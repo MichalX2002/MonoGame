@@ -54,6 +54,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private VertexPositionColorTexture[] _vertexArray;
 
+        public int Capacity { get => _batchItemList.Length; set => EnsureArrayCapacity(value); }
+
 		public SpriteBatcher (GraphicsDevice device)
 		{
             _device = device;
@@ -77,11 +79,11 @@ namespace Microsoft.Xna.Framework.Graphics
             if (_batchItemCount >= _batchItemList.Length)
             {
                 var oldSize = _batchItemList.Length;
-                var newSize = oldSize + oldSize/2; // grow by x1.5
+                var newSize = oldSize + oldSize / 2; // grow by x1.5
                 newSize = (newSize + 63) & (~63); // grow in chunks of 64.
                 Array.Resize(ref _batchItemList, newSize);
-                for(int i=oldSize; i<newSize; i++)
-                    _batchItemList[i]=new SpriteBatchItem();
+                for (int i = oldSize; i < newSize; i++)
+                    _batchItemList[i] = new SpriteBatchItem();
 
                 EnsureArrayCapacity(Math.Min(newSize, MaxBatchSize));
             }
