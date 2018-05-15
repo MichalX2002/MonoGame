@@ -1,3 +1,9 @@
+#Binaries
+MonoGame.Framework/bin/
+MonoGame.Framework/obj/
+MonoGame.Framework.Content.Pipeline/bin/
+MonoGame.Framework.Content.Pipeline/obj/
+
 #OS junk files
 [Tt]humbs.db
 *.DS_Store
