@@ -89,11 +89,11 @@ namespace Lidgren.Network
             byte[] data;
             using (var ms = new MemoryStream())
             {
-                using (var cs = new CryptoStream(ms, Encryptor, CryptoStreamMode.Write, true))
+                using (var cs = new CryptoStream(ms, Encryptor, CryptoStreamMode.Write))
                     cs.Write(msg.m_data, 0, msg.LengthBytes);
 
-                length = (int)ms.Length;
-                data = ms.GetBuffer();
+                data = ms.ToArray();
+                length = data.Length;
             }
 
             int neededBufferSize = (length + 4) * 8;
