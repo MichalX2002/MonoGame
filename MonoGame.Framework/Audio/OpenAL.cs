@@ -196,8 +196,7 @@ namespace MonoGame.OpenAL
 #else
         internal const string NativeLibName = "soft_oal.dll";
 #endif
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alEnable")]
         internal static extern void Enable(int cap);
 
@@ -217,8 +216,7 @@ namespace MonoGame.OpenAL
             BufferData((uint)bid, (int)format, handle.AddrOfPinnedObject(), size, freq);
             handle.Free();
         }
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alDeleteBuffers")]
         internal static unsafe extern void DeleteBuffers(int n, int* buffers);
 
@@ -234,8 +232,7 @@ namespace MonoGame.OpenAL
                 DeleteBuffers(n, pbuffers);
             }
         }
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alBufferi")]
         internal static extern void Bufferi(int buffer, ALBufferi param, int value);
 
@@ -264,22 +261,19 @@ namespace MonoGame.OpenAL
 
         internal static void GenBuffers(int count, out int buffer)
         {
-            int[] ret;
-            GenBuffers(count, out ret);
+            GenBuffers(count, out int[] ret);
             buffer = ret[0];
         }
 
         internal static int[] GenBuffers(int count)
         {
-            int[] ret;
-            GenBuffers(count, out ret);
+            GenBuffers(count, out int[] ret);
             return ret;
         }
 
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGenSources")]
         internal static extern void GenSources(int n, uint[] sources);
-
-
+        
         internal static void GenSources(int[] sources)
         {
             uint[] temp = new uint[sources.Length];
@@ -321,12 +315,10 @@ namespace MonoGame.OpenAL
         {
             return errorCode.ToString();
         }
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alIsSource")]
         internal static extern bool IsSource(int source);
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alDeleteSources")]
         internal static extern void DeleteSources(int n, ref int sources);
 
@@ -334,15 +326,13 @@ namespace MonoGame.OpenAL
         {
             DeleteSources(1, ref source);
         }
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourceStop")]
         internal static extern void SourceStop(int sourceId);
 
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourcei")]
         internal static extern void Source(int sourceId, int i, int a);
 
-        [CLSCompliant(false)]
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSource3i")]
         internal static extern void Source(int sourceId, ALSourcei i, int a, int b, int c);
 
@@ -355,47 +345,37 @@ namespace MonoGame.OpenAL
         {
             Source(sourceId, (int)i, a ? 1 : 0);
         }
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourcef")]
         internal static extern void Source(int sourceId, ALSourcef i, float a);
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSource3f")]
         internal static extern void Source(int sourceId, ALSource3f i, float x, float y, float z);
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGetSourcei")]
         internal static extern void GetSource(int sourceId, ALGetSourcei i, out int state);
 
         internal static ALSourceState GetSourceState(int sourceId)
         {
-            int state;
-            GetSource(sourceId, ALGetSourcei.SourceState, out state);
+            GetSource(sourceId, ALGetSourcei.SourceState, out int state);
             return (ALSourceState)state;
         }
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGetListener3f")]
         internal static extern void GetListener(ALListener3f param, out float value1, out float value2, out float value3);
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alDistanceModel")]
         internal static extern void DistanceModel(ALDistanceModel model);
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alDopplerFactor")]
         internal static extern void DopplerFactor(float value);
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourceQueueBuffers")]
         internal unsafe static extern void SourceQueueBuffers(int sourceId, int numEntries, [In] int* buffers);
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourceUnqueueBuffers")]
         internal unsafe static extern void SourceUnqueueBuffers(int sourceId, int numEntries, [In] int* salvaged);
-
-        [CLSCompliant(false)]
+        
         internal unsafe static void SourceQueueBuffers(int sourceId, int numEntries, int[] buffers)
         {
             fixed (int* ptr = &buffers[0])
@@ -408,8 +388,7 @@ namespace MonoGame.OpenAL
         {
             AL.SourceQueueBuffers(sourceId, 1, &buffer);
         }
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourceUnqueueBuffers")]
         internal static extern void SourceUnqueueBuffers(int sid, int numEntries, [Out] int[] bids);
 
@@ -437,11 +416,11 @@ namespace MonoGame.OpenAL
         internal static extern IntPtr GetProcAddress(string functionName);
 
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGetString")]
-        private static extern IntPtr alGetString(int p);
+        private static extern IntPtr AlGetString(int p);
 
         internal static string GetString(int p)
         {
-            return Marshal.PtrToStringAnsi(alGetString(p));
+            return Marshal.PtrToStringAnsi(AlGetString(p));
         }
 
         internal static string Get(ALGetString p)
@@ -459,8 +438,7 @@ namespace MonoGame.OpenAL
 #else
         internal const string NativeLibName = "soft_oal.dll";
 #endif
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcCreateContext")]
         internal static extern IntPtr CreateContext(IntPtr device, int[] attributes);
 
@@ -469,44 +447,38 @@ namespace MonoGame.OpenAL
             return GetError(IntPtr.Zero);
         }
 
-        [CLSCompliant(false)]
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcGetError")]
         internal static extern AlcError GetError(IntPtr device);
 
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcGetIntegerv")]
-        internal static extern void alcGetIntegerv(IntPtr device, int param, int size, int[] values);
+        internal static extern void AlcGetIntegerv(IntPtr device, int param, int size, int[] values);
 
         internal static void GetInteger(IntPtr device, AlcGetInteger param, int size, int[] values)
         {
-            alcGetIntegerv(device, (int)param, size, values);
+            AlcGetIntegerv(device, (int)param, size, values);
         }
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcGetCurrentContext")]
         internal static extern IntPtr GetCurrentContext();
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcMakeContextCurrent")]
         internal static extern void MakeContextCurrent(IntPtr context);
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcDestroyContext")]
         internal static extern void DestroyContext(IntPtr context);
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcCloseDevice")]
         internal static extern void CloseDevice(IntPtr device);
-
-        [CLSCompliant(false)]
+        
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcOpenDevice")]
         internal static extern IntPtr OpenDevice([In] [MarshalAs(UnmanagedType.LPStr)] string device);
 
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcCaptureOpenDevice")]
-        internal static extern IntPtr alcCaptureOpenDevice([In()] [MarshalAs(UnmanagedType.LPStr)] string device, uint sampleRate, int format, int sampleSize);
+        internal static extern IntPtr AlcCaptureOpenDevice([In()] [MarshalAs(UnmanagedType.LPStr)] string device, uint sampleRate, int format, int sampleSize);
 
         internal static IntPtr CaptureOpenDevice(string device, uint sampleRate, ALFormat format, int sampleSize)
         {
-            return alcCaptureOpenDevice(device, sampleRate, (int)format, sampleSize);
+            return AlcCaptureOpenDevice(device, sampleRate, (int)format, sampleSize);
         }
 
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcCaptureStart")]
@@ -525,11 +497,11 @@ namespace MonoGame.OpenAL
         internal static extern bool IsExtensionPresent(IntPtr device, [MarshalAs(UnmanagedType.LPStr)] string extensionName);
 
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcGetString")]
-        internal static extern IntPtr alGetString(IntPtr device, int p);
+        internal static extern IntPtr AlGetString(IntPtr device, int p);
 
         internal static string GetString(IntPtr device, int p)
         {
-            return Marshal.PtrToStringAnsi(alGetString(device, p));
+            return Marshal.PtrToStringAnsi(AlGetString(device, p));
         }
 
         internal static string GetString(IntPtr device, AlcGetString p)
@@ -571,7 +543,7 @@ namespace MonoGame.OpenAL
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate bool SetBufferModeDelegate(int n, ref int buffers, int value);
 
-        private SetBufferModeDelegate setBufferMode;
+        private readonly SetBufferModeDelegate setBufferMode;
 
         internal XRamExtension()
         {
@@ -615,8 +587,7 @@ namespace MonoGame.OpenAL
             return setBufferMode(i, ref id, StorageHardware);
         }
     }
-
-    [CLSCompliant(false)]
+    
     internal class EffectsExtension
     {
         /* Effect API */
@@ -649,8 +620,7 @@ namespace MonoGame.OpenAL
         private delegate void alFilterfDelegate(uint fid, EfxFilterf param, float value);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private unsafe delegate void alDeleteFiltersDelegate(int n, [In] uint* filters);
-
-
+        
         private alGenEffectsDelegate alGenEffects;
         private alDeleteEffectsDelegate alDeleteEffects;
         //private alIsEffectDelegate alIsEffect;

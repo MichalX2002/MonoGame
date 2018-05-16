@@ -2,14 +2,11 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using Microsoft.Xna.Framework.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using Microsoft.Xna.Framework.Utilities;
-using System.Runtime.InteropServices;
-using Microsoft.Xna.Framework.Utilities;
-
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -20,7 +17,6 @@ namespace Microsoft.Xna.Framework.Graphics
         private bool _isDisposed;
 
         private Color _blendFactor = Color.White;
-        private bool _blendFactorDirty;
 
         private BlendState _blendState;
         private BlendState _actualBlendState;
@@ -61,7 +57,7 @@ namespace Microsoft.Xna.Framework.Graphics
         private readonly RenderTargetBinding[] _tempRenderTargetBinding = new RenderTargetBinding[1];
 
         internal GraphicsCapabilities GraphicsCapabilities { get; private set; }
-
+        
         public TextureCollection VertexTextures { get; private set; }
 
         public SamplerStateCollection VertexSamplerStates { get; private set; }
@@ -192,8 +188,10 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal GraphicsDevice()
 		{
-            PresentationParameters = new PresentationParameters();
-            PresentationParameters.DepthStencilFormat = DepthFormat.Depth24;
+            PresentationParameters = new PresentationParameters
+            {
+                DepthStencilFormat = DepthFormat.Depth24
+            };
             Setup();
             GraphicsCapabilities = new GraphicsCapabilities();
             GraphicsCapabilities.Initialize(this);
@@ -211,14 +209,13 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </exception>
         public GraphicsDevice(GraphicsAdapter adapter, GraphicsProfile graphicsProfile, PresentationParameters presentationParameters)
         {
-            if (adapter == null)
-                throw new ArgumentNullException("adapter");
+            Adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
             if (!adapter.IsProfileSupported(graphicsProfile))
-                throw new NoSuitableGraphicsDeviceException(String.Format("Adapter '{0}' does not support the {1} profile.", adapter.Description, graphicsProfile));
-            if (presentationParameters == null)
-                throw new ArgumentNullException("presentationParameters");
-            Adapter = adapter;
-            PresentationParameters = presentationParameters;
+                throw new NoSuitableGraphicsDeviceException(
+                    String.Format("Adapter '{0}' does not support the {1} profile.", adapter.Description, graphicsProfile));
+            
+            PresentationParameters = presentationParameters ??
+                throw new ArgumentNullException(nameof(presentationParameters));
             _graphicsProfile = graphicsProfile;
             Setup();
             GraphicsCapabilities = new GraphicsCapabilities();
@@ -240,9 +237,10 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
 
             // Initialize the main viewport
-            _viewport = new Viewport (0, 0,
-			                         DisplayMode.Width, DisplayMode.Height);
-			_viewport.MaxDepth = 1.0f;
+            _viewport = new Viewport(0, 0, DisplayMode.Width, DisplayMode.Height)
+            {
+                MaxDepth = 1.0f
+            };
 
             PlatformSetup();
 
@@ -392,7 +390,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 if (_blendFactor == value)
                     return;
                 _blendFactor = value;
-                _blendFactorDirty = true;
+                BlendFactorDirty = true;
             }
         }
 
@@ -537,8 +535,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     {
                         foreach (var resource in _resources.ToArray())
                         {
-                            var target = resource.Target as IDisposable;
-                            if (target != null)
+                            if (resource.Target is IDisposable target)
                                 target.Dispose();
                         }
                         _resources.Clear();
@@ -624,10 +621,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public void Reset(PresentationParameters presentationParameters)
         {
-            if (presentationParameters == null)
-                throw new ArgumentNullException("presentationParameters");
-
-            PresentationParameters = presentationParameters;
+            PresentationParameters = presentationParameters ??
+                throw new ArgumentNullException(nameof(presentationParameters));
             Reset();
         }
 
@@ -643,8 +638,7 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 foreach (var resource in _resources)
                 {
-                    var target = resource.Target as GraphicsResource;
-                    if (target != null)
+                    if (resource.Target is GraphicsResource target)
                         target.GraphicsDeviceResetting();
                 }
 
@@ -957,6 +951,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         public bool ResourcesLost { get; set; }
+        public bool BlendFactorDirty { get; private set; }
 
         /// <summary>
         /// Draw geometry by indexing into the vertex buffer.

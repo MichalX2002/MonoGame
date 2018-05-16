@@ -28,17 +28,15 @@ namespace Microsoft.Xna.Framework.Graphics
 	    readonly EffectParameter _matrixTransform;
         readonly EffectPass _spritePass;
 
-		Matrix? _matrix;
-	    private Viewport _lastViewport;
-	    private Matrix _projection;
-		Rectangle _tempRect = new Rectangle (0,0,0,0);
-		Vector2 _texCoordTL = new Vector2 (0,0);
-		Vector2 _texCoordBR = new Vector2 (0,0);
+        Matrix? _matrix;
+	    Viewport _lastViewport;
+	    Matrix _projection;
+        Rectangle _tempRect = new Rectangle(0, 0, 0, 0);
+        Vector2 _texCoordTL = new Vector2(0, 0);
+        Vector2 _texCoordBR = new Vector2(0, 0);
         #endregion
-
-        internal static bool _needsHalfPixelOffset;
-
-        public static bool NeedsHalfPixelOffset => _needsHalfPixelOffset;
+        
+        public static bool NeedsHalfPixelOffset { get; internal set; }
 
         public int Capacity { get => _batcher.Capacity; set => _batcher.Capacity = value; }
 

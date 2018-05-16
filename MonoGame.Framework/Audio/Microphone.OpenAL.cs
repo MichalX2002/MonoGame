@@ -57,7 +57,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 #if true //DESKTOPGL
             // enumarating capture devices
-            IntPtr deviceList = Alc.alGetString(IntPtr.Zero, (int)AlcGetString.CaptureDeviceSpecifier);
+            IntPtr deviceList = Alc.AlGetString(IntPtr.Zero, (int)AlcGetString.CaptureDeviceSpecifier);
             // we need to marshal a string array
             string deviceIdentifier = Marshal.PtrToStringAnsi(deviceList);
             while (!String.IsNullOrEmpty(deviceIdentifier))

@@ -1,5 +1,4 @@
-﻿using System.Text;
-
+﻿
 namespace MonoGame.Utilities
 {
     unsafe partial class Imaging

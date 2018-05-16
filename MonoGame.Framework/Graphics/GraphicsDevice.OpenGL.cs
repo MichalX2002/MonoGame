@@ -267,8 +267,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             _maxVertexBufferSlots = MaxVertexAttributes;
             _newEnabledVertexAttributes = new bool[MaxVertexAttributes];
-
-
+            
             SpriteBatch.NeedsHalfPixelOffset = true;
 
             // try getting the context version
