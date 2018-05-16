@@ -85,7 +85,7 @@ namespace Microsoft.Xna.Framework.Audio
         public AudioEngine(string settingsFile, TimeSpan lookAheadTime, string rendererId)
         {
             if (string.IsNullOrEmpty(settingsFile))
-                throw new ArgumentNullException("settingsFile");
+                throw new ArgumentNullException(nameof(settingsFile));
 
             // Read the xact settings file
             // Credits to alisci01 for initial format documentation
@@ -314,7 +314,7 @@ namespace Microsoft.Xna.Framework.Audio
         public AudioCategory GetCategory(string name)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             int i;
             if (!_categoryLookup.TryGetValue(name, out i))
@@ -330,7 +330,7 @@ namespace Microsoft.Xna.Framework.Audio
         public float GetGlobalVariable(string name)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             int i;
             if (!_variableLookup.TryGetValue(name, out i) || !_variables[i].IsPublic)
@@ -352,7 +352,7 @@ namespace Microsoft.Xna.Framework.Audio
         public void SetGlobalVariable(string name, float value)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             int i;
             if (!_variableLookup.TryGetValue(name, out i) || !_variables[i].IsPublic)

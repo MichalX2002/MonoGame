@@ -53,7 +53,8 @@ namespace Microsoft.Xna.Framework
             return Position.GetHashCode() ^ Direction.GetHashCode();
         }
 
-        // adapted from http://www.scratchapixel.com/lessons/3d-basic-lessons/lesson-7-intersecting-simple-shapes/ray-box-intersection/
+        // adapted from
+        // http://www.scratchapixel.com/lessons/3d-basic-lessons/lesson-7-intersecting-simple-shapes/ray-box-intersection/
         public float? Intersects(BoundingBox box)
         {
             const float Epsilon = 1e-6f;
@@ -128,11 +129,13 @@ namespace Microsoft.Xna.Framework
 
             // having a positive tMin and a negative tMax means the ray is inside the box
             // we expect the intesection distance to be 0 in that case
-            if ((tMin.HasValue && tMin < 0) && tMax > 0) return 0;
+            if ((tMin.HasValue && tMin < 0) && tMax > 0)
+                return 0;
 
             // a negative tMin means that the intersection point is behind the ray's origin
             // we discard these as not hitting the AABB
-            if (tMin < 0) return null;
+            if (tMin < 0)
+                return null;
 
             return tMin;
         }
@@ -148,7 +151,7 @@ namespace Microsoft.Xna.Framework
         {
             if (frustum == null)
 			{
-				throw new ArgumentNullException("frustum");
+				throw new ArgumentNullException(nameof(frustum));
 			}
 			
 			return frustum.Intersects(this);			
@@ -157,15 +160,13 @@ namespace Microsoft.Xna.Framework
 
         public float? Intersects(BoundingSphere sphere)
         {
-            float? result;
-            Intersects(ref sphere, out result);
+            Intersects(ref sphere, out float? result);
             return result;
         }
 
         public float? Intersects(Plane plane)
         {
-            float? result;
-            Intersects(ref plane, out result);
+            Intersects(ref plane, out float? result);
             return result;
         }
 
@@ -200,8 +201,6 @@ namespace Microsoft.Xna.Framework
             float differenceLengthSquared = difference.LengthSquared();
             float sphereRadiusSquared = sphere.Radius * sphere.Radius;
 
-            float distanceAlongRay;
-
             // If the distance between the ray start and the sphere's centre is less than
             // the radius of the sphere, it means we've intersected. N.B. checking the LengthSquared is faster.
             if (differenceLengthSquared < sphereRadiusSquared)
@@ -210,7 +209,7 @@ namespace Microsoft.Xna.Framework
                 return;
             }
 
-            Vector3.Dot(ref this.Direction, ref difference, out distanceAlongRay);
+            Vector3.Dot(ref this.Direction, ref difference, out float distanceAlongRay);
             // If the ray is pointing away from the sphere then we don't ever intersect
             if (distanceAlongRay < 0)
             {

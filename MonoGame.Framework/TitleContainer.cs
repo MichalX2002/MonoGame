@@ -29,11 +29,13 @@ namespace Microsoft.Xna.Framework
         public static Stream OpenStream(string name)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             // We do not accept absolute paths here.
             if (Path.IsPathRooted(name))
-                throw new ArgumentException("Invalid filename. TitleContainer.OpenStream requires a relative path.", name);
+                throw new ArgumentException(
+                    $"Invalid filename. {nameof(TitleContainer)}.{nameof(TitleContainer.OpenStream)} requires a relative path.",
+                    nameof(name));
 
             // Normalize the file path.
             var safeName = NormalizeRelativePath(name);
@@ -61,7 +63,7 @@ namespace Microsoft.Xna.Framework
 
         private static Exception FileNotFoundException(string name, Exception inner)
         {
-            return new FileNotFoundException("Error loading \"" + name + "\". File not found.", inner);
+            return new FileNotFoundException("Error loading file; not found.", name, inner);
         }
 
         internal static string NormalizeRelativePath(string name)

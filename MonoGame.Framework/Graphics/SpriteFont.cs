@@ -178,9 +178,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		public Vector2 MeasureString(string text)
 		{
 			var source = new CharacterSource(text);
-			Vector2 size;
-			MeasureString(ref source, out size);
-			return size;
+            MeasureString(ref source, out Vector2 size);
+            return size;
 		}
 
 		/// <summary>
@@ -193,9 +192,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		public Vector2 MeasureString(StringBuilder text)
 		{
 			var source = new CharacterSource(text);
-			Vector2 size;
-			MeasureString(ref source, out size);
-			return size;
+            MeasureString(ref source, out Vector2 size);
+            return size;
 		}
 
 		internal unsafe void MeasureString(ref CharacterSource text, out Vector2 size)
@@ -231,7 +229,8 @@ namespace Microsoft.Xna.Framework.Graphics
                 }
 
                 var currentGlyphIndex = GetGlyphIndexOrDefault(c);
-                Debug.Assert(currentGlyphIndex >= 0 && currentGlyphIndex < Glyphs.Length, "currentGlyphIndex was outside the bounds of the array.");
+                Debug.Assert(currentGlyphIndex >= 0 && currentGlyphIndex < Glyphs.Length,
+                    "currentGlyphIndex was outside the bounds of the array.");
                 var pCurrentGlyph = pGlyphs + currentGlyphIndex;
 
                 // The first character on a line might have a negative left side bearing.
@@ -301,11 +300,10 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal int GetGlyphIndexOrDefault(char c)
         {
-            int glyphIdx;
-            if (!TryGetGlyphIndex(c, out glyphIdx))
+            if (!TryGetGlyphIndex(c, out int glyphIdx))
             {
                 if (_defaultGlyphIndex == -1)
-                    throw new ArgumentException(Errors.TextContainsUnresolvableCharacters, "text");
+                    throw new ArgumentException(Errors.TextContainsUnresolvableCharacters, nameof(c));
 
                 return _defaultGlyphIndex;
             }

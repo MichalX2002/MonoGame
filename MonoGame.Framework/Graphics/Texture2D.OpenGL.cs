@@ -58,8 +58,7 @@ namespace Microsoft.Xna.Framework.Graphics
                         else
                         {
                             int blockSize = format.GetSize();
-                            int blockWidth, blockHeight;
-                            format.GetBlockSize(out blockWidth, out blockHeight);
+                            format.GetBlockSize(out int blockWidth, out int blockHeight);
                             int wBlocks = (w + (blockWidth - 1)) / blockWidth;
                             int hBlocks = (h + (blockHeight - 1)) / blockHeight;
                             imageSize = wBlocks * hBlocks * blockSize;
@@ -86,8 +85,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformSetData<T>(int level, T[] data, int startIndex, int elementCount) where T : struct
         {
-            int w, h;
-            GetSizeForLevel(Width, Height, level, out w, out h);
+            GetSizeForLevel(Width, Height, level, out int w, out int h);
             Threading.BlockOnUIThread(() =>
             {
                 var elementSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
@@ -221,8 +219,8 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 // Note: for compressed format Format.GetSize() returns the size of a 4x4 block
                 var pixelToT = Format.GetSize() / tSizeInByte;
-                var tFullWidth = Math.Max(this.width >> level, 1) / 4 * pixelToT;
-                var temp = new T[Math.Max(this.height >> level, 1) / 4 * tFullWidth];
+                var tFullWidth = Math.Max(this.Width >> level, 1) / 4 * pixelToT;
+                var temp = new T[Math.Max(this.Height >> level, 1) / 4 * tFullWidth];
                 GL.GetCompressedTexImage(TextureTarget.Texture2D, level, temp);
                 GraphicsExtensions.CheckGLError();
 
@@ -238,8 +236,8 @@ namespace Microsoft.Xna.Framework.Graphics
             else
             {
                 // we need to convert from our format size to the size of T here
-                var tFullWidth = Math.Max(this.width >> level, 1) * Format.GetSize() / tSizeInByte;
-                var temp = new T[Math.Max(this.height >> level, 1) * tFullWidth];
+                var tFullWidth = Math.Max(this.Width >> level, 1) * Format.GetSize() / tSizeInByte;
+                var temp = new T[Math.Max(this.Height >> level, 1) * tFullWidth];
                 GL.GetTexImage(TextureTarget.Texture2D, level, glFormat, glType, temp);
                 GraphicsExtensions.CheckGLError();
 
@@ -259,10 +257,9 @@ namespace Microsoft.Xna.Framework.Graphics
         private unsafe static Texture2D PlatformFromStream(GraphicsDevice graphicsDevice, Stream stream)
         {
             var reader = new ImageReader();
-            int width, height, channels;
 
             // The data returned is always four channel BGRA
-            var data = reader.Read(stream, out width, out height, out channels, Imaging.STBI_rgb_alpha);
+            var data = reader.Read(stream, out int width, out int height, out int channels, Imaging.STBI_rgb_alpha);
 
             // XNA blacks out any pixels with an alpha of zero.
             if (channels == 4)
@@ -446,15 +443,15 @@ namespace Microsoft.Xna.Framework.Graphics
         {
 	        if (stream == null)
 	        {
-		        throw new ArgumentNullException("stream", "'stream' cannot be null (Nothing in Visual Basic)");
+		        throw new ArgumentNullException(nameof(stream));
 	        }
 	        if (width <= 0)
 	        {
-		        throw new ArgumentOutOfRangeException("width", width, "'width' cannot be less than or equal to zero");
+		        throw new ArgumentOutOfRangeException(nameof(width), "Texture width must be greater than zero.");
 	        }
 	        if (height <= 0)
 	        {
-		        throw new ArgumentOutOfRangeException("height", height, "'height' cannot be less than or equal to zero");
+		        throw new ArgumentOutOfRangeException(nameof(height), "Texture height must be greater than zero.");
 	        }
 	        byte[] data = null;
 	        try
@@ -515,7 +512,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 // For best compatibility and to keep the default wrap mode of XNA, only set ClampToEdge if either
                 // dimension is not a power of two.
                 var wrap = TextureWrapMode.Repeat;
-                if (((width & (width - 1)) != 0) || ((height & (height - 1)) != 0))
+                if (((Width & (Width - 1)) != 0) || ((Height & (Height - 1)) != 0))
                     wrap = TextureWrapMode.ClampToEdge;
 
                 GL.BindTexture(TextureTarget.Texture2D, this.glTexture);

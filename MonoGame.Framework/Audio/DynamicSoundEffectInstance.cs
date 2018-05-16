@@ -77,9 +77,9 @@ namespace Microsoft.Xna.Framework.Audio
         public DynamicSoundEffectInstance(int sampleRate, AudioChannels channels)
         {
             if ((sampleRate < 8000) || (sampleRate > 48000))
-                throw new ArgumentOutOfRangeException("sampleRate");
+                throw new ArgumentOutOfRangeException(nameof(sampleRate));
             if ((channels != AudioChannels.Mono) && (channels != AudioChannels.Stereo))
-                throw new ArgumentOutOfRangeException("channels");
+                throw new ArgumentOutOfRangeException(nameof(channels));
 
             _sampleRate = sampleRate;
             _channels = channels;
@@ -294,7 +294,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (bufferNeededHandler != null)
             {
                 var eventCount = (_buffersNeeded < 3) ? _buffersNeeded : 3;
-                for (var i = 0; i < eventCount; i++)
+                for (int i = 0; i < eventCount; i++)
                 {
                     bufferNeededHandler(this, EventArgs.Empty);
                 }

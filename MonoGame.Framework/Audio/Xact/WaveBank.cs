@@ -79,17 +79,21 @@ namespace Microsoft.Xna.Framework.Audio
         private WaveBank(AudioEngine audioEngine, string waveBankFilename, bool streaming, int offset, int packetsize)
         {
             if (audioEngine == null)
-                throw new ArgumentNullException("audioEngine");
+                throw new ArgumentNullException(nameof(audioEngine));
+
             if (string.IsNullOrEmpty(waveBankFilename))
-                throw new ArgumentNullException("nonStreamingWaveBankFilename");
+                throw new ArgumentNullException(nameof(waveBankFilename));
 
             // Is this a streaming wavebank?
             if (streaming)
             {
                 if (offset != 0)
-                    throw new ArgumentException("We only support a zero offset in streaming banks.", "offset");
+                    throw new ArgumentException(
+                        "We only support a zero offset in streaming banks.", nameof(offset));
+
                 if (packetsize < 2)
-                    throw new ArgumentException("The packet size must be greater than 2.", "packetsize");
+                    throw new ArgumentException(
+                        "The packet size must be greater than 2.", nameof(packetsize));
 
                 _streaming = true;
                 _offset = offset;

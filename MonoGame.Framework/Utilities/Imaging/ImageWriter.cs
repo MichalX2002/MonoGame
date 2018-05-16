@@ -60,8 +60,10 @@ namespace MonoGame.Utilities
                         case ImageWriterFormat.Png:
                             Imaging.stbi_write_png_to_func(WriteCallback, null, x, y, comp, b, x*comp);
                             break;
+
                         default:
-                            throw new ArgumentOutOfRangeException("format", format, null);
+                            throw new ArgumentOutOfRangeException(
+                                nameof(format), $"Invalid format ({format}).");
                     }
                 }
             }

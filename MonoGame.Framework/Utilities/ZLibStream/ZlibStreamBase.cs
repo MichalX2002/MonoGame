@@ -387,12 +387,23 @@ namespace MonoGame.Utilities
             if (_streamMode != StreamMode.Reader)
                 throw new ZlibException("Cannot Read after Writing.");
 
-            if (count == 0) return 0;
-            if (nomoreinput && _wantCompress) return 0;  // workitem 8557
-            if (buffer == null) throw new ArgumentNullException("buffer");
-            if (count < 0) throw new ArgumentOutOfRangeException("count");
-            if (offset < buffer.GetLowerBound(0)) throw new ArgumentOutOfRangeException("offset");
-            if ((offset + count) > buffer.GetLength(0)) throw new ArgumentOutOfRangeException("count");
+            if (count == 0)
+                return 0;
+
+            if (nomoreinput && _wantCompress)
+                return 0;  // workitem 8557
+
+            if (buffer == null)
+                throw new ArgumentNullException(nameof(buffer));
+
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count));
+
+            if (offset < buffer.GetLowerBound(0))
+                throw new ArgumentOutOfRangeException(nameof(offset));
+
+            if ((offset + count) > buffer.GetLength(0))
+                throw new ArgumentOutOfRangeException(nameof(count));
 
             int rc = 0;
 
@@ -427,7 +438,8 @@ namespace MonoGame.Utilities
                     return 0;
 
                 if (rc != ZlibConstants.Z_OK && rc != ZlibConstants.Z_STREAM_END)
-                    throw new ZlibException(String.Format("{0}flating:  rc={1}  msg={2}", (_wantCompress ? "de" : "in"), rc, _z.Message));
+                    throw new ZlibException(
+                        $"{(_wantCompress ? "de" : "in")}flating: rc={rc} msg={_z.Message}");
 
                 if ((nomoreinput || rc == ZlibConstants.Z_STREAM_END) && (_z.AvailableBytesOut == count))
                     break; // nothing more to read
@@ -456,7 +468,7 @@ namespace MonoGame.Utilities
                         rc = _z.Deflate(FlushType.Finish);
 
                         if (rc != ZlibConstants.Z_OK && rc != ZlibConstants.Z_STREAM_END)
-                            throw new ZlibException(String.Format("Deflating:  rc={0}  msg={1}", rc, _z.Message));
+                            throw new ZlibException($"Deflating: rc={rc} msg={_z.Message}");
                     }
                 }
             }
@@ -470,9 +482,7 @@ namespace MonoGame.Utilities
 
             return rc;
         }
-
-
-
+        
         public override System.Boolean CanRead
         {
             get { return this._stream.CanRead; }

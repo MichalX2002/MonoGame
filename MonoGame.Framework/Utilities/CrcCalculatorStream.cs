@@ -147,11 +147,11 @@ namespace MonoGame.Utilities
         /// </remarks>
         /// <param name="stream">The underlying stream</param>
         /// <param name="length">The length of the stream to slurp</param>
-        public CrcCalculatorStream(System.IO.Stream stream, Int64 length)
+        public CrcCalculatorStream(Stream stream, Int64 length)
             : this(true, length, stream, null)
         {
             if (length < 0)
-                throw new ArgumentException("length");
+                throw new ArgumentException(nameof(length));
         }
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace MonoGame.Utilities
             : this(leaveOpen, length, stream, null)
         {
             if (length < 0)
-                throw new ArgumentException("length");
+                throw new ArgumentException(nameof(length));
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace MonoGame.Utilities
             : this(leaveOpen, length, stream, crc32)
         {
             if (length < 0)
-                throw new ArgumentException("length");
+                throw new ArgumentException(nameof(length));
         }
 
 

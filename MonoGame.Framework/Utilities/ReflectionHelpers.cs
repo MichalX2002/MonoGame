@@ -145,9 +145,10 @@ namespace Microsoft.Xna.Framework.Utilities
         public static bool IsAssignableFrom(Type type, object value)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
+
             if (value == null)
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
 
             return IsAssignableFromType(type, value.GetType());
         }
@@ -158,9 +159,9 @@ namespace Microsoft.Xna.Framework.Utilities
         public static bool IsAssignableFromType(Type type, Type objectType)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             if (objectType == null)
-                throw new ArgumentNullException("objectType");
+                throw new ArgumentNullException(nameof(objectType));
 #if NET45
             if (type.GetTypeInfo().IsAssignableFrom(objectType.GetTypeInfo()))
                 return true;

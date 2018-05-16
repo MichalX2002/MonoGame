@@ -196,7 +196,7 @@ namespace Microsoft.Xna.Framework.Audio
         public void SetVariable(string name, float value)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             var i = FindVariable(name);
             if (i == -1 || !_variables[i].IsPublic)
@@ -215,7 +215,7 @@ namespace Microsoft.Xna.Framework.Audio
         public float GetVariable(string name)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             var i = FindVariable(name);
             if (i == -1 || !_variables[i].IsPublic)
@@ -234,12 +234,13 @@ namespace Microsoft.Xna.Framework.Audio
         public void Apply3D(AudioListener listener, AudioEmitter emitter) 
         {
             if (listener == null)
-                throw new ArgumentNullException("listener");
+                throw new ArgumentNullException(nameof(listener));
             if (emitter == null)
-                throw new ArgumentNullException("emitter");
+                throw new ArgumentNullException(nameof(emitter));
 
             if (_played && !_applied3D)
-                throw new InvalidOperationException("You must call Apply3D on a Cue before calling Play to be able to call Apply3D after calling Play.");
+                throw new InvalidOperationException(
+                    "You must call Apply3D() on a Cue before calling Play() to be able to call Apply3D() after calling Play().");
 
             var direction = listener.Position - emitter.Position;
 
@@ -327,7 +328,7 @@ namespace Microsoft.Xna.Framework.Audio
                             break;
 
                         default:
-                            throw new ArgumentOutOfRangeException("rpcCurve.Parameter");
+                            throw new ArgumentOutOfRangeException(nameof(rpcCurve.Parameter));
                     }
                 }
 

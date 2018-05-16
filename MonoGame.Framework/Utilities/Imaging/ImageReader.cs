@@ -13,7 +13,7 @@ namespace MonoGame.Utilities
         }
 
         private Stream _stream;
-        private byte[] _buffer = new byte[1024];
+        private byte[] _buffer = new byte[1024 * 4];
 
         private readonly Imaging.stbi_io_callbacks _callbacks;
 

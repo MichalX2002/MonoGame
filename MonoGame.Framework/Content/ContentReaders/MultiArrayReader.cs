@@ -77,7 +77,7 @@ namespace Microsoft.Xna.Framework.Content
             }
 
             if (index != 0)
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
         }
     }
 }

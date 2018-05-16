@@ -60,8 +60,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
             public bool Equals(Data other)
             {
-                if (ReferenceEquals(null, other))
+                if (other is null)
                     return false;
+
                 if (ReferenceEquals(this, other))
                     return true;
 
@@ -101,8 +102,7 @@ namespace Microsoft.Xna.Framework.Graphics
             lock (_vertexDeclarationCache)
             {
                 var data = new Data(vertexStride, elements);
-                VertexDeclaration vertexDeclaration;
-                if (!_vertexDeclarationCache.TryGetValue(data, out vertexDeclaration))
+                if (!_vertexDeclarationCache.TryGetValue(data, out VertexDeclaration vertexDeclaration))
                 {
                     // Data.Elements have already been set in the Data ctor. However, entries
                     // in the vertex declaration cache must be immutable. Therefore, we create a 
@@ -158,13 +158,12 @@ namespace Microsoft.Xna.Framework.Graphics
         public VertexDeclaration(int vertexStride, params VertexElement[] elements)
         {
             if ((elements == null) || (elements.Length == 0))
-                throw new ArgumentNullException("elements", "Elements cannot be empty");
+                throw new ArgumentNullException(nameof(elements), "Elements cannot be empty.");
 
             lock (_vertexDeclarationCache)
             {
                 var data = new Data(vertexStride, elements);
-                VertexDeclaration vertexDeclaration;
-                if (_vertexDeclarationCache.TryGetValue(data, out vertexDeclaration))
+                if (_vertexDeclarationCache.TryGetValue(data, out var vertexDeclaration))
                 {
                     // Reuse existing data.
                     _data = vertexDeclaration._data;
@@ -204,24 +203,22 @@ namespace Microsoft.Xna.Framework.Graphics
 		internal static VertexDeclaration FromType(Type vertexType)
 		{
 			if (vertexType == null)
-				throw new ArgumentNullException("vertexType", "Cannot be null");
+				throw new ArgumentNullException(nameof(vertexType));
 
             if (!ReflectionHelpers.IsValueType(vertexType))
             {
-				throw new ArgumentException("Must be value type", "vertexType");
+				throw new ArgumentException("Must be value type.", nameof(vertexType));
 			}
 
             var type = Activator.CreateInstance(vertexType) as IVertexType;
-			if (type == null)
-			{
-				throw new ArgumentException("vertexData does not inherit IVertexType");
-			}
-
             var vertexDeclaration = type.VertexDeclaration;
+
+            if (type == null)
+				throw new ArgumentException(
+                    $"{nameof(vertexType)} does not inherit {nameof(IVertexType)}.", nameof(vertexType));
+
 			if (vertexDeclaration == null)
-			{
-				throw new Exception("VertexDeclaration cannot be null");
-			}
+				throw new Exception($"{nameof(IVertexType)}.{nameof(VertexDeclaration)} cannot be null.");
 
 			return vertexDeclaration;
 		}

@@ -102,44 +102,48 @@ namespace Microsoft.Xna.Framework.Audio
         /// <param name="loopStart">The position where the sound should begin looping in samples.</param>
         /// <param name="loopLength">The duration of the sound data loop in samples.</param>
         /// <remarks>This only supports uncompressed 16bit PCM wav data.</remarks>
-        public SoundEffect(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
+        public SoundEffect(byte[] buffer, int offset, int count,
+            int sampleRate, AudioChannels channels, int loopStart, int loopLength)
         {
             if (sampleRate < 8000 || sampleRate > 48000)
-                throw new ArgumentOutOfRangeException("sampleRate");
+                throw new ArgumentOutOfRangeException(nameof(sampleRate));
             if ((int)channels != 1 && (int)channels != 2)
-                throw new ArgumentOutOfRangeException("channels");
+                throw new ArgumentOutOfRangeException(nameof(channels));
 
             if (buffer == null || buffer.Length == 0)
-                throw new ArgumentException("Ensure that the buffer length is non-zero.", "buffer");
+                throw new ArgumentException("Ensure that the buffer length is non-zero.", nameof(buffer));
 
             var blockAlign = (int)channels * 2;
             if ((buffer.Length % blockAlign) != 0)
-                throw new ArgumentException("Ensure that the buffer meets the block alignment requirements for the number of channels.", "buffer");
+                throw new ArgumentException(
+                    "Ensure that the buffer meets the block alignment requirements for the number of channels.", nameof(buffer));
 
             if (count <= 0)
-                throw new ArgumentException("Ensure that the count is greater than zero.", "count");
+                throw new ArgumentException("Ensure that the count is greater than zero.", nameof(count));
             if ((count % blockAlign) != 0)
-                throw new ArgumentException("Ensure that the count meets the block alignment requirements for the number of channels.", "count");
+                throw new ArgumentException(
+                    "Ensure that the count meets the block alignment requirements for the number of channels.", nameof(count));
 
             if (offset < 0)
-                throw new ArgumentException("The offset cannot be negative.", "offset");
+                throw new ArgumentException("The offset cannot be negative.", nameof(offset));
             if (((ulong)count + (ulong)offset) > (ulong)buffer.Length)
-                throw new ArgumentException("Ensure that the offset+count region lines within the buffer.", "offset");
+                throw new ArgumentException("Ensure that the offset+count region lines within the buffer.", nameof(offset));
 
             var totalSamples = buffer.Length / blockAlign;
 
             if (loopStart < 0)
-                throw new ArgumentException("The loopStart cannot be negative.", "loopStart");
+                throw new ArgumentException("The loopStart cannot be negative.", nameof(loopStart));
             if (loopStart > totalSamples)
-                throw new ArgumentException("The loopStart cannot be greater than the total number of samples.", "loopStart");
+                throw new ArgumentException("The loopStart cannot be greater than the total number of samples.", nameof(loopStart));
 
             if (loopLength == 0)
                 loopLength = totalSamples - loopStart;
 
             if (loopLength < 0)
-                throw new ArgumentException("The loopLength cannot be negative.", "loopLength");
+                throw new ArgumentException("The loopLength cannot be negative.", nameof(loopLength));
             if (((ulong)loopStart + (ulong)loopLength) > (ulong)totalSamples)
-                throw new ArgumentException("Ensure that the loopStart+loopLength region lies within the sample range.", "loopLength");
+                throw new ArgumentException(
+                    "Ensure that the loopStart+loopLength region lies within the sample range.", nameof(loopLength));
 
             _duration = GetSampleDuration(count, sampleRate, channels);
 
@@ -199,7 +203,7 @@ namespace Microsoft.Xna.Framework.Audio
         public static SoundEffect FromStream(Stream stream)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
 
             return new SoundEffect(stream);
         }
@@ -214,13 +218,13 @@ namespace Microsoft.Xna.Framework.Audio
         public static TimeSpan GetSampleDuration(int sizeInBytes, int sampleRate, AudioChannels channels)
         {
             if (sizeInBytes < 0)
-                throw new ArgumentException("Buffer size cannot be negative.", "sizeInBytes");
+                throw new ArgumentException("Buffer size cannot be negative.", nameof(sizeInBytes));
             if (sampleRate < 8000 || sampleRate > 48000)
-                throw new ArgumentOutOfRangeException("sampleRate");
+                throw new ArgumentOutOfRangeException(nameof(sampleRate));
 
             var numChannels = (int)channels;
             if (numChannels != 1 && numChannels != 2)
-                throw new ArgumentOutOfRangeException("channels");
+                throw new ArgumentOutOfRangeException(nameof(channels));
 
             if (sizeInBytes == 0)
                 return TimeSpan.Zero;
@@ -245,13 +249,13 @@ namespace Microsoft.Xna.Framework.Audio
         public static int GetSampleSizeInBytes(TimeSpan duration, int sampleRate, AudioChannels channels)
         {
             if (duration < TimeSpan.Zero || duration > TimeSpan.FromMilliseconds(0x7FFFFFF))
-                throw new ArgumentOutOfRangeException("duration");
+                throw new ArgumentOutOfRangeException(nameof(duration));
             if (sampleRate < 8000 || sampleRate > 48000)
-                throw new ArgumentOutOfRangeException("sampleRate");
+                throw new ArgumentOutOfRangeException(nameof(sampleRate));
 
             var numChannels = (int)channels;
             if (numChannels != 1 && numChannels != 2)
-                throw new ArgumentOutOfRangeException("channels");
+                throw new ArgumentOutOfRangeException(nameof(channels));
 
             // Reference
             // http://tinyurl.com/hq9slfy
@@ -379,7 +383,8 @@ namespace Microsoft.Xna.Framework.Audio
             set
             {
                 if (value <= 0f)
-                    throw new ArgumentOutOfRangeException ("value of DistanceScale");
+                    throw new ArgumentOutOfRangeException(
+                        value.ToString(), "value of DistanceScale");
 
                 _distanceScale = value;
             }
@@ -403,7 +408,8 @@ namespace Microsoft.Xna.Framework.Audio
                 //   although the documentation does not say it throws an error we will anyway
                 //   just so it is like the DistanceScale
                 if (value < 0.0f)
-                    throw new ArgumentOutOfRangeException ("value of DopplerScale");
+                    throw new ArgumentOutOfRangeException (
+                        value.ToString(), "value of DopplerScale");
 
                 _dopplerScale = value;
             }

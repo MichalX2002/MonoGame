@@ -39,56 +39,47 @@ purpose and non-infringement.
 #endregion License
 
 #region Using clause
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Runtime.Remoting.Messaging;
-
 using Microsoft.Xna.Framework.Net;
-
+using System;
+using System.Collections.Generic;
 
 #endregion Using clause
 
 namespace Microsoft.Xna.Framework.GamerServices
 {
-	public static class Guide
-	{
-		private static bool isScreenSaverEnabled;
-		private static bool isTrialMode;
-		private static bool isVisible;
-		private static bool simulateTrialMode;		
+    public static class Guide
+    {
+        //private static bool isTrialMode = false;
 
-		delegate string ShowKeyboardInputDelegate(
-		 PlayerIndex player,           
+        private delegate string ShowKeyboardInputDelegate(
+         PlayerIndex player,
          string title,
          string description,
          string defaultText,
-		 bool usePasswordMode);
+         bool usePasswordMode);
 
-		public static string ShowKeyboardInput(
-		 PlayerIndex player,           
+        public static string ShowKeyboardInput(
+         PlayerIndex player,
          string title,
          string description,
          string defaultText,
-		 bool usePasswordMode)
-		{
+         bool usePasswordMode)
+        {
             throw new NotImplementedException();
-		}
+        }
 
-		public static IAsyncResult BeginShowKeyboardInput (
+        public static IAsyncResult BeginShowKeyboardInput(
          PlayerIndex player,
          string title,
          string description,
          string defaultText,
          AsyncCallback callback,
          Object state)
-		{
-			return BeginShowKeyboardInput(player, title, description, defaultText, callback, state, false );
-		}
+        {
+            return BeginShowKeyboardInput(player, title, description, defaultText, callback, state, false);
+        }
 
-		public static IAsyncResult BeginShowKeyboardInput (
+        public static IAsyncResult BeginShowKeyboardInput(
          PlayerIndex player,
          string title,
          string description,
@@ -96,24 +87,24 @@ namespace Microsoft.Xna.Framework.GamerServices
          AsyncCallback callback,
          Object state,
          bool usePasswordMode)
-		{
-            return BeginShowKeyboardInput(player, title, description, defaultText, callback, state, false );
-		}
-
-		public static string EndShowKeyboardInput (IAsyncResult result)
         {
-            ShowKeyboardInputDelegate ski = (ShowKeyboardInputDelegate)result.AsyncState; 
+            return BeginShowKeyboardInput(player, title, description, defaultText, callback, state, false);
+        }
 
-            return ski.EndInvoke(result);			
-		}
+        public static string EndShowKeyboardInput(IAsyncResult result)
+        {
+            ShowKeyboardInputDelegate ski = (ShowKeyboardInputDelegate)result.AsyncState;
 
-		delegate Nullable<int> ShowMessageBoxDelegate( string title,
+            return ski.EndInvoke(result);
+        }
+
+        delegate int? ShowMessageBoxDelegate(string title,
          string text,
          IEnumerable<string> buttons,
          int focusButton,
          MessageBoxIcon icon);
 
-		public static Nullable<int> ShowMessageBox( string title,
+        public static int? ShowMessageBox(string title,
          string text,
          IEnumerable<string> buttons,
          int focusButton,
@@ -124,9 +115,9 @@ namespace Microsoft.Xna.Framework.GamerServices
 
             IsVisible = false;
             return result;
-		}
+        }
 
-		public static IAsyncResult BeginShowMessageBox(
+        public static IAsyncResult BeginShowMessageBox(
          PlayerIndex player,
          string title,
          string text,
@@ -135,8 +126,8 @@ namespace Microsoft.Xna.Framework.GamerServices
          MessageBoxIcon icon,
          AsyncCallback callback,
          Object state
-		)
-		{	
+        )
+        {
             if (IsVisible)
                 throw new Exception("The function cannot be completed at this time: the Guide UI is already active. Wait until Guide.IsVisible is false before issuing this call.");
 
@@ -151,10 +142,10 @@ namespace Microsoft.Xna.Framework.GamerServices
 
             ShowMessageBoxDelegate smb = ShowMessageBox;
 
-            return smb.BeginInvoke(title, text, buttons, focusButton, icon, callback, smb);		
-		}
+            return smb.BeginInvoke(title, text, buttons, focusButton, icon, callback, smb);
+        }
 
-		public static IAsyncResult BeginShowMessageBox (
+        public static IAsyncResult BeginShowMessageBox(
          string title,
          string text,
          IEnumerable<string> buttons,
@@ -162,34 +153,34 @@ namespace Microsoft.Xna.Framework.GamerServices
          MessageBoxIcon icon,
          AsyncCallback callback,
          Object state
-		)
-		{
-			return BeginShowMessageBox(PlayerIndex.One, title, text, buttons, focusButton, icon, callback, state);
-		}
+        )
+        {
+            return BeginShowMessageBox(PlayerIndex.One, title, text, buttons, focusButton, icon, callback, state);
+        }
 
-		public static Nullable<int> EndShowMessageBox (IAsyncResult result)
+        public static Nullable<int> EndShowMessageBox(IAsyncResult result)
         {
             return ((ShowMessageBoxDelegate)result.AsyncState).EndInvoke(result);
-		}
+        }
 
 
-		public static void ShowMarketplace (PlayerIndex player )
-		{
-			
-		}
+        public static void ShowMarketplace(PlayerIndex player)
+        {
 
-		public static void Show ()
-		{
-			ShowSignIn(1, false);
-		}
+        }
 
-		public static void ShowSignIn (int paneCount, bool onlineOnly)
-		{
-			if ( paneCount != 1 && paneCount != 2 && paneCount != 4)
-			{
-				new ArgumentException("paneCount Can only be 1, 2 or 4 on Windows");
-				return;
-			}
+        public static void Show()
+        {
+            ShowSignIn(1, false);
+        }
+
+        public static void ShowSignIn(int paneCount, bool onlineOnly)
+        {
+            if (paneCount != 1 && paneCount != 2 && paneCount != 4)
+            {
+                new ArgumentException("paneCount Can only be 1, 2 or 4 on Windows");
+                return;
+            }
 
             Microsoft.Xna.Framework.GamerServices.MonoGameGamerServicesHelper.ShowSigninSheet();
             if (GamerServicesComponent.LocalNetworkGamer == null)
@@ -200,10 +191,10 @@ namespace Microsoft.Xna.Framework.GamerServices
             {
                 GamerServicesComponent.LocalNetworkGamer.SignedInGamer.BeginAuthentication(null, null);
             }
-		}
+        }
 
-		public static void ShowLeaderboard()
-		{
+        public static void ShowLeaderboard()
+        {
             //if ( ( Gamer.SignedInGamers.Count > 0 ) && ( Gamer.SignedInGamers[0].IsSignedInToLive ) )
             //{
             //    // Lazy load it
@@ -234,10 +225,10 @@ namespace Microsoft.Xna.Framework.GamerServices
             //        }
             //    }
             //}
-		}
+        }
 
-		public static void ShowAchievements()
-		{
+        public static void ShowAchievements()
+        {
             //if ( ( Gamer.SignedInGamers.Count > 0 ) && ( Gamer.SignedInGamers[0].IsSignedInToLive ) )
             //{
             //    // Lazy load it
@@ -268,59 +259,30 @@ namespace Microsoft.Xna.Framework.GamerServices
             //        }
             //    }
             //}
-		}
+        }
 
-		#region Properties
-		public static bool IsScreenSaverEnabled 
-		{ 
-			get
-			{
-				return isScreenSaverEnabled;
-			}
-			set
-			{
-				isScreenSaverEnabled = value;
-			}
-		}
+        #region Properties
+        public static bool IsScreenSaverEnabled { get; set; }
 
-		public static bool IsTrialMode 
-		{ 
-			get
-			{
-                return simulateTrialMode || isTrialMode;
-			}
-		}
+        public static bool IsTrialMode
+        {
+            get
+            {
+                return SimulateTrialMode; // || _isTrialMode;
+            }
+        }
 
-		public static bool IsVisible 
-		{ 
-			get
-			{
-				return isVisible;
-			}
-			set
-			{
-				isVisible = value;
-			}
-		}
+        public static bool IsVisible { get; set; }
 
-		public static bool SimulateTrialMode 
-		{ 
-			get
-			{
-				return simulateTrialMode;
-			}
-			set
-			{
-				simulateTrialMode = value;
-			}
-		}
+        public static bool SimulateTrialMode { get; set; }
 
-		public static GameWindow Window 
-		{ 
-			get;
-			set;
-		}
-		#endregion
+        public static GameWindow Window
+        {
+            get;
+            set;
+        }
+
+        #endregion
 
         internal static void Initialise(Game game)
         {

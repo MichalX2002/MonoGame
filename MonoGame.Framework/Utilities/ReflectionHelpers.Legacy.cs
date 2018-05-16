@@ -12,7 +12,7 @@ namespace Microsoft.Xna.Framework.Utilities
         /// </summary>
         internal static class SizeOf<T>
         {
-            static int _sizeOf;
+            private static readonly int _sizeOf;
 
             static SizeOf()
             {
@@ -20,7 +20,7 @@ namespace Microsoft.Xna.Framework.Utilities
                 _sizeOf = Marshal.SizeOf(type);
             }
 
-            static public int Get()
+            public static int Get()
             {
                 return _sizeOf;
             }

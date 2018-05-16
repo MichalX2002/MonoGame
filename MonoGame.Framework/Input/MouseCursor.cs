@@ -81,7 +81,9 @@ namespace Microsoft.Xna.Framework.Input
         public static MouseCursor FromTexture2D(Texture2D texture, int originx, int originy)
         {
             if (texture.Format != SurfaceFormat.Color && texture.Format != SurfaceFormat.ColorSRgb)
-                throw new ArgumentException("Only Color or ColorSrgb textures are accepted for mouse cursors", "texture");
+                throw new ArgumentException(
+                    $"Only {SurfaceFormat.Color} or {SurfaceFormat.ColorSRgb} textures are accepted for mouse cursors.",
+                    nameof(texture));
 
             return PlatformFromTexture2D(texture, originx, originy);
         }

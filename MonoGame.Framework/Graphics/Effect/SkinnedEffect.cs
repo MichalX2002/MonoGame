@@ -315,7 +315,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     (value != 2) &&
                     (value != 4))
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 weightsPerVertex = value;
@@ -330,7 +330,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public void SetBoneTransforms(Matrix[] boneTransforms)
         {
             if ((boneTransforms == null) || (boneTransforms.Length == 0))
-                throw new ArgumentNullException("boneTransforms");
+                throw new ArgumentNullException(nameof(boneTransforms));
 
             if (boneTransforms.Length > MaxBones)
                 throw new ArgumentException();
@@ -345,7 +345,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public Matrix[] GetBoneTransforms(int count)
         {
             if (count <= 0 || count > MaxBones)
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
 
             Matrix[] bones = bonesParam.GetValueMatrixArray(count);
             

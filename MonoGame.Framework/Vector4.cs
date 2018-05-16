@@ -859,8 +859,7 @@ namespace Microsoft.Xna.Framework
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
         public static Vector4 Transform(Vector2 value, Matrix matrix)
         {
-            Vector4 result;
-            Transform(ref value, ref matrix, out result);
+            Transform(ref value, ref matrix, out Vector4 result);
             return result;
         }
 
@@ -872,8 +871,7 @@ namespace Microsoft.Xna.Framework
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
         public static Vector4 Transform(Vector2 value, Quaternion rotation)
         {
-            Vector4 result;
-            Transform(ref value, ref rotation, out result);
+            Transform(ref value, ref rotation, out Vector4 result);
             return result;
         }
 
@@ -885,8 +883,7 @@ namespace Microsoft.Xna.Framework
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
         public static Vector4 Transform(Vector3 value, Matrix matrix)
         {
-            Vector4 result;
-            Transform(ref value, ref matrix, out result);
+            Transform(ref value, ref matrix, out Vector4 result);
             return result;
         }
 
@@ -898,8 +895,7 @@ namespace Microsoft.Xna.Framework
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
         public static Vector4 Transform(Vector3 value, Quaternion rotation)
         {
-            Vector4 result;
-            Transform(ref value, ref rotation, out result);
+            Transform(ref value, ref rotation, out Vector4 result);
             return result;
         }
 
@@ -923,8 +919,7 @@ namespace Microsoft.Xna.Framework
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
         public static Vector4 Transform(Vector4 value, Quaternion rotation)
         {
-            Vector4 result;
-            Transform(ref value, ref rotation, out result);
+            Transform(ref value, ref rotation, out Vector4 result);
             return result;
         }
 
@@ -1016,29 +1011,19 @@ namespace Microsoft.Xna.Framework
         /// <param name="destinationArray">Destination array.</param>
         /// <param name="destinationIndex">The starting index in the destination array, where the first <see cref="Vector4"/> should be written.</param>
         /// <param name="length">The number of vectors to be transformed.</param>
-        public static void Transform
-        (
-            Vector4[] sourceArray,
-            int sourceIndex,
-            ref Matrix matrix,
-            Vector4[] destinationArray,
-            int destinationIndex,
-            int length
-        )
+        public static void Transform(
+            Vector4[] sourceArray, int sourceIndex, ref Matrix matrix,
+            Vector4[] destinationArray, int destinationIndex, int length)
         {
-            if (sourceArray == null)
-                throw new ArgumentNullException("sourceArray");
-            if (destinationArray == null)
-                throw new ArgumentNullException("destinationArray");
-            if (sourceArray.Length < sourceIndex + length)
-                throw new ArgumentException("Source array length is lesser than sourceIndex + length");
-            if (destinationArray.Length < destinationIndex + length)
-                throw new ArgumentException("Destination array length is lesser than destinationIndex + length");
+            if (ExceptionHelper.CheckIndexedSrcDstArrays(
+                   sourceArray, sourceIndex, length, destinationArray, destinationIndex, out var exc))
+                throw exc;
 
-            for (var i = 0; i < length; i++)
+            for (int i = 0; i < length; i++)
             {
-                var value = sourceArray[sourceIndex + i];
-                destinationArray[destinationIndex + i] = Transform(value, matrix);
+                Transform(
+                    ref sourceArray[sourceIndex + i], ref matrix,
+                    out destinationArray[destinationIndex + i]);
             }
         }
 
@@ -1052,27 +1037,18 @@ namespace Microsoft.Xna.Framework
         /// <param name="destinationIndex">The starting index in the destination array, where the first <see cref="Vector4"/> should be written.</param>
         /// <param name="length">The number of vectors to be transformed.</param>
         public static void Transform(
-            Vector4[] sourceArray,
-            int sourceIndex,
-            ref Quaternion rotation,
-            Vector4[] destinationArray,
-            int destinationIndex,
-            int length
-            )
+            Vector4[] sourceArray, int sourceIndex, ref Quaternion rotation,
+            Vector4[] destinationArray, int destinationIndex, int length)
         {
-            if (sourceArray == null)
-                throw new ArgumentNullException("sourceArray");
-            if (destinationArray == null)
-                throw new ArgumentNullException("destinationArray");
-            if (sourceArray.Length < sourceIndex + length)
-                throw new ArgumentException("Source array length is lesser than sourceIndex + length");
-            if (destinationArray.Length < destinationIndex + length)
-                throw new ArgumentException("Destination array length is lesser than destinationIndex + length");
+            if (ExceptionHelper.CheckIndexedSrcDstArrays(
+                   sourceArray, sourceIndex, length, destinationArray, destinationIndex, out var exc))
+                throw exc;
 
-            for (var i = 0; i < length; i++)
+            for (int i = 0; i < length; i++)
             {
-                var value = sourceArray[sourceIndex + i];
-                destinationArray[destinationIndex + i] = Transform(value, rotation);
+                Transform(
+                    ref sourceArray[sourceIndex + i], ref rotation,
+                    out destinationArray[destinationIndex + i]);
             }
         }
 
@@ -1084,17 +1060,12 @@ namespace Microsoft.Xna.Framework
         /// <param name="destinationArray">Destination array.</param>
         public static void Transform(Vector4[] sourceArray, ref Matrix matrix, Vector4[] destinationArray)
         {
-            if (sourceArray == null)
-                throw new ArgumentNullException("sourceArray");
-            if (destinationArray == null)
-                throw new ArgumentNullException("destinationArray");
-            if (destinationArray.Length < sourceArray.Length)
-                throw new ArgumentException("Destination array length is lesser than source array length");
+            if (ExceptionHelper.CheckSrcDstArrays(sourceArray, destinationArray, out var exc))
+                throw exc;
 
-            for (var i = 0; i < sourceArray.Length; i++)
+            for (int i = 0; i < sourceArray.Length; i++)
             {
-                var value = sourceArray[i];
-                destinationArray[i] = Transform(value, matrix);
+                Transform(ref sourceArray[i], ref matrix, out destinationArray[i]);
             }
         }
 
@@ -1106,17 +1077,12 @@ namespace Microsoft.Xna.Framework
         /// <param name="destinationArray">Destination array.</param>
         public static void Transform(Vector4[] sourceArray, ref Quaternion rotation, Vector4[] destinationArray)
         {
-            if (sourceArray == null)
-                throw new ArgumentNullException("sourceArray");
-            if (destinationArray == null)
-                throw new ArgumentNullException("destinationArray");
-            if (destinationArray.Length < sourceArray.Length)
-                throw new ArgumentException("Destination array length is lesser than source array length");
+            if (ExceptionHelper.CheckSrcDstArrays(sourceArray, destinationArray, out var exc))
+                throw exc;
 
-            for (var i = 0; i < sourceArray.Length; i++)
+            for (int i = 0; i < sourceArray.Length; i++)
             {
-                var value = sourceArray[i];
-                destinationArray[i] = Transform(value, rotation);
+                Transform(ref sourceArray[i], ref rotation, out destinationArray[i]);
             }
         }
 

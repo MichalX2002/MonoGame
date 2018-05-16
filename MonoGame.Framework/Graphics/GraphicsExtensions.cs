@@ -368,7 +368,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			case Blend.Zero:
 				return BlendingFactorSrc.Zero;
             default:
-                throw new ArgumentOutOfRangeException("blend", "The specified blend function is not implemented.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(blend), "The specified blend function is not implemented.");
             }
 
 		}
@@ -403,7 +404,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			case Blend.Zero:
 				return BlendingFactorDest.Zero;
 			default:
-				throw new ArgumentOutOfRangeException("blend", "The specified blend function is not implemented.");
+				throw new ArgumentOutOfRangeException(
+                    nameof(blend), "The specified blend function is not implemented.");
 			}
 
 		}

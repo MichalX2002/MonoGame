@@ -22,11 +22,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		protected IndexBuffer(GraphicsDevice graphicsDevice, IndexElementSize indexElementSize, int indexCount, BufferUsage usage, bool dynamic)
         {
-			if (graphicsDevice == null)
-            {
-                throw new ArgumentNullException("graphicsDevice", FrameworkResources.ResourceCreationWhenDeviceIsNull);
-            }
-			this.GraphicsDevice = graphicsDevice;
+            this.GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
+                nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
+
 			this.IndexElementSize = indexElementSize;	
             this.IndexCount = indexCount;
             this.BufferUsage = usage;
@@ -60,15 +58,18 @@ namespace Microsoft.Xna.Framework.Graphics
                     return IndexElementSize.SixteenBits;
                 case 4:
                     if (graphicsDevice.GraphicsProfile == GraphicsProfile.Reach)
-                        throw new NotSupportedException("The profile does not support an elementSize of IndexElementSize.ThirtyTwoBits; use IndexElementSize.SixteenBits or a type that has a size of two bytes.");
+                        throw new NotSupportedException(
+                            $"The profile does not support an {nameof(IndexElementSize)} of {IndexElementSize.ThirtyTwoBits}; " +
+                            $"use {IndexElementSize.SixteenBits} (or a type that has a size of two bytes).");
                     return IndexElementSize.ThirtyTwoBits;
+
                 default:
-                    throw new ArgumentOutOfRangeException("type","Index buffers can only be created for types that are sixteen or thirty two bits in length");
+                    throw new ArgumentOutOfRangeException(nameof(type), "Index buffers can only be created for types that are sixteen or thirty two bits in length.");
             }
         }
 
         /// <summary>
-        /// The GraphicsDevice is resetting, so GPU resources must be recreated.
+        /// The <see cref="GraphicsDevice"/> is resetting, so GPU resources must be recreated.
         /// </summary>
         internal protected override void GraphicsDeviceResetting()
         {
@@ -78,13 +79,18 @@ namespace Microsoft.Xna.Framework.Graphics
         public void GetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount) where T : struct
         {
             if (data == null)
-                throw new ArgumentNullException("data");
-            if (data.Length < (startIndex + elementCount))
-                throw new InvalidOperationException("The array specified in the data parameter is not the correct size for the amount of data requested.");
-            if (BufferUsage == BufferUsage.WriteOnly)
-                throw new NotSupportedException("This IndexBuffer was created with a usage type of BufferUsage.WriteOnly. Calling GetData on a resource that was created with BufferUsage.WriteOnly is not supported.");
+                throw new ArgumentNullException(nameof(data));
 
-            PlatformGetData<T>(offsetInBytes, data, startIndex, elementCount);
+            if (data.Length < (startIndex + elementCount))
+                throw new InvalidOperationException(
+                    $"The array specified in the {nameof(data)} parameter is not the correct size for the amount of data requested.");
+
+            if (BufferUsage == BufferUsage.WriteOnly)
+                throw new NotSupportedException(
+                    $"This {nameof(IndexBuffer)} was created with a usage type of {BufferUsage.WriteOnly}. " +
+                    $"Calling {nameof(GetData)} on a resource that was created with {BufferUsage.WriteOnly} is not supported.");
+
+            PlatformGetData(offsetInBytes, data, startIndex, elementCount);
         }
 
         public void GetData<T>(T[] data, int startIndex, int elementCount) where T : struct
@@ -99,27 +105,29 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public void SetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount) where T : struct
         {
-            SetDataInternal<T>(offsetInBytes, data, startIndex, elementCount, SetDataOptions.None);
+            SetDataInternal(offsetInBytes, data, startIndex, elementCount, SetDataOptions.None);
         }
         		
 		public void SetData<T>(T[] data, int startIndex, int elementCount) where T : struct
         {
-            SetDataInternal<T>(0, data, startIndex, elementCount, SetDataOptions.None);
+            SetDataInternal(0, data, startIndex, elementCount, SetDataOptions.None);
 		}
 		
         public void SetData<T>(T[] data) where T : struct
         {
-            SetDataInternal<T>(0, data, 0, data.Length, SetDataOptions.None);
+            SetDataInternal(0, data, 0, data.Length, SetDataOptions.None);
         }
 
         protected void SetDataInternal<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, SetDataOptions options) where T : struct
         {
             if (data == null)
-                throw new ArgumentNullException("data");
-            if (data.Length < (startIndex + elementCount))
-                throw new InvalidOperationException("The array specified in the data parameter is not the correct size for the amount of data requested.");
+                throw new ArgumentNullException(nameof(data));
 
-            PlatformSetDataInternal<T>(offsetInBytes, data, startIndex, elementCount, options);
+            if (data.Length < (startIndex + elementCount))
+                throw new InvalidOperationException(
+                    $"The array specified in the {nameof(data)} parameter is not the correct size for the amount of data requested.");
+
+            PlatformSetDataInternal(offsetInBytes, data, startIndex, elementCount, options);
         }
 	}
 }

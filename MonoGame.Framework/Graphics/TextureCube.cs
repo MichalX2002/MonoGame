@@ -31,13 +31,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal TextureCube(GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format, bool renderTarget)
         {
-            if (graphicsDevice == null)
-                throw new ArgumentNullException("graphicsDevice", FrameworkResources.ResourceCreationWhenDeviceIsNull);
-            if (size <= 0)
-                throw new ArgumentOutOfRangeException("size","Cube size must be greater than zero");
+            this.GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
 
-            this.GraphicsDevice = graphicsDevice;
-			this.size = size;
+            if (size <= 0)
+                throw new ArgumentOutOfRangeException(nameof(size), "Cube size must be greater than zero");
+
+            this.size = size;
             this._format = format;
             this._levelCount = mipMap ? CalculateMipLevels(size) : 1;
 
@@ -53,7 +52,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public void GetData<T>(CubeMapFace cubeMapFace, T[] data) where T : struct
         {
             if (data == null)
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
             GetData(cubeMapFace, 0, null, data, 0, data.Length);
         }
 
@@ -93,18 +92,28 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             var textureBounds = new Rectangle(0, 0, Math.Max(Size >> level, 1), Math.Max(Size >> level, 1));
             checkedRect = rect ?? textureBounds;
+
             if (level < 0 || level >= LevelCount)
-                throw new ArgumentException("level must be smaller than the number of levels in this texture.");
+                throw new ArgumentException(
+                    $"{nameof(level)} must be smaller than the number of levels in this texture.", nameof(level));
+
             if (!textureBounds.Contains(checkedRect) || checkedRect.Width <= 0 || checkedRect.Height <= 0)
-                throw new ArgumentException("Rectangle must be inside the texture bounds", "rect");
+                throw new ArgumentException("Rectangle must be inside the texture bounds", nameof(rect));
+
             if (data == null)
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
+            
             var tSize = ReflectionHelpers.SizeOf<T>.Get();
             var fSize = Format.GetSize();
             if (tSize > fSize || fSize % tSize != 0)
-                throw new ArgumentException("Type T is of an invalid size for the format of this texture.", "T");
+                throw new ArgumentException(
+                    $"Type {nameof(T)} is of an invalid size for the format of this texture.", nameof(T));
+
             if (startIndex < 0 || startIndex >= data.Length)
-                throw new ArgumentException("startIndex must be at least zero and smaller than data.Length.", "startIndex");
+                throw new ArgumentException(
+                    $"{nameof(startIndex)} must be at least zero and smaller than {nameof(data)}.{nameof(data.Length)}.",
+                    nameof(startIndex));
+            
             if (data.Length < startIndex + elementCount)
                 throw new ArgumentException("The data array is too small.");
 
@@ -131,9 +140,9 @@ namespace Microsoft.Xna.Framework.Graphics
                 dataByteSize = checkedRect.Width * checkedRect.Height * fSize;
             }
             if (elementCount * tSize != dataByteSize)
-                throw new ArgumentException(string.Format("elementCount is not the right size, " +
-                                            "elementCount * sizeof(T) is {0}, but data size is {1}.",
-                                            elementCount * tSize, dataByteSize), "elementCount");
+                throw new ArgumentException($"{nameof(elementCount)} is not the right size, " +
+                                            $"{nameof(elementCount)} * sizeof({nameof(T)}) is {elementCount * tSize}, " +
+                                            $"but data size is {dataByteSize}.", nameof(elementCount));
         }
 	}
 }

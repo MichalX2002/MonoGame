@@ -44,7 +44,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public bool TryGetValue(string boneName, out ModelBone value)
         {
             if (string.IsNullOrEmpty(boneName))
-                throw new ArgumentNullException("boneName");
+                throw new ArgumentNullException(nameof(boneName));
 
             foreach (ModelBone bone in this)
             {

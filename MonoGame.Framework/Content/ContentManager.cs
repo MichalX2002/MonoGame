@@ -147,26 +147,14 @@ namespace Microsoft.Xna.Framework.Content
 
 		public ContentManager(IServiceProvider serviceProvider)
 		{
-			if (serviceProvider == null)
-			{
-				throw new ArgumentNullException("serviceProvider");
-			}
-			this.serviceProvider = serviceProvider;
+            this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             AddContentManager(this);
 		}
 
 		public ContentManager(IServiceProvider serviceProvider, string rootDirectory)
-		{
-			if (serviceProvider == null)
-			{
-				throw new ArgumentNullException("serviceProvider");
-			}
-			if (rootDirectory == null)
-			{
-				throw new ArgumentNullException("rootDirectory");
-			}
-			this.RootDirectory = rootDirectory;
-			this.serviceProvider = serviceProvider;
+        {
+            this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            this.RootDirectory = rootDirectory ?? throw new ArgumentNullException(nameof(rootDirectory));
             AddContentManager(this);
 		}
 
@@ -223,11 +211,11 @@ namespace Microsoft.Xna.Framework.Content
 		{
             if (string.IsNullOrEmpty(assetName))
             {
-                throw new ArgumentNullException("assetName");
+                throw new ArgumentNullException(nameof(assetName));
             }
             if (disposed)
             {
-                throw new ObjectDisposedException("ContentManager");
+                throw new ObjectDisposedException(nameof(ContentManager));
             }
 
             T result = default(T);
@@ -304,11 +292,11 @@ namespace Microsoft.Xna.Framework.Content
 		{
 			if (string.IsNullOrEmpty(assetName))
 			{
-				throw new ArgumentNullException("assetName");
+				throw new ArgumentNullException(nameof(assetName));
 			}
 			if (disposed)
 			{
-				throw new ObjectDisposedException("ContentManager");
+				throw new ObjectDisposedException(nameof(ContentManager));
 			}
 						
 			string originalAssetName = assetName;
@@ -433,11 +421,11 @@ namespace Microsoft.Xna.Framework.Content
 			string assetName = originalAssetName;
 			if (string.IsNullOrEmpty(assetName))
 			{
-				throw new ArgumentNullException("assetName");
+				throw new ArgumentNullException(nameof(assetName));
 			}
 			if (disposed)
 			{
-				throw new ObjectDisposedException("ContentManager");
+				throw new ObjectDisposedException(nameof(ContentManager));
 			}
 
 			if (this.graphicsDeviceService == null)

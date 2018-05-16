@@ -67,7 +67,7 @@ namespace Microsoft.Xna.Framework
         internal static void BlockOnUIThread(Action action)
         {
             if (action == null)
-                throw new ArgumentNullException("action");
+                throw new ArgumentNullException(nameof(action));
 
 #if DIRECTX || PSM
             action();

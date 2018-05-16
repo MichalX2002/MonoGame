@@ -11,30 +11,25 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class Texture2D : Texture
     {
-        internal protected enum SurfaceType
+        public enum SurfaceType
         {
             Texture,
             RenderTarget,
             SwapChainRenderTarget,
         }
 
-		internal int width;
-		internal int height;
+        internal Rectangle _bounds;
         internal int ArraySize;
-                
-        internal float TexelWidth { get; private set; }
-        internal float TexelHeight { get; private set; }
+        internal Vector2 _texel;
+
+        public Vector2 Texel => _texel;
+        public float TexelWidth => _texel.X;
+        public float TexelHeight => _texel.Y;
 
         /// <summary>
         /// Gets the dimensions of the texture
         /// </summary>
-        public Rectangle Bounds
-        {
-            get
-            {
-				return new Rectangle(0, 0, this.width, this.height);
-            }
-        }
+        public Rectangle Bounds => _bounds;
 
         /// <summary>
         /// Creates a new texture of the given size
@@ -73,7 +68,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public Texture2D(GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format, int arraySize)
             : this(graphicsDevice, width, height, mipmap, format, SurfaceType.Texture, false, arraySize)
         {
-            
+
         }
 
         /// <summary>
@@ -89,31 +84,31 @@ namespace Microsoft.Xna.Framework.Graphics
             : this(graphicsDevice, width, height, mipmap, format, type, false, 1)
         {
         }
-        
+
         protected Texture2D(GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format, SurfaceType type, bool shared, int arraySize)
-		{
+        {
             if (graphicsDevice == null)
-                throw new ArgumentNullException("graphicsDevice", FrameworkResources.ResourceCreationWhenDeviceIsNull);
-            if (width <= 0)
-                throw new ArgumentOutOfRangeException("width","Texture width must be greater than zero");
-            if (height <= 0)
-                throw new ArgumentOutOfRangeException("height","Texture height must be greater than zero");
+                throw new ArgumentNullException(nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
+
             if (arraySize > 1 && !graphicsDevice.GraphicsCapabilities.SupportsTextureArrays)
-                throw new ArgumentException("Texture arrays are not supported on this graphics device", "arraySize");
+                throw new ArgumentException("Texture arrays are not supported on this graphics device", nameof(arraySize));
+
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException(nameof(width), "Texture width must be greater than zero");
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException(nameof(height), "Texture height must be greater than zero");
 
             this.GraphicsDevice = graphicsDevice;
-            this.width = width;
-            this.height = height;
-            this.TexelWidth = 1f / (float)width;
-            this.TexelHeight = 1f / (float)height;
+            this._bounds = new Rectangle(0, 0, width, height);
+            this._texel = new Vector2(1f / width, 1f / height);
 
             this._format = format;
             this._levelCount = mipmap ? CalculateMipLevels(width, height) : 1;
             this.ArraySize = arraySize;
 
             // Texture will be assigned by the swap chain.
-		    if (type == SurfaceType.SwapChainRenderTarget)
-		        return;
+            if (type == SurfaceType.SwapChainRenderTarget)
+                return;
 
             PlatformConstruct(width, height, mipmap, format, type, shared);
         }
@@ -121,24 +116,12 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Gets the width of the texture in pixels.
         /// </summary>
-        public int Width
-        {
-            get
-            {
-                return width;
-            }
-        }
+        public int Width => _bounds.Width;
 
         /// <summary>
         /// Gets the height of the texture in pixels.
         /// </summary>
-        public int Height
-        {
-            get
-            {
-                return height;
-            }
-        }
+        public int Height => _bounds.Height;
 
         /// <summary>
         /// Changes the pixels of the texture
@@ -154,8 +137,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="elementCount"></param>
         public void SetData<T>(int level, int arraySlice, Rectangle? rect, T[] data, int startIndex, int elementCount) where T : struct
         {
-            Rectangle checkedRect;
-            ValidateParams(level, arraySlice, rect, data, startIndex, elementCount, out checkedRect);
+            ValidateParams(level, arraySlice, rect, data, startIndex, elementCount, out Rectangle checkedRect);
             PlatformSetData(level, arraySlice, checkedRect, data, startIndex, elementCount);
         }
 
@@ -168,10 +150,9 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="data">New data for the texture</param>
         /// <param name="startIndex">Start position of data</param>
         /// <param name="elementCount"></param>
-        public void SetData<T>(int level, Rectangle? rect, T[] data, int startIndex, int elementCount) where T : struct 
+        public void SetData<T>(int level, Rectangle? rect, T[] data, int startIndex, int elementCount) where T : struct
         {
-            Rectangle checkedRect;
-            ValidateParams(level, 0, rect, data, startIndex, elementCount, out checkedRect);
+            ValidateParams(level, 0, rect, data, startIndex, elementCount, out Rectangle checkedRect);
             if (rect.HasValue)
                 PlatformSetData(level, 0, checkedRect, data, startIndex, elementCount);
             else
@@ -187,20 +168,18 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="elementCount"></param>
 		public void SetData<T>(T[] data, int startIndex, int elementCount) where T : struct
         {
-            Rectangle checkedRect;
-            ValidateParams(0, 0, null, data, startIndex, elementCount, out checkedRect);
+            ValidateParams(0, 0, null, data, startIndex, elementCount, out Rectangle checkedRect);
             PlatformSetData(0, data, startIndex, elementCount);
         }
 
-		/// <summary>
+        /// <summary>
         /// Changes the texture's pixels
         /// </summary>
         /// <typeparam name="T">New data for the texture</typeparam>
         /// <param name="data"></param>
-		public void SetData<T>(T[] data) where T : struct
-		{
-            Rectangle checkedRect;
-            ValidateParams(0, 0, null, data, 0, data.Length, out checkedRect);
+        public void SetData<T>(T[] data) where T : struct
+        {
+            ValidateParams(0, 0, null, data, 0, data.Length, out Rectangle checkedRect);
             PlatformSetData(0, data, 0, data.Length);
         }
 
@@ -218,8 +197,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="elementCount">Number of pixels to read</param>
         public void GetData<T>(int level, int arraySlice, Rectangle? rect, T[] data, int startIndex, int elementCount) where T : struct
         {
-            Rectangle checkedRect;
-            ValidateParams(level, arraySlice, rect, data, startIndex, elementCount, out checkedRect);
+            ValidateParams(level, arraySlice, rect, data, startIndex, elementCount, out Rectangle checkedRect);
             PlatformGetData(level, arraySlice, checkedRect, data, startIndex, elementCount);
         }
 
@@ -249,9 +227,9 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="startIndex">First position in data where to write the pixel data</param>
         /// <param name="elementCount">Number of pixels to read</param>
 		public void GetData<T>(T[] data, int startIndex, int elementCount) where T : struct
-		{
-			this.GetData(0, null, data, startIndex, elementCount);
-		}
+        {
+            this.GetData(0, null, data, startIndex, elementCount);
+        }
 
         /// <summary>
         /// Retrieves the contents of the texture
@@ -260,13 +238,13 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="data">Destination array for the texture data</param>
-        public void GetData<T> (T[] data) where T : struct
-		{
-		    if (data == null)
-		        throw new ArgumentNullException("data");
-			this.GetData(0, null, data, 0, data.Length);
-		}
-		
+        public void GetData<T>(T[] data) where T : struct
+        {
+            if (data == null)
+                throw new ArgumentNullException("data");
+            this.GetData(0, null, data, 0, data.Length);
+        }
+
         /// <summary>
         /// Creates a Texture2D from a stream, supported formats bmp, gif, jpg, png, tif and dds (only for simple textures).
         /// May work with other formats, but will not work with tga files.
@@ -279,7 +257,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// result in black color data.
         /// </remarks>
         public static Texture2D FromStream(GraphicsDevice graphicsDevice, Stream stream)
-		{
+        {
             if (graphicsDevice == null)
                 throw new ArgumentNullException("graphicsDevice");
             if (stream == null)
@@ -288,7 +266,8 @@ namespace Microsoft.Xna.Framework.Graphics
             try
             {
                 return PlatformFromStream(graphicsDevice, stream);
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
                 throw new InvalidOperationException("This image format is not supported", e);
             }
@@ -337,32 +316,38 @@ namespace Microsoft.Xna.Framework.Graphics
         private void ValidateParams<T>(int level, int arraySlice, Rectangle? rect, T[] data,
             int startIndex, int elementCount, out Rectangle checkedRect) where T : struct
         {
-            var textureBounds = new Rectangle(0, 0, Math.Max(width >> level, 1), Math.Max(height >> level, 1));
+            var textureBounds = new Rectangle(0, 0, Math.Max(_bounds.Width >> level, 1), Math.Max(_bounds.Height >> level, 1));
             checkedRect = rect ?? textureBounds;
             if (level < 0 || level >= LevelCount)
-                throw new ArgumentException("level must be smaller than the number of levels in this texture.", "level");
+                throw new ArgumentException(
+                    $"{nameof(level)} must be smaller than the number of levels in this texture.", nameof(level));
             if (arraySlice > 0 && !GraphicsDevice.GraphicsCapabilities.SupportsTextureArrays)
-                throw new ArgumentException("Texture arrays are not supported on this graphics device", "arraySlice");
+                throw new ArgumentException("Texture arrays are not supported on this graphics device", nameof(arraySlice));
             if (arraySlice < 0 || arraySlice >= ArraySize)
-                throw new ArgumentException("arraySlice must be smaller than the ArraySize of this texture and larger than 0.", "arraySlice");
+                throw new ArgumentException(
+                    $"{nameof(arraySlice)} must be smaller than the {nameof(ArraySize)} of this texture and larger than 0.", nameof(arraySlice));
             if (!textureBounds.Contains(checkedRect) || checkedRect.Width <= 0 || checkedRect.Height <= 0)
-                throw new ArgumentException("Rectangle must be inside the texture bounds", "rect");
+                throw new ArgumentException("Rectangle must be inside the texture bounds.", nameof(rect));
             if (data == null)
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
             var tSize = ReflectionHelpers.SizeOf<T>.Get();
             var fSize = Format.GetSize();
             if (tSize > fSize || fSize % tSize != 0)
-                throw new ArgumentException("Type T is of an invalid size for the format of this texture.", "T");
+                throw new ArgumentException(
+                    $"Type {nameof(T)} is of an invalid size for the format of this texture.", nameof(T));
+
             if (startIndex < 0 || startIndex >= data.Length)
-                throw new ArgumentException("startIndex must be at least zero and smaller than data.Length.", "startIndex");
+                throw new ArgumentException(
+                    $"{nameof(startIndex)} must be at least zero and smaller than {nameof(data)}.{nameof(data.Length)}.",
+                    nameof(startIndex));
+
             if (data.Length < startIndex + elementCount)
-                throw new ArgumentException("The data array is too small.");
+                throw new ArgumentException("The data array is too small.", nameof(data));
 
             int dataByteSize;
             if (Format.IsCompressedFormat())
             {
-                int blockWidth, blockHeight;
-                Format.GetBlockSize(out blockWidth, out blockHeight);
+                Format.GetBlockSize(out int blockWidth, out int blockHeight);
                 int blockWidthMinusOne = blockWidth - 1;
                 int blockHeightMinusOne = blockHeight - 1;
                 // round x and y down to next multiple of block size; width and height up to next multiple of block size
@@ -396,9 +381,9 @@ namespace Microsoft.Xna.Framework.Graphics
                 dataByteSize = checkedRect.Width * checkedRect.Height * fSize;
             }
             if (elementCount * tSize != dataByteSize)
-                throw new ArgumentException(string.Format("elementCount is not the right size, " +
-                                            "elementCount * sizeof(T) is {0}, but data size is {1}.",
-                                            elementCount * tSize, dataByteSize), "elementCount");
+                throw new ArgumentException($"{nameof(elementCount)} is not the right size, " +
+                                            $"{nameof(elementCount)} * sizeof({nameof(T)}) is {elementCount * tSize}, " +
+                                            $"but data size is {dataByteSize}.", nameof(elementCount));
         }
-	}
+    }
 }

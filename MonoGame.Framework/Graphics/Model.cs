@@ -64,15 +64,11 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </exception>
         public Model(GraphicsDevice graphicsDevice, List<ModelBone> bones, List<ModelMesh> meshes)
 		{
-            if (graphicsDevice == null)
-            {
-                throw new ArgumentNullException("graphicsDevice", FrameworkResources.ResourceCreationWhenDeviceIsNull);
-            }
+            this.graphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
+                    nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
 
-			// TODO: Complete member initialization
-			this.graphicsDevice = graphicsDevice;
-
-			Bones = new ModelBoneCollection(bones);
+            // TODO: Complete member initialization
+            Bones = new ModelBoneCollection(bones);
 			Meshes = new ModelMeshCollection(meshes);
 		}
 
@@ -149,9 +145,9 @@ namespace Microsoft.Xna.Framework.Graphics
         public void CopyAbsoluteBoneTransformsTo(Matrix[] destinationBoneTransforms)
 		{
 			if (destinationBoneTransforms == null)
-				throw new ArgumentNullException("destinationBoneTransforms");
+				throw new ArgumentNullException(nameof(destinationBoneTransforms));
             if (destinationBoneTransforms.Length < this.Bones.Count)
-				throw new ArgumentOutOfRangeException("destinationBoneTransforms");
+				throw new ArgumentOutOfRangeException(nameof(destinationBoneTransforms));
             int count = this.Bones.Count;
 			for (int index1 = 0; index1 < count; ++index1)
 			{
@@ -181,9 +177,9 @@ namespace Microsoft.Xna.Framework.Graphics
         public void CopyBoneTransformsFrom(Matrix[] sourceBoneTransforms)
         {
             if (sourceBoneTransforms == null)
-                throw new ArgumentNullException("sourceBoneTransforms");
+                throw new ArgumentNullException(nameof(sourceBoneTransforms));
             if (sourceBoneTransforms.Length < Bones.Count)
-                throw new ArgumentOutOfRangeException("sourceBoneTransforms");
+                throw new ArgumentOutOfRangeException(nameof(sourceBoneTransforms));
 
             int count = Bones.Count;
             for (int i = 0; i < count; i++)
@@ -205,9 +201,9 @@ namespace Microsoft.Xna.Framework.Graphics
         public void CopyBoneTransformsTo(Matrix[] destinationBoneTransforms)
         {
             if (destinationBoneTransforms == null)
-                throw new ArgumentNullException("destinationBoneTransforms");
+                throw new ArgumentNullException(nameof(destinationBoneTransforms));
             if (destinationBoneTransforms.Length < Bones.Count)
-                throw new ArgumentOutOfRangeException("destinationBoneTransforms");
+                throw new ArgumentOutOfRangeException(nameof(destinationBoneTransforms));
 
             int count = Bones.Count;
             for (int i = 0; i < count; i++)

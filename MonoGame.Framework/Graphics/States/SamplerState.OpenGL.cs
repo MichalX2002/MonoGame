@@ -180,20 +180,20 @@ namespace Microsoft.Xna.Framework.Graphics
 
     private int GetWrapMode(TextureAddressMode textureAddressMode)
     {
-      switch(textureAddressMode)
-      {
-      case TextureAddressMode.Clamp:
-        return (int)TextureWrapMode.ClampToEdge;
-      case TextureAddressMode.Wrap:
-        return (int)TextureWrapMode.Repeat;
-      case TextureAddressMode.Mirror:
-        return (int)TextureWrapMode.MirroredRepeat;
+            switch (textureAddressMode)
+            {
+                case TextureAddressMode.Clamp:
+                    return (int)TextureWrapMode.ClampToEdge;
+                case TextureAddressMode.Wrap:
+                    return (int)TextureWrapMode.Repeat;
+                case TextureAddressMode.Mirror:
+                    return (int)TextureWrapMode.MirroredRepeat;
 #if !GLES
-      case TextureAddressMode.Border:
-        return (int)TextureWrapMode.ClampToBorder;
+                case TextureAddressMode.Border:
+                    return (int)TextureWrapMode.ClampToBorder;
 #endif
-      default:
-        throw new ArgumentException("No support for " + textureAddressMode);
+                default:
+                    throw new ArgumentException($"No support for {textureAddressMode}.");
       }
     }
   }

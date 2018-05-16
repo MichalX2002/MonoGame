@@ -45,9 +45,6 @@ namespace Microsoft.Xna.Framework
         private IGraphicsDeviceManager _graphicsDeviceManager;
         private IGraphicsDeviceService _graphicsDeviceService;
 
-        private bool _initialized = false;
-        private bool _isFixedTimeStep = true;
-
         private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(166667); // 60fps
         private TimeSpan _inactiveSleepTime = TimeSpan.FromSeconds(0.02);
 
@@ -85,7 +82,7 @@ namespace Microsoft.Xna.Framework
             Dispose(false);
         }
 
-		[System.Diagnostics.Conditional("DEBUG")]
+		[Conditional("DEBUG")]
 		internal void Log(string Message)
 		{
 			if (Platform != null) Platform.Log(Message);
@@ -110,8 +107,7 @@ namespace Microsoft.Xna.Framework
                     // Dispose loaded game components
                     for (int i = 0; i < _components.Count; i++)
                     {
-                        var disposable = _components[i] as IDisposable;
-                        if (disposable != null)
+                        if (_components[i] is IDisposable disposable)
                             disposable.Dispose();
                     }
                     _components = null;
@@ -185,7 +181,7 @@ namespace Microsoft.Xna.Framework
             set
             {
                 if (value < TimeSpan.Zero)
-                    throw new ArgumentOutOfRangeException("The time must be positive.", default(Exception));
+                    throw new ArgumentOutOfRangeException("The time must be positive.");
 
                 _inactiveSleepTime = value;
             }
@@ -201,9 +197,9 @@ namespace Microsoft.Xna.Framework
             set
             {
                 if (value < TimeSpan.Zero)
-                    throw new ArgumentOutOfRangeException("The time must be positive.", default(Exception));
+                    throw new ArgumentOutOfRangeException("The time must be positive.");
                 if (value < _targetElapsedTime)
-                    throw new ArgumentOutOfRangeException("The time must be at least TargetElapsedTime", default(Exception));
+                    throw new ArgumentOutOfRangeException("The time must be at least TargetElapsedTime.");
 
                 _maxElapsedTime = value;
             }
@@ -241,11 +237,7 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        public bool IsFixedTimeStep
-        {
-            get { return _isFixedTimeStep; }
-            set { _isFixedTimeStep = value; }
-        }
+        public bool IsFixedTimeStep { get; set; } = true;
 
         public GameServiceContainer Services {
             get { return _services; }
@@ -256,10 +248,7 @@ namespace Microsoft.Xna.Framework
             get { return _content; }
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException();
-
-                _content = value;
+                _content = value ?? throw new ArgumentNullException(nameof(value));
             }
         }
 
@@ -293,10 +282,7 @@ namespace Microsoft.Xna.Framework
         // Currently Game.Initialized is used by the Mac game window class to
         // determine whether to raise DeviceResetting and DeviceReset on
         // GraphicsDeviceManager.
-        internal bool Initialized
-        {
-            get { return _initialized; }
-        }
+        internal bool Initialized { get; private set; } = false;
 
         #endregion Internal Properties
 
@@ -348,11 +334,11 @@ namespace Microsoft.Xna.Framework
             if (!Platform.BeforeRun())
                 return;
 
-            if (!_initialized)
+            if (!Initialized)
             {
                 DoInitialize ();
                 _gameTimer = Stopwatch.StartNew();
-                _initialized = true;
+                Initialized = true;
             }
 
             BeginRun();            
@@ -379,30 +365,31 @@ namespace Microsoft.Xna.Framework
                 return;
             }
 
-            if (!_initialized) {
-                DoInitialize ();
-                _initialized = true;
+            if (!Initialized) {
+                DoInitialize();
+                Initialized = true;
             }
 
             BeginRun();
             _gameTimer = Stopwatch.StartNew();
             switch (runBehavior)
             {
-            case GameRunBehavior.Asynchronous:
-                Platform.AsyncRunLoopEnded += Platform_AsyncRunLoopEnded;
-                Platform.StartRunLoop();
-                break;
-            case GameRunBehavior.Synchronous:
-                // XNA runs one Update even before showing the window
-                DoUpdate(new GameTime());
+                case GameRunBehavior.Asynchronous:
+                    Platform.AsyncRunLoopEnded += Platform_AsyncRunLoopEnded;
+                    Platform.StartRunLoop();
+                    break;
 
-                Platform.RunLoop();
-                EndRun();
-				DoExiting();
-                break;
-            default:
-                throw new ArgumentException(string.Format(
-                    "Handling for the run behavior {0} is not implemented.", runBehavior));
+                case GameRunBehavior.Synchronous:
+                    // XNA runs one Update even before showing the window
+                    DoUpdate(new GameTime());
+
+                    Platform.RunLoop();
+                    EndRun();
+                    DoExiting();
+                    break;
+
+                default:
+                    throw new ArgumentException($"Handling for the run behavior {runBehavior} is not implemented.");
             }
         }
 
@@ -528,7 +515,7 @@ namespace Microsoft.Xna.Framework
         {
             // TODO: This should be removed once all platforms use the new GraphicsDeviceManager
 #if !(WINDOWS && DIRECTX)
-            applyChanges(graphicsDeviceManager);
+            InternalApplyChanges(InternalGraphicsDeviceManager);
 #endif
 
             // According to the information given on MSDN (see link below), all
@@ -620,7 +607,7 @@ namespace Microsoft.Xna.Framework
         //        be added by third parties without changing MonoGame itself.
 
 #if !(WINDOWS && DIRECTX)
-        internal void applyChanges(GraphicsDeviceManager manager)
+        internal void InternalApplyChanges(GraphicsDeviceManager manager)
         {
 			Platform.BeginScreenDeviceChange(GraphicsDevice.PresentationParameters.IsFullScreen);
 
@@ -667,7 +654,7 @@ namespace Microsoft.Xna.Framework
         internal void DoInitialize()
         {
             AssertNotDisposed();
-            if (GraphicsDevice == null && graphicsDeviceManager != null)
+            if (GraphicsDevice == null && InternalGraphicsDeviceManager != null)
                 _graphicsDeviceManager.CreateDevice();
 
             Platform.BeforeInitialize();
@@ -691,7 +678,7 @@ namespace Microsoft.Xna.Framework
 
         #endregion Internal Methods
 
-        internal GraphicsDeviceManager graphicsDeviceManager
+        internal GraphicsDeviceManager InternalGraphicsDeviceManager
         {
             get
             {
@@ -728,7 +715,7 @@ namespace Microsoft.Xna.Framework
                 CategorizeComponent(Components[i]);
         }
 
-        // FIXME: I am open to a better name for this method.  It does the
+        // FIXME: I am open to a better name for this method. It does the
         //        opposite of CategorizeComponents.
         private void DecategorizeComponents()
         {

@@ -38,7 +38,7 @@ namespace Microsoft.Xna.Framework
         {
             if (base.IndexOf(item) != -1)
             {
-                throw new ArgumentException("Cannot Add Same Component Multiple Times");
+                throw new ArgumentException("Cannot add same component multiple times.");
             }
             base.InsertItem(index, item);
             if (item != null)

@@ -38,10 +38,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// <param name="touches">Array of <see cref="TouchLocation"/> items to initialize with.</param>
         public TouchCollection(TouchLocation[] touches)
         {
-            if (touches == null)
-                throw new ArgumentNullException("touches");
-
-            _collection = touches;
+            _collection = touches ?? throw new ArgumentNullException(nameof(touches));
         }
 
         /// <summary>

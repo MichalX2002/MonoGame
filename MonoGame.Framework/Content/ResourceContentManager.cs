@@ -14,7 +14,7 @@ namespace Microsoft.Xna.Framework.Content
         {
             if (resource == null)
             {
-                throw new ArgumentNullException("resource");
+                throw new ArgumentNullException(nameof(resource));
             }
             this.resource = resource;
         }
@@ -24,11 +24,11 @@ namespace Microsoft.Xna.Framework.Content
             object obj = this.resource.GetObject(assetName);
             if (obj == null)
             {
-                throw new ContentLoadException("Resource not found");
+                throw new ContentLoadException("Resource not found.");
             }
             if (!(obj is byte[]))
             {
-                throw new ContentLoadException("Resource is not in binary format");
+                throw new ContentLoadException("Resource is not in binary format.");
             }
             return new MemoryStream(obj as byte[]);
         }

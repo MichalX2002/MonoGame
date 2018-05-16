@@ -69,7 +69,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		public RenderTargetBinding(RenderTarget2D renderTarget)
 		{
 			if (renderTarget == null) 
-				throw new ArgumentNullException("renderTarget");
+				throw new ArgumentNullException(nameof(renderTarget));
 
 			_renderTarget = renderTarget;
             _arraySlice = (int)CubeMapFace.PositiveX;
@@ -78,12 +78,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public RenderTargetBinding(RenderTargetCube renderTarget, CubeMapFace cubeMapFace)
         {
-            if (renderTarget == null)
-                throw new ArgumentNullException("renderTarget");
-            if (cubeMapFace < CubeMapFace.PositiveX || cubeMapFace > CubeMapFace.NegativeZ)
-                throw new ArgumentOutOfRangeException("cubeMapFace");
+            _renderTarget = renderTarget ?? throw new ArgumentNullException(nameof(renderTarget));
 
-            _renderTarget = renderTarget;
+            if (cubeMapFace < CubeMapFace.PositiveX || cubeMapFace > CubeMapFace.NegativeZ)
+                throw new ArgumentOutOfRangeException(nameof(cubeMapFace));
+
             _arraySlice = (int)cubeMapFace;
             _depthFormat = renderTarget.DepthStencilFormat;
         }
@@ -93,11 +92,11 @@ namespace Microsoft.Xna.Framework.Graphics
         public RenderTargetBinding(RenderTarget2D renderTarget, int arraySlice)
         {
             if (renderTarget == null)
-                throw new ArgumentNullException("renderTarget");
+                throw new ArgumentNullException(nameof(renderTarget));
             if (arraySlice < 0 || arraySlice >= renderTarget.ArraySize)
-                throw new ArgumentOutOfRangeException("arraySlice");
+                throw new ArgumentOutOfRangeException(nameof(arraySlice));
             if (!renderTarget.GraphicsDevice.GraphicsCapabilities.SupportsTextureArrays)
-                throw new InvalidOperationException("Texture arrays are not supported on this graphics device");
+                throw new InvalidOperationException("Texture arrays are not supported on this graphics device.");
 
             _renderTarget = renderTarget;
             _arraySlice = arraySlice;
@@ -107,7 +106,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public RenderTargetBinding(RenderTarget3D renderTarget)
         {
             if (renderTarget == null)
-                throw new ArgumentNullException("renderTarget");
+                throw new ArgumentNullException(nameof(renderTarget));
 
             _renderTarget = renderTarget;
             _arraySlice = 0;
@@ -117,9 +116,9 @@ namespace Microsoft.Xna.Framework.Graphics
         public RenderTargetBinding(RenderTarget3D renderTarget, int arraySlice)
         {
             if (renderTarget == null)
-                throw new ArgumentNullException("renderTarget");
+                throw new ArgumentNullException(nameof(renderTarget));
             if (arraySlice < 0 || arraySlice >= renderTarget.Depth)
-                throw new ArgumentOutOfRangeException("arraySlice");
+                throw new ArgumentOutOfRangeException(nameof(arraySlice));
 
             _renderTarget = renderTarget;
             _arraySlice = arraySlice;

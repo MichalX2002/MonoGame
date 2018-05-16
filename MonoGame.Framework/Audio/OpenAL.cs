@@ -396,7 +396,7 @@ namespace MonoGame.OpenAL
         {
             if (numEntries <= 0)
             {
-                throw new ArgumentOutOfRangeException("numEntries", "Must be greater than zero.");
+                throw new ArgumentOutOfRangeException(nameof(numEntries), "Must be greater than zero.");
             }
             int[] array = new int[numEntries];
             fixed (int* ptr = &array[0])
