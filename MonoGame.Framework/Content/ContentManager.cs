@@ -229,12 +229,11 @@ namespace Microsoft.Xna.Framework.Content
             var key = assetName.Replace('\\', '/');
 
             // Check for a previously loaded asset first
-            object asset = null;
-            if (loadedAssets.TryGetValue(key, out asset))
+            if (loadedAssets.TryGetValue(key, out object asset))
             {
-                if (asset is T)
+                if (asset is T typedAsset)
                 {
-                    return (T)asset;
+                    return typedAsset;
                 }
             }
 
@@ -306,9 +305,9 @@ namespace Microsoft.Xna.Framework.Content
 			{
 				this.graphicsDeviceService = serviceProvider.GetService(typeof(IGraphicsDeviceService)) as IGraphicsDeviceService;
 				if (this.graphicsDeviceService == null)
-				{
-					throw new InvalidOperationException("No Graphics Device Service");
-				}
+                {
+                    throw new InvalidOperationException(FrameworkResources.NoGraphicsDeviceService);
+                }
 			}
 			
             // Try to load as XNB file
@@ -340,7 +339,8 @@ namespace Microsoft.Xna.Framework.Content
             if (x != 'X' || n != 'N' || b != 'B' ||
                 !(targetPlatformIdentifiers.Contains((char)platform)))
             {
-                throw new ContentLoadException("Asset does not appear to be a valid XNB file. Did you process your content for Windows?");
+                throw new ContentLoadException(
+                    "Asset does not appear to be a valid XNB file. Did you process your content for Windows?");
             }
 
             byte version = xnbReader.ReadByte();
@@ -350,7 +350,7 @@ namespace Microsoft.Xna.Framework.Content
             bool compressedLz4 = (flags & ContentCompressedLz4) != 0;
             if (version != 5 && version != 4)
             {
-                throw new ContentLoadException("Invalid XNB version");
+                throw new ContentLoadException("Invalid XNB version.");
             }
 
             // The next int32 is the length of the XNB file
@@ -433,7 +433,7 @@ namespace Microsoft.Xna.Framework.Content
 				this.graphicsDeviceService = serviceProvider.GetService(typeof(IGraphicsDeviceService)) as IGraphicsDeviceService;
 				if (this.graphicsDeviceService == null)
 				{
-					throw new InvalidOperationException("No Graphics Device Service");
+					throw new InvalidOperationException(FrameworkResources.NoGraphicsDeviceService);
 				}
 			}
 
