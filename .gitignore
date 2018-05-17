@@ -78,12 +78,6 @@ monodroid*.msi
 Documentation/Output/
 
 # Protobuild Generated Files
-Tools/2MGFX/*.csproj
-Tools/MGCB/*.csproj
-Tools/Pipeline/*.csproj
-Tools/MonoGame.Build.Tasks/MonoGame.Build.Tasks.*.csproj
-Test/*.csproj
-!Test/MonoGame.Test.XNA.csproj
 *.speccache
 *.ncrunchproject
 *.ncrunchsolution
