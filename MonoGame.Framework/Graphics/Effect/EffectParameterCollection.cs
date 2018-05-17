@@ -53,8 +53,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             get
             {
-                int index;
-                if (_indexLookup.TryGetValue(name, out index))
+                if (_indexLookup.TryGetValue(name, out int index))
                     return _parameters[index];
                 return null;
 			}

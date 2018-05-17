@@ -178,8 +178,7 @@ namespace Microsoft.Xna.Framework
         /// <returns>Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingBox"/>.</returns>
         public ContainmentType Contains(BoundingBox box)
         {
-            var result = default(ContainmentType);
-            this.Contains(ref box, out result);
+            this.Contains(ref box, out ContainmentType result);
             return result;
         }
 
@@ -193,8 +192,7 @@ namespace Microsoft.Xna.Framework
             var intersects = false;
             for (var i = 0; i < PlaneCount; ++i)
             {
-                var planeIntersectionType = default(PlaneIntersectionType);
-                box.Intersects(ref this._planes[i], out planeIntersectionType);
+                box.Intersects(ref this._planes[i], out PlaneIntersectionType planeIntersectionType);
                 switch (planeIntersectionType)
                 {
                 case PlaneIntersectionType.Front:
@@ -221,8 +219,7 @@ namespace Microsoft.Xna.Framework
             var intersects = false;
             for (var i = 0; i < PlaneCount; ++i)
             {
-                PlaneIntersectionType planeIntersectionType;
-                frustum.Intersects(ref _planes[i], out planeIntersectionType);
+                frustum.Intersects(ref _planes[i], out PlaneIntersectionType planeIntersectionType);
                 switch (planeIntersectionType)
                 {
                     case PlaneIntersectionType.Front:
@@ -242,8 +239,7 @@ namespace Microsoft.Xna.Framework
         /// <returns>Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingSphere"/>.</returns>
         public ContainmentType Contains(BoundingSphere sphere)
         {
-            var result = default(ContainmentType);
-            this.Contains(ref sphere, out result);
+            this.Contains(ref sphere, out ContainmentType result);
             return result;
         }
 
@@ -257,10 +253,9 @@ namespace Microsoft.Xna.Framework
             var intersects = false;
             for (var i = 0; i < PlaneCount; ++i) 
             {
-                var planeIntersectionType = default(PlaneIntersectionType);
 
                 // TODO: we might want to inline this for performance reasons
-                sphere.Intersects(ref this._planes[i], out planeIntersectionType);
+                sphere.Intersects(ref this._planes[i], out PlaneIntersectionType planeIntersectionType);
                 switch (planeIntersectionType)
                 {
                 case PlaneIntersectionType.Front:
@@ -281,8 +276,7 @@ namespace Microsoft.Xna.Framework
         /// <returns>Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="Vector3"/>.</returns>
         public ContainmentType Contains(Vector3 point)
         {
-            var result = default(ContainmentType);
-            this.Contains(ref point, out result);
+            this.Contains(ref point, out ContainmentType result);
             return result;
         }
 
@@ -367,9 +361,8 @@ namespace Microsoft.Xna.Framework
         /// <returns><c>true</c> if specified <see cref="BoundingBox"/> intersects with this <see cref="BoundingFrustum"/>; <c>false</c> otherwise.</returns>
         public bool Intersects(BoundingBox box)
         {
-			var result = false;
-			this.Intersects(ref box, out result);
-			return result;
+            this.Intersects(ref box, out bool result);
+            return result;
         }
 
         /// <summary>
@@ -379,9 +372,8 @@ namespace Microsoft.Xna.Framework
         /// <param name="result"><c>true</c> if specified <see cref="BoundingBox"/> intersects with this <see cref="BoundingFrustum"/>; <c>false</c> otherwise as an output parameter.</param>
         public void Intersects(ref BoundingBox box, out bool result)
         {
-			var containment = default(ContainmentType);
-			this.Contains(ref box, out containment);
-			result = containment != ContainmentType.Disjoint;
+            this.Contains(ref box, out ContainmentType containment);
+            result = containment != ContainmentType.Disjoint;
 		}
 
         /// <summary>
@@ -401,8 +393,7 @@ namespace Microsoft.Xna.Framework
         /// <returns><c>true</c> if specified <see cref="BoundingSphere"/> intersects with this <see cref="BoundingFrustum"/>; <c>false</c> otherwise.</returns>
         public bool Intersects(BoundingSphere sphere)
         {
-            var result = default(bool);
-            this.Intersects(ref sphere, out result);
+            this.Intersects(ref sphere, out bool result);
             return result;
         }
 
@@ -413,8 +404,7 @@ namespace Microsoft.Xna.Framework
         /// <param name="result"><c>true</c> if specified <see cref="BoundingSphere"/> intersects with this <see cref="BoundingFrustum"/>; <c>false</c> otherwise as an output parameter.</param>
         public void Intersects(ref BoundingSphere sphere, out bool result)
         {
-            var containment = default(ContainmentType);
-            this.Contains(ref sphere, out containment);
+            this.Contains(ref sphere, out ContainmentType containment);
             result = containment != ContainmentType.Disjoint;
         }
 
@@ -425,8 +415,7 @@ namespace Microsoft.Xna.Framework
         /// <returns>A plane intersection type.</returns>
         public PlaneIntersectionType Intersects(Plane plane)
         {
-            PlaneIntersectionType result;
-            Intersects(ref plane, out result);
+            Intersects(ref plane, out PlaneIntersectionType result);
             return result;
         }
 
@@ -450,8 +439,7 @@ namespace Microsoft.Xna.Framework
         /// <returns>Distance at which ray intersects with this <see cref="BoundingFrustum"/> or null if no intersection happens.</returns>
         public float? Intersects(Ray ray)
         {
-            float? result;
-            Intersects(ref ray, out result);
+            Intersects(ref ray, out float? result);
             return result;
         }
 
@@ -462,8 +450,7 @@ namespace Microsoft.Xna.Framework
         /// <param name="result">Distance at which ray intersects with this <see cref="BoundingFrustum"/> or null if no intersection happens as an output parameter.</param>
         public void Intersects(ref Ray ray, out float? result)
         {
-            ContainmentType ctype;
-            this.Contains(ref ray.Position, out ctype);
+            this.Contains(ref ray.Position, out ContainmentType ctype);
 
             switch (ctype)
             {
@@ -531,34 +518,24 @@ namespace Microsoft.Xna.Framework
 
         private static void IntersectionPoint(ref Plane a, ref Plane b, ref Plane c, out Vector3 result)
         {
-            // Formula used
-            //                d1 ( N2 * N3 ) + d2 ( N3 * N1 ) + d3 ( N1 * N2 )
-            //P =   -------------------------------------------------------------------------
-            //                             N1 . ( N2 * N3 )
-            //
-            // Note: N refers to the normal, d refers to the displacement. '.' means dot product. '*' means cross product
-            
-            Vector3 v1, v2, v3;
-            Vector3 cross;
-            
-            Vector3.Cross(ref b.Normal, ref c.Normal, out cross);
-            
-            float f;
-            Vector3.Dot(ref a.Normal, ref cross, out f);
+
+            Vector3.Cross(ref b.Normal, ref c.Normal, out Vector3 cross);
+
+            Vector3.Dot(ref a.Normal, ref cross, out float f);
             f *= -1.0f;
             
             Vector3.Cross(ref b.Normal, ref c.Normal, out cross);
-            Vector3.Multiply(ref cross, a.D, out v1);
+            Vector3.Multiply(ref cross, a.D, out Vector3 v1);
             //v1 = (a.D * (Vector3.Cross(b.Normal, c.Normal)));
             
             
             Vector3.Cross(ref c.Normal, ref a.Normal, out cross);
-            Vector3.Multiply(ref cross, b.D, out v2);
+            Vector3.Multiply(ref cross, b.D, out Vector3 v2);
             //v2 = (b.D * (Vector3.Cross(c.Normal, a.Normal)));
             
             
             Vector3.Cross(ref a.Normal, ref b.Normal, out cross);
-            Vector3.Multiply(ref cross, c.D, out v3);
+            Vector3.Multiply(ref cross, c.D, out Vector3 v3);
             //v3 = (c.D * (Vector3.Cross(a.Normal, b.Normal)));
             
             result.X = (v1.X + v2.X + v3.X) / f;

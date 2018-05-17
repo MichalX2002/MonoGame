@@ -105,9 +105,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
             pixelShader.ApplySamplerTextureUnits(program);
 
-            var linked = 0;
 
-            GL.GetProgram(program, GetProgramParameterName.LinkStatus, out linked);
+            GL.GetProgram(program, GetProgramParameterName.LinkStatus, out int linked);
             GraphicsExtensions.LogGLError("VertexShaderCache.Link(), GL.GetProgram");
             if (linked == (int)Bool.False)
             {

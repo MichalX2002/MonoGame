@@ -26,7 +26,6 @@ namespace Microsoft.Xna.Framework.Audio
 
         public XactClip (SoundBank soundBank, BinaryReader clipReader, bool useReverb)
         {
-#pragma warning disable 0219
             State = SoundState.Stopped;
 
             UseReverb = useReverb;
@@ -371,7 +370,6 @@ namespace Microsoft.Xna.Framework.Audio
             }
             
             clipReader.BaseStream.Seek (oldPosition, SeekOrigin.Begin);
-#pragma warning restore 0219
         }
 
         internal void Update(float dt)

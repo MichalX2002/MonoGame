@@ -130,8 +130,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             // Get the completed buffers
             AL.GetError();
-            int numBuffers;
-            AL.GetSource(SourceId, ALGetSourcei.BuffersProcessed, out numBuffers);
+            AL.GetSource(SourceId, ALGetSourcei.BuffersProcessed, out int numBuffers);
             ALHelper.CheckError("Failed to get processed buffer count.");
 
             // Unqueue them

@@ -28,8 +28,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             get
             {
-                ModelMesh ret;
-                if (!TryGetValue(meshName, out ret))
+                if (!TryGetValue(meshName, out ModelMesh ret))
                     throw new KeyNotFoundException();
                 return ret;
             }

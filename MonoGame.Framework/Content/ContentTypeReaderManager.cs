@@ -57,19 +57,17 @@ namespace Microsoft.Xna.Framework.Content
             if (targetType.IsArray && targetType.GetArrayRank() > 1)
                 targetType = typeof(Array);
 
-            ContentTypeReader reader;
-            if (_contentReaders.TryGetValue(targetType, out reader))
+            if (_contentReaders.TryGetValue(targetType, out ContentTypeReader reader))
                 return reader;
 
             return null;
         }
 
         // Trick to prevent the linker removing the code, but not actually execute the code
-        static bool falseflag = false;
+        static readonly bool falseflag = false;
 
 		internal ContentTypeReader[] LoadAssetReaders(ContentReader reader)
         {
-#pragma warning disable 0219, 0649
             // Trick to prevent the linker removing the code, but not actually execute the code
             if (falseflag)
             {
@@ -125,7 +123,6 @@ namespace Microsoft.Xna.Framework.Content
                 var hVideoReader = new VideoReader();
 #endif
             }
-#pragma warning restore 0219, 0649
 
 		    // The first content byte i read tells me the number of content readers in this XNB file
             var numberOfReaders = reader.Read7BitEncodedInt();
@@ -146,8 +143,7 @@ namespace Microsoft.Xna.Framework.Content
                     // string readerTypeString = reader.ReadString();
                     string originalReaderTypeString = reader.ReadString();
 
-                    Func<ContentTypeReader> readerFunc;
-                    if (typeCreators.TryGetValue(originalReaderTypeString, out readerFunc))
+                    if (typeCreators.TryGetValue(originalReaderTypeString, out Func<ContentTypeReader> readerFunc))
                     {
                         contentReaders[i] = readerFunc();
                         needsInitialize[i] = true;
@@ -164,8 +160,7 @@ namespace Microsoft.Xna.Framework.Content
                         var l_readerType = Type.GetType(readerTypeString);
                         if (l_readerType != null)
                         {
-                            ContentTypeReader typeReader;
-                            if (!_contentReadersCache.TryGetValue(l_readerType, out typeReader))
+                            if (!_contentReadersCache.TryGetValue(l_readerType, out ContentTypeReader typeReader))
                             {
                                 try
                                 {

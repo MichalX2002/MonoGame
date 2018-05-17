@@ -416,15 +416,15 @@ namespace Microsoft.Xna.Framework.Net
 			string[] ep = endPoint.Split (':');
 			if (ep.Length != 2)
 				throw new FormatException ("Invalid endpoint format");
-			IPAddress ip;
-			if (!IPAddress.TryParse (ep [0], out ip)) {
-				throw new FormatException ("Invalid ip-adress");
-			}
-			int port;
-			if (!int.TryParse (ep [1], out port)) {
-				throw new FormatException ("Invalid port");
-			}
-			return new IPEndPoint (ip, port);
+            if (!IPAddress.TryParse(ep[0], out IPAddress ip))
+            {
+                throw new FormatException("Invalid ip-adress");
+            }
+            if (!int.TryParse(ep[1], out int port))
+            {
+                throw new FormatException("Invalid port");
+            }
+            return new IPEndPoint (ip, port);
 		}
 
 		internal static string GetMyLocalIpAddress ()

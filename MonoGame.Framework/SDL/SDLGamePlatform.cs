@@ -35,8 +35,7 @@ namespace Microsoft.Xna.Framework
             _keys = new List<Keys>();
             Keyboard.SetKeys(_keys);
 
-            Sdl.Version sversion;
-            Sdl.GetVersion(out sversion);
+            Sdl.GetVersion(out Sdl.Version sversion);
 
             Sdl.Major = sversion.Major;
             Sdl.Minor = sversion.Minor;
@@ -111,9 +110,8 @@ namespace Microsoft.Xna.Framework
 
         private void SdlRunLoop()
         {
-            Sdl.Event ev;
 
-            while (Sdl.PollEvent(out ev) == 1)
+            while (Sdl.PollEvent(out Sdl.Event ev) == 1)
             {
                 if (ev.Type == Sdl.EventType.Quit)
                     _isExiting++;
@@ -154,18 +152,19 @@ namespace Microsoft.Xna.Framework
                     string text = String.Empty;
                     unsafe
                     {
-                        while (Marshal.ReadByte ((IntPtr)ev.Text.Text, len) != 0) {
+                        while (Marshal.ReadByte((IntPtr)ev.Text.Text, len) != 0)
+                        {
                             len++;
                         }
-                        var buffer = new byte [len];
-                        Marshal.Copy ((IntPtr)ev.Text.Text, buffer, 0, len);
-                        text = System.Text.Encoding.UTF8.GetString (buffer);
+                        var buffer = new byte[len];
+                        Marshal.Copy((IntPtr)ev.Text.Text, buffer, 0, len);
+                        text = System.Text.Encoding.UTF8.GetString(buffer);
                     }
                     if (text.Length == 0)
                         continue;
                     foreach (var c in text)
                     {
-                        var key = KeyboardUtil.ToXna((int)c);
+                        var key = KeyboardUtil.ToXna(c);
                         _view.CallTextInput(c, key);
                     }
                 }

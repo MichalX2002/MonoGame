@@ -114,7 +114,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				if ((height != 0) && (width != 0))
 				{
-					return (((float) width)/((float)height));
+					return width / (float)height;
 				}
 				return 0f;
 			}
@@ -228,8 +228,8 @@ namespace Microsoft.Xna.Framework.Graphics
         public Vector3 Unproject(Vector3 source, Matrix projection, Matrix view, Matrix world)
         {
              Matrix matrix = Matrix.Invert(Matrix.Multiply(Matrix.Multiply(world, view), projection));
-		    source.X = (((source.X - this.x) / ((float) this.width)) * 2f) - 1f;
-		    source.Y = -((((source.Y - this.y) / ((float) this.height)) * 2f) - 1f);
+		    source.X = (((source.X - this.x) / this.width) * 2f) - 1f;
+		    source.Y = -((((source.Y - this.y) / this.height) * 2f) - 1f);
 		    source.Z = (source.Z - this.minDepth) / (this.maxDepth - this.minDepth);
 		    Vector3 vector = Vector3.Transform(source, matrix);
 		    float a = (((source.X * matrix.M14) + (source.Y * matrix.M24)) + (source.Z * matrix.M34)) + matrix.M44;

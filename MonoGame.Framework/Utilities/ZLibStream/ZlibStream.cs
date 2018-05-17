@@ -87,9 +87,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace MonoGame.Utilities
 {
@@ -830,7 +828,7 @@ namespace MonoGame.Utilities
         /// <summary>
         /// The size of the working buffer used in the ZlibCodec class. Defaults to 8192 bytes.
         /// </summary>
-#if NETCF        
+#if NETCF
         internal const int WorkingBufferSizeDefault = 8192;
 #else
         internal const int WorkingBufferSizeDefault = 16384;
@@ -852,10 +850,10 @@ namespace MonoGame.Utilities
     /// href="http://www.ietf.org/rfc/rfc1951.txt">RFC 1951 - DEFLATE</see>.
     /// </remarks>
 
-    
+
     internal enum ZlibStreamFlavor { ZLIB = 1950, DEFLATE = 1951, GZIP = 1952 }
 
-    
+
     /// <summary>
     /// Describes how to flush the current deflate operation.
     /// </summary>
@@ -1230,12 +1228,9 @@ namespace MonoGame.Utilities
     {
         // largest prime smaller than 65536
         private static readonly uint BASE = 65521;
+
         // NMAX is the largest n such that 255n(n+1)/2 + (n+1)(BASE-1) <= 2^32-1
         private static readonly int NMAX = 5552;
-
-
-#pragma warning disable 3001
-#pragma warning disable 3002
 
         /// <summary>
         ///   Calculates the Adler32 checksum.
@@ -1257,8 +1252,8 @@ namespace MonoGame.Utilities
             if (buf == null)
                 return 1;
 
-            uint s1 = (uint)(adler & 0xffff);
-            uint s2 = (uint)((adler >> 16) & 0xffff);
+            uint s1 = adler & 0xffff;
+            uint s2 = (adler >> 16) & 0xffff;
 
             while (len > 0)
             {
@@ -1297,14 +1292,9 @@ namespace MonoGame.Utilities
                 s1 %= BASE;
                 s2 %= BASE;
             }
-            return (uint)((s2 << 16) | s1);
+            return (s2 << 16) | s1;
         }
-#pragma warning restore 3001
-#pragma warning restore 3002
-
     }
-
-#pragma warning restore IDE1006 // Naming Styles
     
     internal static class InternalInflateConstants
     {

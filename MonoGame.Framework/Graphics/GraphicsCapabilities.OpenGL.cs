@@ -84,7 +84,7 @@ namespace Microsoft.Xna.Framework.Graphics
             int anisotropy = 0;
             if (SupportsTextureFilterAnisotropic)
             {
-                GL.GetInteger((GetPName)GetParamName.MaxTextureMaxAnisotropyExt, out anisotropy);
+                GL.GetInteger(GetParamName.MaxTextureMaxAnisotropyExt, out anisotropy);
                 GraphicsExtensions.CheckGLError();
             }
             MaxTextureAnisotropy = anisotropy;
@@ -111,7 +111,7 @@ namespace Microsoft.Xna.Framework.Graphics
             SupportsVertexTextures = false; // For now, until we implement vertex textures in OpenGL.
 
 
-            GL.GetInteger((GetPName)GetParamName.MaxSamples, out _maxMultiSampleCount);
+            GL.GetInteger(GetParamName.MaxSamples, out _maxMultiSampleCount);
 
             SupportsInstancing = GL.VertexAttribDivisor != null;
         }

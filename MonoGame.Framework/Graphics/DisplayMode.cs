@@ -48,7 +48,7 @@ namespace Microsoft.Xna.Framework.Graphics
         #region Properties
         
         public float AspectRatio {
-            get { return (float)width / (float)height; }
+            get { return width / (float)height; }
         }
 
         public SurfaceFormat Format {

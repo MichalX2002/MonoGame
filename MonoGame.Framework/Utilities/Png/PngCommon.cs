@@ -661,7 +661,7 @@ namespace MonoGame.Utilities.Png
 
         private static byte[] ReverseByteArray(byte[] byteArray)
         {
-            return (byte[])byteArray.Reverse().ToArray();
+            return byteArray.Reverse().ToArray();
         }
     }
 }

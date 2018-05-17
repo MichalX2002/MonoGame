@@ -411,8 +411,7 @@ namespace Microsoft.Xna.Framework
         /// <returns>Overlapping region of the two rectangles.</returns>
         public static Rectangle Intersect(Rectangle value1, Rectangle value2)
         {
-            Rectangle rectangle;
-            Intersect(ref value1, ref value2, out rectangle);
+            Intersect(ref value1, ref value2, out Rectangle rectangle);
             return rectangle;
         }
 

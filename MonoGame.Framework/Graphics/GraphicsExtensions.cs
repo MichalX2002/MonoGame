@@ -560,43 +560,43 @@ namespace Microsoft.Xna.Framework.Graphics
                 if (!supportsS3tc)
                     goto case InvalidFormat;
 				glInternalFormat = PixelInternalFormat.CompressedRgbS3tcDxt1Ext;
-                glFormat = (PixelFormat)GLPixelFormat.CompressedTextureFormats;
+                glFormat = GLPixelFormat.CompressedTextureFormats;
 				break;
             case SurfaceFormat.Dxt1SRgb:
                 if (!supportsSRgb)
                     goto case SurfaceFormat.Dxt1;
                 glInternalFormat = PixelInternalFormat.CompressedSrgbS3tcDxt1Ext;
-                glFormat = (PixelFormat)GLPixelFormat.CompressedTextureFormats;
+                glFormat = GLPixelFormat.CompressedTextureFormats;
                 break;
             case SurfaceFormat.Dxt1a:
                 if (!supportsS3tc)
                     goto case InvalidFormat;
                 glInternalFormat = PixelInternalFormat.CompressedRgbaS3tcDxt1Ext;
-                glFormat = (PixelFormat)GLPixelFormat.CompressedTextureFormats;
+                glFormat = GLPixelFormat.CompressedTextureFormats;
                 break;
             case SurfaceFormat.Dxt3:
                 if (!supportsS3tc)
                     goto case InvalidFormat;
 				glInternalFormat = PixelInternalFormat.CompressedRgbaS3tcDxt3Ext;
-                glFormat = (PixelFormat)GLPixelFormat.CompressedTextureFormats;
+                glFormat = GLPixelFormat.CompressedTextureFormats;
 				break;
             case SurfaceFormat.Dxt3SRgb:
                 if (!supportsSRgb)
                     goto case SurfaceFormat.Dxt3;
                 glInternalFormat = PixelInternalFormat.CompressedSrgbAlphaS3tcDxt3Ext;
-                glFormat = (PixelFormat)GLPixelFormat.CompressedTextureFormats;
+                glFormat = GLPixelFormat.CompressedTextureFormats;
                 break;
 			case SurfaceFormat.Dxt5:
                 if (!supportsS3tc)
                     goto case InvalidFormat;
 				glInternalFormat = PixelInternalFormat.CompressedRgbaS3tcDxt5Ext;
-                glFormat = (PixelFormat)GLPixelFormat.CompressedTextureFormats;
+                glFormat = GLPixelFormat.CompressedTextureFormats;
 				break;
             case SurfaceFormat.Dxt5SRgb:
                 if (!supportsSRgb)
                     goto case SurfaceFormat.Dxt5;
                 glInternalFormat = PixelInternalFormat.CompressedSrgbAlphaS3tcDxt5Ext;
-                glFormat = (PixelFormat)GLPixelFormat.CompressedTextureFormats;
+                glFormat = GLPixelFormat.CompressedTextureFormats;
                 break;
 #if !IOS && !ANDROID && !ANGLE
             case SurfaceFormat.Rgba1010102:
@@ -905,8 +905,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public static int GetBoundTexture2D()
         {
-            var prevTexture = 0;
-            GL.GetInteger(GetPName.TextureBinding2D, out prevTexture);
+            GL.GetInteger(GetPName.TextureBinding2D, out int prevTexture);
             GraphicsExtensions.LogGLError("GraphicsExtensions.GetBoundTexture2D() GL.GetInteger");
             return prevTexture;
         }

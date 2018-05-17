@@ -2,7 +2,6 @@
 
 namespace MonoGame.Utilities
 {
-#pragma warning disable IDE1006 // Naming Styles
     internal sealed class DeflateManager
     {
         private static readonly int MEM_LEVEL_MAX = 9;
@@ -314,6 +313,7 @@ namespace MonoGame.Utilities
             last_lit = matches = 0;
         }
 
+#pragma warning disable IDE1006 // Naming Styles
 
         // Restore the heap property by moving down the tree starting at node k,
         // exchanging a node with the smallest of its two sons if necessary, stopping
@@ -357,7 +357,7 @@ namespace MonoGame.Utilities
             int n; // iterates over all tree elements
             int prevlen = -1; // last emitted length
             int curlen; // length of current code
-            int nextlen = (int)tree[0 * 2 + 1]; // length of next code
+            int nextlen = tree[0 * 2 + 1]; // length of next code
             int count = 0; // repeat count of the current code
             int max_count = 7; // max repeat count
             int min_count = 4; // min repeat count
@@ -366,11 +366,11 @@ namespace MonoGame.Utilities
             {
                 max_count = 138; min_count = 3;
             }
-            tree[(max_code + 1) * 2 + 1] = (short)0x7fff; // guard //??
+            tree[(max_code + 1) * 2 + 1] = 0x7fff; // guard //??
 
             for (n = 0; n <= max_code; n++)
             {
-                curlen = nextlen; nextlen = (int)tree[(n + 1) * 2 + 1];
+                curlen = nextlen; nextlen = tree[(n + 1) * 2 + 1];
                 if (++count < max_count && curlen == nextlen)
                 {
                     continue;
@@ -420,7 +420,7 @@ namespace MonoGame.Utilities
             scan_tree(dyn_dtree, treeDistances.max_code);
 
             // Build the bit length tree:
-            treeBitLengths.build_tree(this);
+            treeBitLengths.BuildTree(this);
             // opt_len now includes the length of the tree representations, except
             // the lengths of the bit lengths codes and the 5+5+4 bits for the counts.
 
@@ -566,7 +566,7 @@ namespace MonoGame.Utilities
             int len = length;
             unchecked
             {
-                if (bi_valid > (int)Buf_size - len)
+                if (bi_valid > Buf_size - len)
                 {
                     //int val = value;
                     //      bi_buf |= (val << bi_valid);
@@ -650,7 +650,7 @@ namespace MonoGame.Utilities
                 int dcode;
                 for (dcode = 0; dcode < InternalConstants.D_CODES; dcode++)
                 {
-                    out_length = (int)(out_length + (int)dyn_dtree[dcode * 2] * (5L + Tree.ExtraDistanceBits[dcode]));
+                    out_length = (int)(out_length + dyn_dtree[dcode * 2] * (5L + Tree.ExtraDistanceBits[dcode]));
                 }
                 out_length >>= 3;
                 if ((matches < (last_lit / 2)) && out_length < in_length / 2)
@@ -775,6 +775,7 @@ namespace MonoGame.Utilities
             }
         }
 
+
         // Flush the bit buffer and align the output on a byte boundary
         internal void bi_windup()
         {
@@ -861,8 +862,8 @@ namespace MonoGame.Utilities
                 if (strstart == 0 || strstart >= max_start)
                 {
                     // strstart == 0 is possible when wraparound on 16-bit machine
-                    lookahead = (int)(strstart - max_start);
-                    strstart = (int)max_start;
+                    lookahead = strstart - max_start;
+                    strstart = max_start;
 
                     flush_block_only(false);
                     if (_codec.AvailableBytesOut == 0)
@@ -909,9 +910,9 @@ namespace MonoGame.Utilities
                     set_data_type();
 
                 // Construct the literal and distance trees
-                treeLiterals.build_tree(this);
+                treeLiterals.BuildTree(this);
 
-                treeDistances.build_tree(this);
+                treeDistances.BuildTree(this);
 
                 // At this point, opt_len and static_len are the total bit lengths of
                 // the compressed block data, excluding the tree representations.
@@ -1404,7 +1405,7 @@ namespace MonoGame.Utilities
                        window[++scan] == window[++match] &&
                        window[++scan] == window[++match] && scan < strend);
 
-                len = MAX_MATCH - (int)(strend - scan);
+                len = MAX_MATCH - (strend - scan);
                 scan = strend - MAX_MATCH;
 
                 if (len > best_len)
@@ -1421,18 +1422,13 @@ namespace MonoGame.Utilities
 
             if (best_len <= lookahead)
                 return best_len;
+
             return lookahead;
         }
-
+#pragma warning restore IDE1006 // Naming Styles
 
         private bool Rfc1950BytesEmitted = false;
-        private bool _WantRfc1950HeaderBytes = true;
-        internal bool WantRfc1950HeaderBytes
-        {
-            get { return _WantRfc1950HeaderBytes; }
-            set { _WantRfc1950HeaderBytes = value; }
-        }
-
+        internal bool WantRfc1950HeaderBytes { get; set; } = true;
 
         internal int Initialize(ZlibCodec codec, CompressionLevel level)
         {
@@ -1792,5 +1788,4 @@ namespace MonoGame.Utilities
             return pendingCount != 0 ? ZlibConstants.Z_OK : ZlibConstants.Z_STREAM_END;
         }
     }
-#pragma warning restore IDE1006 // Naming Styles
 }

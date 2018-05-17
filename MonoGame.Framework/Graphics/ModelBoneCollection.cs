@@ -28,8 +28,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             get
             {
-                ModelBone ret;
-                if (!TryGetValue(boneName, out ret))
+                if (!TryGetValue(boneName, out ModelBone ret))
                     throw new KeyNotFoundException();
                 return ret;
             }

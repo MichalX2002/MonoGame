@@ -270,11 +270,7 @@ namespace Microsoft.Xna.Framework.Audio
                     // Read the data.
                     reader.BaseStream.Seek(info.FileOffset + _playRegionOffset, SeekOrigin.Begin);
                     var audiodata = reader.ReadBytes(info.FileLength);
-
-                    // Decode the format information.
-                    MiniFormatTag codec;
-                    int channels, rate, alignment;
-                    DecodeFormat(info.Format, out codec, out channels, out rate, out alignment);
+                    DecodeFormat(info.Format, out MiniFormatTag codec, out int channels, out int rate, out int alignment);
 
                     // Call the special constuctor on SoundEffect to sort it out.
                     _sounds[i] = new SoundEffect(codec, audiodata, channels, rate, alignment, info.LoopStart, info.LoopLength);                

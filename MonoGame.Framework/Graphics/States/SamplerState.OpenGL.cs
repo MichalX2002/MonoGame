@@ -13,7 +13,7 @@ namespace Microsoft.Xna.Framework.Graphics
   {
       private readonly float[] _openGLBorderColor = new float[4];
 
-        internal const TextureParameterName TextureParameterNameTextureMaxAnisotropy = (TextureParameterName)ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt;
+        internal const TextureParameterName TextureParameterNameTextureMaxAnisotropy = ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt;
         internal const TextureParameterName TextureParameterNameTextureMaxLevel = TextureParameterName.TextureMaxLevel;
 
         internal void Activate(GraphicsDevice device, TextureTarget target, bool useMipmaps = false)
@@ -132,9 +132,9 @@ namespace Microsoft.Xna.Framework.Graphics
       }
 
       // Set up texture addressing.
-      GL.TexParameter(target, TextureParameterName.TextureWrapS, (int)GetWrapMode(AddressU));
+      GL.TexParameter(target, TextureParameterName.TextureWrapS, GetWrapMode(AddressU));
             GraphicsExtensions.CheckGLError();
-            GL.TexParameter(target, TextureParameterName.TextureWrapT, (int)GetWrapMode(AddressV));
+            GL.TexParameter(target, TextureParameterName.TextureWrapT, GetWrapMode(AddressV));
             GraphicsExtensions.CheckGLError();
 #if !GLES
             // Border color is not supported by glTexParameter in OpenGL ES 2.0

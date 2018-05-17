@@ -60,10 +60,10 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         public Vector4 ToVector4()
         {
             return new Vector4(
-                (float) (((packedValue >> 10) & 0x1F) / 31.0f),
-                (float) (((packedValue >> 5) & 0x1F) / 31.0f),
-                (float) (((packedValue >> 0) & 0x1F) / 31.0f),
-                (float) ((packedValue >> 15)& 0x01)
+                 ((packedValue >> 10) & 0x1F) / 31.0f,
+                 ((packedValue >> 5) & 0x1F) / 31.0f,
+                 ((packedValue >> 0) & 0x1F) / 31.0f,
+                 (packedValue >> 15) & 0x01
             );
         }
 

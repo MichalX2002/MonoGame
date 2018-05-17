@@ -487,7 +487,7 @@ namespace Microsoft.Xna.Framework
             }
             else
             {
-                Vector3.Multiply(ref vector, 1f / ((float)Math.Sqrt((double)num)), out vector);
+                Vector3.Multiply(ref vector, 1f / ((float)Math.Sqrt(num)), out vector);
             }
             Vector3.Cross(ref cameraUpVector, ref vector, out Vector3 vector3);
             vector3.Normalize();
@@ -552,7 +552,7 @@ namespace Microsoft.Xna.Framework
             }
             else
             {
-                Vector3.Multiply(ref vector2, 1f / ((float)Math.Sqrt((double)num2)), out vector2);
+                Vector3.Multiply(ref vector2, 1f / ((float)Math.Sqrt(num2)), out vector2);
             }
             Vector3 vector4 = rotateAxis;
             Vector3.Dot(ref rotateAxis, ref vector2, out float num);

@@ -198,8 +198,7 @@ namespace Microsoft.Xna.Framework
 
         public ContainmentType Contains(Vector3 point)
         {
-            ContainmentType result;
-            this.Contains(ref point, out result);
+            this.Contains(ref point, out ContainmentType result);
             return result;
         }
 
@@ -258,8 +257,7 @@ namespace Microsoft.Xna.Framework
 
         public static BoundingBox CreateFromSphere(BoundingSphere sphere)
         {
-            BoundingBox result;
-            CreateFromSphere(ref sphere, out result);
+            CreateFromSphere(ref sphere, out BoundingBox result);
             return result;
         }
 
@@ -272,8 +270,7 @@ namespace Microsoft.Xna.Framework
 
         public static BoundingBox CreateMerged(BoundingBox original, BoundingBox additional)
         {
-            BoundingBox result;
-            CreateMerged(ref original, ref additional, out result);
+            CreateMerged(ref original, ref additional, out BoundingBox result);
             return result;
         }
 
@@ -355,8 +352,7 @@ namespace Microsoft.Xna.Framework
 
         public bool Intersects(BoundingBox box)
         {
-            bool result;
-            Intersects(ref box, out result);
+            Intersects(ref box, out bool result);
             return result;
         }
 
@@ -423,8 +419,7 @@ namespace Microsoft.Xna.Framework
 
         public PlaneIntersectionType Intersects(Plane plane)
         {
-            PlaneIntersectionType result;
-            Intersects(ref plane, out result);
+            Intersects(ref plane, out PlaneIntersectionType result);
             return result;
         }
 

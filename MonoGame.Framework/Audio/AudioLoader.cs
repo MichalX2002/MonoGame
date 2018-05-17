@@ -135,7 +135,7 @@ namespace Microsoft.Xna.Framework.Audio
                             channels = reader.ReadInt16(); // 4
                             frequency = reader.ReadInt32();  // 8
                             int byteRate = reader.ReadInt32();    // 12
-                            blockAlignment = (int)reader.ReadInt16();  // 14
+                            blockAlignment = reader.ReadInt16();  // 14
                             bitsPerSample = reader.ReadInt16(); // 16
 
                             // Read extra data if present

@@ -35,13 +35,10 @@ namespace Microsoft.Xna.Framework.Graphics
         
         protected static SurfaceFormat QuerySelectedFormat(GraphicsDevice graphicsDevice, SurfaceFormat preferredFormat)
         {
-			SurfaceFormat selectedFormat;
-			DepthFormat selectedDepthFormat;
-			int selectedMultiSampleCount;
 
-            graphicsDevice.Adapter.QueryRenderTargetFormat(graphicsDevice.GraphicsProfile, preferredFormat, DepthFormat.None, 0, 
-                out selectedFormat, out selectedDepthFormat, out selectedMultiSampleCount);
-            
+            graphicsDevice.Adapter.QueryRenderTargetFormat(graphicsDevice.GraphicsProfile, preferredFormat, DepthFormat.None, 0,
+                out SurfaceFormat selectedFormat, out DepthFormat selectedDepthFormat, out int selectedMultiSampleCount);
+
             return selectedFormat;
         }
 

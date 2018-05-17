@@ -93,7 +93,7 @@ namespace MonoGame.Utilities.Png
                     headerChunk.Decode(chunkBytes);
                     width = (int)headerChunk.Width;
                     height = (int)headerChunk.Height;
-                    bitsPerSample = (int)headerChunk.BitDepth;
+                    bitsPerSample = headerChunk.BitDepth;
                     colorType = headerChunk.ColorType;
                     chunks.Add(headerChunk);
 

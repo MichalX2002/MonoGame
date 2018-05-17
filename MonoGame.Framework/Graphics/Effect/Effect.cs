@@ -93,17 +93,16 @@ namespace Microsoft.Xna.Framework.Graphics
 
             // First look for it in the cache.
             //
-            Effect cloneSource;
-            if (!graphicsDevice.EffectCache.TryGetValue(effectKey, out cloneSource))
+            if (!graphicsDevice.EffectCache.TryGetValue(effectKey, out Effect cloneSource))
             {
                 using (var stream = new MemoryStream(effectCode, index + headerSize, count - headerSize, false))
-            	using (var reader = new BinaryReader(stream))
-            {
-                // Create one.
-                cloneSource = new Effect(graphicsDevice);
+                using (var reader = new BinaryReader(stream))
+                {
+                    // Create one.
+                    cloneSource = new Effect(graphicsDevice);
                     cloneSource.ReadEffect(reader);
 
-                // Cache the effect for later in its original unmodified state.
+                    // Cache the effect for later in its original unmodified state.
                     graphicsDevice.EffectCache.Add(effectKey, cloneSource);
                 }
             }
@@ -117,8 +116,8 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             MGFXHeader header;
             header.Signature = BitConverter.ToInt32(effectCode, index); index += 4;
-            header.Version = (int)effectCode[index++];
-            header.Profile = (int)effectCode[index++];
+            header.Version = effectCode[index++];
+            header.Profile = effectCode[index++];
             header.EffectKey = BitConverter.ToInt32(effectCode, index); index += 4;
             header.HeaderSize = index;
 
@@ -244,8 +243,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				var offsets = new int[parameters.Length];
 				for (var i = 0; i < parameters.Length; i++) 
                 {
-					parameters [i] = (int)reader.ReadByte ();
-					offsets [i] = (int)reader.ReadUInt16 ();
+					parameters [i] = reader.ReadByte();
+					offsets [i] = reader.ReadUInt16();
 				}
 
                 var buffer = new ConstantBuffer(GraphicsDevice,
@@ -314,7 +313,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 // Get the pixel shader.
                 Shader pixelShader = null;
-                shaderIndex = (int)reader.ReadByte();
+                shaderIndex = reader.ReadByte();
                 if (shaderIndex != 255)
                     pixelShader = shaders[shaderIndex];
 

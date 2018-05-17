@@ -121,8 +121,6 @@
         internal int max_code; // largest code with non zero frequency
         internal StaticTree staticTree; // the corresponding static tree
 
-#pragma warning disable IDE1006 // Naming Styles
-
         // Compute the optimal bit lengths for a tree and update the total bit length
         // for the current block.
         // IN assertion: the fields freq and dad are set, heap[heap_max] and
@@ -131,7 +129,7 @@
         //     array bl_count contains the frequencies for each bit length.
         //     The length opt_len is updated; static_len is also updated if stree is
         //     not null.
-        internal void gen_bitlen(DeflateManager s)
+        internal void GenBitlen(DeflateManager s)
         {
             short[] tree = dyn_tree;
             short[] stree = staticTree.treeCodes;
@@ -204,7 +202,7 @@
                         continue;
                     if (tree[m * 2 + 1] != bits)
                     {
-                        s.opt_len = (int)(s.opt_len + ((long)bits - (long)tree[m * 2 + 1]) * (long)tree[m * 2]);
+                        s.opt_len = (int)(s.opt_len + (bits - (long)tree[m * 2 + 1]) * tree[m * 2]);
                         tree[m * 2 + 1] = (short)bits;
                     }
                     n--;
@@ -218,7 +216,7 @@
         // OUT assertions: the fields len and code are set to the optimal bit length
         //     and corresponding code. The length opt_len is updated; static_len is
         //     also updated if stree is not null. The field max_code is set.
-        internal void build_tree(DeflateManager s)
+        internal void BuildTree(DeflateManager s)
         {
             short[] tree = dyn_tree;
             short[] stree = staticTree.treeCodes;
@@ -299,10 +297,10 @@
             // At this point, the fields freq and dad are set. We can now
             // generate the bit lengths.
 
-            gen_bitlen(s);
+            GenBitlen(s);
 
             // The field len is now set, we can generate the bit codes
-            gen_codes(tree, max_code, s.bl_count);
+            GenCodes(tree, max_code, s.bl_count);
         }
 
         // Generate the codes for a given tree and bit counts (which need not be
@@ -311,7 +309,7 @@
         // the given tree and the field len is set for all tree elements.
         // OUT assertion: the field code is set for all tree elements of non
         //     zero code length.
-        internal static void gen_codes(short[] tree, int max_code, short[] bl_count)
+        internal static void GenCodes(short[] tree, int max_code, short[] bl_count)
         {
             short[] next_code = new short[InternalConstants.MAX_BITS + 1]; // next code value for each bit length
             short code = 0; // running code value
@@ -338,14 +336,14 @@
                 if (len == 0)
                     continue;
                 // Now reverse the bits
-                tree[n * 2] = unchecked((short)(bi_reverse(next_code[len]++, len)));
+                tree[n * 2] = unchecked((short)(BiReverse(next_code[len]++, len)));
             }
         }
 
         // Reverse the first len bits of a code, using straightforward code (a faster
         // method would use a table)
         // IN assertion: 1 <= len <= 15
-        internal static int bi_reverse(int code, int len)
+        internal static int BiReverse(int code, int len)
         {
             int res = 0;
             do

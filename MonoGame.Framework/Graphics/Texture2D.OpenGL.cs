@@ -42,7 +42,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 int level = 0;
                 while (true)
                 {
-                    if (glFormat == (PixelFormat)GLPixelFormat.CompressedTextureFormats)
+                    if (glFormat == GLPixelFormat.CompressedTextureFormats)
                     {
                         int imageSize = 0;
                         // PVRTC has explicit calculations for imageSize
@@ -107,7 +107,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     GenerateGLTextureIfRequired();
                     GL.PixelStore(PixelStoreParameter.UnpackAlignment, Math.Min(_format.GetSize(), 8));
 
-                    if (glFormat == (PixelFormat)GLPixelFormat.CompressedTextureFormats)
+                    if (glFormat == GLPixelFormat.CompressedTextureFormats)
                     {
                         GL.CompressedTexImage2D(TextureTarget.Texture2D, level, glInternalFormat, w, h, 0, elementCount * elementSizeInByte, dataPtr);
                     }
@@ -160,10 +160,10 @@ namespace Microsoft.Xna.Framework.Graphics
                     GenerateGLTextureIfRequired();
                     GL.PixelStore(PixelStoreParameter.UnpackAlignment, Math.Min(_format.GetSize(), 8));
 
-                    if (glFormat == (PixelFormat)GLPixelFormat.CompressedTextureFormats)
+                    if (glFormat == GLPixelFormat.CompressedTextureFormats)
                     {
                         GL.CompressedTexSubImage2D(TextureTarget.Texture2D, level, rect.X, rect.Y, rect.Width, rect.Height,
-                            (PixelInternalFormat)glInternalFormat, elementCount * elementSizeInByte, dataPtr);
+                            glInternalFormat, elementCount * elementSizeInByte, dataPtr);
                     }
                     else
                     {
@@ -215,7 +215,7 @@ namespace Microsoft.Xna.Framework.Graphics
             GL.BindTexture(TextureTarget.Texture2D, this.glTexture);
             GL.PixelStore(PixelStoreParameter.PackAlignment, Math.Min(tSizeInByte, 8));
 
-            if (glFormat == (PixelFormat) GLPixelFormat.CompressedTextureFormats)
+            if (glFormat == GLPixelFormat.CompressedTextureFormats)
             {
                 // Note: for compressed format Format.GetSize() returns the size of a 4x4 block
                 var pixelToT = Format.GetSize() / tSizeInByte;

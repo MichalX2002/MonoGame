@@ -44,7 +44,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         /// <returns>The packed vector in Vector3 format</returns>
         public float ToAlpha()
         {
-            return (float) (packedValue / 255.0f);
+            return packedValue / 255.0f;
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
                 0.0f,
                 0.0f,
                 0.0f,
-                (float) (packedValue / 255.0f)
+                 packedValue / 255.0f
             );
         }
 

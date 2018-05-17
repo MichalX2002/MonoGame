@@ -2,7 +2,6 @@
 
 namespace MonoGame.Utilities
 {
-#pragma warning disable IDE1006 // Naming Styles
     sealed class InfTree
     {
         private const int MANY = 1440;
@@ -51,7 +50,7 @@ namespace MonoGame.Utilities
         internal int[] u = null; // table stack
         internal int[] x = null; // bit offsets, then code stack
         
-        private int huft_build(int[] b, int bindex, int n, int s, int[] d, int[] e, int[] t, int[] m, int[] hp, int[] hn, int[] v)
+        private int HuftBuild(int[] b, int bindex, int n, int s, int[] d, int[] e, int[] t, int[] m, int[] hp, int[] hn, int[] v)
         {
             // Given a list of code lengths and a maximum table size, make a set of
             // tables to decode that set of codes.  Return Z_OK on success, Z_BUF_ERROR
@@ -211,7 +210,7 @@ namespace MonoGame.Utilities
                             r[0] = (sbyte)j; // bits in this table
                             r[1] = (sbyte)l; // bits to dump before this table
                             j = SharedUtils.URShift(i, (w - l));
-                            r[2] = (int)(q - u[h - 1] - j); // offset to this table
+                            r[2] = q - u[h - 1] - j; // offset to this table
                             Array.Copy(r, 0, hp, (u[h - 1] + j) * 3, 3); // connect to last table
                         }
                         else
@@ -265,12 +264,12 @@ namespace MonoGame.Utilities
             return y != 0 && g != 1 ? Z_BUF_ERROR : Z_OK;
         }
 
-        internal int inflate_trees_bits(int[] c, int[] bb, int[] tb, int[] hp, ZlibCodec z)
+        internal int InflateTreesBits(int[] c, int[] bb, int[] tb, int[] hp, ZlibCodec z)
         {
             int result;
-            initWorkArea(19);
+            InitWorkArea(19);
             hn[0] = 0;
-            result = huft_build(c, 0, 19, 19, null, null, tb, bb, hp, hn, v);
+            result = HuftBuild(c, 0, 19, 19, null, null, tb, bb, hp, hn, v);
 
             if (result == Z_DATA_ERROR)
             {
@@ -284,14 +283,14 @@ namespace MonoGame.Utilities
             return result;
         }
 
-        internal int inflate_trees_dynamic(int nl, int nd, int[] c, int[] bl, int[] bd, int[] tl, int[] td, int[] hp, ZlibCodec z)
+        internal int InflateTreesDynamic(int nl, int nd, int[] c, int[] bl, int[] bd, int[] tl, int[] td, int[] hp, ZlibCodec z)
         {
             int result;
 
             // build literal/length tree
-            initWorkArea(288);
+            InitWorkArea(288);
             hn[0] = 0;
-            result = huft_build(c, 0, nl, 257, cplens, cplext, tl, bl, hp, hn, v);
+            result = HuftBuild(c, 0, nl, 257, cplens, cplext, tl, bl, hp, hn, v);
             if (result != Z_OK || bl[0] == 0)
             {
                 if (result == Z_DATA_ERROR)
@@ -307,8 +306,8 @@ namespace MonoGame.Utilities
             }
 
             // build distance tree
-            initWorkArea(288);
-            result = huft_build(c, nl, nd, 0, cpdist, cpdext, td, bd, hp, hn, v);
+            InitWorkArea(288);
+            result = HuftBuild(c, nl, nd, 0, cpdist, cpdext, td, bd, hp, hn, v);
 
             if (result != Z_OK || (bd[0] == 0 && nl > 257))
             {
@@ -332,7 +331,7 @@ namespace MonoGame.Utilities
             return Z_OK;
         }
 
-        internal static int inflate_trees_fixed(int[] bl, int[] bd, int[][] tl, int[][] td, ZlibCodec z)
+        internal static int InflateTreesFixed(int[] bl, int[] bd, int[][] tl, int[][] td, ZlibCodec z)
         {
             bl[0] = fixed_bl;
             bd[0] = fixed_bd;
@@ -341,7 +340,7 @@ namespace MonoGame.Utilities
             return Z_OK;
         }
 
-        private void initWorkArea(int vsize)
+        private void InitWorkArea(int vsize)
         {
             if (hn == null)
             {
@@ -370,5 +369,4 @@ namespace MonoGame.Utilities
             }
         }
     }
-#pragma warning restore IDE1006 // Naming Styles
 }

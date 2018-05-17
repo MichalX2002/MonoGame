@@ -43,7 +43,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 {
                     var target = GetGLCubeFace((CubeMapFace)i);
 
-                    if (glFormat == (PixelFormat)GLPixelFormat.CompressedTextureFormats)
+                    if (glFormat == GLPixelFormat.CompressedTextureFormats)
                     {
                         var imageSize = 0;
                         switch (format)
@@ -104,7 +104,7 @@ namespace Microsoft.Xna.Framework.Graphics
             var tSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
             GL.BindTexture(TextureTarget.TextureCubeMap, this.glTexture);
 
-            if (glFormat == (PixelFormat) GLPixelFormat.CompressedTextureFormats)
+            if (glFormat == GLPixelFormat.CompressedTextureFormats)
             {
                 // Note: for compressed format Format.GetSize() returns the size of a 4x4 block
                 var pixelToT = Format.GetSize() / tSizeInByte;
@@ -161,10 +161,10 @@ namespace Microsoft.Xna.Framework.Graphics
                     GraphicsExtensions.CheckGLError();
 
                     var target = GetGLCubeFace(face);
-                    if (glFormat == (PixelFormat) GLPixelFormat.CompressedTextureFormats)
+                    if (glFormat == GLPixelFormat.CompressedTextureFormats)
                     {
                         GL.CompressedTexSubImage2D(target, level, rect.X, rect.Y, rect.Width, rect.Height,
-                            (PixelInternalFormat) glInternalFormat, elementCount * elementSizeInByte, dataPtr);
+                             glInternalFormat, elementCount * elementSizeInByte, dataPtr);
                         GraphicsExtensions.CheckGLError();
                     }
                     else

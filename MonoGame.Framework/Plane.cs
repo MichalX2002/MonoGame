@@ -123,8 +123,7 @@ namespace Microsoft.Xna.Framework
         /// <returns>The transformed plane.</returns>
         public static Plane Transform(Plane plane, Matrix matrix)
         {
-            Plane result;
-            Transform(ref plane, ref matrix, out result);
+            Transform(ref plane, ref matrix, out Plane result);
             return result;
         }
 
@@ -139,14 +138,12 @@ namespace Microsoft.Xna.Framework
             // See "Transforming Normals" in http://www.glprogramming.com/red/appendixf.html
             // for an explanation of how this works.
 
-            Matrix transformedMatrix;
-            Matrix.Invert(ref matrix, out transformedMatrix);
+            Matrix.Invert(ref matrix, out Matrix transformedMatrix);
             Matrix.Transpose(ref transformedMatrix, out transformedMatrix);
 
             var vector = new Vector4(plane.Normal, plane.D);
 
-            Vector4 transformedVector;
-            Vector4.Transform(ref vector, ref transformedMatrix, out transformedVector);
+            Vector4.Transform(ref vector, ref transformedMatrix, out Vector4 transformedVector);
 
             result = new Plane(transformedVector);
         }
@@ -159,8 +156,7 @@ namespace Microsoft.Xna.Framework
         /// <returns>The transformed plane.</returns>
         public static Plane Transform(Plane plane, Quaternion rotation)
         {
-            Plane result;
-            Transform(ref plane, ref rotation, out result);
+            Transform(ref plane, ref rotation, out Plane result);
             return result;
         }
 
@@ -186,9 +182,8 @@ namespace Microsoft.Xna.Framework
 
         public static Plane Normalize(Plane value)
         {
-			Plane ret;
-			Normalize(ref value, out ret);
-			return ret;
+            Normalize(ref value, out Plane ret);
+            return ret;
         }
 
         public static void Normalize(ref Plane value, out Plane result)
@@ -251,8 +246,7 @@ namespace Microsoft.Xna.Framework
 
         internal PlaneIntersectionType Intersects(ref Vector3 point)
         {
-            float distance;
-            DotCoordinate(ref point, out distance);
+            DotCoordinate(ref point, out float distance);
 
             if (distance > 0)
                 return PlaneIntersectionType.Front;

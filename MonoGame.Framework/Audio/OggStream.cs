@@ -258,8 +258,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         void Empty()
         {
-            int queued;
-            AL.GetSource(alSourceId, ALGetSourcei.BuffersQueued, out queued);
+            AL.GetSource(alSourceId, ALGetSourcei.BuffersQueued, out int queued);
             ALHelper.CheckError("Failed to fetch queued buffers.");
             if (queued > 0)
             {
@@ -272,8 +271,7 @@ namespace Microsoft.Xna.Framework.Audio
                 {
                     // This is a bug in the OpenAL implementation
                     // Salvage what we can
-                    int processed;
-                    AL.GetSource(alSourceId, ALGetSourcei.BuffersProcessed, out processed);
+                    AL.GetSource(alSourceId, ALGetSourcei.BuffersProcessed, out int processed);
                     ALHelper.CheckError("Failed to fetch processed buffers.");
                     var salvaged = new int[processed];
                     if (processed > 0)
@@ -451,11 +449,9 @@ namespace Microsoft.Xna.Framework.Audio
 
                         bool finished = false;
 
-                        int queued;
-                        AL.GetSource(stream.alSourceId, ALGetSourcei.BuffersQueued, out queued);
+                        AL.GetSource(stream.alSourceId, ALGetSourcei.BuffersQueued, out int queued);
                         ALHelper.CheckError("Failed to fetch queued buffers.");
-                        int processed;
-                        AL.GetSource(stream.alSourceId, ALGetSourcei.BuffersProcessed, out processed);
+                        AL.GetSource(stream.alSourceId, ALGetSourcei.BuffersProcessed, out int processed);
                         ALHelper.CheckError("Failed to fetch processed buffers.");
 
                         if (processed == 0 && queued == stream.BufferCount) continue;

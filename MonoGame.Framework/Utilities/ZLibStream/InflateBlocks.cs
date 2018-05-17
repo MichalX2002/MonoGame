@@ -96,7 +96,7 @@ namespace MonoGame.Utilities
             k = bitk;
 
             q = writeAt;
-            m = (int)(q < readAt ? readAt - q - 1 : end - q);
+            m = q < readAt ? readAt - q - 1 : end - q;
 
 
             // process input based on current state
@@ -126,7 +126,7 @@ namespace MonoGame.Utilities
                             b |= (_codec.InputBuffer[p++] & 0xff) << k;
                             k += 8;
                         }
-                        t = (int)(b & 7);
+                        t = b & 7;
                         last = t & 1;
 
                         switch ((uint)t >> 1)
@@ -143,7 +143,7 @@ namespace MonoGame.Utilities
                                 int[] bd = new int[1];
                                 int[][] tl = new int[1][];
                                 int[][] td = new int[1][];
-                                InfTree.inflate_trees_fixed(bl, bd, tl, td, _codec);
+                                InfTree.InflateTreesFixed(bl, bd, tl, td, _codec);
                                 codes.Init(bl[0], bd[0], tl[0], 0, td[0], 0);
                                 b >>= 3; k -= 3;
                                 mode = InflateBlockMode.CODES;
@@ -224,16 +224,16 @@ namespace MonoGame.Utilities
                         {
                             if (q == end && readAt != 0)
                             {
-                                q = 0; m = (int)(q < readAt ? readAt - q - 1 : end - q);
+                                q = 0; m = q < readAt ? readAt - q - 1 : end - q;
                             }
                             if (m == 0)
                             {
                                 writeAt = q;
                                 r = Flush(r);
-                                q = writeAt; m = (int)(q < readAt ? readAt - q - 1 : end - q);
+                                q = writeAt; m = q < readAt ? readAt - q - 1 : end - q;
                                 if (q == end && readAt != 0)
                                 {
-                                    q = 0; m = (int)(q < readAt ? readAt - q - 1 : end - q);
+                                    q = 0; m = q < readAt ? readAt - q - 1 : end - q;
                                 }
                                 if (m == 0)
                                 {
@@ -355,7 +355,7 @@ namespace MonoGame.Utilities
                         }
 
                         bb[0] = 7;
-                        t = inftree.inflate_trees_bits(blens, bb, tb, hufts, _codec);
+                        t = inftree.InflateTreesBits(blens, bb, tb, hufts, _codec);
                         if (t != ZlibConstants.Z_OK)
                         {
                             r = t;
@@ -487,7 +487,7 @@ namespace MonoGame.Utilities
                             int[] td = new int[1];
 
                             t = table;
-                            t = inftree.inflate_trees_dynamic(257 + (t & 0x1f), 1 + ((t >> 5) & 0x1f), blens, bl, bd, tl, td, hufts, _codec);
+                            t = inftree.InflateTreesDynamic(257 + (t & 0x1f), 1 + ((t >> 5) & 0x1f), blens, bl, bd, tl, td, hufts, _codec);
 
                             if (t != ZlibConstants.Z_OK)
                             {
@@ -529,7 +529,7 @@ namespace MonoGame.Utilities
                         b = bitb;
                         k = bitk;
                         q = writeAt;
-                        m = (int)(q < readAt ? readAt - q - 1 : end - q);
+                        m = q < readAt ? readAt - q - 1 : end - q;
 
                         if (last == 0)
                         {
@@ -542,7 +542,7 @@ namespace MonoGame.Utilities
                     case InflateBlockMode.DRY:
                         writeAt = q;
                         r = Flush(r);
-                        q = writeAt; m = (int)(q < readAt ? readAt - q - 1 : end - q);
+                        q = writeAt; m = q < readAt ? readAt - q - 1 : end - q;
                         if (readAt != writeAt)
                         {
                             bitb = b; bitk = k;
@@ -620,7 +620,7 @@ namespace MonoGame.Utilities
                 if (pass == 0)
                 {
                     // compute number of bytes to copy as far as end of window
-                    nBytes = (int)((readAt <= writeAt ? writeAt : end) - readAt);
+                    nBytes = (readAt <= writeAt ? writeAt : end) - readAt;
                 }
                 else
                 {

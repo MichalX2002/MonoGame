@@ -707,7 +707,7 @@ namespace MonoGame.Utilities
                 }
             }
 
-#pragma warning disable CS0162 // Unreachable code detected
+            /*
             if (256 <= 143)
             {
                 bitbuf |= (uint)((stbiw__zlib_bitrev((int)(0x30 + (256)), (int)(8))) << bitcount);
@@ -721,19 +721,20 @@ namespace MonoGame.Utilities
                 bitcount += (int)(9);
                 _out_ = stbiw__zlib_flushf(_out_, &bitbuf, &bitcount);
             }
-            else if (256 <= 279)
+            else*/ if (256 <= 279)
             {
                 bitbuf |= (uint)((stbiw__zlib_bitrev((int)(0 + (256) - 256), (int)(7))) << bitcount);
                 bitcount += (int)(7);
                 _out_ = stbiw__zlib_flushf(_out_, &bitbuf, &bitcount);
             }
+            /*
             else
             {
                 bitbuf |= (uint)((stbiw__zlib_bitrev((int)(0xc0 + (256) - 280), (int)(8))) << bitcount);
                 bitcount += (int)(8);
                 _out_ = stbiw__zlib_flushf(_out_, &bitbuf, &bitcount);
             }
-#pragma warning restore CS0162 // Unreachable code detected
+            */
 
             while ((bitcount) != 0)
             {

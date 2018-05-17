@@ -243,13 +243,11 @@ namespace Microsoft.Xna.Framework.Audio
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
 
-            XactSound[] sounds;
-            if (!_sounds.TryGetValue(name, out sounds))
+            if (!_sounds.TryGetValue(name, out XactSound[] sounds))
                 throw new ArgumentException();
 
-            float [] probs;
-            if (!_probabilities.TryGetValue (name, out probs))
-                throw new ArgumentException ();
+            if (!_probabilities.TryGetValue(name, out float[] probs))
+                throw new ArgumentException();
 
             IsInUse = true;
 
@@ -267,13 +265,11 @@ namespace Microsoft.Xna.Framework.Audio
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
 
-            XactSound[] sounds;
-            if (!_sounds.TryGetValue(name, out sounds))
+            if (!_sounds.TryGetValue(name, out XactSound[] sounds))
                 throw new ArgumentException();
 
-            float [] probs;
-            if (!_probabilities.TryGetValue (name, out probs))
-                throw new ArgumentException ();
+            if (!_probabilities.TryGetValue(name, out float[] probs))
+                throw new ArgumentException();
 
             IsInUse = true;
             var cue = new Cue (_audioengine, name, sounds, probs);
@@ -295,13 +291,11 @@ namespace Microsoft.Xna.Framework.Audio
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
 
-            XactSound[] sounds;
-            if (!_sounds.TryGetValue(name, out sounds))
+            if (!_sounds.TryGetValue(name, out XactSound[] sounds))
                 throw new InvalidOperationException();
 
-            float [] probs;
-            if (!_probabilities.TryGetValue (name, out probs))
-                throw new ArgumentException ();
+            if (!_probabilities.TryGetValue(name, out float[] probs))
+                throw new ArgumentException();
 
             IsInUse = true;
 

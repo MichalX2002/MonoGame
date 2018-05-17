@@ -14,8 +14,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal VertexDeclarationAttributeInfo GetAttributeInfo(Shader shader, int programHash)
         {
-            VertexDeclarationAttributeInfo attrInfo;
-            if (_shaderAttributeInfo.TryGetValue(programHash, out attrInfo))
+            if (_shaderAttributeInfo.TryGetValue(programHash, out VertexDeclarationAttributeInfo attrInfo))
                 return attrInfo;
 
             // Get the vertex attribute info and cache it

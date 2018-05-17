@@ -419,8 +419,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         public double SourceCurrentPosition (int sourceId)
 		{
-            int pos;
-			AL.GetSource (sourceId, ALGetSourcei.SampleOffset, out pos);
+            AL.GetSource(sourceId, ALGetSourcei.SampleOffset, out int pos);
             ALHelper.CheckError("Failed to set source offset.");
 			return pos;
 		}

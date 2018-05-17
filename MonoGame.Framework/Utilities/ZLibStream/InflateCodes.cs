@@ -478,7 +478,7 @@ namespace MonoGame.Utilities
                     if ((e & 16) != 0)
                     {
                         e &= 15;
-                        c = tp[tp_index_t_3 + 2] + ((int)b & InternalInflateConstants.InflateMask[e]);
+                        c = tp[tp_index_t_3 + 2] + (b & InternalInflateConstants.InflateMask[e]);
 
                         b >>= e; k -= e;
 

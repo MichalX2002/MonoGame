@@ -674,7 +674,7 @@ namespace Microsoft.Xna.Framework
 		        quaternion.W = (num2 * quaternion1.W) - (num * quaternion2.W);
 		    }
 		    float num4 = (((quaternion.X * quaternion.X) + (quaternion.Y * quaternion.Y)) + (quaternion.Z * quaternion.Z)) + (quaternion.W * quaternion.W);
-		    float num3 = 1f / ((float) Math.Sqrt((double) num4));
+		    float num3 = 1f / ((float) Math.Sqrt(num4));
 		    quaternion.X *= num3;
 		    quaternion.Y *= num3;
 		    quaternion.Z *= num3;
@@ -709,7 +709,7 @@ namespace Microsoft.Xna.Framework
 		        result.W = (num2 * quaternion1.W) - (num * quaternion2.W);
 		    }
 		    float num4 = (((result.X * result.X) + (result.Y * result.Y)) + (result.Z * result.Z)) + (result.W * result.W);
-		    float num3 = 1f / ((float) Math.Sqrt((double) num4));
+		    float num3 = 1f / ((float) Math.Sqrt(num4));
 		    result.X *= num3;
 		    result.Y *= num3;
 		    result.Z *= num3;
@@ -748,10 +748,10 @@ namespace Microsoft.Xna.Framework
 		    }
 		    else
 		    {
-		        float num5 = (float) Math.Acos((double) num4);
-		        float num6 = (float) (1.0 / Math.Sin((double) num5));
-		        num3 = ((float) Math.Sin((double) ((1f - num) * num5))) * num6;
-		        num2 = flag ? (((float) -Math.Sin((double) (num * num5))) * num6) : (((float) Math.Sin((double) (num * num5))) * num6);
+		        float num5 = (float) Math.Acos(num4);
+		        float num6 = (float) (1.0 / Math.Sin(num5));
+		        num3 = ((float) Math.Sin((1f - num) * num5)) * num6;
+		        num2 = flag ? (((float) -Math.Sin(num * num5)) * num6) : (((float) Math.Sin(num * num5)) * num6);
 		    }
 		    quaternion.X = (num3 * quaternion1.X) + (num2 * quaternion2.X);
 		    quaternion.Y = (num3 * quaternion1.Y) + (num2 * quaternion2.Y);
@@ -786,10 +786,10 @@ namespace Microsoft.Xna.Framework
 		    }
 		    else
 		    {
-		        float num5 = (float) Math.Acos((double) num4);
-		        float num6 = (float) (1.0 / Math.Sin((double) num5));
-		        num3 = ((float) Math.Sin((double) ((1f - num) * num5))) * num6;
-		        num2 = flag ? (((float) -Math.Sin((double) (num * num5))) * num6) : (((float) Math.Sin((double) (num * num5))) * num6);
+		        float num5 = (float) Math.Acos(num4);
+		        float num6 = (float) (1.0 / Math.Sin(num5));
+		        num3 = ((float) Math.Sin((1f - num) * num5)) * num6;
+		        num2 = flag ? (((float) -Math.Sin(num * num5)) * num6) : (((float) Math.Sin(num * num5)) * num6);
 		    }
 		    result.X = (num3 * quaternion1.X) + (num2 * quaternion2.X);
 		    result.Y = (num3 * quaternion1.Y) + (num2 * quaternion2.Y);

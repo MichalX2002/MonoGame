@@ -76,11 +76,8 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             ushort c0 = imageReader.ReadUInt16();
             ushort c1 = imageReader.ReadUInt16();
-
-			byte r0, g0, b0;
-			byte r1, g1, b1;
-            ConvertRgb565ToRgb888(c0, out r0, out g0, out b0);
-			ConvertRgb565ToRgb888(c1, out r1, out g1, out b1);
+            ConvertRgb565ToRgb888(c0, out byte r0, out byte g0, out byte b0);
+			ConvertRgb565ToRgb888(c1, out byte r1, out byte g1, out byte b1);
 
             uint lookupTable = imageReader.ReadUInt32();
 
@@ -199,11 +196,8 @@ namespace Microsoft.Xna.Framework.Graphics
             
             ushort c0 = imageReader.ReadUInt16();
             ushort c1 = imageReader.ReadUInt16();
-
-			byte r0, g0, b0;
-			byte r1, g1, b1;
-			ConvertRgb565ToRgb888(c0, out r0, out g0, out b0);
-			ConvertRgb565ToRgb888(c1, out r1, out g1, out b1);
+            ConvertRgb565ToRgb888(c0, out byte r0, out byte g0, out byte b0);
+			ConvertRgb565ToRgb888(c1, out byte r1, out byte g1, out byte b1);
 
             uint lookupTable = imageReader.ReadUInt32();
 
@@ -339,7 +333,7 @@ namespace Microsoft.Xna.Framework.Graphics
             byte alpha0 = imageReader.ReadByte();
             byte alpha1 = imageReader.ReadByte();
 
-            ulong alphaMask = (ulong)imageReader.ReadByte();
+            ulong alphaMask = imageReader.ReadByte();
             alphaMask += (ulong)imageReader.ReadByte() << 8;
             alphaMask += (ulong)imageReader.ReadByte() << 16;
             alphaMask += (ulong)imageReader.ReadByte() << 24;
@@ -348,11 +342,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
             ushort c0 = imageReader.ReadUInt16();
             ushort c1 = imageReader.ReadUInt16();
-
-			byte r0, g0, b0;
-			byte r1, g1, b1;
-			ConvertRgb565ToRgb888(c0, out r0, out g0, out b0);
-			ConvertRgb565ToRgb888(c1, out r1, out g1, out b1);
+            ConvertRgb565ToRgb888(c0, out byte r0, out byte g0, out byte b0);
+			ConvertRgb565ToRgb888(c1, out byte r1, out byte g1, out byte b1);
 
             uint lookupTable = imageReader.ReadUInt32();
 

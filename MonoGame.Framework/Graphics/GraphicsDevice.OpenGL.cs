@@ -318,12 +318,14 @@ namespace Microsoft.Xna.Framework.Graphics
                 glMajorVersion = 1;
                 glMinorVersion = 1;
             }
+
+#endif
+#if !GLES
 #endif
 
 #if !GLES
-			// Initialize draw buffer attachment array
-			int maxDrawBuffers;
-            GL.GetInteger(GetPName.MaxDrawBuffers, out maxDrawBuffers);
+            // Initialize draw buffer attachment array
+            GL.GetInteger(GetPName.MaxDrawBuffers, out int maxDrawBuffers);
             GraphicsExtensions.CheckGLError ();
 			_drawBuffers = new DrawBuffersEnum[maxDrawBuffers];
 			for (int i = 0; i < maxDrawBuffers; i++)
@@ -748,8 +750,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 foreach (var bindings in bindingsToDelete)
                 {
-                    var fbo = 0;
-                    if (this.glFramebuffers.TryGetValue(bindings, out fbo))
+                    if (this.glFramebuffers.TryGetValue(bindings, out int fbo))
                     {
                         this.framebufferHelper.DeleteFramebuffer(fbo);
                         this.glFramebuffers.Remove(bindings);
@@ -772,15 +773,14 @@ namespace Microsoft.Xna.Framework.Graphics
             var renderTarget = renderTargetBinding.RenderTarget as IRenderTarget;
             if (renderTarget.MultiSampleCount > 0 && this.framebufferHelper.SupportsBlitFramebuffer)
             {
-                var glResolveFramebuffer = 0;
-                if (!this.glResolveFramebuffers.TryGetValue(this._currentRenderTargetBindings, out glResolveFramebuffer))
+                if (!this.glResolveFramebuffers.TryGetValue(this._currentRenderTargetBindings, out int glResolveFramebuffer))
                 {
                     this.framebufferHelper.GenFramebuffer(out glResolveFramebuffer);
                     this.framebufferHelper.BindFramebuffer(glResolveFramebuffer);
                     for (var i = 0; i < this._currentRenderTargetCount; ++i)
                     {
                         var rt = this._currentRenderTargetBindings[i].RenderTarget as IRenderTarget;
-                        this.framebufferHelper.FramebufferTexture2D((int)(FramebufferAttachment.ColorAttachment0 + i), (int) rt.GetFramebufferTarget(renderTargetBinding), rt.GLTexture);
+                        this.framebufferHelper.FramebufferTexture2D((int)(FramebufferAttachment.ColorAttachment0 + i), (int)rt.GetFramebufferTarget(renderTargetBinding), rt.GLTexture);
                     }
                     this.glResolveFramebuffers.Add((RenderTargetBinding[])this._currentRenderTargetBindings.Clone(), glResolveFramebuffer);
                 }
@@ -816,7 +816,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 renderTarget = renderTargetBinding.RenderTarget as IRenderTarget;
                 if (renderTarget.LevelCount > 1)
                 {
-                    GL.BindTexture((TextureTarget)renderTarget.GLTarget, renderTarget.GLTexture);
+                    GL.BindTexture(renderTarget.GLTarget, renderTarget.GLTexture);
                     GraphicsExtensions.CheckGLError();
                     this.framebufferHelper.GenerateMipmap((int)renderTarget.GLTarget);
                 }
@@ -825,8 +825,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private IRenderTarget PlatformApplyRenderTargets()
         {
-            var glFramebuffer = 0;
-            if (!this.glFramebuffers.TryGetValue(this._currentRenderTargetBindings, out glFramebuffer))
+            if (!this.glFramebuffers.TryGetValue(this._currentRenderTargetBindings, out int glFramebuffer))
             {
                 this.framebufferHelper.GenFramebuffer(out glFramebuffer);
                 this.framebufferHelper.BindFramebuffer(glFramebuffer);
@@ -1265,16 +1264,14 @@ namespace Microsoft.Xna.Framework.Graphics
                 RefreshRate = 0,
                 DriverData = IntPtr.Zero
             };
-            Sdl.Display.Mode closest;
-            Sdl.Display.GetClosestDisplayMode(0, mode, out closest);
+            Sdl.Display.GetClosestDisplayMode(0, mode, out Sdl.Display.Mode closest);
             width = closest.Width;
             height = closest.Height;
         }
 
         private void GetDisplayResolution(out int width, out int height)
         {
-            Sdl.Display.Mode mode;
-            Sdl.Display.GetCurrentDisplayMode(0, out mode);
+            Sdl.Display.GetCurrentDisplayMode(0, out Sdl.Display.Mode mode);
             width = mode.Width;
             height = mode.Height;
         }

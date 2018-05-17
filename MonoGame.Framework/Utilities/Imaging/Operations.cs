@@ -40,8 +40,7 @@ namespace MonoGame.Utilities
 
         public static void Free(void* a)
         {
-            Pointer pointer;
-            if (!_pointers.TryRemove((long) a, out pointer))
+            if (!_pointers.TryRemove((long)a, out Pointer pointer))
             {
                 return;
             }
@@ -51,8 +50,7 @@ namespace MonoGame.Utilities
 
         public static void* Realloc(void* a, long newSize)
         {
-            Pointer pointer;
-            if (!_pointers.TryGetValue((long) a, out pointer))
+            if (!_pointers.TryGetValue((long)a, out Pointer pointer))
             {
                 // Allocate new
                 return Malloc(newSize);

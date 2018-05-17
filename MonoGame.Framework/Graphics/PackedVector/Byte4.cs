@@ -149,10 +149,10 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         public Vector4 ToVector4()
         {
             return new Vector4(
-                (float)(packedValue & 0xFF),
-                (float)((packedValue >> 0x8) & 0xFF),
-                (float)((packedValue >> 0x10) & 0xFF),
-                (float)((packedValue >> 0x18) & 0xFF));
+                packedValue & 0xFF,
+                (packedValue >> 0x8) & 0xFF,
+                (packedValue >> 0x10) & 0xFF,
+                (packedValue >> 0x18) & 0xFF);
         }
     }
 }
