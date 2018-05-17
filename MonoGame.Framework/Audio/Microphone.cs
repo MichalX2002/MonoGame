@@ -85,12 +85,12 @@ namespace Microsoft.Xna.Framework.Audio
         /// Returns the sample rate of the captured audio.
         /// Note: default value is 44100hz
         /// </summary>
-        public int SampleRate { get; } = 44100;
+        public int SampleRate { get; internal set; } = 44100;
 
         /// <summary>
         /// Returns the state of the Microphone. 
         /// </summary>
-        public MicrophoneState State { get; } = MicrophoneState.Stopped;
+        public MicrophoneState State { get; internal set; } = MicrophoneState.Stopped;
 
         #endregion
 
@@ -114,7 +114,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// Returns the default microphone.
         /// </summary>
-        public static Microphone Default { get; } = null;
+        public static Microphone Default { get; internal set; } = null;
 
         #endregion
 

@@ -13,7 +13,6 @@ namespace Microsoft.Xna.Framework.Media
 {
     public static partial class MediaPlayer
     {
-
         #region Properties
         
         private static void PlatformInitialize()
@@ -30,11 +29,11 @@ namespace Microsoft.Xna.Framework.Media
         {
             _isMuted = muted;
 
-            if (_queue.Count == 0)
+            if (Queue.Count == 0)
                 return;
 
             var newVolume = _isMuted ? 0.0f : _volume;
-            _queue.SetVolume(newVolume);
+            Queue.SetVolume(newVolume);
         }
 
         private static bool PlatformGetIsRepeating()
@@ -59,10 +58,10 @@ namespace Microsoft.Xna.Framework.Media
 
         private static TimeSpan PlatformGetPlayPosition()
         {
-            if (_queue.ActiveSong == null)
+            if (Queue.ActiveSong == null)
                 return TimeSpan.Zero;
 
-            return _queue.ActiveSong.Position;
+            return Queue.ActiveSong.Position;
         }
 
 #if (IOS && !TVOS) || ANDROID
@@ -87,10 +86,10 @@ namespace Microsoft.Xna.Framework.Media
         {
             _volume = volume;
 
-            if (_queue.ActiveSong == null)
+            if (Queue.ActiveSong == null)
                 return;
 
-            _queue.SetVolume(_isMuted ? 0.0f : _volume);
+            Queue.SetVolume(_isMuted ? 0.0f : _volume);
         }
 
         private static bool PlatformGetGameHasControl()
@@ -106,15 +105,15 @@ namespace Microsoft.Xna.Framework.Media
 
         private static void PlatformPause()
         {
-            if (_queue.ActiveSong == null)
+            if (Queue.ActiveSong == null)
                 return;
 
-            _queue.ActiveSong.Pause();
+            Queue.ActiveSong.Pause();
         }
 
         private static void PlatformPlaySong(Song song, TimeSpan? startPosition)
         {
-            if (_queue.ActiveSong == null)
+            if (Queue.ActiveSong == null)
                 return;
 
             song.SetEventHandler(OnSongFinishedPlaying);
@@ -125,17 +124,17 @@ namespace Microsoft.Xna.Framework.Media
 
         private static void PlatformResume()
         {
-            if (_queue.ActiveSong == null)
+            if (Queue.ActiveSong == null)
                 return;
 
-            _queue.ActiveSong.Resume();
+            Queue.ActiveSong.Resume();
         }
 
         private static void PlatformStop()
         {
             // Loop through so that we reset the PlayCount as well
             foreach (var song in Queue.Songs)
-                _queue.ActiveSong.Stop();
+                Queue.ActiveSong.Stop();
         }
     }
 }
