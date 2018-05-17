@@ -14,7 +14,6 @@ namespace Microsoft.Xna.Framework
     public partial class GraphicsDeviceManager : IGraphicsDeviceService, IDisposable, IGraphicsDeviceManager
     {
         private readonly Game _game;
-        private GraphicsDevice _graphicsDevice;
         private bool _initialized = false;
 
         private int _preferredBackBufferHeight;
@@ -101,7 +100,7 @@ namespace Microsoft.Xna.Framework
 
         private void CreateDevice()
         {
-            if (_graphicsDevice != null)
+            if (GraphicsDevice != null)
                 return;
 
             try
@@ -124,10 +123,10 @@ namespace Microsoft.Xna.Framework
 
         private void CreateDevice(GraphicsDeviceInformation gdi)
         {
-            if (_graphicsDevice != null)
+            if (GraphicsDevice != null)
                 return;
 
-            _graphicsDevice = new GraphicsDevice(gdi);
+            GraphicsDevice = new GraphicsDevice(gdi);
             _shouldApplyChanges = false;
 
             // hook up reset events
@@ -135,8 +134,8 @@ namespace Microsoft.Xna.Framework
             GraphicsDevice.DeviceResetting += (sender, args) => OnDeviceResetting(args);
 
             // update the touchpanel display size when the graphicsdevice is reset
-            _graphicsDevice.DeviceReset += UpdateTouchPanel;
-            _graphicsDevice.PresentationChanged += OnPresentationChanged;
+            GraphicsDevice.DeviceReset += UpdateTouchPanel;
+            GraphicsDevice.PresentationChanged += OnPresentationChanged;
 
             OnDeviceCreated(EventArgs.Empty);
         }
@@ -148,7 +147,7 @@ namespace Microsoft.Xna.Framework
 
         public bool BeginDraw()
         {
-            if (_graphicsDevice == null)
+            if (GraphicsDevice == null)
                 return false;
 
             _drawBegun = true;
@@ -157,10 +156,10 @@ namespace Microsoft.Xna.Framework
 
         public void EndDraw()
         {
-            if (_graphicsDevice != null && _drawBegun)
+            if (GraphicsDevice != null && _drawBegun)
             {
                 _drawBegun = false;
-                _graphicsDevice.Present();
+                GraphicsDevice.Present();
             }
         }
 
@@ -233,10 +232,10 @@ namespace Microsoft.Xna.Framework
             {
                 if (disposing)
                 {
-                    if (_graphicsDevice != null)
+                    if (GraphicsDevice != null)
                     {
-                        _graphicsDevice.Dispose();
-                        _graphicsDevice = null;
+                        GraphicsDevice.Dispose();
+                        GraphicsDevice = null;
                     }
                 }
                 _disposed = true;
@@ -294,7 +293,7 @@ namespace Microsoft.Xna.Framework
         public void ApplyChanges()
         {
             // If the device hasn't been created then create it now.
-            if (_graphicsDevice == null)
+            if (GraphicsDevice == null)
                 CreateDevice();
 
             if (!_shouldApplyChanges)
@@ -324,9 +323,9 @@ namespace Microsoft.Xna.Framework
 
         private void DisposeGraphicsDevice()
         {
-            _graphicsDevice.Dispose();
+            GraphicsDevice.Dispose();
             EventHelpers.Raise(this, DeviceDisposing, EventArgs.Empty);
-            _graphicsDevice = null;
+            GraphicsDevice = null;
         }
 
         partial void PlatformInitialize(PresentationParameters presentationParameters);
@@ -346,9 +345,9 @@ namespace Microsoft.Xna.Framework
 
         private void UpdateTouchPanel(object sender, EventArgs eventArgs)
         {
-            TouchPanel.DisplayWidth = _graphicsDevice.PresentationParameters.BackBufferWidth;
-            TouchPanel.DisplayHeight = _graphicsDevice.PresentationParameters.BackBufferHeight;
-            TouchPanel.DisplayOrientation = _graphicsDevice.PresentationParameters.DisplayOrientation;
+            TouchPanel.DisplayWidth = GraphicsDevice.PresentationParameters.BackBufferWidth;
+            TouchPanel.DisplayHeight = GraphicsDevice.PresentationParameters.BackBufferHeight;
+            TouchPanel.DisplayOrientation = GraphicsDevice.PresentationParameters.DisplayOrientation;
         }
 
         /// <summary>
@@ -387,13 +386,7 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Returns the graphics device for this manager.
         /// </summary>
-        public GraphicsDevice GraphicsDevice
-        {
-            get
-            {
-                return _graphicsDevice;
-            }
-        }
+        public GraphicsDevice GraphicsDevice { get; private set; }
 
         /// <summary>
         /// Indicates the desire to switch into fullscreen mode.

@@ -8,34 +8,22 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 {
     public struct HalfSingle : IPackedVector<UInt16>, IEquatable<HalfSingle>, IPackedVector
     {
-        UInt16 packedValue;
-
         public HalfSingle(float single)
         {
-            packedValue = HalfTypeHelper.Convert(single);
+            PackedValue = HalfTypeHelper.Convert(single);
         }
 
         [CLSCompliant(false)]
-        public ushort PackedValue
-        {
-            get
-            {
-                return this.packedValue;
-            }
-            set
-            {
-                this.packedValue = value;
-            }
-        }
+        public ushort PackedValue { get; set; }
 
         public float ToSingle()
         {
-            return HalfTypeHelper.Convert(this.packedValue);
+            return HalfTypeHelper.Convert(this.PackedValue);
         }
 
         void IPackedVector.PackFromVector4(Vector4 vector)
         {
-            this.packedValue = HalfTypeHelper.Convert(vector.X);
+            this.PackedValue = HalfTypeHelper.Convert(vector.X);
         }
 
         Vector4 IPackedVector.ToVector4()
@@ -55,7 +43,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 
         public bool Equals(HalfSingle other)
         {
-            return this.packedValue == other.packedValue;
+            return this.PackedValue == other.PackedValue;
         }
 
         public override string ToString()
@@ -65,17 +53,17 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 
         public override int GetHashCode()
         {
-            return this.packedValue.GetHashCode();
+            return this.PackedValue.GetHashCode();
         }
 
         public static bool operator ==(HalfSingle lhs, HalfSingle rhs)
         {
-            return lhs.packedValue == rhs.packedValue;
+            return lhs.PackedValue == rhs.PackedValue;
         }
 
         public static bool operator !=(HalfSingle lhs, HalfSingle rhs)
         {
-            return lhs.packedValue != rhs.packedValue;
+            return lhs.PackedValue != rhs.PackedValue;
         }
     }
 }

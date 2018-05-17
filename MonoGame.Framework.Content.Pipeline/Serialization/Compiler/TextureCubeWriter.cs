@@ -16,8 +16,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
             var mipmaps0 = value.Faces[0];  // Mipmap chain of face 0 (+X).
             var level0 = mipmaps0[0];       // Most detailed mipmap level of face 0.
 
-            SurfaceFormat format;
-            if (!level0.TryGetFormat(out format))
+            if (!level0.TryGetFormat(out SurfaceFormat format))
                 throw new Exception("Couldn't get format for TextureCubeContent.");
 
             output.Write((int)format);      // Surface format

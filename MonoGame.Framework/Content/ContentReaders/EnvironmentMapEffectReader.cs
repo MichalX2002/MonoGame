@@ -46,15 +46,17 @@ namespace Microsoft.Xna.Framework.Content
     {
         protected internal override EnvironmentMapEffect Read(ContentReader input, EnvironmentMapEffect existingInstance)
         {
-            var effect = new EnvironmentMapEffect(input.GraphicsDevice);
-            effect.Texture = input.ReadExternalReference<Texture>() as Texture2D;
-			effect.EnvironmentMap = input.ReadExternalReference<TextureCube>() as TextureCube;
-			effect.EnvironmentMapAmount = input.ReadSingle ();
-			effect.EnvironmentMapSpecular = input.ReadVector3 ();
-			effect.FresnelFactor = input.ReadSingle ();
-			effect.DiffuseColor = input.ReadVector3 ();
-			effect.EmissiveColor = input.ReadVector3 ();
-			effect.Alpha = input.ReadSingle ();
+            var effect = new EnvironmentMapEffect(input.GraphicsDevice)
+            {
+                Texture = input.ReadExternalReference<Texture>() as Texture2D,
+                EnvironmentMap = input.ReadExternalReference<TextureCube>() as TextureCube,
+                EnvironmentMapAmount = input.ReadSingle(),
+                EnvironmentMapSpecular = input.ReadVector3(),
+                FresnelFactor = input.ReadSingle(),
+                DiffuseColor = input.ReadVector3(),
+                EmissiveColor = input.ReadVector3(),
+                Alpha = input.ReadSingle()
+            };
             return effect;
         }
     }

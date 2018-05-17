@@ -15,7 +15,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
     public sealed class ProcessorParameter
     {
         PropertyInfo propInfo;
-        ReadOnlyCollection<string> enumValues;
 
         /// <summary>
         /// Default value of the processor parameter.
@@ -39,20 +38,14 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         {
             get
             {
-                return enumValues != null;
+                return PossibleEnumValues != null;
             }
         }
 
         /// <summary>
         /// Available options for enumerated type parameters. For parameters of other types, this value is null.
         /// </summary>
-        public ReadOnlyCollection<string> PossibleEnumValues
-        {
-            get
-            {
-                return enumValues;
-            }
-        }
+        public ReadOnlyCollection<string> PossibleEnumValues { get; }
 
         /// <summary>
         /// Name of the property, as defined in the C# code.
@@ -84,7 +77,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         {
             propInfo = propertyInfo;
             if (propInfo.PropertyType.IsEnum)
-                enumValues = new ReadOnlyCollection<string>(propInfo.PropertyType.GetEnumNames());
+                PossibleEnumValues = new ReadOnlyCollection<string>(propInfo.PropertyType.GetEnumNames());
         }
     }
 }

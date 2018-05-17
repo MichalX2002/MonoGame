@@ -39,14 +39,16 @@ namespace MonoGame.Utilities.Png
             outputStream.Write(HeaderChunk.PngSignature, 0, HeaderChunk.PngSignature.Length);
 
             // write header chunk
-            var headerChunk = new HeaderChunk();
-            headerChunk.Width = (uint)texture2D.Width;
-            headerChunk.Height = (uint)texture2D.Height;
-            headerChunk.BitDepth = 8;
-            headerChunk.ColorType = colorType;
-            headerChunk.CompressionMethod = 0;
-            headerChunk.FilterMethod = 0;
-            headerChunk.InterlaceMethod = 0;
+            var headerChunk = new HeaderChunk
+            {
+                Width = (uint)texture2D.Width,
+                Height = (uint)texture2D.Height,
+                BitDepth = 8,
+                ColorType = colorType,
+                CompressionMethod = 0,
+                FilterMethod = 0,
+                InterlaceMethod = 0
+            };
 
             var headerChunkBytes = headerChunk.Encode();
             outputStream.Write(headerChunkBytes, 0, headerChunkBytes.Length);
@@ -66,9 +68,11 @@ namespace MonoGame.Utilities.Png
             {
                 throw new Exception("An error occurred during DEFLATE compression.", exception);
             }
-            
-            var dataChunk = new DataChunk();
-            dataChunk.Data = compressedPixelData.ToArray();
+
+            var dataChunk = new DataChunk
+            {
+                Data = compressedPixelData.ToArray()
+            };
             var dataChunkBytes = dataChunk.Encode();
             outputStream.Write(dataChunkBytes, 0, dataChunkBytes.Length);
 

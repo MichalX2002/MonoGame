@@ -49,8 +49,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             // Do second pass on the namespaces as they were originally ordered, to match XNA.
             foreach (var childNamespace in childNamespaces)
             {
-                AliasedNamespace alias;
-                if (tempAliases.TryGetValue(childNamespace, out alias))
+                if (tempAliases.TryGetValue(childNamespace, out AliasedNamespace alias))
                     _namespaceLookupReverse.Add(childNamespace, alias);
             }
 
@@ -150,8 +149,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
         {
             if (!string.IsNullOrEmpty(type.Namespace))
             {
-                AliasedNamespace namespaceAlias;
-                if (_namespaceLookupReverse.TryGetValue(type.Namespace, out namespaceAlias))
+                if (_namespaceLookupReverse.TryGetValue(type.Namespace, out AliasedNamespace namespaceAlias))
                 {
                     typeName = namespaceAlias.Alias + ":" + namespaceAlias.TypePrefix + _serializer.GetTypeName(type);
                     return true;

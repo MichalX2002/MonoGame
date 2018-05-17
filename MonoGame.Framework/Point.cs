@@ -15,9 +15,8 @@ namespace Microsoft.Xna.Framework
     [DebuggerDisplay("{DebugDisplayString,nq}")]
     public struct Point : IEquatable<Point>
     {
-        #region Private Fields
 
-        private static readonly Point zeroPoint = new Point();
+        #region Private Fields
 
         #endregion
 
@@ -42,10 +41,7 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Returns a <see cref="Point"/> with coordinates 0, 0.
         /// </summary>
-        public static Point Zero
-        {
-            get { return zeroPoint; }
-        }
+        public static Point Zero { get; } = new Point();
 
         #endregion
 

@@ -49,17 +49,19 @@ namespace Microsoft.Xna.Framework.Graphics
         };
 
         private static GraphicsAdapter CreateAdapter(SharpDX.DXGI.Adapter1 device, SharpDX.DXGI.Output monitor)
-        {            
-            var adapter = new GraphicsAdapter();
-            adapter._adapter = device;
+        {
+            var adapter = new GraphicsAdapter
+            {
+                _adapter = device,
 
-            adapter.DeviceName = monitor.Description.DeviceName.TrimEnd(new char[] {'\0'});
-            adapter.Description = device.Description1.Description.TrimEnd(new char[] {'\0'});
-            adapter.DeviceId = device.Description1.DeviceId;
-            adapter.Revision = device.Description1.Revision;
-            adapter.VendorId = device.Description1.VendorId;
-            adapter.SubSystemId = device.Description1.SubsystemId;
-            adapter.MonitorHandle = monitor.Description.MonitorHandle;
+                DeviceName = monitor.Description.DeviceName.TrimEnd(new char[] { '\0' }),
+                Description = device.Description1.Description.TrimEnd(new char[] { '\0' }),
+                DeviceId = device.Description1.DeviceId,
+                Revision = device.Description1.Revision,
+                VendorId = device.Description1.VendorId,
+                SubSystemId = device.Description1.SubsystemId,
+                MonitorHandle = monitor.Description.MonitorHandle
+            };
 
             var desktopWidth = monitor.Description.DesktopBounds.Right - monitor.Description.DesktopBounds.Left;
             var desktopHeight = monitor.Description.DesktopBounds.Bottom - monitor.Description.DesktopBounds.Top;
@@ -80,7 +82,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 {
                     var mode = new DisplayMode(desktopWidth, desktopHeight, SurfaceFormat.Color);
                     modes.Add(mode);
-                    adapter._currentDisplayMode = mode;
+                    adapter.CurrentDisplayMode = mode;
                     break;
                 }
 
@@ -95,18 +97,18 @@ namespace Microsoft.Xna.Framework.Graphics
 
                     modes.Add(mode);
 
-                    if (adapter._currentDisplayMode == null)
+                    if (adapter.CurrentDisplayMode == null)
                     {
                         if (mode.Width == desktopWidth && mode.Height == desktopHeight && mode.Format == SurfaceFormat.Color)
-                            adapter._currentDisplayMode = mode;
+                            adapter.CurrentDisplayMode = mode;
                     }
                 }
             }
 
-            adapter._supportedDisplayModes = new DisplayModeCollection(modes);
+            adapter.SupportedDisplayModes = new DisplayModeCollection(modes);
 
-            if (adapter._currentDisplayMode == null) //(i.e. desktop mode wasn't found in the available modes)
-                adapter._currentDisplayMode = new DisplayMode(desktopWidth, desktopHeight, SurfaceFormat.Color);
+            if (adapter.CurrentDisplayMode == null) //(i.e. desktop mode wasn't found in the available modes)
+                adapter.CurrentDisplayMode = new DisplayMode(desktopWidth, desktopHeight, SurfaceFormat.Color);
 
             return adapter;
         }

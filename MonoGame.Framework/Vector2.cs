@@ -18,11 +18,8 @@ namespace Microsoft.Xna.Framework
     [DebuggerDisplay("{DebugDisplayString,nq}")]
     public struct Vector2 : IEquatable<Vector2>
     {
-        #region Private Fields
 
-        private static readonly Vector2 zeroVector = new Vector2(0f, 0f);
-        private static readonly Vector2 unitVector = new Vector2(1f, 1f);
-        private static readonly Vector2 unitXVector = new Vector2(1f, 0f);
+        #region Private Fields
         private static readonly Vector2 unitYVector = new Vector2(0f, 1f);
 
         #endregion
@@ -48,26 +45,17 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Returns a <see cref="Vector2"/> with components 0, 0.
         /// </summary>
-        public static Vector2 Zero
-        {
-            get { return zeroVector; }
-        }
+        public static Vector2 Zero { get; } = new Vector2(0f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector2"/> with components 1, 1.
         /// </summary>
-        public static Vector2 One
-        {
-            get { return unitVector; }
-        }
+        public static Vector2 One { get; } = new Vector2(1f, 1f);
 
         /// <summary>
         /// Returns a <see cref="Vector2"/> with components 1, 0.
         /// </summary>
-        public static Vector2 UnitX
-        {
-            get { return unitXVector; }
-        }
+        public static Vector2 UnitX { get; } = new Vector2(1f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector2"/> with components 0, 1.

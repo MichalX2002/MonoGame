@@ -22,19 +22,18 @@ namespace Microsoft.Xna.Framework.Graphics
 				"Character cannot be resolved by this SpriteFont.";
 		}
 
-        private readonly Glyph[] _glyphs;
         private readonly CharacterRegion[] _regions;
         private char? _defaultCharacter;
         private int _defaultGlyphIndex = -1;
 		
 		private readonly Texture2D _texture;
 
-		/// <summary>
-		/// All the glyphs in this SpriteFont.
-		/// </summary>
-		public Glyph[] Glyphs { get { return _glyphs; } }
+        /// <summary>
+        /// All the glyphs in this SpriteFont.
+        /// </summary>
+        public Glyph[] Glyphs { get; }
 
-		class CharComparer: IEqualityComparer<char>
+        class CharComparer: IEqualityComparer<char>
 		{
 			public bool Equals(char x, char y)
 			{
@@ -69,12 +68,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			LineSpacing = lineSpacing;
 			Spacing = spacing;
 
-            _glyphs = new Glyph[characters.Count];
+            Glyphs = new Glyph[characters.Count];
             var regions = new Stack<CharacterRegion>();
 
 			for (var i = 0; i < characters.Count; i++) 
             {
-				_glyphs[i] = new Glyph 
+				Glyphs[i] = new Glyph 
                 {
 					BoundsInTexture = glyphBounds[i],
 					Cropping = cropping[i],
@@ -124,8 +123,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <remarks>Can be used to calculate character bounds when implementing custom SpriteFont rendering.</remarks>
         public Dictionary<char, Glyph> GetGlyphs()
         {
-            var glyphsDictionary = new Dictionary<char, Glyph>(_glyphs.Length, CharComparer.Default);
-            foreach(var glyph in _glyphs)
+            var glyphsDictionary = new Dictionary<char, Glyph>(Glyphs.Length, CharComparer.Default);
+            foreach(var glyph in Glyphs)
                 glyphsDictionary.Add(glyph.Character, glyph);
             return glyphsDictionary;
         }

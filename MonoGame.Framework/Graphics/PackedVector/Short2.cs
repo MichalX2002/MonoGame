@@ -9,16 +9,14 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 {
 	public struct Short2 : IPackedVector<uint>, IEquatable<Short2>
 	{
-		private uint _short2Packed;
-
-		public Short2 (Vector2 vector)
+        public Short2 (Vector2 vector)
 		{
-			_short2Packed = PackInTwo (vector.X, vector.Y);
+			PackedValue = PackInTwo (vector.X, vector.Y);
 		}
 
 		public Short2 (Single x,Single y)
 		{
-			_short2Packed = PackInTwo (x, y);
+			PackedValue = PackInTwo (x, y);
 		}
 
 		public static bool operator !=(Short2 a, Short2 b)
@@ -32,19 +30,9 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 		}
 
         [CLSCompliant(false)]
-		public uint PackedValue
-        {
-			get
-            {
-				return _short2Packed;
-			}
-			set
-            {
-				_short2Packed = value;
-			}
-		}
+        public uint PackedValue { get; set; }
 
-		public override bool Equals (object obj)
+        public override bool Equals (object obj)
 		{
             if (obj is Short2)
                 return this == (Short2)obj;
@@ -58,20 +46,22 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 
 		public override int GetHashCode ()
 		{
-			return _short2Packed.GetHashCode();
+			return PackedValue.GetHashCode();
 		}
 
 		public override string ToString ()
 		{
-            return _short2Packed.ToString("x8");
+            return PackedValue.ToString("x8");
 		}
 
 		public Vector2 ToVector2 ()
 		{
-			var v2 = new Vector2 ();
-			v2.X = (short)(_short2Packed & 0xFFFF);
-			v2.Y = (short)(_short2Packed >> 0x10);
-			return v2;
+            var v2 = new Vector2
+            {
+                X = (short)(PackedValue & 0xFFFF),
+                Y = (short)(PackedValue >> 0x10)
+            };
+            return v2;
 		}
 
 		private static uint PackInTwo (float vectorX, float vectorY)
@@ -88,15 +78,17 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 
 		void IPackedVector.PackFromVector4 (Vector4 vector)
 		{
-			_short2Packed = Short2.PackInTwo (vector.X, vector.Y);
+			PackedValue = Short2.PackInTwo (vector.X, vector.Y);
 		}
 
 		Vector4 IPackedVector.ToVector4 ()
 		{
-			var v4 = new Vector4 (0,0,0,1);
-			v4.X = (short)(_short2Packed & 0xFFFF);
-			v4.Y = (short)(_short2Packed >> 0x10);
-			return v4;
+            var v4 = new Vector4(0, 0, 0, 1)
+            {
+                X = (short)(PackedValue & 0xFFFF),
+                Y = (short)(PackedValue >> 0x10)
+            };
+            return v4;
 		}
 	}
 }

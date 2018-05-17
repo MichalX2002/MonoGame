@@ -34,34 +34,28 @@ namespace Microsoft.Xna.Framework.Media
                 source.Dispose();
             }
 
-            PresentationDescriptor presDesc;
-            mediaSource.CreatePresentationDescriptor(out presDesc);
+            mediaSource.CreatePresentationDescriptor(out PresentationDescriptor presDesc);
 
             for (var i = 0; i < presDesc.StreamDescriptorCount; i++)
             {
-                SharpDX.Mathematics.Interop.RawBool selected;
-                StreamDescriptor desc;
-                presDesc.GetStreamDescriptorByIndex(i, out selected, out desc);
+                presDesc.GetStreamDescriptorByIndex(i, out SharpDX.Mathematics.Interop.RawBool selected, out StreamDescriptor desc);
 
                 if (selected)
                 {
-                    TopologyNode sourceNode;
-                    MediaFactory.CreateTopologyNode(TopologyType.SourceStreamNode, out sourceNode);
+                    MediaFactory.CreateTopologyNode(TopologyType.SourceStreamNode, out TopologyNode sourceNode);
 
                     sourceNode.Set(TopologyNodeAttributeKeys.Source, mediaSource);
                     sourceNode.Set(TopologyNodeAttributeKeys.PresentationDescriptor, presDesc);
                     sourceNode.Set(TopologyNodeAttributeKeys.StreamDescriptor, desc);
 
-                    TopologyNode outputNode;
-                    MediaFactory.CreateTopologyNode(TopologyType.OutputNode, out outputNode);
+                    MediaFactory.CreateTopologyNode(TopologyType.OutputNode, out TopologyNode outputNode);
 
                     var typeHandler = desc.MediaTypeHandler;
                     var majorType = typeHandler.MajorType;
                     if (majorType != MediaTypeGuids.Audio)
                         throw new NotSupportedException("The song contains video data!");
 
-                    Activate activate;
-                    MediaFactory.CreateAudioRendererActivate(out activate);
+                    MediaFactory.CreateAudioRendererActivate(out Activate activate);
                     outputNode.Object = activate;
 
                     _topology.AddNode(sourceNode);
@@ -122,7 +116,7 @@ namespace Microsoft.Xna.Framework.Media
 
         private string PlatformGetName()
         {
-            return Path.GetFileNameWithoutExtension(_name);
+            return Path.GetFileNameWithoutExtension(FilePath);
         }
 
         private int PlatformGetPlayCount()

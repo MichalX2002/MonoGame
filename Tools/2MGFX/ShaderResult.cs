@@ -95,11 +95,13 @@ namespace TwoMGFX
             WhitespaceNodes(TokenType.Sampler_Declaration_States, tree.Nodes, ref cleanFile);
 
             // Setup the rest of the shader info.
-            ShaderResult result = new ShaderResult();
-            result.ShaderInfo = shaderInfo;
-            result.Dependencies = dependencies;
-            result.FilePath = fullPath;
-            result.FileContent = cleanFile;
+            ShaderResult result = new ShaderResult
+            {
+                ShaderInfo = shaderInfo,
+                Dependencies = dependencies,
+                FilePath = fullPath,
+                FileContent = cleanFile
+            };
             if (!string.IsNullOrEmpty(options.OutputFile))
                 result.OutputFilePath = Path.GetFullPath(options.OutputFile);
             result.AdditionalOutputFiles = new List<string>();

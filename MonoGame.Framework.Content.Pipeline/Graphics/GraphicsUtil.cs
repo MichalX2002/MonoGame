@@ -15,8 +15,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         internal static BitmapContent Resize(this BitmapContent bitmap, int newWidth, int newHeight)
         {
             BitmapContent src = bitmap;
-            SurfaceFormat format;
-            src.TryGetFormat(out format);
+            src.TryGetFormat(out SurfaceFormat format);
             if (format != SurfaceFormat.Vector4)
             {
                 var v4 = new PixelBitmapContent<Vector4>(src.Width, src.Height);
@@ -105,10 +104,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 		static AlphaRange CalculateAlphaRange(BitmapContent bitmap)
         {
 			AlphaRange result = AlphaRange.Opaque;
-			var pixelBitmap = bitmap as PixelBitmapContent<Vector4>;
-			if (pixelBitmap != null)
-			{
-				for (int y = 0; y < pixelBitmap.Height; ++y)
+            if (bitmap is PixelBitmapContent<Vector4> pixelBitmap)
+            {
+                for (int y = 0; y < pixelBitmap.Height; ++y)
                 {
                     var row = pixelBitmap.GetRow(y);
                     foreach (var pixel in row)
@@ -118,8 +116,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                         else if (pixel.W < 1.0)
                             return AlphaRange.Full;
                     }
-				}
-			}
+                }
+            }
             return result;
         }
 

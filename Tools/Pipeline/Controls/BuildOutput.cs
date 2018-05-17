@@ -41,28 +41,38 @@ namespace MonoGame.Tools.Pipeline
 
             _items = new List<BuildItem>();
 
-            _cmdFilterOutput = new CheckCommand();
-            _cmdFilterOutput.MenuText = "Filter Output";
+            _cmdFilterOutput = new CheckCommand
+            {
+                MenuText = "Filter Output"
+            };
             _cmdFilterOutput.CheckedChanged += CmdFilterOutput_CheckedChanged;
             AddCommand(_cmdFilterOutput);
 
-            _cmdShowSkipped = new CheckCommand();
-            _cmdShowSkipped.MenuText = "Show Skipped Files";
+            _cmdShowSkipped = new CheckCommand
+            {
+                MenuText = "Show Skipped Files"
+            };
             _cmdShowSkipped.CheckedChanged += CmdShowSkipped_CheckedChanged;
             AddCommand(_cmdShowSkipped);
 
-            _cmdShowSuccessful = new CheckCommand();
-            _cmdShowSuccessful.MenuText = "Show Successfully Built Files";
+            _cmdShowSuccessful = new CheckCommand
+            {
+                MenuText = "Show Successfully Built Files"
+            };
             _cmdShowSuccessful.CheckedChanged += CmdShowSuccessful_CheckedChanged;
             AddCommand(_cmdShowSuccessful);
 
-            _cmdShowCleaned = new CheckCommand();
-            _cmdShowCleaned.MenuText = "Show Cleaned Files";
+            _cmdShowCleaned = new CheckCommand
+            {
+                MenuText = "Show Cleaned Files"
+            };
             _cmdShowCleaned.CheckedChanged += CmdShowCleaned_CheckedChanged;
             AddCommand(_cmdShowCleaned);
 
-            _cmdAutoScroll = new CheckCommand();
-            _cmdAutoScroll.MenuText = "Auto Scroll";
+            _cmdAutoScroll = new CheckCommand
+            {
+                MenuText = "Auto Scroll"
+            };
             _cmdAutoScroll.CheckedChanged += CmdAutoScroll_CheckedChanged;
             AddCommand(_cmdAutoScroll);
 

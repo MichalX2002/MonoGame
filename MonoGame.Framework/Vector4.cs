@@ -18,13 +18,8 @@ namespace Microsoft.Xna.Framework
     [DebuggerDisplay("{DebugDisplayString,nq}")]
     public struct Vector4 : IEquatable<Vector4>
     {
-        #region Private Fields
 
-        private static readonly Vector4 zero = new Vector4();
-        private static readonly Vector4 one = new Vector4(1f, 1f, 1f, 1f);
-        private static readonly Vector4 unitX = new Vector4(1f, 0f, 0f, 0f);
-        private static readonly Vector4 unitY = new Vector4(0f, 1f, 0f, 0f);
-        private static readonly Vector4 unitZ = new Vector4(0f, 0f, 1f, 0f);
+        #region Private Fields
         private static readonly Vector4 unitW = new Vector4(0f, 0f, 0f, 1f);
 
         #endregion
@@ -62,42 +57,27 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 0, 0, 0.
         /// </summary>
-        public static Vector4 Zero
-        {
-            get { return zero; }
-        }
+        public static Vector4 Zero { get; } = new Vector4();
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 1, 1, 1, 1.
         /// </summary>
-        public static Vector4 One
-        {
-            get { return one; }
-        }
+        public static Vector4 One { get; } = new Vector4(1f, 1f, 1f, 1f);
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 1, 0, 0, 0.
         /// </summary>
-        public static Vector4 UnitX
-        {
-            get { return unitX; }
-        }
+        public static Vector4 UnitX { get; } = new Vector4(1f, 0f, 0f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 1, 0, 0.
         /// </summary>
-        public static Vector4 UnitY
-        {
-            get { return unitY; }
-        }
+        public static Vector4 UnitY { get; } = new Vector4(0f, 1f, 0f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 0, 1, 0.
         /// </summary>
-        public static Vector4 UnitZ
-        {
-            get { return unitZ; }
-        }
+        public static Vector4 UnitZ { get; } = new Vector4(0f, 0f, 1f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 0, 0, 1.

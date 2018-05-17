@@ -34,8 +34,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
 
         public void WriteExternalReference<T>(ExternalReference<T> value)
         {
-            ExternalReference externalReference;
-            if (!_externalReferences.TryGetValue(value, out externalReference))
+            if (!_externalReferences.TryGetValue(value, out ExternalReference externalReference))
                 _externalReferences.Add(value, externalReference = new ExternalReference
                 {
                     ID = "#External" + (_externalReferences.Count + 1),
@@ -151,8 +150,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             if (value == null)
                 return null;
 
-            string id;
-            if (!_sharedResources.TryGetValue(value, out id))
+            if (!_sharedResources.TryGetValue(value, out string id))
                 _sharedResources.Add(value, id = "#Resource" + (_sharedResources.Count + 1));
             return id;
         }

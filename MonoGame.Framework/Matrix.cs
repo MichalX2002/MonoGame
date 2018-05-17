@@ -253,12 +253,7 @@ namespace Microsoft.Xna.Framework
         }
 
         #endregion
-
         #region Private Members
-        private static Matrix identity = new Matrix(1f, 0f, 0f, 0f,
-                                                    0f, 1f, 0f, 0f,
-                                                    0f, 0f, 1f, 0f,
-                                                    0f, 0f, 0f, 1f);
         #endregion
 
         #region Public Properties
@@ -317,10 +312,10 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Returns the identity matrix.
         /// </summary>
-        public static Matrix Identity
-        {
-            get { return identity; }
-        }
+        public static Matrix Identity { get; } = new Matrix(1f, 0f, 0f, 0f,
+                                                    0f, 1f, 0f, 0f,
+                                                    0f, 0f, 1f, 0f,
+                                                    0f, 0f, 0f, 1f);
 
         /// <summary>
         /// The left vector formed from the first row -M11, -M12, -M13 elements.

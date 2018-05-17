@@ -15,12 +15,8 @@ namespace Microsoft.Xna.Framework
     [DataContract]
     public class CurveKey : IEquatable<CurveKey>, IComparable<CurveKey>
     {
-        #region Private Fields
 
-        private CurveContinuity _continuity;
-        private readonly float _position;
-        private float _tangentIn;
-        private float _tangentOut;
+        #region Private Fields
         private float _value;
 
         #endregion
@@ -31,40 +27,25 @@ namespace Microsoft.Xna.Framework
         /// Gets or sets the indicator whether the segment between this point and the next point on the curve is discrete or continuous.
         /// </summary>
         [DataMember]
-        public CurveContinuity Continuity
-        {
-            get { return this._continuity; }
-            set { this._continuity = value; }
-        }
+        public CurveContinuity Continuity { get; set; }
 
         /// <summary>
         /// Gets a position of the key on the curve.
         /// </summary>
         [DataMember]
-        public float Position
-        {
-            get { return this._position; }
-        }
+        public float Position { get; }
 
         /// <summary>
         /// Gets or sets a tangent when approaching this point from the previous point on the curve.
         /// </summary>
         [DataMember]
-        public float TangentIn
-        {
-            get { return this._tangentIn; }
-            set { this._tangentIn = value; }
-        }
+        public float TangentIn { get; set; }
 
         /// <summary>
         /// Gets or sets a tangent when leaving this point to the next point on the curve.
         /// </summary>
         [DataMember]
-        public float TangentOut
-        {
-            get { return this._tangentOut; }
-            set { this._tangentOut = value; }
-        }
+        public float TangentOut { get; set; }
 
         /// <summary>
         /// Gets a value of this point.
@@ -122,11 +103,11 @@ namespace Microsoft.Xna.Framework
         /// <param name="continuity">Indicates whether the curve is discrete or continuous.</param>
         public CurveKey(float position, float value, float tangentIn, float tangentOut, CurveContinuity continuity)
         {
-            this._position = position;
+            this.Position = position;
             this._value = value;
-            this._tangentIn = tangentIn;
-            this._tangentOut = tangentOut;
-            this._continuity = continuity;
+            this.TangentIn = tangentIn;
+            this.TangentOut = tangentOut;
+            this.Continuity = continuity;
         }
 
         #endregion
@@ -157,11 +138,11 @@ namespace Microsoft.Xna.Framework
             if (object.Equals(value2, null))
                 return object.Equals(value1, null);
 
-            return (value1._position == value2._position)
+            return (value1.Position == value2.Position)
                 && (value1._value == value2._value)
-                && (value1._tangentIn == value2._tangentIn)
-                && (value1._tangentOut == value2._tangentOut)
-                && (value1._continuity == value2._continuity);
+                && (value1.TangentIn == value2.TangentIn)
+                && (value1.TangentOut == value2.TangentOut)
+                && (value1.Continuity == value2.Continuity);
         }
 
         /// <summary>
@@ -170,14 +151,14 @@ namespace Microsoft.Xna.Framework
         /// <returns>A copy of this key.</returns>
         public CurveKey Clone()
         {
-            return new CurveKey(this._position, this._value, this._tangentIn, this._tangentOut, this._continuity);
+            return new CurveKey(this.Position, this._value, this.TangentIn, this.TangentOut, this.Continuity);
         }
 
         #region Inherited Methods
 
         public int CompareTo(CurveKey other)
         {
-            return this._position.CompareTo(other._position);
+            return this.Position.CompareTo(other.Position);
         }
 
         public bool Equals(CurveKey other)
@@ -192,8 +173,8 @@ namespace Microsoft.Xna.Framework
 
         public override int GetHashCode()
         {
-            return this._position.GetHashCode() ^ this._value.GetHashCode() ^ this._tangentIn.GetHashCode() ^
-                this._tangentOut.GetHashCode() ^ this._continuity.GetHashCode();
+            return this.Position.GetHashCode() ^ this._value.GetHashCode() ^ this.TangentIn.GetHashCode() ^
+                this.TangentOut.GetHashCode() ^ this.Continuity.GetHashCode();
         } 
 
         #endregion

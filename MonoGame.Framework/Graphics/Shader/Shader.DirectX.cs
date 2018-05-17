@@ -11,15 +11,11 @@ namespace Microsoft.Xna.Framework.Graphics
     {
         private VertexShader _vertexShader;
         private PixelShader _pixelShader;
-        private byte[] _shaderBytecode;
 
         // Caches the DirectX input layouts for this vertex shader.
         private InputLayoutCache _inputLayouts;
 
-        internal byte[] Bytecode
-        {
-            get { return _shaderBytecode; }
-        }
+        internal byte[] Bytecode { get; private set; }
 
         internal InputLayoutCache InputLayouts
         {
@@ -55,7 +51,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             // We need the bytecode later for allocating the
             // input layout from the vertex declaration.
-            _shaderBytecode = shaderBytecode;
+            Bytecode = shaderBytecode;
 
             HashKey = MonoGame.Utilities.Hash.ComputeHash(Bytecode);
 
@@ -87,13 +83,13 @@ namespace Microsoft.Xna.Framework.Graphics
         private void CreatePixelShader()
         {
             System.Diagnostics.Debug.Assert(Stage == ShaderStage.Pixel);
-            _pixelShader = new PixelShader(GraphicsDevice._d3dDevice, _shaderBytecode);
+            _pixelShader = new PixelShader(GraphicsDevice._d3dDevice, Bytecode);
         }
 
         private void CreateVertexShader()
         {
             System.Diagnostics.Debug.Assert(Stage == ShaderStage.Vertex);
-            _vertexShader = new VertexShader(GraphicsDevice._d3dDevice, _shaderBytecode, null);
+            _vertexShader = new VertexShader(GraphicsDevice._d3dDevice, Bytecode, null);
             _inputLayouts = new InputLayoutCache(GraphicsDevice, Bytecode);
         }
     }

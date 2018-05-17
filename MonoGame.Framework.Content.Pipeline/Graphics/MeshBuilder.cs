@@ -74,8 +74,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
             if (_geometryDirty)
             {
-                _currentGeometryContent = new GeometryContent();
-                _currentGeometryContent.Material = _currentMaterial;
+                _currentGeometryContent = new GeometryContent
+                {
+                    Material = _currentMaterial
+                };
                 foreach (var kvp in _currentOpaqueData)
                     _currentGeometryContent.OpaqueData.Add(kvp.Key, kvp.Value);
 

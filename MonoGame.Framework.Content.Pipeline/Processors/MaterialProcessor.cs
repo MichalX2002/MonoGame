@@ -161,19 +161,16 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             }
 
             // Docs say that if it's a basic effect, only build the diffuse texture.
-            var basic = input as BasicMaterialContent;
-            if (basic != null)
+            if (input is BasicMaterialContent basic)
             {
-                ExternalReference<TextureContent> texture;
-                if (basic.Textures.TryGetValue(BasicMaterialContent.TextureKey, out texture))
+                if (basic.Textures.TryGetValue(BasicMaterialContent.TextureKey, out ExternalReference<TextureContent> texture))
                     basic.Texture = BuildTexture(texture.Filename, texture, context);
 
                 return basic;
             }
 
             // Build custom effects
-            var effectMaterial = input as EffectMaterialContent;
-            if (effectMaterial != null && effectMaterial.CompiledEffect == null)
+            if (input is EffectMaterialContent effectMaterial && effectMaterial.CompiledEffect == null)
             {
                 if (effectMaterial.Effect == null)
                     throw new PipelineException("EffectMaterialContent.Effect or EffectMaterialContent.CompiledEffect should be set for materials with a custom effect.");

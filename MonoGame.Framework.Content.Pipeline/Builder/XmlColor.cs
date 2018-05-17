@@ -44,13 +44,11 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
         {            
             if (!value.Contains(","))
                 return Color.FromName(value);
-
-            int r, g, b, a;
             var colors = value.Split(',');
-            int.TryParse(colors.Length > 0 ? colors[0] : string.Empty, out r);
-            int.TryParse(colors.Length > 1 ? colors[1] : string.Empty, out g);
-            int.TryParse(colors.Length > 2 ? colors[2] : string.Empty, out b);
-            int.TryParse(colors.Length > 3 ? colors[3] : string.Empty, out a);
+            int.TryParse(colors.Length > 0 ? colors[0] : string.Empty, out int r);
+            int.TryParse(colors.Length > 1 ? colors[1] : string.Empty, out int g);
+            int.TryParse(colors.Length > 2 ? colors[2] : string.Empty, out int b);
+            int.TryParse(colors.Length > 3 ? colors[3] : string.Empty, out int a);
 
             return Color.FromArgb(a, r, g, b);
         }

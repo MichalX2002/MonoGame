@@ -23,22 +23,28 @@ namespace MonoGame.Tools.Pipeline
         {
             layout = new DynamicLayout();
 
-            panelLabel = new Panel();
-            panelLabel.Padding = new Padding(5);
+            panelLabel = new Panel
+            {
+                Padding = new Padding(5)
+            };
 
             if (!Global.Unix)
                 panelLabel.Height = 25;
 
-            stack = new StackLayout();
-            stack.Orientation = Orientation.Horizontal;
+            stack = new StackLayout
+            {
+                Orientation = Orientation.Horizontal
+            };
 
             label = new Label();
             label.Font = new Font(label.Font.Family, label.Font.Size - 1, FontStyle.Bold);
             stack.Items.Add(new StackLayoutItem(label, true));
 
-            imageSettings = new ImageView();
-            imageSettings.Image = Global.GetEtoIcon("Icons.Settings.png");
-            imageSettings.Visible = false;
+            imageSettings = new ImageView
+            {
+                Image = Global.GetEtoIcon("Icons.Settings.png"),
+                Visible = false
+            };
             stack.Items.Add(new StackLayoutItem(imageSettings, false)); 
 
             panelLabel.Content = stack;

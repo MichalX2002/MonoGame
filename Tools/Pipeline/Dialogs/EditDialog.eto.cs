@@ -19,19 +19,25 @@ namespace MonoGame.Tools.Pipeline
             DisplayMode = DialogDisplayMode.Attached;
             Size = new Size(400, 160);
 
-            buttonOk = new Button();
-            buttonOk.Text = "Ok";
+            buttonOk = new Button
+            {
+                Text = "Ok"
+            };
             PositiveButtons.Add(buttonOk);
             DefaultButton = buttonOk;
 
-            buttonCancel = new Button();
-            buttonCancel.Text = "Cancel";
+            buttonCancel = new Button
+            {
+                Text = "Cancel"
+            };
             NegativeButtons.Add(buttonCancel);
             AbortButton = buttonCancel;
 
-            layout1 = new DynamicLayout();
-            layout1.DefaultSpacing = new Size(4, 4);
-            layout1.Padding = new Padding(6);
+            layout1 = new DynamicLayout
+            {
+                DefaultSpacing = new Size(4, 4),
+                Padding = new Padding(6)
+            };
             layout1.BeginVertical();
 
             layout1.Add(null, true, true);
@@ -41,10 +47,12 @@ namespace MonoGame.Tools.Pipeline
 
             textBox1 = new TextBox();
             layout1.Add(textBox1);
-            
-            label2 = new Label();
-            label2.TextColor = new Color(SystemColors.ControlText, 0.5f);
-            label2.TextAlignment = TextAlignment.Center;
+
+            label2 = new Label
+            {
+                TextColor = new Color(SystemColors.ControlText, 0.5f),
+                TextAlignment = TextAlignment.Center
+            };
             layout1.Add(label2);
 
             layout1.Add(null, true, true);

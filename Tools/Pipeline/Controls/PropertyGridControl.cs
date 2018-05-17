@@ -20,14 +20,18 @@ namespace MonoGame.Tools.Pipeline
         {
             InitializeComponent();
 
-            _cmdSortAbc = new RadioCommand();
-            _cmdSortAbc.MenuText = "Sort Alphabetically";
+            _cmdSortAbc = new RadioCommand
+            {
+                MenuText = "Sort Alphabetically"
+            };
             _cmdSortAbc.CheckedChanged += CmdSort_CheckedChanged;
             AddCommand(_cmdSortAbc);
 
-            _cmdSortGroup = new RadioCommand();
-            _cmdSortGroup.Controller = _cmdSortAbc;
-            _cmdSortGroup.MenuText = "Sort by Category";
+            _cmdSortGroup = new RadioCommand
+            {
+                Controller = _cmdSortAbc,
+                MenuText = "Sort by Category"
+            };
             _cmdSortGroup.CheckedChanged += CmdSort_CheckedChanged;
             AddCommand(_cmdSortGroup);
 

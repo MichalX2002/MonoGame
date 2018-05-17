@@ -9,14 +9,8 @@ namespace Microsoft.Xna.Framework.Input
     /// </summary>
     public struct MouseState
     {
-        int _x, _y;
-        int _scrollWheelValue;
-        ButtonState _leftButton;
-        ButtonState _rightButton;
-        ButtonState _middleButton;
-        ButtonState _xButton1;
+        int _y;
         ButtonState _xButton2;
-        int _horizontalScrollWheelValue;
 
         /// <summary>
         /// Initializes a new instance of the MouseState.
@@ -40,15 +34,15 @@ namespace Microsoft.Xna.Framework.Input
             ButtonState xButton1,
             ButtonState xButton2)
         {
-            _x = x;
+            X = x;
             _y = y;
-            _scrollWheelValue = scrollWheel;
-            _leftButton = leftButton;
-            _middleButton = middleButton;
-            _rightButton = rightButton;
-            _xButton1 = xButton1;
+            ScrollWheelValue = scrollWheel;
+            LeftButton = leftButton;
+            MiddleButton = middleButton;
+            RightButton = rightButton;
+            XButton1 = xButton1;
             _xButton2 = xButton2;
-            _horizontalScrollWheelValue = 0;
+            HorizontalScrollWheelValue = 0;
         }
 
         /// <summary>
@@ -75,15 +69,15 @@ namespace Microsoft.Xna.Framework.Input
             ButtonState xButton2,
             int horizontalScrollWheel)
         {
-            _x = x;
+            X = x;
             _y = y;
-            _scrollWheelValue = scrollWheel;
-            _leftButton = leftButton;
-            _middleButton = middleButton;
-            _rightButton = rightButton;
-            _xButton1 = xButton1;
+            ScrollWheelValue = scrollWheel;
+            LeftButton = leftButton;
+            MiddleButton = middleButton;
+            RightButton = rightButton;
+            XButton1 = xButton1;
             _xButton2 = xButton2;
-            _horizontalScrollWheelValue = horizontalScrollWheel;
+            HorizontalScrollWheelValue = horizontalScrollWheel;
         }
 		
         /// <summary>
@@ -94,14 +88,14 @@ namespace Microsoft.Xna.Framework.Input
         /// <returns>true if the instances are equal; false otherwise.</returns>
 		public static bool operator ==(MouseState left, MouseState right)
 		{
-			return left._x == right._x &&
+			return left.X == right.X &&
                    left._y == right._y &&
-                   left._leftButton == right._leftButton &&
-                   left._middleButton == right._middleButton &&
-                   left._rightButton == right._rightButton &&
-                   left._scrollWheelValue == right._scrollWheelValue &&
-                   left._horizontalScrollWheelValue == right._horizontalScrollWheelValue &&
-                   left._xButton1 == right._xButton1 &&
+                   left.LeftButton == right.LeftButton &&
+                   left.MiddleButton == right.MiddleButton &&
+                   left.RightButton == right.RightButton &&
+                   left.ScrollWheelValue == right.ScrollWheelValue &&
+                   left.HorizontalScrollWheelValue == right.HorizontalScrollWheelValue &&
+                   left.XButton1 == right.XButton1 &&
                    left._xButton2 == right._xButton2;
 		}
 		
@@ -136,14 +130,14 @@ namespace Microsoft.Xna.Framework.Input
         {
             unchecked
             {
-                var hashCode = _x;
+                var hashCode = X;
                 hashCode = (hashCode*397) ^ _y;
-                hashCode = (hashCode*397) ^ _scrollWheelValue;
-                hashCode = (hashCode*397) ^ _horizontalScrollWheelValue;
-                hashCode = (hashCode*397) ^ (int) _leftButton;
-                hashCode = (hashCode*397) ^ (int) _rightButton;
-                hashCode = (hashCode*397) ^ (int) _middleButton;
-                hashCode = (hashCode*397) ^ (int) _xButton1;
+                hashCode = (hashCode*397) ^ ScrollWheelValue;
+                hashCode = (hashCode*397) ^ HorizontalScrollWheelValue;
+                hashCode = (hashCode*397) ^ (int) LeftButton;
+                hashCode = (hashCode*397) ^ (int) RightButton;
+                hashCode = (hashCode*397) ^ (int) MiddleButton;
+                hashCode = (hashCode*397) ^ (int) XButton1;
                 hashCode = (hashCode*397) ^ (int) _xButton2;
                 return hashCode;
             }
@@ -152,14 +146,7 @@ namespace Microsoft.Xna.Framework.Input
         /// <summary>
         /// Gets horizontal position of the cursor in relation to the window.
         /// </summary>
-		public int X {
-			get {
-				return _x;
-			}
-			internal set {
-				_x = value;
-			}
-		}
+		public int X { get; internal set; }
 
         /// <summary>
         /// Gets vertical position of the cursor in relation to the window.
@@ -178,69 +165,37 @@ namespace Microsoft.Xna.Framework.Input
         /// </summary>
         public Point Position
         {
-            get { return new Point(_x, _y); }   
+            get { return new Point(X, _y); }   
         }
         /// <summary>
         /// Gets state of the left mouse button.
         /// </summary>
-		public ButtonState LeftButton { 
-			get {
-				return _leftButton;
-			}
-			internal set { _leftButton = value; }
-		}
+		public ButtonState LeftButton { get; internal set; }
 
         /// <summary>
         /// Gets state of the middle mouse button.
         /// </summary>
-		public ButtonState MiddleButton { 
-			get {
-				return _middleButton;
-			}
-			internal set { _middleButton = value; }			
-		}
+		public ButtonState MiddleButton { get; internal set; }
 
         /// <summary>
         /// Gets state of the right mouse button.
         /// </summary>
-		public ButtonState RightButton { 
-			get {
-				return _rightButton;
-			}
-			internal set { _rightButton = value; }
-		}
+		public ButtonState RightButton { get; internal set; }
 
         /// <summary>
         /// Returns cumulative scroll wheel value since the game start.
         /// </summary>
-		public int ScrollWheelValue { 
-			get {
-				return _scrollWheelValue;
-			}
-			internal set { _scrollWheelValue = value; }
-		}
+		public int ScrollWheelValue { get; internal set; }
 
         /// <summary>
         /// Returns the cumulative horizontal scroll wheel value since the game start
         /// </summary>
-        public int HorizontalScrollWheelValue {
-            get {
-                return _horizontalScrollWheelValue;
-            }
-            internal set { _horizontalScrollWheelValue = value; }
-        }
+        public int HorizontalScrollWheelValue { get; internal set; }
 
         /// <summary>
         /// Gets state of the XButton1.
         /// </summary>
-		public ButtonState XButton1 { 
-			get {
-                return _xButton1;
-			}
-            internal set {
-                _xButton1 = value;
-            }
-		}
+		public ButtonState XButton1 { get; internal set; }
 
         /// <summary>
         /// Gets state of the XButton2.

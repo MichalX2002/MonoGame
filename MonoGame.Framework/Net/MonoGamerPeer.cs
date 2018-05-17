@@ -258,10 +258,12 @@ namespace Microsoft.Xna.Framework.Net
 								msg.ReadInt32 ();
 								GamerStates state = (GamerStates)msg.ReadInt32 ();
 								state &= ~GamerStates.Local;
-								CommandGamerJoined cgj = new CommandGamerJoined (msg.SenderConnection.RemoteUniqueIdentifier);
-								cgj.GamerTag = gamerTag;
-								cgj.State = state;
-								CommandEvent cmde = new CommandEvent (cgj);
+                                        CommandGamerJoined cgj = new CommandGamerJoined(msg.SenderConnection.RemoteUniqueIdentifier)
+                                        {
+                                            GamerTag = gamerTag,
+                                            State = state
+                                        };
+                                        CommandEvent cmde = new CommandEvent (cgj);
 								session.commandQueue.Enqueue (cmde);					
 							} else {
                                 Game.Instance.Log("We received a profile for an existing gamer.  Need to update it.");

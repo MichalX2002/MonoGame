@@ -39,12 +39,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
             if (type != null && type != typeof(object) && !TargetType.IsValueType)
                 _baseType = type;
 
-            var runtimeType = TargetType.GetCustomAttributes(typeof(ContentSerializerRuntimeTypeAttribute), false).FirstOrDefault() as ContentSerializerRuntimeTypeAttribute;
-            if (runtimeType != null)
+            if (TargetType.GetCustomAttributes(typeof(ContentSerializerRuntimeTypeAttribute), false).FirstOrDefault() is ContentSerializerRuntimeTypeAttribute runtimeType)
                 _runtimeType = runtimeType.RuntimeType;
 
-            var typeVersion = TargetType.GetCustomAttributes(typeof(ContentSerializerTypeVersionAttribute), false).FirstOrDefault() as ContentSerializerTypeVersionAttribute;
-            if (typeVersion != null)
+            if (TargetType.GetCustomAttributes(typeof(ContentSerializerTypeVersionAttribute), false).FirstOrDefault() is ContentSerializerTypeVersionAttribute typeVersion)
                 _typeVersion = typeVersion.TypeVersion;
 
             _properties = TargetType.GetAllProperties().Where(IsValidProperty).ToArray();

@@ -51,10 +51,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         public override CompiledEffectContent Process(EffectContent input, ContentProcessorContext context)
         {
 #if WINDOWS
-            var options = new Options();
-            options.SourceFile = input.Identity.SourceFilename;
+            var options = new Options
+            {
+                SourceFile = input.Identity.SourceFilename,
 
-            options.Profile = ShaderProfile.ForPlatform(context.TargetPlatform.ToString());
+                Profile = ShaderProfile.ForPlatform(context.TargetPlatform.ToString())
+            };
             if (options.Profile == null)
                 throw new InvalidContentException(string.Format("{0} effects are not supported.", context.TargetPlatform), input.Identity);
 

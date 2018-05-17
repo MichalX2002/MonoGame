@@ -19,8 +19,10 @@ namespace MonoGame.Tools.Pipeline
             layout = new DynamicLayout();
             layout.BeginVertical();
 
-            subLayout = new StackLayout();
-            subLayout.Orientation = Orientation.Horizontal;
+            subLayout = new StackLayout
+            {
+                Orientation = Orientation.Horizontal
+            };
 
             layout.Add(subLayout);
 

@@ -32,11 +32,10 @@ namespace MonoGame.Tools.Pipeline
 
                 if (type == FileType.File)
                 {
-                    var item = _con.GetItem(path) as ContentItem;
                     string fullpath = _con.GetFullPath(path);
                     string fullnewpath = _con.GetFullPath(newpath);
 
-                    if (item == null)
+                    if (!(_con.GetItem(path) is ContentItem item))
                     {
                         _con.View.ShowError("Error", "An internal error has occured.");
                         return false;
@@ -84,9 +83,9 @@ namespace MonoGame.Tools.Pipeline
                     var cis = new List<ContentItem>();
                     var nps = new List<string>();
 
-                    for (var i = 0; i < _con._project.ContentItems.Count; i++)
+                    for (var i = 0; i < _con.ProjectItem.ContentItems.Count; i++)
                     {
-                        var item = _con._project.ContentItems[i];
+                        var item = _con.ProjectItem.ContentItems[i];
                         if (item.OriginalPath.StartsWith(path))
                         {
                             cis.Add(item);
@@ -112,13 +111,13 @@ namespace MonoGame.Tools.Pipeline
 
             private void MoveFile(ContentItem item, string newpath)
             {
-                _con._project.ContentItems.Remove(item);
+                _con.ProjectItem.ContentItems.Remove(item);
                 _con.View.RemoveTreeItem(item);
 
                 item.OriginalPath = newpath;
                 item.ResolveTypes();
 
-                _con._project.ContentItems.Add(item);
+                _con.ProjectItem.ContentItems.Add(item);
                 _con.View.AddTreeItem(item);
             }
 

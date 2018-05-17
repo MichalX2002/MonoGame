@@ -18,8 +18,10 @@ namespace TwoMGFX
             }
 
             var options = new Options();
-            var parser = new CommandLineParser(options);
-            parser.Title = "2MGFX - The MonoGame Effect compiler.";
+            var parser = new CommandLineParser(options)
+            {
+                Title = "2MGFX - The MonoGame Effect compiler."
+            };
 
             if (!parser.ParseCommandLine(args))
                 return 1;

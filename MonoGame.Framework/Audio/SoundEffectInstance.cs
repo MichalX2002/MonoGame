@@ -12,7 +12,6 @@ namespace Microsoft.Xna.Framework.Audio
     /// </remarks>
     public partial class SoundEffectInstance : IDisposable
     {
-        private bool _isDisposed = false;
         internal bool _isPooled = true;
         internal bool _isXAct;
         internal bool _isDynamic;
@@ -88,7 +87,7 @@ namespace Microsoft.Xna.Framework.Audio
         public virtual SoundState State { get { return PlatformGetState(); } }
 
         /// <summary>Indicates whether the object is disposed.</summary>
-        public bool IsDisposed { get { return _isDisposed; } }
+        public bool IsDisposed { get; private set; } = false;
 
         internal SoundEffectInstance()
         {
@@ -140,7 +139,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <remarks>Throws an exception if more sounds are playing than the platform allows.</remarks>
         public virtual void Play()
         {
-            if (_isDisposed)
+            if (IsDisposed)
                 throw new ObjectDisposedException("SoundEffectInstance");
 
             if (State == SoundState.Playing)
@@ -203,10 +202,10 @@ namespace Microsoft.Xna.Framework.Audio
         /// not at that time.  Unmanaged resources should always be released.</remarks>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_isDisposed)
+            if (!IsDisposed)
             {
                 PlatformDispose(disposing);
-                _isDisposed = true;
+                IsDisposed = true;
             }
         }
     }

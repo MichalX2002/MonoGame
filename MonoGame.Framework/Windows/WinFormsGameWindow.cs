@@ -259,8 +259,7 @@ namespace MonoGame.Framework
             if (!Form.Visible)
                 return;
 
-            POINTSTRUCT pos;
-            GetCursorPos(out pos);
+            GetCursorPos(out POINTSTRUCT pos);
             MapWindowPoints(new HandleRef(null, IntPtr.Zero), new HandleRef(Form, Form.Handle), out pos, 1);
             var clientPos = new System.Drawing.Point(pos.X, pos.Y);
             var withinClient = Form.ClientRectangle.Contains(clientPos);
@@ -388,7 +387,7 @@ namespace MonoGame.Framework
 
         private void UpdateBackBufferSize()
         {
-            var manager = Game.graphicsDeviceManager;
+            var manager = Game.InternalGraphicsDeviceManager;
             if (manager.GraphicsDevice == null)
                 return;
 

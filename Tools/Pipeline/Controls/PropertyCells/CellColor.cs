@@ -26,8 +26,10 @@ namespace MonoGame.Tools.Pipeline
 
         public override void Edit(PixelLayout control)
         {
-            var dialog = new ColorDialog();
-            dialog.Color = color;
+            var dialog = new ColorDialog
+            {
+                Color = color
+            };
 
             if (dialog.ShowDialog(control) == DialogResult.Ok && _eventHandler != null && dialog.Color != color)
             {

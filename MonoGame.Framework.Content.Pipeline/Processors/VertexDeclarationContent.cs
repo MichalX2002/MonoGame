@@ -13,14 +13,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
     /// </summary>
     public class VertexDeclarationContent : ContentItem
     {
-        Collection<VertexElement> vertexElements;
         int? vertexStride;
 
         /// <summary>
         /// Gets the VertexElement object of the vertex declaration.
         /// </summary>
         /// <value>The VertexElement object of the vertex declaration.</value>
-        public Collection<VertexElement> VertexElements { get { return vertexElements; } }
+        public Collection<VertexElement> VertexElements { get; }
 
         /// <summary>
         /// The number of bytes from one vertex to the next.
@@ -37,7 +36,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         /// </summary>
         public VertexDeclarationContent()
         {
-            vertexElements = new Collection<VertexElement>();
+            VertexElements = new Collection<VertexElement>();
         }
     }
 }

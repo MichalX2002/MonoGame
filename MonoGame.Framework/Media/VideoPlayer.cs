@@ -17,7 +17,6 @@ namespace Microsoft.Xna.Framework.Media
         #region Fields
 
         private MediaState _state;
-        private Video _currentVideo;
         private float _volume = 1.0f;
         private bool _isLooped = false;
         private bool _isMuted = false;
@@ -70,7 +69,7 @@ namespace Microsoft.Xna.Framework.Media
         {
             get
             {
-                if (_currentVideo == null || State == MediaState.Stopped)
+                if (Video == null || State == MediaState.Stopped)
                     return TimeSpan.Zero;
 
                 return PlatformGetPlayPosition();
@@ -94,7 +93,7 @@ namespace Microsoft.Xna.Framework.Media
         /// <summary>
         /// Gets the Video that is currently playing.
         /// </summary>
-        public Video Video { get { return _currentVideo; } }
+        public Video Video { get; private set; }
 
         /// <summary>
         /// Video player volume, from 0.0f (silence) to 1.0f (full volume relative to the current device volume).
@@ -110,7 +109,7 @@ namespace Microsoft.Xna.Framework.Media
 
                 _volume = value;
 
-                if (_currentVideo != null)
+                if (Video != null)
                     PlatformSetVolume();
             }
         }
@@ -135,7 +134,7 @@ namespace Microsoft.Xna.Framework.Media
         /// in a different thread or process. Note: This may be a change from XNA behaviour</exception>
         public Texture2D GetTexture()
         {
-            if (_currentVideo == null)
+            if (Video == null)
                 throw new InvalidOperationException("Operation is not valid due to the current state of the object");
 
             //XNA never returns a null texture
@@ -171,7 +170,7 @@ namespace Microsoft.Xna.Framework.Media
         /// </summary>
         public void Pause()
         {
-            if (_currentVideo == null)
+            if (Video == null)
                 return;
 
             PlatformPause();
@@ -188,7 +187,7 @@ namespace Microsoft.Xna.Framework.Media
             if (video == null)
                 throw new ArgumentNullException("video is null.");
 
-            if (_currentVideo == video)
+            if (Video == video)
             {
                 var state = State;
 							
@@ -206,7 +205,7 @@ namespace Microsoft.Xna.Framework.Media
                 }
             }
             
-            _currentVideo = video;
+            Video = video;
 
             PlatformPlay();
 
@@ -243,7 +242,7 @@ namespace Microsoft.Xna.Framework.Media
         /// </summary>
         public void Resume()
         {
-            if (_currentVideo == null)
+            if (Video == null)
                 return;
 
             var state = State;
@@ -268,7 +267,7 @@ namespace Microsoft.Xna.Framework.Media
         /// </summary>
         public void Stop()
         {
-            if (_currentVideo == null)
+            if (Video == null)
                 return;
 
             PlatformStop();

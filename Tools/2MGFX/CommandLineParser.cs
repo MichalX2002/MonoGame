@@ -38,8 +38,7 @@ namespace TwoMGFX
             // Reflect to find what commandline options are available.
             foreach (var field in optionsObject.GetType().GetFields())
             {
-                String description;
-                var fieldName = GetOptionNameAndDescription(field, out description);
+                var fieldName = GetOptionNameAndDescription(field, out string description);
 
                 if (GetAttribute<RequiredAttribute>(field) != null)
                 {
@@ -100,9 +99,8 @@ namespace TwoMGFX
                 var name = split[0];
                 var value = (split.Length > 1) ? split[1] : "true";
 
-                FieldInfo field;
 
-                if (!_optionalOptions.TryGetValue(name.ToLowerInvariant(), out field))
+                if (!_optionalOptions.TryGetValue(name.ToLowerInvariant(), out FieldInfo field))
                 {
                     ShowError("Unknown option '{0}'", name);
                     return false;

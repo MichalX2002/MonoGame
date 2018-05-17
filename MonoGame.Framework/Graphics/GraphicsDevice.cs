@@ -13,9 +13,6 @@ namespace Microsoft.Xna.Framework.Graphics
     public partial class GraphicsDevice : IDisposable
     {
         private Viewport _viewport;
-
-        private bool _isDisposed;
-
         private Color _blendFactor = Color.White;
 
         private BlendState _blendState;
@@ -53,7 +50,6 @@ namespace Microsoft.Xna.Framework.Graphics
         private bool _indexBufferDirty;
 
         private readonly RenderTargetBinding[] _currentRenderTargetBindings = new RenderTargetBinding[4];
-        private int _currentRenderTargetCount;
         private readonly RenderTargetBinding[] _tempRenderTargetBinding = new RenderTargetBinding[1];
 
         internal GraphicsCapabilities GraphicsCapabilities { get; private set; }
@@ -80,21 +76,13 @@ namespace Microsoft.Xna.Framework.Graphics
         /// The active vertex shader.
         /// </summary>
         private Shader _vertexShader;
-        private bool _vertexShaderDirty;
-        private bool VertexShaderDirty
-        {
-            get { return _vertexShaderDirty; }
-        }
+        private bool VertexShaderDirty { get; set; }
 
         /// <summary>
         /// The active pixel shader.
         /// </summary>
         private Shader _pixelShader;
-        private bool _pixelShaderDirty;
-        private bool PixelShaderDirty
-        {
-            get { return _pixelShaderDirty; }
-        }
+        private bool PixelShaderDirty { get; set; }
 
         private readonly ConstantBufferCollection _vertexConstantBuffers = new ConstantBufferCollection(ShaderStage.Vertex, 16);
         private readonly ConstantBufferCollection _pixelConstantBuffers = new ConstantBufferCollection(ShaderStage.Pixel, 16);
@@ -126,15 +114,9 @@ namespace Microsoft.Xna.Framework.Graphics
         internal int MaxTextureSlots;
         internal int MaxVertexTextureSlots;
 
-        public bool IsDisposed
-        {
-            get
-            {
-                return _isDisposed;
-            }
-        }
+        public bool IsDisposed { get; private set; }
 
-		public bool IsContentLost {
+        public bool IsContentLost {
 			get {
 				// We will just return IsDisposed for now
 				// as that is the only case I can see for now
@@ -146,7 +128,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             get
             {
-                return _currentRenderTargetCount > 0;
+                return RenderTargetCount > 0;
             }
         }
 
@@ -174,12 +156,10 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public GraphicsMetrics Metrics { get { return _graphicsMetrics; } set { _graphicsMetrics = value; } }
 
-        private GraphicsDebug _graphicsDebug;
-
         /// <summary>
         /// Access debugging APIs for the graphics subsystem.
         /// </summary>
-        public GraphicsDebug GraphicsDebug { get { return _graphicsDebug; } set { _graphicsDebug = value; } }
+        public GraphicsDebug GraphicsDebug { get; set; }
 
         internal GraphicsDevice(GraphicsDeviceInformation gdi)
             : this(gdi.Adapter, gdi.GraphicsProfile, gdi.PresentationParameters)
@@ -216,7 +196,7 @@ namespace Microsoft.Xna.Framework.Graphics
             
             PresentationParameters = presentationParameters ??
                 throw new ArgumentNullException(nameof(presentationParameters));
-            _graphicsProfile = graphicsProfile;
+            GraphicsProfile = graphicsProfile;
             Setup();
             GraphicsCapabilities = new GraphicsCapabilities();
             GraphicsCapabilities.Initialize(this);
@@ -325,8 +305,8 @@ namespace Microsoft.Xna.Framework.Graphics
             _vertexBuffers = new VertexBufferBindings(_maxVertexBufferSlots);
             _vertexBuffersDirty = true;
             _indexBufferDirty = true;
-            _vertexShaderDirty = true;
-            _pixelShaderDirty = true;
+            VertexShaderDirty = true;
+            PixelShaderDirty = true;
 
             // Set the default scissor rect.
             _scissorRectangleDirty = true;
@@ -526,7 +506,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!_isDisposed)
+            if (!IsDisposed)
             {
                 if (disposing)
                 {
@@ -566,7 +546,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     PlatformDispose();
                 }
 
-                _isDisposed = true;
+                IsDisposed = true;
                 EventHelpers.Raise(this, Disposing, EventArgs.Empty);
             }
         }
@@ -590,7 +570,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public void Present()
         {
             // We cannot present with a RT set on the device.
-            if (_currentRenderTargetCount != 0)
+            if (RenderTargetCount != 0)
                 throw new InvalidOperationException("Cannot call Present when a render target is active.");
 
             _graphicsMetrics = new GraphicsMetrics();
@@ -691,12 +671,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 PlatformSetViewport(ref value);
             }
         }
-
-        private readonly GraphicsProfile _graphicsProfile;
-        public GraphicsProfile GraphicsProfile
-        {
-            get { return _graphicsProfile; }
-        }
+        public GraphicsProfile GraphicsProfile { get; }
 
         public Rectangle ScissorRectangle
         {
@@ -715,15 +690,9 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        public int RenderTargetCount
-        {
-            get
-            {
-                return _currentRenderTargetCount;
-            }
-        }
+        public int RenderTargetCount { get; private set; }
 
-		public void SetRenderTarget(RenderTarget2D renderTarget)
+        public void SetRenderTarget(RenderTarget2D renderTarget)
 		{
 			if (renderTarget == null)
 		    {
@@ -763,10 +732,10 @@ namespace Microsoft.Xna.Framework.Graphics
             }
 
             // Try to early out if the current and new bindings are equal.
-            if (_currentRenderTargetCount == renderTargetCount)
+            if (RenderTargetCount == renderTargetCount)
             {
                 var isEqual = true;
-                for (var i = 0; i < _currentRenderTargetCount; i++)
+                for (var i = 0; i < RenderTargetCount; i++)
                 {
                     if (_currentRenderTargetBindings[i].RenderTarget != renderTargets[i].RenderTarget ||
                         _currentRenderTargetBindings[i].ArraySlice != renderTargets[i].ArraySlice)
@@ -811,7 +780,7 @@ namespace Microsoft.Xna.Framework.Graphics
             int renderTargetHeight;
             if (renderTargets == null)
             {
-                _currentRenderTargetCount = 0;
+                RenderTargetCount = 0;
 
                 PlatformApplyDefaultRenderTarget();
                 clearTarget = PresentationParameters.RenderTargetUsage == RenderTargetUsage.DiscardContents;
@@ -823,7 +792,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
                 // Copy the new bindings.
                 Array.Copy(renderTargets, _currentRenderTargetBindings, renderTargets.Length);
-                _currentRenderTargetCount = renderTargets.Length;
+                RenderTargetCount = renderTargets.Length;
 
                 var renderTarget = PlatformApplyRenderTargets();
 
@@ -850,15 +819,15 @@ namespace Microsoft.Xna.Framework.Graphics
 		public RenderTargetBinding[] GetRenderTargets()
 		{
             // Return a correctly sized copy our internal array.
-            var bindings = new RenderTargetBinding[_currentRenderTargetCount];
-            Array.Copy(_currentRenderTargetBindings, bindings, _currentRenderTargetCount);
+            var bindings = new RenderTargetBinding[RenderTargetCount];
+            Array.Copy(_currentRenderTargetBindings, bindings, RenderTargetCount);
             return bindings;
 		}
 
         public void GetRenderTargets(RenderTargetBinding[] outTargets)
         {
-            Debug.Assert(outTargets.Length == _currentRenderTargetCount, "Invalid outTargets array length!");
-            Array.Copy(_currentRenderTargetBindings, outTargets, _currentRenderTargetCount);
+            Debug.Assert(outTargets.Length == RenderTargetCount, "Invalid outTargets array length!");
+            Array.Copy(_currentRenderTargetBindings, outTargets, RenderTargetCount);
         }
 
         public void SetVertexBuffer(VertexBuffer vertexBuffer)
@@ -923,7 +892,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 _vertexShader = value;
                 _vertexConstantBuffers.Clear();
-                _vertexShaderDirty = true;
+                VertexShaderDirty = true;
             }
         }
 
@@ -938,7 +907,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 _pixelShader = value;
                 _pixelConstantBuffers.Clear();
-                _pixelShaderDirty = true;
+                PixelShaderDirty = true;
             }
         }
 

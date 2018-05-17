@@ -22,16 +22,13 @@ namespace Microsoft.Xna.Framework.Input
 #endif
 
         internal readonly Buttons _virtualButtons;
-        private readonly Vector2 _left, _right;
+        private readonly Vector2 _right;
 
         /// <summary>
         /// Gets a value indicating the position of the left stick (thumbstick). 
         /// </summary>
         /// <value>A <see cref="Vector2"/> indicating the current position of the left stick (thumbstick).</value>
-        public Vector2 Left
-        {
-            get { return _left; }
-        }
+        public Vector2 Left { get; }
 
         /// <summary>
         /// Gets a value indicating the position of the right stick (thumbstick). 
@@ -56,15 +53,15 @@ namespace Microsoft.Xna.Framework.Input
             switch (deadZoneMode)
             {
                 case GamePadDeadZone.None:
-                    _left = leftPosition;
+                    Left = leftPosition;
                     _right = rightPosition;
                     break;
                 case GamePadDeadZone.IndependentAxes:
-                    _left = ExcludeIndependentAxesDeadZone(leftPosition, leftThumbDeadZone);
+                    Left = ExcludeIndependentAxesDeadZone(leftPosition, leftThumbDeadZone);
                     _right = ExcludeIndependentAxesDeadZone(rightPosition, rightThumbDeadZone);
                     break;
                 case GamePadDeadZone.Circular:
-                    _left = ExcludeCircularDeadZone(leftPosition, leftThumbDeadZone);
+                    Left = ExcludeCircularDeadZone(leftPosition, leftThumbDeadZone);
                     _right = ExcludeCircularDeadZone(rightPosition, rightThumbDeadZone);
                     break;
             }
@@ -72,14 +69,14 @@ namespace Microsoft.Xna.Framework.Input
             // Apply clamp
             if (deadZoneMode == GamePadDeadZone.Circular)
             {
-                if (_left.LengthSquared() > 1f)
-                    _left.Normalize();
+                if (Left.LengthSquared() > 1f)
+                    Left.Normalize();
                 if (_right.LengthSquared() > 1f)
                     _right.Normalize();
             }
             else
             {
-                _left = new Vector2(MathHelper.Clamp(Left.X, -1f, 1f), MathHelper.Clamp(Left.Y, -1f, 1f));
+                Left = new Vector2(MathHelper.Clamp(Left.X, -1f, 1f), MathHelper.Clamp(Left.Y, -1f, 1f));
                 _right = new Vector2(MathHelper.Clamp(Right.X, -1f, 1f), MathHelper.Clamp(Right.Y, -1f, 1f));
             }
 

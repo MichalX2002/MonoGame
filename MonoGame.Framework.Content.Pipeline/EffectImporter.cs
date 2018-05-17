@@ -28,8 +28,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         /// <returns>Resulting game asset.</returns>
         public override EffectContent Import(string filename, ContentImporterContext context)
         {
-            var effect = new EffectContent();
-            effect.Identity = new ContentIdentity(filename);
+            var effect = new EffectContent
+            {
+                Identity = new ContentIdentity(filename)
+            };
             using (var reader = new StreamReader(filename))
                 effect.EffectCode = reader.ReadToEnd();
             return effect;

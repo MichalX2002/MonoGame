@@ -22,10 +22,11 @@ namespace Microsoft.Xna.Framework.Graphics
             if (_state == null)
             {
                 // Build the description.
-                var desc = new SharpDX.Direct3D11.DepthStencilStateDescription();
-
-                desc.IsDepthEnabled = DepthBufferEnable;
-                desc.DepthComparison = DepthBufferFunction.ToComparison();
+                var desc = new SharpDX.Direct3D11.DepthStencilStateDescription
+                {
+                    IsDepthEnabled = DepthBufferEnable,
+                    DepthComparison = DepthBufferFunction.ToComparison()
+                };
 
                 if (DepthBufferWriteEnable)
                     desc.DepthWriteMask = SharpDX.Direct3D11.DepthWriteMask.All;

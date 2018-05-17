@@ -29,8 +29,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             var result = (IList) (existingInstance ?? Activator.CreateInstance(TargetType));
 
             // Create the item serializer attribute.
-            var itemFormat = new ContentSerializerAttribute();
-            itemFormat.ElementName = format.CollectionItemName;
+            var itemFormat = new ContentSerializerAttribute
+            {
+                ElementName = format.CollectionItemName
+            };
 
             // Read all the items.
             while (input.MoveToElement(itemFormat.ElementName))
@@ -45,8 +47,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
         protected internal override void Serialize(IntermediateWriter output, object value, ContentSerializerAttribute format)
         {
             // Create the item serializer attribute.
-            var itemFormat = new ContentSerializerAttribute();
-            itemFormat.ElementName = format.CollectionItemName;
+            var itemFormat = new ContentSerializerAttribute
+            {
+                ElementName = format.CollectionItemName
+            };
 
             // Read all the items.
             foreach (var item in (IList) value)

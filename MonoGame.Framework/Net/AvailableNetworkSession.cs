@@ -51,21 +51,11 @@ namespace Microsoft.Xna.Framework.Net
 
 		public AvailableNetworkSession ()
 		{
-			_QualityOfService = new QualityOfService();
+			QualityOfService = new QualityOfService();
 		}
-		
-		int _currentGameCount;
-		public int CurrentGamerCount 
-		{ 
-			get
-			{
-				return _currentGameCount;
-			}
-			
-			internal set { _currentGameCount = value; }
-		}
-		
-		string _hostGamertag;
+        public int CurrentGamerCount { get; internal set; }
+
+        string _hostGamertag;
 		public string HostGamertag 
 		{ 
 			get
@@ -75,19 +65,9 @@ namespace Microsoft.Xna.Framework.Net
 			
 			internal set { _hostGamertag = value; }
 		}
-		
-		int _openPrivateGamerSlots;
-		public int OpenPrivateGamerSlots 
-		{ 
-			get
-			{
-				return _openPrivateGamerSlots;
-			}
-			
-			internal set { _openPrivateGamerSlots = value; }			
-		}
-		
-		int _openPublicGamerSlots; 
+        public int OpenPrivateGamerSlots { get; internal set; }
+
+        int _openPublicGamerSlots; 
 		public int OpenPublicGamerSlots 
 		{ 
 			get
@@ -96,18 +76,9 @@ namespace Microsoft.Xna.Framework.Net
 			}
 			internal set { _openPublicGamerSlots = value; }			
 		}
-		
-		private QualityOfService _QualityOfService;
-		public QualityOfService QualityOfService 
-		{ 
-			get
-			{
-				return _QualityOfService;
-			}
-			internal set { _QualityOfService = value; }			
-		}
-		
-		NetworkSessionProperties _sessionProperties;
+        public QualityOfService QualityOfService { get; internal set; }
+
+        NetworkSessionProperties _sessionProperties;
 		public NetworkSessionProperties SessionProperties 
 		{ 
 			get
@@ -116,20 +87,9 @@ namespace Microsoft.Xna.Framework.Net
 			}
 			internal set { _sessionProperties = value; }			
 		}
-		
-		IPEndPoint _endPoint;
-		internal IPEndPoint EndPoint 
-		{
-			get { return _endPoint; }
-			set { _endPoint = value;}
-		}
-        IPEndPoint _internalendPoint;
+        internal IPEndPoint EndPoint { get; set; }
 
-        internal IPEndPoint InternalEndpont
-        {
-            get { return _internalendPoint; }
-            set { _internalendPoint = value; }
-        }
+        internal IPEndPoint InternalEndpont { get; set; }
 
         internal NetworkSessionType SessionType { get; set; }
     }

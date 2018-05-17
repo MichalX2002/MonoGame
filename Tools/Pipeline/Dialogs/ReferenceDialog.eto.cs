@@ -24,34 +24,48 @@ namespace MonoGame.Tools.Pipeline
             Size = new Size(500, 400);
             MinimumSize = new Size(450, 300);
 
-            buttonOk = new Button();
-            buttonOk.Text = "Ok";
+            buttonOk = new Button
+            {
+                Text = "Ok"
+            };
             PositiveButtons.Add(buttonOk);
             DefaultButton = buttonOk;
 
-            buttonCancel = new Button();
-            buttonCancel.Text = "Cancel";
+            buttonCancel = new Button
+            {
+                Text = "Cancel"
+            };
             NegativeButtons.Add(buttonCancel);
             AbortButton = buttonCancel;
 
-            layout1 = new DynamicLayout();
-            layout1.DefaultSpacing = new Size(4, 4);
+            layout1 = new DynamicLayout
+            {
+                DefaultSpacing = new Size(4, 4)
+            };
             layout1.BeginHorizontal();
 
-            grid1 = new GridView();
-            grid1.Style = "GridView";
+            grid1 = new GridView
+            {
+                Style = "GridView"
+            };
             layout1.Add(grid1, true, true);
 
-            stack1 = new StackLayout();
-            stack1.Orientation = Orientation.Vertical;
-            stack1.Spacing = 4;
+            stack1 = new StackLayout
+            {
+                Orientation = Orientation.Vertical,
+                Spacing = 4
+            };
 
-            buttonAdd = new Button();
-            buttonAdd.Text = "Add";
+            buttonAdd = new Button
+            {
+                Text = "Add"
+            };
             stack1.Items.Add(new StackLayoutItem(buttonAdd, false));
 
-            buttonRemove = new Button();
-            buttonRemove.Text = "Remove";
+            buttonRemove = new Button
+            {
+                Text = "Remove"
+            };
             stack1.Items.Add(new StackLayoutItem(buttonRemove, false));
 
             layout1.Add(stack1, false, true);

@@ -81,26 +81,16 @@ namespace Microsoft.Xna.Framework.Audio
             get { return _isHeadset; }
         }
 
-        private int _sampleRate = 44100; // XNA default is 44100, don't know if it supports any other rates
-
         /// <summary>
         /// Returns the sample rate of the captured audio.
         /// Note: default value is 44100hz
         /// </summary>
-        public int SampleRate
-        {
-            get { return _sampleRate; }
-        }
-
-        private MicrophoneState _state = MicrophoneState.Stopped;
+        public int SampleRate { get; } = 44100;
 
         /// <summary>
         /// Returns the state of the Microphone. 
         /// </summary>
-        public MicrophoneState State
-        {
-            get { return _state; }
-        }
+        public MicrophoneState State { get; } = MicrophoneState.Stopped;
 
         #endregion
 
@@ -121,15 +111,10 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        private static Microphone _default = null;
-
         /// <summary>
         /// Returns the default microphone.
         /// </summary>
-        public static Microphone Default
-        {
-            get { return _default; }
-        }       
+        public static Microphone Default { get; } = null;
 
         #endregion
 
@@ -144,7 +129,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             // this should be 10ms aligned
             // this assumes 16bit mono data
-            return SoundEffect.GetSampleDuration(sizeInBytes, _sampleRate, AudioChannels.Mono);
+            return SoundEffect.GetSampleDuration(sizeInBytes, SampleRate, AudioChannels.Mono);
         }
 
         /// <summary>
@@ -156,7 +141,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             // this should be 10ms aligned
             // this assumes 16bit mono data
-            return SoundEffect.GetSampleSizeInBytes(duration, _sampleRate, AudioChannels.Mono);
+            return SoundEffect.GetSampleSizeInBytes(duration, SampleRate, AudioChannels.Mono);
         }
 
         /// <summary>

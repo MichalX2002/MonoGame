@@ -30,10 +30,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private static readonly ReadOnlyCollection<GraphicsAdapter> _adapters;
 
-        private DisplayModeCollection _supportedDisplayModes;
-
-        private DisplayMode _currentDisplayMode;
-
         static GraphicsAdapter()
         {
             // NOTE: An adapter is a monitor+device combination, so we expect
@@ -99,16 +95,10 @@ namespace Microsoft.Xna.Framework.Graphics
         public int Revision { get; private set; }
 
         public int SubSystemId { get; private set; }
-       
-        public DisplayModeCollection SupportedDisplayModes
-        {
-            get { return _supportedDisplayModes; }
-        }
 
-        public DisplayMode CurrentDisplayMode
-        {
-            get { return _currentDisplayMode; }
-        }
+        public DisplayModeCollection SupportedDisplayModes { get; private set; }
+
+        public DisplayMode CurrentDisplayMode { get; internal set; }
 
         /// <summary>
         /// Returns true if the <see cref="GraphicsAdapter.CurrentDisplayMode"/> is widescreen.

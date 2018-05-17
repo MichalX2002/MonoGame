@@ -83,8 +83,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
                         return false;
                 }
 
-                info.Attribute = new ContentSerializerAttribute();
-                info.Attribute.ElementName = member.Name;
+                info.Attribute = new ContentSerializerAttribute
+                {
+                    ElementName = member.Name
+                };
             }
 
             if (prop != null)
@@ -119,8 +121,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             var properties = TargetType.GetProperties(_bindingFlags);
             foreach (var prop in properties)
             {
-                ElementInfo info;
-                if (GetElementInfo(serializer, prop, out info))
+                if (GetElementInfo(serializer, prop, out ElementInfo info))
                     _elements.Add(info);
             }
 
@@ -128,9 +129,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             var fields = TargetType.GetFields(_bindingFlags);
             foreach (var field in fields)
             {
-                ElementInfo info;
-                if (GetElementInfo(serializer, field, out info))
-                    _elements.Add(info);                
+                if (GetElementInfo(serializer, field, out ElementInfo info))
+                    _elements.Add(info);
             }
 
             if (GenericCollectionHelper.IsGenericCollectionType(TargetType, false))

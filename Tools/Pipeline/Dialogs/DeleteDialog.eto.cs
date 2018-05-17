@@ -22,28 +22,38 @@ namespace MonoGame.Tools.Pipeline
             Size = new Size(450, 300);
             MinimumSize = new Size(350, 250);
 
-            buttonDelete = new Button();
-            buttonDelete.Text = "Delete";
+            buttonDelete = new Button
+            {
+                Text = "Delete"
+            };
             PositiveButtons.Add(buttonDelete);
             DefaultButton = buttonDelete;
             buttonDelete.Style = "Destuctive";
 
-            buttonCancel = new Button();
-            buttonCancel.Text = "Cancel";
+            buttonCancel = new Button
+            {
+                Text = "Cancel"
+            };
             NegativeButtons.Add(buttonCancel);
             AbortButton = buttonCancel;
 
-            layout1 = new DynamicLayout();
-            layout1.DefaultSpacing = new Size(2, 2);
+            layout1 = new DynamicLayout
+            {
+                DefaultSpacing = new Size(2, 2)
+            };
             layout1.BeginVertical();
 
-            label1 = new Label();
-            label1.Wrap = WrapMode.Word;
-            label1.Text = "The following items will be deleted (this action cannot be undone):";
+            label1 = new Label
+            {
+                Wrap = WrapMode.Word,
+                Text = "The following items will be deleted (this action cannot be undone):"
+            };
             layout1.Add(label1, true, false);
 
-            treeView1 = new TreeGridView();
-            treeView1.ShowHeader = false;
+            treeView1 = new TreeGridView
+            {
+                ShowHeader = false
+            };
             layout1.Add(treeView1, true, true);
 
             DefaultButton.Text = "Delete";

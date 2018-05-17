@@ -43,11 +43,13 @@ namespace TwoMGFX.TPGParser
                 {
                     if (blendState == null)
                     {
-                        blendState = new BlendState();
-                        blendState.ColorSourceBlend = Blend.One;
-                        blendState.AlphaSourceBlend = Blend.One;
-                        blendState.ColorDestinationBlend = Blend.InverseSourceAlpha;
-                        blendState.AlphaDestinationBlend = Blend.InverseSourceAlpha;
+                        blendState = new BlendState
+                        {
+                            ColorSourceBlend = Blend.One,
+                            AlphaSourceBlend = Blend.One,
+                            ColorDestinationBlend = Blend.InverseSourceAlpha,
+                            AlphaDestinationBlend = Blend.InverseSourceAlpha
+                        };
                     }
                 }
                 else if (!value)

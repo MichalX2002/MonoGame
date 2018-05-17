@@ -17,9 +17,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         /// <returns>The item cast as T, or the default value if the item is not present in the dictonary.</returns>
         public T GetValue<T> (string key, T defaultValue)
         {
-            object o;
-            if (TryGetValue (key, out o))
-                return (T)o ;
+            if (TryGetValue(key, out object o))
+                return (T)o;
             return defaultValue;
         }
     }

@@ -278,19 +278,11 @@ namespace Microsoft.Xna.Framework.GamerServices
 				throw new NotSupportedException();
 			}
 		}
+        public GamerPrivileges Privileges { get; } = new GamerPrivileges();
+        #endregion
 
-        GamerPrivileges _privileges = new GamerPrivileges();
-        public GamerPrivileges Privileges
-        {
-            get
-            {
-                return _privileges;
-            }
-        }
-		#endregion
-		
-		
-		protected virtual void OnSignedIn(SignedInEventArgs e)
+
+        protected virtual void OnSignedIn(SignedInEventArgs e)
 		{
             EventHelpers.Raise(this, SignedIn, e);
 		}

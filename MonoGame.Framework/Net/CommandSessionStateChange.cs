@@ -4,22 +4,17 @@ namespace Microsoft.Xna.Framework.Net
 {
 	internal class CommandSessionStateChange : ICommand
 	{
-		
-		NetworkSessionState newState;
-		NetworkSessionState oldState;
+        NetworkSessionState oldState;
 		
 		public CommandSessionStateChange (NetworkSessionState newState, NetworkSessionState oldState)
 		{
-			this.newState = newState;
+			this.NewState = newState;
 			this.oldState = oldState;
 		}
-		
-		public NetworkSessionState NewState
-		{
-			get { return newState; }
-		}
-		
-		public NetworkSessionState OldState
+
+        public NetworkSessionState NewState { get; }
+
+        public NetworkSessionState OldState
 		{
 			get { return oldState; }
 		}

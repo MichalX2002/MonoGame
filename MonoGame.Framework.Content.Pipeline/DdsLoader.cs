@@ -259,10 +259,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                 if (!valid)
                     throw new ContentLoadException("Invalid file signature");
 
-                var header = new DdsHeader();
+                var header = new DdsHeader
+                {
 
-                // Read DDS_HEADER
-                header.dwSize = reader.ReadUInt32();
+                    // Read DDS_HEADER
+                    dwSize = reader.ReadUInt32()
+                };
                 if (header.dwSize != 124)
                     throw new ContentLoadException("Invalid DDS_HEADER dwSize value");
                 header.dwFlags = (Ddsd)reader.ReadUInt32();
@@ -315,8 +317,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                     output = new Texture2DContent() { Identity = identity };
                 }
 
-                bool rbSwap;
-                var format = GetSurfaceFormat(ref header.ddspf, out rbSwap);
+                var format = GetSurfaceFormat(ref header.ddspf, out bool rbSwap);
 
                 for (int f = 0; f < faceCount; ++f)
                 {
@@ -458,15 +459,17 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                 writer.Write((byte)0x53);
                 writer.Write((byte)0x20);
 
-                var header = new DdsHeader();
-                header.dwSize = 124;
-                header.dwFlags = Ddsd.Caps | Ddsd.Width | Ddsd.Height | Ddsd.Pitch | Ddsd.PixelFormat;
-                header.dwWidth = (uint)bitmapContent.Width;
-                header.dwHeight = (uint)bitmapContent.Height;
-                header.dwPitchOrLinearSize = (uint)(bitmapContent.Width * 4);
-                header.dwDepth = (uint)0;
-                header.dwMipMapCount = (uint)0;
-                
+                var header = new DdsHeader
+                {
+                    dwSize = 124,
+                    dwFlags = Ddsd.Caps | Ddsd.Width | Ddsd.Height | Ddsd.Pitch | Ddsd.PixelFormat,
+                    dwWidth = (uint)bitmapContent.Width,
+                    dwHeight = (uint)bitmapContent.Height,
+                    dwPitchOrLinearSize = (uint)(bitmapContent.Width * 4),
+                    dwDepth = (uint)0,
+                    dwMipMapCount = (uint)0
+                };
+
                 writer.Write((uint)header.dwSize);
                 writer.Write((uint)header.dwFlags);
                 writer.Write((uint)header.dwHeight);
@@ -488,8 +491,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                 writer.Write((uint)0);
                 writer.Write((uint)0);
 
-                SurfaceFormat format;
-                if (!bitmapContent.TryGetFormat(out format) || format != SurfaceFormat.Color)
+                if (!bitmapContent.TryGetFormat(out SurfaceFormat format) || format != SurfaceFormat.Color)
                     throw new NotSupportedException("Unsupported bitmap content!");
 
                 header.ddspf.dwSize = 32;

@@ -4,15 +4,13 @@ namespace Microsoft.Xna.Framework.Net
 {
 	internal class CommandGamerJoined : ICommand
 	{
-		int gamerInternalIndex = -1;
-		internal long remoteUniqueIdentifier = -1;
+        internal long remoteUniqueIdentifier = -1;
 		GamerStates states;
-		string gamerTag = string.Empty;
-		string displayName = string.Empty;
+        string displayName = string.Empty;
 		
 		public CommandGamerJoined (int internalIndex, bool isHost, bool isLocal)
 		{
-			gamerInternalIndex = internalIndex;
+			InternalIndex = internalIndex;
 			
 			if (isHost)
 				states = states | GamerStates.Host;
@@ -34,29 +32,19 @@ namespace Microsoft.Xna.Framework.Net
 			set {
 				displayName = value;
 			}
-		}	
-		
-		public string GamerTag {
-			get {
-				return gamerTag;
-			}
-			set {
-				gamerTag = value;
-			}
-		}	
-		
-		public GamerStates State
+		}
+
+        public string GamerTag { get; set; } = string.Empty;
+
+        public GamerStates State
 		{
 			get { return states; }
 			set { states = value; }
 		}
-		
-		public int InternalIndex
-		{
-			get { return gamerInternalIndex; }
-		}
-		
-		public CommandEventType Command {
+
+        public int InternalIndex { get; } = -1;
+
+        public CommandEventType Command {
 			get { return CommandEventType.GamerJoined; }
 		}
 	}

@@ -9,10 +9,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 {
     public sealed class ModelMeshContent
     {
-        private BoundingSphere _boundingSphere;
-        private ModelMeshPartContentCollection _meshParts;
-        private string _name;
-        private ModelBoneContent _parentBone;
         private MeshContent _sourceMesh;
 
         internal ModelMeshContent() { }
@@ -20,32 +16,20 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         internal ModelMeshContent(string name, MeshContent sourceMesh, ModelBoneContent parentBone,
                                   BoundingSphere boundingSphere, IList<ModelMeshPartContent> meshParts)
         {
-            _name = name;
+            Name = name;
             _sourceMesh = sourceMesh;
-            _parentBone = parentBone;
-            _boundingSphere = boundingSphere;
-            _meshParts = new ModelMeshPartContentCollection(meshParts);
+            ParentBone = parentBone;
+            BoundingSphere = boundingSphere;
+            MeshParts = new ModelMeshPartContentCollection(meshParts);
         }
 
-        public BoundingSphere BoundingSphere
-        {
-            get { return _boundingSphere; }
-        }
+        public BoundingSphere BoundingSphere { get; }
 
-        public ModelMeshPartContentCollection MeshParts
-        {
-            get { return _meshParts; }
-        }
+        public ModelMeshPartContentCollection MeshParts { get; }
 
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; }
 
-        public ModelBoneContent ParentBone
-        {
-            get { return _parentBone; }
-        }
+        public ModelBoneContent ParentBone { get; }
 
         public MeshContent SourceMesh
         {

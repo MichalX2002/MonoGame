@@ -48,26 +48,16 @@ namespace Microsoft.Xna.Framework.Input.Touch
     /// </summary>
     public struct GestureSample
     {
-        // attributes
-		private GestureType _gestureType;
-		private TimeSpan _timestamp;
-		private Vector2 _position;
-		private Vector2 _position2;
-		private Vector2 _delta;
-		private Vector2 _delta2;
-		
-		#region Properties
+        private TimeSpan _timestamp;
+        private Vector2 _position2;
+        private Vector2 _delta2;
+
+        #region Properties
 
         /// <summary>
         /// Gets the type of the gesture.
         /// </summary>
-        public GestureType GestureType
-        {
-            get
-            {
-				return this._gestureType;
-            }
-        }
+        public GestureType GestureType { get; }
 
         /// <summary>
         /// Gets the starting time for this multi-touch gesture sample.
@@ -83,13 +73,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// <summary>
         /// Gets the position of the first touch-point in the gesture sample.
         /// </summary>
-        public Vector2 Position
-        {
-            get
-            {
-				return this._position;
-            }
-        }
+        public Vector2 Position { get; }
 
         /// <summary>
         /// Gets the position of the second touch-point in the gesture sample.
@@ -105,13 +89,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// <summary>
         /// Gets the delta information for the first touch-point in the gesture sample.
         /// </summary>
-        public Vector2 Delta
-        {
-            get
-            {
-				return this._delta;
-            }
-        }
+        public Vector2 Delta { get; }
 
         /// <summary>
         /// Gets the delta information for the second touch-point in the gesture sample.
@@ -136,11 +114,11 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// <param name="delta2"></param>
         public GestureSample(GestureType gestureType, TimeSpan timestamp, Vector2 position, Vector2 position2, Vector2 delta, Vector2 delta2)
         {
-			this._gestureType = gestureType;
+			this.GestureType = gestureType;
 			this._timestamp = timestamp;
-			this._position = position;
+			this.Position = position;
 			this._position2 = position2;
-			this._delta = delta;
+			this.Delta = delta;
 			this._delta2 = delta2;
         }
     }

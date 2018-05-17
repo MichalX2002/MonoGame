@@ -16,11 +16,15 @@ namespace MonoGame.Tools.Pipeline
         {
             BackgroundColor = DrawInfo.BackColor;
 
-            pixel1 = new PixelLayout();
-            pixel1.BackgroundColor = DrawInfo.BackColor;
+            pixel1 = new PixelLayout
+            {
+                BackgroundColor = DrawInfo.BackColor
+            };
 
-            drawable = new Drawable();
-            drawable.Height = 100;
+            drawable = new Drawable
+            {
+                Height = 100
+            };
             pixel1.Add(drawable, 0, 0);
 
             Content = pixel1;

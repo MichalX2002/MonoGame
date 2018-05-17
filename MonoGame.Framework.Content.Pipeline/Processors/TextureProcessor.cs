@@ -38,8 +38,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 
         public override TextureContent Process(TextureContent input, ContentProcessorContext context)
         {
-            SurfaceFormat format;
-            if (input.Faces[0][0].TryGetFormat(out format))
+            if (input.Faces[0][0].TryGetFormat(out SurfaceFormat format))
             {
                 // If it is already a compressed format, we cannot do anything else so just return it
                 if (format.IsCompressedFormat())

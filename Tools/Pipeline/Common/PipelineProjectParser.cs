@@ -237,8 +237,10 @@ namespace MonoGame.Tools.Pipeline
             // Store the file name for saving later.
             _project.OriginalPath = projectFilePath;
 
-            var parser = new MGBuildParser(this);
-            parser.Title = "Pipeline";
+            var parser = new MGBuildParser(this)
+            {
+                Title = "Pipeline"
+            };
 
             if (errorCallback != null)
                 parser.OnError += errorCallback;
@@ -388,8 +390,7 @@ namespace MonoGame.Tools.Pipeline
                         var buildAction = io.LocalName;
                         if (buildAction.Equals("Reference"))
                         {
-                            string include, hintPath;
-                            ReadIncludeReference(io, out include, out hintPath);
+                            ReadIncludeReference(io, out string include, out string hintPath);
 
                             if (!string.IsNullOrEmpty(hintPath) &&
                                 hintPath.IndexOf("microsoft", StringComparison.CurrentCultureIgnoreCase) == -1 &&
@@ -400,8 +401,7 @@ namespace MonoGame.Tools.Pipeline
                         }
                         else if (buildAction.Equals("Content") || buildAction.Equals("None"))
                         {
-                            string include, copyToOutputDirectory;
-                            ReadIncludeContent(io, out include, out copyToOutputDirectory);
+                            ReadIncludeContent(io, out string include, out string copyToOutputDirectory);
 
                             if (!string.IsNullOrEmpty(copyToOutputDirectory) && !copyToOutputDirectory.Equals("Never"))
                             {
@@ -413,9 +413,7 @@ namespace MonoGame.Tools.Pipeline
                         }
                         else if (buildAction.Equals("Compile"))
                         {
-                            string include, name, importer, processor;
-                            string[] processorParams;
-                            ReadIncludeCompile(io, out include, out name, out importer, out processor, out processorParams);
+                            ReadIncludeCompile(io, out string include, out string name, out string importer, out string processor, out string[] processorParams);
 
                             Importer = importer;
                             Processor = processor;

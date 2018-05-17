@@ -84,20 +84,12 @@ namespace Microsoft.Xna.Framework.GamerServices
                 }*/
             }
         }
+        public bool IsReadOnly { get; } = false;
 
-		private bool isReadOnly = false;
-		public bool IsReadOnly 
-		{
-            get
-			{
-				return isReadOnly;
-			}
-        }
-		
         #endregion Properties
-		
-		#region Public Methods
-		public void Add(Achievement item)
+
+        #region Public Methods
+        public void Add(Achievement item)
         {
             if (item == null)
                 throw new ArgumentNullException();

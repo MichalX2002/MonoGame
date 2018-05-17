@@ -247,10 +247,9 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
             foreach (var pair in parameters0)
             {
                 object value0 = pair.Value;
-                object value1;
 
                 // Search for matching parameter.
-                if (!parameters1.TryGetValue(pair.Key, out value1) && !defaultValues.TryGetValue(pair.Key, out value1))
+                if (!parameters1.TryGetValue(pair.Key, out object value1) && !defaultValues.TryGetValue(pair.Key, out value1))
                     return false;
 
                 if (!AreEqual(value0, value1))
@@ -263,8 +262,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
                 if (parameters0.ContainsKey(pair.Key))
                     continue;
 
-                object defaultValue;
-                if (!defaultValues.TryGetValue(pair.Key, out defaultValue))
+                if (!defaultValues.TryGetValue(pair.Key, out object defaultValue))
                     return false;
 
                 if (!AreEqual(pair.Value, defaultValue))

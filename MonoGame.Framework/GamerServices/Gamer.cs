@@ -46,11 +46,7 @@ namespace Microsoft.Xna.Framework.GamerServices
     [DataContract]
     public abstract class Gamer
     {
-        static SignedInGamerCollection _signedInGamers = new SignedInGamerCollection();
-        string _gamer = "MonoGame";
         Object _tag;
-        bool disposed;
-
         LeaderboardWriter _leaderboardWriter;
 
         #region Methods
@@ -74,12 +70,12 @@ namespace Microsoft.Xna.Framework.GamerServices
 
         public override string ToString()
         {
-            return _gamer;
+            return Gamertag;
         }
 
         internal void Dispose()
         {
-            disposed = true;
+            IsDisposed = true;
         }
 
         #endregion
@@ -92,27 +88,10 @@ namespace Microsoft.Xna.Framework.GamerServices
         }
 
         [DataMember]
-        public string Gamertag 
-        {
-            get
-            {
-                return _gamer;
-            }
-			
-			internal set
-			{
-				_gamer = value;
-			}
-        }
+        public string Gamertag { get; internal set; } = "MonoGame";
 
         [DataMember]
-        public bool IsDisposed
-        {
-            get
-            {
-                return disposed;
-            }
-        }
+        public bool IsDisposed { get; private set; }
 
         public Object Tag 
         {
@@ -129,13 +108,7 @@ namespace Microsoft.Xna.Framework.GamerServices
             }
         }
 
-        public static SignedInGamerCollection SignedInGamers
-        {
-            get
-            {
-                return _signedInGamers;
-            }
-        }
+        public static SignedInGamerCollection SignedInGamers { get; } = new SignedInGamerCollection();
 
         public LeaderboardWriter LeaderboardWriter 
         { 

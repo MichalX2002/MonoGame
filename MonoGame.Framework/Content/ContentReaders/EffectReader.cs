@@ -17,8 +17,10 @@ namespace Microsoft.Xna.Framework.Content
             int dataSize = input.ReadInt32();
             byte[] data = input.ContentManager.GetScratchBuffer(dataSize);
             input.Read(data, 0, dataSize);
-            var effect = new Effect(input.GraphicsDevice, data, 0, dataSize);
-            effect.Name = input.AssetName;
+            var effect = new Effect(input.GraphicsDevice, data, 0, dataSize)
+            {
+                Name = input.AssetName
+            };
             return effect;
         }
     }

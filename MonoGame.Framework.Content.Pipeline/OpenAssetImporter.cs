@@ -537,8 +537,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                 //   PostRotation, RotationPivotInverse, ScalingOffset, ScalingPivot,
                 //   Scaling, ScalingPivotInverse
                 string originalName = GetNodeName(aiNode.Name);
-                FbxPivot pivot;
-                if (!_pivots.TryGetValue(originalName, out pivot))
+                if (!_pivots.TryGetValue(originalName, out FbxPivot pivot))
                 {
                     pivot = new FbxPivot();
                     _pivots.Add(originalName, pivot);
@@ -819,30 +818,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                       Name = aiNode.Name,
                       Identity = _identity
                     };
-
-                    // node.Transform is irrelevant for bones. This transform is just the
-                    // pose of the node at the time of the export. This could, for example,
-                    // be one of the animation frames. It is not necessarily the bind pose
-                    // (rest pose)!
-                    // In XNA BoneContent.Transform needs to be set to the relative bind pose
-                    // matrix. The relative bind pose matrix can be derived from the OffsetMatrix
-                    // which is stored in aiMesh.Bones.
-                    //
-                    // offsetMatrix ... Offset matrix. Transforms the mesh from local space to bone space in bind pose.
-                    // bindPoseRel  ... Relative bind pose matrix. Defines the transform of a bone relative to its parent bone.
-                    // bindPoseAbs  ... Absolute bind pose matrix. Defines the transform of a bone relative to world space.
-                    //
-                    // The offset matrix is the inverse of the absolute bind pose matrix.
-                    //   offsetMatrix = inverse(bindPoseAbs)
-                    //
-                    // bindPoseAbs = bindPoseRel * parentBindPoseAbs
-                    // => bindPoseRel = bindPoseAbs * inverse(parentBindPoseAbs)
-                    //                = inverse(offsetMatrix) * parentOffsetMatrix
-
-                    Matrix offsetMatrix;
-                    Matrix parentOffsetMatrix;
-                    bool isOffsetMatrixValid = _deformationBones.TryGetValue(aiNode.Name, out offsetMatrix);
-                    bool isParentOffsetMatrixValid = _deformationBones.TryGetValue(aiParent.Name, out parentOffsetMatrix);
+                    bool isOffsetMatrixValid = _deformationBones.TryGetValue(aiNode.Name, out Matrix offsetMatrix);
+                    bool isParentOffsetMatrixValid = _deformationBones.TryGetValue(aiParent.Name, out Matrix parentOffsetMatrix);
                     if (isOffsetMatrixValid && isParentOffsetMatrixValid)
                     {
                         node.Transform = Matrix.Invert(offsetMatrix) * parentOffsetMatrix;
@@ -851,8 +828,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                     {
                         // The current bone is the first in the chain.
                         // The parent offset matrix is missing. :(
-                        FbxPivot pivot;
-                        if (_pivots.TryGetValue(node.Name, out pivot))
+                        if (_pivots.TryGetValue(node.Name, out FbxPivot pivot))
                         {
                             // --> Use transformation pivot.
                             node.Transform = pivot.GetTransform(null, null, null);
@@ -860,8 +836,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                         else
                         {
                             // --> Let's assume that parent's transform is Identity.
-                        node.Transform = Matrix.Invert(offsetMatrix);
-                    }
+                            node.Transform = Matrix.Invert(offsetMatrix);
+                        }
                     }
                     else if (isOffsetMatrixValid && aiParent == _rootBone)
                     {
@@ -936,8 +912,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                 var channel = new AnimationChannel();
 
                 // Get transformation pivot for current bone.
-                FbxPivot pivot;
-                if (!_pivots.TryGetValue(boneName, out pivot))
+                if (!_pivots.TryGetValue(boneName, out FbxPivot pivot))
                     pivot = FbxPivot.Default;
 
                 var scaleKeys = EmptyVectorKeys;

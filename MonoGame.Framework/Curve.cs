@@ -15,10 +15,8 @@ namespace Microsoft.Xna.Framework
     [DataContract]
     public class Curve
     {
-        #region Private Fields
 
-        private CurveLoopType _preLoop;
-        private CurveLoopType _postLoop;
+        #region Private Fields
         private CurveKeyCollection _keys;
 
         #endregion
@@ -38,21 +36,13 @@ namespace Microsoft.Xna.Framework
         /// Defines how to handle weighting values that are less than the first control point in the curve.
         /// </summary>
         [DataMember]
-        public CurveLoopType PreLoop
-        {
-            get { return this._preLoop; }
-            set { this._preLoop = value; }
-        }
+        public CurveLoopType PreLoop { get; set; }
 
         /// <summary>
         /// Defines how to handle weighting values that are greater than the last control point in the curve.
         /// </summary>
         [DataMember]
-        public CurveLoopType PostLoop
-        {
-            get { return this._postLoop; }
-            set { this._postLoop = value; }
-        }
+        public CurveLoopType PostLoop { get; set; }
 
         /// <summary>
         /// The collection of curve keys.
@@ -85,11 +75,12 @@ namespace Microsoft.Xna.Framework
         /// <returns>A copy of this curve.</returns>
         public Curve Clone()
         {
-            Curve curve = new Curve();
-
-            curve._keys = this._keys.Clone();
-            curve._preLoop = this._preLoop;
-            curve._postLoop = this._postLoop;
+            Curve curve = new Curve
+            {
+                _keys = this._keys.Clone(),
+                PreLoop = this.PreLoop,
+                PostLoop = this.PostLoop
+            };
 
             return curve;
         }

@@ -48,10 +48,12 @@ namespace Microsoft.Xna.Framework.Content
             var durationMs = input.ReadInt32();
 
             // Create the effect.
-            var effect = new SoundEffect(header, data, dataSize, durationMs, loopStart, loopLength);
+            var effect = new SoundEffect(header, data, dataSize, durationMs, loopStart, loopLength)
+            {
 
-            // Store the original asset name for debugging later.
-            effect.Name = input.AssetName;
+                // Store the original asset name for debugging later.
+                Name = input.AssetName
+            };
 
             return effect;
         }

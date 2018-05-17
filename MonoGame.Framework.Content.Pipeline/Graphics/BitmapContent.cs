@@ -99,11 +99,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         {
             ValidateCopyArguments(sourceBitmap, sourceRegion, destinationBitmap, destinationRegion);
 
-            SurfaceFormat sourceFormat;
-            if (!sourceBitmap.TryGetFormat(out sourceFormat))
+            if (!sourceBitmap.TryGetFormat(out SurfaceFormat sourceFormat))
                 throw new InvalidOperationException("Could not retrieve surface format of source bitmap");
-            SurfaceFormat destinationFormat;
-            if (!destinationBitmap.TryGetFormat(out destinationFormat))
+            if (!destinationBitmap.TryGetFormat(out SurfaceFormat destinationFormat))
                 throw new InvalidOperationException("Could not retrieve surface format of destination bitmap");
 
             // If the formats are the same and the regions are the full bounds of the bitmaps and they are the same size, do a simpler copy

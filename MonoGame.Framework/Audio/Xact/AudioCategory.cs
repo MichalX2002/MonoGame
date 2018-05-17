@@ -14,7 +14,6 @@ namespace Microsoft.Xna.Framework.Audio
     /// </summary>
     public struct AudioCategory : IEquatable<AudioCategory>
     {
-        readonly string _name;
         readonly AudioEngine _engine;
         readonly List<XactSound> _sounds;
 
@@ -43,7 +42,7 @@ namespace Microsoft.Xna.Framework.Audio
             Debug.Assert(!string.IsNullOrEmpty(name));
 
             _sounds = new List<XactSound>();
-            _name = name;
+            Name = name;
             _engine = audioengine;
 
             maxInstances = reader.ReadByte ();
@@ -95,7 +94,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// Gets the category's friendly name.
         /// </summary>
-        public string Name { get { return _name; } }
+        public string Name { get; }
 
         /// <summary>
         /// Pauses all associated sounds.
@@ -148,7 +147,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <returns>true if the objects are equal or false if they aren't.</returns>
         public static bool operator ==(AudioCategory first, AudioCategory second)
         {
-            return first._engine == second._engine && first._name.Equals(second._name, StringComparison.Ordinal);
+            return first._engine == second._engine && first.Name.Equals(second.Name, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -159,7 +158,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <returns>true if the objects are not equal or false if they are.</returns>
         public static bool operator !=(AudioCategory first, AudioCategory second)
         {
-            return first._engine != second._engine || !first._name.Equals(second._name, StringComparison.Ordinal);
+            return first._engine != second._engine || !first.Name.Equals(second.Name, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -169,7 +168,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <returns>true if the objects are equal or false if they aren't</returns>
         public bool Equals(AudioCategory other)
         {
-            return _engine == other._engine && _name.Equals(other._name, StringComparison.Ordinal);
+            return _engine == other._engine && Name.Equals(other.Name, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -182,7 +181,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (obj is AudioCategory)
             {
                 var other = (AudioCategory)obj;
-                return _engine == other._engine && _name.Equals(other._name, StringComparison.Ordinal);
+                return _engine == other._engine && Name.Equals(other.Name, StringComparison.Ordinal);
             }
 
             return false;
@@ -194,7 +193,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <returns>Hash code for this object.</returns>
         public override int GetHashCode()
         {
-            return _name.GetHashCode() ^ _engine.GetHashCode();
+            return Name.GetHashCode() ^ _engine.GetHashCode();
         }
 
         /// <summary>
@@ -203,7 +202,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <returns>Friendly name of the AudioCategory</returns>
         public override string ToString()
         {
-            return _name;
+            return Name;
         }
     }
 }

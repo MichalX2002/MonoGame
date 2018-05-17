@@ -37,10 +37,8 @@ namespace Microsoft.Xna.Framework.Graphics
     [DataContract]
     public class DisplayMode
     {
-        #region Fields
 
-        private SurfaceFormat format;
-        private int height;
+        #region Fields
         private int width;
 
         #endregion Fields
@@ -48,23 +46,19 @@ namespace Microsoft.Xna.Framework.Graphics
         #region Properties
         
         public float AspectRatio {
-            get { return width / (float)height; }
+            get { return width / (float)Height; }
         }
 
-        public SurfaceFormat Format {
-            get { return format; }
-        }
+        public SurfaceFormat Format { get; }
 
-        public int Height {
-            get { return this.height; }
-        }
+        public int Height { get; }
 
         public int Width {
             get { return this.width; }
         }
         
         public Rectangle TitleSafeArea {
-            get { return GraphicsDevice.GetTitleSafeArea(0, 0, width, height); }
+            get { return GraphicsDevice.GetTitleSafeArea(0, 0, width, Height); }
         }
 
         #endregion Properties
@@ -74,8 +68,8 @@ namespace Microsoft.Xna.Framework.Graphics
         internal DisplayMode(int width, int height, SurfaceFormat format)
         {
             this.width = width;
-            this.height = height;
-            this.format = format;
+            this.Height = height;
+            this.Format = format;
         }
 
         #endregion Constructors
@@ -97,8 +91,8 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 return false;
             }
-            return (left.format == right.format) &&
-                (left.height == right.height) &&
+            return (left.Format == right.Format) &&
+                (left.Height == right.Height) &&
                 (left.width == right.width);
         }
 
@@ -113,12 +107,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public override int GetHashCode()
         {
-            return (this.width.GetHashCode() ^ this.height.GetHashCode() ^ this.format.GetHashCode());
+            return (this.width.GetHashCode() ^ this.Height.GetHashCode() ^ this.Format.GetHashCode());
         }
 
         public override string ToString()
         {
-            return "{Width:" + this.width + " Height:" + this.height + " Format:" + this.Format + " AspectRatio:" + this.AspectRatio + "}";
+            return "{Width:" + this.width + " Height:" + this.Height + " Format:" + this.Format + " AspectRatio:" + this.AspectRatio + "}";
         }
 
         #endregion Public Methods

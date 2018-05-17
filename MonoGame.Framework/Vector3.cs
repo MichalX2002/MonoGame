@@ -19,18 +19,8 @@ namespace Microsoft.Xna.Framework
     [DebuggerDisplay("{DebugDisplayString,nq}")]
     public struct Vector3 : IEquatable<Vector3>
     {
-        #region Private Fields
 
-        private static readonly Vector3 zero = new Vector3(0f, 0f, 0f);
-        private static readonly Vector3 one = new Vector3(1f, 1f, 1f);
-        private static readonly Vector3 unitX = new Vector3(1f, 0f, 0f);
-        private static readonly Vector3 unitY = new Vector3(0f, 1f, 0f);
-        private static readonly Vector3 unitZ = new Vector3(0f, 0f, 1f);
-        private static readonly Vector3 up = new Vector3(0f, 1f, 0f);
-        private static readonly Vector3 down = new Vector3(0f, -1f, 0f);
-        private static readonly Vector3 right = new Vector3(1f, 0f, 0f);
-        private static readonly Vector3 left = new Vector3(-1f, 0f, 0f);
-        private static readonly Vector3 forward = new Vector3(0f, 0f, -1f);
+        #region Private Fields
         private static readonly Vector3 backward = new Vector3(0f, 0f, 1f);
 
         #endregion
@@ -62,82 +52,52 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Returns a <see cref="Vector3"/> with components 0, 0, 0.
         /// </summary>
-        public static Vector3 Zero
-        {
-            get { return zero; }
-        }
+        public static Vector3 Zero { get; } = new Vector3(0f, 0f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector3"/> with components 1, 1, 1.
         /// </summary>
-        public static Vector3 One
-        {
-            get { return one; }
-        }
+        public static Vector3 One { get; } = new Vector3(1f, 1f, 1f);
 
         /// <summary>
         /// Returns a <see cref="Vector3"/> with components 1, 0, 0.
         /// </summary>
-        public static Vector3 UnitX
-        {
-            get { return unitX; }
-        }
+        public static Vector3 UnitX { get; } = new Vector3(1f, 0f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector3"/> with components 0, 1, 0.
         /// </summary>
-        public static Vector3 UnitY
-        {
-            get { return unitY; }
-        }
+        public static Vector3 UnitY { get; } = new Vector3(0f, 1f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector3"/> with components 0, 0, 1.
         /// </summary>
-        public static Vector3 UnitZ
-        {
-            get { return unitZ; }
-        }
+        public static Vector3 UnitZ { get; } = new Vector3(0f, 0f, 1f);
 
         /// <summary>
         /// Returns a <see cref="Vector3"/> with components 0, 1, 0.
         /// </summary>
-        public static Vector3 Up
-        {
-            get { return up; }
-        }
+        public static Vector3 Up { get; } = new Vector3(0f, 1f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector3"/> with components 0, -1, 0.
         /// </summary>
-        public static Vector3 Down
-        {
-            get { return down; }
-        }
+        public static Vector3 Down { get; } = new Vector3(0f, -1f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector3"/> with components 1, 0, 0.
         /// </summary>
-        public static Vector3 Right
-        {
-            get { return right; }
-        }
+        public static Vector3 Right { get; } = new Vector3(1f, 0f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector3"/> with components -1, 0, 0.
         /// </summary>
-        public static Vector3 Left
-        {
-            get { return left; }
-        }
+        public static Vector3 Left { get; } = new Vector3(-1f, 0f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector3"/> with components 0, 0, -1.
         /// </summary>
-        public static Vector3 Forward
-        {
-            get { return forward; }
-        }
+        public static Vector3 Forward { get; } = new Vector3(0f, 0f, -1f);
 
         /// <summary>
         /// Returns a <see cref="Vector3"/> with components 0, 0, 1.

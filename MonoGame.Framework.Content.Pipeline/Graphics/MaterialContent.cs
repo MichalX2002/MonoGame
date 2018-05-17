@@ -12,20 +12,19 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
     /// <remarks>In addition to texture references, opaque data values are stored in the OpaqueData property of the base class.</remarks>
     public class MaterialContent : ContentItem
     {
-        readonly TextureReferenceDictionary _textures;
 
         /// <summary>
         /// Gets the texture collection of the material.
         /// </summary>
         /// <value>Collection of textures used by the material.</value>
-        public TextureReferenceDictionary Textures { get { return _textures; } }
+        public TextureReferenceDictionary Textures { get; }
 
         /// <summary>
         /// Initializes a new instance of MaterialContent.
         /// </summary>
         public MaterialContent()
         {
-            _textures = new TextureReferenceDictionary();
+            Textures = new TextureReferenceDictionary();
         }
 
         /// <summary>
@@ -36,8 +35,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <returns>The related opaque data.</returns>
         protected T GetReferenceTypeProperty<T>(string key) where T : class
         {
-            object value;
-            if (OpaqueData.TryGetValue(key, out value))
+            if (OpaqueData.TryGetValue(key, out object value))
                 return (T)value;
             return default(T);
         }
@@ -49,8 +47,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <returns>Reference to a texture from the collection.</returns>
         protected ExternalReference<TextureContent> GetTexture(string key)
         {
-            ExternalReference<TextureContent> texture;
-            _textures.TryGetValue(key, out texture);
+            Textures.TryGetValue(key, out ExternalReference<TextureContent> texture);
             return texture;
         }
 
@@ -62,8 +59,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <returns>Index of the value type beng retrieved.</returns>
         protected Nullable<T> GetValueTypeProperty<T>(string key) where T : struct
         {
-            object value;
-            if (OpaqueData.TryGetValue(key, out value))
+            if (OpaqueData.TryGetValue(key, out object value))
                 return (T)value;
             return null;
         }
@@ -95,9 +91,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         protected void SetTexture(string key, ExternalReference<TextureContent> value)
         {
             if (value != null)
-                _textures[key] = value;
+                Textures[key] = value;
             else
-                _textures.Remove(key);
+                Textures.Remove(key);
         }
 
         /// <summary>

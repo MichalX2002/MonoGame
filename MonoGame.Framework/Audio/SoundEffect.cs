@@ -15,10 +15,9 @@ namespace Microsoft.Xna.Framework.Audio
     /// </remarks>
     public sealed partial class SoundEffect : IDisposable
     {
+
         #region Internal Audio Data
 
-        private string _name = string.Empty;
-        
         private bool _isDisposed = false;
         private readonly TimeSpan _duration;
 
@@ -335,11 +334,7 @@ namespace Microsoft.Xna.Framework.Audio
         public TimeSpan Duration { get { return _duration; } }
 
         /// <summary>Gets or sets the asset name of the SoundEffect.</summary>
-        public string Name
-        {
-            get { return _name; }
-            set { _name = value; }
-        }
+        public string Name { get; set; } = string.Empty;
 
         #endregion
 

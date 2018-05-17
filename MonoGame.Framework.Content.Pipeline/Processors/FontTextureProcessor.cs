@@ -94,8 +94,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 			// get the char for that glyph, by default we start at ' ' then '!' and then ASCII
 			// after that.
             BitmapContent face = input.Faces[0][0];
-            SurfaceFormat faceFormat;
-            face.TryGetFormat(out faceFormat);
+            face.TryGetFormat(out SurfaceFormat faceFormat);
             if (faceFormat != SurfaceFormat.Color)
             {
                 var colorFace = new PixelBitmapContent<Color>(face.Width, face.Height);
@@ -113,10 +112,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 
             // Get the platform specific texture profile.
             var texProfile = TextureProfile.ForPlatform(context.TargetPlatform);
-
-            // We need to know how to pack the glyphs.
-            bool requiresPot, requiresSquare;
-            texProfile.Requirements(context, TextureFormat, out requiresPot, out requiresSquare);
+            texProfile.Requirements(context, TextureFormat, out bool requiresPot, out bool requiresSquare);
 
             face = GlyphPacker.ArrangeGlyphs(glyphs.ToArray(), requiresPot, requiresSquare);
 			

@@ -33,7 +33,7 @@ namespace MonoGame.Tools.Pipeline
                 {
                     if (Path.IsPathRooted(_folder[i]))
                     {
-                        string projectloc = controller._project.Location;
+                        string projectloc = controller.ProjectItem.Location;
                         if (_folder[i].Length >= projectloc.Length + 1)
                             _folder[i] = _folder[i].Substring(projectloc.Length + 1);
                     }
@@ -45,7 +45,7 @@ namespace MonoGame.Tools.Pipeline
 
             public bool Do()
             {
-                var parser = new PipelineProjectParser(_con, _con._project);
+                var parser = new PipelineProjectParser(_con, _con.ProjectItem);
                 _con.View.BeginTreeUpdate();
 
                 foreach(string f in _folder)
@@ -70,7 +70,7 @@ namespace MonoGame.Tools.Pipeline
                     if (!parser.AddContent(f, skipduplicate))
                         continue;
 
-                    var item = _con._project.ContentItems.Last();
+                    var item = _con.ProjectItem.ContentItems.Last();
                     item.Observer = _con;
                     item.ResolveTypes();
 
@@ -94,13 +94,13 @@ namespace MonoGame.Tools.Pipeline
 
                 foreach (var f in _files)
                 {
-                    for (var i = 0; i < _con._project.ContentItems.Count; i++)
+                    for (var i = 0; i < _con.ProjectItem.ContentItems.Count; i++)
                     {
-                        var item = _con._project.ContentItems[i];
+                        var item = _con.ProjectItem.ContentItems[i];
                         if (item.OriginalPath == f)
                         {
                             _con.View.RemoveTreeItem(item);
-                            _con._project.ContentItems.Remove(item);
+                            _con.ProjectItem.ContentItems.Remove(item);
                             break;
                         }
                     }

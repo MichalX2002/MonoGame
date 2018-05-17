@@ -333,8 +333,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                 boneIndices.Add(flattenedBones[i].Name, i);
 
             var vertexChannel = geometry.Vertices.Channels[vertexChannelIndex];
-            var inputWeights = vertexChannel as VertexChannel<BoneWeightCollection>;
-            if (inputWeights == null)
+            if (!(vertexChannel is VertexChannel<BoneWeightCollection> inputWeights))
             {
                 throw new InvalidContentException(
                     string.Format(
@@ -342,7 +341,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                         vertexChannel.Name,
                         vertexChannel.ElementType.FullName,
                         "Microsoft.Xna.Framework.Content.Pipeline.Graphics.BoneWeightCollection"),
-                    identity);                          
+                    identity);
             }
             var outputIndices = new Byte4[inputWeights.Count];
             var outputWeights = new Vector4[inputWeights.Count];

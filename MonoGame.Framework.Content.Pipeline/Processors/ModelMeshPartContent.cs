@@ -9,12 +9,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 {
     public sealed class ModelMeshPartContent
     {
-        private IndexCollection _indexBuffer;
-        private MaterialContent _material;
-        private int _numVertices;
-        private int _primitiveCount;
         private int _startIndex;
-        private VertexBufferContent _vertexBuffer;
         private int _vertexOffset;
 
         internal ModelMeshPartContent() { }
@@ -22,34 +17,21 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         internal ModelMeshPartContent(VertexBufferContent vertexBuffer, IndexCollection indices, int vertexOffset,
                                       int numVertices, int startIndex, int primitiveCount)
         {
-            _vertexBuffer = vertexBuffer;
-            _indexBuffer = indices;
+            VertexBuffer = vertexBuffer;
+            IndexBuffer = indices;
             _vertexOffset = vertexOffset;
-            _numVertices = numVertices;
+            NumVertices = numVertices;
             _startIndex = startIndex;
-            _primitiveCount = primitiveCount;
+            PrimitiveCount = primitiveCount;
         }
 
-        public IndexCollection IndexBuffer
-        {
-            get { return _indexBuffer; }
-        }
+        public IndexCollection IndexBuffer { get; }
 
-        public MaterialContent Material
-        {
-            get { return _material; }
-            set { _material = value; }
-        }
+        public MaterialContent Material { get; set; }
 
-        public int NumVertices
-        {
-            get { return _numVertices; }
-        }
+        public int NumVertices { get; }
 
-        public int PrimitiveCount
-        {
-            get { return _primitiveCount; }
-        }
+        public int PrimitiveCount { get; }
 
         public int StartIndex
         {
@@ -58,10 +40,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 
         public object Tag { get; set; }
 
-        public VertexBufferContent VertexBuffer
-        {
-            get { return _vertexBuffer; }
-        }
+        public VertexBufferContent VertexBuffer { get; }
 
         public int VertexOffset
         {

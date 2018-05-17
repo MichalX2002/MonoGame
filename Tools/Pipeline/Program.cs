@@ -18,8 +18,10 @@ namespace MonoGame.Tools.Pipeline
         {
             Styles.Load();
 
-            var app = new Application(Platform.Detect);
-            app.Style = "PipelineTool";
+            var app = new Application(Platform.Detect)
+            {
+                Style = "PipelineTool"
+            };
 
             var win = new MainWindow();
             var controller = PipelineController.Create(win);

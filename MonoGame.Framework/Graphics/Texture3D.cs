@@ -11,19 +11,11 @@ namespace Microsoft.Xna.Framework.Graphics
 {
 	public partial class Texture3D : Texture
 	{
-        private int _width;
-        private int _height;
         private int _depth;
 
-        public int Width
-        {
-            get { return _width; }
-        }
+        public int Width { get; }
 
-        public int Height
-        {
-            get { return _height; }
-        }
+        public int Height { get; }
 
         public int Depth
         {
@@ -47,8 +39,8 @@ namespace Microsoft.Xna.Framework.Graphics
             if (depth <= 0)
                 throw new ArgumentOutOfRangeException(nameof(depth), "Texture depth must be greater than zero");
 
-		    this._width = width;
-            this._height = height;
+		    this.Width = width;
+            this.Height = height;
             this._depth = depth;
             this._levelCount = 1;
 		    this._format = format;
@@ -110,7 +102,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="elementCount">Number of elements to get.</param>
         public void GetData<T>(T[] data, int startIndex, int elementCount) where T : struct
         {
-            GetData(0, 0, 0, _width, _height, 0, _depth, data, startIndex, elementCount);
+            GetData(0, 0, 0, Width, Height, 0, _depth, data, startIndex, elementCount);
         }
 
         /// <summary>

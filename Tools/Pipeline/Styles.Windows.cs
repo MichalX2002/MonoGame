@@ -24,16 +24,14 @@ namespace MonoGame.Tools.Pipeline
 
                 h.Control.Loaded += delegate
                 {
-                    var overflowGrid = h.Control.Template.FindName("OverflowGrid", h.Control) as System.Windows.FrameworkElement;
 
-                    if (overflowGrid != null)
+                    if (h.Control.Template.FindName("OverflowGrid", h.Control) is System.Windows.FrameworkElement overflowGrid)
                         overflowGrid.Visibility = System.Windows.Visibility.Collapsed;
 
-                    foreach(var item in h.Control.Items)
+                    foreach (var item in h.Control.Items)
                     {
-                        var i = item as System.Windows.Controls.Button;
 
-                        if (i != null)
+                        if (item is System.Windows.Controls.Button i)
                         {
                             i.Opacity = i.IsEnabled ? 1.0 : 0.2;
                             i.IsEnabledChanged += (sender, e) => i.Opacity = i.IsEnabled ? 1.0 : 0.2;

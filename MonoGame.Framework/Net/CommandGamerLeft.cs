@@ -4,12 +4,11 @@ namespace Microsoft.Xna.Framework.Net
 {
 	internal class CommandGamerLeft : ICommand
 	{
-		int gamerInternalIndex = -1;
-		internal long remoteUniqueIdentifier = -1;
+        internal long remoteUniqueIdentifier = -1;
 		
 		public CommandGamerLeft (int internalIndex)
 		{
-			gamerInternalIndex = internalIndex;
+			InternalIndex = internalIndex;
 			
 		}
 		
@@ -17,14 +16,11 @@ namespace Microsoft.Xna.Framework.Net
 		{
 			this.remoteUniqueIdentifier = uniqueIndentifier;
 			
-		}		
-		
-		public int InternalIndex
-		{
-			get { return gamerInternalIndex; }
 		}
-		
-		public CommandEventType Command {
+
+        public int InternalIndex { get; } = -1;
+
+        public CommandEventType Command {
 			get { return CommandEventType.GamerLeft; }
 		}
 	}

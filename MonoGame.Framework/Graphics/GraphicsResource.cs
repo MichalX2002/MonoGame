@@ -45,7 +45,6 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public abstract class GraphicsResource : IDisposable
     {
-        bool disposed;
 
         // The GraphicsDevice property should only be accessed in Dispose(bool) if the disposing
         // parameter is true. If disposing is false, the GraphicsDevice may or may not be
@@ -91,7 +90,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <remarks>Native resources should always be released regardless of the value of the disposing parameter.</remarks>
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (!IsDisposed)
             {
                 if (disposing)
                 {
@@ -112,7 +111,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 _selfReference = null;
                 graphicsDevice = null;
-                disposed = true;
+                IsDisposed = true;
             }
         }
 
@@ -146,16 +145,10 @@ namespace Microsoft.Xna.Framework.Graphics
                 graphicsDevice.AddResourceReference(_selfReference);
             }
 		}
-		
-		public bool IsDisposed
-		{
-			get
-			{
-				return disposed;
-			}
-		}
-		
-		public string Name { get; set; }
+
+        public bool IsDisposed { get; private set; }
+
+        public string Name { get; set; }
 		
 		public Object Tag { get; set; }
 

@@ -145,8 +145,10 @@ namespace Microsoft.Xna.Framework.Input
 
         private static GamePadState GetDefaultState()
         {
-            var state = new GamePadState();
-            state.Buttons = new GamePadButtons(Back ? Buttons.Back : 0);
+            var state = new GamePadState
+            {
+                Buttons = new GamePadButtons(Back ? Buttons.Back : 0)
+            };
             return state;
         }
 
@@ -163,9 +165,8 @@ namespace Microsoft.Xna.Framework.Input
             var gamepad = new SharpDX.XInput.Gamepad();
             try
             {
-                SharpDX.XInput.State xistate;
                 var controller = _controllers[index];
-                _connected[index] = controller.GetState(out xistate);
+                _connected[index] = controller.GetState(out SharpDX.XInput.State xistate);
                 packetNumber = xistate.PacketNumber;
                 gamepad = xistate.Gamepad;
             }
@@ -205,9 +206,10 @@ namespace Microsoft.Xna.Framework.Input
                 thumbSticks: thumbSticks,
                 triggers: triggers,
                 buttons: buttons,
-                dPad: dpadState);
-
-            state.PacketNumber = packetNumber;
+                dPad: dpadState)
+            {
+                PacketNumber = packetNumber
+            };
 
             return state;
         }

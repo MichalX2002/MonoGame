@@ -195,9 +195,11 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
                         else
                         {
                             // If no attribute specify default one
-                            var importerAttribute = new ContentImporterAttribute(".*");
-                            importerAttribute.DefaultProcessor = "";
-                            importerAttribute.DisplayName = t.Name;
+                            var importerAttribute = new ContentImporterAttribute(".*")
+                            {
+                                DefaultProcessor = "",
+                                DisplayName = t.Name
+                            };
                             _importers.Add(new ImporterInfo
                             {
                                 attribute = importerAttribute,
@@ -397,8 +399,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
             if (processorName == null)
                 processorName = string.Empty;
 
-            OpaqueDataDictionary defaultValues;
-            if (!_processorDefaultValues.TryGetValue(processorName, out defaultValues))
+            if (!_processorDefaultValues.TryGetValue(processorName, out OpaqueDataDictionary defaultValues))
             {
                 // Create the content processor instance and read the default values.
                 defaultValues = new OpaqueDataDictionary();
@@ -543,8 +544,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
             };
 
             // Load the previous content event if it exists.
-            string eventFilepath;
-            var cachedEvent = LoadBuildEvent(contentEvent.DestFile, out eventFilepath);
+            var cachedEvent = LoadBuildEvent(contentEvent.DestFile, out string eventFilepath);
 
             BuildContent(contentEvent, cachedEvent, eventFilepath);
 
@@ -578,8 +578,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
                     // While this asset doesn't need to be rebuilt the dependent assets might.
                     foreach (var asset in cachedEvent.BuildAsset)
                     {
-                        string assetEventFilepath;
-                        var assetCachedEvent = LoadBuildEvent(asset, out assetEventFilepath);
+                        var assetCachedEvent = LoadBuildEvent(asset, out string assetEventFilepath);
 
                         // If we cannot find the cached event for the dependancy
                         // then we have to trigger a rebuild of the parent content.
@@ -720,16 +719,14 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
         {
             // First try to load the event file.
             ResolveOutputFilepath(sourceFilepath, ref outputFilepath);
-            string eventFilepath;
-            var cachedEvent = LoadBuildEvent(outputFilepath, out eventFilepath);
+            var cachedEvent = LoadBuildEvent(outputFilepath, out string eventFilepath);
 
             if (cachedEvent != null)
             {
                 // Recursively clean additional (nested) assets.
                 foreach (var asset in cachedEvent.BuildAsset)
                 {
-                    string assetEventFilepath;
-                    var assetCachedEvent = LoadBuildEvent(asset, out assetEventFilepath);
+                    var assetCachedEvent = LoadBuildEvent(asset, out string assetEventFilepath);
 
                     if (assetCachedEvent == null)
                     {
@@ -790,8 +787,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
         /// <param name="pipelineEvent">The pipeline build event.</param>
         private void TrackPipelineBuildEvent(PipelineBuildEvent pipelineEvent)
         {
-            List<PipelineBuildEvent> pipelineBuildEvents;
-            bool eventsFound = _pipelineBuildEvents.TryGetValue(pipelineEvent.SourceFile, out pipelineBuildEvents);
+            bool eventsFound = _pipelineBuildEvents.TryGetValue(pipelineEvent.SourceFile, out List<PipelineBuildEvent> pipelineBuildEvents);
             if (!eventsFound)
             {
                 pipelineBuildEvents = new List<PipelineBuildEvent>();
@@ -818,8 +814,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
             sourceFileName = PathHelper.Normalize(sourceFileName);
             string relativeSourceFileName = PathHelper.GetRelativePath(ProjectDirectory, sourceFileName);
 
-            List<PipelineBuildEvent> pipelineBuildEvents;
-            if (_pipelineBuildEvents.TryGetValue(sourceFileName, out pipelineBuildEvents))
+            if (_pipelineBuildEvents.TryGetValue(sourceFileName, out List<PipelineBuildEvent> pipelineBuildEvents))
             {
                 // This source file has already been build.
                 // --> Compare pipeline build events.

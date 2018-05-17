@@ -20,28 +20,38 @@ namespace MonoGame.Tools.Pipeline
             DisplayMode = DialogDisplayMode.Attached;
             Height = 250;
 
-            buttonAdd = new Button();
-            buttonAdd.Text = "Add";
+            buttonAdd = new Button
+            {
+                Text = "Add"
+            };
             PositiveButtons.Add(buttonAdd);
             DefaultButton = buttonAdd;
 
-            buttonCancel = new Button();
-            buttonCancel.Text = "Cancel";
+            buttonCancel = new Button
+            {
+                Text = "Cancel"
+            };
             NegativeButtons.Add(buttonCancel);
             AbortButton = buttonCancel;
 
-            layout1 = new DynamicLayout();
-            layout1.DefaultSpacing = new Size(8, 8);
-            layout1.Padding = new Padding(6);
+            layout1 = new DynamicLayout
+            {
+                DefaultSpacing = new Size(8, 8),
+                Padding = new Padding(6)
+            };
             layout1.BeginVertical();
 
-            label1 = new Label();
-            label1.Wrap = WrapMode.Word;
-            label1.Style = "Wrap";
+            label1 = new Label
+            {
+                Wrap = WrapMode.Word,
+                Style = "Wrap"
+            };
             layout1.AddRow(label1);
 
-            radioCopy = new RadioButton();
-            radioCopy.Checked = true;
+            radioCopy = new RadioButton
+            {
+                Checked = true
+            };
             layout1.AddRow(radioCopy);
 
             radioLink = new RadioButton(radioCopy);
@@ -50,8 +60,10 @@ namespace MonoGame.Tools.Pipeline
             radioSkip = new RadioButton(radioCopy);
             layout1.AddRow(radioSkip);
 
-            var spacing = new Label();
-            spacing.Height = 15;
+            var spacing = new Label
+            {
+                Height = 15
+            };
             layout1.Add(spacing, true, true);
 
             checkBox1 = new CheckBox();

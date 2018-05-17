@@ -43,11 +43,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// can be imported as well.
         /// </summary>
         [ContentSerializer(Optional = true, CollectionItemName = "Resx")]
-        public List<string> ResourceFiles
-        {
-            get { return resourceFiles; }
-        }
-
-        List<string> resourceFiles = new List<string>();
+        public List<string> ResourceFiles { get; } = new List<string>();
     }
 }

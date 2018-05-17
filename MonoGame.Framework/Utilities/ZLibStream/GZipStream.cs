@@ -180,7 +180,7 @@ namespace MonoGame.Utilities
         /// <remarks>
         /// This is used for internal error checking. You probably don't need to look at this property.
         /// </remarks>
-        internal int Crc32 { get { return _Crc32; } }
+        internal int Crc32 { get; private set; }
 
         private int _headerByteCount;
         internal ZlibBaseStream _baseStream;
@@ -188,7 +188,6 @@ namespace MonoGame.Utilities
         bool _firstReadDone;
         string _FileName;
         string _Comment;
-        int _Crc32;
 
 
         /// <summary>
@@ -606,7 +605,7 @@ namespace MonoGame.Utilities
                     if (disposing && (this._baseStream != null))
                     {
                         this._baseStream.Dispose();
-                        this._Crc32 = _baseStream.Crc32;
+                        this.Crc32 = _baseStream.Crc32;
                     }
                     _disposed = true;
                 }

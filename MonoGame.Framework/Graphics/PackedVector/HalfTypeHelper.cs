@@ -22,8 +22,10 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
 
         internal static UInt16 Convert(float f)
         {
-            uif uif = new uif();
-            uif.f = f;
+            uif uif = new uif
+            {
+                f = f
+            };
             return Convert(uif.i);
         }
 
@@ -109,8 +111,10 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
                 rst = ((((uint)value & 0x8000) << 16) | ((((((uint)value >> 10) & 0x1f) - 15) + 127) << 23)) | (mantissa << 13);
             }
 
-            var uif = new uif();
-            uif.u = rst;
+            var uif = new uif
+            {
+                u = rst
+            };
             return uif.f;
         }
     }

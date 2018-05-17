@@ -19,8 +19,6 @@ namespace Microsoft.Xna.Framework
 {
     public partial class Game : IDisposable
     {
-        private GameComponentCollection _components;
-        private GameServiceContainer _services;
         private ContentManager _content;
         internal GamePlatform Platform;
 
@@ -60,14 +58,14 @@ namespace Microsoft.Xna.Framework
             _instance = this;
 
             LaunchParameters = new LaunchParameters();
-            _services = new GameServiceContainer();
-            _components = new GameComponentCollection();
-            _content = new ContentManager(_services);
+            Services = new GameServiceContainer();
+            Components = new GameComponentCollection();
+            _content = new ContentManager(Services);
 
             Platform = GamePlatform.PlatformCreate(this);
             Platform.Activated += OnActivated;
             Platform.Deactivated += OnDeactivated;
-            _services.AddService(typeof(GamePlatform), Platform);
+            Services.AddService(typeof(GamePlatform), Platform);
 
             // Calling Update() for first time initializes some systems
             FrameworkDispatcher.Update();
@@ -105,12 +103,12 @@ namespace Microsoft.Xna.Framework
                 if (disposing)
                 {
                     // Dispose loaded game components
-                    for (int i = 0; i < _components.Count; i++)
+                    for (int i = 0; i < Components.Count; i++)
                     {
-                        if (_components[i] is IDisposable disposable)
+                        if (Components[i] is IDisposable disposable)
                             disposable.Dispose();
                     }
-                    _components = null;
+                    Components = null;
 
                     if (_content != null)
                     {
@@ -128,7 +126,7 @@ namespace Microsoft.Xna.Framework
                     {
                         Platform.Activated -= OnActivated;
                         Platform.Deactivated -= OnDeactivated;
-                        _services.RemoveService(typeof(GamePlatform));
+                        Services.RemoveService(typeof(GamePlatform));
 
                         Platform.Dispose();
                         Platform = null;
@@ -170,10 +168,7 @@ namespace Microsoft.Xna.Framework
 
         public LaunchParameters LaunchParameters { get; private set; }
 
-        public GameComponentCollection Components
-        {
-            get { return _components; }
-        }
+        public GameComponentCollection Components { get; private set; }
 
         public TimeSpan InactiveSleepTime
         {
@@ -239,9 +234,7 @@ namespace Microsoft.Xna.Framework
 
         public bool IsFixedTimeStep { get; set; } = true;
 
-        public GameServiceContainer Services {
-            get { return _services; }
-        }
+        public GameServiceContainer Services { get; }
 
         public ContentManager Content
         {
@@ -666,8 +659,8 @@ namespace Microsoft.Xna.Framework
             //    lists synced and to Initialize future components as they are
             //    added.            
             CategorizeComponents();
-            _components.ComponentAdded += Components_ComponentAdded;
-            _components.ComponentRemoved += Components_ComponentRemoved;
+            Components.ComponentAdded += Components_ComponentAdded;
+            Components.ComponentRemoved += Components_ComponentRemoved;
         }
 
 		internal void DoExiting()

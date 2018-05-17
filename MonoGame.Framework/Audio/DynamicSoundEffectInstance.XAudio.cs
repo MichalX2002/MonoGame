@@ -70,8 +70,10 @@ namespace Microsoft.Xna.Framework.Audio
             Buffer.BlockCopy(buffer, offset, pooledBuffer, 0, count);
 
             var stream = DataStream.Create(pooledBuffer, true, false, offset, true);
-            var audioBuffer = new AudioBuffer(stream);
-            audioBuffer.AudioBytes = count;
+            var audioBuffer = new AudioBuffer(stream)
+            {
+                AudioBytes = count
+            };
 
             _voice.SubmitSourceBuffer(audioBuffer, null);
             _queuedBuffers.Enqueue(audioBuffer);

@@ -15,19 +15,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         /// Gets and sets the packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public uint PackedValue
-        {
-            get
-            {
-                return packedValue;
-            }
-            set
-            {
-                packedValue = value;
-            }
-        }
-
-        private uint packedValue;
+        public uint PackedValue { get; set; }
 
         /// <summary>
         /// Creates a new instance of Rg32.
@@ -36,7 +24,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         /// <param name="y">The y component</param>
         public Rg32(float x, float y)
         {
-            packedValue = Pack(x, y);
+            PackedValue = Pack(x, y);
         }
 
         /// <summary>
@@ -47,7 +35,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         /// </param>
         public Rg32(Vector2 vector)
         {
-            packedValue = Pack(vector.X, vector.Y);
+            PackedValue = Pack(vector.X, vector.Y);
         }
 
         /// <summary>
@@ -57,8 +45,8 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         public Vector2 ToVector2()
         {
             return new Vector2(
-                 (packedValue & 0xFFFF) / 65535.0f,
-                ((packedValue >> 16) & 0xFFFF) / 65535.0f
+                 (PackedValue & 0xFFFF) / 65535.0f,
+                ((PackedValue >> 16) & 0xFFFF) / 65535.0f
             );
         }
 
@@ -68,7 +56,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         /// <param name="vector">Vector containing the components.</param>
         void IPackedVector.PackFromVector4(Vector4 vector)
         {
-            packedValue = Pack(vector.X, vector.Y);
+            PackedValue = Pack(vector.X, vector.Y);
         }
 
         /// <summary>
@@ -97,7 +85,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         /// <returns>True if the packed vectors are equal.</returns>
         public bool Equals(Rg32 other)
         {
-            return packedValue == other.packedValue;
+            return PackedValue == other.PackedValue;
         }
 
         /// <summary>
@@ -115,17 +103,17 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         /// <returns>The hash code for the packed vector.</returns>
         public override int GetHashCode()
         {
-            return packedValue.GetHashCode();
+            return PackedValue.GetHashCode();
         }
 
         public static bool operator ==(Rg32 lhs, Rg32 rhs)
         {
-            return lhs.packedValue == rhs.packedValue;
+            return lhs.PackedValue == rhs.PackedValue;
         }
 
         public static bool operator !=(Rg32 lhs, Rg32 rhs)
         {
-            return lhs.packedValue != rhs.packedValue;
+            return lhs.PackedValue != rhs.PackedValue;
         }
 
         private static uint Pack(float x, float y)

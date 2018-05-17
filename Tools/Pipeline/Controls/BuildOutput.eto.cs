@@ -20,14 +20,18 @@ namespace MonoGame.Tools.Pipeline
 
             panel = new Panel();
 
-            textArea = new TextArea();
-            textArea.Wrap = false;
-            textArea.ReadOnly = true;
+            textArea = new TextArea
+            {
+                Wrap = false,
+                ReadOnly = true
+            };
 
-            scrollable = new Scrollable();
-            scrollable.BackgroundColor = DrawInfo.BackColor;
-            scrollable.ExpandContentWidth = true;
-            scrollable.ExpandContentHeight = true;
+            scrollable = new Scrollable
+            {
+                BackgroundColor = DrawInfo.BackColor,
+                ExpandContentWidth = true,
+                ExpandContentHeight = true
+            };
             drawable = new Drawable();
             scrollable.Content = drawable;
 

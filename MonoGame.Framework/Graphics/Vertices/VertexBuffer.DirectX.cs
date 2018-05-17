@@ -167,13 +167,15 @@ namespace Microsoft.Xna.Framework.Graphics
                     {
                         var box = new SharpDX.DataBox(dataPtr, elementCount * elementSizeInBytes, 0);
 
-                        var region = new SharpDX.Direct3D11.ResourceRegion();
-                        region.Top = 0;
-                        region.Front = 0;
-                        region.Back = 1;
-                        region.Bottom = 1;
-                        region.Left = offsetInBytes;
-                        region.Right = offsetInBytes + (elementCount * elementSizeInBytes);
+                        var region = new SharpDX.Direct3D11.ResourceRegion
+                        {
+                            Top = 0,
+                            Front = 0,
+                            Back = 1,
+                            Bottom = 1,
+                            Left = offsetInBytes,
+                            Right = offsetInBytes + (elementCount * elementSizeInBytes)
+                        };
 
                         lock (d3dContext)
                             d3dContext.UpdateSubresource(box, _buffer, 0, region);

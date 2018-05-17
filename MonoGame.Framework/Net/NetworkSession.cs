@@ -76,15 +76,11 @@ namespace Microsoft.Xna.Framework.Net
 	public sealed class NetworkSession : IDisposable
 	{
 		internal static List<NetworkSession> activeSessions = new List<NetworkSession>();
-		
-		private NetworkSessionState sessionState;
-		//private static NetworkSessionType networkSessionType;	
-		private GamerCollection<NetworkGamer> _allGamers;
-		private GamerCollection<LocalNetworkGamer> _localGamers;
-		private GamerCollection<NetworkGamer> _remoteGamers;
-		private GamerCollection<NetworkGamer> _previousGamers;
-		
-		internal Queue<CommandEvent> commandQueue;
+
+        //private static NetworkSessionType networkSessionType;	
+        private GamerCollection<NetworkGamer> _allGamers;
+        private GamerCollection<NetworkGamer> _remoteGamers;
+        internal Queue<CommandEvent> commandQueue;
 
 		// use the static Create or BeginCreate methods
 		private NetworkSession ()
@@ -97,12 +93,9 @@ namespace Microsoft.Xna.Framework.Net
             Dispose(false);
         }
 
-		private NetworkSessionType sessionType;
-		private int maxGamers;
-		private int privateGamerSlots;
-		private NetworkSessionProperties sessionProperties;
-		private bool isHost = false;
-		private NetworkGamer hostingGamer;
+        private int maxGamers;
+        private NetworkSessionProperties sessionProperties;
+        private NetworkGamer hostingGamer;
 
 		internal MonoGamerPeer networkPeer;
 		
@@ -118,7 +111,7 @@ namespace Microsoft.Xna.Framework.Net
 			}
 			
 			_allGamers = new GamerCollection<NetworkGamer>();
-			_localGamers = new GamerCollection<LocalNetworkGamer>();
+			LocalGamers = new GamerCollection<LocalNetworkGamer>();
 //			for (int x = 0; x < Gamer.SignedInGamers.Count; x++) {
 //				GamerStates states = GamerStates.Local;
 //				if (x == 0)
@@ -135,16 +128,16 @@ namespace Microsoft.Xna.Framework.Net
 //			}
 
 			_remoteGamers = new GamerCollection<NetworkGamer>();
-			_previousGamers = new GamerCollection<NetworkGamer>();
+			PreviousGamers = new GamerCollection<NetworkGamer>();
 			hostingGamer = null;
 			
 			commandQueue = new Queue<CommandEvent>();			
 			
-			this.sessionType = sessionType;
+			this.SessionType = sessionType;
 			this.maxGamers = maxGamers;
-			this.privateGamerSlots = privateGamerSlots;
+			this.PrivateGamerSlots = privateGamerSlots;
 			this.sessionProperties = sessionProperties;
-			this.isHost = isHost;
+			this.IsHost = isHost;
             if (isHost)
                 networkPeer = new MonoGamerPeer(this, null);
             else
@@ -153,7 +146,7 @@ namespace Microsoft.Xna.Framework.Net
                     networkPeer = new MonoGamerPeer(this, availableSession);
             }
             			
-			CommandGamerJoined gj = new CommandGamerJoined(hostGamer, this.isHost, true);
+			CommandGamerJoined gj = new CommandGamerJoined(hostGamer, this.IsHost, true);
 			commandQueue.Enqueue(new CommandEvent(gj));
 		}
 		
@@ -235,7 +228,7 @@ namespace Microsoft.Xna.Framework.Net
 		
 		public void Dispose (bool disposing) 
 		{
-            if (!_isDisposed)
+            if (!IsDisposed)
             {
                 if (disposing)
                 {
@@ -255,7 +248,7 @@ namespace Microsoft.Xna.Framework.Net
                     }
                 }
 
-                this._isDisposed = true;
+                this.IsDisposed = true;
             }
 		}
 
@@ -498,7 +491,7 @@ namespace Microsoft.Xna.Framework.Net
 		public void EndGame ()
 		{
 			try {
-				CommandSessionStateChange ssc = new CommandSessionStateChange(NetworkSessionState.Lobby, sessionState);
+				CommandSessionStateChange ssc = new CommandSessionStateChange(NetworkSessionState.Lobby, SessionState);
 				commandQueue.Enqueue(new CommandEvent(ssc));
 
 			} finally {
@@ -649,7 +642,7 @@ namespace Microsoft.Xna.Framework.Net
 		//  peers for a state change.
 		public void ResetReady ()
 		{
-			foreach (NetworkGamer gamer in _localGamers) {
+			foreach (NetworkGamer gamer in LocalGamers) {
 				gamer.IsReady = false;
 			}
 		}
@@ -657,7 +650,7 @@ namespace Microsoft.Xna.Framework.Net
 		public void StartGame ()
 		{
 			try {
-				CommandSessionStateChange ssc = new CommandSessionStateChange(NetworkSessionState.Playing, sessionState);
+				CommandSessionStateChange ssc = new CommandSessionStateChange(NetworkSessionState.Playing, SessionState);
 				commandQueue.Enqueue(new CommandEvent(ssc));
 				//sessionState = NetworkSessionState.Playing;
 			} finally {
@@ -726,10 +719,12 @@ namespace Microsoft.Xna.Framework.Net
 		{
 			networkPeer.SendData(command.data, command.options);
 
-			CommandReceiveData crd = new CommandReceiveData (command.sender.RemoteUniqueIdentifier,
-								command.data);
-			crd.gamer = command.sender;
-			foreach(LocalNetworkGamer gamer in _localGamers) {
+            CommandReceiveData crd = new CommandReceiveData(command.sender.RemoteUniqueIdentifier,
+                                command.data)
+            {
+                gamer = command.sender
+            };
+            foreach (LocalNetworkGamer gamer in LocalGamers) {
 				gamer.receivedData.Enqueue(crd);
 			}
 		}
@@ -761,10 +756,10 @@ namespace Microsoft.Xna.Framework.Net
 		
 		private void ProcessSessionStateChange(CommandSessionStateChange command)
 		{
-			if (sessionState == command.NewState)
+			if (SessionState == command.NewState)
 				return;
 			
-			sessionState = command.NewState;
+			SessionState = command.NewState;
 			
 			switch (command.NewState) {
 			case NetworkSessionState.Ended:
@@ -795,23 +790,25 @@ namespace Microsoft.Xna.Framework.Net
 			if ((command.State & GamerStates.Local) != 0) {
 				gamer = new LocalNetworkGamer(this, (byte)command.InternalIndex, command.State);
 				_allGamers.AddGamer(gamer);
-				_localGamers.AddGamer((LocalNetworkGamer)gamer);
+				LocalGamers.AddGamer((LocalNetworkGamer)gamer);
 
 				// Note - This might be in the wrong place for certain connections
 				//  Take a look at HoneycombRush tut for debugging later.
-				if (Gamer.SignedInGamers.Count >= _localGamers.Count)
-					((LocalNetworkGamer)gamer).SignedInGamer = Gamer.SignedInGamers[_localGamers.Count - 1];
+				if (Gamer.SignedInGamers.Count >= LocalGamers.Count)
+					((LocalNetworkGamer)gamer).SignedInGamer = Gamer.SignedInGamers[LocalGamers.Count - 1];
 				
 				// We will attach a property change handler to local gamers
 				//  se that we can broadcast the change to other peers.
 				gamer.PropertyChanged += HandleGamerPropertyChanged;				
 			}
 			else {
-				gamer = new NetworkGamer (this, (byte)command.InternalIndex, command.State);
-				gamer.DisplayName = command.DisplayName;
-				gamer.Gamertag = command.GamerTag;
-				gamer.RemoteUniqueIdentifier = command.remoteUniqueIdentifier;
-				_allGamers.AddGamer(gamer);
+                gamer = new NetworkGamer(this, (byte)command.InternalIndex, command.State)
+                {
+                    DisplayName = command.DisplayName,
+                    Gamertag = command.GamerTag,
+                    RemoteUniqueIdentifier = command.remoteUniqueIdentifier
+                };
+                _allGamers.AddGamer(gamer);
 				_remoteGamers.AddGamer(gamer);
 			}
 			
@@ -859,14 +856,13 @@ namespace Microsoft.Xna.Framework.Net
 
 		void HandleGamerPropertyChanged (object sender, System.ComponentModel.PropertyChangedEventArgs e)
 		{
-			NetworkGamer gamer = sender as NetworkGamer;
-			if (gamer == null)
-				return;
-			
-			// If the gamer is local then we need to broadcast that change to all other
-			// connected peers.  This is a double check here as we should only be handling 
-			//  property changes for local gamers for now.
-			if (gamer.IsLocal) {
+            if (!(sender is NetworkGamer gamer))
+                return;
+
+            // If the gamer is local then we need to broadcast that change to all other
+            // connected peers.  This is a double check here as we should only be handling 
+            //  property changes for local gamers for now.
+            if (gamer.IsLocal) {
 				CommandGamerStateChange sc = new CommandGamerStateChange(gamer);
 				CommandEvent cmd = new CommandEvent(sc);
 				commandQueue.Enqueue(cmd);
@@ -926,15 +922,9 @@ namespace Microsoft.Xna.Framework.Net
 			}
 		}
 
-		bool _isDisposed = false;
+        public bool IsDisposed { get; private set; } = false;
 
-		public bool IsDisposed { 
-			get {
-				return _isDisposed; // TODO (this.kernelHandle == 0);
-			}
-		}
-
-		public bool IsEveryoneReady { 
+        public bool IsEveryoneReady { 
 			get {
 				if (_allGamers.Count == 0)
 					return false;
@@ -947,43 +937,24 @@ namespace Microsoft.Xna.Framework.Net
 			}
 		}
 
-		public bool IsHost { 
-			get {
-				return isHost;
-			}
-		}
+        public bool IsHost { get; } = false;
 
-		public GamerCollection<LocalNetworkGamer> LocalGamers { 
-			get {
-				return _localGamers;
-			}
-		}	
+        public GamerCollection<LocalNetworkGamer> LocalGamers { get; }
 
-		public int MaxGamers { 
+        public int MaxGamers { 
 			get {
 				return maxGamers;
 			}
 			set {
 				maxGamers = value;
 			}
-		}		
-
-		public GamerCollection<NetworkGamer> PreviousGamers {
-			get {
-				return _previousGamers;
-			}
 		}
 
-		public int PrivateGamerSlots { 
-			get {
-				return privateGamerSlots;
-			}
-			set {
-				privateGamerSlots = value;
-			}
-		}	
+        public GamerCollection<NetworkGamer> PreviousGamers { get; }
 
-		public GamerCollection<NetworkGamer> RemoteGamers {
+        public int PrivateGamerSlots { get; set; }
+
+        public GamerCollection<NetworkGamer> RemoteGamers {
 			get {
 				return _remoteGamers;
 			}
@@ -993,19 +964,11 @@ namespace Microsoft.Xna.Framework.Net
 			get {
 				return sessionProperties;
 			}
-		}	
-
-		public NetworkSessionState SessionState {
-			get {
-				return sessionState;
-			}
 		}
 
-		public NetworkSessionType SessionType {
-			get {
-				return sessionType;
-			}
-		}
+        public NetworkSessionState SessionState { get; private set; }
+
+        public NetworkSessionType SessionType { get; }
 
         private TimeSpan defaultSimulatedLatency = new TimeSpan(0, 0, 0);
 
@@ -1088,35 +1051,23 @@ namespace Microsoft.Xna.Framework.Net
 
 	public class GamerJoinedEventArgs : EventArgs
 	{
-		private NetworkGamer gamer;
-
-		public GamerJoinedEventArgs (NetworkGamer aGamer)
+        public GamerJoinedEventArgs (NetworkGamer aGamer)
 		{
-			gamer = aGamer;
+			Gamer = aGamer;
 		}
 
-		public NetworkGamer Gamer { 
-			get {
-				return gamer;
-			}
-		}
-	}
+        public NetworkGamer Gamer { get; }
+    }
 
 	public class GamerLeftEventArgs : EventArgs
 	{
-		private NetworkGamer gamer;
-
-		public GamerLeftEventArgs (NetworkGamer aGamer)
+        public GamerLeftEventArgs (NetworkGamer aGamer)
 		{
-			gamer = aGamer;
+			Gamer = aGamer;
 		}
 
-		public NetworkGamer Gamer { 
-			get {
-				return gamer;
-			}
-		}
-	}
+        public NetworkGamer Gamer { get; }
+    }
 
 	public class GameStartedEventArgs : EventArgs
 	{
@@ -1125,22 +1076,17 @@ namespace Microsoft.Xna.Framework.Net
 
 	public class HostChangedEventArgs : EventArgs
 	{
-		private NetworkGamer newHost;
-		private NetworkGamer oldHost;
+        private NetworkGamer oldHost;
 
 		public HostChangedEventArgs (NetworkGamer aNewHost, NetworkGamer aOldHost)
 		{
-			newHost = aNewHost;
+			NewHost = aNewHost;
 			oldHost = aOldHost;
 		}
 
-		public NetworkGamer NewHost { 
-			get {
-				return newHost;
-			}
-		}
+        public NetworkGamer NewHost { get; }
 
-		public NetworkGamer OldHost { 
+        public NetworkGamer OldHost { 
 			get {
 				return oldHost;
 			}
@@ -1149,20 +1095,14 @@ namespace Microsoft.Xna.Framework.Net
 
 	public class InviteAcceptedEventArgs : EventArgs
 	{
-		private SignedInGamer gamer;
-
-		public InviteAcceptedEventArgs (SignedInGamer aGamer)
+        public InviteAcceptedEventArgs (SignedInGamer aGamer)
 		{
-			gamer = aGamer;
+			Gamer = aGamer;
 		}
 
-		public SignedInGamer Gamer { 
-			get {
-				return gamer;
-			}
-		}
+        public SignedInGamer Gamer { get; }
 
-		public bool IsCurrentSession { 
+        public bool IsCurrentSession { 
 			get {
 				return false;
 			}
@@ -1171,18 +1111,12 @@ namespace Microsoft.Xna.Framework.Net
 
 	public class NetworkSessionEndedEventArgs : EventArgs
 	{
-		NetworkSessionEndReason endReason;
-
-		public NetworkSessionEndedEventArgs (NetworkSessionEndReason aEndReason)
+        public NetworkSessionEndedEventArgs (NetworkSessionEndReason aEndReason)
 		{
-			endReason = aEndReason;
+			EndReason = aEndReason;
 		}
 
-		public NetworkSessionEndReason EndReason { 
-			get {
-				return endReason;
-			}
-		}
+        public NetworkSessionEndReason EndReason { get; }
 
-	}
+    }
 }

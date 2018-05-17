@@ -10,8 +10,7 @@ namespace Microsoft.Xna.Framework.Media
 	public sealed class MediaQueue
 	{
         List<Song> songs = new List<Song>();
-		private int _activeSongIndex = -1;
-		private Random random = new Random();
+        private Random random = new Random();
 
 		public MediaQueue()
 		{
@@ -22,24 +21,14 @@ namespace Microsoft.Xna.Framework.Media
 		{
 			get
 			{
-				if (songs.Count == 0 || _activeSongIndex < 0)
+				if (songs.Count == 0 || ActiveSongIndex < 0)
 					return null;
 				
-				return songs[_activeSongIndex];
+				return songs[ActiveSongIndex];
 			}
 		}
-		
-		public int ActiveSongIndex
-		{
-		    get
-		    {
-		        return _activeSongIndex;
-		    }
-		    set
-		    {
-		        _activeSongIndex = value;
-		    }
-		}
+
+        public int ActiveSongIndex { get; set; } = -1;
 
         internal int Count
         {
@@ -68,11 +57,11 @@ namespace Microsoft.Xna.Framework.Media
 		internal Song GetNextSong(int direction, bool shuffle)
 		{
 			if (shuffle)
-				_activeSongIndex = random.Next(songs.Count);
+				ActiveSongIndex = random.Next(songs.Count);
 			else			
-				_activeSongIndex = MathHelper.Clamp(_activeSongIndex + direction, 0, songs.Count - 1);
+				ActiveSongIndex = MathHelper.Clamp(ActiveSongIndex + direction, 0, songs.Count - 1);
 			
-			return songs[_activeSongIndex];
+			return songs[ActiveSongIndex];
 		}
 		
 		internal void Clear()

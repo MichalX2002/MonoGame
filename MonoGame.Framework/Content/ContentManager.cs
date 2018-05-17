@@ -22,9 +22,7 @@ namespace Microsoft.Xna.Framework.Content
 	{
         const byte ContentCompressedLzx = 0x80;
         const byte ContentCompressedLz4 = 0x40;
-
-		private string _rootDirectory = string.Empty;
-		private IServiceProvider serviceProvider;
+        private IServiceProvider serviceProvider;
 		private IGraphicsDeviceService graphicsDeviceService;
         private Dictionary<string, object> loadedAssets = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 		private List<IDisposable> disposableAssets = new List<IDisposable>();
@@ -459,17 +457,7 @@ namespace Microsoft.Xna.Framework.Content
 		    loadedAssets.Clear();
 		}
 
-		public string RootDirectory
-		{
-			get
-			{
-				return _rootDirectory;
-			}
-			set
-			{
-				_rootDirectory = value;
-			}
-		}
+        public string RootDirectory { get; set; } = string.Empty;
 
         internal string RootDirectoryFullPath
         {

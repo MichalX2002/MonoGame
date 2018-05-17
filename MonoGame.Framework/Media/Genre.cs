@@ -8,7 +8,6 @@ namespace Microsoft.Xna.Framework.Media
 {
     public sealed class Genre : IDisposable
     {
-        private string genre;
 
         /// <summary>
         /// Gets the AlbumCollection for the Genre.
@@ -35,13 +34,7 @@ namespace Microsoft.Xna.Framework.Media
         /// <summary>
         /// Gets the name of the Genre.
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return this.genre;
-            }
-        }
+        public string Name { get; }
 
         /// <summary>
         /// Gets the SongCollection for the Genre.
@@ -56,7 +49,7 @@ namespace Microsoft.Xna.Framework.Media
 
         public Genre(string genre)
         {
-            this.genre = genre;
+            this.Name = genre;
         }
 
         /// <summary>
@@ -71,7 +64,7 @@ namespace Microsoft.Xna.Framework.Media
         /// </summary>
         public override string ToString()
         {
-            return this.genre;
+            return this.Name;
         }
 
         /// <summary>
@@ -79,7 +72,7 @@ namespace Microsoft.Xna.Framework.Media
         /// </summary>
         public override int GetHashCode()
         {
-            return this.genre.GetHashCode();
+            return this.Name.GetHashCode();
         }
     }
 }

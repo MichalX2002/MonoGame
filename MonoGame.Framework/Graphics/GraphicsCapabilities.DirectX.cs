@@ -33,7 +33,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             MaxTextureAnisotropy = (device.GraphicsProfile == GraphicsProfile.Reach) ? 2 : 16;
 
-            _maxMultiSampleCount = GetMaxMultiSampleCount(device);
+            MaxMultiSampleCount = GetMaxMultiSampleCount(device);
         }
 
         private int GetMaxMultiSampleCount(GraphicsDevice device)

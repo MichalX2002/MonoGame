@@ -43,8 +43,7 @@ namespace Microsoft.Xna.Framework.Graphics
             return _resourceView;
         }
 
-        protected virtual SharpDX.Direct3D11.ShaderResourceView
-            CreateShaderResourceView()
+        protected virtual SharpDX.Direct3D11.ShaderResourceView CreateShaderResourceView()
         {
             return new SharpDX.Direct3D11.ShaderResourceView(GraphicsDevice._d3dDevice, GetTexture());
         }

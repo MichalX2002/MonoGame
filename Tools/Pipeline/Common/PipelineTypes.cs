@@ -43,10 +43,9 @@ namespace MonoGame.Tools.Pipeline
 
         public override bool Equals(object obj)
         {
-            var other = obj as ImporterTypeDescription;
-            if (other == null)
+            if (!(obj is ImporterTypeDescription other))
                 return false;
-            
+
             if (string.IsNullOrEmpty(other.TypeName) != string.IsNullOrEmpty(TypeName))
                 return false;
 
@@ -463,10 +462,12 @@ namespace MonoGame.Tools.Pipeline
                     var types = a.GetTypes();
                     ProcessTypes(types);
 
-                    var watch = new FileSystemWatcher();
-                    watch.Path = Path.GetDirectoryName(path);
-                    watch.EnableRaisingEvents = true;
-                    watch.Filter = Path.GetFileName(path);
+                    var watch = new FileSystemWatcher
+                    {
+                        Path = Path.GetDirectoryName(path),
+                        EnableRaisingEvents = true,
+                        Filter = Path.GetFileName(path)
+                    };
                     watch.Changed += (sender, e) =>
                     {
                         if (Path.GetFileName(path) == e.Name)
@@ -508,9 +509,11 @@ namespace MonoGame.Tools.Pipeline
                     else
                     {
                         // If no attribute specify default one
-                        var importerAttribute = new ContentImporterAttribute(".*");
-                        importerAttribute.DefaultProcessor = "";
-                        importerAttribute.DisplayName = t.Name;
+                        var importerAttribute = new ContentImporterAttribute(".*")
+                        {
+                            DefaultProcessor = "",
+                            DisplayName = t.Name
+                        };
                         _importers.Add(new ImporterInfo { Attribute = importerAttribute, Type = t });
                     }
                 }

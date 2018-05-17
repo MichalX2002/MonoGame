@@ -36,15 +36,11 @@ namespace MonoGame.Utilities
 
     internal unsafe class PinnedArray<T> : Pointer
     {
-        private GCHandle _handle;
         private bool _disposed;
         private void* _ptr;
         private long _size;
 
-        public GCHandle Handle
-        {
-            get { return _handle; }
-        }
+        public GCHandle Handle { get; }
 
         public override void* Ptr
         {
@@ -80,8 +76,8 @@ namespace MonoGame.Utilities
             _ptr = null;
             if (data != null)
             {
-                _handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-                var addr = _handle.AddrOfPinnedObject();
+                Handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+                var addr = Handle.AddrOfPinnedObject();
                 _ptr = addr.ToPointer();
                 ElementSize = Marshal.SizeOf(typeof (T));
                 Count = data.Length;
@@ -131,7 +127,7 @@ namespace MonoGame.Utilities
 
             if (Data != null)
             {
-                _handle.Free();
+                Handle.Free();
                 _ptr = null;
                 Data = null;
                 _size = 0;

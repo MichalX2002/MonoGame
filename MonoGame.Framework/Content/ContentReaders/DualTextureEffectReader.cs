@@ -8,13 +8,15 @@ namespace Microsoft.Xna.Framework.Content
     {
         protected internal override DualTextureEffect Read(ContentReader input, DualTextureEffect existingInstance)
         {
-			DualTextureEffect effect = new DualTextureEffect(input.GraphicsDevice);
-			effect.Texture = input.ReadExternalReference<Texture>() as Texture2D;
-			effect.Texture2 = input.ReadExternalReference<Texture>() as Texture2D;
-			effect.DiffuseColor = input.ReadVector3 ();
-			effect.Alpha = input.ReadSingle ();
-			effect.VertexColorEnabled = input.ReadBoolean ();
-			return effect;
+            DualTextureEffect effect = new DualTextureEffect(input.GraphicsDevice)
+            {
+                Texture = input.ReadExternalReference<Texture>() as Texture2D,
+                Texture2 = input.ReadExternalReference<Texture>() as Texture2D,
+                DiffuseColor = input.ReadVector3(),
+                Alpha = input.ReadSingle(),
+                VertexColorEnabled = input.ReadBoolean()
+            };
+            return effect;
 		}
 	}
 }

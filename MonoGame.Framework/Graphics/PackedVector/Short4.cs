@@ -11,7 +11,6 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
     /// </summary>
     public struct Short4 : IPackedVector<ulong>, IEquatable<Short4>
     {
-        ulong packedValue;
 
         /// <summary>
         /// Initializes a new instance of the Short4 class.
@@ -19,7 +18,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         /// <param name="vector">A vector containing the initial values for the components of the Short4 structure.</param>
         public Short4(Vector4 vector)
         {
-            packedValue = Pack(ref vector);
+            PackedValue = Pack(ref vector);
         }
 
         /// <summary>
@@ -32,7 +31,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         public Short4(float x, float y, float z, float w)
         {
             var vector = new Vector4(x, y, z, w);
-            packedValue = Pack(ref vector);
+            PackedValue = Pack(ref vector);
         }
 
         /// <summary>
@@ -62,17 +61,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         /// </summary>
         /// <value>The packed representation of the value.</value>
         [CLSCompliant(false)]
-        public ulong PackedValue
-        {
-            get
-            {
-                return packedValue;
-            }
-            set
-            {
-                packedValue = value;
-            }
-        }
+        public ulong PackedValue { get; set; }
 
         /// <summary>
         /// Returns a value that indicates whether the current instance is equal to a specified object.
@@ -102,7 +91,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         /// <returns>Hash code for the instance.</returns>
         public override int GetHashCode()
         {
-            return packedValue.GetHashCode();
+            return PackedValue.GetHashCode();
         }
 
         /// <summary>
@@ -111,7 +100,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         /// <returns>String that represents the object.</returns>
         public override string ToString()
         {
-            return packedValue.ToString("x16");
+            return PackedValue.ToString("x16");
         }
 
         /// <summary>
@@ -140,7 +129,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         /// <param name="vector">The vector to create the packed representation from.</param>
         void IPackedVector.PackFromVector4(Vector4 vector)
         {
-            packedValue = Pack(ref vector);
+            PackedValue = Pack(ref vector);
         }
 
         /// <summary>
@@ -150,10 +139,10 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
         public Vector4 ToVector4()
         {
             return new Vector4(
-                (short)(packedValue & 0xFFFF),
-                (short)((packedValue >> 0x10) & 0xFFFF),
-                (short)((packedValue >> 0x20) & 0xFFFF),
-                (short)((packedValue >> 0x30) & 0xFFFF));
+                (short)(PackedValue & 0xFFFF),
+                (short)((PackedValue >> 0x10) & 0xFFFF),
+                (short)((PackedValue >> 0x20) & 0xFFFF),
+                (short)((PackedValue >> 0x30) & 0xFFFF));
         }
     }
 }

@@ -42,14 +42,15 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
         {
             var result = existingInstance ?? new List<T>();
 
-            var elementSerializer = _itemSerializer as ElementSerializer<T>;
-            if (elementSerializer != null)
+            if (_itemSerializer is ElementSerializer<T> elementSerializer)
                 elementSerializer.Deserialize(input, result);
             else
             {
                 // Create the item serializer attribute.
-                var itemFormat = new ContentSerializerAttribute();
-                itemFormat.ElementName = format.CollectionItemName;
+                var itemFormat = new ContentSerializerAttribute
+                {
+                    ElementName = format.CollectionItemName
+                };
 
                 // Read all the items.
                 while (input.MoveToElement(itemFormat.ElementName))
@@ -64,14 +65,15 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
 
         protected internal override void Serialize(IntermediateWriter output, List<T> value, ContentSerializerAttribute format)
         {
-            var elementSerializer = _itemSerializer as ElementSerializer<T>;
-            if (elementSerializer != null)
+            if (_itemSerializer is ElementSerializer<T> elementSerializer)
                 elementSerializer.Serialize(output, value);
             else
             {
                 // Create the item serializer attribute.
-                var itemFormat = new ContentSerializerAttribute();
-                itemFormat.ElementName = format.CollectionItemName;
+                var itemFormat = new ContentSerializerAttribute
+                {
+                    ElementName = format.CollectionItemName
+                };
 
                 // Read all the items.
                 foreach (var item in value)

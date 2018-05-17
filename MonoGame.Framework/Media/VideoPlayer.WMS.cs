@@ -64,7 +64,7 @@ namespace Microsoft.Xna.Framework.Media
 
         private Texture2D PlatformGetTexture()
         {
-            var sampleGrabber = _currentVideo.SampleGrabber;
+            var sampleGrabber = Video.SampleGrabber;
 
             var texData = sampleGrabber.TextureData;
 
@@ -73,7 +73,7 @@ namespace Microsoft.Xna.Framework.Media
 
             // NOTE: It's entirely possible that we could lose the d3d context and therefore lose this texture, but it's better than allocating a new texture each call!
             if (_videoCache == null)
-                _videoCache = new Texture2D(Game.Instance.GraphicsDevice, _currentVideo.Width, _currentVideo.Height, false, SurfaceFormat.Bgr32);
+                _videoCache = new Texture2D(Game.Instance.GraphicsDevice, Video.Width, Video.Height, false, SurfaceFormat.Bgr32);
 
             _videoCache.SetData(texData);
             
@@ -84,8 +84,7 @@ namespace Microsoft.Xna.Framework.Media
         {
             if (_clock != null)
             {
-                ClockState state;
-                _clock.GetState(0, out state);
+                _clock.GetState(0, out ClockState state);
 
                 switch (state)
                 {
@@ -131,7 +130,7 @@ namespace Microsoft.Xna.Framework.Media
             }
 
             // Set the new song.
-            _session.SetTopology(SessionSetTopologyFlags.Immediate, _currentVideo.Topology);
+            _session.SetTopology(SessionSetTopologyFlags.Immediate, Video.Topology);
 
             // Get the clock.
             _clock = _session.Clock.QueryInterface<PresentationClock>();
@@ -144,7 +143,7 @@ namespace Microsoft.Xna.Framework.Media
             if (_videoCache != null)
                 _videoCache.Dispose();
             // Create cached texture
-            _videoCache = new Texture2D(Game.Instance.GraphicsDevice, _currentVideo.Width, _currentVideo.Height, false, SurfaceFormat.Bgr32);
+            _videoCache = new Texture2D(Game.Instance.GraphicsDevice, Video.Width, Video.Height, false, SurfaceFormat.Bgr32);
         }
 
         private void PlatformResume()
@@ -224,8 +223,7 @@ namespace Microsoft.Xna.Framework.Media
                 return;
 
             // Get the volume interface.
-            IntPtr volumeObjectPtr;
-            MediaFactory.GetService(_session, MediaServiceKeys.StreamVolume, AudioStreamVolumeGuid, out volumeObjectPtr);
+            MediaFactory.GetService(_session, MediaServiceKeys.StreamVolume, AudioStreamVolumeGuid, out IntPtr volumeObjectPtr);
             _volumeController = CppObject.FromPointer<AudioStreamVolume>(volumeObjectPtr);
 
             SetChannelVolumes();

@@ -88,11 +88,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 	/// </summary>
 	public class FontDescription : ContentItem
 	{
-        private char? defaultCharacter;
         private string fontName;
         private float size;
-        private float spacing;
-        private FontDescriptionStyle style;
         private bool useKerning;
 	    private CharacterCollection characters = new CharacterCollection();
 
@@ -131,21 +128,11 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets the amount of space, in pixels, to insert between letters in a string.
-		/// </summary>
+        /// <summary>
+        /// Gets or sets the amount of space, in pixels, to insert between letters in a string.
+        /// </summary>
         [ContentSerializer(Optional = true)]
-		public float Spacing
-		{
-			get
-			{
-				return spacing;
-			}
-			set
-			{
-				spacing = value;
-			}
-		}
+        public float Spacing { get; set; }
 
         /// <summary>
         /// Indicates if kerning information is used when drawing characters.
@@ -163,36 +150,16 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             }
         }
 
-		/// <summary>
-		/// Gets or sets the style of the font, expressed as a combination of one or more FontDescriptionStyle flags.
-		/// </summary>
-		public FontDescriptionStyle Style
-		{
-			get
-			{
-				return style;
-			}
-			set
-			{
-				style = value;
-			}
-		}
+        /// <summary>
+        /// Gets or sets the style of the font, expressed as a combination of one or more FontDescriptionStyle flags.
+        /// </summary>
+        public FontDescriptionStyle Style { get; set; }
 
         /// <summary>
         /// Gets or sets the default character for the font.
         /// </summary>
         [ContentSerializer(Optional = true)]
-        public Nullable<char> DefaultCharacter
-        {
-            get
-            {
-                return defaultCharacter;
-            }
-            set
-            {
-                defaultCharacter = value;
-            }
-        }
+        public Nullable<char> DefaultCharacter { get; set; }
 
         [ContentSerializer(CollectionItemName = "CharacterRegion")]
         internal CharacterRegion[] CharacterRegions

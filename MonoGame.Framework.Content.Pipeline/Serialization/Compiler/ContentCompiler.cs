@@ -71,11 +71,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
         {
             ContentTypeWriter result = null;
             var contentTypeWriterType = typeof(ContentTypeWriter<>).MakeGenericType(type);
-            Type typeWriterType;
 
             if (type == typeof(Array))
                 result = new ArrayWriter<Array>();
-            else if (typeWriterMap.TryGetValue(contentTypeWriterType, out typeWriterType))
+            else if (typeWriterMap.TryGetValue(contentTypeWriterType, out Type typeWriterType))
                 result = (ContentTypeWriter)Activator.CreateInstance(typeWriterType);
             else if (type.IsArray)
             {

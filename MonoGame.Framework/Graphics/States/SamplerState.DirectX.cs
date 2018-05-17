@@ -22,11 +22,11 @@ namespace Microsoft.Xna.Framework.Graphics
             if (_state == null)
             {
                 // Build the description.
-                var desc = new SharpDX.Direct3D11.SamplerStateDescription();
-
-                desc.AddressU = GetAddressMode(AddressU);
-                desc.AddressV = GetAddressMode(AddressV);
-                desc.AddressW = GetAddressMode(AddressW);
+                var desc = new SharpDX.Direct3D11.SamplerStateDescription
+                {
+                    AddressU = GetAddressMode(AddressU),
+                    AddressV = GetAddressMode(AddressV),
+                    AddressW = GetAddressMode(AddressW),
 
 #if WINDOWS_UAP
 				desc.BorderColor = new SharpDX.Mathematics.Interop.RawColor4(
@@ -35,19 +35,20 @@ namespace Microsoft.Xna.Framework.Graphics
 					BorderColor.B / 255.0f,
 					BorderColor.A / 255.0f);
 #else
-				desc.BorderColor = BorderColor.ToColor4();
+                    BorderColor = BorderColor.ToColor4(),
 #endif
-				desc.Filter = GetFilter(Filter, FilterMode);
-                desc.MaximumAnisotropy = Math.Min(MaxAnisotropy, device.GraphicsCapabilities.MaxTextureAnisotropy);
-                desc.MipLodBias = MipMapLevelOfDetailBias;
-                desc.ComparisonFunction = ComparisonFunction.ToComparison();
+                    Filter = GetFilter(Filter, FilterMode),
+                    MaximumAnisotropy = Math.Min(MaxAnisotropy, device.GraphicsCapabilities.MaxTextureAnisotropy),
+                    MipLodBias = MipMapLevelOfDetailBias,
+                    ComparisonFunction = ComparisonFunction.ToComparison(),
 
-                // TODO: How do i do this?
-                desc.MinimumLod = 0.0f;
+                    // TODO: How do i do this?
+                    MinimumLod = 0.0f,
 
-                // To support feature level 9.1 these must 
-                // be set to these exact values.
-                desc.MaximumLod = float.MaxValue;
+                    // To support feature level 9.1 these must 
+                    // be set to these exact values.
+                    MaximumLod = float.MaxValue
+                };
 
                 // Create the state.
                 _state = new SharpDX.Direct3D11.SamplerState(GraphicsDevice._d3dDevice, desc);

@@ -80,8 +80,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             // Subtract the base name from the string and convert the remainder to an integer.
             // TryParse solves the problem when name is just 'BlendIndicies' for example, in 
             // which case we default to index 0, assuming only 1 index.
-            int index = 0;
-            int.TryParse(encodedName.Substring(baseName.Length), NumberStyles.Integer, CultureInfo.InvariantCulture, out index);
+            int.TryParse(encodedName.Substring(baseName.Length), NumberStyles.Integer, CultureInfo.InvariantCulture, out int index);
 
             return index;
         }

@@ -79,8 +79,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <returns>The DirectX input layout.</returns>
         public InputLayout GetOrCreate(VertexBufferBindings vertexBuffers)
         {
-            InputLayout inputLayout;
-            if (_cache.TryGetValue(vertexBuffers, out inputLayout))
+            if (_cache.TryGetValue(vertexBuffers, out InputLayout inputLayout))
                 return inputLayout;
 
             var vertexInputLayout = vertexBuffers.ToImmutable();

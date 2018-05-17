@@ -30,9 +30,11 @@ namespace MonoGame.Tools.Pipeline
 
             while (enums.MoveNext())
             {
-                var ret = new ImageListItem();
-                ret.Text = enums.Current.Label + " (" + Path.GetExtension(enums.Current.TemplateFile) + ")";
-                ret.Tag = enums.Current;
+                var ret = new ImageListItem
+                {
+                    Text = enums.Current.Label + " (" + Path.GetExtension(enums.Current.TemplateFile) + ")",
+                    Tag = enums.Current
+                };
 
                 list1.Items.Add(ret);
             }

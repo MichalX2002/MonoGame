@@ -13,9 +13,10 @@ namespace TwoMGFX
         {
             var fullPath = Path.GetFullPath(filePath);
 
-            var pp = new CppNet.Preprocessor();
-
-            pp.EmitExtraLineInfo = false;
+            var pp = new CppNet.Preprocessor
+            {
+                EmitExtraLineInfo = false
+            };
             pp.addFeature(Feature.LINEMARKERS);
             pp.setListener(new MGErrorListener(output));
             pp.setFileSystem(new MGFileSystem(dependencies));

@@ -29,7 +29,7 @@ namespace MonoGame.Tools.Pipeline
 
                 foreach (var item in items)
                     if (item is DirectoryItem)
-                        foreach (var citem in _con._project.ContentItems)
+                        foreach (var citem in _con.ProjectItem.ContentItems)
                             if (citem.OriginalPath.StartsWith(item.OriginalPath))
                                 _subitems.Add(citem);
             }
@@ -41,7 +41,7 @@ namespace MonoGame.Tools.Pipeline
                 foreach (var item in _items)
                 {
                     if (item is ContentItem)
-                        _con._project.ContentItems.Remove(item as ContentItem);
+                        _con.ProjectItem.ContentItems.Remove(item as ContentItem);
                     _con.View.RemoveTreeItem(item);
 
                     if (_delete)
@@ -70,7 +70,7 @@ namespace MonoGame.Tools.Pipeline
                 }
 
                 foreach (var sitem in _subitems)
-                    _con._project.ContentItems.Remove(sitem);
+                    _con.ProjectItem.ContentItems.Remove(sitem);
 
                 _con.View.EndTreeUpdate();
                 _con.ProjectDirty = true;
@@ -88,13 +88,13 @@ namespace MonoGame.Tools.Pipeline
                 foreach (var item in _items)
                 {
                     if(item is ContentItem)
-                        _con._project.ContentItems.Add(item as ContentItem);
+                        _con.ProjectItem.ContentItems.Add(item as ContentItem);
                     _con.View.AddTreeItem(item);
                 }
 
                 foreach (var item in _subitems)
                 {
-                    _con._project.ContentItems.Add(item);
+                    _con.ProjectItem.ContentItems.Add(item);
                     _con.View.AddTreeItem(item);
                 }
 

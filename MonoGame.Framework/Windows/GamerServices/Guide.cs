@@ -68,10 +68,8 @@ namespace Microsoft.Xna.Framework.GamerServices
 
 	public static class Guide
 	{
-		private static bool isScreenSaverEnabled;
-		private static bool isTrialMode = false;
-		private static bool isVisible;
-		private static bool simulateTrialMode;
+        private static bool isTrialMode = false;
+        private static bool simulateTrialMode;
 
 #if WINDOWS_UAP
 	    private static readonly CoreDispatcher _dispatcher;
@@ -359,20 +357,10 @@ namespace Microsoft.Xna.Framework.GamerServices
             //}
 		}
 
-		#region Properties
-		public static bool IsScreenSaverEnabled 
-		{ 
-			get
-			{
-				return isScreenSaverEnabled;
-			}
-			set
-			{
-				isScreenSaverEnabled = value;
-			}
-		}
+        #region Properties
+        public static bool IsScreenSaverEnabled { get; set; }
 
-		public static bool IsTrialMode 
+        public static bool IsTrialMode 
 		{ 
 			get
 			{
@@ -386,19 +374,9 @@ namespace Microsoft.Xna.Framework.GamerServices
 			}
 		}
 
-		public static bool IsVisible 
-		{ 
-			get
-			{
-				return isVisible;
-			}
-			set
-			{
-				isVisible = value;
-			}
-		}
+        public static bool IsVisible { get; set; }
 
-		public static bool SimulateTrialMode 
+        public static bool SimulateTrialMode 
 		{ 
 			get
 			{

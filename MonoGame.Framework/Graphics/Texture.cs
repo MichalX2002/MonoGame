@@ -12,8 +12,6 @@ namespace Microsoft.Xna.Framework.Graphics
 	{
 		internal SurfaceFormat _format;
 		internal int _levelCount;
-
-        private readonly int _sortingKey = Interlocked.Increment(ref _lastSortingKey);
         private static int _lastSortingKey;
 
         /// <summary>
@@ -24,12 +22,9 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <para>The value is an implementation detail and may change between application launches or MonoGame versions.
         /// It is only guaranteed to stay consistent during application lifetime.</para>
         /// </remarks>
-        internal int SortingKey
-        {
-            get { return _sortingKey; }
-        }
+        internal int SortingKey { get; } = Interlocked.Increment(ref _lastSortingKey);
 
-		public SurfaceFormat Format
+        public SurfaceFormat Format
 		{
 			get { return _format; }
 		}

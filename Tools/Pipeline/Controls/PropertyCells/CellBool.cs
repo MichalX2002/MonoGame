@@ -22,10 +22,12 @@ namespace MonoGame.Tools.Pipeline
         {
             _draw = false;
 
-            var checkbox = new CheckBox();
-            checkbox.Tag = this;
-            checkbox.Checked = (bool?)Value;
-            checkbox.ThreeState = (Value == null);
+            var checkbox = new CheckBox
+            {
+                Tag = this,
+                Checked = (bool?)Value,
+                ThreeState = (Value == null)
+            };
             checkbox.Text = (checkbox.Checked == null) ? "Not Set" : checkbox.Checked.ToString();
             checkbox.Width = _lastRec.Width - 10;
             checkbox.Height = _lastRec.Height;

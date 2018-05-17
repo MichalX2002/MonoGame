@@ -15,21 +15,17 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
     public class VideoContent : ContentItem, IDisposable
     {
         private bool _disposed;
-        private int _bitsPerSecond;
-        private TimeSpan _duration;
-        private float _framesPerSecond;
-        private int _height;
         private int _width;
 
         /// <summary>
         /// Gets the bit rate for this video.
         /// </summary>
-        public int BitsPerSecond { get { return _bitsPerSecond; } }
+        public int BitsPerSecond { get; }
 
         /// <summary>
         /// Gets the duration of this video.
         /// </summary>
-        public TimeSpan Duration { get { return _duration; } }
+        public TimeSpan Duration { get; }
 
         /// <summary>
         /// Gets or sets the file name for this video.
@@ -40,12 +36,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         /// <summary>
         /// Gets the frame rate for this video.
         /// </summary>
-        public float FramesPerSecond { get { return _framesPerSecond; } }
+        public float FramesPerSecond { get; }
 
         /// <summary>
         /// Gets the height of this video.
         /// </summary>
-        public int Height { get { return _height; } }
+        public int Height { get; }
 
         /// <summary>
         /// Gets or sets the type of soundtrack accompanying the video.
@@ -65,10 +61,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         public VideoContent(string filename)
         {
             Filename = filename;
-
-            string stdout, stderr;
             var result = ExternalTool.Run("ffprobe",
-                string.Format("-i \"{0}\" -show_format -select_streams v -show_streams -print_format ini", Filename), out stdout, out stderr);
+                string.Format("-i \"{0}\" -show_format -select_streams v -show_streams -print_format ini", Filename), out string stdout, out string stderr);
 
             var lines = stdout.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             foreach (var line in lines)
@@ -81,11 +75,11 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                 switch (key)
                 {
                     case "duration":
-                        _duration = TimeSpan.FromSeconds(double.Parse(value, CultureInfo.InvariantCulture));
+                        Duration = TimeSpan.FromSeconds(double.Parse(value, CultureInfo.InvariantCulture));
                         break;
 
                     case "bit_rate":
-                        _bitsPerSecond = int.Parse(value, CultureInfo.InvariantCulture);
+                        BitsPerSecond = int.Parse(value, CultureInfo.InvariantCulture);
                         break;
 
                     case "width":
@@ -93,12 +87,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                         break;
 
                     case "height":
-                        _height = int.Parse(value, CultureInfo.InvariantCulture);
+                        Height = int.Parse(value, CultureInfo.InvariantCulture);
                         break;
 
                     case "r_frame_rate":
                         var frac = value.Split('/');
-                        _framesPerSecond = float.Parse(frac[0], CultureInfo.InvariantCulture) / float.Parse(frac[1], CultureInfo.InvariantCulture);
+                        FramesPerSecond = float.Parse(frac[0], CultureInfo.InvariantCulture) / float.Parse(frac[1], CultureInfo.InvariantCulture);
                         break;
                 }
             }

@@ -15,9 +15,8 @@ namespace Microsoft.Xna.Framework
     [DebuggerDisplay("{DebugDisplayString,nq}")]
     public struct Rectangle : IEquatable<Rectangle>
     {
-        #region Private Fields
 
-        private static Rectangle emptyRectangle = new Rectangle();
+        #region Private Fields
 
         #endregion
 
@@ -54,10 +53,7 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Returns a <see cref="Rectangle"/> with X=0, Y=0, Width=0, Height=0.
         /// </summary>
-        public static Rectangle Empty
-        {
-            get { return emptyRectangle; }
-        }
+        public static Rectangle Empty { get; } = new Rectangle();
 
         /// <summary>
         /// Returns the x coordinate of the left edge of this <see cref="Rectangle"/>.

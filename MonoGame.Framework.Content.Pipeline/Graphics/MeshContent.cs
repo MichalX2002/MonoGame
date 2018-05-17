@@ -9,19 +9,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
     /// </summary>
     public class MeshContent : NodeContent
     {
-        GeometryContentCollection geometry;
         PositionCollection positions;
 
         /// <summary>
         /// Gets the list of geometry batches for the mesh.
         /// </summary>
-        public GeometryContentCollection Geometry
-        {
-            get
-            {
-                return geometry;
-            }
-        }
+        public GeometryContentCollection Geometry { get; }
 
         /// <summary>
         /// Gets the list of vertex position values.
@@ -39,7 +32,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// </summary>
         public MeshContent()
         {
-            geometry = new GeometryContentCollection(this);
+            Geometry = new GeometryContentCollection(this);
             positions = new PositionCollection();
         }
 
@@ -56,12 +49,11 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             // Normals are "tangent covectors", which need to be transformed using the
             // transpose of the inverse matrix!
             Matrix inverseTranspose = Matrix.Transpose(Matrix.Invert(xform));
-            foreach (var geom in geometry)
+            foreach (var geom in Geometry)
             {
                 foreach (var channel in geom.Vertices.Channels)
                 {
-                    var vector3Channel = channel as VertexChannel<Vector3>;
-                    if (vector3Channel == null)
+                    if (!(channel is VertexChannel<Vector3> vector3Channel))
                         continue;
 
                     if (channel.Name.StartsWith("Normal") ||

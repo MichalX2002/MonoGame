@@ -31,9 +31,7 @@ namespace MonoGame.Tools.Pipeline
 
         public static System.Drawing.Icon ExtractIcon(int number)
         {
-            IntPtr large;
-            IntPtr small;
-            ExtractIconExW("shell32.dll", number, out large, out small, 1);
+            ExtractIconExW("shell32.dll", number, out IntPtr large, out IntPtr small, 1);
 
             return System.Drawing.Icon.FromHandle(large);
         }

@@ -12,8 +12,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
     public abstract class DxtBitmapContent : BitmapContent
     {
         private byte[] _bitmapData;
-        private int _blockSize;
-        private SurfaceFormat _format;
+        private readonly int _blockSize;
+        private readonly SurfaceFormat _format;
 
         private int _nvttWriteOffset;
 
@@ -92,12 +92,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
         protected override bool TryCopyFrom(BitmapContent sourceBitmap, Rectangle sourceRegion, Rectangle destinationRegion)
         {
-            SurfaceFormat sourceFormat;
-            if (!sourceBitmap.TryGetFormat(out sourceFormat))
+            if (!sourceBitmap.TryGetFormat(out SurfaceFormat sourceFormat))
                 return false;
 
-            SurfaceFormat format;
-            TryGetFormat(out format);
+            TryGetFormat(out SurfaceFormat format);
 
             // A shortcut for copying the entire bitmap to another bitmap of the same type and format
             if (format == sourceFormat && (sourceRegion == new Rectangle(0, 0, Width, Height)) && sourceRegion == destinationRegion)
@@ -135,15 +133,14 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
             AlphaMode alphaMode;
             Format outputFormat;
-            var alphaDither = false;
+            bool alphaDither = false;
             switch (format)
             {
                 case SurfaceFormat.Dxt1:
                 case SurfaceFormat.Dxt1SRgb:
                 {
-                    bool hasTransparency;
-                    PrepareNVTT_DXT1(sourceData, out hasTransparency);
-                    outputFormat = hasTransparency ? Format.DXT1a : Format.DXT1;
+                        PrepareNVTT_DXT1(sourceData, out bool hasTransparency);
+                        outputFormat = hasTransparency ? Format.DXT1a : Format.DXT1;
                     alphaMode = hasTransparency ? AlphaMode.Transparency : AlphaMode.None;
                     alphaDither = true;
                     break;
@@ -210,12 +207,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
         protected override bool TryCopyTo(BitmapContent destinationBitmap, Rectangle sourceRegion, Rectangle destinationRegion)
         {
-            SurfaceFormat destinationFormat;
-            if (!destinationBitmap.TryGetFormat(out destinationFormat))
+            if (!destinationBitmap.TryGetFormat(out SurfaceFormat destinationFormat))
                 return false;
 
-            SurfaceFormat format;
-            TryGetFormat(out format);
+            TryGetFormat(out SurfaceFormat format);
 
             // A shortcut for copying the entire bitmap to another bitmap of the same type and format
             var fullRegion = new Rectangle(0, 0, Width, Height);

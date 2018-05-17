@@ -14,7 +14,6 @@ namespace Microsoft.Xna.Framework.Audio
     /// </summary> 
     public class AudioEngine : IDisposable
     {
-        private readonly AudioCategory[] _categories;
         private readonly Dictionary<string, int> _categoryLookup = new Dictionary<string, int>();
 
         private readonly RpcVariable[] _variables;
@@ -30,7 +29,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal List<Cue> ActiveCues = new List<Cue>();
 
-        internal AudioCategory[] Categories { get { return _categories; } }
+        internal AudioCategory[] Categories { get; }
 
         internal Dictionary<string, WaveBank> Wavebanks = new Dictionary<string, WaveBank>();
 
@@ -133,11 +132,11 @@ namespace Microsoft.Xna.Framework.Audio
                 reader.BaseStream.Seek (catNamesOffset, SeekOrigin.Begin);
                 string[] categoryNames = ReadNullTerminatedStrings(numCats, reader);
 
-                _categories = new AudioCategory[numCats];
+                Categories = new AudioCategory[numCats];
                 reader.BaseStream.Seek (catsOffset, SeekOrigin.Begin);
                 for (int i=0; i<numCats; i++) 
                 {
-                    _categories [i] = new AudioCategory (this, categoryNames [i], reader);
+                    Categories [i] = new AudioCategory (this, categoryNames [i], reader);
                     _categoryLookup.Add (categoryNames [i], i);
                 }
 
@@ -150,12 +149,14 @@ namespace Microsoft.Xna.Framework.Audio
                 reader.BaseStream.Seek (varsOffset, SeekOrigin.Begin);
                 for (var i=0; i < numVars; i++)
                 {
-                    var v = new RpcVariable();
-                    v.Name = varNames[i];
-                    v.Flags = reader.ReadByte();						
-                    v.InitValue = reader.ReadSingle();
-                    v.MinValue = reader.ReadSingle();
-                    v.MaxValue = reader.ReadSingle();
+                    var v = new RpcVariable
+                    {
+                        Name = varNames[i],
+                        Flags = reader.ReadByte(),
+                        InitValue = reader.ReadSingle(),
+                        MinValue = reader.ReadSingle(),
+                        MaxValue = reader.ReadSingle()
+                    };
                     v.Value = v.InitValue;
 
                     variables.Add(v);
@@ -177,8 +178,10 @@ namespace Microsoft.Xna.Framework.Audio
                     reader.BaseStream.Seek(rpcOffset, SeekOrigin.Begin);
                     for (var i=0; i < numRpc; i++)
                     {
-                        var curve = new RpcCurve();
-                        curve.FileOffset = (uint)reader.BaseStream.Position;
+                        var curve = new RpcCurve
+                        {
+                            FileOffset = (uint)reader.BaseStream.Position
+                        };
 
                         var variable = variables[ reader.ReadUInt16() ];
                         if (variable.IsGlobal)
@@ -319,7 +322,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (!_categoryLookup.TryGetValue(name, out int i))
                 throw new InvalidOperationException("This resource could not be created.");
 
-            return _categories[i];
+            return Categories[i];
         }
 
         /// <summary>Gets the value of a global variable.</summary>

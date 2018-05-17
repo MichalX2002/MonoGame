@@ -15,13 +15,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
     [ContentProcessor(DisplayName = "Sound Effect - MonoGame")]
     public class SoundEffectProcessor : ContentProcessor<AudioContent, SoundEffectContent>
     {
-        ConversionQuality quality = ConversionQuality.Best;
 
         /// <summary>
         /// Gets or sets the target format quality of the audio content.
         /// </summary>
         /// <value>The ConversionQuality of this audio data.</value>
-        public ConversionQuality Quality { get { return quality; } set { quality = value; } }
+        public ConversionQuality Quality { get; set; } = ConversionQuality.Best;
 
         /// <summary>
         /// Initializes a new instance of SoundEffectProcessor.
@@ -44,9 +43,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                 throw new ArgumentNullException("context");
 
             var profile = AudioProfile.ForPlatform(context.TargetPlatform);
-            var finalQuality = profile.ConvertAudio(context.TargetPlatform, quality, input);
-            if (quality != finalQuality)
-                context.Logger.LogMessage("Failed to convert using \"{0}\" quality, used \"{1}\" quality", quality, finalQuality);
+            var finalQuality = profile.ConvertAudio(context.TargetPlatform, Quality, input);
+            if (Quality != finalQuality)
+                context.Logger.LogMessage("Failed to convert using \"{0}\" quality, used \"{1}\" quality", Quality, finalQuality);
 
             return new SoundEffectContent(input.Format.NativeWaveFormat, input.Data, input.LoopStart, input.LoopLength, (int)input.Duration.TotalMilliseconds);
         }

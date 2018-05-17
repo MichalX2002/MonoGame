@@ -251,10 +251,12 @@ namespace MGCB
             var intermediatePath = ReplaceSymbols (IntermediateDir);
             if (!Path.IsPathRooted(intermediatePath))
                 intermediatePath = PathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, intermediatePath)));
-            
-            _manager = new PipelineManager(projectDirectory, outputPath, intermediatePath);
-            _manager.Logger = new ConsoleLogger();
-            _manager.CompressContent = CompressContent;
+
+            _manager = new PipelineManager(projectDirectory, outputPath, intermediatePath)
+            {
+                Logger = new ConsoleLogger(),
+                CompressContent = CompressContent
+            };
 
             // If the intent is to debug build, break at the original location
             // of any exception, eg, within the actual importer/processor.

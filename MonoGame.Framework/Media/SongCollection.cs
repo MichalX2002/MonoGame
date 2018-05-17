@@ -10,8 +10,7 @@ namespace Microsoft.Xna.Framework.Media
 {
 	public class SongCollection : ICollection<Song>, IEnumerable<Song>, IEnumerable, IDisposable
 	{
-		private bool isReadOnly = false;
-		private List<Song> innerlist = new List<Song>();
+        private List<Song> innerlist = new List<Song>();
 
         internal SongCollection()
         {
@@ -44,14 +43,8 @@ namespace Microsoft.Xna.Framework.Media
 				return innerlist.Count;
             }
         }
-		
-		public bool IsReadOnly
-        {
-		    get
-		    {
-		        return this.isReadOnly;
-		    }
-        }
+
+        public bool IsReadOnly { get; } = false;
 
         public Song this[int index]
         {

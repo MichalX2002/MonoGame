@@ -4,28 +4,23 @@ namespace Microsoft.Xna.Framework.Net
 {
 	internal class CommandEvent
 	{
-		CommandEventType command;
-		object commandObject;
+        object commandObject;
 		
 		public CommandEvent (CommandEventType command, object commandObject)
 		{
-			this.command = command;
+			this.Command = command;
 			this.commandObject = commandObject;
 		}
 		
 		public CommandEvent (ICommand command)
 		{
-			this.command = command.Command;
+			this.Command = command.Command;
 			this.commandObject = command;
-		}		
-		
-		public CommandEventType Command
-		{
-			get { return command; }
-			
 		}
-		
-		public object CommandObject
+
+        public CommandEventType Command { get; }
+
+        public object CommandObject
 		{
 			get { return commandObject; }
 		}

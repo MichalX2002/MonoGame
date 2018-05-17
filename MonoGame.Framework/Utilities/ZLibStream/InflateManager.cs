@@ -39,15 +39,8 @@ namespace MonoGame.Utilities
 
         // if BAD, inflateSync's marker bytes count
         internal int marker;
+        internal bool HandleRfc1950HeaderBytes { get; set; } = true;
 
-        // mode independent information
-        //internal int nowrap; // flag for no wrapper
-        private bool _handleRfc1950HeaderBytes = true;
-        internal bool HandleRfc1950HeaderBytes
-        {
-            get { return _handleRfc1950HeaderBytes; }
-            set { _handleRfc1950HeaderBytes = value; }
-        }
         internal int wbits; // log2(window size)  (8..15, defaults to 15)
 
         internal InflateBlocks blocks; // current inflate_blocks state
@@ -56,7 +49,7 @@ namespace MonoGame.Utilities
 
         internal InflateManager(bool expectRfc1950HeaderBytes)
         {
-            _handleRfc1950HeaderBytes = expectRfc1950HeaderBytes;
+            HandleRfc1950HeaderBytes = expectRfc1950HeaderBytes;
         }
 
         internal int Reset()

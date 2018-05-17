@@ -9,17 +9,12 @@ namespace Microsoft.Xna.Framework.Content
 {
     public abstract class ContentTypeReader
     {
-        private Type _targetType;
-
         public virtual bool CanDeserializeIntoExistingObject
         {
             get { return false; }
         }
 
-        public Type TargetType
-        {
-            get { return _targetType; }
-        }
+        public Type TargetType { get; }
 
         public virtual int TypeVersion
         {
@@ -28,7 +23,7 @@ namespace Microsoft.Xna.Framework.Content
 
         protected ContentTypeReader(Type targetType)
         {
-            _targetType = targetType;
+            TargetType = targetType;
         }
 
         protected internal virtual void Initialize(ContentTypeReaderManager manager)

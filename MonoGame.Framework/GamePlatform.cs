@@ -16,15 +16,14 @@ namespace Microsoft.Xna.Framework
 
         protected TimeSpan _inactiveSleepTime = TimeSpan.FromMilliseconds(20.0);
         protected bool _needsToResetElapsedTime = false;
-        bool disposed;
         protected bool InFullScreenMode = false;
-        protected bool IsDisposed { get { return disposed; } }
+        protected bool IsDisposed { get; private set; }
 
         #endregion
 
         #region Construction/Destruction
 
-		protected GamePlatform(Game game)
+        protected GamePlatform(Game game)
         {
             Game = game ?? throw new ArgumentNullException(nameof(game));
         }
@@ -269,12 +268,12 @@ namespace Microsoft.Xna.Framework
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (!IsDisposed)
             {
                 Mouse.PrimaryWindow = null;
                 TouchPanel.PrimaryWindow = null;
 
-                disposed = true;
+                IsDisposed = true;
             }
         }
 		

@@ -13,12 +13,9 @@ namespace Microsoft.Xna.Framework.Graphics
     [DataContract]
     public struct Viewport
     {
-		private int x;
-		private int y;
-		private int width;
-		private int height;
-		private float minDepth;
-		private float maxDepth;
+        private int y;
+        private int height;
+        private float maxDepth;
 
         #region Properties
 
@@ -54,29 +51,13 @@ namespace Microsoft.Xna.Framework.Graphics
         /// The lower limit of depth of this viewport.
         /// </summary>
         [DataMember]
-        public float MinDepth
-        {
-			get {
-				return this.minDepth;
-			}
-			set {
-				minDepth = value;
-			}
-		}
+        public float MinDepth { get; set; }
 
         /// <summary>
         /// The width of the bounds in pixels.
         /// </summary>
         [DataMember]
-        public int Width
-        {
-			get {
-				return this.width;
-			}
-			set {
-				width = value;
-			}
-		}
+        public int Width { get; set; }
 
         /// <summary>
         /// The y coordinate of the beginning of this viewport.
@@ -97,24 +78,20 @@ namespace Microsoft.Xna.Framework.Graphics
         /// The x coordinate of the beginning of this viewport.
         /// </summary>
         [DataMember]
-        public int X 
-		{
-			get{ return x;}
-			set{ x = value;}
-		}
+        public int X { get; set; }
 
-		#endregion
-		
+        #endregion
+
         /// <summary>
         /// Gets the aspect ratio of this <see cref="Viewport"/>, which is width / height. 
         /// </summary>
-		public float AspectRatio 
+        public float AspectRatio 
 		{
 			get
 			{
-				if ((height != 0) && (width != 0))
+				if ((height != 0) && (Width != 0))
 				{
-					return width / (float)height;
+					return Width / (float)height;
 				}
 				return 0f;
 			}
@@ -127,14 +104,14 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
             get
             {
-                return new Rectangle(x, y, width, height);
+                return new Rectangle(X, y, Width, height);
             }
 				
 			set
 			{				
-				x = value.X;
+				X = value.X;
 				y = value.Y;
-				width = value.Width;
+				Width = value.Width;
 				height = value.Height;
 			}
 		}
@@ -144,7 +121,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
 		public Rectangle TitleSafeArea 
 		{
-			get { return GraphicsDevice.GetTitleSafeArea(x, y, width, height); }
+			get { return GraphicsDevice.GetTitleSafeArea(X, y, Width, height); }
 		}
 
         /// <summary>
@@ -156,11 +133,11 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="height">The height of the view bounds in pixels.</param>
         public Viewport(int x, int y, int width, int height)
 		{
-			this.x = x;
+			this.X = x;
 		    this.y = y;
-		    this.width = width;
+		    this.Width = width;
 		    this.height = height;
-		    this.minDepth = 0.0f;
+		    this.MinDepth = 0.0f;
 		    this.maxDepth = 1.0f;
 		}
 
@@ -175,11 +152,11 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="maxDepth">The upper limit of depth.</param>
         public Viewport(int x, int y, int width, int height,float minDepth,float maxDepth)
         {
-            this.x = x;
+            this.X = x;
             this.y = y;
-            this.width = width;
+            this.Width = width;
             this.height = height;
-            this.minDepth = minDepth;
+            this.MinDepth = minDepth;
             this.maxDepth = maxDepth;
         }
 
@@ -210,9 +187,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		        vector.Y = vector.Y / a;
 		        vector.Z = vector.Z / a;
 		    }
-		    vector.X = (((vector.X + 1f) * 0.5f) * this.width) + this.x;
+		    vector.X = (((vector.X + 1f) * 0.5f) * this.Width) + this.X;
 		    vector.Y = (((-vector.Y + 1f) * 0.5f) * this.height) + this.y;
-		    vector.Z = (vector.Z * (this.maxDepth - this.minDepth)) + this.minDepth;
+		    vector.Z = (vector.Z * (this.maxDepth - this.MinDepth)) + this.MinDepth;
 		    return vector;
         }
 
@@ -228,9 +205,9 @@ namespace Microsoft.Xna.Framework.Graphics
         public Vector3 Unproject(Vector3 source, Matrix projection, Matrix view, Matrix world)
         {
              Matrix matrix = Matrix.Invert(Matrix.Multiply(Matrix.Multiply(world, view), projection));
-		    source.X = (((source.X - this.x) / this.width) * 2f) - 1f;
+		    source.X = (((source.X - this.X) / this.Width) * 2f) - 1f;
 		    source.Y = -((((source.Y - this.y) / this.height) * 2f) - 1f);
-		    source.Z = (source.Z - this.minDepth) / (this.maxDepth - this.minDepth);
+		    source.Z = (source.Z - this.MinDepth) / (this.maxDepth - this.MinDepth);
 		    Vector3 vector = Vector3.Transform(source, matrix);
 		    float a = (((source.X * matrix.M14) + (source.Y * matrix.M24)) + (source.Z * matrix.M34)) + matrix.M44;
 		    if (!WithinEpsilon(a, 1f))
@@ -256,7 +233,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <returns>A <see cref="String"/> representation of this <see cref="Viewport"/>.</returns>
         public override string ToString ()
 	    {
-	        return "{X:" + x + " Y:" + y + " Width:" + width + " Height:" + height + " MinDepth:" + minDepth + " MaxDepth:" + maxDepth + "}";
+	        return "{X:" + X + " Y:" + y + " Width:" + Width + " Height:" + height + " MinDepth:" + MinDepth + " MaxDepth:" + maxDepth + "}";
 	    }
     }
 }

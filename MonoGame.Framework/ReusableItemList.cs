@@ -10,23 +10,22 @@ namespace Microsoft.Xna.Framework
     internal class ReusableItemList<T> : ICollection<T>, IEnumerator<T>
     {
         private readonly List<T> _list = new List<T>();
-        private int _listTop = 0;
         private int _iteratorIndex;
 
         #region ICollection<T> Members
 
         public void Add(T item)
         {
-            if (_list.Count > _listTop)
+            if (_list.Count > Count)
             {
-                _list[_listTop] = item;                
+                _list[Count] = item;                
             }
             else
             {
                 _list.Add(item);
             }
 
-            _listTop++;
+            Count++;
         }
 		
 		public void Sort(IComparer<T> comparison)
@@ -37,9 +36,9 @@ namespace Microsoft.Xna.Framework
 		
 		public T GetNewItem()
 		{
-			if (_listTop < _list.Count)
+			if (Count < _list.Count)
 			{
-				return _list[_listTop++];
+				return _list[Count++];
 			}
 			else
 			{
@@ -53,13 +52,13 @@ namespace Microsoft.Xna.Framework
 		{
 			get
 			{
-				if (index >= _listTop) 
+				if (index >= Count) 
 					throw new IndexOutOfRangeException();
 				return _list[index];
 			}
 			set
 			{
-				if (index >= _listTop) 
+				if (index >= Count) 
 					throw new IndexOutOfRangeException();
 				_list[index] = value;
 			}
@@ -67,7 +66,7 @@ namespace Microsoft.Xna.Framework
 		
         public void Clear()
         {
-            _listTop = 0;
+            Count = 0;
         }
 
         public void Reset()
@@ -86,13 +85,7 @@ namespace Microsoft.Xna.Framework
             _list.CopyTo(array,arrayIndex);
         }
 
-        public int Count
-        {
-            get 
-            {
-                return _listTop;
-            }
-        }
+        public int Count { get; private set; } = 0;
 
         public bool IsReadOnly
         {
@@ -162,7 +155,7 @@ namespace Microsoft.Xna.Framework
         public bool MoveNext()
         {
             _iteratorIndex++;
-            return (_iteratorIndex < _listTop);
+            return (_iteratorIndex < Count);
         }
 
         #endregion

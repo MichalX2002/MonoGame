@@ -45,9 +45,8 @@ namespace MonoGame.Framework
         public override void BeforeInitialize()
         {
             base.BeforeInitialize();
-
-            var gdm = Game.graphicsDeviceManager;
-            if (gdm == null)
+            
+            if (Game.InternalGraphicsDeviceManager == null)
             {
                 _window.Initialize(GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight);
             }

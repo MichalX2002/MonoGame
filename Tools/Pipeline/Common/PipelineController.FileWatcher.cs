@@ -47,8 +47,7 @@ namespace MonoGame.Tools.Pipeline
                     // Can't lock without major code modifications
                     try
                     {
-                        var items = _controller._project.ContentItems.ToArray();
-
+                        var items = _controller.ProjectItem.ContentItems.ToArray();
                         foreach (var item in items)
                         {
                             Thread.Sleep(100);
@@ -60,7 +59,7 @@ namespace MonoGame.Tools.Pipeline
                             _view.Invoke(() => _view.UpdateTreeItem(item));
                         }
                     }
-                    catch (ThreadAbortException ex)
+                    catch (ThreadAbortException)
                     {
                         return;
                     }

@@ -31,6 +31,7 @@ namespace Microsoft.Xna.Framework.Graphics
         internal SharpDX.Direct3D11.RenderTargetView _renderTargetView;
         internal SharpDX.Direct3D11.DepthStencilView _depthStencilView;
         private int _vertexBufferSlotsUsed;
+        private bool _blendFactorDirty;
 
 #if WINDOWS_UAP
 
@@ -571,7 +572,7 @@ namespace Microsoft.Xna.Framework.Graphics
             _d3dContext = _d3dDevice.ImmediateContext.QueryInterface<SharpDX.Direct3D11.DeviceContext>();
             
             // Create a new instance of GraphicsDebug because we support it on Windows platforms.
-            _graphicsDebug = new GraphicsDebug(this);
+            GraphicsDebug = new GraphicsDebug(this);
         }
 
         internal void SetHardwareFullscreen()
@@ -641,8 +642,7 @@ namespace Microsoft.Xna.Framework.Graphics
             }
             else
             {
-                ModeDescription closest;
-                output.GetClosestMatchingMode(_d3dDevice, target, out closest);
+                output.GetClosestMatchingMode(_d3dDevice, target, out ModeDescription closest);
                 width = closest.Width;
                 height = closest.Height;
                 output.Dispose();
@@ -679,7 +679,7 @@ namespace Microsoft.Xna.Framework.Graphics
             _currentDepthStencilView = null;
             Array.Clear(_currentRenderTargets, 0, _currentRenderTargets.Length);
             Array.Clear(_currentRenderTargetBindings, 0, _currentRenderTargetBindings.Length);
-            _currentRenderTargetCount = 0;
+            RenderTargetCount = 0;
 
             // Make sure all pending rendering commands are flushed.
             _d3dContext.Flush();
@@ -1086,13 +1086,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal void PlatformResolveRenderTargets()
         {
-            for (var i = 0; i < _currentRenderTargetCount; i++)
+            for (var i = 0; i < RenderTargetCount; i++)
             {
                 var renderTargetBinding = _currentRenderTargetBindings[i];
 
                 // Resolve MSAA render targets
-                var renderTarget = renderTargetBinding.RenderTarget as RenderTarget2D;
-                if (renderTarget != null && renderTarget.MultiSampleCount > 1)
+                if (renderTargetBinding.RenderTarget is RenderTarget2D renderTarget && renderTarget.MultiSampleCount > 1)
                     renderTarget.ResolveSubresource();
 
                 // Generate mipmaps.
@@ -1118,7 +1117,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 Textures.ClearTargets(this, _currentRenderTargetBindings);
             }
 
-            for (var i = 0; i < _currentRenderTargetCount; i++)
+            for (var i = 0; i < RenderTargetCount; i++)
             {
                 var binding = _currentRenderTargetBindings[i];
                 var target = (IRenderTarget)binding.RenderTarget;
@@ -1275,7 +1274,7 @@ namespace Microsoft.Xna.Framework.Graphics
             if (_pixelShader == null)
                 throw new InvalidOperationException("A pixel shader must be set!");
 
-            if (_vertexShaderDirty)
+            if (VertexShaderDirty)
             {
                 _d3dContext.VertexShader.Set(_vertexShader.VertexShader);
 
@@ -1284,16 +1283,16 @@ namespace Microsoft.Xna.Framework.Graphics
                     _graphicsMetrics._vertexShaderCount++;
                 }
             }
-            if (_vertexShaderDirty || _vertexBuffersDirty)
+            if (VertexShaderDirty || _vertexBuffersDirty)
             {
                 _d3dContext.InputAssembler.InputLayout = _vertexShader.InputLayouts.GetOrCreate(_vertexBuffers);
-                _vertexShaderDirty = _vertexBuffersDirty = false;
+                VertexShaderDirty = _vertexBuffersDirty = false;
             }
 
-            if (_pixelShaderDirty)
+            if (PixelShaderDirty)
             {
                 _d3dContext.PixelShader.Set(_pixelShader.PixelShader);
-                _pixelShaderDirty = false;
+                PixelShaderDirty = false;
 
                 unchecked
                 {
@@ -1313,9 +1312,7 @@ namespace Microsoft.Xna.Framework.Graphics
         private int SetUserVertexBuffer<T>(T[] vertexData, int vertexOffset, int vertexCount, VertexDeclaration vertexDecl)
             where T : struct
         {
-            DynamicVertexBuffer buffer;
-
-            if (!_userVertexBuffers.TryGetValue(vertexDecl, out buffer) || buffer.VertexCount < vertexCount)
+            if (!_userVertexBuffers.TryGetValue(vertexDecl, out DynamicVertexBuffer buffer) || buffer.VertexCount < vertexCount)
             {
                 // Dispose the previous buffer if we have one.
                 if (buffer != null)
@@ -1325,9 +1322,8 @@ namespace Microsoft.Xna.Framework.Graphics
                 _userVertexBuffers[vertexDecl] = buffer;
             }
 
-            var startVertex = buffer.UserOffset;
-
-
+            int startVertex = buffer.UserOffset;
+            
             if ((vertexCount + buffer.UserOffset) < buffer.VertexCount)
             {
                 buffer.UserOffset += vertexCount;

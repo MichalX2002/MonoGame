@@ -15,7 +15,6 @@ namespace Microsoft.Xna.Framework.Audio
     public class Cue : IDisposable
     {
         private readonly AudioEngine _engine;
-        private readonly string _name;
         private readonly XactSound[] _sounds;
         private readonly float[] _probs;
 
@@ -84,15 +83,12 @@ namespace Microsoft.Xna.Framework.Audio
 
         /// <summary>Gets the friendly name of the cue.</summary>
         /// <remarks>The friendly name is a value set from the designer.</remarks>
-        public string Name
-        {
-            get { return _name; }
-        }
-        
+        public string Name { get; }
+
         internal Cue(AudioEngine engine, string cuename, XactSound sound)
         {
             _engine = engine;
-            _name = cuename;
+            Name = cuename;
             _sounds = new XactSound[1];
             _sounds[0] = sound;
             _probs = new float[1];
@@ -103,7 +99,7 @@ namespace Microsoft.Xna.Framework.Audio
         internal Cue(AudioEngine engine, string cuename, XactSound[] sounds, float[] probs)
         {
             _engine = engine;
-            _name = cuename;
+            Name = cuename;
             _sounds = sounds;
             _probs = probs;
             _variables = engine.CreateCueVariables();

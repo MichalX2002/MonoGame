@@ -18,8 +18,13 @@ namespace MonoGame.Tools.Pipeline
         public EventHandler<EventArgs> RecentChanged;
         public EventHandler<EventArgs> TitleChanged;
 #pragma warning restore 649
+
         public const string TitleBase = "MonoGame Pipeline Tool";
         public static MainWindow Instance;
+
+#if MONOMAC
+        int setw = 0;
+#endif
 
         private List<Pad> _pads;
         private Clipboard _clipboard;
@@ -31,8 +36,6 @@ namespace MonoGame.Tools.Pipeline
             "/Library/Frameworks/Mono.framework/Versions/Current/bin/mono",
             Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "mono"),
         };
-
-        int setw = 0;
 
         public MainWindow()
         {
@@ -48,8 +51,10 @@ namespace MonoGame.Tools.Pipeline
             {
                 if (pad.Commands.Count > 0)
                 {
-                    var menu = new ButtonMenuItem();
-                    menu.Text = pad.Title;
+                    var menu = new ButtonMenuItem
+                    {
+                        Text = pad.Title
+                    };
 
                     foreach (var com in pad.Commands)
                         menu.Items.Add(com.CreateMenuItem());
@@ -58,7 +63,7 @@ namespace MonoGame.Tools.Pipeline
                 }
             }
 
-            #if MONOMAC
+#if MONOMAC
             splitterVertical.PositionChanged += delegate {
                 setw++;
                 if (setw > 2)
@@ -67,7 +72,7 @@ namespace MonoGame.Tools.Pipeline
                     setw = 0;
                 }
             };
-            #endif
+#endif
 
             _contextMenu = new ContextMenu();
             projectControl.SetContextMenu(_contextMenu);
@@ -84,7 +89,7 @@ namespace MonoGame.Tools.Pipeline
             base.OnClosing(e);
         }
 
-        #region IView implements
+#region IView implements
 
         public void Attach(IController controller)
         {
@@ -116,8 +121,10 @@ namespace MonoGame.Tools.Pipeline
 
         public bool AskSaveName(ref string filePath, string title)
         {
-            var dialog = new SaveFileDialog();
-            dialog.Title = title;
+            var dialog = new SaveFileDialog
+            {
+                Title = title
+            };
             dialog.Filters.Add(_mgcbFileFilter);
             dialog.Filters.Add(_allFileFilter);
             dialog.CurrentFilter = _mgcbFileFilter;
@@ -241,9 +248,11 @@ namespace MonoGame.Tools.Pipeline
 
         public bool ChooseContentFile(string initialDirectory, out List<string> files)
         {
-            var dialog = new OpenFileDialog();
-            dialog.Directory = new Uri(initialDirectory);
-            dialog.MultiSelect = true;
+            var dialog = new OpenFileDialog
+            {
+                Directory = new Uri(initialDirectory),
+                MultiSelect = true
+            };
             dialog.Filters.Add(_allFileFilter);
             dialog.CurrentFilter = _allFileFilter;
 
@@ -257,8 +266,10 @@ namespace MonoGame.Tools.Pipeline
 
         public bool ChooseContentFolder(string initialDirectory, out string folder)
         {
-            var dialog = new SelectFolderDialog();
-            dialog.Directory = initialDirectory;
+            var dialog = new SelectFolderDialog
+            {
+                Directory = initialDirectory
+            };
             var result = dialog.ShowDialog(this) == DialogResult.Ok;
 
             folder = dialog.Directory;
@@ -471,8 +482,10 @@ namespace MonoGame.Tools.Pipeline
 
             foreach (var recent in recentList)
             {
-                var item = new ButtonMenuItem();
-                item.Text = recent;
+                var item = new ButtonMenuItem
+                {
+                    Text = recent
+                };
                 item.Click += (sender, e) => PipelineController.Instance.OpenProject(recent);
 
                 menuRecent.Items.Insert(0, item);
@@ -481,8 +494,10 @@ namespace MonoGame.Tools.Pipeline
             if (menuRecent.Items.Count > 0)
             {
                 menuRecent.Items.Add(new SeparatorMenuItem());
-                var clearItem = new ButtonMenuItem();
-                clearItem.Text = "Clear";
+                var clearItem = new ButtonMenuItem
+                {
+                    Text = "Clear"
+                };
                 clearItem.Click += (sender, e) => PipelineController.Instance.ClearRecentList();
                 menuRecent.Items.Add(clearItem);
             }
@@ -494,9 +509,9 @@ namespace MonoGame.Tools.Pipeline
             _clipboard.Text = text;
         }
 
-        #endregion
+#endregion
 
-        #region Commands
+#region Commands
 
         private void CmdNew_Executed(object sender, EventArgs e)
         {
@@ -610,10 +625,12 @@ namespace MonoGame.Tools.Pipeline
 
         private void CmdAbout_Executed(object sender, EventArgs e)
         {
-            var adialog = new AboutDialog();
-            adialog.Logo = Bitmap.FromResource("Icons.monogame.png");
-            adialog.WebsiteLabel = "MonoGame Website";
-            adialog.Website = new Uri("http://www.monogame.net/");
+            var adialog = new AboutDialog
+            {
+                Logo = Bitmap.FromResource("Icons.monogame.png"),
+                WebsiteLabel = "MonoGame Website",
+                Website = new Uri("http://www.monogame.net/")
+            };
 
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("LICENSE.txt"))
                 using (var reader = new StreamReader(stream))
@@ -683,7 +700,7 @@ namespace MonoGame.Tools.Pipeline
             PipelineController.Instance.RebuildItems();
         }
 
-        #endregion
+#endregion
 
     }
 }

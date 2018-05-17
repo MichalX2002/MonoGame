@@ -196,14 +196,16 @@ namespace Microsoft.Xna.Framework.Content
                 if (existingInstance != null)
                     continue;
 
-				ModelMesh mesh = new ModelMesh(reader.GraphicsDevice, parts);
+                ModelMesh mesh = new ModelMesh(reader.GraphicsDevice, parts)
+                {
 
-                // Tag reassignment
-                mesh.Tag = meshTag;
+                    // Tag reassignment
+                    Tag = meshTag,
 
-				mesh.Name = name;
-				mesh.ParentBone = bones[parentBoneIndex];
-				mesh.ParentBone.AddMesh(mesh);
+                    Name = name,
+                    ParentBone = bones[parentBoneIndex]
+                };
+                mesh.ParentBone.AddMesh(mesh);
 				mesh.BoundingSphere = boundingSphere;
 				meshes.Add(mesh);
             }
@@ -219,11 +221,12 @@ namespace Microsoft.Xna.Framework.Content
             // Read the final pieces of model data.
             var rootBoneIndex = ReadBoneReference(reader, boneCount);
 
-            Model model = new Model(reader.GraphicsDevice, bones, meshes);
+            Model model = new Model(reader.GraphicsDevice, bones, meshes)
+            {
+                Root = bones[rootBoneIndex]
+            };
 
-            model.Root = bones[rootBoneIndex];
-		
-			model.BuildHierarchy();
+            model.BuildHierarchy();
 			
 			// Tag?
             model.Tag = reader.ReadObject<object>();

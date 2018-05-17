@@ -64,12 +64,11 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
 
         public static void ProbeFormat(string sourceFile, out AudioFileType audioFileType, out AudioFormat audioFormat, out TimeSpan duration, out int loopStart, out int loopLength)
         {
-            string ffprobeStdout, ffprobeStderr;
             var ffprobeExitCode = ExternalTool.Run(
                 "ffprobe",
                 string.Format("-i \"{0}\" -show_format -show_entries streams -v quiet -of flat", sourceFile),
-                out ffprobeStdout,
-                out ffprobeStderr);
+                out string ffprobeStdout,
+                out string ffprobeStderr);
             if (ffprobeExitCode != 0)
                 throw new InvalidOperationException("ffprobe exited with non-zero exit code.");
 
@@ -101,10 +100,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
                             break;
                         case "streams.stream.0.start_time":
                         {
-                            double seconds;
-                            if (double.TryParse(kv[1].Trim('"'), NumberStyles.Any, numberFormat, out seconds))
-                                durationInSeconds += seconds;
-                            break;
+                                if (double.TryParse(kv[1].Trim('"'), NumberStyles.Any, numberFormat, out double seconds))
+                                    durationInSeconds += seconds;
+                                break;
                         }
                         case "streams.stream.0.duration":
                             durationInSeconds += double.Parse(kv[1].Trim('"'), numberFormat);
@@ -277,7 +275,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
 
         public static void WritePcmFile(AudioContent content, string saveToFile, int bitRate = 192000, int? sampeRate = null)
         {
-            string ffmpegStdout, ffmpegStderr;
             var ffmpegExitCode = ExternalTool.Run(
                 "ffmpeg",
                 string.Format(
@@ -287,8 +284,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
                     bitRate,
                     sampeRate != null ? "-ar " + sampeRate.Value : ""
                     ),
-                out ffmpegStdout,
-                out ffmpegStderr);
+                out string ffmpegStdout,
+                out string ffmpegStderr);
             if (ffmpegExitCode != 0)
                 throw new InvalidOperationException("ffmpeg exited with non-zero exit code: \n" + ffmpegStdout + "\n" + ffmpegStderr);          
         }
@@ -391,15 +388,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
                         fs.Write(rawData, 0, rawData.Length);
                 }
 
-                // Use probe to get the final format and information on the converted file.
-                AudioFileType audioFileType;
-                AudioFormat audioFormat;
-                TimeSpan duration;
-                int loopStart, loopLength;
-                ProbeFormat(temporaryOutput, out audioFileType, out audioFormat, out duration, out loopStart, out loopLength);
+                ProbeFormat(temporaryOutput, out AudioFileType audioFileType, out AudioFormat audioFormat, out TimeSpan duration, out int loopStart, out int loopLength);
 
-                AudioFormat riffAudioFormat;
-                byte[] data = StripRiffWaveHeader(rawData, out riffAudioFormat);
+                byte[] data = StripRiffWaveHeader(rawData, out AudioFormat riffAudioFormat);
 
                 // deal with adpcm
                 if (audioFormat.Format == 2 || audioFormat.Format == 17)

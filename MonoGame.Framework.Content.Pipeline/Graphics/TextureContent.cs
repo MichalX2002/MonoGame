@@ -13,18 +13,11 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
     /// </summary>
     public abstract class TextureContent : ContentItem
     {
-        MipmapChainCollection faces;
 
         /// <summary>
         /// Collection of image faces that hold a single mipmap chain for a regular 2D texture, six chains for a cube map, or an arbitrary number for volume and array textures.
         /// </summary>
-        public MipmapChainCollection Faces
-        {
-            get
-            {
-                return faces;
-            }
-        }
+        public MipmapChainCollection Faces { get; }
 
         /// <summary>
         /// Initializes a new instance of TextureContent with the specified face collection.
@@ -32,7 +25,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <param name="faces">Mipmap chain containing the face collection.</param>
         protected TextureContent(MipmapChainCollection faces)
         {
-            this.faces = faces;
+            this.Faces = faces;
         }
 
         /// <summary>
@@ -57,7 +50,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 throw new ArgumentException(string.Format("Type '{0} does not have a constructor with signature (int, int) and cannot be allocated.",
                                                           newBitmapType));
 
-            foreach (var mipChain in faces)
+            foreach (var mipChain in Faces)
             {
                 for (var i = 0; i < mipChain.Count; i++)
                 {
@@ -80,11 +73,11 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         {
             // If we already have mipmaps and we're not supposed to overwrite
             // them then return without any generation.
-            if (!overwriteExistingMipmaps && faces.Any(f => f.Count > 1))
+            if (!overwriteExistingMipmaps && Faces.Any(f => f.Count > 1))
                 return;
 
             // Generate the mips for each face.
-            foreach (var face in faces)
+            foreach (var face in Faces)
             {
                 // Remove any existing mipmaps.
                 var faceBitmap = face[0];

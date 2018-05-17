@@ -427,8 +427,10 @@ namespace MonoGame.Utilities
             if (istate != null)
                 throw new ZlibException(
                     "You may not call InitializeDeflate() after calling InitializeInflate().");
-            dstate = new DeflateManager();
-            dstate.WantRfc1950HeaderBytes = wantRfc1950Header;
+            dstate = new DeflateManager
+            {
+                WantRfc1950HeaderBytes = wantRfc1950Header
+            };
 
             return dstate.Initialize(this, this.CompressLevel, this.WindowBits, this.Strategy);
         }

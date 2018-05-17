@@ -48,8 +48,10 @@ namespace MonoGame.Tools.Pipeline
 
         private void ButtonBrowse_Click(object sender, EventArgs e)
         {
-            var dialog = new SelectFolderDialog();
-            dialog.Directory = _controller.GetFullPath(textBox1.Text);
+            var dialog = new SelectFolderDialog
+            {
+                Directory = _controller.GetFullPath(textBox1.Text)
+            };
 
             if (dialog.ShowDialog(this) == DialogResult.Ok)
                 textBox1.Text = _controller.GetRelativePath(dialog.Directory);

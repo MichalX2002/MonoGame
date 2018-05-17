@@ -25,26 +25,21 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class Texture2D : Texture
     {
-        protected bool Shared { get { return _shared; } }
-        protected bool Mipmap { get { return _mipmap; } }
-        protected SampleDescription SampleDescription { get { return _sampleDescription; } }
-
-        private bool _shared;
-        private bool _mipmap;
-        private SampleDescription _sampleDescription;
+        protected bool Shared { get; private set; }
+        protected bool Mipmap { get; private set; }
+        protected SampleDescription SampleDescription { get; private set; }
 
         private SharpDX.Direct3D11.Texture2D _cachedStagingTexture;
 
         private void PlatformConstruct(int width, int height, bool mipmap, SurfaceFormat format, SurfaceType type, bool shared)
         {
-            _shared = shared;
-            _mipmap = mipmap;
+            Shared = shared;
+            Mipmap = mipmap;
         }
 
         private void PlatformSetData<T>(int level, T[] data, int startIndex, int elementCount) where T : struct
         {
-            int w, h;
-            GetSizeForLevel(Width, Height, level, out w, out h);
+            GetSizeForLevel(Width, Height, level, out int w, out int h);
 
             // For DXT compressed formats the width and height must be
             // a multiple of 4 for the complete mip level to be set.
@@ -61,13 +56,15 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 var startBytes = startIndex * elementSizeInByte;
                 var dataPtr = (IntPtr)(dataHandle.AddrOfPinnedObject().ToInt64() + startBytes);
-                var region = new ResourceRegion();
-                region.Top = 0;
-                region.Front = 0;
-                region.Back = 1;
-                region.Bottom = h;
-                region.Left = 0;
-                region.Right = w;
+                var region = new ResourceRegion
+                {
+                    Top = 0,
+                    Front = 0,
+                    Back = 1,
+                    Bottom = h,
+                    Left = 0,
+                    Right = w
+                };
 
                 // TODO: We need to deal with threaded contexts here!
                 var subresourceIndex = CalculateSubresourceIndex(0, level);
@@ -90,13 +87,15 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 var startBytes = startIndex * elementSizeInByte;
                 var dataPtr = (IntPtr)(dataHandle.AddrOfPinnedObject().ToInt64() + startBytes);
-                var region = new ResourceRegion();
-                region.Top = rect.Top;
-                region.Front = 0;
-                region.Back = 1;
-                region.Bottom = rect.Bottom;
-                region.Left = rect.Left;
-                region.Right = rect.Right;
+                var region = new ResourceRegion
+                {
+                    Top = rect.Top,
+                    Front = 0,
+                    Back = 1,
+                    Bottom = rect.Bottom,
+                    Left = rect.Left,
+                    Right = rect.Right
+                };
 
 
                 // TODO: We need to deal with threaded contexts here!
@@ -119,25 +118,27 @@ namespace Microsoft.Xna.Framework.Graphics
             // and not creating a new one each time.
             //
             var min = _format.IsCompressedFormat() ? 4 : 1;
-            var levelWidth = Math.Max(width >> level, min);
-            var levelHeight = Math.Max(height >> level, min);
+            var levelWidth = Math.Max(Width >> level, min);
+            var levelHeight = Math.Max(Height >> level, min);
 
             if (_cachedStagingTexture == null)
             {
-                var desc = new Texture2DDescription();
-                desc.Width = levelWidth;
-                desc.Height = levelHeight;
-                desc.MipLevels = 1;
-                desc.ArraySize = 1;
-                desc.Format = SharpDXHelper.ToFormat(_format);
-                desc.BindFlags = BindFlags.None;
-                desc.CpuAccessFlags = CpuAccessFlags.Read;
-                desc.SampleDescription = CreateSampleDescription();
-                desc.Usage = ResourceUsage.Staging;
-                desc.OptionFlags = ResourceOptionFlags.None;
+                var desc = new Texture2DDescription
+                {
+                    Width = levelWidth,
+                    Height = levelHeight,
+                    MipLevels = 1,
+                    ArraySize = 1,
+                    Format = SharpDXHelper.ToFormat(_format),
+                    BindFlags = BindFlags.None,
+                    CpuAccessFlags = CpuAccessFlags.Read,
+                    SampleDescription = CreateSampleDescription(),
+                    Usage = ResourceUsage.Staging,
+                    OptionFlags = ResourceOptionFlags.None
+                };
 
                 // Save sampling description.
-                _sampleDescription = desc.SampleDescription;
+                SampleDescription = desc.SampleDescription;
 
                 _cachedStagingTexture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc);
             }
@@ -193,7 +194,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 }
                 finally
                 {
-                    SharpDX.Utilities.Dispose( ref stream);
+                    SharpDX.Utilities.Dispose(ref stream);
 
                     d3dContext.UnmapSubresource(_cachedStagingTexture, 0);
                 }
@@ -218,10 +219,9 @@ namespace Microsoft.Xna.Framework.Graphics
         private unsafe static Texture2D PlatformFromStream(GraphicsDevice graphicsDevice, Stream stream)
         {
             var reader = new ImageReader();
-            int width, height, channels;
 
             // The data returned is always four channel BGRA
-            var data = reader.Read(stream, out width, out height, out channels, Imaging.STBI_rgb_alpha);
+            var data = reader.Read(stream, out int width, out int height, out int channels, Imaging.STBI_rgb_alpha);
 
             // XNA blacks out any pixels with an alpha of zero.
             if (channels == 4)
@@ -330,7 +330,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 // XNA blacks out any pixels with an alpha of zero.
                 var data = (byte*)s.DataPointer;
-                for (var i = 0; i < s.Length; i+=4)
+                for (var i = 0; i < s.Length; i += 4)
                 {
                     if (data[i + 3] == 0)
                     {
@@ -347,6 +347,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         static ImagingFactory imgfactory;
+
         private static BitmapSource LoadBitmap(Stream stream, out SharpDX.WIC.BitmapDecoder decoder)
         {
             if (imgfactory == null)
@@ -377,19 +378,21 @@ namespace Microsoft.Xna.Framework.Graphics
 
         protected internal virtual Texture2DDescription GetTexture2DDescription()
         {
-            var desc = new Texture2DDescription();
-            desc.Width = width;
-            desc.Height = height;
-            desc.MipLevels = _levelCount;
-            desc.ArraySize = ArraySize;
-            desc.Format = SharpDXHelper.ToFormat(_format);
-            desc.BindFlags = BindFlags.ShaderResource;
-            desc.CpuAccessFlags = CpuAccessFlags.None;
-            desc.SampleDescription = CreateSampleDescription();
-            desc.Usage = ResourceUsage.Default;
-            desc.OptionFlags = ResourceOptionFlags.None;
+            var desc = new Texture2DDescription
+            {
+                Width = Width,
+                Height = Height,
+                MipLevels = _levelCount,
+                ArraySize = ArraySize,
+                Format = SharpDXHelper.ToFormat(_format),
+                BindFlags = BindFlags.ShaderResource,
+                CpuAccessFlags = CpuAccessFlags.None,
+                SampleDescription = CreateSampleDescription(),
+                Usage = ResourceUsage.Default,
+                OptionFlags = ResourceOptionFlags.None
+            };
 
-            if (_shared)
+            if (Shared)
                 desc.OptionFlags |= ResourceOptionFlags.Shared;
 
             return desc;
@@ -400,7 +403,7 @@ namespace Microsoft.Xna.Framework.Graphics
             var desc = GetTexture2DDescription();
 
             // Save sampling description.
-            _sampleDescription = desc.SampleDescription;
+            SampleDescription = desc.SampleDescription;
 
             return new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc);
         }
@@ -412,7 +415,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal SampleDescription GetTextureSampleDescription()
         {
-            return _sampleDescription;
+            return SampleDescription;
         }
 
         private void PlatformReload(Stream textureStream)

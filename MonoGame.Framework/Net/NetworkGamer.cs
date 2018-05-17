@@ -50,23 +50,16 @@ namespace Microsoft.Xna.Framework.Net
 {
 	public class NetworkGamer : Gamer, INotifyPropertyChanged
 	{
-		
-		private byte id;
-		NetworkSession session; 
-		//bool isHost;
-		//bool isLocal;
-		//bool hasVoice;
-		long remoteUniqueIdentifier = -1;
-		GamerStates gamerState;
-		GamerStates oldGamerState;
-		
-		// Declare the event
-		public event PropertyChangedEventHandler PropertyChanged;
+        NetworkSession session;
+        GamerStates gamerState;
+
+        // Declare the event
+        public event PropertyChangedEventHandler PropertyChanged;
 		
 		
 		public NetworkGamer ( NetworkSession session, byte id, GamerStates state)
 		{
-			this.id = id;
+			this.Id = id;
 			this.session = session;
 			this.gamerState = state;
 			// We will modify these HasFlags to inline code because MonoTouch does not support
@@ -81,16 +74,12 @@ namespace Microsoft.Xna.Framework.Net
 			//  variables here and instead just use the flags within the gamerState.
 			
 			this.gamerState = state;
-			this.oldGamerState = state;
+			this.OldState = state;
 		}
-		
-		internal long RemoteUniqueIdentifier
-		{
-			get { return remoteUniqueIdentifier; }
-			set { remoteUniqueIdentifier = value; }
-		}
-		
-		public bool HasLeftSession 
+
+        internal long RemoteUniqueIdentifier { get; set; } = -1;
+
+        public bool HasLeftSession 
 		{ 
 			get
 			{
@@ -105,16 +94,10 @@ namespace Microsoft.Xna.Framework.Net
 				return (gamerState & GamerStates.HasVoice) != 0;
 			}
 		}
-		
-		public byte Id 
-		{ 
-			get
-			{
-				return id;
-			}
-		}
-		
-		public bool IsGuest 
+
+        public byte Id { get; }
+
+        public bool IsGuest 
 		{ 
 			get
 			{
@@ -214,13 +197,11 @@ namespace Microsoft.Xna.Framework.Net
 			get { return gamerState; }
 			set { gamerState = value; }
 		}
-		
-		internal GamerStates OldState {
-			get { return oldGamerState; }
-		}		
-		
-		// Create the OnPropertyChanged method to raise the event
-		protected void OnPropertyChanged(string name)
+
+        internal GamerStates OldState { get; }
+
+        // Create the OnPropertyChanged method to raise the event
+        protected void OnPropertyChanged(string name)
 		{
 			PropertyChangedEventHandler handler = PropertyChanged;
 			if (handler != null)

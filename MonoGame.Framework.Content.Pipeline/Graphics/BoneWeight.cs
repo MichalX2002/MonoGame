@@ -9,19 +9,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
     /// </summary>
     public struct BoneWeight
     {
-        string boneName;
         float weight;
 
         /// <summary>
         /// Gets the name of the bone.
         /// </summary>
-        public string BoneName
-        {
-            get
-            {
-                return boneName;
-            }
-        }
+        public string BoneName { get; }
 
         /// <summary>
         /// Gets the amount of bone influence, ranging from zero to one. The complete set of weights in a BoneWeightCollection should sum to one.
@@ -45,7 +38,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <param name="weight">Amount of influence, ranging from zero to one.</param>
         public BoneWeight(string boneName, float weight)
         {
-            this.boneName = boneName;
+            this.BoneName = boneName;
             this.weight = weight;
         }
     }

@@ -73,8 +73,8 @@ namespace Microsoft.Xna.Framework.Graphics
                 Format = SharpDXHelper.ToFormat(DepthStencilFormat),
                 ArraySize = 1,
                 MipLevels = 1,
-                Width = width,
-                Height = height,
+                Width = Width,
+                Height = Height,
                 SampleDescription = multisampleDesc,
                 BindFlags = BindFlags.DepthStencil,
             }))

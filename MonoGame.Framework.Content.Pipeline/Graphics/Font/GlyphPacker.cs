@@ -17,15 +17,16 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
 			for (int i = 0; i < sourceGlyphs.Length; i++)
 			{
-				var glyph = new ArrangedGlyph();
+                var glyph = new ArrangedGlyph
+                {
+                    Source = sourceGlyphs[i],
 
-				glyph.Source = sourceGlyphs[i];
+                    // Leave a one pixel border around every glyph in the output bitmap.
+                    Width = sourceGlyphs[i].Subrect.Width + 2,
+                    Height = sourceGlyphs[i].Subrect.Height + 2
+                };
 
-				// Leave a one pixel border around every glyph in the output bitmap.
-				glyph.Width = sourceGlyphs[i].Subrect.Width + 2;
-				glyph.Height = sourceGlyphs[i].Subrect.Height + 2;
-
-				glyphs.Add(glyph);
+                glyphs.Add(glyph);
 			}
 
 			// Sort so the largest glyphs get arranged first.

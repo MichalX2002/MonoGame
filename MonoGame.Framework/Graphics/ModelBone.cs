@@ -10,21 +10,12 @@ namespace Microsoft.Xna.Framework.Graphics
 	public sealed class ModelBone
 	{
 		private List<ModelBone> children = new List<ModelBone>();
-		
-		private List<ModelMesh> meshes = new List<ModelMesh>();
 
-		public List<ModelMesh> Meshes {
-			get {
-				return this.meshes;
-			}
-			private set {
-				meshes = value;
-			}
-		}
+        public List<ModelMesh> Meshes { get; private set; } = new List<ModelMesh>();
 
-		// Summary:
-		//     Gets a collection of bones that are children of this bone.
-		public ModelBoneCollection Children { get; private set; }
+        // Summary:
+        //     Gets a collection of bones that are children of this bone.
+        public ModelBoneCollection Children { get; private set; }
 		//
 		// Summary:
 		//     Gets the index of this bone in the Bones collection.
@@ -63,7 +54,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		
 		public void AddMesh(ModelMesh mesh)
 		{
-			meshes.Add(mesh);
+			Meshes.Add(mesh);
 		}
 
 		public void AddChild(ModelBone modelBone)

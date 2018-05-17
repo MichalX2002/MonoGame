@@ -12,50 +12,29 @@ namespace Microsoft.Xna.Framework.Content
 {
     public sealed class ContentReader : BinaryReader
     {
-        private ContentManager contentManager;
         private Action<IDisposable> recordDisposableObject;
         private ContentTypeReaderManager typeReaderManager;
-        private GraphicsDevice graphicsDevice;
         private string assetName;
         private List<KeyValuePair<int, Action<object>>> sharedResourceFixups;
-        private ContentTypeReader[] typeReaders;
-		internal int version;
+        internal int version;
 		internal int sharedResourceCount;
 
-        internal ContentTypeReader[] TypeReaders
-        {
-            get
-            {
-                return typeReaders;
-            }
-        }
+        internal ContentTypeReader[] TypeReaders { get; private set; }
 
-        internal GraphicsDevice GraphicsDevice
-        {
-            get
-            {
-                return this.graphicsDevice;
-            }
-        }
+        internal GraphicsDevice GraphicsDevice { get; }
 
         internal ContentReader(ContentManager manager, Stream stream, GraphicsDevice graphicsDevice, string assetName, int version, Action<IDisposable> recordDisposableObject)
             : base(stream)
         {
-            this.graphicsDevice = graphicsDevice;
+            this.GraphicsDevice = graphicsDevice;
             this.recordDisposableObject = recordDisposableObject;
-            this.contentManager = manager;
+            this.ContentManager = manager;
             this.assetName = assetName;
 			this.version = version;
         }
 
-        public ContentManager ContentManager
-        {
-            get
-            {
-                return contentManager;
-            }
-        }
-        
+        public ContentManager ContentManager { get; }
+
         public string AssetName
         {
             get
@@ -93,7 +72,7 @@ namespace Microsoft.Xna.Framework.Content
         internal void InitializeTypeReaders()
         {
             typeReaderManager = new ContentTypeReaderManager();
-            typeReaders = typeReaderManager.LoadAssetReaders(this);
+            TypeReaders = typeReaderManager.LoadAssetReaders(this);
             sharedResourceCount = Read7BitEncodedInt();
             sharedResourceFixups = new List<KeyValuePair<int, Action<object>>>();
         }
@@ -118,7 +97,7 @@ namespace Microsoft.Xna.Framework.Content
 
             if (!String.IsNullOrEmpty(externalReference))
             {
-                return contentManager.Load<T>(FileHelpers.ResolveRelativePath(assetName, externalReference));
+                return ContentManager.Load<T>(FileHelpers.ResolveRelativePath(assetName, externalReference));
             }
 
             return default(T);
@@ -126,36 +105,37 @@ namespace Microsoft.Xna.Framework.Content
 
         public Matrix ReadMatrix()
         {
-            Matrix result = new Matrix();
-            result.M11 = ReadSingle();
-            result.M12 = ReadSingle();
-            result.M13 = ReadSingle();
-            result.M14 = ReadSingle(); 
-            result.M21 = ReadSingle();
-            result.M22 = ReadSingle();
-            result.M23 = ReadSingle();
-            result.M24 = ReadSingle();
-            result.M31 = ReadSingle();
-            result.M32 = ReadSingle();
-            result.M33 = ReadSingle();
-            result.M34 = ReadSingle();
-            result.M41 = ReadSingle();
-            result.M42 = ReadSingle();
-            result.M43 = ReadSingle();
-            result.M44 = ReadSingle();
+            Matrix result = new Matrix
+            {
+                M11 = ReadSingle(),
+                M12 = ReadSingle(),
+                M13 = ReadSingle(),
+                M14 = ReadSingle(),
+                M21 = ReadSingle(),
+                M22 = ReadSingle(),
+                M23 = ReadSingle(),
+                M24 = ReadSingle(),
+                M31 = ReadSingle(),
+                M32 = ReadSingle(),
+                M33 = ReadSingle(),
+                M34 = ReadSingle(),
+                M41 = ReadSingle(),
+                M42 = ReadSingle(),
+                M43 = ReadSingle(),
+                M44 = ReadSingle()
+            };
             return result;
         }
             
         private void RecordDisposable<T>(T result)
         {
-            var disposable = result as IDisposable;
-            if (disposable == null)
+            if (!(result is IDisposable disposable))
                 return;
 
             if (recordDisposableObject != null)
                 recordDisposableObject(disposable);
             else
-                contentManager.RecordDisposable(disposable);
+                ContentManager.RecordDisposable(disposable);
         }
 
         public T ReadObject<T>()
@@ -181,10 +161,10 @@ namespace Microsoft.Xna.Framework.Content
             if (typeReaderIndex == 0)
                 return existingInstance;
 
-            if (typeReaderIndex > typeReaders.Length)
+            if (typeReaderIndex > TypeReaders.Length)
                 throw new ContentLoadException("Incorrect type reader index found!");
 
-            var typeReader = typeReaders[typeReaderIndex - 1];
+            var typeReader = TypeReaders[typeReaderIndex - 1];
             var result = (T)typeReader.Read(this, existingInstance);
 
             RecordDisposable(result);
@@ -206,11 +186,13 @@ namespace Microsoft.Xna.Framework.Content
 
         public Quaternion ReadQuaternion()
         {
-            Quaternion result = new Quaternion();
-            result.X = ReadSingle();
-            result.Y = ReadSingle();
-            result.Z = ReadSingle();
-            result.W = ReadSingle();
+            Quaternion result = new Quaternion
+            {
+                X = ReadSingle(),
+                Y = ReadSingle(),
+                Z = ReadSingle(),
+                W = ReadSingle()
+            };
             return result;
         }
 
@@ -227,7 +209,7 @@ namespace Microsoft.Xna.Framework.Content
         public T ReadRawObject<T>(T existingInstance)
         {
             Type objectType = typeof(T);
-            foreach(ContentTypeReader typeReader in typeReaders)
+            foreach(ContentTypeReader typeReader in TypeReaders)
             {
                 if(typeReader.TargetType == objectType)
                     return ReadRawObject<T>(typeReader, existingInstance);
@@ -258,38 +240,46 @@ namespace Microsoft.Xna.Framework.Content
 
         public Vector2 ReadVector2()
         {
-            Vector2 result = new Vector2();
-            result.X = ReadSingle();
-            result.Y = ReadSingle();
+            Vector2 result = new Vector2
+            {
+                X = ReadSingle(),
+                Y = ReadSingle()
+            };
             return result;
         }
 
         public Vector3 ReadVector3()
         {
-            Vector3 result = new Vector3();
-            result.X = ReadSingle();
-            result.Y = ReadSingle();
-            result.Z = ReadSingle();
+            Vector3 result = new Vector3
+            {
+                X = ReadSingle(),
+                Y = ReadSingle(),
+                Z = ReadSingle()
+            };
             return result;
         }
 
         public Vector4 ReadVector4()
         {
-            Vector4 result = new Vector4();
-            result.X = ReadSingle();
-            result.Y = ReadSingle();
-            result.Z = ReadSingle();
-            result.W = ReadSingle();
+            Vector4 result = new Vector4
+            {
+                X = ReadSingle(),
+                Y = ReadSingle(),
+                Z = ReadSingle(),
+                W = ReadSingle()
+            };
             return result;
         }
 
         public Color ReadColor()
         {
-            Color result = new Color();
-            result.R = ReadByte();
-            result.G = ReadByte();
-            result.B = ReadByte();
-            result.A = ReadByte();
+            Color result = new Color
+            {
+                R = ReadByte(),
+                G = ReadByte(),
+                B = ReadByte(),
+                A = ReadByte()
+            };
             return result;
         }
 

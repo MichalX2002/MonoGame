@@ -56,9 +56,6 @@ namespace Microsoft.Xna.Framework.Graphics
         Vector3 ambientLightColor = Vector3.Zero;
 
         float alpha = 1;
-
-        DirectionalLight light0;
-        DirectionalLight light1;
         DirectionalLight light2;
 
         float fogStart = 0;
@@ -219,13 +216,13 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Gets the first directional light.
         /// </summary>
-        public DirectionalLight DirectionalLight0 { get { return light0; } }
+        public DirectionalLight DirectionalLight0 { get; private set; }
 
 
         /// <summary>
         /// Gets the second directional light.
         /// </summary>
-        public DirectionalLight DirectionalLight1 { get { return light1; } }
+        public DirectionalLight DirectionalLight1 { get; private set; }
 
 
         /// <summary>
@@ -441,7 +438,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public void EnableDefaultLighting()
         {
-            AmbientLightColor = EffectHelpers.EnableDefaultLighting(light0, light1, light2);
+            AmbientLightColor = EffectHelpers.EnableDefaultLighting(DirectionalLight0, DirectionalLight1, light2);
         }
 
 
@@ -463,15 +460,15 @@ namespace Microsoft.Xna.Framework.Graphics
             worldViewProjParam          = Parameters["WorldViewProj"];
             bonesParam                  = Parameters["Bones"];
 
-            light0 = new DirectionalLight(Parameters["DirLight0Direction"],
+            DirectionalLight0 = new DirectionalLight(Parameters["DirLight0Direction"],
                                           Parameters["DirLight0DiffuseColor"],
                                           Parameters["DirLight0SpecularColor"],
-                                          (cloneSource != null) ? cloneSource.light0 : null);
+                                          (cloneSource != null) ? cloneSource.DirectionalLight0 : null);
 
-            light1 = new DirectionalLight(Parameters["DirLight1Direction"],
+            DirectionalLight1 = new DirectionalLight(Parameters["DirLight1Direction"],
                                           Parameters["DirLight1DiffuseColor"],
                                           Parameters["DirLight1SpecularColor"],
-                                          (cloneSource != null) ? cloneSource.light1 : null);
+                                          (cloneSource != null) ? cloneSource.DirectionalLight1 : null);
 
             light2 = new DirectionalLight(Parameters["DirLight2Direction"],
                                           Parameters["DirLight2DiffuseColor"],
@@ -500,7 +497,7 @@ namespace Microsoft.Xna.Framework.Graphics
             }
 
             // Check if we can use the only-bother-with-the-first-light shader optimization.
-            bool newOneLight = !light1.Enabled && !light2.Enabled;
+            bool newOneLight = !DirectionalLight1.Enabled && !light2.Enabled;
             
             if (oneLight != newOneLight)
             {

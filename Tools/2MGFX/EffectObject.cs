@@ -665,23 +665,27 @@ namespace TwoMGFX
             {
                 var tinfo = shaderInfo.Techniques[t]; ;
 
-                var technique = new d3dx_technique();
-                technique.name = tinfo.name;
-                technique.pass_count = (uint)tinfo.Passes.Count;
-                technique.pass_handles = new d3dx_pass[tinfo.Passes.Count];
+                var technique = new d3dx_technique
+                {
+                    name = tinfo.name,
+                    pass_count = (uint)tinfo.Passes.Count,
+                    pass_handles = new d3dx_pass[tinfo.Passes.Count]
+                };
 
                 for (var p = 0; p < tinfo.Passes.Count; p++)
                 {
                     var pinfo = tinfo.Passes[p];
 
-                    var pass = new d3dx_pass();
-                    pass.name = pinfo.name ?? string.Empty;
+                    var pass = new d3dx_pass
+                    {
+                        name = pinfo.name ?? string.Empty,
 
-                    pass.blendState = pinfo.blendState;
-                    pass.depthStencilState = pinfo.depthStencilState;
-                    pass.rasterizerState = pinfo.rasterizerState;
+                        blendState = pinfo.blendState,
+                        depthStencilState = pinfo.depthStencilState,
+                        rasterizerState = pinfo.rasterizerState,
 
-                    pass.state_count = 0;
+                        state_count = 0
+                    };
                     var tempstate = new d3dx_state[2];
 
                     shaderResult.Profile.ValidateShaderModels(pinfo);
@@ -747,10 +751,12 @@ namespace TwoMGFX
                         // Store the index for runtime lookup.
                         shader._samplers[s].parameter = parameters.Count;
 
-                        var param = new d3dx_parameter();
-                        param.class_ = D3DXPARAMETER_CLASS.OBJECT;
-                        param.name = sampler.parameterName;
-                        param.semantic = string.Empty;
+                        var param = new d3dx_parameter
+                        {
+                            class_ = D3DXPARAMETER_CLASS.OBJECT,
+                            name = sampler.parameterName,
+                            semantic = string.Empty
+                        };
 
                         switch (sampler.type)
                         {
@@ -798,19 +804,23 @@ namespace TwoMGFX
             // Compile and create the shader.
             var shaderData = shaderResult.Profile.CreateShader(shaderResult, shaderFunction, shaderProfile, isVertexShader, this, ref errorsAndWarnings);
 
-            var state = new d3dx_state();
-            state.index = 0;
-            state.type = STATE_TYPE.CONSTANT;
-            state.operation = isVertexShader ? (uint)146 : (uint)147;
+            var state = new d3dx_state
+            {
+                index = 0,
+                type = STATE_TYPE.CONSTANT,
+                operation = isVertexShader ? (uint)146 : (uint)147,
 
-            state.parameter = new d3dx_parameter();
-            state.parameter.name = string.Empty;
-            state.parameter.semantic = string.Empty;
-            state.parameter.class_ = D3DXPARAMETER_CLASS.OBJECT;
-            state.parameter.type = isVertexShader ? D3DXPARAMETER_TYPE.VERTEXSHADER : D3DXPARAMETER_TYPE.PIXELSHADER;
-            state.parameter.rows = 0;
-            state.parameter.columns = 0;
-            state.parameter.data = shaderData.SharedIndex;
+                parameter = new d3dx_parameter
+                {
+                    name = string.Empty,
+                    semantic = string.Empty,
+                    class_ = D3DXPARAMETER_CLASS.OBJECT,
+                    type = isVertexShader ? D3DXPARAMETER_TYPE.VERTEXSHADER : D3DXPARAMETER_TYPE.PIXELSHADER,
+                    rows = 0,
+                    columns = 0,
+                    data = shaderData.SharedIndex
+                }
+            };
 
             return state;
         }

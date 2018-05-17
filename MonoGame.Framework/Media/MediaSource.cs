@@ -12,21 +12,14 @@ namespace Microsoft.Xna.Framework.Media
 {
 	public sealed class MediaSource
     {
-		private MediaSourceType _type;
-		private string _name;
+        private string _name;
 		internal MediaSource (string name, MediaSourceType type)
 		{
 			_name = name;
-			_type = type;
+			MediaSourceType = type;
 		}
-				
-        public Microsoft.Xna.Framework.Media.MediaSourceType MediaSourceType
-        {
-            get
-            {
-				return _type;
-            }
-        }
+
+        public Microsoft.Xna.Framework.Media.MediaSourceType MediaSourceType { get; }
 
         public string Name
         {

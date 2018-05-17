@@ -144,10 +144,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
 
             if (string.IsNullOrEmpty(str))
                 return;
-            
+
             // Do we already have one for this?
-            Action<object> prevFixup;
-            if (!_resourceFixups.TryGetValue(str, out prevFixup))
+            if (!_resourceFixups.TryGetValue(str, out Action<object> prevFixup))
                 _resourceFixups.Add(str, (o) => fixup((T)o));
             else
             {
@@ -180,8 +179,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             // Execute the fixups.
             foreach (var fixup in _resourceFixups)
             {
-                object resource;
-                if (!resources.TryGetValue(fixup.Key, out resource))
+                if (!resources.TryGetValue(fixup.Key, out object resource))
                     throw new InvalidContentException("Missing shared resource \"" + fixup.Key + "\".");
                 fixup.Value(resource);
             }
@@ -202,8 +200,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
                 existingInstance.Filename = filename;
             };
 
-            List<Action<Type, string>> fixups;
-            if (!_externalReferences.TryGetValue(str, out fixups))
+            if (!_externalReferences.TryGetValue(str, out List<Action<Type, string>> fixups))
                 _externalReferences.Add(str, fixups = new List<Action<Type, string>>());
             fixups.Add(fixup);
         }
@@ -219,9 +216,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             Xml.ReadStartElement();
             while (MoveToElement("ExternalReference"))
             {
-                List<Action<Type, string>> fixups;
                 var id = Xml.GetAttribute("ID");
-                if (!_externalReferences.TryGetValue(id, out fixups))
+                if (!_externalReferences.TryGetValue(id, out List<Action<Type, string>> fixups))
                     throw NewInvalidContentException(null, "Unknown external reference id '{0}'!", id);
 
                 Xml.MoveToAttribute("TargetType");

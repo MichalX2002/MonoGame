@@ -8,20 +8,12 @@ namespace Microsoft.Xna.Framework
 {
     public class GameComponentCollectionEventArgs : EventArgs
     {
-        private IGameComponent _gameComponent;
-
         public GameComponentCollectionEventArgs(IGameComponent gameComponent)
         {
-            _gameComponent = gameComponent;
+            GameComponent = gameComponent;
         }
 
-        public IGameComponent GameComponent
-        {
-            get
-            {
-                return _gameComponent;
-            }
-        }
+        public IGameComponent GameComponent { get; }
     }
 }
 

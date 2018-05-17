@@ -47,8 +47,7 @@ namespace Microsoft.Xna.Framework.Content
         protected internal override BasicEffect Read(ContentReader input, BasicEffect existingInstance)
         {
             var effect = new BasicEffect(input.GraphicsDevice);
-            var texture = input.ReadExternalReference<Texture>() as Texture2D;
-            if (texture != null)
+            if (input.ReadExternalReference<Texture>() is Texture2D texture)
             {
                 effect.Texture = texture;
                 effect.TextureEnabled = true;

@@ -25,7 +25,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             var element = new SharpDX.Direct3D11.InputElement();
 
-            switch (_usage)
+            switch (VertexElementUsage)
             {
                 case VertexElementUsage.Position:
                     element.SemanticName = "POSITION";
@@ -58,9 +58,9 @@ namespace Microsoft.Xna.Framework.Graphics
                     throw new NotSupportedException("Unknown vertex element usage!");
             }
 
-            element.SemanticIndex = _usageIndex;
+            element.SemanticIndex = UsageIndex;
 
-            switch (_format)
+            switch (VertexElementFormat)
             {
                 case VertexElementFormat.Single:
                     element.Format = SharpDX.DXGI.Format.R32_Float;
@@ -103,7 +103,7 @@ namespace Microsoft.Xna.Framework.Graphics
             }
 
             element.Slot = slot;
-            element.AlignedByteOffset = _offset;
+            element.AlignedByteOffset = Offset;
             
             // Note that instancing is only supported in feature level 9.3 and above.
             element.Classification = (instanceFrequency == 0) 

@@ -52,8 +52,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
         protected override bool TryCopyFrom(BitmapContent sourceBitmap, Rectangle sourceRegion, Rectangle destinationRegion)
         {
-            SurfaceFormat sourceFormat;
-            if (!sourceBitmap.TryGetFormat(out sourceFormat))
+            if (!sourceBitmap.TryGetFormat(out SurfaceFormat sourceFormat))
                 return false;
 
             // A shortcut for copying the entire bitmap to another bitmap of the same type and format
@@ -101,8 +100,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
         protected override bool TryCopyTo(BitmapContent destinationBitmap, Rectangle sourceRegion, Rectangle destinationRegion)
         {
-            SurfaceFormat destinationFormat;
-            if (!destinationBitmap.TryGetFormat(out destinationFormat))
+            if (!destinationBitmap.TryGetFormat(out SurfaceFormat destinationFormat))
                 return false;
 
             // A shortcut for copying the entire bitmap to another bitmap of the same type and format

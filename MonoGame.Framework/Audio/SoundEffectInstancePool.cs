@@ -97,10 +97,12 @@ namespace Microsoft.Xna.Framework.Audio
             }
             else
             {
-                inst = new SoundEffectInstance();
-                inst._isPooled = true;
-                inst._isXAct = forXAct;
-            }
+                    inst = new SoundEffectInstance
+                    {
+                        _isPooled = true,
+                        _isXAct = forXAct
+                    };
+                }
 
             return inst;
 

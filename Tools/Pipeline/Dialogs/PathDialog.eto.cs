@@ -22,53 +22,71 @@ namespace MonoGame.Tools.Pipeline
             DisplayMode = DialogDisplayMode.Attached;
             Size = new Size(370, 200);
 
-            buttonOk = new Button();
-            buttonOk.Text = "Ok";
+            buttonOk = new Button
+            {
+                Text = "Ok"
+            };
             PositiveButtons.Add(buttonOk);
             DefaultButton = buttonOk;
 
-            buttonCancel = new Button();
-            buttonCancel.Text = "Cancel";
+            buttonCancel = new Button
+            {
+                Text = "Cancel"
+            };
             NegativeButtons.Add(buttonCancel);
             AbortButton = buttonCancel;
 
-            layout1 = new DynamicLayout();
-            layout1.DefaultSpacing = new Size(4, 4);
-            layout1.Padding = new Padding(6);
+            layout1 = new DynamicLayout
+            {
+                DefaultSpacing = new Size(4, 4),
+                Padding = new Padding(6)
+            };
             layout1.BeginVertical();
 
             layout1.Add(null, true, true);
 
-            label1 = new Label();
-            label1.Text = "Path to use:";
+            label1 = new Label
+            {
+                Text = "Path to use:"
+            };
             layout1.Add(label1);
 
-            stack1 = new StackLayout();
-            stack1.Spacing = 4;
-            stack1.Orientation = Orientation.Horizontal;
+            stack1 = new StackLayout
+            {
+                Spacing = 4,
+                Orientation = Orientation.Horizontal
+            };
 
             textBox1 = new TextBox();
             stack1.Items.Add(new StackLayoutItem(textBox1, VerticalAlignment.Center, true));
 
-            buttonBrowse = new Button();
-            buttonBrowse.Text = "...";
-            buttonBrowse.MinimumSize = new Size(1, 1);
+            buttonBrowse = new Button
+            {
+                Text = "...",
+                MinimumSize = new Size(1, 1)
+            };
             stack1.Items.Add(new StackLayoutItem(buttonBrowse, VerticalAlignment.Center, false));
 
             layout1.Add(stack1);
 
-            label2 = new Label();
-            label2.Text = "Macros:";
+            label2 = new Label
+            {
+                Text = "Macros:"
+            };
             layout1.Add(label2);
 
-            stack2 = new StackLayout();
-            stack2.Spacing = 4;
-            stack2.Orientation = Orientation.Horizontal;
+            stack2 = new StackLayout
+            {
+                Spacing = 4,
+                Orientation = Orientation.Horizontal
+            };
 
             foreach (var symbol in symbols)
             {
-                var buttonSymbol = new Button();
-                buttonSymbol.Text = symbol;
+                var buttonSymbol = new Button
+                {
+                    Text = symbol
+                };
                 buttonSymbol.Click += ButtonSymbol_Click;
                 stack2.Items.Add(new StackLayoutItem(buttonSymbol, true));
             }

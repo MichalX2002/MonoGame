@@ -12,11 +12,13 @@ namespace Microsoft.Xna.Framework.Graphics
         private void PlatformInitialize()
         {
             // Allocate the hardware constant buffer.
-            var desc = new SharpDX.Direct3D11.BufferDescription();
-            desc.SizeInBytes = _buffer.Length;
-            desc.Usage = SharpDX.Direct3D11.ResourceUsage.Default;
-            desc.BindFlags = SharpDX.Direct3D11.BindFlags.ConstantBuffer;
-            desc.CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags.None;
+            var desc = new SharpDX.Direct3D11.BufferDescription
+            {
+                SizeInBytes = _buffer.Length,
+                Usage = SharpDX.Direct3D11.ResourceUsage.Default,
+                BindFlags = SharpDX.Direct3D11.BindFlags.ConstantBuffer,
+                CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags.None
+            };
             lock (GraphicsDevice._d3dContext)
                 _cbuffer = new SharpDX.Direct3D11.Buffer(GraphicsDevice._d3dDevice, desc);
         }
@@ -24,7 +26,7 @@ namespace Microsoft.Xna.Framework.Graphics
         private void PlatformClear()
         {
             SharpDX.Utilities.Dispose(ref _cbuffer);
-            _dirty = true;
+            Dirty = true;
         }
 
         internal void PlatformApply(GraphicsDevice device, ShaderStage stage, int slot)
@@ -37,10 +39,10 @@ namespace Microsoft.Xna.Framework.Graphics
             var d3dContext = GraphicsDevice._d3dContext;
 
             // Update the hardware buffer.
-            if (_dirty)
+            if (Dirty)
             {
                 d3dContext.UpdateSubresource(_buffer, _cbuffer);
-                _dirty = false;
+                Dirty = false;
             }
             
             // Set the buffer to the right stage.

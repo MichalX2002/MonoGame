@@ -92,40 +92,43 @@ namespace Microsoft.Xna.Framework.Net
 		
 		public Matrix ReadMatrix()
 		{
-			Matrix matrix = new Matrix();
-			
-			matrix.M11 = this.ReadSingle();
-			matrix.M12 = this.ReadSingle();
-			matrix.M13 = this.ReadSingle();
-			matrix.M14 = this.ReadSingle();
-			
-			matrix.M21 = this.ReadSingle();
-			matrix.M22 = this.ReadSingle();
-			matrix.M23 = this.ReadSingle();
-			matrix.M24 = this.ReadSingle();
-			
-			matrix.M31 = this.ReadSingle();
-			matrix.M32 = this.ReadSingle();
-			matrix.M33 = this.ReadSingle();
-			matrix.M34 = this.ReadSingle();
-			
-			matrix.M41 = this.ReadSingle();
-			matrix.M42 = this.ReadSingle();
-			matrix.M43 = this.ReadSingle();
-			matrix.M44 = this.ReadSingle();
+            Matrix matrix = new Matrix
+            {
+                M11 = this.ReadSingle(),
+                M12 = this.ReadSingle(),
+                M13 = this.ReadSingle(),
+                M14 = this.ReadSingle(),
 
-			return matrix;
+                M21 = this.ReadSingle(),
+                M22 = this.ReadSingle(),
+                M23 = this.ReadSingle(),
+                M24 = this.ReadSingle(),
+
+                M31 = this.ReadSingle(),
+                M32 = this.ReadSingle(),
+                M33 = this.ReadSingle(),
+                M34 = this.ReadSingle(),
+
+                M41 = this.ReadSingle(),
+                M42 = this.ReadSingle(),
+                M43 = this.ReadSingle(),
+                M44 = this.ReadSingle()
+            };
+
+            return matrix;
 		}
 		
 		public Quaternion ReadQuaternion()
 		{
-			Quaternion quat = new Quaternion();
-			quat.X = this.ReadSingle();
-			quat.Y = this.ReadSingle();
-			quat.Z = this.ReadSingle();
-			quat.W = this.ReadSingle();
-			
-			return quat;
+            Quaternion quat = new Quaternion
+            {
+                X = this.ReadSingle(),
+                Y = this.ReadSingle(),
+                Z = this.ReadSingle(),
+                W = this.ReadSingle()
+            };
+
+            return quat;
 			
 		}
 		
@@ -136,31 +139,37 @@ namespace Microsoft.Xna.Framework.Net
 		
 		public Vector2 ReadVector2()
 		{
-			Vector2 vect = new Vector2();
-			vect.X = this.ReadSingle();
-			vect.Y = this.ReadSingle();
-			
-			return vect;		}
+            Vector2 vect = new Vector2
+            {
+                X = this.ReadSingle(),
+                Y = this.ReadSingle()
+            };
+
+            return vect;		}
 		
 		public Vector3 ReadVector3()
 		{
-			Vector3 vect = new Vector3();
-			vect.X = this.ReadSingle();
-			vect.Y = this.ReadSingle();
-			vect.Z = this.ReadSingle();
-			
-			return vect;
+            Vector3 vect = new Vector3
+            {
+                X = this.ReadSingle(),
+                Y = this.ReadSingle(),
+                Z = this.ReadSingle()
+            };
+
+            return vect;
 		}
 			
 		public Vector4 ReadVector4()
 		{
-			Vector4 vect = new Vector4();
-			vect.X = this.ReadSingle();
-			vect.Y = this.ReadSingle();
-			vect.Z = this.ReadSingle();
-			vect.W = this.ReadSingle();
-			
-			return vect;
+            Vector4 vect = new Vector4
+            {
+                X = this.ReadSingle(),
+                Y = this.ReadSingle(),
+                Z = this.ReadSingle(),
+                W = this.ReadSingle()
+            };
+
+            return vect;
 		}
 		
 		internal void Reset(int size) {

@@ -7,15 +7,13 @@ namespace Microsoft.Xna.Framework.Graphics
     internal sealed class ConstantBufferCollection
     {
         private readonly ConstantBuffer[] _buffers;
-
-        private ShaderStage _stage;
-        private ShaderStage Stage { get { return this._stage; } }
+        private ShaderStage Stage { get; }
 
         private int _valid;
 
         internal ConstantBufferCollection(ShaderStage stage, int maxBuffers)
         {
-            _stage = stage;
+            Stage = stage;
             _buffers = new ConstantBuffer[maxBuffers];
             _valid = 0;
         }
@@ -71,7 +69,7 @@ namespace Microsoft.Xna.Framework.Graphics
 #if OPENGL || WEB
                     buffer.PlatformApply(device, shaderProgram);
 #else
-                    buffer.PlatformApply(device, _stage, i);
+                    buffer.PlatformApply(device, Stage, i);
 #endif
                 }
 

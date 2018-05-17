@@ -18,9 +18,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
     /// </summary>
     public struct TouchPanelCapabilities
     {
-        private bool hasPressure;
         private bool isConnected;
-        private int maximumTouchCount;
         private bool initialized;
 
         internal void Initialize()
@@ -31,7 +29,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
 
                 // There does not appear to be a way of finding out if a touch device supports pressure.
                 // XNA does not expose a pressure value, so let's assume it doesn't support it.
-                hasPressure = false;
+                HasPressure = false;
 
 #if WINDOWS_UAP
                 // Is a touch device present?
@@ -46,8 +44,8 @@ namespace Microsoft.Xna.Framework.Input.Touch
                         isConnected = true;
                 }
 #elif WINDOWS
-                maximumTouchCount = GetSystemMetrics(SM_MAXIMUMTOUCHES);
-                isConnected = (maximumTouchCount > 0);
+                MaximumTouchCount = GetSystemMetrics(SM_MAXIMUMTOUCHES);
+                isConnected = (MaximumTouchCount > 0);
 #elif ANDROID
                 // http://developer.android.com/reference/android/content/pm/PackageManager.html#FEATURE_TOUCHSCREEN
                 var pm = Game.Activity.PackageManager;
@@ -72,13 +70,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
             }
         }
 
-        public bool HasPressure
-        {
-            get
-            {
-                return hasPressure;
-            }
-        }
+        public bool HasPressure { get; private set; }
 
         /// <summary>
         /// Returns true if a device is available for use.
@@ -94,13 +86,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// <summary>
         /// Returns the maximum number of touch locations tracked by the touch panel device.
         /// </summary>
-        public int MaximumTouchCount
-        {
-            get
-            {
-                return maximumTouchCount;
-            }
-        }
+        public int MaximumTouchCount { get; private set; }
 
 #if WINDOWS
         [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto, ExactSpelling = true)]

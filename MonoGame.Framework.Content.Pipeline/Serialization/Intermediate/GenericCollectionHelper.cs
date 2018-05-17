@@ -66,16 +66,20 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
 
         public void Serialize(IntermediateWriter output, object collection, ContentSerializerAttribute format)
         {
-            var itemFormat = new ContentSerializerAttribute();
-            itemFormat.ElementName = format.CollectionItemName;
+            var itemFormat = new ContentSerializerAttribute
+            {
+                ElementName = format.CollectionItemName
+            };
             foreach (var item in (IEnumerable) collection)
                 output.WriteObject(item, itemFormat, _contentSerializer);
         }
 
         public void Deserialize(IntermediateReader input, object collection, ContentSerializerAttribute format)
         {
-            var itemFormat = new ContentSerializerAttribute();
-            itemFormat.ElementName = format.CollectionItemName;
+            var itemFormat = new ContentSerializerAttribute
+            {
+                ElementName = format.CollectionItemName
+            };
             while (input.MoveToElement(format.CollectionItemName))
                 _addMethod.Invoke(collection, new[] { input.ReadObject<object>(itemFormat, _contentSerializer) });
         }

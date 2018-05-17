@@ -6,42 +6,25 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 {
     public sealed class ModelBoneContent
     {
-        private ModelBoneContentCollection _children;
-        private int _index;
-        private string _name;
-        private ModelBoneContent _parent;
         private Matrix _transform;
 
         internal ModelBoneContent() { }
 
         internal ModelBoneContent(string name, int index, Matrix transform, ModelBoneContent parent)
         {
-            _name = name;
-            _index = index;
+            Name = name;
+            Index = index;
             _transform = transform;
-            _parent = parent;
+            Parent = parent;
         }
 
-        public ModelBoneContentCollection Children
-        {
-            get { return _children; }
-            internal set { _children = value; }
-        }
+        public ModelBoneContentCollection Children { get; internal set; }
 
-        public int Index
-        {
-            get { return _index; }
-        }
+        public int Index { get; }
 
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; }
 
-        public ModelBoneContent Parent
-        {
-            get { return _parent; }
-        }
+        public ModelBoneContent Parent { get; }
 
         public Matrix Transform
         {

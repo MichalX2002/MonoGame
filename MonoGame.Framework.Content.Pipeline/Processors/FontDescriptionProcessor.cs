@@ -73,19 +73,15 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 				if (!File.Exists(fontFile)) {
 					throw new Exception(string.Format("Could not load {0}", fontFile));
 				}
-				var lineSpacing = 0f;
-				int yOffsetMin = 0;
-				var glyphs = ImportFont(input, out lineSpacing, out yOffsetMin, context, fontFile);
+                var glyphs = ImportFont(input, out float lineSpacing, out int yOffsetMin, context, fontFile);
 
-				// Optimize.
-				foreach (Glyph glyph in glyphs)
+                // Optimize.
+                foreach (Glyph glyph in glyphs)
 				{
 					GlyphCropper.Crop(glyph);
 				}
 
-                // We need to know how to pack the glyphs.
-                bool requiresPot, requiresSquare;
-                texProfile.Requirements(context, TextureFormat, out requiresPot, out requiresSquare);
+                texProfile.Requirements(context, TextureFormat, out bool requiresPot, out bool requiresSquare);
 
                 var face = GlyphPacker.ArrangeGlyphs(glyphs, requiresPot, requiresSquare);
 
@@ -239,8 +235,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             }
             else if (CurrentPlatform.OS == OS.Linux)
             {
-                string s, e;
-                ExternalTool.Run("/bin/bash", string.Format("-c \"fc-match -f '%{{file}}:%{{family}}\\n' '{0}:style={1}'\"", name, style), out s, out e);
+                ExternalTool.Run("/bin/bash", string.Format("-c \"fc-match -f '%{{file}}:%{{family}}\\n' '{0}:style={1}'\"", name, style), out string s, out string e);
                 s = s.Trim();
 
                 var split = s.Split(':');

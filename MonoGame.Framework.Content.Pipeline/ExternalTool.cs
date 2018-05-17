@@ -19,8 +19,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
     {
         public static int Run(string command, string arguments)
         {
-            string stdout, stderr;
-            var result = Run(command, arguments, out stdout, out stderr);
+            var result = Run(command, arguments, out string stdout, out string stderr);
             if (result < 0)
                 throw new Exception(string.Format("{0} returned exit code {1}", command, result));
 

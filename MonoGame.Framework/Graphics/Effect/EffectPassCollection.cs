@@ -64,32 +64,28 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             private readonly EffectPass[] _array;
             private int _index;
-            private EffectPass _current;
 
             internal Enumerator(EffectPass[] array)
             {
                 _array = array;
                 _index = 0;
-                _current = null;
+                Current = null;
             }
 
             public bool MoveNext()
             {
                 if (_index < _array.Length)
                 {
-                    _current = _array[_index];
+                    Current = _array[_index];
                     _index++;
                     return true;
                 }
                 _index = _array.Length + 1;
-                _current = null;
+                Current = null;
                 return false;
             }
 
-            public EffectPass Current
-            {
-                get { return _current; }
-            }
+            public EffectPass Current { get; private set; }
 
             public void Dispose()
             {
@@ -109,7 +105,7 @@ namespace Microsoft.Xna.Framework.Graphics
             void System.Collections.IEnumerator.Reset()
             {
                 _index = 0;
-                _current = null;
+                Current = null;
             }
         }
     }

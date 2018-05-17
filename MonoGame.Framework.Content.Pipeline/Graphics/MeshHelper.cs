@@ -151,9 +151,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
             var normals = channels.Get<Vector3>(VertexChannelNames.Normal(0));
             var uvs = channels.Get<Vector2>(textureCoordinateChannelName);
-
-            Vector3[] tangents, bitangents;
-            CalculateTangentFrames(verts.Positions, indices, normals, uvs, out tangents, out bitangents);
+            CalculateTangentFrames(verts.Positions, indices, normals, uvs, out Vector3[] tangents, out Vector3[] bitangents);
 
             // All the indices are 1:1 with the others, so we 
             // can just add the new channels in place.
@@ -331,8 +329,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 // Next try searching the children for a root bone.
                 foreach (var nodeContent in node.Children)
                 {
-                    var bone = nodeContent as BoneContent;
-                    if (bone == null) 
+                    if (!(nodeContent is BoneContent bone))
                         continue;
 
                     // If we found a bone
@@ -366,8 +363,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             while (work.Count > 0)
             {
                 var top = work.Pop();
-                var bone = top as BoneContent;
-                if (bone != null)
+                if (top is BoneContent bone)
                     results.Add(bone);
 
                 for (var i = top.Children.Count - 1; i >= 0; i--)
@@ -451,8 +447,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 var hash = iData.ComputeHash();
 
                 var merged = false;
-                List<VertexData> candidates;
-                if (hashMap.TryGetValue(hash, out candidates))
+                if (hashMap.TryGetValue(hash, out List<VertexData> candidates))
                 {
                     for (var candidateIndex = 0; candidateIndex < candidates.Count; candidateIndex++)
                     {
@@ -556,8 +551,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                     work.Push(child);
 
                 // Transform the mesh content.
-                var mesh = node as MeshContent;
-                if (mesh != null)
+                if (node is MeshContent mesh)
                     mesh.TransformContents(ref transform);
 
                 // Transform local coordinate system using "similarity transform".

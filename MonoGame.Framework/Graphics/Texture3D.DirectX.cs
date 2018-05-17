@@ -33,9 +33,9 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             var description = new Texture3DDescription
             {
-                Width = _width,
-                Height = _height,
-                Depth = _depth,
+                Width = Width,
+                Height = Height,
+                Depth = Depth,
                 MipLevels = _levelCount,
                 Format = SharpDXHelper.ToFormat(_format),
                 BindFlags = BindFlags.ShaderResource,
@@ -98,9 +98,9 @@ namespace Microsoft.Xna.Framework.Graphics
             //
             var desc = new Texture3DDescription
             {
-                Width = _width,
-                Height = _height,
-                Depth = _depth,
+                Width = Width,
+                Height = Height,
+                Depth = Depth,
                 MipLevels = 1,
                 Format = SharpDXHelper.ToFormat(_format),
                 BindFlags = BindFlags.None,

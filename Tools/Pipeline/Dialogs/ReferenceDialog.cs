@@ -39,16 +39,20 @@ namespace MonoGame.Tools.Pipeline
             _dllFileFilter = new FileFilter("Dll Files (*.dll)", new[] { ".dll" });
             _allFileFilter = new FileFilter("All Files (*.*)", new[] { ".*" });
 
-            var assemblyColumn = new GridColumn();
-            assemblyColumn.HeaderText = "Assembly";
-            assemblyColumn.DataCell = new TextBoxCell("Assembly");
-            assemblyColumn.Sortable = true;
+            var assemblyColumn = new GridColumn
+            {
+                HeaderText = "Assembly",
+                DataCell = new TextBoxCell("Assembly"),
+                Sortable = true
+            };
             grid1.Columns.Add(assemblyColumn);
 
-            var locationColumn = new GridColumn();
-            locationColumn.HeaderText = "Location";
-            locationColumn.DataCell = new TextBoxCell("Location");
-            locationColumn.Sortable = true;
+            var locationColumn = new GridColumn
+            {
+                HeaderText = "Location",
+                DataCell = new TextBoxCell("Location"),
+                Sortable = true
+            };
             grid1.Columns.Add(locationColumn);
 
             grid1.DataStore = _dataStore = new SelectableFilterCollection<RefItem>(grid1);
@@ -80,9 +84,11 @@ namespace MonoGame.Tools.Pipeline
 
         private void ButtonAdd_Click(object sender, EventArgs e)
         {
-            var dialog = new OpenFileDialog();
-            dialog.Directory = new Uri(_controller.ProjectItem.Location);
-            dialog.MultiSelect = true;
+            var dialog = new OpenFileDialog
+            {
+                Directory = new Uri(_controller.ProjectItem.Location),
+                MultiSelect = true
+            };
             dialog.Filters.Add(_dllFileFilter);
             dialog.Filters.Add(_allFileFilter);
             dialog.CurrentFilter = _dllFileFilter;

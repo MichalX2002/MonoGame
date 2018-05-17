@@ -138,11 +138,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             }
 
             // Look it up.
-            ContentTypeSerializer serializer;
-            if (_serializers.TryGetValue(type, out serializer))
+            if (_serializers.TryGetValue(type, out ContentTypeSerializer serializer))
                 return serializer;
 
-            Type serializerType;
 
             if (type.IsArray)
             {
@@ -152,7 +150,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
                 var arrayType = typeof(ArraySerializer<>).MakeGenericType(new[] { type.GetElementType() });
                 serializer = (ContentTypeSerializer)Activator.CreateInstance(arrayType);
             }
-            else if (type.IsGenericType && _genericSerializerTypes.TryGetValue(type.GetGenericTypeDefinition(), out serializerType))
+            else if (type.IsGenericType && _genericSerializerTypes.TryGetValue(type.GetGenericTypeDefinition(), out Type serializerType))
             {
                 serializerType = serializerType.MakeGenericType(type.GetGenericArguments());
                 serializer = (ContentTypeSerializer)Activator.CreateInstance(serializerType);
@@ -193,8 +191,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             if (_collectionHelpers == null)
                 _collectionHelpers = new Dictionary<Type, GenericCollectionHelper>();
 
-            GenericCollectionHelper result;
-            if (!_collectionHelpers.TryGetValue(type, out result))
+            if (!_collectionHelpers.TryGetValue(type, out GenericCollectionHelper result))
             {
                 result = new GenericCollectionHelper(this, type);
                 _collectionHelpers.Add(type, result);
@@ -245,12 +242,11 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
         /// </summary>
         internal Type FindType(string typeName)
         {
-            Type foundType;
 
             typeName = typeName.Trim();
 
             // Shortcut for friendly C# names
-            if (_typeAliases.TryGetValue(typeName, out foundType))
+            if (_typeAliases.TryGetValue(typeName, out Type foundType))
                 return foundType;
 
             // If this is an array then handle it separately.
@@ -297,10 +293,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
         /// </summary>
         internal string GetFullTypeName(Type type)
         {
-            string typeName;
 
             // Shortcut for friendly C# names
-            if (_typeAliasesReverse.TryGetValue(type, out typeName))
+            if (_typeAliasesReverse.TryGetValue(type, out string typeName))
                 return typeName;
 
             // Look for aliased namespace.
