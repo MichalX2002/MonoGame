@@ -201,6 +201,24 @@ namespace Microsoft.Xna.Framework
 
         #region Operators
 
+        public static Rectangle operator +(Rectangle a, Rectangle b)
+        {
+            return new Rectangle(
+                a.X + b.X,
+                a.Y + b.Y,
+                a.Width + b.Width,
+                a.Height + b.Height);
+        }
+
+        public static Rectangle operator -(Rectangle a, Rectangle b)
+        {
+            return new Rectangle(
+                a.X - b.X,
+                a.Y - b.Y,
+                a.Width - b.Width,
+                a.Height - b.Height);
+        }
+
         /// <summary>
         /// Compares whether two <see cref="Rectangle"/> instances are equal.
         /// </summary>

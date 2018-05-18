@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Xna.Framework
 {
-    internal class ReusableItemList<T> : ICollection<T>, IEnumerator<T>
+    internal class ReusableItemList<T> : ICollection<T>, IReadOnlyList<T>, IEnumerator<T>
     {
         private readonly List<T> _list = new List<T>();
         private int _iteratorIndex;
