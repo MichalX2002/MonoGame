@@ -240,6 +240,16 @@ namespace Microsoft.Xna.Framework
         #region Public Methods
 
         /// <summary>
+        /// Gets a <see cref="Vector3"/> representation for this
+        /// object with <see cref="Vector3.Z"/> axis set to 0.
+        /// </summary>
+        /// <returns>A <see cref="Vector3"/> representation for this object.</returns>
+        public Vector3 ToVector3()
+        {
+            return new Vector3(X, Y, 0);
+        }
+
+        /// <summary>
         /// Performs vector addition on <paramref name="value1"/> and <paramref name="value2"/>.
         /// </summary>
         /// <param name="value1">The first vector to add.</param>
