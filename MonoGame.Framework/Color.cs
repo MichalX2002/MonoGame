@@ -533,701 +533,597 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Crimson color (R:220,G:20,B:60,A:255).
         /// </summary>
-        public static Color Crimson;
+        public static readonly Color Crimson;
 
         /// <summary>
         /// Cyan color (R:0,G:255,B:255,A:255).
         /// </summary>
-        public static Color Cyan;
+        public static readonly Color Cyan;
 
         /// <summary>
         /// DarkBlue color (R:0,G:0,B:139,A:255).
         /// </summary>
-        public static Color DarkBlue;
+        public static readonly Color DarkBlue;
 
         /// <summary>
         /// DarkCyan color (R:0,G:139,B:139,A:255).
         /// </summary>
-        public static Color DarkCyan;
+        public static readonly Color DarkCyan;
 
         /// <summary>
         /// DarkGoldenrod color (R:184,G:134,B:11,A:255).
         /// </summary>
-        public static Color DarkGoldenrod;
+        public static readonly Color DarkGoldenrod;
 
         /// <summary>
         /// DarkGray color (R:169,G:169,B:169,A:255).
         /// </summary>
-        public static Color DarkGray;
+        public static readonly Color DarkGray;
 
         /// <summary>
         /// DarkGreen color (R:0,G:100,B:0,A:255).
         /// </summary>
-        public static Color DarkGreen;
+        public static readonly Color DarkGreen;
 
         /// <summary>
         /// DarkKhaki color (R:189,G:183,B:107,A:255).
         /// </summary>
-        public static Color DarkKhaki;
+        public static readonly Color DarkKhaki;
 
         /// <summary>
         /// DarkMagenta color (R:139,G:0,B:139,A:255).
         /// </summary>
-        public static Color DarkMagenta;
+        public static readonly Color DarkMagenta;
 
         /// <summary>
         /// DarkOliveGreen color (R:85,G:107,B:47,A:255).
         /// </summary>
-        public static Color DarkOliveGreen;
+        public static readonly Color DarkOliveGreen;
 
         /// <summary>
         /// DarkOrange color (R:255,G:140,B:0,A:255).
         /// </summary>
-        public static Color DarkOrange;
+        public static readonly Color DarkOrange;
 
         /// <summary>
         /// DarkOrchid color (R:153,G:50,B:204,A:255).
         /// </summary>
-        public static Color DarkOrchid;
+        public static readonly Color DarkOrchid;
 
         /// <summary>
         /// DarkRed color (R:139,G:0,B:0,A:255).
         /// </summary>
-        public static Color DarkRed;
+        public static readonly Color DarkRed;
 
         /// <summary>
         /// DarkSalmon color (R:233,G:150,B:122,A:255).
         /// </summary>
-        public static Color DarkSalmon;
+        public static readonly Color DarkSalmon;
 
         /// <summary>
         /// DarkSeaGreen color (R:143,G:188,B:139,A:255).
         /// </summary>
-        public static Color DarkSeaGreen;
+        public static readonly Color DarkSeaGreen;
 
         /// <summary>
         /// DarkSlateBlue color (R:72,G:61,B:139,A:255).
         /// </summary>
-        public static Color DarkSlateBlue;
+        public static readonly Color DarkSlateBlue;
 
         /// <summary>
         /// DarkSlateGray color (R:47,G:79,B:79,A:255).
         /// </summary>
-        public static Color DarkSlateGray;
+        public static readonly Color DarkSlateGray;
 
         /// <summary>
         /// DarkTurquoise color (R:0,G:206,B:209,A:255).
         /// </summary>
-        public static Color DarkTurquoise;
+        public static readonly Color DarkTurquoise;
 
         /// <summary>
         /// DarkViolet color (R:148,G:0,B:211,A:255).
         /// </summary>
-        public static Color DarkViolet;
+        public static readonly Color DarkViolet;
 
         /// <summary>
         /// DeepPink color (R:255,G:20,B:147,A:255).
         /// </summary>
-        public static Color DeepPink;
+        public static readonly Color DeepPink;
 
         /// <summary>
         /// DeepSkyBlue color (R:0,G:191,B:255,A:255).
         /// </summary>
-        public static Color DeepSkyBlue;
+        public static readonly Color DeepSkyBlue;
 
         /// <summary>
         /// DimGray color (R:105,G:105,B:105,A:255).
         /// </summary>
-        public static Color DimGray;
+        public static readonly Color DimGray;
 
         /// <summary>
         /// DodgerBlue color (R:30,G:144,B:255,A:255).
         /// </summary>
-        public static Color DodgerBlue;
+        public static readonly Color DodgerBlue;
 
         /// <summary>
         /// Firebrick color (R:178,G:34,B:34,A:255).
         /// </summary>
-        public static Color Firebrick;
+        public static readonly Color Firebrick;
 
         /// <summary>
         /// FloralWhite color (R:255,G:250,B:240,A:255).
         /// </summary>
-        public static Color FloralWhite;
+        public static readonly Color FloralWhite;
 
         /// <summary>
         /// ForestGreen color (R:34,G:139,B:34,A:255).
         /// </summary>
-        public static Color ForestGreen;
+        public static readonly Color ForestGreen;
 
         /// <summary>
         /// Fuchsia color (R:255,G:0,B:255,A:255).
         /// </summary>
-        public static Color Fuchsia;
+        public static readonly Color Fuchsia;
 
         /// <summary>
         /// Gainsboro color (R:220,G:220,B:220,A:255).
         /// </summary>
-        public static Color Gainsboro;
+        public static readonly Color Gainsboro;
 
         /// <summary>
         /// GhostWhite color (R:248,G:248,B:255,A:255).
         /// </summary>
-        public static Color GhostWhite;
+        public static readonly Color GhostWhite;
 
         /// <summary>
         /// Gold color (R:255,G:215,B:0,A:255).
         /// </summary>
-        public static Color Gold;
+        public static readonly Color Gold;
 
         /// <summary>
         /// Goldenrod color (R:218,G:165,B:32,A:255).
         /// </summary>
-        public static Color Goldenrod;
+        public static readonly Color Goldenrod;
 
         /// <summary>
         /// Gray color (R:128,G:128,B:128,A:255).
         /// </summary>
-        public static Color Gray;
+        public static readonly Color Gray;
 
         /// <summary>
         /// Green color (R:0,G:128,B:0,A:255).
         /// </summary>
-        public static Color Green;
+        public static readonly Color Green;
 
         /// <summary>
         /// GreenYellow color (R:173,G:255,B:47,A:255).
         /// </summary>
-        public static Color GreenYellow;
+        public static readonly Color GreenYellow;
 
         /// <summary>
         /// Honeydew color (R:240,G:255,B:240,A:255).
         /// </summary>
-        public static Color Honeydew;
+        public static readonly Color Honeydew;
 
         /// <summary>
         /// HotPink color (R:255,G:105,B:180,A:255).
         /// </summary>
-        public static Color HotPink;
+        public static readonly Color HotPink;
 
         /// <summary>
         /// IndianRed color (R:205,G:92,B:92,A:255).
         /// </summary>
-        public static Color IndianRed;
+        public static readonly Color IndianRed;
 
         /// <summary>
         /// Indigo color (R:75,G:0,B:130,A:255).
         /// </summary>
-        public static Color Indigo;
+        public static readonly Color Indigo;
 
         /// <summary>
         /// Ivory color (R:255,G:255,B:240,A:255).
         /// </summary>
-        public static Color Ivory;
+        public static readonly Color Ivory;
 
         /// <summary>
         /// Khaki color (R:240,G:230,B:140,A:255).
         /// </summary>
-        public static Color Khaki;
+        public static readonly Color Khaki;
 
         /// <summary>
         /// Lavender color (R:230,G:230,B:250,A:255).
         /// </summary>
-        public static Color Lavender;
+        public static readonly Color Lavender;
 
         /// <summary>
         /// LavenderBlush color (R:255,G:240,B:245,A:255).
         /// </summary>
-        public static Color LavenderBlush;
+        public static readonly Color LavenderBlush;
 
         /// <summary>
         /// LawnGreen color (R:124,G:252,B:0,A:255).
         /// </summary>
-        public static Color LawnGreen;
+        public static readonly Color LawnGreen;
 
         /// <summary>
         /// LemonChiffon color (R:255,G:250,B:205,A:255).
         /// </summary>
-        public static Color LemonChiffon;
+        public static readonly Color LemonChiffon;
 
         /// <summary>
         /// LightBlue color (R:173,G:216,B:230,A:255).
         /// </summary>
-        public static Color LightBlue;
+        public static readonly Color LightBlue;
 
         /// <summary>
         /// LightCoral color (R:240,G:128,B:128,A:255).
         /// </summary>
-        public static Color LightCoral;
+        public static readonly Color LightCoral;
 
         /// <summary>
         /// LightCyan color (R:224,G:255,B:255,A:255).
         /// </summary>
-        public static Color LightCyan;
+        public static readonly Color LightCyan;
 
         /// <summary>
         /// LightGoldenrodYellow color (R:250,G:250,B:210,A:255).
         /// </summary>
-        public static Color LightGoldenrodYellow;
+        public static readonly Color LightGoldenrodYellow;
 
         /// <summary>
         /// LightGray color (R:211,G:211,B:211,A:255).
         /// </summary>
-        public static Color LightGray;
+        public static readonly Color LightGray;
 
         /// <summary>
         /// LightGreen color (R:144,G:238,B:144,A:255).
         /// </summary>
-        public static Color LightGreen;
+        public static readonly Color LightGreen;
 
         /// <summary>
         /// LightPink color (R:255,G:182,B:193,A:255).
         /// </summary>
-        public static Color LightPink;
+        public static readonly Color LightPink;
 
         /// <summary>
         /// LightSalmon color (R:255,G:160,B:122,A:255).
         /// </summary>
-        public static Color LightSalmon;
+        public static readonly Color LightSalmon;
 
         /// <summary>
         /// LightSeaGreen color (R:32,G:178,B:170,A:255).
         /// </summary>
-        public static Color LightSeaGreen;
+        public static readonly Color LightSeaGreen;
 
         /// <summary>
         /// LightSkyBlue color (R:135,G:206,B:250,A:255).
         /// </summary>
-        public static Color LightSkyBlue;
+        public static readonly Color LightSkyBlue;
 
         /// <summary>
         /// LightSlateGray color (R:119,G:136,B:153,A:255).
         /// </summary>
-        public static Color LightSlateGray;
+        public static readonly Color LightSlateGray;
 
         /// <summary>
         /// LightSteelBlue color (R:176,G:196,B:222,A:255).
         /// </summary>
-        public static Color LightSteelBlue;
+        public static readonly Color LightSteelBlue;
 
         /// <summary>
         /// LightYellow color (R:255,G:255,B:224,A:255).
         /// </summary>
-        public static Color LightYellow;
+        public static readonly Color LightYellow;
 
         /// <summary>
         /// Lime color (R:0,G:255,B:0,A:255).
         /// </summary>
-        public static Color Lime;
+        public static readonly Color Lime;
 
         /// <summary>
         /// LimeGreen color (R:50,G:205,B:50,A:255).
         /// </summary>
-        public static Color LimeGreen;
+        public static readonly Color LimeGreen;
 
         /// <summary>
         /// Linen color (R:250,G:240,B:230,A:255).
         /// </summary>
-        public static Color Linen;
+        public static readonly Color Linen;
 
         /// <summary>
         /// Magenta color (R:255,G:0,B:255,A:255).
         /// </summary>
-        public static Color Magenta;
+        public static readonly Color Magenta;
 
         /// <summary>
         /// Maroon color (R:128,G:0,B:0,A:255).
         /// </summary>
-        public static Color Maroon;
+        public static readonly Color Maroon;
 
         /// <summary>
         /// MediumAquamarine color (R:102,G:205,B:170,A:255).
         /// </summary>
-        public static Color MediumAquamarine;
+        public static readonly Color MediumAquamarine;
 
         /// <summary>
         /// MediumBlue color (R:0,G:0,B:205,A:255).
         /// </summary>
-        public static Color MediumBlue;
+        public static readonly Color MediumBlue;
 
         /// <summary>
         /// MediumOrchid color (R:186,G:85,B:211,A:255).
         /// </summary>
-        public static Color MediumOrchid;
+        public static readonly Color MediumOrchid;
 
         /// <summary>
         /// MediumPurple color (R:147,G:112,B:219,A:255).
         /// </summary>
-        public static Color MediumPurple;
+        public static readonly Color MediumPurple;
 
         /// <summary>
         /// MediumSeaGreen color (R:60,G:179,B:113,A:255).
         /// </summary>
-        public static Color MediumSeaGreen;
+        public static readonly Color MediumSeaGreen;
 
         /// <summary>
         /// MediumSlateBlue color (R:123,G:104,B:238,A:255).
         /// </summary>
-        public static Color MediumSlateBlue;
+        public static readonly Color MediumSlateBlue;
 
         /// <summary>
         /// MediumSpringGreen color (R:0,G:250,B:154,A:255).
         /// </summary>
-        public static Color MediumSpringGreen;
+        public static readonly Color MediumSpringGreen;
 
         /// <summary>
         /// MediumTurquoise color (R:72,G:209,B:204,A:255).
         /// </summary>
-        public static Color MediumTurquoise;
+        public static readonly Color MediumTurquoise;
 
         /// <summary>
         /// MediumVioletRed color (R:199,G:21,B:133,A:255).
         /// </summary>
-        public static Color MediumVioletRed;
+        public static readonly Color MediumVioletRed;
 
         /// <summary>
         /// MidnightBlue color (R:25,G:25,B:112,A:255).
         /// </summary>
-        public static Color MidnightBlue;
+        public static readonly Color MidnightBlue;
 
         /// <summary>
         /// MintCream color (R:245,G:255,B:250,A:255).
         /// </summary>
-        public static Color MintCream;
+        public static readonly Color MintCream;
 
         /// <summary>
         /// MistyRose color (R:255,G:228,B:225,A:255).
         /// </summary>
-        public static Color MistyRose;
+        public static readonly Color MistyRose;
 
         /// <summary>
         /// Moccasin color (R:255,G:228,B:181,A:255).
         /// </summary>
-        public static Color Moccasin;
+        public static readonly Color Moccasin;
 
         /// <summary>
         /// MonoGame orange theme color (R:231,G:60,B:0,A:255).
         /// </summary>
-        public static Color MonoGameOrange;
+        public static readonly Color MonoGameOrange;
 
         /// <summary>
         /// NavajoWhite color (R:255,G:222,B:173,A:255).
         /// </summary>
-        public static Color NavajoWhite;
+        public static readonly Color NavajoWhite;
 
         /// <summary>
         /// Navy color (R:0,G:0,B:128,A:255).
         /// </summary>
-        public static Color Navy;
+        public static readonly Color Navy;
 
         /// <summary>
         /// OldLace color (R:253,G:245,B:230,A:255).
         /// </summary>
-        public static Color OldLace;
+        public static readonly Color OldLace;
 
         /// <summary>
         /// Olive color (R:128,G:128,B:0,A:255).
         /// </summary>
-        public static Color Olive;
+        public static readonly Color Olive;
 
         /// <summary>
         /// OliveDrab color (R:107,G:142,B:35,A:255).
         /// </summary>
-        public static Color OliveDrab;
+        public static readonly Color OliveDrab;
 
         /// <summary>
         /// Orange color (R:255,G:165,B:0,A:255).
         /// </summary>
-        public static Color Orange;
+        public static readonly Color Orange;
 
         /// <summary>
         /// OrangeRed color (R:255,G:69,B:0,A:255).
         /// </summary>
-        public static Color OrangeRed;
+        public static readonly Color OrangeRed;
 
         /// <summary>
         /// Orchid color (R:218,G:112,B:214,A:255).
         /// </summary>
-        public static Color Orchid;
+        public static readonly Color Orchid;
 
         /// <summary>
         /// PaleGoldenrod color (R:238,G:232,B:170,A:255).
         /// </summary>
-        public static Color PaleGoldenrod;
+        public static readonly Color PaleGoldenrod;
 
         /// <summary>
         /// PaleGreen color (R:152,G:251,B:152,A:255).
         /// </summary>
-        public static Color PaleGreen;
+        public static readonly Color PaleGreen;
 
         /// <summary>
         /// PaleTurquoise color (R:175,G:238,B:238,A:255).
         /// </summary>
-        public static Color PaleTurquoise;
+        public static readonly Color PaleTurquoise;
 
         /// <summary>
         /// PaleVioletRed color (R:219,G:112,B:147,A:255).
         /// </summary>
-        public static Color PaleVioletRed;
+        public static readonly Color PaleVioletRed;
 
         /// <summary>
         /// PapayaWhip color (R:255,G:239,B:213,A:255).
         /// </summary>
-        public static Color PapayaWhip;
+        public static readonly Color PapayaWhip;
 
         /// <summary>
         /// PeachPuff color (R:255,G:218,B:185,A:255).
         /// </summary>
-        public static Color PeachPuff;
+        public static readonly Color PeachPuff;
 
         /// <summary>
         /// Peru color (R:205,G:133,B:63,A:255).
         /// </summary>
-        public static Color Peru;
+        public static readonly Color Peru;
 
         /// <summary>
         /// Pink color (R:255,G:192,B:203,A:255).
         /// </summary>
-        public static Color Pink;
+        public static readonly Color Pink;
 
         /// <summary>
         /// Plum color (R:221,G:160,B:221,A:255).
         /// </summary>
-        public static Color Plum;
+        public static readonly Color Plum;
 
         /// <summary>
         /// PowderBlue color (R:176,G:224,B:230,A:255).
         /// </summary>
-        public static Color PowderBlue
-        {
-            get;
-            private set;
-        }
+        public static readonly Color PowderBlue;
 
         /// <summary>
         ///  Purple color (R:128,G:0,B:128,A:255).
         /// </summary>
-        public static Color Purple
-        {
-            get;
-            private set;
-        }
+        public static readonly Color Purple;
 
         /// <summary>
         /// Red color (R:255,G:0,B:0,A:255).
         /// </summary>
-        public static Color Red
-        {
-            get;
-            private set;
-        }
+        public static readonly Color Red;
 
         /// <summary>
         /// RosyBrown color (R:188,G:143,B:143,A:255).
         /// </summary>
-        public static Color RosyBrown
-        {
-            get;
-            private set;
-        }
+        public static readonly Color RosyBrown;
 
         /// <summary>
         /// RoyalBlue color (R:65,G:105,B:225,A:255).
         /// </summary>
-        public static Color RoyalBlue
-        {
-            get;
-            private set;
-        }
+        public static readonly Color RoyalBlue;
 
         /// <summary>
         /// SaddleBrown color (R:139,G:69,B:19,A:255).
         /// </summary>
-        public static Color SaddleBrown
-        {
-            get;
-            private set;
-        }
+        public static readonly Color SaddleBrown;
 
         /// <summary>
         /// Salmon color (R:250,G:128,B:114,A:255).
         /// </summary>
-        public static Color Salmon
-        {
-            get;
-            private set;
-        }
+        public static readonly Color Salmon;
 
         /// <summary>
         /// SandyBrown color (R:244,G:164,B:96,A:255).
         /// </summary>
-        public static Color SandyBrown
-        {
-            get;
-            private set;
-        }
+        public static readonly Color SandyBrown;
 
         /// <summary>
         /// SeaGreen color (R:46,G:139,B:87,A:255).
         /// </summary>
-        public static Color SeaGreen
-        {
-            get;
-            private set;
-        }
+        public static readonly Color SeaGreen;
 
         /// <summary>
         /// SeaShell color (R:255,G:245,B:238,A:255).
         /// </summary>
-        public static Color SeaShell
-        {
-            get;
-            private set;
-        }
+        public static readonly Color SeaShell;
 
         /// <summary>
         /// Sienna color (R:160,G:82,B:45,A:255).
         /// </summary>
-        public static Color Sienna
-        {
-            get;
-            private set;
-        }
+        public static readonly Color Sienna;
 
         /// <summary>
         /// Silver color (R:192,G:192,B:192,A:255).
         /// </summary>
-        public static Color Silver
-        {
-            get;
-            private set;
-        }
+        public static readonly Color Silver;
 
         /// <summary>
         /// SkyBlue color (R:135,G:206,B:235,A:255).
         /// </summary>
-        public static Color SkyBlue
-        {
-            get;
-            private set;
-        }
+        public static readonly Color SkyBlue;
 
         /// <summary>
         /// SlateBlue color (R:106,G:90,B:205,A:255).
         /// </summary>
-        public static Color SlateBlue
-        {
-            get;
-            private set;
-        }
+        public static readonly Color SlateBlue;
 
         /// <summary>
         /// SlateGray color (R:112,G:128,B:144,A:255).
         /// </summary>
-        public static Color SlateGray
-        {
-            get;
-            private set;
-        }
+        public static readonly Color SlateGray;
 
         /// <summary>
         /// Snow color (R:255,G:250,B:250,A:255).
         /// </summary>
-        public static Color Snow
-        {
-            get;
-            private set;
-        }
+        public static readonly Color Snow;
 
         /// <summary>
         /// SpringGreen color (R:0,G:255,B:127,A:255).
         /// </summary>
-        public static Color SpringGreen
-        {
-            get;
-            private set;
-        }
+        public static readonly Color SpringGreen;
 
         /// <summary>
         /// SteelBlue color (R:70,G:130,B:180,A:255).
         /// </summary>
-        public static Color SteelBlue
-        {
-            get;
-            private set;
-        }
+        public static readonly Color SteelBlue;
 
         /// <summary>
         /// Tan color (R:210,G:180,B:140,A:255).
         /// </summary>
-        public static Color Tan
-        {
-            get;
-            private set;
-        }
+        public static readonly Color Tan;
 
         /// <summary>
         /// Teal color (R:0,G:128,B:128,A:255).
         /// </summary>
-        public static Color Teal
-        {
-            get;
-            private set;
-        }
+        public static readonly Color Teal;
 
         /// <summary>
         /// Thistle color (R:216,G:191,B:216,A:255).
         /// </summary>
-        public static Color Thistle
-        {
-            get;
-            private set;
-        }
+        public static readonly Color Thistle;
 
         /// <summary>
         /// Tomato color (R:255,G:99,B:71,A:255).
         /// </summary>
-        public static Color Tomato
-        {
-            get;
-            private set;
-        }
+        public static readonly Color Tomato;
 
         /// <summary>
         /// Turquoise color (R:64,G:224,B:208,A:255).
         /// </summary>
-        public static Color Turquoise
-        {
-            get;
-            private set;
-        }
+        public static readonly Color Turquoise;
 
         /// <summary>
         /// Violet color (R:238,G:130,B:238,A:255).
         /// </summary>
-        public static Color Violet
-        {
-            get;
-            private set;
-        }
+        public static readonly Color Violet;
 
         /// <summary>
         /// Wheat color (R:245,G:222,B:179,A:255).
         /// </summary>
-        public static Color Wheat
-        {
-            get;
-            private set;
-        }
+        public static readonly Color Wheat;
 
         /// <summary>
         /// White color (R:255,G:255,B:255,A:255).
         /// </summary>
-        public static Color White
-        {
-            get;
-            private set;
-        }
+        public static readonly Color White;
 
         /// <summary>
         /// WhiteSmoke color (R:245,G:245,B:245,A:255).
@@ -1260,21 +1156,6 @@ namespace Microsoft.Xna.Framework
                 (int)MathHelper.Lerp(value1.G, value2.G, amount),
                 (int)MathHelper.Lerp(value1.B, value2.B, amount),
                 (int)MathHelper.Lerp(value1.A, value2.A, amount));
-        }
-
-        /// <summary>
-        /// <see cref="Color.Lerp"/> should be used instead of this function.
-        /// </summary>
-        /// <returns>Interpolated <see cref="Color"/>.</returns>
-        [Obsolete("Color.Lerp should be used instead of this function.")]
-        public static Color LerpPrecise(Color value1, Color value2, Single amount)
-        {
-            amount = MathHelper.Clamp(amount, 0, 1);
-            return new Color(
-                (int)MathHelper.LerpPrecise(value1.R, value2.R, amount),
-                (int)MathHelper.LerpPrecise(value1.G, value2.G, amount),
-                (int)MathHelper.LerpPrecise(value1.B, value2.B, amount),
-                (int)MathHelper.LerpPrecise(value1.A, value2.A, amount));
         }
 
         /// <summary>
