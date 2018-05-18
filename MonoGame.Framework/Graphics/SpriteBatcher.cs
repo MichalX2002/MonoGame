@@ -210,10 +210,10 @@ namespace Microsoft.Xna.Framework.Graphics
                         }
 
                         // store the SpriteBatchItem data in our vertexArray
-                        *(vertexArrayPtr+0) = item.vertexTL;
-                        *(vertexArrayPtr+1) = item.vertexTR;
-                        *(vertexArrayPtr+2) = item.vertexBL;
-                        *(vertexArrayPtr+3) = item.vertexBR;
+                        *(vertexArrayPtr+0) = item.VertexTL;
+                        *(vertexArrayPtr+1) = item.VertexTR;
+                        *(vertexArrayPtr+2) = item.VertexBL;
+                        *(vertexArrayPtr+3) = item.VertexBR;
 
                         // Release the texture.
                         item.Texture = null;
