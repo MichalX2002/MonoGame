@@ -22,8 +22,7 @@ namespace Microsoft.Xna.Framework.Content
 	{
         const byte ContentCompressedLzx = 0x80;
         const byte ContentCompressedLz4 = 0x40;
-        private IServiceProvider serviceProvider;
-		private IGraphicsDeviceService graphicsDeviceService;
+        private IGraphicsDeviceService graphicsDeviceService;
         private Dictionary<string, object> loadedAssets = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 		private List<IDisposable> disposableAssets = new List<IDisposable>();
         private bool disposed;
@@ -145,13 +144,13 @@ namespace Microsoft.Xna.Framework.Content
 
 		public ContentManager(IServiceProvider serviceProvider)
 		{
-            this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            this.ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             AddContentManager(this);
 		}
 
 		public ContentManager(IServiceProvider serviceProvider, string rootDirectory)
         {
-            this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            this.ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             this.RootDirectory = rootDirectory ?? throw new ArgumentNullException(nameof(rootDirectory));
             AddContentManager(this);
 		}
@@ -180,7 +179,17 @@ namespace Microsoft.Xna.Framework.Content
                 scratchBuffer = null;
 				disposed = true;
 			}
-		}
+        }
+
+        public bool AssetFileExists(string assetName)
+        {
+            return File.Exists(GetAssetPath(assetName));
+        }
+
+        public string GetAssetPath(string assetName)
+        {
+            return Path.Combine(RootDirectory, assetName).Replace('\\', '/') + ".xnb";
+        }
 
         public virtual T LoadLocalized<T> (string assetName)
         {
@@ -301,7 +310,7 @@ namespace Microsoft.Xna.Framework.Content
 
 			if (this.graphicsDeviceService == null)
 			{
-				this.graphicsDeviceService = serviceProvider.GetService(typeof(IGraphicsDeviceService)) as IGraphicsDeviceService;
+				this.graphicsDeviceService = ServiceProvider.GetService(typeof(IGraphicsDeviceService)) as IGraphicsDeviceService;
 				if (this.graphicsDeviceService == null)
                 {
                     throw new InvalidOperationException(FrameworkResources.NoGraphicsDeviceService);
@@ -428,7 +437,7 @@ namespace Microsoft.Xna.Framework.Content
 
 			if (this.graphicsDeviceService == null)
 			{
-				this.graphicsDeviceService = serviceProvider.GetService(typeof(IGraphicsDeviceService)) as IGraphicsDeviceService;
+				this.graphicsDeviceService = ServiceProvider.GetService(typeof(IGraphicsDeviceService)) as IGraphicsDeviceService;
 				if (this.graphicsDeviceService == null)
 				{
 					throw new InvalidOperationException(FrameworkResources.NoGraphicsDeviceService);
@@ -466,14 +475,8 @@ namespace Microsoft.Xna.Framework.Content
                 return Path.Combine(TitleContainer.Location, RootDirectory);
             }
         }
-		
-		public IServiceProvider ServiceProvider
-		{
-			get
-			{
-				return this.serviceProvider;
-			}
-		}
+
+        public IServiceProvider ServiceProvider { get; }
 
         internal byte[] GetScratchBuffer(int size)
         {            
