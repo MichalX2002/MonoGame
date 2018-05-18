@@ -13,10 +13,18 @@ namespace Lidgren.Network
 	{
 		private const string c_readOverflowError = "Trying to read past the buffer size - likely caused by mismatching Write/Reads, different size or order.";
 
-		/// <summary>
-		/// Reads a boolean value (stored as a single bit) written using Write(bool)
-		/// </summary>
-		public bool ReadBoolean()
+        /// <summary>
+        /// Reads a byte and casts it to <see cref="NetConnectionStatus"/>.
+        /// </summary>
+        public NetConnectionStatus ReadStatus()
+        {
+            return (NetConnectionStatus)ReadByte();
+        }
+
+        /// <summary>
+        /// Reads a boolean value (stored as a single bit) written using <see cref="NetBuffer.Write(bool)"/>.
+        /// </summary>
+        public bool ReadBoolean()
 		{
 			NetException.Assert(m_bitLength - m_readPosition >= 1, c_readOverflowError);
 			byte retval = NetBitWriter.ReadByte(m_data, 1, m_readPosition);
