@@ -310,7 +310,7 @@ namespace Microsoft.Xna.Framework
             _gameTimer.Reset();
             _gameTimer.Start();
             _accumulatedElapsedTime = TimeSpan.Zero;
-            _gameTime.ElapsedGameTime = TimeSpan.Zero;
+            Time.ElapsedGameTime = TimeSpan.Zero;
             _previousTicks = 0L;
         }
 
@@ -387,10 +387,11 @@ namespace Microsoft.Xna.Framework
         }
 
         private TimeSpan _accumulatedElapsedTime;
-        private readonly GameTime _gameTime = new GameTime();
         private Stopwatch _gameTimer;
         private long _previousTicks = 0;
         private int _updateFrameLag;
+
+        public GameTime Time { get; } = new GameTime();
 
         public void Tick()
         {
@@ -430,32 +431,32 @@ namespace Microsoft.Xna.Framework
 
             if (IsFixedTimeStep)
             {
-                _gameTime.ElapsedGameTime = TargetElapsedTime;
+                Time.ElapsedGameTime = TargetElapsedTime;
                 var stepCount = 0;
 
                 // Perform as many full fixed length time steps as we can.
                 while (_accumulatedElapsedTime >= TargetElapsedTime && !_shouldExit)
                 {
-                    _gameTime.TotalGameTime += TargetElapsedTime;
+                    Time.TotalGameTime += TargetElapsedTime;
                     _accumulatedElapsedTime -= TargetElapsedTime;
                     ++stepCount;
 
-                    DoUpdate(_gameTime);
+                    DoUpdate(Time);
                 }
 
                 //Every update after the first accumulates lag
                 _updateFrameLag += Math.Max(0, stepCount - 1);
 
                 //If we think we are running slowly, wait until the lag clears before resetting it
-                if (_gameTime.IsRunningSlowly)
+                if (Time.IsRunningSlowly)
                 {
                     if (_updateFrameLag == 0)
-                        _gameTime.IsRunningSlowly = false;
+                        Time.IsRunningSlowly = false;
                 }
                 else if (_updateFrameLag >= 5)
                 {
                     //If we lag more than 5 frames, start thinking we are running slowly
-                    _gameTime.IsRunningSlowly = true;
+                    Time.IsRunningSlowly = true;
                 }
 
                 //Every time we just do one update and one draw, then we are not running slowly, so decrease the lag
@@ -464,16 +465,16 @@ namespace Microsoft.Xna.Framework
 
                 // Draw needs to know the total elapsed time
                 // that occured for the fixed length updates.
-                _gameTime.ElapsedGameTime = TimeSpan.FromTicks(TargetElapsedTime.Ticks * stepCount);
+                Time.ElapsedGameTime = TimeSpan.FromTicks(TargetElapsedTime.Ticks * stepCount);
             }
             else
             {
                 // Perform a single variable length update.
-                _gameTime.ElapsedGameTime = _accumulatedElapsedTime;
-                _gameTime.TotalGameTime += _accumulatedElapsedTime;
+                Time.ElapsedGameTime = _accumulatedElapsedTime;
+                Time.TotalGameTime += _accumulatedElapsedTime;
                 _accumulatedElapsedTime = TimeSpan.Zero;
 
-                DoUpdate(_gameTime);
+                DoUpdate(Time);
             }
 
             // Draw unless the update suppressed it.
@@ -481,7 +482,7 @@ namespace Microsoft.Xna.Framework
                 _suppressDraw = false;
             else
             {
-                DoDraw(_gameTime);
+                DoDraw(Time);
             }
 
             if (_shouldExit)
