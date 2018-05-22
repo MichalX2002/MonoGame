@@ -61,20 +61,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="Options.cs" />
-    <Compile Include="..\..\MonoGame.Framework\BoundingBox.cs">
-      <Link>MonoGame.Framework\BoundingBox.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\BoundingFrustum.cs">
-      <Link>MonoGame.Framework\BoundingFrustum.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\BoundingSphere.cs">
-      <Link>MonoGame.Framework\BoundingSphere.cs</Link>
-    </Compile>
     <Compile Include="..\..\MonoGame.Framework\Color.cs">
       <Link>MonoGame.Framework\Color.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\ContainmentType.cs">
-      <Link>MonoGame.Framework\ContainmentType.cs</Link>
     </Compile>
     <Compile Include="..\..\MonoGame.Framework\EventHelpers.cs">
       <Link>MonoGame.Framework\EventHelpers.cs</Link>
@@ -136,39 +124,6 @@
     <Compile Include="..\..\MonoGame.Framework\Graphics\Vertices\VertexElementUsage.cs">
       <Link>MonoGame.Framework\VertexElementUsage.cs</Link>
     </Compile>
-    <Compile Include="..\..\MonoGame.Framework\MathHelper.cs">
-      <Link>MonoGame.Framework\MathHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Matrix.cs">
-      <Link>MonoGame.Framework\Matrix.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Plane.cs">
-      <Link>MonoGame.Framework\Plane.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Point.cs">
-      <Link>MonoGame.Framework\Point.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\PlaneIntersectionType.cs">
-      <Link>MonoGame.Framework\PlaneIntersectionType.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Quaternion.cs">
-      <Link>MonoGame.Framework\Quaternion.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Ray.cs">
-      <Link>MonoGame.Framework\Ray.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Rectangle.cs">
-      <Link>MonoGame.Framework\Rectangle.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Vector2.cs">
-      <Link>MonoGame.Framework\Vector2.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Vector3.cs">
-      <Link>MonoGame.Framework\Vector3.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Vector4.cs">
-      <Link>MonoGame.Framework\Vector4.cs</Link>
-    </Compile>
     <Compile Include="..\..\MonoGame.Framework\Design\Vector2TypeConverter.cs">
       <Link>MonoGame.Framework\Design\Vector2TypeConverter.cs</Link>
     </Compile>
@@ -193,6 +148,51 @@
     </Compile>
     <Compile Include="..\..\MonoGame.Framework.Content.Pipeline\LoadedTypeCollection.cs">
       <Link>MonoGame.Framework.Content.Pipeline\LoadedTypeCollection.c</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\Vector2.cs">
+      <Link>MonoGame.Framework\Math\Vector2.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\Vector3.cs">
+      <Link>MonoGame.Framework\Math\Vector3.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\Vector4.cs">
+      <Link>MonoGame.Framework\Math\Vector4.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\Rectangle.cs">
+      <Link>MonoGame.Framework\Math\Rectangle.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\Point.cs">
+      <Link>MonoGame.Framework\Math\Point.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\Quaternion.cs">
+      <Link>MonoGame.Framework\Math\Quaternion.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\Matrix.cs">
+      <Link>MonoGame.Framework\Math\Matrix.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\Plane.cs">
+      <Link>MonoGame.Framework\Math\Plane.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\PlaneIntersectionType.cs">
+      <Link>MonoGame.Framework\Math\PlaneIntersectionType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\BoundingBox.cs">
+      <Link>MonoGame.Framework\Math\BoundingBox.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\BoundingFrustum.cs">
+      <Link>MonoGame.Framework\Math\BoundingFrustum.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\BoundingSphere.cs">
+      <Link>MonoGame.Framework\Math\BoundingSphere.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\Ray.cs">
+      <Link>MonoGame.Framework\Math\Ray.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\ContainmentType.cs">
+      <Link>MonoGame.Framework\Math\ContainmentType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\MathHelper.cs">
+      <Link>MonoGame.Framework\Math\MathHelper.cs</Link>
     </Compile>
     <Compile Include="MonoGame.Framework\GraphicsDevice.cs" />
     <Compile Include="ConstantBufferData.cs" />
@@ -227,7 +227,9 @@
     <Compile Include="TPGParser\TechniqueInfo.cs" />
     <Compile Include="Preprocessor.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="MonoGame.Framework\Math\" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="TPGParser\MGFX.tpg" />

@@ -72,21 +72,32 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExceptionHelper.cs" />
+    <Compile Include="Math\BoundingBox.cs" />
+    <Compile Include="Math\BoundingFrustum.cs" />
+    <Compile Include="Math\BoundingSphere.cs" />
+    <Compile Include="Math\ContainmentType.cs" />
+    <Compile Include="Math\Curve.cs" />
+    <Compile Include="Math\CurveContinuity.cs" />
+    <Compile Include="Math\CurveKey.cs" />
+    <Compile Include="Math\CurveKeyCollection.cs" />
+    <Compile Include="Math\CurveLoopType.cs" />
+    <Compile Include="Math\CurveTangent.cs" />
+    <Compile Include="Math\MathHelper.cs" />
+    <Compile Include="Math\Matrix.cs" />
+    <Compile Include="Math\Plane.cs" />
+    <Compile Include="Math\PlaneIntersectionType.cs" />
+    <Compile Include="Math\Point.cs" />
+    <Compile Include="Math\Quaternion.cs" />
+    <Compile Include="Math\Ray.cs" />
+    <Compile Include="Math\Rectangle.cs" />
+    <Compile Include="Math\Vector2.cs" />
+    <Compile Include="Math\Vector3.cs" />
+    <Compile Include="Math\Vector4.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.Windows.cs">
       <Platforms>Windows</Platforms>
     </Compile>
-    <Compile Include="BoundingBox.cs" />
-    <Compile Include="BoundingFrustum.cs" />
-    <Compile Include="BoundingSphere.cs" />
     <Compile Include="Color.cs" />
-    <Compile Include="ContainmentType.cs" />
-    <Compile Include="CurveContinuity.cs" />
-    <Compile Include="Curve.cs" />
-    <Compile Include="CurveKeyCollection.cs" />
-    <Compile Include="CurveKey.cs" />
-    <Compile Include="CurveLoopType.cs" />
-    <Compile Include="CurveTangent.cs" />
     <Compile Include="DisplayOrientation.cs" />
     <Compile Include="DrawableGameComponent.cs" />
     <Compile Include="EventHelpers.cs" />
@@ -110,17 +121,9 @@
     <Compile Include="IGraphicsDeviceManager.cs" />
     <Compile Include="IUpdateable.cs" />
     <Compile Include="LaunchParameters.cs" />
-    <Compile Include="MathHelper.cs" />
-    <Compile Include="Matrix.cs" />
     <Compile Include="NamespaceDocs.cs" />
-    <Compile Include="Plane.cs" />
-    <Compile Include="PlaneIntersectionType.cs" />
     <Compile Include="PlayerIndex.cs" />
-    <Compile Include="Point.cs" />
     <Compile Include="PreparingDeviceSettingsEventArgs.cs" />
-    <Compile Include="Quaternion.cs" />
-    <Compile Include="Ray.cs" />
-    <Compile Include="Rectangle.cs" />
     <Compile Include="ReusableItemList.cs" />
     <Compile Include="TextInputEventArgs.cs">
       <Platforms>Angle,Linux,MacOS,Windows,WindowsGL,WindowsUniversal</Platforms>
@@ -140,9 +143,6 @@
     <Compile Include="Utilities\ZlibStream\Tree.cs" />
     <Compile Include="Utilities\ZlibStream\ZlibCodec.cs" />
     <Compile Include="Utilities\ZlibStream\ZlibStreamBase.cs" />
-    <Compile Include="Vector2.cs" />
-    <Compile Include="Vector3.cs" />
-    <Compile Include="Vector4.cs" />
     <Compile Include="Audio\AudioChannels.cs" />
     <Compile Include="Audio\AudioEmitter.cs" />
     <Compile Include="Audio\AudioListener.cs" />
