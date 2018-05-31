@@ -61,11 +61,11 @@ namespace Lidgren.Network
 		internal void Discover(NetPeer peer)
 		{
 			string str =
-"M-SEARCH * HTTP/1.1\r\n" +
-"HOST: 239.255.255.250:1900\r\n" +
-"ST:upnp:rootdevice\r\n" +
-"MAN:\"ssdp:discover\"\r\n" +
-"MX:3\r\n\r\n";
+                "M-SEARCH * HTTP/1.1\r\n" +
+                "HOST: 239.255.255.250:1900\r\n" +
+                "ST:upnp:rootdevice\r\n" +
+                "MAN:\"ssdp:discover\"\r\n" +
+                "MX:3\r\n\r\n";
 
 			m_status = UPnPStatus.Discovering;
 
@@ -91,6 +91,7 @@ namespace Lidgren.Network
 #endif
 			XmlDocument desc = new XmlDocument();
 			desc.Load(WebRequest.Create(resp).GetResponse().GetResponseStream());
+
 			XmlNamespaceManager nsMgr = new XmlNamespaceManager(desc.NameTable);
 			nsMgr.AddNamespace("tns", "urn:schemas-upnp-org:device-1-0");
 			XmlNode typen = desc.SelectSingleNode("//tns:device/tns:deviceType/text()", nsMgr);
@@ -114,9 +115,9 @@ namespace Lidgren.Network
 			m_discoveryComplete.Set();
 #if !DEBUG
 			}
-			catch
+			catch(Exception exc)
 			{
-				m_peer.LogVerbose("Exception ignored trying to parse UPnP XML response");
+				m_peer.LogVerbose("Exception ignored trying to parse UPnP XML response: " + exc);
 				return;
 			}
 #endif
@@ -227,9 +228,10 @@ namespace Lidgren.Network
 				return null;
 			try
 			{
-				XmlDocument xdoc = SOAPRequest(m_serviceUrl, "<u:GetExternalIPAddress xmlns:u=\"urn:schemas-upnp-org:service:" + m_serviceName + ":1\">" +
-				"</u:GetExternalIPAddress>", "GetExternalIPAddress");
-				XmlNamespaceManager nsMgr = new XmlNamespaceManager(xdoc.NameTable);
+				XmlDocument xdoc = SOAPRequest(m_serviceUrl, "<u:GetExternalIPAddress xmlns:u=\"urn:schemas-upnp-org:service:" +
+                    m_serviceName + ":1\">" + "</u:GetExternalIPAddress>", "GetExternalIPAddress");
+
+                XmlNamespaceManager nsMgr = new XmlNamespaceManager(xdoc.NameTable);
 				nsMgr.AddNamespace("tns", "urn:schemas-upnp-org:device-1-0");
 				string IP = xdoc.SelectSingleNode("//NewExternalIPAddress/text()", nsMgr).Value;
 				return IPAddress.Parse(IP);
@@ -243,24 +245,31 @@ namespace Lidgren.Network
 
 		private XmlDocument SOAPRequest(string url, string soap, string function)
 		{
-			string req = "<?xml version=\"1.0\"?>" +
-			"<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">" +
-			"<s:Body>" +
-			soap +
-			"</s:Body>" +
-			"</s:Envelope>";
+			string req =
+                "<?xml version=\"1.0\"?>" +
+			    "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">" +
+			    "<s:Body>" +
+			    soap +
+			    "</s:Body>" +
+			    "</s:Envelope>";
+
 			WebRequest r = HttpWebRequest.Create(url);
 			r.Method = "POST";
 			byte[] b = System.Text.Encoding.UTF8.GetBytes(req);
 			r.Headers.Add("SOAPACTION", "\"urn:schemas-upnp-org:service:" + m_serviceName + ":1#" + function + "\""); 
 			r.ContentType = "text/xml; charset=\"utf-8\"";
 			r.ContentLength = b.Length;
-			r.GetRequestStream().Write(b, 0, b.Length);
-			XmlDocument resp = new XmlDocument();
+
+            using (var requestStream = r.GetRequestStream())
+                requestStream.Write(b, 0, b.Length);
+
 			WebResponse wres = r.GetResponse();
-			Stream ress = wres.GetResponseStream();
-			resp.Load(ress);
-			return resp;
+            using (var responseStream = wres.GetResponseStream())
+            {
+                XmlDocument resp = new XmlDocument();
+                resp.Load(responseStream);
+                return resp;
+            }
 		}
 	}
 }

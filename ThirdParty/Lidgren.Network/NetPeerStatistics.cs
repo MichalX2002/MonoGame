@@ -114,25 +114,7 @@ namespace Lidgren.Network
 			m_sentBytes += numBytes;
 			m_sentMessages += numMessages;
 		}
-#else
-		[Conditional("DEBUG")]
-		internal void PacketSent(int numBytes, int numMessages)
-		{
-			m_sentPackets++;
-			m_sentBytes += numBytes;
-			m_sentMessages += numMessages;
-		}
-#endif
 
-#if USE_RELEASE_STATISTICS
-		internal void PacketReceived(int numBytes, int numMessages)
-		{
-			m_receivedPackets++;
-			m_receivedBytes += numBytes;
-			m_receivedMessages += numMessages;
-		}
-#else
-		[Conditional("DEBUG")]
 		internal void PacketReceived(int numBytes, int numMessages, int numFragments)
 		{
 			m_receivedPackets++;
@@ -142,10 +124,10 @@ namespace Lidgren.Network
 		}
 #endif
 
-		/// <summary>
-		/// Returns a string that represents this object
-		/// </summary>
-		public override string ToString()
+        /// <summary>
+        /// Returns a string that represents this object
+        /// </summary>
+        public override string ToString()
 		{
 			StringBuilder bdr = new StringBuilder();
 			bdr.AppendLine(m_peer.ConnectionsCount.ToString() + " connections");

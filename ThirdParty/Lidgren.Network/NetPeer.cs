@@ -315,11 +315,7 @@ namespace Lidgren.Network
 		/// <summary>
 		/// Send raw bytes; only used for debugging
 		/// </summary>
-#if DEBUG
 		public void RawSend(byte[] arr, int offset, int length, IPEndPoint destination)
-#else
-		public void RawSend(byte[] arr, int offset, int length, IPEndPoint destination)
-#endif
 	{
 			// wrong thread - this miiiight crash with network thread... but what's a boy to do.
 			Array.Copy(arr, offset, m_sendBuffer, 0, length);
