@@ -13,16 +13,22 @@ namespace Microsoft.Xna.Framework.Graphics
 		internal SurfaceFormat _format;
 		internal int _levelCount;
         private static int _lastSortingKey;
+        
+        public int MaxSize => GraphicsDevice._maxTextureSize;
 
         /// <summary>
-        /// Gets a unique identifier of this texture for sorting purposes.
+        ///   Gets a unique identifier of this texture for sorting purposes.
         /// </summary>
         /// <remarks>
-        /// <para>For example, this value is used by <see cref="SpriteBatch"/> when drawing with <see cref="SpriteSortMode.Texture"/>.</para>
-        /// <para>The value is an implementation detail and may change between application launches or MonoGame versions.
-        /// It is only guaranteed to stay consistent during application lifetime.</para>
+        /// <para>
+        ///   For example, this value is used by <see cref="SpriteBatch"/> when drawing with <see cref="SpriteSortMode.Texture"/>.
+        /// </para>
+        /// <para>
+        ///   The value is an implementation detail and may change between application launches or MonoGame versions.
+        ///   It is only guaranteed to stay consistent during application lifetime.
+        /// </para>
         /// </remarks>
-        internal int SortingKey { get; } = Interlocked.Increment(ref _lastSortingKey);
+        public int SortingKey { get; } = Interlocked.Increment(ref _lastSortingKey);
 
         public SurfaceFormat Format
 		{
