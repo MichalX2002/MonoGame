@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Imaging
 {
     internal abstract unsafe class Pointer : IDisposable
     {

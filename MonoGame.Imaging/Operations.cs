@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Imaging
 {
     internal static unsafe class Operations
     {
@@ -11,7 +11,7 @@ namespace MonoGame.Utilities
             get { return Pointer.AllocatedTotal; }
         }
 
-        public static void* Malloc(long size)
+        public static void* MAlloc(long size)
         {
             var result = new PinnedArray<byte>(size);
             _pointers[(long) result.Ptr] = result;
@@ -19,7 +19,7 @@ namespace MonoGame.Utilities
             return result.Ptr;
         }
 
-        public static void Memcpy(void* a, void* b, long size)
+        public static void MemCopy(void* a, void* b, long size)
         {
             var ap = (byte*) a;
             var bp = (byte*) b;
@@ -33,8 +33,8 @@ namespace MonoGame.Utilities
         {
             using (var temp = new PinnedArray<byte>(size))
             {
-                Memcpy(temp.Ptr, b, size);
-                Memcpy(a, temp.Ptr, size);
+                MemCopy(temp.Ptr, b, size);
+                MemCopy(a, temp.Ptr, size);
             }
         }
 
@@ -48,12 +48,12 @@ namespace MonoGame.Utilities
             pointer.Dispose();
         }
 
-        public static void* Realloc(void* a, long newSize)
+        public static void* ReAlloc(void* a, long newSize)
         {
             if (!_pointers.TryGetValue((long)a, out Pointer pointer))
             {
                 // Allocate new
-                return Malloc(newSize);
+                return MAlloc(newSize);
             }
 
             if (newSize <= pointer.Size)
@@ -62,8 +62,8 @@ namespace MonoGame.Utilities
                 return a;
             }
 
-            var result = Malloc(newSize);
-            Memcpy(result, a, pointer.Size);
+            var result = MAlloc(newSize);
+            MemCopy(result, a, pointer.Size);
 
             _pointers.TryRemove((long) pointer.Ptr, out pointer);
             pointer.Dispose();
@@ -71,7 +71,7 @@ namespace MonoGame.Utilities
             return result;
         }
 
-        public static int Memcmp(void* a, void* b, long size)
+        public static int MemCmp(void* a, void* b, long size)
         {
             var result = 0;
             var ap = (byte*) a;

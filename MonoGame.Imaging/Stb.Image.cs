@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Imaging
 {
     internal unsafe partial class Imaging
     {
@@ -13,7 +14,7 @@ namespace MonoGame.Utilities
 
         public delegate int SkipCallback(void* user, int n);
 
-        public delegate int EofCallback(void* user);
+        public delegate int EoFCallback(void* user);
 
         public delegate void idct_block_kernel(byte* output, int out_stride, short* data);
 
@@ -25,15 +26,22 @@ namespace MonoGame.Utilities
         public static string stbi__g_failure_reason;
         public static int stbi__vertically_flip_on_load;
 
-        public class stbi_io_callbacks
+        public struct IOCallbacks
         {
-            public ReadCallback read;
-            public SkipCallback skip;
-            public EofCallback eof;
+            public ReadCallback Read;
+            public SkipCallback Skip;
+            public EoFCallback EoF;
+
+            public IOCallbacks(ReadCallback read, SkipCallback skip, EoFCallback eof)
+            {
+                Read = read;
+                Skip = skip;
+                EoF = eof;
+            }
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct img_comp
+        public struct ImgComp
         {
             public int id;
             public int h, v;
@@ -50,9 +58,9 @@ namespace MonoGame.Utilities
             public int coeff_w, coeff_h; // number of 8x8 coefficient blocks
         }
 
-        public class stbi__jpeg
+        public class JpegImage
         {
-            public stbi__context s;
+            public ReadContext s;
             public readonly PinnedArray<stbi__huffman> huff_dc = new PinnedArray<stbi__huffman>(4);
             public readonly PinnedArray<stbi__huffman> huff_ac = new PinnedArray<stbi__huffman>(4);
             public readonly PinnedArray<ushort>[] dequant;
@@ -65,7 +73,7 @@ namespace MonoGame.Utilities
             public int img_mcu_w, img_mcu_h;
 
 // definition of jpeg image component
-            public img_comp[] img_comp = new img_comp[4];
+            public ImgComp[] img_comp = new ImgComp[4];
 
             public uint code_buffer; // jpeg entropy-coded buffer
             public int code_bits; // number of valid bits
@@ -91,7 +99,7 @@ namespace MonoGame.Utilities
             public YCbCr_to_RGB_kernel YCbCr_to_RGB_kernel;
             public Resampler resample_row_hv_2_kernel;
 
-            public stbi__jpeg()
+            public JpegImage()
             {
                 for (var i = 0; i < 4; ++i)
                 {
@@ -101,7 +109,7 @@ namespace MonoGame.Utilities
 
                 for (var i = 0; i < img_comp.Length; ++i)
                 {
-                    img_comp[i] = new img_comp();
+                    img_comp[i] = new ImgComp();
                 }
 
                 fast_ac = new PinnedArray<short>[4];
@@ -118,7 +126,7 @@ namespace MonoGame.Utilities
             }
         };
 
-        public class stbi__resample
+        public class Resample
         {
             public Resampler resample;
             public byte* line0;
@@ -131,14 +139,14 @@ namespace MonoGame.Utilities
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct stbi__gif_lzw
+        public struct GifLzw
         {
             public short prefix;
             public byte first;
             public byte suffix;
         }
 
-        public class stbi__gif
+        public class GifImage
         {
             public int w;
             public int h;
@@ -152,7 +160,7 @@ namespace MonoGame.Utilities
             public int delay;
             public PinnedArray<byte> pal;
             public PinnedArray<byte> lpal;
-            public PinnedArray<stbi__gif_lzw> codes;
+            public PinnedArray<GifLzw> codes;
             public byte* color_table;
             public int parse;
             public int step;
@@ -165,113 +173,85 @@ namespace MonoGame.Utilities
             public int cur_y;
             public int line_size;
 
-            public stbi__gif()
+            public GifImage()
             {
-                codes = new PinnedArray<stbi__gif_lzw>(4096);
-                pal = new PinnedArray<byte>(256*4);
-                lpal = new PinnedArray<byte>(256*4);
+                codes = new PinnedArray<GifLzw>(4096);
+                pal = new PinnedArray<byte>(256 * 4);
+                lpal = new PinnedArray<byte>(256 * 4);
             }
         }
 
-        private static void* stbi__malloc(int size)
-        {
-            return Operations.Malloc(size);
-        }
-
-        private static void* stbi__malloc(ulong size)
-        {
-            return stbi__malloc((int) size);
-        }
-
-        private static void* malloc(ulong size)
-        {
-            return stbi__malloc(size);
-        }
-
-        private static int stbi__err(string str)
+        private static int Error(string str)
         {
             LastError = str;
             return 0;
         }
 
-        private static void memcpy(void* a, void* b, long size)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void* MAlloc(ulong size)
         {
-            Operations.Memcpy(a, b, size);
+            return Operations.MAlloc((int) size);
         }
 
-        private static void memcpy(void* a, void* b, ulong size)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void MemCopy(void* a, void* b, ulong size)
         {
-            memcpy(a, b, (long) size);
+            Operations.MemCopy(a, b, (long) size);
         }
 
-        private static void memmove(void* a, void* b, long size)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void MemMove(void* a, void* b, ulong size)
         {
-            Operations.MemMove(a, b, size);
+            Operations.MemMove(a, b, (long) size);
         }
 
-        private static void memmove(void* a, void* b, ulong size)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int MemCmp(void* a, void* b, ulong size)
         {
-            memmove(a, b, (long) size);
+            return Operations.MemCmp(a, b, (long) size);
         }
 
-        private static int memcmp(void* a, void* b, long size)
-        {
-            return Operations.Memcmp(a, b, size);
-        }
-
-        private static int memcmp(void* a, void* b, ulong size)
-        {
-            return memcmp(a, b, (long) size);
-        }
-
-        private static void free(void* a)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void Free(void* a)
         {
             Operations.Free(a);
         }
 
-        private static void memset(void* ptr, int value, long size)
+        private static void MemSet(void* ptr, int value, ulong size)
         {
             byte* bptr = (byte*) ptr;
             var bval = (byte) value;
-            for (long i = 0; i < size; ++i)
+            for (ulong i = 0; i < size; ++i)
             {
                 *bptr++ = bval;
             }
         }
 
-        private static void memset(void* ptr, int value, ulong size)
-        {
-            memset(ptr, value, (long) size);
-        }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint _lrotl(uint x, int y)
         {
             return (x << y) | (x >> (32 - y));
         }
 
-        private static void* realloc(void* ptr, long newSize)
+        private static void* ReAlloc(void* ptr, ulong newSize)
         {
-            return Operations.Realloc(ptr, newSize);
+            return Operations.ReAlloc(ptr, (long)newSize);
         }
 
-        private static void* realloc(void* ptr, ulong newSize)
-        {
-            return realloc(ptr, (long) newSize);
-        }
-
-        private static int abs(int v)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Abs(int v)
         {
             return Math.Abs(v);
         }
 
-        public static void stbi__gif_parse_colortable(stbi__context s, byte* pal, int num_entries, int transp)
+        public static void GifParseColortable(ReadContext s, byte* pal, int num_entries, int transp)
         {
             int i;
             for (i = 0; (i) < (num_entries); ++i)
             {
-                pal[i*4 + 2] = stbi__get8(s);
-                pal[i*4 + 1] = stbi__get8(s);
-                pal[i*4] = stbi__get8(s);
+                pal[i*4 + 2] = GetByte(s);
+                pal[i*4 + 1] = GetByte(s);
+                pal[i*4] = GetByte(s);
                 pal[i*4 + 3] = (byte) (transp == i ? 0 : 255);
             }
         }
@@ -288,7 +268,7 @@ namespace MonoGame.Utilities
         /// <param name="number"></param>
         /// <param name="exponent"></param>
         /// <returns></returns>
-        private static double frexp(double number, int* exponent)
+        private static double FRExp(double number, int* exponent)
         {
             var bits = BitConverter.DoubleToInt64Bits(number);
             var exp = (int) ((bits & DBL_EXP_MASK) >> DBL_MANT_BITS);
