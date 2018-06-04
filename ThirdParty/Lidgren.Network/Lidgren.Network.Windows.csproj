@@ -35,7 +35,7 @@
     <OutputPath>bin\Windows\AnyCPU\Release</OutputPath>
     <IntermediateOutputPath>obj\Windows\AnyCPU\Release</IntermediateOutputPath>
     <DocumentationFile>bin\Windows\AnyCPU\Release\Lidgren.Network.xml</DocumentationFile>
-    <DefineConstants>TRACE;UNITY_4_5</DefineConstants>
+    <DefineConstants>TRACE;UNITY_4_5;USE_RELEASE_STATISTICS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>0</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>

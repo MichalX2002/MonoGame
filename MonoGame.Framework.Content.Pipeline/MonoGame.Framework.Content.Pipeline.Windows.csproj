@@ -544,6 +544,10 @@
       <Project>{7DE47032-A904-4C29-BD22-2D235E8D91BA}</Project>
       <Name>MonoGame.Framework.Windows</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj">
+      <Project>{B2B538A9-AD83-4484-A908-698503F4652F}</Project>
+      <Name>MonoGame.Imaging</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Tools\MonoGame.Build.Tasks\MonoGame.Build.Tasks.Windows.csproj">
       <Project>{E2D9E2AE-B875-D3D6-92B1-ECDC6C642E54}</Project>
       <Name>MonoGame.Build.Tasks.Windows</Name>

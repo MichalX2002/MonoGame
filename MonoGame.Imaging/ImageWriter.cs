@@ -6,8 +6,10 @@ namespace MonoGame.Imaging
     public class ImageWriter : IDisposable
     {
         private Stream _stream;
-        private byte[] _buffer;
         private int _lastSize;
+
+        [ThreadStatic]
+        private static byte[] _buffer;
         
         public bool Disposed { get; private set; }
         public bool LeaveOpen { get; protected set; }
@@ -16,16 +18,18 @@ namespace MonoGame.Imaging
         {
             _stream = stream;
             LeaveOpen = leaveOpen;
-
-            _buffer = new byte[1024 * 64];
         }
 
         private unsafe int WriteCallback(void* context, void* data, int size)
         {
-            _lastSize = size;
-
             if (data == null || size <= 0)
+            {
+                _lastSize = 0;
                 return 0;
+            }
+
+            if(_buffer == null)
+                _buffer = new byte[1024 * 64];
 
             using (var input = new UnmanagedMemoryStream((byte*)data, size))
             {
@@ -36,27 +40,36 @@ namespace MonoGame.Imaging
                 }
             }
 
+            _lastSize = size;
             return size;
         }
 
-        public unsafe int Write(byte* bytes, int width, int height, int channels, Format format)
+        public int Write(IntPtr bytes, int width, int height, int sourceChannels, Format format)
+        {
+            unsafe
+            {
+                return Write((byte*)bytes, width, height, sourceChannels, format);
+            }
+        }
+
+        public unsafe int Write(byte* bytes, int width, int height, int sourceChannels, Format format)
         {
             switch (format)
             {
                 case Format.Bmp:
-                    Imaging.CallbackWriteBmp(WriteCallback, null, width, height, channels, bytes);
+                    Imaging.CallbackWriteBmp(WriteCallback, null, width, height, sourceChannels, bytes);
                     break;
 
                 case Format.Tga:
-                    Imaging.CallbackWriteTga(WriteCallback, null, width, height, channels, bytes);
+                    Imaging.CallbackWriteTga(WriteCallback, null, width, height, sourceChannels, bytes);
                     break;
 
                 case Format.Jpg:
-                    Imaging.CallbackWriteJpg(WriteCallback, null, width, height, channels, bytes, 90);
+                    Imaging.CallbackWriteJpg(WriteCallback, null, width, height, sourceChannels, bytes, 90);
                     break;
 
                 case Format.Png:
-                    Imaging.CallbackWritePng(WriteCallback, null, width, height, channels, bytes, width * channels);
+                    Imaging.CallbackWritePng(WriteCallback, null, width, height, sourceChannels, bytes, width * sourceChannels);
                     break;
 
                 default:
@@ -76,6 +89,9 @@ namespace MonoGame.Imaging
                     if (LeaveOpen == false)
                         _stream.Dispose();
                 }
+
+                _buffer = null;
+                _stream = null;
 
                 Disposed = true;
             }

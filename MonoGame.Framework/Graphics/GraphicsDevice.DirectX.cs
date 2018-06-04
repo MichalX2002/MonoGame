@@ -33,6 +33,8 @@ namespace Microsoft.Xna.Framework.Graphics
         private int _vertexBufferSlotsUsed;
         private bool _blendFactorDirty;
 
+        public int MaxTexture2DSize => SharpDX.Direct3D11.Resource.MaximumTexture2DSize;
+
 #if WINDOWS_UAP
 
         // Declare Direct2D Objects
@@ -117,7 +119,6 @@ namespace Microsoft.Xna.Framework.Graphics
 #if WINDOWS
             CreateDeviceResources();
 #endif
-
             _maxVertexBufferSlots = _d3dDevice.FeatureLevel >= FeatureLevel.Level_11_0 ? SharpDX.Direct3D11.InputAssemblerStage.VertexInputResourceSlotCount : 16;
         }
 
@@ -570,7 +571,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
             // Get Direct3D 11.1 context
             _d3dContext = _d3dDevice.ImmediateContext.QueryInterface<SharpDX.Direct3D11.DeviceContext>();
-            
+
+
+
             // Create a new instance of GraphicsDebug because we support it on Windows platforms.
             GraphicsDebug = new GraphicsDebug(this);
         }

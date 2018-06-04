@@ -184,6 +184,27 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         /// <summary>
+        /// Changes the texture's pixels
+        /// </summary>
+        /// <param name="data">Image data</param>
+        /// <param name="elementStartIndex">start index (not in bytes)</param>
+        /// <param name="elementSize">per-element size in bytes</param>
+        /// <param name="elementCount">amount of elements to read</param>
+        public void SetData(IntPtr data, int elementStartIndex, int elementSize, int elementCount)
+        {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
+            if (elementSize <= 0)
+                throw new ArgumentOutOfRangeException(nameof(elementSize));
+
+            if (elementCount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(elementCount));
+
+            PlatformSetData(0, data, elementSize, elementStartIndex, elementCount);
+        }
+
+        /// <summary>
         /// Retrieves the contents of the texture
         /// Throws ArgumentException if data is null, data.length is too short or
         /// if arraySlice is greater than 0 and the GraphicsDevice doesn't support texture arrays
@@ -241,7 +262,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public void GetData<T>(T[] data) where T : struct
         {
             if (data == null)
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
             this.GetData(0, null, data, 0, data.Length);
         }
 
@@ -259,9 +280,9 @@ namespace Microsoft.Xna.Framework.Graphics
         public static Texture2D FromStream(GraphicsDevice graphicsDevice, Stream stream)
         {
             if (graphicsDevice == null)
-                throw new ArgumentNullException("graphicsDevice");
+                throw new ArgumentNullException(nameof(graphicsDevice));
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
 
             try
             {

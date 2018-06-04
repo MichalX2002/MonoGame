@@ -13,8 +13,6 @@ namespace Microsoft.Xna.Framework.Graphics
 		internal SurfaceFormat _format;
 		internal int _levelCount;
         private static int _lastSortingKey;
-        
-        public int MaxSize => GraphicsDevice._maxTextureSize;
 
         /// <summary>
         ///   Gets a unique identifier of this texture for sorting purposes.
@@ -122,6 +120,15 @@ namespace Microsoft.Xna.Framework.Graphics
         internal protected override void GraphicsDeviceResetting()
         {
             PlatformGraphicsDeviceResetting();
+        }
+
+        internal unsafe static void CopyMemory(
+            IntPtr src, int srcIndex, IntPtr dst, int dstIndex, int dstSize,
+            int elementCount, int elementSize)
+        {
+            IntPtr srcOffset = new IntPtr(src.ToInt64() + srcIndex * elementSize);
+            IntPtr dstOffset = new IntPtr(dst.ToInt64() + dstIndex * elementSize);
+            Buffer.MemoryCopy((void*)srcOffset, (void*)dstOffset, dstSize, elementCount * elementSize);
         }
     }
 }

@@ -1612,32 +1612,16 @@ namespace MonoGame.OpenGL
             TexParameteri(target, name, value);
         }
 
-        internal static void GetTexImage<T>(TextureTarget target, int level, PixelFormat format, PixelType type, T[] pixels) where T : struct
+        internal static void GetTexImage(TextureTarget target, int level, PixelFormat format, PixelType type, IntPtr output)
         {
-            var pixelsPtr = GCHandle.Alloc(pixels, GCHandleType.Pinned);
-            try
-            {
-                GetTexImageInternal(target, level, format, type, pixelsPtr.AddrOfPinnedObject());
-            }
-            finally
-            {
-                pixelsPtr.Free();
-            }
+            GetTexImageInternal(target, level, format, type, output);
         }
 
-        internal static void GetCompressedTexImage<T>(TextureTarget target, int level, T[] pixels) where T : struct
+        internal static void GetCompressedTexImage(TextureTarget target, int level, IntPtr output)
         {
-            var pixelsPtr = GCHandle.Alloc(pixels, GCHandleType.Pinned);
-            try
-            {
-                GetCompressedTexImageInternal(target, level, pixelsPtr.AddrOfPinnedObject());
-            }
-            finally
-            {
-                pixelsPtr.Free();
-            }
+            GetCompressedTexImageInternal(target, level, output);
         }
-
+    
         public static void ReadPixels<T>(int x, int y, int width, int height, PixelFormat format, PixelType type, T[] data)
         {
             var dataPtr = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -1649,6 +1633,11 @@ namespace MonoGame.OpenGL
             {
                 dataPtr.Free();
             }
+        }
+
+        public static void ReadPixels(int x, int y, int width, int height, PixelFormat format, PixelType type, IntPtr output)
+        {
+            ReadPixelsInternal(x, y, width, height, format, type, output);
         }
     }
 }

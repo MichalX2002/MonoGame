@@ -97,48 +97,64 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformGetData<T>(CubeMapFace cubeMapFace, int level, Rectangle rect, T[] data, int startIndex, int elementCount) where T : struct
         {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
             Threading.EnsureUIThread();
 
 #if OPENGL && DESKTOPGL
-            var target = GetGLCubeFace(cubeMapFace);
-            var tSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
-            GL.BindTexture(TextureTarget.TextureCubeMap, this.glTexture);
+            int tSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
+            GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            IntPtr dataPointer = dataHandle.AddrOfPinnedObject();
+            int dstSize = data.Length * tSizeInByte;
 
-            if (glFormat == GLPixelFormat.CompressedTextureFormats)
+            try
             {
-                // Note: for compressed format Format.GetSize() returns the size of a 4x4 block
-                var pixelToT = Format.GetSize() / tSizeInByte;
-                var tFullWidth = Math.Max(this.size >> level, 1) / 4 * pixelToT;
-                var temp = new T[Math.Max(this.size >> level, 1) / 4 * tFullWidth];
-                GL.GetCompressedTexImage(target, level, temp);
-                GraphicsExtensions.CheckGLError();
+                TextureTarget target = GetGLCubeFace(cubeMapFace);
+                GL.BindTexture(TextureTarget.TextureCubeMap, this.glTexture);
 
-                var rowCount = rect.Height / 4;
-                var tRectWidth = rect.Width / 4 * Format.GetSize() / tSizeInByte;
-                for (var r = 0; r < rowCount; r++)
+                if (glFormat == GLPixelFormat.CompressedTextureFormats)
                 {
-                    var tempStart = rect.X / 4 * pixelToT + (rect.Top / 4 + r) * tFullWidth;
-                    var dataStart = startIndex + r * tRectWidth;
-                    Array.Copy(temp, tempStart, data, dataStart, tRectWidth);
+                    // Note: for compressed format Format.GetSize() returns the size of a 4x4 block
+                    var pixelToT = Format.GetSize() / tSizeInByte;
+                    var tFullWidth = Math.Max(this.size >> level, 1) / 4 * pixelToT;
+                    IntPtr temp = Marshal.AllocHGlobal(Math.Max(this.size >> level, 1) / 4 * tFullWidth * tSizeInByte);
+                    GL.GetCompressedTexImage(target, level, temp);
+                    GraphicsExtensions.CheckGLError();
+
+                    var rowCount = rect.Height / 4;
+                    var tRectWidth = rect.Width / 4 * Format.GetSize() / tSizeInByte;
+                    for (var r = 0; r < rowCount; r++)
+                    {
+                        var tempStart = rect.X / 4 * pixelToT + (rect.Top / 4 + r) * tFullWidth;
+                        var dataStart = startIndex + r * tRectWidth;
+
+                        CopyMemory(temp, tempStart, dataPointer, dataStart, dstSize, tRectWidth, tSizeInByte);
+                    }
+                }
+                else
+                {
+                    // we need to convert from our format size to the size of T here
+                    var tFullWidth = Math.Max(this.size >> level, 1) * Format.GetSize() / tSizeInByte;
+                    IntPtr temp = Marshal.AllocHGlobal(Math.Max(this.size >> level, 1) * tFullWidth * tSizeInByte);
+                    GL.GetTexImage(target, level, glFormat, glType, temp);
+                    GraphicsExtensions.CheckGLError();
+
+                    var pixelToT = Format.GetSize() / tSizeInByte;
+                    var rowCount = rect.Height;
+                    var tRectWidth = rect.Width * pixelToT;
+                    for (var r = 0; r < rowCount; r++)
+                    {
+                        var tempStart = rect.X * pixelToT + (r + rect.Top) * tFullWidth;
+                        var dataStart = startIndex + r * tRectWidth;
+
+                        CopyMemory(temp, tempStart, dataPointer, dataStart, dstSize, tRectWidth, tSizeInByte);
+                    }
                 }
             }
-            else
+            finally
             {
-                // we need to convert from our format size to the size of T here
-                var tFullWidth = Math.Max(this.size >> level, 1) * Format.GetSize() / tSizeInByte;
-                var temp = new T[Math.Max(this.size >> level, 1) * tFullWidth];
-                GL.GetTexImage(target, level, glFormat, glType, temp);
-                GraphicsExtensions.CheckGLError();
-
-                var pixelToT = Format.GetSize() / tSizeInByte;
-                var rowCount = rect.Height;
-                var tRectWidth = rect.Width * pixelToT;
-                for (var r = 0; r < rowCount; r++)
-                {
-                    var tempStart = rect.X * pixelToT + (r + rect.Top) * tFullWidth;
-                    var dataStart = startIndex + r * tRectWidth;
-                    Array.Copy(temp, tempStart, data, dataStart, tRectWidth);
-                }
+                dataHandle.Free();
             }
 #else
             throw new NotImplementedException();
@@ -169,8 +185,8 @@ namespace Microsoft.Xna.Framework.Graphics
                     }
                     else
                     {
-                        GL.TexSubImage2D(target, level, rect.X, rect.Y, rect.Width, rect.Height, glFormat, glType,
-                            dataPtr);
+                        GL.TexSubImage2D(target, level, rect.X, rect.Y, rect.Width, rect.Height,
+                            glFormat, glType, dataPtr);
                         GraphicsExtensions.CheckGLError();
                     }
                 }

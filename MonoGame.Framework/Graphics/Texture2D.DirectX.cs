@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework.Utilities;
+using MonoGame.Imaging;
 using MonoGame.Utilities.Png;
 using SharpDX;
 using SharpDX.Direct3D11;
@@ -13,7 +14,6 @@ using SharpDX.DXGI;
 using SharpDX.WIC;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
 using Resource = SharpDX.Direct3D11.Resource;
-using MonoGame.Utilities;
 
 #if WINDOWS_UAP
 using Windows.Graphics.Imaging;
@@ -25,6 +25,8 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class Texture2D : Texture
     {
+        public int MaxSize => GraphicsDevice.MaxTexture2DSize;
+
         protected bool Shared { get; private set; }
         protected bool Mipmap { get; private set; }
         protected SampleDescription SampleDescription { get; private set; }
@@ -37,7 +39,22 @@ namespace Microsoft.Xna.Framework.Graphics
             Mipmap = mipmap;
         }
 
-        private void PlatformSetData<T>(int level, T[] data, int startIndex, int elementCount) where T : struct
+        private void PlatformSetData<T>(int level, T[] data, int startIndex, int elementCount)
+        {
+            var elementSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
+            var dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            // Use try..finally to make sure dataHandle is freed in case of an error
+            try
+            {
+                PlatformSetData(level, dataHandle.AddrOfPinnedObject(), startIndex, elementCount, elementSizeInByte);
+            }
+            finally
+            {
+                dataHandle.Free();
+            }
+        }
+
+        private void PlatformSetData(int level, IntPtr data, int startIndex, int elementCount, int elementSize)
         {
             GetSizeForLevel(Width, Height, level, out int w, out int h);
 
@@ -49,33 +66,23 @@ namespace Microsoft.Xna.Framework.Graphics
                 h = (h + 3) & ~3;
             }
 
-            var elementSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
-            var dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            // Use try..finally to make sure dataHandle is freed in case of an error
-            try
+            int startBytes = startIndex * elementSize;
+            IntPtr dataPtr = (IntPtr)(data.ToInt64() + startBytes);
+            var region = new ResourceRegion
             {
-                var startBytes = startIndex * elementSizeInByte;
-                var dataPtr = (IntPtr)(dataHandle.AddrOfPinnedObject().ToInt64() + startBytes);
-                var region = new ResourceRegion
-                {
-                    Top = 0,
-                    Front = 0,
-                    Back = 1,
-                    Bottom = h,
-                    Left = 0,
-                    Right = w
-                };
+                Top = 0,
+                Front = 0,
+                Back = 1,
+                Bottom = h,
+                Left = 0,
+                Right = w
+            };
 
-                // TODO: We need to deal with threaded contexts here!
-                var subresourceIndex = CalculateSubresourceIndex(0, level);
-                var d3dContext = GraphicsDevice._d3dContext;
-                lock (d3dContext)
-                    d3dContext.UpdateSubresource(GetTexture(), subresourceIndex, region, dataPtr, GetPitch(w), 0);
-            }
-            finally
-            {
-                dataHandle.Free();
-            }
+            // TODO: We need to deal with threaded contexts here!
+            var subresourceIndex = CalculateSubresourceIndex(0, level);
+            var d3dContext = GraphicsDevice._d3dContext;
+            lock (d3dContext)
+                d3dContext.UpdateSubresource(GetTexture(), subresourceIndex, region, dataPtr, GetPitch(w), 0);
         }
 
         private void PlatformSetData<T>(int level, int arraySlice, Rectangle rect, T[] data, int startIndex, int elementCount) where T : struct
@@ -216,35 +223,35 @@ namespace Microsoft.Xna.Framework.Graphics
             return arraySlice * _levelCount + level;
         }
 
-        private unsafe static Texture2D PlatformFromStream(GraphicsDevice graphicsDevice, Stream stream)
+        private static Texture2D PlatformFromStream(GraphicsDevice graphicsDevice, Stream stream)
         {
-            var reader = new ImageReader();
-
-            // The data returned is always four channel BGRA
-            var data = reader.Read(stream, out int width, out int height, out int channels, Imaging.STBI_rgb_alpha);
-
-            // XNA blacks out any pixels with an alpha of zero.
-            if (channels == 4)
+            using (var reader = new ImageReader(stream, true))
             {
-                fixed (byte* b = &data[0])
+                int length = reader.Read(out IntPtr data, out int width, out int height,
+                    out int channels, ImagePixelFormat.RgbWithAlpha);
+
+                // XNA blacks out any pixels with an alpha of zero.
+                unsafe
                 {
-                    for (var i = 0; i < data.Length; i += 4)
+                    if (channels == 4)
                     {
-                        if (b[i + 3] == 0)
+                        byte* b = (byte*)data;
+                        for (var i = 0; i < length; i += 4)
                         {
-                            b[i + 0] = 0;
-                            b[i + 1] = 0;
-                            b[i + 2] = 0;
+                            if (b[i + 3] == 0)
+                            {
+                                b[i + 0] = 0;
+                                b[i + 1] = 0;
+                                b[i + 2] = 0;
+                            }
                         }
                     }
                 }
+                
+                Texture2D texture = new Texture2D(graphicsDevice, width, height);
+                texture.SetData(data, 0, channels, length / channels);
+                return texture;
             }
-
-            Texture2D texture = null;
-            texture = new Texture2D(graphicsDevice, width, height);
-            texture.SetData(data);
-
-            return texture;
         }
 
         private void PlatformSaveAsJpeg(Stream stream, int width, int height)
