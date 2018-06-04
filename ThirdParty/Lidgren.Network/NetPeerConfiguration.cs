@@ -90,7 +90,7 @@ namespace Lidgren.Network
 			// default values
 			//
 			m_disabledTypes = NetIncomingMessageType.ConnectionApproval | NetIncomingMessageType.UnconnectedData | NetIncomingMessageType.VerboseDebugMessage | NetIncomingMessageType.ConnectionLatencyUpdated | NetIncomingMessageType.NatIntroductionSuccess;
-			m_networkThreadName = "Lidgren network thread";
+			m_networkThreadName = "Lidgren Network Thread";
 			m_localAddress = IPAddress.Any;
 			m_broadcastAddress = IPAddress.Broadcast;
 			var ip = NetUtility.GetBroadcastAddress();
@@ -428,8 +428,7 @@ namespace Lidgren.Network
 			get { return m_expandMTUFailAttempts; }
 			set { m_expandMTUFailAttempts = value; }
 		}
-
-#if DEBUG
+        
 		/// <summary>
 		/// Gets or sets the simulated amount of sent packets lost from 0.0f to 1.0f
 		/// </summary>
@@ -473,7 +472,6 @@ namespace Lidgren.Network
 			get { return m_duplicates; }
 			set { m_duplicates = value; }
 		}
-#endif
 
 		/// <summary>
 		/// Creates a memberwise shallow clone of this configuration

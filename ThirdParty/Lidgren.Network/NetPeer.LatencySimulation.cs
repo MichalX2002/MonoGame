@@ -17,7 +17,6 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
-//#define USE_RELEASE_STATISTICS
 
 using System;
 using System.Collections.Generic;
@@ -29,8 +28,6 @@ namespace Lidgren.Network
 {
 	public partial class NetPeer
 	{
-
-#if DEBUG
 		private readonly List<DelayedPacket> m_delayedPackets = new List<DelayedPacket>();
 
 		private class DelayedPacket
@@ -104,7 +101,7 @@ namespace Lidgren.Network
 
 			bool connectionReset;
 
-		RestartDelaySending:
+		    RestartDelaySending:
 			foreach (DelayedPacket p in m_delayedPackets)
 			{
 				if (now > p.DelayedUntil)
@@ -212,7 +209,8 @@ namespace Lidgren.Network
 			}
 			return true;
 		}
-#else
+
+        /*
 		internal bool SendMTUPacket(int numBytes, IPEndPoint target)
 		{
 			try
@@ -298,5 +296,6 @@ namespace Lidgren.Network
 		{
 		}
 #endif
-	}
+        */
+    }
 }

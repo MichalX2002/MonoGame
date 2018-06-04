@@ -153,6 +153,8 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
+        public int MaxTextureSize => _maxTextureSize;
+
         internal void SetVertexAttributeArray(bool[] attrs)
         {
             for (var x = 0; x < attrs.Length; x++)
