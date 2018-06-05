@@ -1,50 +1,157 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace MonoGame.Imaging
 {
+    public class StackQueue<T>
+    {
+        private LinkedList<T> _linkedList;
+
+        public StackQueue()
+        {
+            _linkedList = new LinkedList<T>();
+        }
+
+        public void Push(T obj)
+        {
+            this._linkedList.AddFirst(obj);
+        }
+
+        public void Enqueue(T obj)
+        {
+            this._linkedList.AddFirst(obj);
+        }
+
+        public T Pop()
+        {
+            var obj = this._linkedList.First.Value;
+            this._linkedList.RemoveFirst();
+            return obj;
+        }
+
+        public T Dequeue()
+        {
+            var obj = this._linkedList.Last.Value;
+            this._linkedList.RemoveLast();
+            return obj;
+        }
+
+        public T PeekStack()
+        {
+            return this._linkedList.First.Value;
+        }
+
+        public T PeekQueue()
+        {
+            return this._linkedList.Last.Value;
+        }
+
+        public int Count => _linkedList.Count;
+    }
+
+    public class FixedSizedStackQueue<T> : StackQueue<T>
+    {
+        private readonly int _maxCapacity;
+        private readonly object _lock = new object();
+
+        public FixedSizedStackQueue(int maxCapacity)
+        {
+            _maxCapacity = maxCapacity;
+        }
+
+        public new void Enqueue(T item)
+        {
+            lock (_lock)
+            {
+                base.Enqueue(item);
+                if (Count > _maxCapacity)
+                    Dequeue(); // Throw away
+            }
+        }
+
+        public new T Dequeue()
+        {
+            lock(_lock)
+                return base.Dequeue();
+        }
+    }
+
+    public class ImagingError
+    {
+        public readonly Thread WorkerThread;
+        public readonly string Error;
+
+        public ImagingError(Thread workerThread, string error)
+        {
+            WorkerThread = workerThread;
+            Error = error;
+        }
+
+        public static ImagingError GetLatestError()
+        {
+            return Imaging.LastErrors.Pop();
+        }
+
+        public static ImagingError GetLastError()
+        {
+            return Imaging.LastErrors.Dequeue();   
+        }
+    }
+
     internal unsafe partial class Imaging
     {
-        public static string LastError;
+        public static FixedSizedStackQueue<ImagingError> LastErrors;
+        public static int _verticallyFlipOnLoad;
 
-        public static string stbi__g_failure_reason;
-        public static int stbi__vertically_flip_on_load;
+        static Imaging()
+        {
+            LastErrors = new FixedSizedStackQueue<ImagingError>(128);
+        }
 
         private static int Error(string str)
         {
-            LastError = str;
+            LastErrors.Enqueue(new ImagingError(Thread.CurrentThread, str));
             return 0;
         }
 
+        /*
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void* MAlloc(ulong size)
+        private static void* MAlloc(MemoryManager manager, ulong size)
         {
-            return Operations.MAlloc((int) size);
+            return manager.MAlloc((int) size);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void MemCopy(void* a, void* b, ulong size)
+        private static void MemCopy(MemoryManager manager, void* a, void* b, ulong size)
         {
-            Operations.MemCopy(a, b, (long) size);
+            manager.MemCopy(a, b, (long) size);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void MemMove(void* a, void* b, ulong size)
+        private static void MemMove(MemoryManager manager, void* a, void* b, ulong size)
         {
-            Operations.MemMove(a, b, (long) size);
+            manager.MemMove(a, b, (long) size);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int MemCmp(void* a, void* b, ulong size)
+        private static int MemCmp(MemoryManager manager, void* a, void* b, ulong size)
         {
-            return Operations.MemCmp(a, b, (long) size);
+            return manager.MemCmp(a, b, (long) size);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void Free(void* a)
+        private static void Free(MemoryManager manager, void* a)
         {
-            Operations.Free(a);
+            manager.Free(a);
         }
+
+        private static void* ReAlloc(MemoryManager manager, void* ptr, ulong newSize)
+        {
+            return manager.ReAlloc(ptr, (long)newSize);
+        }
+        */
 
         private static void MemSet(void* ptr, int value, ulong size)
         {
@@ -57,14 +164,9 @@ namespace MonoGame.Imaging
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static uint _lrotl(uint x, int y)
+        private static uint Rot32(uint x, int y)
         {
             return (x << y) | (x >> (32 - y));
-        }
-
-        private static void* ReAlloc(void* ptr, ulong newSize)
-        {
-            return Operations.ReAlloc(ptr, (long)newSize);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

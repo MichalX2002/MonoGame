@@ -3,7 +3,7 @@
 namespace MonoGame.Imaging
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct BmpData
+    internal struct BmpInfo
     {
         public int bpp;
         public int offset;

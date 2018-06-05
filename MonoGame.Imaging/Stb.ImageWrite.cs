@@ -6,11 +6,13 @@ namespace MonoGame.Imaging
         public struct WriteContext
         {
             public WriteCallback Callback;
+            public MemoryManager Manager;
             public void* Context;
 
-            public WriteContext(WriteCallback callback, void* context)
+            public WriteContext(WriteCallback callback, MemoryManager manager, void* context)
             {
                 Callback = callback;
+                Manager = manager;
                 Context = context;
             }
         }
@@ -19,9 +21,10 @@ namespace MonoGame.Imaging
 
         public delegate int WriteCallback(void* context, void* data, int size);
 
-        public static WriteContext GetWriteContext(WriteCallback c, void* context)
+        public static WriteContext GetWriteContext(
+            WriteCallback c, MemoryManager manager, void* context)
         {
-            return new WriteContext(c, context);
+            return new WriteContext(c, manager, context);
         }
 
         public static void WriteFv(in WriteContext s, string fmt, params int[] v)
@@ -82,7 +85,7 @@ namespace MonoGame.Imaging
             return 1;
         }
 
-        public static int CallbackWriteBmp(WriteCallback func,
+        public static int CallbackWriteBmp(WriteCallback func, MemoryManager manager,
             void* context,
             int x,
             int y,
@@ -90,11 +93,11 @@ namespace MonoGame.Imaging
             void* data
             )
         {
-            WriteContext s = GetWriteContext(func, context);
+            WriteContext s = GetWriteContext(func, manager, context);
             return WriteBmpCore(s, x, y, comp, data);
         }
 
-        public static int CallbackWriteTga(WriteCallback func,
+        public static int CallbackWriteTga(WriteCallback func, MemoryManager manager,
             void* context,
             int x,
             int y,
@@ -102,11 +105,11 @@ namespace MonoGame.Imaging
             void* data
             )
         {
-            WriteContext s = GetWriteContext(func, context);
+            WriteContext s = GetWriteContext(func, manager, context);
             return WriteTgaCore(s, x, y, comp, data);
         }
 
-        public static int CallbackWritePng(WriteCallback func,
+        public static int CallbackWritePng(WriteCallback func, MemoryManager manager,
             void* context,
             int x,
             int y,
@@ -116,15 +119,15 @@ namespace MonoGame.Imaging
             )
         {
             int len;
-            var png = MemoryWritePng((byte*) (data), stride_bytes, x, y, comp, &len);
+            var png = MemoryWritePng(manager, (byte*) (data), stride_bytes, x, y, comp, &len);
             if (png == null)
                 return 0;
             func(context, png, len);
-            Free(png);
+            manager.Free(png);
             return 1;
         }
 
-        public static int CallbackWriteJpg(WriteCallback func,
+        public static int CallbackWriteJpg(WriteCallback func, MemoryManager manager,
             void* context,
             int x,
             int y,
@@ -133,7 +136,7 @@ namespace MonoGame.Imaging
             int quality
             )
         {
-            WriteContext s = GetWriteContext(func, context);
+            WriteContext s = GetWriteContext(func, manager, context);
             return WriteJpgCore(s, x, y, comp, data, quality);
         }
     }

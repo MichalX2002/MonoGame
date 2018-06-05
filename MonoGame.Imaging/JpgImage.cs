@@ -1,12 +1,11 @@
-﻿using System;
-
+﻿
 namespace MonoGame.Imaging
 {
     internal unsafe delegate byte* ResampleDelegate(byte* a, byte* b, byte* c, int d, int e);
 
     internal unsafe class Resample
     {
-        public ResampleDelegate resample;
+        public ResampleDelegate resampleDelegate;
         public byte* line0;
         public byte* line1;
         public int hs;
@@ -18,19 +17,17 @@ namespace MonoGame.Imaging
 
     internal unsafe class JpgImage
     {
-        public delegate void idct_BlockKernel(byte* output, int out_stride, short* data);
-
-        public delegate void YCbCrToRGBKernel(
-            byte* output, byte* y, byte* pcb, byte* pcr, int count, int step);
+        public delegate void IDCT_BlockKernelDelegate(byte* output, int out_stride, short* data);
+        public delegate void YCbCrToRGBKernelDelegate(byte* output, byte* y, byte* pcb, byte* pcr, int count, int step);
 
         public const int STBI__ZFAST_BITS = 9;
 
-        public ReadContext s;
-        public readonly PinnedArray<Huffman> huff_dc = new PinnedArray<Huffman>(4);
-        public readonly PinnedArray<Huffman> huff_ac = new PinnedArray<Huffman>(4);
-        public readonly PinnedArray<ushort>[] dequant;
+        public readonly ReadContext _context;
+        public readonly MarshalPointer<Huffman> _huff_dc = new MarshalPointer<Huffman>(4);
+        public readonly MarshalPointer<Huffman> _huff_ac = new MarshalPointer<Huffman>(4);
+        public readonly MarshalPointer<ushort>[] _dequant;
 
-        public readonly PinnedArray<short>[] fast_ac;
+        public readonly MarshalPointer<short>[] _fastAc;
 
         // sizes for components, interleaved MCUs
         public int img_h_max, img_v_max;
@@ -38,12 +35,12 @@ namespace MonoGame.Imaging
         public int img_mcu_w, img_mcu_h;
 
         // definition of jpeg image component
-        public ImgComp[] img_comp = new ImgComp[4];
+        public ImgComp[] JpgImgComp = new ImgComp[4];
 
-        public uint code_buffer; // jpeg entropy-coded buffer
-        public int code_bits; // number of valid bits
-        public byte marker; // marker seen while filling entropy buffer
-        public int nomore; // flag if we saw a marker so must stop
+        public uint _codeBuffer; // jpeg entropy-coded buffer
+        public int _codeBits; // number of valid bits
+        public byte _marker; // marker seen while filling entropy buffer
+        public int _noMore; // flag if we saw a marker so must stop
 
         public int progressive;
         public int spec_start;
@@ -56,37 +53,41 @@ namespace MonoGame.Imaging
         public int rgb;
 
         public int scan_n;
-        public PinnedArray<int> order = new PinnedArray<int>(4);
-        public int restart_interval, todo;
+        public MarshalPointer<int> _order = new MarshalPointer<int>(4);
+        public int RestartInterval, ToDo;
 
         // kernels
-        public idct_BlockKernel idct_block_kernel;
-        public YCbCrToRGBKernel YCbCr_to_RGB_kernel;
-        public ResampleDelegate resample_row_hv_2_kernel;
+        public IDCT_BlockKernelDelegate _IDCT_BlockKernel;
+        public YCbCrToRGBKernelDelegate _YCbCrToRGBkernel;
+        public ResampleDelegate _resampleRow_HV2_kernel;
 
-        public JpgImage()
+        public JpgImage(ReadContext context)
         {
+            this._context = context;
+
+            Huffman* huffAcP = (Huffman*)_huff_ac.Ptr;
+            Huffman* huffDcP = (Huffman*)_huff_dc.Ptr;
             for (var i = 0; i < 4; ++i)
             {
-                huff_ac[i] = new Huffman();
-                huff_dc[i] = new Huffman();
+                huffAcP[i] = new Huffman();
+                huffDcP[i] = new Huffman();
             }
 
-            for (var i = 0; i < img_comp.Length; ++i)
+            for (var i = 0; i < JpgImgComp.Length; ++i)
             {
-                img_comp[i] = new ImgComp();
+                JpgImgComp[i] = new ImgComp();
             }
 
-            fast_ac = new PinnedArray<short>[4];
-            for (var i = 0; i < fast_ac.Length; ++i)
+            _fastAc = new MarshalPointer<short>[4];
+            for (var i = 0; i < _fastAc.Length; ++i)
             {
-                fast_ac[i] = new PinnedArray<short>(1 << STBI__ZFAST_BITS);
+                _fastAc[i] = new MarshalPointer<short>(1 << STBI__ZFAST_BITS);
             }
 
-            dequant = new PinnedArray<ushort>[4];
-            for (var i = 0; i < dequant.Length; ++i)
+            _dequant = new MarshalPointer<ushort>[4];
+            for (var i = 0; i < _dequant.Length; ++i)
             {
-                dequant[i] = new PinnedArray<ushort>(64);
+                _dequant[i] = new MarshalPointer<ushort>(64);
             }
         }
     }

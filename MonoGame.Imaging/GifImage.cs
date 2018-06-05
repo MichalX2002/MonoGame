@@ -13,9 +13,9 @@ namespace MonoGame.Imaging
         public int transparent;
         public int eflags;
         public int delay;
-        public PinnedArray<byte> pal;
-        public PinnedArray<byte> lpal;
-        public PinnedArray<GifLzw> codes;
+        public MarshalPointer<byte> pal;
+        public MarshalPointer<byte> lpal;
+        public MarshalPointer<GifLzw> codes;
         public byte* color_table;
         public int parse;
         public int step;
@@ -30,9 +30,9 @@ namespace MonoGame.Imaging
 
         public GifImage()
         {
-            codes = new PinnedArray<GifLzw>(4096);
-            pal = new PinnedArray<byte>(256 * 4);
-            lpal = new PinnedArray<byte>(256 * 4);
+            codes = new MarshalPointer<GifLzw>(4096);
+            pal = new MarshalPointer<byte>(256 * 4);
+            lpal = new MarshalPointer<byte>(256 * 4);
         }
     }
 }

@@ -5,8 +5,8 @@ namespace MonoGame.Imaging
     [StructLayout(LayoutKind.Sequential)]
     internal struct GifLzw
     {
-        public short prefix;
-        public byte first;
-        public byte suffix;
+        public short Prefix;
+        public byte First;
+        public byte Suffix;
     }
 }
