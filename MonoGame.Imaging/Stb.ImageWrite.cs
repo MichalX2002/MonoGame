@@ -1,30 +1,31 @@
 ﻿
+using System.IO;
+
 namespace MonoGame.Imaging
 {
     unsafe partial class Imaging
     {
         public struct WriteContext
         {
-            public WriteCallback Callback;
+            public WriteCallback Write;
             public MemoryManager Manager;
-            public void* Context;
+            public Stream Stream;
 
-            public WriteContext(WriteCallback callback, MemoryManager manager, void* context)
+            public WriteContext(WriteCallback callback, MemoryManager manager, Stream stream)
             {
-                Callback = callback;
+                Write = callback;
                 Manager = manager;
-                Context = context;
+                Stream = stream;
             }
         }
 
         public static int stbi_write_tga_with_rle = 1;
 
-        public delegate int WriteCallback(void* context, void* data, int size);
+        public delegate int WriteCallback(Stream stream, byte* data, int size);
 
-        public static WriteContext GetWriteContext(
-            WriteCallback c, MemoryManager manager, void* context)
+        public static WriteContext GetWriteContext(WriteCallback c, MemoryManager manager, Stream stream)
         {
-            return new WriteContext(c, manager, context);
+            return new WriteContext(c, manager, stream);
         }
 
         public static void WriteFv(in WriteContext s, string fmt, params int[] v)
@@ -40,7 +41,7 @@ namespace MonoGame.Imaging
                     case '1':
                     {
                         var x = (byte)(v[vindex++] & 0xff);
-                        s.Callback(s.Context, &x, 1);
+                        s.Write(s.Stream, &x, 1);
                         break;
                     }
                     case '2':
@@ -49,7 +50,7 @@ namespace MonoGame.Imaging
                         var b = stackalloc byte[2];
                         b[0] = (byte) (x & 0xff);
                         b[1] = (byte) ((x >> 8) & 0xff);
-                        s.Callback(s.Context, b, 2);
+                        s.Write(s.Stream, b, 2);
                         break;
                     }
                     case '4':
@@ -60,7 +61,7 @@ namespace MonoGame.Imaging
                         b[1] = (byte) ((x >> 8) & 0xff);
                         b[2] = (byte) ((x >> 16) & 0xff);
                         b[3] = (byte) ((x >> 24) & 0xff);
-                        s.Callback(s.Context, b, 4);
+                        s.Write(s.Stream, b, 4);
                         break;
                     }
                 }
@@ -86,31 +87,31 @@ namespace MonoGame.Imaging
         }
 
         public static int CallbackWriteBmp(WriteCallback func, MemoryManager manager,
-            void* context,
+            Stream stream,
             int x,
             int y,
             int comp,
             void* data
             )
         {
-            WriteContext s = GetWriteContext(func, manager, context);
+            WriteContext s = GetWriteContext(func, manager, stream);
             return WriteBmpCore(s, x, y, comp, data);
         }
 
         public static int CallbackWriteTga(WriteCallback func, MemoryManager manager,
-            void* context,
+            Stream stream,
             int x,
             int y,
             int comp,
             void* data
             )
         {
-            WriteContext s = GetWriteContext(func, manager, context);
+            WriteContext s = GetWriteContext(func, manager, stream);
             return WriteTgaCore(s, x, y, comp, data);
         }
 
         public static int CallbackWritePng(WriteCallback func, MemoryManager manager,
-            void* context,
+            Stream stream,
             int x,
             int y,
             int comp,
@@ -122,13 +123,13 @@ namespace MonoGame.Imaging
             var png = MemoryWritePng(manager, (byte*) (data), stride_bytes, x, y, comp, &len);
             if (png == null)
                 return 0;
-            func(context, png, len);
+            func(stream, png, len);
             manager.Free(png);
             return 1;
         }
 
         public static int CallbackWriteJpg(WriteCallback func, MemoryManager manager,
-            void* context,
+            Stream stream,
             int x,
             int y,
             int comp,
@@ -136,7 +137,7 @@ namespace MonoGame.Imaging
             int quality
             )
         {
-            WriteContext s = GetWriteContext(func, manager, context);
+            WriteContext s = GetWriteContext(func, manager, stream);
             return WriteJpgCore(s, x, y, comp, data, quality);
         }
     }

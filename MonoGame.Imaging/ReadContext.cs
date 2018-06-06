@@ -9,6 +9,7 @@ namespace MonoGame.Imaging
         public int OutChannels;
 
         public MemoryManager Manager;
+        public ErrorContext ErrorCtx;
         public ReadCallbacks Callbacks;
         public void* IOUserData;
         public int ReadFromCallbacks;
@@ -18,5 +19,10 @@ namespace MonoGame.Imaging
         public byte* ImgBufferEnd;
         public byte* ImgBufferOrigin;
         public byte* ImgBufferEndOrigin;
+
+        public int Error(string error)
+        {
+            return ErrorCtx.Error(error);
+        }
     }
 }

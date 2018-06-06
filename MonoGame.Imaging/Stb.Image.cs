@@ -1,118 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace MonoGame.Imaging
 {
-    public class StackQueue<T>
-    {
-        private LinkedList<T> _linkedList;
-
-        public StackQueue()
-        {
-            _linkedList = new LinkedList<T>();
-        }
-
-        public void Push(T obj)
-        {
-            this._linkedList.AddFirst(obj);
-        }
-
-        public void Enqueue(T obj)
-        {
-            this._linkedList.AddFirst(obj);
-        }
-
-        public T Pop()
-        {
-            var obj = this._linkedList.First.Value;
-            this._linkedList.RemoveFirst();
-            return obj;
-        }
-
-        public T Dequeue()
-        {
-            var obj = this._linkedList.Last.Value;
-            this._linkedList.RemoveLast();
-            return obj;
-        }
-
-        public T PeekStack()
-        {
-            return this._linkedList.First.Value;
-        }
-
-        public T PeekQueue()
-        {
-            return this._linkedList.Last.Value;
-        }
-
-        public int Count => _linkedList.Count;
-    }
-
-    public class FixedSizedStackQueue<T> : StackQueue<T>
-    {
-        private readonly int _maxCapacity;
-        private readonly object _lock = new object();
-
-        public FixedSizedStackQueue(int maxCapacity)
-        {
-            _maxCapacity = maxCapacity;
-        }
-
-        public new void Enqueue(T item)
-        {
-            lock (_lock)
-            {
-                base.Enqueue(item);
-                if (Count > _maxCapacity)
-                    Dequeue(); // Throw away
-            }
-        }
-
-        public new T Dequeue()
-        {
-            lock(_lock)
-                return base.Dequeue();
-        }
-    }
-
-    public class ImagingError
-    {
-        public readonly Thread WorkerThread;
-        public readonly string Error;
-
-        public ImagingError(Thread workerThread, string error)
-        {
-            WorkerThread = workerThread;
-            Error = error;
-        }
-
-        public static ImagingError GetLatestError()
-        {
-            return Imaging.LastErrors.Pop();
-        }
-
-        public static ImagingError GetLastError()
-        {
-            return Imaging.LastErrors.Dequeue();   
-        }
-    }
-
     internal unsafe partial class Imaging
     {
-        public static FixedSizedStackQueue<ImagingError> LastErrors;
         public static int _verticallyFlipOnLoad;
-
-        static Imaging()
+        
+        private static int Error(ErrorContext context, string error)
         {
-            LastErrors = new FixedSizedStackQueue<ImagingError>(128);
-        }
-
-        private static int Error(string str)
-        {
-            LastErrors.Enqueue(new ImagingError(Thread.CurrentThread, str));
+            context.AddError(error);
             return 0;
         }
 
@@ -153,14 +50,40 @@ namespace MonoGame.Imaging
         }
         */
 
+        private static unsafe int MemCmp(void* a, void* b, long size)
+        {
+            int result = 0;
+            byte* ap = (byte*)a;
+            byte* bp = (byte*)b;
+
+            for (long i = 0; i < size; ++i)
+            {
+                if (*ap != *bp)
+                    result += 1;
+
+                ap++;
+                bp++;
+            }
+
+            return result;
+        }
+
+        private static unsafe void MemMove(void* a, void* b, long size)
+        {
+            using (var temp = new MarshalPointer<byte>((int)size))
+            {
+                MemCopy(temp.Ptr, b, size);
+                MemCopy(a, temp.Ptr, size);
+            }
+        }
+
         private static void MemSet(void* ptr, int value, ulong size)
         {
             byte* bptr = (byte*) ptr;
             var bval = (byte) value;
+
             for (ulong i = 0; i < size; ++i)
-            {
                 *bptr++ = bval;
-            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -22,7 +22,7 @@ namespace MonoGame.Imaging
             LeaveOpen = leaveOpen;
         }
 
-        private unsafe int WriteCallback(void* context, void* data, int size)
+        private unsafe int WriteCallback(Stream stream, byte* data, int size)
         {
             if (data == null || size <= 0)
             {
@@ -33,12 +33,12 @@ namespace MonoGame.Imaging
             if(_buffer == null)
                 _buffer = new byte[1024 * 32];
 
-            using (var input = new UnmanagedMemoryStream((byte*)data, size))
+            using (var input = new UnmanagedMemoryStream(data, size))
             {
                 int read;
                 while ((read = input.Read(_buffer, 0, _buffer.Length)) > 0)
                 {
-                    _stream.Write(_buffer, 0, read);
+                    stream.Write(_buffer, 0, read);
                 }
             }
 
@@ -59,19 +59,19 @@ namespace MonoGame.Imaging
             switch (format)
             {
                 case ImageSaveFormat.Bmp:
-                    Imaging.CallbackWriteBmp(WriteCallback, _manager, null, width, height, sourceChannels, bytes);
+                    Imaging.CallbackWriteBmp(WriteCallback, _manager, _stream, width, height, sourceChannels, bytes);
                     break;
 
                 case ImageSaveFormat.Tga:
-                    Imaging.CallbackWriteTga(WriteCallback, _manager, null, width, height, sourceChannels, bytes);
+                    Imaging.CallbackWriteTga(WriteCallback, _manager, _stream, width, height, sourceChannels, bytes);
                     break;
 
                 case ImageSaveFormat.Jpg:
-                    Imaging.CallbackWriteJpg(WriteCallback, _manager, null, width, height, sourceChannels, bytes, 90);
+                    Imaging.CallbackWriteJpg(WriteCallback, _manager, _stream, width, height, sourceChannels, bytes, 90);
                     break;
 
                 case ImageSaveFormat.Png:
-                    Imaging.CallbackWritePng(WriteCallback, _manager, null, width, height, sourceChannels, bytes, width * sourceChannels);
+                    Imaging.CallbackWritePng(WriteCallback, _manager, _stream, width, height, sourceChannels, bytes, width * sourceChannels);
                     break;
 
                 default:

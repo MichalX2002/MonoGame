@@ -22,7 +22,7 @@ namespace MonoGame.Imaging
             _stream = stream;
             LeaveOpen = leaveOpen;
 
-            _callbacks = new ReadCallbacks(ReadCallback, SkipCallback, EoFCallback);
+            _callbacks = new ReadCallbacks(ReadCallback, EoFCallback);
         }
 
         private int SkipCallback(void* user, int i)
@@ -35,7 +35,7 @@ namespace MonoGame.Imaging
             return _stream.CanRead ? 1 : 0;
         }
 
-        private int ReadCallback(void* user, sbyte* data, int size)
+        private int ReadCallback(void* user, byte* data, int size)
         {
             if(_buffer == null)
                 _buffer = new byte[1024 * 32];
@@ -67,15 +67,16 @@ namespace MonoGame.Imaging
             int dc = (int)desiredChannels;
 
             int xx, yy, cc;
+            ErrorContext errorCtx = new ErrorContext();
             var result = Imaging.Load8FromCallbacks(
-                _manager, _callbacks, null, &xx, &yy, &cc, dc);
+                _manager, errorCtx, _callbacks, null, &xx, &yy, &cc, dc);
 
             width = xx;
             height = yy;
             channels = cc;
 
             if (result == null)
-                throw new InvalidOperationException(ImagingError.GetLastError().Error);
+                throw new InvalidDataException(errorCtx.ToString());
 
             // Convert to array
             int c = (dc >= 1 && dc <= 4) ? dc : channels;

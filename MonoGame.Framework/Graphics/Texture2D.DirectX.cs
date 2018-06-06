@@ -225,10 +225,15 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private static Texture2D PlatformFromStream(GraphicsDevice graphicsDevice, Stream stream)
         {
-            using (var reader = new ImageReader(stream, true))
+            using (var img = new Image(stream, true))
             {
-                int length = reader.Read(out IntPtr data, out int width, out int height,
-                    out int channels, ImagePixelFormat.RgbWithAlpha);
+                IntPtr data = img.GetDataPointer();
+                if (data == IntPtr.Zero)
+                    throw new InvalidDataException("Could not decode stream.");
+
+                ImageInfo info = img.Info;
+                int channels = (int)info.PixelFormat;
+                int length = img.PointerLength;
 
                 // XNA blacks out any pixels with an alpha of zero.
                 unsafe
@@ -248,7 +253,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     }
                 }
                 
-                Texture2D texture = new Texture2D(graphicsDevice, width, height);
+                Texture2D texture = new Texture2D(graphicsDevice, info.Width, info.Height);
                 texture.SetData(data, 0, channels, length / channels);
                 return texture;
             }

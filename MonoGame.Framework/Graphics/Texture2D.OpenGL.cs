@@ -359,10 +359,15 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private static Texture2D PlatformFromStream(GraphicsDevice graphicsDevice, Stream stream)
         {
-            using (var reader = new ImageReader(stream, true))
+            using (var img = new Image(stream, true))
             {
-                int length = reader.Read(out IntPtr data, out int width, out int height,
-                    out int channels, ImagePixelFormat.RgbWithAlpha);
+                IntPtr data = img.GetDataPointer();
+                if (data == IntPtr.Zero)
+                    throw new InvalidDataException("Could not decode stream.");
+
+                ImageInfo info = img.Info;
+                int channels = (int)info.PixelFormat;
+                int length = img.PointerSize;
 
                 // XNA blacks out any pixels with an alpha of zero.
                 unsafe
@@ -383,7 +388,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     }
                 }
 
-                Texture2D texture = new Texture2D(graphicsDevice, width, height);
+                Texture2D texture = new Texture2D(graphicsDevice, info.Width, info.Height);
                 texture.SetData(data, 0, channels, length / channels);
                 return texture;
             }
@@ -522,7 +527,7 @@ namespace Microsoft.Xna.Framework.Graphics
         private void PlatformSaveAsJpeg(Stream stream, int width, int height)
         {
 #if DESKTOPGL
-            SaveAsImage(stream, width, height, ImageWriter.Format.Jpg);
+            SaveAsImage(stream, width, height, ImageSaveFormat.Png);
 #elif ANDROID
             SaveAsImage(stream, width, height, Bitmap.CompressFormat.Jpeg);
 #else
@@ -533,7 +538,7 @@ namespace Microsoft.Xna.Framework.Graphics
         private void PlatformSaveAsPng(Stream stream, int width, int height)
         {
 #if DESKTOPGL
-            SaveAsImage(stream, width, height, ImageWriter.Format.Png);
+            SaveAsImage(stream, width, height, ImageSaveFormat.Png);
 #elif ANDROID
             SaveAsImage(stream, width, height, Bitmap.CompressFormat.Png);
 #else
@@ -543,7 +548,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
 #if DESKTOPGL
-        internal void SaveAsImage(Stream stream, int width, int height, ImageWriter.Format format)
+        internal void SaveAsImage(Stream stream, int width, int height, ImageSaveFormat format)
         {
 	        if (stream == null)
 		        throw new ArgumentNullException(nameof(stream));
@@ -562,8 +567,8 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 PlatformGetData(0, 0, new Rectangle(0, 0, width, height), buffer, bufferSize, 0, channels, elementCount);
 
-                using (var writer = new ImageWriter(stream, true))
-                    writer.Write(buffer, width, height, channels, format);
+                using (var img = new Image(buffer, width, height, (ImagePixelFormat)channels))
+                    img.Save(stream, format);
             }
             finally
             {

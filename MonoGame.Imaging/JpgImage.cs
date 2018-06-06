@@ -22,7 +22,7 @@ namespace MonoGame.Imaging
 
         public const int STBI__ZFAST_BITS = 9;
 
-        public readonly ReadContext _context;
+        public readonly ReadContext _readCtx;
         public readonly MarshalPointer<Huffman> _huff_dc = new MarshalPointer<Huffman>(4);
         public readonly MarshalPointer<Huffman> _huff_ac = new MarshalPointer<Huffman>(4);
         public readonly MarshalPointer<ushort>[] _dequant;
@@ -63,7 +63,7 @@ namespace MonoGame.Imaging
 
         public JpgImage(ReadContext context)
         {
-            this._context = context;
+            this._readCtx = context;
 
             Huffman* huffAcP = (Huffman*)_huff_ac.Ptr;
             Huffman* huffDcP = (Huffman*)_huff_dc.Ptr;

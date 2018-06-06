@@ -3,27 +3,32 @@ using System.IO;
 
 namespace MonoGame.Imaging
 {
-    public sealed class Image : IDisposable
+    public sealed partial class Image : IDisposable
     {
-        private readonly object _mutex;
+        public delegate void ErrorDelegate(ErrorContext errors);
 
         private Stream _stream;
         private MemoryManager _manager;
         private readonly bool _leaveStreamOpen;
         private readonly bool _leaveManagerOpen;
+        private bool _fromPtr;
 
         private IntPtr _pointer;
         private ImageInfo _cachedInfo;
-
-        private byte[] _buffer;
+        
         private ReadCallbacks _callbacks;
-        private ReadContext _context;
+        private ReadContext _readContext;
 
         public bool Disposed { get; private set; }
+        public object SyncRoot { get; } = new object();
+
         public IntPtr Pointer => GetDataPointer();
+        public int PointerLength { get; private set; }
         public ImageInfo Info => GetImageInfo();
 
-        public ImagingError LastError { get; private set; }
+        public event ErrorDelegate ErrorOccurred;
+        public ErrorContext LastError { get; private set; }
+
         public bool LastGetInfoFailed { get; private set; }
         public bool LastGetContextFailed { get; private set; }
         public bool LastGetPointerFailed { get; private set; }
@@ -37,12 +42,12 @@ namespace MonoGame.Imaging
 
             _manager = manager ?? throw new ArgumentNullException(nameof(manager));
             _leaveManagerOpen = leaveManagerOpen;
-
-            _mutex = new object();
+            
+            LastError = new ErrorContext();
 
             unsafe
             {
-                _callbacks = new ReadCallbacks(ReadCallback, SkipCallback, EoFCallback);
+                _callbacks = new ReadCallbacks(ReadCallback, EoFCallback);
             }
         }
 
@@ -51,134 +56,134 @@ namespace MonoGame.Imaging
         {
         }
 
-        private unsafe int SkipCallback(void* user, int i)
+        public Image(IntPtr data, int width, int height, ImagePixelFormat pixelFormat)
         {
-            return (int)_stream.Seek(i, SeekOrigin.Current);
+            _pointer = data;
+            _cachedInfo = new ImageInfo(width, height, pixelFormat, ImageFormat.RawData);
+            _fromPtr = true;
         }
 
-        private unsafe int EoFCallback(void* user)
+        private void TriggerError()
         {
-            return _stream.CanRead ? 1 : 0;
+            ErrorOccurred?.Invoke(LastError);
         }
 
-        private unsafe int ReadCallback(void* user, sbyte* data, int size)
+        public ImageInfo GetImageInfo()
         {
-            if (_buffer == null)
-                _buffer = new byte[1024 * 32];
-
-            int total = 0;
-            using (var stream = new UnmanagedMemoryStream((byte*)data, 0, size, FileAccess.Write))
+            lock (SyncRoot)
             {
-                int leftToRead = size;
-                int read = 0;
-                while (leftToRead > 0 && (read = _stream.Read(_buffer, 0, leftToRead)) > 0)
+                if (Disposed == false)
                 {
-                    stream.Write(_buffer, 0, read);
-                    leftToRead -= read;
-                    total += read;
-                }
-            }
+                    if (LastGetInfoFailed || LastGetContextFailed)
+                        return null;
 
-            return total;
-        }
-
-        private unsafe ReadContext GetReadContext()
-        {
-            if (_context == null)
-            {
-                if (LastGetContextFailed == true)
-                    return null;
-
-                _context = Imaging.GetReadContext(_manager, _callbacks, null);
-            }
-
-            if (_context == null)
-            {
-                LastGetContextFailed = true;
-                LastError = ImagingError.GetLatestError();
-            }
-
-            return _context;
-        }
-
-        private ImageInfo GetImageInfo()
-        {
-            if (_cachedInfo == null && LastGetInfoFailed == false)
-            {
-                unsafe
-                {
-                    var rc = GetReadContext();
-                    _cachedInfo = Imaging.GetImageInfo(rc);
-
-                    if (_cachedInfo.IsValid())
+                    if (_cachedInfo == null)
                     {
-                        LastGetInfoFailed = true;
-                        LastError = ImagingError.GetLatestError();
+                        ReadContext rc = GetReadContext();
+                        LastGetInfoFailed = CheckInvalidReadCtx(rc);
+
+                        if (LastGetInfoFailed == false)
+                        {
+                            _cachedInfo = Imaging.GetImageInfo(rc);
+
+                            if (_cachedInfo.IsValid() == false)
+                            {
+                                LastGetInfoFailed = true;
+                                TriggerError();
+                                return null;
+                            }
+                        }
                     }
                 }
-            }
 
-            return _cachedInfo;
+                return _cachedInfo;
+            }
         }
 
         public IntPtr GetDataPointer()
         {
-            if (_pointer == null)
+            lock (SyncRoot)
             {
-                if (LastGetPointerFailed == true)
+                CheckDisposed();
+
+                if (LastGetContextFailed || LastGetPointerFailed || LastGetInfoFailed)
                     return IntPtr.Zero;
 
-                unsafe
+                if (_pointer == IntPtr.Zero)
                 {
-                    int width;
-                    int height;
-                    int comp;
+                    ReadContext rc = GetReadContext();
+                    LastGetPointerFailed = CheckInvalidReadCtx(rc);
 
-                    var rc = GetReadContext();
-                    var data = Imaging.LoadAndPostprocess8(rc, &width, &height, &comp, 4);
-
-                    var info = GetImageInfo();
-                    int srcComp = (int)info.PixelFormat;
-                    if (info.Width == width && info.Height == height && srcComp == comp)
+                    if (LastGetPointerFailed == false)
                     {
-                        _pointer = (IntPtr)data;
+                        ImageInfo info = GetImageInfo();
+                        if (LastGetInfoFailed == false && info != null)
+                        {
+                            unsafe
+                            {
+                                int width, height, comp;
+                                byte* data = Imaging.LoadAndPostprocess8(rc, &width, &height, &comp, 4);
+                                CloseStream();
+
+                                int srcComp = (int)info.PixelFormat;
+                                if (info.Width == width && info.Height == height && srcComp == comp)
+                                {
+                                    _pointer = (IntPtr)data;
+                                    PointerLength = width * height * comp;
+                                }
+                            }
+                        }
+                        else
+                            LastError.AddError("no image info");
                     }
+
+                    if (_pointer == IntPtr.Zero)
+                        LastGetPointerFailed = true;
                 }
-            }
 
-            if (_pointer == null)
+                return _pointer;
+            }
+        }
+
+        private void CheckDisposed()
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(Image));
+        }
+
+        private void CloseStream()
+        {
+            if (_stream != null)
             {
-                LastGetPointerFailed = true;
-                LastError = ImagingError.GetLatestError();
+                if (_leaveStreamOpen == false)
+                    _stream.Dispose();
+                _stream = null;
             }
-
-            return _pointer;
         }
 
         private void Dispose(bool disposing)
         {
-            if (!Disposed)
+            lock (SyncRoot)
             {
-                unsafe
+                if (!Disposed)
                 {
-                    if (_pointer != null)
+                    if (_fromPtr == false)
                     {
-                        _manager.Free((void*)_pointer);
-                        _pointer = IntPtr.Zero;
+                        MemoryManager.Free(_manager, _pointer);
+
+                        if (_leaveManagerOpen == false)
+                            _manager.Dispose();
+
+                        CloseStream();
+
+                        _manager = null;
+                        _readContext = null;
                     }
+
+                    _pointer = IntPtr.Zero;
+
+                    Disposed = true;
                 }
-
-                if (_leaveManagerOpen == false)
-                    _manager.Dispose();
-
-                if (_leaveStreamOpen == false)
-                    _stream.Dispose();
-
-                _manager = null;
-                _stream = null;
-                _buffer = null;
-
-                Disposed = true;
             }
         }
         

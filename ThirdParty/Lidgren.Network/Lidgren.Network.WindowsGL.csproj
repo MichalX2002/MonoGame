@@ -24,7 +24,7 @@
     <OutputPath>bin\WindowsGL\AnyCPU\Debug</OutputPath>
     <IntermediateOutputPath>obj\WindowsGL\AnyCPU\Debug</IntermediateOutputPath>
     <DocumentationFile>bin\WindowsGL\AnyCPU\Debug\Lidgren.Network.xml</DocumentationFile>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;USE_RELEASE_STATISTICS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>0</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
