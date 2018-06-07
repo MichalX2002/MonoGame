@@ -844,7 +844,8 @@ namespace MonoGame.Imaging
             int k;
             int p;
             int zlen;
-            if ((stride_bytes) == 0) stride_bytes = (int)(x * n);
+            if ((stride_bytes) == 0)
+                stride_bytes = (int)(x * n);
             filt = (byte*)(manager.MAlloc((x * n + 1) * y));
             if (filt == null) return null;
             line_buffer = (sbyte*)(manager.MAlloc(x * n));

@@ -14,11 +14,13 @@ namespace MonoGame.Imaging
                     void Get(out int w, out int h, out int p, out byte* d)
                     {
                         ImageInfo i = GetImageInfo();
+                        //Console.WriteLine("INFO ERRORS: " + LastError);
                         if (i == null || i.IsValid() == false)
                             throw new InvalidOperationException(
                                 $"No image info is present in this {nameof(Image)} instance.");
 
                         IntPtr data = GetDataPointer();
+                        //Console.WriteLine("DATA ERRORS: " + LastError);
                         if (data == IntPtr.Zero)
                             throw new InvalidOperationException(
                                 $"No image data is present in this {nameof(Image)} instance.");
@@ -65,14 +67,13 @@ namespace MonoGame.Imaging
                         case ImageSaveFormat.Png:
                             {
                                 Get(out width, out height, out bpp, out ptr);
-                                int stride = width * bpp;
-                                if (Imaging.CallbackWritePng(WriteCallback, _manager, output, width, height, bpp, ptr, stride) == 0)
+                                if (Imaging.CallbackWritePng(WriteCallback, _manager, output, width, height, bpp, ptr, 0) == 0)
                                     throw GetException();
                                 break;
                             }
 
                         default:
-                                throw new ArgumentOutOfRangeException(nameof(format), $"Invalid Format: {format}");
+                            throw new ArgumentOutOfRangeException(nameof(format), $"Invalid Format: {format}");
                     }
                 }
             }

@@ -68,7 +68,7 @@ namespace MonoGame.Imaging
 
             int xx, yy, cc;
             ErrorContext errorCtx = new ErrorContext();
-            var result = Imaging.Load8FromCallbacks(
+            var result = Imaging.LoadFromCallbacks8(
                 _manager, errorCtx, _callbacks, null, &xx, &yy, &cc, dc);
 
             width = xx;

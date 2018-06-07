@@ -14,6 +14,7 @@ namespace MonoGame.Imaging.Tests
             ZipArchive archive = ZipFile.OpenRead(DATA_FOLDER);
             MemoryManager manager = new MemoryManager(true);
 
+            TestEntry(manager, archive, "jpg.jpeg");
             TestEntry(manager, archive, "bmp/8bit.bmp");
             TestEntry(manager, archive, "bmp/24bit.bmp");
 
@@ -32,7 +33,7 @@ namespace MonoGame.Imaging.Tests
             TestEntry(manager, archive, "tga/24bit.tga");
             TestEntry(manager, archive, "tga/24bit_compressed.tga");
 
-            TestEntry(manager, archive, "32bit.gif");
+            //TestEntry(manager, archive, "32bit.gif");
 
             archive.Dispose();
             manager.Dispose();
@@ -42,33 +43,41 @@ namespace MonoGame.Imaging.Tests
 
         static void TestEntry(MemoryManager manager, ZipArchive archive, string name)
         {
-            using(var img = new Image(archive.GetEntry(name).Open(), false, manager, true))
+            try
             {
-                ImageInfo imageInfo = img.Info;
-                
-                Console.WriteLine(name + ": " + (img.LastGetInfoFailed ? "Failed to read info" : "Retrieved info successfully"));
-
-                Console.WriteLine("Loading data...");
-                IntPtr data = img.GetDataPointer();
-                if (data == null)
-                    Console.WriteLine("Data Pointer NULL: " + img.LastError);
-                else
+                using (var img = new Image(archive.GetEntry(name).Open(), false, manager, true))
                 {
-                    Console.WriteLine("Saving " + img.PointerSize + " bytes...");
+                    ImageInfo imageInfo = img.Info;
 
-                    FileInfo outputInfo = new FileInfo(name);
-                    outputInfo.Directory.Create();
+                    Console.WriteLine(name + ": " +
+                        (img.LastGetInfoFailed ? "Failed to read info" : "Retrieved info successfully"));
 
-                    using (var fs = new FileStream(outputInfo.FullName, FileMode.Create))
-                        img.Save(fs, ImageSaveFormat.Png);
+                    Console.WriteLine($"Loading ({imageInfo}) data...");
+                    IntPtr data = img.GetDataPointer();
+                    if (data == null)
+                        Console.WriteLine("Data Pointer NULL: " + img.LastError);
+                    else
+                    {
+                        Console.WriteLine("Saving " + img.PointerLength + " bytes...");
+
+                        FileInfo outputInfo = new FileInfo(name);
+                        outputInfo.Directory.Create();
+
+                        using (var fs = new FileStream(outputInfo.FullName + ".png", FileMode.Create))
+                            img.Save(fs, ImageSaveFormat.Png);
+                    }
                 }
-
-                Console.WriteLine();
-
-                Console.WriteLine($"Memory Allocated (Pointers: {manager.AllocatedPointers}): " + manager.AllocatedBytes + " bytes");
-                Console.WriteLine($"Lifetime Allocated (Pointers: {manager.LifetimeAllocatedPointers}): " + manager.LifetimeAllocatedBytes + " bytes");
-                Console.WriteLine("----------------------------------------------------");
             }
+            catch (Exception exc)
+            {
+                Console.WriteLine(exc.Message);
+            }
+
+            Console.WriteLine();
+
+            Console.WriteLine($"Memory Allocated (Pointers: {manager.AllocatedPointers}): " + manager.AllocatedBytes + " bytes");
+            Console.WriteLine($"Lifetime Allocated (Pointers: {manager.LifetimeAllocatedPointers}): " + manager.LifetimeAllocatedBytes + " bytes");
+            Console.WriteLine("----------------------------------------------------");
         }
     }
 }

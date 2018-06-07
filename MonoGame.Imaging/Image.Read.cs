@@ -8,27 +8,19 @@ namespace MonoGame.Imaging
         {
             lock (SyncRoot)
             {
-                if (LastGetContextFailed)
-                    return null;
-
-                if (_readContext == null)
+                unsafe
                 {
-                    unsafe
-                    {
-                        _readContext = Imaging.GetReadContext(
-                            _manager, LastError, _callbacks, null);
-                    }
-
-                    if (LastError.Count > 0)
-                    {
-                        LastGetContextFailed = true;
-                        TriggerError();
+                    if (LastGetContextFailed)
                         return null;
-                    }
-                }
 
-                _readContext.ErrorCtx.Clear();
-                return _readContext;
+                    var context = Imaging.GetReadContext(
+                            _manager, LastError, _callbacks, null);
+
+                    if (context == null)
+                        LastGetContextFailed = true;
+
+                    return context;
+                }
             }
         }
 
@@ -56,9 +48,13 @@ namespace MonoGame.Imaging
                 while (leftToRead > 0 && (read = _stream.Read(buffer, 0, size)) > 0)
                 {
                     stream.Write(buffer, 0, read);
+                    _infoBuffer?.Write(buffer, 0, read);
+
                     leftToRead -= read;
                 }
             }
+
+            _manager.ReleaseByteArray(buffer);
 
             return size - leftToRead;
         }

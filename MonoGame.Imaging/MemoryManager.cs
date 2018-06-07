@@ -79,7 +79,9 @@ namespace MonoGame.Imaging
             lock (SyncRoot)
             {
                 CheckDisposed();
-                
+
+                _allocatedArrays++;
+
                 for (int i = 0; i < _arrayPool.Count; i++)
                 {
                     if (_arrayPool[i].Length >= size)
@@ -89,12 +91,8 @@ namespace MonoGame.Imaging
                         return pooledArray;
                     }
                 }
-
-                _allocatedArrays++;
+                
                 LifetimeAllocatedArrays++;
-
-                Console.WriteLine("Created new read buffer of size " + size);
-
                 return new byte[size];
             }
         }

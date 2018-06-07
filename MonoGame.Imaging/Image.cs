@@ -15,9 +15,9 @@ namespace MonoGame.Imaging
 
         private IntPtr _pointer;
         private ImageInfo _cachedInfo;
-        
+        private MemoryStream _infoBuffer;
+
         private ReadCallbacks _callbacks;
-        private ReadContext _readContext;
 
         public bool Disposed { get; private set; }
         public object SyncRoot { get; } = new object();
@@ -33,8 +33,7 @@ namespace MonoGame.Imaging
         public bool LastGetContextFailed { get; private set; }
         public bool LastGetPointerFailed { get; private set; }
         
-        public Image(
-            Stream stream, bool leaveStreamOpen,
+        public Image(Stream stream, bool leaveStreamOpen,
             MemoryManager manager, bool leaveManagerOpen)
         {
             _stream = stream ?? throw new ArgumentNullException(nameof(stream));
@@ -44,6 +43,7 @@ namespace MonoGame.Imaging
             _leaveManagerOpen = leaveManagerOpen;
             
             LastError = new ErrorContext();
+            _infoBuffer = new MemoryStream();
 
             unsafe
             {
@@ -81,17 +81,19 @@ namespace MonoGame.Imaging
                     {
                         ReadContext rc = GetReadContext();
                         LastGetInfoFailed = CheckInvalidReadCtx(rc);
-
                         if (LastGetInfoFailed == false)
                         {
                             _cachedInfo = Imaging.GetImageInfo(rc);
-
-                            if (_cachedInfo.IsValid() == false)
+                            if (_cachedInfo.IsValid() == false || _cachedInfo == null)
                             {
                                 LastGetInfoFailed = true;
                                 TriggerError();
                                 return null;
                             }
+
+                            _stream = new MultiStream(_infoBuffer, _stream);
+                            _infoBuffer.Position = 0;
+                            _infoBuffer = null;
                         }
                     }
                 }
@@ -113,32 +115,23 @@ namespace MonoGame.Imaging
                 {
                     ReadContext rc = GetReadContext();
                     LastGetPointerFailed = CheckInvalidReadCtx(rc);
-
                     if (LastGetPointerFailed == false)
                     {
                         ImageInfo info = GetImageInfo();
-                        if (LastGetInfoFailed == false && info != null)
+                        if (LastGetInfoFailed == false)
                         {
-                            unsafe
-                            {
-                                int width, height, comp;
-                                byte* data = Imaging.LoadAndPostprocess8(rc, &width, &height, &comp, 4);
-                                CloseStream();
-
-                                int srcComp = (int)info.PixelFormat;
-                                if (info.Width == width && info.Height == height && srcComp == comp)
-                                {
-                                    _pointer = (IntPtr)data;
-                                    PointerLength = width * height * comp;
-                                }
-                            }
+                            int bpp = (int)info.PixelFormat;
+                            _pointer = Imaging.LoadFromInfo8(rc, info, bpp);
+                            if (_pointer == IntPtr.Zero)
+                                LastGetPointerFailed = true;
+                            else
+                                PointerLength = info.Width * info.Height * bpp;
                         }
                         else
                             LastError.AddError("no image info");
                     }
 
-                    if (_pointer == IntPtr.Zero)
-                        LastGetPointerFailed = true;
+                    CloseStream();
                 }
 
                 return _pointer;
@@ -177,7 +170,6 @@ namespace MonoGame.Imaging
                         CloseStream();
 
                         _manager = null;
-                        _readContext = null;
                     }
 
                     _pointer = IntPtr.Zero;
