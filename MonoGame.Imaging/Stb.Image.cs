@@ -122,7 +122,7 @@ namespace MonoGame.Imaging
         /// <param name="number"></param>
         /// <param name="exponent"></param>
         /// <returns></returns>
-        private static double FRExp(double number, int* exponent)
+        private static double DecomposeDouble(double number, int* exponent)
         {
             var bits = BitConverter.DoubleToInt64Bits(number);
             var exp = (int) ((bits & DBL_EXP_MASK) >> DBL_MANT_BITS);

@@ -367,7 +367,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 ImageInfo info = img.Info;
                 int channels = (int)info.PixelFormat;
-                int length = img.PointerSize;
+                int length = img.PointerLength;
 
                 // XNA blacks out any pixels with an alpha of zero.
                 unsafe

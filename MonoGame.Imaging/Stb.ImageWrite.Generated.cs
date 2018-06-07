@@ -350,7 +350,7 @@ namespace MonoGame.Imaging
             int format = (int)((colorbytes) < 2 ? 3 : 2);
             if (((y) < 0) || ((x) < 0))
                 return 0;
-            if (stbi_write_tga_with_rle == 0)
+            if (s.WriteTgaWithRle == false)
             {
                 return WriteOutFile(s, -1, -1, (int)(x), (int)(y), (int)(comp), 0, data,
                     has_alpha,
@@ -436,18 +436,17 @@ namespace MonoGame.Imaging
 
         public static void LinearToRgbe(byte* rgbe, float* linear)
         {
-            float maxcomp = (float)
-                    ((linear[0]) > ((linear[1]) > (linear[2]) ? (linear[1]) : (linear[2]))
-                        ? (linear[0])
-                        : ((linear[1]) > (linear[2]) ? (linear[1]) : (linear[2])));
+            float maxcomp = (linear[0] > (linear[1] > linear[2] ? linear[1] : linear[2]) ?
+                linear[0] : (linear[1] > linear[2] ? linear[1] : linear[2]));
+
             if ((maxcomp) < (1e-32f))
             {
-                rgbe[0] = (byte)(rgbe[1] = (byte)(rgbe[2] = (byte)(rgbe[3] = (byte)0)));
+                rgbe[0] = rgbe[1] = rgbe[2] = rgbe[3] = 0;
             }
             else
             {
                 int exponent;
-                float normalize = (float)FRExp((double)(maxcomp), &exponent) * 256f / maxcomp;
+                float normalize = (float)DecomposeDouble((double)(maxcomp), &exponent) * 256f / maxcomp;
                 rgbe[0] = ((byte)(linear[0] * normalize));
                 rgbe[1] = ((byte)(linear[1] * normalize));
                 rgbe[2] = ((byte)(linear[2] * normalize));
@@ -847,7 +846,8 @@ namespace MonoGame.Imaging
             if ((stride_bytes) == 0)
                 stride_bytes = (int)(x * n);
             filt = (byte*)(manager.MAlloc((x * n + 1) * y));
-            if (filt == null) return null;
+            if (filt == null)
+                return null;
             line_buffer = (sbyte*)(manager.MAlloc(x * n));
             if (line_buffer == null)
             {
@@ -1261,8 +1261,7 @@ namespace MonoGame.Imaging
                 {
                     s.Write(s.Stream, h, HEAD0.Length);
                 }
-
-
+            
                 s.Write(s.Stream, YTable, 64);
                 WriteChar(s, (byte)1);
                 s.Write(s.Stream, UVTable, 64);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using MonoGame.Imaging;
@@ -13,8 +14,7 @@ namespace MonoGame.Imaging.Tests
         {
             ZipArchive archive = ZipFile.OpenRead(DATA_FOLDER);
             MemoryManager manager = new MemoryManager(true);
-
-            TestEntry(manager, archive, "jpg.jpeg");
+            
             TestEntry(manager, archive, "bmp/8bit.bmp");
             TestEntry(manager, archive, "bmp/24bit.bmp");
 
@@ -43,17 +43,26 @@ namespace MonoGame.Imaging.Tests
 
         static void TestEntry(MemoryManager manager, ZipArchive archive, string name)
         {
+            Stopwatch watch = new Stopwatch();
             try
             {
                 using (var img = new Image(archive.GetEntry(name).Open(), false, manager, true))
                 {
+                    watch.Start();
                     ImageInfo imageInfo = img.Info;
+                    watch.Stop();
+                    Console.WriteLine("Info Read Time: " + Math.Round(watch.Elapsed.TotalMilliseconds, 3) + "ms");
 
                     Console.WriteLine(name + ": " +
                         (img.LastGetInfoFailed ? "Failed to read info" : "Retrieved info successfully"));
 
                     Console.WriteLine($"Loading ({imageInfo}) data...");
+
+                    watch.Restart();
                     IntPtr data = img.GetDataPointer();
+                    watch.Stop();
+                    Console.WriteLine("Pointer Read Time: " + Math.Round(watch.Elapsed.TotalMilliseconds, 3) + "ms");
+
                     if (data == null)
                         Console.WriteLine("Data Pointer NULL: " + img.LastError);
                     else
@@ -63,8 +72,13 @@ namespace MonoGame.Imaging.Tests
                         FileInfo outputInfo = new FileInfo(name);
                         outputInfo.Directory.Create();
 
-                        using (var fs = new FileStream(outputInfo.FullName + ".png", FileMode.Create))
-                            img.Save(fs, ImageSaveFormat.Png);
+                        using (var fs = new FileStream(outputInfo.FullName, FileMode.Create))
+                        {
+                            watch.Restart();
+                            img.Save(fs);
+                            watch.Stop();
+                            Console.WriteLine("Image Save Time: " + Math.Round(watch.Elapsed.TotalMilliseconds, 3) + "ms");
+                        }
                     }
                 }
             }

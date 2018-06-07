@@ -43,7 +43,7 @@ namespace MonoGame.Imaging
             _leaveManagerOpen = leaveManagerOpen;
             
             LastError = new ErrorContext();
-            _infoBuffer = new MemoryStream();
+            _infoBuffer = new MemoryStream(512);
 
             unsafe
             {

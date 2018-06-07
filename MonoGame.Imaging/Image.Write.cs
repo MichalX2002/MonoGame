@@ -5,7 +5,37 @@ namespace MonoGame.Imaging
 {
     public sealed partial class Image
     {
+        private void CheckImageInfo(ImageInfo info)
+        {
+            if (info == null || info.IsValid() == false)
+                throw new InvalidOperationException(
+                    $"No image info is present in this {nameof(Image)} instance.");
+        }
+
+        public void Save(Stream output)
+        {
+            Save(output, Configuration.Default);
+        }
+
+        public void Save(Stream output, Configuration config)
+        {
+            ImageInfo info = GetImageInfo();
+            CheckImageInfo(info);
+
+            var saveFormat = info.SourceFormat.ToSaveFormat();
+            if (saveFormat == ImageSaveFormat.Unknown)
+                throw new InvalidOperationException(
+                    $"Source format \"{info.SourceFormat}\" is not supported.");
+
+            Save(output, saveFormat, config);
+        }
+
         public void Save(Stream output, ImageSaveFormat format)
+        {
+            Save(output, format, Configuration.Default);
+        }
+
+        public void Save(Stream output, ImageSaveFormat format, Configuration config)
         {
             lock (SyncRoot)
             {
@@ -13,21 +43,17 @@ namespace MonoGame.Imaging
                 {
                     void Get(out int w, out int h, out int p, out byte* d)
                     {
-                        ImageInfo i = GetImageInfo();
-                        //Console.WriteLine("INFO ERRORS: " + LastError);
-                        if (i == null || i.IsValid() == false)
-                            throw new InvalidOperationException(
-                                $"No image info is present in this {nameof(Image)} instance.");
+                        ImageInfo info = GetImageInfo();
+                        CheckImageInfo(info);
 
                         IntPtr data = GetDataPointer();
-                        //Console.WriteLine("DATA ERRORS: " + LastError);
                         if (data == IntPtr.Zero)
                             throw new InvalidOperationException(
                                 $"No image data is present in this {nameof(Image)} instance.");
 
-                        w = i.Width;
-                        h = i.Height;
-                        p = (int)i.PixelFormat;
+                        w = info.Width;
+                        h = info.Height;
+                        p = (int)info.PixelFormat;
                         d = (byte*)data;
                     }
 
@@ -51,7 +77,7 @@ namespace MonoGame.Imaging
                         case ImageSaveFormat.Tga:
                             {
                                 Get(out width, out height, out bpp, out ptr);
-                                if (Imaging.CallbackWriteTga(WriteCallback, _manager, output, width, height, bpp, ptr) == 0)
+                                if (Imaging.CallbackWriteTga(WriteCallback, _manager, output, config.UseTgaRLE, width, height, bpp, ptr) == 0)
                                     throw GetException();
                                 break;
                             }
@@ -59,7 +85,7 @@ namespace MonoGame.Imaging
                         case ImageSaveFormat.Jpg:
                             {
                                 Get(out width, out height, out bpp, out ptr);
-                                if (Imaging.CallbackWriteJpg(WriteCallback, _manager, output, width, height, bpp, ptr, 90) == 0)
+                                if (Imaging.CallbackWriteJpg(WriteCallback, _manager, output, config.JpgQuality, width, height, bpp, ptr) == 0)
                                     throw GetException();
                                 break;
                             }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Imaging
@@ -8,7 +7,12 @@ namespace MonoGame.Imaging
     public class MemoryManager : IDisposable
     {
         private readonly bool _clearOnDispose;
-        private Dictionary<long, Pointer> _pointers;
+
+        private readonly int _maxPointerSize = 1024;
+        private int _allocatedPointers;
+        private Dictionary<IntPtr, Pointer> _pointers;
+        private List<Pointer> _pointerPool;
+
         private int _allocatedArrays;
         private List<byte[]> _arrayPool;
 
@@ -16,14 +20,16 @@ namespace MonoGame.Imaging
         public object SyncRoot { get; }
 
         /// <summary>
-        ///  Returns the amount of currently allocated unmanaged memory.
+        ///  Returns the amount of currently allocated memory.
         /// </summary>
         public long AllocatedBytes => GetAllocatedBytes();
 
         /// <summary>
         ///  Returns the amount of pointers currently allocated.
         /// </summary>
-        public int AllocatedPointers => _pointers == null ? 0 : _pointers.Count;
+        public int AllocatedPointers => _allocatedPointers +
+            (_pointerPool == null ? 0 : _pointerPool.Count) +
+            (_pointers == null ? 0 : _pointers.Count);
 
         /// <summary>
         ///  Returns the amount of arrays currently allocated.
@@ -51,7 +57,9 @@ namespace MonoGame.Imaging
         public MemoryManager(bool clearOnDispose)
         {
             SyncRoot = new object();
-            _pointers = new Dictionary<long, Pointer>();
+
+            _pointers = new Dictionary<IntPtr, Pointer>();
+            _pointerPool = new List<Pointer>();
             _arrayPool = new List<byte[]>();
 
             _clearOnDispose = clearOnDispose;
@@ -69,7 +77,11 @@ namespace MonoGame.Imaging
                 foreach (var p in _pointers.Values)
                     p.Dispose();
 
+                foreach (var p in _pointerPool)
+                    p.Dispose();
+
                 _pointers.Clear();
+                _pointerPool.Clear();
                 _arrayPool.Clear();
             }
         }
@@ -108,28 +120,7 @@ namespace MonoGame.Imaging
                 _allocatedArrays--;
 
                 if (_arrayPool != null)
-                {
                     _arrayPool.Add(array);
-                    _arrayPool.Sort(CompareArraysByLength);
-                }
-            }
-        }
-
-        private static int CompareArraysByLength(Array x, Array y)
-        {
-            if (x == null)
-            {
-                if (y == null)
-                    return 0;
-                else
-                    return -1;
-            }
-            else
-            {
-                if (y == null)
-                    return 1;
-                else
-                    return x.Length.CompareTo(y.Length);
             }
         }
 
@@ -138,20 +129,19 @@ namespace MonoGame.Imaging
             lock (SyncRoot)
             {
                 if (Disposed)
-                return 0;
+                    return 0;
 
                 long total = 0;
                 foreach (var p in _pointers.Values)
                     total += p.Size;
+                foreach (var p in _pointerPool)
+                    total += p.Size;
+                foreach (var p in _arrayPool)
+                    total += p.Length;
                 return total;
             }
         }
-
-        internal unsafe IntPtr MAllocPtr(long size)
-        {
-            return (IntPtr)MAlloc(size);
-        }
-
+        
         internal unsafe void* MAlloc(long size)
         {
             lock (SyncRoot)
@@ -161,11 +151,27 @@ namespace MonoGame.Imaging
                 if (size > int.MaxValue)
                     throw new ArgumentOutOfRangeException(nameof(size));
 
+                _allocatedPointers++;
+
+                for (int i = 0; i < _pointerPool.Count; i++)
+                {
+                    if (_pointerPool[i].Size >= size)
+                    {
+                        var pooledPointerItem = _pointerPool[i];
+                        _pointerPool.RemoveAt(i);
+
+                        pooledPointerItem.Reset();
+                        return pooledPointerItem.Ptr;
+                    }
+                }
+
                 var result = new MarshalPointer<byte>((int)size);
-                _pointers[(long)result.Ptr] = result;
+                _pointers[(IntPtr)result.Ptr] = result;
 
                 LifetimeAllocatedBytes += size;
                 LifetimeAllocatedPointers++;
+
+                //Console.WriteLine("Allocated " + size + " bytes");
 
                 return result.Ptr;
             }
@@ -187,11 +193,20 @@ namespace MonoGame.Imaging
 
         private unsafe void Remove(void* p)
         {
-            long key = (long)p;
+            IntPtr key = (IntPtr)p;
             if (_pointers.TryGetValue(key, out Pointer value))
             {
-                _pointers.Remove(key);
-                value.Dispose();
+                _allocatedPointers--;
+
+                if (value.Size < _maxPointerSize)
+                {
+                    _pointerPool.Add(value);
+                }
+                else
+                {
+                    _pointers.Remove(key);
+                    value.Dispose();
+                }
             }
         }
 
@@ -210,7 +225,7 @@ namespace MonoGame.Imaging
             {
                 CheckDisposed();
 
-                if (!_pointers.TryGetValue((long)p, out Pointer pointer))
+                if (!_pointers.TryGetValue((IntPtr)p, out Pointer pointer))
                     return MAlloc(newSize); // Allocate new
 
                 if (newSize <= pointer.Size)
@@ -220,7 +235,6 @@ namespace MonoGame.Imaging
                 Imaging.MemCopy(newP, p, pointer.Size);
 
                 Remove(p);
-
                 return newP;
             }
         }

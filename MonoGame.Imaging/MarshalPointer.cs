@@ -8,6 +8,8 @@ namespace MonoGame.Imaging
         public abstract int Size { get; }
         public abstract void* Ptr { get; }
 
+        public abstract void Reset();
+
         public static implicit operator void* (Pointer ptr)
         {
             return ptr.Ptr;
@@ -39,6 +41,7 @@ namespace MonoGame.Imaging
     internal unsafe class MarshalPointer<TStruct> : Pointer where TStruct : struct
     {
         private bool _disposed;
+        private void* _sourcePtr;
         private void* _ptr;
         private int _size;
 
@@ -52,7 +55,13 @@ namespace MonoGame.Imaging
             ElementSize = Marshal.SizeOf(typeof(TStruct));
             _size = size * ElementSize;
 
-            _ptr = (void*)Marshal.AllocHGlobal(_size);
+            _sourcePtr = (void*)Marshal.AllocHGlobal(_size);
+            Reset();
+        }
+
+        public override void Reset()
+        {
+            _ptr = _sourcePtr;
         }
 
         protected virtual void Dispose(bool disposing)
