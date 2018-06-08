@@ -4,7 +4,7 @@ Tests are not included in this fork (too much to organize/handle).
 Check out the original repository; https://github.com/MonoGame/MonoGame <br />
 (This "README.md" has been modified practically everywhere.)
 
-<br />
+
 ## Supported Platforms
  * Desktop PCs
    * Windows 10 Store Apps (UWP)
@@ -23,7 +23,7 @@ Check out the original repository; https://github.com/MonoGame/MonoGame <br />
  * Other
    * tvOS (OpenGL)
 
-<br />
+
 ## Source Code
 For the prerequisites for building from source please look at the [Requirements](REQUIREMENTS.md) file.
 
@@ -39,7 +39,7 @@ A high level breakdown of the components of the framework:
  * [Tools/2MGFX](Tools/2MGFX) is the command line effect compiler tool.
  * The [Tools/Pipeline](Tools/Pipeline) tool is a GUI frontend for content processing.
 
-<br />
+
 ## Helpful Links
  * The official website is [monogame.net](http://www.monogame.net).
  * Our [issue tracker](https://github.com/MonoGame/MonoGame/issues) is on GitHub.
@@ -49,7 +49,7 @@ A high level breakdown of the components of the framework:
  * Download release and development [installers and packages](http://www.monogame.net/downloads/).
  * Follow [@MonoGameTeam](https://twitter.com/monogameteam) on Twitter.
 
-<br />
+
 ## License
 The MonoGame project is under the [Microsoft Public License](https://opensource.org/licenses/MS-PL) except for a few portions of the code.
 See the [LICENSE.txt](LICENSE.txt) file for more details.
