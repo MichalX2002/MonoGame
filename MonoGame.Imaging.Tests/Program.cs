@@ -70,7 +70,7 @@ namespace MonoGame.Imaging.Tests
         static void TestEntry(MemoryManager manager, ZipArchive archive, string name)
         {
             Stopwatch watch = new Stopwatch();
-            int tries = 50;
+            int tries = 100;
 
             byte[] buf = new byte[1024 * 128];
 

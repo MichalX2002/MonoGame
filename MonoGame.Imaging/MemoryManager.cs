@@ -16,6 +16,12 @@ namespace MonoGame.Imaging
         public object SyncRoot { get; }
 
         /// <summary>
+        ///  Returns the size of the one pre-allocated array
+        ///  that was created by a constructor.
+        /// </summary>
+        public int PreAllocSize { get; private set; }
+
+        /// <summary>
         ///  Returns the amount of currently allocated memory.
         /// </summary>
         public long AllocatedBytes => GetAllocatedBytes();
@@ -48,17 +54,40 @@ namespace MonoGame.Imaging
         /// </summary>
         public int LifetimeAllocatedArrays { get; private set; } = 1;
 
-        public MemoryManager(bool clearOnDispose)
+        /// <summary>
+        /// Contructs a new <see cref="MemoryManager"/> instance.
+        /// </summary>
+        /// <param name="arrayPreAllocSize">
+        ///  One array of this size gets pre-allocated
+        ///  (nothing will be pre-allocated if the value is 0).
+        /// </param>
+        /// <param name="clearOnDispose">
+        ///  Indicates if <see cref="Dispose"/> disposes all pointers
+        ///  and removes references to arrays.
+        /// </param>
+        public MemoryManager(int arrayPreAllocSize, bool clearOnDispose)
         {
             SyncRoot = new object();
-            
-            _pointers = new Dictionary<IntPtr, Pointer>();
-            _arrayPool = new List<byte[]>
-            {
-                new byte[1024 * 80]
-            };
-            
+            PreAllocSize = arrayPreAllocSize;
             _clearOnDispose = clearOnDispose;
+
+            _pointers = new Dictionary<IntPtr, Pointer>();
+
+            _arrayPool = new List<byte[]>();
+            if (PreAllocSize > 0)
+                _arrayPool.Add(new byte[PreAllocSize]);
+        }
+        
+        /// <summary>
+        /// Contructs a new <see cref="MemoryManager"/> instance.
+        /// </summary>
+        /// <param name="clearOnDispose">
+        ///  Indicates if <see cref="Dispose"/> disposes all pointers
+        ///  and removes references to arrays.
+        /// </param>
+        public MemoryManager(bool clearOnDispose) : this(1024 * 32, clearOnDispose)
+        {
+
         }
         
         /// <summary>
@@ -78,6 +107,11 @@ namespace MonoGame.Imaging
             }
         }
 
+        internal int GetOptimalByteArraySize(int size)
+        {
+            return size > PreAllocSize ? PreAllocSize : size;
+        }
+
         internal byte[] AllocateByteArray(int size)
         {
             lock (SyncRoot)
@@ -87,14 +121,12 @@ namespace MonoGame.Imaging
                 _allocatedArrays++;
 
                 for (int i = 0; i < _arrayPool.Count; i++)
-                {
                     if (_arrayPool[i].Length >= size)
                     {
                         byte[] pooledArray = _arrayPool[i];
                         _arrayPool.RemoveAt(i);
                         return pooledArray;
                     }
-                }
 
                 Console.WriteLine("New array: " + size);
                 

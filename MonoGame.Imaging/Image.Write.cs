@@ -109,13 +109,15 @@ namespace MonoGame.Imaging
         {
             if (data == null || size <= 0)
                 return 0;
-            
+
+            int bufferSize = _manager.GetOptimalByteArraySize(size);
+            byte[] buffer = _manager.AllocateByteArray(bufferSize);
+
             int read = 0;
-            byte[] buffer = _manager.AllocateByteArray(size);
 
             using (var input = new UnmanagedMemoryStream(data, size))
             {
-                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+                while ((read = input.Read(buffer, 0, bufferSize)) > 0)
                     stream.Write(buffer, 0, read);
             }
 
