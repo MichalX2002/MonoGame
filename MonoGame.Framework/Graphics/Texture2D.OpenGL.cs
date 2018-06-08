@@ -284,7 +284,7 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
         }
 
-        private void PlatformGetData(int level, int arraySlice, Rectangle rect, IntPtr output, int outputSize, int startIndex, int elementSize, int elementCount)
+        private void PlatformGetData(int level, int arraySlice, Rectangle rect, IntPtr output, int startIndex, int elementSize, int elementCount)
         {
             Threading.EnsureUIThread();
 
@@ -309,6 +309,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             unsafe
             {
+                int outputSize = rect.Width * rect.Height * 4;
                 if (glFormat == GLPixelFormat.CompressedTextureFormats)
                 {
                     // Note: for compressed format Format.GetSize() returns the size of a 4x4 block
@@ -558,16 +559,14 @@ namespace Microsoft.Xna.Framework.Graphics
 
 	        if (height <= 0)
 		        throw new ArgumentOutOfRangeException(nameof(height), "Texture height must be greater than zero.");
-
-            const int channels = 4;
+            
             int elementCount = width * height;
-            int bufferSize = elementCount * channels;
-            IntPtr buffer = Marshal.AllocHGlobal(bufferSize);
+            IntPtr buffer = Marshal.AllocHGlobal(elementCount * 4);
             try
             {
-                PlatformGetData(0, 0, new Rectangle(0, 0, width, height), buffer, bufferSize, 0, channels, elementCount);
+                PlatformGetData(0, 0, new Rectangle(0, 0, width, height), buffer, 0, 4, elementCount);
 
-                using (var img = new Image(buffer, width, height, (ImagePixelFormat)channels))
+                using (var img = new Image(buffer, width, height, (ImagePixelFormat)4))
                     img.Save(stream, format);
             }
             finally

@@ -71,7 +71,7 @@ namespace MonoGame.Imaging
         public static byte[] LuminanceNrCodesDc = { 0, 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 };
         public static byte[] LuminanceNrCodesAc = { 0, 0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 0x7d };
         public static byte[] LuminanceValuesDc = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
-        
+
         public static byte[] LuminanceValuesAc =
         {
             0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12, 0x21, 0x31, 0x41, 0x06,
@@ -509,15 +509,18 @@ namespace MonoGame.Imaging
             return res;
         }
 
-        public static uint ZlibCountm(byte* a, byte* b, int limit)
+        public static int ZlibCountm(byte* a, byte* b, int limit)
         {
+            if (limit > 258)
+                limit = 258;
+
             int i;
-            for (i = 0; (i < limit) && (i < 258); ++i)
+            for (i = 0; i < limit; ++i)
             {
                 if (a[i] != b[i])
-                    break;
+                    return i;
             }
-            return (uint)(i);
+            return i;
         }
 
         public static uint HashZ(byte* data)
@@ -582,7 +585,7 @@ namespace MonoGame.Imaging
                 {
                     if ((hlist[j] - data) > (i - 32768))
                     {
-                        int d = (int)(ZlibCountm(hlist[j], data + i, (int)(data_len - i)));
+                        int d = ZlibCountm(hlist[j], data + i, data_len - i);
                         if ((d) >= (best))
                         {
                             best = (int)(d);
@@ -610,7 +613,7 @@ namespace MonoGame.Imaging
                     {
                         if ((hlist[j] - data) > (i - 32767))
                         {
-                            int e = (int)(ZlibCountm(hlist[j], data + i + 1, (int)(data_len - i - 1)));
+                            int e = ZlibCountm(hlist[j], data + i + 1, data_len - i - 1);
                             if ((e) > (best))
                             {
                                 bestloc = null;
@@ -925,11 +928,10 @@ namespace MonoGame.Imaging
                                     line_buffer[i] = (sbyte)(z[i] - ((z[i - n] + z[i - stride_bytes]) >> 1));
                                     break;
                                 case 4:
-                                    line_buffer[i] =
-                                        (sbyte)
-                                            (z[i] -
-                                             PaethFilter((int)(z[i - n]), (int)(z[i - stride_bytes]),
-                                                 (int)(z[i - stride_bytes - n])));
+                                    line_buffer[i] = (sbyte)(z[i] - PaethFilter(
+                                        (int)(z[i - n]),
+                                        (int)(z[i - stride_bytes]),
+                                        (int)(z[i - stride_bytes - n])));
                                     break;
                                 case 5:
                                     line_buffer[i] = (sbyte)(z[i] - (z[i - n] >> 1));
@@ -1261,7 +1263,7 @@ namespace MonoGame.Imaging
                 {
                     s.Write(s.Stream, h, HEAD0.Length);
                 }
-            
+
                 s.Write(s.Stream, YTable, 64);
                 WriteChar(s, (byte)1);
                 s.Write(s.Stream, UVTable, 64);

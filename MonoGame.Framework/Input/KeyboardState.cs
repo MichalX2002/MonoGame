@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Xna.Framework.Input
@@ -11,9 +12,6 @@ namespace Microsoft.Xna.Framework.Input
     /// </summary>
 	public struct KeyboardState
     {
-        // Used for the common situation where GetPressedKeys will return an empty array
-        static Keys[] empty = new Keys[0];
-
         #region Key Data
 
         // Array of 256 bits:
@@ -228,7 +226,7 @@ namespace Microsoft.Xna.Framework.Input
             uint count = CountBits(keys0) + CountBits(keys1) + CountBits(keys2) + CountBits(keys3)
                     + CountBits(keys4) + CountBits(keys5) + CountBits(keys6) + CountBits(keys7);
             if (count == 0)
-                return empty;
+                return Array.Empty<Keys>();
             Keys[] keys = new Keys[count];
 
             int index = 0;

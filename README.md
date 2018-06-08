@@ -26,9 +26,7 @@ Check out the original repository; https://github.com/MonoGame/MonoGame <br />
 
 ## Source Code
 For the prerequisites for building from source please look at the [Requirements](REQUIREMENTS.md) file.
-
 A high level breakdown of the components of the framework:
-
  * The game framework is found in [MonoGame.Framework](MonoGame.Framework).
  * The content pipeline is located in [MonoGame.Framework.Content.Pipeline](MonoGame.Framework.Content.Pipeline).
  * The MonoDevelop addin is in [IDE/MonoDevelop](IDE/MonoDevelop).

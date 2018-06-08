@@ -3,9 +3,8 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework.Graphics;
-using MonoGame.Utilities;
 
 namespace Microsoft.Xna.Framework.Input
 {
@@ -38,9 +37,18 @@ namespace Microsoft.Xna.Framework.Input
             IntPtr handle = IntPtr.Zero;
             try
             {
-                var bytes = new byte[texture.Width * texture.Height * 4];
-                texture.GetData(bytes);
-                surface = Sdl.CreateRGBSurfaceFrom(bytes, texture.Width, texture.Height, 32, texture.Width * 4, 0x000000ff, 0x0000FF00, 0x00FF0000, 0xFF000000);
+                int elementCount = texture.Width * texture.Height;
+                IntPtr byteBuffer = Marshal.AllocHGlobal(elementCount * 4);
+                try
+                {
+                    texture.GetData(0, 0, texture._bounds, byteBuffer, 0, 4, elementCount);
+                    surface = Sdl.CreateRGBSurfaceFrom(byteBuffer, texture.Width, texture.Height, 32, texture.Width * 4, 0x000000ff, 0x0000FF00, 0x00FF0000, 0xFF000000);
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(byteBuffer);
+                }
+
                 if (surface == IntPtr.Zero)
                     throw new InvalidOperationException("Failed to create surface for mouse cursor: " + Sdl.GetError());
 

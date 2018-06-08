@@ -192,14 +192,9 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="elementCount">amount of elements to read</param>
         public void SetData(IntPtr data, int elementStartIndex, int elementSize, int elementCount)
         {
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
-            if (elementSize <= 0)
-                throw new ArgumentOutOfRangeException(nameof(elementSize));
-
-            if (elementCount <= 0)
-                throw new ArgumentOutOfRangeException(nameof(elementCount));
+            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (elementSize <= 0) throw new ArgumentOutOfRangeException(nameof(elementSize));
+            if (elementCount <= 0) throw new ArgumentOutOfRangeException(nameof(elementCount));
 
             PlatformSetData(0, data, elementSize, elementStartIndex, elementCount);
         }
@@ -220,6 +215,27 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             ValidateParams(level, arraySlice, rect, data, startIndex, elementCount, out Rectangle checkedRect);
             PlatformGetData(level, arraySlice, checkedRect, data, startIndex, elementCount);
+        }
+
+        /// <summary>
+        /// Retrieves the contents of the texture
+        /// Throws ArgumentException if data is null, data.length is too short or
+        /// if arraySlice is greater than 0 and the GraphicsDevice doesn't support texture arrays
+        /// </summary>
+        /// <param name="level">Layer of the texture</param>
+        /// <param name="arraySlice">Index inside the texture array</param>
+        /// <param name="rect">Area of the texture to retrieve</param>
+        /// <param name="buffer">Destination pointer for the data</param>
+        /// <param name="startIndex">Starting index of data where to write the pixel data</param>
+        /// <param name="elementSize">per-element size in bytes</param>
+        /// <param name="elementCount">Number of pixels to read</param>
+        public void GetData(int level, int arraySlice, Rectangle rect, IntPtr buffer, int startIndex, int elementSize, int elementCount)
+        {
+            if (buffer == null) throw new ArgumentNullException(nameof(buffer)); 
+            if (elementSize <= 0) throw new ArgumentOutOfRangeException(nameof(elementSize));
+            if (elementCount <= 0) throw new ArgumentOutOfRangeException(nameof(elementCount));
+
+            PlatformGetData(level, arraySlice, rect, buffer, startIndex, elementSize, elementCount);
         }
 
         /// <summary>

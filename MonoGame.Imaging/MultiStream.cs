@@ -65,6 +65,9 @@ namespace MonoGame.Imaging
             Start:
             if (_streamQueue.Count > 0)
             {
+                if (count > buffer.Length)
+                    count = buffer.Length;
+
                 int read = _streamQueue.Peek().Read(buffer, offset, count);
                 if (read == 0)
                 {

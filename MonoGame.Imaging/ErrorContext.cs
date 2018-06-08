@@ -44,6 +44,7 @@ namespace MonoGame.Imaging
             for (int i = 0; i < max; i++)
             {
                 builder.AppendLine(Errors[i]);
+                builder.Append(' ');
             }
 
             if (Count > 10)
