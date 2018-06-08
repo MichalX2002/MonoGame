@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Runtime;
 using MonoGame.Imaging;
 
 namespace MonoGame.Imaging.Tests
@@ -33,6 +34,31 @@ namespace MonoGame.Imaging.Tests
             TestEntry(manager, archive, "tga/24bit.tga");
             TestEntry(manager, archive, "tga/24bit_compressed.tga");
 
+            /*
+            var watch = new Stopwatch();
+            var fs = new FileStream("test.png", FileMode.Open);
+            using(var img = new Image(fs, false, manager, true))
+            {
+                watch.Restart();
+                img.GetImageInfo();
+                watch.Stop();
+                Console.WriteLine("Info: " + watch.Elapsed.TotalMilliseconds + "ms");
+
+                watch.Restart();
+                img.GetDataPointer();
+                watch.Stop();
+                Console.WriteLine("Pointer: " + watch.Elapsed.TotalMilliseconds + "ms");
+
+                using (var outFs = new FileStream("out.png", FileMode.Create))
+                {
+                    watch.Restart();
+                    img.Save(outFs);
+                    watch.Stop();
+                    Console.WriteLine("Saving: " + watch.Elapsed.TotalMilliseconds + "ms");
+                }
+            }
+            */
+
             //TestEntry(manager, archive, "32bit.gif");
 
             archive.Dispose();
@@ -44,53 +70,75 @@ namespace MonoGame.Imaging.Tests
         static void TestEntry(MemoryManager manager, ZipArchive archive, string name)
         {
             Stopwatch watch = new Stopwatch();
+            int tries = 50;
+
+            byte[] buf = new byte[1024 * 128];
+
             try
             {
-                using (var img = new Image(archive.GetEntry(name).Open(), false, manager, true))
+                var entry = archive.GetEntry(name);
+                MemoryStream dataStream = new MemoryStream((int)entry.Length);
+                entry.Open().CopyTo(dataStream);
+                dataStream.Position = 0;
+
+                double infoReadTime = 0;
+                double pointerReadTime = 0;
+                double imageSaveTime = 0;
+
+                for (int i = 0; i < tries; i++)
                 {
-                    watch.Start();
-                    ImageInfo imageInfo = img.Info;
-                    watch.Stop();
-                    Console.WriteLine("Info Read Time: " + Math.Round(watch.Elapsed.TotalMilliseconds, 3) + "ms");
-
-                    Console.WriteLine(name + ": " +
-                        (img.LastGetInfoFailed ? "Failed to read info" : "Retrieved info successfully"));
-
-                    Console.WriteLine($"Loading ({imageInfo}) data...");
-
-                    watch.Restart();
-                    IntPtr data = img.GetDataPointer();
-                    watch.Stop();
-                    Console.WriteLine("Pointer Read Time: " + Math.Round(watch.Elapsed.TotalMilliseconds, 3) + "ms");
-
-                    if (data == null)
-                        Console.WriteLine("Data Pointer NULL: " + img.LastError);
-                    else
+                    using (var img = new Image(dataStream, false, manager, true))
                     {
-                        Console.WriteLine("Saving " + img.PointerLength + " bytes...");
+                        watch.Start();
+                        ImageInfo imageInfo = img.Info;
+                        watch.Stop();
+                        infoReadTime += watch.Elapsed.TotalMilliseconds;
 
-                        FileInfo outputInfo = new FileInfo(name);
-                        outputInfo.Directory.Create();
+                        //Console.WriteLine(name + ": " + (img.LastGetInfoFailed ? "Failed to read info" : "Retrieved info successfully"));
 
-                        using (var fs = new FileStream(outputInfo.FullName, FileMode.Create))
+                        //Console.WriteLine($"Loading ({imageInfo}) data...");
+
+                        watch.Restart();
+                        IntPtr data = img.GetDataPointer();
+                        watch.Stop();
+                        pointerReadTime += watch.Elapsed.TotalMilliseconds;
+
+                        if (data == null)
+                            Console.WriteLine("Data Pointer NULL: " + img.LastError);
+                        else
                         {
-                            watch.Restart();
-                            img.Save(fs);
-                            watch.Stop();
-                            Console.WriteLine("Image Save Time: " + Math.Round(watch.Elapsed.TotalMilliseconds, 3) + "ms");
+                            //Console.WriteLine("Saving " + img.PointerLength + " bytes...");
+
+                            FileInfo outputInfo = new FileInfo(name);
+                            outputInfo.Directory.Create();
+
+                            //using (var fs = new FileStream(outputInfo.FullName, FileMode.Create))
+                            using (var fs = new MemoryStream(buf))
+                            {
+                                watch.Restart();
+                                img.Save(fs);
+                                watch.Stop();
+                                imageSaveTime += watch.Elapsed.TotalMilliseconds;
+                            }
                         }
+                        dataStream.Position = 0;
                     }
                 }
+
+                Console.WriteLine();
+
+                Console.WriteLine(name);
+                Console.WriteLine("Info Read Avg: " + Math.Round(infoReadTime / tries, 2) + "ms");
+                Console.WriteLine("Pointer Read Avg: " + Math.Round(pointerReadTime / tries, 2) + "ms");
+                Console.WriteLine("Saving Time Avg: " + Math.Round(imageSaveTime / tries, 2) + "ms");
             }
             catch (Exception exc)
             {
                 Console.WriteLine(exc.Message);
             }
 
-            Console.WriteLine();
-
-            Console.WriteLine($"Memory Allocated (Pointers: {manager.AllocatedPointers}): " + manager.AllocatedBytes + " bytes");
-            Console.WriteLine($"Lifetime Allocated (Pointers: {manager.LifetimeAllocatedPointers}): " + manager.LifetimeAllocatedBytes + " bytes");
+            Console.WriteLine($"Memory Allocated (Pointers: {manager.AllocatedPointers}, Arrays: {manager.AllocatedArrays}): " + manager.AllocatedBytes + " bytes");
+            Console.WriteLine($"Lifetime Allocated (Pointers: {manager.LifetimeAllocatedPointers}, Arrays: {manager.LifetimeAllocatedArrays}): " + manager.LifetimeAllocatedBytes + " bytes");
             Console.WriteLine("----------------------------------------------------");
         }
     }

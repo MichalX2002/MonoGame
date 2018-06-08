@@ -41,10 +41,10 @@ namespace MonoGame.Imaging
     internal unsafe class MarshalPointer<TStruct> : Pointer where TStruct : struct
     {
         private bool _disposed;
-        private void* _sourcePtr;
+        private readonly void* _sourcePtr;
         private void* _ptr;
         private int _size;
-
+        
         public override void* Ptr => _ptr;
         public override int Size => _size;
 
