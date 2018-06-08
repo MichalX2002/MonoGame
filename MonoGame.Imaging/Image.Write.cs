@@ -118,7 +118,9 @@ namespace MonoGame.Imaging
                 while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
                     stream.Write(buffer, 0, read);
             }
-            
+
+            _manager.ReleaseByteArray(buffer);
+
             return size;
         }
 

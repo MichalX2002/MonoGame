@@ -592,13 +592,10 @@ namespace MonoGame.Imaging
                 int blen = (int)(s.ImgBufferEnd - s.ImgBuffer);
                 if ((blen) < (n))
                 {
-                    int res;
-                    int count;
                     MemCopy(buffer, s.ImgBuffer, blen);
-                    count = s.Callbacks.Read(s.IOUserData, buffer + blen, n - blen);
-                    res = (count) == (n - blen) ? 1 : 0;
+                    int count = s.Callbacks.Read(s.IOUserData, buffer + blen, n - blen);
                     s.ImgBuffer = s.ImgBufferEnd;
-                    return res;
+                    return count == (n - blen) ? 1 : 0;
                 }
             }
 
@@ -1261,15 +1258,19 @@ namespace MonoGame.Imaging
             return 1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte Clamp(int x)
         {
-            if (((uint)(x)) > (255))
+            if ((uint)x > 255)
             {
-                if ((x) < 0) return 0;
-                if ((x) > (255)) return 255;
+                if (x < 0)
+                    return 0;
+
+                if (x > 255)
+                    return 255;
             }
 
-            return (byte)(x);
+            return (byte)x;
         }
 
         public static void IdctBlock(byte* _out_, int out_stride, short* data)
@@ -3691,10 +3692,12 @@ namespace MonoGame.Imaging
                                     idata_limit *= 2;
                                 }
                                 p = (byte*)(s.Manager.ReAlloc(z.idata, idata_limit));
-                                if ((p) == null) return s.Error("outofmem");
+                                if ((p) == null)
+                                    return s.Error("outofmem");
                                 z.idata = p;
                             }
-                            if (GetN(s, z.idata + ioff, (int)(c.Length)) == 0) return s.Error("outofdata");
+                            if (GetN(s, z.idata + ioff, (int)c.Length) == 0)
+                                return s.Error("outofdata");
                             ioff += c.Length;
                             break;
                         }
