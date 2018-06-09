@@ -70,7 +70,7 @@ namespace MonoGame.Imaging.Tests
         static void TestEntry(MemoryManager manager, ZipArchive archive, string name)
         {
             Stopwatch watch = new Stopwatch();
-            int tries = 100;
+            int tries = 1;
 
             byte[] buf = new byte[1024 * 128];
 
@@ -112,8 +112,7 @@ namespace MonoGame.Imaging.Tests
                             FileInfo outputInfo = new FileInfo(name);
                             outputInfo.Directory.Create();
 
-                            //using (var fs = new FileStream(outputInfo.FullName, FileMode.Create))
-                            using (var fs = new MemoryStream(buf))
+                            using (var fs = new FileStream(outputInfo.FullName, FileMode.Create))
                             {
                                 watch.Restart();
                                 img.Save(fs);

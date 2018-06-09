@@ -14,10 +14,10 @@ namespace MonoGame.Imaging
 
         public void Save(Stream output)
         {
-            Save(output, Configuration.Default);
+            Save(output, SaveConfiguration.Default);
         }
 
-        public void Save(Stream output, Configuration config)
+        public void Save(Stream output, SaveConfiguration config)
         {
             ImageInfo info = GetImageInfo();
             CheckImageInfo(info);
@@ -32,10 +32,10 @@ namespace MonoGame.Imaging
 
         public void Save(Stream output, ImageSaveFormat format)
         {
-            Save(output, format, Configuration.Default);
+            Save(output, format, SaveConfiguration.Default);
         }
 
-        public void Save(Stream output, ImageSaveFormat format, Configuration config)
+        public void Save(Stream output, ImageSaveFormat format, SaveConfiguration config)
         {
             lock (SyncRoot)
             {
@@ -64,12 +64,13 @@ namespace MonoGame.Imaging
 
                     byte* ptr;
                     int width, height, bpp;
+                    WriteContext writeCtx = Imaging.GetWriteContext(WriteCallback, _manager, output, config);
                     switch (format)
                     {
                         case ImageSaveFormat.Bmp:
                             {
                                 Get(out width, out height, out bpp, out ptr);
-                                if (Imaging.CallbackWriteBmp(WriteCallback, _manager, output, width, height, bpp, ptr) == 0)
+                                if (Imaging.CallbackWriteBmp(writeCtx, width, height, bpp, ptr) == 0)
                                     throw GetException();
                                 break;
                             }
@@ -77,7 +78,7 @@ namespace MonoGame.Imaging
                         case ImageSaveFormat.Tga:
                             {
                                 Get(out width, out height, out bpp, out ptr);
-                                if (Imaging.CallbackWriteTga(WriteCallback, _manager, output, config.UseTgaRLE, width, height, bpp, ptr) == 0)
+                                if (Imaging.CallbackWriteTga(writeCtx, width, height, bpp, ptr) == 0)
                                     throw GetException();
                                 break;
                             }
@@ -85,7 +86,7 @@ namespace MonoGame.Imaging
                         case ImageSaveFormat.Jpg:
                             {
                                 Get(out width, out height, out bpp, out ptr);
-                                if (Imaging.CallbackWriteJpg(WriteCallback, _manager, output, config.JpgQuality, width, height, bpp, ptr) == 0)
+                                if (Imaging.CallbackWriteJpg(writeCtx, config.JpgQuality, width, height, bpp, ptr) == 0)
                                     throw GetException();
                                 break;
                             }
@@ -93,7 +94,7 @@ namespace MonoGame.Imaging
                         case ImageSaveFormat.Png:
                             {
                                 Get(out width, out height, out bpp, out ptr);
-                                if (Imaging.CallbackWritePng(WriteCallback, _manager, output, width, height, bpp, ptr, 0) == 0)
+                                if (Imaging.CallbackWritePng(writeCtx, width, height, bpp, ptr, 0) == 0)
                                     throw GetException();
                                 break;
                             }
@@ -105,7 +106,8 @@ namespace MonoGame.Imaging
             }
         }
 
-        private unsafe int WriteCallback(Stream stream, byte* data, int size)
+        private unsafe int WriteCallback(
+            Stream stream, byte* data, int size, in WriteContext c)
         {
             if (data == null || size <= 0)
                 return 0;
@@ -118,7 +120,10 @@ namespace MonoGame.Imaging
             using (var input = new UnmanagedMemoryStream(data, size))
             {
                 while ((read = input.Read(buffer, 0, bufferSize)) > 0)
+                {
                     stream.Write(buffer, 0, read);
+                    c.OnWrite?.Invoke(read);
+                }
             }
 
             _manager.ReleaseByteArray(buffer);

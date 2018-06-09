@@ -252,7 +252,7 @@ namespace MonoGame.Imaging
 
         public static void WriteChar(in WriteContext s, byte c)
         {
-            s.Write(s.Stream, &c, 1);
+            s.Write(s.Stream, &c, 1, s);
         }
 
         public static void WriteBytes(in WriteContext s, byte a, byte b, byte c)
@@ -261,49 +261,56 @@ namespace MonoGame.Imaging
             arr[0] = (byte)(a);
             arr[1] = (byte)(b);
             arr[2] = (byte)(c);
-            s.Write(s.Stream, arr, 3);
+            s.Write(s.Stream, arr, 3, s);
         }
 
-        public static void WritePixel(in WriteContext s, int rgb_dir, int comp, int write_alpha,
-            int expand_mono, byte* d)
+        public static void WritePixel(in WriteContext s, int rgb_dir, int comp,
+            int write_alpha, int expand_mono, byte* d)
         {
             byte* bg = stackalloc byte[3];
             bg[0] = (byte)(255);
             bg[1] = (byte)0;
             bg[2] = (byte)(255);
             byte* px = stackalloc byte[3];
-            int k;
-            if ((write_alpha) < 0) s.Write(s.Stream, &d[comp - 1], 1);
+            if ((write_alpha) < 0)
+                s.Write(s.Stream, &d[comp - 1], 1, s);
             switch (comp)
             {
                 case 1:
                 case 2:
-                    if ((expand_mono) != 0) WriteBytes(s, (byte)(d[0]), (byte)(d[0]), (byte)(d[0]));
-                    else s.Write(s.Stream, d, 1);
-                    break;
-                case 3:
-                case 4:
-                    if (((comp) == 4) && (write_alpha == 0))
                     {
-                        for (k = 0; (k) < 3; ++k)
-                        {
-                            px[k] = (byte)(bg[k] + ((d[k] - bg[k]) * d[3]) / 255);
-                        }
-                        WriteBytes(s, (byte)(px[1 - rgb_dir]), (byte)(px[1]), (byte)(px[1 + rgb_dir]));
+                        if ((expand_mono) != 0)
+                            WriteBytes(s, (byte)(d[0]), (byte)(d[0]), (byte)(d[0]));
+                        else
+                            s.Write(s.Stream, d, 1, s);
                         break;
                     }
-                    WriteBytes(s, (byte)(d[1 - rgb_dir]), (byte)(d[1]), (byte)(d[1 + rgb_dir]));
-                    break;
+
+                case 3:
+                case 4:
+                    {
+                        if (comp == 4 && write_alpha == 0)
+                        {
+                            for (int k = 0; k < 3; ++k)
+                            {
+                                px[k] = (byte)(bg[k] + ((d[k] - bg[k]) * d[3]) / 255);
+                            }
+                            WriteBytes(s, (byte)(px[1 - rgb_dir]), (byte)(px[1]), (byte)(px[1 + rgb_dir]));
+                            break;
+                        }
+                        WriteBytes(s, (byte)(d[1 - rgb_dir]), (byte)(d[1]), (byte)(d[1 + rgb_dir]));
+                        break;
+                    }
             }
 
-            if ((write_alpha) > 0) s.Write(s.Stream, &d[comp - 1], 1);
+            if (write_alpha > 0)
+                s.Write(s.Stream, &d[comp - 1], 1, s);
         }
 
         public static void WritePixels(in WriteContext s, int rgb_dir, int vdir, int x, int y, int comp,
             void* data, int write_alpha, int scanline_pad, int expand_mono)
         {
             byte zero = 0;
-            int i;
             int j;
             int j_end;
             if (y <= 0) return;
@@ -318,14 +325,14 @@ namespace MonoGame.Imaging
                 j = 0;
             }
 
-            for (; j != j_end; j += (int)(vdir))
+            for (; j != j_end; j += vdir)
             {
-                for (i = 0; (i) < (x); ++i)
+                for (int i = 0; i < x; ++i)
                 {
                     byte* d = (byte*)(data) + (j * x + i) * comp;
                     WritePixel(s, (int)(rgb_dir), (int)(comp), (int)(write_alpha), (int)(expand_mono), d);
                 }
-                s.Write(s.Stream, &zero, (int)(scanline_pad));
+                s.Write(s.Stream, &zero, (int)(scanline_pad), s);
             }
         }
 
@@ -414,17 +421,16 @@ namespace MonoGame.Imaging
                         if ((diff) != 0)
                         {
                             byte header = (byte)((len - 1) & 0xff);
-                            s.Write(s.Stream, &header, 1);
+                            s.Write(s.Stream, &header, 1, s);
                             for (k = 0; (k) < (len); ++k)
                             {
-                                WritePixel(s, -1, comp, has_alpha, 0,
-                                    begin + k * comp);
+                                WritePixel(s, -1, comp, has_alpha, 0, begin + k * comp);
                             }
                         }
                         else
                         {
                             byte header = (byte)((len - 129) & 0xff);
-                            s.Write(s.Stream, &header, 1);
+                            s.Write(s.Stream, &header, 1, s);
                             WritePixel(s, -1, comp, has_alpha, 0, begin);
                         }
                     }
@@ -458,15 +464,15 @@ namespace MonoGame.Imaging
         public static void WriteRunData(in WriteContext s, int length, byte databyte)
         {
             byte lengthbyte = (byte)((length + 128) & 0xff);
-            s.Write(s.Stream, &lengthbyte, 1);
-            s.Write(s.Stream, &databyte, 1);
+            s.Write(s.Stream, &lengthbyte, 1, s);
+            s.Write(s.Stream, &databyte, 1, s);
         }
 
         public static void WriteDumpData(in WriteContext s, int length, byte* data)
         {
             byte lengthbyte = (byte)((length) & 0xff);
-            s.Write(s.Stream, &lengthbyte, 1);
-            s.Write(s.Stream, data, length);
+            s.Write(s.Stream, &lengthbyte, 1, s);
+            s.Write(s.Stream, data, length, s);
         }
 
         public static void* SbGrowF(MemoryManager manager, void** arr, int increment, int itemsize)
@@ -1261,46 +1267,46 @@ namespace MonoGame.Imaging
 
                 fixed (byte* h = HEAD0)
                 {
-                    s.Write(s.Stream, h, HEAD0.Length);
+                    s.Write(s.Stream, h, HEAD0.Length, s);
                 }
 
-                s.Write(s.Stream, YTable, 64);
+                s.Write(s.Stream, YTable, 64, s);
                 WriteChar(s, (byte)1);
-                s.Write(s.Stream, UVTable, 64);
-                s.Write(s.Stream, head1, 24);
+                s.Write(s.Stream, UVTable, 64, s);
+                s.Write(s.Stream, head1, 24, s);
 
                 fixed (byte* d = &LuminanceNrCodesDc[1])
                 {
-                    s.Write(s.Stream, d, ChrominanceNrCodes_Dc.Length - 1);
+                    s.Write(s.Stream, d, ChrominanceNrCodes_Dc.Length - 1, s);
                 }
 
                 fixed (byte* d = LuminanceValuesDc)
                 {
-                    s.Write(s.Stream, d, ChrominanceValues_Dc.Length);
+                    s.Write(s.Stream, d, ChrominanceValues_Dc.Length, s);
                 }
 
                 WriteChar(s, (byte)(0x10));
 
                 fixed (byte* a = &LuminanceNrCodesAc[1])
                 {
-                    s.Write(s.Stream, a, LuminanceNrCodesAc.Length - 1);
+                    s.Write(s.Stream, a, LuminanceNrCodesAc.Length - 1, s);
                 }
 
                 fixed (byte* a = LuminanceValuesAc)
                 {
-                    s.Write(s.Stream, a, LuminanceValuesAc.Length);
+                    s.Write(s.Stream, a, LuminanceValuesAc.Length, s);
                 }
 
                 WriteChar(s, (byte)1);
 
                 fixed (byte* c = &ChrominanceNrCodes_Dc[1])
                 {
-                    s.Write(s.Stream, c, ChrominanceNrCodes_Dc.Length - 1);
+                    s.Write(s.Stream, c, ChrominanceNrCodes_Dc.Length - 1, s);
                 }
 
                 fixed (byte* c = ChrominanceValues_Dc)
                 {
-                    s.Write(s.Stream, c, ChrominanceValues_Dc.Length);
+                    s.Write(s.Stream, c, ChrominanceValues_Dc.Length, s);
                 }
 
                 WriteChar(s, (byte)(0x11));
@@ -1308,17 +1314,17 @@ namespace MonoGame.Imaging
 
                 fixed (byte* c = &ChrominanceNrCodes_Ac[1])
                 {
-                    s.Write(s.Stream, c, ChrominanceNrCodes_Ac.Length - 1);
+                    s.Write(s.Stream, c, ChrominanceNrCodes_Ac.Length - 1, s);
                 }
 
                 fixed (byte* c = ChrominanceValues_Ac)
                 {
-                    s.Write(s.Stream, c, ChrominanceValues_Ac.Length);
+                    s.Write(s.Stream, c, ChrominanceValues_Ac.Length, s);
                 }
 
                 fixed (byte* c = HEAD2)
                 {
-                    s.Write(s.Stream, c, HEAD2.Length);
+                    s.Write(s.Stream, c, HEAD2.Length, s);
                 }
             }
 
@@ -1370,14 +1376,9 @@ namespace MonoGame.Imaging
                             }
                         }
 
-                        DCY =
-                            (int)(ProcessJpgDU(s, &bitBuf, &bitCnt, YDU, fdtbl_Y, (int)(DCY), YDC_HT, YAC_HT));
-                        DCU =
-                            (int)
-                                (ProcessJpgDU(s, &bitBuf, &bitCnt, UDU, fdtbl_UV, (int)(DCU), UVDC_HT, UVAC_HT));
-                        DCV =
-                            (int)
-                                (ProcessJpgDU(s, &bitBuf, &bitCnt, VDU, fdtbl_UV, (int)(DCV), UVDC_HT, UVAC_HT));
+                        DCY = ProcessJpgDU(s, &bitBuf, &bitCnt, YDU, fdtbl_Y, (int)(DCY), YDC_HT, YAC_HT);
+                        DCU = ProcessJpgDU(s, &bitBuf, &bitCnt, UDU, fdtbl_UV, (int)(DCU), UVDC_HT, UVAC_HT);
+                        DCV = ProcessJpgDU(s, &bitBuf, &bitCnt, VDU, fdtbl_UV, (int)(DCV), UVDC_HT, UVAC_HT);
                     }
                 }
                 WriteJpgBits(s, &bitBuf, &bitCnt, fillBits[0], fillBits[1]);
