@@ -313,7 +313,9 @@ namespace MonoGame.Imaging
             byte zero = 0;
             int j;
             int j_end;
-            if (y <= 0) return;
+            if (y <= 0)
+                return;
+
             if ((vdir) < 0)
             {
                 j_end = -1;
@@ -325,29 +327,35 @@ namespace MonoGame.Imaging
                 j = 0;
             }
 
+            /*
+            int iterations = 0;
+            for (int ix = j; ix != j_end; ix += vdir)
+                iterations += 1;
+            iterations *= x;
+            */
+
             for (; j != j_end; j += vdir)
             {
                 for (int i = 0; i < x; ++i)
                 {
                     byte* d = (byte*)(data) + (j * x + i) * comp;
-                    WritePixel(s, (int)(rgb_dir), (int)(comp), (int)(write_alpha), (int)(expand_mono), d);
+                    WritePixel(s, rgb_dir, comp, write_alpha, expand_mono, d);
                 }
-                s.Write(s.Stream, &zero, (int)(scanline_pad), s);
+                s.Write(s.Stream, &zero, scanline_pad, s);
             }
         }
 
         public static int WriteBmpCore(in WriteContext s, int x, int y, int comp, void* data)
         {
             int pad = (int)((-x * 3) & 3);
-            return
-                (int)
-                    (WriteOutFile(s, -1, -1, (int)(x), (int)(y), (int)(comp), 1, data,
-                        0,
-                        (int)(pad), "11 4 22 44 44 22 444444", (int)('B'), (int)('M'),
-                        (int)(14 + 40 + (x * 3 + pad) * y), 0,
-                        0, (int)(14 + 40), (int)(40), (int)(x), (int)(y), 1, (int)(24), 0,
-                        0,
-                        0, 0, 0, 0));
+            return WriteFile(
+                s, -1, -1, (int)(x), (int)(y), (int)(comp), 1, data,
+                0,
+                (int)(pad), "11 4 22 44 44 22 444444", (int)('B'), (int)('M'),
+                (int)(14 + 40 + (x * 3 + pad) * y), 0,
+                0, (int)(14 + 40), (int)(40), (int)(x), (int)(y), 1, (int)(24), 0,
+                0,
+                0, 0, 0, 0);
         }
 
         public static int WriteTgaCore(in WriteContext s, int x, int y, int comp, void* data)
@@ -357,9 +365,11 @@ namespace MonoGame.Imaging
             int format = (int)((colorbytes) < 2 ? 3 : 2);
             if (((y) < 0) || ((x) < 0))
                 return 0;
+
+            
             if (s.WriteTgaWithRle == false)
             {
-                return WriteOutFile(s, -1, -1, (int)(x), (int)(y), (int)(comp), 0, data,
+                return WriteFile(s, -1, -1, (int)(x), (int)(y), (int)(comp), 0, data,
                     has_alpha,
                     0, "111 221 2222 11", 0, 0, (int)(format), 0, 0,
                     0, 0,

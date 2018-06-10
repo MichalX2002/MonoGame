@@ -56,13 +56,11 @@ namespace MonoGame.Imaging
             WriteFv(s, fmt, v);
         }
 
-        public static int WriteOutFile(in WriteContext s, int rgb_dir, int vdir, int x, int y,
+        public static int WriteFile(in WriteContext s, int rgb_dir, int vdir, int x, int y,
             int comp, int expand_mono, void* data, int alpha, int pad, string fmt, params int[] v)
         {
             if ((y < 0) || (x < 0))
-            {
                 return 0;
-            }
 
             WriteFv(s, fmt, v);
             WritePixels(s, rgb_dir, vdir, x, y, comp, data, alpha, pad, expand_mono);
