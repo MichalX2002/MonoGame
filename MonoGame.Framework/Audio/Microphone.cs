@@ -58,9 +58,9 @@ namespace Microsoft.Xna.Framework.Audio
             set
             {
                 if (value.TotalMilliseconds < 100 || value.TotalMilliseconds > 1000)
-                    throw new ArgumentOutOfRangeException("Buffer duration must be a value between 100 and 1000 milliseconds.");
+                    throw new ArgumentOutOfRangeException(nameof(value), "Buffer duration must be a value between 100 and 1000 milliseconds.");
                 if (value.TotalMilliseconds % 10 != 0)
-                    throw new ArgumentOutOfRangeException("Buffer duration must be 10ms aligned (BufferDuration % 10 == 0)");
+                    throw new ArgumentOutOfRangeException(nameof(value), "Buffer duration must be 10ms aligned (BufferDuration % 10 == 0)");
                 _bufferDuration = value;
             }
         }

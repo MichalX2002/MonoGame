@@ -132,13 +132,13 @@ namespace Microsoft.Xna.Framework.GamerServices
                 throw new Exception("The function cannot be completed at this time: the Guide UI is already active. Wait until Guide.IsVisible is false before issuing this call.");
 
             if (player != PlayerIndex.One)
-                throw new ArgumentOutOfRangeException("player", "Specified argument was out of the range of valid values.");
+                throw new ArgumentOutOfRangeException(nameof(player), "Specified argument was out of the range of valid values.");
             if (title == null)
-                throw new ArgumentNullException("title", "This string cannot be null or empty, and must be less than 256 characters long.");
+                throw new ArgumentNullException(nameof(title), "This string cannot be null or empty, and must be less than 256 characters long.");
             if (text == null)
-                throw new ArgumentNullException("text", "This string cannot be null or empty, and must be less than 256 characters long.");
+                throw new ArgumentNullException(nameof(text), "This string cannot be null or empty, and must be less than 256 characters long.");
             if (buttons == null)
-                throw new ArgumentNullException("buttons", "Value can not be null.");
+                throw new ArgumentNullException(nameof(buttons), "Value can not be null.");
 
             ShowMessageBoxDelegate smb = ShowMessageBox;
 

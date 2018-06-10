@@ -390,7 +390,7 @@ namespace MonoGame.Utilities
             get { return (this._baseStream._flushMode); }
             set
             {
-                if (_disposed) throw new ObjectDisposedException("ZlibStream");
+                if (_disposed) throw new ObjectDisposedException(nameof(ZlibStream));
                 this._baseStream._flushMode = value;
             }
         }
@@ -420,7 +420,7 @@ namespace MonoGame.Utilities
             }
             set
             {
-                if (_disposed) throw new ObjectDisposedException("ZlibStream");
+                if (_disposed) throw new ObjectDisposedException(nameof(ZlibStream));
                 if (this._baseStream._workingBuffer != null)
                     throw new ZlibException("The working buffer is already set.");
                 if (value < ZlibConstants.WorkingBufferSizeMin)
@@ -496,7 +496,7 @@ namespace MonoGame.Utilities
         {
             get
             {
-                if (_disposed) throw new ObjectDisposedException("ZlibStream");
+                if (_disposed) throw new ObjectDisposedException(nameof(ZlibStream));
                 return _baseStream._stream.CanRead;
             }
         }
@@ -522,7 +522,7 @@ namespace MonoGame.Utilities
         {
             get
             {
-                if (_disposed) throw new ObjectDisposedException("ZlibStream");
+                if (_disposed) throw new ObjectDisposedException(nameof(ZlibStream));
                 return _baseStream._stream.CanWrite;
             }
         }
@@ -532,7 +532,7 @@ namespace MonoGame.Utilities
         /// </summary>
         public override void Flush()
         {
-            if (_disposed) throw new ObjectDisposedException("ZlibStream");
+            if (_disposed) throw new ObjectDisposedException(nameof(ZlibStream));
             _baseStream.Flush();
         }
 
@@ -604,7 +604,7 @@ namespace MonoGame.Utilities
         /// <returns>the number of bytes read</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (_disposed) throw new ObjectDisposedException("ZlibStream");
+            if (_disposed) throw new ObjectDisposedException(nameof(ZlibStream));
             return _baseStream.Read(buffer, offset, count);
         }
 
@@ -666,7 +666,7 @@ namespace MonoGame.Utilities
         /// <param name="count">the number of bytes to write.</param>
         public override void Write(byte[] buffer, int offset, int count)
         {
-            if (_disposed) throw new ObjectDisposedException("ZlibStream");
+            if (_disposed) throw new ObjectDisposedException(nameof(ZlibStream));
             _baseStream.Write(buffer, offset, count);
         }
         #endregion

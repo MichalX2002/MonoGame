@@ -82,7 +82,7 @@ namespace Microsoft.Xna.Framework.Net
 			out NetworkGamer sender)
 		{
 			if (data == null)
-				throw new ArgumentNullException("data");
+				throw new ArgumentNullException(nameof(data));
 			
 			if (receivedData.Count <= 0) {
 				sender = null;
@@ -97,7 +97,7 @@ namespace Microsoft.Xna.Framework.Net
 				crd = receivedData.Peek();
 				
 				if (offset + crd.data.Length > data.Length)
-					throw new ArgumentOutOfRangeException("data","The length + offset is greater than parameter can hold.");
+					throw new ArgumentOutOfRangeException(nameof(data), "The length + offset is greater than parameter can hold.");
 				
 				// no exception thrown yet so let's process it
 				// take it off the queue

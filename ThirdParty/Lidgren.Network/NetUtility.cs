@@ -83,19 +83,18 @@ namespace Lidgren.Network
 		public static void ResolveAsync(string ipOrHost, ResolveAddressCallback callback)
 		{
 			if (string.IsNullOrEmpty(ipOrHost))
-				throw new ArgumentException("Supplied string must not be empty", "ipOrHost");
+				throw new ArgumentException("Supplied string must not be empty", nameof(ipOrHost));
 
 			ipOrHost = ipOrHost.Trim();
-
-			IPAddress ipAddress = null;
-			if (IPAddress.TryParse(ipOrHost, out ipAddress))
+            
+			if (IPAddress.TryParse(ipOrHost, out var ipAddress))
 			{
 				if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
 				{
 					callback(ipAddress);
 					return;
 				}
-				throw new ArgumentException("This method will not currently resolve other than ipv4 addresses");
+				throw new ArgumentException("This method will not currently resolve other than IPv4 addresses");
 			}
 
 			// ok must be a host name
@@ -161,7 +160,7 @@ namespace Lidgren.Network
 		public static IPAddress Resolve(string ipOrHost)
 		{
 			if (string.IsNullOrEmpty(ipOrHost))
-				throw new ArgumentException("Supplied string must not be empty", "ipOrHost");
+				throw new ArgumentException("Supplied string must not be empty", nameof(ipOrHost));
 
 			ipOrHost = ipOrHost.Trim();
 
@@ -170,7 +169,7 @@ namespace Lidgren.Network
 			{
 				if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
 					return ipAddress;
-				throw new ArgumentException("This method will not currently resolve other than ipv4 addresses");
+				throw new ArgumentException("This method will not currently resolve other than IPv4 addresses");
 			}
 
 			// ok must be a host name

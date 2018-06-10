@@ -70,7 +70,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		public void SetData<T> (CubeMapFace face, T[] data) where T : struct
 		{
             if (data == null)
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
             SetData(face, 0, null, data, 0, data.Length);
 		}
 

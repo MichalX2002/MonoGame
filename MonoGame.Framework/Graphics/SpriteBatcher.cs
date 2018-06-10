@@ -149,7 +149,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public unsafe void DrawBatch(SpriteSortMode sortMode, Effect effect)
 		{
             if (effect != null && effect.IsDisposed)
-                throw new ObjectDisposedException("effect");
+                throw new ObjectDisposedException(nameof(effect));
 
 			// nothing to do
             if (_batchItemCount == 0)

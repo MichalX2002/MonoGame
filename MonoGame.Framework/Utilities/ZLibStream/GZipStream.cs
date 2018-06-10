@@ -112,7 +112,8 @@ namespace MonoGame.Utilities
             }
             set
             {
-                if (_disposed) throw new ObjectDisposedException("GZipStream");
+                if (_disposed)
+                    throw new ObjectDisposedException(nameof(GZipStream));
                 _Comment = value;
             }
         }
@@ -145,7 +146,8 @@ namespace MonoGame.Utilities
             get { return _FileName; }
             set
             {
-                if (_disposed) throw new ObjectDisposedException("GZipStream");
+                if (_disposed)
+                    throw new ObjectDisposedException(nameof(GZipStream));
                 _FileName = value;
                 if (_FileName == null) return;
                 if (_FileName.IndexOf("/") != -1)
@@ -191,7 +193,7 @@ namespace MonoGame.Utilities
 
 
         /// <summary>
-        ///   Create a <c>GZipStream</c> using the specified <c>CompressionMode</c>.
+        ///   Creates a <see cref="GZipStream"/> using the specified <see cref="CompressionMode"/>.
         /// </summary>
         /// <remarks>
         ///
@@ -310,8 +312,8 @@ namespace MonoGame.Utilities
         }
 
         /// <summary>
-        ///   Create a <c>GZipStream</c> using the specified <c>CompressionMode</c> and
-        ///   the specified <c>CompressionLevel</c>.
+        ///   Creates a <see cref="GZipStream"/> using the specified <see cref="CompressionMode"/> and
+        ///   the specified <see cref="CompressionLevel"/>.
         /// </summary>
         /// <remarks>
         ///
@@ -511,7 +513,7 @@ namespace MonoGame.Utilities
             get { return (this._baseStream._flushMode); }
             set
             {
-                if (_disposed) throw new ObjectDisposedException("GZipStream");
+                if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
                 this._baseStream._flushMode = value;
             }
         }
@@ -541,7 +543,7 @@ namespace MonoGame.Utilities
             }
             set
             {
-                if (_disposed) throw new ObjectDisposedException("GZipStream");
+                if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
                 if (this._baseStream._workingBuffer != null)
                     throw new ZlibException("The working buffer is already set.");
                 if (value < ZlibConstants.WorkingBufferSizeMin)
@@ -627,7 +629,7 @@ namespace MonoGame.Utilities
         {
             get
             {
-                if (_disposed) throw new ObjectDisposedException("GZipStream");
+                if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
                 return _baseStream._stream.CanRead;
             }
         }
@@ -654,7 +656,7 @@ namespace MonoGame.Utilities
         {
             get
             {
-                if (_disposed) throw new ObjectDisposedException("GZipStream");
+                if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
                 return _baseStream._stream.CanWrite;
             }
         }
@@ -664,7 +666,7 @@ namespace MonoGame.Utilities
         /// </summary>
         public override void Flush()
         {
-            if (_disposed) throw new ObjectDisposedException("GZipStream");
+            if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
             _baseStream.Flush();
         }
 
@@ -734,7 +736,7 @@ namespace MonoGame.Utilities
         /// <returns>the number of bytes actually read</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (_disposed) throw new ObjectDisposedException("GZipStream");
+            if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
             int n = _baseStream.Read(buffer, offset, count);
 
             // Console.WriteLine("GZipStream::Read(buffer, off({0}), c({1}) = {2}", offset, count, n);
@@ -795,7 +797,7 @@ namespace MonoGame.Utilities
         /// <param name="count">the number of bytes to write.</param>
         public override void Write(byte[] buffer, int offset, int count)
         {
-            if (_disposed) throw new ObjectDisposedException("GZipStream");
+            if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
             if (_baseStream._streamMode == ZlibBaseStream.StreamMode.Undefined)
             {
                 //Console.WriteLine("GZipStream: First write");
