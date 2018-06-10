@@ -24,7 +24,8 @@ namespace Microsoft.Xna.Framework.Graphics
             VertexBR = new VertexPositionColorTexture();            
 		}
 
-        public void Set(float x, float y, float dx, float dy, float w, float h, float sin, float cos, Color color, Vector2 texCoordTL, Vector2 texCoordBR, float depth)
+        public void Set(float x, float y, float dx, float dy, float w, float h, float sin, float cos,
+            Color color, in Vector2 texCoordTL, in Vector2 texCoordBR, float depth)
         {
             // TODO, Should we be just assigning the Depth Value to Z?
             // According to http://blogs.msdn.com/b/shawnhar/archive/2011/01/12/spritebatch-billboards-in-a-3d-world.aspx
@@ -58,7 +59,8 @@ namespace Microsoft.Xna.Framework.Graphics
             VertexBR.TextureCoordinate.Y = texCoordBR.Y;
         }
 
-        public void Set(float x, float y, float w, float h, Color color, Vector2 texCoordTL, Vector2 texCoordBR, float depth)
+        public void Set(float x, float y, float w, float h,
+            in Color color, in Vector2 texCoordTL, in Vector2 texCoordBR, float depth)
         {
             VertexTL.Position.X = x;
             VertexTL.Position.Y = y;

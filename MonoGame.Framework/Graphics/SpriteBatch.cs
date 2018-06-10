@@ -219,10 +219,10 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         public void Draw(Texture2D texture,
-            ref VertexPositionColorTexture vertexTL,
-            ref VertexPositionColorTexture vertexTR,
-            ref VertexPositionColorTexture vertexBL,
-            ref VertexPositionColorTexture vertexBR,
+            in VertexPositionColorTexture vertexTL,
+            in VertexPositionColorTexture vertexTR,
+            in VertexPositionColorTexture vertexBL,
+            in VertexPositionColorTexture vertexBR,
             float depth)
         {
             var item = GetBatchItem();
@@ -239,12 +239,12 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         public void Draw(Texture2D texture,
-            ref VertexPositionColorTexture vertexTL,
-            ref VertexPositionColorTexture vertexTR,
-            ref VertexPositionColorTexture vertexBL,
-            ref VertexPositionColorTexture vertexBR)
+            in VertexPositionColorTexture vertexTL,
+            in VertexPositionColorTexture vertexTR,
+            in VertexPositionColorTexture vertexBL,
+            in VertexPositionColorTexture vertexBR)
         {
-            Draw(texture, ref vertexTL, ref vertexTR, ref vertexBL, ref vertexBR, vertexTL.Position.Z);
+            Draw(texture, vertexTL, vertexTR, vertexBL, vertexBR, vertexTL.Position.Z);
         }
 
         /// <summary>
