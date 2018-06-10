@@ -362,11 +362,12 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             using (var img = new Image(stream, true))
             {
+                ImageInfo info = img.Info;
+
                 IntPtr data = img.GetDataPointer();
                 if (data == IntPtr.Zero)
-                    throw new InvalidDataException("Could not decode stream.");
+                    throw new InvalidDataException($"Could not decode stream {info}: \n" + img.LastError);
 
-                ImageInfo info = img.Info;
                 int channels = (int)info.PixelFormat;
                 int length = img.PointerLength;
 
