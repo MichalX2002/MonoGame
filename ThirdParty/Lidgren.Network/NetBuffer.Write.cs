@@ -129,7 +129,7 @@ namespace Lidgren.Network
 		public void Write(byte[] source)
 		{
 			if (source == null)
-				throw new ArgumentNullException("source");
+				throw new ArgumentNullException(nameof(source));
 			int bits = source.Length * 8;
 			EnsureBufferSize(m_bitLength + bits);
 			NetBitWriter.WriteBytes(source, 0, source.Length, m_data, m_bitLength);
@@ -142,7 +142,7 @@ namespace Lidgren.Network
 		public void Write(byte[] source, int offsetInBytes, int numberOfBytes)
 		{
 			if (source == null)
-				throw new ArgumentNullException("source");
+				throw new ArgumentNullException(nameof(source));
 			int bits = numberOfBytes * 8;
 			EnsureBufferSize(m_bitLength + bits);
 			NetBitWriter.WriteBytes(source, offsetInBytes, numberOfBytes, m_data, m_bitLength);

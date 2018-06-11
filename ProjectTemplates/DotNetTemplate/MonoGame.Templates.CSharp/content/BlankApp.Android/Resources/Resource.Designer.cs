@@ -9,9 +9,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: global::Android.Runtime.ResourceDesignerAttribute("BlankApp.Android.Resource", IsApplication=true)]
+[assembly: global::Android.Runtime.ResourceDesignerAttribute("BlankApp.Resource", IsApplication=true)]
 
-namespace BlankApp.Android
+namespace BlankApp
 {
 	
 	

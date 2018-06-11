@@ -266,7 +266,7 @@ namespace Lidgren.Network
 		public virtual NetConnection Connect(IPEndPoint remoteEndPoint, NetOutgoingMessage hailMessage)
 		{
 			if (remoteEndPoint == null)
-				throw new ArgumentNullException("remoteEndPoint");
+				throw new ArgumentNullException(nameof(remoteEndPoint));
 
 			lock (m_connections)
 			{

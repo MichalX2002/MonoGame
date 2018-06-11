@@ -33,14 +33,14 @@ namespace MonoGame.Imaging.Tests
             TestEntry(manager, archive, "tga/32bit_compressed.tga");
             TestEntry(manager, archive, "tga/24bit.tga");
             TestEntry(manager, archive, "tga/24bit_compressed.tga");
-            
+
+            /*
             var watch = new Stopwatch();
             var fs = new FileStream("test.png", FileMode.Open);
-            using(var img = new Image(fs, false))
+            using(var img = new Image(fs, false, manager, true))
             {
                 watch.Restart();
-                var wtf = img.GetImageInfo();
-                Console.WriteLine(wtf);
+                img.GetImageInfo();
                 watch.Stop();
                 Console.WriteLine("Info: " + watch.Elapsed.TotalMilliseconds + "ms");
 
@@ -57,6 +57,7 @@ namespace MonoGame.Imaging.Tests
                     Console.WriteLine("Saving: " + watch.Elapsed.TotalMilliseconds + "ms");
                 }
             }
+            */
 
             //TestEntry(manager, archive, "32bit.gif");
 
@@ -69,7 +70,7 @@ namespace MonoGame.Imaging.Tests
         static void TestEntry(MemoryManager manager, ZipArchive archive, string name)
         {
             Stopwatch watch = new Stopwatch();
-            int tries = 50;
+            int tries = 1;
 
             byte[] buf = new byte[1024 * 128];
 
@@ -111,8 +112,7 @@ namespace MonoGame.Imaging.Tests
                             FileInfo outputInfo = new FileInfo(name);
                             outputInfo.Directory.Create();
 
-                            //using (var fs = new FileStream(outputInfo.FullName, FileMode.Create))
-                            using (var fs = new MemoryStream(buf))
+                            using (var fs = new FileStream(outputInfo.FullName, FileMode.Create))
                             {
                                 watch.Restart();
                                 img.Save(fs);

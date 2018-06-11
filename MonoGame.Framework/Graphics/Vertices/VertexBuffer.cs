@@ -86,7 +86,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     nameof(vertexStride), "Vertex stride can not be larger than the vertex buffer size.");
 
             if (data == null)
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
 
             if (data.Length < (startIndex + elementCount))
                 throw new ArgumentOutOfRangeException(nameof(elementCount), "This parameter must be a valid index within the array.");

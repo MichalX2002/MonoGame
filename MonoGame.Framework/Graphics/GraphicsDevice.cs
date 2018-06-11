@@ -1253,7 +1253,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new InvalidOperationException("Index buffer must be set before calling DrawInstancedPrimitives.");
 
             if (primitiveCount <= 0)
-                throw new ArgumentOutOfRangeException("primitiveCount");
+                throw new ArgumentOutOfRangeException(nameof(primitiveCount));
 
             PlatformDrawInstancedPrimitives(primitiveType, baseVertex, startIndex, primitiveCount, instanceCount);
 

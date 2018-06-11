@@ -24,8 +24,7 @@ namespace Microsoft.Xna.Framework
         internal static void Raise<TEventArgs>(object sender, EventHandler<TEventArgs> handler, TEventArgs e)
             where TEventArgs : EventArgs
         {
-            if (handler != null)
-                handler(sender, e);
+            handler?.Invoke(sender, e);
         }
 
         /// <summary>
@@ -38,8 +37,7 @@ namespace Microsoft.Xna.Framework
         /// <param name="e">The <see cref="EventArgs"/> passed to <see cref="EventHandler"/></param>
         internal static void Raise(object sender, EventHandler handler, EventArgs e)
         {
-            if (handler != null)
-                handler(sender, e);
+            handler?.Invoke(sender, e);
         }
     }
 }

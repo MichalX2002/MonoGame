@@ -117,6 +117,14 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
+        private void PlatformGetData(int level, int arraySlice, Rectangle rect, IntPtr buffer, int startIndex, int elementSize, int elementCount)
+        {
+            byte[] data = new byte[elementCount * elementSize];
+            PlatformGetData(level, arraySlice, rect, data, startIndex, elementCount);
+
+            Marshal.Copy(data, 0, new IntPtr(buffer.ToInt64() + startIndex * elementSize), data.Length);
+        }
+
         private void PlatformGetData<T>(int level, int arraySlice, Rectangle rect, T[] data, int startIndex, int elementCount) where T : struct
         {
             // Create a temp staging resource for copying the data.

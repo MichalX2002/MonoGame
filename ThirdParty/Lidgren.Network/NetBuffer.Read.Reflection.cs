@@ -37,7 +37,7 @@ namespace Lidgren.Network
 		public void ReadAllFields(object target, BindingFlags flags)
 		{
 			if (target == null)
-				throw new ArgumentNullException("target");
+				throw new ArgumentNullException(nameof(target));
 
 			Type tp = target.GetType();
 
@@ -75,7 +75,7 @@ namespace Lidgren.Network
 		public void ReadAllProperties(object target, BindingFlags flags)
 		{
 			if (target == null)
-				throw new ArgumentNullException("target");
+				throw new ArgumentNullException(nameof(target));
 
 			Type tp = target.GetType();
 

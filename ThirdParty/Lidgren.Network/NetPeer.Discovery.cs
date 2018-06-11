@@ -43,7 +43,7 @@ namespace Lidgren.Network
 		public void SendDiscoveryResponse(NetOutgoingMessage msg, IPEndPoint recipient)
 		{
 			if (recipient == null)
-				throw new ArgumentNullException("recipient");
+				throw new ArgumentNullException(nameof(recipient));
 
 			if (msg == null)
 				msg = CreateMessage(0);

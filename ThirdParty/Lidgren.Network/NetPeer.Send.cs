@@ -28,11 +28,11 @@ namespace Lidgren.Network
 		public NetSendResult SendMessage(NetOutgoingMessage msg, NetConnection recipient, NetDeliveryMethod method, int sequenceChannel)
 		{
 			if (msg == null)
-				throw new ArgumentNullException("msg");
+				throw new ArgumentNullException(nameof(msg));
 			if (recipient == null)
-				throw new ArgumentNullException("recipient");
+				throw new ArgumentNullException(nameof(recipient));
 			if (sequenceChannel >= NetConstants.NetChannelsPerDeliveryMethod)
-				throw new ArgumentOutOfRangeException("sequenceChannel");
+				throw new ArgumentOutOfRangeException(nameof(sequenceChannel));
 
 			NetException.Assert(
 				((method != NetDeliveryMethod.Unreliable && method != NetDeliveryMethod.ReliableUnordered) ||
@@ -98,9 +98,9 @@ namespace Lidgren.Network
 		public void SendMessage(NetOutgoingMessage msg, List<NetConnection> recipients, NetDeliveryMethod method, int sequenceChannel)
 		{
 			if (msg == null)
-				throw new ArgumentNullException("msg");
+				throw new ArgumentNullException(nameof(msg));
 			if (recipients == null)
-				throw new ArgumentNullException("recipients");
+				throw new ArgumentNullException(nameof(recipients));
 			if (recipients.Count < 1)
 				throw new NetException("recipients must contain at least one item");
 			if (method == NetDeliveryMethod.Unreliable || method == NetDeliveryMethod.ReliableUnordered)
@@ -143,9 +143,9 @@ namespace Lidgren.Network
 		public void SendUnconnectedMessage(NetOutgoingMessage msg, string host, int port)
 		{
 			if (msg == null)
-				throw new ArgumentNullException("msg");
+				throw new ArgumentNullException(nameof(msg));
 			if (host == null)
-				throw new ArgumentNullException("host");
+				throw new ArgumentNullException(nameof(host));
 			if (msg.m_isSent)
 				throw new NetException("This message has already been sent! Use NetPeer.SendMessage() to send to multiple recipients efficiently");
 			if (msg.LengthBytes > m_configuration.MaximumTransmissionUnit)
@@ -168,9 +168,9 @@ namespace Lidgren.Network
 		public void SendUnconnectedMessage(NetOutgoingMessage msg, IPEndPoint recipient)
 		{
 			if (msg == null)
-				throw new ArgumentNullException("msg");
+				throw new ArgumentNullException(nameof(msg));
 			if (recipient == null)
-				throw new ArgumentNullException("recipient");
+				throw new ArgumentNullException(nameof(recipient));
 			if (msg.m_isSent)
 				throw new NetException("This message has already been sent! Use NetPeer.SendMessage() to send to multiple recipients efficiently");
 			if (msg.LengthBytes > m_configuration.MaximumTransmissionUnit)
@@ -189,9 +189,9 @@ namespace Lidgren.Network
 		public void SendUnconnectedMessage(NetOutgoingMessage msg, IList<IPEndPoint> recipients)
 		{
 			if (msg == null)
-				throw new ArgumentNullException("msg");
+				throw new ArgumentNullException(nameof(msg));
 			if (recipients == null)
-				throw new ArgumentNullException("recipients");
+				throw new ArgumentNullException(nameof(recipients));
 			if (recipients.Count < 1)
 				throw new NetException("recipients must contain at least one item");
 			if (msg.m_isSent)
@@ -213,7 +213,7 @@ namespace Lidgren.Network
 		public void SendUnconnectedToSelf(NetOutgoingMessage msg)
 		{
 			if (msg == null)
-				throw new ArgumentNullException("msg");
+				throw new ArgumentNullException(nameof(msg));
 			if (msg.m_isSent)
 				throw new NetException("This message has already been sent! Use NetPeer.SendMessage() to send to multiple recipients efficiently");
 

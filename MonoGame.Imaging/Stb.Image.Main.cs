@@ -585,7 +585,7 @@ namespace MonoGame.Imaging
             s.ImgBuffer += n;
         }
 
-        public static int GetN(ReadContext s, byte* buffer, int n)
+        public static int GetRawData(ReadContext s, byte* buffer, int n)
         {
             if ((s.Callbacks.Read) != null)
             {
@@ -605,7 +605,8 @@ namespace MonoGame.Imaging
                 s.ImgBuffer += n;
                 return 1;
             }
-            else return 0;
+            else
+                return 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -3696,7 +3697,7 @@ namespace MonoGame.Imaging
                                     return s.Error("outofmem");
                                 z.idata = p;
                             }
-                            if (GetN(s, z.idata + ioff, (int)c.Length) == 0)
+                            if (GetRawData(s, z.idata + ioff, (int)c.Length) == 0)
                                 return s.Error("outofdata");
                             ioff += c.Length;
                             break;
@@ -4487,7 +4488,7 @@ namespace MonoGame.Imaging
                 {
                     int row = (tga_inverted) != 0 ? tga_height - i - 1 : i;
                     byte* tga_row = tga_data + row * tga_width * tga_comp;
-                    GetN(s, tga_row, tga_width * tga_comp);
+                    GetRawData(s, tga_row, tga_width * tga_comp);
                 }
             }
             else
@@ -4510,7 +4511,7 @@ namespace MonoGame.Imaging
                             pal_entry += tga_comp;
                         }
                     }
-                    else if (GetN(s, tga_palette, tga_palette_len * tga_comp) == 0)
+                    else if (GetRawData(s, tga_palette, tga_palette_len * tga_comp) == 0)
                     {
                         s.Manager.Free(tga_data);
                         s.Manager.Free(tga_palette);

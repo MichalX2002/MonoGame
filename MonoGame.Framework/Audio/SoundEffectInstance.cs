@@ -140,7 +140,7 @@ namespace Microsoft.Xna.Framework.Audio
         public virtual void Play()
         {
             if (IsDisposed)
-                throw new ObjectDisposedException("SoundEffectInstance");
+                throw new ObjectDisposedException(nameof(SoundEffectInstance));
 
             if (State == SoundState.Playing)
                 return;

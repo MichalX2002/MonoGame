@@ -52,15 +52,29 @@ namespace MonoGame.Imaging
         }
 
         public Image(Stream stream, bool leaveOpen) :
-            this(stream, leaveOpen, new MemoryManager(true), false)
+            this(stream, leaveOpen, new MemoryManager(1024 * 4, true), false)
         {
         }
 
-        public Image(IntPtr data, int width, int height, ImagePixelFormat pixelFormat)
+        public Image(IntPtr data, int width, int height, ImagePixelFormat pixelFormat,
+            MemoryManager manager, bool leaveManagerOpen)
         {
             _pointer = data;
             _cachedInfo = new ImageInfo(width, height, pixelFormat, ImageFormat.RawData);
             _fromPtr = true;
+
+            _manager = manager;
+            _leaveManagerOpen = leaveManagerOpen;
+        }
+
+        public Image(IntPtr data, int width, int height, ImagePixelFormat pixelFormat, MemoryManager manager) :
+            this(data, width, height, pixelFormat, manager, true)
+        {
+        }
+
+        public Image(IntPtr data, int width, int height, ImagePixelFormat pixelFormat) :
+            this(data, width, height, pixelFormat, new MemoryManager(1024 * 4, true), true)
+        {
         }
 
         private void TriggerError()
@@ -113,23 +127,24 @@ namespace MonoGame.Imaging
 
                 if (_pointer == IntPtr.Zero)
                 {
-                    ReadContext rc = GetReadContext();
-                    LastGetPointerFailed = CheckInvalidReadCtx(rc);
-                    if (LastGetPointerFailed == false)
+                    ImageInfo info = GetImageInfo();
+                    if (info != null)
                     {
-                        ImageInfo info = GetImageInfo();
-                        if (LastGetInfoFailed == false)
+                        int bpp = (int)info.PixelFormat;
+                        ReadContext rc = GetReadContext();
+
+                        if (rc != null)
                         {
-                            int bpp = (int)info.PixelFormat;
                             _pointer = Imaging.LoadFromInfo8(rc, info, bpp);
+
                             if (_pointer == IntPtr.Zero)
                                 LastGetPointerFailed = true;
                             else
                                 PointerLength = info.Width * info.Height * bpp;
                         }
-                        else
-                            LastError.AddError("no image info");
                     }
+                    else
+                        LastError.AddError("no image info");
 
                     CloseStream();
                 }
