@@ -87,7 +87,7 @@ namespace MonoGame.Imaging.Tests
 
                 for (int i = 0; i < tries; i++)
                 {
-                    using (var img = new Image(dataStream, false, manager, true))
+                    using (var img = new Image(dataStream, false))
                     {
                         watch.Start();
                         ImageInfo imageInfo = img.Info;

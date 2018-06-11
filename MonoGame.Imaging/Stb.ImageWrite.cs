@@ -24,7 +24,7 @@ namespace MonoGame.Imaging
                     case '1':
                         {
                             var x = (byte)(v[vindex++] & 0xff);
-                            s.Write(s.Stream, &x, 1, s);
+                            s.Write(s.Stream, &x, 1);
                             break;
                         }
                     case '2':
@@ -33,7 +33,7 @@ namespace MonoGame.Imaging
                             var b = stackalloc byte[2];
                             b[0] = (byte)(x & 0xff);
                             b[1] = (byte)((x >> 8) & 0xff);
-                            s.Write(s.Stream, b, 2, s);
+                            s.Write(s.Stream, b, 2);
                             break;
                         }
                     case '4':
@@ -44,7 +44,7 @@ namespace MonoGame.Imaging
                             b[1] = (byte)((x >> 8) & 0xff);
                             b[2] = (byte)((x >> 16) & 0xff);
                             b[3] = (byte)((x >> 24) & 0xff);
-                            s.Write(s.Stream, b, 4, s);
+                            s.Write(s.Stream, b, 4);
                             break;
                         }
                 }
@@ -100,7 +100,7 @@ namespace MonoGame.Imaging
             if (png == null)
                 return 0;
 
-            c.Write.Invoke(c.Stream, png, len, c);
+            c.Write.Invoke(c.Stream, png, len);
 
             c.Manager.Free(png);
             return 1;

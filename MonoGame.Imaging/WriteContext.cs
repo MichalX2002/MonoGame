@@ -2,8 +2,7 @@
 
 namespace MonoGame.Imaging
 {
-    public unsafe delegate int WriteCallback(
-        Stream stream, byte* data, int size, in WriteContext c);
+    public unsafe delegate int WriteCallback(Stream stream, byte* data, int size);
 
     public struct WriteContext
     {

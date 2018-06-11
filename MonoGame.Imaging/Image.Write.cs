@@ -106,8 +106,7 @@ namespace MonoGame.Imaging
             }
         }
 
-        private unsafe int WriteCallback(
-            Stream stream, byte* data, int size, in WriteContext c)
+        private unsafe int WriteCallback(Stream stream, byte* data, int size)
         {
             if (data == null || size <= 0)
                 return 0;
@@ -122,7 +121,6 @@ namespace MonoGame.Imaging
                 while ((read = input.Read(buffer, 0, bufferSize)) > 0)
                 {
                     stream.Write(buffer, 0, read);
-                    c.OnWrite?.Invoke(read);
                 }
             }
 

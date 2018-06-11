@@ -85,7 +85,7 @@ namespace MonoGame.Imaging
         ///  Indicates if <see cref="Dispose"/> disposes all pointers
         ///  and removes references to arrays.
         /// </param>
-        public MemoryManager(bool clearOnDispose) : this(1024 * 32, clearOnDispose)
+        public MemoryManager(bool clearOnDispose) : this(1024 * 64, clearOnDispose)
         {
 
         }
