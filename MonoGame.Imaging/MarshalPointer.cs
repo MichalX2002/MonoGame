@@ -40,7 +40,6 @@ namespace MonoGame.Imaging
 
     internal unsafe class MarshalPointer<TStruct> : Pointer where TStruct : struct
     {
-        private bool _disposed;
         private readonly void* _sourcePtr;
         private void* _ptr;
         private int _size;
@@ -48,6 +47,7 @@ namespace MonoGame.Imaging
         public override void* Ptr => _ptr;
         public override int Size => _size;
 
+        public bool Disposed { get; private set; }
         public int ElementSize { get; private set; }
 
         public MarshalPointer(int size)
@@ -66,7 +66,7 @@ namespace MonoGame.Imaging
 
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposed == false)
+            if (Disposed == false)
             {
                 _size = 0;
 
@@ -76,7 +76,7 @@ namespace MonoGame.Imaging
                     _ptr = null;
                 }
 
-                _disposed = true;
+                Disposed = true;
             }
         }
 

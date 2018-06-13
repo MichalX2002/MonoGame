@@ -213,7 +213,6 @@ namespace MonoGame.Imaging
         {
             lock (SyncRoot)
             {
-                CheckDisposed();
                 Remove(p);
             }
         }
@@ -252,8 +251,7 @@ namespace MonoGame.Imaging
                 {
                     if (_clearOnDispose)
                         Clear();
-
-                    _pointers = null;
+                    
                     _arrayPool = null;
 
                     Disposed = true;
