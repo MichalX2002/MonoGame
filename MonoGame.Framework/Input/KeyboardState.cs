@@ -12,10 +12,14 @@ namespace Microsoft.Xna.Framework.Input
     /// </summary>
 	public struct KeyboardState
     {
+        public const int MaxKeysPerState = 8;
+
         #region Key Data
 
         // Array of 256 bits:
         uint keys0, keys1, keys2, keys3, keys4, keys5, keys6, keys7;
+
+        public int Count => GetCount();
 
         bool InternalGetKey(Keys key)
         {
@@ -84,6 +88,12 @@ namespace Microsoft.Xna.Framework.Input
 
         #endregion
 
+        private int GetCount()
+        {
+            uint count = CountBits(keys0) + CountBits(keys1) + CountBits(keys2) + CountBits(keys3)
+                    + CountBits(keys4) + CountBits(keys5) + CountBits(keys6) + CountBits(keys7);
+            return (int)count;
+        }
 
         #region XNA Interface
 
@@ -217,35 +227,40 @@ namespace Microsoft.Xna.Framework.Input
             return index;
         }
 
+        public int GetPressedKeys(Keys[] buffer)
+        {
+            int count = GetCount();
+            if (count > buffer.Length)
+                throw new ArgumentException("Insufficient capacity.", nameof(buffer));
+            
+            int index = 0;
+            if (keys0 != 0) index = AddKeysToArray(keys0, 0 * 32, buffer, index);
+            if (keys1 != 0) index = AddKeysToArray(keys1, 1 * 32, buffer, index);
+            if (keys2 != 0) index = AddKeysToArray(keys2, 2 * 32, buffer, index);
+            if (keys3 != 0) index = AddKeysToArray(keys3, 3 * 32, buffer, index);
+            if (keys4 != 0) index = AddKeysToArray(keys4, 4 * 32, buffer, index);
+            if (keys5 != 0) index = AddKeysToArray(keys5, 5 * 32, buffer, index);
+            if (keys6 != 0) index = AddKeysToArray(keys6, 6 * 32, buffer, index);
+            if (keys7 != 0) index = AddKeysToArray(keys7, 7 * 32, buffer, index);
+
+            return count;
+        }
+
         /// <summary>
         /// Returns an array of values holding keys that are currently being pressed.
         /// </summary>
         /// <returns>The keys that are currently being pressed.</returns>
         public Keys[] GetPressedKeys()
         {
-            uint count = CountBits(keys0) + CountBits(keys1) + CountBits(keys2) + CountBits(keys3)
-                    + CountBits(keys4) + CountBits(keys5) + CountBits(keys6) + CountBits(keys7);
-            if (count == 0)
-                return Array.Empty<Keys>();
-            Keys[] keys = new Keys[count];
-
-            int index = 0;
-            if (keys0 != 0) index = AddKeysToArray(keys0, 0 * 32, keys, index);
-            if (keys1 != 0) index = AddKeysToArray(keys1, 1 * 32, keys, index);
-            if (keys2 != 0) index = AddKeysToArray(keys2, 2 * 32, keys, index);
-            if (keys3 != 0) index = AddKeysToArray(keys3, 3 * 32, keys, index);
-            if (keys4 != 0) index = AddKeysToArray(keys4, 4 * 32, keys, index);
-            if (keys5 != 0) index = AddKeysToArray(keys5, 5 * 32, keys, index);
-            if (keys6 != 0) index = AddKeysToArray(keys6, 6 * 32, keys, index);
-            if (keys7 != 0) index = AddKeysToArray(keys7, 7 * 32, keys, index);
-
+            Keys[] keys = new Keys[GetCount()];
+            GetPressedKeys(keys);
             return keys;
         }
 
         #endregion
 
 
-        #region Objet and Equality
+        #region Object and Equality
 
         /// <summary>
         /// Gets the hash code for <see cref="KeyboardState"/> instance.
