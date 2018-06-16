@@ -11,13 +11,14 @@ namespace Microsoft.Xna.Framework.Input
     {
         static List<Keys> _keys;
         public static ReadOnlyCollection<Keys> KeyList { get; private set; }
+        public static KeyModifier Modifiers { get; private set; }
 
         private static KeyboardState PlatformGetState()
         {
-            var modifiers = Sdl.Keyboard.GetModState();
+            Modifiers = Sdl.Keyboard.GetModState();
             return new KeyboardState(_keys,
-                                     (modifiers & Sdl.Keyboard.Keymod.CapsLock) == Sdl.Keyboard.Keymod.CapsLock,
-                                     (modifiers & Sdl.Keyboard.Keymod.NumLock) == Sdl.Keyboard.Keymod.NumLock);
+                                     (Modifiers & KeyModifier.CapsLock) == KeyModifier.CapsLock,
+                                     (Modifiers & KeyModifier.NumLock) == KeyModifier.NumLock);
         }
 
         internal static void SetKeys(List<Keys> keys)
