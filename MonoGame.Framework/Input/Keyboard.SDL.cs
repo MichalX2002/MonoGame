@@ -3,12 +3,14 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Microsoft.Xna.Framework.Input
 {
     public static partial class Keyboard
     {
         static List<Keys> _keys;
+        public static ReadOnlyCollection<Keys> KeyList { get; private set; }
 
         private static KeyboardState PlatformGetState()
         {
@@ -21,6 +23,7 @@ namespace Microsoft.Xna.Framework.Input
         internal static void SetKeys(List<Keys> keys)
         {
             _keys = keys;
+            KeyList = _keys.AsReadOnly();
         }
     }
 }

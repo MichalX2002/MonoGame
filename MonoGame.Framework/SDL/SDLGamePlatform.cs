@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Utilities;
+using System.Text;
 
 namespace Microsoft.Xna.Framework
 {
@@ -28,8 +29,7 @@ namespace Microsoft.Xna.Framework
         private int _isExiting;
         private SdlGameWindow _view;
 
-        public SdlGamePlatform(Game game)
-            : base(game)
+        public SdlGamePlatform(Game game) : base(game)
         {
             _game = game;
             _keys = new List<Keys>();
@@ -108,19 +108,28 @@ namespace Microsoft.Xna.Framework
             }
         }
 
+        private byte[] _textInputBuffer = new byte[4];
+
         private void SdlRunLoop()
         {
-
             while (Sdl.PollEvent(out Sdl.Event ev) == 1)
             {
                 if (ev.Type == Sdl.EventType.Quit)
+                {
                     _isExiting++;
+                }
                 else if (ev.Type == Sdl.EventType.JoyDeviceAdded)
+                {
                     Joystick.AddDevice(ev.JoystickDevice.Which);
+                }
                 else if (ev.Type == Sdl.EventType.ControllerDeviceRemoved)
+                {
                     GamePad.RemoveDevice(ev.ControllerDevice.Which);
+                }
                 else if (ev.Type == Sdl.EventType.JoyDeviceRemoved)
+                {
                     Joystick.RemoveDevice(ev.JoystickDevice.Which);
+                }
                 else if (ev.Type == Sdl.EventType.MouseWheel)
                 {
                     const int wheelDelta = 120;
@@ -149,22 +158,25 @@ namespace Microsoft.Xna.Framework
                 else if (ev.Type == Sdl.EventType.TextInput)
                 {
                     int len = 0;
-                    string text = String.Empty;
+                    string text = string.Empty;
                     unsafe
                     {
                         while (Marshal.ReadByte((IntPtr)ev.Text.Text, len) != 0)
-                        {
                             len++;
-                        }
-                        var buffer = new byte[len];
-                        Marshal.Copy((IntPtr)ev.Text.Text, buffer, 0, len);
-                        text = System.Text.Encoding.UTF8.GetString(buffer);
+
+                        if(_textInputBuffer.Length < len)
+                            _textInputBuffer = new byte[len];
+
+                        Marshal.Copy((IntPtr)ev.Text.Text, _textInputBuffer, 0, len);
+                        text = Encoding.UTF8.GetString(_textInputBuffer);
                     }
                     if (text.Length == 0)
                         continue;
-                    foreach (var c in text)
+
+                    for (int i = 0; i < text.Length; i++)
                     {
-                        var key = KeyboardUtil.ToXna(c);
+                        char c = text[i];
+                        Keys key = KeyboardUtil.ToXna(c);
                         _view.CallTextInput(c, key);
                     }
                 }
