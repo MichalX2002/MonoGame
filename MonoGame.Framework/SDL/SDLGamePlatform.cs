@@ -169,7 +169,7 @@ namespace Microsoft.Xna.Framework
                             _textInputBuffer = new byte[len];
 
                         Marshal.Copy((IntPtr)ev.Text.Text, _textInputBuffer, 0, len);
-                        text = Encoding.UTF8.GetString(_textInputBuffer);
+                        text = Encoding.UTF8.GetString(_textInputBuffer, 0, len);
                     }
                     if (text.Length == 0)
                         continue;
