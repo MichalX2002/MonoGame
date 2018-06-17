@@ -99,6 +99,7 @@ namespace Microsoft.Xna.Framework
             while (true)
             {
                 SdlRunLoop();
+                Keyboard.Modifiers = Sdl.Keyboard.GetModState();
                 Game.Tick();
                 Threading.Run();
                 GraphicsDevice.DisposeContexts();
