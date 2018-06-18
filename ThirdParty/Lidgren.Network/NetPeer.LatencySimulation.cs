@@ -128,7 +128,9 @@ namespace Lidgren.Network
 		internal bool ActuallySendPacket(byte[] data, int numBytes, IPEndPoint target, out bool connectionReset)
 		{
 			connectionReset = false;
-			try
+            target = NetUtility.MapToIPv6(target);
+
+            try
 			{
 				// TODO: refactor this check outta here
 				if (target.Address == IPAddress.Broadcast)

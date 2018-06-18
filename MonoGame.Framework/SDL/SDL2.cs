@@ -53,19 +53,16 @@ internal static class Sdl
     public static int Minor;
     public static int Patch;
 
-    private static unsafe string GetString(IntPtr handle)
+    public static unsafe string GetString(IntPtr handle)
     {
         if (handle == IntPtr.Zero)
-            return "";
+            return string.Empty;
 
         var ptr = (byte*)handle;
         while (*ptr != 0)
             ptr++;
-
-        var bytes = new byte[ptr - (byte*)handle];
-        Marshal.Copy(handle, bytes, 0, bytes.Length);
-
-        return Encoding.UTF8.GetString(bytes);
+        
+        return Encoding.UTF8.GetString((byte*)handle, (int)(ptr - (byte*)handle));
     }
 
     [Flags]
@@ -188,6 +185,39 @@ internal static class Sdl
         GetError(SDL_Init(flags));
     }
 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate int d_sdl_hasclipboardtext();
+    private static readonly d_sdl_hasclipboardtext SDL_HasClipboardText = FuncLoader.LoadFunction<d_sdl_hasclipboardtext>(NativeLibrary, "SDL_HasClipboardText");
+
+    public static bool HasClipboardText()
+    {
+        return SDL_HasClipboardText() > 0 ? true : false;
+    }
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate IntPtr d_sdl_getclipboardtext();
+    private static readonly d_sdl_getclipboardtext SDL_GetClipboardText = FuncLoader.LoadFunction<d_sdl_getclipboardtext>(NativeLibrary, "SDL_GetClipboardText");
+
+    public static string GetClipboardText()
+    {
+        if (HasClipboardText())
+        {
+            IntPtr data = SDL_GetClipboardText();
+            string value = GetString(data);
+            SDL_free(data);
+            return value;
+        }
+        return string.Empty;
+    }
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate IntPtr d_sdl_free(IntPtr pointer);
+    private static readonly d_sdl_free SDL_free = FuncLoader.LoadFunction<d_sdl_free>(NativeLibrary, "SDL_free");
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate void d_sdl_setclipboardtext(string value);
+    public static readonly d_sdl_setclipboardtext SetClipboardText = FuncLoader.LoadFunction<d_sdl_setclipboardtext>(NativeLibrary, "SDL_SetClipboardText");
+    
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void d_sdl_disablescreensaver();
     public static d_sdl_disablescreensaver DisableScreenSaver = FuncLoader.LoadFunction<d_sdl_disablescreensaver>(NativeLibrary, "SDL_DisableScreenSaver");

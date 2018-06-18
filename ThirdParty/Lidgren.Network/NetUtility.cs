@@ -41,17 +41,28 @@ namespace Lidgren.Network
 	public static class NetUtility
 	{
 		/// <summary>
-		/// Resolve endpoint callback
+		/// Resolve endpoint callback.
 		/// </summary>
 		public delegate void ResolveEndPointCallback(IPEndPoint endPoint);
 
 		/// <summary>
-		/// Resolve address callback
+		/// Resolve address callback.
 		/// </summary>
 		public delegate void ResolveAddressCallback(IPAddress adr);
 
+        /// <summary>
+        /// Maps the <see cref="IPEndPoint"/> to an IPv6 address, if it is currently mapped to an IPv4 address.
+        /// </summary>
+	    internal static IPEndPoint MapToIPv6(IPEndPoint endPoint)
+        {
+            if (endPoint.AddressFamily == AddressFamily.InterNetwork)
+                return new IPEndPoint(endPoint.Address.MapToIPv6(), endPoint.Port);
+
+            return endPoint;
+        }
+        
 		/// <summary>
-		/// Get IPv4 endpoint from notation (xxx.xxx.xxx.xxx) or hostname and port number (asynchronous version)
+		/// Get IPv4 endpoint from notation (xxx.xxx.xxx.xxx) or hostname and port number (asynchronous version).
 		/// </summary>
 		public static void ResolveAsync(string ipOrHost, int port, ResolveEndPointCallback callback)
 		{
@@ -69,7 +80,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Get IPv4 endpoint from notation (xxx.xxx.xxx.xxx) or hostname and port number
+		/// Get IPv4 endpoint from notation (xxx.xxx.xxx.xxx) or hostname and port number.
 		/// </summary>
 		public static IPEndPoint Resolve(string ipOrHost, int port)
 		{
@@ -78,7 +89,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Get IPv4 address from notation (xxx.xxx.xxx.xxx) or hostname (asynchronous version)
+		/// Get IPv4 address from notation (xxx.xxx.xxx.xxx) or hostname (asynchronous version).
 		/// </summary>
 		public static void ResolveAsync(string ipOrHost, ResolveAddressCallback callback)
 		{
@@ -89,9 +100,9 @@ namespace Lidgren.Network
             
 			if (IPAddress.TryParse(ipOrHost, out var ipAddress))
 			{
-				if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
-				{
-					callback(ipAddress);
+                if (ipAddress.AddressFamily == AddressFamily.InterNetwork || ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
+                {
+                    callback(ipAddress);
 					return;
 				}
 				throw new ArgumentException("This method will not currently resolve other than IPv4 addresses");
@@ -130,9 +141,9 @@ namespace Lidgren.Network
 					// check each entry for a valid IP address
 					foreach (IPAddress ipCurrent in entry.AddressList)
 					{
-						if (ipCurrent.AddressFamily == AddressFamily.InterNetwork)
-						{
-							callback(ipCurrent);
+                        if (ipCurrent.AddressFamily == AddressFamily.InterNetwork || ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
+                        {
+                            callback(ipCurrent);
 							return;
 						}
 					}
@@ -155,7 +166,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Get IPv4 address from notation (xxx.xxx.xxx.xxx) or hostname
+		/// Get <see cref="IPAddress"/> from notation (xxx.xxx.xxx.xxx) or hostname.
 		/// </summary>
 		public static IPAddress Resolve(string ipOrHost)
 		{
@@ -167,21 +178,21 @@ namespace Lidgren.Network
 			IPAddress ipAddress = null;
 			if (IPAddress.TryParse(ipOrHost, out ipAddress))
 			{
-				if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
-					return ipAddress;
-				throw new ArgumentException("This method will not currently resolve other than IPv4 addresses");
-			}
+                if (ipAddress.AddressFamily == AddressFamily.InterNetwork || ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
+                    return ipAddress;
+                throw new ArgumentException("This method will not currently resolve other than IPv4 or IPv6 addresses");
+            }
 
-			// ok must be a host name
-			try
+            // ok must be a host name
+            try
 			{
 				var addresses = Dns.GetHostAddresses(ipOrHost);
 				if (addresses == null)
 					return null;
 				foreach (var address in addresses)
 				{
-					if (address.AddressFamily == AddressFamily.InterNetwork)
-						return address;
+                    if (address.AddressFamily == AddressFamily.InterNetwork || ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
+                        return address;
 				}
 				return null;
 			}
@@ -238,7 +249,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Returns the physical (MAC) address for the first usable network interface
+		/// Returns the physical (MAC) address for the first usable network interface.
 		/// </summary>
 		public static PhysicalAddress GetMacAddress()
 		{
@@ -250,7 +261,7 @@ namespace Lidgren.Network
 #endif
 
 		/// <summary>
-		/// Create a hex string from an Int64 value
+		/// Create a hex string from an <see cref="long"/> value.
 		/// </summary>
 		public static string ToHexString(long data)
 		{
@@ -258,7 +269,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Create a hex string from an array of bytes
+		/// Create a hex string from an array of bytes.
 		/// </summary>
 		public static string ToHexString(byte[] data)
 		{
@@ -266,7 +277,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Create a hex string from an array of bytes
+		/// Create a hex string from an array of bytes.
 		/// </summary>
 		public static string ToHexString(byte[] data, int offset, int length)
 		{
@@ -283,7 +294,7 @@ namespace Lidgren.Network
 		}
 		
 		/// <summary>
-		/// Gets the local broadcast address
+		/// Gets the local broadcast address.
 		/// </summary>
 		public static IPAddress GetBroadcastAddress()
 		{
@@ -347,7 +358,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Gets my local IPv4 address (not necessarily external) and subnet mask
+		/// Gets the local IPv4 address (not necessarily external) and subnet mask.
 		/// </summary>
 		public static IPAddress GetMyAddress(out IPAddress mask)
 		{
@@ -395,7 +406,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Returns true if the IPEndPoint supplied is on the same subnet as this host
+		/// Returns true if the IPEndPoint supplied is on the same subnet as this host.
 		/// </summary>
 		public static bool IsLocal(IPEndPoint endPoint)
 		{
@@ -405,7 +416,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Returns true if the IPAddress supplied is on the same subnet as this host
+		/// Returns true if the IPAddress supplied is on the same subnet as this host.
 		/// </summary>
 		public static bool IsLocal(IPAddress remote)
 		{
@@ -424,7 +435,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Returns how many bits are necessary to hold a certain number
+		/// Returns how many bits are necessary to hold a certain number.
 		/// </summary>
 		[CLSCompliant(false)]
 		public static int BitsToHoldUInt(uint value)
@@ -436,7 +447,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Returns how many bytes are required to hold a certain number of bits
+		/// Returns how many bytes are required to hold a certain number of bits.
 		/// </summary>
 		public static int BytesToHoldBits(int numBits)
 		{
@@ -476,7 +487,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Convert a hexadecimal string to a byte array
+		/// Convert a hexadecimal string to a byte array.
 		/// </summary>
 		public static byte[] ToByteArray(String hexString)
 		{
@@ -487,7 +498,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Converts a number of bytes to a shorter, more readable string representation
+		/// Converts a number of bytes to a shorter, more readable string representation.
 		/// </summary>
 		public static string ToHumanReadable(long bytes)
 		{
@@ -510,7 +521,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Gets the window size used internally in the library for a certain delivery method
+		/// Gets the window size used internally in the library for a certain delivery method.
 		/// </summary>
 		public static int GetWindowSize(NetDeliveryMethod method)
 		{
@@ -585,24 +596,24 @@ namespace Lidgren.Network
 			return NetDeliveryMethod.Unreliable;
 		}
 
-		/// <summary>
-		/// Creates a comma delimited string from a lite of items
-		/// </summary>
-		public static string MakeCommaDelimitedList<T>(IList<T> list)
-		{
-			var cnt = list.Count;
-			StringBuilder bdr = new StringBuilder(cnt * 5); // educated guess
-			for(int i=0;i<cnt;i++)
-			{
-				bdr.Append(list[i].ToString());
-				if (i != cnt - 1)
-					bdr.Append(", ");
-			}
-			return bdr.ToString();
-		}
+        /// <summary>
+        /// Creates a comma delimited string from a <see cref="IList{T}"/> of items.
+        /// </summary>
+        public static string MakeCommaDelimitedList<T>(IList<T> list)
+        {
+            var cnt = list.Count;
+            StringBuilder bdr = new StringBuilder(cnt * 5); // educated guess
+            for (int i = 0; i < cnt; i++)
+            {
+                bdr.Append(list[i].ToString());
+                if (i != cnt - 1)
+                    bdr.Append(", ");
+            }
+            return bdr.ToString();
+        }
 
 		/// <summary>
-		/// Create a SHA1 digest from a string
+		/// Create a SHA1 digest from a string.
 		/// </summary>
 		public static byte[] CreateSHA1Hash(string key)
 		{
@@ -611,7 +622,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Create a SHA1 digest from a byte buffer
+		/// Create a SHA1 digest from a byte buffer.
 		/// </summary>
 		public static byte[] CreateSHA1Hash(byte[] data)
 		{
@@ -620,7 +631,7 @@ namespace Lidgren.Network
 		}
 
 		/// <summary>
-		/// Create a SHA1 digest from a byte buffer
+		/// Create a SHA1 digest from a byte buffer.
 		/// </summary>
 		public static byte[] CreateSHA1Hash(byte[] data, int offset, int count)
 		{

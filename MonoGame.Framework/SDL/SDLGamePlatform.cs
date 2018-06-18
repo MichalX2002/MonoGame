@@ -109,8 +109,6 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        private byte[] _textInputBuffer = new byte[4];
-
         private void SdlRunLoop()
         {
             while (Sdl.PollEvent(out Sdl.Event ev) == 1)
@@ -158,27 +156,18 @@ namespace Microsoft.Xna.Framework
                 }
                 else if (ev.Type == Sdl.EventType.TextInput)
                 {
-                    int len = 0;
-                    string text = string.Empty;
                     unsafe
                     {
-                        while (Marshal.ReadByte((IntPtr)ev.Text.Text, len) != 0)
-                            len++;
+                        string text = Sdl.GetString((IntPtr)ev.Text.Text);
+                        if (text.Length == 0)
+                            continue;
 
-                        if(_textInputBuffer.Length < len)
-                            _textInputBuffer = new byte[len];
-
-                        Marshal.Copy((IntPtr)ev.Text.Text, _textInputBuffer, 0, len);
-                        text = Encoding.UTF8.GetString(_textInputBuffer, 0, len);
-                    }
-                    if (text.Length == 0)
-                        continue;
-
-                    for (int i = 0; i < text.Length; i++)
-                    {
-                        char c = text[i];
-                        Keys key = KeyboardUtil.ToXna(c);
-                        _view.CallTextInput(c, key);
+                        for (int i = 0; i < text.Length; i++)
+                        {
+                            char c = text[i];
+                            Keys key = KeyboardUtil.ToXna(c);
+                            _view.CallTextInput(c, key);
+                        }
                     }
                 }
                 else if (ev.Type == Sdl.EventType.WindowEvent)

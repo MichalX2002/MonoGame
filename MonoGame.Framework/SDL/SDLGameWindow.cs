@@ -79,6 +79,9 @@ namespace Microsoft.Xna.Framework
             }
         }
 
+        public override bool HasClipboardText => Sdl.HasClipboardText();
+        public override string ClipboardText { get => Sdl.GetClipboardText(); set => Sdl.SetClipboardText(value); }
+
         public static GameWindow Instance;
         public bool IsFullScreen;
 

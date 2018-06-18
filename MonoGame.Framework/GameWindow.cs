@@ -16,6 +16,9 @@ namespace Microsoft.Xna.Framework {
 
 		public abstract Rectangle ClientBounds { get; }
 
+        public abstract bool HasClipboardText { get; }
+        public abstract string ClipboardText { get; set; }
+
 	    internal bool _allowAltF4 = true;
 
         /// <summary>
