@@ -35,7 +35,7 @@
     <OutputPath>bin\WindowsGL\AnyCPU\Release</OutputPath>
     <IntermediateOutputPath>obj\WindowsGL\AnyCPU\Release</IntermediateOutputPath>
     <DocumentationFile>bin\WindowsGL\AnyCPU\Release\MonoGame.Framework.xml</DocumentationFile>
-    <DefineConstants>OPENGL;OPENAL;XNADESIGNPROVIDED;TRACE;WINDOWS;DESKTOPGL;SUPPORTS_EFX</DefineConstants>
+    <DefineConstants>TRACE;OPENGL;OPENAL;XNADESIGNPROVIDED;DESKTOPGL;SUPPORTS_EFX;NET45</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -741,12 +741,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj">
-      <Project>{ee13a84f-68d1-4848-94ac-342cad4a95f1}</Project>
-      <Name>MonoGame.Imaging</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\ThirdParty\Dependencies\MonoGame.Framework.dll.config">
       <Platforms>WindowsGL,Linux,MacOS</Platforms>
       <Link>MonoGame.Framework.dll.config</Link>
@@ -831,7 +825,12 @@
       <Services>_GLCompatible</Services>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj">
+      <Project>{4344dacf-e2a9-4699-a89e-89dedba6d941}</Project>
+      <Name>MonoGame.Imaging</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup />
   <ItemGroup />
   <ItemGroup />

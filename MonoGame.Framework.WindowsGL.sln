@@ -8,14 +8,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Framework.WindowsG
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Framework.Net.WindowsGL", "MonoGame.Framework\MonoGame.Framework.Net.WindowsGL.csproj", "{6D6009F4-0AFB-4806-89D7-7945F20270F5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Imaging", "MonoGame.Imaging\MonoGame.Imaging.csproj", "{EE13A84F-68D1-4848-94AC-342CAD4A95F1}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Imaging.Tests", "MonoGame.Imaging.Tests\MonoGame.Imaging.Tests.csproj", "{AA7D39F2-81F3-4ACC-893B-F4C40BB21C2F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Imaging", "MonoGame.Imaging\MonoGame.Imaging.csproj", "{4344DACF-E2A9-4699-A89E-89DEDBA6D941}"
+EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -33,20 +30,23 @@ Global
 		{6D6009F4-0AFB-4806-89D7-7945F20270F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D6009F4-0AFB-4806-89D7-7945F20270F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D6009F4-0AFB-4806-89D7-7945F20270F5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EE13A84F-68D1-4848-94AC-342CAD4A95F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EE13A84F-68D1-4848-94AC-342CAD4A95F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EE13A84F-68D1-4848-94AC-342CAD4A95F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EE13A84F-68D1-4848-94AC-342CAD4A95F1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AA7D39F2-81F3-4ACC-893B-F4C40BB21C2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AA7D39F2-81F3-4ACC-893B-F4C40BB21C2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA7D39F2-81F3-4ACC-893B-F4C40BB21C2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA7D39F2-81F3-4ACC-893B-F4C40BB21C2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4344DACF-E2A9-4699-A89E-89DEDBA6D941}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4344DACF-E2A9-4699-A89E-89DEDBA6D941}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4344DACF-E2A9-4699-A89E-89DEDBA6D941}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4344DACF-E2A9-4699-A89E-89DEDBA6D941}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {58C319F3-4E97-4E7B-8489-F7ED1B2AA9FE}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true

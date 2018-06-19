@@ -70,7 +70,6 @@ namespace Microsoft.Xna.Framework.Audio
         private static EffectsExtension _efx = null;
         private IntPtr _device;
         private IntPtr _context;
-        IntPtr NullContext = IntPtr.Zero;
         private int[] allSourcesArray;
 #if DESKTOPGL || ANGLE
 
@@ -108,10 +107,8 @@ namespace Microsoft.Xna.Framework.Audio
         /// </summary>
 		private OpenALSoundController()
         {
-#if WINDOWS
             // On Windows, set the DLL search path for correct native binaries
             NativeHelper.InitDllDirectory();
-#endif
 
             if (!OpenSoundController())
             {
@@ -269,7 +266,7 @@ namespace Microsoft.Xna.Framework.Audio
 
                 AlcHelper.CheckError("Could not create OpenAL context");
 
-                if (_context != NullContext)
+                if (_context != IntPtr.Zero)
                 {
                     Alc.MakeContextCurrent(_context);
                     AlcHelper.CheckError("Could not make OpenAL context current");
@@ -322,12 +319,12 @@ namespace Microsoft.Xna.Framework.Audio
         /// </summary>
         private void CleanUpOpenAL()
         {
-            Alc.MakeContextCurrent(NullContext);
+            Alc.MakeContextCurrent(IntPtr.Zero);
 
-            if (_context != NullContext)
+            if (_context != IntPtr.Zero)
             {
                 Alc.DestroyContext (_context);
-                _context = NullContext;
+                _context = IntPtr.Zero;
             }
             if (_device != IntPtr.Zero)
             {

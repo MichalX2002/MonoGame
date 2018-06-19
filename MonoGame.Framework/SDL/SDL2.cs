@@ -455,7 +455,7 @@ internal static class Sdl
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void d_sdl_setwindowtitle(IntPtr window, ref byte value);
-        private static d_sdl_setwindowtitle SDL_SetWindowTitle = FuncLoader.LoadFunction<d_sdl_setwindowtitle>(NativeLibrary, "SDL_SetWindowTitle");
+        private static readonly d_sdl_setwindowtitle SDL_SetWindowTitle = FuncLoader.LoadFunction<d_sdl_setwindowtitle>(NativeLibrary, "SDL_SetWindowTitle");
 
         public static void SetTitle(IntPtr handle, string title)
         {

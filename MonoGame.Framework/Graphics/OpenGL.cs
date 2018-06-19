@@ -1491,26 +1491,32 @@ namespace MonoGame.OpenGL
             return Marshal.PtrToStringAnsi (GetStringInternal (name));
         }
 
-        protected static IntPtr MarshalStringArrayToPtr (string[] strings)
+        protected static IntPtr MarshalStringArrayToPtr(string[] strings)
         {
             IntPtr intPtr = IntPtr.Zero;
-            if (strings != null && strings.Length != 0) {
-                intPtr = Marshal.AllocHGlobal (strings.Length * IntPtr.Size);
-                if (intPtr == IntPtr.Zero) {
-                    throw new OutOfMemoryException ();
+            if (strings != null && strings.Length != 0)
+            {
+                intPtr = Marshal.AllocHGlobal(strings.Length * IntPtr.Size);
+                if (intPtr == IntPtr.Zero)
+                {
+                    throw new OutOfMemoryException();
                 }
                 int i = 0;
-                try {
-                    for (i = 0; i < strings.Length; i++) {
-                        IntPtr val = MarshalStringToPtr (strings [i]);
-                        Marshal.WriteIntPtr (intPtr, i * IntPtr.Size, val);
+                try
+                {
+                    for (i = 0; i < strings.Length; i++)
+                    {
+                        IntPtr val = MarshalStringToPtr(strings[i]);
+                        Marshal.WriteIntPtr(intPtr, i * IntPtr.Size, val);
                     }
                 }
-                catch (OutOfMemoryException) {
-                    for (i--; i >= 0; i--) {
-                        Marshal.FreeHGlobal (Marshal.ReadIntPtr (intPtr, i * IntPtr.Size));
+                catch (OutOfMemoryException)
+                {
+                    for (i--; i >= 0; i--)
+                    {
+                        Marshal.FreeHGlobal(Marshal.ReadIntPtr(intPtr, i * IntPtr.Size));
                     }
-                    Marshal.FreeHGlobal (intPtr);
+                    Marshal.FreeHGlobal(intPtr);
                     throw;
                 }
             }
