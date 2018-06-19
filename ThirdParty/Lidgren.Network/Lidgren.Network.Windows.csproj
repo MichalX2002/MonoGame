@@ -24,7 +24,7 @@
     <OutputPath>bin\Windows\AnyCPU\Debug</OutputPath>
     <IntermediateOutputPath>obj\Windows\AnyCPU\Debug</IntermediateOutputPath>
     <DocumentationFile>bin\Windows\AnyCPU\Debug\Lidgren.Network.xml</DocumentationFile>
-    <DefineConstants>DEBUG;TRACE;UNITY_4_5</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;UNITY_4_5;USE_RELEASE_STATISTICS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>0</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
