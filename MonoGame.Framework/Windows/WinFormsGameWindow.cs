@@ -131,6 +131,9 @@ namespace MonoGame.Framework
         public bool IsFullScreen { get; private set; }
         public bool HardwareModeSwitch { get; private set; }
 
+        public override bool HasClipboardText => Clipboard.ContainsText();
+        public override string ClipboardText { get => Clipboard.GetText(); set => Clipboard.SetText(value); }
+
         #endregion
 
         internal WinFormsGameWindow(WinFormsGamePlatform platform)
