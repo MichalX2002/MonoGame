@@ -534,11 +534,11 @@ namespace MonoGame.OpenAL
             Accessible
         }
 
-        private int RamSize;
-        private int RamFree;
-        private int StorageAuto;
-        private int StorageHardware;
-        private int StorageAccessible;
+        private readonly int RamSize;
+        private readonly int RamFree;
+        private readonly int StorageAuto;
+        private readonly int StorageHardware;
+        private readonly int StorageAccessible;
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate bool SetBufferModeDelegate(int n, ref int buffers, int value);
@@ -621,19 +621,19 @@ namespace MonoGame.OpenAL
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private unsafe delegate void alDeleteFiltersDelegate(int n, [In] uint* filters);
         
-        private alGenEffectsDelegate alGenEffects;
-        private alDeleteEffectsDelegate alDeleteEffects;
+        private readonly alGenEffectsDelegate alGenEffects;
+        private readonly alDeleteEffectsDelegate alDeleteEffects;
         //private alIsEffectDelegate alIsEffect;
-        private alEffectfDelegate alEffectf;
-        private alEffectiDelegate alEffecti;
-        private alGenAuxiliaryEffectSlotsDelegate alGenAuxiliaryEffectSlots;
-        private alDeleteAuxiliaryEffectSlotsDelegate alDeleteAuxiliaryEffectSlots;
-        private alAuxiliaryEffectSlotiDelegate alAuxiliaryEffectSloti;
-        private alAuxiliaryEffectSlotfDelegate alAuxiliaryEffectSlotf;
-        private alGenFiltersDelegate alGenFilters;
-        private alFilteriDelegate alFilteri;
-        private alFilterfDelegate alFilterf;
-        private alDeleteFiltersDelegate alDeleteFilters;
+        private readonly alEffectfDelegate alEffectf;
+        private readonly alEffectiDelegate alEffecti;
+        private readonly alGenAuxiliaryEffectSlotsDelegate alGenAuxiliaryEffectSlots;
+        private readonly alDeleteAuxiliaryEffectSlotsDelegate alDeleteAuxiliaryEffectSlots;
+        private readonly alAuxiliaryEffectSlotiDelegate alAuxiliaryEffectSloti;
+        private readonly alAuxiliaryEffectSlotfDelegate alAuxiliaryEffectSlotf;
+        private readonly alGenFiltersDelegate alGenFilters;
+        private readonly alFilteriDelegate alFilteri;
+        private readonly alFilterfDelegate alFilterf;
+        private readonly alDeleteFiltersDelegate alDeleteFilters;
 
         internal static IntPtr device;
         static EffectsExtension _instance;

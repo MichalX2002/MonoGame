@@ -3,33 +3,27 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    public class SpriteBatchItem : IComparable<SpriteBatchItem>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SpriteBatchItem : IComparable<SpriteBatchItem>
 	{
-		public Texture2D Texture;
         public float SortKey;
 
         public VertexPositionColorTexture VertexTL;
-		public VertexPositionColorTexture VertexTR;
+        public VertexPositionColorTexture VertexTR;
 		public VertexPositionColorTexture VertexBL;
 		public VertexPositionColorTexture VertexBR;
-
-		public SpriteBatchItem ()
-		{
-			VertexTL = new VertexPositionColorTexture();
-            VertexTR = new VertexPositionColorTexture();
-            VertexBL = new VertexPositionColorTexture();
-            VertexBR = new VertexPositionColorTexture();            
-		}
-
+        
         public void Set(float x, float y, float dx, float dy, float w, float h, float sin, float cos,
-            Color color, in Vector2 texCoordTL, in Vector2 texCoordBR, float depth)
+            in Color color, in Vector2 texCoordTL, in Vector2 texCoordBR, float depth)
         {
             // TODO, Should we be just assigning the Depth Value to Z?
             // According to http://blogs.msdn.com/b/shawnhar/archive/2011/01/12/spritebatch-billboards-in-a-3d-world.aspx
             // We do.
+
             VertexTL.Position.X = x + dx * cos - dy * sin;
             VertexTL.Position.Y = y + dx * sin + dy * cos;
             VertexTL.Position.Z = depth;

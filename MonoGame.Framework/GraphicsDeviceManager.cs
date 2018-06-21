@@ -47,9 +47,9 @@ namespace Microsoft.Xna.Framework
         partial void PlatformConstruct();
 
         /// <summary>
-        /// Associates this graphics device manager to a game instances.
+        /// Associates this <see cref="GraphicsDeviceManager"/> to a <see cref="Game"/> instance.
         /// </summary>
-        /// <param name="game">The game instance to attach.</param>
+        /// <param name="game">The game instance to attach to.</param>
         public GraphicsDeviceManager(Game game)
         {
             _game = game ?? throw new ArgumentNullException(nameof(game));
