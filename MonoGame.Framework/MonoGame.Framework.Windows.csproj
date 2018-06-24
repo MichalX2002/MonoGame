@@ -74,6 +74,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExceptionHelper.cs" />
+    <Compile Include="Graphics\SpriteBatchE.cs" />
+    <Compile Include="Graphics\SpriteBatcherE.cs" />
+    <Compile Include="Graphics\SpriteBatchItemE.cs" />
     <Compile Include="Math\BoundingBox.cs" />
     <Compile Include="Math\BoundingFrustum.cs" />
     <Compile Include="Math\BoundingSphere.cs" />
@@ -425,9 +428,6 @@
       <Services>DirectXGraphics</Services>
     </Compile>
     <Compile Include="Graphics\Shader\ShaderStage.cs" />
-    <Compile Include="Graphics\SpriteBatch.cs" />
-    <Compile Include="Graphics\SpriteBatcher.cs" />
-    <Compile Include="Graphics\SpriteBatchItem.cs" />
     <Compile Include="Graphics\SpriteEffects.cs" />
     <Compile Include="Graphics\SpriteFont.cs" />
     <Compile Include="Graphics\SpriteSortMode.cs" />

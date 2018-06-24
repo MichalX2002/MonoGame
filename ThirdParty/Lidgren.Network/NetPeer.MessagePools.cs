@@ -10,7 +10,7 @@ namespace Lidgren.Network
 		private NetQueue<NetOutgoingMessage> m_outgoingMessagesPool;
 		private NetQueue<NetIncomingMessage> m_incomingMessagesPool;
 
-		internal int m_storagePoolBytes;
+		internal int m_bytesInPool;
 
 		private void InitializePools()
 		{
@@ -41,7 +41,7 @@ namespace Lidgren.Network
 					if (retval != null && retval.Length >= minimumCapacityInBytes)
 					{
 						m_storagePool[i] = null;
-						m_storagePoolBytes -= retval.Length;
+						m_bytesInPool -= retval.Length;
 						return retval;
 					}
 				}
@@ -57,7 +57,7 @@ namespace Lidgren.Network
 
 			lock (m_storagePool)
 			{
-				m_storagePoolBytes += storage.Length;
+				m_bytesInPool += storage.Length;
 				int cnt = m_storagePool.Count;
 				for (int i = 0; i < cnt; i++)
 				{
@@ -161,7 +161,7 @@ namespace Lidgren.Network
 					{
 						var storage = msg.m_data;
 						msg.m_data = null;
-						m_storagePoolBytes += storage.Length;
+						m_bytesInPool += storage.Length;
 						int cnt = m_storagePool.Count;
 						for (int i = 0; i < cnt; i++)
 						{

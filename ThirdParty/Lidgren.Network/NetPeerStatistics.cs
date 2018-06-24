@@ -105,7 +105,7 @@ namespace Lidgren.Network
 		/// <summary>
 		/// Gets the number of bytes in the recycled pool
 		/// </summary>
-		public int BytesInRecyclePool { get { return m_peer.m_storagePoolBytes; } }
+		public int BytesInRecyclePool { get { return m_peer.m_bytesInPool; } }
 
 #if USE_RELEASE_STATISTICS
 		internal void PacketSent(int numBytes, int numMessages)
@@ -125,22 +125,24 @@ namespace Lidgren.Network
 #endif
 
         /// <summary>
-        /// Returns a string that represents this object
+        /// Builds and returns a string that represents this object.
         /// </summary>
         public override string ToString()
-		{
-			StringBuilder bdr = new StringBuilder();
-			bdr.AppendLine(m_peer.ConnectionsCount.ToString() + " connections");
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"{m_peer.ConnectionsCount} connections");
+
 #if DEBUG || USE_RELEASE_STATISTICS
-			bdr.AppendLine("Sent " + m_sentBytes + " bytes in " + m_sentMessages + " messages in " + m_sentPackets + " packets");
-			bdr.AppendLine("Received " + m_receivedBytes + " bytes in " + m_receivedMessages + " messages (of which " + m_receivedFragments + " fragments) in " + m_receivedPackets + " packets");
+            sb.AppendLine($"Sent {m_sentBytes} bytes in {m_sentMessages} messages in {m_sentPackets} packets");
+            sb.AppendLine($"Received {m_receivedBytes} bytes in {m_receivedMessages} messages ({m_receivedFragments} fragments) in {m_receivedPackets} packets");
 #else
 			bdr.AppendLine("Sent (n/a) bytes in (n/a) messages in (n/a) packets");
 			bdr.AppendLine("Received (n/a) bytes in (n/a) messages in (n/a) packets");
 #endif
-			bdr.AppendLine("Storage allocated " + m_bytesAllocated + " bytes");
-			bdr.AppendLine("Recycled pool " + m_peer.m_storagePoolBytes + " bytes");
-			return bdr.ToString();
+            sb.AppendLine();
+			sb.AppendLine($"Bytes in Pool: {m_peer.m_bytesInPool} bytes");
+            sb.AppendLine($"Memory Allocated over Lifetime: {m_bytesAllocated} bytes");
+            return sb.ToString();
 		}
 	}
 }
