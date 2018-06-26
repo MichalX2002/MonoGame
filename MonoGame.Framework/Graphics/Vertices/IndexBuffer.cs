@@ -3,20 +3,17 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    public partial class IndexBuffer : GraphicsResource
+    public partial class IndexBuffer : IndexBufferBase
     {
         private readonly bool _isDynamic;
 
         public BufferUsage BufferUsage { get; private set; }
-        public int IndexCount { get; private set; }
-        public IndexElementSize IndexElementSize { get; private set; }
 
-   		protected IndexBuffer(GraphicsDevice graphicsDevice, Type indexType, int indexCount, BufferUsage usage, bool dynamic)
-            : this(graphicsDevice, SizeForType(graphicsDevice, indexType), indexCount, usage, dynamic)
+        protected IndexBuffer(GraphicsDevice graphicsDevice, Type indexType, int indexCount, BufferUsage usage, bool dynamic)
+         : this(graphicsDevice, SizeForType(graphicsDevice, indexType), indexCount, usage, dynamic)
         {
         }
 

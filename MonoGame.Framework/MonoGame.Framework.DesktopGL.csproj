@@ -52,6 +52,14 @@
     <Compile Include="Graphics\SpriteBatchE.cs" />
     <Compile Include="Graphics\SpriteBatcherE.cs" />
     <Compile Include="Graphics\SpriteBatchItemE.cs" />
+    <Compile Include="Graphics\Vertices\IndexBufferBase.OpenGL.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeDynamicIndexBuffer.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeIndexBuffer.OpenGL.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeDynamicVertexBuffer.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeIndexBuffer.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeVertexBuffer.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeVertexBuffer.OpenGL.cs" />
+    <Compile Include="Graphics\Vertices\VertexBufferBase.cs" />
     <Compile Include="Input\KeyModifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.DesktopGL.cs">

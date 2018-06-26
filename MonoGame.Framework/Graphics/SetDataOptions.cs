@@ -14,7 +14,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         None,
         /// <summary>
-        /// The SetData will discard the entire buffer. A pointer to a new memory area is returned and rendering from the previous area do not stall.
+        /// The SetData will discard the entire buffer. A pointer to a new memory area is returned and rendering from the previous area does not stall.
         /// </summary>
         Discard,
         /// <summary>

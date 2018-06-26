@@ -3,16 +3,13 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    public partial class VertexBuffer : GraphicsResource
+    public partial class VertexBuffer : VertexBufferBase
     {
         private readonly bool _isDynamic;
-
-		public int VertexCount { get; private set; }
-		public VertexDeclaration VertexDeclaration { get; private set; }
+        
 		public BufferUsage BufferUsage { get; private set; }
 		
 		protected VertexBuffer(GraphicsDevice graphicsDevice, VertexDeclaration vertexDeclaration, int vertexCount, BufferUsage bufferUsage, bool dynamic)
@@ -97,7 +94,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             if (elementCount > 1 && elementCount * vertexStride > vertexByteSize)
                 throw new InvalidOperationException(
-                    "The {nameof(data)} array is not the correct size for the amount of data requested.");
+                    $"The {nameof(data)} array is not the correct size for the amount of data requested.");
 
             PlatformGetData(offsetInBytes, data, startIndex, elementCount, vertexStride);
         }

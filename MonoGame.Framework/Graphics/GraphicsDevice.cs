@@ -46,7 +46,7 @@ namespace Microsoft.Xna.Framework.Graphics
         private VertexBufferBindings _vertexBuffers;
         private bool _vertexBuffersDirty;
 
-        private IndexBuffer _indexBuffer;
+        private IndexBufferBase _indexBuffer;
         private bool _indexBufferDirty;
 
         private readonly RenderTargetBinding[] _currentRenderTargetBindings = new RenderTargetBinding[4];
@@ -830,14 +830,14 @@ namespace Microsoft.Xna.Framework.Graphics
             Array.Copy(_currentRenderTargetBindings, outTargets, RenderTargetCount);
         }
 
-        public void SetVertexBuffer(VertexBuffer vertexBuffer)
+        public void SetVertexBuffer(VertexBufferBase vertexBuffer)
         {
             _vertexBuffersDirty |= (vertexBuffer == null)
                                    ? _vertexBuffers.Clear()
                                    : _vertexBuffers.Set(vertexBuffer, 0);
         }
 
-        public void SetVertexBuffer(VertexBuffer vertexBuffer, int vertexOffset)
+        public void SetVertexBuffer(VertexBufferBase vertexBuffer, int vertexOffset)
         {
             // Validate vertexOffset.
             if (vertexOffset < 0
@@ -870,7 +870,7 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        private void SetIndexBuffer(IndexBuffer indexBuffer)
+        private void SetIndexBuffer(IndexBufferBase indexBuffer)
         {
             if (_indexBuffer == indexBuffer)
                 return;
@@ -879,7 +879,7 @@ namespace Microsoft.Xna.Framework.Graphics
             _indexBufferDirty = true;
         }
 
-        public IndexBuffer Indices { set { SetIndexBuffer(value); } get { return _indexBuffer; } }
+        public IndexBufferBase Indices { set { SetIndexBuffer(value); } get { return _indexBuffer; } }
 
         internal Shader VertexShader
         {

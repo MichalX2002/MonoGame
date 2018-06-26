@@ -3,17 +3,16 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Runtime.InteropServices;
 using MonoGame.OpenGL;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    public partial class IndexBuffer
+    public partial class IndexBuffer : IndexBufferBase
     {
-		internal int ibo;	
+		internal int _ibo;
+
+        internal override int IBO => _ibo;
 
         private void PlatformConstruct(IndexElementSize indexElementSize, int indexCount)
         {
@@ -22,7 +21,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformGraphicsDeviceResetting()
         {
-            ibo = 0;
+            _ibo = 0;
         }
 
         /// <summary>
@@ -30,13 +29,13 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         void GenerateIfRequired()
         {
-            if (ibo == 0)
+            if (_ibo == 0)
             {
                 var sizeInBytes = IndexCount * (this.IndexElementSize == IndexElementSize.SixteenBits ? 2 : 4);
 
-                GL.GenBuffers(1, out ibo);
+                GL.GenBuffers(1, out _ibo);
                 GraphicsExtensions.CheckGLError();
-                GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ibo);
                 GraphicsExtensions.CheckGLError();
                 GL.BufferData(BufferTarget.ElementArrayBuffer,
                               (IntPtr)sizeInBytes, IntPtr.Zero, _isDynamic ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
@@ -52,21 +51,14 @@ namespace Microsoft.Xna.Framework.Graphics
             throw new NotSupportedException("Index buffers are write-only on OpenGL ES platforms");
 #endif
 #if !GLES
-            if (Threading.IsOnUIThread())
-            {
-                GetBufferData(offsetInBytes, data, startIndex, elementCount);
-            }
-            else
-            {
-                Threading.BlockOnUIThread(() => GetBufferData(offsetInBytes, data, startIndex, elementCount));
-            }
+            Threading.BlockOnUIThread(() => GetBufferData(offsetInBytes, data, startIndex, elementCount));
 #endif
         }
 
 #if !GLES
         private void GetBufferData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount) where T : struct
         {
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ibo);
             GraphicsExtensions.CheckGLError();
             var elementSizeInByte = Marshal.SizeOf(typeof(T));
             IntPtr ptr = GL.MapBuffer(BufferTarget.ElementArrayBuffer, BufferAccess.ReadOnly);
@@ -95,27 +87,20 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformSetDataInternal<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, SetDataOptions options) where T : struct
         {
-            if (Threading.IsOnUIThread())
-            {
-                BufferData(offsetInBytes, data, startIndex, elementCount, options);
-            }
-            else
-            {
-                Threading.BlockOnUIThread(() => BufferData(offsetInBytes, data, startIndex, elementCount, options));
-            }
+            Threading.BlockOnUIThread(() => BufferData(offsetInBytes, data, startIndex, elementCount, options));
         }
 
         private void BufferData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, SetDataOptions options) where T : struct
         {
             GenerateIfRequired();
-            
+
             var elementSizeInByte = Marshal.SizeOf(typeof(T));
             var sizeInBytes = elementSizeInByte * elementCount;
             var dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
             var dataPtr = (IntPtr)(dataHandle.AddrOfPinnedObject().ToInt64() + startIndex * elementSizeInByte);
             var bufferSize = IndexCount * (IndexElementSize == IndexElementSize.SixteenBits ? 2 : 4);
             
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ibo);
             GraphicsExtensions.CheckGLError();
             
             if (options == SetDataOptions.Discard)
@@ -139,7 +124,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             if (!IsDisposed)
             {
-                GraphicsDevice.DisposeBuffer(ibo);
+                GraphicsDevice.DisposeBuffer(_ibo);
             }
             base.Dispose(disposing);
         }

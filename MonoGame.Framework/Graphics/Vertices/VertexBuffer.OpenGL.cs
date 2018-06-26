@@ -11,10 +11,11 @@ using MonoGame.OpenGL;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    public partial class VertexBuffer
+    public partial class VertexBuffer : VertexBufferBase
     {
 		//internal uint vao;
-		internal int vbo;
+		internal int _vbo;
+        internal override int VBO => _vbo;
 
         private void PlatformConstruct()
         {
@@ -23,7 +24,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformGraphicsDeviceResetting()
         {
-            vbo = 0;
+            _vbo = 0;
         }
 
         /// <summary>
@@ -31,13 +32,13 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         void GenerateIfRequired()
         {
-            if (vbo == 0)
+            if (_vbo == 0)
             {
                 //GLExt.Oes.GenVertexArrays(1, out this.vao);
                 //GLExt.Oes.BindVertexArray(this.vao);
-                GL.GenBuffers(1, out this.vbo);
+                GL.GenBuffers(1, out this._vbo);
                 GraphicsExtensions.CheckGLError();
-                GL.BindBuffer(BufferTarget.ArrayBuffer, this.vbo);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, this._vbo);
                 GraphicsExtensions.CheckGLError();
                 GL.BufferData(BufferTarget.ArrayBuffer,
                               new IntPtr(VertexDeclaration.VertexStride * VertexCount), IntPtr.Zero,
@@ -61,7 +62,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void GetBufferData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, int vertexStride) where T : struct
         {
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
             GraphicsExtensions.CheckGLError();
 
             // Pointer to the start of data in the vertex buffer
@@ -70,33 +71,18 @@ namespace Microsoft.Xna.Framework.Graphics
 
             ptr = (IntPtr) (ptr.ToInt64() + offsetInBytes);
 
-            if (typeof(T) == typeof(byte) && vertexStride == 1)
+            if (vertexStride == 1 && data is byte[] byteBuffer)
             {
                 // If data is already a byte[] and stride is 1 we can skip the temporary buffer
-                var buffer = data as byte[];
-                Marshal.Copy(ptr, buffer, startIndex * vertexStride, elementCount * vertexStride);
+                Marshal.Copy(ptr, byteBuffer, startIndex * vertexStride, elementCount * vertexStride);
             }
             else
             {
-                // Temporary buffer to store the copied section of data
-                var tmp = new byte[elementCount * vertexStride];
-                // Copy from the vertex buffer to the temporary buffer
-                Marshal.Copy(ptr, tmp, 0, tmp.Length);
-
-                // Copy from the temporary buffer to the destination array
-                var tmpHandle = GCHandle.Alloc(tmp, GCHandleType.Pinned);
-                var tmpPtr = tmpHandle.AddrOfPinnedObject();
-                try
+                // Copy from vertex buffer to data
+                for (var i = 0; i < elementCount; i++)
                 {
-                    for (var i = 0; i < elementCount; i++)
-                    {
-                        data[startIndex + i] = (T) Marshal.PtrToStructure(tmpPtr, typeof(T));
-                        tmpPtr = (IntPtr) (tmpPtr.ToInt64() + vertexStride);
-                    }
-                }
-                finally
-                {
-                    tmpHandle.Free();
+                    data[startIndex + i] = (T)Marshal.PtrToStructure(ptr, typeof(T));
+                    ptr += vertexStride;
                 }
             }
 
@@ -115,14 +101,14 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             GenerateIfRequired();
 
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
             GraphicsExtensions.CheckGLError();
             
             if (options == SetDataOptions.Discard)
             {
                 // By assigning NULL data to the buffer this gives a hint
                 // to the device to discard the previous content.
-                GL.BufferData(  BufferTarget.ArrayBuffer,
+                GL.BufferData(BufferTarget.ArrayBuffer,
                               (IntPtr)bufferSize, 
                               IntPtr.Zero,
                               _isDynamic ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
@@ -174,7 +160,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             if (!IsDisposed)
             {
-                GraphicsDevice.DisposeBuffer(vbo);
+                GraphicsDevice.DisposeBuffer(_vbo);
             }
             base.Dispose(disposing);
         }

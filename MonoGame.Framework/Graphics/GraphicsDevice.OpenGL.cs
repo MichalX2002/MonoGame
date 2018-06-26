@@ -192,12 +192,12 @@ namespace Microsoft.Xna.Framework.Graphics
                     _bufferBindingInfos[slot].VertexOffset == offset &&
                     ReferenceEquals(_bufferBindingInfos[slot].AttributeInfo, attrInfo) &&
                     _bufferBindingInfos[slot].InstanceFrequency == vertexBufferBinding.InstanceFrequency &&
-                    _bufferBindingInfos[slot].Vbo == vertexBufferBinding.VertexBuffer.vbo)
+                    _bufferBindingInfos[slot].Vbo == vertexBufferBinding.VertexBuffer.VBO)
                     continue;
 
                 bindingsChanged = true;
 
-                GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferBinding.VertexBuffer.vbo);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferBinding.VertexBuffer.VBO);
                 GraphicsExtensions.CheckGLError();
 
                 // If instancing is not supported, but InstanceFrequency of the buffer is not zero, throw an exception
@@ -223,7 +223,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 _bufferBindingInfos[slot].VertexOffset = offset;
                 _bufferBindingInfos[slot].AttributeInfo = attrInfo;
                 _bufferBindingInfos[slot].InstanceFrequency = vertexBufferBinding.InstanceFrequency;
-                _bufferBindingInfos[slot].Vbo = vertexBufferBinding.VertexBuffer.vbo;
+                _bufferBindingInfos[slot].Vbo = vertexBufferBinding.VertexBuffer.VBO;
             }
 
             _attribsDirty = false;
@@ -998,7 +998,7 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 if (_indexBuffer != null)
                 {
-                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer.ibo);
+                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer.IBO);
                     GraphicsExtensions.CheckGLError();
                 }
                 _indexBufferDirty = false;
@@ -1053,10 +1053,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             ApplyAttribs(_vertexShader, baseVertex);
 
-            GL.DrawElements(target,
-                                     indexElementCount,
-                                     indexElementType,
-                                     indexOffsetInBytes);
+            GL.DrawElements(target, indexElementCount, indexElementType, indexOffsetInBytes);
             GraphicsExtensions.CheckGLError();
         }
 
@@ -1097,9 +1094,7 @@ namespace Microsoft.Xna.Framework.Graphics
             if (vertexStart < 0)
                 vertexStart = 0;
 
-            GL.DrawArrays(PrimitiveTypeGL(primitiveType),
-                          vertexStart,
-                          vertexCount);
+            GL.DrawArrays(PrimitiveTypeGL(primitiveType), vertexStart, vertexCount);
             GraphicsExtensions.CheckGLError();
         }
 
@@ -1185,11 +1180,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             ApplyAttribs(_vertexShader, baseVertex);
 
-            GL.DrawElementsInstanced(target,
-                                     indexElementCount,
-                                     indexElementType,
-                                     indexOffsetInBytes,
-                                     instanceCount);
+            GL.DrawElementsInstanced(target, indexElementCount, indexElementType, indexOffsetInBytes, instanceCount);
             GraphicsExtensions.CheckGLError();
         }
 
