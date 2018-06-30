@@ -4,72 +4,32 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
     /// <summary>
     /// This class handles the queueing of batch items into the GPU by creating the triangle tesselations
     /// that are used to draw the sprite textures. This class supports <see cref="int.MaxValue "/> number 
-    /// of sprites to be batched at once and will process them into <see cref="OptimalBatchSize"/> groups
+    /// of sprites to be batched at once and will process them into <see cref="MaximalBatchSize"/> groups
     /// (strided by 6 for the number of vertices sent to the GPU). 
     /// </summary>
-	internal class SpriteBatcher
+	internal class SpriteBatcher : IDisposable
     {
         /*
          * Note that this class is fundamental to high performance for SpriteBatch games. Please exercise
          * caution when making changes to this class.
          */
-        
-        struct Texture2DEqualityComparer : IEqualityComparer<Texture2D>
-        {
-            public bool Equals(Texture2D x, Texture2D y)
-            {
-                return x.SortingKey.Equals(y.SortingKey);
-            }
-
-            public int GetHashCode(Texture2D obj)
-            {
-                return obj.SortingKey.GetHashCode();
-            }
-        }
-
-        class BatchItemList
-        {
-            /// <summary>
-            /// Initialization size for the batch item queue.
-            /// </summary>
-            public const int InitialBatchSize = 256;
-
-            /// <summary>
-            /// Used to determine if this <see cref="BatchItemList"/> was previously used
-            /// for a specific texture (to predict the needed size of the items array).
-            /// </summary>
-            public int LastTextureSortKey;
-
-            public int Count;
-            public SpriteBatchItem[] Items;
-
-            public BatchItemList(int textureSortKey)
-            {
-                LastTextureSortKey = textureSortKey;
-                Items = new SpriteBatchItem[InitialBatchSize];
-            }
-
-            public void Resize(int newSize)
-            {
-                Array.Resize(ref Items, newSize);
-            }
-
-            public void Sort()
-            {
-                Array.Sort(Items, 0, Count);
-            }
-        }
+         
+        /// <summary>
+        /// Initial  size for the batch item queue.
+        /// </summary>
+        public const int InitialBatchSize = 256;
 
         /// <summary>
-        /// The number of batch items that are optimal to process per iteration.
+        /// The maximal number of batch items per iteration.
         /// </summary>
-        private const int OptimalBatchSize = 32767;
+        private const int MaximalBatchSize = 16384;
         
         /// <summary>
         /// The target graphics device.
@@ -87,66 +47,91 @@ namespace Microsoft.Xna.Framework.Graphics
         /// excessive amounts of garbage when batching.
         /// </summary>
         private List<BatchItemList> _listPool;
+        
+        /// <summary>
+        /// Buffer for copying vertices from the enqueued batch items into
+        /// easy-to-upload data for the unsafe buffers.
+        /// </summary>
+        private IntPtr _vertexBuildBuffer;
+        private int _vertexBuildBufferSize;
 
         /// <summary>
-        /// Vertex buffer array.
+        /// Vertex buffer.
         /// </summary>
-        private readonly VertexPositionColorTexture[] _vertexArray;
+        private UnsafeDynamicVertexBuffer _vertices;
 
         /// <summary>
-        /// Vertex index array. The values in this array never change.
+        /// Index buffer; the values in this buffer are semi-constant and 
+        /// more indices are added as needed.
         /// </summary>
-        private readonly int[] _indices;
+        private UnsafeDynamicIndexBuffer _indices;
+
+        public bool Disposed { get; private set; }
         
         public SpriteBatcher(GraphicsDevice device)
         {
             _device = device;
+            _indices = new UnsafeDynamicIndexBuffer(_device, IndexElementSize.SixteenBits, BufferUsage.WriteOnly);
+            _vertices = new UnsafeDynamicVertexBuffer(_device, VertexPositionColorTexture.VertexDeclaration, BufferUsage.WriteOnly);
 
             _batches = new Dictionary<Texture2D, BatchItemList>(new Texture2DEqualityComparer());
             _listPool = new List<BatchItemList>();
 
-            // 1 batch item contains 4 vertex positions
-            _vertexArray = new VertexPositionColorTexture[OptimalBatchSize * 4];
+            EnsureVertexBuildBufferSize(InitialBatchSize);
+            EnsureIndexBufferSize(InitialBatchSize);
+        }
 
-            // 1 batch item needs 6 indices
-            _indices = new int[OptimalBatchSize * 6];
-            InitializeIndexBuffer();
+        private void EnsureVertexBuildBufferSize(int newSize)
+        {
+            if(newSize > _vertexBuildBufferSize)
+            {
+                if (_vertexBuildBuffer != IntPtr.Zero)
+                    Marshal.FreeHGlobal(_vertexBuildBuffer);
+
+                // 1 batch item contains 4 vertex positions
+                _vertexBuildBuffer = Marshal.AllocHGlobal(newSize * 4 * Marshal.SizeOf<VertexPositionColorTexture>());
+                _vertexBuildBufferSize = newSize;
+            }
         }
 
         /// <summary>
-        /// Fills the index buffer with correct indices.
-        /// Only needs to be called once.
+        /// Ensures that the index buffer contains enough indices 
+        /// for the specified <paramref name="itemCount"/>
+        /// (up to <see cref="MaximalBatchSize"/>).
         /// </summary>
-        private void InitializeIndexBuffer()
+        private void EnsureIndexBufferSize(int itemCount)
         {
             unsafe
             {
-                fixed (int* newIndicesPtr = _indices)
-                {
-                    int* indexPtr = newIndicesPtr;
-                    for (int i = 0; i < OptimalBatchSize; i++, indexPtr += 6)
-                    {
-                        /*
-                         *  TL    TR
-                         *   0----1 0,1,2,3 = index offsets for vertex indices
-                         *   |   /| TL,TR,BL,BR are vertex references in SpriteBatchItem.
-                         *   |  / |
-                         *   | /  |
-                         *   |/   |
-                         *   2----3
-                         *  BL    BR
-                         */
+                // 1 batch item needs 6 indices
+                IntPtr ptr = Marshal.AllocHGlobal(itemCount * 6 * sizeof(ushort));
 
-                        // Triangle 1
-                        *(indexPtr) = i * 4;
-                        *(indexPtr + 1) = i * 4 + 1;
-                        *(indexPtr + 2) = i * 4 + 2;
-                        // Triangle 2     
-                        *(indexPtr + 3) = i * 4 + 1;
-                        *(indexPtr + 4) = i * 4 + 3;
-                        *(indexPtr + 5) = i * 4 + 2;
-                    }
+                ushort* indexPtr = (ushort*)ptr;
+                for (int i = 0; i < itemCount; i++, indexPtr += 6)
+                {
+                    /*
+                     *  TL    TR    0,1,2,3 = index offsets for vertex indices
+                     *   0----1     TL,TR,BL,BR are vertex references in SpriteBatchItem.   
+                     *   |   /|    
+                     *   |  / |
+                     *   | /  |
+                     *   |/   |
+                     *   2----3
+                     *  BL    BR
+                     */
+
+                    // Triangle 1
+                    *(indexPtr) = (ushort)(i * 4);
+                    *(indexPtr + 1) = (ushort)(i * 4 + 1);
+                    *(indexPtr + 2) = (ushort)(i * 4 + 2);
+
+                    // Triangle 2
+                    *(indexPtr + 3) = (ushort)(i * 4 + 1);
+                    *(indexPtr + 4) = (ushort)(i * 4 + 3);
+                    *(indexPtr + 5) = (ushort)(i * 4 + 2);
                 }
+                _indices.SetData(ptr, itemCount);
+                Marshal.FreeHGlobal(ptr);
             }
         }
 
@@ -213,7 +198,7 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 Texture2D texture = batch.Key;
                 BatchItemList list = batch.Value;
-                int totalItemCount = list.Count;
+                int itemsInList = list.Count;
 
                 _device.Textures[0] = texture;
 
@@ -226,21 +211,27 @@ namespace Microsoft.Xna.Framework.Graphics
                         break;
                 }
 
-                fixed (VertexPositionColorTexture* outputPtr = _vertexArray)
                 fixed (SpriteBatchItem* itemPtr = list.Items)
                 {
-                    int itemsLeft = totalItemCount;
+                    int itemsLeft = itemsInList;
                     while (itemsLeft > 0)
                     {
-                        int sliceCount = Math.Min(itemsLeft, OptimalBatchSize);
+                        int sliceCount = Math.Min(itemsLeft, MaximalBatchSize);
+
+                        EnsureVertexBuildBufferSize(sliceCount);
+                        EnsureIndexBufferSize(sliceCount);
+
+                        var vertexBufferPtr = (VertexPositionColorTexture*)_vertexBuildBuffer;
                         for (int i = 0; i < sliceCount; i++)
                         {
                             ref SpriteBatchItem item = ref itemPtr[i];
-                            outputPtr[i * 4] = item.VertexTL;
-                            outputPtr[i * 4 + 1] = item.VertexTR;
-                            outputPtr[i * 4 + 2] = item.VertexBL;
-                            outputPtr[i * 4 + 3] = item.VertexBR;
+                            vertexBufferPtr[i * 4] = item.VertexTL;
+                            vertexBufferPtr[i * 4 + 1] = item.VertexTR;
+                            vertexBufferPtr[i * 4 + 2] = item.VertexBL;
+                            vertexBufferPtr[i * 4 + 3] = item.VertexBR;
                         }
+
+                        _vertices.SetData(_vertexBuildBuffer, sliceCount);
 
                         // flush vertex data
                         FlushVertexArray(sliceCount, effect, texture);
@@ -254,9 +245,10 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 unchecked
                 {
-                    _device._graphicsMetrics._spriteCount += totalItemCount;
+                    _device._graphicsMetrics._spriteCount += itemsInList;
                 }
             }
+            
             _batches.Clear();
         }
 
@@ -268,11 +260,13 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="texture">The texture to draw.</param>
         private void FlushVertexArray(int count, Effect effect, Texture texture)
         {
+            _device.Indices = _indices;
+            _device.SetVertexBuffer(_vertices);
+
             // If the effect is not null, then apply each pass and render the geometry
             if (effect != null)
             {
-                var passes = effect.CurrentTechnique.Passes;
-                foreach (var pass in passes)
+                foreach (var pass in effect.CurrentTechnique.Passes)
                 {
                     pass.Apply();
 
@@ -280,31 +274,94 @@ namespace Microsoft.Xna.Framework.Graphics
                     // ends up in Textures[0].
                     _device.Textures[0] = texture;
 
-                    _device.DrawUserIndexedPrimitives(
-                        PrimitiveType.TriangleList,
-                        _vertexArray,
-                        0,
-                        count,
-                        _indices,
-                        0,
-                        (count / 4) * 2,
-                        VertexPositionColorTexture.VertexDeclaration);
+                    _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (count / 4) * 2);
                 }
             }
             else
             {
                 // If no custom effect is defined, then simply render.
-                _device.DrawUserIndexedPrimitives(
-                    PrimitiveType.TriangleList,
-                    _vertexArray,
-                    0,
-                    count,
-                    _indices,
-                    0,
-                    (count / 4) * 2,
-                    VertexPositionColorTexture.VertexDeclaration);
+                _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (count / 4) * 2);
+            }
+
+            _device.Indices = null;
+            _device.SetVertexBuffer(null);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!Disposed)
+            {
+                _vertices.Dispose();
+                _vertices = null;
+
+                _indices.Dispose();
+                _indices = null;
+
+                if (_vertexBuildBuffer != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(_vertexBuildBuffer);
+                    _vertexBuildBuffer = IntPtr.Zero;
+                }
+                _vertexBuildBufferSize = 0;
+
+                _batches = null;
+                _listPool = null;
+
+                Disposed = true;
             }
         }
-	}
+        
+        ~SpriteBatcher()
+        {
+          Dispose(false);
+        }
+        
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        struct Texture2DEqualityComparer : IEqualityComparer<Texture2D>
+        {
+            public bool Equals(Texture2D x, Texture2D y)
+            {
+                return x.SortingKey.Equals(y.SortingKey);
+            }
+
+            public int GetHashCode(Texture2D obj)
+            {
+                return obj.SortingKey.GetHashCode();
+            }
+        }
+
+        class BatchItemList
+        {
+            /// <summary>
+            /// Used to determine if this <see cref="BatchItemList"/> was previously used
+            /// for a specific texture (to predict the needed size of the items array).
+            /// </summary>
+            public int LastTextureSortKey;
+
+            public int Count;
+            public SpriteBatchItem[] Items;
+
+            public BatchItemList(int textureSortKey)
+            {
+                LastTextureSortKey = textureSortKey;
+                Items = new SpriteBatchItem[InitialBatchSize];
+            }
+
+            public void Resize(int newSize)
+            {
+                Array.Resize(ref Items, newSize);
+            }
+
+            public void Sort()
+            {
+                Array.Sort(Items, 0, Count);
+            }
+        }
+    }
 }
 

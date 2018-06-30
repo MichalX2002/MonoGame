@@ -1202,6 +1202,8 @@ namespace Microsoft.Xna.Framework.Graphics
                         _spriteEffect = null;
                     }
                 }
+
+                _batcher.Dispose();
             }
             base.Dispose(disposing);
         }

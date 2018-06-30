@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Microsoft.Xna.Framework.Graphics.Vertices
+namespace Microsoft.Xna.Framework.Graphics
 {
     public class UnsafeDynamicVertexBuffer : UnsafeVertexBuffer
     {
