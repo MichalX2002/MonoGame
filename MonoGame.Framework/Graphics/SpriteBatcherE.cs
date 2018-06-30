@@ -274,13 +274,13 @@ namespace Microsoft.Xna.Framework.Graphics
                     // ends up in Textures[0].
                     _device.Textures[0] = texture;
 
-                    _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (count / 4) * 2);
+                    _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, count * 2);
                 }
             }
             else
             {
                 // If no custom effect is defined, then simply render.
-                _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (count / 4) * 2);
+                _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, count * 2);
             }
 
             _device.Indices = null;
