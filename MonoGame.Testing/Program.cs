@@ -36,11 +36,11 @@ namespace MonoGame.Testing
 
                 _batch = new SpriteBatch(GraphicsDevice);
 
-                _textures = new Texture2D[20];
+                _textures = new Texture2D[8];
                 for (int i = 0; i < _textures.Length; i++)
                 {
-                    _textures [i]= new Texture2D(GraphicsDevice, 2, 2);
-                    Color c = new Color((uint)(uint.MaxValue * r.NextDouble()))
+                    _textures [i] = new Texture2D(GraphicsDevice, 2, 2);
+                    Color c = new Color(127, (int)(255 * (i + 1) / _textures.Length), 127) //(uint)(uint.MaxValue * r.NextDouble()))
                     {
                         A = 255
                     };
@@ -49,7 +49,6 @@ namespace MonoGame.Testing
             }
 
             Random r = new Random();
-            int t;
 
             Stopwatch watch = new Stopwatch();
             List<double> timings = new List<double>();
@@ -68,20 +67,22 @@ namespace MonoGame.Testing
                 int offset = size + 8;
                 Rectangle rect = new Rectangle(10, 10, size, size);
 
-                Texture2D tex = _textures[t];
-
-                for (int x = 0; x < 1; x++)
+                for (int t = 0; t < _textures.Length; t++)
                 {
-                    watch.Restart();
-                    _batch.Begin(SpriteSortMode.Texture);
-                    for (int i = 0; i < drawCount; i++)
-                    {
-                        _batch.Draw(tex, rect, Color.White);
-                    }
-                    rect.X += offset;
-                    watch.Stop();
-                    timings.Add(watch.Elapsed.TotalMilliseconds);
+                    Texture2D tex = _textures[t];
 
+                    _batch.Begin(SpriteSortMode.Texture);
+                    for (int x = 0; x < 32; x++)
+                    {
+                        watch.Restart();
+
+                        _batch.Draw(tex, rect, Color.White);
+
+                        rect.X += offset;
+                        watch.Stop();
+                        timings.Add(watch.Elapsed.TotalMilliseconds);
+                    }
+                    
                     watch.Restart();
                     _batch.End();
                     watch.Stop();
@@ -98,8 +99,6 @@ namespace MonoGame.Testing
 
                     timings.Clear();
                     endTimings.Clear();
-                    
-                    t = r.Next(_textures.Length);
                 }
 
                 base.Draw(gameTime);

@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
@@ -13,6 +14,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		internal SurfaceFormat _format;
 		internal int _levelCount;
         private static int _lastSortingKey;
+        public static List<Texture> AllTextures = new List<Texture>();
 
         /// <summary>
         ///   Gets a unique identifier of this texture for sorting purposes.
@@ -27,6 +29,11 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </para>
         /// </remarks>
         public int SortingKey { get; } = Interlocked.Increment(ref _lastSortingKey);
+
+        public Texture()
+        {
+            AllTextures.Add(this);
+        }
 
         public SurfaceFormat Format
 		{

@@ -81,16 +81,16 @@ namespace Microsoft.Xna.Framework.Graphics
             EnsureIndexBufferSize(InitialBatchSize);
         }
 
-        private void EnsureVertexBuildBufferSize(int newSize)
+        private void EnsureVertexBuildBufferSize(int itemCount)
         {
-            if(newSize > _vertexBuildBufferSize)
+            if(itemCount > _vertexBuildBufferSize)
             {
                 if (_vertexBuildBuffer != IntPtr.Zero)
                     Marshal.FreeHGlobal(_vertexBuildBuffer);
 
-                // 1 batch item contains 4 vertex positions
-                _vertexBuildBuffer = Marshal.AllocHGlobal(newSize * 4 * Marshal.SizeOf<VertexPositionColorTexture>());
-                _vertexBuildBufferSize = newSize;
+                // 1 batch item has 4 vertices
+                _vertexBuildBuffer = Marshal.AllocHGlobal(itemCount * 4 * Marshal.SizeOf<VertexPositionColorTexture>());
+                _vertexBuildBufferSize = itemCount;
             }
         }
 
@@ -130,7 +130,9 @@ namespace Microsoft.Xna.Framework.Graphics
                     *(indexPtr + 4) = (ushort)(i * 4 + 3);
                     *(indexPtr + 5) = (ushort)(i * 4 + 2);
                 }
-                _indices.SetData(ptr, itemCount);
+
+                // 1 batch item needs 6 indices
+                _indices.SetData(ptr, itemCount * 6);
                 Marshal.FreeHGlobal(ptr);
             }
         }
@@ -163,21 +165,25 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private BatchItemList GetBatchList(Texture2D texture)
         {
-            var existingList = _listPool.Find((x) => x.LastTextureSortKey == texture.SortingKey);
-            if (existingList != null)
-                return existingList;
-            else
+            int count = _listPool.Count;
+            for (int i = 0; i < count; i++)
             {
-                int count = _listPool.Count;
-                if(count > 0)
+                var item = _listPool[i];
+                if (item.LastTextureSortKey == texture.SortingKey)
                 {
-                    int index = count - 1;
-                    BatchItemList item = _listPool[index];
-                    item.LastTextureSortKey = texture.SortingKey;
-
-                    _listPool.RemoveAt(index);
+                    _listPool.RemoveAt(i);
                     return item;
                 }
+            }
+
+            if (count > 0)
+            {
+                int index = count - 1;
+                BatchItemList item = _listPool[index];
+                item.LastTextureSortKey = texture.SortingKey;
+
+                _listPool.RemoveAt(index);
+                return item;
             }
 
             return new BatchItemList(texture.SortingKey);
@@ -231,7 +237,8 @@ namespace Microsoft.Xna.Framework.Graphics
                             vertexBufferPtr[i * 4 + 3] = item.VertexBR;
                         }
 
-                        _vertices.SetData(_vertexBuildBuffer, sliceCount);
+                        // 1 batch item has 4 vertices
+                        _vertices.SetData(_vertexBuildBuffer, sliceCount * 4);
 
                         // flush vertex data
                         FlushVertexArray(sliceCount, effect, texture);
@@ -255,7 +262,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Sends data to the graphics device. Here is where the actual drawing starts.
         /// </summary>
-        /// <param name="count">The amount of vertices.</param>
+        /// <param name="count">The amount of batch items.</param>
         /// <param name="effect">The custom effect to apply to the geometry</param>
         /// <param name="texture">The texture to draw.</param>
         private void FlushVertexArray(int count, Effect effect, Texture texture)
@@ -331,7 +338,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             public int GetHashCode(Texture2D obj)
             {
-                return obj.SortingKey.GetHashCode();
+                return obj.SortingKey;
             }
         }
 
@@ -354,7 +361,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
             public void Resize(int newSize)
             {
-                Array.Resize(ref Items, newSize);
+                SpriteBatchItem[] items = new SpriteBatchItem[newSize];
+                Array.Copy(Items, items, Count);
+                Items = items;
             }
 
             public void Sort()
