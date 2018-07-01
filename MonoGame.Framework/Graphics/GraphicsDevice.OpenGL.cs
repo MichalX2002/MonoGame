@@ -126,7 +126,6 @@ namespace Microsoft.Xna.Framework.Graphics
         internal int glMinorVersion = 0;
         internal int glFramebuffer = 0;
         internal int MaxVertexAttributes;
-        internal int _maxTextureSize = 0;
 
         // Keeps track of last applied state to avoid redundant OpenGL calls
         internal bool _lastBlendEnable = false;
@@ -153,19 +152,18 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        public int MaxTextureSize => _maxTextureSize;
-
         internal void SetVertexAttributeArray(bool[] attrs)
         {
             for (var x = 0; x < attrs.Length; x++)
             {
-                if (attrs[x] && !_enabledVertexAttributes.Contains(x))
+                bool contains = _enabledVertexAttributes.Contains(x);
+                if (attrs[x] && !contains)
                 {
                     _enabledVertexAttributes.Add(x);
                     GL.EnableVertexAttribArray(x);
                     GraphicsExtensions.CheckGLError();
                 }
-                else if (!attrs[x] && _enabledVertexAttributes.Contains(x))
+                else if (!attrs[x] && contains)
                 {
                     _enabledVertexAttributes.Remove(x);
                     GL.DisableVertexAttribArray(x);
@@ -176,8 +174,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void ApplyAttribs(Shader shader, int baseVertex)
         {
-            var programHash = ShaderProgramHash;
-            var bindingsChanged = false;
+            int programHash = ShaderProgramHash;
+            bool bindingsChanged = false;
 
             for (var slot = 0; slot < _vertexBuffers.Count; slot++)
             {
@@ -204,8 +202,11 @@ namespace Microsoft.Xna.Framework.Graphics
                 if (!GraphicsCapabilities.SupportsInstancing && vertexBufferBinding.InstanceFrequency > 0)
                     throw new PlatformNotSupportedException("Instanced geometry drawing requires at least OpenGL 3.2 or GLES 3.2. Try upgrading your graphics drivers.");
 
-                foreach (var element in attrInfo.Elements)
+                var elements = attrInfo.Elements;
+                for (int i = 0, count = elements.Count; i < count; i++)
                 {
+                    var element = elements[i];
+
                     GL.VertexAttribPointer(element.AttributeLocation,
                         element.NumberOfElements,
                         element.VertexAttribPointerType,
@@ -230,11 +231,16 @@ namespace Microsoft.Xna.Framework.Graphics
 
             if (bindingsChanged)
             {
-                Array.Clear(_newEnabledVertexAttributes, 0, _newEnabledVertexAttributes.Length);
+                for (int i = 0; i < _newEnabledVertexAttributes.Length; i++)
+                    _newEnabledVertexAttributes[i] = false;
+
                 for (var slot = 0; slot < _vertexBuffers.Count; slot++)
                 {
-                    foreach (var element in _bufferBindingInfos[slot].AttributeInfo.Elements)
-                        _newEnabledVertexAttributes[element.AttributeLocation] = true;
+                    var elements = _bufferBindingInfos[slot].AttributeInfo.Elements;
+                    for (int i = 0, count = elements.Count; i < count; i++)
+                    {
+                        _newEnabledVertexAttributes[elements[i].AttributeLocation] = true;
+                    }
                 }
             }
             SetVertexAttributeArray(_newEnabledVertexAttributes);

@@ -114,6 +114,9 @@ namespace Microsoft.Xna.Framework.Graphics
         internal int MaxTextureSlots;
         internal int MaxVertexTextureSlots;
 
+        internal int _maxTextureSize = 0;
+        public int MaxTextureSize => _maxTextureSize;
+
         public bool IsDisposed { get; private set; }
 
         public bool IsContentLost {
