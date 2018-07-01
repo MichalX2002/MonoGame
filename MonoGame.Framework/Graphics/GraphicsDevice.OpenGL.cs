@@ -117,7 +117,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private static BufferBindingInfo[] _bufferBindingInfos;
         private static bool[] _newEnabledVertexAttributes;
-        internal static readonly List<int> _enabledVertexAttributes = new List<int>();
+        internal static readonly HashSet<int> _enabledVertexAttributes = new HashSet<int>(new Int32Comparer());
         internal static bool _attribsDirty;
 
         internal FramebufferHelper framebufferHelper;
@@ -177,14 +177,15 @@ namespace Microsoft.Xna.Framework.Graphics
             int programHash = ShaderProgramHash;
             bool bindingsChanged = false;
 
-            for (var slot = 0; slot < _vertexBuffers.Count; slot++)
+            int vertexBufferCount = _vertexBuffers.Count;
+            for (var slot = 0; slot < vertexBufferCount; slot++)
             {
                 var vertexBufferBinding = _vertexBuffers.Get(slot);
                 var vertexDeclaration = vertexBufferBinding.VertexBuffer.VertexDeclaration;
                 var attrInfo = vertexDeclaration.GetAttributeInfo(shader, programHash);
 
                 var vertexStride = vertexDeclaration.VertexStride;
-                var offset = (IntPtr)(vertexDeclaration.VertexStride * (baseVertex + vertexBufferBinding.VertexOffset));
+                var offset = new IntPtr(vertexDeclaration.VertexStride * (baseVertex + vertexBufferBinding.VertexOffset));
 
                 if (!_attribsDirty &&
                     _bufferBindingInfos[slot].VertexOffset == offset &&
@@ -212,7 +213,7 @@ namespace Microsoft.Xna.Framework.Graphics
                         element.VertexAttribPointerType,
                         element.Normalized,
                         vertexStride,
-                        (IntPtr)(offset.ToInt64() + element.Offset));
+                        new IntPtr(offset.ToInt64() + element.Offset));
 
                     // only set the divisor if instancing is supported
                     if (GraphicsCapabilities.SupportsInstancing)
@@ -234,7 +235,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 for (int i = 0; i < _newEnabledVertexAttributes.Length; i++)
                     _newEnabledVertexAttributes[i] = false;
 
-                for (var slot = 0; slot < _vertexBuffers.Count; slot++)
+                for (var slot = 0; slot < vertexBufferCount; slot++)
                 {
                     var elements = _bufferBindingInfos[slot].AttributeInfo.Elements;
                     for (int i = 0, count = elements.Count; i < count; i++)
@@ -1004,7 +1005,7 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 if (_indexBuffer != null)
                 {
-                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer.IBO);
+                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer._ibo);
                     GraphicsExtensions.CheckGLError();
                 }
                 _indexBufferDirty = false;
@@ -1053,7 +1054,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             var indexElementType = shortIndices ? DrawElementsType.UnsignedShort : DrawElementsType.UnsignedInt;
             var indexElementSize = shortIndices ? 2 : 4;
-            var indexOffsetInBytes = (IntPtr)(startIndex * indexElementSize);
+            var indexOffsetInBytes = new IntPtr(startIndex * indexElementSize);
             var indexElementCount = GetElementCountArray(primitiveType, primitiveCount);
             var target = PrimitiveTypeGL(primitiveType);
 
@@ -1148,7 +1149,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             // Pin the buffers.
             var vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
-            var vertexAddr = (IntPtr)(vbHandle.AddrOfPinnedObject().ToInt64() + declaration.VertexStride * vertexOffset);
+            var vertexAddr = new IntPtr(vbHandle.AddrOfPinnedObject().ToInt64() + declaration.VertexStride * vertexOffset);
 
             // Setup the vertex declaration to point at the VB data.
             declaration.GraphicsDevice = this;
@@ -1157,7 +1158,7 @@ namespace Microsoft.Xna.Framework.Graphics
             //Draw
             GL.DrawElements(
                 PrimitiveTypeGL(primitiveType), GetElementCountArray(primitiveType, primitiveCount),
-                indexType, (IntPtr)(indexData.ToInt64() + (indexOffset * sizeofIndex)));
+                indexType, new IntPtr(indexData.ToInt64() + (indexOffset * sizeofIndex)));
             GraphicsExtensions.CheckGLError();
 
             // Release the vertex handle.
@@ -1174,7 +1175,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             var indexElementType = shortIndices ? DrawElementsType.UnsignedShort : DrawElementsType.UnsignedInt;
             var indexElementSize = shortIndices ? 2 : 4;
-            var indexOffsetInBytes = (IntPtr)(startIndex * indexElementSize);
+            var indexOffsetInBytes = new IntPtr(startIndex * indexElementSize);
             var indexElementCount = GetElementCountArray(primitiveType, primitiveCount);
             var target = PrimitiveTypeGL(primitiveType);
 

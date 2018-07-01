@@ -49,7 +49,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// The mapping between platform specific touch ids
         /// and the touch ids we assign to touch locations.
         /// </summary>
-        private readonly Dictionary<int, int> _touchIds = new Dictionary<int, int>();
+        private readonly Dictionary<int, int> _touchIds = new Dictionary<int, int>(new Int32Comparer());
 
         internal readonly Queue<GestureSample> GestureList = new Queue<GestureSample>();
 

@@ -9,9 +9,6 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class UnsafeIndexBuffer : IndexBufferBase
     {
-		internal int _ibo;
-        internal override int IBO => _ibo;
-
         private long _lastBufferSize;
 
         private void PlatformConstruct()

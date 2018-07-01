@@ -10,10 +10,6 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class IndexBuffer : IndexBufferBase
     {
-		internal int _ibo;
-
-        internal override int IBO => _ibo;
-
         private void PlatformConstruct(IndexElementSize indexElementSize, int indexCount)
         {
             Threading.BlockOnUIThread(GenerateIfRequired);

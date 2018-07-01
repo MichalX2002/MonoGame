@@ -252,7 +252,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             RasterizerState = RasterizerState.CullCounterClockwise;
 
-            EffectCache = new Dictionary<int, Effect>();
+            EffectCache = new Dictionary<int, Effect>(new Int32Comparer());
         }
 
         ~GraphicsDevice()
