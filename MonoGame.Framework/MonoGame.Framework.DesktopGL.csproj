@@ -59,7 +59,7 @@
     <Compile Include="Graphics\Vertices\UnsafeIndexBuffer.cs" />
     <Compile Include="Graphics\Vertices\UnsafeVertexBuffer.cs" />
     <Compile Include="Graphics\Vertices\UnsafeVertexBuffer.OpenGL.cs" />
-    <Compile Include="Graphics\Vertices\VertexBufferBase.cs" />
+    <Compile Include="Graphics\Vertices\VertexBufferBase.OpenGL.cs" />
     <Compile Include="Input\KeyModifier.cs" />
     <Compile Include="Int32Comparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

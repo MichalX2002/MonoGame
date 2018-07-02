@@ -102,7 +102,7 @@ namespace Lidgren.Network
 			NetException.Assert(totalBits > 0);
 			NetException.Assert(chunkByteSize > 0);
 			
-			int totalBytes = NetUtility.BytesToHoldBits((int)totalBits);
+			int totalBytes = NetUtility.BytesNeededToHoldBits((int)totalBits);
 			int totalNumChunks = totalBytes / chunkByteSize;
 			if (totalNumChunks * chunkByteSize < totalBytes)
 				totalNumChunks++;

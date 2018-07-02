@@ -68,7 +68,7 @@ namespace Lidgren.Network
 				intoBuffer[ptr++] = (byte)m_bitLength;
 				intoBuffer[ptr++] = (byte)(m_bitLength >> 8);
 
-				int byteLen = NetUtility.BytesToHoldBits(m_bitLength);
+				int byteLen = NetUtility.BytesNeededToHoldBits(m_bitLength);
 				if (byteLen > 0)
 				{
 					Buffer.BlockCopy(m_data, 0, intoBuffer, ptr, byteLen);
@@ -92,7 +92,7 @@ namespace Lidgren.Network
 				intoBuffer[wasPtr] = (byte)realBitLength;
 				intoBuffer[wasPtr + 1] = (byte)(realBitLength >> 8);
 
-				int byteLen = NetUtility.BytesToHoldBits(m_bitLength);
+				int byteLen = NetUtility.BytesNeededToHoldBits(m_bitLength);
 				if (byteLen > 0)
 				{
 					Buffer.BlockCopy(m_data, (int)(m_fragmentChunkNumber * m_fragmentChunkByteSize), intoBuffer, ptr, byteLen);

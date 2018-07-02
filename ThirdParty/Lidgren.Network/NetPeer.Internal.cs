@@ -365,9 +365,7 @@ namespace Lidgren.Network
 					}
 				}
 
-#if DEBUG
 				SendDelayedPackets();
-#endif
 
 				// update m_executeFlushSendQueue
 				if (m_configuration.m_autoFlushSendQueue)
@@ -513,7 +511,7 @@ namespace Lidgren.Network
 					numFragments++;
 
 					ushort payloadBitLength = (ushort)(m_receiveBuffer[ptr++] | (m_receiveBuffer[ptr++] << 8));
-					int payloadByteLength = NetUtility.BytesToHoldBits(payloadBitLength);
+					int payloadByteLength = NetUtility.BytesNeededToHoldBits(payloadBitLength);
 
 					if (bytesReceived - ptr < payloadByteLength)
 					{

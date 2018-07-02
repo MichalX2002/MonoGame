@@ -24,7 +24,7 @@ namespace Lidgren.Network
 			m_windowStart = 0;
 			m_sendStart = 0;
 			m_receivedAcks = new NetBitVector(NetConstants.NumSequenceNumbers);
-			m_queuedSends = new NetQueue<NetOutgoingMessage>(8);
+			m_queuedSends = new NetQueue<NetOutgoingMessage>(16);
 		}
 
 		internal override int GetAllowedSends()

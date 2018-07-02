@@ -6,9 +6,9 @@ namespace Lidgren.Network
 {
 	public partial class NetPeer
 	{
-		private List<byte[]> m_storagePool; // sorted smallest to largest
-		private NetQueue<NetOutgoingMessage> m_outgoingMessagesPool;
-		private NetQueue<NetIncomingMessage> m_incomingMessagesPool;
+		public List<byte[]> m_storagePool; // sorted smallest to largest
+		public NetQueue<NetOutgoingMessage> m_outgoingMessagesPool;
+		public NetQueue<NetIncomingMessage> m_incomingMessagesPool;
 
 		internal int m_bytesInPool;
 
@@ -17,8 +17,8 @@ namespace Lidgren.Network
 			if (m_configuration.UseMessageRecycling)
 			{
 				m_storagePool = new List<byte[]>(16);
-				m_outgoingMessagesPool = new NetQueue<NetOutgoingMessage>(4);
-				m_incomingMessagesPool = new NetQueue<NetIncomingMessage>(4);
+				m_outgoingMessagesPool = new NetQueue<NetOutgoingMessage>(32);
+				m_incomingMessagesPool = new NetQueue<NetIncomingMessage>(32);
 			}
 			else
 			{

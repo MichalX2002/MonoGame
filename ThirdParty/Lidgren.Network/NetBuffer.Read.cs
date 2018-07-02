@@ -136,7 +136,7 @@ namespace Lidgren.Network
 		public void ReadBits(byte[] into, int offset, int numberOfBits)
 		{
 			NetException.Assert(m_bitLength - m_readPosition >= numberOfBits, c_readOverflowError);
-			NetException.Assert(offset + NetUtility.BytesToHoldBits(numberOfBits) <= into.Length);
+			NetException.Assert(offset + NetUtility.BytesNeededToHoldBits(numberOfBits) <= into.Length);
 
 			int numberOfWholeBytes = numberOfBits / 8;
 			int extraBits = numberOfBits - (numberOfWholeBytes * 8);

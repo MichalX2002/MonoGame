@@ -83,45 +83,46 @@ namespace Lidgren.Network
 			m_status = UPnPStatus.Discovering;
 		}
 
-		internal void ExtractServiceUrl(string resp)
-		{
+        internal void ExtractServiceUrl(string resp)
+        {
 #if !DEBUG
-			try
-			{
+            try
+            {
 #endif
-			XmlDocument desc = new XmlDocument();
-			desc.Load(WebRequest.Create(resp).GetResponse().GetResponseStream());
+                XmlDocument desc = new XmlDocument();
+                using (var rep = WebRequest.Create(resp).GetResponse())
+                using (var stream = rep.GetResponseStream())
+                    desc.Load(stream);
 
-			XmlNamespaceManager nsMgr = new XmlNamespaceManager(desc.NameTable);
-			nsMgr.AddNamespace("tns", "urn:schemas-upnp-org:device-1-0");
-			XmlNode typen = desc.SelectSingleNode("//tns:device/tns:deviceType/text()", nsMgr);
-			if (!typen.Value.Contains("InternetGatewayDevice"))
-				return;
+                XmlNamespaceManager nsMgr = new XmlNamespaceManager(desc.NameTable);
+                nsMgr.AddNamespace("tns", "urn:schemas-upnp-org:device-1-0");
+                XmlNode typen = desc.SelectSingleNode("//tns:device/tns:deviceType/text()", nsMgr);
+                if (!typen.Value.Contains("InternetGatewayDevice"))
+                    return;
 
-			m_serviceName = "WANIPConnection";
-			XmlNode node = desc.SelectSingleNode("//tns:service[tns:serviceType=\"urn:schemas-upnp-org:service:" + m_serviceName + ":1\"]/tns:controlURL/text()", nsMgr);
-			if (node == null)
-			{
-				//try another service name
-				m_serviceName = "WANPPPConnection";
-				node = desc.SelectSingleNode("//tns:service[tns:serviceType=\"urn:schemas-upnp-org:service:" + m_serviceName + ":1\"]/tns:controlURL/text()", nsMgr);
-				if (node == null)
-					return;
-			}
+                m_serviceName = "WANIPConnection";
+                XmlNode node = desc.SelectSingleNode("//tns:service[tns:serviceType=\"urn:schemas-upnp-org:service:" + m_serviceName + ":1\"]/tns:controlURL/text()", nsMgr);
+                if (node == null)
+                {
+                    //try another service name
+                    m_serviceName = "WANPPPConnection";
+                    node = desc.SelectSingleNode("//tns:service[tns:serviceType=\"urn:schemas-upnp-org:service:" + m_serviceName + ":1\"]/tns:controlURL/text()", nsMgr);
+                    if (node == null)
+                        return;
+                }
 
-			m_serviceUrl = CombineUrls(resp, node.Value);
-			m_peer.LogDebug("UPnP service ready");
-			m_status = UPnPStatus.Available;
-			m_discoveryComplete.Set();
+                m_serviceUrl = CombineUrls(resp, node.Value);
+                m_peer.LogDebug("UPnP service ready");
+                m_status = UPnPStatus.Available;
+                m_discoveryComplete.Set();
 #if !DEBUG
-			}
-			catch(Exception exc)
-			{
-				m_peer.LogVerbose("Exception ignored trying to parse UPnP XML response: " + exc);
-				return;
-			}
+            }
+            catch (Exception exc)
+            {
+                m_peer.LogVerbose("Exception ignored trying to parse UPnP XML response: " + exc);
+            }
 #endif
-		}
+        }
 
 		private static string CombineUrls(string gatewayURL, string subURL)
 		{
@@ -243,33 +244,34 @@ namespace Lidgren.Network
 			}
 		}
 
-		private XmlDocument SOAPRequest(string url, string soap, string function)
-		{
-			string req =
+        private XmlDocument SOAPRequest(string url, string soap, string function)
+        {
+            string reqQuery =
                 "<?xml version=\"1.0\"?>" +
-			    "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">" +
-			    "<s:Body>" +
-			    soap +
-			    "</s:Body>" +
-			    "</s:Envelope>";
+                "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">" +
+                "<s:Body>" +
+                soap +
+                "</s:Body>" +
+                "</s:Envelope>";
 
-			WebRequest r = HttpWebRequest.Create(url);
-			r.Method = "POST";
-			byte[] b = System.Text.Encoding.UTF8.GetBytes(req);
-			r.Headers.Add("SOAPACTION", "\"urn:schemas-upnp-org:service:" + m_serviceName + ":1#" + function + "\""); 
-			r.ContentType = "text/xml; charset=\"utf-8\"";
-			r.ContentLength = b.Length;
+            var req = HttpWebRequest.Create(url);
+            req.Method = "POST";
+            req.Headers.Add("SOAPACTION", "\"urn:schemas-upnp-org:service:" + m_serviceName + ":1#" + function + "\"");
+            req.ContentType = "text/xml; charset=\"utf-8\"";
 
-            using (var requestStream = r.GetRequestStream())
-                requestStream.Write(b, 0, b.Length);
+            byte[] reqBytes = System.Text.Encoding.UTF8.GetBytes(reqQuery);
+            req.ContentLength = reqBytes.Length;
 
-			WebResponse wres = r.GetResponse();
-            using (var responseStream = wres.GetResponseStream())
+            using (var requestStream = req.GetRequestStream())
+                requestStream.Write(reqBytes, 0, reqBytes.Length);
+
+            using (var rep = req.GetResponse())
+            using (var stream = rep.GetResponseStream())
             {
                 XmlDocument resp = new XmlDocument();
-                resp.Load(responseStream);
+                resp.Load(stream);
                 return resp;
             }
-		}
+        }
 	}
 }

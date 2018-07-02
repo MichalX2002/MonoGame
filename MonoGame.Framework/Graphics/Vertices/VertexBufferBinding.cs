@@ -11,7 +11,6 @@ namespace Microsoft.Xna.Framework.Graphics
     /// </summary>
     public struct VertexBufferBinding
     {
-        private readonly int _instanceFrequency;
 
         /// <summary>
         /// Gets the vertex buffer.
@@ -34,10 +33,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// buffer by one element. This value must be 0 for an element that contains per-vertex
         /// data and greater than 0 for per-instance data.
         /// </value>
-        public int InstanceFrequency
-        {
-            get { return _instanceFrequency; }
-        }
+        public int InstanceFrequency { get; }
 
         /// <summary>
         /// Creates an instance of <see cref="VertexBufferBinding"/>.
@@ -89,7 +85,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             VertexBuffer = vertexBuffer;
             VertexOffset = vertexOffset;
-            _instanceFrequency = instanceFrequency;
+            InstanceFrequency = instanceFrequency;
         }
     }
 }

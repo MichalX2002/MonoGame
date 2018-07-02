@@ -87,8 +87,8 @@ namespace Lidgren.Network
 			m_remoteEndPoint = remoteEndPoint;
 			m_sendChannels = new NetSenderChannelBase[NetConstants.NumTotalChannels];
 			m_receiveChannels = new NetReceiverChannelBase[NetConstants.NumTotalChannels];
-			m_queuedOutgoingAcks = new NetQueue<NetTuple<NetMessageType, int>>(4);
-			m_queuedIncomingAcks = new NetQueue<NetTuple<NetMessageType, int>>(4);
+			m_queuedOutgoingAcks = new NetQueue<NetTuple<NetMessageType, int>>(16);
+			m_queuedIncomingAcks = new NetQueue<NetTuple<NetMessageType, int>>(16);
 			m_statistics = new NetConnectionStatistics(this);
 			m_averageRoundtripTime = -1.0f;
 			m_currentMTU = m_peerConfiguration.MaximumTransmissionUnit;

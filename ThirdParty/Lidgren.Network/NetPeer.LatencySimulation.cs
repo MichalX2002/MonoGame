@@ -293,10 +293,6 @@ namespace Lidgren.Network
 			}
 			return;
 		}
-
-		private void FlushDelayedPackets()
-		{
-		}
 #endif
         */
     }

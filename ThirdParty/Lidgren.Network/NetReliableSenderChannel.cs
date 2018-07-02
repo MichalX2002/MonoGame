@@ -28,7 +28,7 @@ namespace Lidgren.Network
 			m_sendStart = 0;
 			m_receivedAcks = new NetBitVector(NetConstants.NumSequenceNumbers);
 			m_storedMessages = new NetStoredReliableMessage[m_windowSize];
-			m_queuedSends = new NetQueue<NetOutgoingMessage>(8);
+			m_queuedSends = new NetQueue<NetOutgoingMessage>(16);
 			m_resendDelay = m_connection.GetResendDelay();
 		}
 
@@ -128,24 +128,24 @@ namespace Lidgren.Network
 			return;
 		}
 
-		private void DestoreMessage(int storeIndex)
-		{
-			NetOutgoingMessage storedMessage = m_storedMessages[storeIndex].Message;
+        private void DestoreMessage(int storeIndex)
+        {
+            NetOutgoingMessage storedMessage = m_storedMessages[storeIndex].Message;
 #if DEBUG
 			if (storedMessage == null)
 				throw new NetException("m_storedMessages[" + storeIndex + "].Message is null; sent " + m_storedMessages[storeIndex].NumSent + " times, last time " + (NetTime.Now - m_storedMessages[storeIndex].LastSent) + " seconds ago");
 #else
-			if (storedMessage != null)
-			{
+            if (storedMessage != null)
+            {
 #endif
-			if (Interlocked.Decrement(ref storedMessage.m_recyclingCount) <= 0)
-				m_connection.m_peer.Recycle(storedMessage);
+                if (Interlocked.Decrement(ref storedMessage.m_recyclingCount) <= 0)
+                    m_connection.m_peer.Recycle(storedMessage);
 
 #if !DEBUG
-			}
+            }
 #endif
-			m_storedMessages[storeIndex] = new NetStoredReliableMessage();
-		}
+            m_storedMessages[storeIndex] = new NetStoredReliableMessage();
+        }
 
 		// remoteWindowStart is remote expected sequence number; everything below this has arrived properly
 		// seqNr is the actual nr received

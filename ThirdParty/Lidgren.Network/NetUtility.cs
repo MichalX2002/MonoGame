@@ -449,7 +449,7 @@ namespace Lidgren.Network
 		/// <summary>
 		/// Returns how many bytes are required to hold a certain number of bits.
 		/// </summary>
-		public static int BytesToHoldBits(int numBits)
+		public static int BytesNeededToHoldBits(int numBits)
 		{
 			return (numBits + 7) / 8;
 		}

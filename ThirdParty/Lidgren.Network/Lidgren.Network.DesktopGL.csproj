@@ -33,9 +33,9 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
     <DebugType>portable</DebugType>
-    <OutputPath>bin\WindowsGL\AnyCPU\Release</OutputPath>
+    <OutputPath>bin\DesktopGL\AnyCPU\Release\</OutputPath>
     <IntermediateOutputPath>obj\WindowsGL\AnyCPU\Release</IntermediateOutputPath>
-    <DocumentationFile>bin\WindowsGL\AnyCPU\Release\Lidgren.Network.xml</DocumentationFile>
+    <DocumentationFile>bin\DesktopGL\AnyCPU\Release\Lidgren.Network.xml</DocumentationFile>
     <DefineConstants>TRACE;USE_RELEASE_STATISTICS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>0</WarningLevel>

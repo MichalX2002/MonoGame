@@ -69,7 +69,7 @@ namespace Lidgren.Network
         public override void SetKey(byte[] data, int offset, int count)
         {
             int len = m_algorithm.Key.Length;
-            var key = new byte[len];
+            byte[] key = new byte[len];
             for (int i = 0; i < len; i++)
                 key[i] = data[offset + (i % count)];
             m_algorithm.Key = key;
@@ -83,58 +83,84 @@ namespace Lidgren.Network
 
         public override bool Encrypt(NetOutgoingMessage msg)
         {
-            int sourceBits = msg.LengthBits;
-
-            int length;
-            byte[] data;
-            using (var ms = new MemoryStream())
+            try
             {
-                using (var cs = new CryptoStream(ms, Encryptor, CryptoStreamMode.Write))
-                    cs.Write(msg.m_data, 0, msg.LengthBytes);
+                int sourceBits = msg.LengthBits;
+                using (var ms = new MemoryStream())
+                {
+                    using (var cs = new CryptoStream(ms, Encryptor, CryptoStreamMode.Write, true))
+                        cs.Write(msg.m_data, 0, msg.LengthBytes);
 
-                data = ms.ToArray();
-                length = data.Length;
+                    int length = (int)ms.Length;
+                    int neededBufferSize = (length + 4) * 8;
+
+                    msg.EnsureBufferSize(neededBufferSize);
+                    msg.LengthBits = 0; // reset write pointer
+                    msg.Write((uint)sourceBits);
+                    msg.Write(ms.GetBuffer(), 0, length);
+                    msg.LengthBits = neededBufferSize;
+
+                    return true;
+                }
             }
-
-            int neededBufferSize = (length + 4) * 8;
-            msg.EnsureBufferSize(neededBufferSize);
-            msg.LengthBits = 0; // reset write pointer
-            msg.Write((uint)sourceBits);
-            msg.Write(data, 0, length);
-            msg.LengthBits = neededBufferSize;
-
-            return true;
+            catch
+            {
+                return false;
+            }
         }
 
         public override bool Decrypt(NetIncomingMessage msg)
         {
-            int decryptedLenBits = (int)msg.ReadUInt32();
-            int storageSize = NetUtility.BytesToHoldBits(decryptedLenBits);
-            byte[] result = m_peer.GetStorage(storageSize);
+            void Recycle(byte[] buffer)
+            {
+                if (m_peer.m_configuration.m_useMessageRecycling)
+                    m_peer.Recycle(buffer);
+            }
 
-            using (var ms = new MemoryStream(msg.m_data, 4, msg.LengthBytes - 4))
-            using (var cs = new CryptoStream(ms, Decryptor, CryptoStreamMode.Read))
-                cs.Read(result, 0, storageSize);
+            bool success = true;
+            int decryptedBits = 0;
+            byte[] result = null;
+            byte[] originalMessageBuffer = msg.m_data;
 
-            if (m_peer.m_configuration.m_useMessageRecycling)
-                m_peer.Recycle(msg.m_data);
+            try
+            {
+                decryptedBits = (int)msg.ReadUInt32();
+                int decryptedLength = NetUtility.BytesNeededToHoldBits(decryptedBits);
+                result = m_peer.GetStorage(decryptedLength);
+
+                using (var ms = new MemoryStream(originalMessageBuffer, 4, msg.LengthBytes - 4))
+                using (var cs = new CryptoStream(ms, Decryptor, CryptoStreamMode.Read))
+                {
+                    if (cs.Read(result, 0, decryptedLength) != decryptedLength)
+                        success = false;
+                }
+            }
+            catch
+            {
+                success = false;
+            }
+
+            Recycle(originalMessageBuffer);
+            if (success == false)
+            {
+                if (result != null)
+                {
+                    Recycle(result);
+                    result = null;
+                }
+                decryptedBits = 0;
+            }
 
             msg.m_data = result;
-            msg.m_bitLength = decryptedLenBits;
+            msg.m_bitLength = decryptedBits;
             msg.m_readPosition = 0;
-
-            return true;
+            return success;
         }
 
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed == false)
             {
-                if (disposing)
-                {
-
-                }
-
                 __encryptor.Dispose();
                 __decryptor.Dispose();
                 m_algorithm.Dispose();
