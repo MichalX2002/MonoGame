@@ -46,7 +46,7 @@ namespace Lidgren.Network
 					}
 				}
 			}
-			m_statistics.m_bytesAllocated += minimumCapacityInBytes;
+			m_statistics.m_totalBytesAllocated += minimumCapacityInBytes;
 			return new byte[minimumCapacityInBytes];
 		}
 

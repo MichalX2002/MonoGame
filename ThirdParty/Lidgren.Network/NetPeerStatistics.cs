@@ -18,12 +18,11 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-// Uncomment the line below to get statistics in RELEASE builds
-//#define USE_RELEASE_STATISTICS
-
 using System;
 using System.Text;
 using System.Diagnostics;
+using System.Collections.Generic;
+using Lidgren.Network.Language;
 
 namespace Lidgren.Network
 {
@@ -44,7 +43,7 @@ namespace Lidgren.Network
 		internal int m_sentBytes;
 		internal int m_receivedBytes;
 
-		internal long m_bytesAllocated;
+		internal long m_totalBytesAllocated;
 
 		internal NetPeerStatistics(NetPeer peer)
 		{
@@ -64,7 +63,7 @@ namespace Lidgren.Network
 			m_sentBytes = 0;
 			m_receivedBytes = 0;
 
-			m_bytesAllocated = 0;
+			m_totalBytesAllocated = 0;
 		}
 
 		/// <summary>
@@ -100,14 +99,13 @@ namespace Lidgren.Network
 		/// <summary>
 		/// Gets the number of bytes allocated (and possibly garbage collected) for message storage
 		/// </summary>
-		public long StorageBytesAllocated { get { return m_bytesAllocated; } }
+		public long StorageBytesAllocated { get { return m_totalBytesAllocated; } }
 
 		/// <summary>
 		/// Gets the number of bytes in the recycled pool
 		/// </summary>
 		public int BytesInRecyclePool { get { return m_peer.m_bytesInPool; } }
-
-#if USE_RELEASE_STATISTICS
+        
 		internal void PacketSent(int numBytes, int numMessages)
 		{
 			m_sentPackets++;
@@ -122,27 +120,23 @@ namespace Lidgren.Network
 			m_receivedMessages += numMessages;
 			m_receivedFragments += numFragments;
 		}
-#endif
 
         /// <summary>
         /// Builds and returns a string that represents this object.
         /// </summary>
         public override string ToString()
         {
+            ILibraryLanguage lang = LanguageManager.Current;
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"{m_peer.ConnectionsCount} connections");
 
-#if DEBUG || USE_RELEASE_STATISTICS
-            sb.AppendLine($"Sent {m_sentBytes} bytes in {m_sentMessages} messages in {m_sentPackets} packets");
-            sb.AppendLine($"Received {m_receivedBytes} bytes in {m_receivedMessages} messages ({m_receivedFragments} fragments) in {m_receivedPackets} packets");
-#else
-			bdr.AppendLine("Sent (n/a) bytes in (n/a) messages in (n/a) packets");
-			bdr.AppendLine("Received (n/a) bytes in (n/a) messages in (n/a) packets");
-#endif
+            sb.AppendFormatLine(lang["X_connections"], m_peer.ConnectionsCount);
+            sb.AppendFormatLine(lang["sent_X_bytes_X_messages_X_packets"], m_sentBytes, m_sentMessages, m_sentPackets);
+            sb.AppendFormatLine(lang["received_X_bytes_X_messages_X_fragments_X_packets"], m_receivedBytes, m_receivedMessages, m_receivedFragments, m_receivedPackets);
             sb.AppendLine();
-			sb.AppendLine($"Bytes in Pool: {m_peer.m_bytesInPool} bytes");
-            sb.AppendLine($"Memory Allocated over Lifetime: {m_bytesAllocated} bytes");
+            sb.AppendFormatLine(lang["bytesInPool_X"], BytesInRecyclePool);
+            sb.AppendFormatLine(lang["totalBytesAllocated_X"], m_totalBytesAllocated);
+
             return sb.ToString();
-		}
+        }
 	}
 }

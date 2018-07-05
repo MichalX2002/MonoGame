@@ -203,12 +203,12 @@
   </Target>
   <ItemGroup>
     <ProjectReference Include="..\ThirdParty\Lidgren.Network\Lidgren.Network.DesktopGL.csproj">
-      <Project>{AE483C29-042E-4226-BA52-D247CE7676DA}</Project>
-      <Name>Lidgren.Network.WindowsGL</Name>
+      <Project>{ae483c29-042e-4226-ba52-d247ce7676da}</Project>
+      <Name>Lidgren.Network.DesktopGL</Name>
     </ProjectReference>
     <ProjectReference Include="MonoGame.Framework.DesktopGL.csproj">
       <Project>{6D75E618-19CA-4C51-9546-F10965FBC0B8}</Project>
-      <Name>MonoGame.Framework.WindowsGL</Name>
+      <Name>MonoGame.Framework.DesktopGL</Name>
     </ProjectReference>
   </ItemGroup>
   <ProjectExtensions>

@@ -21,29 +21,27 @@ using System.Diagnostics;
 namespace Lidgren.Network
 {
 	public partial class NetPeer
-	{
-		internal void LogVerbose(string message)
+    {
+        [Conditional("DEBUG")]
+        internal void LogVerbose(string message)
 		{
 #if __ANDROID__
 			Android.Util.Log.WriteLine(Android.Util.LogPriority.Verbose, "", message);
 #endif
-
-#if DEBUG
+            
             if (m_configuration.IsMessageTypeEnabled(NetIncomingMessageType.VerboseDebugMessage))
 				ReleaseMessage(CreateIncomingMessage(NetIncomingMessageType.VerboseDebugMessage, message));
-#endif
         }
         
+        [Conditional("DEBUG")]
 		internal void LogDebug(string message)
 		{
 #if __ANDROID__
 			Android.Util.Log.WriteLine(Android.Util.LogPriority.Debug, "", message);
 #endif
-
-#if DEBUG
+            
 			if (m_configuration.IsMessageTypeEnabled(NetIncomingMessageType.DebugMessage))
 				ReleaseMessage(CreateIncomingMessage(NetIncomingMessageType.DebugMessage, message));
-#endif
 		}
 
 		internal void LogWarning(string message)

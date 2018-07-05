@@ -17,9 +17,6 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// Uncomment the line below to get statistics in RELEASE builds
-//#define USE_RELEASE_STATISTICS
-
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -98,8 +95,7 @@ namespace Lidgren.Network
 		public int ResentMessages { get { return m_resentMessagesDueToHole + m_resentMessagesDueToDelay; } }
 
 		// public double LastSendRespondedTo { get { return m_connection.m_lastSendRespondedTo; } }
-
-#if USE_RELEASE_STATISTICS || DEBUG
+        
 		internal void PacketSent(int numBytes, int numMessages)
 		{
 			NetException.Assert(numBytes > 0 && numMessages > 0);
@@ -124,23 +120,22 @@ namespace Lidgren.Network
 			else
 				m_resentMessagesDueToHole++;
 		}
-#endif
 
 		/// <summary>
 		/// Returns a string that represents this object
 		/// </summary>
 		public override string ToString()
 		{
-			StringBuilder bdr = new StringBuilder();
-			//bdr.AppendLine("Average roundtrip time: " + NetTime.ToReadable(m_connection.m_averageRoundtripTime));
-			bdr.AppendLine("Current MTU: " + m_connection.m_currentMTU);
-			bdr.AppendLine("Sent " + m_sentBytes + " bytes in " + m_sentMessages + " messages in " + m_sentPackets + " packets");
-			bdr.AppendLine("Received " + m_receivedBytes + " bytes in " + m_receivedMessages + " messages (of which " + m_receivedFragments + " fragments) in " + m_receivedPackets + " packets");
+			StringBuilder sb = new StringBuilder();
+			sb.AppendLine("Average Roundtrip Time: " + NetTime.ToReadable(m_connection.AverageRoundtripTime));
+			sb.AppendLine("Current MTU: " + m_connection.m_currentMTU);
+			sb.AppendLine("Sent " + m_sentBytes + " bytes in " + m_sentMessages + " messages in " + m_sentPackets + " packets");
+			sb.AppendLine("Received " + m_receivedBytes + " bytes in " + m_receivedMessages + " messages (of which " + m_receivedFragments + " fragments) in " + m_receivedPackets + " packets");
 
 			if (m_resentMessagesDueToDelay > 0)
-				bdr.AppendLine("Resent messages (delay): " + m_resentMessagesDueToDelay);
+				sb.AppendLine("Resent messages (delay): " + m_resentMessagesDueToDelay);
 			if (m_resentMessagesDueToHole > 0)
-				bdr.AppendLine("Resent messages (holes): " + m_resentMessagesDueToHole);
+				sb.AppendLine("Resent messages (holes): " + m_resentMessagesDueToHole);
 
 			int numUnsent = 0;
 			int numStored = 0;
@@ -171,11 +166,11 @@ namespace Lidgren.Network
 				}
 			}
 
-			bdr.AppendLine("Unsent messages: " + numUnsent);
-			bdr.AppendLine("Stored messages: " + numStored);
-			bdr.AppendLine("Withheld messages: " + numWithheld);
+			sb.AppendLine("Unsent messages: " + numUnsent);
+			sb.AppendLine("Stored messages: " + numStored);
+			sb.AppendLine("Withheld messages: " + numWithheld);
 
-			return bdr.ToString();
+			return sb.ToString();
 		}
 	}
 }
