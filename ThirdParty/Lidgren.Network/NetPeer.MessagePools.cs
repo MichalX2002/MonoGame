@@ -6,9 +6,9 @@ namespace Lidgren.Network
 {
 	public partial class NetPeer
 	{
-		public List<byte[]> m_storagePool; // sorted smallest to largest
-		public NetQueue<NetOutgoingMessage> m_outgoingMessagesPool;
-		public NetQueue<NetIncomingMessage> m_incomingMessagesPool;
+		internal List<byte[]> m_storagePool; // sorted smallest to largest
+		internal NetQueue<NetOutgoingMessage> m_outgoingMessagesPool;
+		internal NetQueue<NetIncomingMessage> m_incomingMessagesPool;
 
 		internal int m_bytesInPool;
 
