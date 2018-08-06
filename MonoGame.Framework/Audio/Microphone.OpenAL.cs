@@ -30,7 +30,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal void CheckALCError(string operation)
         {
-            AlcError error = Alc.GetError(_captureDevice);
+            AlcError error = Alc.GetErrorForDevice(_captureDevice);
 
             if (error == AlcError.NoError)
                 return;
@@ -50,14 +50,14 @@ namespace Microsoft.Xna.Framework.Audio
             else
                 _allMicrophones = new List<Microphone>();
 
-            Default = null;
+            _default = null;
 
             // default device
             string defaultDevice = Alc.GetString(IntPtr.Zero, AlcGetString.CaptureDefaultDeviceSpecifier);
 
 #if true //DESKTOPGL
             // enumarating capture devices
-            IntPtr deviceList = Alc.AlGetString(IntPtr.Zero, (int)AlcGetString.CaptureDeviceSpecifier);
+            IntPtr deviceList = Alc.alcGetString(IntPtr.Zero, (int)AlcGetString.CaptureDeviceSpecifier);
             // we need to marshal a string array
             string deviceIdentifier = Marshal.PtrToStringAnsi(deviceList);
             while (!String.IsNullOrEmpty(deviceIdentifier))
@@ -65,7 +65,7 @@ namespace Microsoft.Xna.Framework.Audio
                 Microphone microphone = new Microphone(deviceIdentifier);
                 _allMicrophones.Add(microphone);                
                 if (deviceIdentifier == defaultDevice)
-                    Default = microphone;
+                    _default = microphone;
                 deviceList += deviceIdentifier.Length + 1;
                 deviceIdentifier = Marshal.PtrToStringAnsi(deviceList);
             }
@@ -80,12 +80,12 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal void PlatformStart()
         {
-            if (State == MicrophoneState.Started)
+            if (_state == MicrophoneState.Started)
                 return;
 
             _captureDevice = Alc.CaptureOpenDevice(
                 Name,
-                (uint)SampleRate,
+                (uint)_sampleRate,
                 ALFormat.Mono16,
                 GetSampleSizeInBytes(_bufferDuration));
 
@@ -96,7 +96,7 @@ namespace Microsoft.Xna.Framework.Audio
                 Alc.CaptureStart(_captureDevice);
                 CheckALCError("Failed to start capture.");
 
-                State = MicrophoneState.Started;
+                _state = MicrophoneState.Started;
             }
 			else
             {
@@ -106,7 +106,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal void PlatformStop()
         {
-            if (State == MicrophoneState.Started)
+            if (_state == MicrophoneState.Started)
             {
                 Alc.CaptureStop(_captureDevice);
                 CheckALCError("Failed to stop capture.");
@@ -114,12 +114,12 @@ namespace Microsoft.Xna.Framework.Audio
                 CheckALCError("Failed to close capture device.");
                 _captureDevice = IntPtr.Zero;
             }
-            State = MicrophoneState.Stopped;
+            _state = MicrophoneState.Stopped;
         }
 
         internal int GetQueuedSampleCount()
         {
-            if (State == MicrophoneState.Stopped || BufferReady == null)
+            if (_state == MicrophoneState.Stopped || BufferReady == null)
                 return 0;
 
             int[] values = new int[1];
