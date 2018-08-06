@@ -3,13 +3,12 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class VertexBuffer : VertexBufferBase
     {
-        private readonly bool _isDynamic;
-        
 		public BufferUsage BufferUsage { get; private set; }
 		
 		protected VertexBuffer(GraphicsDevice graphicsDevice, VertexDeclaration vertexDeclaration, int vertexCount, BufferUsage bufferUsage, bool dynamic)
@@ -40,14 +39,6 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         /// <summary>
-        /// The GraphicsDevice is resetting, so GPU resources must be recreated.
-        /// </summary>
-        internal protected override void GraphicsDeviceResetting()
-        {
-            PlatformGraphicsDeviceResetting();
-        }
-
-        /// <summary>
         /// Get the vertex data froom this VertexBuffer.
         /// </summary>
         /// <typeparam name="T">The struct you want to fill.</typeparam>
@@ -71,7 +62,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// For vertexStride we pass the size of a <see cref="VertexPositionTexture"/>.
         /// </p>
         /// </remarks>
-        public void GetData<T> (int offsetInBytes, T[] data, int startIndex, int elementCount, int vertexStride = 0) where T : struct
+        public void GetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, int vertexStride = 0) where T : struct
         {
             var elementSizeInBytes = Utilities.ReflectionHelpers.SizeOf<T>.Get();
             if (vertexStride == 0)
@@ -96,7 +87,16 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new InvalidOperationException(
                     $"The {nameof(data)} array is not the correct size for the amount of data requested.");
 
-            PlatformGetData(offsetInBytes, data, startIndex, elementCount, vertexStride);
+            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            try
+            {
+                IntPtr ptr = handle.AddrOfPinnedObject();
+                PlatformGetData(offsetInBytes, ptr, startIndex, elementCount, elementSizeInBytes, vertexStride);
+            }
+            finally
+            {
+                handle.Free();
+            }
         }
 
         public void GetData<T>(T[] data, int startIndex, int elementCount) where T : struct
@@ -195,8 +195,8 @@ namespace Microsoft.Xna.Framework.Graphics
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
 
-            var elementSizeInBytes = Utilities.ReflectionHelpers.SizeOf<T>.Get();
-            var bufferSize = VertexCount * VertexDeclaration.VertexStride;
+            int elementSizeInBytes = Utilities.ReflectionHelpers.SizeOf<T>.Get();
+            int bufferSize = VertexCount * VertexDeclaration.VertexStride;
 
             if (vertexStride == 0)
                 vertexStride = elementSizeInBytes;
@@ -215,9 +215,18 @@ namespace Microsoft.Xna.Framework.Graphics
 
             if (vertexStride < elementSizeInBytes)
                 throw new ArgumentOutOfRangeException(
-                    $"The vertex stride must be greater than or equal to the size of the specified data ({elementSizeInBytes}).");            
+                    $"The vertex stride must be greater than or equal to the size of the specified data ({elementSizeInBytes}).");
 
-            PlatformSetDataInternal(offsetInBytes, data, startIndex, elementCount, vertexStride, options, bufferSize, elementSizeInBytes);
+            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            try
+            {
+                IntPtr ptr = handle.AddrOfPinnedObject();
+                PlatformSetData(offsetInBytes, ptr, startIndex, elementCount, elementSizeInBytes, vertexStride, options);
+            }
+            finally
+            {
+                handle.Free();
+            }
         }
     }
 }

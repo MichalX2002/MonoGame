@@ -1,9 +1,9 @@
-﻿using MonoGame.OpenGL;
-using System;
+﻿using System;
+using MonoGame.OpenGL;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    public partial class UnsafeVertexBuffer : VertexBufferBase
+    public abstract partial class UnsafeBufferBase : BufferBase
     {
         private long _lastBufferSize;
 

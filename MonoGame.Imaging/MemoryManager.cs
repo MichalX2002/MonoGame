@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MonoGame.Utilities.Collections;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
@@ -8,7 +9,7 @@ namespace MonoGame.Imaging
     {
         private readonly bool _clearOnDispose;
         
-        private Dictionary<IntPtr, Pointer> _pointers;
+        private QuickDictionary<IntPtr, Pointer> _pointers;
         private int _allocatedArrays;
         private List<byte[]> _arrayPool;
 
@@ -16,8 +17,8 @@ namespace MonoGame.Imaging
         public object SyncRoot { get; }
 
         /// <summary>
-        ///  Returns the size of the one pre-allocated array
-        ///  that was created by a constructor.
+        ///  Returns the size of the initial pre-allocated
+        ///  array that was created by a constructor.
         /// </summary>
         public int PreAllocSize { get; private set; }
 
@@ -71,9 +72,9 @@ namespace MonoGame.Imaging
             PreAllocSize = arrayPreAllocSize;
             _clearOnDispose = clearOnDispose;
 
-            _pointers = new Dictionary<IntPtr, Pointer>();
-
+            _pointers = new QuickDictionary<IntPtr, Pointer>();
             _arrayPool = new List<byte[]>();
+
             if (PreAllocSize > 0)
                 _arrayPool.Add(new byte[PreAllocSize]);
         }
@@ -87,7 +88,6 @@ namespace MonoGame.Imaging
         /// </param>
         public MemoryManager(bool clearOnDispose) : this(1024 * 64, clearOnDispose)
         {
-
         }
         
         /// <summary>
@@ -121,14 +121,14 @@ namespace MonoGame.Imaging
                 _allocatedArrays++;
 
                 for (int i = 0; i < _arrayPool.Count; i++)
+                {
                     if (_arrayPool[i].Length >= size)
                     {
                         byte[] pooledArray = _arrayPool[i];
                         _arrayPool.RemoveAt(i);
                         return pooledArray;
                     }
-
-                Console.WriteLine("New array: " + size);
+                }
                 
                 LifetimeAllocatedArrays++;
                 return new byte[size];
@@ -141,7 +141,7 @@ namespace MonoGame.Imaging
             {
                 if (_allocatedArrays == 0)
                     throw new InvalidOperationException(
-                        $"This {nameof(MemoryManager)} cannot free more arrays than itself allocated.");
+                        $"This {nameof(MemoryManager)} cannot free more arrays than it allocated.");
 
                 _allocatedArrays--;
 
@@ -201,10 +201,8 @@ namespace MonoGame.Imaging
 
         private unsafe void Remove(void* p)
         {
-            IntPtr key = (IntPtr)p;
-            if (_pointers.TryGetValue(key, out Pointer value))
+            if (_pointers.TryRemove((IntPtr)p, out Pointer value))
             {
-                _pointers.Remove(key);
                 value.Dispose();
             }
         }

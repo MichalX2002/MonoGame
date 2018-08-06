@@ -534,7 +534,6 @@ namespace Microsoft.Xna.Framework.Graphics
             item.SortKey = GetSortKey(texture, 0);
 
             Vector2 size;
-
             if (sourceRectangle.HasValue)
             {
                 var srcRect = sourceRectangle.GetValueOrDefault();

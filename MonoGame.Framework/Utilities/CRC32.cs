@@ -8,7 +8,7 @@ namespace MonoGame.Utilities
     ///   can set the polynomial and enable or disable bit
     ///   reversal. This can be used for GZIP, BZip2, or ZIP.
     /// </summary>
-    public class CRC32
+    public class Crc32
     {
         // private members
         private readonly uint _dwPolynomial;
@@ -95,7 +95,7 @@ namespace MonoGame.Utilities
         }
 
         /// <summary>
-        /// Update the value for the running <see cref="CRC32"/>
+        /// Update the value for the running <see cref="Crc32"/>
         /// using the block of bytes.
         /// </summary>
         /// <param name="block">block of bytes to slurp</param>
@@ -356,7 +356,7 @@ namespace MonoGame.Utilities
         ///   Create an instance of the CRC32 class using the default settings: no
         ///   bit reversal, and a polynomial of 0xEDB88320.
         /// </summary>
-        public CRC32() : this(false)
+        public Crc32() : this(false)
         {
         }
 
@@ -376,7 +376,7 @@ namespace MonoGame.Utilities
         ///     those, you should pass false.
         ///   </para>
         /// </remarks>
-        public CRC32(bool reverseBits) : this(unchecked((int)0xEDB88320), reverseBits)
+        public Crc32(bool reverseBits) : this(unchecked((int)0xEDB88320), reverseBits)
         {
         }
 
@@ -406,7 +406,7 @@ namespace MonoGame.Utilities
         ///     <c>reverseBits</c> parameter.
         ///   </para>
         /// </remarks>
-        public CRC32(int polynomial, bool reverseBits)
+        public Crc32(int polynomial, bool reverseBits)
         {
             this._reverseBits = reverseBits;
             this._dwPolynomial = (uint)polynomial;
@@ -414,7 +414,7 @@ namespace MonoGame.Utilities
         }
 
         /// <summary>
-        /// Reset this <see cref="CRC32"/> instance by
+        /// Reset this <see cref="Crc32"/> instance by
         /// clearing the CRC "remainder register."
         /// </summary>
         /// <remarks>

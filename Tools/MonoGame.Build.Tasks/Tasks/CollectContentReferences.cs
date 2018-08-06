@@ -11,7 +11,7 @@ namespace MonoGame.Build.Tasks
 {
     public static class StringExt
     {
-        public static string NormalisePath(this string path)
+        public static string NormalizePath(this string path)
         {
             return path.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
         }
@@ -33,9 +33,9 @@ namespace MonoGame.Build.Tasks
             var output = new List<ITaskItem>();
             foreach (var content in ContentReferences)
             {
-                var relative = content.GetMetadata("RelativeDir").NormalisePath();
-                var fp = content.GetMetadata("FullPath").NormalisePath();
-                var link = content.GetMetadata("Link").NormalisePath();
+                var relative = content.GetMetadata("RelativeDir").NormalizePath();
+                var fp = content.GetMetadata("FullPath").NormalizePath();
+                var link = content.GetMetadata("Link").NormalizePath();
                 var metaData = new Dictionary<string, string>();
                 var contentFolder = String.Empty;
                 if (!string.IsNullOrEmpty(link))

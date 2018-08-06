@@ -92,7 +92,7 @@ namespace Microsoft.Xna.Framework.Content
 				else
                 {
                     var readerType = input.Read7BitEncodedInt();
-                    key = readerType > 0 ? input.ReadObject<TKey>(input.TypeReaders[readerType - 1]) : default(TKey);
+                    key = readerType > 0 ? input.ReadObject<TKey>(input.TypeReaders[readerType - 1]) : default;
                 }
 
                 if (ReflectionHelpers.IsValueType(valueType))
@@ -102,7 +102,7 @@ namespace Microsoft.Xna.Framework.Content
 				else
                 {
                     var readerType = input.Read7BitEncodedInt();
-                    value = readerType > 0 ? input.ReadObject<TValue>(input.TypeReaders[readerType - 1]) : default(TValue);
+                    value = readerType > 0 ? input.ReadObject<TValue>(input.TypeReaders[readerType - 1]) : default;
                 }
 
                 dictionary.Add(key, value);

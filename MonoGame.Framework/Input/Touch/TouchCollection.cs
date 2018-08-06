@@ -59,7 +59,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
                 }
             }
 
-            touchLocation = default(TouchLocation);
+            touchLocation = default;
             return false;
 		}
 

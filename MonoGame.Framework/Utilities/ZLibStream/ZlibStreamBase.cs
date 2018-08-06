@@ -21,7 +21,7 @@ namespace MonoGame.Utilities
         protected internal CompressionStrategy Strategy = CompressionStrategy.Default;
 
         // workitem 7159
-        private CRC32 crc;
+        private Crc32 crc;
         protected internal string _GzipFileName;
         protected internal string _GzipComment;
         protected internal DateTime _GzipMtime;
@@ -46,7 +46,7 @@ namespace MonoGame.Utilities
             // workitem 7159
             if (flavor == ZlibStreamFlavor.GZIP)
             {
-                this.crc = new CRC32();
+                this.crc = new Crc32();
             }
         }
 

@@ -225,7 +225,7 @@ namespace Microsoft.Xna.Framework.Content
                 throw new ObjectDisposedException(nameof(ContentManager));
             }
 
-            T result = default(T);
+            T result = default;
             
             // On some platforms, name and slash direction matter.
             // We store the asset by a /-seperating key rather than how the

@@ -7,6 +7,8 @@ namespace Microsoft.Xna.Framework.Graphics
     {
         public static readonly VertexDeclaration VertexDeclaration;
 
+        VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
+
         public Vector3 Position;
         public Color Color;
         public Vector2 TextureCoordinate;
@@ -27,8 +29,6 @@ namespace Microsoft.Xna.Framework.Graphics
             Color = color;
             TextureCoordinate = textureCoordinate;
         }
-		
-        VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
 
         public override int GetHashCode()
         {

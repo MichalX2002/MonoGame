@@ -77,6 +77,14 @@
     <Compile Include="Graphics\SpriteBatchE.cs" />
     <Compile Include="Graphics\SpriteBatcherE.cs" />
     <Compile Include="Graphics\SpriteBatchItemE.cs" />
+    <Compile Include="Graphics\Vertices\BufferBase.cs" />
+    <Compile Include="Graphics\Vertices\IndexBufferBase.cs" />
+    <Compile Include="Graphics\Vertices\IndexBufferBase.DirectX.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeDynamicIndexBuffer.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeDynamicVertexBuffer.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeIndexBuffer.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeVertexBuffer.cs" />
+    <Compile Include="Graphics\Vertices\VertexBufferBase.cs" />
     <Compile Include="Math\BoundingBox.cs" />
     <Compile Include="Math\BoundingFrustum.cs" />
     <Compile Include="Math\BoundingSphere.cs" />
@@ -489,9 +497,6 @@
       <Services>DirectXGraphics</Services>
     </Compile>
     <Compile Include="Graphics\Vertices\IndexBuffer.cs" />
-    <Compile Include="Graphics\Vertices\IndexBuffer.DirectX.cs">
-      <Services>DirectXGraphics</Services>
-    </Compile>
     <Compile Include="Graphics\Vertices\IndexElementSize.cs" />
     <Compile Include="Graphics\Vertices\InputLayoutCache.cs">
       <Services>DirectXGraphics</Services>
@@ -499,9 +504,6 @@
     <Compile Include="Graphics\Vertices\IVertexType.cs" />
     <Compile Include="Graphics\Vertices\PrimitiveType.cs" />
     <Compile Include="Graphics\Vertices\VertexBuffer.cs" />
-    <Compile Include="Graphics\Vertices\VertexBuffer.DirectX.cs">
-      <Services>DirectXGraphics</Services>
-    </Compile>
     <Compile Include="Graphics\Vertices\VertexBufferBinding.cs" />
     <Compile Include="Graphics\Vertices\VertexBufferBindings.cs" />
     <Compile Include="Graphics\Vertices\VertexBufferBindings.DirectX.cs">
@@ -667,7 +669,9 @@
       <Name>MonoGame.Imaging</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="Graphics\Vertices\VertexBufferBase.DirectX.cs" />
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Graphics\Effect\Resources\AlphaTestEffect.dx11.mgfxo">
       <Services>DirectXGraphics</Services>

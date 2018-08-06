@@ -3,21 +3,16 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class IndexBuffer : IndexBufferBase
     {
-        private readonly bool _isDynamic;
-
         public BufferUsage BufferUsage { get; private set; }
 
-        protected IndexBuffer(GraphicsDevice graphicsDevice, Type indexType, int indexCount, BufferUsage usage, bool dynamic)
-         : this(graphicsDevice, SizeForType(graphicsDevice, indexType), indexCount, usage, dynamic)
-        {
-        }
-
-		protected IndexBuffer(GraphicsDevice graphicsDevice, IndexElementSize indexElementSize, int indexCount, BufferUsage usage, bool dynamic)
+        protected IndexBuffer(
+            GraphicsDevice graphicsDevice, IndexElementSize indexElementSize, int indexCount, BufferUsage usage, bool dynamic)
         {
             this.GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
                 nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
@@ -28,8 +23,14 @@ namespace Microsoft.Xna.Framework.Graphics
 			
             _isDynamic = dynamic;
 
-            PlatformConstruct(indexElementSize, indexCount);
+            PlatformConstruct();
 		}
+
+        protected IndexBuffer(GraphicsDevice graphicsDevice, Type indexType, int indexCount, BufferUsage usage, bool dynamic)
+         : this(graphicsDevice, SizeForType(graphicsDevice, indexType), indexCount, usage, dynamic)
+        {
+        }
+        
 
 		public IndexBuffer(GraphicsDevice graphicsDevice, IndexElementSize indexElementSize, int indexCount, BufferUsage bufferUsage) :
 			this(graphicsDevice, indexElementSize, indexCount, bufferUsage, false)
@@ -61,18 +62,11 @@ namespace Microsoft.Xna.Framework.Graphics
                     return IndexElementSize.ThirtyTwoBits;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(type), "Index buffers can only be created for types that are sixteen or thirty two bits in length.");
+                    throw new ArgumentOutOfRangeException(
+                        nameof(type), "Index buffers can only be created for types that are sixteen or thirty two bits in length.");
             }
         }
-
-        /// <summary>
-        /// The <see cref="GraphicsDevice"/> is resetting, so GPU resources must be recreated.
-        /// </summary>
-        internal protected override void GraphicsDeviceResetting()
-        {
-            PlatformGraphicsDeviceResetting();
-        }
-
+        
         public void GetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount) where T : struct
         {
             if (data == null)
@@ -87,7 +81,16 @@ namespace Microsoft.Xna.Framework.Graphics
                     $"This {nameof(IndexBuffer)} was created with a usage type of {BufferUsage.WriteOnly}. " +
                     $"Calling {nameof(GetData)} on a resource that was created with {BufferUsage.WriteOnly} is not supported.");
 
-            PlatformGetData(offsetInBytes, data, startIndex, elementCount);
+            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            try
+            {
+                IntPtr ptr = handle.AddrOfPinnedObject();
+                PlatformGetData(offsetInBytes, ptr, startIndex, elementCount);
+            }
+            finally
+            {
+                handle.Free();
+            }
         }
 
         public void GetData<T>(T[] data, int startIndex, int elementCount) where T : struct
@@ -115,7 +118,8 @@ namespace Microsoft.Xna.Framework.Graphics
             SetDataInternal(0, data, 0, data.Length, SetDataOptions.None);
         }
 
-        protected void SetDataInternal<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, SetDataOptions options) where T : struct
+        protected void SetDataInternal<T>(
+            int offsetInBytes, T[] data, int startIndex, int elementCount, SetDataOptions options) where T : struct
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
@@ -124,7 +128,16 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new InvalidOperationException(
                     $"The array specified in the {nameof(data)} parameter is not the correct size for the amount of data requested.");
 
-            PlatformSetDataInternal(offsetInBytes, data, startIndex, elementCount, options);
+            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            try
+            {
+                IntPtr ptr = handle.AddrOfPinnedObject();
+                PlatformSetData(offsetInBytes, ptr, startIndex, elementCount, options);
+            }
+            finally
+            {
+                handle.Free();
+            }
         }
 	}
 }

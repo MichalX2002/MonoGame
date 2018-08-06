@@ -56,6 +56,9 @@
     <Compile Include="Encryption\NetTripleDESEncryption.cs" />
     <Compile Include="Encryption\NetXorEncryption.cs" />
     <Compile Include="Encryption\NetXteaEncryption.cs" />
+    <Compile Include="Language\ILibraryLanguage.cs" />
+    <Compile Include="Language\LanguageManager.cs" />
+    <Compile Include="Language\StringBuilderExtensions.cs" />
     <Compile Include="NamespaceDoc.cs" />
     <Compile Include="NetBigInteger.cs" />
     <Compile Include="NetBitVector.cs" />

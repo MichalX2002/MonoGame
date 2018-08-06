@@ -4,7 +4,7 @@ using System.IO;
 namespace MonoGame.Utilities
 {
     /// <summary>
-    /// A stream that calculates a <see cref="CRC32"/> (a checksum)
+    /// A stream that calculates a <see cref="Crc32"/> (a checksum)
     /// on all bytes read or on all bytes written.
     /// </summary>
     ///
@@ -20,7 +20,7 @@ namespace MonoGame.Utilities
         private readonly long _lengthLimit = UnsetLengthLimit;
 
         private Stream _innerStream;
-        private CRC32 _crc32;
+        private Crc32 _crc32;
 
         /// <summary>
         /// Gets the total number of bytes run through the CRC32 calculator.
@@ -177,10 +177,10 @@ namespace MonoGame.Utilities
         /// <summary>
         /// A constructor allowing the specification of the length of the stream
         /// to read, as well as whether to keep the underlying stream open upon
-        /// <see cref="Stream.Close"/>, and the <see cref="CRC32"/> instance to use.
+        /// <see cref="Stream.Close"/>, and the <see cref="Crc32"/> instance to use.
         /// </summary>
         /// <remarks>
-        /// The stream uses the specified <see cref="CRC32"/> instance, which allows the
+        /// The stream uses the specified <see cref="Crc32"/> instance, which allows the
         /// application to specify how the CRC gets calculated.
         /// </remarks>
         /// <param name="stream">The underlying stream</param>
@@ -188,7 +188,7 @@ namespace MonoGame.Utilities
         /// <param name="leaveOpen">true to leave the underlying stream
         /// open upon close of the <see cref="CrcCalculatorStream"/>; false otherwise.</param>
         /// <param name="crc32">the CRC32 instance to use to calculate the CRC32</param>
-        public CrcCalculatorStream(Stream stream, Int64 length, bool leaveOpen, CRC32 crc32)
+        public CrcCalculatorStream(Stream stream, Int64 length, bool leaveOpen, Crc32 crc32)
             : this(leaveOpen, length, stream, crc32)
         {
             if (length < 0)
@@ -202,10 +202,10 @@ namespace MonoGame.Utilities
         // explicit param, otherwise we don't validate, because it could be our special
         // value.
         private CrcCalculatorStream
-            (bool leaveOpen, Int64 length, Stream stream, CRC32 crc32) : base()
+            (bool leaveOpen, Int64 length, Stream stream, Crc32 crc32) : base()
         {
             _innerStream = stream;
-            _crc32 = crc32 ?? new CRC32();
+            _crc32 = crc32 ?? new Crc32();
             _lengthLimit = length;
             LeaveOpen = leaveOpen;
         }

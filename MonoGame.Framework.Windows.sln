@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pipeline.Windows", "Tools\P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Imaging", "MonoGame.Imaging\MonoGame.Imaging.csproj", "{B2B538A9-AD83-4484-A908-698503F4652F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Utilities", "MonoGame.Utilities\MonoGame.Utilities.csproj", "{DE48723F-D255-49F6-8372-AEF8B059D5E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{B2B538A9-AD83-4484-A908-698503F4652F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2B538A9-AD83-4484-A908-698503F4652F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2B538A9-AD83-4484-A908-698503F4652F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE48723F-D255-49F6-8372-AEF8B059D5E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE48723F-D255-49F6-8372-AEF8B059D5E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE48723F-D255-49F6-8372-AEF8B059D5E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE48723F-D255-49F6-8372-AEF8B059D5E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

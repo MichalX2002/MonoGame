@@ -109,7 +109,7 @@ namespace MonoGame.Imaging.Tests
                         {
                             //Console.WriteLine("Saving " + img.PointerLength + " bytes...");
 
-                            FileInfo outputInfo = new FileInfo(name);
+                            FileInfo outputInfo = new FileInfo("testoutput/" + name);
                             outputInfo.Directory.Create();
 
                             using (var fs = new FileStream(outputInfo.FullName, FileMode.Create))

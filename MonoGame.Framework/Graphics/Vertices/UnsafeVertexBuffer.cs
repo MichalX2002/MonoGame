@@ -4,8 +4,6 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class UnsafeVertexBuffer : VertexBufferBase
     {
-        private readonly bool _isDynamic;
-        
         public BufferUsage BufferUsage { get; private set; }
 
         protected UnsafeVertexBuffer(GraphicsDevice graphicsDevice, VertexDeclaration vertexDeclaration, BufferUsage bufferUsage, bool dynamic)
@@ -34,30 +32,30 @@ namespace Microsoft.Xna.Framework.Graphics
         {
         }
 
-        /// <summary>
-        /// The GraphicsDevice is resetting, so GPU resources must be recreated.
-        /// </summary>
-        internal protected override void GraphicsDeviceResetting()
+        public void GetData(IntPtr buffer, int startIndex, int elementCount)
         {
-            PlatformGraphicsDeviceResetting();
+            int stride = VertexDeclaration.VertexStride;
+            GetData(buffer, startIndex, elementCount, stride);
         }
-        
+
         public void GetData(IntPtr buffer, int startIndex, int elementCount, int vertexStride)
         {
-            PlatformGetData(buffer, startIndex, elementCount, vertexStride);
+            int stride = VertexDeclaration.VertexStride;
+            PlatformGetData(0, buffer, startIndex, elementCount, stride, vertexStride);
         }
 
         public void SetData(IntPtr data, int elementCount)
         {
-            SetData(data, elementCount, VertexDeclaration.VertexStride);
+            int stride = VertexDeclaration.VertexStride;
+            SetData(data, elementCount, stride);
         }
 
         public void SetData(IntPtr data, int elementCount, int elementSize)
         {
             int stride = VertexDeclaration.VertexStride;
             SetData(data, 0, elementCount, elementSize, stride, SetDataOptions.Discard);
-        }   
-        
+        }
+
         public void SetData(IntPtr data, int startIndex, int elementCount, int elementSize, int vertexStride, SetDataOptions options)
         {
             if (elementSize < vertexStride)
@@ -67,7 +65,16 @@ namespace Microsoft.Xna.Framework.Graphics
             if (elementCount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(elementCount), $"Cannot upload zero elements.");
 
-            PlatformSetData(data, startIndex, elementCount, elementSize, vertexStride, options);
+            VertexCount = elementCount;
+            try
+            {
+                PlatformSetData(0, data, startIndex, elementCount, elementSize, vertexStride, options);
+            }
+            catch
+            {
+                VertexCount = 0;
+                throw;
+            }
         }
     }
 }

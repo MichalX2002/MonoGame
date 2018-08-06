@@ -50,7 +50,7 @@ namespace Microsoft.Xna.Framework.Content
                     if (readerType > 0)
                         value = input.ReadObject<T>(input.TypeReaders[readerType - 1]);
                     else
-                        value = default(T);
+                        value = default;
                 }
 
                 CalcIndices(array, i, indices);

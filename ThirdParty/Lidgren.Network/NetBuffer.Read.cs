@@ -127,13 +127,31 @@ namespace Lidgren.Network
 			return;
 		}
 
-		/// <summary>
-		/// Reads the specified number of bits into a preallocated array
-		/// </summary>
-		/// <param name="into">The destination array</param>
-		/// <param name="offset">The offset where to start writing in the destination array</param>
-		/// <param name="numberOfBits">The number of bits to read</param>
-		public void ReadBits(byte[] into, int offset, int numberOfBits)
+        /// <summary>
+        /// Reads a block of bytes from the stream and writes the data in a given buffer.
+        /// </summary>
+        /// <param name="buffer">The destination buffer.</param>
+        /// <param name="offset">The offset where to start writing in the destination buffer.</param>
+        /// <param name="count">The number of bytes to read.</param>
+		public int Read(byte[] buffer, int offset, int count)
+        {
+            NetException.Assert(offset + count <= buffer.Length);
+
+            int bitsToRead = Math.Min((m_bitLength - m_readPosition + 7), count * 8);
+            int bytesToRead = bitsToRead / 8;
+
+            NetBitWriter.ReadBytes(m_data, bytesToRead, m_readPosition, buffer, offset);
+            m_readPosition += bitsToRead;
+            return bytesToRead;
+        }
+
+        /// <summary>
+        /// Reads the specified number of bits into a preallocated array
+        /// </summary>
+        /// <param name="into">The destination array</param>
+        /// <param name="offset">The offset where to start writing in the destination array</param>
+        /// <param name="numberOfBits">The number of bits to read</param>
+        public void ReadBits(byte[] into, int offset, int numberOfBits)
 		{
 			NetException.Assert(m_bitLength - m_readPosition >= numberOfBits, c_readOverflowError);
 			NetException.Assert(offset + NetUtility.BytesNeededToHoldBits(numberOfBits) <= into.Length);

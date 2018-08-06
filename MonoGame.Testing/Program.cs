@@ -36,11 +36,11 @@ namespace MonoGame.Testing
 
                 _batch = new SpriteBatch(GraphicsDevice);
 
-                _textures = new Texture2D[8];
+                _textures = new Texture2D[40];
                 for (int i = 0; i < _textures.Length; i++)
                 {
                     _textures [i] = new Texture2D(GraphicsDevice, 2, 2);
-                    Color c = new Color(127, (int)(255 * (i + 1) / _textures.Length), 127) //(uint)(uint.MaxValue * r.NextDouble()))
+                    Color c = new Color(127, 255 * (i + 1) / _textures.Length, 127) //(uint)(uint.MaxValue * r.NextDouble()))
                     {
                         A = 255
                     };
@@ -60,53 +60,68 @@ namespace MonoGame.Testing
                     Exit();
 
                 GraphicsDevice.Clear(Color.CornflowerBlue);
-
-                int drawCount = 30000;
-
+                
                 int size = 16;
                 int offset = size + 8;
                 Rectangle rect = new Rectangle(10, 10, size, size);
+                
+                _batch.Begin();
 
+                for (int i = 0; i < 10000; i++)
+                {
+                    _batch.Draw(_textures[_textures.Length - 1], new Rectangle(i * 32 + 16, 16, 32, 32), new Color(i * 16, 127, 127));
+                }
+
+                _batch.End();
+
+                /*
+                watch.Restart();
                 for (int t = 0; t < _textures.Length; t++)
                 {
                     Texture2D tex = _textures[t];
 
-                    _batch.Begin(SpriteSortMode.Texture);
-                    for (int x = 0; x < 32; x++)
+                    //for (int x = 0; x < 1; x++)
+                    //{
+                    for (int yy = 0; yy < 1000; yy++)
                     {
-                        watch.Restart();
-
-                        _batch.Draw(tex, rect, Color.White);
-
-                        rect.X += offset;
-                        watch.Stop();
-                        timings.Add(watch.Elapsed.TotalMilliseconds);
+                        //float dep = (float)r.NextDouble();
+                        _batch.Draw(texture: tex, destinationRectangle: rect, color: Color.White, layerDepth: 0);
                     }
-                    
-                    watch.Restart();
-                    _batch.End();
-                    watch.Stop();
-                    endTimings.Add(watch.Elapsed.TotalMilliseconds);
 
-                    rect.X = 10;
-                    rect.Y += offset;
+                        //rect.X += offset;
+                    //}
+
+                    //rect.X = 10;
+                    //rect.Y += offset;
                 }
+                watch.Stop();
+                timings.Add(watch.Elapsed.TotalMilliseconds);
+
+                watch.Restart();
+                _batch.End();
+                watch.Stop();
+                endTimings.Add(watch.Elapsed.TotalMilliseconds);
 
                 if (timings.Count > 60)
                 {
-                    Console.WriteLine("SpriteBatch : " + Math.Round(timings.Average(), 2).ToString("N2") + "ms");
-                    Console.WriteLine("SpriteBatch  Flush: " + Math.Round(endTimings.Average(), 2).ToString("N2") + "ms");
+                    string draw = Math.Round(timings.Average(), 4).ToString("N4");
+                    string flush = Math.Round(endTimings.Average(), 4).ToString("N4");
+
+                    Console.WriteLine($"Draw {draw}ms | Flush: {flush}ms");
 
                     timings.Clear();
                     endTimings.Clear();
                 }
+                */
+
+                Console.WriteLine(GraphicsDevice.Metrics.SpriteCount);
 
                 base.Draw(gameTime);
             }
         }
 
         static void Main(string[] args)
-        {
+        {   
             using (var frame = new GameFrame())
                 frame.Run();
         }

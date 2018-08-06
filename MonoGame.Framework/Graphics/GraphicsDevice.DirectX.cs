@@ -1239,7 +1239,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 if (_indexBuffer != null)
                 {
                     _d3dContext.InputAssembler.SetIndexBuffer(
-                        _indexBuffer.Buffer,
+                        _indexBuffer._buffer,
                         _indexBuffer.IndexElementSize == IndexElementSize.SixteenBits ?
                             SharpDX.DXGI.Format.R16_UInt : SharpDX.DXGI.Format.R32_UInt,
                         0);
@@ -1259,7 +1259,7 @@ namespace Microsoft.Xna.Framework.Graphics
                         int vertexStride = vertexDeclaration.VertexStride;
                         int vertexOffsetInBytes = vertexBufferBinding.VertexOffset * vertexStride;
                         _d3dContext.InputAssembler.SetVertexBuffers(
-                            slot, new SharpDX.Direct3D11.VertexBufferBinding(vertexBuffer.Buffer, vertexStride, vertexOffsetInBytes));
+                            slot, new SharpDX.Direct3D11.VertexBufferBinding(vertexBuffer._buffer, vertexStride, vertexOffsetInBytes));
                     }
                     _vertexBufferSlotsUsed = _vertexBuffers.Count;
                 }
@@ -1326,7 +1326,6 @@ namespace Microsoft.Xna.Framework.Graphics
             }
 
             int startVertex = buffer.UserOffset;
-            
             if ((vertexCount + buffer.UserOffset) < buffer.VertexCount)
             {
                 buffer.UserOffset += vertexCount;
@@ -1344,8 +1343,7 @@ namespace Microsoft.Xna.Framework.Graphics
             return startVertex;
         }
 
-        private int SetUserIndexBuffer<T>(T[] indexData, int indexOffset, int indexCount)
-            where T : struct
+        private int SetUserIndexBuffer<T>(T[] indexData, int indexOffset, int indexCount) where T : struct
         {
             DynamicIndexBuffer buffer;
 
@@ -1431,6 +1429,21 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
                 _d3dContext.Draw(vertexCount, vertexStart);
+            }
+        }
+
+        private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, ushort[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
+        {
+            var indexCount = GetElementCountArray(primitiveType, primitiveCount);
+            var startVertex = SetUserVertexBuffer(vertexData, vertexOffset, numVertices, vertexDeclaration);
+            var startIndex = SetUserIndexBuffer(indexData, indexOffset, indexCount);
+
+            lock (_d3dContext)
+            {
+                ApplyState(true);
+
+                _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
+                _d3dContext.DrawIndexed(indexCount, startIndex, startVertex);
             }
         }
 

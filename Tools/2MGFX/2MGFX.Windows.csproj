@@ -31,9 +31,10 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
     <DebugType>none</DebugType>
-    <OutputPath>bin\Windows\AnyCPU\Release</OutputPath>
+    <OutputPath>C:\Program Files %28x86%29\MSBuild\MonoGame\Tools\</OutputPath>
     <IntermediateOutputPath>obj\Windows\AnyCPU\Release</IntermediateOutputPath>
-    <DocumentationFile>bin\Windows\AnyCPU\Release\2MGFX.xml</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <DefineConstants>TRACE;WINDOWS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -227,9 +228,7 @@
     <Compile Include="TPGParser\TechniqueInfo.cs" />
     <Compile Include="Preprocessor.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="MonoGame.Framework\Math\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="app.config" />
     <None Include="TPGParser\MGFX.tpg" />

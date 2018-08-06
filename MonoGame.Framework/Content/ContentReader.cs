@@ -100,7 +100,7 @@ namespace Microsoft.Xna.Framework.Content
                 return ContentManager.Load<T>(FileHelpers.ResolveRelativePath(assetName, externalReference));
             }
 
-            return default(T);
+            return default;
         }
 
         public Matrix ReadMatrix()
@@ -203,7 +203,7 @@ namespace Microsoft.Xna.Framework.Content
 
         public T ReadRawObject<T>(ContentTypeReader typeReader)
         {
-            return ReadRawObject<T>(typeReader, default(T));
+            return ReadRawObject<T>(typeReader, default);
         }
 
         public T ReadRawObject<T>(T existingInstance)

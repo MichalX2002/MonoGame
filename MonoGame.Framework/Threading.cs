@@ -19,7 +19,7 @@ namespace Microsoft.Xna.Framework
 {
     internal class Threading
     {
-        public const int kMaxWaitForUIThread = 750; // In milliseconds
+        public const int MaxWaitForUIThread = 750; // In milliseconds
 
         private static int mainThreadId;
 
@@ -102,7 +102,8 @@ namespace Microsoft.Xna.Framework
                 action();
                 resetEvent.Set();
             });
-            resetEvent.Wait();
+            if (resetEvent.Wait(MaxWaitForUIThread) == false)
+                throw new TimeoutException();
 #endif
 #endif
         }
@@ -117,7 +118,7 @@ namespace Microsoft.Xna.Framework
         }
 
         /// <summary>
-        /// Runs all pending actions.  Must be called from the UI thread.
+        /// Runs all pending actions. Must be called from the UI thread.
         /// </summary>
         internal static void Run()
         {

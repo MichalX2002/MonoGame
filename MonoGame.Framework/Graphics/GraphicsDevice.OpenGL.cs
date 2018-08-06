@@ -191,12 +191,12 @@ namespace Microsoft.Xna.Framework.Graphics
                     _bufferBindingInfos[slot].VertexOffset == offset &&
                     ReferenceEquals(_bufferBindingInfos[slot].AttributeInfo, attrInfo) &&
                     _bufferBindingInfos[slot].InstanceFrequency == vertexBufferBinding.InstanceFrequency &&
-                    _bufferBindingInfos[slot].Vbo == vertexBufferBinding.VertexBuffer.VBO)
+                    _bufferBindingInfos[slot].Vbo == vertexBufferBinding.VertexBuffer._vbo)
                     continue;
 
                 bindingsChanged = true;
 
-                GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferBinding.VertexBuffer.VBO);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferBinding.VertexBuffer._vbo);
                 GraphicsExtensions.CheckGLError();
 
                 // If instancing is not supported, but InstanceFrequency of the buffer is not zero, throw an exception
@@ -225,7 +225,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 _bufferBindingInfos[slot].VertexOffset = offset;
                 _bufferBindingInfos[slot].AttributeInfo = attrInfo;
                 _bufferBindingInfos[slot].InstanceFrequency = vertexBufferBinding.InstanceFrequency;
-                _bufferBindingInfos[slot].Vbo = vertexBufferBinding.VertexBuffer.VBO;
+                _bufferBindingInfos[slot].Vbo = vertexBufferBinding.VertexBuffer._vbo;
             }
 
             _attribsDirty = false;
@@ -1005,7 +1005,7 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 if (_indexBuffer != null)
                 {
-                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer._ibo);
+                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer._vbo);
                     GraphicsExtensions.CheckGLError();
                 }
                 _indexBufferDirty = false;

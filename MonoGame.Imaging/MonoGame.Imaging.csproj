@@ -16,4 +16,8 @@
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
+  </ItemGroup>
+
 </Project>

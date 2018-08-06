@@ -11,8 +11,6 @@ namespace Microsoft.Xna.Framework.Graphics
     /// </summary>
     public partial struct VertexElement : IEquatable<VertexElement>
     {
-        private int _usageIndex;
-
         /// <summary>
         /// Gets or sets the offset in bytes from the beginning of the stream to the vertex element.
         /// </summary>
@@ -44,11 +42,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// MonoGame internally adjusts the usage indices based on the order in which the vertex
         /// buffers are bound.
         /// </remarks>
-        public int UsageIndex
-        {
-            get { return _usageIndex; }
-            set { _usageIndex = value; }
-        }
+        public int UsageIndex { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VertexElement"/> struct.
@@ -61,7 +55,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             Offset = offset;
             VertexElementFormat = elementFormat;
-            _usageIndex = usageIndex;
+            UsageIndex = usageIndex;
             VertexElementUsage = elementUsage;
         }
 
@@ -87,7 +81,7 @@ namespace Microsoft.Xna.Framework.Graphics
             int hashCode = Offset;
             hashCode ^= (int)VertexElementFormat << 9;
             hashCode ^= (int)VertexElementUsage << (9 + 4);
-            hashCode ^= _usageIndex << (9 + 4 + 4);
+            hashCode ^= UsageIndex << (9 + 4 + 4);
             return hashCode;
             // ReSharper restore NonReadonlyMemberInGetHashCode
         }
@@ -98,7 +92,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <returns>A <see cref="string" /> that represents this instance.</returns>
         public override string ToString()
         {
-            return "{Offset:" + Offset + " Format:" + VertexElementFormat + " Usage:" + VertexElementUsage + " UsageIndex: " + _usageIndex + "}";
+            return "{Offset:" + Offset + " Format:" + VertexElementFormat + " Usage:" + VertexElementUsage + " UsageIndex: " + UsageIndex + "}";
         }
 
         /// <summary>
@@ -128,7 +122,7 @@ namespace Microsoft.Xna.Framework.Graphics
             return Offset == other.Offset
                    && VertexElementFormat == other.VertexElementFormat
                    && VertexElementUsage == other.VertexElementUsage
-                   && _usageIndex == other._usageIndex;
+                   && UsageIndex == other.UsageIndex;
         }
 
         /// <summary>

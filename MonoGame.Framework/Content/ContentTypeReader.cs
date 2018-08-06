@@ -49,7 +49,7 @@ namespace Microsoft.Xna.Framework.Content
 			// The object receiving the data, or null if a new instance of the object should be created.
 			if (existingInstance == null)
             {
-				return Read(input, default(T));
+				return Read(input, default);
 			} 
 			return Read(input, (T)existingInstance);
         }

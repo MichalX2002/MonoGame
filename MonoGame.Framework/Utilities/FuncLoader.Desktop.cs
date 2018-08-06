@@ -58,7 +58,7 @@ namespace MonoGame.Utilities
                 ret = Linux.dlsym(library, function);
 
             if (ret == IntPtr.Zero)
-                return default(T);
+                return default;
 
             // TODO: Use the function bellow once Protobuild gets axed
             // requires .NET Framework 4.5.1 and its useful for corert

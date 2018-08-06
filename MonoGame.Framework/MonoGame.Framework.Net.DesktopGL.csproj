@@ -20,9 +20,9 @@
     <Optimize>false</Optimize>
     <DebugType>full</DebugType>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
-    <OutputPath>bin\WindowsGL\AnyCPU\Debug</OutputPath>
+    <OutputPath>bin\DesktopGL\AnyCPU\Debug\</OutputPath>
     <IntermediateOutputPath>obj\WindowsGL\AnyCPU\Debug</IntermediateOutputPath>
-    <DocumentationFile>bin\WindowsGL\AnyCPU\Debug\MonoGame.Framework.Net.xml</DocumentationFile>
+    <DocumentationFile>bin\DesktopGL\AnyCPU\Debug\MonoGame.Framework.Net.xml</DocumentationFile>
     <DefineConstants>DEBUG;TRACE;WINDOWS;OPENGL;OPENAL;NET;DESKTOPGL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -31,9 +31,9 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
     <DebugType>portable</DebugType>
-    <OutputPath>bin\WindowsGL\AnyCPU\Release</OutputPath>
+    <OutputPath>bin\DesktopGL\AnyCPU\Release\</OutputPath>
     <IntermediateOutputPath>obj\WindowsGL\AnyCPU\Release</IntermediateOutputPath>
-    <DocumentationFile>bin\WindowsGL\AnyCPU\Release\MonoGame.Framework.Net.xml</DocumentationFile>
+    <DocumentationFile>bin\DesktopGL\AnyCPU\Release\MonoGame.Framework.Net.xml</DocumentationFile>
     <DefineConstants>TRACE;WINDOWS;OPENGL;OPENAL;NET;DESKTOPGL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>

@@ -8,17 +8,19 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Xna.Framework.Graphics
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct SpriteBatchItem : IComparable<SpriteBatchItem>
-	{
+    public struct SpriteBatchItem
+    {
         public float SortKey;
 
         public VertexPositionColorTexture VertexTL;
         public VertexPositionColorTexture VertexTR;
 		public VertexPositionColorTexture VertexBL;
 		public VertexPositionColorTexture VertexBR;
-        
-        public void Set(float x, float y, float dx, float dy, float w, float h, float sin, float cos,
-            in Color color, in Vector2 texCoordTL, in Vector2 texCoordBR, float depth)
+
+        public void Set(
+            in float x, in float y, in float dx, in float dy,
+            in float w, in float h, in float sin, in float cos,
+            in Color color, in Vector2 texCoordTL, in Vector2 texCoordBR, in float depth)
         {
             // TODO, Should we be just assigning the Depth Value to Z?
             // According to http://blogs.msdn.com/b/shawnhar/archive/2011/01/12/spritebatch-billboards-in-a-3d-world.aspx
@@ -28,8 +30,7 @@ namespace Microsoft.Xna.Framework.Graphics
             VertexTL.Position.Y = y + dx * sin + dy * cos;
             VertexTL.Position.Z = depth;
             VertexTL.Color = color;
-            VertexTL.TextureCoordinate.X = texCoordTL.X;
-            VertexTL.TextureCoordinate.Y = texCoordTL.Y;
+            VertexTL.TextureCoordinate = texCoordTL;
 
             VertexTR.Position.X = x + (dx + w) * cos - dy * sin;
             VertexTR.Position.Y = y + (dx + w) * sin + dy * cos;
@@ -49,19 +50,18 @@ namespace Microsoft.Xna.Framework.Graphics
             VertexBR.Position.Y = y + (dx + w) * sin + (dy + h) * cos;
             VertexBR.Position.Z = depth;
             VertexBR.Color = color;
-            VertexBR.TextureCoordinate.X = texCoordBR.X;
-            VertexBR.TextureCoordinate.Y = texCoordBR.Y;
+            VertexBR.TextureCoordinate = texCoordBR;
         }
 
-        public void Set(float x, float y, float w, float h,
-            in Color color, in Vector2 texCoordTL, in Vector2 texCoordBR, float depth)
+        public void Set(
+            in float x, in float y, in float w, in float h,
+            in Color color, in Vector2 texCoordTL, in Vector2 texCoordBR, in float depth)
         {
             VertexTL.Position.X = x;
             VertexTL.Position.Y = y;
             VertexTL.Position.Z = depth;
             VertexTL.Color = color;
-            VertexTL.TextureCoordinate.X = texCoordTL.X;
-            VertexTL.TextureCoordinate.Y = texCoordTL.Y;
+            VertexTL.TextureCoordinate = texCoordTL;
 
             VertexTR.Position.X = x + w;
             VertexTR.Position.Y = y;
@@ -81,16 +81,18 @@ namespace Microsoft.Xna.Framework.Graphics
             VertexBR.Position.Y = y + h;
             VertexBR.Position.Z = depth;
             VertexBR.Color = color;
-            VertexBR.TextureCoordinate.X = texCoordBR.X;
-            VertexBR.TextureCoordinate.Y = texCoordBR.Y;
+            VertexBR.TextureCoordinate = texCoordBR;
         }
-
-        #region Implement IComparable
+        
         public int CompareTo(SpriteBatchItem other)
         {
             return SortKey.CompareTo(other.SortKey);
         }
-        #endregion
+
+        public int CompareToRef(in SpriteBatchItem other)
+        {
+            return SortKey.CompareTo(other.SortKey);
+        }
     }
 }
 

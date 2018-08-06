@@ -55,7 +55,8 @@ namespace Microsoft.Xna.Framework.Graphics
                     element.VertexAttribPointerType,
                     element.Normalized,
                     VertexStride,
-                    (IntPtr)(offset.ToInt64() + element.Offset));
+                    new IntPtr(offset.ToInt64() + element.Offset));
+
 #if !(GLES || MONOMAC)
                 if (GraphicsDevice.GraphicsCapabilities.SupportsInstancing)
                     GL.VertexAttribDivisor(element.AttributeLocation, 0);
