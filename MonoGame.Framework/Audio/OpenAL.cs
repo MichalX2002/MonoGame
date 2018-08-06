@@ -229,8 +229,7 @@ namespace MonoGame.OpenAL
 
             return ret;
         }
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_alenable(int cap);
         internal static d_alenable Enable = FuncLoader.LoadFunction<d_alenable>(NativeLibrary, "alEnable");
@@ -253,7 +252,6 @@ namespace MonoGame.OpenAL
             handle.Free();
         }
 
-        [CLSCompliant(false)]
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal unsafe delegate void d_aldeletebuffers(int n, int* buffers);
         internal static d_aldeletebuffers alDeleteBuffers = FuncLoader.LoadFunction<d_aldeletebuffers>(NativeLibrary, "alDeleteBuffers");
@@ -270,8 +268,7 @@ namespace MonoGame.OpenAL
                 alDeleteBuffers(n, pbuffers);
             }
         }
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_albufferi(int buffer, ALBufferi param, int value);
         internal static d_albufferi Bufferi = FuncLoader.LoadFunction<d_albufferi>(NativeLibrary, "alBufferi");
@@ -304,15 +301,13 @@ namespace MonoGame.OpenAL
 
         internal static void GenBuffers(int count, out int buffer)
         {
-            int[] ret;
-            GenBuffers(count, out ret);
+            GenBuffers(count, out int[] ret);
             buffer = ret[0];
         }
 
         internal static int[] GenBuffers(int count)
         {
-            int[] ret;
-            GenBuffers(count, out ret);
+            GenBuffers(count, out int[] ret);
             return ret;
         }
 
@@ -367,12 +362,10 @@ namespace MonoGame.OpenAL
             return errorCode.ToString();
         }
 
-        [CLSCompliant(false)]
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate bool d_alissource(int source);
         internal static d_alissource IsSource = FuncLoader.LoadFunction<d_alissource>(NativeLibrary, "alIsSource");
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_aldeletesources(int n, ref int sources);
         internal static d_aldeletesources alDeleteSources = FuncLoader.LoadFunction<d_aldeletesources>(NativeLibrary, "alDeleteSources");
@@ -381,8 +374,7 @@ namespace MonoGame.OpenAL
         {
             alDeleteSources(1, ref source);
         }
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_alsourcestop(int sourceId);
         internal static d_alsourcestop SourceStop = FuncLoader.LoadFunction<d_alsourcestop>(NativeLibrary, "alSourceStop");
@@ -390,8 +382,7 @@ namespace MonoGame.OpenAL
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_alsourcei(int sourceId, int i, int a);
         internal static d_alsourcei alSourcei = FuncLoader.LoadFunction<d_alsourcei>(NativeLibrary, "alSourcei");
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_alsource3i(int sourceId, ALSourcei i, int a, int b, int c);
         internal static d_alsource3i alSource3i = FuncLoader.LoadFunction<d_alsource3i>(NativeLibrary, "alSource3i");
@@ -415,55 +406,45 @@ namespace MonoGame.OpenAL
         {
             alSourcef(sourceId, i, dist);
         }
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_alsourcef(int sourceId, ALSourcef i, float a);
         internal static d_alsourcef alSourcef = FuncLoader.LoadFunction<d_alsourcef>(NativeLibrary, "alSourcef");
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_alsource3f(int sourceId, ALSource3f i, float x, float y, float z);
         internal static d_alsource3f alSource3f = FuncLoader.LoadFunction<d_alsource3f>(NativeLibrary, "alSource3f");
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_algetsourcei(int sourceId, ALGetSourcei i, out int state);
         internal static d_algetsourcei GetSource = FuncLoader.LoadFunction<d_algetsourcei>(NativeLibrary, "alGetSourcei");
 
         internal static ALSourceState GetSourceState(int sourceId)
         {
-            int state;
-            GetSource(sourceId, ALGetSourcei.SourceState, out state);
+            GetSource(sourceId, ALGetSourcei.SourceState, out int state);
             return (ALSourceState)state;
         }
 
-        [CLSCompliant(false)]
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_algetlistener3f(ALListener3f param, out float value1, out float value2, out float value3);
         internal static d_algetlistener3f GetListener = FuncLoader.LoadFunction<d_algetlistener3f>(NativeLibrary, "alGetListener3f");
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_aldistancemodel(ALDistanceModel model);
         internal static d_aldistancemodel DistanceModel = FuncLoader.LoadFunction<d_aldistancemodel>(NativeLibrary, "alDistanceModel");
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_aldopplerfactor(float value);
         internal static d_aldopplerfactor DopplerFactor = FuncLoader.LoadFunction<d_aldopplerfactor>(NativeLibrary, "alDopplerFactor");
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal unsafe delegate void d_alsourcequeuebuffers(int sourceId, int numEntries, int* buffers);
         internal static d_alsourcequeuebuffers alSourceQueueBuffers = FuncLoader.LoadFunction<d_alsourcequeuebuffers>(NativeLibrary, "alSourceQueueBuffers");
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal unsafe delegate void d_alsourceunqueuebuffers(int sourceId, int numEntries, int* salvaged);
         internal static d_alsourceunqueuebuffers alSourceUnqueueBuffers = FuncLoader.LoadFunction<d_alsourceunqueuebuffers>(NativeLibrary, "alSourceUnqueueBuffers");
-
-        [CLSCompliant(false)]
+        
         internal static unsafe void SourceQueueBuffers(int sourceId, int numEntries, int[] buffers)
         {
             fixed (int* ptr = &buffers[0])
@@ -477,7 +458,6 @@ namespace MonoGame.OpenAL
             AL.alSourceQueueBuffers(sourceId, 1, &buffer);
         }
 
-        [CLSCompliant(false)]
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_alsourceunqueuebuffers2(int sid, int numEntries, out int[] bids);
         internal static d_alsourceunqueuebuffers2 alSourceUnqueueBuffers2 = FuncLoader.LoadFunction<d_alsourceunqueuebuffers2>(NativeLibrary, "alSourceUnqueueBuffers");
@@ -530,7 +510,6 @@ namespace MonoGame.OpenAL
 
     internal partial class Alc
     {
-        [CLSCompliant(false)]
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate IntPtr d_alccreatecontext(IntPtr device, int[] attributes);
         internal static d_alccreatecontext CreateContext = FuncLoader.LoadFunction<d_alccreatecontext>(AL.NativeLibrary, "alcCreateContext");
@@ -539,8 +518,7 @@ namespace MonoGame.OpenAL
         {
             return GetErrorForDevice(IntPtr.Zero);
         }
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate AlcError d_alcgeterror(IntPtr device);
         internal static d_alcgeterror GetErrorForDevice = FuncLoader.LoadFunction<d_alcgeterror>(AL.NativeLibrary, "alcGetError");
@@ -553,28 +531,23 @@ namespace MonoGame.OpenAL
         {
             alcGetIntegerv(device, (int)param, size, values);
         }
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate IntPtr d_alcgetcurrentcontext();
         internal static d_alcgetcurrentcontext GetCurrentContext = FuncLoader.LoadFunction<d_alcgetcurrentcontext>(AL.NativeLibrary, "alcGetCurrentContext");
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_alcmakecontextcurrent(IntPtr context);
         internal static d_alcmakecontextcurrent MakeContextCurrent = FuncLoader.LoadFunction<d_alcmakecontextcurrent>(AL.NativeLibrary, "alcMakeContextCurrent");
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_alcdestroycontext(IntPtr context);
         internal static d_alcdestroycontext DestroyContext = FuncLoader.LoadFunction<d_alcdestroycontext>(AL.NativeLibrary, "alcDestroyContext");
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_alcclosedevice(IntPtr device);
         internal static d_alcclosedevice CloseDevice = FuncLoader.LoadFunction<d_alcclosedevice>(AL.NativeLibrary, "alcCloseDevice");
-
-        [CLSCompliant(false)]
+        
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate IntPtr d_alcopendevice(string device);
         internal static d_alcopendevice OpenDevice = FuncLoader.LoadFunction<d_alcopendevice>(AL.NativeLibrary, "alcOpenDevice");
@@ -681,7 +654,7 @@ namespace MonoGame.OpenAL
             }
             try
             {
-                setBufferMode = (XRamExtension.SetBufferModeDelegate)Marshal.GetDelegateForFunctionPointer(AL.alGetProcAddress("EAXSetBufferMode"), typeof(XRamExtension.SetBufferModeDelegate));
+                setBufferMode = (SetBufferModeDelegate)Marshal.GetDelegateForFunctionPointer(AL.alGetProcAddress("EAXSetBufferMode"), typeof(SetBufferModeDelegate));
             }
             catch (Exception)
             {
@@ -694,19 +667,18 @@ namespace MonoGame.OpenAL
 
         internal bool SetBufferMode(int i, ref int id, XRamStorage storage)
         {
-            if (storage == XRamExtension.XRamStorage.Accessible)
+            if (storage == XRamStorage.Accessible)
             {
                 return setBufferMode(i, ref id, StorageAccessible);
             }
-            if (storage != XRamExtension.XRamStorage.Hardware)
+            if (storage != XRamStorage.Hardware)
             {
                 return setBufferMode(i, ref id, StorageAuto);
             }
             return setBufferMode(i, ref id, StorageHardware);
         }
     }
-
-    [CLSCompliant(false)]
+    
     internal class EffectsExtension
     {
         /* Effect API */

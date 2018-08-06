@@ -27,8 +27,10 @@ namespace MonoGame.Tools.Pipeline
 
             if (!string.IsNullOrEmpty(PipelineSettings.Default.ErrorMessage))
             {
-                var logwin = new LogWindow();
-                logwin.LogText = PipelineSettings.Default.ErrorMessage;
+                var logwin = new LogWindow
+                {
+                    LogText = PipelineSettings.Default.ErrorMessage
+                };
                 app.Run(logwin);
                 return;
             }

@@ -107,13 +107,8 @@ namespace Microsoft.Xna.Framework.Audio
         /// </summary>
 		private OpenALSoundController()
         {
-            // On Windows, set the DLL search path for correct native binaries
-            NativeHelper.InitDllDirectory();
-
             if (!OpenSoundController())
-            {
                 throw new NoAudioHardwareException("OpenAL device could not be initialized, see console output for details.");
-            }
 
             if (Alc.IsExtensionPresent(_device, "ALC_EXT_CAPTURE"))
                 Microphone.PopulateCaptureDevices();

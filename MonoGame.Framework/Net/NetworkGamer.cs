@@ -203,12 +203,8 @@ namespace Microsoft.Xna.Framework.Net
         // Create the OnPropertyChanged method to raise the event
         protected void OnPropertyChanged(string name)
 		{
-			PropertyChangedEventHandler handler = PropertyChanged;
-			if (handler != null)
-			{
-				handler(this, new PropertyChangedEventArgs(name));
-			}
-		}
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
 		
 	}
 }

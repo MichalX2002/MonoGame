@@ -21,9 +21,11 @@ namespace MonoGame.Tools.Pipeline
         public ProjectControl()
         {
             Title = "Project";
-            _treeView = new TreeGridView();
-            _treeView.ShowHeader = false;
-            _treeView.AllowMultipleSelection = true;
+            _treeView = new TreeGridView
+            {
+                ShowHeader = false,
+                AllowMultipleSelection = true
+            };
             _treeView.Columns.Add(new GridColumn { DataCell = new ImageTextCell(0, 1), AutoSize = true });
             _treeView.DataStore = _treeBase = new TreeGridItem();
             CreateContent(_treeView);
@@ -97,8 +99,7 @@ namespace MonoGame.Tools.Pipeline
 
         public void RemoveItem(IProjectItem item)
         {
-            TreeGridItem titem;
-            if (FindItem(_treeRoot, item.DestinationPath, out titem))
+            if (FindItem(_treeRoot, item.DestinationPath, out TreeGridItem titem))
             {
                 var parrent = titem.Parent as TreeGridItem;
                 parrent.Children.Remove(titem);

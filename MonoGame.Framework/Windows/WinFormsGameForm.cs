@@ -137,8 +137,7 @@ namespace Microsoft.Xna.Framework.Windows
                     var delta = (short)(((ulong)m.WParam >> 16) & 0xffff); ;
                     var handler = MouseHorizontalWheel;
 
-                    if (handler != null)
-                        handler(this, new HorizontalMouseWheelEventArgs(delta));
+                    handler?.Invoke(this, new HorizontalMouseWheelEventArgs(delta));
                     break;
                 case WM_ENTERSIZEMOVE:
                     IsResizing = true;

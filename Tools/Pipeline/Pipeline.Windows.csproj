@@ -63,6 +63,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\IncludeItem.cs" />
+    <Compile Include="LogWindow.cs" />
+    <Compile Include="LogWindow.eto.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\MGCB\CommandLineParser.cs">
@@ -77,9 +80,7 @@
     <Compile Include="Common\FileType.cs" />
     <Compile Include="Common\ProjectState.cs" />
     <Compile Include="Common\PipelineController.MoveAction.cs" />
-    <Compile Include="Common\PipelineController.NewAction.cs" />
     <Compile Include="Common\PipelineController.ExcludeAction.cs" />
-    <Compile Include="Common\PipelineController.FileWatcher.cs" />
     <Compile Include="Common\PipelineController.IncludeAction.cs" />
     <Compile Include="Common\PipelineController.UpdateProcessorAction.cs" />
     <Compile Include="Common\PipelineController.UpdatePropertyAction.cs" />
@@ -227,17 +228,8 @@
     <EmbeddedResource Include="Icons\TreeView\File.png">
       <LogicalName>TreeView.File.png</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="Icons\TreeView\FileMissing.png">
-      <LogicalName>TreeView.FileMissing.png</LogicalName>
-    </EmbeddedResource>
     <EmbeddedResource Include="Icons\TreeView\Folder.png">
       <LogicalName>TreeView.Folder.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Icons\TreeView\FolderMissing.png">
-      <LogicalName>TreeView.FolderMissing.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Icons\TreeView\Missing.png">
-      <LogicalName>TreeView.Missing.png</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Icons\Build\EndFailed.png">
       <LogicalName>Build.EndFailed.png</LogicalName>
