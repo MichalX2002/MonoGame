@@ -180,7 +180,6 @@ namespace MonoGame.Tools.Pipeline
             pos += items.IndexOf(Path.GetFileName(item.DestinationPath));
 
             var ret = new TreeGridItem();
-
             if (item is DirectoryItem)
                 ret.SetValue(0, Global.GetEtoDirectoryIcon());
             else

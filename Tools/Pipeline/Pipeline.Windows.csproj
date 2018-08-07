@@ -225,6 +225,9 @@
     <EmbeddedResource Include="Icons\TreeView\Root.png">
       <LogicalName>TreeView.Root.png</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="Icons\TreeView\Link.png">
+      <LogicalName>TreeView.Link.png</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="Icons\TreeView\File.png">
       <LogicalName>TreeView.File.png</LogicalName>
     </EmbeddedResource>
