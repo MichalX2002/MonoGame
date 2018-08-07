@@ -396,14 +396,14 @@ namespace Microsoft.Xna.Framework
         public void Tick()
         {
             // NOTE: This code is very sensitive and can break very badly
-            // with even what looks like a safe change.  Be sure to test 
+            // with even what looks like a safe change. Be sure to test 
             // any change fully in both the fixed and variable timestep 
             // modes across multiple devices and platforms.
 
         RetryTick:
 
             // Advance the accumulated elapsed time.
-            var currentTicks = _gameTimer.Elapsed.Ticks;
+            long currentTicks = _gameTimer.Elapsed.Ticks;
             _accumulatedElapsedTime += TimeSpan.FromTicks(currentTicks - _previousTicks);
             _previousTicks = currentTicks;
 
@@ -432,7 +432,7 @@ namespace Microsoft.Xna.Framework
             if (IsFixedTimeStep)
             {
                 Time.ElapsedGameTime = TargetElapsedTime;
-                var stepCount = 0;
+                int stepCount = 0;
 
                 // Perform as many full fixed length time steps as we can.
                 while (_accumulatedElapsedTime >= TargetElapsedTime && !_shouldExit)
