@@ -61,11 +61,29 @@ namespace Lidgren.Network.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bytes in Pool: {0} bytes.
+        ///   Looks up a localized string similar to Average Roundtrip Time: {0}.
+        /// </summary>
+        internal static string averageRoundtrip_X {
+            get {
+                return ResourceManager.GetString("averageRoundtrip_X", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bytes in Pool: {0}.
         /// </summary>
         internal static string bytesInPool_X {
             get {
                 return ResourceManager.GetString("bytesInPool_X", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Current MTU: {0}.
+        /// </summary>
+        internal static string currentMTU_X {
+            get {
+                return ResourceManager.GetString("currentMTU_X", resourceCulture);
             }
         }
         
@@ -79,6 +97,24 @@ namespace Lidgren.Network.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Resent Messages (Delay): {0}.
+        /// </summary>
+        internal static string resentMessages_delay_X {
+            get {
+                return ResourceManager.GetString("resentMessages_delay_X", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Resent Messages (Holes): {0}.
+        /// </summary>
+        internal static string resentMessages_holes_X {
+            get {
+                return ResourceManager.GetString("resentMessages_holes_X", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sent {0} bytes in {1} messages in {2} packets.
         /// </summary>
         internal static string sent_X_bytes_X_messages_X_packets {
@@ -88,11 +124,38 @@ namespace Lidgren.Network.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Stored (Reliable) Messages: {0}.
+        /// </summary>
+        internal static string storedReliableMessages_X {
+            get {
+                return ResourceManager.GetString("storedReliableMessages_X", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Total Bytes Allocated: {0} bytes.
         /// </summary>
         internal static string totalBytesAllocated_X {
             get {
                 return ResourceManager.GetString("totalBytesAllocated_X", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsent Messages: {0}.
+        /// </summary>
+        internal static string unsentMessages_X {
+            get {
+                return ResourceManager.GetString("unsentMessages_X", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Withheld Messages: {0}.
+        /// </summary>
+        internal static string withheldMessages_X {
+            get {
+                return ResourceManager.GetString("withheldMessages_X", resourceCulture);
             }
         }
         

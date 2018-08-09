@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="bytesInPool_X" xml:space="preserve">
-    <value>Bytes in Pool: {0} bytes</value>
+    <value>Bytes in Pool: {0}</value>
     <comment>BytesInRecyclePool</comment>
   </data>
   <data name="received_X_bytes_X_messages_X_fragments_X_packets" xml:space="preserve">
@@ -136,5 +136,33 @@
   <data name="X_connections" xml:space="preserve">
     <value>{0} Connections</value>
     <comment>m_peer.ConnectionsCount</comment>
+  </data>
+  <data name="averageRoundtrip_X" xml:space="preserve">
+    <value>Average Roundtrip Time: {0}</value>
+    <comment>NetTime.ToReadable(m_connection.AverageRoundtripTime)</comment>
+  </data>
+  <data name="currentMTU_X" xml:space="preserve">
+    <value>Current MTU: {0}</value>
+    <comment>m_connection.m_currentMTU</comment>
+  </data>
+  <data name="resentMessages_delay_X" xml:space="preserve">
+    <value>Resent Messages (Delay): {0}</value>
+    <comment>m_resentMessagesDueToDelay</comment>
+  </data>
+  <data name="resentMessages_holes_X" xml:space="preserve">
+    <value>Resent Messages (Holes): {0}</value>
+    <comment>m_resentMessagesDueToHole</comment>
+  </data>
+  <data name="storedReliableMessages_X" xml:space="preserve">
+    <value>Stored (Reliable) Messages: {0}</value>
+    <comment>StoredMessages</comment>
+  </data>
+  <data name="unsentMessages_X" xml:space="preserve">
+    <value>Unsent Messages: {0}</value>
+    <comment>UnsentMessages</comment>
+  </data>
+  <data name="withheldMessages_X" xml:space="preserve">
+    <value>Withheld Messages: {0}</value>
+    <comment>WithheldMessages</comment>
   </data>
 </root>

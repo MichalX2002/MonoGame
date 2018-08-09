@@ -6,7 +6,7 @@ using System.Diagnostics;
 namespace Lidgren.Network
 {
 	/// <summary>
-	/// Represents a connection to a remote peer
+	/// Represents a connection to a remote peer.
 	/// </summary>
 	[DebuggerDisplay("RemoteUniqueIdentifier={RemoteUniqueIdentifier} RemoteEndPoint={remoteEndPoint}")]
 	public partial class NetConnection
@@ -27,27 +27,22 @@ namespace Lidgren.Network
 		internal NetQueue<NetTuple<NetMessageType, int>> m_queuedIncomingAcks;
 		private int m_sendBufferWritePtr;
 		private int m_sendBufferNumMessages;
-		private object m_tag;
 		internal NetConnectionStatistics m_statistics;
 
 		/// <summary>
-		/// Gets or sets the application defined object containing data about the connection
+		/// Gets or sets the application defined object containing data about the connection.
 		/// </summary>
-		public object Tag
-		{
-			get { return m_tag; }
-			set { m_tag = value; }
-		}
+		public object Tag { get; set; }
 
-		/// <summary>
-		/// Gets the peer which holds this connection
-		/// </summary>
-		public NetPeer Peer { get { return m_peer; } }
+        /// <summary>
+        /// Gets the peer which holds this connection.
+        /// </summary>
+        public NetPeer Peer => m_peer;
 
-		/// <summary>
-		/// Gets the current status of the connection (synced to the last status message read)
-		/// </summary>
-		public NetConnectionStatus Status { get { return m_visibleStatus; } }
+        /// <summary>
+        /// Gets the current status of the connection (synced to the last status message read)
+        /// </summary>
+        public NetConnectionStatus Status { get { return m_visibleStatus; } }
 
 		/// <summary>
 		/// Gets various statistics for this connection

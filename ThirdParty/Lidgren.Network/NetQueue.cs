@@ -49,20 +49,20 @@ namespace Lidgren.Network
 		private int m_size;
 		private int m_head;
 
-		/// <summary>
-		/// Gets the number of items in the queue
-		/// </summary>
-		public int Count { get { return m_size; } }
+        /// <summary>
+        /// Gets the number of items in the queue
+        /// </summary>
+        public int Count => m_size;
 
-		/// <summary>
-		/// Gets the current capacity for the queue
-		/// </summary>
-		public int Capacity { get { return m_items.Length; } }
+        /// <summary>
+        /// Gets the current capacity for the queue
+        /// </summary>
+        public int Capacity => m_items.Length;
 
-		/// <summary>
-		/// NetQueue constructor
-		/// </summary>
-		public NetQueue(int initialCapacity)
+        /// <summary>
+        /// NetQueue constructor
+        /// </summary>
+        public NetQueue(int initialCapacity)
 		{
 			m_items = new T[initialCapacity];
 		}
