@@ -502,7 +502,7 @@ namespace MonoGame.Utilities.Collections
         }
 
         [DebuggerDisplay("Count = {Count}")]
-        public sealed class KeyCollection : ICollection<TKey>, IReadOnlyCollection<TKey>
+        public sealed class KeyCollection : ICollection<TKey>, IReadOnlyCollection<TKey>, IEnumerable<TKey>
         {
             private QuickDictionary<TKey, TValue> dictionary;
 
@@ -554,7 +554,7 @@ namespace MonoGame.Utilities.Collections
                 throw new InvalidOperationException();
             }
 
-            IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator()
+            public IEnumerator<TKey> GetEnumerator()
             {
                 return new Enumerator(dictionary);
             }
@@ -627,7 +627,7 @@ namespace MonoGame.Utilities.Collections
         }
         
         [DebuggerDisplay("Count = {Count}")]
-        public sealed class ValueCollection : ICollection<TValue>, IReadOnlyCollection<TValue>
+        public sealed class ValueCollection : ICollection<TValue>, IReadOnlyCollection<TValue>, IEnumerable<TValue>
         {
             private QuickDictionary<TKey, TValue> dictionary;
 
@@ -679,7 +679,7 @@ namespace MonoGame.Utilities.Collections
                 throw new InvalidOperationException();
             }
 
-            IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator()
+            public IEnumerator<TValue> GetEnumerator()
             {
                 return new Enumerator(dictionary);
             }
