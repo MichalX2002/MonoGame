@@ -73,7 +73,7 @@ namespace MonoGame.Imaging
         }
 
         public Image(IntPtr data, int width, int height, ImagePixelFormat pixelFormat) :
-            this(data, width, height, pixelFormat, new MemoryManager(1024 * 4, true), true)
+            this(data, width, height, pixelFormat, new MemoryManager(1024 * 4, true), false)
         {
         }
 
