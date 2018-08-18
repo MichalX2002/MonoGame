@@ -3,14 +3,20 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime;
+using System.Runtime.InteropServices;
 using MonoGame.Imaging;
 
 namespace MonoGame.Imaging.Tests
 {
+    struct ColorRGBA
+    {
+        public byte R;
+    }
+
     class Program
     {
         public const string DATA_FOLDER = "testdata.zip";
-
+        
         static void Main(string[] args)
         {
             ZipArchive archive = ZipFile.OpenRead(DATA_FOLDER);

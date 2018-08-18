@@ -59,6 +59,8 @@
     <Compile Include="Language\ILibraryLanguage.cs" />
     <Compile Include="Language\LanguageManager.cs" />
     <Compile Include="Language\StringBuilderExtensions.cs" />
+    <Compile Include="Memory\NetPeer.MessagePools.cs" />
+    <Compile Include="MessageResendReason.cs" />
     <Compile Include="NamespaceDoc.cs" />
     <Compile Include="NetBigInteger.cs" />
     <Compile Include="NetBitVector.cs" />
@@ -91,7 +93,6 @@
     <Compile Include="NetPeer.Internal.cs" />
     <Compile Include="NetPeer.LatencySimulation.cs" />
     <Compile Include="NetPeer.Logging.cs" />
-    <Compile Include="NetPeer.MessagePools.cs" />
     <Compile Include="NetPeer.Send.cs" />
     <Compile Include="NetPeerConfiguration.cs" />
     <Compile Include="NetPeerStatistics.cs" />
