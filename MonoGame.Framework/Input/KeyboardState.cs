@@ -107,7 +107,7 @@ namespace Microsoft.Xna.Framework.Input
         /// </summary>
         public bool NumLock { get; private set; }
 
-        internal KeyboardState(List<Keys> keys, bool capsLock = false, bool numLock = false) : this()
+        internal KeyboardState(List<Keys> keys, bool capsLock = false, bool numLock = false)
         {
             CapsLock = capsLock;
             NumLock = numLock;
@@ -122,8 +122,12 @@ namespace Microsoft.Xna.Framework.Input
             keys7 = 0;
 
             if (keys != null)
-                foreach (Keys k in keys)
-                    InternalSetKey(k);
+            {
+                for (int i = 0; i < keys.Count; i++)
+                {
+                    InternalSetKey(keys[i]);
+                }
+            }
         }
 
         /// <summary>
@@ -132,7 +136,7 @@ namespace Microsoft.Xna.Framework.Input
         /// <param name="keys">List of keys to be flagged as pressed on initialization.</param>
         /// <param name="capsLock">Caps Lock state.</param>
         /// <param name="numLock">Num Lock state.</param>
-        public KeyboardState(Keys[] keys, bool capsLock = false, bool numLock = false) : this()
+        public KeyboardState(Keys[] keys, bool capsLock = false, bool numLock = false)
         {
             CapsLock = capsLock;
             NumLock = numLock;
@@ -147,15 +151,19 @@ namespace Microsoft.Xna.Framework.Input
             keys7 = 0;
 
             if (keys != null)
-                foreach (Keys k in keys)
-                    InternalSetKey(k);
+            {
+                for (int i = 0; i < keys.Length; i++)
+                {
+                    InternalSetKey(keys[i]);
+                }
+            }
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyboardState"/> class.
         /// </summary>
         /// <param name="keys">List of keys to be flagged as pressed on initialization.</param>
-        public KeyboardState(params Keys[] keys) : this()
+        public KeyboardState(params Keys[] keys)
         {
             CapsLock = false;
             NumLock = false;
@@ -170,8 +178,12 @@ namespace Microsoft.Xna.Framework.Input
             keys7 = 0;
 
             if (keys != null)
-                foreach (Keys k in keys)
-                    InternalSetKey(k);
+            {
+                for (int i = 0; i < keys.Length; i++)
+                {
+                    InternalSetKey(keys[i]);
+                }
+            }
         }
 
         /// <summary>

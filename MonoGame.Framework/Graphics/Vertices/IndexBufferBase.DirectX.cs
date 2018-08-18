@@ -5,11 +5,11 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public abstract partial class IndexBufferBase : BufferBase
     {
+        private int _lastSize;
         internal SharpDX.Direct3D11.Buffer _buffer;
         
         protected void PlatformConstruct()
         {
-            GenerateIfRequired();
         }
 
         private void PlatformGraphicsDeviceResetting()
@@ -17,15 +17,16 @@ namespace Microsoft.Xna.Framework.Graphics
             SharpDX.Utilities.Dispose(ref _buffer);
         }
         
-        protected void GenerateIfRequired()
+        protected void GenerateIfRequired(int size)
         {
-            if (_buffer != null)
+            if (_lastSize >= size)
                 return;
+
+            if (_buffer != null)
+                SharpDX.Utilities.Dispose(ref _buffer);
 
             // TODO: To use true Immutable resources we would need to delay creation of 
             // the Buffer until SetData() and recreate them if set more than once.
-
-            var sizeInBytes = IndexCount * _indexElementSize;
 
             var accessflags = SharpDX.Direct3D11.CpuAccessFlags.None;
             var resUsage = SharpDX.Direct3D11.ResourceUsage.Default;
@@ -36,18 +37,20 @@ namespace Microsoft.Xna.Framework.Graphics
                 resUsage = SharpDX.Direct3D11.ResourceUsage.Dynamic;
             }
             _buffer = new SharpDX.Direct3D11.Buffer(GraphicsDevice._d3dDevice,
-                                                        sizeInBytes,
+                                                        size,
                                                         resUsage,
                                                         SharpDX.Direct3D11.BindFlags.IndexBuffer,
                                                         accessflags,
                                                         SharpDX.Direct3D11.ResourceOptionFlags.None,
                                                         0  // StructureSizeInBytes
                                                         );
+            _lastSize = size;
         }
 
         protected void PlatformGetData(int offsetInBytes, IntPtr data, int startIndex, int elementCount)
         {
-            GenerateIfRequired();
+            if (_buffer == null)
+                return;
 
             if (_isDynamic)
             {
@@ -94,7 +97,8 @@ namespace Microsoft.Xna.Framework.Graphics
         protected void PlatformSetData(
             int offsetInBytes, IntPtr data, int startIndex, int elementCount, SetDataOptions options)
         {
-            GenerateIfRequired();
+            int size = elementCount * _indexElementSize;
+            GenerateIfRequired(size);
 
             if (_isDynamic)
             {
@@ -108,14 +112,11 @@ namespace Microsoft.Xna.Framework.Graphics
                 {
                     var dataBox = d3dContext.MapSubresource(_buffer, 0, mode, SharpDX.Direct3D11.MapFlags.None);
                     
-                    int bytes = elementCount * _indexElementSize;
-
                     int startOffset = startIndex * _indexElementSize;
                     IntPtr inputPtr = data + startOffset;
                     IntPtr outputPtr = dataBox.DataPointer + offsetInBytes;
-
-                    int byteCount = elementCount * _indexElementSize - startOffset;
-                    SharpDX.Utilities.CopyMemory(inputPtr, outputPtr, byteCount);
+                    
+                    SharpDX.Utilities.CopyMemory(outputPtr, inputPtr, size);
 
                     d3dContext.UnmapSubresource(_buffer, 0);
                 }
@@ -125,7 +126,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 int startBytes = startIndex * _indexElementSize;
                 IntPtr dataPtr = data + startBytes;
 
-                var box = new SharpDX.DataBox(dataPtr, elementCount * _indexElementSize, 0);
+                var box = new SharpDX.DataBox(dataPtr, size, 0);
                 var region = new SharpDX.Direct3D11.ResourceRegion
                 {
                     Top = 0,
@@ -133,7 +134,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     Back = 1,
                     Bottom = 1,
                     Left = offsetInBytes,
-                    Right = offsetInBytes + (elementCount * _indexElementSize)
+                    Right = offsetInBytes + size
                 };
 
                 // TODO: We need to deal with threaded contexts here!
@@ -141,6 +142,8 @@ namespace Microsoft.Xna.Framework.Graphics
                 lock (d3dContext)
                     d3dContext.UpdateSubresource(box, _buffer, 0, region);
             }
+
+            IndexCount = elementCount;
         }
 
         protected override void Dispose(bool disposing)

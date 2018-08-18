@@ -5,12 +5,12 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public abstract partial class VertexBufferBase : BufferBase
     {
+        private int _lastSize;
         internal SharpDX.Direct3D11.Buffer _buffer;
         private SharpDX.Direct3D11.Buffer _cachedStagingBuffer;
 
         protected void PlatformConstruct()
         {
-            GenerateIfRequired();
         }
 
         private void PlatformGraphicsDeviceResetting()
@@ -18,10 +18,13 @@ namespace Microsoft.Xna.Framework.Graphics
             SharpDX.Utilities.Dispose(ref _buffer);
         }
 
-        void GenerateIfRequired()
+        void GenerateIfRequired(int size)
         {
-            if (_buffer != null)
+            if (_lastSize >= size)
                 return;
+
+            if (_buffer != null)
+                SharpDX.Utilities.Dispose(ref _buffer);
 
             // TODO: To use Immutable resources we would need to delay creation of 
             // the Buffer until SetData() and recreate them if set more than once.
@@ -36,13 +39,14 @@ namespace Microsoft.Xna.Framework.Graphics
             }
 
             _buffer = new SharpDX.Direct3D11.Buffer(GraphicsDevice._d3dDevice,
-                                                        VertexDeclaration.VertexStride * VertexCount,
+                                                        size,
                                                         usage,
                                                         SharpDX.Direct3D11.BindFlags.VertexBuffer,
                                                         accessflags,
                                                         SharpDX.Direct3D11.ResourceOptionFlags.None,
                                                         0  // StructureSizeInBytes
                                                         );
+            _lastSize = size;
         }
 
         void CreatedCachedStagingBuffer()
@@ -62,7 +66,8 @@ namespace Microsoft.Xna.Framework.Graphics
         protected void PlatformGetData(
             int offsetInBytes, IntPtr ptr, int startIndex, int elementCount, int elementSizeInBytes, int vertexStride)
         {
-            GenerateIfRequired();
+            if (_buffer == null)
+                return;
 
             if (_isDynamic)
             {
@@ -108,7 +113,8 @@ namespace Microsoft.Xna.Framework.Graphics
             int offsetInBytes, IntPtr ptr, int startIndex,
             int elementCount, int elementSizeInBytes, int vertexStride, SetDataOptions options)
         {
-            GenerateIfRequired();
+            int size = vertexStride * elementCount;
+            GenerateIfRequired(size);
 
             var deviceContext = GraphicsDevice._d3dContext;
             if (_isDynamic)
@@ -126,7 +132,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     if (vertexStride == elementSizeInBytes)
                     {
                         SharpDX.Utilities.CopyMemory(
-                            boxPtr, ptr + startIndex * vertexStride, elementCount * vertexStride);
+                            boxPtr, ptr + startIndex * vertexStride, size);
                     }
                     else
                     {
@@ -147,7 +153,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 if (vertexStride == elementSizeInBytes)
                 {
-                    var box = new SharpDX.DataBox(dataPtr, elementCount * vertexStride, 0);
+                    var box = new SharpDX.DataBox(dataPtr, size, 0);
                     var region = new SharpDX.Direct3D11.ResourceRegion
                     {
                         Top = 0,
@@ -155,7 +161,7 @@ namespace Microsoft.Xna.Framework.Graphics
                         Back = 1,
                         Bottom = 1,
                         Left = offsetInBytes,
-                        Right = offsetInBytes + (elementCount * vertexStride)
+                        Right = offsetInBytes + (size)
                     };
 
                     lock (deviceContext)
@@ -187,6 +193,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     }
                 }
             }
+            _lastSize = size;
         }
 
         protected override void Dispose(bool disposing)
