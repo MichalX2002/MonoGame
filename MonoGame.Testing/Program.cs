@@ -36,7 +36,7 @@ namespace MonoGame.Testing
 
                 _batch = new SpriteBatch(GraphicsDevice);
 
-                _textures = new Texture2D[40];
+                _textures = new Texture2D[20];
                 for (int i = 0; i < _textures.Length; i++)
                 {
                     _textures [i] = new Texture2D(GraphicsDevice, 2, 2);
@@ -60,21 +60,35 @@ namespace MonoGame.Testing
                     Exit();
 
                 GraphicsDevice.Clear(Color.CornflowerBlue);
+
+                /*
+                float sin1 = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds) / 4 + 0.7f;
+                float sin2 = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds + Math.PI / 2) / 4 + 0.7f;
+
+                _batch.Begin(SpriteSortMode.Deferred, depthStencilState: DepthStencilState.Default);
+                _batch.Draw(_textures[0], new Vector2(100, 100), null, Color.Red, 0, Vector2.Zero, 50, SpriteEffects.None, sin1);
+                _batch.End();
+
+                _batch.Begin(SpriteSortMode.Deferred, depthStencilState: DepthStencilState.Default);
+                _batch.Draw(_textures[0], new Vector2(150, 150), null, Color.White, 0, Vector2.Zero, 50, SpriteEffects.None, sin2);
+                _batch.End();
+
+                Console.WriteLine("RED: " + sin1 + " | GRAY:" + sin2);
+                */
                 
                 int size = 16;
                 int offset = size + 8;
                 Rectangle rect = new Rectangle(10, 10, size, size);
                 
                 _batch.Begin();
-
+                
+                /*
                 for (int i = 0; i < 10000; i++)
                 {
                     _batch.Draw(_textures[_textures.Length - 1], new Rectangle(i * 32 + 16, 16, 32, 32), new Color(i * 16, 127, 127));
                 }
+                */
 
-                _batch.End();
-
-                /*
                 watch.Restart();
                 for (int t = 0; t < _textures.Length; t++)
                 {
@@ -86,13 +100,14 @@ namespace MonoGame.Testing
                     {
                         //float dep = (float)r.NextDouble();
                         _batch.Draw(texture: tex, destinationRectangle: rect, color: Color.White, layerDepth: 0);
+
+                        rect.X += offset;
                     }
 
-                        //rect.X += offset;
                     //}
 
-                    //rect.X = 10;
-                    //rect.Y += offset;
+                    rect.X = 10;
+                    rect.Y += offset;
                 }
                 watch.Stop();
                 timings.Add(watch.Elapsed.TotalMilliseconds);
@@ -108,13 +123,11 @@ namespace MonoGame.Testing
                     string flush = Math.Round(endTimings.Average(), 4).ToString("N4");
 
                     Console.WriteLine($"Draw {draw}ms | Flush: {flush}ms");
+                    Console.WriteLine(GraphicsDevice.Metrics.SpriteCount);
 
                     timings.Clear();
                     endTimings.Clear();
                 }
-                */
-
-                Console.WriteLine(GraphicsDevice.Metrics.SpriteCount);
 
                 base.Draw(gameTime);
             }

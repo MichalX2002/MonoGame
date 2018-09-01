@@ -2,15 +2,12 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
-using System.Runtime.InteropServices;
-
 namespace Microsoft.Xna.Framework.Graphics
 {
-    [StructLayout(LayoutKind.Sequential)]
-    public struct SpriteBatchItem
+    public class SpriteBatchItem
     {
         public float SortKey;
+        public Texture2D Texture;
 
         public VertexPositionColorTexture VertexTL;
         public VertexPositionColorTexture VertexTR;
@@ -18,9 +15,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		public VertexPositionColorTexture VertexBR;
 
         public void Set(
-            in float x, in float y, in float dx, in float dy,
-            in float w, in float h, in float sin, in float cos,
-            in Color color, in Vector2 texCoordTL, in Vector2 texCoordBR, in float depth)
+            float x, float y, float dx, float dy,
+            float w, float h, float sin, float cos,
+            Color color, Vector2 texCoordTL, Vector2 texCoordBR, float depth)
         {
             // TODO, Should we be just assigning the Depth Value to Z?
             // According to http://blogs.msdn.com/b/shawnhar/archive/2011/01/12/spritebatch-billboards-in-a-3d-world.aspx
@@ -54,8 +51,8 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         public void Set(
-            in float x, in float y, in float w, in float h,
-            in Color color, in Vector2 texCoordTL, in Vector2 texCoordBR, in float depth)
+            float x, float y, float w, float h,
+            Color color, Vector2 texCoordTL, Vector2 texCoordBR, float depth)
         {
             VertexTL.Position.X = x;
             VertexTL.Position.Y = y;
@@ -85,11 +82,6 @@ namespace Microsoft.Xna.Framework.Graphics
         }
         
         public int CompareTo(SpriteBatchItem other)
-        {
-            return SortKey.CompareTo(other.SortKey);
-        }
-
-        public int CompareToRef(in SpriteBatchItem other)
         {
             return SortKey.CompareTo(other.SortKey);
         }

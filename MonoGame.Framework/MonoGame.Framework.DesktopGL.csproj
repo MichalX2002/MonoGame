@@ -49,9 +49,9 @@
   <ItemGroup>
     <Compile Include="Audio\OggStreamer.cs" />
     <Compile Include="ExceptionHelper.cs" />
-    <Compile Include="Graphics\SpriteBatchE.cs" />
-    <Compile Include="Graphics\SpriteBatcherE.cs" />
-    <Compile Include="Graphics\SpriteBatchItemE.cs" />
+    <Compile Include="Graphics\SpriteBatch.cs" />
+    <Compile Include="Graphics\SpriteBatcher.cs" />
+    <Compile Include="Graphics\SpriteBatchItem.cs" />
     <Compile Include="Graphics\Vertices\BufferBase.cs" />
     <Compile Include="Graphics\Vertices\IndexBufferBase.cs" />
     <Compile Include="Graphics\Vertices\IndexBufferBase.OpenGL.cs" />
