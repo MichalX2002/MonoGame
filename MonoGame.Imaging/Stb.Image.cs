@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Imaging
 {
@@ -50,6 +51,59 @@ namespace MonoGame.Imaging
         }
         */
 
+        internal static unsafe MarshalPointer MAlloc(long size)
+        {
+            if (size == 0)
+                return default;
+
+            if (size > int.MaxValue)
+                throw new ArgumentOutOfRangeException(nameof(size));
+
+            return new MarshalPointer(Marshal.AllocHGlobal((int)size), (int)size);
+        }
+
+        internal static void Free(IntPtr ptr)
+        {
+            Marshal.FreeHGlobal(ptr);
+        }
+
+        internal static void Free(void* ptr)
+        {
+            Free((IntPtr)ptr);
+        }
+
+        internal static void Free(MarshalPointer ptr)
+        {
+            ptr.Dispose();
+        }
+
+        internal static MarshalPointer ReAlloc(MarshalPointer p, long newSize)
+        {
+            if (p.Ptr == null)
+                return MAlloc(newSize);
+
+            if (newSize == 0)
+            {
+                Free(p);
+                return default;
+            }
+
+            if (p.Size >= newSize)
+                return p; // Realloc not required
+
+            var newP = MAlloc(newSize);
+            MemCopy(newP.Ptr, p.Ptr, p.Size);
+            p.Dispose();
+            return newP;
+        }
+
+        internal static void* ReAlloc(void* ptr, long newSize)
+        { 
+            if (ptr == null)
+                return (void*)MAlloc(newSize).SourcePtr;
+            return (void*)Marshal.ReAllocHGlobal((IntPtr)ptr, (IntPtr)newSize);
+        }
+
         private static unsafe int MemCmp(void* a, void* b, long size)
         {
             int result = 0;
@@ -70,7 +124,7 @@ namespace MonoGame.Imaging
 
         private static unsafe void MemMove(void* a, void* b, long size)
         {
-            using (var temp = new MarshalPointer<byte>((int)size))
+            using (var temp = MAlloc(size))
             {
                 MemCopy(temp.Ptr, b, size);
                 MemCopy(a, temp.Ptr, size);

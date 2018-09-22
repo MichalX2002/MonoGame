@@ -1,7 +1,8 @@
-﻿
+﻿using System;
+
 namespace MonoGame.Imaging
 {
-    internal unsafe class ReadContext
+    internal unsafe class ReadContext : IDisposable
     {
         public uint Width;
         public uint Height;
@@ -11,10 +12,9 @@ namespace MonoGame.Imaging
         public MemoryManager Manager;
         public ErrorContext ErrorCtx;
         public ReadCallbacks Callbacks;
-        public void* IOUserData;
         public int ReadFromCallbacks;
         public int BufLength;
-        public MarshalPointer<byte> BufferStart = new MarshalPointer<byte>(128);
+        public MarshalPointer BufferStart = Imaging.MAlloc(128);
         public byte* ImgBuffer;
         public byte* ImgBufferEnd;
         public byte* ImgBufferOrigin;
@@ -23,6 +23,11 @@ namespace MonoGame.Imaging
         public int Error(string error)
         {
             return ErrorCtx.Error(error);
+        }
+
+        public void Dispose()
+        {
+            BufferStart.Dispose();
         }
     }
 }

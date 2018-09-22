@@ -35,18 +35,19 @@ namespace MonoGame.Imaging
             Save(output, format, SaveConfiguration.Default);
         }
 
-        public void Save(Stream output, ImageSaveFormat format, SaveConfiguration config)
+        public unsafe void Save(Stream output, ImageSaveFormat format, SaveConfiguration config)
         {
             lock (SyncRoot)
             {
-                unsafe
+                _tempBuffer = _manager.Rent();
+                try
                 {
                     void Get(out int w, out int h, out int p, out byte* d)
                     {
                         ImageInfo info = GetImageInfo();
                         CheckImageInfo(info);
 
-                        IntPtr data = GetDataPointer();
+                        IntPtr data = Pointer;
                         if (data == IntPtr.Zero)
                             throw new InvalidOperationException(
                                 $"No image data is present in this {nameof(Image)} instance.");
@@ -103,6 +104,10 @@ namespace MonoGame.Imaging
                             throw new ArgumentOutOfRangeException(nameof(format), $"Invalid Format: {format}");
                     }
                 }
+                finally
+                {
+                    _manager.Return(_tempBuffer);
+                }
             }
         }
 
@@ -110,21 +115,17 @@ namespace MonoGame.Imaging
         {
             if (data == null || size <= 0)
                 return 0;
-
-            int bufferSize = _manager.GetOptimalByteArraySize(size);
-            byte[] buffer = _manager.AllocateByteArray(bufferSize);
-
-            int read = 0;
-
-            using (var input = new UnmanagedMemoryStream(data, size))
+            
+            int leftToRead = size;
+            while(leftToRead > 0)
             {
-                while ((read = input.Read(buffer, 0, bufferSize)) > 0)
-                {
-                    stream.Write(buffer, 0, read);
-                }
-            }
+                int read = Math.Min(leftToRead, _tempBuffer.Length);
+                for (int i = 0; i < read; i++)
+                    _tempBuffer[i] = data[i + size - leftToRead];
 
-            _manager.ReleaseByteArray(buffer);
+                stream.Write(_tempBuffer, 0, read);
+                leftToRead -= read;
+            }
 
             return size;
         }

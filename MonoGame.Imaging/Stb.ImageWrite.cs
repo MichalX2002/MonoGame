@@ -8,10 +8,10 @@ namespace MonoGame.Imaging
         public static WriteContext GetWriteContext(
             WriteCallback c, MemoryManager manager, Stream stream, SaveConfiguration config)
         {
-            return new WriteContext(config.OnWrite, c, manager, stream, config.UseTgaRLE);
+            return new WriteContext(c, manager, stream, config.UseTgaRLE);
         }
 
-        public static void WriteFv(in WriteContext s, string fmt, params int[] v)
+        public static void WriteFv(WriteContext s, string fmt, params int[] v)
         {
             var vindex = 0;
             for (var i = 0; i < fmt.Length; ++i)
@@ -51,12 +51,12 @@ namespace MonoGame.Imaging
             }
         }
 
-        public static void WriteF(in WriteContext s, string fmt, params int[] v)
+        public static void WriteF(WriteContext s, string fmt, params int[] v)
         {
             WriteFv(s, fmt, v);
         }
 
-        public static int WriteFile(in WriteContext s, int rgb_dir, int vdir, int x, int y,
+        public static int WriteFile(WriteContext s, int rgb_dir, int vdir, int x, int y,
             int comp, int expand_mono, void* data, int alpha, int pad, string fmt, params int[] v)
         {
             if ((y < 0) || (x < 0))
@@ -68,7 +68,7 @@ namespace MonoGame.Imaging
         }
 
         public static int CallbackWriteBmp(
-            in WriteContext s,
+            WriteContext s,
             int x,
             int y,
             int comp,
@@ -78,7 +78,8 @@ namespace MonoGame.Imaging
             return WriteBmpCore(s, x, y, comp, data);
         }
 
-        public static int CallbackWriteTga(in WriteContext s,
+        public static int CallbackWriteTga(
+            WriteContext s,
             int x,
             int y,
             int comp,
@@ -88,7 +89,8 @@ namespace MonoGame.Imaging
             return WriteTgaCore(s, x, y, comp, data);
         }
 
-        public static int CallbackWritePng(in WriteContext c,
+        public static int CallbackWritePng(
+            WriteContext c,
             int x,
             int y,
             int comp,
@@ -102,11 +104,11 @@ namespace MonoGame.Imaging
 
             c.Write.Invoke(c.Stream, png, len);
 
-            c.Manager.Free(png);
+            Free(png);
             return 1;
         }
 
-        public static int CallbackWriteJpg(in WriteContext s, int jpgQuality,
+        public static int CallbackWriteJpg(WriteContext s, int jpgQuality,
             int x,
             int y,
             int comp,

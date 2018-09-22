@@ -10,7 +10,7 @@ namespace MonoGame.Imaging
         public int num_bits;
         public uint code_buffer;
         public sbyte* zout;
-        public sbyte* zout_start;
+        public MarshalPointer zout_start;
         public sbyte* zout_end;
         public int z_expandable;
         public ZHuffman z_length;

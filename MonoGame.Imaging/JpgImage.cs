@@ -23,11 +23,11 @@ namespace MonoGame.Imaging
         public const int STBI__ZFAST_BITS = 9;
 
         public readonly ReadContext _readCtx;
-        public readonly MarshalPointer<Huffman> _huff_dc = new MarshalPointer<Huffman>(4);
-        public readonly MarshalPointer<Huffman> _huff_ac = new MarshalPointer<Huffman>(4);
-        public readonly MarshalPointer<ushort>[] _dequant;
+        public readonly MarshalPointer _huff_dc = Imaging.MAlloc(4 * sizeof(Huffman));
+        public readonly MarshalPointer _huff_ac = Imaging.MAlloc(4 * sizeof(Huffman));
+        public readonly MarshalPointer[] _dequant;
 
-        public readonly MarshalPointer<short>[] _fastAc;
+        public readonly MarshalPointer[] _fastAc;
 
         // sizes for components, interleaved MCUs
         public int img_h_max, img_v_max;
@@ -53,7 +53,7 @@ namespace MonoGame.Imaging
         public int rgb;
 
         public int scan_n;
-        public MarshalPointer<int> _order = new MarshalPointer<int>(4);
+        public MarshalPointer _order = Imaging.MAlloc(4 * sizeof(int));
         public int RestartInterval, ToDo;
 
         // kernels
@@ -78,16 +78,16 @@ namespace MonoGame.Imaging
                 JpgImgComp[i] = new ImgComp();
             }
 
-            _fastAc = new MarshalPointer<short>[4];
+            _fastAc = new MarshalPointer[4];
             for (var i = 0; i < _fastAc.Length; ++i)
             {
-                _fastAc[i] = new MarshalPointer<short>(1 << STBI__ZFAST_BITS);
+                _fastAc[i] = Imaging.MAlloc((1 << STBI__ZFAST_BITS) * sizeof(short));
             }
 
-            _dequant = new MarshalPointer<ushort>[4];
+            _dequant = new MarshalPointer[4];
             for (var i = 0; i < _dequant.Length; ++i)
             {
-                _dequant[i] = new MarshalPointer<ushort>(64);
+                _dequant[i] = Imaging.MAlloc(64 * sizeof(ushort));
             }
         }
     }
