@@ -47,6 +47,7 @@ namespace Lidgren.Network.Language
 
             public string this[string key] => GetString(key);
 
+            public string Culture => "en_us";
             public IEnumerable<KeyValuePair<string, string>> Pairs => _pairs;
 
             public DefaultLanguage()
@@ -73,7 +74,7 @@ namespace Lidgren.Network.Language
                 if (_pairs.TryGetValue(key, out string value))
                     return value;
 
-                return $"String Not Found: \"{key}\"";
+                return $"{Culture}[{key}]";
             }
         }
     }
