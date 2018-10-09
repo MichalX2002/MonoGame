@@ -1,13 +1,13 @@
 ﻿
 namespace MonoGame.Imaging
 {
-    internal unsafe struct ReadCallbacks
+    internal unsafe readonly struct ReadCallbacks
     {
-        public delegate int ReadCallback(void* user, byte* data, int size);
-        public delegate int EoFCallback(void* user);
+        public delegate int ReadCallback(byte* data, int size);
+        public delegate int EoFCallback();
 
-        public ReadCallback Read;
-        public EoFCallback EoF;
+        public readonly ReadCallback Read;
+        public readonly EoFCallback EoF;
 
         public ReadCallbacks(ReadCallback read, EoFCallback eof)
         {

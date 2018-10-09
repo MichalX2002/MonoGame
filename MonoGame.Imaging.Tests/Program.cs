@@ -2,9 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Runtime;
-using System.Runtime.InteropServices;
-using MonoGame.Imaging;
+using System.Linq;
 
 namespace MonoGame.Imaging.Tests
 {
@@ -15,30 +13,33 @@ namespace MonoGame.Imaging.Tests
 
     class Program
     {
-        public const string DATA_FOLDER = "testdata.zip";
-        
+        public const string DATA_ZIP = "testdata.zip";
+
         static void Main(string[] args)
         {
-            ZipArchive archive = ZipFile.OpenRead(DATA_FOLDER);
-            MemoryManager manager = new MemoryManager(true);
-            
-            TestEntry(manager, archive, "bmp/8bit.bmp");
-            TestEntry(manager, archive, "bmp/24bit.bmp");
+            ZipArchive archive = new ZipArchive(File.OpenRead(DATA_ZIP), ZipArchiveMode.Read, false);
+            MemoryManager manager = new MemoryManager();
 
-            TestEntry(manager, archive, "jpg/quality_0.jpg");
-            TestEntry(manager, archive, "jpg/quality_25.jpg");
-            TestEntry(manager, archive, "jpg/quality_50.jpg");
-            TestEntry(manager, archive, "jpg/quality_75.jpg");
-            TestEntry(manager, archive, "jpg/quality_100.jpg");
+            SaveConfiguration nonD = new SaveConfiguration(false, 0);
+            SaveConfiguration d = SaveConfiguration.Default;
 
-            TestEntry(manager, archive, "png/32bit.png");
-            TestEntry(manager, archive, "png/24bit.png");
-            TestEntry(manager, archive, "png/8bit.png");
+            TestEntry(d, manager, archive, "bmp/8bit.bmp");
+            TestEntry(d, manager, archive, "bmp/24bit.bmp");
 
-            TestEntry(manager, archive, "tga/32bit.tga");
-            TestEntry(manager, archive, "tga/32bit_compressed.tga");
-            TestEntry(manager, archive, "tga/24bit.tga");
-            TestEntry(manager, archive, "tga/24bit_compressed.tga");
+            TestEntry(d, manager, archive, "jpg/quality_0.jpg");
+            TestEntry(d, manager, archive, "jpg/quality_25.jpg");
+            TestEntry(d, manager, archive, "jpg/quality_50.jpg");
+            TestEntry(d, manager, archive, "jpg/quality_75.jpg");
+            TestEntry(d, manager, archive, "jpg/quality_100.jpg");
+           
+            TestEntry(d, manager, archive, "png/32bit.png");
+            TestEntry(d, manager, archive, "png/24bit.png");
+            TestEntry(d, manager, archive, "png/8bit.png");
+
+            TestEntry(nonD, manager, archive, "tga/32bit.tga");
+            TestEntry(d, manager, archive, "tga/32bit_compressed.tga");
+            TestEntry(nonD, manager, archive, "tga/24bit.tga");
+            TestEntry(d, manager, archive, "tga/24bit_compressed.tga");
 
             /*
             var watch = new Stopwatch();
@@ -68,66 +69,71 @@ namespace MonoGame.Imaging.Tests
             //TestEntry(manager, archive, "32bit.gif");
 
             archive.Dispose();
-            manager.Dispose();
 
             Console.ReadKey();
         }
 
-        static void TestEntry(MemoryManager manager, ZipArchive archive, string name)
+        static void TestEntry(SaveConfiguration config, MemoryManager manager, ZipArchive archive, string name)
         {
             Stopwatch watch = new Stopwatch();
-            int tries = 1;
-
-            byte[] buf = new byte[1024 * 128];
+            int tries = 100;
 
             try
             {
                 var entry = archive.GetEntry(name);
                 MemoryStream dataStream = new MemoryStream((int)entry.Length);
-                entry.Open().CopyTo(dataStream);
-                dataStream.Position = 0;
+                using (var es = entry.Open())
+                    es.CopyTo(dataStream);
 
                 double infoReadTime = 0;
                 double pointerReadTime = 0;
                 double imageSaveTime = 0;
 
+                var ms = new MemoryStream();
                 for (int i = 0; i < tries; i++)
                 {
-                    using (var img = new Image(dataStream, false))
+                    dataStream.Position = 0;
+                    using (var img = new Image(dataStream, false, manager))
                     {
-                        watch.Start();
+                        watch.Restart();
                         ImageInfo imageInfo = img.Info;
                         watch.Stop();
-                        infoReadTime += watch.Elapsed.TotalMilliseconds;
+                        if(tries > 0)
+                            infoReadTime += watch.Elapsed.TotalMilliseconds;
 
                         //Console.WriteLine(name + ": " + (img.LastGetInfoFailed ? "Failed to read info" : "Retrieved info successfully"));
 
                         //Console.WriteLine($"Loading ({imageInfo}) data...");
 
                         watch.Restart();
-                        IntPtr data = img.GetDataPointer();
+                        IntPtr data = img.Pointer;
                         watch.Stop();
-                        pointerReadTime += watch.Elapsed.TotalMilliseconds;
+                        if (tries > 0)
+                            pointerReadTime += watch.Elapsed.TotalMilliseconds;
 
                         if (data == null)
                             Console.WriteLine("Data Pointer NULL: " + img.LastError);
                         else
                         {
                             //Console.WriteLine("Saving " + img.PointerLength + " bytes...");
-
-                            FileInfo outputInfo = new FileInfo("testoutput/" + name);
-                            outputInfo.Directory.Create();
-
-                            using (var fs = new FileStream(outputInfo.FullName, FileMode.Create))
-                            {
-                                watch.Restart();
-                                img.Save(fs);
-                                watch.Stop();
+                            
+                            watch.Restart();
+                            ms.Position = 0;
+                            ms.SetLength(0);
+                            img.Save(ms, imageInfo.SourceFormat.ToSaveFormat(), config);
+                            watch.Stop();
+                            if (tries > 0)
                                 imageSaveTime += watch.Elapsed.TotalMilliseconds;
-                            }
                         }
-                        dataStream.Position = 0;
                     }
+                }
+
+                FileInfo outputInfo = new FileInfo("testoutput/" + name);
+                outputInfo.Directory.Create();
+                using (var fs = new FileStream(outputInfo.FullName, FileMode.Create))
+                {
+                    ms.Position = 0;
+                    ms.CopyTo(fs);
                 }
 
                 Console.WriteLine();
@@ -139,11 +145,11 @@ namespace MonoGame.Imaging.Tests
             }
             catch (Exception exc)
             {
-                Console.WriteLine(exc.Message);
+                Console.WriteLine(exc);
             }
 
-            Console.WriteLine($"Memory Allocated (Pointers: {manager.AllocatedPointers}, Arrays: {manager.AllocatedArrays}): " + manager.AllocatedBytes + " bytes");
-            Console.WriteLine($"Lifetime Allocated (Pointers: {manager.LifetimeAllocatedPointers}, Arrays: {manager.LifetimeAllocatedArrays}): " + manager.LifetimeAllocatedBytes + " bytes");
+            Console.WriteLine($"Memory Allocated (Arrays: {manager.AllocatedArrays}): " + manager.AllocatedBytes + " bytes");
+            Console.WriteLine($"Lifetime Allocated (Arrays: {manager.LifetimeAllocatedArrays}): " + manager.AllocatedBytes + " bytes");
             Console.WriteLine("----------------------------------------------------");
         }
     }

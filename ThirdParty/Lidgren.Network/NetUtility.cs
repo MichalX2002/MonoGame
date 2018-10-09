@@ -141,7 +141,7 @@ namespace Lidgren.Network
                     // check each entry for a valid IP address
                     foreach (IPAddress ipCurrent in entry.AddressList)
                     {
-                        if (ipCurrent.AddressFamily == AddressFamily.InterNetwork || ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
+                        if (ipCurrent.AddressFamily == AddressFamily.InterNetwork || ipCurrent.AddressFamily == AddressFamily.InterNetworkV6)
                         {
                             callback(ipCurrent);
                             return;
@@ -191,7 +191,7 @@ namespace Lidgren.Network
                     return null;
                 foreach (var address in addresses)
                 {
-                    if (address.AddressFamily == AddressFamily.InterNetwork || ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
+                    if (address.AddressFamily == AddressFamily.InterNetwork || address.AddressFamily == AddressFamily.InterNetworkV6)
                         return address;
                 }
                 return null;

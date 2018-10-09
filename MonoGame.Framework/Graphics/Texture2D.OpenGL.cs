@@ -364,7 +364,7 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 ImageInfo info = img.Info;
 
-                IntPtr data = img.GetDataPointer();
+                IntPtr data = img.Pointer;
                 if (data == IntPtr.Zero)
                     throw new InvalidDataException($"Could not decode stream {info}: \n" + img.LastError);
 

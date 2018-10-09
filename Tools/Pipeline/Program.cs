@@ -3,6 +3,8 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Reflection;
+using System.Text;
 using Eto;
 using Eto.Forms;
 
@@ -73,7 +75,18 @@ namespace MonoGame.Tools.Pipeline
 #if !DEBUG
             catch (Exception ex)
             {
-                PipelineSettings.Default.ErrorMessage = ex.ToString();
+                StringBuilder messageBuilder = new StringBuilder(ex.ToString());
+                if(ex is ReflectionTypeLoadException typeEx)
+                {
+                    messageBuilder.AppendLine();
+                    messageBuilder.AppendLine();
+                    foreach (var innerEx in typeEx.LoaderExceptions)
+                    { 
+                        messageBuilder.AppendLine(innerEx.ToString());
+                    }
+                }
+                    
+                PipelineSettings.Default.ErrorMessage = messageBuilder.ToString();
                 PipelineSettings.Default.Save();
                 app.Restart();
             }

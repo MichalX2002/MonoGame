@@ -4,21 +4,16 @@ namespace MonoGame.Imaging
 {
     public unsafe delegate int WriteCallback(Stream stream, byte* data, int size);
 
-    public struct WriteContext
+    public class WriteContext
     {
-        public SaveConfiguration.ImageWritingDelegate OnWrite;
-
         public WriteCallback Write;
         public MemoryManager Manager;
         public Stream Stream;
-
         public bool WriteTgaWithRle;
 
-        public WriteContext(SaveConfiguration.ImageWritingDelegate onWrite,
+        public WriteContext(
             WriteCallback callback, MemoryManager manager, Stream stream, bool writeTgaWithRle)
         {
-            OnWrite = onWrite;
-
             Write = callback;
             Manager = manager;
             Stream = stream;

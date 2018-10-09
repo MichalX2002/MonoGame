@@ -10,11 +10,11 @@ namespace Microsoft.Xna.Framework.Graphics
     public enum SpriteSortMode
     {
         /// <summary>
-        /// All sprites are drawing when <see cref="SpriteBatch.End"/> invokes, in order of draw call sequence. Depth is ignored.
+        /// All sprites are drawing when <see cref="SpriteBatch.End"/> invokes, in order of draw call sequence and depth.
         /// </summary>
         Deferred,
         /// <summary>
-        /// Each sprite is drawing at individual draw call, instead of <see cref="SpriteBatch.End"/>. Depth is ignored.
+        /// Each sprite is drawing at individual draw call, instead of <see cref="SpriteBatch.End"/>.
         /// </summary>
         Immediate,
         /// <summary>

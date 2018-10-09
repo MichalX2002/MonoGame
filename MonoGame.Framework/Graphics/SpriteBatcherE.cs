@@ -246,10 +246,10 @@ namespace Microsoft.Xna.Framework.Graphics
                     EnsureVertexBuildBuffer(sliceItemCount);
 
                     // setup fields to use in the copying loop
-                    int elementCount = sliceItemCount * 4;
+                    int vertexCount = sliceItemCount * 4;
                     int itemOffset = list.Count - itemsLeft;
                     var outputPtr = (VertexPositionColorTexture*)_vertexBuildBuffer;
-                    for (int i = 0; i < elementCount; i += 4)
+                    for (int i = 0; i < vertexCount; i += 4)
                     {
                         // copy vertex data from items to build buffer
                         // one item contains 4 vertices
@@ -261,11 +261,9 @@ namespace Microsoft.Xna.Framework.Graphics
                     }
 
                     // upload data from build buffer,
-                    // 1 batch item has 4 vertices, therefore we use elementCount
-                    _vertices.SetData(_vertexBuildBuffer, elementCount);
-
-                    // flush vertex data
-                    FlushVertexArray(sliceItemCount, effect, texture);
+                    // 1 batch item has 4 vertices, therefore we use vertexCount
+                    _vertices.SetData(_vertexBuildBuffer, vertexCount);
+                    FlushVertexArray(vertexCount, effect, texture);
                     itemsLeft -= sliceItemCount;
                 }
 
@@ -286,10 +284,10 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Sends data to the graphics device. Here is where the actual drawing starts.
         /// </summary>
-        /// <param name="count">The amount of batch items.</param>
+        /// <param name="vertexCount">The amount of vertices.</param>
         /// <param name="effect">The custom effect to apply to the geometry</param>
         /// <param name="texture">The texture to draw.</param>
-        private void FlushVertexArray(int count, Effect effect, Texture texture)
+        private void FlushVertexArray(int vertexCount, Effect effect, Texture texture)
         {
             _device.Indices = _indices;
             _device.SetVertexBuffer(_vertices);
@@ -305,13 +303,13 @@ namespace Microsoft.Xna.Framework.Graphics
                     // ends up in Textures[0].
                     _device.Textures[0] = texture;
 
-                    _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, count * 2);
+                    _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexCount / 2);
                 }
             }
             else
             {
                 // If no custom effect is defined, then simply render.
-                _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, count * 2);
+                _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexCount / 2);
             }
 
             _device.Indices = null;
@@ -460,171 +458,6 @@ namespace Microsoft.Xna.Framework.Graphics
                 GC.SuppressFinalize(this);
             }
 
-            struct QuickSorter
-            {
-                private const int IntrosortSizeThreshold = 16;
-
-                private readonly SpriteBatchItem* _keys;
-                private readonly int _keyCount;
-
-                public QuickSorter(SpriteBatchItem* keys, int keyCount)
-                {
-                    _keys = keys;
-                    _keyCount = keyCount;
-                }
-
-                public void Sort(int startIndex, int length)
-                {
-                    if (length < 2)
-                        return;
-
-                    IntroSort(startIndex, length + startIndex - 1, FloorLog2(_keyCount) * 2);
-                }
-
-                private static int FloorLog2(int n)
-                {
-                    int result = 0;
-                    while (n >= 1)
-                    {
-                        result++;
-                        n = n / 2;
-                    }
-                    return result;
-                }
-
-                private void Swap(int i, int j)
-                {
-                    SpriteBatchItem item = _keys[i];
-                    _keys[i] = _keys[j];
-                    _keys[j] = item;
-                }
-
-                private void SwapIfGreaterWithItems(int a, int b)
-                {
-                    if (a != b)
-                        if (_keys[a].CompareToRef(_keys[b]) > 0)
-                            Swap(a, b);
-                }
-
-                private void IntroSort(int low, int high, int depthLimit)
-                {
-                    while (high > low)
-                    {
-                        int partitionSize = high - low + 1;
-                        if (partitionSize <= IntrosortSizeThreshold)
-                        {
-                            if (partitionSize == 1)
-                                return;
-
-                            if (partitionSize == 2)
-                            {
-                                SwapIfGreaterWithItems(low, high);
-                                return;
-                            }
-
-                            if (partitionSize == 3)
-                            {
-                                SwapIfGreaterWithItems(low, high - 1);
-                                SwapIfGreaterWithItems(low, high);
-                                SwapIfGreaterWithItems(high - 1, high);
-                                return;
-                            }
-
-                            InsertionSort(low, high);
-                            return;
-                        }
-
-                        if (depthLimit == 0)
-                        {
-                            Heapsort(low, high);
-                            return;
-                        }
-                        depthLimit--;
-
-                        int p = PickPivotAndPartition(low, high);
-                        IntroSort(p + 1, high, depthLimit);
-                        high = p - 1;
-                    }
-                }
-
-                private void InsertionSort(int low, int high)
-                {
-                    int i, j;
-                    SpriteBatchItem t;
-                    for (i = low; i < high; i++)
-                    {
-                        j = i;
-                        t = _keys[i + 1];
-                        while (j >= low && t.CompareToRef(_keys[j]) < 0)
-                        {
-                            _keys[j + 1] = _keys[j];
-                            j--;
-                        }
-                        _keys[j + 1] = t;
-                    }
-                }
-
-                private int PickPivotAndPartition(int lo, int hi)
-                {
-                    // Compute median-of-three.  But also partition them, since we've done the comparison.
-                    int mid = lo + (hi - lo) / 2;
-                    // Sort lo, mid and hi appropriately, then pick mid as the pivot.
-                    SwapIfGreaterWithItems(lo, mid);
-                    SwapIfGreaterWithItems(lo, hi);
-                    SwapIfGreaterWithItems(mid, hi);
-
-                    var pivot = _keys[mid];
-                    Swap(mid, hi - 1);
-                    int left = lo, right = hi - 1;  // We already partitioned lo and hi and put the pivot in hi - 1. And we pre-increment & decrement below.
-
-                    while (left < right)
-                    {
-                        while (_keys[++left].CompareToRef(pivot) < 0) ;
-                        while (pivot.CompareToRef(_keys[--right]) < 0) ;
-
-                        if (left >= right)
-                            break;
-
-                        Swap(left, right);
-                    }
-
-                    // Put pivot in the right location.
-                    Swap(left, (hi - 1));
-                    return left;
-                }
-
-                private void Heapsort(int lo, int hi)
-                {
-                    int n = hi - lo + 1;
-                    for (int i = n / 2; i >= 1; i = i - 1)
-                        DownHeap(i, n, lo);
-
-                    for (int i = n; i > 1; i = i - 1)
-                    {
-                        Swap(lo, lo + i - 1);
-                        DownHeap(1, i - 1, lo);
-                    }
-                }
-
-                private void DownHeap(int i, int n, int lo)
-                {
-                    var d = _keys[lo + i - 1];
-                    int child;
-                    while (i <= n / 2)
-                    {
-                        child = 2 * i;
-                        if (child < n && _keys[lo + child - 1].CompareToRef(_keys[lo + child]) < 0)
-                            child++;
-
-                        if (!(d.CompareToRef(_keys[lo + child - 1]) < 0))
-                            break;
-
-                        _keys[lo + i - 1] = _keys[lo + child - 1];
-                        i = child;
-                    }
-                    _keys[lo + i - 1] = d;
-                }
-            }
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Microsoft.Xna.Framework.Graphics
 	{
 		internal SurfaceFormat _format;
 		internal int _levelCount;
-        private static int _lastSortingKey;
+        internal static int _lastSortingKey = 0;
         public static List<Texture> AllTextures = new List<Texture>();
 
         /// <summary>
