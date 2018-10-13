@@ -502,7 +502,7 @@ namespace MonoGame.Utilities.Collections
         }
 
         [DebuggerDisplay("Count = {Count}")]
-        public sealed class KeyCollection : ICollection<TKey>, IReadOnlyCollection<TKey>, IEnumerable<TKey>
+        public sealed class KeyCollection : IReadOnlyCollection<TKey>, IEnumerable<TKey>
         {
             private QuickDictionary<TKey, TValue> dictionary;
 
@@ -525,45 +525,19 @@ namespace MonoGame.Utilities.Collections
                 if (array.Length - index < dictionary.Count)
                     throw new ArgumentException(nameof(array), ArrayTooSmallException);
                 
-                Entry[] entries = dictionary.entries;
                 for (int i = 0; i < dictionary.count; i++)
                 {
-                    ref Entry entry = ref entries[i];
+                    ref Entry entry = ref dictionary.entries[i];
                     if (entry.hashCode >= 0)
                         array[index++] = entry.key;
                 }
             }
 
-            public bool Contains(TKey item)
-            {
-                return dictionary.ContainsKey(item);
-            }
+            public bool Contains(TKey item) =>  dictionary.ContainsKey(item);
+        
+            public IEnumerator<TKey> GetEnumerator() => new Enumerator(dictionary);
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-            public void Add(TKey item)
-            {
-                throw new InvalidOperationException();
-            }
-
-            public void Clear()
-            {
-                throw new InvalidOperationException();
-            }
-
-            public bool Remove(TKey item)
-            {
-                throw new InvalidOperationException();
-            }
-
-            public IEnumerator<TKey> GetEnumerator()
-            {
-                return new Enumerator(dictionary);
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return new Enumerator(dictionary);
-            }
-            
             private struct Enumerator : IEnumerator<TKey>
             {
                 private QuickDictionary<TKey, TValue> dictionary;
@@ -627,7 +601,7 @@ namespace MonoGame.Utilities.Collections
         }
         
         [DebuggerDisplay("Count = {Count}")]
-        public sealed class ValueCollection : ICollection<TValue>, IReadOnlyCollection<TValue>, IEnumerable<TValue>
+        public sealed class ValueCollection : IReadOnlyCollection<TValue>, IEnumerable<TValue>
         {
             private QuickDictionary<TKey, TValue> dictionary;
 
@@ -659,35 +633,10 @@ namespace MonoGame.Utilities.Collections
                 }
             }
 
-            public bool Contains(TValue item)
-            {
-                return dictionary.ContainsValue(item);
-            }
-
-            public void Add(TValue item)
-            {
-                throw new InvalidOperationException();
-            }
-
-            public void Clear()
-            {
-                throw new InvalidOperationException();
-            }
-
-            public bool Remove(TValue item)
-            {
-                throw new InvalidOperationException();
-            }
-
-            public IEnumerator<TValue> GetEnumerator()
-            {
-                return new Enumerator(dictionary);
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return new Enumerator(dictionary);
-            }
+            public bool Contains(TValue item) => dictionary.ContainsValue(item);
+            
+            public IEnumerator<TValue> GetEnumerator() => new Enumerator(dictionary);
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
             private struct Enumerator : IEnumerator<TValue>
             {
@@ -750,7 +699,5 @@ namespace MonoGame.Utilities.Collections
                 public void Dispose() { }
             }
         }
-
-        
     }
 }
