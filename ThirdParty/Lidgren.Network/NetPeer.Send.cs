@@ -63,27 +63,26 @@ namespace Lidgren.Network
             }
         }
 
-        internal static int GetMTU(IList<NetConnection> recipients)
+        internal static int GetMTU(ICollection<NetConnection> recipients)
         {
-            int count = recipients.Count;
-
-            int mtu = int.MaxValue;
-            if (count < 1)
+            int mtu = NetPeerConfiguration.kDefaultMTU;
+            if (recipients.Count < 1)
             {
 #if DEBUG
 				throw new NetException("GetMTU called with no recipients");
 #else
                 // we don't have access to the particular peer, so just use default MTU
-                return NetPeerConfiguration.kDefaultMTU;
+                return mtu;
 #endif
             }
 
-            for (int i = 0; i < count; i++)
+            foreach(var conn in recipients)
             {
-                var conn = recipients[i];
-                int cmtu = conn.m_currentMTU;
-                if (cmtu < mtu)
-                    mtu = cmtu;
+                if (conn == null)
+                    continue;
+
+                if (conn.m_currentMTU < mtu)
+                    mtu = conn.m_currentMTU;
             }
             return mtu;
         }
@@ -95,7 +94,7 @@ namespace Lidgren.Network
         /// <param name="recipients">The list of recipients to send to</param>
         /// <param name="method">How to deliver the message</param>
         /// <param name="sequenceChannel">Sequence channel within the delivery method</param>
-        public void SendMessage(NetOutgoingMessage msg, List<NetConnection> recipients, NetDeliveryMethod method, int sequenceChannel)
+        public void SendMessage(NetOutgoingMessage msg, ICollection<NetConnection> recipients, NetDeliveryMethod method, int sequenceChannel)
         {
             if (msg == null)
                 throw new ArgumentNullException(nameof(msg));
@@ -103,26 +102,27 @@ namespace Lidgren.Network
                 throw new ArgumentNullException(nameof(recipients));
             if (recipients.Count < 1)
                 throw new NetException("recipients must contain at least one item");
+
             if (method == NetDeliveryMethod.Unreliable || method == NetDeliveryMethod.ReliableUnordered)
                 NetException.Assert(sequenceChannel == 0, "Delivery method " + method + " cannot use sequence channels other than 0!");
             if (msg.m_isSent)
                 throw new NetException("This message has already been sent! Use NetPeer.SendMessage() to send to multiple recipients efficiently");
 
             int mtu = GetMTU(recipients);
-
             msg.m_isSent = true;
 
             int len = msg.GetEncodedSize();
             if (len <= mtu)
             {
                 Interlocked.Add(ref msg.m_recyclingCount, recipients.Count);
-                foreach (NetConnection conn in recipients)
+                foreach (var conn in recipients)
                 {
                     if (conn == null)
                     {
                         Interlocked.Decrement(ref msg.m_recyclingCount);
                         continue;
                     }
+
                     NetSendResult res = conn.EnqueueMessage(msg, method, sequenceChannel);
                     if (res != NetSendResult.Queued && res != NetSendResult.Sent)
                         Interlocked.Decrement(ref msg.m_recyclingCount);
@@ -133,8 +133,6 @@ namespace Lidgren.Network
                 // message must be fragmented!
                 SendFragmentedMessage(msg, recipients, method, sequenceChannel);
             }
-
-            return;
         }
 
         /// <summary>

@@ -7,6 +7,7 @@ namespace Lidgren.Network.Language
     {
         string this[string key] { get; }
 
+        string Culture { get; }
         IEnumerable<KeyValuePair<string, string>> Pairs { get; }
 
         string GetString(string key);

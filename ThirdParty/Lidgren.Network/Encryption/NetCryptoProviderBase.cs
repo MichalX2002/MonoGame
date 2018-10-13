@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MonoGame.Utilities.IO;
+using System;
 using System.IO;
 using System.Security.Cryptography;
 
@@ -6,28 +7,23 @@ namespace Lidgren.Network
 {
     public abstract class NetCryptoProviderBase : NetEncryption, IDisposable
     {
-        private bool _disposed = false;
-
         protected SymmetricAlgorithm m_algorithm;
-
+        
         [ThreadStatic]
         private ICryptoTransform __encryptor;
         protected ICryptoTransform Encryptor
         {
             get
             {
-                ICryptoTransform GetNew() => m_algorithm.CreateEncryptor();
-
                 if (__encryptor == null)
                 {
-                    __encryptor = GetNew();
+                    __encryptor = m_algorithm.CreateEncryptor();
                 }
-                else if (CanTransformBeReused(__encryptor) == false)
+                else if (__encryptor.IsReusable() == false)
                 {
                     __encryptor.Dispose();
-                    __encryptor = GetNew();
+                    __encryptor = m_algorithm.CreateEncryptor();
                 }
-
                 return __encryptor;
             }
         }
@@ -38,32 +34,26 @@ namespace Lidgren.Network
         {
             get
             {
-                ICryptoTransform GetNew() => m_algorithm.CreateDecryptor();
-
                 if (__decryptor == null)
                 {
-                    __decryptor = GetNew();
+                    __decryptor = m_algorithm.CreateDecryptor();
                 }
-                else if (CanTransformBeReused(__decryptor) == false)
+                else if (__decryptor.IsReusable() == false)
                 {
                     __decryptor.Dispose();
-                    __decryptor = GetNew();
+                    __decryptor = m_algorithm.CreateDecryptor();
                 }
-
                 return __decryptor;
             }
         }
+
+        public bool IsDisposed { get; private set; }
 
         public NetCryptoProviderBase(NetPeer peer, SymmetricAlgorithm algo) : base(peer)
         {
             m_algorithm = algo;
             m_algorithm.GenerateKey();
             m_algorithm.GenerateIV();
-        }
-
-        private bool CanTransformBeReused(ICryptoTransform transform)
-        {
-            return transform.CanReuseTransform && transform.CanTransformMultipleBlocks;
         }
 
         public override void SetKey(byte[] data, int offset, int count)
@@ -86,20 +76,20 @@ namespace Lidgren.Network
             try
             {
                 int sourceBits = msg.LengthBits;
-                using (var ms = new MemoryStream())
+                using (var ms = m_peer.GetRecyclableMemory())
                 {
                     using (var cs = new CryptoStream(ms, Encryptor, CryptoStreamMode.Write, true))
                         cs.Write(msg.m_data, 0, msg.LengthBytes);
 
                     int length = (int)ms.Length;
-                    int neededBufferSize = (length + 4) * 8;
+                    int neededBufferBits = (length + 4) * 8;
 
-                    msg.EnsureBufferSize(neededBufferSize);
+                    msg.EnsureBufferSize(neededBufferBits);
                     msg.LengthBits = 0; // reset write pointer
                     msg.Write((uint)sourceBits);
                     msg.Write(ms.GetBuffer(), 0, length);
-                    msg.LengthBits = neededBufferSize;
-
+                    msg.LengthBits = neededBufferBits;
+                    
                     return true;
                 }
             }
@@ -113,24 +103,24 @@ namespace Lidgren.Network
         {
             void Recycle(byte[] buffer)
             {
-                if (m_peer.m_configuration.m_useMessageRecycling)
+                if (m_peer.m_configuration.UseMessageRecycling)
                     m_peer.Recycle(buffer);
             }
 
             bool success = true;
             int decryptedBits = 0;
             byte[] result = null;
-            byte[] originalMessageBuffer = msg.m_data;
+            byte[] originalMsgBuffer = msg.m_data;
 
             try
             {
                 decryptedBits = (int)msg.ReadUInt32();
-                int decryptedLength = NetUtility.BytesNeededToHoldBits(decryptedBits);
-                result = m_peer.GetStorage(decryptedLength);
-
-                using (var ms = new MemoryStream(originalMessageBuffer, 4, msg.LengthBytes - 4))
+                using (var ms = new MemoryStream(originalMsgBuffer, 4, msg.LengthBytes - 4))
                 using (var cs = new CryptoStream(ms, Decryptor, CryptoStreamMode.Read))
                 {
+                    int decryptedLength = NetUtility.BytesNeededToHoldBits(decryptedBits);
+                    result = m_peer.GetStorage(decryptedLength);
+
                     if (cs.Read(result, 0, decryptedLength) != decryptedLength)
                         success = false;
                 }
@@ -140,14 +130,11 @@ namespace Lidgren.Network
                 success = false;
             }
 
-            Recycle(originalMessageBuffer);
+            Recycle(originalMsgBuffer);
             if (success == false)
             {
-                if (result != null)
-                {
-                    Recycle(result);
-                    result = null;
-                }
+                Recycle(result);
+                result = null;
                 decryptedBits = 0;
             }
 
@@ -159,13 +146,19 @@ namespace Lidgren.Network
 
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposed == false)
+            if (IsDisposed == false)
             {
-                __encryptor.Dispose();
-                __decryptor.Dispose();
-                m_algorithm.Dispose();
+                if (disposing)
+                {
+                    __encryptor.Dispose();
+                    __decryptor.Dispose();
+                    m_algorithm.Dispose();
 
-                _disposed = true;
+                    __encryptor = null;
+                    __decryptor = null;
+                    m_algorithm = null;
+                }
+                IsDisposed = true;
             }
         }
 

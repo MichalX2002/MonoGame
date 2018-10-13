@@ -3,9 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.Xna.Framework.Audio
 {
@@ -108,17 +106,19 @@ namespace Microsoft.Xna.Framework.Audio
             AL.BufferData(bufferId, stream.Reader.Channels == 1 ? ALFormat.Mono16 : ALFormat.Stereo16, castBuffer,
                 readSamples * sizeof(short), stream.Reader.SampleRate);
             ALHelper.CheckError("Failed to fill buffer, readSamples = {0}, SampleRate = {1}, buffer.Length = {2}.", readSamples, stream.Reader.SampleRate, castBuffer.Length);
-
-
+            
             return readSamples != BufferSize;
         }
+
         static void CastBuffer(float[] inBuffer, short[] outBuffer, int length)
         {
             for (int i = 0; i < length; i++)
             {
-                var temp = (int)(32767f * inBuffer[i]);
-                if (temp > short.MaxValue) temp = short.MaxValue;
-                else if (temp < short.MinValue) temp = short.MinValue;
+                int temp = (int)(32767f * inBuffer[i]);
+                if (temp > short.MaxValue)
+                    temp = short.MaxValue;
+                else if (temp < short.MinValue)
+                    temp = short.MinValue;
                 outBuffer[i] = (short)temp;
             }
         }
@@ -128,10 +128,12 @@ namespace Microsoft.Xna.Framework.Audio
             while (!cancelled)
             {
                 Thread.Sleep((int)(1000 / ((UpdateRate <= 0) ? 1 : UpdateRate)));
-                if (cancelled) break;
+                if (cancelled)
+                    break;
 
                 threadLocalStreams.Clear();
-                lock (iterationMutex) threadLocalStreams.AddRange(streams);
+                lock (iterationMutex)
+                    threadLocalStreams.AddRange(streams);
 
                 foreach (var stream in threadLocalStreams)
                 {
@@ -141,14 +143,13 @@ namespace Microsoft.Xna.Framework.Audio
                             if (!streams.Contains(stream))
                                 continue;
 
-                        bool finished = false;
-
                         AL.GetSource(stream.alSourceId, ALGetSourcei.BuffersQueued, out int queued);
                         ALHelper.CheckError("Failed to fetch queued buffers.");
                         AL.GetSource(stream.alSourceId, ALGetSourcei.BuffersProcessed, out int processed);
                         ALHelper.CheckError("Failed to fetch processed buffers.");
 
-                        if (processed == 0 && queued == stream.BufferCount) continue;
+                        if (processed == 0 && queued == stream.BufferCount)
+                            continue;
 
                         int[] tempBuffers;
                         if (processed > 0)
@@ -159,6 +160,7 @@ namespace Microsoft.Xna.Framework.Audio
                         else
                             tempBuffers = stream.alBufferIds.Skip(queued).ToArray();
 
+                        bool finished = false;
                         int bufferFilled = 0;
                         for (int i = 0; i < tempBuffers.Length && !pendingFinish; i++)
                         {
