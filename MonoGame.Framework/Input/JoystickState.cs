@@ -37,11 +37,11 @@ namespace Microsoft.Xna.Framework.Input
         public JoystickHat[] Hats{ get; internal set; }
 
         /// <summary>
-        /// Determines whether a specified instance of <see cref="Microsoft.Xna.Framework.Input.JoystickState"/> is
-        /// equal to another specified <see cref="Microsoft.Xna.Framework.Input.JoystickState"/>.
+        /// Determines whether a specified instance of <see cref="JoystickState"/> is
+        /// equal to another specified <see cref="JoystickState"/>.
         /// </summary>
-        /// <param name="left">The first <see cref="Microsoft.Xna.Framework.Input.JoystickState"/> to compare.</param>
-        /// <param name="right">The second <see cref="Microsoft.Xna.Framework.Input.JoystickState"/> to compare.</param>
+        /// <param name="left">The first <see cref="JoystickState"/> to compare.</param>
+        /// <param name="right">The second <see cref="JoystickState"/> to compare.</param>
         /// <returns><c>true</c> if <c>left</c> and <c>right</c> are equal; otherwise, <c>false</c>.</returns>
         public static bool operator ==(JoystickState left, JoystickState right)
         {
@@ -52,11 +52,11 @@ namespace Microsoft.Xna.Framework.Input
         }
 
         /// <summary>
-        /// Determines whether a specified instance of <see cref="Microsoft.Xna.Framework.Input.JoystickState"/> is not
-        /// equal to another specified <see cref="Microsoft.Xna.Framework.Input.JoystickState"/>.
+        /// Determines whether a specified instance of <see cref="JoystickState"/> is not
+        /// equal to another specified <see cref="JoystickState"/>.
         /// </summary>
-        /// <param name="left">The first <see cref="Microsoft.Xna.Framework.Input.JoystickState"/> to compare.</param>
-        /// <param name="right">The second <see cref="Microsoft.Xna.Framework.Input.JoystickState"/> to compare.</param>
+        /// <param name="left">The first <see cref="JoystickState"/> to compare.</param>
+        /// <param name="right">The second <see cref="JoystickState"/> to compare.</param>
         /// <returns><c>true</c> if <c>left</c> and <c>right</c> are not equal; otherwise, <c>false</c>.</returns>
         public static bool operator !=(JoystickState left, JoystickState right)
         {

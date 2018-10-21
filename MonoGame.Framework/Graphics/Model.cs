@@ -165,7 +165,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
         /// <summary>
-        /// Copies bone transforms relative to <see cref="Model.Root"/> bone from a given array to this model.
+        /// Copies bone transforms relative to <see cref="Root"/> bone from a given array to this model.
         /// </summary>
         /// <param name="sourceBoneTransforms">The array of prepared bone transform data.</param>
         /// <exception cref="ArgumentNullException">
@@ -189,7 +189,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         /// <summary>
-        /// Copies bone transforms relative to <see cref="Model.Root"/> bone from this model to a given array.
+        /// Copies bone transforms relative to <see cref="Root"/> bone from this model to a given array.
         /// </summary>
         /// <param name="destinationBoneTransforms">The array receiving the transformed bones.</param>
         /// <exception cref="ArgumentNullException">

@@ -144,7 +144,7 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        [System.Diagnostics.DebuggerNonUserCode]
+        [DebuggerNonUserCode]
         private void AssertNotDisposed()
         {
             if (_isDisposed)

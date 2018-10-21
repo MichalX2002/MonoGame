@@ -62,7 +62,7 @@ namespace MonoGame.Utilities.Png
             UnpackDataChunks();
 
             texture = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
-            texture.SetData<Color>(data);
+            texture.SetData(data);
 
             return texture;
         }

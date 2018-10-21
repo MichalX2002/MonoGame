@@ -11,7 +11,7 @@ namespace Microsoft.Xna.Framework.Graphics
 	{
 		private GraphicsDevice graphicsDevice;
 
-		public ModelMesh(GraphicsDevice graphicsDevice, System.Collections.Generic.List<ModelMeshPart> parts)
+		public ModelMesh(GraphicsDevice graphicsDevice, List<ModelMeshPart> parts)
 		{
 			// TODO: Complete member initialization
 			this.graphicsDevice = graphicsDevice;

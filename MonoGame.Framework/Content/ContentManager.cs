@@ -449,7 +449,7 @@ namespace Microsoft.Xna.Framework.Content
             {
                 using (var reader = GetContentReaderFromXnb(assetName, stream, xnbReader, null))
                 {
-                    reader.ReadAsset<T>(currentAsset);
+                    reader.ReadAsset(currentAsset);
                 }
             }
 		}

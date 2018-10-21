@@ -99,7 +99,7 @@ namespace MonoGame.Utilities
     /// <para>
     /// The ZlibStream is a <see
     /// href="http://en.wikipedia.org/wiki/Decorator_pattern">Decorator</see> on a <see
-    /// cref="System.IO.Stream"/>.  It adds ZLIB compression or decompression to any
+    /// cref="Stream"/>.  It adds ZLIB compression or decompression to any
     /// stream.
     /// </para>
     ///
@@ -185,7 +185,7 @@ namespace MonoGame.Utilities
         ///
         /// <param name="stream">The stream which will be read or written.</param>
         /// <param name="mode">Indicates whether the ZlibStream will compress or decompress.</param>
-        public ZlibStream(System.IO.Stream stream, CompressionMode mode)
+        public ZlibStream(Stream stream, CompressionMode mode)
             : this(stream, mode, CompressionLevel.Default, false)
         {
         }
@@ -249,7 +249,7 @@ namespace MonoGame.Utilities
         /// <param name="stream">The stream to be read or written while deflating or inflating.</param>
         /// <param name="mode">Indicates whether the ZlibStream will compress or decompress.</param>
         /// <param name="level">A tuning knob to trade speed for effectiveness.</param>
-        public ZlibStream(System.IO.Stream stream, CompressionMode mode, CompressionLevel level)
+        public ZlibStream(Stream stream, CompressionMode mode, CompressionLevel level)
             : this(stream, mode, level, false)
         {
         }
@@ -272,7 +272,7 @@ namespace MonoGame.Utilities
         ///   remain open after the deflation or inflation occurs.  By default, after
         ///   <c>Close()</c> is called on the stream, the captive stream is also
         ///   closed. In some cases this is not desired, for example if the stream is a
-        ///   <see cref="System.IO.MemoryStream"/> that will be re-read after
+        ///   <see cref="MemoryStream"/> that will be re-read after
         ///   compression.  Specify true for the <paramref name="leaveOpen"/> parameter to leave the stream
         ///   open.
         /// </para>
@@ -288,7 +288,7 @@ namespace MonoGame.Utilities
         /// <param name="mode">Indicates whether the ZlibStream will compress or decompress.</param>
         /// <param name="leaveOpen">true if the application would like the stream to remain
         /// open after inflation/deflation.</param>
-        public ZlibStream(System.IO.Stream stream, CompressionMode mode, bool leaveOpen)
+        public ZlibStream(Stream stream, CompressionMode mode, bool leaveOpen)
             : this(stream, mode, CompressionLevel.Default, leaveOpen)
         {
         }
@@ -306,7 +306,7 @@ namespace MonoGame.Utilities
         ///   stream remain open after the deflation or inflation occurs.  By
         ///   default, after <c>Close()</c> is called on the stream, the captive
         ///   stream is also closed. In some cases this is not desired, for example
-        ///   if the stream is a <see cref="System.IO.MemoryStream"/> that will be
+        ///   if the stream is a <see cref="MemoryStream"/> that will be
         ///   re-read after compression.  Specify true for the <paramref
         ///   name="leaveOpen"/> parameter to leave the stream open.
         /// </para>
@@ -374,7 +374,7 @@ namespace MonoGame.Utilities
         /// A tuning knob to trade speed for effectiveness. This parameter is
         /// effective only when mode is <c>CompressionMode.Compress</c>.
         /// </param>
-        public ZlibStream(System.IO.Stream stream, CompressionMode mode, CompressionLevel level, bool leaveOpen)
+        public ZlibStream(Stream stream, CompressionMode mode, CompressionLevel level, bool leaveOpen)
         {
             _baseStream = new ZlibBaseStream(stream, mode, level, ZlibStreamFlavor.ZLIB, leaveOpen);
         }
@@ -621,7 +621,7 @@ namespace MonoGame.Utilities
         /// </param>
         ///
         /// <returns>nothing. This method always throws.</returns>
-        public override long Seek(long offset, System.IO.SeekOrigin origin)
+        public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException();
         }
@@ -677,11 +677,11 @@ namespace MonoGame.Utilities
         /// </summary>
         ///
         /// <remarks>
-        ///   Uncompress it with <see cref="ZlibStream.UncompressString(byte[])"/>.
+        ///   Uncompress it with <see cref="UncompressString(byte[])"/>.
         /// </remarks>
         ///
-        /// <seealso cref="ZlibStream.UncompressString(byte[])"/>
-        /// <seealso cref="ZlibStream.CompressBuffer(byte[])"/>
+        /// <seealso cref="UncompressString(byte[])"/>
+        /// <seealso cref="CompressBuffer(byte[])"/>
         /// <seealso cref="GZipStream.CompressString(string)"/>
         ///
         /// <param name="s">
@@ -707,11 +707,11 @@ namespace MonoGame.Utilities
         /// </summary>
         ///
         /// <remarks>
-        ///   Uncompress it with <see cref="ZlibStream.UncompressBuffer(byte[])"/>.
+        ///   Uncompress it with <see cref="UncompressBuffer(byte[])"/>.
         /// </remarks>
         ///
-        /// <seealso cref="ZlibStream.CompressString(string)"/>
-        /// <seealso cref="ZlibStream.UncompressBuffer(byte[])"/>
+        /// <seealso cref="CompressString(string)"/>
+        /// <seealso cref="UncompressBuffer(byte[])"/>
         ///
         /// <param name="b">
         /// A buffer to compress.
@@ -735,8 +735,8 @@ namespace MonoGame.Utilities
         ///   Uncompress a ZLIB-compressed byte array into a single string.
         /// </summary>
         ///
-        /// <seealso cref="ZlibStream.CompressString(String)"/>
-        /// <seealso cref="ZlibStream.UncompressBuffer(byte[])"/>
+        /// <seealso cref="CompressString(string)"/>
+        /// <seealso cref="UncompressBuffer(byte[])"/>
         ///
         /// <param name="compressed">
         ///   A buffer containing ZLIB-compressed data.
@@ -759,8 +759,8 @@ namespace MonoGame.Utilities
         ///   Uncompress a ZLIB-compressed byte array into a byte array.
         /// </summary>
         ///
-        /// <seealso cref="ZlibStream.CompressBuffer(byte[])"/>
-        /// <seealso cref="ZlibStream.UncompressString(byte[])"/>
+        /// <seealso cref="CompressBuffer(byte[])"/>
+        /// <seealso cref="UncompressString(byte[])"/>
         ///
         /// <param name="compressed">
         ///   A buffer containing ZLIB-compressed data.
@@ -885,10 +885,10 @@ namespace MonoGame.Utilities
 
         /// <summary>
         /// Use this during compression to specify that all output should be flushed, as
-        /// with <see cref="FlushType.Sync"/>, but also, the compression state should be reset
+        /// with <see cref="Sync"/>, but also, the compression state should be reset
         /// so that decompression can restart from this point if previous compressed
         /// data has been damaged or if random access is desired. Using
-        /// <see cref="FlushType.Full"/> too often can significantly degrade the compression.
+        /// <see cref="Full"/> too often can significantly degrade the compression.
         /// </summary>
         Full,
 
@@ -1022,7 +1022,7 @@ namespace MonoGame.Utilities
     /// <summary>
     /// A general purpose exception class for exceptions in the Zlib library.
     /// </summary>
-    internal class ZlibException : System.Exception
+    internal class ZlibException : Exception
     {
         /// <summary>
         /// The ZlibException class captures exception information generated
@@ -1085,7 +1085,7 @@ namespace MonoGame.Utilities
         ///   count depending on the data available in the source TextReader. Returns -1
         ///   if the end of the stream is reached.
         /// </returns>
-        internal static System.Int32 ReadInput(System.IO.TextReader sourceTextReader, byte[] target, int start, int count)
+        internal static System.Int32 ReadInput(TextReader sourceTextReader, byte[] target, int start, int count)
         {
             // Returns 0 bytes if not enough space in target
             if (target.Length == 0) return 0;

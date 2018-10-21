@@ -1391,24 +1391,24 @@ namespace MonoGame.OpenGL
                 }
                 else if (Extensions.Contains("GL_APPLE_framebuffer_multisample"))
                 {
-                    GL.RenderbufferStorageMultisample = LoadFunction<GL.RenderbufferStorageMultisampleDelegate>("glRenderbufferStorageMultisampleAPPLE");
-                    GL.BlitFramebuffer = LoadFunction<GL.BlitFramebufferDelegate>("glResolveMultisampleFramebufferAPPLE");
+                    GL.RenderbufferStorageMultisample = LoadFunction<RenderbufferStorageMultisampleDelegate>("glRenderbufferStorageMultisampleAPPLE");
+                    GL.BlitFramebuffer = LoadFunction<BlitFramebufferDelegate>("glResolveMultisampleFramebufferAPPLE");
                 }
                 else if (Extensions.Contains("GL_EXT_multisampled_render_to_texture"))
                 {
-                    GL.RenderbufferStorageMultisample = LoadFunction<GL.RenderbufferStorageMultisampleDelegate>("glRenderbufferStorageMultisampleEXT");
-                    GL.FramebufferTexture2DMultiSample = LoadFunction<GL.FramebufferTexture2DMultiSampleDelegate>("glFramebufferTexture2DMultisampleEXT");
+                    GL.RenderbufferStorageMultisample = LoadFunction<RenderbufferStorageMultisampleDelegate>("glRenderbufferStorageMultisampleEXT");
+                    GL.FramebufferTexture2DMultiSample = LoadFunction<FramebufferTexture2DMultiSampleDelegate>("glFramebufferTexture2DMultisampleEXT");
 
                 }
                 else if (Extensions.Contains("GL_IMG_multisampled_render_to_texture"))
                 {
-                    GL.RenderbufferStorageMultisample = LoadFunction<GL.RenderbufferStorageMultisampleDelegate>("glRenderbufferStorageMultisampleIMG");
-                    GL.FramebufferTexture2DMultiSample = LoadFunction<GL.FramebufferTexture2DMultiSampleDelegate>("glFramebufferTexture2DMultisampleIMG");
+                    GL.RenderbufferStorageMultisample = LoadFunction<RenderbufferStorageMultisampleDelegate>("glRenderbufferStorageMultisampleIMG");
+                    GL.FramebufferTexture2DMultiSample = LoadFunction<FramebufferTexture2DMultiSampleDelegate>("glFramebufferTexture2DMultisampleIMG");
                 }
                 else if (Extensions.Contains("GL_NV_framebuffer_multisample"))
                 {
-                    GL.RenderbufferStorageMultisample = LoadFunction<GL.RenderbufferStorageMultisampleDelegate>("glRenderbufferStorageMultisampleNV");
-                    GL.BlitFramebuffer = LoadFunction<GL.BlitFramebufferDelegate>("glBlitFramebufferNV");
+                    GL.RenderbufferStorageMultisample = LoadFunction<RenderbufferStorageMultisampleDelegate>("glRenderbufferStorageMultisampleNV");
+                    GL.BlitFramebuffer = LoadFunction<BlitFramebufferDelegate>("glBlitFramebufferNV");
                 }
             }
         }

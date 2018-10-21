@@ -217,7 +217,7 @@ namespace MonoGame.Utilities.Png
             {
                 case SurfaceFormat.Single:
                     var floatData = new float[colorDataLength];
-                    texture2D.GetData<float>(floatData);
+                    texture2D.GetData(floatData);
 
                     for (int i = 0; i < colorDataLength; i++)
                     {
@@ -228,12 +228,12 @@ namespace MonoGame.Utilities.Png
                     break;
 
                 case SurfaceFormat.Color:
-                    texture2D.GetData<Color>(colorData);
+                    texture2D.GetData(colorData);
                     break;
 
                 case SurfaceFormat.Alpha8:
                     var alpha8Data = new Alpha8[colorDataLength];
-                    texture2D.GetData<Alpha8>(alpha8Data);
+                    texture2D.GetData(alpha8Data);
 
                     for (int i = 0; i < colorDataLength; i++)
                     {
@@ -244,7 +244,7 @@ namespace MonoGame.Utilities.Png
                 
                 case SurfaceFormat.Bgr565:
                     var bgr565Data = new Bgr565[colorDataLength];
-                    texture2D.GetData<Bgr565>(bgr565Data);
+                    texture2D.GetData(bgr565Data);
 
                     for (int i = 0; i < colorDataLength; i++)
                     {
@@ -255,7 +255,7 @@ namespace MonoGame.Utilities.Png
 
                 case SurfaceFormat.Bgra4444:
                     var bgra4444Data = new Bgra4444[colorDataLength];
-                    texture2D.GetData<Bgra4444>(bgra4444Data);
+                    texture2D.GetData(bgra4444Data);
 
                     for (int i = 0; i < colorDataLength; i++)
                     {
@@ -266,7 +266,7 @@ namespace MonoGame.Utilities.Png
 
                 case SurfaceFormat.Bgra5551:
                     var bgra5551Data = new Bgra5551[colorDataLength];
-                    texture2D.GetData<Bgra5551>(bgra5551Data);
+                    texture2D.GetData(bgra5551Data);
 
                     for (int i = 0; i < colorDataLength; i++)
                     {
@@ -276,7 +276,7 @@ namespace MonoGame.Utilities.Png
 
                 case SurfaceFormat.HalfSingle:
                     var halfSingleData = new HalfSingle[colorDataLength];
-                    texture2D.GetData<HalfSingle>(halfSingleData);
+                    texture2D.GetData(halfSingleData);
 
                     for (int i = 0; i < colorDataLength; i++)
                     {
@@ -287,7 +287,7 @@ namespace MonoGame.Utilities.Png
 
                 case SurfaceFormat.HalfVector2:
                     var halfVector2Data = new HalfVector2[colorDataLength];
-                    texture2D.GetData<HalfVector2>(halfVector2Data);
+                    texture2D.GetData(halfVector2Data);
 
                     for (int i = 0; i < colorDataLength; i++)
                     {
@@ -298,7 +298,7 @@ namespace MonoGame.Utilities.Png
 
                 case SurfaceFormat.HalfVector4:
                     var halfVector4Data = new HalfVector4[colorDataLength];
-                    texture2D.GetData<HalfVector4>(halfVector4Data);
+                    texture2D.GetData(halfVector4Data);
 
                     for (int i = 0; i < colorDataLength; i++)
                     {
@@ -309,7 +309,7 @@ namespace MonoGame.Utilities.Png
 
                 case SurfaceFormat.NormalizedByte2:
                     var normalizedByte2Data = new NormalizedByte2[colorDataLength];
-                    texture2D.GetData<NormalizedByte2>(normalizedByte2Data);
+                    texture2D.GetData(normalizedByte2Data);
 
                     for (int i = 0; i < colorDataLength; i++)
                     {
@@ -320,7 +320,7 @@ namespace MonoGame.Utilities.Png
 
                 case SurfaceFormat.NormalizedByte4:
                     var normalizedByte4Data = new NormalizedByte4[colorDataLength];
-                    texture2D.GetData<NormalizedByte4>(normalizedByte4Data);
+                    texture2D.GetData(normalizedByte4Data);
 
                     for (int i = 0; i < colorDataLength; i++)
                     {
@@ -331,7 +331,7 @@ namespace MonoGame.Utilities.Png
 
                 case SurfaceFormat.Rg32:
                     var rg32Data = new Rg32[colorDataLength];
-                    texture2D.GetData<Rg32>(rg32Data);
+                    texture2D.GetData(rg32Data);
 
                     for (int i = 0; i < colorDataLength; i++)
                     {
@@ -342,7 +342,7 @@ namespace MonoGame.Utilities.Png
 
                 case SurfaceFormat.Rgba64:
                     var rgba64Data = new Rgba64[colorDataLength];
-                    texture2D.GetData<Rgba64>(rgba64Data);
+                    texture2D.GetData(rgba64Data);
 
                     for (int i = 0; i < colorDataLength; i++)
                     {
@@ -353,7 +353,7 @@ namespace MonoGame.Utilities.Png
 
                 case SurfaceFormat.Rgba1010102:
                     var rgba1010102Data = new Rgba1010102[colorDataLength];
-                    texture2D.GetData<Rgba1010102>(rgba1010102Data);
+                    texture2D.GetData(rgba1010102Data);
 
                     for (int i = 0; i < colorDataLength; i++)
                     {

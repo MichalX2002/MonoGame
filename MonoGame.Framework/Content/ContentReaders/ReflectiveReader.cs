@@ -146,7 +146,7 @@ namespace Microsoft.Xna.Framework.Content
             // We need to have a reader at this point.
             var reader = manager.GetTypeReader(elementType);
             if (reader == null)
-                if (elementType == typeof(System.Array))
+                if (elementType == typeof(Array))
                     reader = new ArrayReader<Array>();
                 else
                     throw new ContentLoadException(string.Format("Content reader could not be found for {0} type.", elementType.FullName));

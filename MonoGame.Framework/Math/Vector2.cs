@@ -12,7 +12,7 @@ namespace Microsoft.Xna.Framework
     /// Describes a 2D-vector.
     /// </summary>
 #if XNADESIGNPROVIDED
-    [System.ComponentModel.TypeConverter(typeof(Microsoft.Xna.Framework.Design.Vector2TypeConverter))]
+    [System.ComponentModel.TypeConverter(typeof(Design.Vector2TypeConverter))]
 #endif
     [DataContract]
     [DebuggerDisplay("{DebugDisplayString,nq}")]
@@ -592,7 +592,7 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains linear interpolation of the specified vectors.
         /// Uses <see cref="MathHelper.LerpPrecise"/> on MathHelper for the interpolation.
-        /// Less efficient but more precise compared to <see cref="Vector2.Lerp(Vector2, Vector2, float)"/>.
+        /// Less efficient but more precise compared to <see cref="Lerp(Vector2, Vector2, float)"/>.
         /// See remarks section of <see cref="MathHelper.LerpPrecise"/> on MathHelper for more info.
         /// </summary>
         /// <param name="value1">The first vector.</param>
@@ -609,7 +609,7 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains linear interpolation of the specified vectors.
         /// Uses <see cref="MathHelper.LerpPrecise"/> on MathHelper for the interpolation.
-        /// Less efficient but more precise compared to <see cref="Vector2.Lerp(ref Vector2, ref Vector2, float, out Vector2)"/>.
+        /// Less efficient but more precise compared to <see cref="Lerp(ref Vector2, ref Vector2, float, out Vector2)"/>.
         /// See remarks section of <see cref="MathHelper.LerpPrecise"/> on MathHelper for more info.
         /// </summary>
         /// <param name="value1">The first vector.</param>

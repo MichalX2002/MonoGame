@@ -10,7 +10,7 @@ namespace Microsoft.Xna.Framework.Graphics
     public enum PresentInterval
     {
         /// <summary>
-        /// Equivalent to <see cref="PresentInterval.One"/>.
+        /// Equivalent to <see cref="One"/>.
         /// </summary>
         Default,
         /// <summary>

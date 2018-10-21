@@ -186,20 +186,20 @@ namespace Microsoft.Xna.Framework.Content
 
 		    return contentReaders;
         }
-		
-		/// <summary>
-		/// Removes Version, Culture and PublicKeyToken from a type string.
-		/// </summary>
-		/// <remarks>
+
+        /// <summary>
+        /// Removes Version, Culture and PublicKeyToken from a type string.
+        /// </summary>
+        /// <remarks>
         /// Supports multiple generic types (e.g. Dictionary&lt;TKey,TValue&gt;) and nested generic types (e.g. List&lt;List&lt;int&gt;&gt;).
-		/// </remarks> 
-		/// <param name="type">
-		/// A <see cref="System.String"/>
-		/// </param>
-		/// <returns>
-		/// A <see cref="System.String"/>
-		/// </returns>
-		public static string PrepareType(string type)
+        /// </remarks> 
+        /// <param name="type">
+        /// A <see cref="string"/>
+        /// </param>
+        /// <returns>
+        /// A <see cref="string"/>
+        /// </returns>
+        public static string PrepareType(string type)
 		{			
 			//Needed to support nested types
 			int count = type.Split(new[] {"[["}, StringSplitOptions.None).Length - 1;

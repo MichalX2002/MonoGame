@@ -70,7 +70,7 @@ namespace Microsoft.Xna.Framework.Media
         /// <summary>
         /// Returns a song that can be played via <see cref="MediaPlayer"/>.
         /// </summary>
-        /// <param name="name">The name for the song. See <see cref="Song.Name"/>.</param>
+        /// <param name="name">The name for the song. See <see cref="Name"/>.</param>
         /// <param name="uri">The path to the song file.</param>
         /// <returns></returns>
         public static Song FromUri(string name, Uri uri)

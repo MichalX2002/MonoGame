@@ -102,13 +102,13 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public void GetData<T>(T[] data, int startIndex, int elementCount) where T : struct
         {
-            this.GetData<T>(0, data, startIndex, elementCount, 0);
+            this.GetData(0, data, startIndex, elementCount, 0);
         }
 
         public void GetData<T>(T[] data) where T : struct
         {
             var elementSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
-            this.GetData<T>(0, data, 0, data.Length, elementSizeInByte);
+            this.GetData(0, data, 0, data.Length, elementSizeInByte);
         }
 
         /// <summary>

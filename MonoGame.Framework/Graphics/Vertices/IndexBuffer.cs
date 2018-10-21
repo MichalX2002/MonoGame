@@ -96,12 +96,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public void GetData<T>(T[] data, int startIndex, int elementCount) where T : struct
         {
-            this.GetData<T>(0, data, startIndex, elementCount);
+            this.GetData(0, data, startIndex, elementCount);
         }
 
         public void GetData<T>(T[] data) where T : struct
         {
-            this.GetData<T>(0, data, 0, data.Length);
+            this.GetData(0, data, 0, data.Length);
         }
 
         public void SetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount) where T : struct

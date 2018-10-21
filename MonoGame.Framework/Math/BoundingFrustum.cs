@@ -333,7 +333,7 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Returns a copy of internal corners array.
         /// </summary>
-        /// <param name="corners">The array which values will be replaced to corner values of this instance. It must have size of <see cref="BoundingFrustum.CornerCount"/>.</param>
+        /// <param name="corners">The array which values will be replaced to corner values of this instance. It must have size of <see cref="CornerCount"/>.</param>
 		public void GetCorners(Vector3[] corners)
         {
 			if (corners == null)

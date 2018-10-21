@@ -12,7 +12,7 @@ namespace Microsoft.Xna.Framework
     /// Describes a 4D-vector.
     /// </summary>
 #if XNADESIGNPROVIDED
-    [System.ComponentModel.TypeConverter(typeof(Microsoft.Xna.Framework.Design.Vector4TypeConverter))]
+    [System.ComponentModel.TypeConverter(typeof(Design.Vector4TypeConverter))]
 #endif
     [DataContract]
     [DebuggerDisplay("{DebugDisplayString,nq}")]
@@ -555,7 +555,7 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains linear interpolation of the specified vectors.
         /// Uses <see cref="MathHelper.LerpPrecise"/> on MathHelper for the interpolation.
-        /// Less efficient but more precise compared to <see cref="Vector4.Lerp(Vector4, Vector4, float)"/>.
+        /// Less efficient but more precise compared to <see cref="Lerp(Vector4, Vector4, float)"/>.
         /// See remarks section of <see cref="MathHelper.LerpPrecise"/> on MathHelper for more info.
         /// </summary>
         /// <param name="value1">The first vector.</param>
@@ -574,7 +574,7 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains linear interpolation of the specified vectors.
         /// Uses <see cref="MathHelper.LerpPrecise"/> on MathHelper for the interpolation.
-        /// Less efficient but more precise compared to <see cref="Vector4.Lerp(ref Vector4, ref Vector4, float, out Vector4)"/>.
+        /// Less efficient but more precise compared to <see cref="Lerp(ref Vector4, ref Vector4, float, out Vector4)"/>.
         /// See remarks section of <see cref="MathHelper.LerpPrecise"/> on MathHelper for more info.
         /// </summary>
         /// <param name="value1">The first vector.</param>

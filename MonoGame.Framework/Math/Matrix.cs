@@ -451,7 +451,7 @@ namespace Microsoft.Xna.Framework
         /// <param name="cameraForwardVector">Optional camera forward vector.</param>
         /// <returns>The <see cref="Matrix"/> for spherical billboarding.</returns>
         public static Matrix CreateBillboard(Vector3 objectPosition, Vector3 cameraPosition,
-            Vector3 cameraUpVector, Nullable<Vector3> cameraForwardVector)
+            Vector3 cameraUpVector, Vector3? cameraForwardVector)
         {
 
             // Delegate to the other overload of the function to do the work
@@ -515,7 +515,7 @@ namespace Microsoft.Xna.Framework
         /// <param name="objectForwardVector">Optional object forward vector.</param>
         /// <returns>The <see cref="Matrix"/> for cylindrical billboarding.</returns>
         public static Matrix CreateConstrainedBillboard(Vector3 objectPosition, Vector3 cameraPosition,
-            Vector3 rotateAxis, Nullable<Vector3> cameraForwardVector, Nullable<Vector3> objectForwardVector)
+            Vector3 rotateAxis, Vector3? cameraForwardVector, Vector3? objectForwardVector)
         {
             CreateConstrainedBillboard(ref objectPosition, ref cameraPosition, ref rotateAxis,
                 cameraForwardVector, objectForwardVector, out Matrix result);

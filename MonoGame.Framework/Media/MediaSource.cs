@@ -19,7 +19,7 @@ namespace Microsoft.Xna.Framework.Media
 			MediaSourceType = type;
 		}
 
-        public Microsoft.Xna.Framework.Media.MediaSourceType MediaSourceType { get; }
+        public MediaSourceType MediaSourceType { get; }
 
         public string Name
         {

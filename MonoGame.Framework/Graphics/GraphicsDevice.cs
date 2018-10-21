@@ -154,7 +154,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         /// <summary>
         /// The rendering information for debugging and profiling.
-        /// The metrics are reset every frame after draw within <see cref="GraphicsDevice.Present"/>. 
+        /// The metrics are reset every frame after draw within <see cref="Present"/>. 
         /// </summary>
         public GraphicsMetrics Metrics { get { return _graphicsMetrics; } set { _graphicsMetrics = value; } }
 
@@ -1055,7 +1055,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// in the array of vertices.</remarks>
         public void DrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, ushort[] indexData, int indexOffset, int primitiveCount) where T : struct, IVertexType
         {
-            DrawUserIndexedPrimitives<T>(primitiveType, vertexData, vertexOffset, numVertices, indexData, indexOffset, primitiveCount, VertexDeclarationCache<T>.VertexDeclaration);
+            DrawUserIndexedPrimitives(primitiveType, vertexData, vertexOffset, numVertices, indexData, indexOffset, primitiveCount, VertexDeclarationCache<T>.VertexDeclaration);
         }
 
         /// <summary>
@@ -1104,7 +1104,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// in the array of vertices.</remarks>
         public void DrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, short[] indexData, int indexOffset, int primitiveCount) where T : struct, IVertexType
         {
-            DrawUserIndexedPrimitives<T>(primitiveType, vertexData, vertexOffset, numVertices, indexData, indexOffset, primitiveCount, VertexDeclarationCache<T>.VertexDeclaration);
+            DrawUserIndexedPrimitives(primitiveType, vertexData, vertexOffset, numVertices, indexData, indexOffset, primitiveCount, VertexDeclarationCache<T>.VertexDeclaration);
         }
 
         /// <summary>
@@ -1153,7 +1153,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// in the array of vertices.</remarks>
         public void DrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, int[] indexData, int indexOffset, int primitiveCount) where T : struct, IVertexType
         {
-            DrawUserIndexedPrimitives<T>(primitiveType, vertexData, vertexOffset, numVertices, indexData, indexOffset, primitiveCount, VertexDeclarationCache<T>.VertexDeclaration);
+            DrawUserIndexedPrimitives(primitiveType, vertexData, vertexOffset, numVertices, indexData, indexOffset, primitiveCount, VertexDeclarationCache<T>.VertexDeclaration);
         }
 
         /// <summary>

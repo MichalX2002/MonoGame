@@ -425,7 +425,7 @@ namespace Microsoft.Xna.Framework.Audio
             inst.SoundState = SoundState.Stopped;
 		}
 
-        public double SourceCurrentPosition (int sourceId)
+        public double SourceCurrentPosition(int sourceId)
 		{
             AL.GetSource(sourceId, ALGetSourcei.SampleOffset, out int pos);
             ALHelper.CheckError("Failed to set source offset.");

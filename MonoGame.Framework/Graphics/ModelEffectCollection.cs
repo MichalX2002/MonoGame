@@ -31,9 +31,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 	    // Summary:
 	    //     Returns a ModelEffectCollection.Enumerator that can iterate through a ModelEffectCollection.
-	    public new ModelEffectCollection.Enumerator GetEnumerator()
+	    public new Enumerator GetEnumerator()
 		{
-			return new ModelEffectCollection.Enumerator((List<Effect>)Items);
+			return new Enumerator((List<Effect>)Items);
 		}
 
 	    // Summary:

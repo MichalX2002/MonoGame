@@ -817,7 +817,7 @@ namespace MonoGame.Utilities
         #endregion
 
 
-        internal static readonly System.DateTime _unixEpoch = new System.DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        internal static readonly DateTime _unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         internal static readonly System.Text.Encoding iso8859dash1 = new Iso88591Encoding();
 
         private int EmitHeader()
@@ -848,7 +848,7 @@ namespace MonoGame.Utilities
 
             // mtime
             if (!LastModified.HasValue) LastModified = DateTime.Now;
-            System.TimeSpan delta = LastModified.Value - _unixEpoch;
+            TimeSpan delta = LastModified.Value - _unixEpoch;
             Int32 timet = (Int32)delta.TotalSeconds;
             Array.Copy(BitConverter.GetBytes(timet), 0, header, i, 4);
             i += 4;
@@ -890,11 +890,11 @@ namespace MonoGame.Utilities
         /// </summary>
         ///
         /// <remarks>
-        ///   Uncompress it with <see cref="GZipStream.UncompressString(byte[])"/>.
+        ///   Uncompress it with <see cref="UncompressString(byte[])"/>.
         /// </remarks>
         ///
-        /// <seealso cref="GZipStream.UncompressString(byte[])"/>
-        /// <seealso cref="GZipStream.CompressBuffer(byte[])"/>
+        /// <seealso cref="UncompressString(byte[])"/>
+        /// <seealso cref="CompressBuffer(byte[])"/>
         ///
         /// <param name="s">
         ///   A string to compress. The string will first be encoded
@@ -906,7 +906,7 @@ namespace MonoGame.Utilities
         {
             using (var ms = new MemoryStream())
             {
-                System.IO.Stream compressor =
+                Stream compressor =
                     new GZipStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
                 ZlibBaseStream.CompressString(s, compressor);
                 return ms.ToArray();
@@ -919,11 +919,11 @@ namespace MonoGame.Utilities
         /// </summary>
         ///
         /// <remarks>
-        ///   Uncompress it with <see cref="GZipStream.UncompressBuffer(byte[])"/>.
+        ///   Uncompress it with <see cref="UncompressBuffer(byte[])"/>.
         /// </remarks>
         ///
-        /// <seealso cref="GZipStream.CompressString(string)"/>
-        /// <seealso cref="GZipStream.UncompressBuffer(byte[])"/>
+        /// <seealso cref="CompressString(string)"/>
+        /// <seealso cref="UncompressBuffer(byte[])"/>
         ///
         /// <param name="b">
         ///   A buffer to compress.
@@ -934,7 +934,7 @@ namespace MonoGame.Utilities
         {
             using (var ms = new MemoryStream())
             {
-                System.IO.Stream compressor =
+                Stream compressor =
                     new GZipStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
 
                 ZlibBaseStream.CompressBuffer(b, compressor);
@@ -947,8 +947,8 @@ namespace MonoGame.Utilities
         ///   Uncompress a GZip'ed byte array into a single string.
         /// </summary>
         ///
-        /// <seealso cref="GZipStream.CompressString(String)"/>
-        /// <seealso cref="GZipStream.UncompressBuffer(byte[])"/>
+        /// <seealso cref="CompressString(string)"/>
+        /// <seealso cref="UncompressBuffer(byte[])"/>
         ///
         /// <param name="compressed">
         ///   A buffer containing GZIP-compressed data.

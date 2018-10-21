@@ -18,7 +18,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
 		Depth16,
         /// <summary>
-        /// 24-bit depth buffer. Equivalent of <see cref="DepthFormat.Depth24Stencil8"/> for DirectX platforms.
+        /// 24-bit depth buffer. Equivalent of <see cref="Depth24Stencil8"/> for DirectX platforms.
         /// </summary>
 		Depth24,
         /// <summary>

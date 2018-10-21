@@ -35,7 +35,7 @@ namespace Microsoft.Xna.Framework.Graphics
             /// </summary>
             Reference,
             /// <summary>
-            /// Useful when <see cref="DriverType.Hardware"/> acceleration does not work.
+            /// Useful when <see cref="Hardware"/> acceleration does not work.
             /// </summary>
             FastSoftware
         }
@@ -359,8 +359,8 @@ namespace Microsoft.Xna.Framework.Graphics
         */
 
         /// <summary>
-        /// Gets a <see cref="System.Boolean"/> indicating whether
-        /// <see cref="GraphicsAdapter.CurrentDisplayMode"/> has a
+        /// Gets a <see cref="bool"/> indicating whether
+        /// <see cref="CurrentDisplayMode"/> has a
         /// Width:Height ratio corresponding to a widescreen <see cref="DisplayMode"/>.
         /// Common widescreen modes include 16:9, 16:10 and 2:1.
         /// </summary>

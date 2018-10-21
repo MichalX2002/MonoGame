@@ -18,7 +18,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
 		Clamp,
         /// <summary>
-        /// Same as <see cref="TextureAddressMode.Wrap"/> but tiles will also flipped at every integer junction.
+        /// Same as <see cref="Wrap"/> but tiles will also flipped at every integer junction.
         /// </summary>
         Mirror,
         /// <summary>

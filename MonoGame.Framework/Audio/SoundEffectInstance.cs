@@ -104,7 +104,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         /// <summary>
         /// Releases unmanaged resources and performs other cleanup operations before the
-        /// <see cref="Microsoft.Xna.Framework.Audio.SoundEffectInstance"/> is reclaimed by garbage collection.
+        /// <see cref="SoundEffectInstance"/> is reclaimed by garbage collection.
         /// </summary>
         ~SoundEffectInstance()
         {
@@ -184,7 +184,7 @@ namespace Microsoft.Xna.Framework.Audio
             PlatformStop(immediate);
         }
 
-        /// <summary>Releases the resources held by this <see cref="Microsoft.Xna.Framework.Audio.SoundEffectInstance"/>.</summary>
+        /// <summary>Releases the resources held by this <see cref="SoundEffectInstance"/>.</summary>
         public void Dispose()
         {
             Dispose(true);
@@ -192,18 +192,19 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
         /// <summary>
-        /// Releases the resources held by this <see cref="Microsoft.Xna.Framework.Audio.SoundEffectInstance"/>.
+        /// Releases the resources held by this <see cref="SoundEffectInstance"/>.
         /// </summary>
         /// <param name="disposing">If set to <c>true</c>, Dispose was called explicitly.</param>
         /// <remarks>If the disposing parameter is true, the Dispose method was called explicitly. This
         /// means that managed objects referenced by this instance should be disposed or released as
-        /// required.  If the disposing parameter is false, Dispose was called by the finalizer and
+        /// required. If the disposing parameter is false, Dispose was called by the finalizer and
         /// no managed objects should be touched because we do not know if they are still valid or
-        /// not at that time.  Unmanaged resources should always be released.</remarks>
+        /// not at that time. Unmanaged resources should always be released.</remarks>
         protected virtual void Dispose(bool disposing)
         {
             if (!IsDisposed)
             {
+                PlatformStop(true);
                 PlatformDispose(disposing);
                 IsDisposed = true;
             }

@@ -61,7 +61,7 @@ namespace Microsoft.Xna.Framework {
         /// <summary>
         /// Determines whether the border of the window is visible. Currently only supported on the WinDX and WinGL/Linux platforms.
         /// </summary>
-        /// <exception cref="System.NotImplementedException">
+        /// <exception cref="NotImplementedException">
         /// Thrown when trying to use this property on a platform other than the WinDX and WinGL/Linux platforms.
         /// </exception>
         public virtual bool IsBorderless

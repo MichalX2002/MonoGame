@@ -54,7 +54,7 @@ namespace Microsoft.Xna.Framework.Content
             InitializeTypeReaders();
 
             // Read primary object
-            object result = ReadObject<T>(existingInstance);
+            object result = ReadObject(existingInstance);
 
             // Read shared resources
             ReadSharedResources();
@@ -191,7 +191,7 @@ namespace Microsoft.Xna.Framework.Content
 
         public T ReadRawObject<T>()
         {
-			return ReadRawObject<T>(default(T));
+			return ReadRawObject(default(T));
         }
 
         public T ReadRawObject<T>(ContentTypeReader typeReader)
@@ -205,7 +205,7 @@ namespace Microsoft.Xna.Framework.Content
             foreach(ContentTypeReader typeReader in TypeReaders)
             {
                 if(typeReader.TargetType == objectType)
-                    return ReadRawObject<T>(typeReader, existingInstance);
+                    return ReadRawObject(typeReader, existingInstance);
             }
             throw new NotSupportedException();
         }

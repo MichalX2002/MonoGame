@@ -135,11 +135,11 @@ namespace Microsoft.Xna.Framework.Input
         }
 
         /// <summary>
-        /// Determines whether a specified instance of <see cref="Microsoft.Xna.Framework.Input.GamePadState"/> is equal
-        /// to another specified <see cref="Microsoft.Xna.Framework.Input.GamePadState"/>.
+        /// Determines whether a specified instance of <see cref="GamePadState"/> is equal
+        /// to another specified <see cref="GamePadState"/>.
         /// </summary>
-        /// <param name="left">The first <see cref="Microsoft.Xna.Framework.Input.GamePadState"/> to compare.</param>
-        /// <param name="right">The second <see cref="Microsoft.Xna.Framework.Input.GamePadState"/> to compare.</param>
+        /// <param name="left">The first <see cref="GamePadState"/> to compare.</param>
+        /// <param name="right">The second <see cref="GamePadState"/> to compare.</param>
         /// <returns><c>true</c> if <c>left</c> and <c>right</c> are equal; otherwise, <c>false</c>.</returns>
         public static bool operator ==(GamePadState left, GamePadState right)
         {
@@ -152,11 +152,11 @@ namespace Microsoft.Xna.Framework.Input
         }
 
         /// <summary>
-        /// Determines whether a specified instance of <see cref="Microsoft.Xna.Framework.Input.GamePadState"/> is not
-        /// equal to another specified <see cref="Microsoft.Xna.Framework.Input.GamePadState"/>.
+        /// Determines whether a specified instance of <see cref="GamePadState"/> is not
+        /// equal to another specified <see cref="GamePadState"/>.
         /// </summary>
-        /// <param name="left">The first <see cref="Microsoft.Xna.Framework.Input.GamePadState"/> to compare.</param>
-        /// <param name="right">The second <see cref="Microsoft.Xna.Framework.Input.GamePadState"/> to compare.</param>
+        /// <param name="left">The first <see cref="GamePadState"/> to compare.</param>
+        /// <param name="right">The second <see cref="GamePadState"/> to compare.</param>
         /// <returns><c>true</c> if <c>left</c> and <c>right</c> are not equal; otherwise, <c>false</c>.</returns>
         public static bool operator !=(GamePadState left, GamePadState right)
         {

@@ -269,7 +269,7 @@ namespace MonoGame.Utilities
             _stream.Flush();
         }
 
-        public override System.Int64 Seek(System.Int64 offset, System.IO.SeekOrigin origin)
+        public override System.Int64 Seek(System.Int64 offset, SeekOrigin origin)
         {
             throw new NotImplementedException();
             //_outStream.Seek(offset, origin);

@@ -228,7 +228,7 @@ namespace Microsoft.Xna.Framework
         /// </summary>
         /// <param name="points">The list of Vector3 instances defining the point cloud to bound</param>
         /// <returns>A bounding box that encapsulates the given point cloud.</returns>
-        /// <exception cref="System.ArgumentException">Thrown if the given list has no points.</exception>
+        /// <exception cref="ArgumentException">Thrown if the given list has no points.</exception>
         public static BoundingBox CreateFromPoints(IEnumerable<Vector3> points)
         {
             if (points == null)
@@ -482,12 +482,12 @@ namespace Microsoft.Xna.Framework
             result = PlaneIntersectionType.Intersecting;
         }
 
-        public Nullable<float> Intersects(Ray ray)
+        public float? Intersects(Ray ray)
         {
             return ray.Intersects(this);
         }
 
-        public void Intersects(ref Ray ray, out Nullable<float> result)
+        public void Intersects(ref Ray ray, out float? result)
         {
             result = Intersects(ray);
         }

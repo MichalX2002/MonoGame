@@ -182,11 +182,11 @@ namespace Microsoft.Xna.Framework.Input
         public GamePadType GamePadType { get; internal set; }
 
         /// <summary>
-        /// Determines whether a specified instance of <see cref="Microsoft.Xna.Framework.Input.GamePadCapabilities"/>
-        /// is equal to another specified <see cref="Microsoft.Xna.Framework.Input.GamePadCapabilities"/>.
+        /// Determines whether a specified instance of <see cref="GamePadCapabilities"/>
+        /// is equal to another specified <see cref="GamePadCapabilities"/>.
         /// </summary>
-        /// <param name="left">The first <see cref="Microsoft.Xna.Framework.Input.GamePadCapabilities"/> to compare.</param>
-        /// <param name="right">The second <see cref="Microsoft.Xna.Framework.Input.GamePadCapabilities"/> to compare.</param>
+        /// <param name="left">The first <see cref="GamePadCapabilities"/> to compare.</param>
+        /// <param name="right">The second <see cref="GamePadCapabilities"/> to compare.</param>
         /// <returns><c>true</c> if <c>left</c> and <c>right</c> are equal; otherwise, <c>false</c>.</returns>
         public static bool operator ==(GamePadCapabilities left, GamePadCapabilities right)
         {
@@ -225,11 +225,11 @@ namespace Microsoft.Xna.Framework.Input
         }
 
         /// <summary>
-        /// Determines whether a specified instance of <see cref="Microsoft.Xna.Framework.Input.GamePadCapabilities"/>
-        /// is not equal to another specified <see cref="Microsoft.Xna.Framework.Input.GamePadCapabilities"/>.
+        /// Determines whether a specified instance of <see cref="GamePadCapabilities"/>
+        /// is not equal to another specified <see cref="GamePadCapabilities"/>.
         /// </summary>
-        /// <param name="left">The first <see cref="Microsoft.Xna.Framework.Input.GamePadCapabilities"/> to compare.</param>
-        /// <param name="right">The second <see cref="Microsoft.Xna.Framework.Input.GamePadCapabilities"/> to compare.</param>
+        /// <param name="left">The first <see cref="GamePadCapabilities"/> to compare.</param>
+        /// <param name="right">The second <see cref="GamePadCapabilities"/> to compare.</param>
         /// <returns><c>true</c> if <c>left</c> and <c>right</c> are not equal; otherwise, <c>false</c>.</returns>
         public static bool operator !=(GamePadCapabilities left, GamePadCapabilities right)
         {

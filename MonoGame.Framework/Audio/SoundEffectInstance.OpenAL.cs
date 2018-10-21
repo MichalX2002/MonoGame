@@ -263,6 +263,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if (!OpenALSoundController.Efx.IsInitialized)
                 return;
+
             reverb = mix;
             if (State == SoundState.Playing)
             {
@@ -348,7 +349,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformDispose(bool disposing)
         {
-            
+
         }
     }
 }

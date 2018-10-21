@@ -44,7 +44,7 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public interface IGraphicsDeviceService
     {
-		Microsoft.Xna.Framework.Graphics.GraphicsDevice GraphicsDevice { get; }
+        GraphicsDevice GraphicsDevice { get; }
         
 		event EventHandler<EventArgs> DeviceCreated;
         event EventHandler<EventArgs> DeviceDisposing;
