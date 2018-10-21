@@ -15,6 +15,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
 using Microsoft.Xna.Framework.Windows;
 using ButtonState = Microsoft.Xna.Framework.Input.ButtonState;
+using Keys = Microsoft.Xna.Framework.Input.Keys;
 using Point = System.Drawing.Point;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using XnaPoint = Microsoft.Xna.Framework.Point;
@@ -275,6 +276,8 @@ namespace MonoGame.Framework
             MouseState.LeftButton = (buttons & MouseButtons.Left) == MouseButtons.Left ? ButtonState.Pressed : ButtonState.Released;
             MouseState.MiddleButton = (buttons & MouseButtons.Middle) == MouseButtons.Middle ? ButtonState.Pressed : ButtonState.Released;
             MouseState.RightButton = (buttons & MouseButtons.Right) == MouseButtons.Right ? ButtonState.Pressed : ButtonState.Released;
+            MouseState.XButton1 = (buttons & MouseButtons.XButton1) == MouseButtons.XButton1 ? ButtonState.Pressed : ButtonState.Released;
+            MouseState.XButton2 = (buttons & MouseButtons.XButton2) == MouseButtons.XButton2 ? ButtonState.Pressed : ButtonState.Released;
 
             // Don't process touch state if we're not active 
             // and the mouse is within the client area.
@@ -323,9 +326,13 @@ namespace MonoGame.Framework
             }
         }
 
+        [DllImport("user32.dll")]
+        private static extern short VkKeyScanEx(char ch, IntPtr dwhkl);
+
         private void OnKeyPress(object sender, KeyPressEventArgs e)
         {
-            OnTextInput(sender, new TextInputEventArgs(e.KeyChar));
+            var key = (Keys) (VkKeyScanEx(e.KeyChar, InputLanguage.CurrentInputLanguage.Handle) & 0xff);
+            OnTextInput(sender, new TextInputEventArgs(e.KeyChar, key));
         }
 
         internal void Initialize(int width, int height)
