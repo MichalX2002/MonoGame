@@ -148,6 +148,9 @@
       <Platforms>Angle,Linux,Windows,WindowsGL,Web,MacOS</Platforms>
     </Compile>
     <Compile Include="Utilities\CRC32.cs" />
+    <Compile Include="Utilities\CrcCalculatorStream.cs" />
+    <Compile Include="Utilities\Int32Comparer.cs" />
+    <Compile Include="Utilities\ReflectionHelpers.Default.cs" />
     <Compile Include="Utilities\ZlibStream\DeflateManager.cs" />
     <Compile Include="Utilities\ZlibStream\GZipStream.cs" />
     <Compile Include="Utilities\ZlibStream\InflateBlocks.cs" />
@@ -624,9 +627,6 @@
     <Compile Include="Utilities\Hash.cs" />
     <Compile Include="Utilities\FileHelpers.cs" />
     <Compile Include="Utilities\ReflectionHelpers.cs" />
-    <Compile Include="Utilities\ReflectionHelpers.Legacy.cs">
-      <Platforms>Angle,Linux,MacOS,Windows,WindowsGL,Web</Platforms>
-    </Compile>
     <Compile Include="Utilities\Lz4Stream\Lz4DecoderStream.cs" />
     <Compile Include="Utilities\LzxStream\LzxDecoderStream.cs" />
     <Compile Include="Utilities\ZlibStream\ZlibStream.cs" />
@@ -666,12 +666,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj">
-      <Project>{b2b538a9-ad83-4484-a908-698503f4652f}</Project>
-      <Name>MonoGame.Imaging</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Graphics\Vertices\VertexBufferBase.DirectX.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -694,7 +688,16 @@
       <Services>DirectXGraphics</Services>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj">
+      <Project>{b2b538a9-ad83-4484-a908-698503f4652f}</Project>
+      <Name>MonoGame.Imaging</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj">
+      <Project>{de48723f-d255-49f6-8372-aef8b059d5e7}</Project>
+      <Name>MonoGame.Utilities</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup />
   <ItemGroup />
   <ItemGroup />

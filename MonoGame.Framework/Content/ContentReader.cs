@@ -14,7 +14,6 @@ namespace Microsoft.Xna.Framework.Content
     {
         private Action<IDisposable> recordDisposableObject;
         private ContentTypeReaderManager typeReaderManager;
-        private string assetName;
         private List<KeyValuePair<int, Action<object>>> sharedResourceFixups;
         internal int version;
 		internal int sharedResourceCount;
@@ -29,19 +28,13 @@ namespace Microsoft.Xna.Framework.Content
             this.GraphicsDevice = graphicsDevice;
             this.recordDisposableObject = recordDisposableObject;
             this.ContentManager = manager;
-            this.assetName = assetName;
+            this.AssetName = assetName;
 			this.version = version;
         }
 
         public ContentManager ContentManager { get; }
 
-        public string AssetName
-        {
-            get
-            {
-                return assetName;
-            }
-        }
+        public string AssetName { get; }
 
         internal object ReadAsset<T>()
         {
@@ -97,7 +90,7 @@ namespace Microsoft.Xna.Framework.Content
 
             if (!String.IsNullOrEmpty(externalReference))
             {
-                return ContentManager.Load<T>(FileHelpers.ResolveRelativePath(assetName, externalReference));
+                return ContentManager.Load<T>(FileHelpers.ResolveRelativePath(AssetName, externalReference));
             }
 
             return default;

@@ -5,7 +5,6 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.Xna.Framework.Utilities;
 using MonoGame.Imaging;
 using MonoGame.Utilities.Png;
 
@@ -20,6 +19,7 @@ using System.Drawing;
 using MonoGame.OpenGL;
 using GLPixelFormat = MonoGame.OpenGL.PixelFormat;
 using PixelFormat = MonoGame.OpenGL.PixelFormat;
+using MonoGame.Utilities;
 
 #if ANDROID
 using Android.Graphics;

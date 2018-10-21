@@ -22,7 +22,6 @@ namespace Microsoft.Xna.Framework.Input
 #endif
 
         internal readonly Buttons _virtualButtons;
-        private readonly Vector2 _right;
 
         /// <summary>
         /// Gets a value indicating the position of the left stick (thumbstick). 
@@ -34,51 +33,18 @@ namespace Microsoft.Xna.Framework.Input
         /// Gets a value indicating the position of the right stick (thumbstick). 
         /// </summary>
         /// <value>A <see cref="Vector2"/> indicating the current position of the right stick (thumbstick).</value>
-        public Vector2 Right
-        {
-            get { return _right; }
-        }
+        public Vector2 Right { get; }
 
         public GamePadThumbSticks(Vector2 leftPosition, Vector2 rightPosition)
-            : this(leftPosition, rightPosition, GamePadDeadZone.None)
+            : this(leftPosition, rightPosition, GamePadDeadZone.None, GamePadDeadZone.None)
         {
-            
         }
 
-        internal GamePadThumbSticks(Vector2 leftPosition, Vector2 rightPosition, GamePadDeadZone deadZoneMode) : this()
+        internal GamePadThumbSticks(Vector2 leftPosition, Vector2 rightPosition, GamePadDeadZone leftDeadZoneMode, GamePadDeadZone rightDeadZoneMode) : this()
         {
-            // XNA applies dead zones before rounding/clamping values. The public ctor does not allow this because the dead zone must be known before
-
             // Apply dead zone
-            switch (deadZoneMode)
-            {
-                case GamePadDeadZone.None:
-                    Left = leftPosition;
-                    _right = rightPosition;
-                    break;
-                case GamePadDeadZone.IndependentAxes:
-                    Left = ExcludeIndependentAxesDeadZone(leftPosition, leftThumbDeadZone);
-                    _right = ExcludeIndependentAxesDeadZone(rightPosition, rightThumbDeadZone);
-                    break;
-                case GamePadDeadZone.Circular:
-                    Left = ExcludeCircularDeadZone(leftPosition, leftThumbDeadZone);
-                    _right = ExcludeCircularDeadZone(rightPosition, rightThumbDeadZone);
-                    break;
-            }
-
-            // Apply clamp
-            if (deadZoneMode == GamePadDeadZone.Circular)
-            {
-                if (Left.LengthSquared() > 1f)
-                    Left.Normalize();
-                if (_right.LengthSquared() > 1f)
-                    _right.Normalize();
-            }
-            else
-            {
-                Left = new Vector2(MathHelper.Clamp(Left.X, -1f, 1f), MathHelper.Clamp(Left.Y, -1f, 1f));
-                _right = new Vector2(MathHelper.Clamp(Right.X, -1f, 1f), MathHelper.Clamp(Right.Y, -1f, 1f));
-            }
+            Left = ApplyDeadZone(leftDeadZoneMode, leftThumbDeadZone, leftPosition);
+            Right = ApplyDeadZone(rightDeadZoneMode, rightThumbDeadZone, rightPosition);
 
             // VirtualButtons should always behave like deadzone is IndependentAxes. 
             // This is consistent with XNA behaviour and generally most convenient (e.g. for menu navigation)
@@ -103,6 +69,37 @@ namespace Microsoft.Xna.Framework.Input
                 _virtualButtons |= Buttons.RightThumbstickDown;
             else if (rightPosition.Y > rightThumbDeadZone)
                 _virtualButtons |= Buttons.RightThumbstickUp;
+        }
+
+        private Vector2 ApplyDeadZone(GamePadDeadZone deadZoneMode, float deadZone, Vector2 thumbstickPosition)
+        {
+            // XNA applies dead zones before rounding/clamping values. The public ctor does not allow this because the dead zone must be known before
+
+            // Apply dead zone
+            switch (deadZoneMode)
+            {
+                case GamePadDeadZone.None:
+                    break;
+                case GamePadDeadZone.IndependentAxes:
+                    thumbstickPosition = ExcludeIndependentAxesDeadZone(thumbstickPosition, deadZone);
+                    break;
+                case GamePadDeadZone.Circular:
+                    thumbstickPosition = ExcludeCircularDeadZone(thumbstickPosition, deadZone);
+                    break;
+            }
+
+            // Apply clamp
+            if (deadZoneMode == GamePadDeadZone.Circular)
+            {
+                if (thumbstickPosition.LengthSquared() > 1f)
+                    thumbstickPosition.Normalize();
+            }
+            else
+            {
+                thumbstickPosition = new Vector2(MathHelper.Clamp(thumbstickPosition.X, -1f, 1f), MathHelper.Clamp(thumbstickPosition.Y, -1f, 1f));
+            }
+
+            return thumbstickPosition;
         }
 
         private Vector2 ExcludeIndependentAxesDeadZone(Vector2 value, float deadZone)

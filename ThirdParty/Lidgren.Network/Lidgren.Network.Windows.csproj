@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Encryption\CryptoTransformExtensions.cs" />
     <Compile Include="Encryption\NetAESEncryption.cs" />
     <Compile Include="Encryption\NetCryptoProviderBase.cs" />
     <Compile Include="Encryption\NetDESEncryption.cs" />
@@ -59,7 +60,9 @@
     <Compile Include="Language\ILibraryLanguage.cs" />
     <Compile Include="Language\LanguageManager.cs" />
     <Compile Include="Language\StringBuilderExtensions.cs" />
-    <Compile Include="Memory\NetPeer.MessagePools.cs" />
+    <Compile Include="Memory\NetPeer.Pools.Create.cs" />
+    <Compile Include="Memory\NetPeer.Pools.cs" />
+    <Compile Include="Memory\NetPeer.Pools.Recycle.cs" />
     <Compile Include="MessageResendReason.cs" />
     <Compile Include="NamespaceDoc.cs" />
     <Compile Include="NetBigInteger.cs" />
@@ -120,7 +123,12 @@
     <Compile Include="NetUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\MonoGame.Utilities\MonoGame.Utilities.csproj">
+      <Project>{de48723f-d255-49f6-8372-aef8b059d5e7}</Project>
+      <Name>MonoGame.Utilities</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup />
   <ItemGroup />
   <ItemGroup />

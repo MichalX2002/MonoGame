@@ -128,6 +128,7 @@
     <Compile Include="Utilities\Png\PngCommon.cs" />
     <Compile Include="Utilities\Png\PngReader.cs" />
     <Compile Include="Utilities\Png\PngWriter.cs" />
+    <Compile Include="Utilities\ReflectionHelpers.Default.cs" />
     <Compile Include="Utilities\ZlibStream\DeflateManager.cs" />
     <Compile Include="Utilities\ZlibStream\GZipStream.cs" />
     <Compile Include="Utilities\ZlibStream\InflateBlocks.cs" />
@@ -608,9 +609,6 @@
     <Compile Include="Utilities\Hash.cs" />
     <Compile Include="Utilities\FileHelpers.cs" />
     <Compile Include="Utilities\ReflectionHelpers.cs" />
-    <Compile Include="Utilities\ReflectionHelpers.Legacy.cs">
-      <Platforms>Angle,Linux,MacOS,Windows,WindowsGL,Web</Platforms>
-    </Compile>
     <Compile Include="Utilities\Lz4Stream\Lz4DecoderStream.cs" />
     <Compile Include="Utilities\LzxStream\LzxDecoderStream.cs" />
     <Compile Include="Utilities\ZlibStream\ZlibStream.cs" />

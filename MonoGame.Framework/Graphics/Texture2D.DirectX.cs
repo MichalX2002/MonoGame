@@ -5,8 +5,8 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.Xna.Framework.Utilities;
 using MonoGame.Imaging;
+using MonoGame.Utilities;
 using MonoGame.Utilities.Png;
 using SharpDX;
 using SharpDX.Direct3D11;
@@ -235,7 +235,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             using (var img = new Image(stream, true))
             {
-                IntPtr data = img.GetDataPointer();
+                IntPtr data = img.Pointer;
                 if (data == IntPtr.Zero)
                     throw new InvalidDataException("Could not decode stream.");
 
