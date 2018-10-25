@@ -40,7 +40,7 @@ namespace MonoGame.Utilities.IO
     /// multiples/exponentials of LargeBufferMultiple (1 MB by default). They are split by size to avoid overly-wasteful buffer
     /// usage. There should be far fewer 8 MB buffers than 1 MB buffers, for example.
     /// </remarks>
-    public partial class RecyclableMemoryStreamManager
+    public partial class RecyclableMemoryManager
     {
         /// <summary>
         /// Generic delegate for handling events without any arguments.
@@ -98,7 +98,7 @@ namespace MonoGame.Utilities.IO
         /// <summary>
         /// Initializes the memory manager with the default block/buffer specifications.
         /// </summary>
-        public RecyclableMemoryStreamManager()
+        public RecyclableMemoryManager()
             : this(DefaultBlockSize, DefaultLargeBufferMultiple, DefaultMaximumBufferSize, false) { }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace MonoGame.Utilities.IO
         /// <param name="maximumBufferSize">Buffers larger than this are not pooled</param>
         /// <exception cref="ArgumentOutOfRangeException">blockSize is not a positive number, or largeBufferMultiple is not a positive number, or maximumBufferSize is less than blockSize.</exception>
         /// <exception cref="ArgumentException">maximumBufferSize is not a multiple of largeBufferMultiple</exception>
-        public RecyclableMemoryStreamManager(int blockSize, int largeBufferMultiple, int maximumBufferSize)
+        public RecyclableMemoryManager(int blockSize, int largeBufferMultiple, int maximumBufferSize)
             : this(blockSize, largeBufferMultiple, maximumBufferSize, false) { }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace MonoGame.Utilities.IO
         /// <param name="useExponentialLargeBuffer">Switch to exponential large buffer allocation strategy</param>
         /// <exception cref="ArgumentOutOfRangeException">blockSize is not a positive number, or largeBufferMultiple is not a positive number, or maximumBufferSize is less than blockSize.</exception>
         /// <exception cref="ArgumentException">maximumBufferSize is not a multiple/exponential of largeBufferMultiple</exception>
-        public RecyclableMemoryStreamManager(int blockSize, int largeBufferMultiple, int maximumBufferSize, bool useExponentialLargeBuffer)
+        public RecyclableMemoryManager(int blockSize, int largeBufferMultiple, int maximumBufferSize, bool useExponentialLargeBuffer)
         {
             if (blockSize <= 0)
             {

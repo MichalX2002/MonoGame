@@ -1,9 +1,11 @@
 ﻿
+using System;
+
 namespace MonoGame.Imaging
 {
     internal unsafe delegate byte* ResampleDelegate(byte* a, byte* b, byte* c, int d, int e);
 
-    internal unsafe class Resample
+    internal unsafe struct Resample
     {
         public ResampleDelegate resampleDelegate;
         public byte* line0;
@@ -15,7 +17,7 @@ namespace MonoGame.Imaging
         public int ypos;
     }
 
-    internal unsafe class JpgImage
+    internal unsafe class JpgImage : IDisposable
     {
         public delegate void IDCT_BlockKernelDelegate(byte* output, int out_stride, short* data);
         public delegate void YCbCrToRGBKernelDelegate(byte* output, byte* y, byte* pcb, byte* pcr, int count, int step);
@@ -23,8 +25,8 @@ namespace MonoGame.Imaging
         public const int STBI__ZFAST_BITS = 9;
 
         public readonly ReadContext _readCtx;
-        public readonly MarshalPointer _huff_dc = Imaging.MAlloc(4 * sizeof(Huffman));
-        public readonly MarshalPointer _huff_ac = Imaging.MAlloc(4 * sizeof(Huffman));
+        public readonly MarshalPointer _huff_dc;
+        public readonly MarshalPointer _huff_ac;
         public readonly MarshalPointer[] _dequant;
 
         public readonly MarshalPointer[] _fastAc;
@@ -53,7 +55,7 @@ namespace MonoGame.Imaging
         public int rgb;
 
         public int scan_n;
-        public MarshalPointer _order = Imaging.MAlloc(4 * sizeof(int));
+        public MarshalPointer _order;
         public int RestartInterval, ToDo;
 
         // kernels
@@ -64,6 +66,10 @@ namespace MonoGame.Imaging
         public JpgImage(ReadContext context)
         {
             this._readCtx = context;
+
+            _huff_dc = Imaging.MAlloc(4 * sizeof(Huffman));
+            _huff_ac = Imaging.MAlloc(4 * sizeof(Huffman));
+            _order = Imaging.MAlloc(4 * sizeof(int));
 
             Huffman* huffAcP = (Huffman*)_huff_ac.Ptr;
             Huffman* huffDcP = (Huffman*)_huff_dc.Ptr;
@@ -89,6 +95,37 @@ namespace MonoGame.Imaging
             {
                 _dequant[i] = Imaging.MAlloc(64 * sizeof(ushort));
             }
+        }
+        
+        private bool _disposed = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                for (int i = 0; i < _fastAc.Length; i++)
+                    _fastAc[i].Dispose();
+
+                for (int i = 0; i < _dequant.Length; i++)
+                    _dequant[i].Dispose();
+
+                _huff_dc.Dispose();
+                _huff_ac.Dispose();
+                _order.Dispose();
+
+                _disposed = true;
+            }
+        }
+
+        ~JpgImage()
+        {
+            Dispose(false);
+        }
+        
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

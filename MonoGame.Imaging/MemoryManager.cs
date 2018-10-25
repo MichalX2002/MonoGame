@@ -5,7 +5,7 @@ namespace MonoGame.Imaging
 {
     public unsafe class MemoryManager
     {
-        public const int DEFAULT_ARRAY_SIZE = 1024 * 16;
+        public const int DEFAULT_PREALLOC = 1024 * 16;
         
         private int _allocatedArrays;
         private List<WeakReference<byte[]>> _arrayPool;
@@ -69,7 +69,7 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Contructs a new <see cref="MemoryManager"/> instance.
         /// </summary>
-        public MemoryManager() : this(DEFAULT_ARRAY_SIZE)
+        public MemoryManager() : this(DEFAULT_PREALLOC)
         {
         }
 
@@ -86,7 +86,7 @@ namespace MonoGame.Imaging
 
         internal byte[] Rent()
         {
-            return Rent(DEFAULT_ARRAY_SIZE);
+            return Rent(DEFAULT_PREALLOC);
         }
         
         internal byte[] Rent(int size)

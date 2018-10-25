@@ -22,24 +22,25 @@ namespace MonoGame.Imaging.Tests
 
             SaveConfiguration nonD = new SaveConfiguration(false, 0);
             SaveConfiguration d = SaveConfiguration.Default;
+            var ms = new MemoryStream();
 
-            TestEntry(d, manager, archive, "bmp/8bit.bmp");
-            TestEntry(d, manager, archive, "bmp/24bit.bmp");
+            TestEntry(ms, d, manager, archive, "bmp/8bit.bmp");
+            TestEntry(ms, d, manager, archive, "bmp/24bit.bmp");
 
-            TestEntry(d, manager, archive, "jpg/quality_0.jpg");
-            TestEntry(d, manager, archive, "jpg/quality_25.jpg");
-            TestEntry(d, manager, archive, "jpg/quality_50.jpg");
-            TestEntry(d, manager, archive, "jpg/quality_75.jpg");
-            TestEntry(d, manager, archive, "jpg/quality_100.jpg");
-           
-            TestEntry(d, manager, archive, "png/32bit.png");
-            TestEntry(d, manager, archive, "png/24bit.png");
-            TestEntry(d, manager, archive, "png/8bit.png");
+            TestEntry(ms, d, manager, archive, "jpg/quality_0.jpg");
+            TestEntry(ms, d, manager, archive, "jpg/quality_25.jpg");
+            TestEntry(ms, d, manager, archive, "jpg/quality_50.jpg");
+            TestEntry(ms, d, manager, archive, "jpg/quality_75.jpg");
+            TestEntry(ms, d, manager, archive, "jpg/quality_100.jpg");
 
-            TestEntry(nonD, manager, archive, "tga/32bit.tga");
-            TestEntry(d, manager, archive, "tga/32bit_compressed.tga");
-            TestEntry(nonD, manager, archive, "tga/24bit.tga");
-            TestEntry(d, manager, archive, "tga/24bit_compressed.tga");
+            TestEntry(ms, d, manager, archive, "png/32bit.png");
+            TestEntry(ms, d, manager, archive, "png/24bit.png");
+            TestEntry(ms, d, manager, archive, "png/8bit.png");
+
+            TestEntry(ms, nonD, manager, archive, "tga/32bit.tga");
+            TestEntry(ms, d, manager, archive, "tga/32bit_compressed.tga");
+            TestEntry(ms, nonD, manager, archive, "tga/24bit.tga");
+            TestEntry(ms, d, manager, archive, "tga/24bit_compressed.tga");
 
             /*
             var watch = new Stopwatch();
@@ -73,10 +74,11 @@ namespace MonoGame.Imaging.Tests
             Console.ReadKey();
         }
 
-        static void TestEntry(SaveConfiguration config, MemoryManager manager, ZipArchive archive, string name)
+        static void TestEntry(MemoryStream ms, 
+            SaveConfiguration config, MemoryManager manager, ZipArchive archive, string name)
         {
             Stopwatch watch = new Stopwatch();
-            int tries = 100;
+            int tries = 500;
 
             try
             {
@@ -89,7 +91,6 @@ namespace MonoGame.Imaging.Tests
                 double pointerReadTime = 0;
                 double imageSaveTime = 0;
 
-                var ms = new MemoryStream();
                 for (int i = 0; i < tries; i++)
                 {
                     dataStream.Position = 0;
@@ -120,7 +121,9 @@ namespace MonoGame.Imaging.Tests
                             watch.Restart();
                             ms.Position = 0;
                             ms.SetLength(0);
+
                             img.Save(ms, imageInfo.SourceFormat.ToSaveFormat(), config);
+
                             watch.Stop();
                             if (tries > 0)
                                 imageSaveTime += watch.Elapsed.TotalMilliseconds;
@@ -148,8 +151,8 @@ namespace MonoGame.Imaging.Tests
                 Console.WriteLine(exc);
             }
 
-            Console.WriteLine($"Memory Allocated (Arrays: {manager.AllocatedArrays}): " + manager.AllocatedBytes + " bytes");
-            Console.WriteLine($"Lifetime Allocated (Arrays: {manager.LifetimeAllocatedArrays}): " + manager.AllocatedBytes + " bytes");
+            //Console.WriteLine($"Memory Allocated (Arrays: {manager.AllocatedArrays}): " + manager.AllocatedBytes + " bytes");
+            //Console.WriteLine($"Lifetime Allocated (Arrays: {manager.LifetimeAllocatedArrays}): " + manager.AllocatedBytes + " bytes");
             Console.WriteLine("----------------------------------------------------");
         }
     }

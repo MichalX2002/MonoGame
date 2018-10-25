@@ -65,7 +65,8 @@ namespace MonoGame.Imaging
 
                     byte* ptr;
                     int width, height, bpp;
-                    WriteContext writeCtx = Imaging.GetWriteContext(WriteCallback, _manager, output, config);
+                    //var buffer = new BufferedStream(output, 1024 * 8);
+                    var writeCtx = Imaging.GetWriteContext(WriteCallback, _manager, output, config);
                     switch (format)
                     {
                         case ImageSaveFormat.Bmp:
