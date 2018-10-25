@@ -76,7 +76,7 @@ namespace MonoGame.Utilities.IO
 
         private readonly Guid id;
 
-        private readonly RecyclableMemoryStreamManager memoryManager;
+        private readonly RecyclableMemoryManager memoryManager;
 
         private readonly string tag;
 
@@ -129,7 +129,7 @@ namespace MonoGame.Utilities.IO
         /// Gets the memory manager being used by this stream.
         /// </summary>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
-        internal RecyclableMemoryStreamManager MemoryManager
+        internal RecyclableMemoryManager MemoryManager
         {
             get
             {
@@ -155,7 +155,7 @@ namespace MonoGame.Utilities.IO
         /// Allocate a new RecyclableMemoryStream object.
         /// </summary>
         /// <param name="memoryManager">The memory manager</param>
-        public RecyclableMemoryStream(RecyclableMemoryStreamManager memoryManager)
+        public RecyclableMemoryStream(RecyclableMemoryManager memoryManager)
             : this(memoryManager, null, 0, null) { }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace MonoGame.Utilities.IO
         /// </summary>
         /// <param name="memoryManager">The memory manager</param>
         /// <param name="tag">A string identifying this stream for logging and debugging purposes</param>
-        public RecyclableMemoryStream(RecyclableMemoryStreamManager memoryManager, string tag)
+        public RecyclableMemoryStream(RecyclableMemoryManager memoryManager, string tag)
             : this(memoryManager, tag, 0, null) { }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace MonoGame.Utilities.IO
         /// <param name="memoryManager">The memory manager</param>
         /// <param name="tag">A string identifying this stream for logging and debugging purposes</param>
         /// <param name="requestedSize">The initial requested size to prevent future allocations</param>
-        public RecyclableMemoryStream(RecyclableMemoryStreamManager memoryManager, string tag, int requestedSize)
+        public RecyclableMemoryStream(RecyclableMemoryManager memoryManager, string tag, int requestedSize)
             : this(memoryManager, tag, requestedSize, null) { }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace MonoGame.Utilities.IO
         /// <param name="tag">A string identifying this stream for logging and debugging purposes</param>
         /// <param name="requestedSize">The initial requested size to prevent future allocations</param>
         /// <param name="initialLargeBuffer">An initial buffer to use. This buffer will be owned by the stream and returned to the memory manager upon Dispose.</param>
-        internal RecyclableMemoryStream(RecyclableMemoryStreamManager memoryManager, string tag, int requestedSize,
+        internal RecyclableMemoryStream(RecyclableMemoryManager memoryManager, string tag, int requestedSize,
                                         byte[] initialLargeBuffer)
             : base(emptyArray)
         {
@@ -209,7 +209,7 @@ namespace MonoGame.Utilities.IO
                 this.AllocationStack = Environment.StackTrace;
             }
 
-            RecyclableMemoryStreamManager.Events.Writer.MemoryStreamCreated(this.id, this.tag, requestedSize);
+            RecyclableMemoryManager.Events.Writer.MemoryStreamCreated(this.id, this.tag, requestedSize);
             this.memoryManager.ReportStreamCreated();
         }
         #endregion
@@ -236,14 +236,14 @@ namespace MonoGame.Utilities.IO
                     doubleDisposeStack = Environment.StackTrace;
                 }
 
-                RecyclableMemoryStreamManager.Events.Writer.MemoryStreamDoubleDispose(this.id, this.tag,
+                RecyclableMemoryManager.Events.Writer.MemoryStreamDoubleDispose(this.id, this.tag,
                                                                                      this.AllocationStack,
                                                                                      this.DisposeStack,
                                                                                      doubleDisposeStack);
                 return;
             }
 
-            RecyclableMemoryStreamManager.Events.Writer.MemoryStreamDisposed(this.id, this.tag);
+            RecyclableMemoryManager.Events.Writer.MemoryStreamDisposed(this.id, this.tag);
 
             if (this.memoryManager.GenerateCallStacks)
             {
@@ -260,7 +260,7 @@ namespace MonoGame.Utilities.IO
             {
                 // We're being finalized.
 
-                RecyclableMemoryStreamManager.Events.Writer.MemoryStreamFinalized(this.id, this.tag, this.AllocationStack);
+                RecyclableMemoryManager.Events.Writer.MemoryStreamFinalized(this.id, this.tag, this.AllocationStack);
 
 #if !NETSTANDARD1_4
                 if (AppDomain.CurrentDomain.IsFinalizingForUnload())
@@ -467,7 +467,7 @@ namespace MonoGame.Utilities.IO
 
             this.InternalRead(newBuffer, 0, this.length, 0);
             string stack = this.memoryManager.GenerateCallStacks ? Environment.StackTrace : null;
-            RecyclableMemoryStreamManager.Events.Writer.MemoryStreamToArray(this.id, this.tag, stack, 0);
+            RecyclableMemoryManager.Events.Writer.MemoryStreamToArray(this.id, this.tag, stack, 0);
             this.memoryManager.ReportStreamToArray();
 
             return newBuffer;
@@ -835,7 +835,7 @@ namespace MonoGame.Utilities.IO
         {
             if (newCapacity > this.memoryManager.MaximumStreamCapacity && this.memoryManager.MaximumStreamCapacity > 0)
             {
-                RecyclableMemoryStreamManager.Events.Writer.MemoryStreamOverCapacity(newCapacity,
+                RecyclableMemoryManager.Events.Writer.MemoryStreamOverCapacity(newCapacity,
                                                                                     this.memoryManager
                                                                                         .MaximumStreamCapacity, this.tag,
                                                                                     this.AllocationStack);

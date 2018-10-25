@@ -118,7 +118,7 @@ namespace MonoGame.Imaging
 
                     if (_cachedInfo == null)
                     {
-                        _tempBuffer = _manager.Rent(MemoryManager.DEFAULT_ARRAY_SIZE);
+                        _tempBuffer = _manager.Rent(MemoryManager.DEFAULT_PREALLOC);
                         
                         ReadContext rc = GetReadContext();
                         LastGetInfoFailed = CheckInvalidReadCtx(rc);

@@ -1838,8 +1838,7 @@ namespace MonoGame.Imaging
         public static int FreeJpgComponents(JpgImage z, int ncomp, int why)
         {
             MemoryManager mm = z._readCtx.Manager;
-            int i;
-            for (i = 0; (i) < (ncomp); ++i)
+            for (int i = 0; i < ncomp; ++i)
             {
                 if ((z.JpgImgComp[i].raw_data) != null)
                 {
@@ -1859,6 +1858,7 @@ namespace MonoGame.Imaging
                     z.JpgImgComp[i].linebuf = null;
                 }
             }
+            z.Dispose();
             return why;
         }
 
@@ -2198,18 +2198,19 @@ namespace MonoGame.Imaging
                 decode_n = 1;
             else
                 decode_n = s.SourceChannels;
-
-            int k;
+            
             uint i;
-            uint j;
             byte* output;
             byte** coutput = stackalloc byte*[4];
             var res_comp = new Resample[4];
-            for (var kkk = 0; kkk < res_comp.Length; ++kkk) res_comp[kkk] = new Resample();
-            for (k = 0; (k) < (decode_n); ++k)
+            for (int kkk = 0; kkk < res_comp.Length; ++kkk)
+                res_comp[kkk] = new Resample();
+
+            for (int k = 0; k < decode_n; ++k)
             {
-                Resample r = res_comp[k];
+                ref Resample r = ref res_comp[k];
                 z.JpgImgComp[k].linebuf = MAlloc(s.Width + 3).Ptr;
+
                 if (z.JpgImgComp[k].linebuf == null)
                 {
                     CleanupJpg(z);
@@ -2229,19 +2230,19 @@ namespace MonoGame.Imaging
                 else r.resampleDelegate = GenericResampleRow;
             }
 
-            output = (byte*)(MAlloc_mad3(n, (int)(s.Width), (int)(s.Height), 1));
+            output = MAlloc_mad3(n, (int)(s.Width), (int)(s.Height), 1);
             if (output == null)
             {
                 CleanupJpg(z);
                 return (s.Error("outofmem")) != 0 ? (byte*)null : null;
             }
 
-            for (j = 0; (j) < (s.Height); ++j)
+            for (int j = 0; (j) < (s.Height); ++j)
             {
                 byte* _out_ = output + n * s.Width * j;
-                for (k = 0; (k) < (decode_n); ++k)
+                for (int k = 0; (k) < (decode_n); ++k)
                 {
-                    Resample r = res_comp[k];
+                    ref Resample r = ref res_comp[k];
                     int y_bot = (r.ystep) >= (r.vs >> 1) ? 1 : 0;
 
                     coutput[k] = r.resampleDelegate(
@@ -2393,10 +2394,9 @@ namespace MonoGame.Imaging
         public static void* LoadJpg(ReadContext s, int* x, int* y, int* comp, int req_comp,
             ResultInfo* ri)
         {
-            byte* result;
             JpgImage j = new JpgImage(s);
             SetupJpg(j);
-            result = LoadJpgImage(j, x, y, comp, req_comp);
+            byte* result = LoadJpgImage(j, x, y, comp, req_comp);
 
             return result;
         }
@@ -2538,7 +2538,8 @@ namespace MonoGame.Imaging
             {
                 if ((k) < (z->maxcode[s])) break;
             }
-            if ((s) == (16)) return -1;
+            if ((s) == (16))
+                return -1;
             b = (k >> (16 - s)) - z->firstcode[s] + z->firstsymbol[s];
             a->code_buffer >>= s;
             a->num_bits -= s;
@@ -4652,19 +4653,19 @@ namespace MonoGame.Imaging
                 return 0;
             }
 
-            if ((x) != null)
+            if (x != null)
                 *x = g.w;
 
-            if ((y) != null)
+            if (y != null)
                 *y = g.h;
-
+            
+            g.Dispose();
             return 1;
         }
 
         public static void GetGifCode(GifImage g, ushort code)
         {
             GifLzw* gCodesP = (GifLzw*)g.codes.Ptr;
-
             if ((gCodesP[code].Prefix) >= 0)
                 GetGifCode(g, (ushort)(gCodesP[code].Prefix));
 
@@ -4725,7 +4726,8 @@ namespace MonoGame.Imaging
                     if ((len) == 0)
                     {
                         len = GetByte(s);
-                        if ((len) == 0) return g._out_;
+                        if ((len) == 0)
+                            return g._out_;
                     }
                     --len;
                     bits |= GetByte(s) << valid_bits;
@@ -4771,6 +4773,7 @@ namespace MonoGame.Imaging
                         }
                         else if ((code) == (avail))
                             return (s.Error("illegal code in raster")) != 0 ? (byte*)null : null;
+
                         GetGifCode(g, (ushort)(code));
                         if (((avail & codemask) == 0) && (avail <= 0x0FFF))
                         {
@@ -4853,7 +4856,6 @@ namespace MonoGame.Imaging
                             int y;
                             int w;
                             int h;
-                            byte* o;
                             x = Get16le(s);
                             y = Get16le(s);
                             w = Get16le(s);
@@ -4900,7 +4902,7 @@ namespace MonoGame.Imaging
                             else
                                 return (s.Error("missing color table")) != 0 ? (byte*)null : null;
 
-                            o = ProcessGifRaster(s, g);
+                            byte* o = ProcessGifRaster(s, g);
                             if (o == null)
                                 return null;
 
@@ -4942,14 +4944,13 @@ namespace MonoGame.Imaging
             }
         }
 
-        public static void* LoadGif(ReadContext s, int* x, int* y,
+        public static void* LoadGif(
+            ReadContext s, int* x, int* y,
             int* comp, int req_comp, ResultInfo* ri)
         {
-            byte* u = null;
             GifImage g = new GifImage();
-
-            u = LoadNextGif(s, g, comp, req_comp);
-            if ((u) != null)
+            byte* u = LoadNextGif(s, g, comp, req_comp);
+            if (u != null)
             {
                 *x = g.w;
                 *y = g.h;
@@ -4960,6 +4961,7 @@ namespace MonoGame.Imaging
             else if ((g._out_) != null)
                 Free(g._out_);
 
+            g.Dispose();
             return u;
         }
 

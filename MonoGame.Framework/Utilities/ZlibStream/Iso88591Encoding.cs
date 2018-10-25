@@ -17,7 +17,7 @@ namespace MonoGame.Utilities
         /// Internet Assigned Numbers Authority (IANA) for the current encoding.
         /// </summary>
         /// <returns>
-        /// The IANA name for the current <see cref="System.Text.Encoding"/>.
+        /// The IANA name for the current <see cref="Encoding"/>.
         /// </returns>
         public override string WebName
         {
