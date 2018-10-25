@@ -12,7 +12,7 @@ namespace MonoGame.Imaging
                     if (LastGetContextFailed)
                         return null;
 
-                    var context = Imaging.GetReadContext(_manager, LastError, _callbacks);
+                    var context = Imaging.GetReadContext(LastError, _callbacks);
                     if (context == null)
                         LastGetContextFailed = true;
 

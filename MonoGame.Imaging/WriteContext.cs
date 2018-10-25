@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using MonoGame.Utilities.IO;
+using System.IO;
 
 namespace MonoGame.Imaging
 {
@@ -7,15 +8,13 @@ namespace MonoGame.Imaging
     public class WriteContext
     {
         public WriteCallback Write;
-        public MemoryManager Manager;
         public Stream Stream;
         public bool WriteTgaWithRle;
 
         public WriteContext(
-            WriteCallback callback, MemoryManager manager, Stream stream, bool writeTgaWithRle)
+            WriteCallback callback, Stream stream, bool writeTgaWithRle)
         {
             Write = callback;
-            Manager = manager;
             Stream = stream;
 
             WriteTgaWithRle = writeTgaWithRle;

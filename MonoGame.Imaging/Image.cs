@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MonoGame.Utilities.IO;
+using System;
 using System.IO;
 
 namespace MonoGame.Imaging
@@ -8,9 +9,7 @@ namespace MonoGame.Imaging
         public delegate void ErrorDelegate(ErrorContext errors);
 
         private Stream _stream;
-        private MemoryManager _manager;
         private readonly bool _leaveStreamOpen;
-        private readonly bool _leaveManagerOpen;
         private bool _fromPtr;
 
         private byte[] _tempBuffer;
@@ -34,19 +33,11 @@ namespace MonoGame.Imaging
         public bool LastGetInfoFailed { get; private set; }
         public bool LastGetContextFailed { get; private set; }
         public bool LastGetPointerFailed { get; private set; }
-        
-        private Image(MemoryManager manager, bool leaveManagerOpen)
-        {
-            _manager = manager ?? throw new ArgumentNullException(nameof(manager));
-            _leaveManagerOpen = leaveManagerOpen;
-        }
 
-        public Image(
-            Stream stream, bool leaveStreamOpen,
-            MemoryManager manager, bool leaveManagerOpen) : this(manager, leaveManagerOpen)
+        public Image(Stream stream, bool leaveOpen)
         {
             _stream = stream ?? throw new ArgumentNullException(nameof(stream));
-            _leaveStreamOpen = leaveStreamOpen;
+            _leaveStreamOpen = leaveOpen;
 
             LastError = new ErrorContext();
             _infoBuffer = new MemoryStream(512);
@@ -58,22 +49,14 @@ namespace MonoGame.Imaging
             }
         }
 
-        public Image(Stream stream, bool leaveOpen) :
-           this(stream, leaveOpen, new MemoryManager(), false)
+        public Image(Stream stream) : this(stream, false)
         {
         }
 
-        public Image(Stream stream, bool leaveOpen, MemoryManager manager) :
-            this(stream, leaveOpen, manager, true)
-        {
-        }
-
-        public Image(
-            IntPtr data, int width, int height, ImagePixelFormat pixelFormat,
-            MemoryManager manager, bool leaveManagerOpen) : this(manager, leaveManagerOpen)
+        public Image(IntPtr data, int width, int height, ImagePixelFormat pixelFormat)
         {
             if (data == IntPtr.Zero)
-                throw new ArgumentException("Pointer was zero.", nameof(data));
+                throw new ArgumentException("Pointer is zero.", nameof(data));
 
             switch(pixelFormat)
             {
@@ -84,22 +67,12 @@ namespace MonoGame.Imaging
                     break;
 
                 default:
-                    throw new ArgumentException(nameof(pixelFormat), "Unknown pixel format: " + pixelFormat);
+                    throw new ArgumentException("Unknown pixel format: " + pixelFormat, nameof(pixelFormat));
             }
 
             _pointer = new MarshalPointer(data, width * height * (int)pixelFormat);
             _cachedInfo = new ImageInfo(width, height, pixelFormat, ImageFormat.RawData);
             _fromPtr = true;
-        }
-
-        public Image(IntPtr data, int width, int height, ImagePixelFormat pixelFormat) :
-            this(data, width, height, pixelFormat, new MemoryManager(), false)
-        {
-        }
-
-        public Image(IntPtr data, int width, int height, ImagePixelFormat pixelFormat, MemoryManager manager) :
-            this(data, width, height, pixelFormat, manager, true)
-        {
         }
 
         private void TriggerError()
@@ -118,7 +91,7 @@ namespace MonoGame.Imaging
 
                     if (_cachedInfo == null)
                     {
-                        _tempBuffer = _manager.Rent(MemoryManager.DEFAULT_PREALLOC);
+                        //_tempBuffer = _manager.();
                         
                         ReadContext rc = GetReadContext();
                         LastGetInfoFailed = CheckInvalidReadCtx(rc);
@@ -137,7 +110,7 @@ namespace MonoGame.Imaging
                             _infoBuffer = null;
                         }
 
-                        _manager.Return(_tempBuffer);
+                        //_manager.Return(_tempBuffer);
                     }
                 }
 
@@ -158,12 +131,12 @@ namespace MonoGame.Imaging
                 {
                     ImageInfo info = Info;
                     if (info == null)
-                        LastError.AddError("no image info");
+                        LastError.AddError(ImagingError.NoImageInfo);
                     else
                     {
                         try
                         {
-                            _tempBuffer = _manager.Rent();
+                            //_tempBuffer = _manager.Rent();
 
                             int bpp = (int)info.PixelFormat;
                             ReadContext rc = GetReadContext();
@@ -181,7 +154,7 @@ namespace MonoGame.Imaging
                         }
                         finally
                         {
-                            _manager.Return(_tempBuffer);
+                            //_manager.Return(_tempBuffer);
                         }
                     }
                     CloseStream();

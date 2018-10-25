@@ -8,7 +8,7 @@ namespace MonoGame.Imaging
         public readonly IntPtr SourcePtr;
         public readonly int Size;
         public readonly byte* Ptr;
-        
+
         public MarshalPointer(IntPtr ptr, int size)
         {
             SourcePtr = ptr;
@@ -16,10 +16,10 @@ namespace MonoGame.Imaging
             Size = size;
             IsDisposed = false;
         }
-        
+
         public void Dispose()
         {
-            if (IsDisposed == false)
+            if (!IsDisposed)
             {
                 Imaging.Free(SourcePtr);
                 IsDisposed = true;

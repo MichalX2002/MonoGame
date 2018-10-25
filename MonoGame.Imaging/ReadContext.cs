@@ -4,12 +4,13 @@ namespace MonoGame.Imaging
 {
     internal unsafe class ReadContext : IDisposable
     {
+        public bool IsDisposed { get; private set; }
+
         public uint Width;
         public uint Height;
         public int SourceChannels;
         public int OutChannels;
-
-        public MemoryManager Manager;
+        
         public ErrorContext ErrorCtx;
         public ReadCallbacks Callbacks;
         public int ReadFromCallbacks;
@@ -20,14 +21,34 @@ namespace MonoGame.Imaging
         public byte* ImgBufferOrigin;
         public byte* ImgBufferEndOrigin;
 
-        public int Error(string error)
+        public int Error(ImagingError error)
         {
             return ErrorCtx.Error(error);
         }
 
-        public void Dispose()
+        public void Disposee()
         {
             BufferStart.Dispose();
+        }
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+            {
+
+                IsDisposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~ReadContext()
+        {
+            Dispose(false);
         }
     }
 }

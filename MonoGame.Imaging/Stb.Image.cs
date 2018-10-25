@@ -8,7 +8,7 @@ namespace MonoGame.Imaging
     {
         public static int _verticallyFlipOnLoad;
         
-        private static int Error(ErrorContext context, string error)
+        private static int Error(ErrorContext context, ImagingError error)
         {
             context.AddError(error);
             return 0;

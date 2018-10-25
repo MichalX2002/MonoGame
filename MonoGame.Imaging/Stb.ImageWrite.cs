@@ -6,9 +6,9 @@ namespace MonoGame.Imaging
     unsafe partial class Imaging
     {
         public static WriteContext GetWriteContext(
-            WriteCallback c, MemoryManager manager, Stream stream, SaveConfiguration config)
+            WriteCallback c, Stream stream, SaveConfiguration config)
         {
-            return new WriteContext(c, manager, stream, config.UseTgaRLE);
+            return new WriteContext(c, stream, config.UseTgaRLE);
         }
 
         public static void WriteFv(WriteContext s, string fmt, params int[] v)
@@ -98,7 +98,7 @@ namespace MonoGame.Imaging
             int stride_bytes)
         {
             int len;
-            byte* png = MemoryWritePng(c.Manager, (byte*)data, stride_bytes, x, y, comp, &len);
+            byte* png = MemoryWritePng((byte*)data, stride_bytes, x, y, comp, &len);
             if (png == null)
                 return 0;
 

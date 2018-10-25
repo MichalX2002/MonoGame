@@ -39,7 +39,7 @@ namespace MonoGame.Imaging
         {
             lock (SyncRoot)
             {
-                _tempBuffer = _manager.Rent();
+                //_tempBuffer = _manager.Rent();
                 try
                 {
                     void Get(out int w, out int h, out int p, out byte* d)
@@ -65,8 +65,8 @@ namespace MonoGame.Imaging
 
                     byte* ptr;
                     int width, height, bpp;
-                    //var buffer = new BufferedStream(output, 1024 * 8);
-                    var writeCtx = Imaging.GetWriteContext(WriteCallback, _manager, output, config);
+                    var buffer = new BufferedStream(output, 1024 * 16);
+                    var writeCtx = Imaging.GetWriteContext(WriteCallback, output, config);
                     switch (format)
                     {
                         case ImageSaveFormat.Bmp:
@@ -105,22 +105,27 @@ namespace MonoGame.Imaging
                             throw new ArgumentOutOfRangeException(nameof(format), $"Invalid Format: {format}");
                     }
                 }
+                catch
+                {
+                    throw;
+                }
                 finally
                 {
-                    _manager.Return(_tempBuffer);
+                    //_manager.Return(_tempBuffer);
                 }
             }
         }
 
         private unsafe int WriteCallback(Stream stream, byte* data, int size)
         {
-            if (data == null || size <= 0)
+            if (data == null || size < 1)
                 return 0;
-            
+
             int leftToRead = size;
-            while(leftToRead > 0)
+            int read = 0;
+            while (leftToRead > 0)
             {
-                int read = Math.Min(leftToRead, _tempBuffer.Length);
+                read = _tempBuffer.Length < leftToRead ? _tempBuffer.Length : leftToRead;
                 for (int i = 0; i < read; i++)
                     _tempBuffer[i] = data[i + size - leftToRead];
 

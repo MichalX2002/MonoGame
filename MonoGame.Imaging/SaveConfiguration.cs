@@ -1,18 +1,42 @@
-﻿namespace MonoGame.Imaging
+﻿using MonoGame.Utilities.IO;
+
+namespace MonoGame.Imaging
 {
-    public struct SaveConfiguration
+    public class SaveConfiguration
     {
         public delegate void ImageWritingDelegate(int writeCount);
 
-        public static SaveConfiguration Default => new SaveConfiguration(true, 90);
+        private static RecyclableMemoryManager _defaultMemory;
+        public static RecyclableMemoryManager DefaultMemoryManager
+        {
+            get
+            {
+                if (_defaultMemory == null)
+                    _defaultMemory = new RecyclableMemoryManager();
+                return _defaultMemory;
+            }
+        }
+
+        private static SaveConfiguration _default;
+        public static SaveConfiguration Default
+        {
+            get
+            {
+                if (_default == null)
+                    _default = new SaveConfiguration(true, 90, DefaultMemoryManager);
+                return _default;
+            }
+        }
 
         public bool UseTgaRLE { get; }
         public int JpgQuality { get; }
+        public RecyclableMemoryManager MemoryManager { get; }
 
-        public SaveConfiguration(bool useTgaRLE, int jpgQuality)
+        public SaveConfiguration(bool useTgaRLE, int jpgQuality, RecyclableMemoryManager manager)
         {
             UseTgaRLE = useTgaRLE;
             JpgQuality = jpgQuality < 0 ? 90 : (jpgQuality > 100 ? 100 : jpgQuality);
+            MemoryManager = manager;
         }
     }
 }

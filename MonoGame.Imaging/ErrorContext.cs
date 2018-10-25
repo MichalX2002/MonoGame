@@ -1,19 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace MonoGame.Imaging
 {
     public class ErrorContext
     {
-        public IList<string> Errors { get; private set; }
+        public IList<ImagingError> Errors { get; private set; }
         public int Count => Errors.Count;
 
         public ErrorContext()
         {
-            Errors = new List<string>();
+            Errors = new List<ImagingError>();
         }
 
-        public ErrorContext(IList<string> items)
+        public ErrorContext(IList<ImagingError> items)
         {
             Errors = items;
         }
@@ -23,13 +24,13 @@ namespace MonoGame.Imaging
             Errors.Clear();
         }
 
-        internal int Error(string error)
+        internal int Error(ImagingError error)
         {
             AddError(error);
             return 0;
         }
 
-        internal void AddError(string error)
+        internal void AddError(ImagingError error)
         {
             Errors.Add(error);
         }
@@ -43,11 +44,11 @@ namespace MonoGame.Imaging
             var builder = new StringBuilder(max * 10 + 5);
             for (int i = 0; i < max; i++)
             {
-                builder.AppendLine(Errors[i]);
+                builder.AppendLine(Enum.GetName(typeof(ImagingError), Errors[i]));
                 builder.Append(' ');
             }
 
-            if (Count > 10)
+            if (Count > max)
                 builder.AppendLine($" and {Count - max} more...");
 
             return builder.ToString();

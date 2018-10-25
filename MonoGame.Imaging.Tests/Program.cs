@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MonoGame.Utilities.IO;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -18,10 +19,10 @@ namespace MonoGame.Imaging.Tests
         static void Main(string[] args)
         {
             ZipArchive archive = new ZipArchive(File.OpenRead(DATA_ZIP), ZipArchiveMode.Read, false);
-            MemoryManager manager = new MemoryManager();
+            var manager = new RecyclableMemoryManager();
 
-            SaveConfiguration nonD = new SaveConfiguration(false, 0);
-            SaveConfiguration d = SaveConfiguration.Default;
+            SaveConfiguration d = new SaveConfiguration(true, 0, manager);
+            SaveConfiguration nonD = new SaveConfiguration(false, 0, manager);
             var ms = new MemoryStream();
 
             TestEntry(ms, d, manager, archive, "bmp/8bit.bmp");
@@ -75,10 +76,10 @@ namespace MonoGame.Imaging.Tests
         }
 
         static void TestEntry(MemoryStream ms, 
-            SaveConfiguration config, MemoryManager manager, ZipArchive archive, string name)
+            SaveConfiguration config, RecyclableMemoryManager manager, ZipArchive archive, string name)
         {
             Stopwatch watch = new Stopwatch();
-            int tries = 500;
+            int tries = 1000;
 
             try
             {
@@ -94,7 +95,7 @@ namespace MonoGame.Imaging.Tests
                 for (int i = 0; i < tries; i++)
                 {
                     dataStream.Position = 0;
-                    using (var img = new Image(dataStream, false, manager))
+                    using (var img = new Image(dataStream, true))
                     {
                         watch.Restart();
                         ImageInfo imageInfo = img.Info;
@@ -121,7 +122,7 @@ namespace MonoGame.Imaging.Tests
                             watch.Restart();
                             ms.Position = 0;
                             ms.SetLength(0);
-
+                            var buff = new BufferedStream(ms, 1024 * 16);
                             img.Save(ms, imageInfo.SourceFormat.ToSaveFormat(), config);
 
                             watch.Stop();
