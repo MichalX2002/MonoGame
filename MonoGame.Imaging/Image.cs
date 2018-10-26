@@ -1,18 +1,19 @@
 ﻿using MonoGame.Utilities.IO;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Imaging
 {
     public sealed partial class Image : IDisposable
     {
         public delegate void ErrorDelegate(ErrorContext errors);
+        private static RecyclableMemoryManager _memoryManager = SaveConfiguration.DefaultMemoryManager;
 
-        private Stream _stream;
+        private Stream _sourceStream;
+        private MultiStream _combinedStream;
         private readonly bool _leaveStreamOpen;
-        private bool _fromPtr;
-
-        private byte[] _tempBuffer;
+        private bool _leavePointerOpen;
 
         private MarshalPointer _pointer;
         private ImageInfo _cachedInfo;
@@ -20,28 +21,38 @@ namespace MonoGame.Imaging
 
         private ReadCallbacks _callbacks;
 
-        public bool Disposed { get; private set; }
+        public bool IsDisposed { get; private set; }
         public object SyncRoot { get; } = new object();
 
-        public IntPtr Pointer => GetDataPointer().SourcePtr;
+        public IntPtr Pointer
+        {
+            get
+            {
+                unsafe
+                {
+                    return (IntPtr)GetDataPointer().Ptr;
+                }
+            }
+        }
+
         public int PointerLength { get; private set; }
         public ImageInfo Info => GetImageInfo();
 
         public event ErrorDelegate ErrorOccurred;
         public ErrorContext LastError { get; private set; }
 
-        public bool LastGetInfoFailed { get; private set; }
-        public bool LastGetContextFailed { get; private set; }
-        public bool LastGetPointerFailed { get; private set; }
+        public bool LastInfoFailed { get; private set; }
+        public bool LastContextFailed { get; private set; }
+        public bool LastPointerFailed { get; private set; }
 
         public Image(Stream stream, bool leaveOpen)
         {
-            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
+            _sourceStream = stream ?? throw new ArgumentNullException(nameof(stream));
             _leaveStreamOpen = leaveOpen;
 
             LastError = new ErrorContext();
-            _infoBuffer = new MemoryStream(512);
-            _fromPtr = false;
+            _infoBuffer = _memoryManager.GetMemoryStream();
+            _leavePointerOpen = false;
 
             unsafe
             {
@@ -53,12 +64,36 @@ namespace MonoGame.Imaging
         {
         }
 
-        public Image(IntPtr data, int width, int height, ImagePixelFormat pixelFormat)
+        private Image(IntPtr data, bool leavePointerOpen, int width, int height, ImagePixelFormat pixelFormat)
+        {
+            _pointer = new MarshalPointer(data, leavePointerOpen, width * height * (int)pixelFormat);
+            _leavePointerOpen = leavePointerOpen;
+            _cachedInfo = new ImageInfo(width, height, pixelFormat, ImageFormat.RawData);
+        }
+
+        public Image(IntPtr data, int width, int height, ImagePixelFormat pixelFormat) :
+            this(data, true, width, height, pixelFormat)
         {
             if (data == IntPtr.Zero)
                 throw new ArgumentException("Pointer is zero.", nameof(data));
 
-            switch(pixelFormat)
+            CheckPixelFormat(pixelFormat);
+        }
+
+        public Image(int width, int height, ImagePixelFormat pixelFormat) :
+            this(GetNewPtr(width, height, pixelFormat), false, width, height, pixelFormat)
+        {
+        }
+
+        private static IntPtr GetNewPtr(int width, int height, ImagePixelFormat pixelFormat)
+        {
+            CheckPixelFormat(pixelFormat);
+            return Marshal.AllocHGlobal(width * height * (int)pixelFormat);
+        }
+
+        private static void CheckPixelFormat(ImagePixelFormat pixelFormat)
+        {
+            switch (pixelFormat)
             {
                 case ImagePixelFormat.Grey:
                 case ImagePixelFormat.GreyWithAlpha:
@@ -69,10 +104,6 @@ namespace MonoGame.Imaging
                 default:
                     throw new ArgumentException("Unknown pixel format: " + pixelFormat, nameof(pixelFormat));
             }
-
-            _pointer = new MarshalPointer(data, width * height * (int)pixelFormat);
-            _cachedInfo = new ImageInfo(width, height, pixelFormat, ImageFormat.RawData);
-            _fromPtr = true;
         }
 
         private void TriggerError()
@@ -84,33 +115,31 @@ namespace MonoGame.Imaging
         {
             lock (SyncRoot)
             {
-                if (Disposed == false)
+                if (IsDisposed == false)
                 {
-                    if (LastGetInfoFailed || LastGetContextFailed)
+                    if (LastInfoFailed || LastContextFailed)
                         return null;
 
                     if (_cachedInfo == null)
                     {
-                        _tempBuffer = SaveConfiguration.DefaultMemoryManager.GetBlock();
-                        
-                        ReadContext rc = GetReadContext();
-                        LastGetInfoFailed = CheckInvalidReadCtx(rc);
-                        if (LastGetInfoFailed == false)
+                        var buffer = _memoryManager.GetBlock();
+                        ReadContext rc = GetReadContext(_sourceStream, buffer);
+                        LastInfoFailed = rc == null;
+                        if (LastInfoFailed == false)
                         {
                             _cachedInfo = Imaging.GetImageInfo(rc);
                             if (_cachedInfo.IsValid() == false || _cachedInfo == null)
                             {
-                                LastGetInfoFailed = true;
+                                LastInfoFailed = true;
                                 TriggerError();
                                 return null;
                             }
 
-                            _stream = new MultiStream(_infoBuffer, _stream);
+                            _combinedStream = new MultiStream(_infoBuffer, _sourceStream, _sourceStream.Length);
                             _infoBuffer.Position = 0;
                             _infoBuffer = null;
                         }
-
-                        SaveConfiguration.DefaultMemoryManager.ReturnBlock(_tempBuffer, null);
+                        _memoryManager.ReturnBlock(buffer, null);
                     }
                 }
 
@@ -118,65 +147,68 @@ namespace MonoGame.Imaging
             }
         }
 
-        private MarshalPointer GetDataPointer()
+        private unsafe MarshalPointer GetDataPointer()
         {
             lock (SyncRoot)
             {
                 CheckDisposed();
 
-                if (LastGetContextFailed || LastGetPointerFailed || LastGetInfoFailed)
+                if (LastContextFailed || LastPointerFailed || LastInfoFailed)
                     return default;
 
-                if (_pointer.SourcePtr == IntPtr.Zero)
+                if (_pointer.Ptr == null)
                 {
                     ImageInfo info = Info;
                     if (info == null)
                         LastError.AddError(ImagingError.NoImageInfo);
                     else
                     {
-                        try
+                        using (var bufferStream = _memoryManager.GetReadBufferedStream(_combinedStream, true))
                         {
-                            _tempBuffer = SaveConfiguration.DefaultMemoryManager.GetBlock();
-
-                            int bpp = (int)info.PixelFormat;
-                            ReadContext rc = GetReadContext();
-                            if (rc != null)
+                            var buffer = _memoryManager.GetBlock();
+                            try
                             {
-                                IntPtr data = Imaging.LoadFromInfo8(rc, info, bpp);
-                                if (data == IntPtr.Zero)
-                                    LastGetPointerFailed = true;
-                                else
+                                ReadContext rc = GetReadContext(bufferStream, buffer);
+                                if (rc != null)
                                 {
-                                    PointerLength = info.Width * info.Height * bpp;
-                                    _pointer = new MarshalPointer(data, PointerLength);
+                                    int bpp = (int)info.PixelFormat;
+                                    IntPtr data = Imaging.LoadFromInfo8(rc, info, bpp);
+                                    if (data != IntPtr.Zero)
+                                    {
+                                        PointerLength = info.Width * info.Height * bpp;
+                                        _pointer = new MarshalPointer(data, PointerLength);
+                                    }
+                                    else
+                                        LastPointerFailed = true;
                                 }
+                                else
+                                    LastPointerFailed = true;
                             }
-                        }
-                        finally
-                        {
-                            SaveConfiguration.DefaultMemoryManager.ReturnBlock(_tempBuffer, null);
+                            finally
+                            {
+                                _memoryManager.ReturnBlock(buffer, null);
+                            }
                         }
                     }
                     CloseStream();
                 }
-
                 return _pointer;
             }
         }
 
         private void CheckDisposed()
         {
-            if (Disposed)
+            if (IsDisposed)
                 throw new ObjectDisposedException(nameof(Image));
         }
 
         private void CloseStream()
         {
-            if (_stream != null)
+            if (_sourceStream != null)
             {
                 if (_leaveStreamOpen == false)
-                    _stream.Dispose();
-                _stream = null;
+                    _sourceStream.Dispose();
+                _sourceStream = null;
             }
         }
 
@@ -184,16 +216,15 @@ namespace MonoGame.Imaging
         {
             lock (SyncRoot)
             {
-                if (!Disposed)
+                if (!IsDisposed)
                 {
-                    if (_fromPtr == false)
-                    {
-                        _pointer.Dispose();
-                        CloseStream();
-                    }
+                    CloseStream();
 
+                    if (_leavePointerOpen == false)
+                        _pointer.Dispose();
                     _pointer = default;
-                    Disposed = true;
+
+                    IsDisposed = true;
                 }
             }
         }

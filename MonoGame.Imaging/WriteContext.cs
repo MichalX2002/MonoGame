@@ -1,23 +1,25 @@
-﻿using MonoGame.Utilities.IO;
-using System.IO;
+﻿using System.IO;
 
 namespace MonoGame.Imaging
 {
-    public unsafe delegate int WriteCallback(Stream stream, byte* data, int size);
+    public unsafe delegate void WriteCallback(Stream stream, byte* data, byte[] buffer, int size);
 
     public class WriteContext
     {
         public WriteCallback Write;
+
         public Stream Stream;
-        public bool WriteTgaWithRle;
+        public byte[] Buffer;
+        public bool WriteTgaWithRLE;
 
         public WriteContext(
-            WriteCallback callback, Stream stream, bool writeTgaWithRle)
+            WriteCallback callback, Stream stream, byte[] buffer, bool writeTgaWithRLE)
         {
             Write = callback;
-            Stream = stream;
 
-            WriteTgaWithRle = writeTgaWithRle;
+            Stream = stream;
+            Buffer = buffer;
+            WriteTgaWithRLE = writeTgaWithRLE;
         }
     }
 }

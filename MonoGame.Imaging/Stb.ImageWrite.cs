@@ -6,9 +6,9 @@ namespace MonoGame.Imaging
     unsafe partial class Imaging
     {
         public static WriteContext GetWriteContext(
-            WriteCallback c, Stream stream, SaveConfiguration config)
+            WriteCallback c,Stream stream, byte[] buffer, SaveConfiguration config)
         {
-            return new WriteContext(c, stream, config.UseTgaRLE);
+            return new WriteContext(c, stream, buffer, config.UseTgaRLE);
         }
 
         public static void WriteFv(WriteContext s, string fmt, params int[] v)
@@ -23,8 +23,8 @@ namespace MonoGame.Imaging
 
                     case '1':
                         {
-                            var x = (byte)(v[vindex++] & 0xff);
-                            s.Write(s.Stream, &x, 1);
+                            byte x = (byte)(v[vindex++] & 0xff);
+                            WriteChar(s, x);
                             break;
                         }
                     case '2':
@@ -33,7 +33,7 @@ namespace MonoGame.Imaging
                             var b = stackalloc byte[2];
                             b[0] = (byte)(x & 0xff);
                             b[1] = (byte)((x >> 8) & 0xff);
-                            s.Write(s.Stream, b, 2);
+                            s.Write(s.Stream, b, s.Buffer, 2);
                             break;
                         }
                     case '4':
@@ -44,7 +44,7 @@ namespace MonoGame.Imaging
                             b[1] = (byte)((x >> 8) & 0xff);
                             b[2] = (byte)((x >> 16) & 0xff);
                             b[3] = (byte)((x >> 24) & 0xff);
-                            s.Write(s.Stream, b, 4);
+                            s.Write(s.Stream, b, s.Buffer, 4);
                             break;
                         }
                 }
@@ -90,29 +90,31 @@ namespace MonoGame.Imaging
         }
 
         public static int CallbackWritePng(
-            WriteContext c,
+            WriteContext s,
             int x,
             int y,
             int comp,
-            void* data,
+            byte* data,
             int stride_bytes)
         {
             int len;
-            byte* png = MemoryWritePng((byte*)data, stride_bytes, x, y, comp, &len);
+            byte* png = MemoryWritePng(data, stride_bytes, x, y, comp, &len);
             if (png == null)
                 return 0;
 
-            c.Write.Invoke(c.Stream, png, len);
+            s.Write(s.Stream, png, s.Buffer, len);
 
             Free(png);
             return 1;
         }
 
-        public static int CallbackWriteJpg(WriteContext s, int jpgQuality,
+        public static int CallbackWriteJpg(
+            WriteContext s,
+            int jpgQuality,
             int x,
             int y,
             int comp,
-            void* data)
+            byte* data)
         {
             return WriteJpgCore(s, x, y, comp, data, jpgQuality);
         }

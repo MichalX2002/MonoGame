@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace MonoGame.Imaging
 {
@@ -10,9 +11,11 @@ namespace MonoGame.Imaging
         public uint Height;
         public int SourceChannels;
         public int OutChannels;
-        
+
+        public Stream Stream;
         public ErrorContext ErrorCtx;
         public ReadCallbacks Callbacks;
+        public byte[] Buffer;
         public int ReadFromCallbacks;
         public int BufLength;
         public MarshalPointer BufferStart = Imaging.MAlloc(128);
@@ -26,16 +29,11 @@ namespace MonoGame.Imaging
             return ErrorCtx.Error(error);
         }
 
-        public void Disposee()
-        {
-            BufferStart.Dispose();
-        }
-        
         protected virtual void Dispose(bool disposing)
         {
             if (!IsDisposed)
             {
-
+                BufferStart.Dispose();
                 IsDisposed = true;
             }
         }

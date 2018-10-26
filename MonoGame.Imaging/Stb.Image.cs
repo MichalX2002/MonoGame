@@ -100,7 +100,7 @@ namespace MonoGame.Imaging
         internal static void* ReAlloc(void* ptr, long newSize)
         { 
             if (ptr == null)
-                return (void*)MAlloc(newSize).SourcePtr;
+                return (void*)MAlloc(newSize).Ptr;
             return (void*)Marshal.ReAllocHGlobal((IntPtr)ptr, (IntPtr)newSize);
         }
 

@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using MonoGame.Utilities.IO;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -8,22 +8,13 @@ namespace MonoGame.Imaging
     internal class MultiStream : Stream
     {
         private Queue<Stream> _streamQueue;
-        private int _position;
+        private long _position;
 
         public override bool CanRead => true;
         public override bool CanSeek => false;
         public override bool CanWrite => false;
 
-        public override long Length
-        {
-            get
-            {
-                long length = 0;
-                foreach (var stream in _streamQueue)
-                    length += stream.Length;
-                return length;
-            }
-        }
+        public override long Length { get; }
 
         public override long Position
         {
@@ -31,12 +22,12 @@ namespace MonoGame.Imaging
             set => throw new NotSupportedException();
         }
 
-        public MultiStream()
+        public MultiStream(long length)
         {
-            _streamQueue = new Queue<Stream>();
+            Length = length;
         }
 
-        public MultiStream(Stream a, Stream b)
+        public MultiStream(Stream a, Stream b, long length) : this(length)
         {
             _streamQueue = new Queue<Stream>(2);
             _streamQueue.Enqueue(a);
@@ -47,7 +38,9 @@ namespace MonoGame.Imaging
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
-
+            
+            if(_streamQueue == null)
+                _streamQueue = new Queue<Stream>();
             _streamQueue.Enqueue(stream);
         }
 
@@ -72,7 +65,9 @@ namespace MonoGame.Imaging
                 int read = _streamQueue.Peek().Read(buffer, offset, count);
                 if (read == 0)
                 {
-                    _streamQueue.Dequeue();
+                    var dequeued = _streamQueue.Dequeue();
+                    if (dequeued is RecyclableReadBufferedStream recyclable)
+                        recyclable.Dispose();
                     goto Start;
                 }
                 else
@@ -91,7 +86,6 @@ namespace MonoGame.Imaging
 
         public override void Flush()
         {
-
         }
 
         protected override void Dispose(bool disposing)

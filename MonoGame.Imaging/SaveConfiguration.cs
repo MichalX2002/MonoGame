@@ -12,7 +12,13 @@ namespace MonoGame.Imaging
             get
             {
                 if (_defaultMemory == null)
-                    _defaultMemory = new RecyclableMemoryManager();
+                {
+                    _defaultMemory = new RecyclableMemoryManager(1024 * 32, 2, 1024 * 80)
+                    {
+                        AggressiveBufferReturn = true,
+                        GenerateCallStacks = false
+                    };
+                }
                 return _defaultMemory;
             }
         }

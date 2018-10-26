@@ -2,6 +2,7 @@
 
 using MonoGame.Utilities.IO;
 using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -154,19 +155,22 @@ namespace MonoGame.Imaging
             s.ErrorCtx = errorCtx;
             s.ImgBuffer = s.ImgBufferOrigin = buffer;
             s.ImgBufferEnd = s.ImgBufferEndOrigin = buffer + len;
-
             return s;
         }
 
-        public static ReadContext GetReadContext(ErrorContext errorCtx, in ReadCallbacks c)
+        public static ReadContext GetReadContext(
+            Stream stream, ErrorContext errorCtx, in ReadCallbacks c, byte[] buffer)
         {
             var s = new ReadContext
             {
+                Stream = stream,
                 Callbacks = c,
-                ErrorCtx = errorCtx
+                ErrorCtx = errorCtx,
+                Buffer = buffer,
+                ReadFromCallbacks = 1
             };
             s.BufLength = s.BufferStart.Size;
-            s.ReadFromCallbacks = 1;
+
             s.ImgBufferOrigin = s.BufferStart.Ptr;
             RefillBuffer(s);
             s.ImgBufferEndOrigin = s.ImgBufferEnd;
@@ -464,31 +468,35 @@ namespace MonoGame.Imaging
             return (ushort*)result;
         }
 
-        public static ushort* Load16FromMemory(ErrorContext errorContext,
-            byte* buffer, int len, int* x, int* y, int* channels, int desiredChannels)
+        public static ushort* Load16FromMemory(
+            ErrorContext errorContext, byte* buffer,
+            int len, int* x, int* y, int* channels, int desiredChannels)
         {
             ReadContext s = GetMemoryReadContext(errorContext, buffer, len);
             return LoadAndPostprocess16(s, x, y, channels, desiredChannels);
         }
 
-        public static ushort* Load16FromCallbacks(ErrorContext errorContext,
-            in ReadCallbacks clbk, int* x, int* y, int* channelsInFile, int desiredChannels)
+        public static ushort* Load16FromCallbacks(
+            Stream stream, ErrorContext errorContext, in ReadCallbacks clbk, byte[] buffer, 
+            int* x, int* y, int* channelsInFile, int desiredChannels)
         {
-            ReadContext s = GetReadContext( errorContext, clbk);
+            ReadContext s = GetReadContext(stream, errorContext, clbk, buffer);
             return LoadAndPostprocess16(s, x, y, channelsInFile, desiredChannels);
         }
 
-        public static byte* LoadFromMemory(ErrorContext errorContext,
-            byte* buffer, int len, int* x, int* y, int* channels, int desiredChannels)
+        public static byte* LoadFromMemory(
+            ErrorContext errorContext, byte* buffer,
+            int len, int* x, int* y, int* channels, int desiredChannels)
         {
             ReadContext s = GetMemoryReadContext(errorContext, buffer, len);
             return LoadAndPostprocess8(s, x, y, channels, desiredChannels);
         }
 
-        public static byte* LoadFromCallbacks8(ErrorContext errorContext,
-            in ReadCallbacks clbk, int* x, int* y, int* channelsInFile, int desiredChannels)
+        public static byte* LoadFromCallbacks8(
+            Stream stream, ErrorContext errorContext, in ReadCallbacks clbk, byte[] buffer,
+            int* x, int* y, int* channelsInFile, int desiredChannels)
         {
-            ReadContext s = GetReadContext(errorContext, clbk);
+            ReadContext s = GetReadContext(stream, errorContext, clbk, buffer);
             return LoadAndPostprocess8(s, x, y, channelsInFile, desiredChannels);
         }
 
@@ -504,7 +512,7 @@ namespace MonoGame.Imaging
 
         public static void RefillBuffer(ReadContext s)
         {
-            int n = s.Callbacks.Read(s.BufferStart.Ptr, s.BufLength);
+            int n = s.Callbacks.Read(s.Stream, s.BufferStart.Ptr, s.Buffer, s.BufLength);
             if (n == 0)
             {
                 s.ReadFromCallbacks = 0;
@@ -519,7 +527,6 @@ namespace MonoGame.Imaging
                 s.ImgBufferEnd = s.BufferStart.Ptr;
                 s.ImgBufferEnd += n;
             }
-
         }
 
         public static byte GetByte(ReadContext s)
@@ -540,7 +547,7 @@ namespace MonoGame.Imaging
         {
             if ((s.Callbacks.Read) != null)
             {
-                if (s.Callbacks.EoF() == 0)
+                if (s.Callbacks.EoF(s.Stream) == 0)
                     return 0;
                 if ((s.ReadFromCallbacks) == 0)
                     return 1;
@@ -566,7 +573,7 @@ namespace MonoGame.Imaging
 
                     int skipCount = n - blen;
                     var skipBuffer = MAlloc(skipCount);
-                    s.Callbacks.Read(skipBuffer.Ptr, skipCount);
+                    s.Callbacks.Read(s.Stream, skipBuffer.Ptr, s.Buffer, skipCount);
                     Free(skipBuffer);
                     return;
                 }
@@ -583,7 +590,7 @@ namespace MonoGame.Imaging
                 if ((blen) < (n))
                 {
                     MemCopy(buffer, s.ImgBuffer, blen);
-                    int count = s.Callbacks.Read(buffer + blen, n - blen);
+                    int count = s.Callbacks.Read(s.Stream, buffer + blen, s.Buffer, n - blen);
                     s.ImgBuffer = s.ImgBufferEnd;
                     return count == (n - blen) ? 1 : 0;
                 }
@@ -755,7 +762,7 @@ namespace MonoGame.Imaging
             int i;
             if ((req_comp) == (img_n))
                 return data;
-            ushort* good = (ushort*)(MAlloc(req_comp * x * y * 2).SourcePtr);
+            ushort* good = (ushort*)(MAlloc(req_comp * x * y * 2).Ptr);
             if ((good) == null)
             {
                 Free(data);
@@ -2584,8 +2591,8 @@ namespace MonoGame.Imaging
             if (z->z_expandable == 0)
                 return ec.Error(ImagingError.OutputBufferLimit);
 
-            cur = ((int)(z->zout - (int)z->zout_start.SourcePtr));
-            limit = old_limit = ((int)(z->zout_end - (int)z->zout_start.SourcePtr));
+            cur = ((int)(z->zout - (int)z->zout_start.Ptr));
+            limit = old_limit = ((int)(z->zout_end - (int)z->zout_start.Ptr));
             while ((cur + n) > (limit))
             {
                 limit *= 2;

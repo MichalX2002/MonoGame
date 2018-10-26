@@ -79,7 +79,7 @@ namespace MonoGame.Imaging.Tests
             SaveConfiguration config, RecyclableMemoryManager manager, ZipArchive archive, string name)
         {
             Stopwatch watch = new Stopwatch();
-            int tries = 1000;
+            int tries = 3000;
 
             try
             {
@@ -120,9 +120,9 @@ namespace MonoGame.Imaging.Tests
                             //Console.WriteLine("Saving " + img.PointerLength + " bytes...");
                             
                             watch.Restart();
+
                             ms.Position = 0;
                             ms.SetLength(0);
-                            var buff = new BufferedStream(ms, 1024 * 16);
                             img.Save(ms, imageInfo.SourceFormat.ToSaveFormat(), config);
 
                             watch.Stop();

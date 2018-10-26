@@ -1,49 +1,46 @@
 ﻿
+using System.IO;
+
 namespace MonoGame.Imaging
 {
     public partial class Image
     {
-        private ReadContext GetReadContext()
+        private ReadContext GetReadContext(Stream stream, byte[] buffer)
         {
             lock (SyncRoot)
             {
                 unsafe
                 {
-                    if (LastGetContextFailed)
+                    if (LastContextFailed)
                         return null;
 
-                    var context = Imaging.GetReadContext(LastError, _callbacks);
+                    var context = Imaging.GetReadContext(stream, LastError, _callbacks, buffer);
                     if (context == null)
-                        LastGetContextFailed = true;
+                        LastContextFailed = true;
 
                     return context;
                 }
             }
         }
 
-        private bool CheckInvalidReadCtx(ReadContext context)
+        private unsafe int EoFCallback(Stream stream)
         {
-            return context == null;
+            return stream.CanRead ? 1 : 0;
         }
 
-        private unsafe int EoFCallback()
-        {
-            return _stream.CanRead ? 1 : 0;
-        }
-
-        private unsafe int ReadCallback(byte* data, int size)
+        private unsafe int ReadCallback(Stream stream, byte* data, byte[] buffer, int size)
         {
             if (data == null || size <= 0)
                 return 0;
 
             int leftToRead = size;
             int read = 0;
-            while (leftToRead > 0 && (read = _stream.Read(_tempBuffer, 0, leftToRead)) > 0)
+            while (leftToRead > 0 && (read = stream.Read(buffer, 0, leftToRead)) > 0)
             {
                 for (int i = 0; i < read; i++)
-                    data[i + size - leftToRead] = _tempBuffer[i];
+                    data[i + size - leftToRead] = buffer[i];
 
-                _infoBuffer?.Write(_tempBuffer, 0, read);
+                _infoBuffer?.Write(buffer, 0, read);
                 leftToRead -= read;
             }
 

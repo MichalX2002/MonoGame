@@ -39,7 +39,7 @@ namespace MonoGame.Imaging
         {
             lock (SyncRoot)
             {
-                //_tempBuffer = _manager.Rent();
+                var buffer = _memoryManager.GetBlock();
                 try
                 {
                     void Get(out int w, out int h, out int p, out byte* d)
@@ -63,46 +63,48 @@ namespace MonoGame.Imaging
                         return new InvalidOperationException($"Could not save image: {LastError}");
                     }
 
-                    byte* ptr;
-                    int width, height, bpp;
-                    var buffer = new BufferedStream(output, 1024 * 16);
-                    var writeCtx = Imaging.GetWriteContext(WriteCallback, output, config);
-                    switch (format)
+                    using (var bufferStream = _memoryManager.GetWriteBufferedStream(output, true))
                     {
-                        case ImageSaveFormat.Bmp:
-                            {
-                                Get(out width, out height, out bpp, out ptr);
-                                if (Imaging.CallbackWriteBmp(writeCtx, width, height, bpp, ptr) == 0)
-                                    throw GetException();
-                                break;
-                            }
+                        byte* ptr;
+                        int width, height, bpp;
+                        var writeCtx = Imaging.GetWriteContext(WriteCallback, output, buffer, config);
+                        switch (format)
+                        {
+                            case ImageSaveFormat.Bmp:
+                                {
+                                    Get(out width, out height, out bpp, out ptr);
+                                    if (Imaging.CallbackWriteBmp(writeCtx, width, height, bpp, ptr) == 0)
+                                        throw GetException();
+                                    break;
+                                }
 
-                        case ImageSaveFormat.Tga:
-                            {
-                                Get(out width, out height, out bpp, out ptr);
-                                if (Imaging.CallbackWriteTga(writeCtx, width, height, bpp, ptr) == 0)
-                                    throw GetException();
-                                break;
-                            }
+                            case ImageSaveFormat.Tga:
+                                {
+                                    Get(out width, out height, out bpp, out ptr);
+                                    if (Imaging.CallbackWriteTga(writeCtx, width, height, bpp, ptr) == 0)
+                                        throw GetException();
+                                    break;
+                                }
 
-                        case ImageSaveFormat.Jpg:
-                            {
-                                Get(out width, out height, out bpp, out ptr);
-                                if (Imaging.CallbackWriteJpg(writeCtx, config.JpgQuality, width, height, bpp, ptr) == 0)
-                                    throw GetException();
-                                break;
-                            }
+                            case ImageSaveFormat.Jpg:
+                                {
+                                    Get(out width, out height, out bpp, out ptr);
+                                    if (Imaging.CallbackWriteJpg(writeCtx, config.JpgQuality, width, height, bpp, ptr) == 0)
+                                        throw GetException();
+                                    break;
+                                }
 
-                        case ImageSaveFormat.Png:
-                            {
-                                Get(out width, out height, out bpp, out ptr);
-                                if (Imaging.CallbackWritePng(writeCtx, width, height, bpp, ptr, 0) == 0)
-                                    throw GetException();
-                                break;
-                            }
+                            case ImageSaveFormat.Png:
+                                {
+                                    Get(out width, out height, out bpp, out ptr);
+                                    if (Imaging.CallbackWritePng(writeCtx, width, height, bpp, ptr, 0) == 0)
+                                        throw GetException();
+                                    break;
+                                }
 
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(format), $"Invalid Format: {format}");
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(format), $"Invalid Format: {format}");
+                        }
                     }
                 }
                 catch
@@ -111,38 +113,35 @@ namespace MonoGame.Imaging
                 }
                 finally
                 {
-                    //_manager.Return(_tempBuffer);
+                    _memoryManager.ReturnBlock(buffer, null);
                 }
             }
         }
 
-        private unsafe int WriteCallback(Stream stream, byte* data, int size)
+        private unsafe void WriteCallback(Stream stream, byte* data, byte[] buffer, int size)
         {
-            if (data == null || size < 1)
-                return 0;
+            if (data == null || size <= 0)
+                return;
 
-            int leftToRead = size;
-            int read = 0;
-            while (leftToRead > 0)
+            if (size > buffer.Length)
             {
-                read = _tempBuffer.Length < leftToRead ? _tempBuffer.Length : leftToRead;
-                for (int i = 0; i < read; i++)
-                    _tempBuffer[i] = data[i + size - leftToRead];
+                int leftToWrite = size;
+                int read = 0;
+                while (leftToWrite > 0)
+                {
+                    read = buffer.Length < leftToWrite ? buffer.Length : leftToWrite;
+                    for (int i = 0; i < read; i++)
+                        buffer[i] = data[i + size - leftToWrite];
 
-                stream.Write(_tempBuffer, 0, read);
-                leftToRead -= read;
+                    stream.Write(buffer, 0, read);
+                    leftToWrite -= read;
+                }
             }
-
-            return size;
-        }
-
-        private struct StreamHolder
-        {
-            public readonly Stream Stream;
-
-            public StreamHolder(Stream stream)
+            else
             {
-                Stream = stream;
+                for (int i = 0; i < size; i++)
+                    buffer[i] = data[i];
+                stream.Write(buffer, 0, size);
             }
         }
     }
