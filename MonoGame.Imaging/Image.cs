@@ -91,7 +91,7 @@ namespace MonoGame.Imaging
 
                     if (_cachedInfo == null)
                     {
-                        //_tempBuffer = _manager.();
+                        _tempBuffer = SaveConfiguration.DefaultMemoryManager.GetBlock();
                         
                         ReadContext rc = GetReadContext();
                         LastGetInfoFailed = CheckInvalidReadCtx(rc);
@@ -110,7 +110,7 @@ namespace MonoGame.Imaging
                             _infoBuffer = null;
                         }
 
-                        //_manager.Return(_tempBuffer);
+                        SaveConfiguration.DefaultMemoryManager.ReturnBlock(_tempBuffer, null);
                     }
                 }
 
@@ -136,7 +136,7 @@ namespace MonoGame.Imaging
                     {
                         try
                         {
-                            //_tempBuffer = _manager.Rent();
+                            _tempBuffer = SaveConfiguration.DefaultMemoryManager.GetBlock();
 
                             int bpp = (int)info.PixelFormat;
                             ReadContext rc = GetReadContext();
@@ -154,7 +154,7 @@ namespace MonoGame.Imaging
                         }
                         finally
                         {
-                            //_manager.Return(_tempBuffer);
+                            SaveConfiguration.DefaultMemoryManager.ReturnBlock(_tempBuffer, null);
                         }
                     }
                     CloseStream();

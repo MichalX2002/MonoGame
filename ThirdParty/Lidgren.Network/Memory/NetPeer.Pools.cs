@@ -10,13 +10,13 @@ namespace Lidgren.Network
         internal List<byte[]> m_storagePool; // sorted smallest to largest
 		internal NetQueue<NetOutgoingMessage> m_outgoingMessagesPool;
 		internal NetQueue<NetIncomingMessage> m_incomingMessagesPool;
-        internal RecyclableMemoryStreamManager _streamManager;
+        internal RecyclableMemoryManager _streamManager;
 
         internal int m_bytesInPool;
 
 		private void InitializePools()
 		{
-            _streamManager = new RecyclableMemoryStreamManager();
+            _streamManager = new RecyclableMemoryManager();
             _streamManager.GenerateCallStacks = false;
             _streamManager.AggressiveBufferReturn = true;
 

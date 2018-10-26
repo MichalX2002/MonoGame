@@ -51,7 +51,7 @@ namespace MonoGame.Utilities.IO
         /// Delegate for handling large buffer discard reports.
         /// </summary>
         /// <param name="reason">Reason the buffer was discarded.</param>
-        public delegate void LargeBufferDiscardedEventHandler(Events.MemoryStreamDiscardReason reason);
+        public delegate void LargeBufferDiscardedEventHandler(Events.MemoryDiscardReason reason);
 
         /// <summary>
         /// Delegate for handling reports of stream size when streams are allocated
@@ -278,7 +278,7 @@ namespace MonoGame.Utilities.IO
         /// Removes and returns a single block from the pool.
         /// </summary>
         /// <returns>A byte[] array</returns>
-        internal byte[] GetBlock()
+        public byte[] GetBlock()
         {
             if (!this.smallPool.TryPop(out byte[] block))
             {
@@ -425,9 +425,9 @@ namespace MonoGame.Utilities.IO
                 }
                 else
                 {
-                    Events.Writer.MemoryStreamDiscardBuffer(Events.MemoryStreamBufferType.Large, tag,
-                                                           Events.MemoryStreamDiscardReason.EnoughFree);
-                    ReportLargeBufferDiscarded(Events.MemoryStreamDiscardReason.EnoughFree);
+                    Events.Writer.MemoryStreamDiscardBuffer(Events.MemoryBufferType.Large, tag,
+                                                           Events.MemoryDiscardReason.EnoughFree);
+                    ReportLargeBufferDiscarded(Events.MemoryDiscardReason.EnoughFree);
                 }
             }
             else
@@ -436,9 +436,9 @@ namespace MonoGame.Utilities.IO
                 // analysis. We have space in the inuse array for this.
                 poolIndex = this.largeBufferInUseSize.Length - 1;
 
-                Events.Writer.MemoryStreamDiscardBuffer(Events.MemoryStreamBufferType.Large, tag,
-                                                       Events.MemoryStreamDiscardReason.TooLarge);
-                ReportLargeBufferDiscarded(Events.MemoryStreamDiscardReason.TooLarge);
+                Events.Writer.MemoryStreamDiscardBuffer(Events.MemoryBufferType.Large, tag,
+                                                       Events.MemoryDiscardReason.TooLarge);
+                ReportLargeBufferDiscarded(Events.MemoryDiscardReason.TooLarge);
             }
 
             Interlocked.Add(ref this.largeBufferInUseSize[poolIndex], -buffer.Length);
@@ -454,7 +454,7 @@ namespace MonoGame.Utilities.IO
         /// <param name="tag">The tag of the stream returning these blocks, for logging if necessary.</param>
         /// <exception cref="ArgumentNullException">blocks is null</exception>
         /// <exception cref="ArgumentException">blocks contains buffers that are the wrong size (or null) for this memory manager</exception>
-        internal void ReturnBlocks(ICollection<byte[]> blocks, string tag)
+        public void ReturnBlocks(ICollection<byte[]> blocks, string tag)
         {
             if (blocks == null)
             {
@@ -481,15 +481,44 @@ namespace MonoGame.Utilities.IO
                 }
                 else
                 {
-                    Events.Writer.MemoryStreamDiscardBuffer(Events.MemoryStreamBufferType.Small, tag,
-                                                           Events.MemoryStreamDiscardReason.EnoughFree);
+                    Events.Writer.MemoryStreamDiscardBuffer(Events.MemoryBufferType.Small, tag,
+                                                           Events.MemoryDiscardReason.EnoughFree);
                     ReportBlockDiscarded();
                     break;
                 }
             }
 
-            ReportUsageReport(this.smallPoolInUseSize, this.smallPoolFreeSize, this.LargePoolInUseSize,
-                              this.LargePoolFreeSize);
+            ReportUsageReport(this.smallPoolInUseSize, this.smallPoolFreeSize, this.LargePoolInUseSize, this.LargePoolFreeSize);
+        }
+
+        /// <summary>
+        /// Returns a block to the pool
+        /// </summary>
+        /// <param name="block">Collection of blocks to return to the pool</param>
+        /// <exception cref="ArgumentNullException">block is null</exception>
+        /// <exception cref="ArgumentException">block is the wrong size for this memory manager</exception>
+        public void ReturnBlock(byte[] block, string tag)
+        {
+            if (block == null)
+                throw new ArgumentNullException(nameof(block));
+
+            if (block.Length != this.BlockSize)
+                throw new ArgumentException("block is the wrong size for this memory manager");
+
+            Interlocked.Add(ref this.smallPoolInUseSize, -this.BlockSize);
+
+            if (this.MaximumFreeSmallPoolBytes == 0 || this.SmallPoolFreeSize < this.MaximumFreeSmallPoolBytes)
+            {
+                Interlocked.Add(ref this.smallPoolFreeSize, this.BlockSize);
+                this.smallPool.Push(block);
+            }
+            else
+            {
+                Events.Writer.MemoryStreamDiscardBuffer(Events.MemoryBufferType.Small, tag, Events.MemoryDiscardReason.EnoughFree);
+                ReportBlockDiscarded();
+            }
+
+            ReportUsageReport(this.smallPoolInUseSize, this.smallPoolFreeSize, this.LargePoolInUseSize, this.LargePoolFreeSize);
         }
 
         internal void ReportBlockCreated()
@@ -507,7 +536,7 @@ namespace MonoGame.Utilities.IO
             this.LargeBufferCreated?.Invoke();
         }
 
-        internal void ReportLargeBufferDiscarded(Events.MemoryStreamDiscardReason reason)
+        internal void ReportLargeBufferDiscarded(Events.MemoryDiscardReason reason)
         {
             this.LargeBufferDiscarded?.Invoke(reason);
         }

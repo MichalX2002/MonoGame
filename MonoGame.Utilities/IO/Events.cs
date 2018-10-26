@@ -32,13 +32,13 @@ namespace MonoGame.Utilities.IO
         {
             public static Events Writer = new Events();
 
-            public enum MemoryStreamBufferType
+            public enum MemoryBufferType
             {
                 Small,
                 Large
             }
 
-            public enum MemoryStreamDiscardReason
+            public enum MemoryDiscardReason
             {
                 TooLarge,
                 EnoughFree
@@ -128,8 +128,8 @@ namespace MonoGame.Utilities.IO
             }
 
             [Event(10, Level = EventLevel.Warning)]
-            public void MemoryStreamDiscardBuffer(MemoryStreamBufferType bufferType, string tag,
-                                                  MemoryStreamDiscardReason reason)
+            public void MemoryStreamDiscardBuffer(MemoryBufferType bufferType, string tag,
+                                                  MemoryDiscardReason reason)
             {
                 if (this.IsEnabled())
                 {

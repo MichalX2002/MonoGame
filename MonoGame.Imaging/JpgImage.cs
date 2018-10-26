@@ -59,8 +59,8 @@ namespace MonoGame.Imaging
         public int RestartInterval, ToDo;
 
         // kernels
-        public IDCT_BlockKernelDelegate _IDCT_BlockKernel;
-        public YCbCrToRGBKernelDelegate _YCbCrToRGBkernel;
+        // public IDCT_BlockKernelDelegate _IDCT_BlockKernel;
+        // public YCbCrToRGBKernelDelegate _YCbCrToRGBkernel;
         public ResampleDelegate _resampleRow_HV2_kernel;
 
         public JpgImage(ReadContext context)
