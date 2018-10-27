@@ -79,7 +79,7 @@ namespace MonoGame.Imaging.Tests
             SaveConfiguration config, RecyclableMemoryManager manager, ZipArchive archive, string name)
         {
             Stopwatch watch = new Stopwatch();
-            int tries = 3000;
+            int tries = 1; //3000;
 
             try
             {

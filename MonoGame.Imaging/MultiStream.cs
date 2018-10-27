@@ -13,8 +13,7 @@ namespace MonoGame.Imaging
         public override bool CanRead => true;
         public override bool CanSeek => false;
         public override bool CanWrite => false;
-
-        public override long Length { get; }
+        public override long Length => throw new NotSupportedException();
 
         public override long Position
         {
@@ -22,18 +21,14 @@ namespace MonoGame.Imaging
             set => throw new NotSupportedException();
         }
 
-        public MultiStream(long length)
-        {
-            Length = length;
-        }
-
-        public MultiStream(Stream a, Stream b, long length) : this(length)
+        public MultiStream(Stream a, Stream b)
         {
             _streamQueue = new Queue<Stream>(2);
             _streamQueue.Enqueue(a);
             _streamQueue.Enqueue(b);
         }
 
+        /*
         public void AddStream(Stream stream)
         {
             if (stream == null)
@@ -43,6 +38,7 @@ namespace MonoGame.Imaging
                 _streamQueue = new Queue<Stream>();
             _streamQueue.Enqueue(stream);
         }
+        */
 
         public override long Seek(long offset, SeekOrigin origin)
         {
