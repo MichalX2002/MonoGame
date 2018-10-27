@@ -39,72 +39,70 @@ namespace MonoGame.Imaging
         {
             lock (SyncRoot)
             {
+                void Get(out int w, out int h, out int p, out byte* d)
+                {
+                    ImageInfo info = GetImageInfo();
+                    CheckImageInfo(info);
+
+                    IntPtr data = Pointer;
+                    if (data == IntPtr.Zero)
+                        throw new InvalidOperationException(
+                            $"No image data is present in this {nameof(Image)} instance.");
+
+                    w = info.Width;
+                    h = info.Height;
+                    p = (int)info.PixelFormat;
+                    d = (byte*)data;
+                }
+
+                InvalidOperationException GetException()
+                {
+                    return new InvalidOperationException($"Could not save image: {LastError}");
+                }
+
                 var buffer = _memoryManager.GetBlock();
+                var bufferStream = _memoryManager.GetWriteBufferedStream(output, true);
                 try
                 {
-                    void Get(out int w, out int h, out int p, out byte* d)
+                    byte* ptr;
+                    int width, height, bpp;
+                    var writeCtx = Imaging.GetWriteContext(WriteCallback, bufferStream, buffer, config);
+                    switch (format)
                     {
-                        ImageInfo info = GetImageInfo();
-                        CheckImageInfo(info);
+                        case ImageSaveFormat.Bmp:
+                            {
+                                Get(out width, out height, out bpp, out ptr);
+                                if (Imaging.CallbackWriteBmp(writeCtx, width, height, bpp, ptr) == 0)
+                                    throw GetException();
+                                break;
+                            }
 
-                        IntPtr data = Pointer;
-                        if (data == IntPtr.Zero)
-                            throw new InvalidOperationException(
-                                $"No image data is present in this {nameof(Image)} instance.");
+                        case ImageSaveFormat.Tga:
+                            {
+                                Get(out width, out height, out bpp, out ptr);
+                                if (Imaging.CallbackWriteTga(writeCtx, width, height, bpp, ptr) == 0)
+                                    throw GetException();
+                                break;
+                            }
 
-                        w = info.Width;
-                        h = info.Height;
-                        p = (int)info.PixelFormat;
-                        d = (byte*)data;
-                    }
+                        case ImageSaveFormat.Jpg:
+                            {
+                                Get(out width, out height, out bpp, out ptr);
+                                if (Imaging.CallbackWriteJpg(writeCtx, config.JpgQuality, width, height, bpp, ptr) == 0)
+                                    throw GetException();
+                                break;
+                            }
 
-                    InvalidOperationException GetException()
-                    {
-                        return new InvalidOperationException($"Could not save image: {LastError}");
-                    }
+                        case ImageSaveFormat.Png:
+                            {
+                                Get(out width, out height, out bpp, out ptr);
+                                if (Imaging.CallbackWritePng(writeCtx, width, height, bpp, ptr, 0) == 0)
+                                    throw GetException();
+                                break;
+                            }
 
-                    using (var bufferStream = _memoryManager.GetWriteBufferedStream(output, true))
-                    {
-                        byte* ptr;
-                        int width, height, bpp;
-                        var writeCtx = Imaging.GetWriteContext(WriteCallback, output, buffer, config);
-                        switch (format)
-                        {
-                            case ImageSaveFormat.Bmp:
-                                {
-                                    Get(out width, out height, out bpp, out ptr);
-                                    if (Imaging.CallbackWriteBmp(writeCtx, width, height, bpp, ptr) == 0)
-                                        throw GetException();
-                                    break;
-                                }
-
-                            case ImageSaveFormat.Tga:
-                                {
-                                    Get(out width, out height, out bpp, out ptr);
-                                    if (Imaging.CallbackWriteTga(writeCtx, width, height, bpp, ptr) == 0)
-                                        throw GetException();
-                                    break;
-                                }
-
-                            case ImageSaveFormat.Jpg:
-                                {
-                                    Get(out width, out height, out bpp, out ptr);
-                                    if (Imaging.CallbackWriteJpg(writeCtx, config.JpgQuality, width, height, bpp, ptr) == 0)
-                                        throw GetException();
-                                    break;
-                                }
-
-                            case ImageSaveFormat.Png:
-                                {
-                                    Get(out width, out height, out bpp, out ptr);
-                                    if (Imaging.CallbackWritePng(writeCtx, width, height, bpp, ptr, 0) == 0)
-                                        throw GetException();
-                                    break;
-                                }
-
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(format), $"Invalid Format: {format}");
-                        }
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(format), $"Invalid Format: {format}");
                     }
                 }
                 catch
@@ -114,6 +112,7 @@ namespace MonoGame.Imaging
                 finally
                 {
                     _memoryManager.ReturnBlock(buffer, null);
+                    bufferStream.Dispose();
                 }
             }
         }
