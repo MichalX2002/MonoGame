@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Imaging
 {
@@ -22,7 +23,7 @@ namespace MonoGame.Imaging
                         LastInfoFailed = rc == null;
                         if (LastInfoFailed == false)
                         {
-                            _cachedInfo = Imaging.GetImageInfo(rc);
+                            _cachedInfo = Imaging.GetImageInfo(_desiredFormat, rc);
                             if (_cachedInfo.IsValid() == false || _cachedInfo == null)
                             {
                                 LastInfoFailed = true;
@@ -30,6 +31,7 @@ namespace MonoGame.Imaging
                                 return null;
                             }
 
+                            TryRemovePngSigError();
                             _combinedStream = new MultiStream(_infoBuffer, _sourceStream);
                             _infoBuffer.Position = 0;
                             _infoBuffer = null;
@@ -39,6 +41,12 @@ namespace MonoGame.Imaging
                 }
                 return _cachedInfo;
             }
+        }
+
+        private void TryRemovePngSigError()
+        {
+            if (_cachedInfo.SourceFormat != ImageFormat.Png)
+                Errors.RemoveError(ImagingError.BadPngSignature);
         }
 
         private unsafe MarshalPointer GetDataPointer()
@@ -55,7 +63,7 @@ namespace MonoGame.Imaging
                     ImageInfo info = Info;
                     if (info == null)
                     {
-                        LastError.AddError(ImagingError.NoImageInfo);
+                        Errors.AddError(ImagingError.NoImageInfo);
                         LastPointerFailed = true;
                         return default;
                     }
@@ -68,16 +76,42 @@ namespace MonoGame.Imaging
                         LastPointerFailed = rc == null;
                         if (LastPointerFailed == false)
                         {
-                            int bpp = (int)info.PixelFormat;
-                            IntPtr data = Imaging.LoadFromInfo8(rc, info, bpp);
-                            if (data == IntPtr.Zero)
+                            int bpp = 
+                                info.SourceFormat == ImageFormat.Jpg ? 3 :
+                                (info.DesiredPixelFormat == ImagePixelFormat.Source ?
+                                (int)info.SourcePixelFormat :
+                                (int)info.DesiredPixelFormat);
+
+                            IntPtr result = Imaging.LoadFromInfo8(rc, info, bpp);
+                            if (result == IntPtr.Zero)
                             {
                                 LastPointerFailed = true;
                                 return default;
                             }
+                            TryRemovePngSigError();
 
-                            PointerLength = info.Width * info.Height * bpp;
-                            _pointer = new MarshalPointer(data, PointerLength);
+                            if(info.PixelFormat == ImagePixelFormat.RgbWithAlpha && bpp == 3)
+                            {
+                                _pointerLength = info.Width * info.Height * 4;
+                                IntPtr oldResult = result;
+                                result = Marshal.AllocHGlobal(_pointerLength);
+
+                                int pixels = info.Width * info.Height;
+                                byte* srcPtr = (byte*)oldResult;
+                                byte* dstPtr = (byte*)result;
+                                for (int i = 0; i < pixels; i++)
+                                {
+                                    dstPtr[i * 4] = srcPtr[i * 3];
+                                    dstPtr[i * 4 + 1] = srcPtr[i * 3 + 1];
+                                    dstPtr[i * 4 + 2] = srcPtr[i * 3 + 2];
+                                    dstPtr[i * 4 + 3] = 255;
+                                }
+                                Imaging.Free(oldResult);
+                            }
+                            else
+                                _pointerLength = info.Width * info.Height * bpp;
+
+                            _pointer = new MarshalPointer(result, _pointerLength);
                             LastPointerFailed = false;
                         }
                     }
@@ -105,7 +139,7 @@ namespace MonoGame.Imaging
                     if (LastContextFailed)
                         return null;
 
-                    var context = Imaging.GetReadContext(stream, LastError, _callbacks, buffer);
+                    var context = Imaging.GetReadContext(stream, Errors, _callbacks, buffer);
                     LastContextFailed = context == null;
                     return context;
                 }

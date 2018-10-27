@@ -57,7 +57,7 @@ namespace MonoGame.Imaging
 
                 InvalidOperationException GetException()
                 {
-                    return new InvalidOperationException($"Could not save image: {LastError}");
+                    return new InvalidOperationException($"Could not save image: {Errors}");
                 }
 
                 var buffer = _memoryManager.GetBlock();

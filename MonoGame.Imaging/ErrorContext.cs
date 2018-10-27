@@ -1,27 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 
 namespace MonoGame.Imaging
 {
     public class ErrorContext
     {
-        public IList<ImagingError> Errors { get; private set; }
-        public int Count => Errors.Count;
+        private IList<ImagingError> _errors;
 
-        public ErrorContext()
-        {
-            Errors = new List<ImagingError>();
-        }
+        public ReadOnlyCollection<ImagingError> Errors { get; }
+        public int Count => _errors.Count;
 
         public ErrorContext(IList<ImagingError> items)
         {
-            Errors = items;
+            _errors = items;
+            Errors = new ReadOnlyCollection<ImagingError>(_errors);
+        }
+
+        public ErrorContext() : this(new List<ImagingError>())
+        {
         }
 
         public void Clear()
         {
-            Errors.Clear();
+            _errors.Clear();
         }
 
         internal int Error(ImagingError error)
@@ -32,7 +35,12 @@ namespace MonoGame.Imaging
 
         internal void AddError(ImagingError error)
         {
-            Errors.Add(error);
+            _errors.Add(error);
+        }
+
+        internal void RemoveError(ImagingError error)
+        {
+            _errors.Remove(error);
         }
 
         public override string ToString()

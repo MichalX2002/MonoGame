@@ -3,7 +3,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 
 namespace MonoGame.Imaging.Tests
 {
@@ -18,6 +17,28 @@ namespace MonoGame.Imaging.Tests
 
         static void Main(string[] args)
         {
+            using (Image img1 = new Image(File.OpenRead("texture_0.jpg"), ImagePixelFormat.RgbWithAlpha))
+            //using (Image img2 = new Image(img1.Width, img1.Height, img1.PixelFormat))
+            {
+                /*
+                unsafe
+                {
+                    byte* srcPtr = (byte*)img1.Pointer;
+                    byte* dstPtr = (byte*)img2.Pointer;
+                    int pixels = img1.PointerLength;
+
+                    for (int i = 0; i < pixels; i++)
+                    {
+                        dstPtr[i] = srcPtr[i];
+                    }
+                }
+                */
+                Console.WriteLine(img1.Pointer);
+                Console.WriteLine(img1.PointerLength);
+                using (var fs = File.OpenWrite("texture.png"))
+                    img1.Save(fs, ImageSaveFormat.Png);
+            }
+
             ZipArchive archive = new ZipArchive(File.OpenRead(DATA_ZIP), ZipArchiveMode.Read, false);
             var manager = new RecyclableMemoryManager();
 
@@ -114,7 +135,7 @@ namespace MonoGame.Imaging.Tests
                             pointerReadTime += watch.Elapsed.TotalMilliseconds;
 
                         if (data == null)
-                            Console.WriteLine("Data Pointer NULL: " + img.LastError);
+                            Console.WriteLine("Data Pointer NULL: " + img.Errors);
                         else
                         {
                             //Console.WriteLine("Saving " + img.PointerLength + " bytes...");
