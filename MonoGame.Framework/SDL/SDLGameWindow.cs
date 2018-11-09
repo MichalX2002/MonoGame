@@ -84,11 +84,10 @@ namespace Microsoft.Xna.Framework
 
         public override bool IsMaximized
         {
-            get => _maximized;
+            get => (Sdl.Window.GetWindowFlags(_handle) & Sdl.Window.State.Maximized) != 0;
             set
             {
-                _maximized = value;
-                if (_maximized)
+                if (value)
                     Sdl.Window.MaximizeWindow(_handle);
                 else
                     Sdl.Window.RestoreWindow(_handle);
@@ -106,7 +105,6 @@ namespace Microsoft.Xna.Framework
         private string _screenDeviceName;
         private int _width, _height;
         private bool _wasMoved, _supressMoved;
-        private bool _maximized;
 
         public SdlGameWindow(Game game)
         {
