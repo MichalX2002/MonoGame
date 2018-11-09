@@ -138,11 +138,12 @@ namespace MonoGame.Imaging
                         {
                             _tempBuffer = SaveConfiguration.DefaultMemoryManager.GetBlock();
 
-                            int bpp = (int)info.PixelFormat;
                             ReadContext rc = GetReadContext();
                             if (rc != null)
                             {
+                                int bpp = (int)info.PixelFormat;
                                 IntPtr data = Imaging.LoadFromInfo8(rc, info, bpp);
+
                                 if (data == IntPtr.Zero)
                                     LastGetPointerFailed = true;
                                 else
