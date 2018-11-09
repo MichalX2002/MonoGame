@@ -82,6 +82,19 @@ namespace Microsoft.Xna.Framework
         public override bool HasClipboardText => Sdl.HasClipboardText();
         public override string ClipboardText { get => Sdl.GetClipboardText(); set => Sdl.SetClipboardText(value); }
 
+        public override bool IsMaximized
+        {
+            get => _maximized;
+            set
+            {
+                _maximized = value;
+                if (_maximized)
+                    Sdl.Window.MaximizeWindow(_handle);
+                else
+                    Sdl.Window.RestoreWindow(_handle);
+            }
+        }
+
         public static GameWindow Instance;
         public bool IsFullScreen;
 
@@ -93,6 +106,7 @@ namespace Microsoft.Xna.Framework
         private string _screenDeviceName;
         private int _width, _height;
         private bool _wasMoved, _supressMoved;
+        private bool _maximized;
 
         public SdlGameWindow(Game game)
         {

@@ -61,7 +61,7 @@ internal static class Sdl
         var ptr = (byte*)handle;
         while (*ptr != 0)
             ptr++;
-        
+
         return Encoding.UTF8.GetString((byte*)handle, (int)(ptr - (byte*)handle));
     }
 
@@ -200,14 +200,13 @@ internal static class Sdl
 
     public static string GetClipboardText()
     {
-        if (HasClipboardText())
-        {
-            IntPtr data = SDL_GetClipboardText();
-            string value = GetString(data);
-            SDL_free(data);
-            return value;
-        }
-        return string.Empty;
+        if (!HasClipboardText())
+            return string.Empty;
+
+        IntPtr data = SDL_GetClipboardText();
+        string value = GetString(data);
+        SDL_free(data);
+        return value;
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -217,7 +216,7 @@ internal static class Sdl
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void d_sdl_setclipboardtext(string value);
     public static readonly d_sdl_setclipboardtext SetClipboardText = FuncLoader.LoadFunction<d_sdl_setclipboardtext>(NativeLibrary, "SDL_SetClipboardText");
-    
+
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void d_sdl_disablescreensaver();
     public static d_sdl_disablescreensaver DisableScreenSaver = FuncLoader.LoadFunction<d_sdl_disablescreensaver>(NativeLibrary, "SDL_DisableScreenSaver");
@@ -389,6 +388,14 @@ internal static class Sdl
             public SysWMType subsystem;
             public IntPtr window;
         }
+        
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void d_sdl_maximizewindow(IntPtr window);
+        public static readonly d_sdl_maximizewindow MaximizeWindow = FuncLoader.LoadFunction<d_sdl_maximizewindow>(NativeLibrary, "SDL_MaximizeWindow");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void d_sdl_restorewindow(IntPtr window);
+        public static readonly d_sdl_restorewindow RestoreWindow = FuncLoader.LoadFunction<d_sdl_restorewindow>(NativeLibrary, "SDL_RestoreWindow");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_createwindow(string title, int x, int y, int w, int h, int flags);

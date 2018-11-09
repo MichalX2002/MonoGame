@@ -8,18 +8,20 @@ using System;
 using System.ComponentModel;
 
 namespace Microsoft.Xna.Framework {
-	public abstract class GameWindow {
-		#region Properties
+    public abstract class GameWindow {
+        #region Properties
 
-		[DefaultValue(false)]
-		public abstract bool AllowUserResizing { get; set; }
+        [DefaultValue(false)]
+        public abstract bool AllowUserResizing { get; set; }
 
-		public abstract Rectangle ClientBounds { get; }
+        public abstract Rectangle ClientBounds { get; }
 
         public abstract bool HasClipboardText { get; }
         public abstract string ClipboardText { get; set; }
 
-	    internal bool _allowAltF4 = true;
+        public abstract bool IsMaximized { get; set; }
+
+        internal bool _allowAltF4 = true;
 
         /// <summary>
         /// Gets or sets a bool that enables usage of Alt+F4 for window closing on desktop platforms. Value is true by default.
