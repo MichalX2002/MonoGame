@@ -45,7 +45,7 @@ namespace MonoGame.Imaging
         BadZlibHeader,
         NoPresetDict,
         BadCompression,
-        BadPngSig,
+        BadPngSignature,
         NotEnoughPixels,
         InvalidFilter,
         MultipleIHDR,

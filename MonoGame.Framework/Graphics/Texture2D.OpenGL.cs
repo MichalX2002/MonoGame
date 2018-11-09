@@ -88,15 +88,13 @@ namespace Microsoft.Xna.Framework.Graphics
         private void PlatformSetData(int level, IntPtr data, int startIndex, int elementSize, int elementCount)
         {
             int startBytes = startIndex * elementSize;
-            IntPtr dataPtr = new IntPtr(data.ToInt64() + startBytes);
-
+            IntPtr dataPtr = data + startBytes;
             GetSizeForLevel(Width, Height, level, out int w, out int h);
 
             Threading.BlockOnUIThread(() =>
             {
                 // Store the current bound texture.
                 var prevTexture = GraphicsExtensions.GetBoundTexture2D();
-
                 if (prevTexture != glTexture)
                 {
                     GL.BindTexture(TextureTarget.Texture2D, glTexture);
@@ -360,37 +358,32 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private static Texture2D PlatformFromStream(GraphicsDevice graphicsDevice, Stream stream)
         {
-            using (var img = new Image(stream, true))
+            using (var img = new Image(stream, ImagePixelFormat.RgbWithAlpha, true))
             {
-                ImageInfo info = img.Info;
-
                 IntPtr data = img.Pointer;
-                if (data == IntPtr.Zero)
-                    throw new InvalidDataException($"Could not decode stream {info}: \n" + img.LastError);
+                int channels = (int)img.PixelFormat;
 
-                int channels = (int)info.PixelFormat;
+                if (data == IntPtr.Zero || channels != 4)
+                    throw new InvalidDataException($"Could not decode stream {img.Info}: \n" + img.Errors);
+
                 int length = img.PointerLength;
-
-                // XNA blacks out any pixels with an alpha of zero.
                 unsafe
                 {
-                    if (channels == 4)
-                    {
-                        byte* b = (byte*)data;
+                    // XNA blacks out any pixels with an alpha of zero.
 
-                        for (var i = 0; i < length; i += 4)
+                    byte* src = (byte*)data;
+                    for (int i = 0; i < length; i += 4)
+                    {
+                        if (src[i + 3] == 0)
                         {
-                            if (b[i + 3] == 0)
-                            {
-                                b[i + 0] = 0;
-                                b[i + 1] = 0;
-                                b[i + 2] = 0;
-                            }
+                            src[i + 0] = 0;
+                            src[i + 1] = 0;
+                            src[i + 2] = 0;
                         }
                     }
                 }
 
-                Texture2D texture = new Texture2D(graphicsDevice, info.Width, info.Height);
+                Texture2D texture = new Texture2D(graphicsDevice, img.Width, img.Height);
                 texture.SetData(data, 0, channels, length / channels);
                 return texture;
             }

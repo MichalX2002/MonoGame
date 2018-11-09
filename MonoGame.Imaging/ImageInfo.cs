@@ -6,25 +6,31 @@ namespace MonoGame.Imaging
     {
         public int Width { get; }
         public int Height { get; }
-
-        public ImagePixelFormat PixelFormat { get; }
+        
+        public ImagePixelFormat SourcePixelFormat { get; }
+        public ImagePixelFormat DesiredPixelFormat { get; }
+        public ImagePixelFormat PixelFormat => DesiredPixelFormat == ImagePixelFormat.Source ? SourcePixelFormat : DesiredPixelFormat;
         public ImageFormat SourceFormat { get; }
 
-        internal ImageInfo(int width, int height,
-            ImagePixelFormat pixelFormat, ImageFormat sourceFormat)
+        internal ImageInfo(
+            int width, int height,
+            ImagePixelFormat sourcePixelFormat,
+            ImagePixelFormat desiredPixelFormat,
+            ImageFormat sourceFormat)
         {
             Width = width;
             Height = height;
 
+            SourcePixelFormat = sourcePixelFormat;
+            DesiredPixelFormat = desiredPixelFormat;
             SourceFormat = sourceFormat;
-            PixelFormat = pixelFormat;
         }
 
         public bool IsValid()
         {
             return !(
                 Width == 0 ||
-                Height == 0 ||                
+                Height == 0 ||
                 PixelFormat == ImagePixelFormat.Unknown ||
                 SourceFormat == ImageFormat.Unknown);
         }
@@ -35,7 +41,7 @@ namespace MonoGame.Imaging
             builder.Append(Width).Append('x').Append(Height);
             builder.Append(" | ").Append(SourceFormat);
             builder.Append(": ").Append(PixelFormat);
-            return builder.ToString();
+            return builder.ToString(); // width x height | source format: pixel format
         }
     }
 }

@@ -514,11 +514,11 @@ namespace MonoGame.Utilities.IO
             }
             else
             {
-                Events.Writer.MemoryStreamDiscardBuffer(Events.MemoryBufferType.Small, tag, Events.MemoryDiscardReason.EnoughFree);
+                //Events.Writer.MemoryStreamDiscardBuffer(Events.MemoryBufferType.Small, tag, Events.MemoryDiscardReason.EnoughFree);
                 ReportBlockDiscarded();
             }
 
-            ReportUsageReport(this.smallPoolInUseSize, this.smallPoolFreeSize, this.LargePoolInUseSize, this.LargePoolFreeSize);
+            //ReportUsageReport(this.smallPoolInUseSize, this.smallPoolFreeSize, this.LargePoolInUseSize, this.LargePoolFreeSize);
         }
 
         internal void ReportBlockCreated()
@@ -566,8 +566,7 @@ namespace MonoGame.Utilities.IO
             this.StreamConvertedToArray?.Invoke();
         }
 
-        internal void ReportUsageReport(
-            long smallPoolInUseBytes, long smallPoolFreeBytes, long largePoolInUseBytes, long largePoolFreeBytes)
+        internal void ReportUsageReport(long smallPoolInUseBytes, long smallPoolFreeBytes, long largePoolInUseBytes, long largePoolFreeBytes)
         {
             this.UsageReport?.Invoke(smallPoolInUseBytes, smallPoolFreeBytes, largePoolInUseBytes, largePoolFreeBytes);
         }
@@ -576,9 +575,19 @@ namespace MonoGame.Utilities.IO
         /// Retrieve a new MemoryStream object with no tag and a default initial capacity.
         /// </summary>
         /// <returns>A MemoryStream.</returns>
-        public MemoryStream GetStream()
+        public MemoryStream GetMemoryStream()
         {
             return new RecyclableMemoryStream(this);
+        }
+
+        public RecyclableWriteBufferedStream GetWriteBufferedStream(Stream stream, bool leaveOpen)
+        {
+            return new RecyclableWriteBufferedStream(stream, leaveOpen, this);
+        }
+
+        public RecyclableReadBufferedStream GetReadBufferedStream(Stream stream, bool leaveOpen)
+        {
+            return new RecyclableReadBufferedStream(stream, leaveOpen, this);
         }
 
         /// <summary>
@@ -597,7 +606,7 @@ namespace MonoGame.Utilities.IO
         /// <param name="tag">A tag which can be used to track the source of the stream.</param>
         /// <param name="requiredSize">The minimum desired capacity for the stream.</param>
         /// <returns>A MemoryStream.</returns>
-        public MemoryStream GetStream(string tag, int requiredSize)
+        public MemoryStream GetMemoryStream(string tag, int requiredSize)
         {
             return new RecyclableMemoryStream(this, tag, requiredSize);
         }
@@ -614,11 +623,11 @@ namespace MonoGame.Utilities.IO
         /// <param name="requiredSize">The minimum desired capacity for the stream.</param>
         /// <param name="asContiguousBuffer">Whether to attempt to use a single contiguous buffer.</param>
         /// <returns>A MemoryStream.</returns>
-        public MemoryStream GetStream(string tag, int requiredSize, bool asContiguousBuffer)
+        public MemoryStream GetMemoryStream(string tag, int requiredSize, bool asContiguousBuffer)
         {
             if (!asContiguousBuffer || requiredSize <= this.BlockSize)
             {
-                return this.GetStream(tag, requiredSize);
+                return this.GetMemoryStream(tag, requiredSize);
             }
 
             return new RecyclableMemoryStream(this, tag, requiredSize, this.GetLargeBuffer(requiredSize, tag));
@@ -634,7 +643,7 @@ namespace MonoGame.Utilities.IO
         /// <param name="offset">The offset from the start of the buffer to copy from.</param>
         /// <param name="count">The number of bytes to copy from the buffer.</param>
         /// <returns>A MemoryStream.</returns>
-        public MemoryStream GetStream(string tag, byte[] buffer, int offset, int count)
+        public MemoryStream GetMemoryStream(string tag, byte[] buffer, int offset, int count)
         {
             RecyclableMemoryStream stream = null;
             try

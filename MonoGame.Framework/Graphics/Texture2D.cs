@@ -189,14 +189,14 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="data">Image data</param>
         /// <param name="elementStartIndex">start index (not in bytes)</param>
         /// <param name="elementSize">per-element size in bytes</param>
-        /// <param name="elementCount">amount of elements to read</param>
+        /// <param name="elementCount">amount of elements to write</param>
         public void SetData(IntPtr data, int elementStartIndex, int elementSize, int elementCount)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (elementSize <= 0) throw new ArgumentOutOfRangeException(nameof(elementSize));
             if (elementCount <= 0) throw new ArgumentOutOfRangeException(nameof(elementCount));
 
-            PlatformSetData(0, data, elementSize, elementStartIndex, elementCount);
+            PlatformSetData(0, data, elementStartIndex, elementSize, elementCount);
         }
 
         /// <summary>

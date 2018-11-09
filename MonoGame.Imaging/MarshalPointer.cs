@@ -2,27 +2,28 @@
 
 namespace MonoGame.Imaging
 {
-    internal unsafe struct MarshalPointer : IDisposable
+    public unsafe struct MarshalPointer : IDisposable
     {
-        public bool IsDisposed { get; private set; }
-        public readonly IntPtr SourcePtr;
+        private bool _leaveOpen;
         public readonly int Size;
         public readonly byte* Ptr;
 
-        public MarshalPointer(IntPtr ptr, int size)
+        public MarshalPointer(IntPtr ptr, int size) : this(ptr, false, size)
         {
-            SourcePtr = ptr;
-            Ptr = (byte*)SourcePtr;
+        }
+
+        public MarshalPointer(IntPtr ptr, bool leaveOpen, int size)
+        {
+            _leaveOpen = leaveOpen;
+            Ptr = (byte*)ptr;
             Size = size;
-            IsDisposed = false;
         }
 
         public void Dispose()
         {
-            if (!IsDisposed)
+            if (!_leaveOpen && Ptr != null)
             {
-                Imaging.Free(SourcePtr);
-                IsDisposed = true;
+                Imaging.Free((IntPtr)Ptr);
             }
         }
     }

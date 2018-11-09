@@ -39,34 +39,34 @@ namespace MonoGame.Imaging
         {
             lock (SyncRoot)
             {
-                //_tempBuffer = _manager.Rent();
+                void Get(out int w, out int h, out int p, out byte* d)
+                {
+                    ImageInfo info = GetImageInfo();
+                    CheckImageInfo(info);
+
+                    IntPtr data = Pointer;
+                    if (data == IntPtr.Zero)
+                        throw new InvalidOperationException(
+                            $"No image data is present in this {nameof(Image)} instance.");
+
+                    w = info.Width;
+                    h = info.Height;
+                    p = (int)info.PixelFormat;
+                    d = (byte*)data;
+                }
+
+                InvalidOperationException GetException()
+                {
+                    return new InvalidOperationException($"Could not save image: {Errors}");
+                }
+
+                var buffer = _memoryManager.GetBlock();
+                var bufferStream = _memoryManager.GetWriteBufferedStream(output, true);
                 try
                 {
-                    void Get(out int w, out int h, out int p, out byte* d)
-                    {
-                        ImageInfo info = GetImageInfo();
-                        CheckImageInfo(info);
-
-                        IntPtr data = Pointer;
-                        if (data == IntPtr.Zero)
-                            throw new InvalidOperationException(
-                                $"No image data is present in this {nameof(Image)} instance.");
-
-                        w = info.Width;
-                        h = info.Height;
-                        p = (int)info.PixelFormat;
-                        d = (byte*)data;
-                    }
-
-                    InvalidOperationException GetException()
-                    {
-                        return new InvalidOperationException($"Could not save image: {LastError}");
-                    }
-
                     byte* ptr;
                     int width, height, bpp;
-                    var buffer = new BufferedStream(output, 1024 * 16);
-                    var writeCtx = Imaging.GetWriteContext(WriteCallback, output, config);
+                    var writeCtx = Imaging.GetWriteContext(WriteCallback, bufferStream, buffer, config);
                     switch (format)
                     {
                         case ImageSaveFormat.Bmp:
@@ -111,38 +111,36 @@ namespace MonoGame.Imaging
                 }
                 finally
                 {
-                    //_manager.Return(_tempBuffer);
+                    _memoryManager.ReturnBlock(buffer, null);
+                    bufferStream.Dispose();
                 }
             }
         }
 
-        private unsafe int WriteCallback(Stream stream, byte* data, int size)
+        private unsafe void WriteCallback(Stream stream, byte* data, byte[] buffer, int size)
         {
-            if (data == null || size < 1)
-                return 0;
+            if (data == null || size <= 0)
+                return;
 
-            int leftToRead = size;
-            int read = 0;
-            while (leftToRead > 0)
+            if (size > buffer.Length)
             {
-                read = _tempBuffer.Length < leftToRead ? _tempBuffer.Length : leftToRead;
-                for (int i = 0; i < read; i++)
-                    _tempBuffer[i] = data[i + size - leftToRead];
+                int leftToWrite = size;
+                int read = 0;
+                while (leftToWrite > 0)
+                {
+                    read = buffer.Length < leftToWrite ? buffer.Length : leftToWrite;
+                    for (int i = 0; i < read; i++)
+                        buffer[i] = data[i + size - leftToWrite];
 
-                stream.Write(_tempBuffer, 0, read);
-                leftToRead -= read;
+                    stream.Write(buffer, 0, read);
+                    leftToWrite -= read;
+                }
             }
-
-            return size;
-        }
-
-        private struct StreamHolder
-        {
-            public readonly Stream Stream;
-
-            public StreamHolder(Stream stream)
+            else
             {
-                Stream = stream;
+                for (int i = 0; i < size; i++)
+                    buffer[i] = data[i];
+                stream.Write(buffer, 0, size);
             }
         }
     }

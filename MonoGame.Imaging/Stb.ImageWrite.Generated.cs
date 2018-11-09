@@ -2,6 +2,7 @@
 
 using MonoGame.Utilities.IO;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace MonoGame.Imaging
 {
@@ -252,19 +253,17 @@ namespace MonoGame.Imaging
         };
 
         public static byte[] HEAD2 = { 0xFF, 0xDA, 0, 0xC, 3, 1, 0, 2, 0x11, 3, 0x11, 0, 0x3F, 0 };
-
+        
         public static void WriteChar(WriteContext s, byte c)
         {
-            s.Write(s.Stream, &c, 1);
+            s.Stream.WriteByte(c);
         }
-
+        
         public static void WriteBytes(WriteContext s, byte a, byte b, byte c)
         {
-            byte* arr = stackalloc byte[3];
-            arr[0] = (byte)(a);
-            arr[1] = (byte)(b);
-            arr[2] = (byte)(c);
-            s.Write(s.Stream, arr, 3);
+            WriteChar(s, a);
+            WriteChar(s, b);
+            WriteChar(s, c);
         }
 
         public static void WritePixel(
@@ -272,7 +271,7 @@ namespace MonoGame.Imaging
             int write_alpha, int expand_mono, byte* d)
         {
             if ((write_alpha) < 0)
-                s.Write(s.Stream, &d[comp - 1], 1);
+                WriteChar(s, d[comp - 1]);
 
             switch (comp)
             {
@@ -282,7 +281,7 @@ namespace MonoGame.Imaging
                         if ((expand_mono) != 0)
                             WriteBytes(s, (byte)(d[0]), (byte)(d[0]), (byte)(d[0]));
                         else
-                            s.Write(s.Stream, d, 1);
+                            WriteChar(s, d[0]);
                         break;
                     }
 
@@ -312,7 +311,7 @@ namespace MonoGame.Imaging
             }
 
             if (write_alpha > 0)
-                s.Write(s.Stream, &d[comp - 1], 1);
+                WriteChar(s, d[comp - 1]);
         }
 
         public static void WritePixels(
@@ -350,7 +349,7 @@ namespace MonoGame.Imaging
                     byte* d = (byte*)(data) + (j * x + i) * comp;
                     WritePixel(s, rgb_dir, comp, write_alpha, expand_mono, d);
                 }
-                s.Write(s.Stream, &zero, scanline_pad);
+                s.Write(s.Stream, &zero, s.Buffer, scanline_pad);
             }
         }
 
@@ -375,8 +374,8 @@ namespace MonoGame.Imaging
             if (((y) < 0) || ((x) < 0))
                 return 0;
 
-            
-            if (s.WriteTgaWithRle == false)
+
+            if (s.WriteTgaWithRLE == false)
             {
                 return WriteFile(s, -1, -1, (int)(x), (int)(y), (int)(comp), 0, data,
                     has_alpha,
@@ -440,7 +439,7 @@ namespace MonoGame.Imaging
                         if ((diff) != 0)
                         {
                             byte header = (byte)((len - 1) & 0xff);
-                            s.Write(s.Stream, &header, 1);
+                            WriteChar(s, header);
                             for (k = 0; (k) < (len); ++k)
                             {
                                 WritePixel(s, -1, comp, has_alpha, 0, begin + k * comp);
@@ -449,7 +448,7 @@ namespace MonoGame.Imaging
                         else
                         {
                             byte header = (byte)((len - 129) & 0xff);
-                            s.Write(s.Stream, &header, 1);
+                            WriteChar(s, header);
                             WritePixel(s, -1, comp, has_alpha, 0, begin);
                         }
                     }
@@ -483,15 +482,15 @@ namespace MonoGame.Imaging
         public static void WriteRunData(WriteContext s, int length, byte databyte)
         {
             byte lengthbyte = (byte)((length + 128) & 0xff);
-            s.Write(s.Stream, &lengthbyte, 1);
-            s.Write(s.Stream, &databyte, 1);
+            WriteChar(s, lengthbyte);
+            WriteChar(s, databyte);
         }
 
         public static void WriteDumpData(WriteContext s, int length, byte* data)
         {
             byte lengthbyte = (byte)((length) & 0xff);
-            s.Write(s.Stream, &lengthbyte, 1);
-            s.Write(s.Stream, data, length);
+            WriteChar(s, lengthbyte);
+            s.Write(s.Stream, data, s.Buffer, length);
         }
 
         public static void* SbGrowF(void** arr, int increment, int itemsize)
@@ -662,25 +661,25 @@ namespace MonoGame.Imaging
                     {
                         bitbuf |= (uint)((ZlibBitRev((int)(0x190 + (j + 257) - 144), (int)9)) << bitcount);
                         bitcount += 9;
-                        _out_ = ZlibFlushF( _out_, &bitbuf, &bitcount);
+                        _out_ = ZlibFlushF(_out_, &bitbuf, &bitcount);
                     }
                     else if (j + 257 <= 279)
                     {
                         bitbuf |= (uint)((ZlibBitRev((int)(0 + (j + 257) - 256), (int)7)) << bitcount);
                         bitcount += 7;
-                        _out_ = ZlibFlushF( _out_, &bitbuf, &bitcount);
+                        _out_ = ZlibFlushF(_out_, &bitbuf, &bitcount);
                     }
                     else
                     {
                         bitbuf |= (uint)((ZlibBitRev((int)(0xc0 + (j + 257) - 280), (int)8)) << bitcount);
                         bitcount += 8;
-                        _out_ = ZlibFlushF( _out_, &bitbuf, &bitcount);
+                        _out_ = ZlibFlushF(_out_, &bitbuf, &bitcount);
                     }
                     if ((LengthEb[j]) != 0)
                     {
                         bitbuf |= (uint)((best - LengthC[j]) << bitcount);
                         bitcount += (int)(LengthEb[j]);
-                        _out_ = ZlibFlushF( _out_, &bitbuf, &bitcount);
+                        _out_ = ZlibFlushF(_out_, &bitbuf, &bitcount);
                     }
                     for (j = 0; (d) > (DistC[j + 1] - 1); ++j)
                     {
@@ -694,7 +693,7 @@ namespace MonoGame.Imaging
                     {
                         bitbuf |= (uint)((d - DistC[j]) << bitcount);
                         bitcount += (int)(DistEb[j]);
-                        _out_ = ZlibFlushF( _out_, &bitbuf, &bitcount);
+                        _out_ = ZlibFlushF(_out_, &bitbuf, &bitcount);
                     }
                     i += (int)(best);
                 }
@@ -704,13 +703,13 @@ namespace MonoGame.Imaging
                     {
                         bitbuf |= (uint)((ZlibBitRev((int)(0x30 + (data[i])), (int)8)) << bitcount);
                         bitcount += 8;
-                        _out_ = ZlibFlushF( _out_, &bitbuf, &bitcount);
+                        _out_ = ZlibFlushF(_out_, &bitbuf, &bitcount);
                     }
                     else
                     {
                         bitbuf |= (uint)((ZlibBitRev((int)(0x190 + (data[i]) - 144), (int)9)) << bitcount);
                         bitcount += 9;
-                        _out_ = ZlibFlushF( _out_, &bitbuf, &bitcount);
+                        _out_ = ZlibFlushF(_out_, &bitbuf, &bitcount);
                     }
                     ++i;
                 }
@@ -721,13 +720,13 @@ namespace MonoGame.Imaging
                 {
                     bitbuf |= (uint)((ZlibBitRev((int)(0x30 + (data[i])), (int)8)) << bitcount);
                     bitcount += 9;
-                    _out_ = ZlibFlushF( _out_, &bitbuf, &bitcount);
+                    _out_ = ZlibFlushF(_out_, &bitbuf, &bitcount);
                 }
                 else
                 {
                     bitbuf |= (uint)((ZlibBitRev((int)(0x190 + (data[i]) - 144), (int)9)) << bitcount);
                     bitcount += 9;
-                    _out_ = ZlibFlushF( _out_, &bitbuf, &bitcount);
+                    _out_ = ZlibFlushF(_out_, &bitbuf, &bitcount);
                 }
             }
 
@@ -750,7 +749,7 @@ namespace MonoGame.Imaging
             {
                 bitbuf |= (uint)((ZlibBitRev((int)(0 + (256) - 256), (int)7)) << bitcount);
                 bitcount += (int)7;
-                _out_ = ZlibFlushF( _out_, &bitbuf, &bitcount);
+                _out_ = ZlibFlushF(_out_, &bitbuf, &bitcount);
             }
             /*
             else
@@ -765,7 +764,7 @@ namespace MonoGame.Imaging
             {
                 bitbuf |= (uint)(0 << bitcount);
                 bitcount += 1;
-                _out_ = ZlibFlushF( _out_, &bitbuf, &bitcount);
+                _out_ = ZlibFlushF(_out_, &bitbuf, &bitcount);
             }
             for (i = 0; i < 16384; ++i)
             {
@@ -794,22 +793,22 @@ namespace MonoGame.Imaging
                 }
                 if ((((_out_) == null) || ((((int*)(_out_) - 2)[1] + 1) >= (((int*)(_out_) - 2)[0]))))
                 {
-                    SbGrowF( (void**)(&(_out_)), 1, sizeof(byte));
+                    SbGrowF((void**)(&(_out_)), 1, sizeof(byte));
                 }
                 (_out_)[((int*)(_out_) - 2)[1]++] = ((byte)((s2 >> 8) & 0xff));
                 if ((((_out_) == null) || ((((int*)(_out_) - 2)[1] + 1) >= (((int*)(_out_) - 2)[0]))))
                 {
-                    SbGrowF( (void**)(&(_out_)), 1, sizeof(byte));
+                    SbGrowF((void**)(&(_out_)), 1, sizeof(byte));
                 }
                 (_out_)[((int*)(_out_) - 2)[1]++] = ((byte)((s2) & 0xff));
                 if ((((_out_) == null) || ((((int*)(_out_) - 2)[1] + 1) >= (((int*)(_out_) - 2)[0]))))
                 {
-                    SbGrowF( (void**)(&(_out_)), 1, sizeof(byte));
+                    SbGrowF((void**)(&(_out_)), 1, sizeof(byte));
                 }
                 (_out_)[((int*)(_out_) - 2)[1]++] = ((byte)((s1 >> 8) & 0xff));
                 if ((((_out_) == null) || ((((int*)(_out_) - 2)[1] + 1) >= (((int*)(_out_) - 2)[0]))))
                 {
-                    SbGrowF( (void**)(&(_out_)), 1, sizeof(byte));
+                    SbGrowF((void**)(&(_out_)), 1, sizeof(byte));
                 }
                 (_out_)[((int*)(_out_) - 2)[1]++] = ((byte)((s1) & 0xff));
             }
@@ -889,12 +888,14 @@ namespace MonoGame.Imaging
                 mapping[2] = (int)2;
                 mapping[3] = (int)3;
                 mapping[4] = (int)4;
+
                 int* firstmap = stackalloc int[5];
                 firstmap[0] = 0;
                 firstmap[1] = 1;
                 firstmap[2] = 0;
                 firstmap[3] = (int)5;
                 firstmap[4] = (int)6;
+
                 int* mymap = (j != 0) ? mapping : firstmap;
                 int best = 0;
                 int bestval = (int)(0x7fffffff);
@@ -981,11 +982,14 @@ namespace MonoGame.Imaging
                 MemMove(filt + j * (x * n + 1) + 1, line_buffer, x * n);
             }
             Free(line_buffer);
-            zlib = ZlibCompress( filt, (int)(y * (x * n + 1)), &zlen, (int)8);
+            zlib = ZlibCompress(filt, (int)(y * (x * n + 1)), &zlen, (int)8);
             Free(filt);
-            if (zlib == null) return null;
+
+            if (zlib == null)
+                return null;
             _out_ = (byte*)MAlloc(8 + 12 + 13 + 12 + zlen + 12).Ptr;
-            if (_out_ == null) return null;
+            if (_out_ == null)
+                return null;
             *out_len = (int)(8 + 12 + 13 + 12 + zlen + 12);
             o = _out_;
             MemMove(o, sig, 8);
@@ -995,10 +999,10 @@ namespace MonoGame.Imaging
             (o)[2] = ((byte)(((13) >> 8) & 0xff));
             (o)[3] = ((byte)((13) & 0xff));
             (o) += 4;
-            (o)[0] = ((byte)(("IHDR"[0]) & 0xff));
-            (o)[1] = ((byte)(("IHDR"[1]) & 0xff));
-            (o)[2] = ((byte)(("IHDR"[2]) & 0xff));
-            (o)[3] = ((byte)(("IHDR"[3]) & 0xff));
+            (o)[0] = ((byte)(('I') & 0xff));
+            (o)[1] = ((byte)(('H') & 0xff));
+            (o)[2] = ((byte)(('D') & 0xff));
+            (o)[3] = ((byte)(('R') & 0xff));
             (o) += 4;
             (o)[0] = ((byte)(((x) >> 24) & 0xff));
             (o)[1] = ((byte)(((x) >> 16) & 0xff));
@@ -1021,10 +1025,10 @@ namespace MonoGame.Imaging
             (o)[2] = ((byte)(((zlen) >> 8) & 0xff));
             (o)[3] = ((byte)((zlen) & 0xff));
             (o) += 4;
-            (o)[0] = ((byte)(("IDAT"[0]) & 0xff));
-            (o)[1] = ((byte)(("IDAT"[1]) & 0xff));
-            (o)[2] = ((byte)(("IDAT"[2]) & 0xff));
-            (o)[3] = ((byte)(("IDAT"[3]) & 0xff));
+            (o)[0] = ((byte)(('I') & 0xff));
+            (o)[1] = ((byte)(('D') & 0xff));
+            (o)[2] = ((byte)(('A') & 0xff));
+            (o)[3] = ((byte)(('T') & 0xff));
             (o) += 4;
             MemMove(o, zlib, zlen);
             o += zlen;
@@ -1035,10 +1039,10 @@ namespace MonoGame.Imaging
             (o)[2] = ((byte)((0 >> 8) & 0xff));
             (o)[3] = ((byte)(0 & 0xff));
             (o) += 4;
-            (o)[0] = ((byte)(("IEND"[0]) & 0xff));
-            (o)[1] = ((byte)(("IEND"[1]) & 0xff));
-            (o)[2] = ((byte)(("IEND"[2]) & 0xff));
-            (o)[3] = ((byte)(("IEND"[3]) & 0xff));
+            (o)[0] = ((byte)(('I') & 0xff));
+            (o)[1] = ((byte)(('E') & 0xff));
+            (o)[2] = ((byte)(('N') & 0xff));
+            (o)[3] = ((byte)(('D') & 0xff));
             (o) += 4;
             DoCrc32(&o, 0);
             return _out_;
@@ -1066,9 +1070,9 @@ namespace MonoGame.Imaging
             *bitCntP = (int)(bitCnt);
         }
 
-        public static void JpgDCT(float* d0p, float* d1p, float* d2p, float* d3p, float* d4p, float* d5p,
-            float* d6p,
-            float* d7p)
+        public static void JpgDCT(
+            float* d0p, float* d1p, float* d2p, float* d3p, 
+            float* d4p, float* d5p, float* d6p, float* d7p)
         {
             float d0 = (float)(*d0p);
             float d1 = (float)(*d1p);
@@ -1078,13 +1082,6 @@ namespace MonoGame.Imaging
             float d5 = (float)(*d5p);
             float d6 = (float)(*d6p);
             float d7 = (float)(*d7p);
-            float z1;
-            float z2;
-            float z3;
-            float z4;
-            float z5;
-            float z11;
-            float z13;
             float tmp0 = (float)(d0 + d7);
             float tmp7 = (float)(d0 - d7);
             float tmp1 = (float)(d1 + d6);
@@ -1099,18 +1096,18 @@ namespace MonoGame.Imaging
             float tmp12 = (float)(tmp1 - tmp2);
             d0 = (float)(tmp10 + tmp11);
             d4 = (float)(tmp10 - tmp11);
-            z1 = (float)((tmp12 + tmp13) * 0.707106781f);
+            float z1 = (float)((tmp12 + tmp13) * 0.707106781f);
             d2 = (float)(tmp13 + z1);
             d6 = (float)(tmp13 - z1);
             tmp10 = (float)(tmp4 + tmp5);
             tmp11 = (float)(tmp5 + tmp6);
             tmp12 = (float)(tmp6 + tmp7);
-            z5 = (float)((tmp10 - tmp12) * 0.382683433f);
-            z2 = (float)(tmp10 * 0.541196100f + z5);
-            z4 = (float)(tmp12 * 1.306562965f + z5);
-            z3 = (float)(tmp11 * 0.707106781f);
-            z11 = (float)(tmp7 + z3);
-            z13 = (float)(tmp7 - z3);
+            float z5 = (float)((tmp10 - tmp12) * 0.382683433f);
+            float z2 = (float)(tmp10 * 0.541196100f + z5);
+            float z4 = (float)(tmp12 * 1.306562965f + z5);
+            float z3 = (float)(tmp11 * 0.707106781f);
+            float z11 = (float)(tmp7 + z3);
+            float z13 = (float)(tmp7 - z3);
             *d5p = (float)(z13 + z2);
             *d3p = (float)(z13 - z2);
             *d1p = (float)(z11 + z4);
@@ -1147,8 +1144,6 @@ namespace MonoGame.Imaging
 
             int dataOff;
             int i;
-            int diff;
-            int end0pos;
             int* DU = stackalloc int[64];
             for (dataOff = 0; (dataOff) < (64); dataOff += (int)8)
             {
@@ -1166,7 +1161,8 @@ namespace MonoGame.Imaging
                 float v = (float)(CDU[i] * fdtbl[i]);
                 DU[JpgZigZag[i]] = ((int)((v) < 0 ? v - 0.5f : v + 0.5f));
             }
-            diff = (int)(DU[0] - DC);
+
+            int diff = (int)(DU[0] - DC);
             if ((diff) == 0)
             {
                 WriteJpgBits(s, bitBuf, bitCnt, HTDC[0, 0], HTDC[0, 1]);
@@ -1179,10 +1175,9 @@ namespace MonoGame.Imaging
                 WriteJpgBits(s, bitBuf, bitCnt, bits[0], bits[1]);
             }
 
-            end0pos = (int)(63);
-            for (; ((end0pos) > 0) && ((DU[end0pos]) == 0); --end0pos)
-            {
-            }
+            int end0pos = 63;
+            for (; ((end0pos) > 0) && ((DU[end0pos]) == 0); --end0pos) ;
+
             if ((end0pos) == 0)
             {
                 WriteJpgBits(s, bitBuf, bitCnt, EOB[0], EOB[1]);
@@ -1192,12 +1187,11 @@ namespace MonoGame.Imaging
             for (i = 1; i <= end0pos; ++i)
             {
                 int startpos = (int)(i);
-                int nrzeroes;
                 ushort* bits = stackalloc ushort[2];
                 for (; ((DU[i]) == 0) && (i <= end0pos); ++i)
                 {
                 }
-                nrzeroes = (int)(i - startpos);
+                int nrzeroes = (int)(i - startpos);
                 if ((nrzeroes) >= (16))
                 {
                     int lng = (int)(nrzeroes >> 4);
@@ -1213,35 +1207,31 @@ namespace MonoGame.Imaging
                     HTAC[(nrzeroes << 4) + bits[1], 1]);
                 WriteJpgBits(s, bitBuf, bitCnt, bits[0], bits[1]);
             }
+
             if (end0pos != 63)
-            {
                 WriteJpgBits(s, bitBuf, bitCnt, EOB[0], EOB[1]);
-            }
 
             return (int)(DU[0]);
         }
 
         public static int WriteJpgCore(
             WriteContext s, int width, int height,
-            int comp, void* data, int quality)
+            int comp, byte* data, int quality)
         {
             int row;
             int col;
-            int i;
             int k;
-            float* fdtbl_Y = stackalloc float[64];
-            float* fdtbl_UV = stackalloc float[64];
-            byte* YTable = stackalloc byte[64];
-            byte* UVTable = stackalloc byte[64];
             if (((((data == null) || (width == 0)) || (height == 0)) || ((comp) > 4)) || ((comp) < 1))
             {
                 return 0;
             }
 
+            byte* YTable = stackalloc byte[64];
+            byte* UVTable = stackalloc byte[64];
             quality = (int)((quality) != 0 ? quality : 90);
             quality = (int)((quality) < 1 ? 1 : (quality) > (100) ? 100 : quality);
             quality = (int)((quality) < (50) ? 5000 / quality : 200 - quality * 2);
-            for (i = 0; (i) < (64); ++i)
+            for (int i = 0; (i) < (64); ++i)
             {
                 int uvti;
                 int yti = (int)((YQT[i] * quality + 50) / 100);
@@ -1249,6 +1239,9 @@ namespace MonoGame.Imaging
                 uvti = (int)((UVQT[i] * quality + 50) / 100);
                 UVTable[JpgZigZag[i]] = ((byte)((uvti) < 1 ? 1 : (uvti) > (255) ? 255 : uvti));
             }
+
+            float* fdtbl_Y = stackalloc float[64];
+            float* fdtbl_UV = stackalloc float[64];
             for (row = 0, k = 0; (row) < 8; ++row)
             {
                 for (col = 0; (col) < 8; ++col, ++k)
@@ -1257,151 +1250,142 @@ namespace MonoGame.Imaging
                     fdtbl_UV[k] = (float)(1 / (UVTable[JpgZigZag[k]] * AASF[row] * AASF[col]));
                 }
             }
+            byte* head1 = stackalloc byte[24];
+            head1[0] = (byte)(0xFF);
+            head1[1] = (byte)(0xC0);
+            head1[2] = (byte)0;
+            head1[3] = (byte)(0x11);
+            head1[4] = (byte)8;
+            head1[5] = (byte)(height >> 8);
+            head1[6] = (byte)((height) & 0xff);
+            head1[7] = (byte)(width >> 8);
+            head1[8] = (byte)((width) & 0xff);
+            head1[9] = (byte)3;
+            head1[10] = (byte)1;
+            head1[11] = (byte)(0x11);
+            head1[12] = (byte)0;
+            head1[13] = (byte)2;
+            head1[14] = (byte)(0x11);
+            head1[15] = (byte)1;
+            head1[16] = (byte)3;
+            head1[17] = (byte)(0x11);
+            head1[18] = (byte)1;
+            head1[19] = (byte)(0xFF);
+            head1[20] = (byte)(0xC4);
+            head1[21] = (byte)(0x01);
+            head1[22] = (byte)(0xA2);
+            head1[23] = (byte)0;
+
+            fixed (byte* h = HEAD0)
             {
-                byte* head1 = stackalloc byte[24];
-                head1[0] = (byte)(0xFF);
-                head1[1] = (byte)(0xC0);
-                head1[2] = (byte)0;
-                head1[3] = (byte)(0x11);
-                head1[4] = (byte)8;
-                head1[5] = (byte)(height >> 8);
-                head1[6] = (byte)((height) & 0xff);
-                head1[7] = (byte)(width >> 8);
-                head1[8] = (byte)((width) & 0xff);
-                head1[9] = (byte)3;
-                head1[10] = (byte)1;
-                head1[11] = (byte)(0x11);
-                head1[12] = (byte)0;
-                head1[13] = (byte)2;
-                head1[14] = (byte)(0x11);
-                head1[15] = (byte)1;
-                head1[16] = (byte)3;
-                head1[17] = (byte)(0x11);
-                head1[18] = (byte)1;
-                head1[19] = (byte)(0xFF);
-                head1[20] = (byte)(0xC4);
-                head1[21] = (byte)(0x01);
-                head1[22] = (byte)(0xA2);
-                head1[23] = (byte)0;
-
-                fixed (byte* h = HEAD0)
-                {
-                    s.Write(s.Stream, h, HEAD0.Length);
-                }
-
-                s.Write(s.Stream, YTable, 64);
-                WriteChar(s, (byte)1);
-                s.Write(s.Stream, UVTable, 64);
-                s.Write(s.Stream, head1, 24);
-
-                fixed (byte* d = &LuminanceNrCodesDc[1])
-                {
-                    s.Write(s.Stream, d, ChrominanceNrCodes_Dc.Length - 1);
-                }
-
-                fixed (byte* d = LuminanceValuesDc)
-                {
-                    s.Write(s.Stream, d, ChrominanceValues_Dc.Length);
-                }
-
-                WriteChar(s, (byte)(0x10));
-
-                fixed (byte* a = &LuminanceNrCodesAc[1])
-                {
-                    s.Write(s.Stream, a, LuminanceNrCodesAc.Length - 1);
-                }
-
-                fixed (byte* a = LuminanceValuesAc)
-                {
-                    s.Write(s.Stream, a, LuminanceValuesAc.Length);
-                }
-
-                WriteChar(s, (byte)1);
-
-                fixed (byte* c = &ChrominanceNrCodes_Dc[1])
-                {
-                    s.Write(s.Stream, c, ChrominanceNrCodes_Dc.Length - 1);
-                }
-
-                fixed (byte* c = ChrominanceValues_Dc)
-                {
-                    s.Write(s.Stream, c, ChrominanceValues_Dc.Length);
-                }
-
-                WriteChar(s, (byte)(0x11));
-
-
-                fixed (byte* c = &ChrominanceNrCodes_Ac[1])
-                {
-                    s.Write(s.Stream, c, ChrominanceNrCodes_Ac.Length - 1);
-                }
-
-                fixed (byte* c = ChrominanceValues_Ac)
-                {
-                    s.Write(s.Stream, c, ChrominanceValues_Ac.Length);
-                }
-
-                fixed (byte* c = HEAD2)
-                {
-                    s.Write(s.Stream, c, HEAD2.Length);
-                }
+                s.Write(s.Stream, h, s.Buffer, HEAD0.Length);
             }
 
-            {
-                ushort* fillBits = stackalloc ushort[2];
-                fillBits[0] = (ushort)(0x7F);
-                fillBits[1] = (ushort)7;
-                byte* imageData = (byte*)(data);
-                int DCY = 0;
-                int DCU = 0;
-                int DCV = 0;
-                int bitBuf = 0;
-                int bitCnt = 0;
-                int ofsG = (int)((comp) > 2 ? 1 : 0);
-                int ofsB = (int)((comp) > 2 ? 2 : 0);
-                int x;
-                int y;
-                int pos;
-                float* YDU = stackalloc float[64];
-                float* UDU = stackalloc float[64];
-                float* VDU = stackalloc float[64];
+            s.Write(s.Stream, YTable, s.Buffer, 64);
+            WriteChar(s, (byte)1);
+            s.Write(s.Stream, UVTable, s.Buffer, 64);
+            s.Write(s.Stream, head1, s.Buffer, 24);
 
-                for (y = 0; (y) < (height); y += (int)8)
+            fixed (byte* d = &LuminanceNrCodesDc[1])
+            {
+                s.Write(s.Stream, d, s.Buffer, ChrominanceNrCodes_Dc.Length - 1);
+            }
+
+            fixed (byte* d = LuminanceValuesDc)
+            {
+                s.Write(s.Stream, d, s.Buffer, ChrominanceValues_Dc.Length);
+            }
+
+            WriteChar(s, (byte)(0x10));
+
+            fixed (byte* a = &LuminanceNrCodesAc[1])
+            {
+                s.Write(s.Stream, a, s.Buffer, LuminanceNrCodesAc.Length - 1);
+            }
+
+            fixed (byte* a = LuminanceValuesAc)
+            {
+                s.Write(s.Stream, a, s.Buffer, LuminanceValuesAc.Length);
+            }
+
+            WriteChar(s, (byte)1);
+
+            fixed (byte* c = &ChrominanceNrCodes_Dc[1])
+            {
+                s.Write(s.Stream, c, s.Buffer, ChrominanceNrCodes_Dc.Length - 1);
+            }
+
+            fixed (byte* c = ChrominanceValues_Dc)
+            {
+                s.Write(s.Stream, c, s.Buffer, ChrominanceValues_Dc.Length);
+            }
+
+            WriteChar(s, (byte)(0x11));
+
+
+            fixed (byte* c = &ChrominanceNrCodes_Ac[1])
+            {
+                s.Write(s.Stream, c, s.Buffer, ChrominanceNrCodes_Ac.Length - 1);
+            }
+
+            fixed (byte* c = ChrominanceValues_Ac)
+            {
+                s.Write(s.Stream, c, s.Buffer, ChrominanceValues_Ac.Length);
+            }
+
+            fixed (byte* c = HEAD2)
+            {
+                s.Write(s.Stream, c, s.Buffer, HEAD2.Length);
+            }
+
+            ushort* fillBits = stackalloc ushort[2];
+            fillBits[0] = (ushort)(0x7F);
+            fillBits[1] = (ushort)7;
+            int DCY = 0;
+            int DCU = 0;
+            int DCV = 0;
+            int bitBuf = 0;
+            int bitCnt = 0;
+            int ofsG = (int)((comp) > 2 ? 1 : 0);
+            int ofsB = (int)((comp) > 2 ? 2 : 0);
+            int pos;
+            float* YDU = stackalloc float[64];
+            float* UDU = stackalloc float[64];
+            float* VDU = stackalloc float[64];
+
+            for (int y = 0; (y) < (height); y += (int)8)
+            {
+                for (int x = 0; (x) < (width); x += (int)8)
                 {
-                    for (x = 0; (x) < (width); x += (int)8)
+                    for (row = (int)(y), pos = 0; (row) < (y + 8); ++row)
                     {
-                        for (row = (int)(y), pos = 0; (row) < (y + 8); ++row)
+                        for (col = (int)(x); (col) < (x + 8); ++col, ++pos)
                         {
-                            for (col = (int)(x); (col) < (x + 8); ++col, ++pos)
+                            int p = (int)(row * width * comp + col * comp);
+                            if ((row) >= (height))
                             {
-                                int p = (int)(row * width * comp + col * comp);
-                                float r;
-                                float g;
-                                float b;
-                                if ((row) >= (height))
-                                {
-                                    p -= (int)(width * comp * (row + 1 - height));
-                                }
-                                if ((col) >= (width))
-                                {
-                                    p -= (int)(comp * (col + 1 - width));
-                                }
-                                r = (float)(imageData[p + 0]);
-                                g = (float)(imageData[p + ofsG]);
-                                b = (float)(imageData[p + ofsB]);
-                                YDU[pos] = (float)(+0.29900f * r + 0.58700f * g + 0.11400f * b - 128);
-                                UDU[pos] = (float)(-0.16874f * r - 0.33126f * g + 0.50000f * b);
-                                VDU[pos] = (float)(+0.50000f * r - 0.41869f * g - 0.08131f * b);
+                                p -= (int)(width * comp * (row + 1 - height));
                             }
-                        }
+                            if ((col) >= (width))
+                            {
+                                p -= (int)(comp * (col + 1 - width));
+                            }
 
-                        DCY = ProcessJpgDU(s, &bitBuf, &bitCnt, YDU, fdtbl_Y, (int)(DCY), YDC_HT, YAC_HT);
-                        DCU = ProcessJpgDU(s, &bitBuf, &bitCnt, UDU, fdtbl_UV, (int)(DCU), UVDC_HT, UVAC_HT);
-                        DCV = ProcessJpgDU(s, &bitBuf, &bitCnt, VDU, fdtbl_UV, (int)(DCV), UVDC_HT, UVAC_HT);
+                            float r = (float)(data[p + 0]);
+                            float g = (float)(data[p + ofsG]);
+                            float b = (float)(data[p + ofsB]);
+                            YDU[pos] = (float)(+0.29900f * r + 0.58700f * g + 0.11400f * b - 128);
+                            UDU[pos] = (float)(-0.16874f * r - 0.33126f * g + 0.50000f * b);
+                            VDU[pos] = (float)(+0.50000f * r - 0.41869f * g - 0.08131f * b);
+                        }
                     }
+
+                    DCY = ProcessJpgDU(s, &bitBuf, &bitCnt, YDU, fdtbl_Y, (int)(DCY), YDC_HT, YAC_HT);
+                    DCU = ProcessJpgDU(s, &bitBuf, &bitCnt, UDU, fdtbl_UV, (int)(DCU), UVDC_HT, UVAC_HT);
+                    DCV = ProcessJpgDU(s, &bitBuf, &bitCnt, VDU, fdtbl_UV, (int)(DCV), UVDC_HT, UVAC_HT);
                 }
-                WriteJpgBits(s, &bitBuf, &bitCnt, fillBits[0], fillBits[1]);
             }
+            WriteJpgBits(s, &bitBuf, &bitCnt, fillBits[0], fillBits[1]);
 
             WriteChar(s, (byte)(0xFF));
             WriteChar(s, (byte)(0xD9));
