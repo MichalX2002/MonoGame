@@ -480,7 +480,7 @@ namespace Microsoft.Xna.Framework.Content
 
         internal byte[] GetScratchBuffer(int size)
         {            
-            size = Math.Max(size, 1024 * 1024);
+            size = Math.Max(size, 1024 * 1024 + 1024 * 8);
             if (scratchBuffer == null || scratchBuffer.Length < size)
                 scratchBuffer = new byte[size];
             return scratchBuffer;

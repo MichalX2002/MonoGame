@@ -74,6 +74,7 @@ namespace Microsoft.Xna.Framework.Content
 				    var levelDataSizeInBytes = reader.ReadInt32();
                     var levelData = reader.ContentManager.GetScratchBuffer(levelDataSizeInBytes);
                     reader.Read(levelData, 0, levelDataSizeInBytes);
+
                     int levelWidth = Math.Max(width >> level, 1);
                     int levelHeight = Math.Max(height >> level, 1);
 

@@ -35,7 +35,7 @@ namespace Microsoft.Xna.Framework.Content
             if (array == null)
                 array = Array.CreateInstance(typeof(T), dimensions);//new T[count];
             else if (dimensions.Length != array.Rank)
-                throw new RankException("existingInstance");
+                throw new RankException(nameof(existingInstance));
 
             var indices = new int[rank];
 
