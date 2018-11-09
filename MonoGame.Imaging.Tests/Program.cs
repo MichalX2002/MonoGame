@@ -33,7 +33,7 @@ namespace MonoGame.Imaging.Tests
                     }
                 }
                 */
-                Console.WriteLine(img1.Pointer);
+                Console.WriteLine(img1.GetPointer());
                 Console.WriteLine(img1.PointerLength);
                 using (var fs = File.OpenWrite("texture.png"))
                     img1.Save(fs, ImageSaveFormat.Png);
@@ -129,7 +129,7 @@ namespace MonoGame.Imaging.Tests
                         //Console.WriteLine($"Loading ({imageInfo}) data...");
 
                         watch.Restart();
-                        IntPtr data = img.Pointer;
+                        IntPtr data = img.GetPointer();
                         watch.Stop();
                         if (tries > 0)
                             pointerReadTime += watch.Elapsed.TotalMilliseconds;

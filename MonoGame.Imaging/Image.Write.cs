@@ -44,7 +44,7 @@ namespace MonoGame.Imaging
                     ImageInfo info = GetImageInfo();
                     CheckImageInfo(info);
 
-                    IntPtr data = Pointer;
+                    IntPtr data = GetPointer();
                     if (data == IntPtr.Zero)
                         throw new InvalidOperationException(
                             $"No image data is present in this {nameof(Image)} instance.");

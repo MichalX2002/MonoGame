@@ -360,7 +360,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             using (var img = new Image(stream, ImagePixelFormat.RgbWithAlpha, true))
             {
-                IntPtr data = img.Pointer;
+                IntPtr data = img.GetPointer();
                 int channels = (int)img.PixelFormat;
 
                 if (data == IntPtr.Zero || channels != 4)

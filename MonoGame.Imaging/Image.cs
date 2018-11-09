@@ -12,40 +12,19 @@ namespace MonoGame.Imaging
 
         private Stream _sourceStream;
         private MultiStream _combinedStream;
+        private ReadCallbacks _callbacks;
         private readonly bool _leaveStreamOpen;
         private bool _leavePointerOpen;
 
         private MarshalPointer _pointer;
-        private int _pointerLength;
         private ImagePixelFormat _desiredFormat;
         private ImageInfo _cachedInfo;
         private MemoryStream _infoBuffer;
-
-        private ReadCallbacks _callbacks;
-
+        
         public bool IsDisposed { get; private set; }
         public object SyncRoot { get; } = new object();
 
-        public IntPtr Pointer
-        {
-            get
-            {
-                unsafe
-                {
-                    return (IntPtr)GetDataPointer().Ptr;
-                }
-            }
-        }
-
-        public int PointerLength
-        {
-            get
-            {
-                GetDataPointer();
-                return _pointerLength;
-            }
-        }
-
+        public int PointerLength { get; private set; }
         public ImageInfo Info => GetImageInfo();
         public int Width => Info.Width;
         public int Height => Info.Height;
@@ -83,6 +62,7 @@ namespace MonoGame.Imaging
             Errors = new ErrorContext();
             _infoBuffer = _memoryManager.GetMemoryStream();
             _leavePointerOpen = false;
+            PointerLength = -1;
 
             unsafe
             {
@@ -106,6 +86,8 @@ namespace MonoGame.Imaging
         {
             _pointer = new MarshalPointer(data, leavePointerOpen, width * height * (int)pixelFormat);
             _leavePointerOpen = leavePointerOpen;
+
+            PointerLength = -1;
             _cachedInfo = new ImageInfo(width, height, pixelFormat, pixelFormat, ImageFormat.Pointer);
         }
 
@@ -142,6 +124,11 @@ namespace MonoGame.Imaging
                 default:
                     throw new ArgumentException(pixelFormat + " is not valid.", nameof(pixelFormat));
             }
+        }
+
+        public unsafe IntPtr GetPointer()
+        {
+            return (IntPtr)GetDataPointer().Ptr;
         }
 
         private void TriggerError()

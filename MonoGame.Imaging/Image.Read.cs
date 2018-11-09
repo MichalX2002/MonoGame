@@ -88,15 +88,15 @@ namespace MonoGame.Imaging
                                 LastPointerFailed = true;
                                 return default;
                             }
-                            TryRemovePngSigError();
 
                             if(info.PixelFormat == ImagePixelFormat.RgbWithAlpha && bpp == 3)
                             {
-                                _pointerLength = info.Width * info.Height * 4;
-                                IntPtr oldResult = result;
-                                result = Marshal.AllocHGlobal(_pointerLength);
-
                                 int pixels = info.Width * info.Height;
+                                PointerLength = pixels * 4;
+
+                                IntPtr oldResult = result;
+                                result = Marshal.AllocHGlobal(PointerLength);
+
                                 byte* srcPtr = (byte*)oldResult;
                                 byte* dstPtr = (byte*)result;
                                 for (int i = 0; i < pixels; i++)
@@ -109,10 +109,11 @@ namespace MonoGame.Imaging
                                 Imaging.Free(oldResult);
                             }
                             else
-                                _pointerLength = info.Width * info.Height * bpp;
+                                PointerLength = info.Width * info.Height * bpp;
 
-                            _pointer = new MarshalPointer(result, _pointerLength);
+                            _pointer = new MarshalPointer(result, PointerLength);
                             LastPointerFailed = false;
+                            TryRemovePngSigError();
                         }
                     }
                     catch
