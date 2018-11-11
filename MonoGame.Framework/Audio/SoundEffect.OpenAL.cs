@@ -55,7 +55,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformInitializeIeeeFloat(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
         {
-            if (!OpenALSoundController.GetInstance.SupportsIeee)
+            if (!OpenALSoundController.Instance.SupportsIeee)
             {
                 // If 32-bit IEEE float is not supported, convert to 16-bit signed PCM
                 buffer = AudioLoader.ConvertFloatTo16(buffer, offset, count);
@@ -72,7 +72,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformInitializeAdpcm(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int blockAlignment, int loopStart, int loopLength)
         {
-            if (!OpenALSoundController.GetInstance.SupportsAdpcm)
+            if (!OpenALSoundController.Instance.SupportsAdpcm)
             {
                 // If MS-ADPCM is not supported, convert to 16-bit signed PCM
                 buffer = AudioLoader.ConvertMsAdpcmToPcm(buffer, offset, count, (int)channels, blockAlignment);
@@ -92,7 +92,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformInitializeIma4(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int blockAlignment, int loopStart, int loopLength)
         {
-            if (!OpenALSoundController.GetInstance.SupportsIma4)
+            if (!OpenALSoundController.Instance.SupportsIma4)
             {
                 // If IMA/ADPCM is not supported, convert to 16-bit signed PCM
                 buffer = AudioLoader.ConvertIma4ToPcm(buffer, offset, count, (int)channels, blockAlignment);
@@ -232,7 +232,7 @@ namespace Microsoft.Xna.Framework.Audio
             try
             {
                 // Getting the instance for the first time initializes OpenAL
-                var oal = OpenALSoundController.GetInstance;
+                var oal = OpenALSoundController.Instance;
             }
             catch (DllNotFoundException ex)
             {

@@ -466,28 +466,18 @@ namespace MonoGame.OpenAL
         {
             AL.alSourceQueueBuffers(sourceId, 1, &buffer);
         }
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void d_alsourceunqueuebuffers2(int sid, int numEntries, out int[] bids);
-        internal static d_alsourceunqueuebuffers2 alSourceUnqueueBuffers2 = FuncLoader.LoadFunction<d_alsourceunqueuebuffers2>(NativeLibrary, "alSourceUnqueueBuffers");
-
+        
         internal static unsafe int[] SourceUnqueueBuffers(int sourceId, int numEntries)
         {
             if (numEntries <= 0)
-            {
-                throw new ArgumentOutOfRangeException("numEntries", "Must be greater than zero.");
-            }
+                throw new ArgumentOutOfRangeException(nameof(numEntries), "Must be greater than zero.");
+
             int[] array = new int[numEntries];
-            fixed (int* ptr = &array[0])
+            fixed (int* ptr = array)
             {
                 alSourceUnqueueBuffers(sourceId, numEntries, ptr);
             }
             return array;
-        }
-
-        internal static void SourceUnqueueBuffers(int sid, int numENtries, out int[] bids)
-        {
-            alSourceUnqueueBuffers2(sid, numENtries, out bids);
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -690,38 +680,34 @@ namespace MonoGame.OpenAL
     
     internal class EffectsExtension
     {
-        /* Effect API */
-
+        #region Effect API
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void alGenEffectsDelegate(int n, out uint effect);
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void alDeleteEffectsDelegate(int n, ref int effect);
+
         //[UnmanagedFunctionPointer (CallingConvention.Cdecl)]
         //private delegate bool alIsEffectDelegate (uint effect);
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void alEffectfDelegate(uint effect, EfxEffectf param, float value);
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void alEffectiDelegate(uint effect, EfxEffecti param, int value);
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void alGenAuxiliaryEffectSlotsDelegate(int n, out uint effectslots);
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void alDeleteAuxiliaryEffectSlotsDelegate(int n, ref int effectslots);
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void alAuxiliaryEffectSlotiDelegate(uint slot, EfxEffecti type, uint effect);
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void alAuxiliaryEffectSlotfDelegate(uint slot, EfxEffectSlotf param, float value);
-
-        /* Filter API */
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private unsafe delegate void alGenFiltersDelegate(int n, [Out] uint* filters);
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void alFilteriDelegate(uint fid, EfxFilteri param, int value);
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void alFilterfDelegate(uint fid, EfxFilterf param, float value);
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private unsafe delegate void alDeleteFiltersDelegate(int n, [In] uint* filters);
-
-
+        
         private alGenEffectsDelegate alGenEffects;
         private alDeleteEffectsDelegate alDeleteEffects;
         //private alIsEffectDelegate alIsEffect;
@@ -731,14 +717,33 @@ namespace MonoGame.OpenAL
         private alDeleteAuxiliaryEffectSlotsDelegate alDeleteAuxiliaryEffectSlots;
         private alAuxiliaryEffectSlotiDelegate alAuxiliaryEffectSloti;
         private alAuxiliaryEffectSlotfDelegate alAuxiliaryEffectSlotf;
+        #endregion
+
+        #region Filter API
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private unsafe delegate void alGenFiltersDelegate(int n, [Out] uint* filters);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void alFilteriDelegate(uint fid, EfxFilteri param, int value);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void alFilterfDelegate(uint fid, EfxFilterf param, float value);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private unsafe delegate void alDeleteFiltersDelegate(int n, [In] uint* filters);
+        
         private alGenFiltersDelegate alGenFilters;
         private alFilteriDelegate alFilteri;
         private alFilterfDelegate alFilterf;
         private alDeleteFiltersDelegate alDeleteFilters;
+        #endregion
 
-        internal static IntPtr device;
-        static EffectsExtension _instance;
-        internal static EffectsExtension Instance
+        internal bool IsInitialized { get; private set; }
+
+        internal static IntPtr _device;
+
+        private static EffectsExtension _instance;
+        public static EffectsExtension Instance
         {
             get
             {
@@ -751,10 +756,8 @@ namespace MonoGame.OpenAL
         internal EffectsExtension()
         {
             IsInitialized = false;
-            if (!Alc.IsExtensionPresent(device, "ALC_EXT_EFX"))
-            {
+            if (!Alc.IsExtensionPresent(_device, "ALC_EXT_EFX"))
                 return;
-            }
 
             alGenEffects = (alGenEffectsDelegate)Marshal.GetDelegateForFunctionPointer(AL.alGetProcAddress("alGenEffects"), typeof(alGenEffectsDelegate));
             alDeleteEffects = (alDeleteEffectsDelegate)Marshal.GetDelegateForFunctionPointer(AL.alGetProcAddress("alDeleteEffects"), typeof(alDeleteEffectsDelegate));
@@ -773,14 +776,10 @@ namespace MonoGame.OpenAL
             IsInitialized = true;
         }
 
-        internal bool IsInitialized { get; private set; }
 
-        /*
-
-alEffecti (effect, EfxEffecti.FilterType, (int)EfxEffectType.Reverb);
-            ALHelper.CheckError ("Failed to set Filter Type.");
-
-        */
+        //alEffecti(effect, EfxEffecti.FilterType, (int) EfxEffectType.Reverb);
+        //ALHelper.CheckError("Failed to set Filter Type.");      
+        
 
         internal void GenAuxiliaryEffectSlots(int count, out uint slot)
         {
@@ -839,18 +838,22 @@ alEffecti (effect, EfxEffecti.FilterType, (int)EfxEffectType.Reverb);
             this.alGenFilters(1, &filter);
             return (int)filter;
         }
+
         internal void Filter(int sourceId, EfxFilteri filter, int EfxFilterType)
         {
             this.alFilteri((uint)sourceId, filter, EfxFilterType);
         }
+
         internal void Filter(int sourceId, EfxFilterf filter, float EfxFilterType)
         {
             this.alFilterf((uint)sourceId, filter, EfxFilterType);
         }
+
         internal void BindFilterToSource(int sourceId, int filterId)
         {
             AL.Source(sourceId, ALSourcei.EfxDirectFilter, filterId);
         }
+
         internal unsafe void DeleteFilter(int filterId)
         {
             alDeleteFilters(1, (uint*)&filterId);

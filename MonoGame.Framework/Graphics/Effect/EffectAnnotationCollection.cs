@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
 	public class EffectAnnotationCollection : IEnumerable<EffectAnnotation>
 	{
-        internal static readonly EffectAnnotationCollection Empty = new EffectAnnotationCollection(new EffectAnnotation[0]);
+        internal static readonly EffectAnnotationCollection Empty = new EffectAnnotationCollection(Array.Empty<EffectAnnotation>());
 
 	    private readonly EffectAnnotation[] _annotations;
 

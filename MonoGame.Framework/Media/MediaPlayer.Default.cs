@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using Microsoft.Xna.Framework.Audio;
 using System;
 
 #if IOS
@@ -91,6 +92,21 @@ namespace Microsoft.Xna.Framework.Media
 
             Queue.SetVolume(_isMuted ? 0.0f : _volume);
         }
+        
+        private static float PlatformGetPitch()
+        {
+            return _pitch;
+        }
+
+        private static void PlatformSetPitch(float pitch)
+        {
+            _pitch = pitch;
+
+            if (Queue.ActiveSong == null)
+                return;
+
+            Queue.SetPitch(_pitch);
+        }
 
         private static bool PlatformGetGameHasControl()
         {
@@ -102,6 +118,16 @@ namespace Microsoft.Xna.Framework.Media
 #endif
         }
 		#endregion
+
+        private static bool PlatformGetIsVisualizationEnabled()
+        {
+            return _isVisualizationEnabled;
+        }
+
+        private static void PlatformSetIsVisualizationEnabled(bool value)
+        {
+            _isVisualizationEnabled = value;
+        }
 
         private static void PlatformPause()
         {
@@ -119,6 +145,7 @@ namespace Microsoft.Xna.Framework.Media
             song.SetEventHandler(OnSongFinishedPlaying);
 
             song.Volume = _isMuted ? 0.0f : _volume;
+            song.Pitch = _pitch;
             song.Play(startPosition);
         }
 
@@ -135,6 +162,25 @@ namespace Microsoft.Xna.Framework.Media
             // Loop through so that we reset the PlayCount as well
             foreach (var song in Queue.Songs)
                 Queue.ActiveSong.Stop();
+        }   
+        
+        private static bool PlatformGetIsRunningSlowly()
+        {
+            return PlatformGetUpdateTime() > 0.2f;
+        }
+
+        private static float PlatformGetUpdateTime()
+        {
+#if DESKTOPGL
+            float[] timing = OggStreamer.Instance.ThreadTiming;
+            float sum = 0;
+            for (int i = 0; i < timing.Length; i++)
+                sum += timing[i];
+
+            return sum / timing.Length; // this threshold may need some tweaking
+#else
+            return 0;
+#endif
         }
     }
 }

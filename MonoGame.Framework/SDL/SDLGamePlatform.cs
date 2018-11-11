@@ -64,7 +64,7 @@ namespace Microsoft.Xna.Framework
 
             try
             {
-                _soundControllerInstance = OpenALSoundController.GetInstance;
+                _soundControllerInstance = OpenALSoundController.Instance;
             }
             catch (DllNotFoundException ex)
             {

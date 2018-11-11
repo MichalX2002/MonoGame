@@ -37,6 +37,8 @@ namespace Microsoft.Xna.Framework.Audio
         public Action FinishedAction { get; private set; }
         public int BufferCount { get; private set; }
 
+        public bool CanSeek => Reader.CanSeek;
+
         public OggStream(string filename, Action finishedAction = null, int bufferCount = DefaultBufferCount)
         {
             oggFileName = filename;
@@ -45,7 +47,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             alBufferIds = AL.GenBuffers(bufferCount);
             ALHelper.CheckError("Failed to generate buffers.");
-            alSourceId = OpenALSoundController.GetInstance.ReserveSource();
+            alSourceId = OpenALSoundController.Instance.ReserveSource();
 
             if (OggStreamer.Instance.XRam.IsInitialized)
             {
@@ -54,6 +56,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
 
             Volume = 1;
+            Pitch = 1;
 
             if (OggStreamer.Instance.Efx.IsInitialized)
             {
@@ -69,7 +72,8 @@ namespace Microsoft.Xna.Framework.Audio
 
         public void Prepare()
         {
-            if (Preparing) return;
+            if (Preparing)
+                return;
 
             var state = AL.GetSourceState(alSourceId);
             ALHelper.CheckError("Failed to get source state.");
@@ -173,6 +177,17 @@ namespace Microsoft.Xna.Framework.Audio
         public void SeekToPosition(TimeSpan pos)
         {
             Reader.DecodedTime = pos;
+            SeekStopSource();
+        }
+
+        public void SeekToPosition(long pos)
+        {
+            Reader.DecodedPosition = pos;
+            SeekStopSource();
+        }
+
+        private void SeekStopSource()
+        {
             AL.SourceStop(alSourceId);
             ALHelper.CheckError("Failed to stop source.");
         }
@@ -217,6 +232,17 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
+        float pitch;
+        public float Pitch
+        {
+            get { return pitch; }
+            set
+            {
+                AL.Source(alSourceId, ALSourcef.Pitch, pitch = value);
+                ALHelper.CheckError("Failed to set pitch.");
+            }
+        }
+
         public bool IsLooped { get; set; }
 
         public void Dispose()
@@ -238,7 +264,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             AL.Source(alSourceId, ALSourcei.Buffer, 0);
             ALHelper.CheckError("Failed to free source from buffers.");
-            OpenALSoundController.GetInstance.RecycleSource(alSourceId);
+            OpenALSoundController.Instance.RecycleSource(alSourceId);
             AL.DeleteBuffers(alBufferIds);
             ALHelper.CheckError("Failed to delete buffer.");
             if (OggStreamer.Instance.Efx.IsInitialized)
@@ -246,8 +272,6 @@ namespace Microsoft.Xna.Framework.Audio
                 OggStreamer.Instance.Efx.DeleteFilter(alFilterId);
                 ALHelper.CheckError("Failed to delete EFX filter.");
             }
-            
-            
         }
 
         void StopPlayback()
@@ -260,6 +284,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             AL.GetSource(alSourceId, ALGetSourcei.BuffersQueued, out int queued);
             ALHelper.CheckError("Failed to fetch queued buffers.");
+
             if (queued > 0)
             {
                 try
@@ -273,10 +298,10 @@ namespace Microsoft.Xna.Framework.Audio
                     // Salvage what we can
                     AL.GetSource(alSourceId, ALGetSourcei.BuffersProcessed, out int processed);
                     ALHelper.CheckError("Failed to fetch processed buffers.");
-                    var salvaged = new int[processed];
+                    
                     if (processed > 0)
                     {
-                        AL.SourceUnqueueBuffers(alSourceId, processed, out salvaged);
+                        AL.SourceUnqueueBuffers(alSourceId, processed);
                         ALHelper.CheckError("Failed to unqueue buffers (second attempt).");
                     }
 
@@ -291,7 +316,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal void Open(bool precache = false)
         {
-            Reader = new VorbisReader(oggFileName);
+            Reader = new VorbisReader(File.OpenRead(oggFileName), true);
 
             if (precache)
             {
@@ -312,6 +337,11 @@ namespace Microsoft.Xna.Framework.Audio
                 Reader = null;
             }
             Ready = false;
+        }
+
+        public override int GetHashCode()
+        {
+            return alSourceId;
         }
     }
 }

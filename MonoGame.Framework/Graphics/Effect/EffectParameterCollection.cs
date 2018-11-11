@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
     public class EffectParameterCollection : IEnumerable<EffectParameter>
     {
-        internal static readonly EffectParameterCollection Empty = new EffectParameterCollection(new EffectParameter[0]);
+        internal static readonly EffectParameterCollection Empty = new EffectParameterCollection(Array.Empty<EffectParameter>());
 
         private readonly EffectParameter[] _parameters;
         private readonly Dictionary<string, int> _indexLookup;

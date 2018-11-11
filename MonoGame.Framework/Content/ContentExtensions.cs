@@ -14,7 +14,7 @@ namespace Microsoft.Xna.Framework.Content
             return ctor;
 #else
             var attrs = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
-            return type.GetConstructor(attrs, null, new Type[0], null);
+            return type.GetConstructor(attrs, null, Array.Empty<Type>();, null);
 #endif
         }
 

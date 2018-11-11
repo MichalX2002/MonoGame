@@ -31,7 +31,7 @@ namespace Microsoft.Xna.Framework.Audio
             if ((error = AL.GetError()) != ALError.NoError)
             {
                 if (args != null && args.Length > 0)
-                    message = String.Format(message, args);
+                    message = string.Format(message, args);
                 
                 throw new InvalidOperationException(message + " (Reason: " + AL.GetErrorString(error) + ")");
             }
@@ -57,7 +57,7 @@ namespace Microsoft.Xna.Framework.Audio
             if ((error = Alc.GetError()) != AlcError.NoError)
             {
                 if (args != null && args.Length > 0)
-                    message = String.Format(message, args);
+                    message = string.Format(message, args);
 
                 throw new InvalidOperationException(message + " (Reason: " + error.ToString() + ")");
             }
@@ -66,27 +66,23 @@ namespace Microsoft.Xna.Framework.Audio
 
     internal sealed class OpenALSoundController : IDisposable
     {
-        private static OpenALSoundController _instance = null;
-        private static EffectsExtension _efx = null;
+        private static OpenALSoundController _instance;
         private IntPtr _device;
         private IntPtr _context;
         private int[] allSourcesArray;
+
 #if DESKTOPGL || ANGLE
-
-        // MacOS & Linux shares a limit of 256.
+        // MacOS & Linux share a limit of 256.
         internal const int MAX_NUMBER_OF_SOURCES = 256;
-
 #elif IOS
-
         // Reference: http://stackoverflow.com/questions/3894044/maximum-number-of-openal-sound-buffers-on-iphone
         internal const int MAX_NUMBER_OF_SOURCES = 32;
 
 #elif ANDROID
-
         // Set to the same as OpenAL on iOS
         internal const int MAX_NUMBER_OF_SOURCES = 32;
-
 #endif
+
 #if ANDROID
         private const int DEFAULT_FREQUENCY = 48000;
         private const int DEFAULT_UPDATE_SIZE = 512;
@@ -94,13 +90,27 @@ namespace Microsoft.Xna.Framework.Audio
 #elif DESKTOPGL
         private static OggStreamer _oggstreamer;
 #endif
+
         private List<int> availableSourcesCollection;
         private List<int> inUseSourcesCollection;
-        bool _isDisposed;
+        private bool _isDisposed;
+
         public bool SupportsIma4 { get; private set; }
         public bool SupportsAdpcm { get; private set; }
         public bool SupportsEfx { get; private set; }
         public bool SupportsIeee { get; private set; }
+        public int Filter { get; private set; }
+
+        public static EffectsExtension Efx => EffectsExtension.Instance;
+        public static OpenALSoundController Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    _instance = new OpenALSoundController();
+                return _instance;
+            }
+        }
 
         /// <summary>
         /// Sets up the hardware resources used by the controller.
@@ -144,11 +154,11 @@ namespace Microsoft.Xna.Framework.Audio
             try
             {
                 _device = Alc.OpenDevice(string.Empty);
-                EffectsExtension.device = _device;
+                EffectsExtension._device = _device;
             }
-            catch (DllNotFoundException ex)
+            catch (DllNotFoundException)
             {
-                throw ex;
+                throw;
             }
             catch (Exception ex)
             {
@@ -265,9 +275,9 @@ namespace Microsoft.Xna.Framework.Audio
                 // Activate the instance or else the interruption handler will not be called.
                 AVAudioSession.SharedInstance().SetActive(true);
 
-                int[] attribute = new int[0];
+                int[] attribute = Array.Empty<int>();
 #else
-                int[] attribute = new int[0];
+                int[] attribute = Array.Empty<int>();
 #endif
 
                 _context = Alc.CreateContext(_device, attribute);
@@ -289,31 +299,6 @@ namespace Microsoft.Xna.Framework.Audio
                 }
             }
             return false;
-        }
-
-		public static OpenALSoundController GetInstance
-        {
-			get
-            {
-				if (_instance == null)
-					_instance = new OpenALSoundController();
-				return _instance;
-			}
-		}
-
-        public static EffectsExtension Efx
-        {
-            get
-            {
-                if (_efx == null)
-                    _efx = new EffectsExtension();
-                return _efx;
-            }
-        }
-
-        public int Filter
-        {
-            get; private set;
         }
 
         public static void DestroyInstance()
@@ -357,7 +342,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// Dispose of the OpenALSoundCOntroller.
         /// </summary>
         /// <param name="disposing">If true, the managed resources are to be disposed.</param>
-		void Dispose(bool disposing)
+		private void Dispose(bool disposing)
 		{
             if (!_isDisposed)
             {

@@ -13,6 +13,7 @@ namespace Microsoft.Xna.Framework.Media
     {
         private OggStream stream;
         private float _volume = 1f;
+        private float _pitch = 0f;
 
         private void PlatformInitialize(string fileName)
         {
@@ -91,6 +92,22 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
+        internal float Pitch
+        {
+            get
+            {
+                if (stream == null)
+                    return 0.0f;
+                return _pitch;
+            }
+            set
+            {
+                _pitch = SoundEffectInstance.XnaPitchToAlPitch(value);
+                if (stream != null)
+                    stream.Pitch = _pitch;
+            }
+        }
+
         public TimeSpan Position
         {
             get
@@ -133,7 +150,7 @@ namespace Microsoft.Xna.Framework.Media
 
         private string PlatformGetName()
         {
-            return Path.GetFileNameWithoutExtension(Name);
+            return Path.GetFileNameWithoutExtension(FilePath);
         }
 
         private int PlatformGetPlayCount()

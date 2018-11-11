@@ -6,25 +6,25 @@ using System.Diagnostics;
 namespace Microsoft.Xna.Framework.Graphics
 {
     [DebuggerDisplay("{DebugDisplayString}")]
-	public class EffectParameter
-	{
+    public class EffectParameter
+    {
         /// <summary>
         /// The next state key used when an effect parameter
         /// is updated by any of the 'set' methods.
         /// </summary>
         internal static ulong NextStateKey { get; private set; }
 
-        internal EffectParameter(   EffectParameterClass class_, 
-                                    EffectParameterType type, 
-                                    string name, 
-                                    int rowCount, 
+        internal EffectParameter(EffectParameterClass class_,
+                                    EffectParameterType type,
+                                    string name,
+                                    int rowCount,
                                     int columnCount,
-                                    string semantic, 
+                                    string semantic,
                                     EffectAnnotationCollection annotations,
                                     EffectParameterCollection elements,
                                     EffectParameterCollection structMembers,
-                                    object data )
-		{
+                                    object data)
+        {
             ParameterClass = class_;
             ParameterType = type;
 
@@ -33,14 +33,14 @@ namespace Microsoft.Xna.Framework.Graphics
             Annotations = annotations;
 
             RowCount = rowCount;
-			ColumnCount = columnCount;
+            ColumnCount = columnCount;
 
             Elements = elements;
             StructureMembers = structMembers;
 
             Data = data;
             StateKey = unchecked(NextStateKey++);
-		}
+        }
 
         internal EffectParameter(EffectParameter cloneSource)
         {
@@ -63,15 +63,15 @@ namespace Microsoft.Xna.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-		public string Name { get; private set; }
+        public string Name { get; private set; }
 
         public string Semantic { get; private set; }
 
-		public EffectParameterClass ParameterClass { get; private set; }
+        public EffectParameterClass ParameterClass { get; private set; }
 
-		public EffectParameterType ParameterType { get; private set; }
+        public EffectParameterType ParameterType { get; private set; }
 
-		public int RowCount { get; private set; }
+        public int RowCount { get; private set; }
 
         public int ColumnCount { get; private set; }
 
@@ -102,7 +102,7 @@ namespace Microsoft.Xna.Framework.Graphics
             get
             {
                 var semanticStr = string.Empty;
-                if (!string.IsNullOrEmpty(Semantic))                
+                if (!string.IsNullOrEmpty(Semantic))
                     semanticStr = string.Concat(" <", Semantic, ">");
 
                 return string.Concat("[", ParameterClass, " ", ParameterType, "]", semanticStr, " ", Name, " : ", GetDataValueString());
@@ -117,33 +117,33 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 if (Elements == null)
                     valueStr = "(null)";
-                else                
-                    valueStr = string.Join(", ", Elements.Select(e => e.GetDataValueString()));                
+                else
+                    valueStr = string.Join(", ", Elements.Select(e => e.GetDataValueString()));
             }
             else
             {
                 switch (ParameterClass)
                 {
-                        // Object types are stored directly in the Data property.
-                        // Display Data's string value.
+                    // Object types are stored directly in the Data property.
+                    // Display Data's string value.
                     case EffectParameterClass.Object:
                         valueStr = Data.ToString();
                         break;
 
-                        // Matrix types are stored in a float[16] which we don't really have room for.
-                        // Display "...".
+                    // Matrix types are stored in a float[16] which we don't really have room for.
+                    // Display "...".
                     case EffectParameterClass.Matrix:
                         valueStr = "...";
                         break;
 
-                        // Scalar types are stored as a float[1].
-                        // Display the first (and only) element's string value.                    
+                    // Scalar types are stored as a float[1].
+                    // Display the first (and only) element's string value.                    
                     case EffectParameterClass.Scalar:
                         valueStr = (Data as Array).GetValue(0).ToString();
                         break;
 
-                        // Vector types are stored as an Array<Type>.
-                        // Display the string value of each array element.
+                    // Vector types are stored as an Array<Type>.
+                    // Display the string value of each array element.
                     case EffectParameterClass.Vector:
                         var array = Data as Array;
                         var arrayStr = new string[array.Length];
@@ -157,18 +157,18 @@ namespace Microsoft.Xna.Framework.Graphics
                         valueStr = string.Join(" ", arrayStr);
                         break;
 
-                        // Handle additional cases here...
+                    // Handle additional cases here...
                     default:
                         valueStr = Data.ToString();
                         break;
                 }
             }
 
-            return string.Concat("{", valueStr, "}");                
+            return string.Concat("{", valueStr, "}");
         }
 
-        public bool GetValueBoolean ()
-		{
+        public bool GetValueBoolean()
+        {
             if (ParameterClass != EffectParameterClass.Scalar || ParameterType != EffectParameterType.Bool)
                 throw new InvalidCastException();
 
@@ -179,7 +179,7 @@ namespace Microsoft.Xna.Framework.Graphics
             return ((int[])Data)[0] != 0;
 #endif
         }
-        
+
         /*
 		public bool[] GetValueBooleanArray ()
 		{
@@ -187,8 +187,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
         */
 
-		public int GetValueInt32 ()
-		{
+        public int GetValueInt32()
+        {
             if (ParameterClass != EffectParameterClass.Scalar || ParameterType != EffectParameterType.Int32)
                 throw new InvalidCastException();
 
@@ -199,7 +199,7 @@ namespace Microsoft.Xna.Framework.Graphics
             return ((int[])Data)[0];
 #endif
         }
-        
+
         /*
 		public int[] GetValueInt32Array ()
 		{
@@ -207,24 +207,23 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
         */
 
-		public Matrix GetValueMatrix ()
-		{
+        public Matrix GetValueMatrix()
+        {
             if (ParameterClass != EffectParameterClass.Matrix || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             if (RowCount != 4 || ColumnCount != 4)
                 throw new InvalidCastException();
 
-            var floatData = (float[])Data;
+            float[] floatData = (float[])Data;
+            return new Matrix(floatData[0], floatData[4], floatData[8], floatData[12],
+                              floatData[1], floatData[5], floatData[9], floatData[13],
+                              floatData[2], floatData[6], floatData[10], floatData[14],
+                              floatData[3], floatData[7], floatData[11], floatData[15]);
+        }
 
-            return new Matrix(  floatData[0], floatData[4], floatData[8], floatData[12],
-                                floatData[1], floatData[5], floatData[9], floatData[13],
-                                floatData[2], floatData[6], floatData[10], floatData[14],
-                                floatData[3], floatData[7], floatData[11], floatData[15]);
-		}
-        
-		public Matrix[] GetValueMatrixArray (int count)
-		{
+        public Matrix[] GetValueMatrixArray(int count)
+        {
             if (ParameterClass != EffectParameterClass.Matrix || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
@@ -232,15 +231,15 @@ namespace Microsoft.Xna.Framework.Graphics
             for (var i = 0; i < count; i++)
                 ret[i] = Elements[i].GetValueMatrix();
 
-		    return ret;
-		}
+            return ret;
+        }
 
-		public Quaternion GetValueQuaternion ()
-		{
+        public Quaternion GetValueQuaternion()
+        {
             if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
-            var vecInfo = (float[])Data;
+            float[] vecInfo = (float[])Data;
             return new Quaternion(vecInfo[0], vecInfo[1], vecInfo[2], vecInfo[3]);
         }
 
@@ -251,115 +250,115 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
         */
 
-		public Single GetValueSingle ()
-		{
+        public Single GetValueSingle()
+        {
             // TODO: Should this fetch int and bool as a float?
             if (ParameterClass != EffectParameterClass.Scalar || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
-			return ((float[])Data)[0];
-		}
+            return ((float[])Data)[0];
+        }
 
-		public Single[] GetValueSingleArray ()
-		{
-			if (Elements != null && Elements.Count > 0)
+        public Single[] GetValueSingleArray()
+        {
+            if (Elements != null && Elements.Count > 0)
             {
                 var ret = new Single[RowCount * ColumnCount * Elements.Count];
-				for (int i=0; i<Elements.Count; i++)
+                for (int i = 0; i < Elements.Count; i++)
                 {
                     var elmArray = Elements[i].GetValueSingleArray();
                     for (var j = 0; j < elmArray.Length; j++)
-						ret[RowCount*ColumnCount*i+j] = elmArray[j];
-				}
-				return ret;
-			}
-			
-			switch(ParameterClass) 
+                        ret[RowCount * ColumnCount * i + j] = elmArray[j];
+                }
+                return ret;
+            }
+
+            switch (ParameterClass)
             {
-			case EffectParameterClass.Scalar:
-				return new Single[] { GetValueSingle () };
-            case EffectParameterClass.Vector:
-			case EffectParameterClass.Matrix:
+                case EffectParameterClass.Scalar:
+                    return new Single[] { GetValueSingle() };
+                case EffectParameterClass.Vector:
+                case EffectParameterClass.Matrix:
                     if (Data is Matrix)
                         return Matrix.ToFloatArray((Matrix)Data);
                     else
                         return (float[])Data;
-			default:
-				throw new NotImplementedException();
-			}
-		}
+                default:
+                    throw new NotImplementedException();
+            }
+        }
 
-		public string GetValueString ()
-		{
+        public string GetValueString()
+        {
             if (ParameterClass != EffectParameterClass.Object || ParameterType != EffectParameterType.String)
                 throw new InvalidCastException();
 
-		    return ((string[])Data)[0];
-		}
+            return ((string[])Data)[0];
+        }
 
-		public Texture2D GetValueTexture2D ()
-		{
+        public Texture2D GetValueTexture2D()
+        {
             if (ParameterClass != EffectParameterClass.Object || ParameterType != EffectParameterType.Texture2D)
                 throw new InvalidCastException();
 
-			return (Texture2D)Data;
-		}
+            return (Texture2D)Data;
+        }
 
 #if !GLES
-	    public Texture3D GetValueTexture3D ()
-	    {
+        public Texture3D GetValueTexture3D()
+        {
             if (ParameterClass != EffectParameterClass.Object || ParameterType != EffectParameterType.Texture3D)
                 throw new InvalidCastException();
 
             return (Texture3D)Data;
-	    }
+        }
 #endif
 
-		public TextureCube GetValueTextureCube ()
-		{
+        public TextureCube GetValueTextureCube()
+        {
             if (ParameterClass != EffectParameterClass.Object || ParameterType != EffectParameterType.TextureCube)
                 throw new InvalidCastException();
 
             return (TextureCube)Data;
-		}
+        }
 
-		public Vector2 GetValueVector2 ()
-		{
+        public Vector2 GetValueVector2()
+        {
             if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
-            var vecInfo = (float[])Data;
-			return new Vector2(vecInfo[0],vecInfo[1]);
-		}
+            float[] vecInfo = (float[])Data;
+            return new Vector2(vecInfo[0], vecInfo[1]);
+        }
 
-		public Vector2[] GetValueVector2Array()
-		{
+        public Vector2[] GetValueVector2Array()
+        {
             if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
-			if (Elements != null && Elements.Count > 0)
-			{
-				Vector2[] result = new Vector2[Elements.Count];
-				for (int i = 0; i < Elements.Count; i++)
-				{
-					var v = Elements[i].GetValueSingleArray();
-					result[i] = new Vector2(v[0], v[1]);
-				}
-			return result;
-			}
-			
-		return null;
-		}
+            if (Elements != null && Elements.Count > 0)
+            {
+                Vector2[] result = new Vector2[Elements.Count];
+                for (int i = 0; i < Elements.Count; i++)
+                {
+                    float[] v = Elements[i].GetValueSingleArray();
+                    result[i] = new Vector2(v[0], v[1]);
+                }
+                return result;
+            }
 
-		public Vector3 GetValueVector3 ()
-		{
+            return null;
+        }
+
+        public Vector3 GetValueVector3()
+        {
             if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
-            var vecInfo = (float[])Data;
-			return new Vector3(vecInfo[0],vecInfo[1],vecInfo[2]);
-		}
+            float[] vecInfo = (float[])Data;
+            return new Vector3(vecInfo[0], vecInfo[1], vecInfo[2]);
+        }
 
-       public Vector3[] GetValueVector3Array()
+        public Vector3[] GetValueVector3Array()
         {
             if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
@@ -369,7 +368,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 Vector3[] result = new Vector3[Elements.Count];
                 for (int i = 0; i < Elements.Count; i++)
                 {
-                    var v = Elements[i].GetValueSingleArray();
+                    float[] v = Elements[i].GetValueSingleArray();
                     result[i] = new Vector3(v[0], v[1], v[2]);
                 }
                 return result;
@@ -378,16 +377,16 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
 
-		public Vector4 GetValueVector4 ()
-		{
+        public Vector4 GetValueVector4()
+        {
             if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
-            var vecInfo = (float[])Data;
-			return new Vector4(vecInfo[0],vecInfo[1],vecInfo[2],vecInfo[3]);
-		}
-        
-          public Vector4[] GetValueVector4Array()
+            float[] vecInfo = (float[])Data;
+            return new Vector4(vecInfo[0], vecInfo[1], vecInfo[2], vecInfo[3]);
+        }
+
+        public Vector4[] GetValueVector4Array()
         {
             if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
@@ -397,16 +396,16 @@ namespace Microsoft.Xna.Framework.Graphics
                 Vector4[] result = new Vector4[Elements.Count];
                 for (int i = 0; i < Elements.Count; i++)
                 {
-                    var v = Elements[i].GetValueSingleArray();
-                    result[i] = new Vector4(v[0], v[1],v[2], v[3]);
+                    float[] v = Elements[i].GetValueSingleArray();
+                    result[i] = new Vector4(v[0], v[1], v[2], v[3]);
                 }
                 return result;
             }
             return null;
         }
 
-		public void SetValue (bool value)
-		{
+        public void SetValue(bool value)
+        {
             if (ParameterClass != EffectParameterClass.Scalar || ParameterType != EffectParameterType.Bool)
                 throw new InvalidCastException();
 
@@ -418,7 +417,7 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
 
             StateKey = unchecked(NextStateKey++);
-		}
+        }
 
         /*
 		public void SetValue (bool[] value)
@@ -427,8 +426,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
         */
 
-		public void SetValue (int value)
-		{
+        public void SetValue(int value)
+        {
             if (ParameterClass != EffectParameterClass.Scalar || ParameterType != EffectParameterType.Int32)
                 throw new InvalidCastException();
 
@@ -439,7 +438,7 @@ namespace Microsoft.Xna.Framework.Graphics
             ((int[])Data)[0] = value;
 #endif
             StateKey = unchecked(NextStateKey++);
-		}
+        }
 
         /*
 		public void SetValue (int[] value)
@@ -550,8 +549,8 @@ namespace Microsoft.Xna.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-		public void SetValueTranspose(Matrix value)
-		{
+        public void SetValueTranspose(Matrix value)
+        {
             if (ParameterClass != EffectParameterClass.Matrix || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
@@ -649,42 +648,42 @@ namespace Microsoft.Xna.Framework.Graphics
                 fData[5] = value.M23;
             }
 
-			StateKey = unchecked(NextStateKey++);
-		}
+            StateKey = unchecked(NextStateKey++);
+        }
 
-		public void SetValue (Matrix[] value)
-		{
+        public void SetValue(Matrix[] value)
+        {
             if (ParameterClass != EffectParameterClass.Matrix || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
-		    if (RowCount == 4 && ColumnCount == 4)
-		    {
-		        for (var i = 0; i < value.Length; i++)
-		        {
-		            var fData = (float[])Elements[i].Data;
+            if (RowCount == 4 && ColumnCount == 4)
+            {
+                for (var i = 0; i < value.Length; i++)
+                {
+                    var fData = (float[])Elements[i].Data;
 
-		            fData[0] = value[i].M11;
-		            fData[1] = value[i].M21;
-		            fData[2] = value[i].M31;
-		            fData[3] = value[i].M41;
+                    fData[0] = value[i].M11;
+                    fData[1] = value[i].M21;
+                    fData[2] = value[i].M31;
+                    fData[3] = value[i].M41;
 
-		            fData[4] = value[i].M12;
-		            fData[5] = value[i].M22;
-		            fData[6] = value[i].M32;
-		            fData[7] = value[i].M42;
+                    fData[4] = value[i].M12;
+                    fData[5] = value[i].M22;
+                    fData[6] = value[i].M32;
+                    fData[7] = value[i].M42;
 
-		            fData[8] = value[i].M13;
-		            fData[9] = value[i].M23;
-		            fData[10] = value[i].M33;
-		            fData[11] = value[i].M43;
+                    fData[8] = value[i].M13;
+                    fData[9] = value[i].M23;
+                    fData[10] = value[i].M33;
+                    fData[11] = value[i].M43;
 
-		            fData[12] = value[i].M14;
-		            fData[13] = value[i].M24;
-		            fData[14] = value[i].M34;
-		            fData[15] = value[i].M44;
-		        }
-		    }
-		    else if (RowCount == 4 && ColumnCount == 3)
+                    fData[12] = value[i].M14;
+                    fData[13] = value[i].M24;
+                    fData[14] = value[i].M34;
+                    fData[15] = value[i].M44;
+                }
+            }
+            else if (RowCount == 4 && ColumnCount == 3)
             {
                 for (var i = 0; i < value.Length; i++)
                 {
@@ -765,10 +764,10 @@ namespace Microsoft.Xna.Framework.Graphics
             }
 
             StateKey = unchecked(NextStateKey++);
-		}
+        }
 
-		public void SetValue (Quaternion value)
-		{
+        public void SetValue(Quaternion value)
+        {
             if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
@@ -778,7 +777,7 @@ namespace Microsoft.Xna.Framework.Graphics
             fData[2] = value.Z;
             fData[3] = value.W;
             StateKey = unchecked(NextStateKey++);
-		}
+        }
 
         /*
 		public void SetValue (Quaternion[] value)
@@ -787,22 +786,22 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
         */
 
-		public void SetValue (Single value)
-		{
+        public void SetValue(Single value)
+        {
             if (ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
-			((float[])Data)[0] = value;
+            ((float[])Data)[0] = value;
             StateKey = unchecked(NextStateKey++);
-		}
+        }
 
-		public void SetValue (Single[] value)
-		{
-			for (var i=0; i<value.Length; i++)
-				Elements[i].SetValue (value[i]);
+        public void SetValue(Single[] value)
+        {
+            for (var i = 0; i < value.Length; i++)
+                Elements[i].SetValue(value[i]);
 
             StateKey = unchecked(NextStateKey++);
-		}
-		
+        }
+
         /*
 		public void SetValue (string value)
 		{
@@ -810,23 +809,23 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
         */
 
-		public void SetValue (Texture value)
-		{
-            if (this.ParameterType != EffectParameterType.Texture && 
+        public void SetValue(Texture value)
+        {
+            if (this.ParameterType != EffectParameterType.Texture &&
                 this.ParameterType != EffectParameterType.Texture1D &&
                 this.ParameterType != EffectParameterType.Texture2D &&
                 this.ParameterType != EffectParameterType.Texture3D &&
-                this.ParameterType != EffectParameterType.TextureCube) 
+                this.ParameterType != EffectParameterType.TextureCube)
             {
                 throw new InvalidCastException();
             }
 
-			Data = value;
+            Data = value;
             StateKey = unchecked(NextStateKey++);
-		}
+        }
 
-		public void SetValue (Vector2 value)
-		{
+        public void SetValue(Vector2 value)
+        {
             if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
@@ -834,17 +833,17 @@ namespace Microsoft.Xna.Framework.Graphics
             fData[0] = value.X;
             fData[1] = value.Y;
             StateKey = unchecked(NextStateKey++);
-		}
+        }
 
-		public void SetValue (Vector2[] value)
-		{
+        public void SetValue(Vector2[] value)
+        {
             for (var i = 0; i < value.Length; i++)
-				Elements[i].SetValue (value[i]);
+                Elements[i].SetValue(value[i]);
             StateKey = unchecked(NextStateKey++);
-		}
+        }
 
-		public void SetValue (Vector3 value)
-		{
+        public void SetValue(Vector3 value)
+        {
             if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
@@ -853,33 +852,33 @@ namespace Microsoft.Xna.Framework.Graphics
             fData[1] = value.Y;
             fData[2] = value.Z;
             StateKey = unchecked(NextStateKey++);
-		}
+        }
 
-		public void SetValue (Vector3[] value)
-		{
+        public void SetValue(Vector3[] value)
+        {
             for (var i = 0; i < value.Length; i++)
-				Elements[i].SetValue (value[i]);
+                Elements[i].SetValue(value[i]);
             StateKey = unchecked(NextStateKey++);
-		}
+        }
 
-		public void SetValue (Vector4 value)
-		{
+        public void SetValue(Vector4 value)
+        {
             if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
-			var fData = (float[])Data;
+            float[] fData = (float[])Data;
             fData[0] = value.X;
             fData[1] = value.Y;
             fData[2] = value.Z;
             fData[3] = value.W;
             StateKey = unchecked(NextStateKey++);
-		}
+        }
 
-		public void SetValue (Vector4[] value)
-		{
+        public void SetValue(Vector4[] value)
+        {
             for (var i = 0; i < value.Length; i++)
-				Elements[i].SetValue (value[i]);
+                Elements[i].SetValue(value[i]);
             StateKey = unchecked(NextStateKey++);
-		}
-	}    
+        }
+    }
 }

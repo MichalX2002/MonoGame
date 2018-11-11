@@ -41,7 +41,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// </summary>
         internal void InitializeSound()
         {
-            controller = OpenALSoundController.GetInstance;
+            controller = OpenALSoundController.Instance;
         }
 
 #endregion // Initialization
@@ -50,7 +50,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// Converts the XNA [-1, 1] pitch range to OpenAL pitch (0, INF) or Android SoundPool playback rate [0.5, 2].
         /// <param name="xnaPitch">The pitch of the sound in the Microsoft XNA range.</param>
         /// </summary>
-        private static float XnaPitchToAlPitch(float xnaPitch)
+        internal static float XnaPitchToAlPitch(float xnaPitch)
         {
             return (float)Math.Pow(2, xnaPitch);
         }
@@ -172,7 +172,7 @@ namespace Microsoft.Xna.Framework.Audio
 
                 // Reset the SendFilter to 0 if we are NOT using reverb since 
                 // sources are recycled
-                if (OpenALSoundController.GetInstance.SupportsEfx)
+                if (OpenALSoundController.Instance.SupportsEfx)
                 {
                     OpenALSoundController.Efx.BindSourceToAuxiliarySlot(SourceId, 0, 0, 0);
                     ALHelper.CheckError("Failed to unset reverb.");

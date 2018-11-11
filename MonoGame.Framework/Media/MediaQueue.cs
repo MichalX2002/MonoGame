@@ -66,23 +66,26 @@ namespace Microsoft.Xna.Framework.Media
 		
 		internal void Clear()
 		{
-			Song song;
-			for(; songs.Count > 0; )
-			{
-				song = songs[0];
+            for (int i = songs.Count; i-- > 0; )
+            {
 #if !DIRECTX
-				song.Stop();
+                //songs[i].Stop();
 #endif
-				songs.Remove(song);
+				songs.RemoveAt(i);
 			}	
 		}
 
 #if !DIRECTX
         internal void SetVolume(float volume)
         {
-            int count = songs.Count;
-            for (int i = 0; i < count; ++i)
+            for (int i = 0; i < songs.Count; ++i)
                 songs[i].Volume = volume;
+        }
+
+        internal void SetPitch(float pitch)
+        {
+            for (int i = 0; i < songs.Count; ++i)
+                songs[i].Pitch = pitch;
         }
 #endif
 
@@ -94,8 +97,7 @@ namespace Microsoft.Xna.Framework.Media
 #if !DIRECTX
         internal void Stop()
         {
-            int count = songs.Count;
-            for (int i = 0; i < count; ++i)
+            for (int i = 0; i < songs.Count; ++i)
                 songs[i].Stop();
         }
 #endif

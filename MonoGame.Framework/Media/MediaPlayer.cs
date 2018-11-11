@@ -13,7 +13,9 @@ namespace Microsoft.Xna.Framework.Media
 		private static int _numSongsInQueuePlayed = 0;
 		private static MediaState _state = MediaState.Stopped;
 		private static float _volume = 1.0f;
-		private static bool _isMuted;
+        private static float _pitch = 0.0f;
+        private static bool _isVisualizationEnabled;
+        private static bool _isMuted;
         private static bool _isRepeating;
         private static bool _isShuffled;
 
@@ -47,7 +49,11 @@ namespace Microsoft.Xna.Framework.Media
             set { PlatformSetIsShuffled(value); }
         }
 
-        public static bool IsVisualizationEnabled { get { return false; } }
+        public static bool IsVisualizationEnabled
+        {
+            get { return PlatformGetIsVisualizationEnabled(); }
+            set { PlatformSetIsVisualizationEnabled(value); }
+        }
 
         public static TimeSpan PlayPosition
         {
@@ -85,13 +91,32 @@ namespace Microsoft.Xna.Framework.Media
             set
             {
                 var volume = MathHelper.Clamp(value, 0, 1);
-
                 PlatformSetVolume(volume);
             }
         }
 
-		#endregion
-		
+        public static float Pitch
+        {
+            get { return PlatformGetPitch(); }
+            set
+            {
+                var pitch = MathHelper.Clamp(value, -1, 1);
+                PlatformSetPitch(pitch);
+            }
+        }
+
+        public static bool IsRunningSlowly
+        {
+            get { return PlatformGetIsRunningSlowly(); }
+        }
+
+        public static float UpdateTime
+        {
+            get { return PlatformGetUpdateTime(); }
+        }
+
+        #endregion
+
         public static void Pause()
         {
             if (State != MediaState.Playing || Queue.ActiveSong == null)
@@ -120,9 +145,9 @@ namespace Microsoft.Xna.Framework.Media
             var previousSong = Queue.Count > 0 ? Queue[0] : null;
             Queue.Clear();
             _numSongsInQueuePlayed = 0;
+
             Queue.Add(song);
             Queue.ActiveSongIndex = 0;
-            
             PlaySong(song, startPosition);
 
             if (previousSong != song)
@@ -130,7 +155,8 @@ namespace Microsoft.Xna.Framework.Media
         }
 
 		public static void Play(SongCollection collection, int index = 0)
-		{
+        {
+            var previousSong = index < Queue.Count ? Queue[index] : null;
             Queue.Clear();
             _numSongsInQueuePlayed = 0;
 
@@ -138,9 +164,11 @@ namespace Microsoft.Xna.Framework.Media
 				Queue.Add(song);
 			
 			Queue.ActiveSongIndex = index;
-			
 			PlaySong(Queue.ActiveSong, null);
-		}
+
+            if (previousSong != Queue.ActiveSong)
+                EventHelpers.Raise(null, ActiveSongChanged, EventArgs.Empty);
+        }
 
         private static void PlaySong(Song song, TimeSpan? startPosition)
         {

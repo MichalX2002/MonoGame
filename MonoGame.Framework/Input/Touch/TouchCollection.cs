@@ -27,7 +27,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// </summary>
         public bool IsConnected { get { return TouchPanel.GetCapabilities().IsConnected; } }
 
-        private static readonly TouchLocation[] EmptyLocationArray = new TouchLocation[0];
+        private static readonly TouchLocation[] EmptyLocationArray = Array.Empty<TouchLocation>();
         internal static readonly TouchCollection Empty = new TouchCollection(EmptyLocationArray);
 
 		#endregion

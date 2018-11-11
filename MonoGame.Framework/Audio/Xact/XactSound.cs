@@ -37,7 +37,7 @@ namespace Microsoft.Xna.Framework.Audio
             _soundBank = soundBank;
             _waveBankIndex = waveBankIndex;
             _trackIndex = trackIndex;
-            RpcCurves = new int[0];
+            RpcCurves = Array.Empty<int>();
         }
 
         public XactSound(AudioEngine engine, SoundBank soundBank, BinaryReader soundReader)
@@ -65,7 +65,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
 
             if (!hasRPCs)
-                RpcCurves = new int[0];
+                RpcCurves = Array.Empty<int>();
             else
             {
                 var current = soundReader.BaseStream.Position;

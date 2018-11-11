@@ -55,7 +55,7 @@ namespace MonoGame.Utilities.Png
     {
         internal PngChunk()
         {
-            this.Data = new byte[0];
+            this.Data = Array.Empty<byte>();
         }
 
         /// <summary>

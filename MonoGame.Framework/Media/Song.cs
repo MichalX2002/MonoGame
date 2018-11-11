@@ -47,8 +47,7 @@ namespace Microsoft.Xna.Framework.Media
         event FinishedPlayingHandler DonePlaying;
 #endif
 #endif
-        internal Song(string fileName, int durationMS)
-            : this(fileName)
+        internal Song(string fileName, int durationMS) : this(fileName)
         {
             _duration = TimeSpan.FromMilliseconds(durationMS);
         }
@@ -75,11 +74,10 @@ namespace Microsoft.Xna.Framework.Media
         /// <returns></returns>
         public static Song FromUri(string name, Uri uri)
         {
-            var song = new Song(uri.OriginalString)
+            return new Song(uri.OriginalString)
             {
                 FilePath = name
             };
-            return song;
         }
 		
 		public void Dispose()
