@@ -3,7 +3,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -31,11 +33,11 @@ namespace MonoGame.Testings
             base.Initialize();
 
             MediaPlayer.ActiveSongChanged += MediaPlayer_ActiveSongChanged;
-            MediaPlayer.Volume = 0.02f;
+            MediaPlayer.Volume = 0.25f;
             MediaPlayer.Pitch = 1f;
             MediaPlayer.IsRepeating = true;
 
-            MediaPlayer.Play(_songs[0]);
+            MediaPlayer.Play(_songs);
 
             MediaPlayer.IsVisualizationEnabled = true;
         }
@@ -67,13 +69,15 @@ namespace MonoGame.Testings
 
         private float t = 0;
 
+        Queue<float> updates = new Queue<float>();
+ 
         protected override void Update(GameTime time)
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
             t += time.Delta;
-            if(t > 1)
+            if(t > 1f)
             {
                 Console.WriteLine(MediaPlayer.IsRunningSlowly + " | " + MediaPlayer.UpdateTime);
                 t = 0;

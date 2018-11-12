@@ -69,7 +69,7 @@ namespace Microsoft.Xna.Framework.Media
             for (int i = songs.Count; i-- > 0; )
             {
 #if !DIRECTX
-                //songs[i].Stop();
+                songs[i].Stop();
 #endif
 				songs.RemoveAt(i);
 			}	

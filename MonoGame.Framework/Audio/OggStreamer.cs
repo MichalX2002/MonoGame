@@ -119,7 +119,7 @@ namespace Microsoft.Xna.Framework.Audio
                 var format = stream.Reader.Channels == 1 ? ALFormat.Mono16 : ALFormat.Stereo16;
                 int size = readSamples * sizeof(short);
                 AL.BufferData(bufferId, format, castBuffer, size, stream.Reader.SampleRate);
-                ALHelper.CheckError("Failed to fill buffer, readSamples = {0}, SampleRate = {1}, buffer.Length = {2}.", readSamples, stream.Reader.SampleRate, castBuffer.Length);
+                ALHelper.CheckError("Failed to fill buffer, readSamples = {0}, SampleRate = {1}.", readSamples, stream.Reader.SampleRate);
             }
 
             return readSamples != BufferSize;
@@ -160,77 +160,7 @@ namespace Microsoft.Xna.Framework.Audio
                             if (!streams.Contains(stream))
                                 continue;
 
-                        AL.GetSource(stream.alSourceId, ALGetSourcei.BuffersQueued, out int queued);
-                        ALHelper.CheckError("Failed to fetch queued buffers.");
-
-                        AL.GetSource(stream.alSourceId, ALGetSourcei.BuffersProcessed, out int processed);
-                        ALHelper.CheckError("Failed to fetch processed buffers.");
-
-                        if (processed == 0 && queued == stream.BufferCount)
-                            continue;
-
-                        IEnumerable<int> tempBuffers;
-                        if (processed > 0)
-                        {
-                            tempBuffers = AL.SourceUnqueueBuffers(stream.alSourceId, processed);
-                            ALHelper.CheckError("Failed to unqueue buffers.");
-                        }
-                        else
-                            tempBuffers = stream.alBufferIds.Skip(queued);
-
-                        bool finished = false;
-                        int buffersFilled = 0;
-                        foreach(int buffer in tempBuffers)
-                        {
-                            if (pendingFinish)
-                                break;
-
-                            finished |= FillBuffer(stream, buffer);
-                            buffersFilled++;
-
-                            if (finished)
-                            {
-                                if (stream.IsLooped)
-                                {
-                                    if (stream.CanSeek)
-                                    {
-                                        // try to seek first
-                                        stream.SeekToPosition(0);
-                                    }
-                                    else
-                                    { 
-                                        // as closing and opening the stream is a bit expensive
-                                        stream.Close();
-                                        stream.Open();
-                                    }
-                                }
-                                else
-                                    pendingFinish = true;
-                            }
-                        }
-
-                        if (pendingFinish && queued == 0)
-                        {
-                            pendingFinish = false;
-                            lock (iterationMutex)
-                                streams.Remove(stream);
-
-                            if (stream.FinishedAction != null)
-                                stream.FinishedAction.Invoke();
-                        }
-                        else if (!finished && buffersFilled > 0) // queue only successfully filled buffers
-                        {
-                            foreach (int buffer in tempBuffers)
-                            {
-                                if (buffersFilled <= 0)
-                                    break;
-                                buffersFilled--;
-
-                                AL.SourceQueueBuffer(stream.alSourceId, buffer);
-                                ALHelper.CheckError("Failed to queue buffers.");
-                            }
-                        }
-                        else if (!stream.IsLooped)
+                        if (!FillStream(stream))
                             continue;
                     }
 
@@ -261,6 +191,78 @@ namespace Microsoft.Xna.Framework.Audio
                 if (nextTimingIndex >= ThreadTiming.Length)
                     nextTimingIndex = 0;
             }
+        }
+
+        private bool FillStream(OggStream stream)
+        {
+            AL.GetSource(stream.alSourceId, ALGetSourcei.BuffersQueued, out int queued);
+            ALHelper.CheckError("Failed to fetch queued buffers.");
+
+            AL.GetSource(stream.alSourceId, ALGetSourcei.BuffersProcessed, out int processed);
+            ALHelper.CheckError("Failed to fetch processed buffers.");
+
+            if (processed == 0 && queued == stream.BufferCount)
+                return false;
+
+            IEnumerable<int> tempBuffers;
+            if (processed > 0)
+            {
+                tempBuffers = AL.SourceUnqueueBuffers(stream.alSourceId, processed);
+                ALHelper.CheckError("Failed to unqueue buffers.");
+            }
+            else
+                tempBuffers = stream.alBufferIds.Skip(queued);
+
+            bool finished = false;
+            int buffersFilled = 0;
+            foreach (int buffer in tempBuffers)
+            {
+                if (pendingFinish)
+                    break;
+
+                finished |= FillBuffer(stream, buffer);
+                buffersFilled++;
+
+                if (finished)
+                {
+                    if (stream.IsLooped)
+                    {
+                        // we dont support non-seekable streams anyway
+                        stream.SeekToPosition(0);
+
+                        // closing and opening the stream is a bit expensive
+                        //stream.Close();
+                        //stream.Open();
+                    }
+                    else
+                        pendingFinish = true;
+                }
+            }
+
+            if (pendingFinish && queued == 0)
+            {
+                pendingFinish = false;
+                lock (iterationMutex)
+                    streams.Remove(stream);
+
+                if (stream.FinishedAction != null)
+                    stream.FinishedAction.Invoke();
+            }
+            else if (!finished && buffersFilled > 0) // queue only successfully filled buffers
+            {
+                foreach (int buffer in tempBuffers)
+                {
+                    if (buffersFilled <= 0)
+                        break;
+                    buffersFilled--;
+
+                    AL.SourceQueueBuffer(stream.alSourceId, buffer);
+                    ALHelper.CheckError("Failed to queue buffers.");
+                }
+            }
+            else if (!stream.IsLooped)
+                return false;
+            return true;
         }
     }
 }

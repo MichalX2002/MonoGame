@@ -36,9 +36,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         public Action FinishedAction { get; private set; }
         public int BufferCount { get; private set; }
-
-        public bool CanSeek => Reader.CanSeek;
-
+        
         public OggStream(string filename, Action finishedAction = null, int bufferCount = DefaultBufferCount)
         {
             oggFileName = filename;

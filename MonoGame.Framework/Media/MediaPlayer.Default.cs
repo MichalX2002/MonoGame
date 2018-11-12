@@ -166,7 +166,7 @@ namespace Microsoft.Xna.Framework.Media
         
         private static bool PlatformGetIsRunningSlowly()
         {
-            return PlatformGetUpdateTime() > 0.2f;
+            return PlatformGetUpdateTime() > 0.125f;
         }
 
         private static float PlatformGetUpdateTime()
