@@ -23,7 +23,6 @@ namespace Microsoft.Xna.Framework
         }
 
         private readonly Game _game;
-        private readonly OpenALSoundController _soundControllerInstance;
         private readonly List<Keys> _keys;
 
         private int _isExiting;
@@ -61,15 +60,6 @@ namespace Microsoft.Xna.Framework
 
             GamePad.InitDatabase();
             Window = _view = new SdlGameWindow(_game);
-
-            try
-            {
-                _soundControllerInstance = OpenALSoundController.Instance;
-            }
-            catch (DllNotFoundException ex)
-            {
-                throw (new NoAudioHardwareException("Failed to init OpenALSoundController", ex));
-            }
         }
 
         public override void BeforeInitialize ()

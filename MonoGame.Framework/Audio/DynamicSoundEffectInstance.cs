@@ -290,7 +290,6 @@ namespace Microsoft.Xna.Framework.Audio
 
             // Raise the event
             var bufferNeededHandler = BufferNeeded;
-
             if (bufferNeededHandler != null)
             {
                 var eventCount = (_buffersNeeded < 3) ? _buffersNeeded : 3;

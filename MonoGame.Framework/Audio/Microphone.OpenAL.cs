@@ -27,24 +27,18 @@ namespace Microsoft.Xna.Framework.Audio
         internal void CheckALCError(string operation)
         {
             AlcError error = Alc.GetErrorForDevice(_captureDevice);
-
             if (error == AlcError.NoError)
                 return;
-
-            string errorFmt = "OpenAL Error: {0}";
-
-            throw new NoMicrophoneConnectedException(String.Format("{0} - {1}",
-                            operation,
-                            string.Format(errorFmt, error)));
+            
+            throw new NoMicrophoneConnectedException(
+                string.Format("{0} - {1}", operation,
+                string.Format("OpenAL Error: {0}", error)));
         }
        
         internal static void PopulateCaptureDevices()
         {
             // clear microphones
-            if (_allMicrophones != null)
-                _allMicrophones.Clear();
-            else
-                _allMicrophones = new List<Microphone>();
+            _allMicrophones.Clear();
 
             Default = null;
 
@@ -54,20 +48,22 @@ namespace Microsoft.Xna.Framework.Audio
 #if true //DESKTOPGL
             // enumarating capture devices
             IntPtr deviceList = Alc.alcGetString(IntPtr.Zero, (int)AlcGetString.CaptureDeviceSpecifier);
+
             // we need to marshal a string array
             string deviceIdentifier = Marshal.PtrToStringAnsi(deviceList);
-            while (!String.IsNullOrEmpty(deviceIdentifier))
+            while (!string.IsNullOrEmpty(deviceIdentifier))
             {  
-                Microphone microphone = new Microphone(deviceIdentifier);
-                _allMicrophones.Add(microphone);                
+                var microphone = new Microphone(deviceIdentifier);
+                _allMicrophones.Add(microphone);          
                 if (deviceIdentifier == defaultDevice)
                     Default = microphone;
+
                 deviceList += deviceIdentifier.Length + 1;
                 deviceIdentifier = Marshal.PtrToStringAnsi(deviceList);
             }
 #else
-            // Xamarin platforms don't provide an handle to alGetString that allow to marshal string arrays
-            // so we're basically only adding the default microphone
+            // Xamarin platforms don't provide a handle to alGetString that allow to marshal string
+            // arrays so we're basically only adding the default microphone
             Microphone microphone = new Microphone(defaultDevice);
             _allMicrophones.Add(microphone);
             _default = microphone;
@@ -84,7 +80,6 @@ namespace Microsoft.Xna.Framework.Audio
                 (uint)SampleRate,
                 ALFormat.Mono16,
                 GetSampleSizeInBytes(_bufferDuration));
-
             CheckALCError("Failed to open capture device.");
 
             if (_captureDevice != IntPtr.Zero)
@@ -106,31 +101,40 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 Alc.CaptureStop(_captureDevice);
                 CheckALCError("Failed to stop capture.");
+
+                Update(); // to ensure that BufferReady doesn't get invoked after Stop()
+
                 Alc.CaptureCloseDevice(_captureDevice);
                 CheckALCError("Failed to close capture device.");
+
                 _captureDevice = IntPtr.Zero;
             }
             State = MicrophoneState.Stopped;
         }
+
+        [ThreadStatic]
+        private static int[] _queuedSampleCountBuffer;
 
         internal int GetQueuedSampleCount()
         {
             if (State == MicrophoneState.Stopped || BufferReady == null)
                 return 0;
 
-            int[] values = new int[1];
-            Alc.GetInteger(_captureDevice, AlcGetInteger.CaptureSamples, 1, values);
+            if(_queuedSampleCountBuffer == null)
+                _queuedSampleCountBuffer = new int[1];
 
+            Alc.GetInteger(_captureDevice, AlcGetInteger.CaptureSamples, 1, _queuedSampleCountBuffer);
             CheckALCError("Failed to query capture samples.");
 
-            return values[0];
+            return _queuedSampleCountBuffer[0];
         }
 
         internal void Update()
         {
-            if (GetQueuedSampleCount() > 0)
+            int sampleCount = GetQueuedSampleCount();
+            if (sampleCount > 0)
             {
-                BufferReady.Invoke(this, EventArgs.Empty);                
+                BufferReady.Invoke(this, sampleCount);
             }
         }
 
@@ -142,12 +146,17 @@ namespace Microsoft.Xna.Framework.Audio
             if (sampleCount > 0)
             {
                 GCHandle handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-                Alc.CaptureSamples(_captureDevice, handle.AddrOfPinnedObject() + offset, sampleCount);
-                handle.Free();
+                try
+                {
+                    Alc.CaptureSamples(_captureDevice, handle.AddrOfPinnedObject() + offset, sampleCount);
+                    CheckALCError("Failed to capture samples.");
 
-                CheckALCError("Failed to capture samples.");
-
-                return sampleCount * 2; // 16bit adjust
+                    return sampleCount * 2; // 16bit adjust
+                }
+                finally
+                {
+                    handle.Free();
+                }
             }
 
             return 0;

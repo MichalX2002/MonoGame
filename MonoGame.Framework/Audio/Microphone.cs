@@ -22,32 +22,51 @@ namespace Microsoft.Xna.Framework.Audio
     /// </summary>
     public sealed partial class Microphone
     {
-        #region Internal Constructors
+        public delegate void BufferReadyDelegate(Microphone source, int sampleCount);
 
-        internal Microphone()
+        private TimeSpan _bufferDuration = TimeSpan.FromMilliseconds(1000.0);
+
+        private static List<Microphone> _allMicrophones = new List<Microphone>();
+        private static ReadOnlyCollection<Microphone> _allMicrophonesRead;
+
+        /// <summary>
+        /// Returns the default microphone.
+        /// </summary>
+        public static Microphone Default { get; internal set; } = null;
+
+        /// <summary>
+        /// Returns all compatible microphones.
+        /// </summary>
+        public static ReadOnlyCollection<Microphone> All
         {
-
+            get
+            {
+                if (_allMicrophonesRead == null)
+                    _allMicrophonesRead = new ReadOnlyCollection<Microphone>(_allMicrophones);
+                return _allMicrophonesRead;
+            }
         }
 
-        internal Microphone(string name)
-        {
-            Name = name;
-        }
-
-        #endregion
-
-        #region Public Fields
+        /// <summary>
+        /// Event fired when the audio data are available.
+        /// </summary>
+        public event BufferReadyDelegate BufferReady;
 
         /// <summary>
         /// Returns the friendly name of the microphone.
         /// </summary>
-        public readonly string Name;
+        public string Name { get; }
 
-        #endregion
+        /// <summary>
+        /// Returns the sample rate of the captured audio.
+        /// Note: default value is 44100hz
+        /// </summary>
+        public int SampleRate { get; internal set; } = 44100;
 
-        #region Public Properties
-
-        private TimeSpan _bufferDuration = TimeSpan.FromMilliseconds(1000.0);
+        /// <summary>
+        /// Returns the state of the Microphone. 
+        /// </summary>
+        public MicrophoneState State { get; internal set; } = MicrophoneState.Stopped;
 
         /// <summary>
         /// Gets or sets the capture buffer duration. This value must be greater than 100 milliseconds, lower than 1000 milliseconds, and must be 10 milliseconds aligned (BufferDuration % 10 == 10).
@@ -65,12 +84,6 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        // always true on mobile, this can't be queried on any platform (it was most probably only set to true if the headset was plugged in an XInput controller)
-#if IOS || ANDROID
-        private const bool _isHeadset = true;
-#else
-        private const bool _isHeadset = false;
-#endif
         /// <summary>
         /// Determines if the microphone is a wired headset.
         /// Note: XNA could know if a headset microphone was plugged in an Xbox 360 controller but MonoGame can't.
@@ -78,45 +91,21 @@ namespace Microsoft.Xna.Framework.Audio
         /// </summary>
         public bool IsHeadset
         {
-            get { return _isHeadset; }
-        }
-
-        /// <summary>
-        /// Returns the sample rate of the captured audio.
-        /// Note: default value is 44100hz
-        /// </summary>
-        public int SampleRate { get; internal set; } = 44100;
-
-        /// <summary>
-        /// Returns the state of the Microphone. 
-        /// </summary>
-        public MicrophoneState State { get; internal set; } = MicrophoneState.Stopped;
-
-        #endregion
-
-        #region Static Members
-
-        private static List<Microphone> _allMicrophones = null;
-
-        /// <summary>
-        /// Returns all compatible microphones.
-        /// </summary>
-        public static ReadOnlyCollection<Microphone> All
-        {
             get
             {
-                if (_allMicrophones == null)
-                    _allMicrophones = new List<Microphone>();
-                return new ReadOnlyCollection<Microphone>(_allMicrophones);
+                // always true on mobile, this can't be queried on any platform (it was most probably only set to true if the headset was plugged in an XInput controller)
+#if IOS || ANDROID
+                return true;
+#else
+                return false;
+#endif
             }
         }
 
-        /// <summary>
-        /// Returns the default microphone.
-        /// </summary>
-        public static Microphone Default { get; internal set; } = null;
-
-        #endregion
+        internal Microphone(string name)
+        {
+            Name = name;
+        }
 
         #region Public Methods
 
@@ -184,33 +173,18 @@ namespace Microsoft.Xna.Framework.Audio
 
         #endregion
 
-        #region Public Events
-
-        /// <summary>
-        /// Event fired when the audio data are available.
-        /// </summary>
-        public event EventHandler<EventArgs> BufferReady;
-
-        #endregion
-
-        #region Static Methods
-
         internal static void UpdateMicrophones()
         {
             // querying all running microphones for new samples available
-            if (_allMicrophones != null)
-                for (int i = 0; i < _allMicrophones.Count; i++)
-                    _allMicrophones[i].Update();
+            for (int i = 0; i < _allMicrophones.Count; i++)
+                _allMicrophones[i].Update();
         }
 
         internal static void StopMicrophones()
         {
             // stopping all running microphones before shutting down audio devices
-            if (_allMicrophones != null)
-                for (int i = 0; i < _allMicrophones.Count; i++)
-                    _allMicrophones[i].Stop();
+            for (int i = 0; i < _allMicrophones.Count; i++)
+                _allMicrophones[i].Stop();
         }
-
-        #endregion
     }
 }

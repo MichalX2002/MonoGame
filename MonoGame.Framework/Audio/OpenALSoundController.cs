@@ -66,6 +66,7 @@ namespace Microsoft.Xna.Framework.Audio
 
     internal sealed class OpenALSoundController : IDisposable
     {
+        private static object _initMutex = new object();
         private static OpenALSoundController _instance;
         private IntPtr _device;
         private IntPtr _context;
@@ -91,8 +92,8 @@ namespace Microsoft.Xna.Framework.Audio
         private static OggStreamer _oggstreamer;
 #endif
 
-        private List<int> availableSourcesCollection;
-        private List<int> inUseSourcesCollection;
+        private List<int> availableSourcesList;
+        private List<int> inUseSourcesList;
         private bool _isDisposed;
 
         public bool SupportsIma4 { get; private set; }
@@ -106,9 +107,21 @@ namespace Microsoft.Xna.Framework.Audio
         {
             get
             {
-                if (_instance == null)
+                lock (_initMutex)
+                {
+                    if (_instance == null)
+                        InitializeInstance();
+                    return _instance;
+                }
+            }
+        }
+
+        public static void InitializeInstance()
+        {
+            lock (_initMutex)
+            {
+                if(_instance == null)
                     _instance = new OpenALSoundController();
-                return _instance;
             }
         }
 
@@ -128,13 +141,13 @@ namespace Microsoft.Xna.Framework.Audio
 			allSourcesArray = new int[MAX_NUMBER_OF_SOURCES];
 			AL.GenSources(allSourcesArray);
             ALHelper.CheckError("Failed to generate sources.");
+
             Filter = 0;
             if (Efx.IsInitialized)
-            {
                 Filter = Efx.GenFilter();
-            }
-            availableSourcesCollection = new List<int>(allSourcesArray);
-			inUseSourcesCollection = new List<int>();
+
+            availableSourcesList = new List<int>(allSourcesArray);
+			inUseSourcesList = new List<int>();
 		}
 
         ~OpenALSoundController()
@@ -151,24 +164,26 @@ namespace Microsoft.Xna.Framework.Audio
         /// <returns>True if the sound controller was setup, and false if not.</returns>
         private bool OpenSoundController()
         {
-            try
+            lock (_initMutex)
             {
-                _device = Alc.OpenDevice(string.Empty);
-                EffectsExtension._device = _device;
-            }
-            catch (DllNotFoundException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new NoAudioHardwareException("OpenAL device could not be initialized.", ex);
-            }
+                try
+                {
+                    _device = Alc.OpenDevice(string.Empty);
+                    EffectsExtension._device = _device;
+                }
+                catch (DllNotFoundException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    throw new NoAudioHardwareException("OpenAL device could not be initialized.", ex);
+                }
 
-            AlcHelper.CheckError("Could not open OpenAL device");
+                AlcHelper.CheckError("Could not open OpenAL device");
 
-            if (_device != IntPtr.Zero)
-            {
+                if (_device != IntPtr.Zero)
+                {
 #if ANDROID
                 // Attach activity event handlers so we can pause and resume all playing sounds
                 MonoGameAndroidGameView.OnPauseGameThread += Activity_Paused;
@@ -277,36 +292,40 @@ namespace Microsoft.Xna.Framework.Audio
 
                 int[] attribute = Array.Empty<int>();
 #else
-                int[] attribute = Array.Empty<int>();
+                    int[] attribute = Array.Empty<int>();
 #endif
 
-                _context = Alc.CreateContext(_device, attribute);
+                    _context = Alc.CreateContext(_device, attribute);
 #if DESKTOPGL
-                _oggstreamer = new OggStreamer();
+                    _oggstreamer = new OggStreamer();
 #endif
 
-                AlcHelper.CheckError("Could not create OpenAL context");
+                    AlcHelper.CheckError("Could not create OpenAL context");
 
-                if (_context != IntPtr.Zero)
-                {
-                    Alc.MakeContextCurrent(_context);
-                    AlcHelper.CheckError("Could not make OpenAL context current");
-                    SupportsIma4 = AL.IsExtensionPresent("AL_EXT_IMA4");
-                    SupportsAdpcm = AL.IsExtensionPresent("AL_SOFT_MSADPCM");
-                    SupportsEfx = AL.IsExtensionPresent("AL_EXT_EFX");
-                    SupportsIeee = AL.IsExtensionPresent("AL_EXT_float32");
-                    return true;
+                    if (_context != IntPtr.Zero)
+                    {
+                        Alc.MakeContextCurrent(_context);
+                        AlcHelper.CheckError("Could not make OpenAL context current");
+                        SupportsIma4 = AL.IsExtensionPresent("AL_EXT_IMA4");
+                        SupportsAdpcm = AL.IsExtensionPresent("AL_SOFT_MSADPCM");
+                        SupportsEfx = AL.IsExtensionPresent("AL_EXT_EFX");
+                        SupportsIeee = AL.IsExtensionPresent("AL_EXT_float32");
+                        return true;
+                    }
                 }
+                return false;
             }
-            return false;
         }
 
         public static void DestroyInstance()
         {
-            if (_instance != null)
+            lock (_initMutex)
             {
-                _instance.Dispose();
-                _instance = null;
+                if (_instance != null)
+                {
+                    _instance.Dispose();
+                    _instance = null;
+                }
             }
         }
 
@@ -378,16 +397,16 @@ namespace Microsoft.Xna.Framework.Audio
 		{
             int sourceNumber;
 
-            lock (availableSourcesCollection)
+            lock (availableSourcesList)
             {                
-                if (availableSourcesCollection.Count == 0)
+                if (availableSourcesList.Count == 0)
                 {
                     throw new InstancePlayLimitException();
                 }
 
-                sourceNumber = availableSourcesCollection.Last();
-                inUseSourcesCollection.Add(sourceNumber);
-                availableSourcesCollection.Remove(sourceNumber);
+                sourceNumber = availableSourcesList.Last();
+                inUseSourcesList.Add(sourceNumber);
+                availableSourcesList.Remove(sourceNumber);
             }
 
             return sourceNumber;
@@ -395,10 +414,10 @@ namespace Microsoft.Xna.Framework.Audio
 
         public void RecycleSource(int sourceId)
 		{
-            lock (availableSourcesCollection)
+            lock (availableSourcesList)
             {
-                inUseSourcesCollection.Remove(sourceId);
-                availableSourcesCollection.Add(sourceId);
+                inUseSourcesList.Remove(sourceId);
+                availableSourcesList.Add(sourceId);
             }
 		}
 

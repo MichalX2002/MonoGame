@@ -38,10 +38,21 @@ namespace Microsoft.Xna.Framework
 
         private static void Initialize()
         {
-            // Initialize sound system
-            SoundEffect.InitializeSoundEffect();
+            InitializeSoundSystem();
 
             _initialized = true;
+        }
+
+        private static void InitializeSoundSystem()
+        {
+            try
+            {
+                OpenALSoundController.InitializeInstance();
+            }
+            catch (DllNotFoundException ex)
+            {
+                throw new NoAudioHardwareException("Failed to initialzie OpenALSoundController.", ex);
+            }
         }
     }
 }

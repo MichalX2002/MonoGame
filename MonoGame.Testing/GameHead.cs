@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
@@ -18,6 +19,7 @@ namespace MonoGame.Testings
         private SpriteBatch _spriteBatch;
 
         private SongCollection _songs;
+        private VisualizationData _visData;
         
         public GameHead()
         {
@@ -40,19 +42,18 @@ namespace MonoGame.Testings
             MediaPlayer.Play(_songs);
 
             MediaPlayer.IsVisualizationEnabled = true;
+            _visData = new VisualizationData();
         }
 
         private void MediaPlayer_ActiveSongChanged(object s, EventArgs e)
         {
-            //Console.WriteLine(MediaPlayer.Queue.ActiveSong.Name);
-
-
+            Console.WriteLine(MediaPlayer.Queue.ActiveSong.Name);
         }
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            
+
             _songs = new SongCollection
             {
                 Content.Load<Song>("Alphys Takes Action"),
@@ -61,27 +62,17 @@ namespace MonoGame.Testings
                 Content.Load<Song>("Run with Me")
             };
         }
-        
+
         protected override void UnloadContent()
         {
-
         }
-
-        private float t = 0;
-
-        Queue<float> updates = new Queue<float>();
- 
+        
         protected override void Update(GameTime time)
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            t += time.Delta;
-            if(t > 1f)
-            {
-                Console.WriteLine(MediaPlayer.IsRunningSlowly + " | " + MediaPlayer.UpdateTime);
-                t = 0;
-            }
+
 
             base.Update(time);
         }

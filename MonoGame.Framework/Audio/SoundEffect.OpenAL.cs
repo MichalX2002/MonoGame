@@ -214,7 +214,7 @@ namespace Microsoft.Xna.Framework.Audio
             efx.BindEffectToAuxiliarySlot (ReverbSlot, ReverbEffect);
         }
 
-#region IDisposable Members
+        #region IDisposable Members
 
         private void PlatformDispose(bool disposing)
         {
@@ -225,20 +225,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-#endregion
-
-        internal static void InitializeSoundEffect()
-        {
-            try
-            {
-                // Getting the instance for the first time initializes OpenAL
-                var oal = OpenALSoundController.Instance;
-            }
-            catch (DllNotFoundException ex)
-            {
-                throw new NoAudioHardwareException("Failed to init OpenALSoundController", ex);
-            }
-        }
+        #endregion
 
         internal static void PlatformShutdown()
         {

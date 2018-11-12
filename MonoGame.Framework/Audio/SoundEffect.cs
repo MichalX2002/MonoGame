@@ -15,21 +15,18 @@ namespace Microsoft.Xna.Framework.Audio
     /// </remarks>
     public sealed partial class SoundEffect : IDisposable
     {
-
-        #region Internal Audio Data
-
-        private bool _isDisposed = false;
         private readonly TimeSpan _duration;
-
-        #endregion
 
         #region Internal Constructors
 
         // Only used from SoundEffect.FromStream.
         private SoundEffect(Stream stream)
         {
+            // TODO: add more audio formats, Ogg/Vorbis is a great candidate as we already use it with Songs
+
             /*
-              The Stream object must point to the head of a valid PCM wave file. Also, this wave file must be in the RIFF bitstream format.
+              The Stream object must point to the head of a valid PCM wave file.
+              This wave file must be in the RIFF bitstream format.
               The audio format has the following restrictions:
               Must be a PCM wave file
               Can only be mono or stereo
@@ -340,7 +337,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         #region Static Members
 
-        static float _masterVolume = 1.0f;
+        private static float _masterVolume = 1.0f;
         /// <summary>
         /// Gets or sets the master volume scale applied to all SoundEffectInstances.
         /// </summary>
@@ -364,7 +361,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        static float _distanceScale = 1.0f;
+        private static float _distanceScale = 1.0f;
         /// <summary>
         /// Gets or sets the scale of distance calculations.
         /// </summary>
@@ -385,7 +382,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        static float _dopplerScale = 1f;
+        private static float _dopplerScale = 1f;
         /// <summary>
         /// Gets or sets the scale of Doppler calculations applied to sounds.
         /// </summary>
@@ -410,7 +407,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        static float speedOfSound = 343.5f;
+        private static float speedOfSound = 343.5f;
         /// <summary>Returns the speed of sound used when calculating the Doppler effect..</summary>
         /// <remarks>
         /// <para>Defaults to 343.5. Value is measured in meters per second.</para>
@@ -433,7 +430,7 @@ namespace Microsoft.Xna.Framework.Audio
         #region IDisposable Members
 
         /// <summary>Indicates whether the object is disposed.</summary>
-        public bool IsDisposed { get { return _isDisposed; } }
+        public bool IsDisposed { get; private set; } = false;
 
         /// <summary>Releases the resources held by this <see cref="SoundEffect"/>.</summary>
         public void Dispose()
@@ -453,11 +450,11 @@ namespace Microsoft.Xna.Framework.Audio
         /// not at that time.  Unmanaged resources should always be released.</remarks>
         void Dispose(bool disposing)
         {
-            if (!_isDisposed)
+            if (!IsDisposed)
             {
                 SoundEffectInstancePool.StopPooledInstances(this);
                 PlatformDispose(disposing);
-                _isDisposed = true;
+                IsDisposed = true;
             }
         }
 

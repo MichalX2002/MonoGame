@@ -48,23 +48,34 @@ namespace Microsoft.Xna.Framework.Graphics
 			static public readonly CharComparer Default = new CharComparer();
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="SpriteFont" /> class.
-		/// </summary>
-		/// <param name="texture">The font texture.</param>
-		/// <param name="glyphBounds">The rectangles in the font texture containing letters.</param>
-		/// <param name="cropping">The cropping rectangles, which are applied to the corresponding glyphBounds to calculate the bounds of the actual character.</param>
-		/// <param name="characters">The characters.</param>
-		/// <param name="lineSpacing">The line spacing (the distance from baseline to baseline) of the font.</param>
-		/// <param name="spacing">The spacing (tracking) between characters in the font.</param>
-		/// <param name="kerning">The letters kernings(X - left side bearing, Y - width and Z - right side bearing).</param>
-		/// <param name="defaultCharacter">The character that will be substituted when a given character is not included in the font.</param>
-		public SpriteFont (
-			Texture2D texture, List<Rectangle> glyphBounds, List<Rectangle> cropping, List<char> characters,
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SpriteFont" /> class.
+        /// </summary>
+        /// <param name="texture">The font texture.</param>
+        /// <param name="glyphBounds">The rectangles in the font texture containing letters.</param>
+        /// <param name="cropping">The cropping rectangles, which are applied to the corresponding glyphBounds to calculate the bounds of the actual character.</param>
+        /// <param name="characters">The characters.</param>
+        /// <param name="lineSpacing">The line spacing (the distance from baseline to baseline) of the font.</param>
+        /// <param name="spacing">The spacing (tracking) between characters in the font.</param>
+        /// <param name="kerning">The letters kernings(X - left side bearing, Y - width and Z - right side bearing).</param>
+        /// <param name="defaultCharacter">The character that will be substituted when a given character is not included in the font.</param>
+        public SpriteFont(
+            Texture2D texture, List<Rectangle> glyphBounds, List<Rectangle> cropping, List<char> characters,
+            int lineSpacing, float spacing, List<Vector3> kerning, char? defaultCharacter) :
+            this(texture, glyphBounds, cropping, characters, true, lineSpacing, spacing, kerning, defaultCharacter)
+        {
+        }
+
+        internal SpriteFont (
+			Texture2D texture, List<Rectangle> glyphBounds, List<Rectangle> cropping, List<char> characters, bool copyChars,
 			int lineSpacing, float spacing, List<Vector3> kerning, char? defaultCharacter)
 		{
-			Characters = new ReadOnlyCollection<char>(characters.ToArray());
-			_texture = texture;
+            if (copyChars)
+                Characters = new ReadOnlyCollection<char>(characters.ToArray());
+            else
+                Characters = new ReadOnlyCollection<char>(characters);
+
+            _texture = texture;
 			LineSpacing = lineSpacing;
 			Spacing = spacing;
 

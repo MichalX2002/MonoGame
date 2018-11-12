@@ -52,7 +52,7 @@ namespace Microsoft.Xna.Framework.Content
                 {
                     defaultCharacter = new char?(input.ReadChar());
                 }
-                return new SpriteFont(texture, glyphs, cropping, charMap, lineSpacing, spacing, kerning, defaultCharacter);
+                return new SpriteFont(texture, glyphs, cropping, charMap, copyChars: false, lineSpacing, spacing, kerning, defaultCharacter);
             }
         }
     }

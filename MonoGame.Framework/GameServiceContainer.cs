@@ -21,6 +21,7 @@ namespace Microsoft.Xna.Framework
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
+
             if (provider == null)
                 throw new ArgumentNullException(nameof(provider));
 
@@ -48,20 +49,15 @@ namespace Microsoft.Xna.Framework
 
             services.Remove(type);
         }
-        
+
         public void AddService<T>(T provider)
         {
             AddService(typeof(T), provider);
         }
 
- 	public T GetService<T>() where T : class
+        public T GetService<T>() where T : class
         {
-            var service = GetService(typeof(T));
-
-            if (service == null)
-                return null;
-
-            return (T)service;
+            return GetService(typeof(T)) as T;
         }
     }
 }
