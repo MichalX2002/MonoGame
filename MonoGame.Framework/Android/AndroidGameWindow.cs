@@ -23,6 +23,7 @@ namespace Microsoft.Xna.Framework
         private DisplayOrientation _supportedOrientations = DisplayOrientation.Default;
         private DisplayOrientation _currentOrientation;
 
+        public override bool IsMaximized { get => true; set => throw new NotImplementedException(); }
         public override IntPtr Handle { get { return IntPtr.Zero; } }
 
 
@@ -162,8 +163,23 @@ namespace Microsoft.Xna.Framework
             SetDisplayOrientation(newOrientation);
             TouchPanel.DisplayOrientation = newOrientation;
 
-            if (applyGraphicsChanges && oldOrientation != CurrentOrientation && _game.graphicsDeviceManager != null)
-                _game.graphicsDeviceManager.ApplyChanges();
+            if (applyGraphicsChanges &&
+                oldOrientation != CurrentOrientation &&
+                _game.InternalGraphicsDeviceManager != null)
+                _game.InternalGraphicsDeviceManager.ApplyChanges();
+        }
+
+        public override bool HasClipboardText => false;
+
+        public override string ClipboardText
+        {
+            get
+            {
+                return string.Empty;
+            }
+            set
+            {
+            }
         }
 
         public override string ScreenDeviceName
@@ -231,7 +247,7 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        
+
         private void SetDisplayOrientation(DisplayOrientation value)
         {
             if (value != _currentOrientation)

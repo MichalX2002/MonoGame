@@ -12,7 +12,7 @@
     <AssemblyName>MonoGame.Framework</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>1591,0436</NoWarn>
-    <TargetFrameworkVersion>v4.4</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <LangVersion>Default</LangVersion>
     <FileAlignment>512</FileAlignment>
@@ -37,6 +37,7 @@
     <Prefer32Bit>false</Prefer32Bit>
     <MonoDroidLinkMode>None</MonoDroidLinkMode>
     <AndroidLinkMode>None</AndroidLinkMode>
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -50,6 +51,7 @@
     <Prefer32Bit>false</Prefer32Bit>
     <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
     <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Android" />
@@ -59,22 +61,48 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DisplayOrientation.cs" />
+    <Compile Include="Graphics\Vertices\BufferBase.cs" />
+    <Compile Include="Graphics\Vertices\BufferBase.OpenGL.cs" />
+    <Compile Include="Graphics\Vertices\IndexBufferBase.cs" />
+    <Compile Include="Graphics\Vertices\IndexBufferBase.OpenGL.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeBufferBase.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeBufferBase.OpenGL.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeDynamicIndexBuffer.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeDynamicVertexBuffer.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeIndexBuffer.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeIndexBuffer.OpenGL.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeVertexBuffer.cs" />
+    <Compile Include="Graphics\Vertices\UnsafeVertexBuffer.OpenGL.cs" />
+    <Compile Include="Graphics\Vertices\VertexBufferBase.cs" />
+    <Compile Include="Graphics\Vertices\VertexBufferBase.OpenGL.cs" />
+    <Compile Include="Math\BoundingBox.cs" />
+    <Compile Include="Math\BoundingFrustum.cs" />
+    <Compile Include="Math\BoundingSphere.cs" />
+    <Compile Include="Math\ContainmentType.cs" />
+    <Compile Include="Math\Curve.cs" />
+    <Compile Include="Math\CurveContinuity.cs" />
+    <Compile Include="Math\CurveKey.cs" />
+    <Compile Include="Math\CurveKeyCollection.cs" />
+    <Compile Include="Math\CurveLoopType.cs" />
+    <Compile Include="Math\CurveTangent.cs" />
+    <Compile Include="Math\MathHelper.cs" />
+    <Compile Include="Math\Matrix.cs" />
+    <Compile Include="Math\Plane.cs" />
+    <Compile Include="Math\PlaneIntersectionType.cs" />
+    <Compile Include="Math\Point.cs" />
+    <Compile Include="Math\Quaternion.cs" />
+    <Compile Include="Math\Ray.cs" />
+    <Compile Include="Math\Rectangle.cs" />
+    <Compile Include="Math\Vector2.cs" />
+    <Compile Include="Math\Vector3.cs" />
+    <Compile Include="Math\Vector4.cs" />
+    <Compile Include="Media\VisualizationData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.Android.cs">
       <Platforms>Android</Platforms>
     </Compile>
-    <Compile Include="BoundingBox.cs" />
-    <Compile Include="BoundingFrustum.cs" />
-    <Compile Include="BoundingSphere.cs" />
     <Compile Include="Color.cs" />
-    <Compile Include="ContainmentType.cs" />
-    <Compile Include="CurveContinuity.cs" />
-    <Compile Include="Curve.cs" />
-    <Compile Include="CurveKeyCollection.cs" />
-    <Compile Include="CurveKey.cs" />
-    <Compile Include="CurveLoopType.cs" />
-    <Compile Include="CurveTangent.cs" />
-    <Compile Include="DisplayOrientation.cs" />
     <Compile Include="DrawableGameComponent.cs" />
     <Compile Include="EventHelpers.cs" />
     <Compile Include="FrameworkDispatcher.cs" />
@@ -97,20 +125,12 @@
     <Compile Include="IGraphicsDeviceManager.cs" />
     <Compile Include="IUpdateable.cs" />
     <Compile Include="LaunchParameters.cs" />
-    <Compile Include="MathHelper.cs" />
-    <Compile Include="Matrix.cs" />
     <Compile Include="NamespaceDocs.cs" />
-    <Compile Include="Plane.cs" />
-    <Compile Include="PlaneIntersectionType.cs" />
     <Compile Include="PlayerIndex.cs" />
-    <Compile Include="Point.cs" />
     <Compile Include="PreparingDeviceSettingsEventArgs.cs" />
     <Compile Include="PrimaryThreadLoader.cs">
       <Platforms>Android,MacOS</Platforms>
     </Compile>
-    <Compile Include="Quaternion.cs" />
-    <Compile Include="Ray.cs" />
-    <Compile Include="Rectangle.cs" />
     <Compile Include="ReusableItemList.cs" />
     <Compile Include="Threading.cs">
       <Platforms>Android,Angle,iOS,Linux,MacOS,WindowsGL,tvOS</Platforms>
@@ -119,9 +139,6 @@
     <Compile Include="TitleContainer.Android.cs">
       <Platforms>Android</Platforms>
     </Compile>
-    <Compile Include="Vector2.cs" />
-    <Compile Include="Vector3.cs" />
-    <Compile Include="Vector4.cs" />
     <Compile Include="Audio\AudioChannels.cs" />
     <Compile Include="Audio\AudioEmitter.cs" />
     <Compile Include="Audio\AudioListener.cs" />
@@ -620,19 +637,10 @@
     </Compile>
     <Compile Include="Utilities\Lz4Stream\Lz4DecoderStream.cs" />
     <Compile Include="Utilities\LzxStream\LzxDecoderStream.cs" />
-    <Compile Include="Utilities\ZLibStream\ZlibStream.cs" />
     <Compile Include="Utilities\Png\PngCommon.cs" />
     <Compile Include="Utilities\Png\PngReader.cs" />
     <Compile Include="Utilities\Png\PngWriter.cs" />
     <Compile Include="Utilities\ByteBufferPool.cs" />
-    <Compile Include="Utilities\Imaging\Stb.Image.cs" />
-    <Compile Include="Utilities\Imaging\Stb.Image.Generated.cs" />
-    <Compile Include="Utilities\Imaging\ImageReader.cs" />
-    <Compile Include="Utilities\Imaging\Stb.ImageWrite.cs" />
-    <Compile Include="Utilities\Imaging\Stb.ImageWrite.Generated.cs" />
-    <Compile Include="Utilities\Imaging\ImageWriter.cs" />
-    <Compile Include="Utilities\Imaging\Operations.cs" />
-    <Compile Include="Utilities\Imaging\PinnedArray.cs" />
     <Compile Include="Android\AndroidCompatibility.cs">
       <Platforms>Android</Platforms>
     </Compile>
@@ -676,8 +684,16 @@
       <Platforms>Android,Ouya</Platforms>
     </Compile>
   </ItemGroup>
-  <ItemGroup />
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.Android.csproj">
+      <Project>{fd4faa48-4062-46a6-9f7b-d1e470d7805b}</Project>
+      <Name>MonoGame.Imaging.Android</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.Android.csproj">
+      <Project>{f23bfeb3-2856-43b0-a1b0-bae164d62811}</Project>
+      <Name>MonoGame.Utilities.Android</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Graphics\Effect\Resources\AlphaTestEffect.ogl.mgfxo">
       <Services>_GLCompatible</Services>
@@ -731,7 +747,7 @@
   <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <PropertyGroup>
-    <_PostBuildHookTimestamp>@(IntermediateAssembly-&gt;'%(FullPath).timestamp')</_PostBuildHookTimestamp>
+    <_PostBuildHookTimestamp>@(IntermediateAssembly->'%(FullPath).timestamp')</_PostBuildHookTimestamp>
     <_PostBuildHookHostPlatform>$(Platform)</_PostBuildHookHostPlatform>
   </PropertyGroup>
   <Target Name="PostBuildHooks" Inputs="@(IntermediateAssembly);@(ReferencePath)" Outputs="@(IntermediateAssembly);$(_PostBuildHookTimestamp)" AfterTargets="CoreCompile" BeforeTargets="AfterCompile">
@@ -743,11 +759,12 @@
   <ItemGroup />
   <ProjectExtensions>
     <MonoDevelop>
-      <Properties><Policies>
-  <TextStylePolicy inheritsSet="VisualStudio" inheritsScope="text/plain" scope="text/x-csharp" />
-  <CSharpFormattingPolicy IndentSwitchSection="True" NewLinesForBracesInProperties="True" NewLinesForBracesInAccessors="True" NewLinesForBracesInAnonymousMethods="True" NewLinesForBracesInControlBlocks="True" NewLinesForBracesInAnonymousTypes="True" NewLinesForBracesInObjectCollectionArrayInitializers="True" NewLinesForBracesInLambdaExpressionBody="True" NewLineForElse="True" NewLineForCatch="True" NewLineForFinally="True" NewLineForMembersInObjectInit="True" NewLineForMembersInAnonymousTypes="True" NewLineForClausesInQuery="True" SpacingAfterMethodDeclarationName="False" SpaceAfterMethodCallName="False" SpaceBeforeOpenSquareBracket="False" inheritsSet="Mono" inheritsScope="text/x-csharp" scope="text/x-csharp" />
-</Policies>
-</Properties>
+      <Properties>
+        <Policies>
+          <TextStylePolicy inheritsSet="VisualStudio" inheritsScope="text/plain" scope="text/x-csharp" />
+          <CSharpFormattingPolicy IndentSwitchSection="True" NewLinesForBracesInProperties="True" NewLinesForBracesInAccessors="True" NewLinesForBracesInAnonymousMethods="True" NewLinesForBracesInControlBlocks="True" NewLinesForBracesInAnonymousTypes="True" NewLinesForBracesInObjectCollectionArrayInitializers="True" NewLinesForBracesInLambdaExpressionBody="True" NewLineForElse="True" NewLineForCatch="True" NewLineForFinally="True" NewLineForMembersInObjectInit="True" NewLineForMembersInAnonymousTypes="True" NewLineForClausesInQuery="True" SpacingAfterMethodDeclarationName="False" SpaceAfterMethodCallName="False" SpaceBeforeOpenSquareBracket="False" inheritsSet="Mono" inheritsScope="text/x-csharp" scope="text/x-csharp" />
+        </Policies>
+      </Properties>
     </MonoDevelop>
   </ProjectExtensions>
 </Project>

@@ -60,17 +60,19 @@ namespace Microsoft.Xna.Framework.Media
 
         private static TimeSpan PlatformGetPlayPosition()
         {
-            if (Queue.ActiveSong == null)
+            var activeSong = Queue.ActiveSong;
+            if (activeSong == null)
                 return TimeSpan.Zero;
 
-            return Queue.ActiveSong.Position;
+            return activeSong.Position;
         }
 
 #if (IOS && !TVOS) || ANDROID
         private static void PlatformSetPlayPosition(TimeSpan playPosition)
         {
-            if (_queue.ActiveSong != null)
-                _queue.ActiveSong.Position = playPosition;
+            var activeSong = Queue.ActiveSong;
+            if (activeSong != null)
+                activeSong.Position = playPosition;
         }
 #endif
 
@@ -127,15 +129,20 @@ namespace Microsoft.Xna.Framework.Media
 
         private static void PlatformSetIsVisualizationEnabled(bool value)
         {
+#if DESKTOPGL
             _isVisualizationEnabled = value;
+#else
+            _isVisualizationEnabled = false;
+#endif
         }
 
         private static void PlatformPause()
         {
-            if (Queue.ActiveSong == null)
+            var activeSong = Queue.ActiveSong;
+            if (activeSong == null)
                 return;
 
-            Queue.ActiveSong.Pause();
+            activeSong.Pause();
         }
 
         private static void PlatformPlaySong(Song song, TimeSpan? startPosition)
@@ -152,10 +159,11 @@ namespace Microsoft.Xna.Framework.Media
 
         private static void PlatformResume()
         {
-            if (Queue.ActiveSong == null)
+            var activeSong = Queue.ActiveSong;
+            if (activeSong == null)
                 return;
 
-            Queue.ActiveSong.Resume();
+            activeSong.Resume();
         }
 
         private static void PlatformStop()
@@ -167,6 +175,7 @@ namespace Microsoft.Xna.Framework.Media
 
         private static void PlatformGetVisualizationData(VisualizationData data)
         {
+#if DESKTOPGL
             var instance = OggStreamer.Instance;
             float[] samples = instance.readSampleBuffer;
 
@@ -179,6 +188,7 @@ namespace Microsoft.Xna.Framework.Media
                     break;
                 data._samples[i] = samples[index];
             }
+#endif
         }
 
         private static bool PlatformGetIsRunningSlowly()

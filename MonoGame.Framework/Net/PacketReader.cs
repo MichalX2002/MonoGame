@@ -49,49 +49,51 @@ namespace Microsoft.Xna.Framework.Net
 {
 
 
-	public class PacketReader : BinaryReader
-	{
-		
-		// Read comments within the PacketWriter
-		#region Constructors
-		public PacketReader() : this(0)
-		{
-		}
-		
-		
-		public PacketReader(int capacity) : base(new MemoryStream(0))
-		{
-			
-		}
-		#endregion
-		
-		#region Methods
-		internal byte[] Data
-		{
-			get {
-				MemoryStream stream = (MemoryStream)this.BaseStream;
-				return stream.GetBuffer();
-			}			
-			set {
-				MemoryStream ms = (MemoryStream)this.BaseStream;
-				ms.Write(value, 0, value.Length);
-			}
-		}
-		
-		public Color ReadColor()
-		{
-			Color newColor = Color.Transparent;
-			newColor.PackedValue = this.ReadUInt32();
-			return newColor;
-		}
-		
-		public override double ReadDouble()
-		{
-			return this.ReadDouble();
-		}
-		
-		public Matrix ReadMatrix()
-		{
+    public class PacketReader : BinaryReader
+    {
+
+        // Read comments within the PacketWriter
+        #region Constructors
+        public PacketReader() : this(0)
+        {
+        }
+
+
+        public PacketReader(int capacity) : base(new MemoryStream(0))
+        {
+
+        }
+        #endregion
+
+        #region Methods
+        internal byte[] Data
+        {
+            get
+            {
+                MemoryStream stream = (MemoryStream)this.BaseStream;
+                return stream.GetBuffer();
+            }
+            set
+            {
+                MemoryStream ms = (MemoryStream)this.BaseStream;
+                ms.Write(value, 0, value.Length);
+            }
+        }
+
+        public Color ReadColor()
+        {
+            Color newColor = Color.Transparent;
+            newColor.PackedValue = this.ReadUInt32();
+            return newColor;
+        }
+
+        public override double ReadDouble()
+        {
+            return this.ReadDouble();
+        }
+
+        public Matrix ReadMatrix()
+        {
             Matrix matrix = new Matrix
             {
                 M11 = this.ReadSingle(),
@@ -116,10 +118,10 @@ namespace Microsoft.Xna.Framework.Net
             };
 
             return matrix;
-		}
-		
-		public Quaternion ReadQuaternion()
-		{
+        }
+
+        public Quaternion ReadQuaternion()
+        {
             Quaternion quat = new Quaternion
             {
                 X = this.ReadSingle(),
@@ -129,26 +131,27 @@ namespace Microsoft.Xna.Framework.Net
             };
 
             return quat;
-			
-		}
-		
-//		public override float ReadSingle()
-//		{
-//			return this.ReadSingle();
-//		}
-		
-		public Vector2 ReadVector2()
-		{
+
+        }
+
+        //		public override float ReadSingle()
+        //		{
+        //			return this.ReadSingle();
+        //		}
+
+        public Vector2 ReadVector2()
+        {
             Vector2 vect = new Vector2
             {
                 X = this.ReadSingle(),
                 Y = this.ReadSingle()
             };
 
-            return vect;		}
-		
-		public Vector3 ReadVector3()
-		{
+            return vect;
+        }
+
+        public Vector3 ReadVector3()
+        {
             Vector3 vect = new Vector3
             {
                 X = this.ReadSingle(),
@@ -157,10 +160,10 @@ namespace Microsoft.Xna.Framework.Net
             };
 
             return vect;
-		}
-			
-		public Vector4 ReadVector4()
-		{
+        }
+
+        public Vector4 ReadVector4()
+        {
             Vector4 vect = new Vector4
             {
                 X = this.ReadSingle(),
@@ -170,31 +173,37 @@ namespace Microsoft.Xna.Framework.Net
             };
 
             return vect;
-		}
-		
-		internal void Reset(int size) {
-			MemoryStream ms = (MemoryStream)BaseStream;
-			ms.SetLength(size);
-			ms.Position = 0;
-		}
-		#endregion
-		
-		#region Properties
-		public int Length { 
-			get {
-				return (int)BaseStream.Length;
-			}
-		}
+        }
 
-		public int Position { 
-			get {
-				return (int)BaseStream.Position;
-			}
-			set {
-				if (BaseStream.Position != value)
-					BaseStream.Position = value;
-			} 
-		}
-		#endregion
-	}
+        internal void Reset(int size)
+        {
+            MemoryStream ms = (MemoryStream)BaseStream;
+            ms.SetLength(size);
+            ms.Position = 0;
+        }
+        #endregion
+
+        #region Properties
+        public int Length
+        {
+            get
+            {
+                return (int)BaseStream.Length;
+            }
+        }
+
+        public int Position
+        {
+            get
+            {
+                return (int)BaseStream.Position;
+            }
+            set
+            {
+                if (BaseStream.Position != value)
+                    BaseStream.Position = value;
+            }
+        }
+        #endregion
+    }
 }

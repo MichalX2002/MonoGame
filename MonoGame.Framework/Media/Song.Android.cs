@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using Microsoft.Xna.Framework.Audio;
 using System;
 using System.IO;
 
@@ -18,13 +19,9 @@ namespace Microsoft.Xna.Framework.Media
         private string name;
         private TimeSpan duration;
         private TimeSpan position;
-        private Android.Net.Uri assetUri;
 
         [CLSCompliant(false)]
-        public Android.Net.Uri AssetUri
-        {
-            get { return this.assetUri; }
-        }
+        public Android.Net.Uri AssetUri { get; }
 
         static Song()
         {
@@ -39,7 +36,7 @@ namespace Microsoft.Xna.Framework.Media
             this.genre = genre;
             this.name = name;
             this.duration = duration;
-            this.assetUri = assetUri;
+            AssetUri = assetUri;
         }
 
         private void PlatformInitialize(string fileName)
@@ -76,13 +73,13 @@ namespace Microsoft.Xna.Framework.Media
             // Prepare the player
             _androidPlayer.Reset();
 
-            if (assetUri != null)
+            if (AssetUri != null)
             {
-                _androidPlayer.SetDataSource(MediaLibrary.Context, this.assetUri);
+                _androidPlayer.SetDataSource(MediaLibrary.Context, AssetUri);
             }
             else
             {
-                var afd = Game.Activity.Assets.OpenFd(_name);
+                var afd = Game.Activity.Assets.OpenFd(Name);
                 if (afd == null)
                     return;
 
@@ -131,6 +128,19 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
+        internal float Pitch
+        {
+            get
+            {
+                return _androidPlayer.PlaybackParams.Pitch;
+            }
+            set
+            {
+                float p = SoundEffectInstance.XnaPitchToAlPitch(value);
+                _androidPlayer.PlaybackParams.SetPitch(p);
+            }
+        }
+
         public TimeSpan Position
         {
             get
@@ -149,22 +159,22 @@ namespace Microsoft.Xna.Framework.Media
 
         private Album PlatformGetAlbum()
         {
-            return this.album;
+            return album;
         }
 
         private Artist PlatformGetArtist()
         {
-            return this.artist;
+            return artist;
         }
 
         private Genre PlatformGetGenre()
         {
-            return this.genre;
+            return genre;
         }
 
         private TimeSpan PlatformGetDuration()
         {
-            return this.assetUri != null ? this.duration : _duration;
+            return AssetUri != null ? duration : _duration;
         }
 
         private bool PlatformIsProtected()
@@ -179,7 +189,7 @@ namespace Microsoft.Xna.Framework.Media
 
         private string PlatformGetName()
         {
-            return this.assetUri != null ? this.name : Path.GetFileNameWithoutExtension(_name);
+            return name ?? Path.GetFileNameWithoutExtension(AssetUri.Path);
         }
 
         private int PlatformGetPlayCount()

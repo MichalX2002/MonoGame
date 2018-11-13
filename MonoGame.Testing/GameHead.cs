@@ -96,12 +96,12 @@ namespace MonoGame.Testings
 
             _spriteBatch.Begin();
 
-            float baseScale = 2;
+            float baseScale = 1;
             for (int i = 0; i < _visData.Samples.Count; i++)
             {
-                var pos = new Vector2(i * (baseScale + 0) + 10, yOrigin);
-                var color = new Color(i / 2 + 20, i / 3, 150 - i / 2);
-                var scale = new Vector2(baseScale, _visData.Samples[i] * baseScale * 249 + baseScale);
+                var pos = new Vector2(i * (baseScale / 12 + 0) + 10, yOrigin);
+                var color = new Color(i / 10 + 20, i / 15, 150 - i / 10);
+                var scale = new Vector2(baseScale, _visData.Samples[i] * baseScale * 499 + baseScale);
 
                 _spriteBatch.Draw(_pixel, pos, null, color, 0, Vector2.Zero, scale, SpriteEffects.None, 0);
             }

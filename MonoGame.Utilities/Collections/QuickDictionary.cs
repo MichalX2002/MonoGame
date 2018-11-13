@@ -2,12 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace MonoGame.Utilities.Collections
 {
     [DebuggerDisplay("Count = {Count}")]
-    public unsafe class QuickDictionary<TKey, TValue> : IDisposable, IEnumerable<KeyValuePair<TKey, TValue>>
+    public class QuickDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
     {
         private struct Entry
         {
@@ -28,8 +27,7 @@ namespace MonoGame.Utilities.Collections
             187751, 225307, 270371, 324449, 389357, 467237, 560689, 672827, 807403, 968897, 1162687, 1395263,
             1674319, 2009191, 2411033, 2893249, 3471899, 4166287, 4999559, 5999471, 7199369};
 
-        private int* buckets;
-        private long bucketsLength;
+        private int[] buckets;
         private Entry[] entries;
         private int count;
         private int version;
@@ -112,7 +110,7 @@ namespace MonoGame.Utilities.Collections
         {
             if (count > 0)
             {
-                for (long i = 0; i < bucketsLength; i++)
+                for (long i = 0; i < buckets.LongLength; i++)
                     buckets[i] = -1;
 
                 Array.Clear(entries, 0, count);
@@ -179,7 +177,7 @@ namespace MonoGame.Utilities.Collections
             if (buckets != null)
             {
                 long hashCode = keyComparer.GetLongHashCode(key) & long.MaxValue;
-                long targetBucket = hashCode % bucketsLength;
+                long targetBucket = hashCode % buckets.LongLength;
                 int i = buckets[targetBucket];
                 for (; i >= 0; i = entries[i].next)
                 {
@@ -227,18 +225,10 @@ namespace MonoGame.Utilities.Collections
             return min;
         }
 
-        private void DisposeBuckets()
-        {
-            if(buckets != null)
-                Marshal.FreeHGlobal((IntPtr)buckets);
-        }
-
         private void SetNewBuckets(int size)
         {
-            DisposeBuckets();
-            buckets = (int*)Marshal.AllocHGlobal(sizeof(int) * size);
-            bucketsLength = size;
-            for (long i = 0; i < bucketsLength; i++)
+            buckets = new int[size];
+            for (long i = 0; i < buckets.LongLength; i++)
                 buckets[i] = -1;
         }
 
@@ -259,7 +249,7 @@ namespace MonoGame.Utilities.Collections
                 Initialize(0);
 
             long hashCode = keyComparer.GetLongHashCode(key) & long.MaxValue;
-            long targetBucket = hashCode % bucketsLength;
+            long targetBucket = hashCode % buckets.LongLength;
             for (int i = buckets[targetBucket]; i >= 0; i = entries[i].next)
             {
                 ref Entry iEntry = ref entries[i];
@@ -287,7 +277,7 @@ namespace MonoGame.Utilities.Collections
                 if (count == entries.Length)
                 {
                     Resize();
-                    targetBucket = hashCode % bucketsLength;
+                    targetBucket = hashCode % buckets.LongLength;
                 }
                 index = count;
                 count++;
@@ -363,7 +353,7 @@ namespace MonoGame.Utilities.Collections
             if (buckets != null)
             {
                 long hashCode = keyComparer.GetLongHashCode(key) & long.MaxValue;
-                long bucket = hashCode % bucketsLength;
+                long bucket = hashCode % buckets.LongLength;
                 int last = -1;
                 for (int i = buckets[bucket]; i >= 0; last = i, i = entries[i].next)
                 {
@@ -415,27 +405,7 @@ namespace MonoGame.Utilities.Collections
         {
             return new Enumerator(this);
         }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!Disposed)
-            {
-                DisposeBuckets();
-                Disposed = true;
-            }
-        }
-
-        ~QuickDictionary()
-        {
-            Dispose(false);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
+        
         private struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>
         {
             private QuickDictionary<TKey, TValue> dictionary;

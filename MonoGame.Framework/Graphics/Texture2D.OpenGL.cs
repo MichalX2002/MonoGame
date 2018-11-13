@@ -18,7 +18,6 @@ using System.Drawing;
 #if OPENGL
 using MonoGame.OpenGL;
 using GLPixelFormat = MonoGame.OpenGL.PixelFormat;
-using PixelFormat = MonoGame.OpenGL.PixelFormat;
 using MonoGame.Utilities;
 
 #if ANDROID
@@ -32,7 +31,7 @@ namespace Microsoft.Xna.Framework.Graphics
     {
         private void PlatformConstruct(int width, int height, bool mipmap, SurfaceFormat format, SurfaceType type, bool shared)
         {
-            this.glTarget = TextureTarget.Texture2D;
+            glTarget = TextureTarget.Texture2D;
             format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
             Threading.BlockOnUIThread(() =>
             {
@@ -209,15 +208,14 @@ namespace Microsoft.Xna.Framework.Graphics
 #if GLES
             // TODO: check for for non renderable formats (formats that can't be attached to FBO)
 
-            var framebufferId = 0;
-            GL.GenFramebuffers(1, out framebufferId);
+            GL.GenFramebuffers(1, out int framebufferId);
             GraphicsExtensions.CheckGLError();
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, framebufferId);
             GraphicsExtensions.CheckGLError();
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, this.glTexture, 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, glTexture, 0);
             GraphicsExtensions.CheckGLError();
 
-            GL.ReadPixels(rect.X, rect.Y, rect.Width, rect.Height, this.glFormat, this.glType, data);
+            GL.ReadPixels(rect.X, rect.Y, rect.Width, rect.Height, glFormat, glType, data);
             GraphicsExtensions.CheckGLError();
             GraphicsDevice.DisposeFramebuffer(framebufferId);
 #else
@@ -289,15 +287,14 @@ namespace Microsoft.Xna.Framework.Graphics
 #if GLES
             // TODO: check for for non renderable formats (formats that can't be attached to FBO)
 
-            var framebufferId = 0;
-            GL.GenFramebuffers(1, out framebufferId);
+            GL.GenFramebuffers(1, out int framebufferId);
             GraphicsExtensions.CheckGLError();
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, framebufferId);
             GraphicsExtensions.CheckGLError();
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, this.glTexture, 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, glTexture, 0);
             GraphicsExtensions.CheckGLError();
 
-            GL.ReadPixels(rect.X, rect.Y, rect.Width, rect.Height, this.glFormat, this.glType, output);
+            GL.ReadPixels(rect.X, rect.Y, rect.Width, rect.Height, glFormat, glType, output);
             GraphicsExtensions.CheckGLError();
             GraphicsDevice.DisposeFramebuffer(framebufferId);
 #else
@@ -395,6 +392,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             return PlatformFromStream(graphicsDevice, uiImage.CGImage);
         }
+
 #elif ANDROID
         [CLSCompliant(false)]
         public static Texture2D FromStream(GraphicsDevice graphicsDevice, Bitmap bitmap)
@@ -427,7 +425,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             image.Recycle();
 
-            this.SetData<int>(pixels);
+            SetData(pixels);
         }
 #endif
 
@@ -485,7 +483,7 @@ namespace Microsoft.Xna.Framework.Graphics
             Threading.BlockOnUIThread(() =>
             {
                 texture = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
-                texture.SetData<int>(pixels);
+                texture.SetData(pixels);
             });
 
             return texture;
@@ -513,7 +511,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 // Convert from ARGB to ABGR
                 ConvertToABGR(height, width, pixels);
 
-                this.SetData<int>(pixels);
+                SetData(pixels);
                 image.Recycle();
             }
 #endif
@@ -603,9 +601,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void GenerateGLTextureIfRequired()
         {
-            if (this.glTexture < 0)
+            if (glTexture < 0)
             {
-                GL.GenTextures(1, out this.glTexture);
+                GL.GenTextures(1, out glTexture);
                 GraphicsExtensions.CheckGLError();
 
                 // For best compatibility and to keep the default wrap mode of XNA, only set ClampToEdge if either
@@ -615,7 +613,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 if (((Width & (Width - 1)) != 0) || ((Height & (Height - 1)) != 0))
                     wrap = TextureWrapMode.ClampToEdge;
 
-                GL.BindTexture(TextureTarget.Texture2D, this.glTexture);
+                GL.BindTexture(TextureTarget.Texture2D, glTexture);
                 GraphicsExtensions.CheckGLError();
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
                                 (_levelCount > 1) ? (int)TextureMinFilter.LinearMipmapLinear : (int)TextureMinFilter.Linear);
