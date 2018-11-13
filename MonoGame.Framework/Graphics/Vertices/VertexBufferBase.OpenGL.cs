@@ -71,7 +71,8 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
         }
 
-        protected void PlatformSetData(int offsetInBytes, IntPtr ptr, int startIndex,
+        protected void PlatformSetData(
+            int offsetInBytes, IntPtr ptr, int startIndex,
             int elementCount, int elementSize, int vertexStride, SetDataOptions options)
         {
             Threading.BlockOnUIThread(() =>

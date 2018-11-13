@@ -73,11 +73,8 @@ namespace MonoGame.Utilities.IO
         public const int DefaultLargeBufferMultiple = 1024 * 1024;
         public const int DefaultMaximumBufferSize = 128 * 1024 * 1024;
 
-        private readonly int blockSize;
         private readonly long[] largeBufferFreeSize;
         private readonly long[] largeBufferInUseSize;
-
-        private readonly int largeBufferMultiple;
 
         /// <summary>
         /// pools[0] = 1x largeBufferMultiple buffers
@@ -86,10 +83,6 @@ namespace MonoGame.Utilities.IO
         /// etc., up to maximumBufferSize
         /// </summary>
         private readonly ConcurrentStack<byte[]>[] largePools;
-
-        private readonly int maximumBufferSize;
-        private readonly bool useExponentialLargeBuffer;
-
         private readonly ConcurrentStack<byte[]> smallPool;
 
         private long smallPoolFreeSize;
@@ -125,35 +118,36 @@ namespace MonoGame.Utilities.IO
         {
             if (blockSize <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(blockSize), blockSize, "blockSize must be a positive number");
+                throw new ArgumentOutOfRangeException(
+                    nameof(blockSize), blockSize, "blockSize must be a positive number");
             }
 
             if (largeBufferMultiple <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(largeBufferMultiple),
-                                                      "largeBufferMultiple must be a positive number");
+                throw new ArgumentOutOfRangeException(
+                    nameof(largeBufferMultiple), "largeBufferMultiple must be a positive number");
             }
 
             if (maximumBufferSize < blockSize)
             {
-                throw new ArgumentOutOfRangeException(nameof(maximumBufferSize),
-                                                      "maximumBufferSize must be at least blockSize");
+                throw new ArgumentOutOfRangeException(
+                    nameof(maximumBufferSize), "maximumBufferSize must be at least blockSize");
             }
 
-            this.blockSize = blockSize;
-            this.largeBufferMultiple = largeBufferMultiple;
-            this.maximumBufferSize = maximumBufferSize;
-            this.useExponentialLargeBuffer = useExponentialLargeBuffer;
+            this.BlockSize = blockSize;
+            this.LargeBufferMultiple = largeBufferMultiple;
+            this.MaximumBufferSize = maximumBufferSize;
+            this.UseExponentialLargeBuffer = useExponentialLargeBuffer;
 
             if (!this.IsLargeBufferSize(maximumBufferSize))
             {
-                throw new ArgumentException(String.Format("maximumBufferSize is not {0} of largeBufferMultiple", 
-                                                          this.useExponentialLargeBuffer ? "an exponential" : "a multiple"),
-                                            nameof(maximumBufferSize));
+                throw new ArgumentException(
+                    string.Format("maximumBufferSize is not {0} of largeBufferMultiple",
+                    this.UseExponentialLargeBuffer ? "an exponential" : "a multiple"), nameof(maximumBufferSize));
             }
 
             this.smallPool = new ConcurrentStack<byte[]>();
-            var numLargePools = useExponentialLargeBuffer
+            int numLargePools = useExponentialLargeBuffer
                                     ? ((int)Math.Log(maximumBufferSize / largeBufferMultiple, 2) + 1)
                                     : (maximumBufferSize / largeBufferMultiple);
 
@@ -162,11 +156,8 @@ namespace MonoGame.Utilities.IO
             this.largeBufferFreeSize = new long[numLargePools];
 
             this.largePools = new ConcurrentStack<byte[]>[numLargePools];
-
             for (var i = 0; i < this.largePools.Length; ++i)
-            {
                 this.largePools[i] = new ConcurrentStack<byte[]>();
-            }
 
             Events.Writer.MemoryStreamManagerInitialized(blockSize, largeBufferMultiple, maximumBufferSize);
         }
@@ -174,29 +165,29 @@ namespace MonoGame.Utilities.IO
         /// <summary>
         /// The size of each block. It must be set at creation and cannot be changed.
         /// </summary>
-        public int BlockSize => this.blockSize;
+        public int BlockSize { get; }
 
         /// <summary>
         /// All buffers are multiples/exponentials of this number. It must be set at creation and cannot be changed.
         /// </summary>
-        public int LargeBufferMultiple => this.largeBufferMultiple;
+        public int LargeBufferMultiple { get; }
 
         /// <summary>
         /// Use multiple large buffer allocation strategy. It must be set at creation and cannot be changed.
         /// </summary>
-        public bool UseMultipleLargeBuffer => !this.useExponentialLargeBuffer;
+        public bool UseMultipleLargeBuffer => !this.UseExponentialLargeBuffer;
 
         /// <summary>
         /// Use exponential large buffer allocation strategy. It must be set at creation and cannot be changed.
         /// </summary>
-        public bool UseExponentialLargeBuffer => this.useExponentialLargeBuffer;
+        public bool UseExponentialLargeBuffer { get; }
 
         /// <summary>
         /// Gets or sets the maximum buffer size.
         /// </summary>
         /// <remarks>Any buffer that is returned to the pool that is larger than this will be
         /// discarded and garbage collected.</remarks>
-        public int MaximumBufferSize => this.maximumBufferSize;
+        public int MaximumBufferSize { get; }
 
         /// <summary>
         /// Number of bytes in small pool not currently in use
@@ -308,7 +299,7 @@ namespace MonoGame.Utilities.IO
         {
             requiredSize = this.RoundToLargeBufferSize(requiredSize);
 
-            var poolIndex = this.GetPoolIndex(requiredSize);
+            int poolIndex = this.GetPoolIndex(requiredSize);
 
             byte[] buffer;
             if (poolIndex < this.largePools.Length)
@@ -352,14 +343,14 @@ namespace MonoGame.Utilities.IO
 
         private int RoundToLargeBufferSize(int requiredSize)
         {
-            if (this.useExponentialLargeBuffer)
+            if (this.UseExponentialLargeBuffer)
             {
                 int pow = 1;
-                while (this.largeBufferMultiple * pow < requiredSize)
+                while (this.LargeBufferMultiple * pow < requiredSize)
                 {
                     pow <<= 1;
                 }
-                return this.largeBufferMultiple * pow;
+                return this.LargeBufferMultiple * pow;
             }
             else
             {
@@ -369,17 +360,17 @@ namespace MonoGame.Utilities.IO
 
         private bool IsLargeBufferSize(int value)
         {
-            return (value != 0) && (this.useExponentialLargeBuffer
+            return (value != 0) && (this.UseExponentialLargeBuffer
                                         ? (value == RoundToLargeBufferSize(value))
                                         : (value % this.LargeBufferMultiple) == 0);
         }
 
         private int GetPoolIndex(int length)
         {
-            if (this.useExponentialLargeBuffer)
+            if (this.UseExponentialLargeBuffer)
             {
                 int index = 0;
-                while ((this.largeBufferMultiple << index) < length)
+                while ((this.LargeBufferMultiple << index) < length)
                 {
                     ++index;
                 }
@@ -387,7 +378,7 @@ namespace MonoGame.Utilities.IO
             }
             else
             {
-                return length / this.largeBufferMultiple - 1;
+                return length / this.LargeBufferMultiple - 1;
             }
         }
 
@@ -409,8 +400,8 @@ namespace MonoGame.Utilities.IO
             {
                 throw new ArgumentException(
                     String.Format("buffer did not originate from this memory manager. The size is not {0} of ",
-                                  this.useExponentialLargeBuffer ? "an exponential" : "a multiple") + 
-                    this.largeBufferMultiple);
+                                  this.UseExponentialLargeBuffer ? "an exponential" : "a multiple") + 
+                    this.LargeBufferMultiple);
             }
 
             var poolIndex = this.GetPoolIndex(buffer.Length);
@@ -461,7 +452,7 @@ namespace MonoGame.Utilities.IO
                 throw new ArgumentNullException(nameof(blocks));
             }
 
-            var bytesToReturn = blocks.Count * this.BlockSize;
+            int bytesToReturn = blocks.Count * this.BlockSize;
             Interlocked.Add(ref this.smallPoolInUseSize, -bytesToReturn);
 
             foreach (var block in blocks)

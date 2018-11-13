@@ -6,20 +6,25 @@ namespace MonoGame.Imaging
     {
         public delegate void ImageWritingDelegate(int writeCount);
 
+        private static readonly object _initLock = new object();
+
         private static RecyclableMemoryManager _defaultMemory;
         public static RecyclableMemoryManager DefaultMemoryManager
         {
             get
             {
-                if (_defaultMemory == null)
+                lock (_initLock)
                 {
-                    _defaultMemory = new RecyclableMemoryManager(1024 * 32, 2, 1024 * 80)
+                    if (_defaultMemory == null)
                     {
-                        AggressiveBufferReturn = true,
-                        GenerateCallStacks = false
-                    };
+                        _defaultMemory = new RecyclableMemoryManager(1024 * 64, 1024 * 64, 1024 * 256, false)
+                        {
+                            AggressiveBufferReturn = true,
+                            GenerateCallStacks = false
+                        };
+                    }
+                    return _defaultMemory;
                 }
-                return _defaultMemory;
             }
         }
 
@@ -28,9 +33,12 @@ namespace MonoGame.Imaging
         {
             get
             {
-                if (_default == null)
-                    _default = new SaveConfiguration(true, 90, DefaultMemoryManager);
-                return _default;
+                lock (_initLock)
+                {
+                    if (_default == null)
+                        _default = new SaveConfiguration(true, 90, DefaultMemoryManager);
+                    return _default;
+                }
             }
         }
 
