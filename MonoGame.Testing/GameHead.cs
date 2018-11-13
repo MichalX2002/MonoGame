@@ -17,6 +17,7 @@ namespace MonoGame.Testings
     {
         private GraphicsDeviceManager _graphicsManager;
         private SpriteBatch _spriteBatch;
+        private Texture2D _pixel;
 
         private SongCollection _songs;
         private VisualizationData _visData;
@@ -36,7 +37,7 @@ namespace MonoGame.Testings
 
             MediaPlayer.ActiveSongChanged += MediaPlayer_ActiveSongChanged;
             MediaPlayer.Volume = 0.25f;
-            MediaPlayer.Pitch = 1f;
+            MediaPlayer.Pitch = -0.5f;
             MediaPlayer.IsRepeating = true;
 
             MediaPlayer.Play(_songs);
@@ -53,6 +54,8 @@ namespace MonoGame.Testings
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            _pixel = new Texture2D(GraphicsDevice, 1, 1);
+            _pixel.SetData(new Color[] { Color.White });
 
             _songs = new SongCollection
             {
@@ -65,14 +68,22 @@ namespace MonoGame.Testings
 
         protected override void UnloadContent()
         {
+
         }
+
+        private float _hej;
         
         protected override void Update(GameTime time)
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-
+            _hej += time.Delta;
+            if (_hej > 0)
+            {
+                MediaPlayer.GetVisualizationData(_visData);
+                _hej = 0;
+            }
 
             base.Update(time);
         }
@@ -80,6 +91,22 @@ namespace MonoGame.Testings
         protected override void Draw(GameTime time)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            int yOrigin = GraphicsDevice.Viewport.Height / 2;
+
+            _spriteBatch.Begin();
+
+            float baseScale = 2;
+            for (int i = 0; i < _visData.Samples.Count; i++)
+            {
+                var pos = new Vector2(i * (baseScale + 0) + 10, yOrigin);
+                var color = new Color(i / 2 + 20, i / 3, 150 - i / 2);
+                var scale = new Vector2(baseScale, _visData.Samples[i] * baseScale * 249 + baseScale);
+
+                _spriteBatch.Draw(_pixel, pos, null, color, 0, Vector2.Zero, scale, SpriteEffects.None, 0);
+            }
+
+            _spriteBatch.End();
 
             base.Draw(time);
         }

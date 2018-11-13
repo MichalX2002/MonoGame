@@ -21,9 +21,12 @@ namespace Microsoft.Xna.Framework.Media
 		}
 
         /// <summary>
-        /// Load the contents of MediaLibrary. This blocking call might take up to a few minutes depending on the platform and the size of the user's music library.
+        /// Load the contents of MediaLibrary. This blocking call might take up to a few
+        /// minutes depending on the platform and the size of the user's music library.
         /// </summary>
-        /// <param name="progressCallback">Callback that reports back the progress of the music library loading in percents (0-100).</param>
+        /// <param name="progressCallback">
+        /// Callback that reports back the progress of the music library loading in percents (0-100).
+        /// </param>
         public void Load(Action<int> progressCallback = null)
 	    {
 	        PlatformLoad(progressCallback);

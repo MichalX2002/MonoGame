@@ -9,7 +9,7 @@ namespace Microsoft.Xna.Framework.Media
 {
 	public sealed class MediaQueue
 	{
-        List<Song> songs = new List<Song>();
+        private List<Song> songs = new List<Song>();
         private Random random = new Random();
 
 		public MediaQueue()

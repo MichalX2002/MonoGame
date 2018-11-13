@@ -11,7 +11,7 @@ namespace Microsoft.Xna.Framework.Media
 {
     public sealed partial class Song : IEquatable<Song>, IDisposable
     {
-        private OggStream stream;
+        internal OggStream stream;
         private float _volume = 1f;
         private float _pitch = 0f;
 

@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using Microsoft.Xna.Framework.Audio;
+using MonoGame.OpenAL;
 using System;
 
 #if IOS
@@ -162,8 +163,24 @@ namespace Microsoft.Xna.Framework.Media
             // Loop through so that we reset the PlayCount as well
             foreach (var song in Queue.Songs)
                 Queue.ActiveSong.Stop();
-        }   
-        
+        }
+
+        private static void PlatformGetVisualizationData(VisualizationData data)
+        {
+            var instance = OggStreamer.Instance;
+            float[] samples = instance.readSampleBuffer;
+
+            AL.GetSource(Queue.ActiveSong.stream.alSourceId, ALGetSourcei.SampleOffset, out int start);
+            
+            for (int i = 0; i < VisualizationData.Size; i++)
+            {
+                int index = i + start;
+                if (index >= samples.Length)
+                    break;
+                data._samples[i] = samples[index];
+            }
+        }
+
         private static bool PlatformGetIsRunningSlowly()
         {
             return PlatformGetUpdateTime() > 0.125f;

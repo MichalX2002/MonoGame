@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 #if WINDOWS_UAP
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
@@ -657,8 +658,7 @@ namespace Microsoft.Xna.Framework
             // We need to do this after virtual Initialize(...) is called.
             // 1. Categorize components into IUpdateable and IDrawable lists.
             // 2. Subscribe to Added/Removed events to keep the categorized
-            //    lists synced and to Initialize future components as they are
-            //    added.            
+            //    lists synced and to Initialize future components as they are added.            
             CategorizeComponents();
             Components.ComponentAdded += Components_ComponentAdded;
             Components.ComponentRemoved += Components_ComponentRemoved;

@@ -15,25 +15,25 @@ namespace Microsoft.Xna.Framework.Audio
         const float DefaultUpdateRate = 10;
         const int DefaultBufferSize = 44100;
 
-        static readonly object singletonMutex = new object();
-
+        internal static readonly object singletonMutex = new object();
         readonly object iterationMutex = new object();
         readonly object readMutex = new object();
 
-        readonly float[] readSampleBuffer;
+        internal readonly float[] readSampleBuffer;
         readonly short[] castBuffer;
 
         readonly HashSet<OggStream> streams = new HashSet<OggStream>();
         readonly List<OggStream> threadLocalStreams = new List<OggStream>();
-
+        
         readonly Thread underlyingThread;
         Stopwatch threadWatch;
         int nextTimingIndex;
-        volatile bool cancelled;
         bool pendingFinish;
+        volatile bool cancelled;
 
-        public float UpdateRate { get; private set; }
-        public int BufferSize { get; private set; }
+        public float UpdateRate { get; }
+        public int BufferSize { get; }
+        public float[] ThreadTiming { get; }
 
         private static OggStreamer _instance;
         public static OggStreamer Instance
@@ -53,8 +53,6 @@ namespace Microsoft.Xna.Framework.Audio
                     _instance = value;
             }
         }
-
-        public float[] ThreadTiming { get; }
 
         public OggStreamer(int bufferSize = DefaultBufferSize, float updateRate = DefaultUpdateRate)
         {
@@ -89,6 +87,7 @@ namespace Microsoft.Xna.Framework.Audio
                 lock (iterationMutex)
                     streams.Clear();
 
+                underlyingThread.Join(1000);
                 Instance = null;
             }
         }

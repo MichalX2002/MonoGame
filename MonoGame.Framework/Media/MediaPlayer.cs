@@ -248,6 +248,14 @@ namespace Microsoft.Xna.Framework.Media
 
             EventHelpers.Raise(null, ActiveSongChanged, EventArgs.Empty);
 		}
+
+        public static void GetVisualizationData(VisualizationData data)
+        {
+            if (IsVisualizationEnabled)
+            {
+                PlatformGetVisualizationData(data);
+            }
+        }
     }
 }
 
