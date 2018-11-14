@@ -190,7 +190,8 @@ namespace Microsoft.Xna.Framework.Graphics
             SetDataInternal(0, data, 0, data.Length, elementSizeInBytes, SetDataOptions.None);
         }
 
-        protected void SetDataInternal<T>(int offsetInBytes, T[] data, int startIndex,
+        protected void SetDataInternal<T>(
+            int offsetInBytes, T[] data, int startIndex,
             int elementCount, int vertexStride, SetDataOptions options) where T : struct
         {
             if (data == null)

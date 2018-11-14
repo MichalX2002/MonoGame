@@ -17,7 +17,7 @@ namespace MonoGame.Imaging.Tests
 
         static void Main(string[] args)
         {
-            using (Image img1 = new Image(File.OpenRead("texture_0.jpg"), ImagePixelFormat.RgbWithAlpha))
+            //using (Image img1 = new Image(File.OpenRead("texture_0.jpg"), ImagePixelFormat.RgbWithAlpha))
             //using (Image img2 = new Image(img1.Width, img1.Height, img1.PixelFormat))
             {
                 /*
@@ -33,36 +33,37 @@ namespace MonoGame.Imaging.Tests
                     }
                 }
                 */
-                Console.WriteLine(img1.GetPointer());
-                Console.WriteLine(img1.PointerLength);
-                using (var fs = File.OpenWrite("texture.png"))
-                    img1.Save(fs, ImageSaveFormat.Png);
+            //    Console.WriteLine(img1.GetPointer());
+            //    Console.WriteLine(img1.PointerLength);
+            //    using (var fs = File.OpenWrite("texture.png"))
+            //        img1.Save(fs, ImageSaveFormat.Png);
             }
 
             ZipArchive archive = new ZipArchive(File.OpenRead(DATA_ZIP), ZipArchiveMode.Read, false);
-            var manager = new RecyclableMemoryManager();
 
-            SaveConfiguration d = new SaveConfiguration(true, 0, manager);
-            SaveConfiguration nonD = new SaveConfiguration(false, 0, manager);
+            SaveConfiguration d = new SaveConfiguration(true, 0, SaveConfiguration.DefaultMemoryManager);
+            SaveConfiguration nonD = new SaveConfiguration(false, 0, SaveConfiguration.DefaultMemoryManager);
             var ms = new MemoryStream();
 
-            TestEntry(ms, d, manager, archive, "bmp/8bit.bmp");
-            TestEntry(ms, d, manager, archive, "bmp/24bit.bmp");
+            TestEntry(ms, d, archive, "bmp/8bit.bmp");
+            TestEntry(ms, d, archive, "bmp/24bit.bmp");
+                           
+            TestEntry(ms, d, archive, "jpg/quality_0.jpg");
+            TestEntry(ms, d, archive, "jpg/quality_25.jpg");
+            TestEntry(ms, d, archive, "jpg/quality_50.jpg");
+            TestEntry(ms, d, archive, "jpg/quality_75.jpg");
+            TestEntry(ms, d, archive, "jpg/quality_100.jpg");
+                           
+            TestEntry(ms, d, archive, "png/32bit.png");
+            TestEntry(ms, d, archive, "png/24bit.png");
+            TestEntry(ms, d, archive, "png/8bit.png");
 
-            TestEntry(ms, d, manager, archive, "jpg/quality_0.jpg");
-            TestEntry(ms, d, manager, archive, "jpg/quality_25.jpg");
-            TestEntry(ms, d, manager, archive, "jpg/quality_50.jpg");
-            TestEntry(ms, d, manager, archive, "jpg/quality_75.jpg");
-            TestEntry(ms, d, manager, archive, "jpg/quality_100.jpg");
+            TestEntry(ms, nonD, archive, "tga/32bit.tga");
+            TestEntry(ms, d, archive, "tga/32bit_compressed.tga");
+            TestEntry(ms, nonD, archive, "tga/24bit.tga");
+            TestEntry(ms, d, archive, "tga/24bit_compressed.tga");
 
-            TestEntry(ms, d, manager, archive, "png/32bit.png");
-            TestEntry(ms, d, manager, archive, "png/24bit.png");
-            TestEntry(ms, d, manager, archive, "png/8bit.png");
-
-            TestEntry(ms, nonD, manager, archive, "tga/32bit.tga");
-            TestEntry(ms, d, manager, archive, "tga/32bit_compressed.tga");
-            TestEntry(ms, nonD, manager, archive, "tga/24bit.tga");
-            TestEntry(ms, d, manager, archive, "tga/24bit_compressed.tga");
+            Console.WriteLine(SaveConfiguration.DefaultMemoryManager.SmallBlocksFree);
 
             /*
             var watch = new Stopwatch();
@@ -97,7 +98,7 @@ namespace MonoGame.Imaging.Tests
         }
 
         static void TestEntry(MemoryStream ms, 
-            SaveConfiguration config, RecyclableMemoryManager manager, ZipArchive archive, string name)
+            SaveConfiguration config, ZipArchive archive, string name)
         {
             Stopwatch watch = new Stopwatch();
             int tries = 1; //3000;

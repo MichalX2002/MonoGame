@@ -215,11 +215,12 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new InvalidOperationException("DrawString was called, but Begin has not yet been called. Begin must be called successfully before you can call DrawString.");
         }
 
-        public void Draw(Texture2D texture,
-            in VertexPositionColorTexture vertexTL,
-            in VertexPositionColorTexture vertexTR,
-            in VertexPositionColorTexture vertexBL,
-            in VertexPositionColorTexture vertexBR,
+        public void DrawRef(
+            Texture2D texture,
+            ref VertexPositionColorTexture vertexTL,
+            ref VertexPositionColorTexture vertexTR,
+            ref VertexPositionColorTexture vertexBL,
+            ref VertexPositionColorTexture vertexBR,
             float depth)
         {
             var item = GetBatchItem(texture);
@@ -233,11 +234,41 @@ namespace Microsoft.Xna.Framework.Graphics
             FlushIfNeeded();
         }
 
-        public void Draw(Texture2D texture,
-            in VertexPositionColorTexture vertexTL,
-            in VertexPositionColorTexture vertexTR,
-            in VertexPositionColorTexture vertexBL,
-            in VertexPositionColorTexture vertexBR)
+        public void DrawRef(
+            Texture2D texture,
+            ref VertexPositionColorTexture vertexTL,
+            ref VertexPositionColorTexture vertexTR,
+            ref VertexPositionColorTexture vertexBL,
+            ref VertexPositionColorTexture vertexBR)
+        {
+            DrawRef(texture, ref vertexTL, ref vertexTR, ref vertexBL, ref vertexBR, vertexTL.Position.Z);
+        }
+
+        public void Draw(
+            Texture2D texture,
+            VertexPositionColorTexture vertexTL,
+            VertexPositionColorTexture vertexTR,
+            VertexPositionColorTexture vertexBL,
+            VertexPositionColorTexture vertexBR,
+            float depth)
+        {
+            var item = GetBatchItem(texture);
+            item.SortKey = GetSortKey(texture, depth);
+
+            item.VertexTL = vertexTL;
+            item.VertexTR = vertexTR;
+            item.VertexBL = vertexBL;
+            item.VertexBR = vertexBR;
+
+            FlushIfNeeded();
+        }
+
+        public void Draw(
+            Texture2D texture,
+            VertexPositionColorTexture vertexTL,
+            VertexPositionColorTexture vertexTR,
+            VertexPositionColorTexture vertexBL,
+            VertexPositionColorTexture vertexBR)
         {
             Draw(texture, vertexTL, vertexTR, vertexBL, vertexBR, vertexTL.Position.Z);
         }
@@ -258,16 +289,17 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <exception cref="InvalidOperationException">Throwns if both <paramref name="position"/> and <paramref name="destinationRectangle"/> been used.</exception>
         /// <remarks>This overload uses optional parameters. This overload requires only one of <paramref name="position"/> and <paramref name="destinationRectangle"/> been used.</remarks>
         [Obsolete("In future versions this method can be removed.")]
-        public void Draw(Texture2D texture,
-                Vector2? position = null,
-                Rectangle? destinationRectangle = null,
-                Rectangle? sourceRectangle = null,
-                Vector2? origin = null,
-                float rotation = 0f,
-                Vector2? scale = null,
-                Color? color = null,
-                SpriteEffects effects = SpriteEffects.None,
-                float layerDepth = 0f)
+        public void Draw(
+            Texture2D texture,
+            Vector2? position = null,
+            Rectangle? destinationRectangle = null,
+            Rectangle? sourceRectangle = null,
+            Vector2? origin = null,
+            float rotation = 0f,
+            Vector2? scale = null,
+            Color? color = null,
+            SpriteEffects effects = SpriteEffects.None,
+            float layerDepth = 0f)
         {
 
             // Assign default values to null parameters here, as they are not compile-time constants
@@ -307,15 +339,16 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="scale">A scaling of this sprite.</param>
         /// <param name="effects">Modificators for drawing. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this sprite.</param>
-		public void Draw(Texture2D texture,
-                Vector2 position,
-                Rectangle? sourceRectangle,
-                Color color,
-                float rotation,
-                Vector2 origin,
-                Vector2 scale,
-                SpriteEffects effects,
-                float layerDepth)
+		public void Draw(
+            Texture2D texture,
+            Vector2 position,
+            Rectangle? sourceRectangle,
+            Color color,
+            float rotation,
+            Vector2 origin,
+            Vector2 scale,
+            SpriteEffects effects,
+            float layerDepth)
         {
             CheckValid(texture);
 
@@ -398,15 +431,16 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="scale">A scaling of this sprite.</param>
         /// <param name="effects">Modificators for drawing. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this sprite.</param>
-		public void Draw(Texture2D texture,
-                Vector2 position,
-                Rectangle? sourceRectangle,
-                Color color,
-                float rotation,
-                Vector2 origin,
-                float scale,
-                SpriteEffects effects,
-                float layerDepth)
+		public void Draw(
+            Texture2D texture,
+            Vector2 position,
+            Rectangle? sourceRectangle,
+            Color color,
+            float rotation,
+            Vector2 origin,
+            float scale,
+            SpriteEffects effects,
+            float layerDepth)
         {
             var scaleVec = new Vector2(scale, scale);
             Draw(texture, position, sourceRectangle, color, rotation, origin, scaleVec, effects, layerDepth);
@@ -423,7 +457,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="origin">Center of the rotation. 0,0 by default.</param>
         /// <param name="effects">Modificators for drawing. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this sprite.</param>
-		public void Draw(Texture2D texture,
+		public void Draw(
+            Texture2D texture,
             Rectangle destinationRectangle,
             Rectangle? sourceRectangle,
             Color color,

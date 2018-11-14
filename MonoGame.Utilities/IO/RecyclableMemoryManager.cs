@@ -103,7 +103,9 @@ namespace MonoGame.Utilities.IO
         /// <exception cref="ArgumentOutOfRangeException">blockSize is not a positive number, or largeBufferMultiple is not a positive number, or maximumBufferSize is less than blockSize.</exception>
         /// <exception cref="ArgumentException">maximumBufferSize is not a multiple of largeBufferMultiple</exception>
         public RecyclableMemoryManager(int blockSize, int largeBufferMultiple, int maximumBufferSize)
-            : this(blockSize, largeBufferMultiple, maximumBufferSize, false) { }
+            : this(blockSize, largeBufferMultiple, maximumBufferSize, false)
+        {
+        }
 
         /// <summary>
         /// Initializes the memory manager with the given block requiredSize.

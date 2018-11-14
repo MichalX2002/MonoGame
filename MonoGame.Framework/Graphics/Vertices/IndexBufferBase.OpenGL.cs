@@ -37,49 +37,60 @@ namespace Microsoft.Xna.Framework.Graphics
             // http://www.khronos.org/registry/gles/extensions/OES/OES_mapbuffer.txt
             throw new NotSupportedException("Index buffers are write-only on OpenGL ES platforms");
 #else
-            Threading.BlockOnUIThread(() =>
-            {
-                GL.BindBuffer(BufferTarget.ElementArrayBuffer, _vbo);
-                GraphicsExtensions.CheckGLError();
-
-                IntPtr mapPtr = GL.MapBuffer(BufferTarget.ElementArrayBuffer, BufferAccess.ReadOnly);
-                // Pointer to the start of data to read in the index buffer
-                mapPtr = new IntPtr(mapPtr.ToInt64() + offsetInBytes);
-
-                int startOffset = startIndex * _indexElementSize;
-                int bytes = elementCount * _indexElementSize - startOffset;
-                unsafe
-                {
-                    Buffer.MemoryCopy((byte*)mapPtr, (byte*)ptr, bytes, bytes);
-                }
-
-                GL.UnmapBuffer(BufferTarget.ElementArrayBuffer);
-                GraphicsExtensions.CheckGLError();
-            });
+            if (Threading.IsOnUIThread())
+                GetDataInternal(offsetInBytes, ptr, startIndex, elementCount);
+            else
+                Threading.BlockOnUIThread(() => { GetDataInternal(offsetInBytes, ptr, startIndex, elementCount); });
 #endif
+        }
+
+        private void GetDataInternal(int offsetInBytes, IntPtr ptr, int startIndex, int elementCount)
+        {
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _vbo);
+            GraphicsExtensions.CheckGLError();
+
+            IntPtr mapPtr = GL.MapBuffer(BufferTarget.ElementArrayBuffer, BufferAccess.ReadOnly);
+            // Pointer to the start of data to read in the index buffer
+            mapPtr = new IntPtr(mapPtr.ToInt64() + offsetInBytes);
+
+            int startOffset = startIndex * _indexElementSize;
+            int bytes = elementCount * _indexElementSize - startOffset;
+            unsafe
+            {
+                Buffer.MemoryCopy((byte*)mapPtr, (byte*)ptr, bytes, bytes);
+            }
+
+            GL.UnmapBuffer(BufferTarget.ElementArrayBuffer);
+            GraphicsExtensions.CheckGLError();
         }
 
         protected void PlatformSetData(
             int offsetInBytes, IntPtr data, int startIndex, int elementCount, SetDataOptions options)
         {
-            Threading.BlockOnUIThread(() =>
-            {
-                GenerateIfRequired();
-
-                IntPtr dataPtr = new IntPtr(data.ToInt64() + startIndex * _indexElementSize);
-                int bufferSize = IndexCount * _indexElementSize;
-
-                GL.BindBuffer(BufferTarget.ElementArrayBuffer, _vbo);
-                GraphicsExtensions.CheckGLError();
-
-                DiscardCheck(BufferTarget.ElementArrayBuffer, options, (IntPtr)bufferSize);
-
-                IntPtr size = new IntPtr(_indexElementSize * elementCount);
-                GL.BufferSubData(BufferTarget.ElementArrayBuffer, (IntPtr)offsetInBytes, size, dataPtr);
-                GraphicsExtensions.CheckGLError();
-            });
+            if (Threading.IsOnUIThread())
+                SetDataInternal(offsetInBytes, data, startIndex, elementCount, options);
+            else
+                Threading.BlockOnUIThread(() => { SetDataInternal(offsetInBytes, data, startIndex, elementCount, options); });
         }
 
+        private void SetDataInternal(
+            int offsetInBytes, IntPtr data, int startIndex, int elementCount, SetDataOptions options)
+        {
+            GenerateIfRequired();
+
+            IntPtr dataPtr = new IntPtr(data.ToInt64() + startIndex * _indexElementSize);
+            int bufferSize = IndexCount * _indexElementSize;
+
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _vbo);
+            GraphicsExtensions.CheckGLError();
+
+            DiscardCheck(BufferTarget.ElementArrayBuffer, options, (IntPtr)bufferSize);
+
+            IntPtr size = new IntPtr(_indexElementSize * elementCount);
+            GL.BufferSubData(BufferTarget.ElementArrayBuffer, (IntPtr)offsetInBytes, size, dataPtr);
+            GraphicsExtensions.CheckGLError();
+        }
+    
         protected override void Dispose(bool disposing)
         {
             if (!IsDisposed)
