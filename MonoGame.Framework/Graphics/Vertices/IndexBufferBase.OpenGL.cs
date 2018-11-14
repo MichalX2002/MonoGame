@@ -37,7 +37,7 @@ namespace Microsoft.Xna.Framework.Graphics
             // http://www.khronos.org/registry/gles/extensions/OES/OES_mapbuffer.txt
             throw new NotSupportedException("Index buffers are write-only on OpenGL ES platforms");
 #else
-            if (Threading.IsOnUIThread())
+            if (Threading.IsOnUIThread()) // to not create unnecessary Action garbage with BlockOnUIThread
                 GetDataInternal(offsetInBytes, ptr, startIndex, elementCount);
             else
                 Threading.BlockOnUIThread(() => { GetDataInternal(offsetInBytes, ptr, startIndex, elementCount); });
@@ -67,7 +67,7 @@ namespace Microsoft.Xna.Framework.Graphics
         protected void PlatformSetData(
             int offsetInBytes, IntPtr data, int startIndex, int elementCount, SetDataOptions options)
         {
-            if (Threading.IsOnUIThread())
+            if (Threading.IsOnUIThread()) // to not create unnecessary Action garbage with BlockOnUIThread
                 SetDataInternal(offsetInBytes, data, startIndex, elementCount, options);
             else
                 Threading.BlockOnUIThread(() => { SetDataInternal(offsetInBytes, data, startIndex, elementCount, options); });

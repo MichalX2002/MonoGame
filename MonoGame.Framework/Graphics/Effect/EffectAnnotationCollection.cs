@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-	public class EffectAnnotationCollection : IEnumerable<EffectAnnotation>
+	public class EffectAnnotationCollection : IReadOnlyList<EffectAnnotation>
 	{
-        internal static readonly EffectAnnotationCollection Empty = new EffectAnnotationCollection(Array.Empty<EffectAnnotation>());
+        internal static readonly EffectAnnotationCollection Empty = new EffectAnnotationCollection(new EffectAnnotation[0]);
 
 	    private readonly EffectAnnotation[] _annotations;
 

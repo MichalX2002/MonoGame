@@ -19,7 +19,8 @@ namespace Microsoft.Xna.Framework.Content
 
             if (indexBuffer == null)
             {
-                indexBuffer = new IndexBuffer(input.GraphicsDevice,
+                indexBuffer = new IndexBuffer(
+                    input.GraphicsDevice,
                     sixteenBits ? IndexElementSize.SixteenBits : IndexElementSize.ThirtyTwoBits, 
                     dataSize / (sixteenBits ? 2 : 4), BufferUsage.None);
             }

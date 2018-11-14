@@ -1053,7 +1053,9 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <remarks>All indices in the vertex buffer are interpreted relative to the specified <paramref name="vertexOffset"/>.
         /// For example a value of zero in the array of indices points to the vertex at index <paramref name="vertexOffset"/>
         /// in the array of vertices.</remarks>
-        public void DrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, ushort[] indexData, int indexOffset, int primitiveCount) where T : struct, IVertexType
+        public void DrawUserIndexedPrimitives<T>(
+            PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices,
+            ushort[] indexData, int indexOffset, int primitiveCount) where T : struct, IVertexType
         {
             DrawUserIndexedPrimitives(primitiveType, vertexData, vertexOffset, numVertices, indexData, indexOffset, primitiveCount, VertexDeclarationCache<T>.VertexDeclaration);
         }
@@ -1073,10 +1075,12 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <remarks>All indices in the vertex buffer are interpreted relative to the specified <paramref name="vertexOffset"/>.
         /// For example a value of zero in the array of indices points to the vertex at index <paramref name="vertexOffset"/>
         /// in the array of vertices.</remarks>
-        public void DrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, ushort[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
+        public void DrawUserIndexedPrimitives<T>(
+            PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices,
+            ushort[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
         {
-            CheckDrawUserIndexedPrimitives(primitiveType, vertexData, vertexOffset, numVertices, indexData, indexOffset, primitiveCount, vertexDeclaration);
-
+            CheckDrawUserIndexedPrimitivesArrays(vertexData, indexData);
+            CheckDrawUserIndexedPrimitives<T>(primitiveType, vertexData.Length, vertexOffset, numVertices, indexData.Length, indexOffset, primitiveCount, vertexDeclaration);
             PlatformDrawUserIndexedPrimitives(primitiveType, vertexData, vertexOffset, numVertices, indexData, indexOffset, primitiveCount, vertexDeclaration);
 
             unchecked
@@ -1084,6 +1088,57 @@ namespace Microsoft.Xna.Framework.Graphics
                 _graphicsMetrics._drawCount++;
                 _graphicsMetrics._primitiveCount += primitiveCount;
             }
+        }
+
+        /// <summary>
+        /// Draw primitives of the specified type by indexing into the given pointers of vertices and indices.
+        /// </summary>
+        /// <param name="primitiveType">The type of primitives to draw with the vertices.</param>
+        /// <param name="vertexData">A pointer that points to the first vertex.</param>
+        /// <param name="vertexOffset">The index in the array of the first vertex to draw.</param>
+        /// <param name="numVertices">The number of vertices to draw.</param>
+        /// <param name="indexSize">The size of the index type.</param>
+        /// <param name="indexData">A pointer that points to the first index.</param>
+        /// <param name="indexOffset">The index in the array of indices of the first index to use</param>
+        /// <param name="primitiveCount">The number of primitives to draw.</param>
+        /// <param name="vertexDeclaration">The layout of the vertices.</param>
+        /// <remarks>All indices in the vertex buffer are interpreted relative to the specified <paramref name="vertexOffset"/>.
+        /// For example a value of zero in the array of indices points to the vertex at index <paramref name="vertexOffset"/>
+        /// in the array of vertices.</remarks>
+        public void DrawUserIndexedPrimitives<T>(
+            PrimitiveType primitiveType, IntPtr vertexData, int vertexOffset, int numVertices,
+            IndexElementSize indexSize, IntPtr indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
+        {
+            int indexCount = GetElementCountArray(primitiveType, primitiveCount);
+            CheckDrawUserIndexedPrimitives<T>(primitiveType, numVertices, vertexOffset, numVertices, indexCount, indexOffset, primitiveCount, vertexDeclaration);
+
+            PlatformDrawUserIndexedPrimitives<T>(primitiveType, vertexData, vertexOffset, numVertices, indexSize, indexData, indexOffset, primitiveCount, vertexDeclaration);
+
+            unchecked
+            {
+                _graphicsMetrics._drawCount++;
+                _graphicsMetrics._primitiveCount += primitiveCount;
+            }
+        }
+
+        /// <summary>
+        /// Draw primitives of the specified type by indexing into the given pointers of vertices and indices.
+        /// </summary>
+        /// <param name="primitiveType">The type of primitives to draw with the vertices.</param>
+        /// <param name="vertexData">A pointer that points to the first vertex.</param>
+        /// <param name="vertexOffset">The index in the array of the first vertex to draw.</param>
+        /// <param name="numVertices">The number of vertices to draw.</param>
+        /// <param name="indexSize">The size of the index type.</param>
+        /// <param name="indexData">A pointer that points to the first index.</param>
+        /// <param name="indexOffset">The index in the array of indices of the first index to use</param>
+        /// <param name="primitiveCount">The number of primitives to draw.</param>
+        public void DrawUserIndexedPrimitives<T>(
+            PrimitiveType primitiveType, IntPtr vertexData, int vertexOffset, int numVertices,
+            IndexElementSize indexSize, IntPtr indexData, int indexOffset, int primitiveCount) where T : struct, IVertexType
+        {
+            DrawUserIndexedPrimitives<T>(
+                primitiveType, vertexData, vertexOffset, numVertices,
+                indexSize, indexData, indexOffset, primitiveCount, VertexDeclarationCache<T>.VertexDeclaration);
         }
 
         /// <summary>
@@ -1124,7 +1179,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// in the array of vertices.</remarks>
         public void DrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, short[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
         {
-            CheckDrawUserIndexedPrimitives(primitiveType, vertexData, vertexOffset, numVertices, indexData, indexOffset, primitiveCount, vertexDeclaration);
+            CheckDrawUserIndexedPrimitivesArrays(vertexData, indexData);
+            CheckDrawUserIndexedPrimitives<T>(primitiveType, vertexData.Length, vertexOffset, numVertices, indexData.Length, indexOffset, primitiveCount, vertexDeclaration);
 
             PlatformDrawUserIndexedPrimitives(primitiveType, vertexData, vertexOffset, numVertices, indexData, indexOffset, primitiveCount, vertexDeclaration);
 
@@ -1173,7 +1229,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// in the array of vertices.</remarks>
         public void DrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, int[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
         {
-            CheckDrawUserIndexedPrimitives(primitiveType, vertexData, vertexOffset, numVertices, indexData, indexOffset, primitiveCount, vertexDeclaration);
+            CheckDrawUserIndexedPrimitivesArrays(vertexData, indexData);
+            CheckDrawUserIndexedPrimitives<T>(primitiveType, vertexData.Length, vertexOffset, numVertices, indexData.Length, indexOffset, primitiveCount, vertexDeclaration);
 
             PlatformDrawUserIndexedPrimitives(
                 primitiveType, vertexData, vertexOffset, numVertices, indexData, indexOffset, primitiveCount, vertexDeclaration);
@@ -1185,34 +1242,44 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        private void CheckDrawUserIndexedPrimitives<TVertex, TIndex>(
-            PrimitiveType primitiveType, TVertex[] vertexData, int vertexOffset, int numVertices,
-            TIndex[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration)
+        private void CheckDrawUserIndexedPrimitivesArrays<TVertex, TIndex>(TVertex[] vertexData, TIndex[] indexData)
             where TVertex : struct
             where TIndex : struct
         {
-            if (vertexData == null || vertexData.Length == 0)
+            if (vertexData == null)
                 throw new ArgumentNullException(nameof(vertexData));
+            
+            if (indexData == null)
+                throw new ArgumentNullException(nameof(indexData));
+        }
 
-            if (vertexOffset < 0 || vertexOffset >= vertexData.Length)
+        private void CheckDrawUserIndexedPrimitives<TVertex>(
+            PrimitiveType primitiveType, int vertexDataLength, int vertexOffset, int numVertices,
+            int indexDataLength, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration)
+            where TVertex : struct
+        {
+            if (vertexDataLength == 0)
+                throw new ArgumentException("vertexData", "Length was zero.");
+
+            if (vertexOffset < 0 || vertexOffset >= vertexDataLength)
                 throw new ArgumentOutOfRangeException(nameof(vertexOffset));
 
-            if (numVertices <= 0 || numVertices > vertexData.Length)
+            if (numVertices <= 0 || numVertices > vertexDataLength)
                 throw new ArgumentOutOfRangeException(nameof(numVertices));
 
-            if (vertexOffset + numVertices > vertexData.Length)
+            if (vertexOffset + numVertices > vertexDataLength)
                 throw new ArgumentOutOfRangeException(nameof(numVertices));
 
-            if (indexData == null || indexData.Length == 0)
-                throw new ArgumentNullException(nameof(indexData));
+            if (indexDataLength == 0)
+                throw new ArgumentException("indexData", "Length was zero.");
 
-            if (indexOffset < 0 || indexOffset >= indexData.Length)
+            if (indexOffset < 0 || indexOffset >= indexDataLength)
                 throw new ArgumentOutOfRangeException(nameof(indexOffset));
 
             if (primitiveCount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(primitiveCount));
 
-            if (indexOffset + GetElementCountArray(primitiveType, primitiveCount) > indexData.Length)
+            if (indexOffset + GetElementCountArray(primitiveType, primitiveCount) > indexDataLength)
                 throw new ArgumentOutOfRangeException(nameof(primitiveCount));
 
             if (vertexDeclaration == null)

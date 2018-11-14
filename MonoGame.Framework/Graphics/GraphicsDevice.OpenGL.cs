@@ -882,15 +882,19 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 case PrimitiveType.LineList:
                     return GLPrimitiveType.Lines;
+
                 case PrimitiveType.LineStrip:
                     return GLPrimitiveType.LineStrip;
+
                 case PrimitiveType.TriangleList:
                     return GLPrimitiveType.Triangles;
+
                 case PrimitiveType.TriangleStrip:
                     return GLPrimitiveType.TriangleStrip;
-            }
 
-            throw new ArgumentException();
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         /// <summary>
@@ -1105,22 +1109,51 @@ namespace Microsoft.Xna.Framework.Graphics
             GraphicsExtensions.CheckGLError();
         }
 
-        private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, ushort[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
+        private void PlatformDrawUserIndexedPrimitives<T>(
+            PrimitiveType primitiveType, IntPtr vertexData, int vertexOffset, int numVertices,
+            IndexElementSize indexSize, IntPtr indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
         {
-            GCHandle ibHandle = GCHandle.Alloc(indexData, GCHandleType.Pinned);
             InternalDrawUserIndexedPrimitives(
                 primitiveType, vertexData, vertexOffset, numVertices,
-                ibHandle.AddrOfPinnedObject(), sizeof(ushort), DrawElementsType.UnsignedShort, indexOffset, primitiveCount, vertexDeclaration);
-            ibHandle.Free();
+                indexSize, indexData, indexOffset, primitiveCount, vertexDeclaration);
         }
 
-        private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, short[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
+        private void PlatformDrawUserIndexedPrimitives<T>(
+            PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices,
+            ushort[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
         {
             GCHandle ibHandle = GCHandle.Alloc(indexData, GCHandleType.Pinned);
-            InternalDrawUserIndexedPrimitives(
-                primitiveType, vertexData, vertexOffset, numVertices,
-                ibHandle.AddrOfPinnedObject(), sizeof(short), DrawElementsType.UnsignedShort, indexOffset, primitiveCount, vertexDeclaration);
-            ibHandle.Free();
+            GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
+            try
+            {
+                InternalDrawUserIndexedPrimitives(
+                    primitiveType, vbHandle.AddrOfPinnedObject(), vertexOffset, numVertices,
+                    IndexElementSize.SixteenBits, ibHandle.AddrOfPinnedObject(), indexOffset, primitiveCount, vertexDeclaration);
+            }
+            finally
+            {
+                vbHandle.Free();
+                ibHandle.Free();
+            }
+        }
+
+        private void PlatformDrawUserIndexedPrimitives<T>(
+            PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices,
+            short[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
+        {
+            GCHandle ibHandle = GCHandle.Alloc(indexData, GCHandleType.Pinned);
+            GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
+            try
+            {
+                InternalDrawUserIndexedPrimitives(
+                    primitiveType, vbHandle.AddrOfPinnedObject(), vertexOffset, numVertices,
+                    IndexElementSize.SixteenBits, ibHandle.AddrOfPinnedObject(), indexOffset, primitiveCount, vertexDeclaration);
+            }
+            finally
+            {
+                vbHandle.Free();
+                ibHandle.Free();
+            }
         }
 
         private void PlatformDrawUserIndexedPrimitives<T>(
@@ -1128,41 +1161,47 @@ namespace Microsoft.Xna.Framework.Graphics
             int[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
         {
             GCHandle ibHandle = GCHandle.Alloc(indexData, GCHandleType.Pinned);
-            InternalDrawUserIndexedPrimitives(
-                primitiveType, vertexData, vertexOffset, numVertices,
-                ibHandle.AddrOfPinnedObject(), sizeof(int), DrawElementsType.UnsignedInt, indexOffset, primitiveCount, vertexDeclaration);
-            ibHandle.Free();
+            GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
+            try
+            {
+                InternalDrawUserIndexedPrimitives(
+                    primitiveType, vbHandle.AddrOfPinnedObject(), vertexOffset, numVertices,
+                    IndexElementSize.ThirtyTwoBits, ibHandle.AddrOfPinnedObject(), indexOffset, primitiveCount, vertexDeclaration);
+            }
+            finally
+            {
+                vbHandle.Free();
+                ibHandle.Free();
+            }
         }
 
-        private void InternalDrawUserIndexedPrimitives<T>(
-            PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices,
-            IntPtr indexData, int sizeofIndex, DrawElementsType indexType, int indexOffset, int primitiveCount, VertexDeclaration declaration) where T : struct
+        private void InternalDrawUserIndexedPrimitives(
+            PrimitiveType primitiveType, IntPtr vertexData, int vertexOffset, int numVertices,
+            IndexElementSize indexSize, IntPtr indexData, int indexOffset, int primitiveCount, VertexDeclaration declaration)
         {
             ApplyState(true);
 
             // Unbind current VBOs.
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GraphicsExtensions.CheckGLError();
+
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
             GraphicsExtensions.CheckGLError();
             _indexBufferDirty = true;
+            
+            IntPtr vertexAddr = vertexData + declaration.VertexStride * vertexOffset;
 
-            // Pin the buffers.
-            var vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
-            var vertexAddr = new IntPtr(vbHandle.AddrOfPinnedObject().ToInt64() + declaration.VertexStride * vertexOffset);
-
-            // Setup the vertex declaration to point at the VB data.
+            // Setup the vertex declaration to point at the data.
             declaration.GraphicsDevice = this;
             declaration.Apply(_vertexShader, vertexAddr, ShaderProgramHash);
 
-            //Draw
+            int glIndexSize = indexSize == IndexElementSize.SixteenBits ? 2 : 4;
+            var glIndexType = indexSize == IndexElementSize.SixteenBits ? DrawElementsType.UnsignedShort : DrawElementsType.UnsignedInt;
+
             GL.DrawElements(
                 PrimitiveTypeGL(primitiveType), GetElementCountArray(primitiveType, primitiveCount),
-                indexType, new IntPtr(indexData.ToInt64() + (indexOffset * sizeofIndex)));
+                glIndexType, new IntPtr(indexData.ToInt64() + (indexOffset * glIndexSize)));
             GraphicsExtensions.CheckGLError();
-
-            // Release the vertex handle.
-            vbHandle.Free();
         }
 
         private void PlatformDrawInstancedPrimitives(PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount, int instanceCount)

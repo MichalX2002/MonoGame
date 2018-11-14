@@ -75,7 +75,7 @@ namespace Microsoft.Xna.Framework
             // If we are already on the UI thread, just call the action and be done with it
             if (IsOnUIThread())
             {
-                action();
+                action.Invoke();
                 return;
             }
 
@@ -99,13 +99,13 @@ namespace Microsoft.Xna.Framework
                 //if (!Game.Instance.Window.GraphicsContext.IsCurrent)
                 ((AndroidGameWindow)Game.Instance.Window).GameView.MakeCurrent();
 #endif
-                action();
+                action.Invoke();
                 resetEvent.Set();
             });
             if (resetEvent.Wait(MaxWaitForUIThread) == false)
                 throw new TimeoutException();
-#endif
-#endif
+#endif // IOS
+#endif // DIRECTX ||PSM
         }
 
 #if ANDROID || WINDOWS || DESKTOPGL || ANGLE

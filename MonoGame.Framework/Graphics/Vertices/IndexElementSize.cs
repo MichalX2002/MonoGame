@@ -5,7 +5,7 @@
 namespace Microsoft.Xna.Framework.Graphics
 {
     /// <summary>
-    /// Defines size for index in <see cref="IndexBuffer"/> and <see cref="DynamicIndexBuffer"/>.
+    /// Defines size for index in every buffer that derives from <see cref="IndexBufferBase"/>.
     /// </summary>
 	public enum IndexElementSize
 	{

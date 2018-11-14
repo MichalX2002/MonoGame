@@ -2,7 +2,7 @@
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    public class EffectTechniqueCollection : IEnumerable<EffectTechnique>
+    public class EffectTechniqueCollection : IReadOnlyList<EffectTechnique>
     {
 		private readonly EffectTechnique[] _techniques;
 

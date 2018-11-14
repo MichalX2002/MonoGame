@@ -34,7 +34,7 @@ namespace Microsoft.Xna.Framework.Graphics
             // http://www.khronos.org/registry/gles/extensions/OES/OES_mapbuffer.txt
             throw new NotSupportedException("Vertex buffers are write-only on OpenGL ES platforms");
 #else
-            if (Threading.IsOnUIThread())
+            if (Threading.IsOnUIThread()) // to not create unnecessary Action garbage with BlockOnUIThread
                 GetDataInternal(offsetInBytes, ptr, startIndex, elementCount, elementSize, vertexStride);
             else
                 Threading.BlockOnUIThread(() =>
@@ -86,7 +86,7 @@ namespace Microsoft.Xna.Framework.Graphics
             int offsetInBytes, IntPtr ptr, int startIndex,
             int elementCount, int elementSize, int vertexStride, SetDataOptions options)
         {
-            if (Threading.IsOnUIThread())
+            if (Threading.IsOnUIThread()) // to not create unnecessary Action garbage with BlockOnUIThread
                 SetDataInternal(offsetInBytes, ptr, startIndex, elementCount, elementSize, vertexStride, options);
             else
                 Threading.BlockOnUIThread(() =>
