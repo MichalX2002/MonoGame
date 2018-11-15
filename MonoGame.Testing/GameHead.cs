@@ -59,6 +59,7 @@ namespace MonoGame.Testings
 
             _songs = new SongCollection
             {
+                Content.Load<Song>("sinus"),
                 Content.Load<Song>("Alphys Takes Action"),
                 Content.Load<Song>("Ambitions & Illusions"),
                 Content.Load<Song>("Creation From Another Era"),
@@ -96,12 +97,15 @@ namespace MonoGame.Testings
 
             _spriteBatch.Begin();
 
-            float baseScale = 1;
+            float baseScale = 1f;
             for (int i = 0; i < _visData.Samples.Count; i++)
             {
-                var pos = new Vector2(i * (baseScale / 12 + 0) + 10, yOrigin);
+                float scl = _visData.Samples[i] * 299 + baseScale;
+                float yOff = scl > 0 ? -scl : 0;
+
+                var pos = new Vector2(i * (baseScale + 0) + 10, yOrigin + yOff);
                 var color = new Color(i / 10 + 20, i / 15, 150 - i / 10);
-                var scale = new Vector2(baseScale, _visData.Samples[i] * baseScale * 499 + baseScale);
+                var scale = new Vector2(baseScale, Math.Abs(scl));
 
                 _spriteBatch.Draw(_pixel, pos, null, color, 0, Vector2.Zero, scale, SpriteEffects.None, 0);
             }

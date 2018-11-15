@@ -19,7 +19,7 @@ namespace Microsoft.Xna.Framework.Audio
         readonly object iterationMutex = new object();
         readonly object readMutex = new object();
 
-        internal readonly float[] readSampleBuffer;
+        readonly float[] readSampleBuffer;
         readonly short[] castBuffer;
 
         readonly HashSet<OggStream> streams = new HashSet<OggStream>();
@@ -73,8 +73,8 @@ namespace Microsoft.Xna.Framework.Audio
                 underlyingThread.Start();
             }
 
-            readSampleBuffer = new float[bufferSize];
-            castBuffer = new short[bufferSize];
+            readSampleBuffer = new float[BufferSize];
+            castBuffer = new short[BufferSize];
         }
 
         public void Dispose()
@@ -119,6 +119,13 @@ namespace Microsoft.Xna.Framework.Audio
                 int size = readSamples * sizeof(short);
                 AL.BufferData(bufferId, format, castBuffer, size, stream.Reader.SampleRate);
                 ALHelper.CheckError("Failed to fill buffer, readSamples = {0}, SampleRate = {1}.", readSamples, stream.Reader.SampleRate);
+                
+                if (readSamples > 0)
+                {
+                    var part = new SongPart(BufferSize);
+                    part.SetData(readSampleBuffer, readSamples);
+                    stream.parts.Add(part);
+                }
             }
 
             return readSamples != BufferSize;
@@ -206,6 +213,9 @@ namespace Microsoft.Xna.Framework.Audio
             IEnumerable<int> tempBuffers;
             if (processed > 0)
             {
+                for (int i = 0; i < processed && stream.parts.Count > 0; i++)
+                    stream.parts.RemoveAt(0);
+
                 tempBuffers = AL.SourceUnqueueBuffers(stream.alSourceId, processed);
                 ALHelper.CheckError("Failed to unqueue buffers.");
             }

@@ -17,6 +17,24 @@ using MonoGame.OpenAL;
 
 namespace Microsoft.Xna.Framework.Audio
 {
+    internal class SongPart
+    {
+        public readonly float[] Data;
+        public int Count;
+
+        public SongPart(int size)
+        {
+            Data = new float[size];
+        }
+
+        public void SetData(float[] buffer, int count)
+        {
+            for (int i = 0; i < count; i++)
+                Data[i] = buffer[i];
+            Count = count;
+        }
+    }
+
     internal class OggStream : IDisposable
     {
         const int DefaultBufferCount = 3;
@@ -26,6 +44,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal readonly int alSourceId;
         internal readonly int[] alBufferIds;
+        internal readonly List<SongPart> parts;
 
         readonly int alFilterId;
         readonly string oggFileName;
@@ -66,6 +85,8 @@ namespace Microsoft.Xna.Framework.Audio
                 ALHelper.CheckError("Failed to set Efx filter value.");
                 LowPassHFGain = 1;
             }
+
+            parts = new List<SongPart>();
         }
 
         public void Prepare()
@@ -213,6 +234,7 @@ namespace Microsoft.Xna.Framework.Audio
                 {
                     OggStreamer.Instance.Efx.Filter(alFilterId, EfxFilterf.LowpassGainHF, lowPassHfGain = value);
                     ALHelper.CheckError("Failed to set Efx filter.");
+
                     OggStreamer.Instance.Efx.BindFilterToSource(alSourceId, alFilterId);
                     ALHelper.CheckError("Failed to bind Efx filter to source.");
                 }
@@ -262,9 +284,12 @@ namespace Microsoft.Xna.Framework.Audio
 
             AL.Source(alSourceId, ALSourcei.Buffer, 0);
             ALHelper.CheckError("Failed to free source from buffers.");
+
             OpenALSoundController.Instance.RecycleSource(alSourceId);
+
             AL.DeleteBuffers(alBufferIds);
             ALHelper.CheckError("Failed to delete buffer.");
+
             if (OggStreamer.Instance.Efx.IsInitialized)
             {
                 OggStreamer.Instance.Efx.DeleteFilter(alFilterId);

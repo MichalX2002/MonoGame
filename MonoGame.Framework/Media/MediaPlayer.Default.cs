@@ -176,17 +176,44 @@ namespace Microsoft.Xna.Framework.Media
         private static void PlatformGetVisualizationData(VisualizationData data)
         {
 #if DESKTOPGL
-            var instance = OggStreamer.Instance;
-            float[] samples = instance.readSampleBuffer;
-
-            AL.GetSource(Queue.ActiveSong.stream.alSourceId, ALGetSourcei.SampleOffset, out int start);
+            var activeSong = Queue.ActiveSong;
+            if (activeSong == null)
+                return;
             
-            for (int i = 0; i < VisualizationData.Size; i++)
+            var stream = activeSong.stream;
+            if (stream == null)
+                return;
+            
+            lock (stream.prepareMutex)
             {
-                int index = i + start;
-                if (index >= samples.Length)
-                    break;
-                data._samples[i] = samples[index];
+                if (stream.parts.Count == 0)
+                    return;
+
+                AL.GetSource(stream.alSourceId, ALGetSourcei.SampleOffset, out int start);
+
+                int partIndex = 0;
+                SongPart part = stream.parts[partIndex];
+                for (int vi = 0, di = start; vi < VisualizationData.Size; vi++, di++)
+                {
+                    int i = di;
+                    if (i >= part.Count)
+                    {
+                        //look at next part
+                        partIndex++;
+                        if (partIndex < stream.parts.Count)
+                        {
+                            part = stream.parts[partIndex];
+                            if (part.Count == 0)
+                                break;
+
+                            di = -1; // the loop adds 1 to 'di'
+                            i = 0;
+                        }
+                        else // no more parts ready
+                            break;
+                    }
+                    data._samples[vi] = part.Data[i];
+                }
             }
 #endif
         }
