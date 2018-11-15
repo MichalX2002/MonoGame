@@ -195,8 +195,7 @@ namespace Microsoft.Xna.Framework.Media
                 SongPart part = stream.parts[partIndex];
                 for (int vi = 0, di = start; vi < VisualizationData.Size; vi++, di++)
                 {
-                    int i = di;
-                    if (i >= part.Count)
+                    if (di >= part.Count)
                     {
                         //look at next part
                         partIndex++;
@@ -206,13 +205,12 @@ namespace Microsoft.Xna.Framework.Media
                             if (part.Count == 0)
                                 break;
 
-                            di = -1; // the loop adds 1 to 'di'
-                            i = 0;
+                            di = 0;
                         }
                         else // no more parts ready
                             break;
                     }
-                    data._samples[vi] = part.Data[i];
+                    data._samples[vi] = part.Data[di];
                 }
             }
 #endif
