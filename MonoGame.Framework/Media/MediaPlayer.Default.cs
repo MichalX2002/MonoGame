@@ -5,6 +5,7 @@
 using Microsoft.Xna.Framework.Audio;
 using MonoGame.OpenAL;
 using System;
+using System.Threading;
 
 #if IOS
 using AudioToolbox;
@@ -179,40 +180,59 @@ namespace Microsoft.Xna.Framework.Media
             var activeSong = Queue.ActiveSong;
             if (activeSong == null)
                 return;
-            
+
             var stream = activeSong.stream;
             if (stream == null)
                 return;
-            
+
+            int start;
+            SongPart part;
             lock (stream.prepareMutex)
             {
-                if (stream.parts.Count == 0)
-                    return;
-
-                AL.GetSource(stream.alSourceId, ALGetSourcei.SampleOffset, out int start);
-
-                int partIndex = 0;
-                SongPart part = stream.parts[partIndex];
-                for (int vi = 0, di = start; vi < VisualizationData.Size; vi++, di++)
-                {
-                    if (di >= part.Count)
-                    {
-                        //look at next part
-                        partIndex++;
-                        if (partIndex < stream.parts.Count)
-                        {
-                            part = stream.parts[partIndex];
-                            if (part.Count == 0)
-                                break;
-
-                            di = 0;
-                        }
-                        else // no more parts ready
-                            break;
-                    }
-                    data._samples[vi] = part.Data[di];
-                }
+                AL.GetSource(stream.alSourceId, ALGetSourcei.SampleOffset, out start);
+                start *= stream.Reader.Channels;
+                part = stream.parts[0];
             }
+
+            int vi = 0;
+            int partIndex = 0;
+            for (int di = start; vi < data._samples.Length; vi++, di++)
+            {
+                if (di < part.Count)
+                {
+                    data._samples[vi] = part.Data[di];
+                    continue;
+                }
+
+                if (Monitor.TryEnter(stream.prepareMutex, 5))
+                {
+                    //look at next part
+                    partIndex++;
+                    if (partIndex < stream.parts.Count)
+                    {
+                        part = stream.parts[partIndex];
+                        if (part.Count == 0)
+                        {
+                            Monitor.Exit(stream.prepareMutex);
+                            break;
+                        }
+
+                        di = 0;
+                    }
+                    else // no more parts ready
+                    {
+                        Monitor.Exit(stream.prepareMutex);
+                        break;
+                    }
+
+                    Monitor.Exit(stream.prepareMutex);
+                }
+                else
+                    return;
+            }
+
+            for (int i = vi; i < data._samples.Length; i++)
+                data._samples[i] = 0;
 #endif
         }
 

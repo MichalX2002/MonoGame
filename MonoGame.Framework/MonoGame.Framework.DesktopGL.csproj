@@ -47,7 +47,7 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Audio\OggStreamer.cs" />
+    <Compile Include="Media\OggStreamer.cs" />
     <Compile Include="ExceptionHelper.cs" />
     <Compile Include="Graphics\SpriteBatch.cs" />
     <Compile Include="Graphics\SpriteBatcher.cs" />
@@ -64,6 +64,7 @@
     <Compile Include="Graphics\Vertices\VertexBufferBase.cs" />
     <Compile Include="Graphics\Vertices\VertexBufferBase.OpenGL.cs" />
     <Compile Include="Input\KeyModifier.cs" />
+    <Compile Include="Media\SongPart.cs" />
     <Compile Include="Media\VisualizationData.cs" />
     <Compile Include="Utilities\Int32Comparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -159,7 +160,7 @@
     <Compile Include="Audio\OALSoundBuffer.cs">
       <Services>OpenALAudio</Services>
     </Compile>
-    <Compile Include="Audio\OggStream.cs">
+    <Compile Include="Media\OggStream.cs">
       <Platforms>WindowsGL,Linux,MacOS</Platforms>
     </Compile>
     <Compile Include="Audio\OpenAL.cs">

@@ -1,11 +1,12 @@
-﻿using MonoGame.OpenAL;
+﻿using Microsoft.Xna.Framework.Audio;
+using MonoGame.OpenAL;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace Microsoft.Xna.Framework.Media
 {
     internal class OggStreamer : IDisposable
     {
@@ -13,7 +14,7 @@ namespace Microsoft.Xna.Framework.Audio
         public readonly EffectsExtension Efx = OpenALSoundController.Efx;
 
         const float DefaultUpdateRate = 10;
-        const int DefaultBufferSize = 44100;
+        const int DefaultBufferSize = 48000;
 
         internal static readonly object singletonMutex = new object();
         readonly object iterationMutex = new object();
@@ -22,9 +23,9 @@ namespace Microsoft.Xna.Framework.Audio
         readonly float[] readSampleBuffer;
         readonly short[] castBuffer;
 
-        readonly HashSet<OggStream> streams = new HashSet<OggStream>();
-        readonly List<OggStream> threadLocalStreams = new List<OggStream>();
-        
+        readonly HashSet<OggStream> _streams = new HashSet<OggStream>();
+        readonly Stack<SongPart> _partCache = new Stack<SongPart>();
+
         readonly Thread underlyingThread;
         Stopwatch threadWatch;
         int nextTimingIndex;
@@ -85,7 +86,7 @@ namespace Microsoft.Xna.Framework.Audio
 
                 cancelled = true;
                 lock (iterationMutex)
-                    streams.Clear();
+                    _streams.Clear();
 
                 underlyingThread.Join(1000);
                 Instance = null;
@@ -95,13 +96,13 @@ namespace Microsoft.Xna.Framework.Audio
         internal bool AddStream(OggStream stream)
         {
             lock (iterationMutex)
-                return streams.Add(stream);
+                return _streams.Add(stream);
         }
 
         internal bool RemoveStream(OggStream stream)
         {
             lock (iterationMutex)
-                return streams.Remove(stream);
+                return _streams.Remove(stream);
         }
 
         public bool FillBuffer(OggStream stream, int bufferId)
@@ -122,7 +123,7 @@ namespace Microsoft.Xna.Framework.Audio
                 
                 if (readSamples > 0)
                 {
-                    var part = new SongPart(BufferSize);
+                    var part = _partCache.Count > 0 ? _partCache.Pop() : new SongPart(BufferSize);
                     part.SetData(readSampleBuffer, readSamples);
                     stream.parts.Add(part);
                 }
@@ -146,6 +147,8 @@ namespace Microsoft.Xna.Framework.Audio
 
         void EnsureBuffersFilled()
         {
+            var localStreams = new List<OggStream>();
+
             while (!cancelled)
             {
                 Thread.Sleep((int)(1000 / ((UpdateRate <= 0) ? 1 : UpdateRate)));
@@ -154,16 +157,16 @@ namespace Microsoft.Xna.Framework.Audio
 
                 threadWatch.Restart();
 
-                threadLocalStreams.Clear();
+                localStreams.Clear();
                 lock (iterationMutex)
-                    threadLocalStreams.AddRange(streams);
+                    localStreams.AddRange(_streams);
 
-                foreach (OggStream stream in threadLocalStreams)
+                foreach (OggStream stream in localStreams)
                 {
                     lock (stream.prepareMutex)
                     {
                         lock (iterationMutex)
-                            if (!streams.Contains(stream))
+                            if (!_streams.Contains(stream))
                                 continue;
 
                         if (!FillStream(stream))
@@ -176,7 +179,7 @@ namespace Microsoft.Xna.Framework.Audio
                             continue;
 
                         lock (iterationMutex)
-                            if (!streams.Contains(stream))
+                            if (!_streams.Contains(stream))
                                 continue;
 
                         var state = AL.GetSourceState(stream.alSourceId);
@@ -210,21 +213,24 @@ namespace Microsoft.Xna.Framework.Audio
             if (processed == 0 && queued == stream.BufferCount)
                 return false;
 
-            IEnumerable<int> tempBuffers;
+            IEnumerable<int> tmpBuffers;
             if (processed > 0)
             {
                 for (int i = 0; i < processed && stream.parts.Count > 0; i++)
+                {
+                    _partCache.Push(stream.parts[0]);
                     stream.parts.RemoveAt(0);
+                }
 
-                tempBuffers = AL.SourceUnqueueBuffers(stream.alSourceId, processed);
+                tmpBuffers = AL.SourceUnqueueBuffers(stream.alSourceId, processed);
                 ALHelper.CheckError("Failed to unqueue buffers.");
             }
             else
-                tempBuffers = stream.alBufferIds.Skip(queued);
+                tmpBuffers = stream.alBufferIds.Skip(queued);
 
             bool finished = false;
             int buffersFilled = 0;
-            foreach (int buffer in tempBuffers)
+            foreach (int buffer in tmpBuffers)
             {
                 if (pendingFinish)
                     break;
@@ -252,14 +258,14 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 pendingFinish = false;
                 lock (iterationMutex)
-                    streams.Remove(stream);
+                    _streams.Remove(stream);
 
                 if (stream.FinishedAction != null)
                     stream.FinishedAction.Invoke();
             }
             else if (!finished && buffersFilled > 0) // queue only successfully filled buffers
             {
-                foreach (int buffer in tempBuffers)
+                foreach (int buffer in tmpBuffers)
                 {
                     if (buffersFilled <= 0)
                         break;

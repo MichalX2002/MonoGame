@@ -43,7 +43,7 @@ namespace MonoGame.Testings
             MediaPlayer.Play(_songs);
 
             MediaPlayer.IsVisualizationEnabled = true;
-            _visData = new VisualizationData();
+            _visData = new VisualizationData(VisualizationData.MAX_SAMPLES / 2);
         }
 
         private void MediaPlayer_ActiveSongChanged(object s, EventArgs e)
@@ -59,7 +59,7 @@ namespace MonoGame.Testings
 
             _songs = new SongCollection
             {
-                Content.Load<Song>("sinus"),
+                //Content.Load<Song>("sinus"),
                 Content.Load<Song>("Alphys Takes Action"),
                 Content.Load<Song>("Ambitions & Illusions"),
                 Content.Load<Song>("Creation From Another Era"),
@@ -69,7 +69,6 @@ namespace MonoGame.Testings
 
         protected override void UnloadContent()
         {
-
         }
 
         private float _hej;
@@ -82,37 +81,46 @@ namespace MonoGame.Testings
             _hej += time.Delta;
             if (_hej > 0)
             {
-                MediaPlayer.GetVisualizationData(_visData);
                 _hej = 0;
             }
 
+            MediaPlayer.GetVisualizationData(_visData);
+
             base.Update(time);
         }
+
+        const float baseScale = 1f;
 
         protected override void Draw(GameTime time)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            int yOrigin = GraphicsDevice.Viewport.Height / 2;
+            float yOrigin = GraphicsDevice.Viewport.Height / 2f;
 
             _spriteBatch.Begin();
 
-            float baseScale = 1f;
-            for (int i = 0; i < _visData.Samples.Count; i++)
+            for (int i = 0; i < _visData.Samples.Count; i += 16)
             {
-                float scl = _visData.Samples[i] * 299 + baseScale;
-                float yOff = scl > 0 ? -scl : 0;
+                float x = i * baseScale / 70f + 10;
 
-                var pos = new Vector2(i * (baseScale + 0) + 10, yOrigin + yOff);
-                var color = new Color(i / 10 + 20, i / 15, 150 - i / 10);
-                var scale = new Vector2(baseScale, Math.Abs(scl));
-
-                _spriteBatch.Draw(_pixel, pos, null, color, 0, Vector2.Zero, scale, SpriteEffects.None, 0);
+                DrawLine(i, x, yOrigin);
             }
 
             _spriteBatch.End();
 
             base.Draw(time);
+        }
+
+        void DrawLine(int i, float x, float yOrigin)
+        {
+            float scl = _visData.Samples[i] * 149 + baseScale;
+            float yOff = scl > 0 ? -scl : 0;
+
+            var pos = new Vector2(x, yOrigin + yOff);
+            var color = new Color(i / 10 + 20, i / 15, 150 - i / 10);
+            var scale = new Vector2(baseScale + 1f, Math.Abs(scl));
+
+            _spriteBatch.Draw(_pixel, pos, null, color, 0, Vector2.Zero, scale, SpriteEffects.None, 0);
         }
     }
 }

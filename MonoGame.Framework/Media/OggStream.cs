@@ -14,27 +14,10 @@ using System.Linq;
 using System.Threading;
 using NVorbis;
 using MonoGame.OpenAL;
+using Microsoft.Xna.Framework.Audio;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace Microsoft.Xna.Framework.Media
 {
-    internal class SongPart
-    {
-        public readonly float[] Data;
-        public int Count;
-
-        public SongPart(int size)
-        {
-            Data = new float[size];
-        }
-
-        public void SetData(float[] buffer, int count)
-        {
-            for (int i = 0; i < count; i++)
-                Data[i] = buffer[i];
-            Count = count;
-        }
-    }
-
     internal class OggStream : IDisposable
     {
         const int DefaultBufferCount = 3;
