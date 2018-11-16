@@ -56,7 +56,7 @@ namespace Microsoft.Xna.Framework
 
         public Game()
         {
-            _instance = this;
+            Instance = this;
 
             LaunchParameters = new LaunchParameters();
             Services = new GameServiceContainer();
@@ -141,7 +141,7 @@ namespace Microsoft.Xna.Framework
                 Activity = null;
 #endif
                 _isDisposed = true;
-                _instance = null;
+                Instance = null;
             }
         }
 
@@ -164,16 +164,36 @@ namespace Microsoft.Xna.Framework
         [CLSCompliant(false)]
         public static AndroidGameActivity Activity { get; internal set; }
 #endif
-        private static Game _instance = null;
-        internal static Game Instance { get { return Game._instance; } }
+        
+        internal static Game Instance { get; private set; }
 
         public LaunchParameters LaunchParameters { get; private set; }
-
         public GameComponentCollection Components { get; private set; }
+        public GameServiceContainer Services { get; }
+
+        public bool IsFixedTimeStep { get; set; } = true;
+        public GameTime Time { get; } = new GameTime();
+
+        [CLSCompliant(false)]
+        public GameWindow Window => Platform.Window;
+
+        public bool IsActive => Platform.IsActive;
+
+        public bool IsMouseVisible
+        {
+            get => Platform.IsMouseVisible;
+            set => Platform.IsMouseVisible = value;
+        }
+
+        public ContentManager Content
+        {
+            get => _content;
+            set => _content = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         public TimeSpan InactiveSleepTime
         {
-            get { return _inactiveSleepTime; }
+            get => _inactiveSleepTime;
             set
             {
                 if (value < TimeSpan.Zero)
@@ -189,7 +209,7 @@ namespace Microsoft.Xna.Framework
         /// </summary>
         public TimeSpan MaxElapsedTime
         {
-            get { return _maxElapsedTime; }
+            get => _maxElapsedTime;
             set
             {
                 if (value < TimeSpan.Zero)
@@ -201,20 +221,9 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        public bool IsActive
-        {
-            get { return Platform.IsActive; }
-        }
-
-        public bool IsMouseVisible
-        {
-            get { return Platform.IsMouseVisible; }
-            set { Platform.IsMouseVisible = value; }
-        }
-
         public TimeSpan TargetElapsedTime
         {
-            get { return _targetElapsedTime; }
+            get => _targetElapsedTime;
             set
             {
                 // Give GamePlatform implementations an opportunity to override
@@ -230,19 +239,6 @@ namespace Microsoft.Xna.Framework
                     _targetElapsedTime = value;
                     Platform.TargetElapsedTimeChanged();
                 }
-            }
-        }
-
-        public bool IsFixedTimeStep { get; set; } = true;
-
-        public GameServiceContainer Services { get; }
-
-        public ContentManager Content
-        {
-            get { return _content; }
-            set
-            {
-                _content = value ?? throw new ArgumentNullException(nameof(value));
             }
         }
 
@@ -262,23 +258,13 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        [CLSCompliant(false)]
-        public GameWindow Window
-        {
-            get { return Platform.Window; }
-        }
-
         #endregion Properties
-
-        #region Internal Properties
-
+        
         // FIXME: Internal members should be eliminated.
         // Currently Game.Initialized is used by the Mac game window class to
         // determine whether to raise DeviceResetting and DeviceReset on
         // GraphicsDeviceManager.
         internal bool Initialized { get; private set; } = false;
-
-        #endregion Internal Properties
 
         #region Events
 

@@ -35,6 +35,7 @@ namespace MonoGame.Testings
 
             base.Initialize();
 
+            /*
             MediaPlayer.ActiveSongChanged += MediaPlayer_ActiveSongChanged;
             MediaPlayer.Volume = 0.25f;
             MediaPlayer.Pitch = -0.5f;
@@ -43,6 +44,7 @@ namespace MonoGame.Testings
             MediaPlayer.Play(_songs);
 
             MediaPlayer.IsVisualizationEnabled = true;
+            */
             _visData = new VisualizationData(VisualizationData.MAX_SAMPLES);
         }
 
@@ -57,7 +59,7 @@ namespace MonoGame.Testings
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
             _pixel.SetData(new Color[] { Color.White });
 
-            
+            /*
             _songs = new SongCollection
             {
                 //Content.Load<Song>("sinus"),
@@ -66,13 +68,12 @@ namespace MonoGame.Testings
                 //Content.Load<Song>("Creation From Another Era"),
                 //Content.Load<Song>("Run with Me")
             };
+            */
 
-            /*
             var def = Microphone.Default;
             def.BufferReady += Def_BufferReady;
             
             def.Start();
-            */
         }
 
         private void Def_BufferReady(Microphone source, int sampleCount)

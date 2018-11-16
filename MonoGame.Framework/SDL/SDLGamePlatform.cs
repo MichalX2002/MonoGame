@@ -148,7 +148,7 @@ namespace Microsoft.Xna.Framework
                 {
                     unsafe
                     {
-                        string text = Sdl.GetString((IntPtr)ev.Text.Text);
+                        string text = InteropHelpers.PtrToString((IntPtr)ev.Text.Text);
                         if (text.Length == 0)
                             continue;
 

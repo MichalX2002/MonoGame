@@ -3,7 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using System.Text;
 
 namespace MonoGame.Utilities
@@ -11,25 +11,22 @@ namespace MonoGame.Utilities
     internal static class InteropHelpers
     {
         /// <summary>
-        /// Convert a pointer to a Utf8 null-terminated string to a .NET System.String
+        /// Convert a <see cref="IntPtr"/> pointing to a UTF8 null-terminated string to a <see cref="String"/>.
         /// </summary>
-        public static unsafe string Utf8ToString(IntPtr handle)
+        public static unsafe string PtrToString(IntPtr handle)
         {
             if (handle == IntPtr.Zero)
                 return string.Empty;
 
-            var ptr = (byte*) handle;
+            byte* ptr = (byte*)handle;
             while (*ptr != 0)
                 ptr++;
 
-            var len = ptr - (byte*) handle;
+            int len = (int)(ptr - (byte*)handle);
             if (len == 0)
                 return string.Empty;
-
-            var bytes = new byte[len];
-            Marshal.Copy(handle, bytes, 0, bytes.Length);
-
-            return Encoding.UTF8.GetString(bytes);
+            
+            return Encoding.UTF8.GetString((byte*)handle, len);
         }
     }
 }

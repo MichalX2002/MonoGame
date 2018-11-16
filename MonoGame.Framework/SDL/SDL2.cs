@@ -192,7 +192,7 @@ internal static class Sdl
             return string.Empty;
 
         IntPtr data = SDL_GetClipboardText();
-        string value = GetString(data);
+        string value = InteropHelpers.PtrToString(data);
         SDL_free(data);
         return value;
     }
@@ -240,7 +240,7 @@ internal static class Sdl
 
     public static string GetError()
     {
-        return InteropHelpers.Utf8ToString(SDL_GetError());
+        return InteropHelpers.PtrToString(SDL_GetError());
     }
 
     public static int GetError(int value)
@@ -269,7 +269,7 @@ internal static class Sdl
 
     public static string GetHint(string name)
     {
-        return InteropHelpers.Utf8ToString(SDL_GetHint(name));
+        return InteropHelpers.PtrToString(SDL_GetHint(name));
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -528,7 +528,7 @@ internal static class Sdl
 
         public static string GetDisplayName(int index)
         {
-            return InteropHelpers.Utf8ToString(GetError(SDL_GetDisplayName(index)));
+            return InteropHelpers.PtrToString(GetError(SDL_GetDisplayName(index)));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -980,7 +980,7 @@ internal static class Sdl
 
         public static string GetMapping(IntPtr gamecontroller)
         {
-            return InteropHelpers.Utf8ToString(SDL_GameControllerMapping(gamecontroller));
+            return InteropHelpers.PtrToString(SDL_GameControllerMapping(gamecontroller));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -998,7 +998,7 @@ internal static class Sdl
 
         public static string GetName(IntPtr gamecontroller)
         {
-            return InteropHelpers.Utf8ToString(SDL_GameControllerName(gamecontroller));
+            return InteropHelpers.PtrToString(SDL_GameControllerName(gamecontroller));
         }
     }
 
