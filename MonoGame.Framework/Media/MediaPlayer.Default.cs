@@ -204,7 +204,7 @@ namespace Microsoft.Xna.Framework.Media
                     continue;
                 }
 
-                if (Monitor.TryEnter(stream.prepareMutex, 5))
+                if (Monitor.TryEnter(stream.prepareMutex))
                 {
                     //look at next part
                     partIndex++;
@@ -227,10 +227,11 @@ namespace Microsoft.Xna.Framework.Media
 
                     Monitor.Exit(stream.prepareMutex);
                 }
-                else
+                else // failed to lock
                     return;
             }
 
+            // clear old samples
             for (int i = vi; i < data._samples.Length; i++)
                 data._samples[i] = 0;
 #endif
