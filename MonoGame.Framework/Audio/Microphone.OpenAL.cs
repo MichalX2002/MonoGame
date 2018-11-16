@@ -27,12 +27,15 @@ namespace Microsoft.Xna.Framework.Audio
         internal void CheckALCError(string operation)
         {
             AlcError error = Alc.GetErrorForDevice(_captureDevice);
+
             if (error == AlcError.NoError)
                 return;
-            
-            throw new NoMicrophoneConnectedException(
-                string.Format("{0} - {1}", operation,
-                string.Format("OpenAL Error: {0}", error)));
+
+            string errorFmt = "OpenAL Error: {0}";
+
+            throw new NoMicrophoneConnectedException(String.Format("{0} - {1}",
+                            operation,
+                            string.Format(errorFmt, error)));
         }
        
         internal static void PopulateCaptureDevices()

@@ -53,18 +53,6 @@ internal static class Sdl
     public static int Minor;
     public static int Patch;
 
-    public static unsafe string GetString(IntPtr handle)
-    {
-        if (handle == IntPtr.Zero)
-            return string.Empty;
-
-        var ptr = (byte*)handle;
-        while (*ptr != 0)
-            ptr++;
-
-        return Encoding.UTF8.GetString((byte*)handle, (int)(ptr - (byte*)handle));
-    }
-
     [Flags]
     public enum InitFlags
     {
@@ -252,7 +240,7 @@ internal static class Sdl
 
     public static string GetError()
     {
-        return GetString(SDL_GetError());
+        return InteropHelpers.Utf8ToString(SDL_GetError());
     }
 
     public static int GetError(int value)
@@ -281,7 +269,7 @@ internal static class Sdl
 
     public static string GetHint(string name)
     {
-        return GetString(SDL_GetHint(name));
+        return InteropHelpers.Utf8ToString(SDL_GetHint(name));
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -411,6 +399,10 @@ internal static class Sdl
         public static d_sdl_destroywindow Destroy = FuncLoader.LoadFunction<d_sdl_destroywindow>(NativeLibrary, "SDL_DestroyWindow");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate uint d_sdl_getwindowid(IntPtr window);
+        public static d_sdl_getwindowid GetWindowId = FuncLoader.LoadFunction<d_sdl_getwindowid>(NativeLibrary, "SDL_GetWindowID");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int d_sdl_getwindowdisplayindex(IntPtr window);
         private static readonly d_sdl_getwindowdisplayindex SDL_GetWindowDisplayIndex = FuncLoader.LoadFunction<d_sdl_getwindowdisplayindex>(NativeLibrary, "SDL_GetWindowDisplayIndex");
 
@@ -536,7 +528,7 @@ internal static class Sdl
 
         public static string GetDisplayName(int index)
         {
-            return GetString(GetError(SDL_GetDisplayName(index)));
+            return InteropHelpers.Utf8ToString(GetError(SDL_GetDisplayName(index)));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -988,7 +980,7 @@ internal static class Sdl
 
         public static string GetMapping(IntPtr gamecontroller)
         {
-            return GetString(SDL_GameControllerMapping(gamecontroller));
+            return InteropHelpers.Utf8ToString(SDL_GameControllerMapping(gamecontroller));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -1006,7 +998,7 @@ internal static class Sdl
 
         public static string GetName(IntPtr gamecontroller)
         {
-            return GetString(SDL_GameControllerName(gamecontroller));
+            return InteropHelpers.Utf8ToString(SDL_GameControllerName(gamecontroller));
         }
     }
 
