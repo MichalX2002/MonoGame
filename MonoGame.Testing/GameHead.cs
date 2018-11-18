@@ -34,18 +34,16 @@ namespace MonoGame.Testings
             IsMouseVisible = true;
 
             base.Initialize();
-
-            /*
+            
             MediaPlayer.ActiveSongChanged += MediaPlayer_ActiveSongChanged;
             MediaPlayer.Volume = 0.25f;
-            MediaPlayer.Pitch = -0.5f;
+            MediaPlayer.Pitch = 0f;
             MediaPlayer.IsRepeating = true;
 
             MediaPlayer.Play(_songs);
 
             MediaPlayer.IsVisualizationEnabled = true;
-            */
-            _visData = new VisualizationData(VisualizationData.MAX_SAMPLES);
+            _visData = new VisualizationData(VisualizationData.MAX_SAMPLES / 2);
         }
 
         private void MediaPlayer_ActiveSongChanged(object s, EventArgs e)
@@ -58,8 +56,7 @@ namespace MonoGame.Testings
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
             _pixel.SetData(new Color[] { Color.White });
-
-            /*
+            
             _songs = new SongCollection
             {
                 //Content.Load<Song>("sinus"),
@@ -68,12 +65,13 @@ namespace MonoGame.Testings
                 //Content.Load<Song>("Creation From Another Era"),
                 //Content.Load<Song>("Run with Me")
             };
-            */
 
+            /*
             var def = Microphone.Default;
             def.BufferReady += Def_BufferReady;
             
             def.Start();
+            */
         }
 
         private void Def_BufferReady(Microphone source, int sampleCount)
@@ -110,6 +108,8 @@ namespace MonoGame.Testings
                 _hej = 0;
             }
 
+            //MediaPlayer.GetVisualizationData(_visData);
+
             base.Update(time);
         }
 
@@ -125,11 +125,14 @@ namespace MonoGame.Testings
 
             _spriteBatch.Begin();
 
-            for (int i = 0; i < samples.Count; i += 16)
+            for (int i = 0; i < _visData.Samples.Count; i += 16)
             {
                 float x = i * baseScale / 56f + 10;
 
-                DrawLine(i, x, yOrigin);
+                float sample = _visData.Samples[i];
+                //float sample = samples[i] / short.MaxValue;
+
+                DrawLine(sample, i, x, yOrigin);
             }
 
             _spriteBatch.End();
@@ -137,9 +140,9 @@ namespace MonoGame.Testings
             base.Draw(time);
         }
 
-        void DrawLine(int i, float x, float yOrigin)
+        void DrawLine(float sample, int i, float x, float yOrigin)
         {
-            float scl = samples[i] * 299f / short.MaxValue + baseScale;
+            float scl = sample * 299f + baseScale;
             float yOff = scl > 0 ? -scl : 0;
 
             var pos = new Vector2(x, yOrigin + yOff);

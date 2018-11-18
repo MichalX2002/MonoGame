@@ -377,6 +377,7 @@ namespace Microsoft.Xna.Framework
         private Stopwatch _gameTimer;
         private long _previousTicks = 0;
         private int _updateFrameLag;
+    
 #if WINDOWS_UAP
         private readonly object _locker = new object();
 #endif
@@ -396,7 +397,7 @@ namespace Microsoft.Xna.Framework
                 lock (_locker)
                     System.Threading.Monitor.Wait(_locker, (int)InactiveSleepTime.TotalMilliseconds);
 #else
-                System.Threading.Thread.Sleep((int)InactiveSleepTime.TotalMilliseconds);
+                Thread.Sleep((int)InactiveSleepTime.TotalMilliseconds);
 #endif
             }
 
@@ -407,11 +408,10 @@ namespace Microsoft.Xna.Framework
 
             if (IsFixedTimeStep && _accumulatedElapsedTime < TargetElapsedTime)
             {
-#if WINDOWS && !DESKTOPGL
                 // Sleep for as long as possible without overshooting the update time
                 var sleepTime = (TargetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
                 Utilities.TimerHelper.SleepForNoMoreThan(sleepTime);
-#endif
+
                 // Keep looping until it's time to perform the next update
                 goto RetryTick;
             }

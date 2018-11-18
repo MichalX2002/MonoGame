@@ -132,6 +132,7 @@
     <Compile Include="Utilities\Png\PngReader.cs" />
     <Compile Include="Utilities\Png\PngWriter.cs" />
     <Compile Include="Utilities\ReflectionHelpers.Default.cs" />
+    <Compile Include="Utilities\TimerHelper.cs" />
     <Compile Include="Utilities\ZlibStream\DeflateManager.cs" />
     <Compile Include="Utilities\ZlibStream\GZipStream.cs" />
     <Compile Include="Utilities\ZlibStream\InflateBlocks.cs" />
