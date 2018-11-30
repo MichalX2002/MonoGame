@@ -14,7 +14,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Utilities", "MonoG
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Imaging.Tests", "MonoGame.Imaging.Tests\MonoGame.Imaging.Tests.csproj", "{8627DE8C-7B2C-4CF8-9725-01BA0BF04CC9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Testing", "MonoGame.Testing\MonoGame.Testing.csproj", "{AEEADB59-7F50-496A-9524-A81A876AE70E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Testing", "MonoGame.Testing\MonoGame.Testing.DesktopGL.csproj", "{AEEADB59-7F50-496A-9524-A81A876AE70E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

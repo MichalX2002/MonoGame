@@ -37,9 +37,9 @@ namespace MonoGame.Testings
             
             MediaPlayer.ActiveSongChanged += MediaPlayer_ActiveSongChanged;
             MediaPlayer.Volume = 0.25f;
-            MediaPlayer.Pitch = 0f;
+            MediaPlayer.Pitch = -1f;
             MediaPlayer.IsRepeating = true;
-
+        
             MediaPlayer.Play(_songs);
 
             MediaPlayer.IsVisualizationEnabled = true;

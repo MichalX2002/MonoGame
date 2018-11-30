@@ -30,7 +30,8 @@ namespace MonoGame.Framework
         static private List<WinFormsGameWindow> _allWindows = new List<WinFormsGameWindow>();
 
         private WinFormsGamePlatform _platform;
-
+        
+        private FormWindowState _lastWindowState;
         private bool _isResizable;
         private bool _isBorderless;
         private bool _isMouseHidden;
@@ -42,18 +43,14 @@ namespace MonoGame.Framework
 
         // true if window position was moved either through code or by dragging/resizing the form
         private bool _wasMoved;
-
-        #region Internal Properties
-
+        
         internal Game Game { get; private set; }
-
-        #endregion
 
         #region Public Properties
 
         public override IntPtr Handle { get { return Form.Handle; } }
 
-        public override string ScreenDeviceName { get { return String.Empty; } }
+        public override string ScreenDeviceName { get { return string.Empty; } }
 
         public override Rectangle ClientBounds
         {
@@ -126,6 +123,28 @@ namespace MonoGame.Framework
                     Form.FormBorderStyle = FormBorderStyle.None;
                 else
                     Form.FormBorderStyle = _isResizable ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
+            }
+        }
+
+        public override bool IsMaximized
+        {
+            get => Form.WindowState == FormWindowState.Maximized;
+            set
+            {
+                if (value)
+                {
+                    if (Form.WindowState != FormWindowState.Maximized)
+                    {
+                        _lastWindowState = Form.WindowState;
+                        Form.WindowState = FormWindowState.Maximized;
+                    }
+                }
+                else
+                {
+                    if (_lastWindowState == FormWindowState.Maximized)
+                        _lastWindowState = FormWindowState.Normal;
+                    Form.WindowState = _lastWindowState;
+                }
             }
         }
 

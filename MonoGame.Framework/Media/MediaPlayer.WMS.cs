@@ -13,14 +13,17 @@ namespace Microsoft.Xna.Framework.Media
     public static partial class MediaPlayer
     {
         private static MediaSession _session;
+        private static PresentationClock _clock;
+
         private static AudioStreamVolume _volumeController;
         private static readonly object _volumeLock = new object();
-        private static PresentationClock _clock;
+
+        private static RateControl _rateControl;
+        private static readonly object _rateLock = new object();
 
         private static Song _nextSong;
         private static TimeSpan? _nextSongStartPosition;
         private static Variant? _desiredPosition;
-
 
         private static Song _currentSong;
 
@@ -28,6 +31,7 @@ namespace Microsoft.Xna.Framework.Media
         private static SessionState _sessionState = SessionState.Stopped;
 
         private static Guid AudioStreamVolumeGuid;
+        private static Guid RateControlGuid;
 
         private static readonly Variant PositionCurrent = new Variant();
         private static readonly Variant PositionBeginning = new Variant { ElementType = VariantElementType.Long, Value = 0L };
@@ -71,10 +75,11 @@ namespace Microsoft.Xna.Framework.Media
         {
             // The GUID is specified in a GuidAttribute attached to the class
             AudioStreamVolumeGuid = Guid.Parse(((GuidAttribute)typeof(AudioStreamVolume).GetCustomAttributes(typeof(GuidAttribute), false)[0]).Value);
+            RateControlGuid = Guid.Parse(((GuidAttribute)typeof(RateControl).GetCustomAttributes(typeof(GuidAttribute), false)[0]).Value);
 
             MediaManagerState.CheckStartup();
             MediaFactory.CreateMediaSession(null, out _session);
-
+            
             _callback = new Callback();
             _session.BeginGetEvent(_callback, null);
 
@@ -165,6 +170,48 @@ namespace Microsoft.Xna.Framework.Media
             SetChannelVolumes();
         }
 
+        private static float PlatformGetPitch()
+        {
+            return _pitch;
+        }
+
+        private static void PlatformSetPitch(float pitch)
+        {
+            _pitch = MathHelper.Clamp(pitch, -1, 1);
+            SetRateControl();
+        }
+
+        private static void SetRateControl()
+        {
+            lock (_rateLock)
+            {
+                if (_rateControl == null)
+                    return;
+
+                _rateControl.SetRate(true, _pitch + 1);
+            }
+        }
+
+        private static bool PlatformGetIsRunningSlowly()
+        {
+            return false;
+        }
+
+        private static float PlatformGetUpdateTime()
+        {
+            return 0;
+        }
+
+        private static bool PlatformGetIsVisualizationEnabled()
+        {
+            return false;
+        }
+
+        private static void PlatformSetIsVisualizationEnabled(bool value)
+        {
+
+        }
+
         #endregion
 
         private static void PlatformPause()
@@ -222,6 +269,15 @@ namespace Microsoft.Xna.Framework.Media
                 }
             }
 
+            lock (_rateLock)
+            {
+                if (_rateControl != null)
+                {
+                    _rateControl.Dispose();
+                    _rateControl = null;
+                }
+            }
+
             _currentSong = song;
 
             //We need to start playing from 0, then seek the stream when the topology is ready, otherwise the song doesn't play.
@@ -246,10 +302,17 @@ namespace Microsoft.Xna.Framework.Media
             lock (_volumeLock)
             {
                 MediaFactory.GetService(_session, MediaServiceKeys.StreamVolume, AudioStreamVolumeGuid, out IntPtr volumeObjectPtr);
-                _volumeController = CppObject.FromPointer<AudioStreamVolume>(volumeObjectPtr);
+                _volumeController = new AudioStreamVolume(volumeObjectPtr);
+            }
+
+            lock (_rateLock)
+            {
+                MediaFactory.GetService(_session, MediaServiceKeys.RateControl, RateControlGuid, out IntPtr rateObjectPtr);
+                _rateControl = new RateControl(rateObjectPtr);
             }
 
             SetChannelVolumes();
+            SetRateControl();
 
             if (_desiredPosition.HasValue)
             {
@@ -297,6 +360,11 @@ namespace Microsoft.Xna.Framework.Media
             if (position.HasValue)
                 return new Variant { Value = position.Value.Ticks };
             return PositionBeginning;
+        }
+
+        private static void PlatformGetVisualizationData(VisualizationData data)
+        {
+
         }
     }
 }
