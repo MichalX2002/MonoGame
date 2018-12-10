@@ -283,14 +283,13 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         /// <summary>
-        /// Creates a Texture2D from a stream, supported formats bmp, gif, jpg, png, tif and dds (only for simple textures).
-        /// May work with other formats, but will not work with tga files.
+        /// Creates a Texture2D from a stream, supported formats bmp, gif, jpg, png, tga (only for simple textures).
         /// </summary>
         /// <param name="graphicsDevice">The graphics device where the texture will be created.</param>
         /// <param name="stream">The stream from which to read the image data.</param>
         /// <returns>The <see cref="SurfaceFormat.Color"/> texture created from the image stream.</returns>
         /// <remarks>Note that different image decoders may generate slight differences between platforms, but perceptually 
-        /// the images should be identical.  This call does not premultiply the image alpha, but areas of zero alpha will
+        /// the images should be identical. This call does not premultiply the image alpha, but areas of zero alpha will
         /// result in black color data.
         /// </remarks>
         public static Texture2D FromStream(GraphicsDevice graphicsDevice, Stream stream)

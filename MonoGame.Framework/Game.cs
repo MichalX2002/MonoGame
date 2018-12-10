@@ -345,7 +345,8 @@ namespace Microsoft.Xna.Framework
                 return;
             }
 
-            if (!Initialized) {
+            if (!Initialized)
+            {
                 DoInitialize();
                 Initialized = true;
             }

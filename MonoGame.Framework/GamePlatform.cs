@@ -106,7 +106,7 @@ namespace Microsoft.Xna.Framework
         public event EventHandler<EventArgs> Deactivated;
 
         /// <summary>
-        /// Raises the AsyncRunLoopEnded event.  This method must be called by
+        /// Raises the AsyncRunLoopEnded event. This method must be called by
         /// derived classes when the asynchronous run loop they start has
         /// stopped running.
         /// </summary>
