@@ -18,30 +18,30 @@ namespace Microsoft.Xna.Framework.Graphics
             this.GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
                 nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
 
-			this.IndexElementSize = indexElementSize;	
+            this.IndexElementSize = indexElementSize;
             this.IndexCount = indexCount;
             this.BufferUsage = usage;
-			
+
             _isDynamic = dynamic;
 
             PlatformConstruct();
-		}
+        }
 
         protected IndexBuffer(GraphicsDevice graphicsDevice, Type indexType, int indexCount, BufferUsage usage, bool dynamic)
          : this(graphicsDevice, SizeForType(graphicsDevice, indexType), indexCount, usage, dynamic)
         {
         }
-        
 
-		public IndexBuffer(GraphicsDevice graphicsDevice, IndexElementSize indexElementSize, int indexCount, BufferUsage bufferUsage) :
-			this(graphicsDevice, indexElementSize, indexCount, bufferUsage, false)
-		{
-		}
 
-		public IndexBuffer(GraphicsDevice graphicsDevice, Type indexType, int indexCount, BufferUsage usage) :
-			this(graphicsDevice, SizeForType(graphicsDevice, indexType), indexCount, usage, false)
-		{
-		}
+        public IndexBuffer(GraphicsDevice graphicsDevice, IndexElementSize indexElementSize, int indexCount, BufferUsage bufferUsage) :
+            this(graphicsDevice, indexElementSize, indexCount, bufferUsage, false)
+        {
+        }
+
+        public IndexBuffer(GraphicsDevice graphicsDevice, Type indexType, int indexCount, BufferUsage usage) :
+            this(graphicsDevice, SizeForType(graphicsDevice, indexType), indexCount, usage, false)
+        {
+        }
 
         /// <summary>
         /// Gets the relevant IndexElementSize enum value for the given type.
@@ -67,7 +67,7 @@ namespace Microsoft.Xna.Framework.Graphics
                         nameof(type), "Index buffers can only be created for types that are sixteen or thirty two bits in length.");
             }
         }
-        
+
         public void GetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount) where T : struct
         {
             if (data == null)
@@ -104,23 +104,7 @@ namespace Microsoft.Xna.Framework.Graphics
             this.GetData(0, data, 0, data.Length);
         }
 
-        public void SetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount) where T : struct
-        {
-            SetDataInternal(offsetInBytes, data, startIndex, elementCount, SetDataOptions.None);
-        }
-        		
-		public void SetData<T>(T[] data, int startIndex, int elementCount) where T : struct
-        {
-            SetDataInternal(0, data, startIndex, elementCount, SetDataOptions.None);
-		}
-		
-        public void SetData<T>(T[] data) where T : struct
-        {
-            SetDataInternal(0, data, 0, data.Length, SetDataOptions.None);
-        }
-
-        protected void SetDataInternal<T>(
-            int offsetInBytes, T[] data, int startIndex, int elementCount, SetDataOptions options) where T : struct
+        protected void SetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, SetDataOptions options) where T : struct
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
@@ -133,12 +117,36 @@ namespace Microsoft.Xna.Framework.Graphics
             try
             {
                 IntPtr ptr = handle.AddrOfPinnedObject();
-                PlatformSetData(offsetInBytes, ptr, startIndex, elementCount, options);
+                SetData(offsetInBytes, ptr, startIndex, elementCount, options);
             }
             finally
             {
                 handle.Free();
             }
         }
-	}
+
+        public void SetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount) where T : struct
+        {
+            SetData(offsetInBytes, data, startIndex, elementCount, SetDataOptions.None);
+        }
+
+        public void SetData<T>(T[] data, int startIndex, int elementCount) where T : struct
+        {
+            SetData(0, data, startIndex, elementCount);
+        }
+
+        public void SetData<T>(T[] data) where T : struct
+        {
+            SetData(data, 0, data.Length);
+        }
+
+        public void SetData(
+            int offsetInBytes, IntPtr data, int startIndex, int elementCount, SetDataOptions options)
+        {
+            if (data == IntPtr.Zero)
+                throw new ArgumentNullException(nameof(data));
+
+            PlatformSetData(offsetInBytes, data, startIndex, elementCount, options);
+        }
+    }
 }

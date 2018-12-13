@@ -10,8 +10,8 @@ namespace Microsoft.Xna.Framework.Input
 {
     public static partial class Mouse
     {
-        [DllImportAttribute("user32.dll", EntryPoint = "SetCursorPos")]
-        [return: MarshalAsAttribute(System.Runtime.InteropServices.UnmanagedType.Bool)]
+        [DllImport("user32.dll", EntryPoint = "SetCursorPos")]
+        [return: MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
         private static extern bool SetCursorPos(int X, int Y);
 
         private static Control _window;

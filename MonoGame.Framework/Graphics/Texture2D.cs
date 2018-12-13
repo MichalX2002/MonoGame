@@ -5,6 +5,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using MonoGame.Imaging;
 using MonoGame.Utilities;
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -301,7 +302,35 @@ namespace Microsoft.Xna.Framework.Graphics
 
             try
             {
-                return PlatformFromStream(graphicsDevice, stream);
+                using (var img = new Image(stream, ImagePixelFormat.RgbWithAlpha, true))
+                {
+                    IntPtr data = img.GetPointer();
+                    int channels = (int)img.PixelFormat;
+
+                    if (data == IntPtr.Zero || channels != 4)
+                        throw new InvalidDataException($"Could not decode stream {img.Info}: \n" + img.Errors);
+
+                    int length = img.PointerLength;
+                    unsafe
+                    {
+                        // XNA blacks out any pixels with an alpha of zero.
+
+                        byte* src = (byte*)data;
+                        for (int i = 0; i < length; i += 4)
+                        {
+                            if (src[i + 3] == 0)
+                            {
+                                src[i + 0] = 0;
+                                src[i + 1] = 0;
+                                src[i + 2] = 0;
+                            }
+                        }
+                    }
+
+                    Texture2D texture = new Texture2D(graphicsDevice, img.Width, img.Height);
+                    texture.SetData(data, 0, channels, length / channels);
+                    return texture;
+                }
             }
             catch (Exception e)
             {
@@ -352,20 +381,25 @@ namespace Microsoft.Xna.Framework.Graphics
         private void ValidateParams<T>(int level, int arraySlice, Rectangle? rect, T[] data,
             int startIndex, int elementCount, out Rectangle checkedRect) where T : struct
         {
-            var textureBounds = new Rectangle(0, 0, Math.Max(_bounds.Width >> level, 1), Math.Max(_bounds.Height >> level, 1));
-            checkedRect = rect ?? textureBounds;
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
             if (level < 0 || level >= LevelCount)
                 throw new ArgumentException(
                     $"{nameof(level)} must be smaller than the number of levels in this texture.", nameof(level));
+
             if (arraySlice > 0 && !GraphicsDevice.GraphicsCapabilities.SupportsTextureArrays)
                 throw new ArgumentException("Texture arrays are not supported on this graphics device", nameof(arraySlice));
+
             if (arraySlice < 0 || arraySlice >= ArraySize)
                 throw new ArgumentException(
                     $"{nameof(arraySlice)} must be smaller than the {nameof(ArraySize)} of this texture and larger than 0.", nameof(arraySlice));
+
+            var textureBounds = new Rectangle(0, 0, Math.Max(_bounds.Width >> level, 1), Math.Max(_bounds.Height >> level, 1));
+            checkedRect = rect ?? textureBounds;
             if (!textureBounds.Contains(checkedRect) || checkedRect.Width <= 0 || checkedRect.Height <= 0)
                 throw new ArgumentException("Rectangle must be inside the texture bounds.", nameof(rect));
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
+
             var tSize = ReflectionHelpers.SizeOf<T>.Get();
             var fSize = Format.GetSize();
             if (tSize > fSize || fSize % tSize != 0)
@@ -416,6 +450,7 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 dataByteSize = checkedRect.Width * checkedRect.Height * fSize;
             }
+
             if (elementCount * tSize != dataByteSize)
                 throw new ArgumentException($"{nameof(elementCount)} is not the right size, " +
                                             $"{nameof(elementCount)} * sizeof({nameof(T)}) is {elementCount * tSize}, " +

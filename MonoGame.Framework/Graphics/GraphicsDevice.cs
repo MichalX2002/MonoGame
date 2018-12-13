@@ -1112,7 +1112,7 @@ namespace Microsoft.Xna.Framework.Graphics
             int indexCount = GetElementCountArray(primitiveType, primitiveCount);
             CheckDrawUserIndexedPrimitives<T>(primitiveType, numVertices, vertexOffset, numVertices, indexCount, indexOffset, primitiveCount, vertexDeclaration);
 
-            PlatformDrawUserIndexedPrimitives<T>(primitiveType, vertexData, vertexOffset, numVertices, indexSize, indexData, indexOffset, primitiveCount, vertexDeclaration);
+            PlatformDrawUserIndexedPrimitives(primitiveType, vertexData, vertexOffset, numVertices, indexSize, indexData, indexOffset, primitiveCount, vertexDeclaration);
 
             unchecked
             {
@@ -1238,7 +1238,7 @@ namespace Microsoft.Xna.Framework.Graphics
             unchecked
             {
                 _graphicsMetrics._drawCount++;
-                _graphicsMetrics._primitiveCount +=  primitiveCount;
+                _graphicsMetrics._primitiveCount += primitiveCount;
             }
         }
 

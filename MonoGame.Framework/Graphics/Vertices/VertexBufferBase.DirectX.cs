@@ -111,7 +111,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         protected void PlatformSetData(
             int offsetInBytes, IntPtr ptr, int startIndex,
-            int elementCount, int elementSizeInBytes, int vertexStride, SetDataOptions options)
+            int elementCount, int elementSize, int vertexStride, SetDataOptions options)
         {
             int size = vertexStride * elementCount;
             GenerateIfRequired(size);
@@ -129,7 +129,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     var box = deviceContext.MapSubresource(_buffer, 0, mode, SharpDX.Direct3D11.MapFlags.None);
                     IntPtr boxPtr = box.DataPointer + offsetInBytes;
 
-                    if (vertexStride == elementSizeInBytes)
+                    if (vertexStride == elementSize)
                     {
                         SharpDX.Utilities.CopyMemory(
                             boxPtr, ptr + startIndex * vertexStride, size);
@@ -139,7 +139,7 @@ namespace Microsoft.Xna.Framework.Graphics
                         for (int i = 0; i < elementCount; i++)
                         {
                             SharpDX.Utilities.CopyMemory(
-                                boxPtr + i * vertexStride, ptr + (startIndex + i) * elementSizeInBytes, vertexStride);
+                                boxPtr + i * vertexStride, ptr + (startIndex + i) * elementSize, vertexStride);
                         }
                     }
 
@@ -151,7 +151,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 int startBytes = startIndex * vertexStride;
                 IntPtr dataPtr = ptr + startBytes;
 
-                if (vertexStride == elementSizeInBytes)
+                if (vertexStride == elementSize)
                 {
                     var box = new SharpDX.DataBox(dataPtr, size, 0);
                     var region = new SharpDX.Direct3D11.ResourceRegion
@@ -183,7 +183,7 @@ namespace Microsoft.Xna.Framework.Graphics
                         for (int i = 0; i < elementCount; i++)
                             SharpDX.Utilities.CopyMemory(
                                 box.DataPointer + i * vertexStride + offsetInBytes,
-                                dataPtr + i * elementSizeInBytes, vertexStride);
+                                dataPtr + i * elementSize, vertexStride);
 
                         // Make sure that we unmap the resource in case of an exception
                         deviceContext.UnmapSubresource(_cachedStagingBuffer, 0);

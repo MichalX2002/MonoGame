@@ -199,7 +199,7 @@ namespace MonoGame.Framework
         private static extern IntPtr ExtractIcon(IntPtr hInst, string exeFileName, int iconIndex);
         
         [DllImport("user32.dll", ExactSpelling=true, CharSet=CharSet.Auto)]
-        [return: MarshalAsAttribute(System.Runtime.InteropServices.UnmanagedType.Bool)]
+        [return: MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
         internal static extern bool GetCursorPos(out POINTSTRUCT pt);
         
         [DllImport("user32.dll", ExactSpelling=true, CharSet=CharSet.Auto)]
@@ -284,7 +284,7 @@ namespace MonoGame.Framework
 
             GetCursorPos(out POINTSTRUCT pos);
             MapWindowPoints(new HandleRef(null, IntPtr.Zero), new HandleRef(Form, Form.Handle), out pos, 1);
-            var clientPos = new System.Drawing.Point(pos.X, pos.Y);
+            var clientPos = new Point(pos.X, pos.Y);
             var withinClient = Form.ClientRectangle.Contains(clientPos);
             var buttons = Control.MouseButtons;
 
@@ -499,7 +499,7 @@ namespace MonoGame.Framework
             public IntPtr wParam;
             public IntPtr lParam;
             public uint time;
-            public System.Drawing.Point p;
+            public Point p;
         }
 
         internal void ChangeClientSize(Size clientBounds)

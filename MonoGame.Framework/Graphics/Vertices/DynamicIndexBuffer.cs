@@ -27,12 +27,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public void SetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, SetDataOptions options) where T : struct
         {
-            base.SetDataInternal<T>(offsetInBytes, data, startIndex, elementCount, options);
+            base.SetData(offsetInBytes, data, startIndex, elementCount, options);
         }
 
         public void SetData<T>(T[] data, int startIndex, int elementCount, SetDataOptions options) where T : struct
         {
-            base.SetDataInternal<T>(0, data, startIndex, elementCount, options);
+            base.SetData(0, data, startIndex, elementCount, options);
         }
     }
 }

@@ -12,6 +12,7 @@ using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.Mathematics.Interop;
 using SharpDX.DXGI;
+using System.Runtime.InteropServices;
 
 #if WINDOWS_UAP
 using Windows.UI.Xaml.Controls;
@@ -20,16 +21,15 @@ using Windows.UI.Core;
 using System.Runtime.InteropServices;
 #endif
 
-
 namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class GraphicsDevice
     {
         // Core Direct3D Objects
         internal SharpDX.Direct3D11.Device _d3dDevice;
-        internal SharpDX.Direct3D11.DeviceContext _d3dContext;
-        internal SharpDX.Direct3D11.RenderTargetView _renderTargetView;
-        internal SharpDX.Direct3D11.DepthStencilView _depthStencilView;
+        internal DeviceContext _d3dContext;
+        internal RenderTargetView _renderTargetView;
+        internal DepthStencilView _depthStencilView;
         private int _vertexBufferSlotsUsed;
         private bool _blendFactorDirty;
 
@@ -65,10 +65,10 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
 
         // The active render targets.
-        readonly SharpDX.Direct3D11.RenderTargetView[] _currentRenderTargets = new SharpDX.Direct3D11.RenderTargetView[4];
+        readonly RenderTargetView[] _currentRenderTargets = new RenderTargetView[4];
 
         // The active depth view.
-        SharpDX.Direct3D11.DepthStencilView _currentDepthStencilView;
+        DepthStencilView _currentDepthStencilView;
 
         private readonly Dictionary<VertexDeclaration, DynamicVertexBuffer> _userVertexBuffers = new Dictionary<VertexDeclaration, DynamicVertexBuffer>();
         private DynamicIndexBuffer _userIndexBuffer16;
@@ -131,7 +131,6 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
 #if WINDOWS_UAP
-
         /// <summary>
         /// Creates resources not tied the active graphics device.
         /// </summary>
@@ -586,7 +585,7 @@ namespace Microsoft.Xna.Framework.Graphics
             }
 
             // Get Direct3D 11.1 context
-            _d3dContext = _d3dDevice.ImmediateContext.QueryInterface<SharpDX.Direct3D11.DeviceContext>();
+            _d3dContext = _d3dDevice.ImmediateContext.QueryInterface<DeviceContext>();
 
 
 
@@ -628,7 +627,7 @@ namespace Microsoft.Xna.Framework.Graphics
             if (_swapChain == null)
             {
                 // get the primary output
-                using (var factory = new SharpDX.DXGI.Factory1())
+                using (var factory = new Factory1())
                 using (var adapter = factory.GetAdapter1(0))
                     output = adapter.Outputs[0];
             }
@@ -680,8 +679,8 @@ namespace Microsoft.Xna.Framework.Graphics
             PresentationParameters.MultiSampleCount =
                 GetClampedMultisampleCount(PresentationParameters.MultiSampleCount);
 
-            _d3dContext.OutputMerger.SetTargets((SharpDX.Direct3D11.DepthStencilView)null,
-                                                (SharpDX.Direct3D11.RenderTargetView)null);
+            _d3dContext.OutputMerger.SetTargets((DepthStencilView)null,
+                                                (RenderTargetView)null);
 
             if (_renderTargetView != null)
             {
@@ -747,7 +746,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 }
 
                 // SwapChain description
-                var desc = new SharpDX.DXGI.SwapChainDescription()
+                var desc = new SwapChainDescription()
                 {
                     ModeDescription =
                     {
@@ -776,7 +775,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 // Creates the swap chain 
                 using (var dxgiDevice = _d3dDevice.QueryInterface<SharpDX.DXGI.Device1>())
                 using (var dxgiAdapter = dxgiDevice.Adapter)
-                using (var dxgiFactory = dxgiAdapter.GetParent<SharpDX.DXGI.Factory1>())
+                using (var dxgiFactory = dxgiAdapter.GetParent<Factory1>())
                 {
                     _swapChain = new SwapChain(dxgiFactory, dxgiDevice, desc);
                     RefreshAdapter();
@@ -796,7 +795,7 @@ namespace Microsoft.Xna.Framework.Graphics
             using (var backBuffer = SharpDX.Direct3D11.Texture2D.FromSwapChain<SharpDX.Direct3D11.Texture2D>(_swapChain, 0))
             {
                 // Create a view interface on the rendertarget to use on bind.
-                _renderTargetView = new SharpDX.Direct3D11.RenderTargetView(_d3dDevice, backBuffer);
+                _renderTargetView = new RenderTargetView(_d3dDevice, backBuffer);
 
                 // Get the rendertarget dimensions for later.
                 var backBufferDesc = backBuffer.Description;
@@ -809,7 +808,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 var depthFormat = SharpDXHelper.ToFormat(PresentationParameters.DepthStencilFormat);
 
                 // Allocate a 2-D surface as the depth/stencil buffer.
-                using (var depthBuffer = new SharpDX.Direct3D11.Texture2D(_d3dDevice, new SharpDX.Direct3D11.Texture2DDescription()
+                using (var depthBuffer = new SharpDX.Direct3D11.Texture2D(_d3dDevice, new Texture2DDescription()
                 {
                     Format = depthFormat,
                     ArraySize = 1,
@@ -822,7 +821,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 }))
 
                     // Create a DepthStencil view on this surface to use on bind.
-                    _depthStencilView = new SharpDX.Direct3D11.DepthStencilView(_d3dDevice, depthBuffer);
+                    _depthStencilView = new DepthStencilView(_d3dDevice, depthBuffer);
             }
 
             // Set the current viewport.
@@ -894,7 +893,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal SampleDescription GetSupportedSampleDescription(Format format, int multiSampleCount)
         {
-            var multisampleDesc = new SharpDX.DXGI.SampleDescription(1, 0);
+            var multisampleDesc = new SampleDescription(1, 0);
 
             if (multiSampleCount > 1)
             {
@@ -934,7 +933,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 }
 
                 // Clear the depth/stencil render buffer.
-                SharpDX.Direct3D11.DepthStencilClearFlags flags = 0;
+                DepthStencilClearFlags flags = 0;
                 if ((options & ClearOptions.DepthBuffer) == ClearOptions.DepthBuffer)
                     flags |= SharpDX.Direct3D11.DepthStencilClearFlags.Depth;
                 if ((options & ClearOptions.Stencil) == ClearOptions.Stencil)
@@ -1046,7 +1045,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 lock (_d3dContext)
                     _swapChain.Present(syncInterval, PresentFlags.None);
             }
-            catch (SharpDX.SharpDXException)
+            catch (SharpDXException)
             {
                 // TODO: How should we deal with a device lost case here?
             }
@@ -1223,9 +1222,9 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        private SharpDX.Mathematics.Interop.RawColor4 GetBlendFactor()
+        private RawColor4 GetBlendFactor()
         {
-			return new SharpDX.Mathematics.Interop.RawColor4(
+			return new RawColor4(
 					BlendFactor.R / 255.0f,
 					BlendFactor.G / 255.0f,
 					BlendFactor.B / 255.0f,
@@ -1328,8 +1327,8 @@ namespace Microsoft.Xna.Framework.Graphics
             SamplerStates.PlatformSetSamplers(this);
         }
 
-        private int SetUserVertexBuffer<T>(T[] vertexData, int vertexOffset, int vertexCount, VertexDeclaration vertexDecl)
-            where T : struct
+        private int SetUserVertexBuffer(
+            IntPtr vertexData, int vertexOffset, int vertexCount, int vertexSize, VertexDeclaration vertexDecl)
         {
             if (!_userVertexBuffers.TryGetValue(vertexDecl, out DynamicVertexBuffer buffer) || buffer.VertexCount < vertexCount)
             {
@@ -1345,25 +1344,41 @@ namespace Microsoft.Xna.Framework.Graphics
             if ((vertexCount + buffer.UserOffset) < buffer.VertexCount)
             {
                 buffer.UserOffset += vertexCount;
-                buffer.SetData(startVertex * vertexDecl.VertexStride, vertexData, vertexOffset, vertexCount, vertexDecl.VertexStride, SetDataOptions.NoOverwrite);
+
+                int byteOffset = startVertex * vertexDecl.VertexStride;
+                buffer.SetData(byteOffset, vertexData, vertexOffset, vertexCount, vertexSize, vertexDecl.VertexStride, SetDataOptions.NoOverwrite);
             }
             else
             {
                 buffer.UserOffset = vertexCount;
-                buffer.SetData(vertexData, vertexOffset, vertexCount, SetDataOptions.Discard);
+                buffer.SetData(0, vertexData, vertexOffset, vertexCount, vertexSize, vertexDecl.VertexStride, SetDataOptions.Discard);
                 startVertex = 0;
             }
 
             SetVertexBuffer(buffer);
-
             return startVertex;
         }
 
-        private int SetUserIndexBuffer<T>(T[] indexData, int indexOffset, int indexCount) where T : struct
+        private int SetUserVertexBuffer<T>(T[] vertexData, int vertexOffset, int vertexCount, VertexDeclaration vertexDecl)
+            where T : struct
+        {
+            int vertexSize = ReflectionHelpers.SizeOf<T>.Get();
+            GCHandle handle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
+            try
+            {
+                IntPtr ptr = handle.AddrOfPinnedObject();
+                return SetUserVertexBuffer(ptr, vertexOffset, vertexCount, vertexSize, vertexDecl);
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }
+
+        private int SetUserIndexBuffer(IntPtr indexData, int indexOffset, int indexCount, int indexSize)
         {
             DynamicIndexBuffer buffer;
 
-            var indexSize = ReflectionHelpers.SizeOf<T>.Get();
             var indexElementSize = indexSize == 2 ? IndexElementSize.SixteenBits : IndexElementSize.ThirtyTwoBits;
 
             var requiredIndexCount = Math.Max(indexCount, 6000);
@@ -1393,7 +1408,6 @@ namespace Microsoft.Xna.Framework.Graphics
             }
 
             var startIndex = buffer.UserOffset;
-
             if ((indexCount + buffer.UserOffset) < buffer.IndexCount)
             {
                 buffer.UserOffset += indexCount;
@@ -1403,12 +1417,26 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 startIndex = 0;
                 buffer.UserOffset = indexCount;
-                buffer.SetData(indexData, indexOffset, indexCount, SetDataOptions.Discard);
+                buffer.SetData(0, indexData, indexOffset, indexCount, SetDataOptions.Discard);
             }
 
             Indices = buffer;
-
             return startIndex;
+        }
+        
+        private int SetUserIndexBuffer<T>(T[] indexData, int indexOffset, int indexCount) where T : struct
+        {
+            int indexSize = ReflectionHelpers.SizeOf<T>.Get();
+            GCHandle handle = GCHandle.Alloc(indexData, GCHandleType.Pinned);
+            try
+            {
+                IntPtr ptr = handle.AddrOfPinnedObject();
+                return SetUserIndexBuffer(ptr, indexOffset, indexCount, indexSize);
+            }
+            finally
+            {
+                handle.Free();
+            }
         }
 
         private void PlatformDrawIndexedPrimitives(PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount)
@@ -1424,9 +1452,10 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        private void PlatformDrawUserPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, VertexDeclaration vertexDeclaration, int vertexCount) where T : struct
+        private void PlatformDrawUserPrimitives<T>(
+            PrimitiveType primitiveType, T[] vertexData, int vertexOffset, VertexDeclaration vertexDeclaration, int vertexCount) where T : struct
         {
-            var startVertex = SetUserVertexBuffer(vertexData, vertexOffset, vertexCount, vertexDeclaration);
+            int startVertex = SetUserVertexBuffer(vertexData, vertexOffset, vertexCount, vertexDeclaration);
 
             lock (_d3dContext)
             {
@@ -1448,11 +1477,13 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, ushort[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
+        private void PlatformDrawUserIndexedPrimitives<T>(
+            PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices,
+            ushort[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
         {
-            var indexCount = GetElementCountArray(primitiveType, primitiveCount);
-            var startVertex = SetUserVertexBuffer(vertexData, vertexOffset, numVertices, vertexDeclaration);
-            var startIndex = SetUserIndexBuffer(indexData, indexOffset, indexCount);
+            int indexCount = GetElementCountArray(primitiveType, primitiveCount);
+            int startVertex = SetUserVertexBuffer(vertexData, vertexOffset, numVertices, vertexDeclaration);
+            int startIndex = SetUserIndexBuffer(indexData, indexOffset, indexCount);
 
             lock (_d3dContext)
             {
@@ -1463,11 +1494,13 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, short[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
+        private void PlatformDrawUserIndexedPrimitives(
+            PrimitiveType primitiveType, IntPtr vertexData, int vertexOffset, int numVertices,
+            IndexElementSize indexSize, IntPtr indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration)
         {
-            var indexCount = GetElementCountArray(primitiveType, primitiveCount);
-            var startVertex = SetUserVertexBuffer(vertexData, vertexOffset, numVertices, vertexDeclaration);
-            var startIndex = SetUserIndexBuffer(indexData, indexOffset, indexCount);
+            int indexCount = GetElementCountArray(primitiveType, primitiveCount);
+            int startVertex = SetUserVertexBuffer(vertexData, vertexOffset, numVertices, vertexDeclaration.VertexStride, vertexDeclaration);
+            int startIndex = SetUserIndexBuffer(indexData, indexOffset, indexCount, indexSize == IndexElementSize.SixteenBits ? 2 : 4);
 
             lock (_d3dContext)
             {
@@ -1478,11 +1511,13 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, int[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
+        private void PlatformDrawUserIndexedPrimitives<T>(
+            PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices,
+            short[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
         {
-            var indexCount = GetElementCountArray(primitiveType, primitiveCount);
-            var startVertex = SetUserVertexBuffer(vertexData, vertexOffset, numVertices, vertexDeclaration);
-            var startIndex = SetUserIndexBuffer(indexData, indexOffset, indexCount);
+            int indexCount = GetElementCountArray(primitiveType, primitiveCount);
+            int startVertex = SetUserVertexBuffer(vertexData, vertexOffset, numVertices, vertexDeclaration);
+            int startIndex = SetUserIndexBuffer(indexData, indexOffset, indexCount);
 
             lock (_d3dContext)
             {
@@ -1493,8 +1528,25 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        private void PlatformDrawInstancedPrimitives(PrimitiveType primitiveType, int baseVertex, int startIndex,
-            int primitiveCount, int instanceCount)
+        private void PlatformDrawUserIndexedPrimitives<T>(
+            PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices,
+            int[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
+        {
+            int indexCount = GetElementCountArray(primitiveType, primitiveCount);
+            int startVertex = SetUserVertexBuffer(vertexData, vertexOffset, numVertices, vertexDeclaration);
+            int startIndex = SetUserIndexBuffer(indexData, indexOffset, indexCount);
+
+            lock (_d3dContext)
+            {
+                ApplyState(true);
+
+                _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
+                _d3dContext.DrawIndexed(indexCount, startIndex, startVertex);
+            }
+        }
+
+        private void PlatformDrawInstancedPrimitives(
+            PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount, int instanceCount)
         {
             lock (_d3dContext)
             {

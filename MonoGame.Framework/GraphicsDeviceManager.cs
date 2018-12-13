@@ -22,7 +22,7 @@ namespace Microsoft.Xna.Framework
         private DepthFormat _preferredDepthStencilFormat;
         private bool _preferMultiSampling;
         private DisplayOrientation _supportedOrientations;
-        private bool _synchronizedWithVerticalRetrace = true;
+        private PresentInterval _presentInterval;
         private bool _drawBegun;
         private bool _disposed;
         private bool _hardwareModeSwitch = true;
@@ -57,7 +57,7 @@ namespace Microsoft.Xna.Framework
             _supportedOrientations = DisplayOrientation.Default;
             _preferredBackBufferFormat = SurfaceFormat.Color;
             _preferredDepthStencilFormat = DepthFormat.Depth24;
-            _synchronizedWithVerticalRetrace = true;
+            _presentInterval = PresentInterval.One;
 
             // Assume the window client size as the default back 
             // buffer resolution in the landscape orientation.
@@ -257,7 +257,7 @@ namespace Microsoft.Xna.Framework
             presentationParameters.DepthStencilFormat = _preferredDepthStencilFormat;
             presentationParameters.IsFullScreen = _wantFullScreen;
             presentationParameters.HardwareModeSwitch = _hardwareModeSwitch;
-            presentationParameters.PresentationInterval = _synchronizedWithVerticalRetrace ? PresentInterval.One : PresentInterval.Immediate;
+            presentationParameters.PresentationInterval = _presentInterval;
             presentationParameters.DisplayOrientation = _game.Window.CurrentOrientation;
             presentationParameters.DeviceWindowHandle = _game.Window.Handle;
 
@@ -523,23 +523,23 @@ namespace Microsoft.Xna.Framework
         }
 
         /// <summary>
-        /// Indicates the desire for vsync when presenting the back buffer.
+        /// Indicates the desire for VSync when presenting the back buffer.
         /// </summary>
         /// <remarks>
-        /// Vsync limits the frame rate of the game to the monitor referesh rate to prevent screen tearing.
-        /// When called at startup this will automatically set the vsync mode during initialization.  If
-        /// set after startup you must call ApplyChanges() for the vsync mode to be changed.
+        /// VSync limits the frame rate of the game to the monitor referesh rate to prevent screen tearing.
+        /// When called at startup this will automatically set the VSync mode during initialization.
+        /// If set after startup you must call ApplyChanges() for the VSync mode to be changed.
         /// </remarks>
-        public bool SynchronizeWithVerticalRetrace
+        public PresentInterval VerticalSyncInterval
         {
             get
             {
-                return _synchronizedWithVerticalRetrace;
+                return _presentInterval;
             }
             set
             {
                 _shouldApplyChanges = true;
-                _synchronizedWithVerticalRetrace = value;
+                _presentInterval = value;
             }
         }
 

@@ -175,7 +175,7 @@ namespace Microsoft.Xna.Framework.Graphics
         protected override ShaderResourceView CreateShaderResourceView()
         {
             if (MultiSampleCount > 1)
-                return new SharpDX.Direct3D11.ShaderResourceView
+                return new ShaderResourceView
                 (GraphicsDevice._d3dDevice, _resolvedTexture.GetTexture());
             else
                 return base.CreateShaderResourceView();

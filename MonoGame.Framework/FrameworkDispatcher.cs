@@ -47,11 +47,11 @@ namespace Microsoft.Xna.Framework
         {
             try
             {
-                OpenALSoundController.InitializeInstance();
+                SoundEffect.InitializeAudio();
             }
             catch (DllNotFoundException ex)
             {
-                throw new NoAudioHardwareException("Failed to initialzie OpenALSoundController.", ex);
+                throw new NoAudioHardwareException("Failed to initialize audio engine.", ex);
             }
         }
     }

@@ -198,10 +198,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
 
             int width, height;
             byte[] data = null;
-            using (var img = new Image(
-                File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read), false))
+            using (var img = new Image(File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read), false))
             {
-                if (img.Pointer == IntPtr.Zero || img.Info == null || img.Info.IsValid() == false)
+                if (img.GetPointer() == IntPtr.Zero || img.Info == null || img.Info.IsValid() == false)
                     throw new InvalidDataException("Could not decode image.");
 
                 int length = img.PointerLength;
@@ -209,7 +208,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                 unsafe
                 {
                     fixed (byte* dataPointer = data)
-                        Buffer.MemoryCopy((void*)img.Pointer, dataPointer, length, length);
+                        Buffer.MemoryCopy((void*)img.GetPointer(), dataPointer, length, length);
                 }
 
                 width = img.Info.Width;

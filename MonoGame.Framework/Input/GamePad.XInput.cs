@@ -216,22 +216,22 @@ namespace Microsoft.Xna.Framework.Input
         }
 
         private static ButtonState ConvertToButtonState(
-            SharpDX.XInput.GamepadButtonFlags buttonFlags,
-            SharpDX.XInput.GamepadButtonFlags desiredButton)
+            GBF buttonFlags,
+            GBF desiredButton)
         {
             return ((buttonFlags & desiredButton) == desiredButton) ? ButtonState.Pressed : ButtonState.Released;
         }
 
         private static Buttons AddButtonIfPressed(
-            SharpDX.XInput.GamepadButtonFlags buttonFlags,
-            SharpDX.XInput.GamepadButtonFlags xInputButton,
+            GBF buttonFlags,
+            GBF xInputButton,
             Buttons xnaButton)
         {
             var buttonState = ((buttonFlags & xInputButton) == xInputButton) ? ButtonState.Pressed : ButtonState.Released;
             return buttonState == ButtonState.Pressed ? xnaButton : 0;
         }
 
-        private static GamePadButtons ConvertToButtons(SharpDX.XInput.GamepadButtonFlags buttonFlags,
+        private static GamePadButtons ConvertToButtons(GBF buttonFlags,
             byte leftTrigger,
             byte rightTrigger)
         {

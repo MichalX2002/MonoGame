@@ -155,7 +155,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </remarks>
         public void SetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, int vertexStride) where T : struct
         {
-            SetDataInternal(offsetInBytes, data, startIndex, elementCount, vertexStride, SetDataOptions.None);
+            SetData(offsetInBytes, data, startIndex, elementCount, vertexStride, SetDataOptions.None);
         }
 
         /// <summary>
@@ -173,10 +173,9 @@ namespace Microsoft.Xna.Framework.Graphics
         /// must be within the <paramref name="data"/> array bounds.</param>
 		public void SetData<T>(T[] data, int startIndex, int elementCount) where T : struct
         {
-            var elementSizeInBytes = ReflectionHelpers.SizeOf<T>.Get();
-            SetDataInternal(0, data, startIndex, elementCount, elementSizeInBytes, SetDataOptions.None);
-		}
-		
+            SetData(0, data, startIndex, elementCount, 0);
+        }
+
         /// <summary>
         /// Sets the vertex buffer data. This is the same as calling <see cref="SetData{T}(int, T[], int, int, int)"/> 
         /// with <c>offsetInBytes</c> and <c>startIndex</c> equal to <c>0</c>, <c>elementCount</c> equal to <c>data.Length</c>, 
@@ -186,49 +185,55 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="data">Data array.</param>
         public void SetData<T>(T[] data) where T : struct
         {
-            var elementSizeInBytes = ReflectionHelpers.SizeOf<T>.Get();
-            SetDataInternal(0, data, 0, data.Length, elementSizeInBytes, SetDataOptions.None);
+            SetData(data, 0, data.Length);
         }
 
-        protected void SetDataInternal<T>(
-            int offsetInBytes, T[] data, int startIndex,
-            int elementCount, int vertexStride, SetDataOptions options) where T : struct
+        protected void SetData<T>(
+            int offsetInBytes, T[] data, int startIndex, int elementCount, int vertexStride, SetDataOptions options)
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
 
-            int elementSizeInBytes = ReflectionHelpers.SizeOf<T>.Get();
-            int bufferSize = VertexCount * VertexDeclaration.VertexStride;
-
-            if (vertexStride == 0)
-                vertexStride = elementSizeInBytes;
-
-            var vertexByteSize = VertexCount * VertexDeclaration.VertexStride;
-            if (vertexStride > vertexByteSize)
+            int elementSize = ReflectionHelpers.SizeOf<T>.Get();
+            if (vertexStride < elementSize)
                 throw new ArgumentOutOfRangeException(
-                    nameof(vertexStride), "Vertex stride can not be larger than the vertex buffer size.");
+                    $"The vertex stride must be greater than or equal to the size of the specified data ({elementSize}).");
 
             if (startIndex + elementCount > data.Length || elementCount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(data),
                     $"The array specified in the {nameof(data)} parameter is not the correct size for the amount of data requested.");
 
-            if (elementCount > 1 && (elementCount * vertexStride > bufferSize))
-                throw new InvalidOperationException("The vertex stride is larger than the vertex buffer.");
-
-            if (vertexStride < elementSizeInBytes)
-                throw new ArgumentOutOfRangeException(
-                    $"The vertex stride must be greater than or equal to the size of the specified data ({elementSizeInBytes}).");
-
             GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
             try
             {
                 IntPtr ptr = handle.AddrOfPinnedObject();
-                PlatformSetData(offsetInBytes, ptr, startIndex, elementCount, elementSizeInBytes, vertexStride, options);
+                SetData(0, ptr, 0, data.Length, elementSize, vertexStride, SetDataOptions.None);
             }
             finally
             {
                 handle.Free();
             }
+        }
+
+        public void SetData(
+            int offsetInBytes, IntPtr data, int startIndex,
+            int elementCount, int elementSize, int vertexStride, SetDataOptions options)
+        {
+            if (data == IntPtr.Zero)
+                throw new ArgumentNullException(nameof(data));
+
+            if (vertexStride == 0)
+                vertexStride = elementSize;
+
+            var vertexByteSize = VertexCount * VertexDeclaration.VertexStride;
+            if (elementSize > vertexByteSize)
+                throw new ArgumentOutOfRangeException(
+                    nameof(elementSize), "Vertex stride can not be larger than the vertex buffer size.");
+
+            if (elementCount > 1 && elementCount * elementSize > vertexByteSize)
+                throw new InvalidOperationException("The vertex stride is larger than the vertex buffer.");
+
+            PlatformSetData(offsetInBytes, data, startIndex, elementCount, elementSize, vertexStride, options);
         }
     }
 }

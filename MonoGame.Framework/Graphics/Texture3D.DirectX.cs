@@ -30,7 +30,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
 
-        internal override SharpDX.Direct3D11.Resource CreateTexture()
+        internal override Resource CreateTexture()
         {
             var description = new Texture3DDescription
             {

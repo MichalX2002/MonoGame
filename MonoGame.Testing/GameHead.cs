@@ -108,7 +108,7 @@ namespace MonoGame.Testings
                 _hej = 0;
             }
 
-            //MediaPlayer.GetVisualizationData(_visData);
+            MediaPlayer.GetVisualizationData(_visData);
 
             base.Update(time);
         }

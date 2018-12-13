@@ -170,6 +170,11 @@ namespace Microsoft.Xna.Framework.Audio
 
         #endregion
 
+        internal static void InitializeAudio()
+        {
+            OpenALSoundController.InitializeInstance();
+        }
+
         internal static void PlatformSetReverbSettings(ReverbSettings reverbSettings)
         {
             if (!OpenALSoundController.Efx.IsInitialized)

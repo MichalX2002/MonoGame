@@ -231,42 +231,6 @@ namespace Microsoft.Xna.Framework.Graphics
             return arraySlice * _levelCount + level;
         }
 
-        private static Texture2D PlatformFromStream(GraphicsDevice graphicsDevice, Stream stream)
-        {
-            using (var img = new Image(stream, true))
-            {
-                IntPtr data = img.Pointer;
-                if (data == IntPtr.Zero)
-                    throw new InvalidDataException("Could not decode stream.");
-
-                ImageInfo info = img.Info;
-                int channels = (int)info.PixelFormat;
-                int length = img.PointerLength;
-
-                // XNA blacks out any pixels with an alpha of zero.
-                unsafe
-                {
-                    if (channels == 4)
-                    {
-                        byte* b = (byte*)data;
-                        for (var i = 0; i < length; i += 4)
-                        {
-                            if (b[i + 3] == 0)
-                            {
-                                b[i + 0] = 0;
-                                b[i + 1] = 0;
-                                b[i + 2] = 0;
-                            }
-                        }
-                    }
-                }
-                
-                Texture2D texture = new Texture2D(graphicsDevice, info.Width, info.Height);
-                texture.SetData(data, 0, channels, length / channels);
-                return texture;
-            }
-        }
-
         private void PlatformSaveAsJpeg(Stream stream, int width, int height)
         {
 #if WINDOWS_UAP
@@ -368,14 +332,14 @@ namespace Microsoft.Xna.Framework.Graphics
 
         static ImagingFactory imgfactory;
 
-        private static BitmapSource LoadBitmap(Stream stream, out SharpDX.WIC.BitmapDecoder decoder)
+        private static BitmapSource LoadBitmap(Stream stream, out BitmapDecoder decoder)
         {
             if (imgfactory == null)
             {
                 imgfactory = new ImagingFactory();
             }
 
-            decoder = new SharpDX.WIC.BitmapDecoder(
+            decoder = new BitmapDecoder(
                 imgfactory,
                 stream,
                 DecodeOptions.CacheOnDemand
