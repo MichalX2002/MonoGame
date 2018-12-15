@@ -43,7 +43,7 @@ namespace Microsoft.Xna.Framework.Content
 				case SurfaceFormat.Dxt1:
 				case SurfaceFormat.Dxt1a:
 					if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsDxt1)
-						convertedFormat = SurfaceFormat.Color;
+						convertedFormat = SurfaceFormat.Rgba32;
 					break;
 				case SurfaceFormat.Dxt1SRgb:
 					if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsDxt1)
@@ -52,7 +52,7 @@ namespace Microsoft.Xna.Framework.Content
 				case SurfaceFormat.Dxt3:
 				case SurfaceFormat.Dxt5:
 					if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc)
-						convertedFormat = SurfaceFormat.Color;
+						convertedFormat = SurfaceFormat.Rgba32;
 					break;
 				case SurfaceFormat.Dxt3SRgb:
 				case SurfaceFormat.Dxt5SRgb:
@@ -60,7 +60,7 @@ namespace Microsoft.Xna.Framework.Content
 						convertedFormat = SurfaceFormat.ColorSRgb;
 					break;
 				case SurfaceFormat.NormalizedByte4:
-					convertedFormat = SurfaceFormat.Color;
+					convertedFormat = SurfaceFormat.Rgba32;
 					break;
 			}
 			
@@ -87,7 +87,7 @@ namespace Microsoft.Xna.Framework.Content
 					    case SurfaceFormat.Dxt1:
                         case SurfaceFormat.Dxt1SRgb:
                         case SurfaceFormat.Dxt1a:
-				            if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsDxt1 && convertedFormat == SurfaceFormat.Color)
+				            if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsDxt1 && convertedFormat == SurfaceFormat.Rgba32)
 				            {
 				                levelData = DxtUtil.DecompressDxt1(levelData, levelWidth, levelHeight);
 				                levelDataSizeInBytes = levelData.Length;
@@ -97,7 +97,7 @@ namespace Microsoft.Xna.Framework.Content
 					    case SurfaceFormat.Dxt3SRgb:
                             if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc)
 				                if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc &&
-				                    convertedFormat == SurfaceFormat.Color)
+				                    convertedFormat == SurfaceFormat.Rgba32)
 				                {
 				                    levelData = DxtUtil.DecompressDxt3(levelData, levelWidth, levelHeight);
                                     levelDataSizeInBytes = levelData.Length;
@@ -107,7 +107,7 @@ namespace Microsoft.Xna.Framework.Content
 					    case SurfaceFormat.Dxt5SRgb:
                             if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc)
 				                if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc &&
-				                    convertedFormat == SurfaceFormat.Color)
+				                    convertedFormat == SurfaceFormat.Rgba32)
 				                {
 				                    levelData = DxtUtil.DecompressDxt5(levelData, levelWidth, levelHeight);
                                     levelDataSizeInBytes = levelData.Length;

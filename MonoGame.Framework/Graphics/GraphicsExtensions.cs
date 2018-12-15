@@ -459,7 +459,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 case SurfaceFormat.Bgr32:
                     return new ColorFormat(8, 8, 8, 0);
                 case SurfaceFormat.Bgra32:
-                case SurfaceFormat.Color:
+                case SurfaceFormat.Rgba32:
                 case SurfaceFormat.ColorSRgb:
                     return new ColorFormat(8, 8, 8, 8);
                 case SurfaceFormat.Rgba1010102:
@@ -526,20 +526,20 @@ namespace Microsoft.Xna.Framework.Graphics
 
             switch (format)
             {
-                case SurfaceFormat.ColorRgb:
+                case SurfaceFormat.Rgb24:
                     glInternalFormat = PixelInternalFormat.Rgb;
                     glFormat = PixelFormat.Rgb;
                     glType = PixelType.UnsignedByte;
                     break;
 
-                case SurfaceFormat.Color:
+                case SurfaceFormat.Rgba32:
                     glInternalFormat = PixelInternalFormat.Rgba;
                     glFormat = PixelFormat.Rgba;
                     glType = PixelType.UnsignedByte;
                     break;
                 case SurfaceFormat.ColorSRgb:
                     if (!supportsSRgb)
-                        goto case SurfaceFormat.Color;
+                        goto case SurfaceFormat.Rgba32;
                     glInternalFormat = PixelInternalFormat.Srgb;
                     glFormat = PixelFormat.Rgba;
                     glType = PixelType.UnsignedByte;
@@ -812,7 +812,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 case SurfaceFormat.HalfSingle:
                 case SurfaceFormat.NormalizedByte2:
                     return 2;
-                case SurfaceFormat.Color:
+                case SurfaceFormat.Rgba32:
                 case SurfaceFormat.ColorSRgb:
                 case SurfaceFormat.Single:
                 case SurfaceFormat.Rg32:

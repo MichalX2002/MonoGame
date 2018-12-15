@@ -82,7 +82,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 Sdl.Display.GetCurrentDisplayMode(displayIndex, out Sdl.Display.Mode mode);
 
-                return new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Color);
+                return new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Rgba32);
 #elif WINDOWS
                 using (var graphics = System.Drawing.Graphics.FromHwnd(IntPtr.Zero))
                 {
@@ -180,7 +180,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 selectedFormat == SurfaceFormat.Dxt1SRgb ||
                 selectedFormat == SurfaceFormat.Dxt3SRgb ||
                 selectedFormat == SurfaceFormat.Dxt5SRgb)
-                selectedFormat = SurfaceFormat.Color;
+                selectedFormat = SurfaceFormat.Rgba32;
 
 
             return (format == selectedFormat) && (depthFormat == selectedDepthFormat) && (multiSampleCount == selectedMultiSampleCount);
@@ -310,7 +310,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
                         // We are only using one format, Color
                         // mode.Format gets the Color format from SDL
-                        var displayMode = new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Color);
+                        var displayMode = new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Rgba32);
                         if (!modes.Contains(displayMode))
                             modes.Add(displayMode);
                     }

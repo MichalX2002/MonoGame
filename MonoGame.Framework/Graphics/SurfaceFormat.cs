@@ -10,13 +10,13 @@ namespace Microsoft.Xna.Framework.Graphics
     public enum SurfaceFormat
     {
         /// <summary>
-        /// Unsigned 32-bit ARGB pixel format for store 8 bits per channel. 
+        /// Unsigned 32-bit RGBA pixel format for store 8 bits per channel. 
         /// </summary>
-        Color,
+        Rgba32,
         /// <summary>
         /// Unsigned 24-bit RGB pixel format for store 8 bits per channel. 
         /// </summary>
-        ColorRgb,
+        Rgb24,
         /// <summary>
         /// Unsigned 16-bit BGR pixel format for store 5 bits for blue, 6 bits for green, and 5 bits for red.   
         /// </summary>
@@ -40,7 +40,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// DXT5. Texture format with compression. Surface dimensions must be a multiple 4.
         /// </summary>
-        Dxt5 = 6,
+        Dxt5,
         /// <summary>
         /// Signed 16-bit bump-map format for store 8 bits for <c>u</c> and <c>v</c> data.
         /// </summary>

@@ -227,7 +227,7 @@ namespace MonoGame.Utilities.Png
                     }
                     break;
 
-                case SurfaceFormat.Color:
+                case SurfaceFormat.Rgba32:
                     texture2D.GetData(colorData);
                     break;
 

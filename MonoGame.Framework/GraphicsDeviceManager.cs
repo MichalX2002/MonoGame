@@ -55,7 +55,7 @@ namespace Microsoft.Xna.Framework
             _game = game ?? throw new ArgumentNullException(nameof(game));
 
             _supportedOrientations = DisplayOrientation.Default;
-            _preferredBackBufferFormat = SurfaceFormat.Color;
+            _preferredBackBufferFormat = SurfaceFormat.Rgba32;
             _preferredDepthStencilFormat = DepthFormat.Depth24;
             _presentInterval = PresentInterval.One;
 

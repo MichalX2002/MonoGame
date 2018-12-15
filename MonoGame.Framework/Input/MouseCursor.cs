@@ -80,9 +80,9 @@ namespace Microsoft.Xna.Framework.Input
         /// <param name="originy">Y cordinate of the image that will be used for mouse position.</param>
         public static MouseCursor FromTexture2D(Texture2D texture, int originx, int originy)
         {
-            if (texture.Format != SurfaceFormat.Color && texture.Format != SurfaceFormat.ColorSRgb)
+            if (texture.Format != SurfaceFormat.Rgba32 && texture.Format != SurfaceFormat.ColorSRgb)
                 throw new ArgumentException(
-                    $"Only {SurfaceFormat.Color} or {SurfaceFormat.ColorSRgb} textures are accepted for mouse cursors.",
+                    $"Only {SurfaceFormat.Rgba32} or {SurfaceFormat.ColorSRgb} textures are accepted for mouse cursors.",
                     nameof(texture));
 
             return PlatformFromTexture2D(texture, originx, originy);

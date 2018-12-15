@@ -115,7 +115,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public void Clear()
         {
-            BackBufferFormat = SurfaceFormat.Color;
+            BackBufferFormat = SurfaceFormat.Rgba32;
 #if IOS
 			// Mainscreen.Bounds does not account for the device's orientation. it ALWAYS assumes portrait
 			var width = (int)(UIScreen.MainScreen.Bounds.Width * UIScreen.MainScreen.Scale);

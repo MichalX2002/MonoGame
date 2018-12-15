@@ -39,7 +39,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="width"></param>
         /// <param name="height"></param>
         public Texture2D(GraphicsDevice graphicsDevice, int width, int height)
-            : this(graphicsDevice, width, height, false, SurfaceFormat.Color, SurfaceType.Texture, false, 1)
+            : this(graphicsDevice, width, height, false, SurfaceFormat.Rgba32, SurfaceType.Texture, false, 1)
         {
         }
 
@@ -288,7 +288,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         /// <param name="graphicsDevice">The graphics device where the texture will be created.</param>
         /// <param name="stream">The stream from which to read the image data.</param>
-        /// <returns>The <see cref="SurfaceFormat.Color"/> texture created from the image stream.</returns>
+        /// <returns>The <see cref="SurfaceFormat.Rgba32"/> texture created from the image stream.</returns>
         /// <remarks>Note that different image decoders may generate slight differences between platforms, but perceptually 
         /// the images should be identical. This call does not premultiply the image alpha, but areas of zero alpha will
         /// result in black color data.
