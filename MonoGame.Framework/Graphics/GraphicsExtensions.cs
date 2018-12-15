@@ -526,6 +526,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
             switch (format)
             {
+                case SurfaceFormat.ColorRgb:
+                    glInternalFormat = PixelInternalFormat.Rgb;
+                    glFormat = PixelFormat.Rgb;
+                    glType = PixelType.UnsignedByte;
+                    break;
+
                 case SurfaceFormat.Color:
                     glInternalFormat = PixelInternalFormat.Rgba;
                     glFormat = PixelFormat.Rgba;
