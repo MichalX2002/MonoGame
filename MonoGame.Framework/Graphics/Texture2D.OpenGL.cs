@@ -110,7 +110,10 @@ namespace Microsoft.Xna.Framework.Graphics
             }
 
             GenerateGLTextureIfRequired();
-            GL.PixelStore(PixelStoreParameter.UnpackAlignment, Math.Min(_format.GetSize(), 8));
+            int unpackSize = _format.GetSize();
+            if (unpackSize == 3)
+                unpackSize = 1;
+            GL.PixelStore(PixelStoreParameter.UnpackAlignment, Math.Min(unpackSize, 8));
 
             if (glFormat == GLPixelFormat.CompressedTextureFormats)
             {
@@ -179,7 +182,10 @@ namespace Microsoft.Xna.Framework.Graphics
                     }
 
                     GenerateGLTextureIfRequired();
-                    GL.PixelStore(PixelStoreParameter.UnpackAlignment, Math.Min(_format.GetSize(), 8));
+                    int unpackSize = _format.GetSize();
+                    if (unpackSize == 3)
+                        unpackSize = 1;
+                    GL.PixelStore(PixelStoreParameter.UnpackAlignment, Math.Min(unpackSize, 8));
 
                     if (glFormat == GLPixelFormat.CompressedTextureFormats)
                     {

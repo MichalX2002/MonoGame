@@ -830,6 +830,8 @@ namespace Microsoft.Xna.Framework.Graphics
                     return 8;
                 case SurfaceFormat.Vector4:
                     return 16;
+                case SurfaceFormat.Rgb24:
+                    return 3;
                 default:
                     throw new ArgumentException();
             }
