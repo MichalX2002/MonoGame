@@ -159,7 +159,7 @@ namespace MonoGame.Imaging
         }
 
         public static ReadContext GetReadContext(
-            Stream stream, ErrorContext errorCtx, in ReadCallbacks c, byte[] buffer)
+            Stream stream, ErrorContext errorCtx, ReadCallbacks c, byte[] buffer)
         {
             var s = new ReadContext
             {
@@ -280,7 +280,7 @@ namespace MonoGame.Imaging
 
                 case ImageFormat.Png:
                     result = LoadPng(s, &x, &y, &comp, reqComp, &ri);
-                        break;
+                    break;
 
                 case ImageFormat.Jpg:
                     result = LoadJpg(s, &x, &y, &comp, reqComp, &ri);
@@ -293,15 +293,14 @@ namespace MonoGame.Imaging
                 case ImageFormat.Gif:
                     result = LoadGif(s, &x, &y, &comp, reqComp, &ri);
                     break;
-                    
+
                 default:
                     return IntPtr.Zero;
             }
 
             if (result == null ||
                 info.Width != x ||
-                info.Height != y || 
-                comp != reqComp)
+                info.Height != y)
                 return IntPtr.Zero;
 
             if (ri.BitsPerChannel != 8)
@@ -326,11 +325,11 @@ namespace MonoGame.Imaging
             ri->BitsPerChannel = 8;
             ri->ChannelOrder = STBI_ORDER_RGB;
 
-            if ((TestForPng(s)) != 0) return LoadPng(s, x, y, comp, req_comp, ri);
-            if ((TestForJpg(s)) != 0) return LoadJpg(s, x, y, comp, req_comp, ri);
-            if ((TestForBmp(s)) != 0) return LoadBmp(s, x, y, comp, req_comp, ri);
-            if ((TestForTga(s)) != 0) return LoadTga(s, x, y, comp, req_comp, ri);
-            if ((TestForGif(s)) != 0) return LoadGif(s, x, y, comp, req_comp, ri);
+            if (TestForPng(s) != 0) return LoadPng(s, x, y, comp, req_comp, ri);
+            if (TestForJpg(s) != 0) return LoadJpg(s, x, y, comp, req_comp, ri);
+            if (TestForBmp(s) != 0) return LoadBmp(s, x, y, comp, req_comp, ri);
+            if (TestForTga(s) != 0) return LoadTga(s, x, y, comp, req_comp, ri);
+            if (TestForGif(s) != 0) return LoadGif(s, x, y, comp, req_comp, ri);
             return (s.Error(ImagingError.UnknownImageType)) != 0 ? (byte*)null : null;
         }
 
@@ -3806,8 +3805,10 @@ namespace MonoGame.Imaging
 
             if (ParsePngFile(p, STBI__SCAN_load, req_comp) != 0)
             {
-                if ((p.depth) < 8) ri->BitsPerChannel = 8;
-                else ri->BitsPerChannel = p.depth;
+                if ((p.depth) < 8)
+                    ri->BitsPerChannel = 8;
+                else
+                    ri->BitsPerChannel = p.depth;
                 result = p._out;
                 p._out = null;
                 if (((req_comp) != 0) && (req_comp != s.OutChannels))
@@ -3831,7 +3832,7 @@ namespace MonoGame.Imaging
 
             Free(p._out);
             p._out = null;
-
+             
             Free(p._expanded);
             p._expanded = null;
 

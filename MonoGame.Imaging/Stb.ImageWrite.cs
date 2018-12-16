@@ -3,7 +3,7 @@ using System.IO;
 
 namespace MonoGame.Imaging
 {
-    unsafe partial class Imaging
+    internal unsafe partial class Imaging
     {
         public static WriteContext GetWriteContext(
             WriteCallback c,Stream stream, byte[] buffer, SaveConfiguration config)

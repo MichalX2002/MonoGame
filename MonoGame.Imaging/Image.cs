@@ -12,7 +12,6 @@ namespace MonoGame.Imaging
 
         private Stream _sourceStream;
         private MultiStream _combinedStream;
-        private ReadCallbacks _callbacks;
         private readonly bool _leaveStreamOpen;
         private bool _leavePointerOpen;
 
@@ -63,11 +62,6 @@ namespace MonoGame.Imaging
             _infoBuffer = _memoryManager.GetMemoryStream();
             _leavePointerOpen = false;
             PointerLength = -1;
-
-            unsafe
-            {
-                _callbacks = new ReadCallbacks(ReadCallback, EoFCallback);
-            }
         }
 
         public Image(Stream stream, bool leaveOpen) : this(stream, ImagePixelFormat.Source, leaveOpen)

@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Net;
 
 namespace MonoGame.Imaging.Tests
 {
@@ -17,6 +18,34 @@ namespace MonoGame.Imaging.Tests
 
         static void Main(string[] args)
         {
+            /*
+            using (var f = File.OpenRead("wtf.png"))
+            {
+                IntPtr result = idk.ReadImg(f, out int w, out int h, out int c);
+                Console.WriteLine(w + "x" + h + " *" + c);
+                if (result == IntPtr.Zero)
+                    Console.WriteLine("Decoding failed");
+
+                Image img = new Image(result, w, h, (ImagePixelFormat)c);
+                using (var fo = File.OpenWrite("ok wot.png"))
+                    img.Save(fo, ImageSaveFormat.Png);
+            }
+            */
+
+            var req = WebRequest.CreateHttp("https://preview.redd.it/2ws638caxh421.png?auto=webp&s=07157d5f791ebec998d2793ff384aa6f8c67a638");
+            using (Image img1 = new Image(File.OpenRead("wtf.png"), ImagePixelFormat.RgbWithAlpha))
+            {
+                img1.GetPointer();
+
+                if (!img1.LastPointerFailed)
+                    using (var fs = File.OpenWrite("im done.png"))
+                        img1.Save(fs, ImageSaveFormat.Png);
+            }
+
+            Console.ReadKey();
+
+            return;
+            
             //using (Image img1 = new Image(File.OpenRead("texture_0.jpg"), ImagePixelFormat.RgbWithAlpha))
             //using (Image img2 = new Image(img1.Width, img1.Height, img1.PixelFormat))
             {
@@ -33,10 +62,10 @@ namespace MonoGame.Imaging.Tests
                     }
                 }
                 */
-            //    Console.WriteLine(img1.GetPointer());
-            //    Console.WriteLine(img1.PointerLength);
-            //    using (var fs = File.OpenWrite("texture.png"))
-            //        img1.Save(fs, ImageSaveFormat.Png);
+                //    Console.WriteLine(img1.GetPointer());
+                //    Console.WriteLine(img1.PointerLength);
+                //    using (var fs = File.OpenWrite("texture.png"))
+                //        img1.Save(fs, ImageSaveFormat.Png);
             }
 
             ZipArchive archive = new ZipArchive(File.OpenRead(DATA_ZIP), ZipArchiveMode.Read, false);

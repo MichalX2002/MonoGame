@@ -73,9 +73,7 @@ namespace MonoGame.Utilities.IO
             _readLen = 0;
             
             if (count >= _bufferSize)
-            {
                 return _stream.Read(buffer, offset, count) + alreadySatisfied;
-            }
             
             _readLen = _stream.Read(_buffer, 0, _bufferSize);
             bytesFromBuffer = ReadFromBuffer(buffer, offset, count);

@@ -28,11 +28,10 @@ namespace MonoGame.Imaging
 
         public bool IsValid()
         {
-            return !(
-                Width == 0 ||
-                Height == 0 ||
-                PixelFormat == ImagePixelFormat.Unknown ||
-                SourceFormat == ImageFormat.Unknown);
+            return Width != 0 
+                && Height != 0 
+                && PixelFormat != ImagePixelFormat.Unknown 
+                && SourceFormat != ImageFormat.Unknown;
         }
 
         public override string ToString()

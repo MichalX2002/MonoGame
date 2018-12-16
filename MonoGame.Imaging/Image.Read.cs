@@ -48,7 +48,7 @@ namespace MonoGame.Imaging
             if (_cachedInfo.SourceFormat != ImageFormat.Png)
                 Errors.RemoveError(ImagingError.BadPngSignature);
         }
-
+        
         private unsafe MarshalPointer GetDataPointer()
         {
             lock (SyncRoot)
@@ -67,20 +67,18 @@ namespace MonoGame.Imaging
                         LastPointerFailed = true;
                         return default;
                     }
-
-                    var bufferStream = _memoryManager.GetReadBufferedStream(_combinedStream, true);
+                    
+                    var dataStream = _combinedStream; //_memoryManager.GetReadBufferedStream(_combinedStream, true);
                     var buffer = _memoryManager.GetBlock();
                     try
                     {
-                        ReadContext rc = GetReadContext(bufferStream, buffer);
+                        ReadContext rc = GetReadContext(dataStream, buffer);
                         LastPointerFailed = rc == null;
                         if (LastPointerFailed == false)
                         {
-                            int bpp = 
-                                info.SourceFormat == ImageFormat.Jpg ? 3 :
-                                (info.DesiredPixelFormat == ImagePixelFormat.Source ?
-                                (int)info.SourcePixelFormat :
-                                (int)info.DesiredPixelFormat);
+                            int bpp = info.SourceFormat == ImageFormat.Jpg ?
+                                3 : (info.DesiredPixelFormat == ImagePixelFormat.Source ?
+                                (int)info.SourcePixelFormat : (int)info.DesiredPixelFormat);
 
                             IntPtr result = Imaging.LoadFromInfo8(rc, info, bpp);
                             if (result == IntPtr.Zero)
@@ -123,7 +121,7 @@ namespace MonoGame.Imaging
                     finally
                     {
                         _memoryManager.ReturnBlock(buffer, null);
-                        bufferStream.Dispose();
+                        dataStream.Dispose();
                         CloseStream();
                     }
                 }
@@ -140,7 +138,8 @@ namespace MonoGame.Imaging
                     if (LastContextFailed)
                         return null;
 
-                    var context = Imaging.GetReadContext(stream, Errors, _callbacks, buffer);
+                    var callbacks = new ReadCallbacks(ReadCallback, EoFCallback);
+                    var context = Imaging.GetReadContext(stream, Errors, callbacks, buffer);
                     LastContextFailed = context == null;
                     return context;
                 }
@@ -151,24 +150,28 @@ namespace MonoGame.Imaging
         {
             return stream.CanRead ? 1 : 0;
         }
-
+        
         private unsafe int ReadCallback(Stream stream, byte* data, byte[] buffer, int size)
         {
             if (data == null || size <= 0)
                 return 0;
 
-            int leftToRead = size;
+            // "size - left" gives us how much we've already read
+
+            int left = size;
             int read = 0;
-            while (leftToRead > 0 && (read = stream.Read(buffer, 0, leftToRead)) > 0)
+
+            while (left > 0 && (read = stream.Read(buffer, 0, Math.Min(buffer.Length, left))) > 0)
             {
+                int totalRead = size - left;
                 for (int i = 0; i < read; i++)
-                    data[i + size - leftToRead] = buffer[i];
+                    data[i + totalRead] = buffer[i];
 
                 _infoBuffer?.Write(buffer, 0, read);
-                leftToRead -= read;
+                left -= read;
             }
 
-            return size - leftToRead;
+            return size - left;
         }
     }
 }

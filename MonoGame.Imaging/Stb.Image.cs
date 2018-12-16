@@ -15,31 +15,26 @@ namespace MonoGame.Imaging
         }
 
         /*
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void* MAlloc(MemoryManager manager, ulong size)
         {
             return manager.MAlloc((int) size);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         private static void MemCopy(MemoryManager manager, void* a, void* b, ulong size)
         {
             manager.MemCopy(a, b, (long) size);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         private static void MemMove(MemoryManager manager, void* a, void* b, ulong size)
         {
             manager.MemMove(a, b, (long) size);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    
         private static int MemCmp(MemoryManager manager, void* a, void* b, ulong size)
         {
             return manager.MemCmp(a, b, (long) size);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Free(MemoryManager manager, void* a)
         {
             manager.Free(a);
