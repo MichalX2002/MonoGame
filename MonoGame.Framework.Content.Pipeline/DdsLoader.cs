@@ -149,7 +149,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                     else if (pixelFormat.dwRgbBitCount == 32)
                     {
                         rbSwap = pixelFormat.dwBBitMask == 0xFF;
-                        return SurfaceFormat.Color;
+                        return SurfaceFormat.Rgba32;
                     }
                     throw new ContentLoadException("Unsupported RGBA pixel format");
                 }
@@ -164,12 +164,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                     else if (pixelFormat.dwRgbBitCount == 24)
                     {
                         rbSwap = pixelFormat.dwBBitMask == 0xFF;
-                        return SurfaceFormat.Color;
+                        return SurfaceFormat.Rgba32;
                     }
                     else if (pixelFormat.dwRgbBitCount == 32)
                     {
                         rbSwap = pixelFormat.dwBBitMask == 0xFF;
-                        return SurfaceFormat.Color;
+                        return SurfaceFormat.Rgba32;
                     }
                     throw new ContentLoadException("Unsupported RGB pixel format");
                 }
@@ -185,7 +185,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         {
             switch (format)
             {
-                case SurfaceFormat.Color:
+                case SurfaceFormat.Rgba32:
                     return new PixelBitmapContent<Color>(width, height);
 
                 case SurfaceFormat.Bgra4444:
@@ -221,7 +221,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
 
             switch (format)
             {
-                case SurfaceFormat.Color:
+                case SurfaceFormat.Rgba32:
                 case SurfaceFormat.Bgra4444:
                 case SurfaceFormat.Bgra5551:
                 case SurfaceFormat.Bgr565:
@@ -345,7 +345,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                                 case SurfaceFormat.Bgra5551:
                                     ByteSwapBGRA5551(bytes);
                                     break;
-                                case SurfaceFormat.Color:
+                                case SurfaceFormat.Rgba32:
                                     if (header.ddspf.dwRgbBitCount == 32)
                                         ByteSwapRGBX(bytes);
                                     else if (header.ddspf.dwRgbBitCount == 24)
@@ -353,7 +353,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                                     break;
                             }
                         }
-                        if ((format == SurfaceFormat.Color) && header.ddspf.dwFlags.HasFlag(Ddpf.Rgb) && !header.ddspf.dwFlags.HasFlag(Ddpf.AlphaPixels))
+                        if ((format == SurfaceFormat.Rgba32) && header.ddspf.dwFlags.HasFlag(Ddpf.Rgb) && !header.ddspf.dwFlags.HasFlag(Ddpf.AlphaPixels))
                         {
                             // Fill or add alpha with opaque
                             if (header.ddspf.dwRgbBitCount == 32)
@@ -491,7 +491,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                 writer.Write((uint)0);
                 writer.Write((uint)0);
 
-                if (!bitmapContent.TryGetFormat(out SurfaceFormat format) || format != SurfaceFormat.Color)
+                if (!bitmapContent.TryGetFormat(out SurfaceFormat format) || format != SurfaceFormat.Rgba32)
                     throw new NotSupportedException("Unsupported bitmap content!");
 
                 header.ddspf.dwSize = 32;

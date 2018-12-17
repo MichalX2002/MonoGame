@@ -410,9 +410,13 @@ namespace Microsoft.Xna.Framework
             if (IsFixedTimeStep && _accumulatedElapsedTime < TargetElapsedTime)
             {
                 // Sleep for as long as possible without overshooting the update time
-                var sleepTime = (TargetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
-                MonoGame.Utilities.TimerHelper.SleepForNoMoreThan(sleepTime);
+                var sleepTime = (TargetElapsedTime - _accumulatedElapsedTime);
+#if WINDOWS
+                MonoGame.Utilities.TimerHelper.SleepForNoMoreThan(sleepTime.TotalMilliseconds);
+#elif DESKTOPGL
+                Thread.Sleep(sleepTime); 
 #endif
+
                 // Keep looping until it's time to perform the next update
                 goto RetryTick;
             }
@@ -481,9 +485,9 @@ namespace Microsoft.Xna.Framework
                 Platform.Exit();
         }
 
-        #endregion
+#endregion
 
-        #region Protected Methods
+#region Protected Methods
 
         protected virtual bool BeginDraw() { return true; }
         protected virtual void EndDraw()
@@ -555,9 +559,9 @@ namespace Microsoft.Xna.Framework
             EventHelpers.Raise(sender, Deactivated, args);
 		}
 
-        #endregion Protected Methods
+#endregion Protected Methods
 
-        #region Event Handlers
+#region Event Handlers
 
         private void Components_ComponentAdded(
             object sender, GameComponentCollectionEventArgs e)
@@ -584,9 +588,9 @@ namespace Microsoft.Xna.Framework
 			DoExiting();
         }
 
-        #endregion Event Handlers
+#endregion Event Handlers
 
-        #region Internal Methods
+#region Internal Methods
 
         // FIXME: We should work toward eliminating internal methods.  They
         //        break entirely the possibility that additional platforms could
@@ -661,7 +665,7 @@ namespace Microsoft.Xna.Framework
 			UnloadContent();
 		}
 
-        #endregion Internal Methods
+#endregion Internal Methods
 
         internal GraphicsDeviceManager InternalGraphicsDeviceManager
         {

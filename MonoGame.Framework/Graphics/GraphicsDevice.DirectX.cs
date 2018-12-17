@@ -1562,7 +1562,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             // TODO share code with Texture2D.GetData and do pooling for staging textures
             // first set up a staging texture
-            const SurfaceFormat format = SurfaceFormat.Color;
+            const SurfaceFormat format = SurfaceFormat.Rgba32;
             //You can't Map the BackBuffer surface, so we copy to another texture
             using (var backBufferTexture = SharpDX.Direct3D11.Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(_swapChain, 0))
             {

@@ -81,7 +81,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         public override bool TryGetFormat(out SurfaceFormat format)
         {
             if (typeof(T) == typeof(Color))
-                format = SurfaceFormat.Color;
+                format = SurfaceFormat.Rgba32;
             else if (typeof(T) == typeof(Bgra4444))
                 format = SurfaceFormat.Bgra4444;
             else if (typeof(T) == typeof(Bgra5551))
@@ -103,7 +103,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             else if (typeof(T) == typeof(Rg32))
                 format = SurfaceFormat.Rg32;
             else if (typeof(T) == typeof(Byte4))
-                format = SurfaceFormat.Color;
+                format = SurfaceFormat.Rgba32;
             else if (typeof(T) == typeof(NormalizedByte2))
                 format = SurfaceFormat.NormalizedByte2;
             else if (typeof(T) == typeof(NormalizedByte4))
@@ -116,7 +116,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 format = SurfaceFormat.HalfVector4;
             else
             {
-                format = SurfaceFormat.Color;
+                format = SurfaceFormat.Rgba32;
                 return false;
             }
 

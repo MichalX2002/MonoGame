@@ -55,7 +55,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{}
 		
 		public RenderTarget3D(GraphicsDevice graphicsDevice, int width, int height, int depth)
-			: this(graphicsDevice, width, height, depth, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents) 
+			: this(graphicsDevice, width, height, depth, false, SurfaceFormat.Rgba32, DepthFormat.None, 0, RenderTargetUsage.DiscardContents) 
 		{}
 	}
 }

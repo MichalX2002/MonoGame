@@ -58,7 +58,7 @@ namespace Microsoft.Xna.Framework
         {
             switch (format)
             {
-                case SurfaceFormat.Color:
+                case SurfaceFormat.Rgba32:
                 default:
                     return SharpDX.DXGI.Format.R8G8B8A8_UNorm;
 

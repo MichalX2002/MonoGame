@@ -7,11 +7,6 @@ using System.Net;
 
 namespace MonoGame.Imaging.Tests
 {
-    struct ColorRGBA
-    {
-        public byte R;
-    }
-
     class Program
     {
         public const string DATA_ZIP = "testdata.zip";

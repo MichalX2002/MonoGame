@@ -99,11 +99,11 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// For compatibility with WPF D3DImage.
         /// </summary>
-        Bgr32 = 20,     // B8G8R8X8
+        Bgr32,     // B8G8R8X8
         /// <summary>
         /// For compatibility with WPF D3DImage.
         /// </summary>
-        Bgra32 = 21,    // B8G8R8A8    
+        Bgra32,    // B8G8R8A8    
 
         /// <summary>
         /// Unsigned 32-bit RGBA sRGB pixel format that supports 8 bits per channel.

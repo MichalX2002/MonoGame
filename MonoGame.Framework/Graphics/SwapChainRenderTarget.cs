@@ -23,48 +23,27 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public PresentInterval PresentInterval;
 
-        public SwapChainRenderTarget(   GraphicsDevice graphicsDevice,
-                                        IntPtr windowHandle,
-                                        int width,
-                                        int height)
-            : this( 
-                graphicsDevice, 
-                windowHandle, 
-                width, 
-                height, 
-                false, 
-                SurfaceFormat.Color,
-                DepthFormat.Depth24,
-                0, 
-                RenderTargetUsage.DiscardContents,
-                PresentInterval.Default)
+        public SwapChainRenderTarget(
+            GraphicsDevice graphicsDevice, IntPtr windowHandle, int width, int height) :
+
+            this(graphicsDevice, windowHandle, width, height, 
+                 false, SurfaceFormat.Rgba32, DepthFormat.Depth24, 0,
+                 RenderTargetUsage.DiscardContents, PresentInterval.Default)
         {
         }
 
-        public SwapChainRenderTarget(   GraphicsDevice graphicsDevice,
-                                        IntPtr windowHandle,                                     
-                                        int width,
-                                        int height,
-                                        bool mipMap,
-                                        SurfaceFormat surfaceFormat,
-                                        DepthFormat depthFormat,                                        
-                                        int preferredMultiSampleCount,
-                                        RenderTargetUsage usage,
-                                        PresentInterval presentInterval)
-            : base(
-                graphicsDevice,
-                width,
-                height,
-                mipMap,
-                surfaceFormat,
-                depthFormat,
-                preferredMultiSampleCount,
-                usage,
-                SurfaceType.SwapChainRenderTarget)
+        public SwapChainRenderTarget(
+            GraphicsDevice graphicsDevice, IntPtr windowHandle,
+            int width, int height, bool mipMap, SurfaceFormat surfaceFormat,
+            DepthFormat depthFormat, int preferredMultiSampleCount,
+            RenderTargetUsage usage, PresentInterval presentInterval) :
+
+            base(graphicsDevice, width, height, mipMap, surfaceFormat,
+                 depthFormat, preferredMultiSampleCount,
+                 usage, SurfaceType.SwapChainRenderTarget)
         {
-            var dxgiFormat = surfaceFormat == SurfaceFormat.Color
-                             ? SharpDX.DXGI.Format.B8G8R8A8_UNorm
-                             : SharpDXHelper.ToFormat(surfaceFormat);
+            var dxgiFormat = surfaceFormat == SurfaceFormat.Rgba32
+                ? SharpDX.DXGI.Format.B8G8R8A8_UNorm : SharpDXHelper.ToFormat(surfaceFormat);
 
             var multisampleDesc = new SampleDescription(1, 0);
             if (preferredMultiSampleCount > 1)
@@ -73,7 +52,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 multisampleDesc.Quality = (int)StandardMultisampleQualityLevels.StandardMultisamplePattern;
             }
 
-            var desc = new SwapChainDescription()
+            var chainDesc = new SwapChainDescription()
             {
                 ModeDescription =
                 {
@@ -103,7 +82,7 @@ namespace Microsoft.Xna.Framework.Graphics
             using (var dxgiAdapter = dxgiDevice.Adapter)
             using (var dxgiFactory = dxgiAdapter.GetParent<Factory1>())
             {
-                _swapChain = new SwapChain(dxgiFactory, dxgiDevice, desc);
+                _swapChain = new SwapChain(dxgiFactory, dxgiDevice, chainDesc);
             }
 
             // Obtain the backbuffer for this window which will be the final 3D rendertarget.
@@ -122,24 +101,24 @@ namespace Microsoft.Xna.Framework.Graphics
             if (depthFormat != DepthFormat.None)
             {
                 dxgiFormat = SharpDXHelper.ToFormat(depthFormat);
+                var texDesc = new Texture2DDescription()
+                {
+                    Format = dxgiFormat,
+                    ArraySize = 1,
+                    MipLevels = 1,
+                    Width = targetSize.X,
+                    Height = targetSize.Y,
+                    SampleDescription = multisampleDesc,
+                    Usage = ResourceUsage.Default,
+                    BindFlags = BindFlags.DepthStencil,
+                };
 
-                // Allocate a 2-D surface as the depth/stencil buffer.
-                using (
-                    var depthBuffer = new SharpDX.Direct3D11.Texture2D(d3dDevice,
-                                                                       new Texture2DDescription()
-                                                                           {
-                                                                               Format = dxgiFormat,
-                                                                               ArraySize = 1,
-                                                                               MipLevels = 1,
-                                                                               Width = targetSize.X,
-                                                                               Height = targetSize.Y,
-                                                                               SampleDescription = multisampleDesc,
-                                                                               Usage = ResourceUsage.Default,
-                                                                               BindFlags = BindFlags.DepthStencil,
-                                                                           }))
-
+                // Allocate a 2D surface as the depth/stencil buffer.
+                using (var depthBuffer = new SharpDX.Direct3D11.Texture2D(d3dDevice, texDesc))
+                {
                     // Create a DepthStencil view on this surface to use on bind.
                     _depthStencilView = new DepthStencilView(d3dDevice, depthBuffer);
+                }
             }
         }
 

@@ -51,7 +51,7 @@ namespace Microsoft.Xna.Framework.GamerServices
             int aDiameter = radius * 2;
             Vector2 aCenter = new Vector2(radius, radius);
 
-            Texture2D aCircle = new Texture2D(graphics, aDiameter, aDiameter, false, SurfaceFormat.Color);
+            Texture2D aCircle = new Texture2D(graphics, aDiameter, aDiameter, false, SurfaceFormat.Rgba32);
             Color[] aColors = new Color[aDiameter * aDiameter];
 
             for (int i = 0; i < aColors.Length; i++)
