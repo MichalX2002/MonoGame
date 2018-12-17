@@ -43,11 +43,14 @@ namespace MonoGame.Framework
 
         // true if window position was moved either through code or by dragging/resizing the form
         private bool _wasMoved;
-        
+
+
+        private bool _isResizeTickEnabled;
+        private readonly System.Timers.Timer _resizeTickTimer;
+
         internal Game Game { get; private set; }
 
-        #region Public Properties
-
+        
         public override IntPtr Handle { get { return Form.Handle; } }
 
         public override string ScreenDeviceName { get { return string.Empty; } }
@@ -154,7 +157,7 @@ namespace MonoGame.Framework
         public override bool HasClipboardText => Clipboard.ContainsText();
         public override string ClipboardText { get => Clipboard.GetText(); set => Clipboard.SetText(value); }
 
-        #endregion
+        
 
         internal WinFormsGameWindow(WinFormsGamePlatform platform)
         {
@@ -178,9 +181,13 @@ namespace MonoGame.Framework
             Form.MouseEnter += OnMouseEnter;
             Form.MouseLeave += OnMouseLeave;            
 
+            _resizeTickTimer = new System.Timers.Timer(1) { SynchronizingObject = Form, AutoReset = false };
+            _resizeTickTimer.Elapsed += OnResizeTick;
+
             Form.Activated += OnActivated;
             Form.Deactivate += OnDeactivate;
             Form.Resize += OnResize;
+            Form.ResizeBegin += OnResizeBegin;
             Form.ResizeEnd += OnResizeEnd;
 
             Form.KeyPress += OnKeyPress;
@@ -258,8 +265,11 @@ namespace MonoGame.Framework
         private void OnDeactivate(object sender, EventArgs eventArgs)
         {
             // If in exclusive mode full-screen, force it out of exclusive mode and minimize the window
-            if (IsFullScreen && _platform.Game.GraphicsDevice.PresentationParameters.HardwareModeSwitch)
-                MinimizeFullScreen();
+			if( IsFullScreen && _platform.Game.GraphicsDevice.PresentationParameters.HardwareModeSwitch ) {			
+				// This is true when the user presses the Windows key while game window has focus
+				if( Form.WindowState == FormWindowState.Minimized )
+					MinimizeFullScreen();				
+			}
             _platform.IsActive = false;
             Keyboard.SetActive(false);
         }
@@ -394,8 +404,26 @@ namespace MonoGame.Framework
             OnClientSizeChanged();
         }
 
+        private void OnResizeBegin(object sender, EventArgs e)
+        {
+            _isResizeTickEnabled = true;
+            _resizeTickTimer.Enabled = true;
+        }
+
+        private void OnResizeTick(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (!_isResizeTickEnabled)
+                return;
+            UpdateWindows();
+            Game.Tick();
+            _resizeTickTimer.Enabled = true;
+        }
+
         private void OnResizeEnd(object sender, EventArgs eventArgs)
         {
+            _isResizeTickEnabled = false;
+            _resizeTickTimer.Enabled = false;
+
             _wasMoved = true;
             if (Game.Window == this)
             {
@@ -521,9 +549,7 @@ namespace MonoGame.Framework
         [System.Security.SuppressUnmanagedCodeSecurity] // We won't use this maliciously
         [DllImport("User32.dll", CharSet = CharSet.Auto)]
         private static extern bool PeekMessage(out NativeMessage msg, IntPtr hWnd, uint messageFilterMin, uint messageFilterMax, uint flags);
-
-        #region Public Methods
-
+        
         public void Dispose()
         {
             Dispose(true);
@@ -576,8 +602,14 @@ namespace MonoGame.Framework
             var raiseClientSizeChanged = false;
             if (pp.IsFullScreen && pp.HardwareModeSwitch && IsFullScreen && HardwareModeSwitch)
             {
-                // stay in hardware full screen, need to call ResizeTargets so the displaymode can be switched
-                _platform.Game.GraphicsDevice.ResizeTargets();
+                if( _platform.IsActive ) {
+					// stay in hardware full screen, need to call ResizeTargets so the displaymode can be switched
+					_platform.Game.GraphicsDevice.ResizeTargets();
+				} else {
+					// This needs to be called in case the user presses the Windows key while the focus is on the second monitor,
+					//	which (sometimes) causes the window to exit fullscreen mode, but still keeps it visible
+					MinimizeFullScreen();
+				}
             }
             else if (pp.IsFullScreen && (!IsFullScreen || pp.HardwareModeSwitch != HardwareModeSwitch))
             {
@@ -595,8 +627,6 @@ namespace MonoGame.Framework
             if (raiseClientSizeChanged)
                 OnClientSizeChanged();
         }
-
-        #endregion
 
         private void EnterFullScreen(PresentationParameters pp)
         {

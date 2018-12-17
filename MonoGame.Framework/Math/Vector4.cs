@@ -12,20 +12,19 @@ namespace Microsoft.Xna.Framework
     /// Describes a 4D-vector.
     /// </summary>
 #if XNADESIGNPROVIDED
-    [System.ComponentModel.TypeConverter(typeof(Design.Vector4TypeConverter))]
+    [System.ComponentModel.TypeConverter(typeof(Microsoft.Xna.Framework.Design.Vector4TypeConverter))]
 #endif
     [DataContract]
     [DebuggerDisplay("{DebugDisplayString,nq}")]
     public struct Vector4 : IEquatable<Vector4>
     {
-
-        #region Private Fields
+        private static readonly Vector4 zero = new Vector4();
+        private static readonly Vector4 one = new Vector4(1f, 1f, 1f, 1f);
+        private static readonly Vector4 unitX = new Vector4(1f, 0f, 0f, 0f);
+        private static readonly Vector4 unitY = new Vector4(0f, 1f, 0f, 0f);
+        private static readonly Vector4 unitZ = new Vector4(0f, 0f, 1f, 0f);
         private static readonly Vector4 unitW = new Vector4(0f, 0f, 0f, 1f);
-
-        #endregion
-
-        #region Public Fields
-
+        
         /// <summary>
         /// The x coordinate of this <see cref="Vector4"/>.
         /// </summary>
@@ -50,34 +49,45 @@ namespace Microsoft.Xna.Framework
         [DataMember]
         public float W;
 
-        #endregion
-
-        #region Public Properties
-
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 0, 0, 0.
         /// </summary>
-        public static Vector4 Zero { get; } = new Vector4();
+        public static Vector4 Zero
+        {
+            get { return zero; }
+        }
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 1, 1, 1, 1.
         /// </summary>
-        public static Vector4 One { get; } = new Vector4(1f, 1f, 1f, 1f);
+        public static Vector4 One
+        {
+            get { return one; }
+        }
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 1, 0, 0, 0.
         /// </summary>
-        public static Vector4 UnitX { get; } = new Vector4(1f, 0f, 0f, 0f);
+        public static Vector4 UnitX
+        {
+            get { return unitX; }
+        }
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 1, 0, 0.
         /// </summary>
-        public static Vector4 UnitY { get; } = new Vector4(0f, 1f, 0f, 0f);
+        public static Vector4 UnitY
+        {
+            get { return unitY; }
+        }
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 0, 1, 0.
         /// </summary>
-        public static Vector4 UnitZ { get; } = new Vector4(0f, 0f, 1f, 0f);
+        public static Vector4 UnitZ
+        {
+            get { return unitZ; }
+        }
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 0, 0, 1.
@@ -86,10 +96,6 @@ namespace Microsoft.Xna.Framework
         {
             get { return unitW; }
         }
-
-        #endregion
-
-        #region Internal Properties
 
         internal string DebugDisplayString
         {
@@ -103,10 +109,6 @@ namespace Microsoft.Xna.Framework
                 );
             }
         }
-
-        #endregion
-
-        #region Constructors
 
         /// <summary>
         /// Constructs a 3d vector with X, Y, Z and W from four values.
@@ -161,10 +163,6 @@ namespace Microsoft.Xna.Framework
             this.Z = value;
             this.W = value;
         }
-
-        #endregion
-
-        #region Public Methods
 
         /// <summary>
         /// Performs vector addition on <paramref name="value1"/> and <paramref name="value2"/>.
@@ -555,7 +553,7 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains linear interpolation of the specified vectors.
         /// Uses <see cref="MathHelper.LerpPrecise"/> on MathHelper for the interpolation.
-        /// Less efficient but more precise compared to <see cref="Lerp(Vector4, Vector4, float)"/>.
+        /// Less efficient but more precise compared to <see cref="Vector4.Lerp(Vector4, Vector4, float)"/>.
         /// See remarks section of <see cref="MathHelper.LerpPrecise"/> on MathHelper for more info.
         /// </summary>
         /// <param name="value1">The first vector.</param>
@@ -574,7 +572,7 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains linear interpolation of the specified vectors.
         /// Uses <see cref="MathHelper.LerpPrecise"/> on MathHelper for the interpolation.
-        /// Less efficient but more precise compared to <see cref="Lerp(ref Vector4, ref Vector4, float, out Vector4)"/>.
+        /// Less efficient but more precise compared to <see cref="Vector4.Lerp(ref Vector4, ref Vector4, float, out Vector4)"/>.
         /// See remarks section of <see cref="MathHelper.LerpPrecise"/> on MathHelper for more info.
         /// </summary>
         /// <param name="value1">The first vector.</param>
@@ -829,8 +827,6 @@ namespace Microsoft.Xna.Framework
             result.Z = value1.Z - value2.Z;
         }
 
-        #region Transform
-
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains a transformation of 2d-vector by the specified <see cref="Matrix"/>.
         /// </summary>
@@ -839,7 +835,8 @@ namespace Microsoft.Xna.Framework
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
         public static Vector4 Transform(Vector2 value, Matrix matrix)
         {
-            Transform(ref value, ref matrix, out Vector4 result);
+            Vector4 result;
+            Transform(ref value, ref matrix, out result);
             return result;
         }
 
@@ -851,7 +848,8 @@ namespace Microsoft.Xna.Framework
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
         public static Vector4 Transform(Vector2 value, Quaternion rotation)
         {
-            Transform(ref value, ref rotation, out Vector4 result);
+            Vector4 result;
+            Transform(ref value, ref rotation, out result);
             return result;
         }
 
@@ -863,7 +861,8 @@ namespace Microsoft.Xna.Framework
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
         public static Vector4 Transform(Vector3 value, Matrix matrix)
         {
-            Transform(ref value, ref matrix, out Vector4 result);
+            Vector4 result;
+            Transform(ref value, ref matrix, out result);
             return result;
         }
 
@@ -875,7 +874,8 @@ namespace Microsoft.Xna.Framework
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
         public static Vector4 Transform(Vector3 value, Quaternion rotation)
         {
-            Transform(ref value, ref rotation, out Vector4 result);
+            Vector4 result;
+            Transform(ref value, ref rotation, out result);
             return result;
         }
 
@@ -899,7 +899,8 @@ namespace Microsoft.Xna.Framework
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
         public static Vector4 Transform(Vector4 value, Quaternion rotation)
         {
-            Transform(ref value, ref rotation, out Vector4 result);
+            Vector4 result;
+            Transform(ref value, ref rotation, out result);
             return result;
         }
 
@@ -991,19 +992,29 @@ namespace Microsoft.Xna.Framework
         /// <param name="destinationArray">Destination array.</param>
         /// <param name="destinationIndex">The starting index in the destination array, where the first <see cref="Vector4"/> should be written.</param>
         /// <param name="length">The number of vectors to be transformed.</param>
-        public static void Transform(
-            Vector4[] sourceArray, int sourceIndex, ref Matrix matrix,
-            Vector4[] destinationArray, int destinationIndex, int length)
+        public static void Transform
+        (
+            Vector4[] sourceArray,
+            int sourceIndex,
+            ref Matrix matrix,
+            Vector4[] destinationArray,
+            int destinationIndex,
+            int length
+        )
         {
-            if (ExceptionHelper.CheckIndexedSrcDstArrays(
-                   sourceArray, sourceIndex, length, destinationArray, destinationIndex, out var exc))
-                throw exc;
+            if (sourceArray == null)
+                throw new ArgumentNullException("sourceArray");
+            if (destinationArray == null)
+                throw new ArgumentNullException("destinationArray");
+            if (sourceArray.Length < sourceIndex + length)
+                throw new ArgumentException("Source array length is lesser than sourceIndex + length");
+            if (destinationArray.Length < destinationIndex + length)
+                throw new ArgumentException("Destination array length is lesser than destinationIndex + length");
 
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
-                Transform(
-                    ref sourceArray[sourceIndex + i], ref matrix,
-                    out destinationArray[destinationIndex + i]);
+                var value = sourceArray[sourceIndex + i];
+                destinationArray[destinationIndex + i] = Transform(value, matrix);
             }
         }
 
@@ -1017,18 +1028,27 @@ namespace Microsoft.Xna.Framework
         /// <param name="destinationIndex">The starting index in the destination array, where the first <see cref="Vector4"/> should be written.</param>
         /// <param name="length">The number of vectors to be transformed.</param>
         public static void Transform(
-            Vector4[] sourceArray, int sourceIndex, ref Quaternion rotation,
-            Vector4[] destinationArray, int destinationIndex, int length)
+            Vector4[] sourceArray,
+            int sourceIndex,
+            ref Quaternion rotation,
+            Vector4[] destinationArray,
+            int destinationIndex,
+            int length
+            )
         {
-            if (ExceptionHelper.CheckIndexedSrcDstArrays(
-                   sourceArray, sourceIndex, length, destinationArray, destinationIndex, out var exc))
-                throw exc;
+            if (sourceArray == null)
+                throw new ArgumentNullException("sourceArray");
+            if (destinationArray == null)
+                throw new ArgumentNullException("destinationArray");
+            if (sourceArray.Length < sourceIndex + length)
+                throw new ArgumentException("Source array length is lesser than sourceIndex + length");
+            if (destinationArray.Length < destinationIndex + length)
+                throw new ArgumentException("Destination array length is lesser than destinationIndex + length");
 
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
-                Transform(
-                    ref sourceArray[sourceIndex + i], ref rotation,
-                    out destinationArray[destinationIndex + i]);
+                var value = sourceArray[sourceIndex + i];
+                destinationArray[destinationIndex + i] = Transform(value, rotation);
             }
         }
 
@@ -1040,12 +1060,17 @@ namespace Microsoft.Xna.Framework
         /// <param name="destinationArray">Destination array.</param>
         public static void Transform(Vector4[] sourceArray, ref Matrix matrix, Vector4[] destinationArray)
         {
-            if (ExceptionHelper.CheckSrcDstArrays(sourceArray, destinationArray, out var exc))
-                throw exc;
+            if (sourceArray == null)
+                throw new ArgumentNullException("sourceArray");
+            if (destinationArray == null)
+                throw new ArgumentNullException("destinationArray");
+            if (destinationArray.Length < sourceArray.Length)
+                throw new ArgumentException("Destination array length is lesser than source array length");
 
-            for (int i = 0; i < sourceArray.Length; i++)
+            for (var i = 0; i < sourceArray.Length; i++)
             {
-                Transform(ref sourceArray[i], ref matrix, out destinationArray[i]);
+                var value = sourceArray[i];
+                destinationArray[i] = Transform(value, matrix);
             }
         }
 
@@ -1057,17 +1082,20 @@ namespace Microsoft.Xna.Framework
         /// <param name="destinationArray">Destination array.</param>
         public static void Transform(Vector4[] sourceArray, ref Quaternion rotation, Vector4[] destinationArray)
         {
-            if (ExceptionHelper.CheckSrcDstArrays(sourceArray, destinationArray, out var exc))
-                throw exc;
+            if (sourceArray == null)
+                throw new ArgumentNullException("sourceArray");
+            if (destinationArray == null)
+                throw new ArgumentNullException("destinationArray");
+            if (destinationArray.Length < sourceArray.Length)
+                throw new ArgumentException("Destination array length is lesser than source array length");
 
-            for (int i = 0; i < sourceArray.Length; i++)
+            for (var i = 0; i < sourceArray.Length; i++)
             {
-                Transform(ref sourceArray[i], ref rotation, out destinationArray[i]);
+                var value = sourceArray[i];
+                destinationArray[i] = Transform(value, rotation);
             }
         }
-
-        #endregion
-
+        
         /// <summary>
         /// Returns a <see cref="String"/> representation of this <see cref="Vector4"/> in the format:
         /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>] Z:[<see cref="Z"/>] W:[<see cref="W"/>]}
@@ -1092,11 +1120,7 @@ namespace Microsoft.Xna.Framework
             z = Z;
             w = W;
         }
-
-        #endregion
-
-        #region Operators
-
+        
         /// <summary>
         /// Inverts values in the specified <see cref="Vector4"/>.
         /// </summary>

@@ -39,19 +39,12 @@ namespace Microsoft.Xna.Framework
     [DebuggerDisplay("{DebugDisplayString,nq}")]
     public struct Plane : IEquatable<Plane>
     {
-        #region Public Fields
-
         [DataMember]
         public float D;
 
         [DataMember]
         public Vector3 Normal;
-
-        #endregion Public Fields
-
-
-        #region Constructors
-
+        
         public Plane(Vector4 value)
             : this(new Vector3(value.X, value.Y, value.Z), value.W)
         {
@@ -79,12 +72,7 @@ namespace Microsoft.Xna.Framework
         {
 
         }
-
-        #endregion Constructors
-
-
-        #region Public Methods
-
+        
         public float Dot(Vector4 value)
         {
             return ((((this.Normal.X * value.X) + (this.Normal.Y * value.Y)) + (this.Normal.Z * value.Z)) + (this.D * value.W));
@@ -123,7 +111,8 @@ namespace Microsoft.Xna.Framework
         /// <returns>The transformed plane.</returns>
         public static Plane Transform(Plane plane, Matrix matrix)
         {
-            Transform(ref plane, ref matrix, out Plane result);
+            Plane result;
+            Transform(ref plane, ref matrix, out result);
             return result;
         }
 
@@ -138,12 +127,14 @@ namespace Microsoft.Xna.Framework
             // See "Transforming Normals" in http://www.glprogramming.com/red/appendixf.html
             // for an explanation of how this works.
 
-            Matrix.Invert(ref matrix, out Matrix transformedMatrix);
+            Matrix transformedMatrix;
+            Matrix.Invert(ref matrix, out transformedMatrix);
             Matrix.Transpose(ref transformedMatrix, out transformedMatrix);
 
             var vector = new Vector4(plane.Normal, plane.D);
 
-            Vector4.Transform(ref vector, ref transformedMatrix, out Vector4 transformedVector);
+            Vector4 transformedVector;
+            Vector4.Transform(ref vector, ref transformedMatrix, out transformedVector);
 
             result = new Plane(transformedVector);
         }
@@ -156,7 +147,8 @@ namespace Microsoft.Xna.Framework
         /// <returns>The transformed plane.</returns>
         public static Plane Transform(Plane plane, Quaternion rotation)
         {
-            Transform(ref plane, ref rotation, out Plane result);
+            Plane result;
+            Transform(ref plane, ref rotation, out result);
             return result;
         }
 
@@ -182,8 +174,9 @@ namespace Microsoft.Xna.Framework
 
         public static Plane Normalize(Plane value)
         {
-            Normalize(ref value, out Plane ret);
-            return ret;
+			Plane ret;
+			Normalize(ref value, out ret);
+			return ret;
         }
 
         public static void Normalize(ref Plane value, out Plane result)
@@ -246,7 +239,8 @@ namespace Microsoft.Xna.Framework
 
         internal PlaneIntersectionType Intersects(ref Vector3 point)
         {
-            DotCoordinate(ref point, out float distance);
+            float distance;
+            DotCoordinate(ref point, out distance);
 
             if (distance > 0)
                 return PlaneIntersectionType.Front;
@@ -283,8 +277,6 @@ namespace Microsoft.Xna.Framework
             normal = Normal;
             d = D;
         }
-
-        #endregion
     }
 }
 

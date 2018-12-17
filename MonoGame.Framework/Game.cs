@@ -411,8 +411,8 @@ namespace Microsoft.Xna.Framework
             {
                 // Sleep for as long as possible without overshooting the update time
                 var sleepTime = (TargetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
-                Utilities.TimerHelper.SleepForNoMoreThan(sleepTime);
-
+                MonoGame.Utilities.TimerHelper.SleepForNoMoreThan(sleepTime);
+#endif
                 // Keep looping until it's time to perform the next update
                 goto RetryTick;
             }
