@@ -33,10 +33,21 @@ namespace MonoGame.Imaging.Tests
             */
 
             var req = WebRequest.CreateHttp("https://preview.redd.it/2ws638caxh421.png?auto=webp&s=07157d5f791ebec998d2793ff384aa6f8c67a638");
-            using (Image img1 = new Image(File.OpenRead("wtf.png"), ImagePixelFormat.RgbWithAlpha))
+
+            using (var rep = req.GetResponse().GetResponseStream())
+            using (Image img1 = new Image(rep, ImagePixelFormat.Rgb))
             {
                 img1.GetPointer();
+                Console.WriteLine("netted: " + img1.LastPointerFailed);
+                if (!img1.LastPointerFailed)
+                    using (var fs = File.OpenWrite("im done netted.png"))
+                        img1.Save(fs, ImageSaveFormat.Png);
+            }
 
+            using (Image img1 = new Image(File.OpenRead("wtf.png"), ImagePixelFormat.Rgb))
+            {
+                img1.GetPointer();
+                Console.WriteLine("local: " + img1.LastPointerFailed);
                 if (!img1.LastPointerFailed)
                     using (var fs = File.OpenWrite("im done.png"))
                         img1.Save(fs, ImageSaveFormat.Png);
