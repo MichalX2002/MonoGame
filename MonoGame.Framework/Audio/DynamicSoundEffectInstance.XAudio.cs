@@ -61,6 +61,19 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
+        private void PlatformSubmitBuffer(short[] buffer, int offset, int count)
+        {
+            count *= sizeof(short);
+
+            // we need to copy so datastream does not pin the buffer that the user might modify later
+            byte[] pooledBuffer;
+            pooledBuffer = _bufferPool.Get(count);
+            _pooledBuffers.Enqueue(pooledBuffer);
+            Buffer.BlockCopy(buffer, offset, pooledBuffer, 0, count);
+
+            SubmitBufferInternal(pooledBuffer, offset, count);
+        }
+
         private void PlatformSubmitBuffer(byte[] buffer, int offset, int count)
         {
             // we need to copy so datastream does not pin the buffer that the user might modify later
@@ -69,7 +82,12 @@ namespace Microsoft.Xna.Framework.Audio
             _pooledBuffers.Enqueue(pooledBuffer);
             Buffer.BlockCopy(buffer, offset, pooledBuffer, 0, count);
 
-            var stream = DataStream.Create(pooledBuffer, true, false, offset, true);
+            SubmitBufferInternal(pooledBuffer, offset, count);
+        }
+
+        private void SubmitBufferInternal(byte[] buffer, int offset, int count)
+        {
+            var stream = DataStream.Create(buffer, true, false, offset, true);
             var audioBuffer = new AudioBuffer(stream)
             {
                 AudioBytes = count

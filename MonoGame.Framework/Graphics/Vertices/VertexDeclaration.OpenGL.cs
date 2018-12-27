@@ -10,7 +10,7 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class VertexDeclaration
     {
-        private readonly Dictionary<int, VertexDeclarationAttributeInfo> _shaderAttributeInfo = new Dictionary<int, VertexDeclarationAttributeInfo>(new Int32Comparer());
+        private readonly Dictionary<int, VertexDeclarationAttributeInfo> _shaderAttributeInfo = new Dictionary<int, VertexDeclarationAttributeInfo>(Int32Comparer.Instance);
 
         internal VertexDeclarationAttributeInfo GetAttributeInfo(Shader shader, int programHash)
         {

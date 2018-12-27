@@ -217,17 +217,18 @@ namespace Microsoft.Xna.Framework.Audio
         /// <param name="buffer">The buffer containing PCM audio data.</param>
         public void SubmitBuffer(byte[] buffer)
         {
-            AssertNotDisposed();
-            
-            if (buffer.Length == 0)
-                throw new ArgumentException("Buffer may not be empty.");
+            SubmitBuffer(buffer, 0, buffer.Length);
+        }
 
-            // Ensure that the buffer length matches alignment.
-            // The data must be 16-bit, so the length is a multiple of 2 (mono) or 4 (stereo).
-            var sampleSize = 2 * (int)_channels;
-            if (buffer.Length % sampleSize != 0)
-                throw new ArgumentException("Buffer length does not match format alignment.");
-
+        /// <summary>
+        /// Queues an audio buffer for playback.
+        /// </summary>
+        /// <remarks>
+        /// The buffer length must conform to alignment requirements for the audio format.
+        /// </remarks>
+        /// <param name="buffer">The buffer containing PCM audio data.</param>
+        public void SubmitBuffer(short[] buffer)
+        {
             SubmitBuffer(buffer, 0, buffer.Length);
         }
 
@@ -239,24 +240,33 @@ namespace Microsoft.Xna.Framework.Audio
         /// </remarks>
         /// <param name="buffer">The buffer containing PCM audio data.</param>
         /// <param name="offset">The starting position of audio data.</param>
-        /// <param name="count">The amount of bytes to use.</param>
+        /// <param name="count">The amount of elements to use.</param>
         public void SubmitBuffer(byte[] buffer, int offset, int count)
         {
             AssertNotDisposed();
-            
-            if ((buffer == null) || (buffer.Length == 0))
-                throw new ArgumentException("Buffer may not be null or empty.");
-            if (count <= 0)
-                throw new ArgumentException("Number of bytes must be greater than zero.");
-            if ((offset + count) > buffer.Length)
-                throw new ArgumentException("Buffer is shorter than the specified number of bytes from the offset.");
 
-            // Ensure that the buffer length and start position match alignment.
-            var sampleSize = 2 * (int)_channels;
-            if (count % sampleSize != 0)
-                throw new ArgumentException("Number of bytes does not match format alignment.");
-            if (offset % sampleSize != 0)
-                throw new ArgumentException("Offset into the buffer does not match format alignment.");
+            // The data must be 16-bit, so the length is a multiple of 2 (mono) or 4 (stereo).
+            int elementsPerSample = 2 * (int)_channels;
+            CheckSubmitArguments(buffer, offset, count, elementsPerSample);
+
+            PlatformSubmitBuffer(buffer, offset, count);
+        }
+
+        /// <summary>
+        /// Queues an audio buffer for playback.
+        /// </summary>
+        /// <remarks>
+        /// The buffer length must conform to alignment requirements for the audio format.
+        /// </remarks>
+        /// <param name="buffer">The buffer containing PCM audio data.</param>
+        /// <param name="offset">The starting position of audio data.</param>
+        /// <param name="count">The amount of elements to use.</param>
+        public void SubmitBuffer(short[] buffer, int offset, int count)
+        {
+            AssertNotDisposed();
+
+            int elementsPerSample = (int)_channels;
+            CheckSubmitArguments(buffer, offset, count, elementsPerSample);
 
             PlatformSubmitBuffer(buffer, offset, count);
         }
@@ -264,6 +274,22 @@ namespace Microsoft.Xna.Framework.Audio
         #endregion
 
         #region Nonpublic Functions
+        
+        private void CheckSubmitArguments<T>(T[] buffer, int offset, int count, int elementsPerSample)
+        {
+            if (buffer == null || buffer.Length == 0)
+                throw new ArgumentException("Buffer may not be null or empty.");
+            if (count <= 0)
+                throw new ArgumentException("Number of elements must be greater than zero.");
+            if (offset + count > buffer.Length)
+                throw new ArgumentException("Buffer is shorter than the specified number of elements from the offset.");
+
+            // Ensure that the buffer length and start position match alignment.
+            if (count % elementsPerSample != 0)
+                throw new ArgumentException("Number of elements does not match format alignment.");
+            if (offset % elementsPerSample != 0)
+                throw new ArgumentException("Offset into the buffer does not match format alignment.");
+        }
 
         private void AssertNotDisposed()
         {

@@ -170,7 +170,7 @@ namespace Microsoft.Xna.Framework.Media
         private static void PlatformStop()
         {
             // Loop through so that we reset the PlayCount as well
-            foreach (var song in Queue.Songs)
+            for (int i = 0; i < Queue.Count; i++)
                 Queue.ActiveSong.Stop();
         }
 
@@ -184,18 +184,37 @@ namespace Microsoft.Xna.Framework.Media
             var stream = activeSong.stream;
             if (stream == null)
                 return;
+            
+            int vi = 0;
+            int partIndex = 0;
+            
+            void ClearOldSamples()
+            {
+                for (int i = vi; i < data._samples.Length; i++)
+                    data._samples[i] = 0;
+            }
 
             int start;
             SongPart part;
-            lock (stream.prepareMutex)
+
+            lock (stream._prepareMutex)
             {
-                AL.GetSource(stream.alSourceId, ALGetSourcei.SampleOffset, out start);
-                start *= stream.Reader.Channels;
-                part = stream.parts[0];
+                lock (stream._stopMutex)
+                {
+                    if (stream._parts.Count == 0)
+                    {
+                        ClearOldSamples();
+                        return;
+                    }
+
+                    AL.GetSource(stream._alSourceId, ALGetSourcei.SampleOffset, out start);
+                    start *= stream.Reader.Channels;
+                    part = stream._parts[0];
+                }
             }
 
-            int vi = 0;
-            int partIndex = 0;
+            // iterate over 'vi' as that is the total amount of samples visualized
+            // 'di' is the offset in the current part
             for (int di = start; vi < data._samples.Length; vi++, di++)
             {
                 if (di < part.Count)
@@ -204,16 +223,16 @@ namespace Microsoft.Xna.Framework.Media
                     continue;
                 }
 
-                if (Monitor.TryEnter(stream.prepareMutex))
+                if (Monitor.TryEnter(stream._prepareMutex))
                 {
                     //look at next part
                     partIndex++;
-                    if (partIndex < stream.parts.Count)
+                    if (partIndex < stream._parts.Count)
                     {
-                        part = stream.parts[partIndex];
+                        part = stream._parts[partIndex];
                         if (part.Count == 0)
                         {
-                            Monitor.Exit(stream.prepareMutex);
+                            Monitor.Exit(stream._prepareMutex);
                             break;
                         }
 
@@ -221,19 +240,20 @@ namespace Microsoft.Xna.Framework.Media
                     }
                     else // no more parts ready
                     {
-                        Monitor.Exit(stream.prepareMutex);
+                        Monitor.Exit(stream._prepareMutex);
                         break;
                     }
 
-                    Monitor.Exit(stream.prepareMutex);
+                    Monitor.Exit(stream._prepareMutex);
                 }
                 else // failed to lock
+                {
+                    ClearOldSamples();
                     return;
+                }
             }
 
-            // clear old samples
-            for (int i = vi; i < data._samples.Length; i++)
-                data._samples[i] = 0;
+            ClearOldSamples();
 #endif
         }
 

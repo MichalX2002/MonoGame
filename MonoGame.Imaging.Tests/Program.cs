@@ -76,8 +76,8 @@ namespace MonoGame.Imaging.Tests
 
             ZipArchive archive = new ZipArchive(File.OpenRead(DATA_ZIP), ZipArchiveMode.Read, false);
 
-            SaveConfiguration d = new SaveConfiguration(true, 0, SaveConfiguration.DefaultMemoryManager);
-            SaveConfiguration nonD = new SaveConfiguration(false, 0, SaveConfiguration.DefaultMemoryManager);
+            SaveConfiguration d = new SaveConfiguration(true, 0, RecyclableMemoryManager.Instance);
+            SaveConfiguration nonD = new SaveConfiguration(false, 0, RecyclableMemoryManager.Instance);
             var ms = new MemoryStream();
 
             TestEntry(ms, d, archive, "bmp/8bit.bmp");
@@ -98,7 +98,7 @@ namespace MonoGame.Imaging.Tests
             TestEntry(ms, nonD, archive, "tga/24bit.tga");
             TestEntry(ms, d, archive, "tga/24bit_compressed.tga");
 
-            Console.WriteLine(SaveConfiguration.DefaultMemoryManager.SmallBlocksFree);
+            Console.WriteLine(RecyclableMemoryManager.Instance.SmallBlocksFree);
 
             /*
             var watch = new Stopwatch();

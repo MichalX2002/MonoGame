@@ -375,12 +375,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
                     throw new InvalidOperationException("ffmpeg exited with non-zero exit code: \n" + ffmpegStdout + "\n" + ffmpegStderr);
                 }
 
-                byte[] rawData;
-                using (var fs = new FileStream(temporaryOutput, FileMode.Open, FileAccess.Read))
-                {
-                    rawData = new byte[fs.Length];
-                    fs.Read(rawData, 0, rawData.Length);
-                }
+                byte[] rawData = File.ReadAllBytes(temporaryOutput);
 
                 if (saveToFile != null)
                 {

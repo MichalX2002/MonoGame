@@ -24,12 +24,10 @@ namespace MonoGame.Utilities
             byte[] result;
             lock (_freeBuffers)
             {
-                var index = FirstLargerThan(size);
+                int index = FirstLargerThan(size);
 
                 if (index == -1)
-                {
                     result = new byte[size];
-                }
                 else
                 {
                     result = _freeBuffers[index];
@@ -47,7 +45,7 @@ namespace MonoGame.Utilities
         {
             lock (_freeBuffers)
             {
-                var index = FirstLargerThan(buffer.Length);
+                int index = FirstLargerThan(buffer.Length);
                 if (index == -1)
                     _freeBuffers.Add(buffer);
                 else
@@ -58,15 +56,16 @@ namespace MonoGame.Utilities
         // Find the smallest buffer that is larger than or equally large as size or -1 if none exist
         private int FirstLargerThan(int size)
         {
-            if (_freeBuffers.Count == 0) return -1;
+            if (_freeBuffers.Count == 0)
+                return -1;
 
-            var l = 0;
-            var r = _freeBuffers.Count - 1;
+            int l = 0;
+            int r = _freeBuffers.Count - 1;
 
             while (l <= r)
             {
-                var m = (l + r)/2;
-                var buffer = _freeBuffers[m];
+                int m = (l + r)/2;
+                byte[] buffer = _freeBuffers[m];
                 if (buffer.Length < size)
                 {
                     l = m + 1;
@@ -74,12 +73,11 @@ namespace MonoGame.Utilities
                 else if (buffer.Length > size)
                 {
                     r = m;
-                    if (l == r) return l;
+                    if (l == r)
+                        return l;
                 }
                 else
-                {
                     return m;
-                }
             }
 
             return -1;

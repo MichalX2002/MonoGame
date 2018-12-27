@@ -3,43 +3,40 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.InteropServices;
 using MonoGame.OpenAL;
 
 namespace Microsoft.Xna.Framework.Audio
 {
-	internal class OALSoundBuffer : IDisposable
-	{
-		int openALDataBuffer;
-		ALFormat openALFormat;
-		int dataSize;
+    internal class OALSoundBuffer : IDisposable
+    {
+        int openALDataBuffer;
+        ALFormat openALFormat;
         bool _isDisposed;
 
-		public OALSoundBuffer()
-		{
+        public int OpenALDataBuffer => openALDataBuffer;
+        public double Duration { get; set; }
+
+        public OALSoundBuffer()
+        {
             AL.GenBuffers(1, out openALDataBuffer);
             ALHelper.CheckError("Failed to generate OpenAL data buffer.");
-		}
-
-        ~OALSoundBuffer()
-        {
-            Dispose(false);
         }
 
-		public int OpenALDataBuffer
+        public void BindDataBuffer(byte[] data, ALFormat format, int size, int sampleRate, int sampleAlignment = 0)
         {
-			get
+            var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            try
             {
-				return openALDataBuffer;
-			}
-		}
+                BindDataBuffer(data, format, size, sampleRate, sampleAlignment);
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }
 
-		public double Duration
-        {
-			get;
-			set;
-		}
-
-        public void BindDataBuffer(byte[] dataBuffer, ALFormat format, int size, int sampleRate, int sampleAlignment = 0)
+        public void BindDataBuffer(IntPtr data, ALFormat format, int size, int sampleRate, int sampleAlignment = 0)
         {
             if ((format == ALFormat.MonoMSAdpcm || format == ALFormat.StereoMSAdpcm) && !OpenALSoundController.Instance.SupportsAdpcm)
                 throw new InvalidOperationException("MS-ADPCM is not supported by this OpenAL driver");
@@ -47,7 +44,6 @@ namespace Microsoft.Xna.Framework.Audio
                 throw new InvalidOperationException("IMA/ADPCM is not supported by this OpenAL driver");
 
             openALFormat = format;
-            dataSize = size;
 
             if (sampleAlignment > 0)
             {
@@ -55,23 +51,26 @@ namespace Microsoft.Xna.Framework.Audio
                 ALHelper.CheckError("Failed to fill buffer.");
             }
 
-            AL.BufferData(openALDataBuffer, openALFormat, dataBuffer, size, sampleRate);
+            AL.BufferData(openALDataBuffer, openALFormat, data, size, sampleRate);
             ALHelper.CheckError("Failed to fill buffer.");
             Duration = -1;
+
             AL.GetBuffer(openALDataBuffer, ALGetBufferi.Bits, out int bits);
             ALHelper.CheckError("Failed to get buffer bits");
+
             AL.GetBuffer(openALDataBuffer, ALGetBufferi.Channels, out int channels);
             ALHelper.CheckError("Failed to get buffer channels");
+
             AL.GetBuffer(openALDataBuffer, ALGetBufferi.Size, out int unpackedSize);
             ALHelper.CheckError("Failed to get buffer size");
-            Duration = unpackedSize / ((bits / 8) * channels) / (float)sampleRate;
+            Duration = unpackedSize / (bits / 8 * channels) / (float)sampleRate;
         }
 
-		public void Dispose()
-		{
+        public void Dispose()
+        {
             Dispose(true);
             GC.SuppressFinalize(this);
-		}
+        }
 
         protected virtual void Dispose(bool disposing)
         {
@@ -81,6 +80,7 @@ namespace Microsoft.Xna.Framework.Audio
                 {
                     // Clean up managed objects
                 }
+
                 // Release unmanaged resources
                 if (AL.IsBuffer(openALDataBuffer))
                 {
@@ -92,5 +92,10 @@ namespace Microsoft.Xna.Framework.Audio
                 _isDisposed = true;
             }
         }
-	}
+
+        ~OALSoundBuffer()
+        {
+            Dispose(false);
+        }
+    }
 }

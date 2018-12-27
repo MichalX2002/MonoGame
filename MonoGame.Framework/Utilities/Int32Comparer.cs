@@ -3,8 +3,14 @@ using System.Collections.Generic;
 
 namespace Microsoft.Xna.Framework
 {
-    internal struct Int32Comparer : IEqualityComparer<int>, IRefEqualityComparer<int>
+    internal class Int32Comparer : IEqualityComparer<int>, IRefEqualityComparer<int>
     {
+        public static readonly Int32Comparer Instance = new Int32Comparer();
+
+        private Int32Comparer()
+        {
+        }
+
         public bool Equals(int x, int y)
         {
             return x.Equals(y);

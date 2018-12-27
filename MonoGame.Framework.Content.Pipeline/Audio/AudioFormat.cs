@@ -16,7 +16,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
     public sealed class AudioFormat
     {
         int format;
-        List<byte> nativeWaveFormat;
+        byte[] nativeWaveFormat;
 
         /// <summary>
         /// Gets the average bytes processed per second.
@@ -52,7 +52,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
         /// Gets the raw byte buffer for the format. For non-PCM formats, this buffer contains important format-specific information beyond the basic format information exposed in other properties of the AudioFormat type.
         /// </summary>
         /// <value>The raw byte buffer represented in a collection.</value>
-        public ReadOnlyCollection<byte> NativeWaveFormat { get { return nativeWaveFormat.AsReadOnly(); } }
+        public byte[] NativeWaveFormat { get { return nativeWaveFormat; } }
 
         /// <summary>
         /// Gets the sample rate of the audio content.
@@ -78,7 +78,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
             this.nativeWaveFormat = this.ConstructNativeWaveFormat();
         }
 
-        private List<byte> ConstructNativeWaveFormat()
+        private byte[] ConstructNativeWaveFormat()
         {
             using (var memory = new MemoryStream())
             {
@@ -95,7 +95,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
                     var bytes = new byte[memory.Position];
                     memory.Seek(0, SeekOrigin.Begin);
                     memory.Read(bytes, 0, bytes.Length);
-                    return bytes.ToList();
+                    return bytes;
                 }
             }
         }

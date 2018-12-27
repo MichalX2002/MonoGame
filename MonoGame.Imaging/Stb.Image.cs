@@ -69,7 +69,7 @@ namespace MonoGame.Imaging
 
         internal static void Free(MarshalPointer ptr)
         {
-            ptr.Dispose();
+            ptr.Free();
         }
 
         internal static MarshalPointer ReAlloc(MarshalPointer p, long newSize)
@@ -88,7 +88,7 @@ namespace MonoGame.Imaging
 
             var newP = MAlloc(newSize);
             MemCopy(newP.Ptr, p.Ptr, p.Size);
-            p.Dispose();
+            p.Free();
             return newP;
         }
 
@@ -119,11 +119,10 @@ namespace MonoGame.Imaging
 
         private static unsafe void MemMove(void* a, void* b, long size)
         {
-            using (var temp = MAlloc(size))
-            {
-                MemCopy(temp.Ptr, b, size);
-                MemCopy(a, temp.Ptr, size);
-            }
+            MarshalPointer tmp = MAlloc(size);
+            MemCopy(tmp.Ptr, b, size);
+            MemCopy(a, tmp.Ptr, size);
+            tmp.Free();
         }
 
         private static void MemSet(void* ptr, int value, ulong size)

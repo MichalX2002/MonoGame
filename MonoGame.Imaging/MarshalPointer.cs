@@ -2,9 +2,9 @@
 
 namespace MonoGame.Imaging
 {
-    public unsafe struct MarshalPointer : IDisposable
+    public unsafe readonly struct MarshalPointer
     {
-        private bool _leaveOpen;
+        private readonly bool _leaveOpen;
         public readonly int Size;
         public readonly byte* Ptr;
 
@@ -19,12 +19,10 @@ namespace MonoGame.Imaging
             Size = size;
         }
 
-        public void Dispose()
+        public void Free()
         {
             if (!_leaveOpen && Ptr != null)
-            {
                 Imaging.Free((IntPtr)Ptr);
-            }
         }
     }
 }

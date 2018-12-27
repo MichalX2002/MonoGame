@@ -247,12 +247,17 @@ namespace MonoGame.OpenAL
         internal delegate void d_albufferdata(uint bid, int format, IntPtr data, int size, int freq);
         internal static d_albufferdata alBufferData = FuncLoader.LoadFunction<d_albufferdata>(NativeLibrary, "alBufferData");
 
-        internal static void BufferData(int bid, ALFormat format, byte[] data, int size, int freq)
+        internal static void BufferData(int bid, ALFormat format, IntPtr data, int size, int freq)
+        {
+            alBufferData((uint)bid, (int)format, data, size, freq);
+        }
+
+        internal static void BufferData(int bid, ALFormat format, byte[] data, int offset, int count, int freq)
         {
             var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
             try
             {
-                alBufferData((uint)bid, (int)format, handle.AddrOfPinnedObject(), size, freq);
+                alBufferData((uint)bid, (int)format, handle.AddrOfPinnedObject() + offset, count, freq);
             }
             finally
             {
@@ -260,12 +265,29 @@ namespace MonoGame.OpenAL
             }
         }
 
-        internal static void BufferData(int bid, ALFormat format, short[] data, int size, int freq)
+        internal static void BufferData(int bid, ALFormat format, short[] data, int offset, int count, int freq)
         {
             var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
             try
             {
-                alBufferData((uint)bid, (int)format, handle.AddrOfPinnedObject(), size, freq);
+                IntPtr ptr = handle.AddrOfPinnedObject() + offset * sizeof(short);
+                int size = count * sizeof(short);
+                alBufferData((uint)bid, (int)format, ptr, size, freq);
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }
+
+        internal static void BufferData(int bid, ALFormat format, float[] data, int offset, int count, int freq)
+        {
+            var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            try
+            {
+                IntPtr ptr = handle.AddrOfPinnedObject() + offset * sizeof(float);
+                int size = count * sizeof(float);
+                alBufferData((uint)bid, (int)format, ptr, size, freq);
             }
             finally
             {

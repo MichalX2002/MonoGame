@@ -42,9 +42,9 @@ namespace MonoGame.Imaging
         {
             if (!_disposed)
             {
-                pal.Dispose();
-                lpal.Dispose();
-                codes.Dispose();
+                pal.Free();
+                lpal.Free();
+                codes.Free();
 
                 _disposed = true;
             }

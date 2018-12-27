@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using MonoGame.OpenAL;
 
 namespace Microsoft.Xna.Framework.Audio
@@ -72,21 +73,39 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformSubmitBuffer(byte[] buffer, int offset, int count)
         {
+            var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+            try
+            {
+                IntPtr ptr = handle.AddrOfPinnedObject() + offset;
+                PlatformSubmitBuffer(ptr, count);
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }
+
+        private void PlatformSubmitBuffer(short[] buffer, int offset, int count)
+        {
+            var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+            try
+            {
+                IntPtr ptr = handle.AddrOfPinnedObject() + offset * sizeof(short);
+                PlatformSubmitBuffer(ptr, count * sizeof(short));
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }
+
+        private void PlatformSubmitBuffer(IntPtr buffer, int size)
+        {
             // Get a buffer
             OALSoundBuffer oalBuffer = new OALSoundBuffer();
 
             // Bind the data
-            if (offset == 0)
-            {
-                oalBuffer.BindDataBuffer(buffer, _format, count, _sampleRate);
-            }
-            else
-            {
-                // BindDataBuffer does not support offset
-                var offsetBuffer = new byte[count];
-                Array.Copy(buffer, offset, offsetBuffer, 0, count);
-                oalBuffer.BindDataBuffer(offsetBuffer, _format, count, _sampleRate);
-            }
+            oalBuffer.BindDataBuffer(buffer, _format, size, _sampleRate);
 
             // Queue the buffer
             AL.SourceQueueBuffer(SourceId, oalBuffer.OpenALDataBuffer);

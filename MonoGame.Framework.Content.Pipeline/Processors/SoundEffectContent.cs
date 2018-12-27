@@ -28,10 +28,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         /// <param name="loopStart">The start of the loop segment (must be block aligned).</param>
         /// <param name="loopLength">The length of the loop segment (must be block aligned).</param>
         /// <param name="duration">The duration of the wave file in milliseconds.</param>
-        internal SoundEffectContent(IEnumerable<byte> format, IEnumerable<byte> data, int loopStart, int loopLength, int duration)
+        internal SoundEffectContent(byte[] format, byte[] data, int loopStart, int loopLength, int duration)
         {
-            this.format = format.ToArray();
-            this.data = data.ToArray();
+            this.format = format;
+            this.data = data;
             this.loopStart = loopStart;
             this.loopLength = loopLength;
             this.duration = duration;

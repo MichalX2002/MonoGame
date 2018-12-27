@@ -33,7 +33,7 @@ namespace MonoGame.Imaging
         {
             if (!IsDisposed)
             {
-                BufferStart.Dispose();
+                BufferStart.Free();
                 IsDisposed = true;
             }
         }

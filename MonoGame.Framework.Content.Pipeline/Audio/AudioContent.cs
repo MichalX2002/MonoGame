@@ -18,7 +18,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
     {
         private bool _disposed;
         private readonly AudioFileType _fileType;
-        private ReadOnlyCollection<byte> _data;
+        private byte[] _data;
         private TimeSpan _duration;
         private AudioFormat _format;
         private int _loopStart;
@@ -42,7 +42,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
         /// This changes from the source data to the output data after conversion.
         /// For MP3 and WMA files this throws an exception to match XNA behavior.
         /// </remarks>
-        public ReadOnlyCollection<byte> Data 
+        public byte[] Data 
         {
             get
             {
@@ -150,7 +150,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
                             throw new InvalidOperationException("Probed sample rate does not match RIFF: " + _format.SampleRate + ", " + riffAudioFormat.SampleRate);
                     }
 
-                    _data = Array.AsReadOnly(stripped);
+                    _data = stripped;
                 }
             }
             catch (Exception ex)
@@ -179,13 +179,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
 
         public void SetData(byte[] data, AudioFormat format, TimeSpan duration, int loopStart, int loopLength)
         {
-            if (data == null)
-                throw new ArgumentNullException("data");
-            if (format == null)
-                throw new ArgumentNullException("format");
-
-            _data = Array.AsReadOnly(data);
-            _format = format;
+            _data = data ?? throw new ArgumentNullException("data");
+            _format = format ?? throw new ArgumentNullException("format");
             _duration = duration;
             _loopStart = loopStart;
             _loopLength = loopLength;

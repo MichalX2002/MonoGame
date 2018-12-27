@@ -23,7 +23,7 @@
     <OutputPath>bin\DesktopGL\AnyCPU\Debug\</OutputPath>
     <IntermediateOutputPath>obj\WindowsGL\AnyCPU\Debug</IntermediateOutputPath>
     <DocumentationFile>bin\DesktopGL\AnyCPU\Debug\MonoGame.Framework.xml</DocumentationFile>
-    <DefineConstants>DEBUG;OPENGL;OPENAL;XNADESIGNPROVIDED;TRACE;WINDOWS;DESKTOPGL;SUPPORTS_EFX</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;OPENGL;OPENAL;XNADESIGNPROVIDED;DESKTOPGL;SUPPORTS_EFX;NET45</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -65,6 +65,7 @@
     <Compile Include="Graphics\Vertices\VertexBufferBase.OpenGL.cs" />
     <Compile Include="Input\KeyModifier.cs" />
     <Compile Include="Media\SongPart.cs" />
+    <Compile Include="Media\SongPartPool.cs" />
     <Compile Include="Media\VisualizationData.cs" />
     <Compile Include="Utilities\Int32Comparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -647,6 +648,10 @@
       <Link>Utilities\NVorbis\BufferedReadStream.cs</Link>
       <Services>NVorbis</Services>
     </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\BufferPool.cs">
+      <Link>Utilities\NVorbis\BufferPool.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
     <Compile Include="..\ThirdParty\NVorbis\NVorbis\DataPacket.cs">
       <Link>Utilities\NVorbis\DataPacket.cs</Link>
       <Services>NVorbis</Services>
@@ -711,6 +716,10 @@
       <Link>Utilities\NVorbis\VorbisReader.cs</Link>
       <Services>NVorbis</Services>
     </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\ArrayExtensions.cs">
+      <Link>Utilities\NVorbis\ArrayExtensions.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
     <Compile Include="..\ThirdParty\NVorbis\NVorbis\VorbisResidue.cs">
       <Link>Utilities\NVorbis\VorbisResidue.cs</Link>
       <Services>NVorbis</Services>
@@ -733,6 +742,10 @@
     </Compile>
     <Compile Include="..\ThirdParty\NVorbis\NVorbis\Ogg\OggPacket.cs">
       <Link>Utilities\NVorbis\Ogg\OggPacket.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\Ogg\OggPacketPool.cs">
+      <Link>Utilities\NVorbis\Ogg\OggPacketPool.cs</Link>
       <Services>NVorbis</Services>
     </Compile>
     <Compile Include="..\ThirdParty\NVorbis\NVorbis\Ogg\OggPacketReader.cs">

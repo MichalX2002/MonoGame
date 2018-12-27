@@ -8,7 +8,7 @@ namespace MonoGame.Imaging
     public sealed partial class Image : IDisposable
     {
         public delegate void ErrorDelegate(ErrorContext errors);
-        private static RecyclableMemoryManager _memoryManager = SaveConfiguration.DefaultMemoryManager;
+        private static RecyclableMemoryManager _memoryManager = RecyclableMemoryManager.Instance;
 
         private Stream _sourceStream;
         private MultiStream _combinedStream;
@@ -155,7 +155,7 @@ namespace MonoGame.Imaging
                     CloseStream();
 
                     if (_leavePointerOpen == false)
-                        _pointer.Dispose();
+                        _pointer.Free();
                     _pointer = default;
 
                     IsDisposed = true;

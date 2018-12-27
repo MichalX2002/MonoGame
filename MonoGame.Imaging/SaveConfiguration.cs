@@ -8,26 +8,6 @@ namespace MonoGame.Imaging
 
         private static readonly object _initLock = new object();
 
-        private static RecyclableMemoryManager _defaultMemory;
-        public static RecyclableMemoryManager DefaultMemoryManager
-        {
-            get
-            {
-                lock (_initLock)
-                {
-                    if (_defaultMemory == null)
-                    {
-                        _defaultMemory = new RecyclableMemoryManager(1024 * 64, 1024 * 64, 1024 * 256, false)
-                        {
-                            AggressiveBufferReturn = true,
-                            GenerateCallStacks = false
-                        };
-                    }
-                    return _defaultMemory;
-                }
-            }
-        }
-
         private static SaveConfiguration _default;
         public static SaveConfiguration Default
         {
@@ -36,7 +16,7 @@ namespace MonoGame.Imaging
                 lock (_initLock)
                 {
                     if (_default == null)
-                        _default = new SaveConfiguration(true, 90, DefaultMemoryManager);
+                        _default = new SaveConfiguration(true, 90, RecyclableMemoryManager.Instance);
                     return _default;
                 }
             }

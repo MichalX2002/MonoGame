@@ -104,14 +104,14 @@ namespace MonoGame.Imaging
             if (!_disposed)
             {
                 for (int i = 0; i < _fastAc.Length; i++)
-                    _fastAc[i].Dispose();
+                    _fastAc[i].Free();
 
                 for (int i = 0; i < _dequant.Length; i++)
-                    _dequant[i].Dispose();
+                    _dequant[i].Free();
 
-                _huff_dc.Dispose();
-                _huff_ac.Dispose();
-                _order.Dispose();
+                _huff_dc.Free();
+                _huff_ac.Free();
+                _order.Free();
 
                 _disposed = true;
             }

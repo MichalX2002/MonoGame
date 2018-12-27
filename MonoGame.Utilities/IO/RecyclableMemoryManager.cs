@@ -42,6 +42,28 @@ namespace MonoGame.Utilities.IO
     /// </remarks>
     public partial class RecyclableMemoryManager
     {
+        private static object _instanceInitMutex = new object();
+        private static RecyclableMemoryManager _instance;
+
+        public static RecyclableMemoryManager Instance
+        {
+            get
+            {
+                lock (_instanceInitMutex)
+                {
+                    if (_instance == null)
+                    {
+                        _instance = new RecyclableMemoryManager(1024 * 64, 1024 * 64, 1024 * 256, false)
+                        {
+                            AggressiveBufferReturn = true,
+                            GenerateCallStacks = false
+                        };
+                    }
+                    return _instance;
+                }
+            }
+        }
+
         /// <summary>
         /// Generic delegate for handling events without any arguments.
         /// </summary>
@@ -300,7 +322,6 @@ namespace MonoGame.Utilities.IO
         internal byte[] GetLargeBuffer(int requiredSize, string tag)
         {
             requiredSize = this.RoundToLargeBufferSize(requiredSize);
-
             int poolIndex = this.GetPoolIndex(requiredSize);
 
             byte[] buffer;
@@ -314,9 +335,7 @@ namespace MonoGame.Utilities.IO
                     ReportLargeBufferCreated();
                 }
                 else
-                {
                     Interlocked.Add(ref this.largeBufferFreeSize[poolIndex], -buffer.Length);
-                }
             }
             else
             {
@@ -349,15 +368,12 @@ namespace MonoGame.Utilities.IO
             {
                 int pow = 1;
                 while (this.LargeBufferMultiple * pow < requiredSize)
-                {
                     pow <<= 1;
-                }
+
                 return this.LargeBufferMultiple * pow;
             }
             else
-            {
                 return ((requiredSize + this.LargeBufferMultiple - 1) / this.LargeBufferMultiple) * this.LargeBufferMultiple;
-            }
         }
 
         private bool IsLargeBufferSize(int value)
