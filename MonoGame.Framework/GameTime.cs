@@ -17,27 +17,27 @@ namespace Microsoft.Xna.Framework
         public TimeSpan ElapsedGameTime
         {
             get => _elapsedGameTime;
-            set { _elapsedGameTime = value; _delta = (float)value.TotalSeconds; }
+            set
+            {
+                _elapsedGameTime = value;
+                _delta = (float)value.TotalSeconds;
+            }
         }
 
-        public GameTime()
+        public GameTime() : this(TimeSpan.Zero, TimeSpan.Zero)
         {
-            TotalGameTime = TimeSpan.Zero;
-            _elapsedGameTime = TimeSpan.Zero;
             IsRunningSlowly = false;
         }
 
-        public GameTime(TimeSpan totalGameTime, TimeSpan elapsedGameTime)
+        public GameTime(TimeSpan totalGameTime, TimeSpan elapsedGameTime) :
+            this(totalGameTime, elapsedGameTime, false)
         {
-            TotalGameTime = totalGameTime;
-            _elapsedGameTime = elapsedGameTime;
-            IsRunningSlowly = false;
         }
 
 		public GameTime (TimeSpan totalRealTime, TimeSpan elapsedRealTime, bool isRunningSlowly)
 		{
             TotalGameTime = totalRealTime;
-            _elapsedGameTime = elapsedRealTime;
+            ElapsedGameTime = elapsedRealTime;
 		    IsRunningSlowly = isRunningSlowly;
 		}
     }
