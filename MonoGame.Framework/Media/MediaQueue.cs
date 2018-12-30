@@ -9,91 +9,79 @@ namespace Microsoft.Xna.Framework.Media
 {
 	public sealed class MediaQueue
 	{
-        private List<Song> songs = new List<Song>();
         private Random random = new Random();
+        
+        internal int Count => Songs.Count;
+        internal List<Song> Songs { get; } = new List<Song>();
 
-		public MediaQueue()
-		{
-			
-		}
+        public Song this[int index] => Songs[index];
+
+        public int ActiveSongIndex { get; set; } = -1;
 		
 		public Song ActiveSong
 		{
 			get
 			{
-				if (songs.Count == 0 || ActiveSongIndex < 0)
+				if (Songs.Count == 0 || ActiveSongIndex < 0)
 					return null;
 				
-				return songs[ActiveSongIndex];
+				return Songs[ActiveSongIndex];
 			}
 		}
 
-        public int ActiveSongIndex { get; set; } = -1;
+		public MediaQueue()
+		{
+		}
 
-        internal int Count
-        {
-            get
-            {
-                return songs.Count;
-            }
-        }
-
-        public Song this[int index]
-        {
-            get
-            {
-                return songs[index];
-            }
-        }
-
-        internal IEnumerable<Song> Songs
-        {
-            get
-            {
-                return songs;
-            }
-        }
-
-		internal Song GetNextSong(int direction, bool shuffle)
+        internal Song GetNextSong(int direction, bool shuffle)
 		{
 			if (shuffle)
-				ActiveSongIndex = random.Next(songs.Count);
+				ActiveSongIndex = random.Next(Songs.Count);
 			else			
-				ActiveSongIndex = MathHelper.Clamp(ActiveSongIndex + direction, 0, songs.Count - 1);
+				ActiveSongIndex = MathHelper.Clamp(ActiveSongIndex + direction, 0, Songs.Count - 1);
 			
-			return songs[ActiveSongIndex];
+			return Songs[ActiveSongIndex];
 		}
 		
 		internal void Clear()
 		{
-            for (int i = songs.Count; i-- > 0; )
+            for (int i = Songs.Count; i-- > 0; )
             {
-                songs[i].Stop();
-				songs.RemoveAt(i);
+                Songs[i].Stop();
+				Songs.RemoveAt(i);
 			}	
 		}
         
         internal void SetVolume(float volume)
         {
-            for (int i = 0; i < songs.Count; ++i)
-                songs[i].Volume = volume;
+            for (int i = 0; i < Songs.Count; ++i)
+                Songs[i].Volume = volume;
         }
 
         internal void SetPitch(float pitch)
         {
-            for (int i = 0; i < songs.Count; ++i)
-                songs[i].Pitch = pitch;
+            for (int i = 0; i < Songs.Count; ++i)
+                Songs[i].Pitch = pitch;
         }
 
         internal void Add(Song song)
         {
-            songs.Add(song);
+            Songs.Add(song);
         }
         
         internal void Stop()
         {
-            for (int i = 0; i < songs.Count; ++i)
-                songs[i].Stop();
+            for (int i = 0; i < Songs.Count; ++i)
+                Songs[i].Stop();
+        }
+
+        internal void UpdateMasterVolume()
+        {
+            for (int i = 0; i < Songs.Count; ++i)
+            {
+                var song = Songs[i];
+                song.Volume = song.Volume;
+            }
         }
 	}
 }

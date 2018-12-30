@@ -182,7 +182,6 @@ namespace Microsoft.Xna.Framework.Audio
         {
             lock (_syncRoot)
             {
-
                 foreach (var inst in _playingInstances)
                 {
                     // XAct sounds are not controlled by the SoundEffect

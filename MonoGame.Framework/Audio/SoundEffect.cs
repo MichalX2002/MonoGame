@@ -375,8 +375,7 @@ namespace Microsoft.Xna.Framework.Audio
             set
             {
                 if (value <= 0f)
-                    throw new ArgumentOutOfRangeException(
-                        value.ToString(), "value of DistanceScale");
+                    throw new ArgumentOutOfRangeException(nameof(value), "value of DistanceScale: " + value);
 
                 _distanceScale = value;
             }

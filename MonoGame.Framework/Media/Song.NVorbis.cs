@@ -5,7 +5,6 @@
 using System;
 using System.IO;
 using Microsoft.Xna.Framework.Audio;
-using MonoGame.OpenAL;
 
 namespace Microsoft.Xna.Framework.Media
 {
@@ -88,7 +87,7 @@ namespace Microsoft.Xna.Framework.Media
             {
                 _volume = value;
                 if (stream != null)
-                    stream.Volume = _volume;
+                    stream.Volume = _volume * MasterVolume;
             }
         }
 
