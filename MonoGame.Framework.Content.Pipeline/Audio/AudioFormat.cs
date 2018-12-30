@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using MonoGame.Utilities.IO;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -80,24 +81,20 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
 
         private byte[] ConstructNativeWaveFormat()
         {
-            using (var memory = new MemoryStream())
+            using (var memory = RecyclableMemoryManager.Instance.GetMemoryStream())
+            using (var writer = new BinaryWriter(memory))
             {
-                using (var writer = new BinaryWriter(memory))
-                {
-                    writer.Write((short)this.format);
-                    writer.Write((short)this.ChannelCount);
-                    writer.Write((int)this.SampleRate);
-                    writer.Write((int)this.AverageBytesPerSecond);
-                    writer.Write((short)this.BlockAlign);
-                    writer.Write((short)this.BitsPerSample);
-                    writer.Write((short)0);
+                writer.Write((short)this.format);
+                writer.Write((short)this.ChannelCount);
+                writer.Write((int)this.SampleRate);
+                writer.Write((int)this.AverageBytesPerSecond);
+                writer.Write((short)this.BlockAlign);
+                writer.Write((short)this.BitsPerSample);
+                writer.Write((short)0);
 
-                    var bytes = new byte[memory.Position];
-                    memory.Seek(0, SeekOrigin.Begin);
-                    memory.Read(bytes, 0, bytes.Length);
-                    return bytes;
-                }
+                return memory.ToArray();
             }
+
         }
     }
 }

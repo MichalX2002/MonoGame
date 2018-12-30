@@ -53,9 +53,8 @@ namespace MonoGame.Utilities.IO
                 {
                     if (_instance == null)
                     {
-                        _instance = new RecyclableMemoryManager(1024 * 64, 1024 * 64, 1024 * 256, false)
+                        _instance = new RecyclableMemoryManager(1024 * 80, 1024 * 64, 1024 * 256, false)
                         {
-                            AggressiveBufferReturn = true,
                             GenerateCallStacks = false
                         };
                     }
@@ -604,7 +603,7 @@ namespace MonoGame.Utilities.IO
         /// </summary>
         /// <param name="tag">A tag which can be used to track the source of the stream.</param>
         /// <returns>A MemoryStream.</returns>
-        public MemoryStream GetStream(string tag)
+        public MemoryStream GetMemoryStream(string tag)
         {
             return new RecyclableMemoryStream(this, tag);
         }

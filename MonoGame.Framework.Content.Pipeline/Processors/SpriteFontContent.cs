@@ -2,15 +2,24 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 {
 	public class SpriteFontContent
     {
+        public string FontName = string.Empty;
+        FontDescriptionStyle Style = FontDescriptionStyle.Regular;
+        public float FontSize;
+        public Texture2DContent Texture = new Texture2DContent();
+        public List<Rectangle> Glyphs = new List<Rectangle>();
+        public List<Rectangle> Cropping = new List<Rectangle>();
+        public List<char> CharacterMap = new List<char>();
+        public int VerticalLineSpacing;
+        public float HorizontalSpacing;
+        public List<Vector3> Kerning = new List<Vector3>();
+        public char? DefaultCharacter;
+
         public SpriteFontContent() { }
 
         public SpriteFontContent(FontDescription desc)
@@ -23,29 +32,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             HorizontalSpacing = desc.Spacing;
 
             DefaultCharacter = desc.DefaultCharacter;
-        }
-
-        public string FontName = string.Empty;
-
-        FontDescriptionStyle Style = FontDescriptionStyle.Regular;
-
-        public float FontSize;
-
-        public Texture2DContent Texture = new Texture2DContent();
-
-        public List<Rectangle> Glyphs = new List<Rectangle>();
-
-        public List<Rectangle> Cropping = new List<Rectangle>();
-
-        public List<Char> CharacterMap = new List<Char>();
-
-        public int VerticalLineSpacing;
-
-        public float HorizontalSpacing;
-
-        public List<Vector3> Kerning = new List<Vector3>();
-
-        public Nullable<Char> DefaultCharacter;	 
+        } 
 
     }
 }

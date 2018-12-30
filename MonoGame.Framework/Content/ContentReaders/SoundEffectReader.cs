@@ -3,15 +3,19 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.IO;
 using Microsoft.Xna.Framework.Audio;
-
+using NVorbis;
 
 namespace Microsoft.Xna.Framework.Content
 {
 	internal class SoundEffectReader : ContentTypeReader<SoundEffect>
 	{
-		protected internal override SoundEffect Read(ContentReader input, SoundEffect existingInstance)
-		{         
+        [ThreadStatic]
+        private float[] _buffer;
+
+        protected internal override SoundEffect Read(ContentReader input, SoundEffect existingInstance)
+        {
             // XNB format for SoundEffect...
             //            
             // Byte [format size]	Format	WAVEFORMATEX structure
@@ -35,27 +39,68 @@ namespace Microsoft.Xna.Framework.Content
             // We let the sound effect deal with parsing this based
             // on what format the audio data actually is.
 
-		    var headerSize = input.ReadInt32();
-            var header = input.ReadBytes(headerSize);
+            int headerSize = input.ReadInt32();
+            byte[] header = input.ReadBytes(headerSize);
 
-            // Read the audio data buffer.
-            var dataSize = input.ReadInt32();
-            var data = input.ContentManager.GetScratchBuffer(dataSize);
-            input.Read(data, 0, dataSize);
+            int loopStart = input.ReadInt32();
+            int loopLength = input.ReadInt32();
+            int durationMs = input.ReadInt32();
 
-            var loopStart = input.ReadInt32();
-            var loopLength = input.ReadInt32();
-            var durationMs = input.ReadInt32();
+            byte[] data;
+            int soundEffectSize;
+
+            int dataSize = input.ReadInt32();
+            short format = BitConverter.ToInt16(header, 0);
+            if (format == 1)
+            {
+                using (var reader = new VorbisReader(input.BaseStream, false))
+                {
+                    long bytes = reader.TotalSamples * reader.Channels * sizeof(short);
+                    if (bytes > int.MaxValue)
+                        throw new InvalidDataException("Size of raw audio data exceeded " + int.MaxValue + " bytes.");
+
+                    soundEffectSize = (int)bytes;
+                    data = new byte[soundEffectSize];
+
+                    unsafe
+                    {
+                        fixed (byte* dataPtr = data)
+                        {
+                            if (_buffer == null)
+                                _buffer = new float[1024 * 8];
+                            var shortDataPtr = (short*)dataPtr;
+
+                            int totalSamples = 0;
+                            int samplesRead;
+                            while ((samplesRead = reader.ReadSamples(_buffer, 0, _buffer.Length)) > 0)
+                            {
+                                for (int i = 0; i < samplesRead; i++)
+                                {
+                                    int tmp = (int)(32767f * _buffer[i]);
+                                    if (tmp > short.MaxValue)
+                                        tmp = short.MaxValue;
+                                    else if (tmp < short.MinValue)
+                                        tmp = short.MinValue;
+                                    shortDataPtr[i + totalSamples] = (short)tmp;
+                                }
+                                totalSamples += samplesRead;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                data = input.ReadBytes(dataSize);
+                soundEffectSize = dataSize;
+            }
 
             // Create the effect.
-            var effect = new SoundEffect(header, data, dataSize, durationMs, loopStart, loopLength)
+            return new SoundEffect(header, data, soundEffectSize, durationMs, loopStart, loopLength)
             {
-
                 // Store the original asset name for debugging later.
                 Name = input.AssetName
             };
-
-            return effect;
         }
-	}
+    }
 }

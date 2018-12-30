@@ -39,8 +39,8 @@ namespace MonoGame.Testings
             base.Initialize();
 
             //MediaPlayer.ActiveSongChanged += MediaPlayer_ActiveSongChanged;
-            MediaPlayer.Volume = 0.01f;
-            MediaPlayer.Pitch = 1f;
+            MediaPlayer.Volume = 0.1f;
+            MediaPlayer.Pitch = 0f;
             MediaPlayer.IsRepeating = true;
             
             MediaPlayer.Play(_songs);
@@ -67,9 +67,23 @@ namespace MonoGame.Testings
 
             _songs = new SongCollection
             {
-                Content.Load<Song>("sinus"),
+                //Content.Load<Song>("sinus"),
                 //Content.Load<Song>("No More Magic")
             };
+
+            var w = new System.Diagnostics.Stopwatch();
+
+            w.Restart();
+            var wtef = Content.Load<SoundEffect>("sinus");
+            w.Stop();
+            Console.WriteLine("Load Time: " + w.ElapsedMilliseconds + "ms");
+
+            w.Restart();
+            var wtf = Content.Load<SoundEffect>("No More Magic");
+            w.Stop();
+            Console.WriteLine("Load Time: " + w.ElapsedMilliseconds + "ms");
+
+            //wtf.Play();
 
             /*
             var def = Microphone.Default;

@@ -202,6 +202,10 @@
     <Touch Files="$(_PostBuildHookTimestamp)" AlwaysCreate="True" />
   </Target>
   <ItemGroup>
+    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj">
+      <Project>{de48723f-d255-49f6-8372-aef8b059d5e7}</Project>
+      <Name>MonoGame.Utilities</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ThirdParty\Lidgren.Network\Lidgren.Network.Windows.csproj">
       <Project>{AE483C29-042E-4226-BA52-D247CE7676DA}</Project>
       <Name>Lidgren.Network.Windows</Name>

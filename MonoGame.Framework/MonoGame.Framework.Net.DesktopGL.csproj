@@ -202,6 +202,10 @@
     <Touch Files="$(_PostBuildHookTimestamp)" AlwaysCreate="True" />
   </Target>
   <ItemGroup>
+    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj">
+      <Project>{d046adda-b87b-4ab2-9dad-fa886d3e2014}</Project>
+      <Name>MonoGame.Utilities</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ThirdParty\Lidgren.Network\Lidgren.Network.DesktopGL.csproj">
       <Project>{ae483c29-042e-4226-ba52-d247ce7676da}</Project>
       <Name>Lidgren.Network.DesktopGL</Name>

@@ -4,6 +4,7 @@
 
 using System.IO;
 using MonoGame.Utilities;
+using MonoGame.Utilities.IO;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -40,11 +41,15 @@ namespace Microsoft.Xna.Framework.Graphics
                             return _bytecode;
 
                         var assembly = ReflectionHelpers.GetAssembly(typeof(EffectResource));
-
                         var stream = assembly.GetManifestResourceStream(_name);
-                        using (var ms = new MemoryStream())
+                        using (var ms = RecyclableMemoryManager.Instance.GetMemoryStream())
                         {
-                            stream.CopyTo(ms);
+                            var buffer = RecyclableMemoryManager.Instance.GetBlock();   //
+                            int read;                                                   //
+                            while ((read = stream.Read(buffer, 0, buffer.Length)) != 0) // instead of CopyTo
+                                ms.Write(buffer, 0, read);                       //
+                            RecyclableMemoryManager.Instance.ReturnBlock(buffer, null); //
+
                             _bytecode = ms.ToArray();
                         }
                     }

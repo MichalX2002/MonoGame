@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MonoGame.Utilities.IO;
+using System;
 using System.IO;
 
 namespace MonoGame.Utilities
@@ -540,7 +541,7 @@ namespace MonoGame.Utilities
             // workitem 8460
             byte[] working = new byte[1024];
             var encoding = System.Text.Encoding.UTF8;
-            using (var output = new MemoryStream())
+            using (var output = RecyclableMemoryManager.Instance.GetMemoryStream())
             {
                 using (decompressor)
                 {
@@ -553,8 +554,7 @@ namespace MonoGame.Utilities
 
                 // reset to allow read from start
                 output.Seek(0, SeekOrigin.Begin);
-                var sr = new StreamReader(output, encoding);
-                return sr.ReadToEnd();
+                return new StreamReader(output, encoding).ReadToEnd();
             }
         }
 
@@ -562,7 +562,7 @@ namespace MonoGame.Utilities
         {
             // workitem 8460
             byte[] working = new byte[1024];
-            using (var output = new MemoryStream())
+            using (var output = RecyclableMemoryManager.Instance.GetMemoryStream())
             {
                 using (decompressor)
                 {

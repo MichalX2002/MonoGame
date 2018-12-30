@@ -758,7 +758,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\ThirdParty\Dependencies\MonoGame.Framework.dll.config">
+    <None Include="..\ThirdParty\Dependencies\Config\DesktopGL\MonoGame.Framework.dll.config">
       <Platforms>WindowsGL,Linux,MacOS</Platforms>
       <Link>MonoGame.Framework.dll.config</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -877,6 +877,10 @@
   </Target>
   <PropertyGroup>
     <DefineConstants Condition=" '$(TargetFrameworkVersion)' != 'v4.0' And '$(TargetFrameworkVersion)' != 'v3.5' And '$(TargetFrameworkVersion)' != 'v3.0' And '$(TargetFrameworkVersion)' != 'v2.0' ">$(DefineConstants);NET45</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <ItemGroup />
   <ProjectExtensions>

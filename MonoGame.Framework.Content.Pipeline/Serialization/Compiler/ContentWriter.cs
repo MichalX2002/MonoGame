@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Content.Pipeline.Utilities.LZ4;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Framework.Content.Pipeline.Builder;
 using System.Collections.Generic;
+using MonoGame.Utilities.IO;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
 {
@@ -34,7 +35,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
         List<object> sharedResources = new List<object>();
         Dictionary<object, int> sharedResourceMap = new Dictionary<object, int>();
         Stream outputStream;
-        Stream bodyStream;
+        MemoryStream bodyStream;
 
         // This array must remain in sync with TargetPlatform
         static char[] targetPlatformIdentifiers = new[]
@@ -76,7 +77,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
         /// <param name="compressContent">True if the content should be compressed.</param>
         /// <param name="rootDirectory">The root directory of the content.</param>
         /// <param name="referenceRelocationPath">The path of the XNB file, used to calculate relative paths for external references.</param>
-        internal ContentWriter(ContentCompiler compiler, Stream output, TargetPlatform targetPlatform, GraphicsProfile targetProfile, bool compressContent, string rootDirectory, string referenceRelocationPath)
+        internal ContentWriter(
+            ContentCompiler compiler, Stream output, TargetPlatform targetPlatform, GraphicsProfile targetProfile,
+            bool compressContent, string rootDirectory, string referenceRelocationPath)
             : base(output)
         {
             this.compiler = compiler;
@@ -89,7 +92,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
             this.referenceRelocationPath = PathHelper.NormalizeDirectory(referenceRelocationPath);
 
             outputStream = this.OutStream;
-            bodyStream = new MemoryStream();
+            bodyStream = RecyclableMemoryManager.Instance.GetMemoryStream();
             this.OutStream = bodyStream;
         }
 
@@ -125,22 +128,22 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
             // Write shared resources to the end of body stream
             WriteSharedResources();
 
-            using (var contentStream = new MemoryStream())
+            using (var contentStream = RecyclableMemoryManager.Instance.GetMemoryStream())
             {
                 this.OutStream = contentStream;
                 WriteTypeWriters();
                 bodyStream.Position = 0;
-                bodyStream.CopyTo(contentStream);
+                bodyStream.WriteTo(contentStream);
                 contentStream.Position = 0;
 
                 // Before we write the header, try to compress the body stream. If compression fails, we want to
                 // turn off the compressContent flag so the correct flags are written in the header
-                Stream compressedStream = null;
+                MemoryStream compressedStream = null;
                 try
                 {
                     if (compressContent)
                     {
-                        compressedStream = new MemoryStream();
+                        compressedStream = RecyclableMemoryManager.Instance.GetMemoryStream();
                         this.OutStream = compressedStream;
                         if (!WriteCompressedStream(contentStream))
                         {
@@ -157,12 +160,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
                     if (compressedStream != null)
                     {
                         compressedStream.Position = 0;
-                        compressedStream.CopyTo(outputStream);
+                        compressedStream.WriteTo(outputStream);
                     }
                     else
-                    {
                         WriteUncompressedStream(contentStream);
-                    }
                 }
                 finally
                 {

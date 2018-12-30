@@ -5,6 +5,7 @@
 using System;
 using System.IO;
 using Microsoft.Xna.Framework.Content;
+using MonoGame.Utilities.IO;
 
 namespace MonoGame.Utilities
 {
@@ -24,9 +25,9 @@ namespace MonoGame.Utilities
         // Decompress into MemoryStream
         private void Decompress(Stream stream, int decompressedSize, int compressedSize)
         {
-            //thanks to ShinAli (https://bitbucket.org/alisci01/xnbdecompressor)
+            // thanks to ShinAli (https://bitbucket.org/alisci01/xnbdecompressor)
             // default window size for XNB encoded files is 64Kb (need 16 bits to represent it)
-            decompressedStream = new MemoryStream(decompressedSize);
+            decompressedStream = RecyclableMemoryManager.Instance.GetMemoryStream(null, decompressedSize);
             long startPos = stream.Position;
             long pos = startPos;
             
@@ -71,9 +72,7 @@ namespace MonoGame.Utilities
             }
 
             if (decompressedStream.Position != decompressedSize)
-            {
                 throw new ContentLoadException("Decompression failed.");
-            }
 
             decompressedStream.Seek(0, SeekOrigin.Begin);
         }

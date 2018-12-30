@@ -101,6 +101,15 @@ namespace Microsoft.Xna.Framework.Audio
         {
             PlatformInitialize(buffer, sampleRate, channels);
         }
+		
+        /// <summary>
+        /// Converts the XNA [-1, 1] pitch range to OpenAL pitch (0, INF) or Android SoundPool playback rate [0.5, 2].
+        /// <param name="xnaPitch">The pitch of the sound in the Microsoft XNA range.</param>
+        /// </summary>
+        internal static float XnaPitchToAlPitch(float xnaPitch)
+        {
+            return (float)Math.Pow(2, xnaPitch);
+        }
 
         /// <summary>
         /// Releases unmanaged resources and performs other cleanup operations before the

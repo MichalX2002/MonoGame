@@ -15,13 +15,13 @@
 
 #begin No More Magic.ogg
 /importer:OggImporter
-/processor:SongProcessor
+/processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:No More Magic.ogg
 
 #begin sinus.ogg
 /importer:OggImporter
-/processor:SongProcessor
+/processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:sinus.ogg
 

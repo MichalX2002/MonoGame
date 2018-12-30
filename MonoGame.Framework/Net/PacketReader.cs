@@ -43,15 +43,13 @@ using System;
 using System.IO;
 
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Utilities.IO;
 #endregion Using clause
 
 namespace Microsoft.Xna.Framework.Net
 {
-
-
     public class PacketReader : BinaryReader
     {
-
         // Read comments within the PacketWriter
         #region Constructors
         public PacketReader() : this(0)
@@ -59,7 +57,7 @@ namespace Microsoft.Xna.Framework.Net
         }
 
 
-        public PacketReader(int capacity) : base(new MemoryStream(0))
+        public PacketReader(int capacity) : base(RecyclableMemoryManager.Instance.GetMemoryStream(null, capacity))
         {
 
         }

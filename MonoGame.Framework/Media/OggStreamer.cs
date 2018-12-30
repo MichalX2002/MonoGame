@@ -12,8 +12,8 @@ namespace Microsoft.Xna.Framework.Media
         public readonly XRamExtension XRam = new XRamExtension();
         public readonly EffectsExtension Efx = OpenALSoundController.Efx;
 
-        const float DefaultUpdateRate = 12;
-        const int DefaultBufferSize = 48000;
+        const float DefaultUpdateRate = 15;
+        const int DefaultBufferSize = 44100 * 2;
 
         internal static readonly object singletonMutex = new object();
         readonly object iterationMutex = new object();
@@ -68,7 +68,11 @@ namespace Microsoft.Xna.Framework.Media
                 threadWatch = new Stopwatch();
                 ThreadTiming = new float[(int)(UpdateRate < 1 ? 1 : UpdateRate)];
 
-                underlyingThread = new Thread(EnsureBuffersFilled) { Priority = ThreadPriority.BelowNormal };
+                underlyingThread = new Thread(EnsureBuffersFilled)
+                {
+                    Name = "Song Streaming Thread",
+                    Priority = ThreadPriority.BelowNormal
+                };
                 underlyingThread.Start();
             }
 
@@ -102,7 +106,7 @@ namespace Microsoft.Xna.Framework.Media
             lock (iterationMutex)
                 return _streams.Remove(stream);
         }
-
+        
         public bool FillBuffer(OggStream stream, int bufferId)
         {
             int readSamples;
@@ -110,7 +114,7 @@ namespace Microsoft.Xna.Framework.Media
             {
                 var reader = stream.Reader;
                 readSamples = reader.ReadSamples(readSampleBuffer, 0, BufferSize);
-
+                
                 if (readSamples > 0)
                 {
                     if (AL.IsExtensionPresent("AL_EXT_FLOAT32"))
@@ -130,19 +134,19 @@ namespace Microsoft.Xna.Framework.Media
                         stream.AddPart(readSampleBuffer, readSamples, BufferSize);
                 }
             }
-            return readSamples != BufferSize;
+            return readSamples == 0;
         }
 
         static void CastBuffer(float[] src, short[] dst, int count)
         {
             for (int i = 0; i < count; i++)
             {
-                int temp = (int)(32767f * src[i]);
-                if (temp > short.MaxValue)
-                    temp = short.MaxValue;
-                else if (temp < short.MinValue)
-                    temp = short.MinValue;
-                dst[i] = (short)temp;
+                int tmp = (int)(32767f * src[i]);
+                if (tmp > short.MaxValue)
+                    tmp = short.MaxValue;
+                else if (tmp < short.MinValue)
+                    tmp = short.MinValue;
+                dst[i] = (short)tmp;
             }
         }
 
@@ -242,9 +246,6 @@ namespace Microsoft.Xna.Framework.Media
             int buffersFilled = 0;
             for (int i = tmpBufferOffset; i < tmpBufferCount; i++)
             {
-                if (pendingFinish)
-                    break;
-
                 finished |= FillBuffer(stream, tmpBuffers[i]);
                 buffersFilled++;
 
@@ -260,7 +261,10 @@ namespace Microsoft.Xna.Framework.Media
                         //stream.Open();
                     }
                     else
+                    {
                         pendingFinish = true;
+                        break;
+                    }
                 }
             }
 
@@ -287,6 +291,7 @@ namespace Microsoft.Xna.Framework.Media
             }
             else if (!stream.IsLooped)
                 return false;
+
             return true;
         }
     }

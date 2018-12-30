@@ -43,5 +43,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
         /// Vorbis open, patent-free audio encoding
         /// </summary>
         Vorbis,
+
+        /// <summary>
+        /// Opus Codec, totally open, royalty-free audio encoding
+        /// </summary>
+        Opus,
     }
 }

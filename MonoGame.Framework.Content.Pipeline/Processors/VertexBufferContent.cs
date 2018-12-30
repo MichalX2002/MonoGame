@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using MonoGame.Utilities.IO;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -35,7 +36,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         /// </summary>
         public VertexBufferContent()
         {
-            stream = new MemoryStream();
+            stream = RecyclableMemoryManager.Instance.GetMemoryStream();
             VertexDeclaration = new VertexDeclarationContent();
         }
 
@@ -43,10 +44,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         /// Initializes a new instance of VertexBufferContent of the specified size.
         /// </summary>
         /// <param name="size">The size of the vertex buffer content, in bytes.</param>
-        public VertexBufferContent(int size)
-            : base()
+        public VertexBufferContent(int size) : base()
         {
-            stream = new MemoryStream(size);
+            stream = RecyclableMemoryManager.Instance.GetMemoryStream(null, size);
             VertexDeclaration = new VertexDeclarationContent();
         }
 

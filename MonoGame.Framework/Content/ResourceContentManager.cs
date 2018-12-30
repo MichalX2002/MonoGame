@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Resources;
 
@@ -12,24 +11,18 @@ namespace Microsoft.Xna.Framework.Content
         public ResourceContentManager(IServiceProvider servicesProvider, ResourceManager resource)
             : base(servicesProvider)
         {
-            if (resource == null)
-            {
-                throw new ArgumentNullException(nameof(resource));
-            }
-            this.resource = resource;
+            this.resource = resource ?? throw new ArgumentNullException(nameof(resource));
         }
 
         protected override Stream OpenStream(string assetName)
         {
             object obj = this.resource.GetObject(assetName);
             if (obj == null)
-            {
                 throw new ContentLoadException("Resource not found.");
-            }
+                
             if (!(obj is byte[]))
-            {
                 throw new ContentLoadException("Resource is not in binary format.");
-            }
+
             return new MemoryStream(obj as byte[]);
         }
     }

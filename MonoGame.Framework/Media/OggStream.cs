@@ -49,7 +49,7 @@ namespace Microsoft.Xna.Framework.Media
             if (OggStreamer.Instance.XRam.IsInitialized)
             {
                 OggStreamer.Instance.XRam.SetBufferMode(BufferCount, ref _alBufferIds[0], XRamExtension.XRamStorage.Hardware);
-                ALHelper.CheckError("Failed to activate Xram.");
+                ALHelper.CheckError("Failed to activate XRam.");
             }
 
             Volume = 1;
@@ -117,19 +117,23 @@ namespace Microsoft.Xna.Framework.Media
 
             switch (state)
             {
-                case ALSourceState.Playing: return;
+                case ALSourceState.Playing:
+                    return;
+
                 case ALSourceState.Paused:
                     Resume();
                     return;
+
+                default:
+                    Prepare();
+
+                    AL.SourcePlay(_alSourceId);
+                    ALHelper.CheckError("Failed to play source.");
+
+                    Preparing = false;
+                    OggStreamer.Instance.AddStream(this);
+                    break;
             }
-
-            Prepare();
-
-            AL.SourcePlay(_alSourceId);
-            ALHelper.CheckError("Failed to play source.");
-
-            Preparing = false;
-            OggStreamer.Instance.AddStream(this);
         }
 
         public void Pause()

@@ -2,16 +2,13 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
+using MonoGame.Utilities.IO;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
-using MonoGame.Utilities;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
 
 namespace MonoGame.Utilities.Png
 {
@@ -55,24 +52,26 @@ namespace MonoGame.Utilities.Png
 
             // write data chunks
             var encodedPixelData = EncodePixelData(texture2D);
-            var compressedPixelData = new MemoryStream();
 
-            try
+            DataChunk dataChunk;
+            using (var compressedPixelData = RecyclableMemoryManager.Instance.GetMemoryStream())
             {
-                using (var deflateStream = new ZlibStream(new MemoryStream(encodedPixelData), CompressionMode.Compress))
+                try
                 {
-                    deflateStream.CopyTo(compressedPixelData);
+                    using (var deflateStream = new ZlibStream(new MemoryStream(encodedPixelData), CompressionMode.Compress))
+                        deflateStream.CopyTo(compressedPixelData);
                 }
-            }
-            catch (Exception exception)
-            {
-                throw new Exception("An error occurred during DEFLATE compression.", exception);
+                catch (Exception exception)
+                {
+                    throw new Exception("An error occurred during DEFLATE compression.", exception);
+                }
+
+                dataChunk = new DataChunk
+                {
+                    Data = compressedPixelData.ToArray()
+                };
             }
 
-            var dataChunk = new DataChunk
-            {
-                Data = compressedPixelData.ToArray()
-            };
             var dataChunkBytes = dataChunk.Encode();
             outputStream.Write(dataChunkBytes, 0, dataChunkBytes.Length);
 

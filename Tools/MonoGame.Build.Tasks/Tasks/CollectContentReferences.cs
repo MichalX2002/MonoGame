@@ -16,7 +16,7 @@ namespace MonoGame.Build.Tasks
             return path.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
         }
     }
-
+    
     public class CollectContentReferences : Task
     {
         [Required]
@@ -30,32 +30,34 @@ namespace MonoGame.Build.Tasks
 
         public override bool Execute()
         {
-            var output = new List<ITaskItem>();
-            foreach (var content in ContentReferences)
+            var output = new ITaskItem[ContentReferences.Length];
+            for (int i = 0; i < ContentReferences.Length; i++)
             {
+                var content = ContentReferences[i];
                 var relative = content.GetMetadata("RelativeDir").NormalizePath();
                 var fp = content.GetMetadata("FullPath").NormalizePath();
                 var link = content.GetMetadata("Link").NormalizePath();
+                
                 var metaData = new Dictionary<string, string>();
-                var contentFolder = String.Empty;
+                var contentFolder = string.Empty;
+
                 if (!string.IsNullOrEmpty(link))
-                {
                     contentFolder = Path.GetFileName(Path.GetDirectoryName(link));
-                }
                 else if (!string.IsNullOrEmpty(relative))
-                {
                     contentFolder = Path.GetFileName(Path.GetDirectoryName(relative));
-                }
+
                 var outputPath = Path.GetFileNameWithoutExtension(fp);
-                if (!outputPath.EndsWith(contentFolder, StringComparison.OrdinalIgnoreCase))
-                    outputPath = Path.Combine(outputPath, contentFolder);
+                //if (!outputPath.EndsWith(contentFolder, StringComparison.OrdinalIgnoreCase))
+                //    outputPath = Path.Combine(outputPath, contentFolder);
+
                 metaData.Add("ContentDirectory", !string.IsNullOrEmpty(contentFolder) ? contentFolder + Path.DirectorySeparatorChar : "");
                 metaData.Add("RelativeFullPath", !string.IsNullOrEmpty(relative) ? Path.GetFullPath(relative) : "");
                 metaData.Add("ContentOutputDir", Path.Combine("bin", MonoGamePlatform, outputPath));
                 metaData.Add("ContentIntermediateOutputDir", Path.Combine("obj", MonoGamePlatform, outputPath));
-                output.Add(new TaskItem(fp, metaData));
+                output[i] = new TaskItem(fp, metaData);
             }
-            Output = output.ToArray();
+
+            Output = output;
             return !Log.HasLoggedErrors;
         }
     }

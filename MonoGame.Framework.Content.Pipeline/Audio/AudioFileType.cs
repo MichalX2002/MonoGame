@@ -28,5 +28,11 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
         /// The Ogg format
         /// </summary>
         Ogg,
+
+        /// <summary>
+        /// The 
+        /// format
+        /// </summary>
+        Opus,
     }
 }

@@ -197,7 +197,7 @@ namespace MonoGame.OpenAL
         {
             var ret = IntPtr.Zero;
 
-#if DESKTOPGL
+#if DESKTOPGL || DIRECTX
             // Load bundled library
             var assemblyLocation = Path.GetDirectoryName(typeof(AL).Assembly.Location);
             if (CurrentPlatform.OS == OS.Windows && Environment.Is64BitProcess)

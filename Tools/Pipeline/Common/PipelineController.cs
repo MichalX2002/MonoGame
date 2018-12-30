@@ -491,9 +491,12 @@ namespace MonoGame.Tools.Pipeline
         private void DoBuild(string commands)
         {
             Encoding encoding;
-            try {
+            try
+            {
                 encoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
-            } catch (NotSupportedException) {
+            }
+            catch (NotSupportedException)
+            {
                 encoding = Encoding.UTF8;
             }
             var currentDir = Environment.CurrentDirectory;
@@ -527,7 +530,8 @@ namespace MonoGame.Tools.Pipeline
                     View.OutputAppend(ex.ToString());
                 }
             }
-            finally {
+            finally
+            {
                 Environment.CurrentDirectory = currentDir;
             }
 

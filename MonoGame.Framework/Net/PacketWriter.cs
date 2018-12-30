@@ -44,6 +44,7 @@ using System.IO;
 
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
+using MonoGame.Utilities.IO;
 
 #endregion Using clause
 
@@ -61,7 +62,7 @@ namespace Microsoft.Xna.Framework.Net
         {
         }
 
-        public PacketWriter(int capacity) : base(new MemoryStream(capacity))
+        public PacketWriter(int capacity) : base(RecyclableMemoryManager.Instance.GetMemoryStream(null, capacity))
         {
         }
 

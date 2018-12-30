@@ -5,6 +5,7 @@
 using System.IO;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using MonoGame.Utilities.IO;
 
 namespace TwoMGFX
 {
@@ -29,7 +30,7 @@ namespace TwoMGFX
             writer.Write(profile);
 
             // Write the rest to a memory stream.
-            using(MemoryStream memStream = new MemoryStream())
+            using(MemoryStream memStream = RecyclableMemoryManager.Instance.GetMemoryStream())
             using(BinaryWriter memWriter = new BinaryWriter(memStream))
             {
             // Write all the constant buffers.

@@ -14,6 +14,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Globalization;
 using Microsoft.Xna.Framework.Content.Pipeline.Builder.Convertors;
 using System.Diagnostics;
+using MonoGame.Utilities.IO;
 
 namespace MonoGame.Framework.Content.Pipeline.Builder
 {
@@ -791,8 +792,8 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
                 _compiler = new ContentCompiler();
 
             // Write the XNB.
-            using (var stream = new FileStream(pipelineEvent.DestFile, FileMode.Create, FileAccess.Write, FileShare.None))
-                _compiler.Compile(stream, content, Platform, Profile, CompressContent, OutputDirectory, outputFileDir);
+            using (var fs = new FileStream(pipelineEvent.DestFile, FileMode.Create, FileAccess.Write, FileShare.None))
+                _compiler.Compile(fs, content, Platform, Profile, CompressContent, OutputDirectory, outputFileDir);
 
             // Store the last write time of the output XNB here
             // so we can verify it hasn't been tampered with.

@@ -61,8 +61,6 @@ namespace MonoGame.Utilities.IO
     {
         private const long MaxStreamLength = int.MaxValue;
 
-        private static readonly byte[] emptyArray = Array.Empty<byte>();
-
         /// <summary>
         /// All of these blocks must be the same size
         /// </summary>
@@ -182,32 +180,24 @@ namespace MonoGame.Utilities.IO
         /// <param name="tag">A string identifying this stream for logging and debugging purposes</param>
         /// <param name="requestedSize">The initial requested size to prevent future allocations</param>
         /// <param name="initialLargeBuffer">An initial buffer to use. This buffer will be owned by the stream and returned to the memory manager upon Dispose.</param>
-        internal RecyclableMemoryStream(RecyclableMemoryManager memoryManager, string tag, int requestedSize,
-                                        byte[] initialLargeBuffer)
-            : base(emptyArray)
+        internal RecyclableMemoryStream(
+            RecyclableMemoryManager memoryManager, string tag, int requestedSize, byte[] initialLargeBuffer)
+            : base(Array.Empty<byte>())
         {
             this.memoryManager = memoryManager;
             this.id = Guid.NewGuid();
             this.tag = tag;
 
             if (requestedSize < memoryManager.BlockSize)
-            {
                 requestedSize = memoryManager.BlockSize;
-            }
 
             if (initialLargeBuffer == null)
-            {
                 this.EnsureCapacity(requestedSize);
-            }
             else
-            {
                 this.largeBuffer = initialLargeBuffer;
-            }
 
             if (this.memoryManager.GenerateCallStacks)
-            {
                 this.AllocationStack = Environment.StackTrace;
-            }
 
             RecyclableMemoryManager.Events.Writer.MemoryStreamCreated(this.id, this.tag, requestedSize);
             this.memoryManager.ReportStreamCreated();
@@ -705,29 +695,27 @@ namespace MonoGame.Utilities.IO
         {
             this.CheckDisposed();
             if (offset > MaxStreamLength)
-            {
                 throw new ArgumentOutOfRangeException(nameof(offset), "offset cannot be larger than " + MaxStreamLength);
-            }
 
             int newPosition;
             switch (loc)
             {
-            case SeekOrigin.Begin:
-                newPosition = (int)offset;
-                break;
-            case SeekOrigin.Current:
-                newPosition = (int)offset + this.position;
-                break;
-            case SeekOrigin.End:
-                newPosition = (int)offset + this.length;
-                break;
-            default:
-                throw new ArgumentException("Invalid seek origin", nameof(loc));
+                case SeekOrigin.Begin:
+                    newPosition = (int)offset;
+                    break;
+                case SeekOrigin.Current:
+                    newPosition = (int)offset + this.position;
+                    break;
+                case SeekOrigin.End:
+                    newPosition = (int)offset + this.length;
+                    break;
+                default:
+                    throw new ArgumentException("Invalid seek origin", nameof(loc));
             }
+
             if (newPosition < 0)
-            {
                 throw new IOException("Seek before beginning");
-            }
+
             this.position = newPosition;
             return this.position;
         }
@@ -741,9 +729,7 @@ namespace MonoGame.Utilities.IO
         {
             this.CheckDisposed();
             if (stream == null)
-            {
                 throw new ArgumentNullException(nameof(stream));
-            }
 
             if (this.largeBuffer == null)
             {
@@ -761,9 +747,7 @@ namespace MonoGame.Utilities.IO
                 }
             }
             else
-            {
                 stream.Write(this.largeBuffer, 0, this.length);
-            }
         }
         #endregion
 

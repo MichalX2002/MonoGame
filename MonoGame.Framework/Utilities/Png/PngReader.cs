@@ -2,16 +2,13 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Utilities.IO;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
-using MonoGame.Utilities;
 
 namespace MonoGame.Utilities.Png
 {
@@ -23,8 +20,8 @@ namespace MonoGame.Utilities.Png
         private int bytesPerSample;
         private int bytesPerPixel;
         private int bytesPerScanline;
-        private IList<PngChunk> chunks;
-        private IList<PngChunk> dataChunks;
+        private List<PngChunk> chunks;
+        private List<PngChunk> dataChunks;
         private ColorType colorType;
         private Palette palette;
         private Texture2D texture;
@@ -88,7 +85,6 @@ namespace MonoGame.Utilities.Png
             switch (chunkType)
             {
                 case "IHDR":
-
                     var headerChunk = new HeaderChunk();
                     headerChunk.Decode(chunkBytes);
                     width = (int)headerChunk.Width;
@@ -96,31 +92,25 @@ namespace MonoGame.Utilities.Png
                     bitsPerSample = headerChunk.BitDepth;
                     colorType = headerChunk.ColorType;
                     chunks.Add(headerChunk);
-
                     break;
 
                 case "PLTE":
-
                     var paletteChunk = new PaletteChunk();
                     paletteChunk.Decode(chunkBytes);
                     palette = paletteChunk.Palette;
                     chunks.Add(paletteChunk);
-
                     break;
 
                 case "tRNS":
-
                     var transparencyChunk = new TransparencyChunk();
                     transparencyChunk.Decode(chunkBytes);
                     palette.AddAlphaToColors(transparencyChunk.PaletteTransparencies);
                     break;
 
                 case "IDAT":
-
                     var dataChunk = new DataChunk();
                     dataChunk.Decode(chunkBytes);
                     dataChunks.Add(dataChunk);
-
                     break;
 
                 default:
@@ -135,29 +125,28 @@ namespace MonoGame.Utilities.Png
             foreach (var dataChunk in dataChunks)
             {
                 if (dataChunk.Type == "IDAT")
-                {
                     dataByteList.AddRange(dataChunk.Data);
-                }
             }
 
-            var compressedStream = new MemoryStream(dataByteList.ToArray());
-            var decompressedStream = new MemoryStream();
-
-            try
+            byte[] decompressedBytes;
+            using (var decompressedStream = RecyclableMemoryManager.Instance.GetMemoryStream())
             {
-                using (var deflateStream = new ZlibStream(compressedStream, CompressionMode.Decompress))
+
+                try
                 {
-                    deflateStream.CopyTo(decompressedStream);
+                    using (var compressedStream = new MemoryStream(dataByteList.ToArray()))
+                    using (var deflateStream = new ZlibStream(compressedStream, CompressionMode.Decompress))
+                        deflateStream.CopyTo(decompressedStream);
                 }
-            }
-            catch (Exception exception)
-            {
-                throw new Exception("An error occurred during DEFLATE decompression.", exception);
+                catch (Exception exception)
+                {
+                    throw new Exception("An error occurred during DEFLATE decompression.", exception);
+                }
+
+                decompressedBytes = decompressedStream.ToArray();
             }
 
-            var decompressedBytes = decompressedStream.ToArray();
             var pixelData = DeserializePixelData(decompressedBytes);
-
             DecodePixelData(pixelData);
         }
 
@@ -169,9 +158,7 @@ namespace MonoGame.Utilities.Png
             int scanlineCount = pixelData.Length / bytesPerScanline;
 
             if (pixelData.Length % bytesPerScanline != 0)
-            {
                 throw new Exception("Malformed pixel data - total length of pixel data not multiple of ((bytesPerPixel * width) + 1)");
-            }
 
             var result = new byte[scanlineCount][];
 
@@ -191,7 +178,6 @@ namespace MonoGame.Utilities.Png
         private void DecodePixelData(byte[][] pixelData)
         {
             data = new Color[width * height];
-            
             byte[] previousScanline = new byte[bytesPerScanline];
 
             for (int y = 0; y < height; y++)

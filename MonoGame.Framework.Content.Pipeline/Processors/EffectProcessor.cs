@@ -7,6 +7,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Utilities.IO;
 #if WINDOWS
 using TwoMGFX;
 #endif
@@ -111,12 +112,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             CompiledEffectContent result;
             try
             {
-                using (var stream = new MemoryStream())
+                using (var stream = RecyclableMemoryManager.Instance.GetMemoryStream())
                 {
                     using (var writer = new BinaryWriter(stream))
                         effect.Write(writer, options);
 
-                    result = new CompiledEffectContent(stream.GetBuffer());
+                    result = new CompiledEffectContent(stream.ToArray());
                 }
             }
             catch (Exception ex)

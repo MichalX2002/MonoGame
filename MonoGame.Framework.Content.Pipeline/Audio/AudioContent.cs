@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.ObjectModel;
 using System.IO;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
@@ -18,7 +17,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
     {
         private bool _disposed;
         private readonly AudioFileType _fileType;
-        private byte[] _data;
         private TimeSpan _duration;
         private AudioFormat _format;
         private int _loopStart;
@@ -33,8 +31,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
         /// <summary>
         /// The type of the original source audio file.
         /// </summary>
-        public AudioFileType FileType { get { return _fileType; } }
+        public AudioFileType FileType => _fileType;
 
+        /*
         /// <summary>
         /// The current raw audio data without header information.
         /// </summary>
@@ -42,62 +41,44 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
         /// This changes from the source data to the output data after conversion.
         /// For MP3 and WMA files this throws an exception to match XNA behavior.
         /// </remarks>
-        public byte[] Data 
+        public byte[] Data
         {
             get
             {
-                if (_disposed || _data == null)                
+                if (_disposed)
+                    throw new ObjectDisposedException(nameof(Data));
+                if (_data == null)
                     throw new InvalidContentException("Could not read the audio data from file \"" + Path.GetFileName(FileName) + "\".");
                 return _data;
             }
         }
+        */
+
+        public FileStream Data { get; private set; }
+        public int DataLength { get; private set; }
 
         /// <summary>
         /// The duration of the audio data.
         /// </summary>
-        public TimeSpan Duration
-        {
-            get
-            {
-                return _duration;
-            }
-        }
+        public TimeSpan Duration => _duration;
 
         /// <summary>
         /// The current format of the audio data.
         /// </summary>
         /// <remarks>This changes from the source format to the output format after conversion.</remarks>
-        public AudioFormat Format
-        {
-            get
-            {
-                return _format;
-            }
-        }
+        public AudioFormat Format => _format;
 
         /// <summary>
         /// The current loop length in samples.
         /// </summary>
         /// <remarks>This changes from the source loop length to the output loop length after conversion.</remarks>
-        public int LoopLength
-        {
-            get
-            {
-                return _loopLength;
-            } 
-        }
+        public int LoopLength => _loopLength;
 
         /// <summary>
         /// The current loop start location in samples.
         /// </summary>
         /// <remarks>This changes from the source loop start to the output loop start after conversion.</remarks>
-        public int LoopStart
-        {
-            get
-            {
-                return _loopStart;
-            }
-        }
+        public int LoopStart => _loopStart;
 
         /// <summary>
         /// Initializes a new instance of AudioContent.
@@ -119,39 +100,39 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
 
                 // Looks like XNA only cares about type mismatch when
                 // the type is WAV... else it is ok.
-                if (    (audioFileType == AudioFileType.Wav || _fileType == AudioFileType.Wav) &&
+                if ((audioFileType == AudioFileType.Wav || _fileType == AudioFileType.Wav) &&
                         audioFileType != _fileType)
                     throw new ArgumentException("Incorrect file type!", "audioFileType");
 
-                // Only provide the data for WAV files.
-                if (audioFileType == AudioFileType.Wav)
-                {
-                    byte[] rawData;
-
-                    // Must be opened in read mode otherwise it fails to open
-                    // read-only files (found in some source control systems)
-                    using (var fs = new FileStream(audioFileName, FileMode.Open, FileAccess.Read))
-                    {
-                        rawData = new byte[fs.Length];
-                        fs.Read(rawData, 0, rawData.Length);
-                    }
-
-                    var stripped = DefaultAudioProfile.StripRiffWaveHeader(rawData, out AudioFormat riffAudioFormat);
-
-                    if (riffAudioFormat != null)
-                    {
-                        if ((_format.Format != 2 && _format.Format != 17) && _format.BlockAlign != riffAudioFormat.BlockAlign)
-                            throw new InvalidOperationException("Calculated block align does not match RIFF " + _format.BlockAlign + " : " + riffAudioFormat.BlockAlign);
-                        if (_format.ChannelCount != riffAudioFormat.ChannelCount)
-                            throw new InvalidOperationException("Probed channel count does not match RIFF: " + _format.ChannelCount + ", " + riffAudioFormat.ChannelCount);
-                        if (_format.Format != riffAudioFormat.Format)
-                            throw new InvalidOperationException("Probed audio format does not match RIFF: " + _format.Format + ", " + riffAudioFormat.Format);
-                        if (_format.SampleRate != riffAudioFormat.SampleRate)
-                            throw new InvalidOperationException("Probed sample rate does not match RIFF: " + _format.SampleRate + ", " + riffAudioFormat.SampleRate);
-                    }
-
-                    _data = stripped;
-                }
+                //// Only provide the data for WAV files.
+                //if (audioFileType == AudioFileType.Wav)
+                //{
+                //    byte[] rawData;
+                //
+                //    // Must be opened in read mode otherwise it fails to open
+                //    // read-only files (found in some source control systems)
+                //    using (var fs = new FileStream(audioFileName, FileMode.Open, FileAccess.Read))
+                //    {
+                //        rawData = new byte[fs.Length];
+                //        fs.Read(rawData, 0, rawData.Length);
+                //    }
+                //
+                //    var stripped = DefaultAudioProfile.StripRiffWaveHeader(rawData, out AudioFormat riffAudioFormat);
+                //
+                //    if (riffAudioFormat != null)
+                //    {
+                //        if ((_format.Format != 2 && _format.Format != 17) && _format.BlockAlign != riffAudioFormat.BlockAlign)
+                //            throw new InvalidOperationException("Calculated block align does not match RIFF " + _format.BlockAlign + " : " + riffAudioFormat.BlockAlign);
+                //        if (_format.ChannelCount != riffAudioFormat.ChannelCount)
+                //            throw new InvalidOperationException("Probed channel count does not match RIFF: " + _format.ChannelCount + ", " + riffAudioFormat.ChannelCount);
+                //        if (_format.Format != riffAudioFormat.Format)
+                //            throw new InvalidOperationException("Probed audio format does not match RIFF: " + _format.Format + ", " + riffAudioFormat.Format);
+                //        if (_format.SampleRate != riffAudioFormat.SampleRate)
+                //            throw new InvalidOperationException("Probed sample rate does not match RIFF: " + _format.SampleRate + ", " + riffAudioFormat.SampleRate);
+                //    }
+                //
+                //    _data = stripped;
+                //}
             }
             catch (Exception ex)
             {
@@ -177,10 +158,11 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
             DefaultAudioProfile.ConvertToFormat(this, formatType, quality, saveToFile);
         }
 
-        public void SetData(byte[] data, AudioFormat format, TimeSpan duration, int loopStart, int loopLength)
+        public void SetData(FileStream data, int dataLength, AudioFormat format, TimeSpan duration, int loopStart, int loopLength)
         {
-            _data = data ?? throw new ArgumentNullException("data");
-            _format = format ?? throw new ArgumentNullException("format");
+            Data = data ?? throw new ArgumentNullException(nameof(data));
+            _format = format ?? throw new ArgumentNullException(nameof(format));
+            DataLength = dataLength;
             _duration = duration;
             _loopStart = loopStart;
             _loopLength = loopLength;
@@ -188,8 +170,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
 
         public void Dispose()
         {
-            _disposed = true;
-            _data = null;
+            if (!_disposed)
+            {
+                Data?.Dispose();
+                Data = null;
+                DataLength = -1;
+                _disposed = true;
+            }
         }
     }
 }

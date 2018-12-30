@@ -1,6 +1,7 @@
 ﻿using MonoGame.Utilities.IO;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace Lidgren.Network
@@ -10,16 +11,11 @@ namespace Lidgren.Network
         internal List<byte[]> m_storagePool; // sorted smallest to largest
 		internal NetQueue<NetOutgoingMessage> m_outgoingMessagesPool;
 		internal NetQueue<NetIncomingMessage> m_incomingMessagesPool;
-        internal RecyclableMemoryManager _streamManager;
 
         internal int m_bytesInPool;
 
 		private void InitializePools()
 		{
-            _streamManager = new RecyclableMemoryManager();
-            _streamManager.GenerateCallStacks = false;
-            _streamManager.AggressiveBufferReturn = true;
-
             if (m_configuration.UseMessageRecycling)
 			{
 				m_storagePool = new List<byte[]>(16);
@@ -34,9 +30,9 @@ namespace Lidgren.Network
 			}
 		}
 
-        internal RecyclableMemoryStream GetRecyclableMemory()
+        internal MemoryStream GetRecyclableMemory()
         {
-            return new RecyclableMemoryStream(_streamManager);
+            return RecyclableMemoryManager.Instance.GetMemoryStream();
         }
 
 		internal byte[] GetStorage(int minimumCapacityInBytes)

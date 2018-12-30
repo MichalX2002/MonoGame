@@ -36,7 +36,7 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 if (_speakers == value)
                     return;
-                
+
                 _speakers = value;
                 _device3DDirty = true;
             }
@@ -97,6 +97,8 @@ namespace Microsoft.Xna.Framework.Audio
         {
             try
             {
+                OpenALSoundController.InitializeInstance();
+
                 if (Device == null)
                 {
 #if !WINDOWS_UAP && DEBUG
@@ -132,8 +134,8 @@ namespace Microsoft.Xna.Framework.Audio
                 Speakers = (Speakers)MasterVoice.ChannelMask;
 #else
                 Speakers = Device.Version == XAudio2Version.Version27 ?
-                    Device.GetDeviceDetails(deviceId).OutputFormat.ChannelMask:
-                    (Speakers) MasterVoice.ChannelMask;
+                    Device.GetDeviceDetails(deviceId).OutputFormat.ChannelMask :
+                    (Speakers)MasterVoice.ChannelMask;
 #endif
             }
             catch
@@ -152,6 +154,9 @@ namespace Microsoft.Xna.Framework.Audio
 
         private static DataStream ToDataStream(int offset, byte[] buffer, int length)
         {
+            if (offset == 0 && buffer.Length == length)
+                return DataStream.Create(buffer, true, false);
+
             // NOTE: We make a copy here because old versions of 
             // DataStream.Create didn't work correctly for offsets.
             var data = new byte[length - offset];
@@ -162,10 +167,11 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformInitializePcm(byte[] buffer, int offset, int count, int sampleBits, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
         {
-            CreateBuffers(  new WaveFormat(sampleRate, sampleBits, (int)channels),
-                            ToDataStream(offset, buffer, count),
-                            loopStart, 
-                            loopLength);
+            CreateBuffers(
+                new WaveFormat(sampleRate, sampleBits, (int)channels),
+                ToDataStream(offset, buffer, count),
+                loopStart,
+                loopLength);
         }
 
         private void PlatformInitializeFormat(byte[] header, byte[] buffer, int bufferSize, int loopStart, int loopLength)
@@ -186,7 +192,7 @@ namespace Microsoft.Xna.Framework.Audio
             else
                 throw new NotSupportedException("Unsupported wave format!");
 
-            CreateBuffers(  waveFormat,
+            CreateBuffers(waveFormat,
                             ToDataStream(0, buffer, bufferSize),
                             loopStart,
                             loopLength);
@@ -198,7 +204,7 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 duration = TimeSpan.FromSeconds((float)loopLength / sampleRate);
 
-                CreateBuffers(  new WaveFormatAdpcm(sampleRate, channels, blockAlignment),
+                CreateBuffers(new WaveFormatAdpcm(sampleRate, channels, blockAlignment),
                                 ToDataStream(0, buffer, buffer.Length),
                                 loopStart,
                                 loopLength);
@@ -284,7 +290,7 @@ namespace Microsoft.Xna.Framework.Audio
                 // instance or return a new instance without a voice.
                 //
                 // For now we do the same test that the pool should be doing here.
-             
+
                 if (!ReferenceEquals(inst._format, _format))
                 {
                     if (inst._format.Encoding != _format.Encoding ||
@@ -380,6 +386,8 @@ namespace Microsoft.Xna.Framework.Audio
 
             _device3DDirty = true;
             _speakers = Speakers.Stereo;
+            
+            OpenALSoundController.DestroyInstance();
         }
     }
 }

@@ -73,7 +73,7 @@ namespace Microsoft.Xna.Framework.Audio
         private IntPtr _context;
         private int[] allSourcesArray;
 
-#if DESKTOPGL || ANGLE
+#if DESKTOPGL || DIRECTX || ANGLE
         // MacOS & Linux share a limit of 256.
         internal const int MAX_NUMBER_OF_SOURCES = 256;
 #elif IOS
@@ -89,7 +89,7 @@ namespace Microsoft.Xna.Framework.Audio
         private const int DEFAULT_FREQUENCY = 48000;
         private const int DEFAULT_UPDATE_SIZE = 512;
         private const int DEFAULT_UPDATE_BUFFER_COUNT = 2;
-#elif DESKTOPGL
+#elif DESKTOPGL || DIRECTX
         private static OggStreamer _oggstreamer;
 #endif
 
@@ -290,7 +290,7 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
 
                     _context = Alc.CreateContext(_device, attribute);
-#if DESKTOPGL
+#if DESKTOPGL || DIRECTX
                     _oggstreamer = new OggStreamer();
 #endif
 
@@ -361,7 +361,7 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 if (disposing)
                 {
-#if DESKTOPGL
+#if DESKTOPGL || DIRECTX
                     if(_oggstreamer != null)
                         _oggstreamer.Dispose();
 #endif
@@ -415,6 +415,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
 		}
 
+#if !DIRECTX
         public void FreeSource(SoundEffectInstance inst)
         {
             RecycleSource(inst.SourceId);
@@ -422,6 +423,7 @@ namespace Microsoft.Xna.Framework.Audio
             inst.HasSourceId = false;
             inst.SoundState = SoundState.Stopped;
 		}
+#endif
 
         public double SourceCurrentPosition(int sourceId)
 		{

@@ -4,8 +4,6 @@
 
 using System;
 using Microsoft.Xna.Framework.Content.Pipeline.Audio;
-using System.IO;
-using MonoGame.Framework.Content.Pipeline.Builder;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 {
@@ -38,16 +36,19 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         public override SoundEffectContent Process(AudioContent input, ContentProcessorContext context)
         {
             if (input == null)
-                throw new ArgumentNullException("input");
+                throw new ArgumentNullException(nameof(input));
+
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
 
             var profile = AudioProfile.ForPlatform(context.TargetPlatform);
             var finalQuality = profile.ConvertAudio(context.TargetPlatform, Quality, input);
+
             if (Quality != finalQuality)
                 context.Logger.LogMessage("Failed to convert using \"{0}\" quality, used \"{1}\" quality", Quality, finalQuality);
 
-            return new SoundEffectContent(input.Format.NativeWaveFormat, input.Data, input.LoopStart, input.LoopLength, (int)input.Duration.TotalMilliseconds);
+            return new SoundEffectContent(
+                input.Format.NativeWaveFormat, input.Data, input.DataLength, input.LoopStart, input.LoopLength, (int)input.Duration.TotalMilliseconds);
         }
     }
 }

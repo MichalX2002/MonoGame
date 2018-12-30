@@ -28,7 +28,7 @@ namespace Microsoft.Xna.Framework.Audio
             var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
             try
             {
-                BindDataBuffer(data, format, size, sampleRate, sampleAlignment);
+                BindDataBuffer(handle.AddrOfPinnedObject(), format, size, sampleRate, sampleAlignment);
             }
             finally
             {

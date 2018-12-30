@@ -116,171 +116,171 @@ namespace Microsoft.Xna.Framework.Audio
 
             _waveBankFileName = waveBankFilename;
 
-            BinaryReader reader = new BinaryReader(AudioEngine.OpenStream(waveBankFilename));
-
-            reader.ReadBytes(4);
-
-            _version = wavebankheader.Version = reader.ReadInt32();
-
-            int last_segment = 4;
-            //if (wavebankheader.Version == 1) goto WAVEBANKDATA;
-            if (wavebankheader.Version <= 3) last_segment = 3;
-            if (wavebankheader.Version >= 42) reader.ReadInt32();    // skip HeaderVersion
-
-            wavebankheader.Segments = new Segment[5];
-
-            for (int i = 0; i <= last_segment; i++)
+            using (var reader = new BinaryReader(AudioEngine.OpenStream(waveBankFilename)))
             {
-                wavebankheader.Segments[i].Offset = reader.ReadInt32();
-                wavebankheader.Segments[i].Length = reader.ReadInt32();
-            }
+                reader.ReadBytes(4);
 
-            reader.BaseStream.Seek(wavebankheader.Segments[0].Offset, SeekOrigin.Begin);
+                _version = wavebankheader.Version = reader.ReadInt32();
 
-            //WAVEBANKDATA:
+                int last_segment = 4;
+                //if (wavebankheader.Version == 1) goto WAVEBANKDATA;
+                if (wavebankheader.Version <= 3) last_segment = 3;
+                if (wavebankheader.Version >= 42) reader.ReadInt32();    // skip HeaderVersion
 
-            wavebankdata.Flags = reader.ReadInt32();
-            wavebankdata.EntryCount = reader.ReadInt32();
+                wavebankheader.Segments = new Segment[5];
 
-            if ((wavebankheader.Version == 2) || (wavebankheader.Version == 3))
-            {
-                wavebankdata.BankName = System.Text.Encoding.UTF8.GetString(reader.ReadBytes(16),0,16).Replace("\0", "");
-            }
-            else
-            {
-                wavebankdata.BankName = System.Text.Encoding.UTF8.GetString(reader.ReadBytes(64),0,64).Replace("\0", "");
-            }
-
-            _bankName = wavebankdata.BankName;
-
-            if (wavebankheader.Version == 1)
-            {
-                //wavebank_offset = (int)ftell(fd) - file_offset;
-                wavebankdata.EntryMetaDataElementSize = 20;
-            }
-            else
-            {
-                wavebankdata.EntryMetaDataElementSize = reader.ReadInt32();
-                wavebankdata.EntryNameElementSize = reader.ReadInt32();
-                wavebankdata.Alignment = reader.ReadInt32();
-                wavebank_offset = wavebankheader.Segments[1].Offset; //METADATASEGMENT
-            }
-
-            if ((wavebankdata.Flags & Flag_Compact) != 0)
-            {
-                reader.ReadInt32(); // compact_format
-            }
-
-            _playRegionOffset = wavebankheader.Segments[last_segment].Offset;
-            if (_playRegionOffset == 0)
-            {
-                _playRegionOffset =
-                    wavebank_offset +
-                    (wavebankdata.EntryCount * wavebankdata.EntryMetaDataElementSize);
-            }
-            
-            int segidx_entry_name = 2;
-            if (wavebankheader.Version >= 42) segidx_entry_name = 3;
-            
-            if ((wavebankheader.Segments[segidx_entry_name].Offset != 0) &&
-                (wavebankheader.Segments[segidx_entry_name].Length != 0))
-            {
-                if (wavebankdata.EntryNameElementSize == -1) wavebankdata.EntryNameElementSize = 0;
-                byte[] entry_name = new byte[wavebankdata.EntryNameElementSize + 1];
-                entry_name[wavebankdata.EntryNameElementSize] = 0;
-            }
-
-            _sounds = new SoundEffect[wavebankdata.EntryCount];
-            _streams = new StreamInfo[wavebankdata.EntryCount];
-
-            reader.BaseStream.Seek(wavebank_offset, SeekOrigin.Begin);
-
-            // The compact format requires us to load stuff differently.
-            var isCompactFormat = (wavebankdata.Flags & Flag_Compact) != 0;
-            if (isCompactFormat)
-            {
-                // Load the sound data offset table from disk.
-                for (var i = 0; i < wavebankdata.EntryCount; i++)
+                for (int i = 0; i <= last_segment; i++)
                 {
-                    var len = reader.ReadInt32();
-                    _streams[i].Format = wavebankdata.CompactFormat;
-                    _streams[i].FileOffset = (len & ((1 << 21) - 1))*wavebankdata.Alignment;
+                    wavebankheader.Segments[i].Offset = reader.ReadInt32();
+                    wavebankheader.Segments[i].Length = reader.ReadInt32();
                 }
 
-                // Now figure out the sound data lengths.
-                for (var i = 0; i < wavebankdata.EntryCount; i++)
-                {
-                    int nextOffset;
-                    if (i == (wavebankdata.EntryCount - 1))
-                        nextOffset = wavebankheader.Segments[last_segment].Length;
-                    else
-                        nextOffset = _streams[i + 1].FileOffset;
+                reader.BaseStream.Seek(wavebankheader.Segments[0].Offset, SeekOrigin.Begin);
 
-                    // The next and current offsets used to calculate the length.
-                    _streams[i].FileLength = nextOffset - _streams[i].FileOffset;
-                }
-            }
-            else
-            {
-                for (var i = 0; i < wavebankdata.EntryCount; i++)
+                //WAVEBANKDATA:
+
+                wavebankdata.Flags = reader.ReadInt32();
+                wavebankdata.EntryCount = reader.ReadInt32();
+
+                if ((wavebankheader.Version == 2) || (wavebankheader.Version == 3))
                 {
-                    var info = new StreamInfo();
-                    if (wavebankheader.Version == 1)
+                    wavebankdata.BankName = System.Text.Encoding.UTF8.GetString(reader.ReadBytes(16), 0, 16).Replace("\0", "");
+                }
+                else
+                {
+                    wavebankdata.BankName = System.Text.Encoding.UTF8.GetString(reader.ReadBytes(64), 0, 64).Replace("\0", "");
+                }
+
+                _bankName = wavebankdata.BankName;
+
+                if (wavebankheader.Version == 1)
+                {
+                    //wavebank_offset = (int)ftell(fd) - file_offset;
+                    wavebankdata.EntryMetaDataElementSize = 20;
+                }
+                else
+                {
+                    wavebankdata.EntryMetaDataElementSize = reader.ReadInt32();
+                    wavebankdata.EntryNameElementSize = reader.ReadInt32();
+                    wavebankdata.Alignment = reader.ReadInt32();
+                    wavebank_offset = wavebankheader.Segments[1].Offset; //METADATASEGMENT
+                }
+
+                if ((wavebankdata.Flags & Flag_Compact) != 0)
+                {
+                    reader.ReadInt32(); // compact_format
+                }
+
+                _playRegionOffset = wavebankheader.Segments[last_segment].Offset;
+                if (_playRegionOffset == 0)
+                {
+                    _playRegionOffset =
+                        wavebank_offset +
+                        (wavebankdata.EntryCount * wavebankdata.EntryMetaDataElementSize);
+                }
+
+                int segidx_entry_name = 2;
+                if (wavebankheader.Version >= 42) segidx_entry_name = 3;
+
+                if ((wavebankheader.Segments[segidx_entry_name].Offset != 0) &&
+                    (wavebankheader.Segments[segidx_entry_name].Length != 0))
+                {
+                    if (wavebankdata.EntryNameElementSize == -1) wavebankdata.EntryNameElementSize = 0;
+                    byte[] entry_name = new byte[wavebankdata.EntryNameElementSize + 1];
+                    entry_name[wavebankdata.EntryNameElementSize] = 0;
+                }
+
+                _sounds = new SoundEffect[wavebankdata.EntryCount];
+                _streams = new StreamInfo[wavebankdata.EntryCount];
+
+                reader.BaseStream.Seek(wavebank_offset, SeekOrigin.Begin);
+
+                // The compact format requires us to load stuff differently.
+                var isCompactFormat = (wavebankdata.Flags & Flag_Compact) != 0;
+                if (isCompactFormat)
+                {
+                    // Load the sound data offset table from disk.
+                    for (var i = 0; i < wavebankdata.EntryCount; i++)
                     {
-                        info.Format = reader.ReadInt32();
-                        info.FileOffset = reader.ReadInt32();
-                        info.FileLength = reader.ReadInt32();
-                        info.LoopStart = reader.ReadInt32();
-                        info.LoopLength = reader.ReadInt32();
+                        var len = reader.ReadInt32();
+                        _streams[i].Format = wavebankdata.CompactFormat;
+                        _streams[i].FileOffset = (len & ((1 << 21) - 1)) * wavebankdata.Alignment;
                     }
-                    else
-                    {
-                        var flagsAndDuration = reader.ReadInt32(); // Unused
 
-                        if (wavebankdata.EntryMetaDataElementSize >= 8)
+                    // Now figure out the sound data lengths.
+                    for (var i = 0; i < wavebankdata.EntryCount; i++)
+                    {
+                        int nextOffset;
+                        if (i == (wavebankdata.EntryCount - 1))
+                            nextOffset = wavebankheader.Segments[last_segment].Length;
+                        else
+                            nextOffset = _streams[i + 1].FileOffset;
+
+                        // The next and current offsets used to calculate the length.
+                        _streams[i].FileLength = nextOffset - _streams[i].FileOffset;
+                    }
+                }
+                else
+                {
+                    for (var i = 0; i < wavebankdata.EntryCount; i++)
+                    {
+                        var info = new StreamInfo();
+                        if (wavebankheader.Version == 1)
+                        {
                             info.Format = reader.ReadInt32();
-                        if (wavebankdata.EntryMetaDataElementSize >= 12)
                             info.FileOffset = reader.ReadInt32();
-                        if (wavebankdata.EntryMetaDataElementSize >= 16)
                             info.FileLength = reader.ReadInt32();
-                        if (wavebankdata.EntryMetaDataElementSize >= 20)
                             info.LoopStart = reader.ReadInt32();
-                        if (wavebankdata.EntryMetaDataElementSize >= 24)
                             info.LoopLength = reader.ReadInt32();
-                    }
+                        }
+                        else
+                        {
+                            var flagsAndDuration = reader.ReadInt32(); // Unused
 
-                    // TODO: What is this doing?
-                    if (wavebankdata.EntryMetaDataElementSize < 24)
-                    {
-                        if (info.FileLength != 0)
-                            info.FileLength = wavebankheader.Segments[last_segment].Length;
-                    }
+                            if (wavebankdata.EntryMetaDataElementSize >= 8)
+                                info.Format = reader.ReadInt32();
+                            if (wavebankdata.EntryMetaDataElementSize >= 12)
+                                info.FileOffset = reader.ReadInt32();
+                            if (wavebankdata.EntryMetaDataElementSize >= 16)
+                                info.FileLength = reader.ReadInt32();
+                            if (wavebankdata.EntryMetaDataElementSize >= 20)
+                                info.LoopStart = reader.ReadInt32();
+                            if (wavebankdata.EntryMetaDataElementSize >= 24)
+                                info.LoopLength = reader.ReadInt32();
+                        }
 
-                    _streams[i] = info;
+                        // TODO: What is this doing?
+                        if (wavebankdata.EntryMetaDataElementSize < 24)
+                        {
+                            if (info.FileLength != 0)
+                                info.FileLength = wavebankheader.Segments[last_segment].Length;
+                        }
+
+                        _streams[i] = info;
+                    }
                 }
-            }
 
-            // If this isn't a streaming wavebank then load all the sounds now.
-            if (!_streaming)
-            {
-                for (var i = 0; i < _streams.Length; i++)
+                // If this isn't a streaming wavebank then load all the sounds now.
+                if (!_streaming)
                 {
-                    var info = _streams[i];
-                    
-                    // Read the data.
-                    reader.BaseStream.Seek(info.FileOffset + _playRegionOffset, SeekOrigin.Begin);
-                    var audiodata = reader.ReadBytes(info.FileLength);
-                    DecodeFormat(info.Format, out MiniFormatTag codec, out int channels, out int rate, out int alignment);
+                    for (var i = 0; i < _streams.Length; i++)
+                    {
+                        var info = _streams[i];
 
-                    // Call the special constuctor on SoundEffect to sort it out.
-                    _sounds[i] = new SoundEffect(codec, audiodata, channels, rate, alignment, info.LoopStart, info.LoopLength);                
+                        // Read the data.
+                        reader.BaseStream.Seek(info.FileOffset + _playRegionOffset, SeekOrigin.Begin);
+                        var audiodata = reader.ReadBytes(info.FileLength);
+                        DecodeFormat(info.Format, out MiniFormatTag codec, out int channels, out int rate, out int alignment);
+
+                        // Call the special constuctor on SoundEffect to sort it out.
+                        _sounds[i] = new SoundEffect(codec, audiodata, channels, rate, alignment, info.LoopStart, info.LoopLength);
+                    }
+
+                    _streams = null;
                 }
-
-                _streams = null;
             }
-            
-            audioEngine.Wavebanks[_bankName] = this;
 
+            audioEngine.Wavebanks[_bankName] = this;
             IsPrepared = true;
         }
 

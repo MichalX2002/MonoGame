@@ -68,14 +68,11 @@ namespace Microsoft.Xna.Framework.Media
 		{
             for (int i = songs.Count; i-- > 0; )
             {
-#if !DIRECTX
                 songs[i].Stop();
-#endif
 				songs.RemoveAt(i);
 			}	
 		}
-
-#if !DIRECTX
+        
         internal void SetVolume(float volume)
         {
             for (int i = 0; i < songs.Count; ++i)
@@ -87,20 +84,17 @@ namespace Microsoft.Xna.Framework.Media
             for (int i = 0; i < songs.Count; ++i)
                 songs[i].Pitch = pitch;
         }
-#endif
 
         internal void Add(Song song)
         {
             songs.Add(song);
         }
-
-#if !DIRECTX
+        
         internal void Stop()
         {
             for (int i = 0; i < songs.Count; ++i)
                 songs[i].Stop();
         }
-#endif
 	}
 }
 

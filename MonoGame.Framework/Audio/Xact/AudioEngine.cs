@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
+using MonoGame.Utilities.IO;
 
 namespace Microsoft.Xna.Framework.Audio
 {
@@ -67,8 +68,14 @@ namespace Microsoft.Xna.Framework.Audio
 
             if (useMemoryStream)
             {
-                var memStream = new MemoryStream();
-                stream.CopyTo(memStream);
+                var memStream = RecyclableMemoryManager.Instance.GetMemoryStream();
+
+                var buffer = RecyclableMemoryManager.Instance.GetBlock();   //
+                int read;                                                   //
+                while ((read = stream.Read(buffer, 0, buffer.Length)) != 0) // instead of CopyTo
+                    memStream.Write(buffer, 0, read);                       //
+                RecyclableMemoryManager.Instance.ReturnBlock(buffer, null); //
+
                 memStream.Seek(0, SeekOrigin.Begin);
                 stream.Dispose();
                 stream = memStream;

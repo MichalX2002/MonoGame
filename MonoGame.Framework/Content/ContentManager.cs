@@ -10,6 +10,7 @@ using System.Reflection;
 using MonoGame.Utilities;
 using Microsoft.Xna.Framework.Graphics;
 using System.Globalization;
+using MonoGame.Utilities.IO;
 
 #if !WINDOWS_UAP
 using Microsoft.Xna.Framework.Audio;
@@ -270,14 +271,14 @@ namespace Microsoft.Xna.Framework.Content
 #if ANDROID
                 // Read the asset into memory in one go. This results in a ~50% reduction
                 // in load times on Android due to slow Android asset streams.
-                MemoryStream memStream = new MemoryStream();
+                MemoryStream memStream = RecyclableMemoryManager.Instance.GetMemoryStream();
                 stream.CopyTo(memStream);
                 memStream.Seek(0, SeekOrigin.Begin);
                 stream.Close();
                 stream = memStream;
 #endif
-			}
-			catch (FileNotFoundException fileNotFound)
+            }
+            catch (FileNotFoundException fileNotFound)
 			{
 				throw new ContentLoadException("The content file was not found.", fileNotFound);
 			}

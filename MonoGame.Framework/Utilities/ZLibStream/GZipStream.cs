@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MonoGame.Utilities.IO;
+using System;
 using System.IO;
 
 namespace MonoGame.Utilities
@@ -904,10 +905,9 @@ namespace MonoGame.Utilities
         /// <returns>The string in compressed form</returns>
         internal static byte[] CompressString(String s)
         {
-            using (var ms = new MemoryStream())
+            using (var ms = RecyclableMemoryManager.Instance.GetMemoryStream())
             {
-                Stream compressor =
-                    new GZipStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
+                Stream compressor = new GZipStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
                 ZlibBaseStream.CompressString(s, compressor);
                 return ms.ToArray();
             }
@@ -932,11 +932,9 @@ namespace MonoGame.Utilities
         /// <returns>The data in compressed form</returns>
         internal static byte[] CompressBuffer(byte[] b)
         {
-            using (var ms = new MemoryStream())
+            using (var ms = RecyclableMemoryManager.Instance.GetMemoryStream())
             {
-                Stream compressor =
-                    new GZipStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
-
+                Stream compressor = new GZipStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
                 ZlibBaseStream.CompressBuffer(b, compressor);
                 return ms.ToArray();
             }

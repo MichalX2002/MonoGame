@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 
@@ -52,17 +51,19 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
         public abstract ConversionQuality ConvertStreamingAudio(TargetPlatform platform, ConversionQuality quality, AudioContent content, ref string outputFileName);
 
 
-        protected static int QualityToSampleRate(ConversionQuality quality, int sourceSampleRate)
+        protected static int QualityToSampleRate(ConversionFormat format, ConversionQuality quality, int sourceSampleRate)
         {
             switch (quality)
             {
                 case ConversionQuality.Low:
                     return Math.Max(8000, (int)Math.Floor(sourceSampleRate / 2.0));
-                case ConversionQuality.Medium:
-                    return Math.Max(8000, (int)Math.Floor((sourceSampleRate / 4.0) * 3));
-            }
 
-            return Math.Max(8000, sourceSampleRate);
+                case ConversionQuality.Medium:
+                    return Math.Max(8000, (int)Math.Floor(sourceSampleRate * 3 / 4.0));
+
+                default:
+                    return Math.Max(8000, sourceSampleRate);
+            }
         }
 
         protected static int QualityToBitRate(ConversionQuality quality)

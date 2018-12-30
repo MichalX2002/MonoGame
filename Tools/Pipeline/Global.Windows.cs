@@ -4,6 +4,7 @@
 
 using Eto.Drawing;
 using Eto.Wpf.Drawing;
+using MonoGame.Utilities.IO;
 using System.IO;
 using System.Windows.Media.Imaging;
 
@@ -25,7 +26,7 @@ namespace MonoGame.Tools.Pipeline
         {
             var ret = new BitmapImage();
 
-            using (MemoryStream stream = new MemoryStream())
+            using (MemoryStream stream = RecyclableMemoryManager.Instance.GetMemoryStream())
             {
                 bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                 stream.Position = 0;

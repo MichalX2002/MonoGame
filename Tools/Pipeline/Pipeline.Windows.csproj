@@ -351,6 +351,10 @@
       <Project>{B950DE10-AC5D-4BD9-B817-51247C4A732D}</Project>
       <Name>MonoGame.Framework.Content.Pipeline.Windows</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\MonoGame.Utilities\MonoGame.Utilities.csproj">
+      <Project>{de48723f-d255-49f6-8372-aef8b059d5e7}</Project>
+      <Name>MonoGame.Utilities</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MGCB\MGCB.Windows.csproj">
       <Project>{4243474D-572E-6E69-646F-77734D474342}</Project>
       <Name>MGCB.Windows</Name>
