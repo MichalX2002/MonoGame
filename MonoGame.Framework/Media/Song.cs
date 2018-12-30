@@ -106,8 +106,8 @@ namespace Microsoft.Xna.Framework.Media
 
         public static bool operator ==(Song song1, Song song2)
         {
-            if (song1 == null)
-                return song2 == null;
+            if (song1 is null)
+                return song2 is null;
 
             return song1.Equals(song2);
         }

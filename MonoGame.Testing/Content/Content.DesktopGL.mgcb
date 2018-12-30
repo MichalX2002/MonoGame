@@ -15,7 +15,7 @@
 
 #begin No More Magic.ogg
 /importer:OggImporter
-/processor:SoundEffectProcessor
+/processor:SongProcessor
 /processorParam:Quality=Best
 /build:No More Magic.ogg
 

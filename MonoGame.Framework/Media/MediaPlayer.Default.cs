@@ -130,7 +130,7 @@ namespace Microsoft.Xna.Framework.Media
 
         private static void PlatformSetIsVisualizationEnabled(bool value)
         {
-#if DESKTOPGL
+#if DESKTOPGL || DIRECTX
             _isVisualizationEnabled = value;
 #else
             _isVisualizationEnabled = false;
@@ -176,7 +176,7 @@ namespace Microsoft.Xna.Framework.Media
 
         private static void PlatformGetVisualizationData(VisualizationData data)
         {
-#if DESKTOPGL
+#if DESKTOPGL || DIRECTX
             var activeSong = Queue.ActiveSong;
             if (activeSong == null)
                 return;
@@ -264,7 +264,7 @@ namespace Microsoft.Xna.Framework.Media
 
         private static float PlatformGetUpdateTime()
         {
-#if DESKTOPGL
+#if DESKTOPGL || DIRECTX
             float[] timing = OggStreamer.Instance.ThreadTiming;
             float sum = 0;
             for (int i = 0; i < timing.Length; i++)
