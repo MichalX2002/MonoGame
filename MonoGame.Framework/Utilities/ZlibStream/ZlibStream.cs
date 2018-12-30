@@ -86,6 +86,7 @@
 
 //------------------------------------------------------------------------------
 
+using MonoGame.Utilities.IO;
 using System;
 using System.IO;
 
@@ -692,10 +693,9 @@ namespace MonoGame.Utilities
         /// <returns>The string in compressed form</returns>
         public static byte[] CompressString(String s)
         {
-            using (var ms = new MemoryStream())
+            using (var ms = RecyclableMemoryManager.Instance.GetMemoryStream())
             {
-                Stream compressor =
-                    new ZlibStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
+                Stream compressor = new ZlibStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
                 ZlibBaseStream.CompressString(s, compressor);
                 return ms.ToArray();
             }
@@ -720,11 +720,9 @@ namespace MonoGame.Utilities
         /// <returns>The data in compressed form</returns>
         public static byte[] CompressBuffer(byte[] b)
         {
-            using (var ms = new MemoryStream())
+            using (var ms = RecyclableMemoryManager.Instance.GetMemoryStream())
             {
-                Stream compressor =
-                    new ZlibStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
-
+                Stream compressor = new ZlibStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
                 ZlibBaseStream.CompressBuffer(b, compressor);
                 return ms.ToArray();
             }
@@ -747,9 +745,7 @@ namespace MonoGame.Utilities
         {
             using (var input = new MemoryStream(compressed))
             {
-                Stream decompressor =
-                    new ZlibStream(input, CompressionMode.Decompress);
-
+                Stream decompressor = new ZlibStream(input, CompressionMode.Decompress);
                 return ZlibBaseStream.UncompressString(compressed, decompressor);
             }
         }
@@ -771,9 +767,7 @@ namespace MonoGame.Utilities
         {
             using (var input = new MemoryStream(compressed))
             {
-                Stream decompressor =
-                    new ZlibStream(input, CompressionMode.Decompress);
-
+                Stream decompressor = new ZlibStream(input, CompressionMode.Decompress);
                 return ZlibBaseStream.UncompressBuffer(compressed, decompressor);
             }
         }

@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Graphics;
@@ -114,7 +115,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             {
                 using (var stream = RecyclableMemoryManager.Instance.GetMemoryStream())
                 {
-                    using (var writer = new BinaryWriter(stream))
+                    using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
                         effect.Write(writer, options);
 
                     result = new CompiledEffectContent(stream.ToArray());

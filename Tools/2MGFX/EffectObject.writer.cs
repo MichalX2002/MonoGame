@@ -11,7 +11,6 @@ namespace TwoMGFX
 {
 	internal partial class EffectObject
 	{
-
         private const string Header = "MGFX";
         private const int Version = 8;
 
@@ -30,47 +29,47 @@ namespace TwoMGFX
             writer.Write(profile);
 
             // Write the rest to a memory stream.
-            using(MemoryStream memStream = RecyclableMemoryManager.Instance.GetMemoryStream())
-            using(BinaryWriter memWriter = new BinaryWriter(memStream))
+            using (MemoryStream memStream = RecyclableMemoryManager.Instance.GetMemoryStream())
+            using (BinaryWriter memWriter = new BinaryWriter(memStream))
             {
-            // Write all the constant buffers.
+                // Write all the constant buffers.
                 memWriter.Write((byte)ConstantBuffers.Count);
-            foreach (var cbuffer in ConstantBuffers)
+                foreach (var cbuffer in ConstantBuffers)
                     cbuffer.Write(memWriter, options);
 
-            // Write all the shaders.
+                // Write all the shaders.
                 memWriter.Write((byte)Shaders.Count);
-            foreach (var shader in Shaders)
+                foreach (var shader in Shaders)
                     shader.Write(memWriter, options);
 
-            // Write the parameters.
+                // Write the parameters.
                 WriteParameters(memWriter, Parameters, Parameters.Length);
 
-            // Write the techniques.
+                // Write the techniques.
                 memWriter.Write((byte)Techniques.Length);
-            foreach (var technique in Techniques)
-            {
+                foreach (var technique in Techniques)
+                {
                     memWriter.Write(technique.name);
                     WriteAnnotations(memWriter, technique.annotation_handles);
 
-                // Write the passes.
+                    // Write the passes.
                     memWriter.Write((byte)technique.pass_count);
-                for (var p = 0; p < technique.pass_count; p++)
-                {
-                    var pass = technique.pass_handles[p];
+                    for (var p = 0; p < technique.pass_count; p++)
+                    {
+                        var pass = technique.pass_handles[p];
 
                         memWriter.Write(pass.name);
                         WriteAnnotations(memWriter, pass.annotation_handles);
 
-                    // Write the index for the vertex and pixel shaders.
-                    var vertexShader = GetShaderIndex(STATE_CLASS.VERTEXSHADER, pass.states);
-                    var pixelShader = GetShaderIndex(STATE_CLASS.PIXELSHADER, pass.states);
+                        // Write the index for the vertex and pixel shaders.
+                        var vertexShader = GetShaderIndex(STATE_CLASS.VERTEXSHADER, pass.states);
+                        var pixelShader = GetShaderIndex(STATE_CLASS.PIXELSHADER, pass.states);
                         memWriter.Write((byte)vertexShader);
                         memWriter.Write((byte)pixelShader);
 
-                    // Write the state objects too!
-					if (pass.blendState != null)
-					{
+                        // Write the state objects too!
+                        if (pass.blendState != null)
+                        {
                             memWriter.Write(true);
                             memWriter.Write((byte)pass.blendState.AlphaBlendFunction);
                             memWriter.Write((byte)pass.blendState.AlphaDestinationBlend);
@@ -87,12 +86,12 @@ namespace TwoMGFX
                             memWriter.Write((byte)pass.blendState.ColorWriteChannels2);
                             memWriter.Write((byte)pass.blendState.ColorWriteChannels3);
                             memWriter.Write(pass.blendState.MultiSampleMask);
-					}
-					else
+                        }
+                        else
                             memWriter.Write(false);
 
-					if (pass.depthStencilState != null)
-					{
+                        if (pass.depthStencilState != null)
+                        {
                             memWriter.Write(true);
                             memWriter.Write((byte)pass.depthStencilState.CounterClockwiseStencilDepthBufferFail);
                             memWriter.Write((byte)pass.depthStencilState.CounterClockwiseStencilFail);
@@ -110,12 +109,12 @@ namespace TwoMGFX
                             memWriter.Write((byte)pass.depthStencilState.StencilPass);
                             memWriter.Write(pass.depthStencilState.StencilWriteMask);
                             memWriter.Write(pass.depthStencilState.TwoSidedStencilMode);
-					}
-					else
+                        }
+                        else
                             memWriter.Write(false);
 
-					if (pass.rasterizerState != null)
-					{
+                        if (pass.rasterizerState != null)
+                        {
                             memWriter.Write(true);
                             memWriter.Write((byte)pass.rasterizerState.CullMode);
                             memWriter.Write(pass.rasterizerState.DepthBias);
@@ -123,8 +122,8 @@ namespace TwoMGFX
                             memWriter.Write(pass.rasterizerState.MultiSampleAntiAlias);
                             memWriter.Write(pass.rasterizerState.ScissorTestEnable);
                             memWriter.Write(pass.rasterizerState.SlopeScaleDepthBias);
-					}
-					else
+                        }
+                        else
                             memWriter.Write(false);
                     }
                 }
