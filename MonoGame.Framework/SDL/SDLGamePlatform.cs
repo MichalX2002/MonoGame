@@ -135,6 +135,7 @@ namespace Microsoft.Xna.Framework
                     var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
                     if (!_keys.Contains(key))
                         _keys.Add(key);
+
                     char character = (char)ev.Key.Keysym.Sym;
                     if (char.IsControl(character))
                         _view.CallTextInput(character, key);

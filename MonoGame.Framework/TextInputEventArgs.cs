@@ -8,12 +8,12 @@ using Microsoft.Xna.Framework.Input;
 namespace Microsoft.Xna.Framework
 {
     /// <summary>
-    /// This class is used for the game window's TextInput event as EventArgs.
+    /// This class is used for the <see cref="GameWindow.TextInput"/> event as <see cref="EventArgs"/>.
     /// </summary>
     public class TextInputEventArgs : EventArgs
     {
         public char Character { get; }
-        public Keys Key { get; private set; }
+        public Keys Key { get; }
 
         public TextInputEventArgs(char character, Keys key = Keys.None)
         {
