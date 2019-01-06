@@ -101,14 +101,19 @@
     <Compile Include="Math\CurveKeyCollection.cs" />
     <Compile Include="Math\CurveLoopType.cs" />
     <Compile Include="Math\CurveTangent.cs" />
+    <Compile Include="Math\IShapeF.cs" />
     <Compile Include="Math\MathHelper.cs" />
     <Compile Include="Math\Matrix.cs" />
     <Compile Include="Math\Plane.cs" />
     <Compile Include="Math\PlaneIntersectionType.cs" />
     <Compile Include="Math\Point.cs" />
+    <Compile Include="Math\PointF.cs" />
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Math\Ray.cs" />
     <Compile Include="Math\Rectangle.cs" />
+    <Compile Include="Math\RectangleF.cs" />
+    <Compile Include="Math\Size.cs" />
+    <Compile Include="Math\SizeF.cs" />
     <Compile Include="Math\Vector2.cs" />
     <Compile Include="Math\Vector3.cs" />
     <Compile Include="Math\Vector4.cs" />
@@ -780,7 +785,6 @@
     <Compile Include="Design\Vector4TypeConverter.cs">
       <Services>_XNADesignProvided</Services>
     </Compile>
-
     <None Include="..\ThirdParty\Dependencies\Config\Windows\MonoGame.Framework.dll.config">
       <Platforms>WindowsGL,Linux,MacOS</Platforms>
       <Link>MonoGame.Framework.dll.config</Link>
@@ -811,7 +815,6 @@
       <Link>libopenal.1.dylib</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Graphics\Vertices\VertexBufferBase.DirectX.cs" />

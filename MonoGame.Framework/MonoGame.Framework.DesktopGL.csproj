@@ -47,6 +47,11 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Math\IShapeF.cs" />
+    <Compile Include="Math\PointF.cs" />
+    <Compile Include="Math\RectangleF.cs" />
+    <Compile Include="Math\Size.cs" />
+    <Compile Include="Math\SizeF.cs" />
     <Compile Include="Media\OggStreamer.cs" />
     <Compile Include="ExceptionHelper.cs" />
     <Compile Include="Graphics\SpriteBatch.cs" />

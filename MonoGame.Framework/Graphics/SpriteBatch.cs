@@ -60,15 +60,13 @@ namespace Microsoft.Xna.Framework.Graphics
         /// If there is none available, the pool grows and initializes new items.
         /// </summary>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SpriteBatchItem GetBatchItem(Texture2D texture)
         {
             var item = _batcher.CreateBatchItem();
             item.Texture = texture;
             return item;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         public float GetSortKey(Texture2D texture, float depth)
         {
             // set SortKey based on SpriteSortMode.
@@ -149,7 +147,7 @@ namespace Microsoft.Xna.Framework.Graphics
             _batcher.DrawBatch(_sortMode, _effect);
         }
 
-        void Setup()
+        private void Setup()
         {
             var gd = GraphicsDevice;
             gd.BlendState = _blendState;
@@ -183,7 +181,7 @@ namespace Microsoft.Xna.Framework.Graphics
             _spritePass.Apply();
         }
 
-        void CheckValid(Texture2D texture)
+        void CheckArgs(Texture2D texture)
         {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
@@ -191,7 +189,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new InvalidOperationException("Draw was called, but Begin has not yet been called. Begin must be called successfully before you can call Draw.");
         }
 
-        void CheckValid(SpriteFont spriteFont, string text)
+        void CheckArgs(SpriteFont spriteFont, string text)
         {
             if (spriteFont == null)
                 throw new ArgumentNullException(nameof(spriteFont));
@@ -201,7 +199,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new InvalidOperationException("DrawString was called, but Begin has not yet been called. Begin must be called successfully before you can call DrawString.");
         }
 
-        void CheckValid(SpriteFont spriteFont, StringBuilder text)
+        void CheckArgs(SpriteFont spriteFont, StringBuilder text)
         {
             if (spriteFont == null)
                 throw new ArgumentNullException(nameof(spriteFont));
@@ -288,8 +286,8 @@ namespace Microsoft.Xna.Framework.Graphics
         public void Draw(
             Texture2D texture,
             Vector2? position = null,
-            Rectangle? destinationRectangle = null,
-            Rectangle? sourceRectangle = null,
+            RectangleF? destinationRectangle = null,
+            RectangleF? sourceRectangle = null,
             Vector2? origin = null,
             float rotation = 0f,
             Vector2? scale = null,
@@ -301,8 +299,10 @@ namespace Microsoft.Xna.Framework.Graphics
             // Assign default values to null parameters here, as they are not compile-time constants
             if (!color.HasValue)
                 color = Color.White;
+
             if (!origin.HasValue)
                 origin = Vector2.Zero;
+
             if (!scale.HasValue)
                 scale = Vector2.One;
 
@@ -319,7 +319,7 @@ namespace Microsoft.Xna.Framework.Graphics
             else
             {
                 // Call Draw() using drawRectangle
-                Draw(texture, (Rectangle)destinationRectangle, sourceRectangle, (Color)color, rotation, (Vector2)origin, effects, layerDepth);
+                Draw(texture, (RectangleF)destinationRectangle, sourceRectangle, (Color)color, rotation, (Vector2)origin, effects, layerDepth);
             }
         }
 
@@ -338,7 +338,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		public void Draw(
             Texture2D texture,
             Vector2 position,
-            Rectangle? sourceRectangle,
+            RectangleF? sourceRectangle,
             Color color,
             float rotation,
             Vector2 origin,
@@ -346,7 +346,7 @@ namespace Microsoft.Xna.Framework.Graphics
             SpriteEffects effects,
             float layerDepth)
         {
-            CheckValid(texture);
+            CheckArgs(texture);
 
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, layerDepth);
@@ -356,7 +356,7 @@ namespace Microsoft.Xna.Framework.Graphics
             float w, h;
             if (sourceRectangle.HasValue)
             {
-                var srcRect = sourceRectangle.GetValueOrDefault();
+                RectangleF srcRect = sourceRectangle.Value;
                 w = srcRect.Width * scale.X;
                 h = srcRect.Height * scale.Y;
                 _texCoordTL.X = srcRect.X * texture.TexelWidth;
@@ -430,7 +430,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		public void Draw(
             Texture2D texture,
             Vector2 position,
-            Rectangle? sourceRectangle,
+            RectangleF? sourceRectangle,
             Color color,
             float rotation,
             Vector2 origin,
@@ -438,8 +438,7 @@ namespace Microsoft.Xna.Framework.Graphics
             SpriteEffects effects,
             float layerDepth)
         {
-            var scaleVec = new Vector2(scale, scale);
-            Draw(texture, position, sourceRectangle, color, rotation, origin, scaleVec, effects, layerDepth);
+            Draw(texture, position, sourceRectangle, color, rotation, origin, new Vector2(scale, scale), effects, layerDepth);
         }
 
         /// <summary>
@@ -455,22 +454,22 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="layerDepth">A depth of the layer of this sprite.</param>
 		public void Draw(
             Texture2D texture,
-            Rectangle destinationRectangle,
-            Rectangle? sourceRectangle,
+            RectangleF destinationRectangle,
+            RectangleF? sourceRectangle,
             Color color,
             float rotation,
             Vector2 origin,
             SpriteEffects effects,
             float layerDepth)
         {
-            CheckValid(texture);
+            CheckArgs(texture);
 
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, layerDepth);
 
             if (sourceRectangle.HasValue)
             {
-                var srcRect = sourceRectangle.GetValueOrDefault();
+                RectangleF srcRect = sourceRectangle.Value;
                 _texCoordTL.X = srcRect.X * texture.TexelWidth;
                 _texCoordTL.Y = srcRect.Y * texture.TexelHeight;
                 _texCoordBR.X = (srcRect.X + srcRect.Width) * texture.TexelWidth;
@@ -544,9 +543,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public void FlushIfNeeded()
         {
             if (_sortMode == SpriteSortMode.Immediate)
-            {
                 _batcher.DrawBatch(_sortMode, _effect);
-            }
         }
 
         /// <summary>
@@ -556,9 +553,9 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="position">The drawing location on screen.</param>
         /// <param name="sourceRectangle">An optional region on the texture which will be rendered. If null - draws full texture.</param>
         /// <param name="color">A color mask.</param>
-		public void Draw(Texture2D texture, Vector2 position, Rectangle? sourceRectangle, Color color)
+		public void Draw(Texture2D texture, Vector2 position, RectangleF? sourceRectangle, Color color)
         {
-            CheckValid(texture);
+            CheckArgs(texture);
 
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, 0);
@@ -566,7 +563,7 @@ namespace Microsoft.Xna.Framework.Graphics
             Vector2 size;
             if (sourceRectangle.HasValue)
             {
-                var srcRect = sourceRectangle.GetValueOrDefault();
+                RectangleF srcRect = sourceRectangle.Value;
                 size = new Vector2(srcRect.Width, srcRect.Height);
                 _texCoordTL.X = srcRect.X * texture.TexelWidth;
                 _texCoordTL.Y = srcRect.Y * texture.TexelHeight;
@@ -599,16 +596,16 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="destinationRectangle">The drawing bounds on screen.</param>
         /// <param name="sourceRectangle">An optional region on the texture which will be rendered. If null - draws full texture.</param>
         /// <param name="color">A color mask.</param>
-		public void Draw(Texture2D texture, Rectangle destinationRectangle, Rectangle? sourceRectangle, Color color)
+		public void Draw(Texture2D texture, RectangleF destinationRectangle, RectangleF? sourceRectangle, Color color)
         {
-            CheckValid(texture);
+            CheckArgs(texture);
 
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, 0);
 
             if (sourceRectangle.HasValue)
             {
-                var srcRect = sourceRectangle.GetValueOrDefault();
+                RectangleF srcRect = sourceRectangle.Value;
                 _texCoordTL.X = srcRect.X * texture.TexelWidth;
                 _texCoordTL.Y = srcRect.Y * texture.TexelHeight;
                 _texCoordBR.X = (srcRect.X + srcRect.Width) * texture.TexelWidth;
@@ -640,7 +637,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="color">A color mask.</param>
 		public void Draw(Texture2D texture, Vector2 position, Color color)
         {
-            CheckValid(texture);
+            CheckArgs(texture);
 
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, 0);
@@ -663,9 +660,9 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="texture">A texture.</param>
         /// <param name="destinationRectangle">The drawing bounds on screen.</param>
         /// <param name="color">A color mask.</param>
-        public void Draw(Texture2D texture, Rectangle destinationRectangle, Color color)
+        public void Draw(Texture2D texture, RectangleF destinationRectangle, Color color)
         {
-            CheckValid(texture);
+            CheckArgs(texture);
 
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, 0);
@@ -691,7 +688,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="color">A color mask.</param>
 		public unsafe void DrawString(SpriteFont spriteFont, string text, Vector2 position, Color color)
         {
-            CheckValid(spriteFont, text);
+            CheckArgs(spriteFont, text);
 
             float sortKey = GetSortKey(spriteFont.Texture, 0);
 
@@ -797,7 +794,7 @@ namespace Microsoft.Xna.Framework.Graphics
             SpriteFont spriteFont, string text, Vector2 position, Color color,
             float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
         {
-            CheckValid(spriteFont, text);
+            CheckArgs(spriteFont, text);
 
             float sortKey = GetSortKey(spriteFont.Texture, layerDepth);
 
@@ -958,7 +955,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="color">A color mask.</param>
 		public unsafe void DrawString(SpriteFont spriteFont, StringBuilder text, Vector2 position, Color color)
         {
-            CheckValid(spriteFont, text);
+            CheckArgs(spriteFont, text);
 
             float sortKey = GetSortKey(spriteFont.Texture, 0);
 
@@ -1063,7 +1060,7 @@ namespace Microsoft.Xna.Framework.Graphics
             SpriteFont spriteFont, StringBuilder text, Vector2 position, Color color,
             float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
         {
-            CheckValid(spriteFont, text);
+            CheckArgs(spriteFont, text);
 
             float sortKey = GetSortKey(spriteFont.Texture, 0);
 

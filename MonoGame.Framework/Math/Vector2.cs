@@ -229,7 +229,7 @@ namespace Microsoft.Xna.Framework
         #endregion
 
         #region Public Methods
-
+        
         /// <summary>
         /// Gets a <see cref="Vector3"/> representation for this
         /// object with <see cref="Vector3.Z"/> axis set to 0.
@@ -238,6 +238,42 @@ namespace Microsoft.Xna.Framework
         public Vector3 ToVector3()
         {
             return new Vector3(X, Y, 0);
+        }
+
+        /// <summary>
+        ///     Calculates the <see cref="Vector2" /> that contains the minimal coordinate values from two <see cref="Vector2" />
+        ///     structures.
+        ///     structures.
+        /// </summary>
+        /// <param name="first">The first point.</param>
+        /// <param name="second">The second point.</param>
+        /// <returns>
+        ///     The the <see cref="Vector2" /> that contains the minimal coordinate values from two <see cref="Vector2" />
+        ///     structures.
+        /// </returns>
+        public static Vector2 Minimum(Vector2 first, Vector2 second)
+        {
+            return new Vector2(
+                first.X < second.X ? first.X : second.X,
+                first.Y < second.Y ? first.Y : second.Y);
+        }
+
+        /// <summary>
+        ///     Calculates the <see cref="Vector2" /> that contains the maximal coordinate values from two <see cref="Vector2" />
+        ///     structures.
+        ///     structures.
+        /// </summary>
+        /// <param name="first">The first point.</param>
+        /// <param name="second">The second point.</param>
+        /// <returns>
+        ///     The the <see cref="Vector2" /> that contains the maximal coordinate values from two <see cref="Vector2" />
+        ///     structures.
+        /// </returns>
+        public static Vector2 Maximum(Vector2 first, Vector2 second)
+        {
+            return new Vector2(
+                first.X > second.X ? first.X : second.X,
+                first.Y > second.Y ? first.Y : second.Y);
         }
 
         /// <summary>

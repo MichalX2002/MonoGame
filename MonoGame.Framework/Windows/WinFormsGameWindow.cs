@@ -18,6 +18,7 @@ using ButtonState = Microsoft.Xna.Framework.Input.ButtonState;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
 using Point = System.Drawing.Point;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
+using Size = System.Drawing.Size;
 using XnaPoint = Microsoft.Xna.Framework.Point;
 
 namespace MonoGame.Framework

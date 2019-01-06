@@ -15,52 +15,39 @@ namespace Microsoft.Xna.Framework
     [DebuggerDisplay("{DebugDisplayString,nq}")]
     public struct Rectangle : IEquatable<Rectangle>
     {
-
-        #region Private Fields
-
-        #endregion
-
-        #region Public Fields
-
         /// <summary>
         /// The x coordinate of the top-left corner of this <see cref="Rectangle"/>.
         /// </summary>
-        [DataMember]
-        public int X;
+        [DataMember] public int X;
 
         /// <summary>
         /// The y coordinate of the top-left corner of this <see cref="Rectangle"/>.
         /// </summary>
-        [DataMember]
-        public int Y;
+        [DataMember] public int Y;
 
         /// <summary>
         /// The width of this <see cref="Rectangle"/>.
         /// </summary>
-        [DataMember]
-        public int Width;
+        [DataMember] public int Width;
 
         /// <summary>
         /// The height of this <see cref="Rectangle"/>.
         /// </summary>
-        [DataMember]
-        public int Height;
-
-        #endregion
+        [DataMember] public int Height;
 
         #region Public Properties
 
         /// <summary>
         /// Returns a <see cref="Rectangle"/> with X=0, Y=0, Width=0, Height=0.
         /// </summary>
-        public static Rectangle Empty { get; } = new Rectangle();
+        public static readonly Rectangle Empty = new Rectangle();
 
         /// <summary>
         /// Returns the x coordinate of the left edge of this <see cref="Rectangle"/>.
         /// </summary>
         public int Left
         {
-            get { return this.X; }
+            get { return X; }
         }
 
         /// <summary>
@@ -68,7 +55,7 @@ namespace Microsoft.Xna.Framework
         /// </summary>
         public int Right
         {
-            get { return (this.X + this.Width); }
+            get { return (X + Width); }
         }
 
         /// <summary>
@@ -76,7 +63,7 @@ namespace Microsoft.Xna.Framework
         /// </summary>
         public int Top
         {
-            get { return this.Y; }
+            get { return Y; }
         }
 
         /// <summary>
@@ -84,30 +71,21 @@ namespace Microsoft.Xna.Framework
         /// </summary>
         public int Bottom
         {
-            get { return (this.Y + this.Height); }
+            get { return (Y + Height); }
         }
 
         /// <summary>
         /// Whether or not this <see cref="Rectangle"/> has a <see cref="Width"/> and
         /// <see cref="Height"/> of 0, and a <see cref="Location"/> of (0, 0).
         /// </summary>
-        public bool IsEmpty
-        {
-            get
-            {
-                return ((((this.Width == 0) && (this.Height == 0)) && (this.X == 0)) && (this.Y == 0));
-            }
-        }
+        public bool IsEmpty => ((((Width == 0) && (Height == 0)) && (X == 0)) && (Y == 0));
 
         /// <summary>
         /// The top-left coordinates of this <see cref="Rectangle"/>.
         /// </summary>
         public Point Location
         {
-            get
-            {
-                return new Point(this.X, this.Y);
-            }
+            get => new Point(X, Y);
             set
             {
                 X = value.X;
@@ -118,16 +96,13 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// The width-height coordinates of this <see cref="Rectangle"/>.
         /// </summary>
-        public Point Size
+        public Size Size
         {
-            get
-            {
-                return new Point(this.Width,this.Height);
-            }
+            get => new Size(Width, Height);
             set
             {
-                Width = value.X;
-                Height = value.Y;
+                Width = value.Width;
+                Height = value.Height;
             }
         }
 
@@ -142,7 +117,7 @@ namespace Microsoft.Xna.Framework
         {
             get
             {
-                return new Point(this.X + (this.Width / 2), this.Y + (this.Height / 2));
+                return new Point(X + (Width / 2), Y + (Height / 2));
             }
         }
 
@@ -152,15 +127,12 @@ namespace Microsoft.Xna.Framework
 
         internal string DebugDisplayString
         {
-            get
-            {
-                return string.Concat(
-                    this.X, "  ",
-                    this.Y, "  ",
-                    this.Width, "  ",
-                    this.Height
+            get => string.Concat(
+                    X, "  ",
+                    Y, "  ",
+                    Width, "  ",
+                    Height
                     );
-            }
         }
 
         #endregion
@@ -177,10 +149,10 @@ namespace Microsoft.Xna.Framework
         /// <param name="height">The height of the created <see cref="Rectangle"/>.</param>
         public Rectangle(int x, int y, int width, int height)
         {
-            this.X = x;
-            this.Y = y;
-            this.Width = width;
-            this.Height = height;
+            X = x;
+            Y = y;
+            Width = width;
+            Height = height;
         }
 
         /// <summary>
@@ -189,12 +161,12 @@ namespace Microsoft.Xna.Framework
         /// </summary>
         /// <param name="location">The x and y coordinates of the top-left corner of the created <see cref="Rectangle"/>.</param>
         /// <param name="size">The width and height of the created <see cref="Rectangle"/>.</param>
-        public Rectangle(Point location,Point size)
+        public Rectangle(Point location, Size size)
         {
-            this.X = location.X;
-            this.Y = location.Y;
-            this.Width = size.X;
-            this.Height = size.Y;
+            X = location.X;
+            Y = location.Y;
+            Width = size.Width;
+            Height = size.Height;
         }
 
         #endregion
@@ -253,7 +225,7 @@ namespace Microsoft.Xna.Framework
         /// <returns><c>true</c> if the provided coordinates lie inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
 		public bool Contains(int x, int y)
         {
-            return ((((this.X <= x) && (x < (this.X + this.Width))) && (this.Y <= y)) && (y < (this.Y + this.Height)));
+            return ((((X <= x) && (x < (X + Width))) && (Y <= y)) && (y < (Y + Height)));
         }
 
         /// <summary>
@@ -264,7 +236,7 @@ namespace Microsoft.Xna.Framework
         /// <returns><c>true</c> if the provided coordinates lie inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
         public bool Contains(float x, float y)
         {
-            return ((((this.X <= x) && (x < (this.X + this.Width))) && (this.Y <= y)) && (y < (this.Y + this.Height)));
+            return ((((X <= x) && (x < (X + Width))) && (Y <= y)) && (y < (Y + Height)));
         }
 		
         /// <summary>
@@ -274,7 +246,7 @@ namespace Microsoft.Xna.Framework
         /// <returns><c>true</c> if the provided <see cref="Point"/> lies inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
         public bool Contains(Point value)
         {
-            return ((((this.X <= value.X) && (value.X < (this.X + this.Width))) && (this.Y <= value.Y)) && (value.Y < (this.Y + this.Height)));
+            return ((((X <= value.X) && (value.X < (X + Width))) && (Y <= value.Y)) && (value.Y < (Y + Height)));
         }
 
         /// <summary>
@@ -284,7 +256,7 @@ namespace Microsoft.Xna.Framework
         /// <param name="result"><c>true</c> if the provided <see cref="Point"/> lies inside this <see cref="Rectangle"/>; <c>false</c> otherwise. As an output parameter.</param>
         public void Contains(ref Point value, out bool result)
         {
-            result = ((((this.X <= value.X) && (value.X < (this.X + this.Width))) && (this.Y <= value.Y)) && (value.Y < (this.Y + this.Height)));
+            result = ((((X <= value.X) && (value.X < (X + Width))) && (Y <= value.Y)) && (value.Y < (Y + Height)));
         }
 
         /// <summary>
@@ -294,7 +266,7 @@ namespace Microsoft.Xna.Framework
         /// <returns><c>true</c> if the provided <see cref="Vector2"/> lies inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
         public bool Contains(Vector2 value)
         {
-            return ((((this.X <= value.X) && (value.X < (this.X + this.Width))) && (this.Y <= value.Y)) && (value.Y < (this.Y + this.Height)));
+            return ((((X <= value.X) && (value.X < (X + Width))) && (Y <= value.Y)) && (value.Y < (Y + Height)));
         }
 
         /// <summary>
@@ -304,7 +276,7 @@ namespace Microsoft.Xna.Framework
         /// <returns><c>true</c> if the provided <see cref="Vector2"/> lies inside this <see cref="Rectangle"/>; <c>false</c> otherwise. As an output parameter.</returns>
         public bool ContainsRef(ref Vector2 value)
         {
-            return ((((this.X <= value.X) && (value.X < (this.X + this.Width))) && (this.Y <= value.Y)) && (value.Y < (this.Y + this.Height)));
+            return ((((X <= value.X) && (value.X < (X + Width))) && (Y <= value.Y)) && (value.Y < (Y + Height)));
         }
 
         /// <summary>
@@ -314,7 +286,7 @@ namespace Microsoft.Xna.Framework
         /// <param name="result"><c>true</c> if the provided <see cref="Vector2"/> lies inside this <see cref="Rectangle"/>; <c>false</c> otherwise. As an output parameter.</param>
         public void Contains(ref Vector2 value, out bool result)
         {
-            result = ((((this.X <= value.X) && (value.X < (this.X + this.Width))) && (this.Y <= value.Y)) && (value.Y < (this.Y + this.Height)));
+            result = ((((X <= value.X) && (value.X < (X + Width))) && (Y <= value.Y)) && (value.Y < (Y + Height)));
         }
 
         /// <summary>
@@ -324,7 +296,7 @@ namespace Microsoft.Xna.Framework
         /// <returns><c>true</c> if the provided <see cref="Rectangle"/>'s bounds lie entirely inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
         public bool Contains(Rectangle value)
         {
-            return ((((this.X <= value.X) && ((value.X + value.Width) <= (this.X + this.Width))) && (this.Y <= value.Y)) && ((value.Y + value.Height) <= (this.Y + this.Height)));
+            return ((((X <= value.X) && ((value.X + value.Width) <= (X + Width))) && (Y <= value.Y)) && ((value.Y + value.Height) <= (Y + Height)));
         }
 
         /// <summary>
@@ -334,7 +306,7 @@ namespace Microsoft.Xna.Framework
         /// <param name="result"><c>true</c> if the provided <see cref="Rectangle"/>'s bounds lie entirely inside this <see cref="Rectangle"/>; <c>false</c> otherwise. As an output parameter.</param>
         public void Contains(ref Rectangle value, out bool result)
         {
-            result = ((((this.X <= value.X) && ((value.X + value.Width) <= (this.X + this.Width))) && (this.Y <= value.Y)) && ((value.Y + value.Height) <= (this.Y + this.Height)));
+            result = ((((X <= value.X) && ((value.X + value.Width) <= (X + Width))) && (Y <= value.Y)) && ((value.Y + value.Height) <= (Y + Height)));
         }
 
         /// <summary>
@@ -344,7 +316,7 @@ namespace Microsoft.Xna.Framework
         /// <returns><c>true</c> if the provided <see cref="Rectangle"/>'s bounds lie entirely inside this <see cref="Rectangle"/>; <c>false</c> otherwise. As an output parameter.</returns>
         public bool ContainsRef(ref Rectangle value)
         {
-            return ((((this.X <= value.X) && ((value.X + value.Width) <= (this.X + this.Width))) && (this.Y <= value.Y)) && ((value.Y + value.Height) <= (this.Y + this.Height)));
+            return ((((X <= value.X) && ((value.X + value.Width) <= (X + Width))) && (Y <= value.Y)) && ((value.Y + value.Height) <= (Y + Height)));
         }
 
         /// <summary>
@@ -565,6 +537,11 @@ namespace Microsoft.Xna.Framework
             y = Y;
             width = Width;
             height = Height;
+        }
+
+        public RectangleF ToRectangleF()
+        {
+            return new RectangleF(X, Y, Width, Height);
         }
 
         #endregion

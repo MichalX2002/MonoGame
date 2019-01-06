@@ -151,8 +151,17 @@
     <Compile Include="..\..\MonoGame.Framework.Content.Pipeline\LoadedTypeCollection.cs">
       <Link>MonoGame.Framework.Content.Pipeline\LoadedTypeCollection.c</Link>
     </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\IShapeF.cs">
+      <Link>MonoGame.Framework\Math\IShapeF.cs</Link>
+    </Compile>
     <Compile Include="..\..\MonoGame.Framework\Math\Vector2.cs">
       <Link>MonoGame.Framework\Math\Vector2.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\Size.cs">
+      <Link>MonoGame.Framework\Math\Size.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\SizeF.cs">
+      <Link>MonoGame.Framework\Math\SizeF.cs</Link>
     </Compile>
     <Compile Include="..\..\MonoGame.Framework\Math\Vector3.cs">
       <Link>MonoGame.Framework\Math\Vector3.cs</Link>
@@ -163,8 +172,14 @@
     <Compile Include="..\..\MonoGame.Framework\Math\Rectangle.cs">
       <Link>MonoGame.Framework\Math\Rectangle.cs</Link>
     </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\RectangleF.cs">
+      <Link>MonoGame.Framework\Math\RectangleF.cs</Link>
+    </Compile>
     <Compile Include="..\..\MonoGame.Framework\Math\Point.cs">
       <Link>MonoGame.Framework\Math\Point.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Math\PointF.cs">
+      <Link>MonoGame.Framework\Math\PointF.cs</Link>
     </Compile>
     <Compile Include="..\..\MonoGame.Framework\Math\Quaternion.cs">
       <Link>MonoGame.Framework\Math\Quaternion.cs</Link>
