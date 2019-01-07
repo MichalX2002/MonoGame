@@ -388,7 +388,7 @@ namespace MonoGame.Utilities
         /// </summary>
         virtual public FlushType FlushMode
         {
-            get { return (this._baseStream._flushMode); }
+            get => (this._baseStream._flushMode);
             set
             {
                 if (_disposed) throw new ObjectDisposedException(nameof(ZlibStream));
@@ -415,10 +415,7 @@ namespace MonoGame.Utilities
         /// </remarks>
         public int BufferSize
         {
-            get
-            {
-                return this._baseStream._bufferSize;
-            }
+            get => this._baseStream._bufferSize;
             set
             {
                 if (_disposed) throw new ObjectDisposedException(nameof(ZlibStream));
@@ -431,16 +428,10 @@ namespace MonoGame.Utilities
         }
 
         /// <summary> Returns the total number of bytes input so far.</summary>
-        virtual public long TotalIn
-        {
-            get { return this._baseStream._z.TotalBytesIn; }
-        }
+        virtual public long TotalIn => this._baseStream._z.TotalBytesIn;
 
         /// <summary> Returns the total number of bytes output so far.</summary>
-        virtual public long TotalOut
-        {
-            get { return this._baseStream._z.TotalBytesOut; }
-        }
+        virtual public long TotalOut => this._baseStream._z.TotalBytesOut;
 
         #endregion
 
@@ -508,10 +499,7 @@ namespace MonoGame.Utilities
         /// <remarks>
         /// Always returns false.
         /// </remarks>
-        public override bool CanSeek
-        {
-            get { return false; }
-        }
+        public override bool CanSeek => false;
 
         /// <summary>
         /// Indicates whether the stream can be written.
@@ -540,10 +528,7 @@ namespace MonoGame.Utilities
         /// <summary>
         /// Reading this property always throws a <see cref="NotSupportedException"/>.
         /// </summary>
-        public override long Length
-        {
-            get { throw new NotSupportedException(); }
-        }
+        public override long Length => throw new NotSupportedException();
 
         /// <summary>
         ///   The position of the stream pointer.
@@ -567,7 +552,7 @@ namespace MonoGame.Utilities
                 return 0;
             }
 
-            set { throw new NotSupportedException(); }
+            set => throw new NotSupportedException();
         }
 
         /// <summary>

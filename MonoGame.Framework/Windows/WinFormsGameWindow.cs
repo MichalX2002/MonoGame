@@ -130,28 +130,6 @@ namespace MonoGame.Framework
             }
         }
 
-        public override bool IsMaximized
-        {
-            get => Form.WindowState == FormWindowState.Maximized;
-            set
-            {
-                if (value)
-                {
-                    if (Form.WindowState != FormWindowState.Maximized)
-                    {
-                        _lastWindowState = Form.WindowState;
-                        Form.WindowState = FormWindowState.Maximized;
-                    }
-                }
-                else
-                {
-                    if (_lastWindowState == FormWindowState.Maximized)
-                        _lastWindowState = FormWindowState.Normal;
-                    Form.WindowState = _lastWindowState;
-                }
-            }
-        }
-
         public bool IsFullScreen { get; private set; }
         public bool HardwareModeSwitch { get; private set; }
 
