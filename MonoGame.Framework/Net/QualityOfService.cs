@@ -47,47 +47,17 @@ namespace Microsoft.Xna.Framework.Net
 {
 	public class QualityOfService
 	{
-		#region Properties
-		public TimeSpan AverageRoundtripTime 
-		{ 
-			get
-			{ 
-				return TimeSpan.MinValue;
-			}
-		}
-		
-		public int BytesPerSecondDownstream 
-		{ 
-			get
-			{ 
-				return 0;
-			}
-		}
-		
-		public int BytesPerSecondUpstream  
-		{ 
-			get
-			{ 
-				return 0;
-			}
-		}
-		
-		public bool IsAvailable 
-		{ 
-			get
-			{ 
-				return false;
-			}
-		}
-		
-		public TimeSpan MinimumRoundtripTime 
-		{ 
-			get
-			{ 
-				return TimeSpan.MinValue;
-			}
-		}
-		#endregion Properties
-		
-	}
+        #region Properties
+        public TimeSpan AverageRoundtripTime => TimeSpan.MinValue;
+
+        public int BytesPerSecondDownstream => 0;
+
+        public int BytesPerSecondUpstream => 0;
+
+        public bool IsAvailable => false;
+
+        public TimeSpan MinimumRoundtripTime => TimeSpan.MinValue;
+        #endregion Properties
+
+    }
 }

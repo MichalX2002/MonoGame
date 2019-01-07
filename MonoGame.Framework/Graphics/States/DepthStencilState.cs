@@ -29,7 +29,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public bool DepthBufferEnable
         {
-            get { return _depthBufferEnable; }
+            get => _depthBufferEnable;
             set
             {
                 ThrowIfBound();
@@ -39,7 +39,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public bool DepthBufferWriteEnable
         {
-            get { return _depthBufferWriteEnable; }
+            get => _depthBufferWriteEnable;
             set
             {
                 ThrowIfBound();
@@ -49,7 +49,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public StencilOperation CounterClockwiseStencilDepthBufferFail
         {
-            get { return _counterClockwiseStencilDepthBufferFail; }
+            get => _counterClockwiseStencilDepthBufferFail;
             set
             {
                 ThrowIfBound();
@@ -59,7 +59,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public StencilOperation CounterClockwiseStencilFail
         {
-            get { return _counterClockwiseStencilFail; }
+            get => _counterClockwiseStencilFail;
             set
             {
                 ThrowIfBound();
@@ -69,7 +69,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public CompareFunction CounterClockwiseStencilFunction
         {
-            get { return _counterClockwiseStencilFunction; }
+            get => _counterClockwiseStencilFunction;
             set
             {
                 ThrowIfBound();
@@ -79,7 +79,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public StencilOperation CounterClockwiseStencilPass
         {
-            get { return _counterClockwiseStencilPass; }
+            get => _counterClockwiseStencilPass;
             set
             {
                 ThrowIfBound();
@@ -89,7 +89,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public CompareFunction DepthBufferFunction
         {
-            get { return _depthBufferFunction; }
+            get => _depthBufferFunction;
             set
             {
                 ThrowIfBound();
@@ -99,7 +99,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public int ReferenceStencil
         {
-            get { return _referenceStencil; }
+            get => _referenceStencil;
             set
             {
                 ThrowIfBound();
@@ -109,7 +109,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public StencilOperation StencilDepthBufferFail
         {
-            get { return _stencilDepthBufferFail; }
+            get => _stencilDepthBufferFail;
             set
             {
                 ThrowIfBound();
@@ -119,7 +119,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public bool StencilEnable
         {
-            get { return _stencilEnable; }
+            get => _stencilEnable;
             set
             {
                 ThrowIfBound();
@@ -129,7 +129,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public StencilOperation StencilFail
         {
-            get { return _stencilFail; }
+            get => _stencilFail;
             set
             {
                 ThrowIfBound();
@@ -139,7 +139,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public CompareFunction StencilFunction
         {
-            get { return _stencilFunction; }
+            get => _stencilFunction;
             set
             {
                 ThrowIfBound();
@@ -149,7 +149,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public int StencilMask
         {
-            get { return _stencilMask; }
+            get => _stencilMask;
             set
             {
                 ThrowIfBound();
@@ -159,7 +159,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public StencilOperation StencilPass
         {
-            get { return _stencilPass; }
+            get => _stencilPass;
             set
             {
                 ThrowIfBound();
@@ -169,7 +169,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public int StencilWriteMask
         {
-            get { return _stencilWriteMask; }
+            get => _stencilWriteMask;
             set
             {
                 ThrowIfBound();
@@ -179,7 +179,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public bool TwoSidedStencilMode
         {
-            get { return _twoSidedStencilMode; }
+            get => _twoSidedStencilMode;
             set
             {
                 ThrowIfBound();

@@ -56,37 +56,28 @@ namespace Microsoft.Xna.Framework.Net
         public int CurrentGamerCount { get; internal set; }
 
         string _hostGamertag;
-		public string HostGamertag 
-		{ 
-			get
-			{
-				return _hostGamertag;
-			}
-			
-			internal set { _hostGamertag = value; }
-		}
+		public string HostGamertag
+        {
+            get => _hostGamertag;
+
+            internal set => _hostGamertag = value;
+        }
         public int OpenPrivateGamerSlots { get; internal set; }
 
         int _openPublicGamerSlots; 
-		public int OpenPublicGamerSlots 
-		{ 
-			get
-			{
-				return _openPublicGamerSlots;
-			}
-			internal set { _openPublicGamerSlots = value; }			
-		}
+		public int OpenPublicGamerSlots
+        {
+            get => _openPublicGamerSlots;
+            internal set => _openPublicGamerSlots = value;
+        }
         public QualityOfService QualityOfService { get; internal set; }
 
         NetworkSessionProperties _sessionProperties;
-		public NetworkSessionProperties SessionProperties 
-		{ 
-			get
-			{
-				return _sessionProperties;
-			}
-			internal set { _sessionProperties = value; }			
-		}
+		public NetworkSessionProperties SessionProperties
+        {
+            get => _sessionProperties;
+            internal set => _sessionProperties = value;
+        }
         internal IPEndPoint EndPoint { get; set; }
 
         internal IPEndPoint InternalEndpont { get; set; }

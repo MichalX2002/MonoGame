@@ -34,13 +34,7 @@ namespace Microsoft.Xna.Framework.Media
         /// <summary>
         /// Gets the duration of the Album.
         /// </summary>
-        public TimeSpan Duration
-        {
-            get
-            {
-                return TimeSpan.Zero; // Not implemented
-            }
-        }
+        public TimeSpan Duration => TimeSpan.Zero; // Not implemented
 
         /// <summary>
         /// Gets the Genre of the Album.
@@ -50,10 +44,7 @@ namespace Microsoft.Xna.Framework.Media
         /// <summary>
         /// Gets a value indicating whether the Album has associated album art.
         /// </summary>
-        public bool HasArt
-        {
-            get
-            {
+        public bool HasArt =>
 #if WINDOWS_UAP
                 return this.thumbnail != null;
 #elif IOS && !TVOS
@@ -62,21 +53,14 @@ namespace Microsoft.Xna.Framework.Media
 #elif ANDROID
                 return this.thumbnail != null;
 #else
-                return false;
+                false;
 #endif
-            }
-        }
+
 
         /// <summary>
         /// Gets a value indicating whether the object is disposed.
         /// </summary>
-        public bool IsDisposed
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool IsDisposed => false;
 
         /// <summary>
         /// Gets the name of the Album.
@@ -86,15 +70,9 @@ namespace Microsoft.Xna.Framework.Media
         /// <summary>
         /// Gets a SongCollection that contains the songs on the album.
         /// </summary>
-        public SongCollection Songs
-        {
-            get
-            {
-                return this.songCollection;
-            }
-        }
+        public SongCollection Songs => this.songCollection;
 
-       private Album(SongCollection songCollection, string name, Artist artist, Genre genre)
+        private Album(SongCollection songCollection, string name, Artist artist, Genre genre)
         {
             this.songCollection = songCollection;
             this.Name = name;

@@ -34,10 +34,7 @@ namespace Microsoft.Xna.Framework.Content
 
                 return _collectionItemName;
             }
-            set
-            {
-                _collectionItemName = value;
-            }
+            set => _collectionItemName = value;
         }
 
         public string ElementName { get; set; }
@@ -47,13 +44,7 @@ namespace Microsoft.Xna.Framework.Content
         /// <summary>
         /// Returns true if the default CollectionItemName value was overridden.
         /// </summary>
-        public bool HasCollectionItemName
-        {
-            get
-            {
-                return !string.IsNullOrEmpty(_collectionItemName);
-            }
-        }
+        public bool HasCollectionItemName => !string.IsNullOrEmpty(_collectionItemName);
 
         public bool Optional { get; set; }
 

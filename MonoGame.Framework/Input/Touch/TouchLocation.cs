@@ -72,22 +72,13 @@ namespace Microsoft.Xna.Framework.Input.Touch
 
         internal TimeSpan PressTimestamp { get; private set; }
 
-        internal TimeSpan Timestamp
-        {
-            get { return _timestamp; }
-        }
+        internal TimeSpan Timestamp => _timestamp;
 
         internal Vector2 Velocity { get; private set; }
 
         public int Id { get; private set; }
 
-        public Vector2 Position 
-		{ 
-			get
-	        {
-	            return _position;
-	        }
-		}
+        public Vector2 Position => _position;
 
         public float Pressure { get; private set; }
 

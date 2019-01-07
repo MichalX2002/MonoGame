@@ -62,13 +62,10 @@ namespace Microsoft.Xna.Framework
 
         internal string DebugDisplayString
         {
-            get
-            {
-                return string.Concat(
+            get => string.Concat(
                     this.X.ToString(), "  ",
                     this.Y.ToString()
                 );
-            }
         }
 
         #endregion

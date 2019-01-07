@@ -49,13 +49,13 @@ namespace Microsoft.Xna.Framework.Graphics
                 disposed = false;
 			}
 
-	        // Summary:
-	        //     Gets the current element in the ModelEffectCollection.
-	        public Effect Current { get { return enumerator.Current; } }
+            // Summary:
+            //     Gets the current element in the ModelEffectCollection.
+            public Effect Current => enumerator.Current;
 
-	        // Summary:
-	        //     Immediately releases the unmanaged resources used by this object.
-	        public void Dispose()
+            // Summary:
+            //     Immediately releases the unmanaged resources used by this object.
+            public void Dispose()
             {
                 if (!disposed)
                 {
@@ -68,14 +68,11 @@ namespace Microsoft.Xna.Framework.Graphics
 	        //     Advances the enumerator to the next element of the ModelEffectCollection.
 	        public bool MoveNext() { return enumerator.MoveNext(); }
 
-	        #region IEnumerator Members
+            #region IEnumerator Members
 
-	        object IEnumerator.Current
-	        {
-	            get { return Current; }
-	        }
+            object IEnumerator.Current => Current;
 
-	        void IEnumerator.Reset()
+            void IEnumerator.Reset()
 	        {
 				IEnumerator resetEnumerator = enumerator;
 				resetEnumerator.Reset ();

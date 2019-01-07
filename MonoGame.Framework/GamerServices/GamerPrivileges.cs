@@ -56,56 +56,20 @@ namespace Microsoft.Xna.Framework.GamerServices
 	
     public class GamerPrivileges
     {
-		#region Properties
-		public GamerPrivilegeSetting AllowCommunication 
-		{ 
-			get
-			{
-				return GamerPrivilegeSetting.Everyone;
-			}
-		}
-		
-		public bool AllowOnlineSessions 
-		{ 
-			get
-			{
-				return true;
-			}
-		}
-		
-		public GamerPrivilegeSetting AllowProfileViewing 
-		{ 
-			get
-			{
-				return GamerPrivilegeSetting.Blocked;
-			}
-		}
-		
-		public bool AllowPurchaseContent
-		{ 
-			get
-			{
-				return false;
-			}
-		}
-		
-		public bool AllowTradeContent 
-		{ 
-			get
-			{
-				return false;
-			} 
-		}
-		
-		public GamerPrivilegeSetting AllowUserCreatedContent 
-		{ 
-			get
-			{
-				return GamerPrivilegeSetting.Blocked;
-			} 
-		}
-		#endregion
-		
-        
+        #region Properties
+        public GamerPrivilegeSetting AllowCommunication => GamerPrivilegeSetting.Everyone;
+
+        public bool AllowOnlineSessions => true;
+
+        public GamerPrivilegeSetting AllowProfileViewing => GamerPrivilegeSetting.Blocked;
+
+        public bool AllowPurchaseContent => false;
+
+        public bool AllowTradeContent => false;
+
+        public GamerPrivilegeSetting AllowUserCreatedContent => GamerPrivilegeSetting.Blocked;
+        #endregion
+
+
     }
 }

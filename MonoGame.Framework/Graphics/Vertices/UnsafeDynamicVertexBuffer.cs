@@ -4,7 +4,7 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public class UnsafeDynamicVertexBuffer : UnsafeVertexBuffer
     {
-        public bool IsContentLost { get { return false; } }
+        public bool IsContentLost => false;
 
         public UnsafeDynamicVertexBuffer(
             GraphicsDevice graphicsDevice, VertexDeclaration vertexDeclaration, BufferUsage bufferUsage) :

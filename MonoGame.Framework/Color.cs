@@ -320,10 +320,7 @@ namespace Microsoft.Xna.Framework
                     return (byte)(this.PackedValue >> 16);
                 }
             }
-            set
-            {
-                this.PackedValue = (this.PackedValue & 0xff00ffff) | ((uint)value << 16);
-            }
+            set => this.PackedValue = (this.PackedValue & 0xff00ffff) | ((uint)value << 16);
         }
 
         /// <summary>
@@ -339,10 +336,7 @@ namespace Microsoft.Xna.Framework
                     return (byte)(this.PackedValue >> 8);
                 }
             }
-            set
-            {
-                this.PackedValue = (this.PackedValue & 0xffff00ff) | ((uint)value << 8);
-            }
+            set => this.PackedValue = (this.PackedValue & 0xffff00ff) | ((uint)value << 8);
         }
 
         /// <summary>
@@ -358,10 +352,7 @@ namespace Microsoft.Xna.Framework
                     return (byte)this.PackedValue;
                 }
             }
-            set
-            {
-                this.PackedValue = (this.PackedValue & 0xffffff00) | value;
-            }
+            set => this.PackedValue = (this.PackedValue & 0xffffff00) | value;
         }
 
         /// <summary>
@@ -377,10 +368,7 @@ namespace Microsoft.Xna.Framework
                     return (byte)(this.PackedValue >> 24);
                 }
             }
-            set
-            {
-                this.PackedValue = (this.PackedValue & 0x00ffffff) | ((uint)value << 24);
-            }
+            set => this.PackedValue = (this.PackedValue & 0x00ffffff) | ((uint)value << 24);
         }
 
         /// <summary>
@@ -1206,15 +1194,12 @@ namespace Microsoft.Xna.Framework
         
         internal string DebugDisplayString
         {
-            get
-            {
-                return string.Concat(
+            get => string.Concat(
                     this.R.ToString(), "  ",
                     this.G.ToString(), "  ",
                     this.B.ToString(), "  ",
                     this.A.ToString()
                 );
-            }
         }
 
 

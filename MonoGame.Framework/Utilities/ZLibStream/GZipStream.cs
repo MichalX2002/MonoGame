@@ -107,10 +107,7 @@ namespace MonoGame.Utilities
         /// </remarks>
         internal String Comment
         {
-            get
-            {
-                return _Comment;
-            }
+            get => _Comment;
             set
             {
                 if (_disposed)
@@ -144,7 +141,7 @@ namespace MonoGame.Utilities
         /// </remarks>
         internal String FileName
         {
-            get { return _FileName; }
+            get => _FileName;
             set
             {
                 if (_disposed)
@@ -511,7 +508,7 @@ namespace MonoGame.Utilities
         /// </summary>
         virtual internal FlushType FlushMode
         {
-            get { return (this._baseStream._flushMode); }
+            get => (this._baseStream._flushMode);
             set
             {
                 if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
@@ -538,10 +535,7 @@ namespace MonoGame.Utilities
         /// </remarks>
         internal int BufferSize
         {
-            get
-            {
-                return this._baseStream._bufferSize;
-            }
+            get => this._baseStream._bufferSize;
             set
             {
                 if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
@@ -555,22 +549,10 @@ namespace MonoGame.Utilities
 
 
         /// <summary> Returns the total number of bytes input so far.</summary>
-        virtual internal long TotalIn
-        {
-            get
-            {
-                return this._baseStream._z.TotalBytesIn;
-            }
-        }
+        virtual internal long TotalIn => this._baseStream._z.TotalBytesIn;
 
         /// <summary> Returns the total number of bytes output so far.</summary>
-        virtual internal long TotalOut
-        {
-            get
-            {
-                return this._baseStream._z.TotalBytesOut;
-            }
-        }
+        virtual internal long TotalOut => this._baseStream._z.TotalBytesOut;
 
         #endregion
 
@@ -641,10 +623,7 @@ namespace MonoGame.Utilities
         /// <remarks>
         /// Always returns false.
         /// </remarks>
-        public override bool CanSeek
-        {
-            get { return false; }
-        }
+        public override bool CanSeek => false;
 
 
         /// <summary>
@@ -674,10 +653,7 @@ namespace MonoGame.Utilities
         /// <summary>
         /// Reading this property always throws a <see cref="NotImplementedException"/>.
         /// </summary>
-        public override long Length
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public override long Length => throw new NotImplementedException();
 
         /// <summary>
         ///   The position of the stream pointer.
@@ -701,7 +677,7 @@ namespace MonoGame.Utilities
                 return 0;
             }
 
-            set { throw new NotImplementedException(); }
+            set => throw new NotImplementedException();
         }
 
         /// <summary>

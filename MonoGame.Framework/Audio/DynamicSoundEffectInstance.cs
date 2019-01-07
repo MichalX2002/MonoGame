@@ -20,10 +20,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// </summary>
         public override bool IsLooped
         {
-            get
-            {
-                return false;
-            }
+            get => false;
 
             set
             {

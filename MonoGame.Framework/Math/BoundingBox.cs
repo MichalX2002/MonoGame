@@ -504,13 +504,10 @@ namespace Microsoft.Xna.Framework
 
         internal string DebugDisplayString
         {
-            get
-            {
-                return string.Concat(
+            get => string.Concat(
                     "Min( ", this.Min.DebugDisplayString, " )  \r\n",
-                    "Max( ",this.Max.DebugDisplayString, " )"
+                    "Max( ", this.Max.DebugDisplayString, " )"
                     );
-            }
         }
 
         public override string ToString()

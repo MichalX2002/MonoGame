@@ -44,7 +44,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Returns the platform specific shader profile identifier.
         /// </summary>
-        public static int Profile { get { return PlatformProfile(); } }
+        public static int Profile => PlatformProfile();
 
         /// <summary>
         /// A hash value which can be used to compare shaders.

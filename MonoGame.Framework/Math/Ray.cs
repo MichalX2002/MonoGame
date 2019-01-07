@@ -241,13 +241,10 @@ namespace Microsoft.Xna.Framework
 
         internal string DebugDisplayString
         {
-            get
-            {
-                return string.Concat(
+            get => string.Concat(
                     "Pos( ", this.Position.DebugDisplayString, " )  \r\n",
                     "Dir( ", this.Direction.DebugDisplayString, " )"
                 );
-            }
         }
 
         public override string ToString()

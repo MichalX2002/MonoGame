@@ -4,10 +4,7 @@ namespace MonoGame.Utilities
 {
     internal class ByteBufferPool
     {
-        public int FreeAmount
-        {
-            get { return _freeBuffers.Count; }
-        }
+        public int FreeAmount => _freeBuffers.Count;
 
         private readonly List<byte[]> _freeBuffers;
 

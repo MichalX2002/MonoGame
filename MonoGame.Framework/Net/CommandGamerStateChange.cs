@@ -13,21 +13,13 @@ namespace Microsoft.Xna.Framework.Net
 			this.NewState = gamer.State;
 			this.oldState = gamer.OldState;
 		}
-		
-		public NetworkGamer Gamer 
-		{
-			get { return gamer; }
-		}
+
+        public NetworkGamer Gamer => gamer;
         public GamerStates NewState { get; }
 
-        public GamerStates OldState
-		{
-			get { return oldState; }
-		}
-		
-		public CommandEventType Command {
-			get { return CommandEventType.GamerStateChange; }
-		}		
-	}
+        public GamerStates OldState => oldState;
+
+        public CommandEventType Command => CommandEventType.GamerStateChange;
+    }
 }
 

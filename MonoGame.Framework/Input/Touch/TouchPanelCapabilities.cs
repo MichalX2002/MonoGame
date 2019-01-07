@@ -75,13 +75,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// <summary>
         /// Returns true if a device is available for use.
         /// </summary>
-        public bool IsConnected
-        {
-            get
-            {
-                return isConnected;
-            }
-        }
+        public bool IsConnected => isConnected;
 
         /// <summary>
         /// Returns the maximum number of touch locations tracked by the touch panel device.

@@ -16,15 +16,9 @@ namespace Microsoft.Xna.Framework.Graphics
         /// Gets the width and height of the cube map face in pixels.
         /// </summary>
         /// <value>The width and height of a cube map face in pixels.</value>
-        public int Size
-        {
-            get
-            {
-                return size;
-            }
-        }
-		
-		public TextureCube (GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format)
+        public int Size => size;
+
+        public TextureCube (GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format)
             : this(graphicsDevice, size, mipMap, format, false)
 		{
         }

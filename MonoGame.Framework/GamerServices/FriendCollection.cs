@@ -58,15 +58,12 @@ namespace Microsoft.Xna.Framework.GamerServices
             Dispose(false);
         }
 
-		#region Properties
-		public int Count
+        #region Properties
+        public int Count => innerlist.Count;
+
+        public FriendGamer this[int index]
         {
-            get { return innerlist.Count; }
-        }
-		
-		public FriendGamer this[int index]
-        {
-            get { return innerlist[index]; }
+            get => innerlist[index];
             set
             {
                 if (value == null)

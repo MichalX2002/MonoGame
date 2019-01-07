@@ -15,7 +15,7 @@ namespace Microsoft.Xna.Framework
     {
         public override bool AllowUserResizing
         {
-            get { return !IsBorderless && _resizable; }
+            get => !IsBorderless && _resizable;
             set
             {
                 if (Sdl.Patch > 4)
@@ -54,24 +54,13 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        public override DisplayOrientation CurrentOrientation
-        {
-            get { return DisplayOrientation.Default; }
-        }
-
-        public override IntPtr Handle
-        {
-            get { return _handle; }
-        }
-
-        public override string ScreenDeviceName
-        {
-            get { return _screenDeviceName; }
-        }
+        public override DisplayOrientation CurrentOrientation => DisplayOrientation.Default;
+        public override IntPtr Handle => _handle;
+        public override string ScreenDeviceName => _screenDeviceName;
 
         public override bool IsBorderless
         {
-            get { return _borderless; }
+            get => _borderless;
             set
             {
                 Sdl.Window.SetBordered(_handle, value ? 0 : 1);
@@ -82,17 +71,21 @@ namespace Microsoft.Xna.Framework
         public override bool HasClipboardText => Sdl.HasClipboardText();
         public override string ClipboardText { get => Sdl.GetClipboardText(); set => Sdl.SetClipboardText(value); }
 
-        public override bool IsMaximized
-        {
-            get => (Sdl.Window.GetWindowFlags(_handle) & Sdl.Window.State.Maximized) != 0;
-            set
-            {
-                if (value)
-                    Sdl.Window.MaximizeWindow(_handle);
-                else
-                    Sdl.Window.RestoreWindow(_handle);
-            }
-        }
+        //public override bool IsMaximized
+        //{
+        //    get => (Sdl.Window.GetWindowFlags(_handle) & Sdl.Window.State.Maximized) != 0;
+        //    set
+        //    {
+        //        if (value)
+        //        {
+        //
+        //            Sdl.Window.SetSize(_handle, 1920, 1080);
+        //            Sdl.Window.MaximizeWindow(_handle);
+        //        }
+        //        else
+        //            Sdl.Window.RestoreWindow(_handle);
+        //    }
+        //}
 
         public static GameWindow Instance;
         public uint? Id;

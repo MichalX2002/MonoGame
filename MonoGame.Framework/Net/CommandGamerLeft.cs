@@ -20,9 +20,7 @@ namespace Microsoft.Xna.Framework.Net
 
         public int InternalIndex { get; } = -1;
 
-        public CommandEventType Command {
-			get { return CommandEventType.GamerLeft; }
-		}
-	}
+        public CommandEventType Command => CommandEventType.GamerLeft;
+    }
 }
 

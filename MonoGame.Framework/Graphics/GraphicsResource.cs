@@ -118,11 +118,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		public event EventHandler<EventArgs> Disposing;
 		
 		public GraphicsDevice GraphicsDevice
-		{
-			get
-			{
-				return graphicsDevice;
-			}
+        {
+            get => graphicsDevice;
 
             internal set
             {
@@ -144,7 +141,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 _selfReference = new WeakReference(this);
                 graphicsDevice.AddResourceReference(_selfReference);
             }
-		}
+        }
 
         public bool IsDisposed { get; private set; }
 

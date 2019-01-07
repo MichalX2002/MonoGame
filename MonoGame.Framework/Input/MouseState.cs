@@ -152,25 +152,18 @@ namespace Microsoft.Xna.Framework.Input
         /// Gets vertical position of the cursor in relation to the window.
         /// </summary>
 		public int Y {
-			get {
-				return _y;
-			}
-			internal set {
-				_y = value;
-			}
+            get => _y;
+            internal set => _y = value;
         }
 
         /// <summary>
         /// Gets cursor position.
         /// </summary>
-        public Point Position
-        {
-            get { return new Point(X, _y); }   
-        }
+        public Point Position => new Point(X, _y);
         /// <summary>
         /// Gets state of the left mouse button.
         /// </summary>
-		public ButtonState LeftButton { get; internal set; }
+        public ButtonState LeftButton { get; internal set; }
 
         /// <summary>
         /// Gets state of the middle mouse button.
@@ -200,14 +193,10 @@ namespace Microsoft.Xna.Framework.Input
         /// <summary>
         /// Gets state of the XButton2.
         /// </summary>
-		public ButtonState XButton2 { 
-			get {
-                return _xButton2;
-			}
-            internal set {
-                _xButton2 = value;
-            }
-		}
-	}
+		public ButtonState XButton2 {
+            get => _xButton2;
+            internal set => _xButton2 = value;
+        }
+    }
 }
 

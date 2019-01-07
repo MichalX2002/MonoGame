@@ -27,10 +27,7 @@ namespace Microsoft.Xna.Framework.Content
         {
         }
 
-        public override bool CanDeserializeIntoExistingObject
-        {
-            get { return TargetType.IsClass(); }
-        }
+        public override bool CanDeserializeIntoExistingObject => TargetType.IsClass();
 
         protected internal override void Initialize(ContentTypeReaderManager manager)
         {

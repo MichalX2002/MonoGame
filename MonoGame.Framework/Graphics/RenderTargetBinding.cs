@@ -52,17 +52,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public Texture RenderTarget { get; }
 
-        public int ArraySlice
-        {
-            get { return _arraySlice; }
-        }
+        public int ArraySlice => _arraySlice;
 
-        internal DepthFormat DepthFormat
-        {
-            get { return _depthFormat; }
-        }
+        internal DepthFormat DepthFormat => _depthFormat;
 
-		public RenderTargetBinding(RenderTarget2D renderTarget)
+        public RenderTargetBinding(RenderTarget2D renderTarget)
 		{
 			if (renderTarget == null) 
 				throw new ArgumentNullException(nameof(renderTarget));

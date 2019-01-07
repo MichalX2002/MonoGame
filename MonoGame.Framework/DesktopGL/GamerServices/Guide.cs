@@ -264,13 +264,7 @@ namespace Microsoft.Xna.Framework.GamerServices
         #region Properties
         public static bool IsScreenSaverEnabled { get; set; }
 
-        public static bool IsTrialMode
-        {
-            get
-            {
-                return SimulateTrialMode; // || _isTrialMode;
-            }
-        }
+        public static bool IsTrialMode => SimulateTrialMode; // || _isTrialMode;
 
         public static bool IsVisible { get; set; }
 

@@ -14,10 +14,8 @@ namespace Microsoft.Xna.Framework.Net
 			this.data = data;
 				
 		}
-		
-		public CommandEventType Command {
-			get { return CommandEventType.ReceiveData; }
-		}
-	}
+
+        public CommandEventType Command => CommandEventType.ReceiveData;
+    }
 }
 

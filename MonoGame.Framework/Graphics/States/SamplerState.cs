@@ -40,7 +40,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public TextureAddressMode AddressU
         {
-            get { return _addressU; }
+            get => _addressU;
             set
             {
                 ThrowIfBound();
@@ -50,7 +50,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public TextureAddressMode AddressV
         {
-            get { return _addressV; }
+            get => _addressV;
             set
             {
                 ThrowIfBound();
@@ -60,7 +60,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public TextureAddressMode AddressW
         {
-            get { return _addressW; }
+            get => _addressW;
             set
             {
                 ThrowIfBound();
@@ -70,7 +70,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public Color BorderColor
         {
-            get { return _borderColor; }
+            get => _borderColor;
             set
             {
                 ThrowIfBound();
@@ -80,7 +80,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public TextureFilter Filter
         {
-            get { return _filter; }
+            get => _filter;
             set
             {
                 ThrowIfBound();
@@ -90,7 +90,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public int MaxAnisotropy
         {
-            get { return _maxAnisotropy; }
+            get => _maxAnisotropy;
             set
             {
                 ThrowIfBound();
@@ -100,7 +100,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public int MaxMipLevel
         {
-            get { return _maxMipLevel; }
+            get => _maxMipLevel;
             set
             {
                 ThrowIfBound();
@@ -110,7 +110,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public float MipMapLevelOfDetailBias
         {
-            get { return _mipMapLevelOfDetailBias; }
+            get => _mipMapLevelOfDetailBias;
             set
             {
                 ThrowIfBound();
@@ -123,7 +123,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public CompareFunction ComparisonFunction
         {
-            get { return _comparisonFunction; }
+            get => _comparisonFunction;
             set
             {
                 ThrowIfBound();
@@ -133,7 +133,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public TextureFilterMode FilterMode
         {
-            get { return _filterMode; }
+            get => _filterMode;
             set
             {
                 ThrowIfBound();

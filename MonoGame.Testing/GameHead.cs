@@ -24,7 +24,7 @@ namespace MonoGame.Testings
 
         private short[] _dynamicBuff;
         private DynamicSoundEffectInstance _dynamicSound;
-        
+
         public GameHead()
         {
             _graphicsManager = new GraphicsDeviceManager(this);

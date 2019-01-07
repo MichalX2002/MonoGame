@@ -33,16 +33,16 @@ namespace Microsoft.Xna.Framework.Graphics
 		//     Gets or sets the matrix used to transform this bone relative to its parent
 		//     bone.
 		internal Matrix transform;
-		public Matrix Transform 
-		{ 
-			get { return this.transform; } 
-			set { this.transform = value; }
-		}
-		
-		/// <summary>
-		/// Transform of this node from the root of the model not from the parent
-		/// </summary>
-		public Matrix ModelTransform {
+		public Matrix Transform
+        {
+            get => this.transform;
+            set => this.transform = value;
+        }
+
+        /// <summary>
+        /// Transform of this node from the root of the model not from the parent
+        /// </summary>
+        public Matrix ModelTransform {
 			get;
 			set;
 		}

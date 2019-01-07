@@ -15,134 +15,68 @@ namespace Microsoft.Xna.Framework.Input
         /// Gets a value indicating if the button A is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the button A is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState A
-        {
-            get
-            {
-                return ((_buttons & Buttons.A) == Buttons.A) ? ButtonState.Pressed : ButtonState.Released;
-            }
-        }
+        public ButtonState A => ((_buttons & Buttons.A) == Buttons.A) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating if the button B is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the button B is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState B
-        {
-            get
-            {
-                return ((_buttons & Buttons.B) == Buttons.B) ? ButtonState.Pressed : ButtonState.Released;
-            }
-        }
+        public ButtonState B => ((_buttons & Buttons.B) == Buttons.B) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating if the button Back is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the button Back is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState Back
-        {
-            get
-            {
-                return ((_buttons & Buttons.Back) == Buttons.Back) ? ButtonState.Pressed : ButtonState.Released;
-            }
-        }
+        public ButtonState Back => ((_buttons & Buttons.Back) == Buttons.Back) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating if the button X is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the button X is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState X
-        {
-            get
-            {
-                return ((_buttons & Buttons.X) == Buttons.X) ? ButtonState.Pressed : ButtonState.Released;
-            }
-        }
+        public ButtonState X => ((_buttons & Buttons.X) == Buttons.X) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating if the button Y is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the button Y is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState Y
-        {
-            get
-            {
-                return ((_buttons & Buttons.Y) == Buttons.Y) ? ButtonState.Pressed : ButtonState.Released;
-            }
-        }
+        public ButtonState Y => ((_buttons & Buttons.Y) == Buttons.Y) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating if the button Start is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the button Start is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState Start
-        {
-            get
-            {
-                return ((_buttons & Buttons.Start) == Buttons.Start) ? ButtonState.Pressed : ButtonState.Released;
-            }
-        }
+        public ButtonState Start => ((_buttons & Buttons.Start) == Buttons.Start) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating if the left shoulder button is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the left shoulder button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState LeftShoulder
-        {
-            get
-            {
-                return ((_buttons & Buttons.LeftShoulder) == Buttons.LeftShoulder) ? ButtonState.Pressed : ButtonState.Released;
-            }
-        }
+        public ButtonState LeftShoulder => ((_buttons & Buttons.LeftShoulder) == Buttons.LeftShoulder) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating if the left stick button is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the left stick button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState LeftStick
-        {
-            get
-            {
-                return ((_buttons & Buttons.LeftStick) == Buttons.LeftStick) ? ButtonState.Pressed : ButtonState.Released;
-            }
-        }
+        public ButtonState LeftStick => ((_buttons & Buttons.LeftStick) == Buttons.LeftStick) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating if the right shoulder button is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the right shoulder button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState RightShoulder
-        {
-            get
-            {
-                return ((_buttons & Buttons.RightShoulder) == Buttons.RightShoulder) ? ButtonState.Pressed : ButtonState.Released;
-            }
-        }
+        public ButtonState RightShoulder => ((_buttons & Buttons.RightShoulder) == Buttons.RightShoulder) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating if the right stick button is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the right stick button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState RightStick
-        {
-            get
-            {
-                return ((_buttons & Buttons.RightStick) == Buttons.RightStick) ? ButtonState.Pressed : ButtonState.Released;
-            }
-        }
+        public ButtonState RightStick => ((_buttons & Buttons.RightStick) == Buttons.RightStick) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating if the guide button is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the guide button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState BigButton
-        {
-            get
-            {
-                return ((_buttons & Buttons.BigButton) == Buttons.BigButton) ? ButtonState.Pressed : ButtonState.Released;
-            }
-        }
-        
+        public ButtonState BigButton => ((_buttons & Buttons.BigButton) == Buttons.BigButton) ? ButtonState.Pressed : ButtonState.Released;
+
         public GamePadButtons(Buttons buttons)
         {
             _buttons = buttons;

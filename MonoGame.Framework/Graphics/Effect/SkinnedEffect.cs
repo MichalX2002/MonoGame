@@ -75,8 +75,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public Matrix World
         {
-            get { return world; }
-            
+            get => world;
+
             set
             {
                 world = value;
@@ -90,8 +90,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public Matrix View
         {
-            get { return view; }
-            
+            get => view;
+
             set
             {
                 view = value;
@@ -105,8 +105,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public Matrix Projection
         {
-            get { return projection; }
-            
+            get => projection;
+
             set
             {
                 projection = value;
@@ -120,8 +120,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public Vector3 DiffuseColor
         {
-            get { return diffuseColor; }
-            
+            get => diffuseColor;
+
             set
             {
                 diffuseColor = value;
@@ -135,8 +135,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public Vector3 EmissiveColor
         {
-            get { return emissiveColor; }
-            
+            get => emissiveColor;
+
             set
             {
                 emissiveColor = value;
@@ -150,8 +150,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public Vector3 SpecularColor
         {
-            get { return specularColorParam.GetValueVector3(); }
-            set { specularColorParam.SetValue(value); }
+            get => specularColorParam.GetValueVector3();
+            set => specularColorParam.SetValue(value);
         }
 
 
@@ -160,8 +160,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public float SpecularPower
         {
-            get { return specularPowerParam.GetValueSingle(); }
-            set { specularPowerParam.SetValue(value); }
+            get => specularPowerParam.GetValueSingle();
+            set => specularPowerParam.SetValue(value);
         }
 
 
@@ -170,8 +170,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public float Alpha
         {
-            get { return alpha; }
-            
+            get => alpha;
+
             set
             {
                 alpha = value;
@@ -185,8 +185,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public bool PreferPerPixelLighting
         {
-            get { return preferPerPixelLighting; }
-            
+            get => preferPerPixelLighting;
+
             set
             {
                 if (preferPerPixelLighting != value)
@@ -203,8 +203,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public Vector3 AmbientLightColor
         {
-            get { return ambientLightColor; }
-            
+            get => ambientLightColor;
+
             set
             {
                 ambientLightColor = value;
@@ -228,7 +228,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Gets the third directional light.
         /// </summary>
-        public DirectionalLight DirectionalLight2 { get { return light2; } }
+        public DirectionalLight DirectionalLight2 => light2;
 
 
         /// <summary>
@@ -236,8 +236,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public bool FogEnabled
         {
-            get { return fogEnabled; }
-            
+            get => fogEnabled;
+
             set
             {
                 if (fogEnabled != value)
@@ -254,8 +254,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public float FogStart
         {
-            get { return fogStart; }
-            
+            get => fogStart;
+
             set
             {
                 fogStart = value;
@@ -269,8 +269,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public float FogEnd
         {
-            get { return fogEnd; }
-            
+            get => fogEnd;
+
             set
             {
                 fogEnd = value;
@@ -284,8 +284,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public Vector3 FogColor
         {
-            get { return fogColorParam.GetValueVector3(); }
-            set { fogColorParam.SetValue(value); }
+            get => fogColorParam.GetValueVector3();
+            set => fogColorParam.SetValue(value);
         }
 
 
@@ -294,8 +294,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public Texture2D Texture
         {
-            get { return textureParam.GetValueTexture2D(); }
-            set { textureParam.SetValue(value); }
+            get => textureParam.GetValueTexture2D();
+            set => textureParam.SetValue(value);
         }
 
 
@@ -304,8 +304,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public int WeightsPerVertex
         {
-            get { return weightsPerVertex; }
-            
+            get => weightsPerVertex;
+
             set
             {
                 if ((value != 1) &&
@@ -362,7 +362,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         bool IEffectLights.LightingEnabled
         {
-            get { return true; }
+            get => true;
             set { if (!value) throw new NotSupportedException("SkinnedEffect does not support setting LightingEnabled to false."); }
         }
 

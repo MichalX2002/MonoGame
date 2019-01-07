@@ -27,13 +27,7 @@ namespace Microsoft.Xna.Framework.Media
             return innerlist.GetEnumerator();
         }
 
-        public int Count
-        {
-            get
-            {
-				return innerlist.Count;
-            }
-        }
+        public int Count => innerlist.Count;
 
         public bool IsReadOnly { get; } = false;
 

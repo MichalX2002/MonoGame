@@ -19,14 +19,14 @@ namespace Microsoft.Xna.Framework {
         public abstract bool HasClipboardText { get; }
         public abstract string ClipboardText { get; set; }
 
-        public abstract bool IsMaximized { get; set; }
+        //public abstract bool IsMaximized { get; set; }
 
         internal bool _allowAltF4 = true;
 
         /// <summary>
         /// Gets or sets a bool that enables usage of Alt+F4 for window closing on desktop platforms. Value is true by default.
         /// </summary>
-        public virtual bool AllowAltF4 { get { return _allowAltF4; } set { _allowAltF4 = value; } }
+        public virtual bool AllowAltF4 { get => _allowAltF4; set => _allowAltF4 = value; }
 
 #if (WINDOWS && !WINDOWS_UAP) || DESKTOPGL
         /// <summary>
@@ -50,15 +50,18 @@ namespace Microsoft.Xna.Framework {
         /// For Windows 8 and Windows 10 UWP this has no effect. For these platforms the title should be
         /// set by using the DisplayName property found in the app manifest file.
         /// </remarks>
-        public string Title {
-			get { return _title; }
-			set {
-				if (_title != value) {
-					SetTitle(value);
-					_title = value;
-				}
-			}
-		}
+        public string Title
+        {
+            get => _title;
+            set
+            {
+                if (_title != value)
+                {
+                    SetTitle(value);
+                    _title = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Determines whether the border of the window is visible. Currently only supported on the WinDX and WinGL/Linux platforms.
@@ -68,14 +71,8 @@ namespace Microsoft.Xna.Framework {
         /// </exception>
         public virtual bool IsBorderless
         {
-            get
-            {
-                return false;
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
+            get => false;
+            set => throw new NotImplementedException();
         }
 
         internal MouseState MouseState;

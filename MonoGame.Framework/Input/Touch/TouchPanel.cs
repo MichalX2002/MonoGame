@@ -93,8 +93,8 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// </summary>
         public static IntPtr WindowHandle
         {
-            get { return PrimaryWindow.TouchPanelState.WindowHandle; }
-            set { PrimaryWindow.TouchPanelState.WindowHandle = value; }
+            get => PrimaryWindow.TouchPanelState.WindowHandle;
+            set => PrimaryWindow.TouchPanelState.WindowHandle = value;
         }
 
         /// <summary>
@@ -102,8 +102,8 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// </summary>
         public static int DisplayHeight
         {
-            get { return PrimaryWindow.TouchPanelState.DisplayHeight; }
-            set { PrimaryWindow.TouchPanelState.DisplayHeight = value; }
+            get => PrimaryWindow.TouchPanelState.DisplayHeight;
+            set => PrimaryWindow.TouchPanelState.DisplayHeight = value;
         }
 
         /// <summary>
@@ -111,8 +111,8 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// </summary>
         public static DisplayOrientation DisplayOrientation
         {
-            get { return PrimaryWindow.TouchPanelState.DisplayOrientation; }
-            set { PrimaryWindow.TouchPanelState.DisplayOrientation = value; }
+            get => PrimaryWindow.TouchPanelState.DisplayOrientation;
+            set => PrimaryWindow.TouchPanelState.DisplayOrientation = value;
         }
 
         /// <summary>
@@ -120,37 +120,34 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// </summary>
         public static int DisplayWidth
         {
-            get { return PrimaryWindow.TouchPanelState.DisplayWidth; }
-            set { PrimaryWindow.TouchPanelState.DisplayWidth = value; }
+            get => PrimaryWindow.TouchPanelState.DisplayWidth;
+            set => PrimaryWindow.TouchPanelState.DisplayWidth = value;
         }
-		
+
         /// <summary>
         /// Gets or sets enabled gestures.
         /// </summary>
         public static GestureType EnabledGestures
         {
-            get { return PrimaryWindow.TouchPanelState.EnabledGestures; }
-            set { PrimaryWindow.TouchPanelState.EnabledGestures = value; }
+            get => PrimaryWindow.TouchPanelState.EnabledGestures;
+            set => PrimaryWindow.TouchPanelState.EnabledGestures = value;
         }
 
         public static bool EnableMouseTouchPoint
         {
-            get { return PrimaryWindow.TouchPanelState.EnableMouseTouchPoint; }
-            set { PrimaryWindow.TouchPanelState.EnableMouseTouchPoint = value; }
+            get => PrimaryWindow.TouchPanelState.EnableMouseTouchPoint;
+            set => PrimaryWindow.TouchPanelState.EnableMouseTouchPoint = value;
         }
 
         public static bool EnableMouseGestures
         {
-            get { return PrimaryWindow.TouchPanelState.EnableMouseGestures; }
-            set { PrimaryWindow.TouchPanelState.EnableMouseGestures = value; }
+            get => PrimaryWindow.TouchPanelState.EnableMouseGestures;
+            set => PrimaryWindow.TouchPanelState.EnableMouseGestures = value;
         }
 
         /// <summary>
         /// Returns true if a touch gesture is available.
         /// </summary>
-        public static bool IsGestureAvailable
-        {
-            get { return PrimaryWindow.TouchPanelState.IsGestureAvailable; }
-        }
+        public static bool IsGestureAvailable => PrimaryWindow.TouchPanelState.IsGestureAvailable;
     }
 }

@@ -73,19 +73,16 @@ namespace Microsoft.Xna.Framework.Net
 		
 		#region Properties
 		NetworkSessionJoinError _JoinError;
-		public NetworkSessionJoinError JoinError 
-		{ 
-			get
-			{
-				return _JoinError;
-			}
-			
-			set
-			{
-				if (_JoinError != value)
-					JoinError = value;
-			}
-		}
-		#endregion
-	}
+		public NetworkSessionJoinError JoinError
+        {
+            get => _JoinError;
+
+            set
+            {
+                if (_JoinError != value)
+                    JoinError = value;
+            }
+        }
+        #endregion
+    }
 }

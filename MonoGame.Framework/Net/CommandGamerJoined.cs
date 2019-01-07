@@ -26,27 +26,21 @@ namespace Microsoft.Xna.Framework.Net
 		}
 		
 		public string DisplayName {
-			get {
-				return displayName;
-			}
-			set {
-				displayName = value;
-			}
-		}
+            get => displayName;
+            set => displayName = value;
+        }
 
         public string GamerTag { get; set; } = string.Empty;
 
         public GamerStates State
-		{
-			get { return states; }
-			set { states = value; }
-		}
+        {
+            get => states;
+            set => states = value;
+        }
 
         public int InternalIndex { get; } = -1;
 
-        public CommandEventType Command {
-			get { return CommandEventType.GamerJoined; }
-		}
-	}
+        public CommandEventType Command => CommandEventType.GamerJoined;
+    }
 }
 

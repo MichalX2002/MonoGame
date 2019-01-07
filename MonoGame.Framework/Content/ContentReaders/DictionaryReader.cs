@@ -30,10 +30,7 @@ namespace Microsoft.Xna.Framework.Content
 			valueReader = manager.GetTypeReader(valueType);
         }
 
-        public override bool CanDeserializeIntoExistingObject
-        {
-            get { return true; }
-        }
+        public override bool CanDeserializeIntoExistingObject => true;
 
         protected internal override Dictionary<TKey, TValue> Read(ContentReader input, Dictionary<TKey, TValue> existingInstance)
         {

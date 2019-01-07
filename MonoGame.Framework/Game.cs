@@ -858,15 +858,9 @@ namespace Microsoft.Xna.Framework
                 _items.CopyTo(array, arrayIndex);
             }
 
-            public int Count
-            {
-                get { return _items.Count; }
-            }
+            public int Count => _items.Count;
 
-            public bool IsReadOnly
-            {
-                get { return false; }
-            }
+            public bool IsReadOnly => false;
 
             public IEnumerator<T> GetEnumerator()
             {

@@ -8,13 +8,10 @@ namespace Microsoft.Xna.Framework.Graphics
 		//     Gets or sets the material Effect for this mesh part. Reference page contains
 		//     code sample.
         private Effect _effect;
-        public Effect Effect 
+        public Effect Effect
         {
-            get 
-            {
-                return _effect;
-            }
-            set 
+            get => _effect;
+            set
             {
                 if (value == _effect)
                     return;
@@ -38,16 +35,16 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 // Set the new effect.
                 _effect = value;
-                
-                if (_effect != null && !parent.Effects.Contains(_effect))                
+
+                if (_effect != null && !parent.Effects.Contains(_effect))
                     parent.Effects.Add(_effect);
             }
         }
 
-		//
-		// Summary:
-		//     Gets the index buffer for this mesh part.
-		public IndexBuffer IndexBuffer { get; set; }
+        //
+        // Summary:
+        //     Gets the index buffer for this mesh part.
+        public IndexBuffer IndexBuffer { get; set; }
 
 		//
 		// Summary:

@@ -53,8 +53,8 @@ namespace Microsoft.Xna.Framework
         [DataMember]
         public float Value
         {
-            get { return this._value; }
-            set { this._value = value; }
+            get => this._value;
+            set => this._value = value;
         }
 
         #endregion

@@ -23,10 +23,7 @@ namespace Microsoft.Xna.Framework.Content
 			elementReader = manager.GetTypeReader(readerType);
         }
 
-        public override bool CanDeserializeIntoExistingObject
-        {
-            get { return true; }
-        }
+        public override bool CanDeserializeIntoExistingObject => true;
 
         protected internal override List<T> Read(ContentReader input, List<T> existingInstance)
         {

@@ -125,7 +125,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// Gets the texture that this SpriteFont draws from.
         /// </summary>
         /// <remarks>Can be used to implement custom rendering of a SpriteFont</remarks>
-        public Texture2D Texture { get { return _texture; } }
+        public Texture2D Texture => _texture;
 
         /// <summary>
         /// Returns a copy of the dictionary containing the glyphs in this SpriteFont.
@@ -151,13 +151,13 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// </summary>
 		public char? DefaultCharacter
         {
-            get { return _defaultCharacter; }
+            get => _defaultCharacter;
             set
-            {   
+            {
                 // Get the default glyph index here once.
                 if (value.HasValue)
                 {
-                    if(!TryGetGlyphIndex(value.Value, out _defaultGlyphIndex))
+                    if (!TryGetGlyphIndex(value.Value, out _defaultGlyphIndex))
                         throw new ArgumentException(Errors.UnresolvableCharacter);
                 }
                 else
@@ -167,11 +167,11 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-		/// <summary>
-		/// Gets or sets the line spacing (the distance from baseline
-		/// to baseline) of the font.
-		/// </summary>
-		public int LineSpacing { get; set; }
+        /// <summary>
+        /// Gets or sets the line spacing (the distance from baseline
+        /// to baseline) of the font.
+        /// </summary>
+        public int LineSpacing { get; set; }
 
 		/// <summary>
 		/// Gets or sets the spacing (tracking) between characters in

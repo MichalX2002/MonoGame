@@ -224,73 +224,31 @@ namespace Microsoft.Xna.Framework.GamerServices
 			}
 		}
 
-		#endregion
-			
-		#region Properties
-		public GameDefaults GameDefaults 
-		{ 
-			get
-			{
-				throw new NotSupportedException();
-			}
-		}
-		
-		public bool IsGuest 
-		{ 
-			get
-			{
-				throw new NotSupportedException();
-			}
-		}
-		
-		public bool IsSignedInToLive 
-		{ 
-			get
-			{
-				return false;
-			}
-		}
-		
-		public int PartySize 
-		{ 
-			get
-			{
-				throw new NotSupportedException();
-			}
-			set
-			{
-				throw new NotSupportedException();
-			}
-		}
-		
-        public PlayerIndex PlayerIndex
+        #endregion
+
+        #region Properties
+        public GameDefaults GameDefaults => throw new NotSupportedException();
+
+        public bool IsGuest => throw new NotSupportedException();
+
+        public bool IsSignedInToLive => false;
+
+        public int PartySize
         {
-            get
-            {
-                return PlayerIndex.One;
-            }
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
         }
-		
-		public GamerPresence Presence 
-		{ 
-			get
-			{
-				throw new NotSupportedException();
-			}
-		}
+
+        public PlayerIndex PlayerIndex => PlayerIndex.One;
+
+        public GamerPresence Presence => throw new NotSupportedException();
 
         GamerPrivileges _privileges = new GamerPrivileges();
-        public GamerPrivileges Privileges
-        {
-            get
-            {
-                return _privileges;
-            }
-        }
-		#endregion
-		
-		
-		protected virtual void OnSignedIn(SignedInEventArgs e)
+        public GamerPrivileges Privileges => _privileges;
+        #endregion
+
+
+        protected virtual void OnSignedIn(SignedInEventArgs e)
 		{
             EventHelpers.Raise(this, SignedIn, e);
         }

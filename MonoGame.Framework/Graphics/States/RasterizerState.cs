@@ -19,68 +19,68 @@ namespace Microsoft.Xna.Framework.Graphics
         private bool _depthClipEnable;
 
         public CullMode CullMode
-	    {
-	        get { return _cullMode; }
+        {
+            get => _cullMode;
             set
             {
                 ThrowIfBound();
                 _cullMode = value;
             }
-	    }
+        }
 
-	    public float DepthBias
-	    {
-	        get { return _depthBias; }
-	        set
-	        {
+        public float DepthBias
+        {
+            get => _depthBias;
+            set
+            {
                 ThrowIfBound();
                 _depthBias = value;
-	        }
-	    }
+            }
+        }
 
-	    public FillMode FillMode
-	    {
-	        get { return _fillMode; }
-	        set
-	        {
+        public FillMode FillMode
+        {
+            get => _fillMode;
+            set
+            {
                 ThrowIfBound();
                 _fillMode = value;
-	        }
-	    }
+            }
+        }
 
-	    public bool MultiSampleAntiAlias
-	    {
-	        get { return _multiSampleAntiAlias; }
-	        set
-	        {
+        public bool MultiSampleAntiAlias
+        {
+            get => _multiSampleAntiAlias;
+            set
+            {
                 ThrowIfBound();
                 _multiSampleAntiAlias = value;
-	        }
-	    }
+            }
+        }
 
-	    public bool ScissorTestEnable
-	    {
-	        get { return _scissorTestEnable; }
-	        set
-	        {
+        public bool ScissorTestEnable
+        {
+            get => _scissorTestEnable;
+            set
+            {
                 ThrowIfBound();
                 _scissorTestEnable = value;
-	        }
-	    }
+            }
+        }
 
-	    public float SlopeScaleDepthBias
-	    {
-	        get { return _slopeScaleDepthBias; }
-	        set
-	        {
+        public float SlopeScaleDepthBias
+        {
+            get => _slopeScaleDepthBias;
+            set
+            {
                 ThrowIfBound();
                 _slopeScaleDepthBias = value;
-	        }
-	    }
+            }
+        }
 
         public bool DepthClipEnable
         {
-            get { return _depthClipEnable; }
+            get => _depthClipEnable;
             set
             {
                 ThrowIfBound();

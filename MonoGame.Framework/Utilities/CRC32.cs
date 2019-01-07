@@ -25,13 +25,7 @@ namespace MonoGame.Utilities
         /// <summary>
         /// Indicates the current CRC for all blocks slurped in.
         /// </summary>
-        public Int32 Crc32Result
-        {
-            get
-            {
-                return unchecked((Int32)(~_register));
-            }
-        }
+        public Int32 Crc32Result => unchecked((Int32)(~_register));
 
         /// <summary>
         /// Returns the CRC32 for the specified stream.

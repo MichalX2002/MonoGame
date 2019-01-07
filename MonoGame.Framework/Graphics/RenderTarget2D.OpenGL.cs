@@ -10,15 +10,9 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class RenderTarget2D
     {
-        int IRenderTarget.GLTexture
-        {
-            get { return glTexture; }
-        }
+        int IRenderTarget.GLTexture => glTexture;
 
-        TextureTarget IRenderTarget.GLTarget
-        {
-            get { return glTarget; }
-        }
+        TextureTarget IRenderTarget.GLTarget => glTarget;
 
         int IRenderTarget.GLColorBuffer { get; set; }
         int IRenderTarget.GLDepthBuffer { get; set; }

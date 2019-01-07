@@ -25,13 +25,9 @@ namespace Microsoft.Xna.Framework.Graphics
         [DataMember]
         public int Height
         {
-			get {
-				return this.height;
-			}
-			set {
-				height = value;
-			}
-		}
+            get => this.height;
+            set => height = value;
+        }
 
         /// <summary>
         /// The upper limit of depth of this viewport.
@@ -39,13 +35,9 @@ namespace Microsoft.Xna.Framework.Graphics
         [DataMember]
         public float MaxDepth
         {
-			get {
-				return this.maxDepth;
-			}
-			set {
-				maxDepth = value;
-			}
-		}
+            get => this.maxDepth;
+            set => maxDepth = value;
+        }
 
         /// <summary>
         /// The lower limit of depth of this viewport.
@@ -65,14 +57,9 @@ namespace Microsoft.Xna.Framework.Graphics
         [DataMember]
         public int Y
         {
-			get {
-				return this.y;
-
-			}
-			set {
-				y = value;
-			}
-		}
+            get => this.y;
+            set => y = value;
+        }
 
         /// <summary>
         /// The x coordinate of the beginning of this viewport.
@@ -100,29 +87,23 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Gets or sets a boundary of this <see cref="Viewport"/>.
         /// </summary>
-		public Rectangle Bounds 
-		{
-            get
+		public Rectangle Bounds
+        {
+            get => new Rectangle(X, y, Width, height);
+
+            set
             {
-                return new Rectangle(X, y, Width, height);
+                X = value.X;
+                y = value.Y;
+                Width = value.Width;
+                height = value.Height;
             }
-				
-			set
-			{				
-				X = value.X;
-				y = value.Y;
-				Width = value.Width;
-				height = value.Height;
-			}
-		}
+        }
 
         /// <summary>
         /// Returns the subset of the viewport that is guaranteed to be visible on a lower quality display.
         /// </summary>
-		public Rectangle TitleSafeArea 
-		{
-			get { return GraphicsDevice.GetTitleSafeArea(X, y, Width, height); }
-		}
+		public Rectangle TitleSafeArea => GraphicsDevice.GetTitleSafeArea(X, y, Width, height);
 
         /// <summary>
         /// Constructs a viewport from the given values. The <see cref="MinDepth"/> will be 0.0 and <see cref="MaxDepth"/> will be 1.0.

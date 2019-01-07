@@ -44,74 +44,74 @@ namespace Microsoft.Xna.Framework.Graphics
 	    }
 
 	    public BlendFunction AlphaBlendFunction
-	    {
-	        get { return _alphaBlendFunction; }
-	        set
-	        {
-	            _parent.ThrowIfBound();
-	            _alphaBlendFunction = value;
-	        }
-	    }
-
-	    public Blend AlphaDestinationBlend
-	    {
-	        get { return _alphaDestinationBlend; }
-	        set
-	        {
+        {
+            get => _alphaBlendFunction;
+            set
+            {
                 _parent.ThrowIfBound();
-	            _alphaDestinationBlend = value;
-	        }
-	    }
+                _alphaBlendFunction = value;
+            }
+        }
 
-	    public Blend AlphaSourceBlend
-	    {
-	        get { return _alphaSourceBlend; }
-	        set
-	        {
+        public Blend AlphaDestinationBlend
+        {
+            get => _alphaDestinationBlend;
+            set
+            {
                 _parent.ThrowIfBound();
-	            _alphaSourceBlend = value;
-	        }
-	    }
+                _alphaDestinationBlend = value;
+            }
+        }
 
-	    public BlendFunction ColorBlendFunction
-	    {
-	        get { return _colorBlendFunction; }
-	        set
-	        {
+        public Blend AlphaSourceBlend
+        {
+            get => _alphaSourceBlend;
+            set
+            {
                 _parent.ThrowIfBound();
-	            _colorBlendFunction = value;
-	        }
-	    }
+                _alphaSourceBlend = value;
+            }
+        }
 
-	    public Blend ColorDestinationBlend
-	    {
-	        get { return _colorDestinationBlend; }
-	        set
-	        {
+        public BlendFunction ColorBlendFunction
+        {
+            get => _colorBlendFunction;
+            set
+            {
                 _parent.ThrowIfBound();
-	            _colorDestinationBlend = value;
-	        }
-	    }
+                _colorBlendFunction = value;
+            }
+        }
 
-	    public Blend ColorSourceBlend
-	    {
-	        get { return _colorSourceBlend; }
-	        set
-	        {
+        public Blend ColorDestinationBlend
+        {
+            get => _colorDestinationBlend;
+            set
+            {
                 _parent.ThrowIfBound();
-	            _colorSourceBlend = value;
-	        }
-	    }
+                _colorDestinationBlend = value;
+            }
+        }
 
-	    public ColorWriteChannels ColorWriteChannels
-	    {
-	        get { return _colorWriteChannels; }
-	        set
-	        {
+        public Blend ColorSourceBlend
+        {
+            get => _colorSourceBlend;
+            set
+            {
                 _parent.ThrowIfBound();
-	            _colorWriteChannels = value;
-	        }
-	    }
+                _colorSourceBlend = value;
+            }
+        }
+
+        public ColorWriteChannels ColorWriteChannels
+        {
+            get => _colorWriteChannels;
+            set
+            {
+                _parent.ThrowIfBound();
+                _colorWriteChannels = value;
+            }
+        }
 
 #if DIRECTX
 
@@ -215,6 +215,6 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 #endif
 
-	}
+    }
 }
 

@@ -253,13 +253,10 @@ namespace Microsoft.Xna.Framework
 
         internal string DebugDisplayString
         {
-            get
-            {
-                return string.Concat(
+            get => string.Concat(
                     this.Normal.DebugDisplayString, "  ",
                     this.D.ToString()
                     );
-            }
         }
 
         public override string ToString()

@@ -64,7 +64,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         string _description = string.Empty;
-        public string Description { get { return _description; } private set { _description = value; } }
+        public string Description { get => _description; private set => _description = value; }
 
         public DisplayMode CurrentDisplayMode
         {
@@ -98,10 +98,7 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        public static GraphicsAdapter DefaultAdapter
-        {
-            get { return Adapters[0]; }
-        }
+        public static GraphicsAdapter DefaultAdapter => Adapters[0];
 
         public static ReadOnlyCollection<GraphicsAdapter> Adapters
         {
@@ -132,8 +129,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </remarks>
         public static bool UseReferenceDevice
         {
-            get { return UseDriverType == DriverType.Reference; }
-            set { UseDriverType = value ? DriverType.Reference : DriverType.Hardware; }
+            get => UseDriverType == DriverType.Reference;
+            set => UseDriverType = value ? DriverType.Reference : DriverType.Hardware;
         }
 
         /// <summary>

@@ -69,10 +69,7 @@ namespace MonoGame.Utilities.Collections
                     return entries[i].value;
                 throw new KeyNotFoundException();
             }
-            set
-            {
-                Insert(key, value, false);
-            }
+            set => Insert(key, value, false);
         }
 
         public QuickDictionary() : this(RefEqualityComparer<TKey>.Default, 0) { }

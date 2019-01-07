@@ -47,10 +47,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Get the bounds of the back buffer.
         /// </summary>
-        public Rectangle Bounds 
-        {
-            get { return new Rectangle(0, 0, BackBufferWidth, BackBufferHeight); }
-        }
+        public Rectangle Bounds => new Rectangle(0, 0, BackBufferWidth, BackBufferHeight);
 
         /// <summary>
         /// Get or set the handle of the window that will present the back buffer.

@@ -55,7 +55,7 @@ namespace Microsoft.Xna.Framework.GamerServices
         {            
         }
 
-        public static bool IsInitialized { get { return false;  } }
+        public static bool IsInitialized => false;
 
         public static IntPtr WindowHandle { get; set; }
 

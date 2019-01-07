@@ -149,20 +149,11 @@ namespace Microsoft.Xna.Framework.Net
         }
 
         #region Properties
-        public int Length
-        {
-            get
-            {
-                return (int)BaseStream.Length;
-            }
-        }
+        public int Length => (int)BaseStream.Length;
 
         public int Position
         {
-            get
-            {
-                return (int)BaseStream.Position;
-            }
+            get => (int)BaseStream.Position;
             set
             {
                 if (BaseStream.Position != value)

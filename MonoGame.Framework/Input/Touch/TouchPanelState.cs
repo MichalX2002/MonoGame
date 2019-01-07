@@ -268,10 +268,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// </summary>
         public int DisplayHeight
         {
-            get
-            {
-                return _displaySize.Y;
-            }
+            get => _displaySize.Y;
             set
             {
                 _displaySize.Y = value;
@@ -289,10 +286,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// </summary>
         public int DisplayWidth
         {
-            get
-            {
-                return _displaySize.X;
-            }
+            get => _displaySize.X;
             set
             {
                 _displaySize.X = value;

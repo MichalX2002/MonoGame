@@ -52,13 +52,7 @@ namespace MonoGame.Utilities
         }
 
 
-        protected internal bool _wantCompress
-        {
-            get
-            {
-                return (this._compressionMode == CompressionMode.Compress);
-            }
-        }
+        protected internal bool _wantCompress => (this._compressionMode == CompressionMode.Compress);
 
         private ZlibCodec Z
         {
@@ -483,31 +477,19 @@ namespace MonoGame.Utilities
 
             return rc;
         }
-        
-        public override System.Boolean CanRead
-        {
-            get { return this._stream.CanRead; }
-        }
 
-        public override System.Boolean CanSeek
-        {
-            get { return this._stream.CanSeek; }
-        }
+        public override System.Boolean CanRead => this._stream.CanRead;
 
-        public override System.Boolean CanWrite
-        {
-            get { return this._stream.CanWrite; }
-        }
+        public override System.Boolean CanSeek => this._stream.CanSeek;
 
-        public override System.Int64 Length
-        {
-            get { return _stream.Length; }
-        }
+        public override System.Boolean CanWrite => this._stream.CanWrite;
+
+        public override System.Int64 Length => _stream.Length;
 
         public override long Position
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         internal enum StreamMode

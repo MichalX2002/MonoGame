@@ -19,13 +19,7 @@ namespace MonoGame.Utilities
         /// <returns>
         /// The IANA name for the current <see cref="Encoding"/>.
         /// </returns>
-        public override string WebName
-        {
-            get
-            {
-                return "iso-8859-1";
-            }
-        }
+        public override string WebName => "iso-8859-1";
 
 
         private char? fallbackCharacter;
@@ -38,7 +32,7 @@ namespace MonoGame.Utilities
         /// </summary>
         public char? FallbackCharacter
         {
-            get { return fallbackCharacter; }
+            get => fallbackCharacter;
             set
             {
                 fallbackCharacter = value;
@@ -246,10 +240,7 @@ namespace MonoGame.Utilities
         /// This property returns a maximum value of 256, as the encoding class
         /// only supports single byte encodings (1 byte == 256 possible values).
         /// </summary>
-        public static int CharacterCount
-        {
-            get { return byteToChar.Length; }
-        }
+        public static int CharacterCount => byteToChar.Length;
 
         #region Character Table
 

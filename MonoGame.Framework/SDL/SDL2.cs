@@ -377,13 +377,13 @@ internal static class Sdl
             public IntPtr window;
         }
         
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate void d_sdl_maximizewindow(IntPtr window);
-        public static readonly d_sdl_maximizewindow MaximizeWindow = FuncLoader.LoadFunction<d_sdl_maximizewindow>(NativeLibrary, "SDL_MaximizeWindow");
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate void d_sdl_restorewindow(IntPtr window);
-        public static readonly d_sdl_restorewindow RestoreWindow = FuncLoader.LoadFunction<d_sdl_restorewindow>(NativeLibrary, "SDL_RestoreWindow");
+        //[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        //public delegate void d_sdl_maximizewindow(IntPtr window);
+        //public static readonly d_sdl_maximizewindow MaximizeWindow = FuncLoader.LoadFunction<d_sdl_maximizewindow>(NativeLibrary, "SDL_MaximizeWindow");
+        //
+        //[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        //public delegate void d_sdl_restorewindow(IntPtr window);
+        //public static readonly d_sdl_restorewindow RestoreWindow = FuncLoader.LoadFunction<d_sdl_restorewindow>(NativeLibrary, "SDL_RestoreWindow");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_createwindow(string title, int x, int y, int w, int h, int flags);

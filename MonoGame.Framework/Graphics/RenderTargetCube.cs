@@ -30,19 +30,13 @@ namespace Microsoft.Xna.Framework.Graphics
         public RenderTargetUsage RenderTargetUsage { get; private set; }
 
         /// <inheritdoc/>
-        int IRenderTarget.Width
-        {
-            get { return size; }
-        }
+        int IRenderTarget.Width => size;
 
         /// <inheritdoc/>
-        int IRenderTarget.Height
-        {
-            get { return size; }
-        }
+        int IRenderTarget.Height => size;
 
-		public bool IsContentLost { get { return false; } }
-		public event EventHandler<EventArgs> ContentLost;
+        public bool IsContentLost => false;
+        public event EventHandler<EventArgs> ContentLost;
 		
         /// <summary>
         /// Initializes a new instance of the <see cref="RenderTargetCube"/> class.

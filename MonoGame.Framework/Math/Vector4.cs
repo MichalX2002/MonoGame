@@ -52,62 +52,41 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 0, 0, 0.
         /// </summary>
-        public static Vector4 Zero
-        {
-            get { return zero; }
-        }
+        public static Vector4 Zero => zero;
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 1, 1, 1, 1.
         /// </summary>
-        public static Vector4 One
-        {
-            get { return one; }
-        }
+        public static Vector4 One => one;
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 1, 0, 0, 0.
         /// </summary>
-        public static Vector4 UnitX
-        {
-            get { return unitX; }
-        }
+        public static Vector4 UnitX => unitX;
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 1, 0, 0.
         /// </summary>
-        public static Vector4 UnitY
-        {
-            get { return unitY; }
-        }
+        public static Vector4 UnitY => unitY;
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 0, 1, 0.
         /// </summary>
-        public static Vector4 UnitZ
-        {
-            get { return unitZ; }
-        }
+        public static Vector4 UnitZ => unitZ;
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 0, 0, 1.
         /// </summary>
-        public static Vector4 UnitW
-        {
-            get { return unitW; }
-        }
+        public static Vector4 UnitW => unitW;
 
         internal string DebugDisplayString
         {
-            get
-            {
-                return string.Concat(
+            get => string.Concat(
                     this.X.ToString(), "  ",
                     this.Y.ToString(), "  ",
                     this.Z.ToString(), "  ",
                     this.W.ToString()
                 );
-            }
         }
 
         /// <summary>

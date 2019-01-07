@@ -15,24 +15,12 @@ namespace Microsoft.Xna.Framework.Media
         /// <summary>
         /// Gets the number of Album objects in the AlbumCollection.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return this.albumCollection.Count;
-            }
-        }
+        public int Count => this.albumCollection.Count;
 
         /// <summary>
         /// Gets a value indicating whether the object is disposed.
         /// </summary>
-        public bool IsDisposed
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool IsDisposed => false;
 
         public AlbumCollection(List<Album> albums)
         {

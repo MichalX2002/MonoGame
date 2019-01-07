@@ -139,9 +139,6 @@ namespace Microsoft.Xna.Framework.Input
         /// access a gamepad index higher than this number will result in an <see cref="InvalidOperationException"/>
         /// being thrown by the API.
         /// </summary>
-        public static int MaximumGamePadCount
-        {
-            get { return PlatformGetMaxNumberOfGamePads(); }
-        }
+        public static int MaximumGamePadCount => PlatformGetMaxNumberOfGamePads();
     }
 }

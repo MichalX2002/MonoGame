@@ -13,10 +13,7 @@ namespace Microsoft.Xna.Framework.Input
         /// Gets a value indicating whether the current platform supports reading raw joystick data.
         /// </summary>
         /// <value><c>true</c> if the current platform supports reading raw joystick data; otherwise, <c>false</c>.</value>
-        public static bool IsSupported
-        {
-            get { return PlatformIsSupported; }
-        }
+        public static bool IsSupported => PlatformIsSupported;
 
         /// <summary>
         /// Gets the capabilites of the joystick.

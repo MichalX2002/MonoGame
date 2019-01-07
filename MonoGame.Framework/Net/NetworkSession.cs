@@ -868,39 +868,37 @@ namespace Microsoft.Xna.Framework.Net
 				commandQueue.Enqueue(cmd);
 			}
 		}
-		
-		#region Properties
-		public GamerCollection<NetworkGamer> AllGamers { 
-			get {
-				return _allGamers;
-			}
-		}
 
-		bool _AllowHostMigration = false;
+        #region Properties
+        public GamerCollection<NetworkGamer> AllGamers => _allGamers;
 
-		public bool AllowHostMigration { 
-			get {
-				return _AllowHostMigration;
-			}
-			set {
-				if (_AllowHostMigration != value) {
-					_AllowHostMigration = value;
-				}
-			}
-		}
+        bool _AllowHostMigration = false;
 
-		bool _AllowJoinInProgress = false;
+		public bool AllowHostMigration
+        {
+            get => _AllowHostMigration;
+            set
+            {
+                if (_AllowHostMigration != value)
+                {
+                    _AllowHostMigration = value;
+                }
+            }
+        }
 
-		public bool AllowJoinInProgress { 
-			get {
-				return _AllowJoinInProgress;
-			}
-			set {
-				if (_AllowJoinInProgress != value) {
-					_AllowJoinInProgress = value;
-				}
-			}
-		}
+        bool _AllowJoinInProgress = false;
+
+		public bool AllowJoinInProgress
+        {
+            get => _AllowJoinInProgress;
+            set
+            {
+                if (_AllowJoinInProgress != value)
+                {
+                    _AllowJoinInProgress = value;
+                }
+            }
+        }
 
         /*
 		public int BytesPerSecondReceived { 
@@ -916,11 +914,7 @@ namespace Microsoft.Xna.Framework.Net
 		}
         */
 
-		public NetworkGamer Host { 
-			get {
-				return hostingGamer;
-			}
-		}
+        public NetworkGamer Host => hostingGamer;
 
         public bool IsDisposed { get; private set; } = false;
 
@@ -941,30 +935,18 @@ namespace Microsoft.Xna.Framework.Net
 
         public GamerCollection<LocalNetworkGamer> LocalGamers { get; }
 
-        public int MaxGamers { 
-			get {
-				return maxGamers;
-			}
-			set {
-				maxGamers = value;
-			}
-		}
+        public int MaxGamers {
+            get => maxGamers;
+            set => maxGamers = value;
+        }
 
         public GamerCollection<NetworkGamer> PreviousGamers { get; }
 
         public int PrivateGamerSlots { get; set; }
 
-        public GamerCollection<NetworkGamer> RemoteGamers {
-			get {
-				return _remoteGamers;
-			}
-		}
+        public GamerCollection<NetworkGamer> RemoteGamers => _remoteGamers;
 
-		public NetworkSessionProperties SessionProperties {
-			get {
-				return sessionProperties;
-			}
-		}
+        public NetworkSessionProperties SessionProperties => sessionProperties;
 
         public NetworkSessionState SessionState { get; private set; }
 
@@ -973,26 +955,23 @@ namespace Microsoft.Xna.Framework.Net
         private TimeSpan defaultSimulatedLatency = new TimeSpan(0, 0, 0);
 
 		public TimeSpan SimulatedLatency {
-			get {
+            get =>
 #if DEBUG
                 if (networkPeer != null)
                 {
                     return networkPeer.SimulatedLatency;
                 }
 #endif
-                return defaultSimulatedLatency;				
-			}
-			set {
-                defaultSimulatedLatency = value;
+                defaultSimulatedLatency;
+            set => defaultSimulatedLatency = value;
 #if DEBUG
                 if (networkPeer != null)
                 {
                     networkPeer.SimulatedLatency = value;
                 }
 #endif
-                
-			}
-		}
+
+        }
 
         private float simulatedPacketLoss = 0.0f;
 
@@ -1086,12 +1065,8 @@ namespace Microsoft.Xna.Framework.Net
 
         public NetworkGamer NewHost { get; }
 
-        public NetworkGamer OldHost { 
-			get {
-				return oldHost;
-			}
-		}
-	}
+        public NetworkGamer OldHost => oldHost;
+    }
 
 	public class InviteAcceptedEventArgs : EventArgs
 	{
@@ -1102,12 +1077,8 @@ namespace Microsoft.Xna.Framework.Net
 
         public SignedInGamer Gamer { get; }
 
-        public bool IsCurrentSession { 
-			get {
-				return false;
-			}
-		}
-	}
+        public bool IsCurrentSession => false;
+    }
 
 	public class NetworkSessionEndedEventArgs : EventArgs
 	{

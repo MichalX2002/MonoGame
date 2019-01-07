@@ -118,30 +118,18 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public bool IsDisposed { get; private set; }
 
-        public bool IsContentLost {
-			get {
-				// We will just return IsDisposed for now
-				// as that is the only case I can see for now
-				return IsDisposed;
-			}
-		}
+        public bool IsContentLost =>
+                // We will just return IsDisposed for now
+                // as that is the only case I can see for now
+                IsDisposed;
 
-        internal bool IsRenderTargetBound
-        {
-            get
-            {
-                return RenderTargetCount > 0;
-            }
-        }
+        internal bool IsRenderTargetBound => RenderTargetCount > 0;
 
         internal DepthFormat ActiveDepthFormat
         {
-            get
-            {
-                return IsRenderTargetBound
+            get => IsRenderTargetBound
                     ? _currentRenderTargetBindings[0].DepthFormat
                     : PresentationParameters.DepthStencilFormat;
-            }
         }
 
         public GraphicsAdapter Adapter
@@ -156,7 +144,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// The rendering information for debugging and profiling.
         /// The metrics are reset every frame after draw within <see cref="Present"/>. 
         /// </summary>
-        public GraphicsMetrics Metrics { get { return _graphicsMetrics; } set { _graphicsMetrics = value; } }
+        public GraphicsMetrics Metrics { get => _graphicsMetrics; set => _graphicsMetrics = value; }
 
         /// <summary>
         /// Access debugging APIs for the graphics subsystem.
@@ -320,10 +308,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public RasterizerState RasterizerState
         {
-            get
-            {
-                return _rasterizerState;
-            }
+            get => _rasterizerState;
 
             set
             {
@@ -366,7 +351,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </remarks>
         public Color BlendFactor
         {
-            get { return _blendFactor; }
+            get => _blendFactor;
             set
             {
                 if (_blendFactor == value)
@@ -378,8 +363,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public BlendState BlendState
         {
-			get { return _blendState; }
-			set
+            get => _blendState;
+            set
             {
                 if (value == null)
                     throw new ArgumentNullException(nameof(value));
@@ -388,7 +373,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 if (_blendState == value)
                     return;
 
-				_blendState = value;
+                _blendState = value;
 
                 // Static state properties never actually get bound;
                 // instead we use our GraphicsDevice-specific version of them.
@@ -412,11 +397,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 _blendStateDirty = true;
             }
-		}
+        }
 
         public DepthStencilState DepthStencilState
         {
-            get { return _depthStencilState; }
+            get => _depthStencilState;
             set
             {
                 if (value == null)
@@ -638,21 +623,9 @@ namespace Microsoft.Xna.Framework.Graphics
             EventHelpers.Raise(this, DeviceReset, EventArgs.Empty);
         }
 
-        public DisplayMode DisplayMode
-        {
-            get
-            {
-                return Adapter.CurrentDisplayMode;
-            }
-        }
+        public DisplayMode DisplayMode => Adapter.CurrentDisplayMode;
 
-        public GraphicsDeviceStatus GraphicsDeviceStatus
-        {
-            get
-            {
-                return GraphicsDeviceStatus.Normal;
-            }
-        }
+        public GraphicsDeviceStatus GraphicsDeviceStatus => GraphicsDeviceStatus.Normal;
 
         public PresentationParameters PresentationParameters
         {
@@ -662,10 +635,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public Viewport Viewport
         {
-            get
-            {
-                return _viewport;
-            }
+            get => _viewport;
 
             set
             {
@@ -677,10 +647,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public Rectangle ScissorRectangle
         {
-            get
-            {
-                return _scissorRectangle;
-            }
+            get => _scissorRectangle;
 
             set
             {
@@ -881,11 +848,11 @@ namespace Microsoft.Xna.Framework.Graphics
             _indexBufferDirty = true;
         }
 
-        public IndexBufferBase Indices { set { SetIndexBuffer(value); } get { return _indexBuffer; } }
+        public IndexBufferBase Indices { set => SetIndexBuffer(value); get => _indexBuffer; }
 
         internal Shader VertexShader
         {
-            get { return _vertexShader; }
+            get => _vertexShader;
 
             set
             {
@@ -900,7 +867,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal Shader PixelShader
         {
-            get { return _pixelShader; }
+            get => _pixelShader;
 
             set
             {

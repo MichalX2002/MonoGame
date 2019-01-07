@@ -452,17 +452,16 @@ namespace Microsoft.Xna.Framework.Net
         /// </summary>
         public TimeSpan SimulatedLatency
         {
-            get
-            {                
+            get =>
 #if DEBUG
 		if (peer != null)
                 	return new TimeSpan(0,0,(int)peer.Configuration.SimulatedAverageLatency);
 		else
 			return new TimeSpan(0);
 #else
-                return new TimeSpan(0);
+                new TimeSpan(0);
 #endif
-            }
+
             set
             {
 #if DEBUG
@@ -479,17 +478,16 @@ namespace Microsoft.Xna.Framework.Net
         /// </summary>
         public float SimulatedPacketLoss
         {
-            get
-            {
+            get =>
 #if DEBUG
 		if (peer != null)
                 	return peer.Configuration.SimulatedLoss;
 		else
 			return 0.0f;
 #else
-                return 0.0f;
+                0.0f;
 #endif
-            }
+
             set
             {
 #if DEBUG
@@ -498,9 +496,9 @@ namespace Microsoft.Xna.Framework.Net
 		}
 #endif
             }
-        }		
+        }
 
-		internal void DiscoverPeers ()
+        internal void DiscoverPeers ()
 		{
 			peer.DiscoverLocalPeers (port);			    
 		}
@@ -748,6 +746,6 @@ namespace Microsoft.Xna.Framework.Net
 			}
 		}
 
-        internal bool IsReady { get { return this.peer != null; } }
-	}
+        internal bool IsReady => this.peer != null;
+    }
 }

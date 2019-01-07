@@ -44,27 +44,21 @@ namespace Microsoft.Xna.Framework.Graphics
         #endregion Fields
 
         #region Properties
-        
-        public float AspectRatio {
-            get { return width / (float)Height; }
-        }
+
+        public float AspectRatio => width / (float)Height;
 
         public SurfaceFormat Format { get; }
 
         public int Height { get; }
 
-        public int Width {
-            get { return this.width; }
-        }
-        
-        public Rectangle TitleSafeArea {
-            get { return GraphicsDevice.GetTitleSafeArea(0, 0, width, Height); }
-        }
+        public int Width => this.width;
+
+        public Rectangle TitleSafeArea => GraphicsDevice.GetTitleSafeArea(0, 0, width, Height);
 
         #endregion Properties
 
         #region Constructors
-        
+
         internal DisplayMode(int width, int height, SurfaceFormat format)
         {
             this.width = width;

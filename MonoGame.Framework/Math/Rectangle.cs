@@ -45,34 +45,22 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Returns the x coordinate of the left edge of this <see cref="Rectangle"/>.
         /// </summary>
-        public int Left
-        {
-            get { return X; }
-        }
+        public int Left => X;
 
         /// <summary>
         /// Returns the x coordinate of the right edge of this <see cref="Rectangle"/>.
         /// </summary>
-        public int Right
-        {
-            get { return (X + Width); }
-        }
+        public int Right => (X + Width);
 
         /// <summary>
         /// Returns the y coordinate of the top edge of this <see cref="Rectangle"/>.
         /// </summary>
-        public int Top
-        {
-            get { return Y; }
-        }
+        public int Top => Y;
 
         /// <summary>
         /// Returns the y coordinate of the bottom edge of this <see cref="Rectangle"/>.
         /// </summary>
-        public int Bottom
-        {
-            get { return (Y + Height); }
-        }
+        public int Bottom => (Y + Height);
 
         /// <summary>
         /// Whether or not this <see cref="Rectangle"/> has a <see cref="Width"/> and
@@ -113,13 +101,7 @@ namespace Microsoft.Xna.Framework
         /// If <see cref="Width"/> or <see cref="Height"/> is an odd number,
         /// the center point will be rounded down.
         /// </remarks>
-        public Point Center
-        {
-            get
-            {
-                return new Point(X + (Width / 2), Y + (Height / 2));
-            }
-        }
+        public Point Center => new Point(X + (Width / 2), Y + (Height / 2));
 
         #endregion
 

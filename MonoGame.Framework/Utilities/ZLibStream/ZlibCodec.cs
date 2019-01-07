@@ -97,7 +97,7 @@ namespace MonoGame.Utilities
         /// <summary>
         /// The Adler32 checksum on the data transferred through the codec so far. You probably don't need to look at this.
         /// </summary>
-        internal int Adler32 { get { return (int)_Adler32; } }
+        internal int Adler32 => (int)_Adler32;
 
 
         /// <summary>

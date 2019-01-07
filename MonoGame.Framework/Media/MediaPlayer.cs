@@ -33,39 +33,33 @@ namespace Microsoft.Xna.Framework.Media
 
         public static bool IsMuted
         {
-            get { return PlatformGetIsMuted(); }
-            set { PlatformSetIsMuted(value); }
+            get => PlatformGetIsMuted();
+            set => PlatformSetIsMuted(value);
         }
 
-        public static bool IsRepeating 
+        public static bool IsRepeating
         {
-            get { return PlatformGetIsRepeating(); }
-            set { PlatformSetIsRepeating(value); }
+            get => PlatformGetIsRepeating();
+            set => PlatformSetIsRepeating(value);
         }
 
         public static bool IsShuffled
         {
-            get { return PlatformGetIsShuffled(); }
-            set { PlatformSetIsShuffled(value); }
+            get => PlatformGetIsShuffled();
+            set => PlatformSetIsShuffled(value);
         }
 
         public static bool IsVisualizationEnabled
         {
-            get { return PlatformGetIsVisualizationEnabled(); }
-            set { PlatformSetIsVisualizationEnabled(value); }
+            get => PlatformGetIsVisualizationEnabled();
+            set => PlatformSetIsVisualizationEnabled(value);
         }
 
-        public static TimeSpan PlayPosition
-        {
-            get { return PlatformGetPlayPosition(); }
-#if (IOS && !TVOS) || ANDROID
-            set { PlatformSetPlayPosition(value); }
-#endif
-        }
+        public static TimeSpan PlayPosition => PlatformGetPlayPosition();
 
         public static MediaState State
         {
-            get { return PlatformGetState(); }
+            get => PlatformGetState();
             private set
             {
                 if (_state != value)
@@ -76,18 +70,12 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
-        public static bool GameHasControl
-        {
-            get
-            {
-                return PlatformGetGameHasControl();
-            }
-        }
-		
+        public static bool GameHasControl => PlatformGetGameHasControl();
+
 
         public static float Volume
         {
-            get { return PlatformGetVolume(); }
+            get => PlatformGetVolume();
             set
             {
                 var volume = MathHelper.Clamp(value, 0, 1);
@@ -97,7 +85,7 @@ namespace Microsoft.Xna.Framework.Media
 
         public static float Pitch
         {
-            get { return PlatformGetPitch(); }
+            get => PlatformGetPitch();
             set
             {
                 var pitch = MathHelper.Clamp(value, -1, 1);
@@ -105,15 +93,9 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
-        public static bool IsRunningSlowly
-        {
-            get { return PlatformGetIsRunningSlowly(); }
-        }
+        public static bool IsRunningSlowly => PlatformGetIsRunningSlowly();
 
-        public static float UpdateTime
-        {
-            get { return PlatformGetUpdateTime(); }
-        }
+        public static float UpdateTime => PlatformGetUpdateTime();
 
         #endregion
 

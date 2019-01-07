@@ -12,24 +12,12 @@ namespace Microsoft.Xna.Framework.Media
         /// <summary>
         /// Gets the AlbumCollection for the Genre.
         /// </summary>
-        public AlbumCollection Albums
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public AlbumCollection Albums => throw new NotImplementedException();
 
         /// <summary>
         /// Gets a value indicating whether the object is disposed.
         /// </summary>
-        public bool IsDisposed
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public bool IsDisposed => true;
 
         /// <summary>
         /// Gets the name of the Genre.
@@ -39,13 +27,7 @@ namespace Microsoft.Xna.Framework.Media
         /// <summary>
         /// Gets the SongCollection for the Genre.
         /// </summary>
-        public SongCollection Songs
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public SongCollection Songs => throw new NotImplementedException();
 
         public Genre(string genre)
         {

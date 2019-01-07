@@ -42,7 +42,7 @@ namespace Microsoft.Xna.Framework
         /// </summary>
         public Matrix Matrix
         {
-            get { return this._matrix; }
+            get => this._matrix;
             set
             {
                 this._matrix = value;
@@ -54,50 +54,32 @@ namespace Microsoft.Xna.Framework
         /// <summary>
         /// Gets the near plane of the frustum.
         /// </summary>
-        public Plane Near
-        {
-            get { return this._planes[0]; }
-        }
+        public Plane Near => this._planes[0];
 
         /// <summary>
         /// Gets the far plane of the frustum.
         /// </summary>
-        public Plane Far
-        {
-            get { return this._planes[1]; }
-        }
+        public Plane Far => this._planes[1];
 
         /// <summary>
         /// Gets the left plane of the frustum.
         /// </summary>
-        public Plane Left
-        {
-            get { return this._planes[2]; }
-        }
+        public Plane Left => this._planes[2];
 
         /// <summary>
         /// Gets the right plane of the frustum.
         /// </summary>
-        public Plane Right
-        {
-            get { return this._planes[3]; }
-        }
+        public Plane Right => this._planes[3];
 
         /// <summary>
         /// Gets the top plane of the frustum.
         /// </summary>
-        public Plane Top
-        {
-            get { return this._planes[4]; }
-        }
+        public Plane Top => this._planes[4];
 
         /// <summary>
         /// Gets the bottom plane of the frustum.
         /// </summary>
-        public Plane Bottom
-        {
-            get { return this._planes[5]; }
-        }
+        public Plane Bottom => this._planes[5];
 
         #endregion
 
@@ -105,9 +87,7 @@ namespace Microsoft.Xna.Framework
 
         internal string DebugDisplayString
         {
-            get
-            {
-                return string.Concat(
+            get => string.Concat(
                     "Near( ", this._planes[0].DebugDisplayString, " )  \r\n",
                     "Far( ", this._planes[1].DebugDisplayString, " )  \r\n",
                     "Left( ", this._planes[2].DebugDisplayString, " )  \r\n",
@@ -115,7 +95,6 @@ namespace Microsoft.Xna.Framework
                     "Top( ", this._planes[4].DebugDisplayString, " )  \r\n",
                     "Bottom( ", this._planes[5].DebugDisplayString, " )  "
                     );
-            }
         }
 
         #endregion

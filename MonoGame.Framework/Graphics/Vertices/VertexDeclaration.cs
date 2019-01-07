@@ -130,10 +130,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// Gets the internal vertex elements array.
         /// </summary>
         /// <value>The internal vertex elements array.</value>
-        internal VertexElement[] InternalVertexElements
-        {
-            get { return _data.Elements; }
-        }
+        internal VertexElement[] InternalVertexElements => _data.Elements;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VertexDeclaration"/> class.
@@ -236,10 +233,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// Gets the size of a vertex (including padding) in bytes.
         /// </summary>
         /// <value>The size of a vertex (including padding) in bytes.</value>
-        public int VertexStride
-		{
-			get { return _data.VertexStride; }
-		}
+        public int VertexStride => _data.VertexStride;
 
         /// <summary>
         /// Determines whether the specified <see cref="object"/> is equal to this instance.

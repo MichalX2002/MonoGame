@@ -35,15 +35,9 @@ namespace Microsoft.Xna.Framework.Graphics
             AllTextures.Add(this);
         }
 
-        public SurfaceFormat Format
-		{
-			get { return _format; }
-		}
-		
-		public int LevelCount
-		{
-			get { return _levelCount; }
-		}
+        public SurfaceFormat Format => _format;
+
+        public int LevelCount => _levelCount;
 
         internal static int CalculateMipLevels(int width, int height = 0, int depth = 0)
         {

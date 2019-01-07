@@ -14,14 +14,9 @@ namespace Microsoft.Xna.Framework.Net
 
         public NetworkSessionState NewState { get; }
 
-        public NetworkSessionState OldState
-		{
-			get { return oldState; }
-		}
-		
-		public CommandEventType Command {
-			get { return CommandEventType.SessionStateChange; }
-		}		
-	}
+        public NetworkSessionState OldState => oldState;
+
+        public CommandEventType Command => CommandEventType.SessionStateChange;
+    }
 }
 

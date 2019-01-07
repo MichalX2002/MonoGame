@@ -93,12 +93,9 @@ namespace Microsoft.Xna.Framework.GamerServices
         [DataMember]
         public bool IsDisposed { get; private set; }
 
-        public Object Tag 
+        public Object Tag
         {
-            get
-            {
-                return _tag;
-            }
+            get => _tag;
             set
             {
                 if (_tag != value)
@@ -110,17 +107,11 @@ namespace Microsoft.Xna.Framework.GamerServices
 
         public static SignedInGamerCollection SignedInGamers { get; } = new SignedInGamerCollection();
 
-        public LeaderboardWriter LeaderboardWriter 
-        { 
-            get
-            {
-                return _leaderboardWriter;
-            }
+        public LeaderboardWriter LeaderboardWriter
+        {
+            get => _leaderboardWriter;
 
-            internal set 
-            {
-                _leaderboardWriter = value;
-            }
+            internal set => _leaderboardWriter = value;
         }
         #endregion
     }

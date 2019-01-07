@@ -63,19 +63,11 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        public bool IsStopping
-        {
-            get
-            {
+        public bool IsStopping =>
                 // TODO: Implement me!
-                return false;
-            }
-        }
+                false;
 
-        public bool IsPreparing 
-        {
-            get { return false; }
-        }
+        public bool IsPreparing => false;
 
         public bool IsPrepared { get; internal set; }
 

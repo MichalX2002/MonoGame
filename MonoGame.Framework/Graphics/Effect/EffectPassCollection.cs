@@ -40,10 +40,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		    }
         }
 
-        public int Count
-        {
-            get { return _passes.Length; }
-        }
+        public int Count => _passes.Length;
 
         public Enumerator GetEnumerator()
         {

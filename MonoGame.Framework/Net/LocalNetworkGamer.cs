@@ -209,16 +209,16 @@ namespace Microsoft.Xna.Framework.Net
 			}
 		}
 
-		public SignedInGamer SignedInGamer { 
-			get {
-				return sig;
-			}
-			
-			internal set {
-				sig = value;
-				DisplayName = sig.DisplayName;
-				Gamertag = sig.Gamertag;
-			}
-		}
-	}
+		public SignedInGamer SignedInGamer
+        {
+            get => sig;
+
+            internal set
+            {
+                sig = value;
+                DisplayName = sig.DisplayName;
+                Gamertag = sig.Gamertag;
+            }
+        }
+    }
 }

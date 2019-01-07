@@ -29,10 +29,7 @@ namespace MonoGame.Utilities
         /// This is either the total number of bytes read, or the total number of
         /// bytes written, depending on the direction of this stream.
         /// </remarks>
-        public Int64 TotalBytesSlurped
-        {
-            get { return _crc32.TotalBytesRead; }
-        }
+        public Int64 TotalBytesSlurped => _crc32.TotalBytesRead;
 
         /// <summary>
         /// Provides the current CRC for all blocks slurped in.
@@ -42,10 +39,7 @@ namespace MonoGame.Utilities
         /// through the stream.  read this property after all reads or writes
         /// to get an accurate CRC for the entire stream.
         /// </remarks>
-        public Int32 Crc
-        {
-            get { return _crc32.Crc32Result; }
-        }
+        public Int32 Crc => _crc32.Crc32Result;
 
         /// <summary>
         /// Indicates whether the underlying stream will be left open when
@@ -59,10 +53,7 @@ namespace MonoGame.Utilities
         /// <summary>
         /// Indicates whether the stream supports reading.
         /// </summary>
-        public override bool CanRead
-        {
-            get { return _innerStream.CanRead; }
-        }
+        public override bool CanRead => _innerStream.CanRead;
 
         /// <summary>
         /// Indicates whether the stream supports seeking.
@@ -70,29 +61,20 @@ namespace MonoGame.Utilities
         /// <remarks>
         /// Always returns false.
         /// </remarks>
-        public override bool CanSeek
-        {
-            get { return false; }
-        }
+        public override bool CanSeek => false;
 
         /// <summary>
         /// Indicates whether the stream supports writing.
         /// </summary>
-        public override bool CanWrite
-        {
-            get { return _innerStream.CanWrite; }
-        }
+        public override bool CanWrite => _innerStream.CanWrite;
 
         /// <summary>
         /// Returns the length of the underlying stream.
         /// </summary>
         public override long Length
         {
-            get
-            {
-                return _lengthLimit == UnsetLengthLimit ?
+            get => _lengthLimit == UnsetLengthLimit ?
                     _innerStream.Length : _lengthLimit;
-            }
         }
 
         /// <summary>
@@ -101,8 +83,8 @@ namespace MonoGame.Utilities
         /// </summary>
         public override long Position
         {
-            get { return _crc32.TotalBytesRead; }
-            set { throw new NotSupportedException(); }
+            get => _crc32.TotalBytesRead;
+            set => throw new NotSupportedException();
         }
 
         /// <summary>
