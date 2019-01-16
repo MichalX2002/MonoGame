@@ -14,10 +14,9 @@ namespace MonoGame.Tools.Pipeline
 {
     partial class MainWindow : Form, IView
     {
-#pragma warning disable 649
         public EventHandler<EventArgs> RecentChanged;
         public EventHandler<EventArgs> TitleChanged;
-#pragma warning restore 649
+
         public const string TitleBase = "MonoGame Pipeline Tool";
         public static MainWindow Instance;
 
@@ -25,14 +24,18 @@ namespace MonoGame.Tools.Pipeline
         private Clipboard _clipboard;
         private ContextMenu _contextMenu;
         private FileFilter _mgcbFileFilter, _allFileFilter, _xnaFileFilter;
-        private string[] monoLocations = {
+
+        private string[] monoLocations = 
+            {
             "/usr/bin/mono",
             "/usr/local/bin/mono",
             "/Library/Frameworks/Mono.framework/Versions/Current/bin/mono",
             Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "mono"),
         };
 
+#if MONOMAC
         int setw = 0;
+#endif
 
         public MainWindow()
         {
@@ -58,7 +61,7 @@ namespace MonoGame.Tools.Pipeline
                 }
             }
 
-            #if MONOMAC
+#if MONOMAC
             splitterVertical.PositionChanged += delegate {
                 setw++;
                 if (setw > 2)
@@ -67,7 +70,7 @@ namespace MonoGame.Tools.Pipeline
                     setw = 0;
                 }
             };
-            #endif
+#endif
 
             _contextMenu = new ContextMenu();
             projectControl.SetContextMenu(_contextMenu);
@@ -84,7 +87,7 @@ namespace MonoGame.Tools.Pipeline
             base.OnClosing(e);
         }
 
-        #region IView implements
+#region IView implements
 
         public void Attach(IController controller)
         {
@@ -497,9 +500,9 @@ namespace MonoGame.Tools.Pipeline
             _clipboard.Text = text;
         }
 
-        #endregion
+#endregion
 
-        #region Commands
+#region Commands
 
         private void CmdNew_Executed(object sender, EventArgs e)
         {
@@ -686,7 +689,7 @@ namespace MonoGame.Tools.Pipeline
             PipelineController.Instance.RebuildItems();
         }
 
-        #endregion
+#endregion
 
     }
 }

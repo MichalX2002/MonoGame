@@ -74,8 +74,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
 
             lock (_locker)
             {
-                ContentStats stats;
-                _statsBySource.TryGetValue(sourceFile, out stats);
+                _statsBySource.TryGetValue(sourceFile, out ContentStats stats);
 
                 stats.SourceFile = sourceFile;
                 stats.DestFile = destFile;
@@ -106,8 +105,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                 if (_statsBySource.ContainsKey(sourceFile))
                     return;
 
-                ContentStats stats;
-                if (PreviousStats.TryGetStats(sourceFile, out stats))
+                if (PreviousStats.TryGetStats(sourceFile, out ContentStats stats))
                     _statsBySource[stats.SourceFile] = stats;
             }
         }
@@ -180,7 +178,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                         collection._statsBySource.Add(stats.SourceFile, stats);
                 }
             }
-            catch (Exception ex)
+            catch // (Exception ex)
             {
                 // Assume the file didn't exist or was incorrectly
                 // formatted... either way we start from fresh data.

@@ -32,7 +32,6 @@ namespace MonoGame.Framework
 
         private WinFormsGamePlatform _platform;
         
-        private FormWindowState _lastWindowState;
         private bool _isResizable;
         private bool _isBorderless;
         private bool _isMouseHidden;
