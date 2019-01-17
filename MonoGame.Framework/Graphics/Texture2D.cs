@@ -125,9 +125,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public int Height => _bounds.Height;
 
         /// <summary>
-        /// Changes the pixels of the texture
-        /// Throws ArgumentNullException if data is null
-        /// Throws ArgumentException if arraySlice is greater than 0, and the GraphicsDevice does not support texture arrays
+        /// Changes the pixels of the texture.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="level">Layer of the texture to modify</param>
@@ -136,6 +134,12 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="data">New data for the texture</param>
         /// <param name="startIndex">Start position of data</param>
         /// <param name="elementCount"></param>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="data"/> is null.</exception>
+        /// <exception cref="ArgumentException">
+        ///  Throws if <paramref name="arraySlice"/> is greater than 0, 
+        ///  <paramref name="elementCount"/> is more than <paramref name="data"/>.Length,
+        ///  and the GraphicsDevice does not support texture arrays.
+        /// </exception>
         public void SetData<T>(int level, int arraySlice, Rectangle? rect, T[] data, int startIndex, int elementCount) where T : struct
         {
             ValidateParams(level, arraySlice, rect, data, startIndex, elementCount, out Rectangle checkedRect);
@@ -143,7 +147,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         /// <summary>
-        /// Changes the pixels of the texture
+        /// Changes the pixels of the texture.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="level">Layer of the texture to modify</param>
@@ -161,7 +165,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         /// <summary>
-        /// Changes the texture's pixels
+        /// Changes the texture's pixels.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="data">New data for the texture</param>
@@ -174,7 +178,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         /// <summary>
-        /// Changes the texture's pixels
+        /// Changes the texture's pixels.
         /// </summary>
         /// <typeparam name="T">New data for the texture</typeparam>
         /// <param name="data"></param>
@@ -185,7 +189,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         /// <summary>
-        /// Changes the texture's pixels
+        /// Changes the texture's pixels.
         /// </summary>
         /// <param name="data">Image data</param>
         /// <param name="elementStartIndex">start index (not in bytes)</param>
@@ -201,9 +205,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         /// <summary>
-        /// Retrieves the contents of the texture
-        /// Throws ArgumentException if data is null, data.length is too short or
-        /// if arraySlice is greater than 0 and the GraphicsDevice doesn't support texture arrays
+        /// Retrieves the contents of the texture.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="level">Layer of the texture</param>
@@ -212,6 +214,12 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="data">Destination array for the data</param>
         /// <param name="startIndex">Starting index of data where to write the pixel data</param>
         /// <param name="elementCount">Number of pixels to read</param>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="data"/> is null.</exception>
+        /// <exception cref="ArgumentException">
+        ///  Throws if <paramref name="arraySlice"/> is greater than 0, 
+        ///  <paramref name="elementCount"/> is more than <paramref name="data"/>.Length,
+        ///  and the GraphicsDevice does not support texture arrays.
+        /// </exception>
         public void GetData<T>(int level, int arraySlice, Rectangle? rect, T[] data, int startIndex, int elementCount) where T : struct
         {
             ValidateParams(level, arraySlice, rect, data, startIndex, elementCount, out Rectangle checkedRect);
@@ -219,9 +227,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         /// <summary>
-        /// Retrieves the contents of the texture
-        /// Throws ArgumentException if data is null, data.length is too short or
-        /// if arraySlice is greater than 0 and the GraphicsDevice doesn't support texture arrays
+        /// Retrieves the contents of the texture.
         /// </summary>
         /// <param name="level">Layer of the texture</param>
         /// <param name="arraySlice">Index inside the texture array</param>
@@ -230,9 +236,14 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="startIndex">Starting index of data where to write the pixel data</param>
         /// <param name="elementSize">per-element size in bytes</param>
         /// <param name="elementCount">Number of pixels to read</param>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="buffer"/> is zero.</exception>
+        /// <exception cref="ArgumentException">
+        ///  Throws if <paramref name="arraySlice"/> is greater than 0,
+        ///  and the GraphicsDevice does not support texture arrays.
+        /// </exception>
         public void GetData(int level, int arraySlice, Rectangle rect, IntPtr buffer, int startIndex, int elementSize, int elementCount)
         {
-            if (buffer == null) throw new ArgumentNullException(nameof(buffer)); 
+            if (buffer == IntPtr.Zero) throw new ArgumentNullException(nameof(buffer)); 
             if (elementSize <= 0) throw new ArgumentOutOfRangeException(nameof(elementSize));
             if (elementCount <= 0) throw new ArgumentOutOfRangeException(nameof(elementCount));
 
@@ -240,9 +251,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         /// <summary>
-        /// Retrieves the contents of the texture
-        /// Throws ArgumentException if data is null, data.length is too short or
-        /// if arraySlice is greater than 0 and the GraphicsDevice doesn't support texture arrays
+        /// Retrieves the contents of the texture.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="level">Layer of the texture</param>
@@ -250,32 +259,40 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="data">Destination array for the texture data</param>
         /// <param name="startIndex">First position in data where to write the pixel data</param>
         /// <param name="elementCount">Number of pixels to read</param>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="data"/> is zero.</exception>
+        /// <exception cref="ArgumentException">
+        ///  Throws if <paramref name="elementCount"/> is more than <paramref name="data"/>.Length,
+        ///  and the GraphicsDevice does not support texture arrays.
+        /// </exception>
         public void GetData<T>(int level, Rectangle? rect, T[] data, int startIndex, int elementCount) where T : struct
         {
             this.GetData(level, 0, rect, data, startIndex, elementCount);
         }
 
         /// <summary>
-        /// Retrieves the contents of the texture
-        /// Throws ArgumentException if data is null, data.length is too short or
-        /// if arraySlice is greater than 0 and the GraphicsDevice doesn't support texture arrays
+        /// Retrieves the contents of the texture.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="data">Destination array for the texture data</param>
         /// <param name="startIndex">First position in data where to write the pixel data</param>
         /// <param name="elementCount">Number of pixels to read</param>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="data"/> is null.</exception>
+        /// <exception cref="ArgumentException">
+        ///  Throws if <paramref name="elementCount"/> is more than <paramref name="data"/>.Length,
+        ///  and the GraphicsDevice does not support texture arrays.
+        /// </exception>
 		public void GetData<T>(T[] data, int startIndex, int elementCount) where T : struct
         {
             this.GetData(0, null, data, startIndex, elementCount);
         }
 
         /// <summary>
-        /// Retrieves the contents of the texture
-        /// Throws ArgumentException if data is null, data.length is too short or
-        /// if arraySlice is greater than 0 and the GraphicsDevice doesn't support texture arrays
+        /// Retrieves the contents of the texture.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="data">Destination array for the texture data</param>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="data"/> is null.</exception>
+        /// <exception cref="ArgumentException">Throws if the GraphicsDevice does not support texture arrays.</exception>
         public void GetData<T>(T[] data) where T : struct
         {
             if (data == null)
@@ -289,9 +306,10 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="graphicsDevice">The graphics device where the texture will be created.</param>
         /// <param name="stream">The stream from which to read the image data.</param>
         /// <returns>The <see cref="SurfaceFormat.Rgba32"/> texture created from the image stream.</returns>
-        /// <remarks>Note that different image decoders may generate slight differences between platforms, but perceptually 
-        /// the images should be identical. This call does not premultiply the image alpha, but areas of zero alpha will
-        /// result in black color data.
+        /// <remarks>
+        ///  Note that different image decoders may generate slight differences between platforms, but perceptually 
+        ///  the images should be identical. This call does not premultiply the image alpha, but areas of zero alpha will
+        ///  result in black color data.
         /// </remarks>
         public static Texture2D FromStream(GraphicsDevice graphicsDevice, Stream stream)
         {

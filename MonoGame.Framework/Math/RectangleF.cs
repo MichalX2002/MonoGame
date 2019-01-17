@@ -145,12 +145,12 @@ namespace Microsoft.Xna.Framework
         /// </summary>
         /// <param name="position">The top-left point.</param>
         /// <param name="size">The extents.</param>
-        public RectangleF(PointF position, PointF size)
+        public RectangleF(PointF position, SizeF size)
         {
             X = position.X;
             Y = position.Y;
-            Width = size.X;
-            Height = size.Y;
+            Width = size.Width;
+            Height = size.Height;
         }
 
         /// <summary>
