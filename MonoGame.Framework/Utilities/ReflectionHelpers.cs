@@ -12,27 +12,20 @@ namespace MonoGame.Utilities
         public static bool IsValueType(Type targetType)
         {
             if (targetType == null)
-            {
-                throw new NullReferenceException("Must supply the targetType parameter");
-            }
-#if NET45            
-            return targetType.GetTypeInfo().IsValueType;
-#else
+                throw new ArgumentNullException(nameof(targetType));
             return targetType.IsValueType;
-#endif
+        }
+
+        public static bool IsValueType<T>()
+        {
+            return IsValueType(typeof(T));
         }
 
         public static Type GetBaseType(Type targetType)
         {
             if (targetType == null)
-            {
-                throw new NullReferenceException("Must supply the targetType parameter");
-            }
-#if NET45            
-            return targetType.GetTypeInfo().BaseType;
-#else
+                throw new ArgumentNullException(nameof(targetType));
             return targetType.BaseType;
-#endif
         }
 
         /// <summary>
@@ -41,86 +34,51 @@ namespace MonoGame.Utilities
         public static Assembly GetAssembly(Type targetType)
         {
             if (targetType == null)
-            {
-                throw new NullReferenceException("Must supply the targetType parameter");
-            }
-#if NET45            
-            return targetType.GetTypeInfo().Assembly;
-#else
+                throw new ArgumentNullException(nameof(targetType));
             return targetType.Assembly;
-#endif
         }
 
         /// <summary>
         /// Returns true if the given type represents a non-object type that is not abstract.
         /// </summary>
-        public static bool IsConcreteClass(Type t)
+        public static bool IsConcreteClass(Type type)
         {
-            if (t == null)
-            {
-                throw new NullReferenceException("Must supply the t (type) parameter");
-            }
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
 
-            if (t == typeof(object))
+            if (type == typeof(object))
                 return false;
-#if NET45            
-            var ti = t.GetTypeInfo();
-            if (ti.IsClass && !ti.IsAbstract)
+
+            if (type.IsClass && !type.IsAbstract)
                 return true;
-#else            
-            if (t.IsClass && !t.IsAbstract)
-                return true;
-#endif
+
             return false;
         }
 
         public static MethodInfo GetMethodInfo(Type type, string methodName)
         {
-#if NET45            
             return type.GetTypeInfo().GetDeclaredMethod(methodName);
-#else
-            return type.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
-#endif
         }
 
         public static MethodInfo GetPropertyGetMethod(PropertyInfo property)
         {
             if (property == null)
-            {
-                throw new NullReferenceException("Must supply the property parameter");
-            }
-
-#if NET45            
+                throw new ArgumentNullException(nameof(property));
             return property.GetMethod;
-#else
-            return property.GetGetMethod();
-#endif
         }
 
         public static MethodInfo GetPropertySetMethod(PropertyInfo property)
         {
             if (property == null)
-            {
-                throw new NullReferenceException("Must supply the property parameter");
-            }
-
-#if NET45            
+                throw new ArgumentNullException(nameof(property));
             return property.SetMethod;
-#else
-            return property.GetSetMethod();
-#endif
         }
 
         public static T GetCustomAttribute<T>(MemberInfo member) where T : Attribute
         {
             if (member == null)
-                throw new NullReferenceException("Must supply the member parameter");
-
-#if NET45            
+                throw new ArgumentNullException(nameof(member));
             return member.GetCustomAttribute(typeof(T)) as T;
-#else
-            return Attribute.GetCustomAttribute(member, typeof(T)) as T;
-#endif
         }
 
         /// <summary>
@@ -131,12 +89,9 @@ namespace MonoGame.Utilities
         public static bool PropertyIsPublic(PropertyInfo property)
         {
             if (property == null)
-            {
-                throw new NullReferenceException("Must supply the property parameter");
-            }
+                throw new ArgumentNullException(nameof(property));
 
             var getMethod = GetPropertyGetMethod(property);
-
             if (getMethod == null || !getMethod.IsPublic)
                 return false;
 
@@ -164,15 +119,13 @@ namespace MonoGame.Utilities
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
+
             if (objectType == null)
                 throw new ArgumentNullException(nameof(objectType));
-#if NET45
-            if (type.GetTypeInfo().IsAssignableFrom(objectType.GetTypeInfo()))
-                return true;
-#else
+
             if (type.IsAssignableFrom(objectType))
-                return true;     
-#endif
+                return true;
+
             return false;
         }
     }

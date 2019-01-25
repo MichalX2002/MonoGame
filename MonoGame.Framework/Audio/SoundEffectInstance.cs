@@ -6,12 +6,16 @@ using System;
 
 namespace Microsoft.Xna.Framework.Audio
 {
-    /// <summary>Represents a single instance of a playing, paused, or stopped sound.</summary>
+    /// <summary>
+    ///  Represents a single instance of a playing, paused, or stopped sound.
+    ///  </summary>
     /// <remarks>
-    /// <para>SoundEffectInstances are created through SoundEffect.CreateInstance() and used internally by SoundEffect.Play()</para>
+    /// SoundEffectInstances are created through SoundEffect.CreateInstance() and used internally by SoundEffect.Play().
     /// </remarks>
     public partial class SoundEffectInstance : IDisposable
     {
+        public static bool UseXnaPitch { get; set; } = false;
+
         internal bool _isPooled = true;
         internal bool _isXAct;
         internal bool _isDynamic;
@@ -96,8 +100,7 @@ namespace Microsoft.Xna.Framework.Audio
             _pitch = 0.0f;            
         }
 
-        internal SoundEffectInstance(byte[] buffer, int sampleRate, int channels)
-            : this()
+        internal SoundEffectInstance(byte[] buffer, int sampleRate, int channels) : this()
         {
             PlatformInitialize(buffer, sampleRate, channels);
         }
@@ -108,7 +111,9 @@ namespace Microsoft.Xna.Framework.Audio
         /// </summary>
         internal static float XnaPitchToAlPitch(float xnaPitch)
         {
-            return (float)Math.Pow(2, xnaPitch);
+            if(UseXnaPitch)
+                return (float)Math.Pow(2, xnaPitch);
+            return xnaPitch + 1f;
         }
 
         /// <summary>

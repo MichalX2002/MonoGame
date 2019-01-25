@@ -40,6 +40,11 @@ namespace Microsoft.Xna.Framework.Content
             return null;
         }
 
+        public ContentTypeReader GetTypeReader<T>()
+        {
+            return GetTypeReader(typeof(T));
+        }
+
         // Trick to prevent the linker removing the code, but not actually execute the code
         static readonly bool falseflag = false;
 

@@ -127,14 +127,13 @@ namespace Microsoft.Xna.Framework
                     {
                         Platform.Activated -= OnActivated;
                         Platform.Deactivated -= OnDeactivated;
-                        Services.RemoveService(typeof(GamePlatform));
+                        Services.RemoveService<GamePlatform>();
 
                         Platform.Dispose();
                         Platform = null;
                     }
 
                     ContentTypeReaderManager.ClearTypeCreators();
-
                     SoundEffect.PlatformShutdown();
                 }
 #if ANDROID
@@ -248,8 +247,7 @@ namespace Microsoft.Xna.Framework
             {
                 if (_graphicsDeviceService == null)
                 {
-                    _graphicsDeviceService = (IGraphicsDeviceService)
-                        Services.GetService(typeof(IGraphicsDeviceService));
+                    _graphicsDeviceService = Services.GetService<IGraphicsDeviceService>();
 
                     if (_graphicsDeviceService == null)
                         throw new InvalidOperationException("No Graphics Device Service");
@@ -515,8 +513,7 @@ namespace Microsoft.Xna.Framework
             // Initialize all existing components
             InitializeExistingComponents();
 
-            _graphicsDeviceService = (IGraphicsDeviceService)
-                Services.GetService(typeof(IGraphicsDeviceService));
+            _graphicsDeviceService = Services.GetService<IGraphicsDeviceService>();
 
             if (_graphicsDeviceService != null &&
                 _graphicsDeviceService.GraphicsDevice != null)
@@ -673,8 +670,7 @@ namespace Microsoft.Xna.Framework
             {
                 if (_graphicsDeviceManager == null)
                 {
-                    _graphicsDeviceManager = (IGraphicsDeviceManager)
-                        Services.GetService(typeof(IGraphicsDeviceManager));
+                    _graphicsDeviceManager = Services.GetService<IGraphicsDeviceManager>();
                 }
                 return (GraphicsDeviceManager)_graphicsDeviceManager;
             }

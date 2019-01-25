@@ -83,14 +83,14 @@ namespace Microsoft.Xna.Framework
             // Let the plaform optionally overload construction defaults.
             PlatformConstruct();
 
-            if (_game.Services.GetService(typeof(IGraphicsDeviceManager)) != null)
+            if (_game.Services.GetService<IGraphicsDeviceManager>() != null)
                 throw new ArgumentException(
                     "A graphics device manager is already registered. The graphics device manager cannot be changed once it is set.");
 
             _game.InternalGraphicsDeviceManager = this;
 
-            _game.Services.AddService(typeof(IGraphicsDeviceManager), this);
-            _game.Services.AddService(typeof(IGraphicsDeviceService), this);
+            _game.Services.AddService<IGraphicsDeviceManager>(this);
+            _game.Services.AddService<IGraphicsDeviceService>(this);
         }
 
         ~GraphicsDeviceManager()

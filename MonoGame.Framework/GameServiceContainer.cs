@@ -10,11 +10,11 @@ namespace Microsoft.Xna.Framework
 {
     public class GameServiceContainer : IServiceProvider
     {
-        Dictionary<Type, object> services;
+        private Dictionary<Type, object> _services;
 
         public GameServiceContainer()
         {
-            services = new Dictionary<Type, object>();
+            _services = new Dictionary<Type, object>();
         }
 
         public void AddService(Type type, object provider)
@@ -28,7 +28,12 @@ namespace Microsoft.Xna.Framework
             if (!ReflectionHelpers.IsAssignableFrom(type, provider))
                 throw new ArgumentException("The provider does not match the specified service type!");
 
-            services.Add(type, provider);
+            _services.Add(type, provider);
+        }
+
+        public void AddService<T>(T provider)
+        {
+            AddService(typeof(T), provider);
         }
 
         public object GetService(Type type)
@@ -36,7 +41,7 @@ namespace Microsoft.Xna.Framework
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
 
-            if (services.TryGetValue(type, out object service))
+            if (_services.TryGetValue(type, out object service))
                 return service;
 
             return null;
@@ -47,17 +52,12 @@ namespace Microsoft.Xna.Framework
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
 
-            services.Remove(type);
+            _services.Remove(type);
         }
 
-        public void AddService<T>(T provider)
+        public void RemoveService<T>()
         {
-            AddService(typeof(T), provider);
-        }
-
-        public T GetService<T>() where T : class
-        {
-            return GetService(typeof(T)) as T;
+            RemoveService(typeof(T));
         }
     }
 }

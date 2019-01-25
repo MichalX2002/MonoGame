@@ -77,6 +77,11 @@ namespace MonoGame.Testings
             w.Stop();
             Console.WriteLine("Load Time: " + w.ElapsedMilliseconds + "ms");
 
+            w.Restart();
+            _hitReflectSound = Content.Load<SoundEffect>("hit_reflect_0");
+            w.Stop();
+            Console.WriteLine("Load Time: " + w.ElapsedMilliseconds + "ms");
+
             //wtef.Play();
 
             /*
@@ -87,6 +92,8 @@ namespace MonoGame.Testings
             */
         }
 
+        SoundEffect _hitReflectSound;
+
         //private void _dynamicSound_BufferNeeded(object sender, EventArgs e)
         //{
         //    var instance = sender as DynamicSoundEffectInstance;
@@ -96,7 +103,7 @@ namespace MonoGame.Testings
         //
         //    Console.WriteLine("Enqueued " + _dynamicBuff.Length + " samples, " + _dynamicSound.PendingBufferCount + " pending buffers");
         //}
-        
+
         //int ix = 0;
         //int j = 0;
         //int a1, b1, a2, b2;
@@ -163,13 +170,25 @@ namespace MonoGame.Testings
         protected override void UnloadContent()
         {
         }
-        
+
+        float f;
+
         protected override void Update(GameTime time)
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
             //MediaPlayer.GetVisualizationData(_visData);
+
+            f -= time.Delta;
+            if(f <= 0)
+            {
+                var instance = _hitReflectSound.CreateInstance();
+                instance.Pitch = -0.6f;
+                instance.Play();
+                
+                f = 2.5f;
+            }
 
             base.Update(time);
         }

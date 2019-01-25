@@ -19,8 +19,10 @@ namespace Microsoft.Xna.Framework.Content
 		internal int sharedResourceCount;
 
         internal ContentTypeReader[] TypeReaders { get; private set; }
-
         internal GraphicsDevice GraphicsDevice { get; }
+
+        public ContentManager ContentManager { get; }
+        public string AssetName { get; }
 
         internal ContentReader(ContentManager manager, Stream stream, GraphicsDevice graphicsDevice, string assetName, int version, Action<IDisposable> recordDisposableObject)
             : base(stream)
@@ -31,10 +33,6 @@ namespace Microsoft.Xna.Framework.Content
             this.AssetName = assetName;
 			this.version = version;
         }
-
-        public ContentManager ContentManager { get; }
-
-        public string AssetName { get; }
 
         internal object ReadAsset<T>()
         {
@@ -161,7 +159,6 @@ namespace Microsoft.Xna.Framework.Content
             var result = (T)typeReader.Read(this, existingInstance);
 
             RecordDisposable(result);
-
             return result;
         }
 
@@ -173,20 +170,18 @@ namespace Microsoft.Xna.Framework.Content
             var result = (T)typeReader.Read(this, existingInstance);
 
             RecordDisposable(result);
-
             return result;
         }
 
         public Quaternion ReadQuaternion()
         {
-            Quaternion result = new Quaternion
+            return new Quaternion
             {
                 X = ReadSingle(),
                 Y = ReadSingle(),
                 Z = ReadSingle(),
                 W = ReadSingle()
             };
-            return result;
         }
 
         public T ReadRawObject<T>()
@@ -202,7 +197,7 @@ namespace Microsoft.Xna.Framework.Content
         public T ReadRawObject<T>(T existingInstance)
         {
             Type objectType = typeof(T);
-            foreach(ContentTypeReader typeReader in TypeReaders)
+            foreach(var typeReader in TypeReaders)
             {
                 if(typeReader.TargetType == objectType)
                     return ReadRawObject(typeReader, existingInstance);
@@ -220,60 +215,57 @@ namespace Microsoft.Xna.Framework.Content
             int index = Read7BitEncodedInt();
             if (index > 0)
             {
-                sharedResourceFixups.Add(new KeyValuePair<int, Action<object>>(index - 1, delegate(object v)
-                    {
-                        if (!(v is T))
-                        {
-                            throw new ContentLoadException(String.Format("Error loading shared resource. Expected type {0}, received type {1}", typeof(T).Name, v.GetType().Name));
-                        }
-                        fixup((T)v);
-                    }));
+                sharedResourceFixups.Add(new KeyValuePair<int, Action<object>>(index - 1, delegate (object v)
+                {
+                    if (!(v is T))
+                        throw new ContentLoadException(
+                            string.Format("Error loading shared resource. Expected type {0}, received type {1}.",
+                            typeof(T).Name, v.GetType().Name));
+
+                    fixup.Invoke((T)v);
+                }));
             }
         }
 
         public Vector2 ReadVector2()
         {
-            Vector2 result = new Vector2
+            return new Vector2
             {
                 X = ReadSingle(),
                 Y = ReadSingle()
             };
-            return result;
         }
 
         public Vector3 ReadVector3()
         {
-            Vector3 result = new Vector3
+            return new Vector3
             {
                 X = ReadSingle(),
                 Y = ReadSingle(),
                 Z = ReadSingle()
             };
-            return result;
         }
 
         public Vector4 ReadVector4()
         {
-            Vector4 result = new Vector4
+            return new Vector4
             {
                 X = ReadSingle(),
                 Y = ReadSingle(),
                 Z = ReadSingle(),
                 W = ReadSingle()
             };
-            return result;
         }
 
         public Color ReadColor()
         {
-            Color result = new Color
+            return new Color
             {
                 R = ReadByte(),
                 G = ReadByte(),
                 B = ReadByte(),
                 A = ReadByte()
             };
-            return result;
         }
 
         internal new int Read7BitEncodedInt()
