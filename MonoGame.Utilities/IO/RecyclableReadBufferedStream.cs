@@ -9,8 +9,8 @@ namespace MonoGame.Utilities.IO
         private Stream _stream;
         private RecyclableMemoryManager _manager;
 
+        private bool _disposed;
         private byte[] _buffer;
-        private int _bufferSize;
         private int _readPos;
         private int _readLen;
 
@@ -38,7 +38,6 @@ namespace MonoGame.Utilities.IO
             _manager = manager;
 
             _buffer = _manager.GetBlock();
-            _bufferSize = _buffer.Length;
         }
 
         private int ReadFromBuffer(byte[] array, int offset, int count)
@@ -72,10 +71,10 @@ namespace MonoGame.Utilities.IO
             _readPos = 0;
             _readLen = 0;
             
-            if (count >= _bufferSize)
+            if (count >= _buffer.Length)
                 return _stream.Read(buffer, offset, count) + alreadySatisfied;
             
-            _readLen = _stream.Read(_buffer, 0, _bufferSize);
+            _readLen = _stream.Read(_buffer, 0, _buffer.Length);
             bytesFromBuffer = ReadFromBuffer(buffer, offset, count);
             
             return bytesFromBuffer + alreadySatisfied;
@@ -85,7 +84,7 @@ namespace MonoGame.Utilities.IO
         {
             if (_readPos == _readLen)
             {
-                _readLen = _stream.Read(_buffer, 0, _bufferSize);
+                _readLen = _stream.Read(_buffer, 0, _buffer.Length);
                 _readPos = 0;
             }
 
@@ -134,12 +133,18 @@ namespace MonoGame.Utilities.IO
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!_disposed)
             {
                 if (!_leaveOpen)
                     _stream.Dispose();
+                _stream = null;
+
+                _manager.ReturnBlock(_buffer, null);
+                _buffer = null;
+
+                _disposed = true;
             }
-            _manager.ReturnBlock(_buffer, null);
+
             base.Dispose(disposing);
         }
     }

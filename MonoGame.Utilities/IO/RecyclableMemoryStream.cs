@@ -222,28 +222,21 @@ namespace MonoGame.Utilities.IO
             {
                 string doubleDisposeStack = null;
                 if (this.memoryManager.GenerateCallStacks)
-                {
                     doubleDisposeStack = Environment.StackTrace;
-                }
 
-                RecyclableMemoryManager.Events.Writer.MemoryStreamDoubleDispose(this.id, this.tag,
-                                                                                     this.AllocationStack,
-                                                                                     this.DisposeStack,
-                                                                                     doubleDisposeStack);
+                RecyclableMemoryManager.Events.Writer.MemoryStreamDoubleDispose(
+                    this.id, this.tag, this.AllocationStack, this.DisposeStack, doubleDisposeStack);
                 return;
             }
 
             RecyclableMemoryManager.Events.Writer.MemoryStreamDisposed(this.id, this.tag);
 
             if (this.memoryManager.GenerateCallStacks)
-            {
                 this.DisposeStack = Environment.StackTrace;
-            }
 
             if (disposing)
             {
                 this.memoryManager.ReportStreamDisposed();
-
                 GC.SuppressFinalize(this);
             }
             else
@@ -269,16 +262,12 @@ namespace MonoGame.Utilities.IO
             this.memoryManager.ReportStreamLength(this.length);
 
             if (this.largeBuffer != null)
-            {
                 this.memoryManager.ReturnLargeBuffer(this.largeBuffer, this.tag);
-            }
 
             if (this.dirtyBuffers != null)
             {
                 foreach (var buffer in this.dirtyBuffers)
-                {
                     this.memoryManager.ReturnLargeBuffer(buffer, this.tag);
-                }
             }
 
             this.memoryManager.ReturnBlocks(this.blocks, this.tag);

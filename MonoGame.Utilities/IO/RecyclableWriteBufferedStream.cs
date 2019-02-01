@@ -9,8 +9,8 @@ namespace MonoGame.Utilities.IO
         private Stream _stream;
         private RecyclableMemoryManager _manager;
 
+        private bool _disposed;
         private byte[] _buffer;
-        private int _bufferSize;
         private int _writePos;
 
         public override bool CanRead => false;
@@ -21,7 +21,7 @@ namespace MonoGame.Utilities.IO
         {
             get
             {
-                TryFlush();
+                TryFlushBuffer();
                 return _stream.Length;
             }
         }
@@ -31,7 +31,7 @@ namespace MonoGame.Utilities.IO
             get => _stream.Position + _writePos;
             set
             {
-                TryFlush();
+                TryFlushBuffer();
                 Seek(value, SeekOrigin.Begin);
             }
         }
@@ -44,30 +44,17 @@ namespace MonoGame.Utilities.IO
             _manager = manager;
 
             _buffer = _manager.GetBlock();
-            _bufferSize = _buffer.Length;
-        }
-
-        private void FlushBuffer()
-        {
-            _stream.Write(_buffer, 0, _writePos);
-            _writePos = 0;
-        }
-
-        private void TryFlush()
-        {
-            if (_writePos > 0)
-                FlushBuffer();
         }
 
         private void TryOptimalFlush()
         {
-            if (_writePos == _bufferSize)
+            if (_writePos == _buffer.Length)
                 FlushBuffer();
         }
 
         private void WriteToBuffer(byte[] buffer, ref int offset, ref int count)
         {
-            int bytesToWrite = Math.Min(_bufferSize - _writePos, count);
+            int bytesToWrite = Math.Min(_buffer.Length - _writePos, count);
             if (bytesToWrite <= 0)
                 return;
 
@@ -80,9 +67,9 @@ namespace MonoGame.Utilities.IO
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            if(count > _bufferSize)
+            if(count > _buffer.Length)
             {
-                TryFlush();
+                TryFlushBuffer();
                 _stream.Write(buffer, offset, count);
             }
             else
@@ -124,31 +111,49 @@ namespace MonoGame.Utilities.IO
                 throw new NotSupportedException(
                     "The underlying stream is currently not seekable.");
 
-            TryFlush();
+            TryFlushBuffer();
             return _stream.Seek(offset, origin);
         }
 
         public override void SetLength(long value)
         {
-            TryFlush();
+            TryFlushBuffer();
             _stream.SetLength(value);
+        }
+
+        private void FlushBuffer()
+        {
+            _stream.Write(_buffer, 0, _writePos);
+            _writePos = 0;
+        }
+
+        private void TryFlushBuffer()
+        {
+            if (_writePos > 0)
+                FlushBuffer();
         }
 
         public override void Flush()
         {
-            TryFlush();
+            TryFlushBuffer();
             _stream.Flush();
         }
-        
+
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!_disposed)
             {
                 Flush();
                 if (!_leaveOpen)
                     _stream.Dispose();
+                _stream = null;
+
+                _manager.ReturnBlock(_buffer, null);
+                _buffer = null;
+
+                _disposed = true;
             }
-            _manager.ReturnBlock(_buffer, null);
+
             base.Dispose(disposing);
         }
     }
