@@ -19,7 +19,7 @@ namespace Microsoft.Xna.Framework
 {
     internal class Threading
     {
-        public const int MaxWaitForUIThread = 750; // In milliseconds
+        public const int MaxWaitForUIThread = 10000; // In milliseconds
 
         private static int mainThreadId;
 
@@ -92,17 +92,17 @@ namespace Microsoft.Xna.Framework
                 GraphicsExtensions.CheckGLError();
             }
 #else
-            ManualResetEventSlim resetEvent = new ManualResetEventSlim(false);
+            var resetEvent = new ManualResetEventSlim(false);
             Add(() =>
             {
 #if ANDROID
                 //if (!Game.Instance.Window.GraphicsContext.IsCurrent)
-                ((AndroidGameWindow)Game.Instance.Window).GameView.MakeCurrent();
+                    ((AndroidGameWindow)Game.Instance.Window).GameView.MakeCurrent();
 #endif
                 action.Invoke();
                 resetEvent.Set();
             });
-            if (resetEvent.Wait(MaxWaitForUIThread) == false)
+            if (!resetEvent.Wait(MaxWaitForUIThread))
                 throw new TimeoutException();
 #endif // IOS
 #endif // DIRECTX ||PSM
