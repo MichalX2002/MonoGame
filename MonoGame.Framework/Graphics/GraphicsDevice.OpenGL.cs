@@ -117,7 +117,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private static BufferBindingInfo[] _bufferBindingInfos;
         private static bool[] _newEnabledVertexAttributes;
-        internal static readonly HashSet<int> _enabledVertexAttributes = new HashSet<int>(Int32Comparer.Instance);
+        internal static readonly HashSet<int> _enabledVertexAttributes = new HashSet<int>();
         internal static bool _attribsDirty;
 
         internal FramebufferHelper framebufferHelper;

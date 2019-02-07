@@ -33,21 +33,6 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         public Glyph[] Glyphs { get; }
 
-        class CharComparer: IEqualityComparer<char>
-		{
-			public bool Equals(char x, char y)
-			{
-				return x == y;
-			}
-
-			public int GetHashCode(char b)
-			{
-				return (b);
-			}
-
-			static public readonly CharComparer Default = new CharComparer();
-		}
-
         /// <summary>
         /// Initializes a new instance of the <see cref="SpriteFont" /> class.
         /// </summary>
@@ -134,7 +119,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <remarks>Can be used to calculate character bounds when implementing custom SpriteFont rendering.</remarks>
         public Dictionary<char, Glyph> GetGlyphs()
         {
-            var glyphsDictionary = new Dictionary<char, Glyph>(Glyphs.Length, CharComparer.Default);
+            var glyphsDictionary = new Dictionary<char, Glyph>(Glyphs.Length);
             foreach(var glyph in Glyphs)
                 glyphsDictionary.Add(glyph.Character, glyph);
             return glyphsDictionary;

@@ -9,7 +9,7 @@ namespace Microsoft.Xna.Framework.Input
 {
     static partial class Joystick
     {
-        internal static Dictionary<int, IntPtr> Joysticks = new Dictionary<int, IntPtr>(Int32Comparer.Instance);
+        internal static Dictionary<int, IntPtr> Joysticks = new Dictionary<int, IntPtr>();
 
         internal static void AddDevice(int deviceId)
         {

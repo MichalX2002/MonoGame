@@ -37,7 +37,7 @@ namespace Microsoft.Xna.Framework.Graphics
     /// </summary>
     internal class ShaderProgramCache : IDisposable
     {
-        private readonly Dictionary<int, ShaderProgram> _programCache = new Dictionary<int, ShaderProgram>(Int32Comparer.Instance);
+        private readonly Dictionary<int, ShaderProgram> _programCache = new Dictionary<int, ShaderProgram>();
         GraphicsDevice _graphicsDevice;
         bool disposed;
 

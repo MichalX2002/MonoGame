@@ -73,7 +73,6 @@
     <Compile Include="Media\SongPartPool.cs" />
     <Compile Include="Media\VisualizationData.cs" />
     <Compile Include="ServiceProviderExtensions.cs" />
-    <Compile Include="Utilities\Int32Comparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.DesktopGL.cs">
       <Platforms>WindowsGL,Linux</Platforms>

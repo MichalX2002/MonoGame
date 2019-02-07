@@ -12,7 +12,7 @@ namespace Microsoft.Xna.Framework.Input
 
         static KeyboardUtil()
         {
-            _map = new Dictionary<int, Keys>(138, Int32Comparer.Instance)
+            _map = new Dictionary<int, Keys>(138)
             {
                 { 8, Keys.Back },
                 { 9, Keys.Tab },

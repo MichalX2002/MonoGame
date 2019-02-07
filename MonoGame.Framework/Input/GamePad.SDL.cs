@@ -20,7 +20,7 @@ namespace Microsoft.Xna.Framework.Input
             public int HapticType;
         }
 
-        private static readonly Dictionary<int, GamePadInfo> Gamepads = new Dictionary<int, GamePadInfo>(Int32Comparer.Instance);
+        private static readonly Dictionary<int, GamePadInfo> Gamepads = new Dictionary<int, GamePadInfo>();
 
         private static Sdl.Haptic.Effect _hapticLeftRightEffect = new Sdl.Haptic.Effect
         {
