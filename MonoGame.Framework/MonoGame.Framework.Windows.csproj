@@ -167,7 +167,6 @@
     <Compile Include="Utilities\CRC32.cs" />
     <Compile Include="Utilities\CrcCalculatorStream.cs" />
     <Compile Include="Utilities\FuncLoader.Desktop.cs" />
-    <Compile Include="Utilities\Int32Comparer.cs" />
     <Compile Include="Utilities\ReflectionHelpers.Default.cs" />
     <Compile Include="Utilities\TimerHelper.cs" />
     <Compile Include="Utilities\ZlibStream\DeflateManager.cs" />
