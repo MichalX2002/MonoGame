@@ -81,7 +81,7 @@ namespace MonoGame.Imaging
             _pointer = new MarshalPointer(data, leavePointerOpen, width * height * (int)pixelFormat);
             _leavePointerOpen = leavePointerOpen;
 
-            PointerLength = -1;
+            PointerLength = width * height * (int)pixelFormat;
             _cachedInfo = new ImageInfo(width, height, pixelFormat, pixelFormat, ImageFormat.Pointer);
         }
 
@@ -140,7 +140,7 @@ namespace MonoGame.Imaging
         {
             if (_sourceStream != null)
             {
-                if (_leaveStreamOpen == false)
+                if (!_leaveStreamOpen)
                     _sourceStream.Dispose();
                 _sourceStream = null;
             }
