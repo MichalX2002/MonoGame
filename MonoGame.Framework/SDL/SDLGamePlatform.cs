@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Utilities;
@@ -144,17 +143,47 @@ namespace Microsoft.Xna.Framework
                 }
                 else if (ev.Type == Sdl.EventType.TextInput)
                 {
-                    unsafe
+                    if (_view.IsTextInputHandled)
                     {
-                        string text = InteropHelpers.PtrToString((IntPtr)ev.Text.Text);
-                        if (text.Length == 0)
-                            continue;
-
-                        for (int i = 0; i < text.Length; i++)
+                        int len = 0;
+                        int utf8character = 0; // using an int to encode multibyte characters longer than 2 bytes
+                        byte currentByte = 0;
+                        int charByteSize = 0; // UTF8 char lenght to decode
+                        unsafe
                         {
-                            char c = text[i];
-                            Keys key = KeyboardUtil.ToXna(c);
-                            _view.CallTextInput(c, key);
+                            while ((currentByte = Marshal.ReadByte((IntPtr)ev.Text.Text, len)) != 0)
+                            {
+                                // we're reading the first UTF8 byte, we need to check if it's multibyte
+                                if (charByteSize == 0)
+                                {
+                                    if (currentByte < 192)
+                                        charByteSize = 1;
+                                    else if (currentByte < 224)
+                                        charByteSize = 2;
+                                    else if (currentByte < 240)
+                                        charByteSize = 3;
+                                    else
+                                        charByteSize = 4;
+
+                                    utf8character = 0;
+                                }
+
+                                // assembling the character
+                                utf8character <<= 8;
+                                utf8character |= currentByte;
+
+                                charByteSize--;
+                                if (charByteSize == 0) // finished decoding the current character
+                                {
+                                    var key = KeyboardUtil.ToXna(utf8character);
+                                    // multibyte conversion might fail here, because the char type only handles UTF8 up to 2-byte characters
+                                    // we should switch to a String parameter for this event to fully support UTF8
+                                    // as-is, it won't support CJK characters and will produce wrong results
+                                    _view.CallTextInput((char)utf8character, key);
+                                }
+
+                                len++;
+                            }
                         }
                     }
                 }

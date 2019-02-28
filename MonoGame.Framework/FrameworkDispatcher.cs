@@ -38,8 +38,6 @@ namespace Microsoft.Xna.Framework
 
         private static void Initialize()
         {
-            InitializeSoundSystem();
-
             _initialized = true;
         }
 
