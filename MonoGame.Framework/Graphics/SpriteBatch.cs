@@ -155,7 +155,7 @@ namespace Microsoft.Xna.Framework.Graphics
             _spritePass.Apply();
 		}
 		
-        void CheckValid(Texture2D texture)
+        void CheckArgs(Texture2D texture)
         {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));

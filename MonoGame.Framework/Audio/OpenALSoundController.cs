@@ -108,21 +108,10 @@ namespace Microsoft.Xna.Framework.Audio
         {
             get
             {
-                lock (_initMutex)
-                {
-                    if (_instance == null)
-                        InitializeInstance();
-                    return _instance;
-                }
-            }
-        }
-
-        public static void InitializeInstance()
-        {
-            lock (_initMutex)
-            {
-                if(_instance == null)
-                    _instance = new OpenALSoundController();
+                if (_instance == null)
+                    throw new NoAudioHardwareException(
+                        "OpenAL context has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
+                return _instance;
             }
         }
 
@@ -157,6 +146,29 @@ namespace Microsoft.Xna.Framework.Audio
         ~OpenALSoundController()
         {
             Dispose(false);
+        }
+
+        public static void EnsureInitialized()
+        {
+            if (_instance != null)
+                return;
+
+            try
+            {
+                _instance = new OpenALSoundController();
+            }
+            catch (DllNotFoundException)
+            {
+                throw;
+            }
+            catch (NoAudioHardwareException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw (new NoAudioHardwareException("Failed to init OpenALSoundController", ex));
+            }
         }
 
         /// <summary>
@@ -316,13 +328,10 @@ namespace Microsoft.Xna.Framework.Audio
 
         public static void DestroyInstance()
         {
-            lock (_initMutex)
+            if (_instance != null)
             {
-                if (_instance != null)
-                {
-                    _instance.Dispose();
-                    _instance = null;
-                }
+                _instance.Dispose();
+                _instance = null;
             }
         }
 

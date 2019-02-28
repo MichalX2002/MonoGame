@@ -97,7 +97,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             try
             {
-                OpenALSoundController.InitializeInstance();
+                OpenALSoundController.EnsureInitialized();
 
                 if (Device == null)
                 {

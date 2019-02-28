@@ -31,7 +31,7 @@ namespace Microsoft.Xna.Framework
 
         private static void DoUpdate()
         {
-            DynamicSoundEffectInstanceManager.UpdatePlayingInstances();
+            DynamicSoundEffectInstanceManager.Update();
             SoundEffectInstancePool.Update();
             Microphone.UpdateMicrophones();
         }
@@ -45,7 +45,7 @@ namespace Microsoft.Xna.Framework
         {
             try
             {
-                SoundEffect.InitializeAudio();
+                SoundEffect.PlatformInitialize();
             }
             catch (DllNotFoundException ex)
             {

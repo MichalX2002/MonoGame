@@ -43,7 +43,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <remarks>
         /// XNA posts <see cref="DynamicSoundEffectInstance.BufferNeeded"/> events always on the main thread.
         /// </remarks>
-        public static void UpdatePlayingInstances()
+        public static void Update()
         {
             for (int i = _playingInstances.Count - 1; i >= 0; i--)
             {
