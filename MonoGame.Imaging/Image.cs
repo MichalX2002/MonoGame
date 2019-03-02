@@ -15,13 +15,15 @@ namespace MonoGame.Imaging
         private readonly bool _leaveStreamOpen;
         private bool _leavePointerOpen;
 
+        private bool _lastReadCtxFailed;
         private MarshalPointer _pointer;
         private ImagePixelFormat _desiredFormat;
-        private ImageInfo _cachedInfo;
+        private ImageInfo _cachedImageInfo;
         private MemoryStream _infoBuffer;
         
         public bool IsDisposed { get; private set; }
         public object SyncRoot { get; } = new object();
+        public bool IsLoaded { get; private set; }
 
         public int PointerLength { get; private set; }
         public ImageInfo Info => GetImageInfo();
@@ -34,10 +36,6 @@ namespace MonoGame.Imaging
 
         public event ErrorDelegate ErrorOccurred;
         public ErrorContext Errors { get; private set; }
-
-        public bool LastInfoFailed { get; private set; }
-        public bool LastContextFailed { get; private set; }
-        public bool LastPointerFailed { get; private set; }
 
         public Image(Stream stream, ImagePixelFormat desiredFormat, bool leaveOpen)
         {
@@ -82,7 +80,7 @@ namespace MonoGame.Imaging
             _leavePointerOpen = leavePointerOpen;
 
             PointerLength = width * height * (int)pixelFormat;
-            _cachedInfo = new ImageInfo(width, height, pixelFormat, pixelFormat, ImageFormat.Pointer);
+            _cachedImageInfo = new ImageInfo(width, height, pixelFormat, pixelFormat, ImageFormat.Pointer);
         }
 
         public Image(IntPtr data, int width, int height, ImagePixelFormat pixelFormat) :
@@ -130,7 +128,7 @@ namespace MonoGame.Imaging
             ErrorOccurred?.Invoke(Errors);
         }
 
-        private void CheckDisposed()
+        private void AssertNotDisposed()
         {
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(Image));

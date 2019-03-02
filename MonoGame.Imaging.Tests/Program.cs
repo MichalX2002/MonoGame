@@ -9,72 +9,48 @@ namespace MonoGame.Imaging.Tests
 {
     class Program
     {
-        public const string DATA_ZIP = "testdata.zip";
+        public const string DataZip = "testdata.zip";
 
         static void Main(string[] args)
         {
-            /*
-            using (var f = File.OpenRead("wtf.png"))
+            // terraria party: "https://preview.redd.it/2ws638caxh421.png?auto=webp&s=07157d5f791ebec998d2793ff384aa6f8c67a638"
+            // nyoom dog: "https://cdn.discordapp.com/attachments/290820360335523840/551171768090492938/unknown.png"
+
+            string request = "https://cdn.discordapp.com/attachments/290820360335523840/551171768090492938/unknown.png";
+            var req = WebRequest.CreateHttp(request);
+
+            Console.WriteLine("Requested " + request);
+            Console.WriteLine();
+
+            using (var rep = req.GetResponse())
             {
-                IntPtr result = idk.ReadImg(f, out int w, out int h, out int c);
-                Console.WriteLine(w + "x" + h + " *" + c);
-                if (result == IntPtr.Zero)
-                    Console.WriteLine("Decoding failed");
+                Console.WriteLine("Got response");
 
-                Image img = new Image(result, w, h, (ImagePixelFormat)c);
-                using (var fo = File.OpenWrite("ok wot.png"))
-                    img.Save(fo, ImageSaveFormat.Png);
-            }
-            */
-
-            var req = WebRequest.CreateHttp("https://preview.redd.it/2ws638caxh421.png?auto=webp&s=07157d5f791ebec998d2793ff384aa6f8c67a638");
-
-            using (var rep = req.GetResponse().GetResponseStream())
-            using (Image img1 = new Image(rep, ImagePixelFormat.Rgb))
-            {
-                img1.GetPointer();
-                Console.WriteLine("netted: " + img1.LastPointerFailed);
-                if (!img1.LastPointerFailed)
+                using (var repStream = rep.GetResponseStream())
+                using (Image img1 = new Image(repStream, ImagePixelFormat.Rgb))
+                {
+                    Console.Write("Writing... ");
                     using (var fs = File.OpenWrite("im done netted.png"))
                         img1.Save(fs, ImageSaveFormat.Png);
+                    Console.WriteLine("Done");
+                }
             }
+            Console.WriteLine();
 
-            using (Image img1 = new Image(File.OpenRead("wtf.png"), ImagePixelFormat.Rgb))
+            Console.WriteLine("Copying net response");
+            using (Image img1 = new Image(File.OpenRead("im done netted.png"), ImagePixelFormat.Rgb))
             {
-                img1.GetPointer();
-                Console.WriteLine("local: " + img1.LastPointerFailed);
-                if (!img1.LastPointerFailed)
-                    using (var fs = File.OpenWrite("im done.png"))
-                        img1.Save(fs, ImageSaveFormat.Png);
+                Console.Write("Writing... ");
+                using (var fs = File.OpenWrite("im done.png"))
+                    img1.Save(fs, ImageSaveFormat.Png);
+                Console.WriteLine("Done");
             }
 
             Console.ReadKey();
 
             return;
-            
-            //using (Image img1 = new Image(File.OpenRead("texture_0.jpg"), ImagePixelFormat.RgbWithAlpha))
-            //using (Image img2 = new Image(img1.Width, img1.Height, img1.PixelFormat))
-            {
-                /*
-                unsafe
-                {
-                    byte* srcPtr = (byte*)img1.Pointer;
-                    byte* dstPtr = (byte*)img2.Pointer;
-                    int pixels = img1.PointerLength;
 
-                    for (int i = 0; i < pixels; i++)
-                    {
-                        dstPtr[i] = srcPtr[i];
-                    }
-                }
-                */
-                //    Console.WriteLine(img1.GetPointer());
-                //    Console.WriteLine(img1.PointerLength);
-                //    using (var fs = File.OpenWrite("texture.png"))
-                //        img1.Save(fs, ImageSaveFormat.Png);
-            }
-
-            ZipArchive archive = new ZipArchive(File.OpenRead(DATA_ZIP), ZipArchiveMode.Read, false);
+            ZipArchive archive = new ZipArchive(File.OpenRead(DataZip), ZipArchiveMode.Read, false);
 
             SaveConfiguration d = new SaveConfiguration(true, 0, RecyclableMemoryManager.Instance);
             SaveConfiguration nonD = new SaveConfiguration(false, 0, RecyclableMemoryManager.Instance);
@@ -82,13 +58,13 @@ namespace MonoGame.Imaging.Tests
 
             TestEntry(ms, d, archive, "bmp/8bit.bmp");
             TestEntry(ms, d, archive, "bmp/24bit.bmp");
-                           
+
             TestEntry(ms, d, archive, "jpg/quality_0.jpg");
             TestEntry(ms, d, archive, "jpg/quality_25.jpg");
             TestEntry(ms, d, archive, "jpg/quality_50.jpg");
             TestEntry(ms, d, archive, "jpg/quality_75.jpg");
             TestEntry(ms, d, archive, "jpg/quality_100.jpg");
-                           
+
             TestEntry(ms, d, archive, "png/32bit.png");
             TestEntry(ms, d, archive, "png/24bit.png");
             TestEntry(ms, d, archive, "png/8bit.png");

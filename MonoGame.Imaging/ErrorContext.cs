@@ -52,7 +52,7 @@ namespace MonoGame.Imaging
             var builder = new StringBuilder(max * 10 + 5);
             for (int i = 0; i < max; i++)
             {
-                builder.AppendLine(Enum.GetName(typeof(ImagingError), Errors[i]));
+                builder.AppendLine(Errors[i].ToString());
                 builder.Append(' ');
             }
 

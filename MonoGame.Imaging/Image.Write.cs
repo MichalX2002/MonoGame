@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace MonoGame.Imaging
@@ -25,7 +26,7 @@ namespace MonoGame.Imaging
             var saveFormat = info.SourceFormat.ToSaveFormat();
             if (saveFormat == ImageSaveFormat.Unknown)
                 throw new InvalidOperationException(
-                    $"Source format \"{info.SourceFormat}\" is not supported.");
+                    $"Source format '{info.SourceFormat}' is not supported.");
 
             Save(output, saveFormat, config);
         }
@@ -35,31 +36,43 @@ namespace MonoGame.Imaging
             Save(output, format, SaveConfiguration.Default);
         }
 
+        private string AppendErrors(string prefix)
+        {
+            string value = prefix;
+            if (Errors.Count > 0)
+                value += "\n " + Errors;
+            return value;
+        }
+
+        [DebuggerHidden]
+        private void ThrowSaveException(ImageSaveFormat format)
+        {
+            throw new InvalidOperationException(AppendErrors($"Could not save image to format '{format}'."));
+        }
+        
+        private unsafe void GetPtrForSave(out int w, out int h, out int p, out byte* d)
+        {
+            ImageInfo info = GetImageInfo();
+            CheckImageInfo(info);
+
+            IntPtr data = GetPointer();
+            if (!IsLoaded)
+                throw new InvalidDataException(AppendErrors("Could not decode source image stream."));
+
+            if (data == IntPtr.Zero)
+                throw new InvalidOperationException(
+                    $"No image data is present in this {nameof(Image)} instance.");
+
+            w = info.Width;
+            h = info.Height;
+            p = (int)info.PixelFormat;
+            d = (byte*)data;
+        }
+        
         public unsafe void Save(Stream output, ImageSaveFormat format, SaveConfiguration config)
         {
             lock (SyncRoot)
             {
-                void Get(out int w, out int h, out int p, out byte* d)
-                {
-                    ImageInfo info = GetImageInfo();
-                    CheckImageInfo(info);
-
-                    IntPtr data = GetPointer();
-                    if (data == IntPtr.Zero)
-                        throw new InvalidOperationException(
-                            $"No image data is present in this {nameof(Image)} instance.");
-
-                    w = info.Width;
-                    h = info.Height;
-                    p = (int)info.PixelFormat;
-                    d = (byte*)data;
-                }
-
-                InvalidOperationException GetException()
-                {
-                    return new InvalidOperationException($"Could not save image: {Errors}");
-                }
-
                 var buffer = _memoryManager.GetBlock();
                 var bufferStream = _memoryManager.GetWriteBufferedStream(output, true);
                 try
@@ -71,33 +84,33 @@ namespace MonoGame.Imaging
                     {
                         case ImageSaveFormat.Bmp:
                             {
-                                Get(out width, out height, out bpp, out ptr);
+                                GetPtrForSave(out width, out height, out bpp, out ptr);
                                 if (Imaging.CallbackWriteBmp(writeCtx, width, height, bpp, ptr) == 0)
-                                    throw GetException();
+                                    ThrowSaveException(format);
                                 break;
                             }
 
                         case ImageSaveFormat.Tga:
                             {
-                                Get(out width, out height, out bpp, out ptr);
+                                GetPtrForSave(out width, out height, out bpp, out ptr);
                                 if (Imaging.CallbackWriteTga(writeCtx, width, height, bpp, ptr) == 0)
-                                    throw GetException();
+                                    ThrowSaveException(format);
                                 break;
                             }
 
                         case ImageSaveFormat.Jpg:
                             {
-                                Get(out width, out height, out bpp, out ptr);
+                                GetPtrForSave(out width, out height, out bpp, out ptr);
                                 if (Imaging.CallbackWriteJpg(writeCtx, config.JpgQuality, width, height, bpp, ptr) == 0)
-                                    throw GetException();
+                                    ThrowSaveException(format);
                                 break;
                             }
 
                         case ImageSaveFormat.Png:
                             {
-                                Get(out width, out height, out bpp, out ptr);
+                                GetPtrForSave(out width, out height, out bpp, out ptr);
                                 if (Imaging.CallbackWritePng(writeCtx, width, height, bpp, ptr, 0) == 0)
-                                    throw GetException();
+                                    ThrowSaveException(format);
                                 break;
                             }
 
@@ -105,8 +118,9 @@ namespace MonoGame.Imaging
                             throw new ArgumentOutOfRangeException(nameof(format), $"Invalid Format: {format}");
                     }
                 }
-                catch
+                catch(Exception exc)
                 {
+                    Console.WriteLine(exc);
                     throw;
                 }
                 finally

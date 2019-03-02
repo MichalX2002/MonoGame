@@ -7,94 +7,69 @@ namespace MonoGame.Imaging
 {
     public partial class Image
     {
-        private ImageInfo GetImageInfo()
+        public bool Load()
         {
+            AssertNotDisposed();
             lock (SyncRoot)
             {
-                if (IsDisposed == false)
-                {
-                    if (LastInfoFailed || LastContextFailed)
-                        return null;
-
-                    if (_cachedInfo == null)
-                    {
-                        var buffer = _memoryManager.GetBlock();
-                        ReadContext rc = GetReadContext(_sourceStream, buffer);
-                        LastInfoFailed = rc == null;
-                        if (LastInfoFailed == false)
-                        {
-                            _cachedInfo = Imaging.GetImageInfo(_desiredFormat, rc);
-                            if (_cachedInfo.IsValid() == false || _cachedInfo == null)
-                            {
-                                LastInfoFailed = true;
-                                TriggerError();
-                                return null;
-                            }
-
-                            TryRemovePngSigError();
-                            _combinedStream = new MultiStream(_infoBuffer, _sourceStream);
-                            _infoBuffer.Position = 0;
-                            _infoBuffer = null;
-                        }
-                        _memoryManager.ReturnBlock(buffer, null);
-                    }
-                }
-                return _cachedInfo;
+                if (!IsLoaded)
+                    IsLoaded = LoadInternal();
+                return IsLoaded;
             }
         }
 
-        private void TryRemovePngSigError()
+        private ImageInfo GetImageInfo()
         {
-            if (_cachedInfo.SourceFormat != ImageFormat.Png)
-                Errors.RemoveError(ImagingError.BadPngSignature);
-        }
-
-        private unsafe MarshalPointer GetDataPointer()
-        {
+            AssertNotDisposed();
             lock (SyncRoot)
             {
-                CheckDisposed();
+                if (_cachedImageInfo == null)
+                    _cachedImageInfo = CreateImageInfo();
+                return _cachedImageInfo;
+            }
+        }
 
-                if (LastContextFailed || LastInfoFailed || LastPointerFailed)
-                    return default;
+        private bool LoadInternal()
+        {
+            ImageInfo info = GetImageInfo();
+            if (info == null)
+            {
+                Errors.AddError(ImagingError.NoImageInfo);
+                return false;
+            }
 
-                if (_pointer.Ptr != null)
-                    return _pointer;
-
-                ImageInfo info = Info;
-                if (info == null)
+            var stream = _memoryManager.GetReadBufferedStream(_combinedStream, true);
+            var buffer = _memoryManager.GetBlock();
+            try
+            {
+                ReadContext rc = GetReadContext(stream, buffer);
+                if (rc == null)
                 {
-                    Errors.AddError(ImagingError.NoImageInfo);
-                    LastPointerFailed = true;
-                    return default;
+                    Errors.AddError(ImagingError.NoReadContext);
+                    return false;
                 }
 
-                var dataStream = _memoryManager.GetReadBufferedStream(_combinedStream, true);
-                var buffer = _memoryManager.GetBlock();
-                try
+                int bpp = info.SourceFormat == ImageFormat.Jpg ?
+                    3 : (info.DesiredPixelFormat == ImagePixelFormat.Source ?
+                    (int)info.SourcePixelFormat : (int)info.DesiredPixelFormat);
+
+                IntPtr result = Imaging.LoadFromInfo8(rc, info, bpp);
+                if (result == IntPtr.Zero)
                 {
-                    ReadContext rc = GetReadContext(dataStream, buffer);
-                    LastPointerFailed = rc == null;
-                    if (LastPointerFailed)
-                        return default;
+                    Errors.AddError(ImagingError.NullPointer);
+                    return false;
+                }
 
-                    int bpp = info.SourceFormat == ImageFormat.Jpg ?
-                        3 : (info.DesiredPixelFormat == ImagePixelFormat.Source ?
-                        (int)info.SourcePixelFormat : (int)info.DesiredPixelFormat);
+                if (info.PixelFormat == ImagePixelFormat.RgbWithAlpha && bpp == 3)
+                {
+                    int pixels = info.Width * info.Height;
+                    PointerLength = pixels * 4;
 
-                    IntPtr result = Imaging.LoadFromInfo8(rc, info, bpp);
-                    LastPointerFailed = result == IntPtr.Zero;
-                    if (LastPointerFailed)
-                        return default;
+                    IntPtr oldResult = result;
+                    result = Marshal.AllocHGlobal(PointerLength);
 
-                    if (info.PixelFormat == ImagePixelFormat.RgbWithAlpha && bpp == 3)
+                    unsafe
                     {
-                        int pixels = info.Width * info.Height;
-                        PointerLength = pixels * 4;
-
-                        IntPtr oldResult = result;
-                        result = Marshal.AllocHGlobal(PointerLength);
-
                         byte* srcPtr = (byte*)oldResult;
                         byte* dstPtr = (byte*)result;
                         for (int i = 0; i < pixels; i++)
@@ -104,43 +79,97 @@ namespace MonoGame.Imaging
                             dstPtr[i * 4 + 2] = srcPtr[i * 3 + 2];
                             dstPtr[i * 4 + 3] = 255;
                         }
-                        Imaging.Free(oldResult);
                     }
-                    else
-                        PointerLength = info.Width * info.Height * bpp;
+                    Imaging.Free(oldResult);
+                }
+                else
+                    PointerLength = info.Width * info.Height * bpp;
 
-                    _pointer = new MarshalPointer(result, PointerLength);
-                    LastPointerFailed = false;
-                    TryRemovePngSigError();
-                }
-                catch
+                _pointer = new MarshalPointer(result, PointerLength);
+                TryRemovePngSigError(info);
+                return true;
+            }
+            catch
+            {
+                Errors.AddError(ImagingError.Exception);
+                return false;
+            }
+            finally
+            {
+                stream.Dispose();
+                _memoryManager.ReturnBlock(buffer, null);
+                CloseStream();
+            }
+        }
+
+        private ImageInfo CreateImageInfo()
+        {
+            var buffer = _memoryManager.GetBlock();
+            try
+            {
+                ReadContext rc = GetReadContext(_sourceStream, buffer);
+                if (rc == null)
                 {
-                    LastPointerFailed = true;
+                    Errors.AddError(ImagingError.NoReadContext);
+                    return null;
                 }
-                finally
+
+                var info = Imaging.GetImageInfo(_desiredFormat, rc);
+                if (info == null || !info.IsValid())
                 {
-                    _memoryManager.ReturnBlock(buffer, null);
-                    dataStream.Dispose();
-                    CloseStream();
+                    Errors.AddError(ImagingError.NoImageInfo);
+                    return null;
                 }
+
+                TryRemovePngSigError(info);
+                _combinedStream = new MultiStream(_infoBuffer, _sourceStream);
+                _infoBuffer.Position = 0;
+                _infoBuffer = null;
+                return info;
+            }
+            catch
+            {
+                Errors.AddError(ImagingError.Exception);
+                return null;
+            }
+            finally
+            {
+                _memoryManager.ReturnBlock(buffer, null);
+            }
+        }
+
+        private void TryRemovePngSigError(ImageInfo info)
+        {
+            if (info.SourceFormat != ImageFormat.Png)
+                Errors.RemoveError(ImagingError.BadPngSignature);
+        }
+
+        private unsafe MarshalPointer GetDataPointer()
+        {
+            lock (SyncRoot)
+            {
+                AssertNotDisposed();
+
+                if (_lastReadCtxFailed || IsLoaded)
+                    return default;
+
+                Load();
                 return _pointer;
             }
         }
 
-        private ReadContext GetReadContext(Stream stream, byte[] buffer)
+        private unsafe ReadContext GetReadContext(Stream stream, byte[] buffer)
         {
             lock (SyncRoot)
             {
-                unsafe
-                {
-                    if (LastContextFailed)
-                        return null;
+                if (_lastReadCtxFailed)
+                    return null;
 
-                    var callbacks = new ReadCallbacks(ReadCallback, EoFCallback);
-                    var context = Imaging.GetReadContext(stream, Errors, callbacks, buffer);
-                    LastContextFailed = context == null;
-                    return context;
-                }
+                var callbacks = new ReadCallbacks(ReadCallback, EoFCallback);
+                var context = Imaging.GetReadContext(stream, Errors, callbacks, buffer);
+
+                _lastReadCtxFailed = context == null;
+                return context;
             }
         }
 

@@ -186,14 +186,14 @@ namespace MonoGame.Imaging
 
         public static int ValidAddSizes(int a, int b)
         {
-            if ((b) < 0) return 0;
+            if (b < 0) return 0;
             return (a <= 2147483647 - b) ? 1 : 0;
         }
 
         public static int ValidMul_2sizes(int a, int b)
         {
-            if (((a) < 0) || ((b) < 0)) return 0;
-            if ((b) == 0) return 1;
+            if ((a < 0) || (b < 0)) return 0;
+            if (b == 0) return 1;
             return (a <= 2147483647 / b) ? 1 : 0;
         }
 
@@ -201,8 +201,8 @@ namespace MonoGame.Imaging
         {
             return
 
-                    ((ValidMul_2sizes(a, b)) != 0) &&
-                     ((ValidAddSizes(a * b, add)) != 0)
+                    (ValidMul_2sizes(a, b) != 0) &&
+                     (ValidAddSizes(a * b, add) != 0)
                         ? 1
                         : 0;
         }
@@ -211,9 +211,9 @@ namespace MonoGame.Imaging
         {
             return
 
-                    (((ValidMul_2sizes(a, b)) != 0) &&
-                      ((ValidMul_2sizes(a * b, c)) != 0)) &&
-                     ((ValidAddSizes(a * b * c, add)) != 0)
+                    (ValidMul_2sizes(a, b) != 0) &&
+                      (ValidMul_2sizes(a * b, c) != 0) &&
+                     (ValidAddSizes(a * b * c, add) != 0)
                         ? 1
                         : 0;
         }
@@ -222,10 +222,10 @@ namespace MonoGame.Imaging
         {
             return
 
-                    ((((ValidMul_2sizes(a, b)) != 0) &&
-                       ((ValidMul_2sizes(a * b, c)) != 0)) &&
-                      ((ValidMul_2sizes(a * b * c, d)) != 0)) &&
-                     ((ValidAddSizes(a * b * c * d, add)) != 0)
+                    (ValidMul_2sizes(a, b) != 0) &&
+                       (ValidMul_2sizes(a * b, c) != 0) &&
+                      (ValidMul_2sizes(a * b * c, d) != 0) &&
+                     (ValidAddSizes(a * b * c * d, add) != 0)
                         ? 1
                         : 0;
         }
@@ -261,7 +261,7 @@ namespace MonoGame.Imaging
 
         public static IntPtr LoadFromInfo8(ReadContext s, ImageInfo info, int reqComp)
         {
-            if (info.IsValid() == false)
+            if (!info.IsValid())
                 return IntPtr.Zero;
 
             ResultInfo ri = new ResultInfo
@@ -310,13 +310,13 @@ namespace MonoGame.Imaging
                 ri.BitsPerChannel = 8;
             }
 
-            if ((_verticallyFlipOnLoad) != 0)
+            if (_verticallyFlipOnLoad != 0)
             {
-                int channels = (reqComp) != 0 ? reqComp : comp;
+                int channels = reqComp != 0 ? reqComp : comp;
                 VerticalFlip(result, x, y, channels);
             }
 
-            return (IntPtr)(result);
+            return (IntPtr)result;
         }
 
         public static void* LoadMain(
@@ -330,7 +330,7 @@ namespace MonoGame.Imaging
             if (TestForBmp(s) != 0) return LoadBmp(s, x, y, comp, req_comp, ri);
             if (TestForTga(s) != 0) return LoadTga(s, x, y, comp, req_comp, ri);
             if (TestForGif(s) != 0) return LoadGif(s, x, y, comp, req_comp, ri);
-            return (s.Error(ImagingError.UnknownImageType)) != 0 ? (byte*)null : null;
+            return s.Error(ImagingError.UnknownImageType) != 0 ? (byte*)null : null;
         }
 
         public static ImageInfo GetImageInfo(ImagePixelFormat desired, ReadContext s)
@@ -347,23 +347,23 @@ namespace MonoGame.Imaging
         public static ImageFormat GetImageFormat(
             ReadContext s, int* width, int* height, int* comp)
         {
-            if ((TestForPng(s)) != 0)
+            if (TestForPng(s) != 0)
                 if (GetPngInfo(s, width, height, comp) == 1)
                     return ImageFormat.Png;
 
-            if ((TestForJpg(s)) != 0)
+            if (TestForJpg(s) != 0)
                 if (GetJpgInfo(s, width, height, comp) == 1)
                     return ImageFormat.Jpg;
 
-            if ((TestForBmp(s)) != 0)
+            if (TestForBmp(s) != 0)
                 if (GetBmpInfo(s, width, height, comp) == 1)
                     return ImageFormat.Bmp;
 
-            if ((TestForTga(s)) != 0)
+            if (TestForTga(s) != 0)
                 if (GetTgaInfo(s, width, height, comp) == 1)
                     return ImageFormat.Tga;
 
-            if ((TestForGif(s)) != 0)
+            if (TestForGif(s) != 0)
                 if (GetGifInfo(s, width, height, comp) == 1)
                     return ImageFormat.Gif;
 
@@ -375,9 +375,9 @@ namespace MonoGame.Imaging
             int i;
             int img_len = w * h * channels;
             byte* reduced = MAlloc(img_len).Ptr;
-            for (i = 0; (i) < (img_len); ++i)
+            for (i = 0; i < img_len; ++i)
             {
-                reduced[i] = ((byte)((orig[i] >> 8) & 0xFF));
+                reduced[i] = (byte)((orig[i] >> 8) & 0xFF);
             }
             Free(orig);
             return reduced;
@@ -388,11 +388,11 @@ namespace MonoGame.Imaging
             int i;
             int img_len = w * h * channels;
             ushort* enlarged = (ushort*)MAlloc(img_len * 2).Ptr;
-            if ((enlarged) == null)
-                return (ushort*)((ec.Error(ImagingError.OutOfMemory)) != 0 ? (byte*)null : null);
-            for (i = 0; (i) < (img_len); ++i)
+            if (enlarged == null)
+                return (ushort*)(ec.Error(ImagingError.OutOfMemory) != 0 ? (byte*)null : null);
+            for (i = 0; i < img_len; ++i)
             {
-                enlarged[i] = ((ushort)((orig[i] << 8) + orig[i]));
+                enlarged[i] = (ushort)((orig[i] << 8) + orig[i]);
             }
             Free(orig);
             return enlarged;
@@ -403,15 +403,15 @@ namespace MonoGame.Imaging
             int row;
             long bytes_per_row = w * bytes_per_pixel;
             byte* temp = stackalloc byte[2048];
-            byte* bytes = (byte*)(image);
-            for (row = 0; (row) < (h >> 1); row++)
+            byte* bytes = (byte*)image;
+            for (row = 0; row < (h >> 1); row++)
             {
                 byte* row0 = bytes + row * bytes_per_row;
                 byte* row1 = bytes + (h - row - 1) * bytes_per_row;
                 long bytes_left = bytes_per_row;
-                while ((bytes_left) != 0)
+                while (bytes_left != 0)
                 {
-                    long bytes_copy = ((bytes_left) < (2048)) ? bytes_left : 2048;
+                    long bytes_copy = (bytes_left < 2048) ? bytes_left : 2048;
                     MemCopy(temp, row0, bytes_copy);
                     MemCopy(row0, row1, bytes_copy);
                     MemCopy(row1, temp, bytes_copy);
@@ -431,18 +431,18 @@ namespace MonoGame.Imaging
 
             if (ri.BitsPerChannel != 8)
             {
-                result = Convert16To8(s.ErrorCtx, (ushort*)(result), *x, *y,
-                    (req_comp) == 0 ? *comp : req_comp);
+                result = Convert16To8(s.ErrorCtx, (ushort*)result, *x, *y,
+                    req_comp == 0 ? *comp : req_comp);
                 ri.BitsPerChannel = 8;
             }
 
-            if ((_verticallyFlipOnLoad) != 0)
+            if (_verticallyFlipOnLoad != 0)
             {
-                int channels = (req_comp) != 0 ? req_comp : *comp;
+                int channels = req_comp != 0 ? req_comp : *comp;
                 VerticalFlip(result, *x, *y, channels);
             }
 
-            return (byte*)(result);
+            return (byte*)result;
         }
 
         public static ushort* LoadAndPostprocess16(ReadContext s, int* x, int* y, int* comp, int req_comp)
@@ -450,17 +450,17 @@ namespace MonoGame.Imaging
             ResultInfo ri = new ResultInfo();
             void* result = LoadMain(s, x, y, comp, req_comp, &ri, 16);
 
-            if ((result) == null) return null;
+            if (result == null) return null;
             if (ri.BitsPerChannel != 16)
             {
                 result = Convert8To16(
-                    s.ErrorCtx, (byte*)(result), *x, *y, (req_comp) == 0 ? *comp : req_comp);
+                    s.ErrorCtx, (byte*)result, *x, *y, req_comp == 0 ? *comp : req_comp);
                 ri.BitsPerChannel = 16;
             }
 
-            if ((_verticallyFlipOnLoad) != 0)
+            if (_verticallyFlipOnLoad != 0)
             {
-                int channels = (req_comp) != 0 ? req_comp : *comp;
+                int channels = req_comp != 0 ? req_comp : *comp;
                 VerticalFlip(result, *x, *y, channels * 2);
             }
 
@@ -544,29 +544,29 @@ namespace MonoGame.Imaging
 
         public static int AtEoF(ReadContext s)
         {
-            if ((s.Callbacks.Read) != null)
+            if (s.Callbacks.Read != null)
             {
                 if (s.Callbacks.EoF(s.Stream) == 0)
                     return 0;
-                if ((s.ReadFromCallbacks) == 0)
+                if (s.ReadFromCallbacks == 0)
                     return 1;
             }
 
-            return (s.ImgBuffer) >= (s.ImgBufferEnd) ? 1 : 0;
+            return s.ImgBuffer >= s.ImgBufferEnd ? 1 : 0;
         }
 
         public static void Skip(ReadContext s, int n)
         {
-            if ((n) < 0)
+            if (n < 0)
             {
                 s.ImgBuffer = s.ImgBufferEnd;
                 return;
             }
 
-            if ((s.Callbacks.Read) != null)
+            if (s.Callbacks.Read != null)
             {
                 int blen = (int)(s.ImgBufferEnd - s.ImgBuffer);
-                if ((blen) < (n))
+                if (blen < n)
                 {
                     s.ImgBuffer = s.ImgBufferEnd;
 
@@ -583,10 +583,10 @@ namespace MonoGame.Imaging
 
         public static int GetRawData(ReadContext s, byte* buffer, int n)
         {
-            if ((s.Callbacks.Read) != null)
+            if (s.Callbacks.Read != null)
             {
                 int blen = (int)(s.ImgBufferEnd - s.ImgBuffer);
-                if ((blen) < (n))
+                if (blen < n)
                 {
                     MemCopy(buffer, s.ImgBuffer, blen);
                     int count = s.Callbacks.Read(s.Stream, buffer + blen, s.Buffer, n - blen);
@@ -615,7 +615,7 @@ namespace MonoGame.Imaging
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint Get32be(ReadContext s)
         {
-            uint z = (uint)(Get16be(s));
+            uint z = (uint)Get16be(s);
             return (uint)((z << 16) + Get16be(s));
         }
 
@@ -629,7 +629,7 @@ namespace MonoGame.Imaging
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint Get32le(ReadContext s)
         {
-            uint z = (uint)(Get16le(s));
+            uint z = (uint)Get16le(s);
             return (uint)(z + (Get16le(s) << 16));
         }
 
@@ -642,64 +642,64 @@ namespace MonoGame.Imaging
         public static byte* ConvertToFormat8(
             ErrorContext ec, byte* data, int img_n, int req_comp, uint x, uint y)
         {
-            int i;
-            int j;
-            byte* good;
-            if ((req_comp) == (img_n)) return data;
-            good = (byte*)(MAlloc_mad3(req_comp, (int)(x), (int)(y), 0));
-            if ((good) == null)
+            if (req_comp == img_n)
+                return data;
+
+            byte* good = MAlloc_mad3(req_comp, (int)x, (int)y, 0);
+            if (good == null)
             {
                 Free(data);
-                return (ec.Error(ImagingError.OutOfMemory)) != 0 ? (byte*)null : null;
+                return ec.Error(ImagingError.OutOfMemory) != 0 ? (byte*)null : null;
             }
 
-            for (j = 0; (j) < ((int)(y)); ++j)
+            int i;
+            for (int j = 0; j < ((int)y); ++j)
             {
                 byte* src = data + j * x * img_n;
                 byte* dest = good + j * x * req_comp;
-                switch (((img_n) * 8 + (req_comp)))
+                switch (img_n * 8 + req_comp)
                 {
-                    case (1 * 8 + 2):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 1, dest += 2)
+                    case 1 * 8 + 2:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 1, dest += 2)
                         {
                             dest[0] = src[0];
                             dest[1] = 255;
                         }
                         break;
-                    case (1 * 8 + 3):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 1, dest += 3)
+                    case 1 * 8 + 3:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 1, dest += 3)
                         {
                             dest[0] = dest[1] = dest[2] = src[0];
                         }
                         break;
-                    case (1 * 8 + 4):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 1, dest += 4)
+                    case 1 * 8 + 4:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 1, dest += 4)
                         {
                             dest[0] = dest[1] = dest[2] = src[0];
                             dest[3] = 255;
                         }
                         break;
-                    case (2 * 8 + 1):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 2, dest += 1)
+                    case 2 * 8 + 1:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 2, dest += 1)
                         {
                             dest[0] = src[0];
                         }
                         break;
-                    case (2 * 8 + 3):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 2, dest += 3)
+                    case 2 * 8 + 3:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 2, dest += 3)
                         {
                             dest[0] = dest[1] = dest[2] = src[0];
                         }
                         break;
-                    case (2 * 8 + 4):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 2, dest += 4)
+                    case 2 * 8 + 4:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 2, dest += 4)
                         {
                             dest[0] = dest[1] = dest[2] = src[0];
                             dest[3] = src[1];
                         }
                         break;
-                    case (3 * 8 + 4):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 3, dest += 4)
+                    case 3 * 8 + 4:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 3, dest += 4)
                         {
                             dest[0] = src[0];
                             dest[1] = src[1];
@@ -707,34 +707,34 @@ namespace MonoGame.Imaging
                             dest[3] = 255;
                         }
                         break;
-                    case (3 * 8 + 1):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 3, dest += 1)
+                    case 3 * 8 + 1:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 3, dest += 1)
                         {
                             dest[0] = ComputeY(src[0], src[1], src[2]);
                         }
                         break;
-                    case (3 * 8 + 2):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 3, dest += 2)
+                    case 3 * 8 + 2:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 3, dest += 2)
                         {
                             dest[0] = ComputeY(src[0], src[1], src[2]);
                             dest[1] = 255;
                         }
                         break;
-                    case (4 * 8 + 1):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 4, dest += 1)
+                    case 4 * 8 + 1:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 4, dest += 1)
                         {
                             dest[0] = ComputeY(src[0], src[1], src[2]);
                         }
                         break;
-                    case (4 * 8 + 2):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 4, dest += 2)
+                    case 4 * 8 + 2:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 4, dest += 2)
                         {
                             dest[0] = ComputeY(src[0], src[1], src[2]);
                             dest[1] = src[3];
                         }
                         break;
-                    case (4 * 8 + 3):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 4, dest += 3)
+                    case 4 * 8 + 3:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 4, dest += 3)
                         {
                             dest[0] = src[0];
                             dest[1] = src[1];
@@ -742,7 +742,7 @@ namespace MonoGame.Imaging
                         }
                         break;
                     default:
-                        return (ec.Error(ImagingError.Zero)) != 0 ? (byte*)null : null;
+                        return ec.Error(ImagingError.Zero) != 0 ? (byte*)null : null;
                 }
             }
             Free(data);
@@ -759,62 +759,62 @@ namespace MonoGame.Imaging
             ErrorContext ec, ushort* data, int img_n, int req_comp, uint x, uint y)
         {
             int i;
-            if ((req_comp) == (img_n))
+            if (req_comp == img_n)
                 return data;
-            ushort* good = (ushort*)(MAlloc(req_comp * x * y * 2).Ptr);
-            if ((good) == null)
+            ushort* good = (ushort*)MAlloc(req_comp * x * y * 2).Ptr;
+            if (good == null)
             {
                 Free(data);
-                return (ushort*)((ec.Error(ImagingError.OutOfMemory)) != 0 ? (byte*)null : null);
+                return (ushort*)(ec.Error(ImagingError.OutOfMemory) != 0 ? (byte*)null : null);
             }
 
-            for (int j = 0; (j) < ((int)(y)); ++j)
+            for (int j = 0; j < ((int)y); ++j)
             {
                 ushort* src = data + j * x * img_n;
                 ushort* dest = good + j * x * req_comp;
-                switch (((img_n) * 8 + (req_comp)))
+                switch (img_n * 8 + req_comp)
                 {
-                    case (1 * 8 + 2):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 1, dest += 2)
+                    case 1 * 8 + 2:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 1, dest += 2)
                         {
                             dest[0] = src[0];
                             dest[1] = 0xffff;
                         }
                         break;
-                    case (1 * 8 + 3):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 1, dest += 3)
+                    case 1 * 8 + 3:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 1, dest += 3)
                         {
                             dest[0] = dest[1] = dest[2] = src[0];
                         }
                         break;
-                    case (1 * 8 + 4):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 1, dest += 4)
+                    case 1 * 8 + 4:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 1, dest += 4)
                         {
                             dest[0] = dest[1] = dest[2] = src[0];
                             dest[3] = 0xffff;
                         }
                         break;
-                    case (2 * 8 + 1):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 2, dest += 1)
+                    case 2 * 8 + 1:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 2, dest += 1)
                         {
                             dest[0] = src[0];
                         }
                         break;
-                    case (2 * 8 + 3):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 2, dest += 3)
+                    case 2 * 8 + 3:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 2, dest += 3)
                         {
                             dest[0] = dest[1] = dest[2] = src[0];
                         }
                         break;
-                    case (2 * 8 + 4):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 2, dest += 4)
+                    case 2 * 8 + 4:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 2, dest += 4)
                         {
                             dest[0] = dest[1] = dest[2] = src[0];
                             dest[3] = src[1];
                         }
                         break;
-                    case (3 * 8 + 4):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 3, dest += 4)
+                    case 3 * 8 + 4:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 3, dest += 4)
                         {
                             dest[0] = src[0];
                             dest[1] = src[1];
@@ -822,34 +822,34 @@ namespace MonoGame.Imaging
                             dest[3] = 0xffff;
                         }
                         break;
-                    case (3 * 8 + 1):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 3, dest += 1)
+                    case 3 * 8 + 1:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 3, dest += 1)
                         {
                             dest[0] = ComputeY16(src[0], src[1], src[2]);
                         }
                         break;
-                    case (3 * 8 + 2):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 3, dest += 2)
+                    case 3 * 8 + 2:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 3, dest += 2)
                         {
                             dest[0] = ComputeY16(src[0], src[1], src[2]);
                             dest[1] = 0xffff;
                         }
                         break;
-                    case (4 * 8 + 1):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 4, dest += 1)
+                    case 4 * 8 + 1:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 4, dest += 1)
                         {
                             dest[0] = ComputeY16(src[0], src[1], src[2]);
                         }
                         break;
-                    case (4 * 8 + 2):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 4, dest += 2)
+                    case 4 * 8 + 2:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 4, dest += 2)
                         {
                             dest[0] = ComputeY16(src[0], src[1], src[2]);
                             dest[1] = src[3];
                         }
                         break;
-                    case (4 * 8 + 3):
-                        for (i = (int)(x - 1); (i) >= 0; --i, src += 4, dest += 3)
+                    case 4 * 8 + 3:
+                        for (i = (int)(x - 1); i >= 0; --i, src += 4, dest += 3)
                         {
                             dest[0] = src[0];
                             dest[1] = src[1];
@@ -857,7 +857,7 @@ namespace MonoGame.Imaging
                         }
                         break;
                     default:
-                        return (ushort*)((ec.Error(ImagingError.Zero)) != 0 ? (byte*)null : null);
+                        return (ushort*)(ec.Error(ImagingError.Zero) != 0 ? (byte*)null : null);
                 }
             }
             Free(data);
@@ -870,11 +870,11 @@ namespace MonoGame.Imaging
             int j;
             int k = 0;
             int code;
-            for (i = 0; (i) < (16); ++i)
+            for (i = 0; i < 16; ++i)
             {
-                for (j = 0; (j) < (count[i]); ++j)
+                for (j = 0; j < count[i]; ++j)
                 {
-                    h->size[k++] = ((byte)(i + 1));
+                    h->size[k++] = (byte)(i + 1);
                 }
             }
             h->size[k] = 0;
@@ -883,11 +883,11 @@ namespace MonoGame.Imaging
             for (j = 1; j <= 16; ++j)
             {
                 h->delta[j] = k - code;
-                if ((h->size[k]) == (j))
+                if (h->size[k] == j)
                 {
-                    while ((h->size[k]) == (j))
+                    while (h->size[k] == j)
                     {
-                        h->code[k++] = ((ushort)(code++));
+                        h->code[k++] = (ushort)code++;
                     }
                     if ((code - 1) >= (1 << j))
                         return ec.Error(ImagingError.BadCodeLengths);
@@ -897,16 +897,16 @@ namespace MonoGame.Imaging
             }
             h->maxcode[j] = 0xffffffff;
             MemSet(h->fast, 255, 1 << 9);
-            for (i = 0; (i) < (k); ++i)
+            for (i = 0; i < k; ++i)
             {
                 int s = h->size[i];
                 if (s <= 9)
                 {
                     int c = h->code[i] << (9 - s);
                     int m = 1 << (9 - s);
-                    for (j = 0; (j) < (m); ++j)
+                    for (j = 0; j < m; ++j)
                     {
-                        h->fast[c + j] = ((byte)(i));
+                        h->fast[c + j] = (byte)i;
                     }
                 }
             }
@@ -916,23 +916,23 @@ namespace MonoGame.Imaging
         public static void BuildFastAc(short* fast_ac, Huffman* h)
         {
             int i;
-            for (i = 0; (i) < (1 << 9); ++i)
+            for (i = 0; i < (1 << 9); ++i)
             {
                 byte fast = h->fast[i];
                 fast_ac[i] = 0;
-                if ((fast) < (255))
+                if (fast < 255)
                 {
                     int rs = h->values[fast];
                     int run = (rs >> 4) & 15;
                     int magbits = rs & 15;
                     int len = h->size[fast];
-                    if (((magbits) != 0) && (len + magbits <= 9))
+                    if ((magbits != 0) && (len + magbits <= 9))
                     {
                         int k = ((i << len) & ((1 << 9) - 1)) >> (9 - magbits);
                         int m = 1 << (magbits - 1);
-                        if ((k) < (m)) k += (int)((~0U << magbits) + 1);
-                        if (((k) >= (-128)) && (k <= 127))
-                            fast_ac[i] = ((short)((k << 8) + (run << 4) + (len + magbits)));
+                        if (k < m) k += (int)((~0U << magbits) + 1);
+                        if ((k >= (-128)) && (k <= 127))
+                            fast_ac[i] = (short)((k << 8) + (run << 4) + len + magbits);
                     }
                 }
             }
@@ -942,17 +942,17 @@ namespace MonoGame.Imaging
         {
             do
             {
-                int b = (j._noMore) != 0 ? 0 : GetByte(j._readCtx);
-                if ((b) == (0xff))
+                int b = j._noMore != 0 ? 0 : GetByte(j._readCtx);
+                if (b == 0xff)
                 {
                     int c = GetByte(j._readCtx);
-                    while ((c) == (0xff))
+                    while (c == 0xff)
                     {
                         c = GetByte(j._readCtx);
                     }
                     if (c != 0)
                     {
-                        j._marker = ((byte)(c));
+                        j._marker = (byte)c;
                         j._noMore = 1;
                         return;
                     }
@@ -967,13 +967,13 @@ namespace MonoGame.Imaging
             uint temp;
             int c;
             int k;
-            if ((j._codeBits) < (16)) GrowBufferUnsafe(j);
+            if (j._codeBits < 16) GrowBufferUnsafe(j);
             c = (int)((j._codeBuffer >> (32 - 9)) & ((1 << 9) - 1));
             k = h->fast[c];
-            if ((k) < (255))
+            if (k < 255)
             {
                 int s = h->size[k];
-                if ((s) > (j._codeBits)) return -1;
+                if (s > j._codeBits) return -1;
                 j._codeBuffer <<= s;
                 j._codeBits -= s;
                 return h->values[k];
@@ -982,15 +982,15 @@ namespace MonoGame.Imaging
             temp = j._codeBuffer >> 16;
             for (k = 9 + 1; ; ++k)
             {
-                if ((temp) < (h->maxcode[k])) break;
+                if (temp < h->maxcode[k]) break;
             }
-            if ((k) == (17))
+            if (k == 17)
             {
                 j._codeBits -= 16;
                 return -1;
             }
 
-            if ((k) > (j._codeBits)) return -1;
+            if (k > j._codeBits) return -1;
             c = (int)(((j._codeBuffer >> (32 - k)) & BMask[k]) + h->delta[k]);
             j._codeBits -= k;
             j._codeBuffer <<= k;
@@ -1001,7 +1001,7 @@ namespace MonoGame.Imaging
         {
             uint k;
             int sgn;
-            if ((j._codeBits) < (n))
+            if (j._codeBits < n)
                 GrowBufferUnsafe(j);
 
             sgn = (int)j._codeBuffer >> 31;
@@ -1016,18 +1016,18 @@ namespace MonoGame.Imaging
         public static int GetJpgBits(JpgImage j, int n)
         {
             uint k;
-            if ((j._codeBits) < (n)) GrowBufferUnsafe(j);
+            if (j._codeBits < n) GrowBufferUnsafe(j);
             k = Rot32(j._codeBuffer, n);
             j._codeBuffer = k & ~BMask[n];
             k &= BMask[n];
             j._codeBits -= n;
-            return (int)(k);
+            return (int)k;
         }
 
         public static int GetJpgBit(JpgImage j)
         {
             uint k;
-            if ((j._codeBits) < 1) GrowBufferUnsafe(j);
+            if (j._codeBits < 1) GrowBufferUnsafe(j);
             k = j._codeBuffer;
             j._codeBuffer <<= 1;
             --j._codeBits;
@@ -1041,15 +1041,15 @@ namespace MonoGame.Imaging
             int dc;
             int k;
             int t;
-            if ((j._codeBits) < (16)) GrowBufferUnsafe(j);
+            if (j._codeBits < 16) GrowBufferUnsafe(j);
             t = HuffDecodeJpg(j, hdc);
-            if ((t) < 0)
+            if (t < 0)
                 return j._readCtx.Error(ImagingError.BadHuffmanCode);
             MemSet(data, 0, 64 * sizeof(short));
-            diff = (t) != 0 ? ExtendReceive(j, t) : 0;
+            diff = t != 0 ? ExtendReceive(j, t) : 0;
             dc = j.JpgImgComp[b].dc_pred + diff;
             j.JpgImgComp[b].dc_pred = dc;
-            data[0] = ((short)(dc * dequant[0]));
+            data[0] = (short)(dc * dequant[0]);
             k = 1;
             do
             {
@@ -1057,26 +1057,26 @@ namespace MonoGame.Imaging
                 int c;
                 int r;
                 int s;
-                if ((j._codeBits) < (16)) GrowBufferUnsafe(j);
+                if (j._codeBits < 16) GrowBufferUnsafe(j);
                 c = (int)((j._codeBuffer >> (32 - 9)) & ((1 << 9) - 1));
                 r = fac[c];
-                if ((r) != 0)
+                if (r != 0)
                 {
                     k += (r >> 4) & 15;
                     s = r & 15;
                     j._codeBuffer <<= s;
                     j._codeBits -= s;
                     zig = JpgDezigzag[k++];
-                    data[zig] = ((short)((r >> 8) * dequant[zig]));
+                    data[zig] = (short)((r >> 8) * dequant[zig]);
                 }
                 else
                 {
                     int rs = HuffDecodeJpg(j, hac);
-                    if ((rs) < 0)
+                    if (rs < 0)
                         return j._readCtx.Error(ImagingError.BadHuffmanCode);
                     s = rs & 15;
                     r = rs >> 4;
-                    if ((s) == 0)
+                    if (s == 0)
                     {
                         if (rs != 0xf0) break;
                         k += 16;
@@ -1085,10 +1085,10 @@ namespace MonoGame.Imaging
                     {
                         k += r;
                         zig = JpgDezigzag[k++];
-                        data[zig] = ((short)(ExtendReceive(j, s) * dequant[zig]));
+                        data[zig] = (short)(ExtendReceive(j, s) * dequant[zig]);
                     }
                 }
-            } while ((k) < (64));
+            } while (k < 64);
             return 1;
         }
 
@@ -1099,19 +1099,19 @@ namespace MonoGame.Imaging
             int t;
             if (j.spec_end != 0)
                 return j._readCtx.Error(ImagingError.CanNotMergeDcAc);
-            if ((j._codeBits) < (16)) GrowBufferUnsafe(j);
-            if ((j.succ_high) == 0)
+            if (j._codeBits < 16) GrowBufferUnsafe(j);
+            if (j.succ_high == 0)
             {
                 MemSet(data, 0, 64 * sizeof(short));
                 t = HuffDecodeJpg(j, hdc);
-                diff = (t) != 0 ? ExtendReceive(j, t) : 0;
+                diff = t != 0 ? ExtendReceive(j, t) : 0;
                 dc = j.JpgImgComp[b].dc_pred + diff;
                 j.JpgImgComp[b].dc_pred = dc;
-                data[0] = ((short)(dc << j.succ_low));
+                data[0] = (short)(dc << j.succ_low);
             }
             else
             {
-                if ((GetJpgBit(j)) != 0) data[0] += ((short)(1 << j.succ_low));
+                if (GetJpgBit(j) != 0) data[0] += (short)(1 << j.succ_low);
             }
 
             return 1;
@@ -1120,13 +1120,13 @@ namespace MonoGame.Imaging
         public static int DecodeJpgBlock_ProgAc(JpgImage j, short* data, Huffman* hac, short* fac)
         {
             int k;
-            if ((j.spec_start) == 0)
+            if (j.spec_start == 0)
                 return j._readCtx.Error(ImagingError.CanNotMergeDcAc);
 
-            if ((j.succ_high) == 0)
+            if (j.succ_high == 0)
             {
                 int shift = j.succ_low;
-                if ((j.eob_run) != 0)
+                if (j.eob_run != 0)
                 {
                     --j.eob_run;
                     return 1;
@@ -1138,31 +1138,31 @@ namespace MonoGame.Imaging
                     int c;
                     int r;
                     int s;
-                    if ((j._codeBits) < (16)) GrowBufferUnsafe(j);
+                    if (j._codeBits < 16) GrowBufferUnsafe(j);
                     c = (int)((j._codeBuffer >> (32 - 9)) & ((1 << 9) - 1));
                     r = fac[c];
-                    if ((r) != 0)
+                    if (r != 0)
                     {
                         k += (r >> 4) & 15;
                         s = r & 15;
                         j._codeBuffer <<= s;
                         j._codeBits -= s;
                         zig = JpgDezigzag[k++];
-                        data[zig] = ((short)((r >> 8) << shift));
+                        data[zig] = (short)((r >> 8) << shift);
                     }
                     else
                     {
                         int rs = HuffDecodeJpg(j, hac);
-                        if ((rs) < 0)
+                        if (rs < 0)
                             return j._readCtx.Error(ImagingError.BadHuffmanCode);
                         s = rs & 15;
                         r = rs >> 4;
-                        if ((s) == 0)
+                        if (s == 0)
                         {
-                            if ((r) < (15))
+                            if (r < 15)
                             {
                                 j.eob_run = 1 << r;
-                                if ((r) != 0) j.eob_run += GetJpgBits(j, r);
+                                if (r != 0) j.eob_run += GetJpgBits(j, r);
                                 --j.eob_run;
                                 break;
                             }
@@ -1172,7 +1172,7 @@ namespace MonoGame.Imaging
                         {
                             k += r;
                             zig = JpgDezigzag[k++];
-                            data[zig] = ((short)(ExtendReceive(j, s) << shift));
+                            data[zig] = (short)(ExtendReceive(j, s) << shift);
                         }
                     }
                 } while (k <= j.spec_end);
@@ -1180,14 +1180,14 @@ namespace MonoGame.Imaging
             else
             {
                 short bit = (short)(1 << j.succ_low);
-                if ((j.eob_run) != 0)
+                if (j.eob_run != 0)
                 {
                     --j.eob_run;
                     for (k = j.spec_start; k <= j.spec_end; ++k)
                     {
                         short* p = &data[JpgDezigzag[k]];
                         if (*p != 0)
-                            if ((GetJpgBit(j)) != 0)
+                            if (GetJpgBit(j) != 0)
                                 if ((*p & bit) == 0)
                                 {
                                     if ((*p) > 0) *p += bit;
@@ -1203,16 +1203,16 @@ namespace MonoGame.Imaging
                         int r;
                         int s;
                         int rs = HuffDecodeJpg(j, hac);
-                        if ((rs) < 0)
+                        if (rs < 0)
                             return j._readCtx.Error(ImagingError.BadHuffmanCode);
                         s = rs & 15;
                         r = rs >> 4;
-                        if ((s) == 0)
+                        if (s == 0)
                         {
-                            if ((r) < (15))
+                            if (r < 15)
                             {
                                 j.eob_run = (1 << r) - 1;
-                                if ((r) != 0) j.eob_run += GetJpgBits(j, r);
+                                if (r != 0) j.eob_run += GetJpgBits(j, r);
                                 r = 64;
                             }
                             else
@@ -1223,7 +1223,7 @@ namespace MonoGame.Imaging
                         {
                             if (s != 1)
                                 return j._readCtx.Error(ImagingError.BadHuffmanCode);
-                            if ((GetJpgBit(j)) != 0) s = bit;
+                            if (GetJpgBit(j) != 0) s = bit;
                             else s = -bit;
                         }
                         while (k <= j.spec_end)
@@ -1231,7 +1231,7 @@ namespace MonoGame.Imaging
                             short* p = &data[JpgDezigzag[k++]];
                             if (*p != 0)
                             {
-                                if ((GetJpgBit(j)) != 0)
+                                if (GetJpgBit(j) != 0)
                                     if ((*p & bit) == 0)
                                     {
                                         if ((*p) > 0) *p += bit;
@@ -1240,9 +1240,9 @@ namespace MonoGame.Imaging
                             }
                             else
                             {
-                                if ((r) == 0)
+                                if (r == 0)
                                 {
-                                    *p = ((short)(s));
+                                    *p = (short)s;
                                     break;
                                 }
                                 --r;
@@ -1277,11 +1277,11 @@ namespace MonoGame.Imaging
             int* v = val;
             byte* o;
             short* d = data;
-            for (i = 0; (i) < 8; ++i, ++d, ++v)
+            for (i = 0; i < 8; ++i, ++d, ++v)
             {
-                if ((((((((d[8]) == 0) && ((d[16]) == 0)) && ((d[24]) == 0)) && ((d[32]) == 0)) &&
-                      ((d[40]) == 0)) &&
-                     ((d[48]) == 0)) && ((d[56]) == 0))
+                if ((d[8] == 0) && (d[16] == 0) && (d[24] == 0) && (d[32] == 0) &&
+                      (d[40] == 0) &&
+                     (d[48] == 0) && (d[56] == 0))
                 {
                     int dcterm = d[0] << 2;
                     v[0] = v[8] = v[16] = v[24] = v[32] = v[40] = v[48] = v[56] = dcterm;
@@ -1303,9 +1303,9 @@ namespace MonoGame.Imaging
                     int x3;
                     p2 = d[16];
                     p3 = d[48];
-                    p1 = (p2 + p3) * ((int)((0.5411961f) * 4096 + 0.5));
+                    p1 = (p2 + p3) * ((int)(0.5411961f * 4096 + 0.5));
                     t2 = p1 + p3 * ((int)((-1.847759065f) * 4096 + 0.5));
-                    t3 = p1 + p2 * ((int)((0.765366865f) * 4096 + 0.5));
+                    t3 = p1 + p2 * ((int)(0.765366865f * 4096 + 0.5));
                     p2 = d[0];
                     p3 = d[32];
                     t0 = (p2 + p3) << 12;
@@ -1322,11 +1322,11 @@ namespace MonoGame.Imaging
                     p4 = t1 + t3;
                     p1 = t0 + t3;
                     p2 = t1 + t2;
-                    p5 = (p3 + p4) * ((int)((1.175875602f) * 4096 + 0.5));
-                    t0 = t0 * ((int)((0.298631336f) * 4096 + 0.5));
-                    t1 = t1 * ((int)((2.053119869f) * 4096 + 0.5));
-                    t2 = t2 * ((int)((3.072711026f) * 4096 + 0.5));
-                    t3 = t3 * ((int)((1.501321110f) * 4096 + 0.5));
+                    p5 = (p3 + p4) * ((int)(1.175875602f * 4096 + 0.5));
+                    t0 = t0 * ((int)(0.298631336f * 4096 + 0.5));
+                    t1 = t1 * ((int)(2.053119869f * 4096 + 0.5));
+                    t2 = t2 * ((int)(3.072711026f * 4096 + 0.5));
+                    t3 = t3 * ((int)(1.501321110f * 4096 + 0.5));
                     p1 = p5 + p1 * ((int)((-0.899976223f) * 4096 + 0.5));
                     p2 = p5 + p2 * ((int)((-2.562915447f) * 4096 + 0.5));
                     p3 = p3 * ((int)((-1.961570560f) * 4096 + 0.5));
@@ -1349,7 +1349,7 @@ namespace MonoGame.Imaging
                     v[32] = (x3 - t0) >> 10;
                 }
             }
-            for (i = 0, v = val, o = _out_; (i) < 8; ++i, v += 8, o += out_stride)
+            for (i = 0, v = val, o = _out_; i < 8; ++i, v += 8, o += out_stride)
             {
                 int t0;
                 int t1;
@@ -1366,9 +1366,9 @@ namespace MonoGame.Imaging
                 int x3;
                 p2 = v[2];
                 p3 = v[6];
-                p1 = (p2 + p3) * ((int)((0.5411961f) * 4096 + 0.5));
+                p1 = (p2 + p3) * ((int)(0.5411961f * 4096 + 0.5));
                 t2 = p1 + p3 * ((int)((-1.847759065f) * 4096 + 0.5));
-                t3 = p1 + p2 * ((int)((0.765366865f) * 4096 + 0.5));
+                t3 = p1 + p2 * ((int)(0.765366865f * 4096 + 0.5));
                 p2 = v[0];
                 p3 = v[4];
                 t0 = (p2 + p3) << 12;
@@ -1385,11 +1385,11 @@ namespace MonoGame.Imaging
                 p4 = t1 + t3;
                 p1 = t0 + t3;
                 p2 = t1 + t2;
-                p5 = (p3 + p4) * ((int)((1.175875602f) * 4096 + 0.5));
-                t0 = t0 * ((int)((0.298631336f) * 4096 + 0.5));
-                t1 = t1 * ((int)((2.053119869f) * 4096 + 0.5));
-                t2 = t2 * ((int)((3.072711026f) * 4096 + 0.5));
-                t3 = t3 * ((int)((1.501321110f) * 4096 + 0.5));
+                p5 = (p3 + p4) * ((int)(1.175875602f * 4096 + 0.5));
+                t0 = t0 * ((int)(0.298631336f * 4096 + 0.5));
+                t1 = t1 * ((int)(2.053119869f * 4096 + 0.5));
+                t2 = t2 * ((int)(3.072711026f * 4096 + 0.5));
+                t3 = t3 * ((int)(1.501321110f * 4096 + 0.5));
                 p1 = p5 + p1 * ((int)((-0.899976223f) * 4096 + 0.5));
                 p2 = p5 + p2 * ((int)((-2.562915447f) * 4096 + 0.5));
                 p3 = p3 * ((int)((-1.961570560f) * 4096 + 0.5));
@@ -1427,7 +1427,7 @@ namespace MonoGame.Imaging
             if (x != 255)
                 return 255;
 
-            while ((x) == (255))
+            while (x == 255)
             {
                 x = GetByte(j._readCtx);
             }
@@ -1443,7 +1443,7 @@ namespace MonoGame.Imaging
 
                     j.JpgImgComp[1].dc_pred = j.JpgImgComp[2].dc_pred = j.JpgImgComp[3].dc_pred = 0;
             j._marker = 0xff;
-            j.ToDo = (j.RestartInterval) != 0 ? j.RestartInterval : 0x7fffffff;
+            j.ToDo = j.RestartInterval != 0 ? j.RestartInterval : 0x7fffffff;
             j.eob_run = 0;
         }
 
@@ -1454,7 +1454,7 @@ namespace MonoGame.Imaging
 
             if (z.progressive == 0)
             {
-                if ((z.scan_n) == 1)
+                if (z.scan_n == 1)
                 {
                     int i;
                     int j;
@@ -1462,9 +1462,9 @@ namespace MonoGame.Imaging
                     int n = zOrderP[0];
                     int w = (z.JpgImgComp[n].x + 7) >> 3;
                     int h = (z.JpgImgComp[n].y + 7) >> 3;
-                    for (j = 0; (j) < (h); ++j)
+                    for (j = 0; j < h; ++j)
                     {
-                        for (i = 0; (i) < (w); ++i)
+                        for (i = 0; i < w; ++i)
                         {
                             int ha = z.JpgImgComp[n].ha;
                             if (DecodeJpgBlock(z, data, (Huffman*)z._huff_dc.Ptr + z.JpgImgComp[n].hd,
@@ -1475,10 +1475,10 @@ namespace MonoGame.Imaging
 
                             if (--z.ToDo <= 0)
                             {
-                                if ((z._codeBits) < (24))
+                                if (z._codeBits < 24)
                                     GrowBufferUnsafe(z);
 
-                                if (!(((z._marker) >= (0xd0)) && ((z._marker) <= 0xd7)))
+                                if (!((z._marker >= 0xd0) && (z._marker <= 0xd7)))
                                     return 1;
 
                                 ResetJpg(z);
@@ -1495,16 +1495,16 @@ namespace MonoGame.Imaging
                     int x;
                     int y;
                     short* data = stackalloc short[64];
-                    for (j = 0; (j) < (z.img_mcu_y); ++j)
+                    for (j = 0; j < z.img_mcu_y; ++j)
                     {
-                        for (i = 0; (i) < (z.img_mcu_x); ++i)
+                        for (i = 0; i < z.img_mcu_x; ++i)
                         {
-                            for (k = 0; (k) < (z.scan_n); ++k)
+                            for (k = 0; k < z.scan_n; ++k)
                             {
                                 int n = zOrderP[k];
-                                for (y = 0; (y) < (z.JpgImgComp[n].v); ++y)
+                                for (y = 0; y < z.JpgImgComp[n].v; ++y)
                                 {
-                                    for (x = 0; (x) < (z.JpgImgComp[n].h); ++x)
+                                    for (x = 0; x < z.JpgImgComp[n].h; ++x)
                                     {
                                         int x2 = (i * z.JpgImgComp[n].h + x) * 8;
                                         int y2 = (j * z.JpgImgComp[n].v + y) * 8;
@@ -1524,8 +1524,8 @@ namespace MonoGame.Imaging
                             }
                             if (--z.ToDo <= 0)
                             {
-                                if ((z._codeBits) < (24)) GrowBufferUnsafe(z);
-                                if (!(((z._marker) >= (0xd0)) && ((z._marker) <= 0xd7))) return 1;
+                                if (z._codeBits < 24) GrowBufferUnsafe(z);
+                                if (!((z._marker >= 0xd0) && (z._marker <= 0xd7))) return 1;
                                 ResetJpg(z);
                             }
                         }
@@ -1535,19 +1535,19 @@ namespace MonoGame.Imaging
             }
             else
             {
-                if ((z.scan_n) == 1)
+                if (z.scan_n == 1)
                 {
                     int i;
                     int j;
                     int n = zOrderP[0];
                     int w = (z.JpgImgComp[n].x + 7) >> 3;
                     int h = (z.JpgImgComp[n].y + 7) >> 3;
-                    for (j = 0; (j) < (h); ++j)
+                    for (j = 0; j < h; ++j)
                     {
-                        for (i = 0; (i) < (w); ++i)
+                        for (i = 0; i < w; ++i)
                         {
                             short* data = z.JpgImgComp[n].coeff + 64 * (i + j * z.JpgImgComp[n].coeff_w);
-                            if ((z.spec_start) == 0)
+                            if (z.spec_start == 0)
                             {
                                 if (
                                     DecodeJpgBlock_ProgDc(z, data,
@@ -1564,8 +1564,8 @@ namespace MonoGame.Imaging
                             }
                             if (--z.ToDo <= 0)
                             {
-                                if ((z._codeBits) < (24)) GrowBufferUnsafe(z);
-                                if (!(((z._marker) >= (0xd0)) && ((z._marker) <= 0xd7))) return 1;
+                                if (z._codeBits < 24) GrowBufferUnsafe(z);
+                                if (!((z._marker >= 0xd0) && (z._marker <= 0xd7))) return 1;
                                 ResetJpg(z);
                             }
                         }
@@ -1579,16 +1579,16 @@ namespace MonoGame.Imaging
                     int k;
                     int x;
                     int y;
-                    for (j = 0; (j) < (z.img_mcu_y); ++j)
+                    for (j = 0; j < z.img_mcu_y; ++j)
                     {
-                        for (i = 0; (i) < (z.img_mcu_x); ++i)
+                        for (i = 0; i < z.img_mcu_x; ++i)
                         {
-                            for (k = 0; (k) < (z.scan_n); ++k)
+                            for (k = 0; k < z.scan_n; ++k)
                             {
                                 int n = zOrderP[k];
-                                for (y = 0; (y) < (z.JpgImgComp[n].v); ++y)
+                                for (y = 0; y < z.JpgImgComp[n].v; ++y)
                                 {
-                                    for (x = 0; (x) < (z.JpgImgComp[n].h); ++x)
+                                    for (x = 0; x < z.JpgImgComp[n].h; ++x)
                                     {
                                         int x2 = i * z.JpgImgComp[n].h + x;
                                         int y2 = j * z.JpgImgComp[n].v + y;
@@ -1602,8 +1602,8 @@ namespace MonoGame.Imaging
                             }
                             if (--z.ToDo <= 0)
                             {
-                                if ((z._codeBits) < (24)) GrowBufferUnsafe(z);
-                                if (!(((z._marker) >= (0xd0)) && ((z._marker) <= 0xd7))) return 1;
+                                if (z._codeBits < 24) GrowBufferUnsafe(z);
+                                if (!((z._marker >= 0xd0) && (z._marker <= 0xd7))) return 1;
                                 ResetJpg(z);
                             }
                         }
@@ -1617,26 +1617,26 @@ namespace MonoGame.Imaging
         public static void JpgDequantize(short* data, ushort* dequant)
         {
             int i;
-            for (i = 0; (i) < (64); ++i)
+            for (i = 0; i < 64; ++i)
             {
-                data[i] *= (short)(dequant[i]);
+                data[i] *= (short)dequant[i];
             }
         }
 
         public static void FinishJpg(JpgImage z)
         {
-            if ((z.progressive) != 0)
+            if (z.progressive != 0)
             {
                 int i;
                 int j;
                 int n;
-                for (n = 0; (n) < (z._readCtx.SourceChannels); ++n)
+                for (n = 0; n < z._readCtx.SourceChannels; ++n)
                 {
                     int w = (z.JpgImgComp[n].x + 7) >> 3;
                     int h = (z.JpgImgComp[n].y + 7) >> 3;
-                    for (j = 0; (j) < (h); ++j)
+                    for (j = 0; j < h; ++j)
                     {
-                        for (i = 0; (i) < (w); ++i)
+                        for (i = 0; i < w; ++i)
                         {
                             short* data = z.JpgImgComp[n].coeff + 64 * (i + j * z.JpgImgComp[n].coeff_w);
                             JpgDequantize(data, (ushort*)z._dequant[z.JpgImgComp[n].tq].Ptr);
@@ -1664,7 +1664,7 @@ namespace MonoGame.Imaging
                     return 1;
                 case 0xDB:
                     L = Get16be(z._readCtx) - 2;
-                    while ((L) > 0)
+                    while (L > 0)
                     {
                         int q = GetByte(z._readCtx);
                         int p = q >> 4;
@@ -1672,21 +1672,21 @@ namespace MonoGame.Imaging
                         int t = q & 15;
                         if ((p != 0) && (p != 1))
                             return z._readCtx.Error(ImagingError.BadDQTType);
-                        if ((t) > 3)
+                        if (t > 3)
                             return z._readCtx.Error(ImagingError.BadDQTTable);
 
                         ushort* dequantP = (ushort*)z._dequant[t].Ptr;
-                        for (int i = 0; (i) < (64); ++i)
+                        for (int i = 0; i < 64; ++i)
                         {
                             dequantP[JpgDezigzag[i]] =
-                                ((ushort)((sixteen) != 0 ? Get16be(z._readCtx) : GetByte(z._readCtx)));
+                                (ushort)(sixteen != 0 ? Get16be(z._readCtx) : GetByte(z._readCtx));
                         }
-                        L -= (sixteen) != 0 ? 129 : 65;
+                        L -= sixteen != 0 ? 129 : 65;
                     }
-                    return (L) == 0 ? 1 : 0;
+                    return L == 0 ? 1 : 0;
                 case 0xC4:
                     L = Get16be(z._readCtx) - 2;
-                    while ((L) > 0)
+                    while (L > 0)
                     {
                         byte* v;
                         int* sizes = stackalloc int[16];
@@ -1695,15 +1695,15 @@ namespace MonoGame.Imaging
                         int q = GetByte(z._readCtx);
                         int tc = q >> 4;
                         int th = q & 15;
-                        if (((tc) > 1) || ((th) > 3))
+                        if ((tc > 1) || (th > 3))
                             return z._readCtx.Error(ImagingError.BadDHTHeader);
-                        for (i = 0; (i) < (16); ++i)
+                        for (i = 0; i < 16; ++i)
                         {
                             sizes[i] = GetByte(z._readCtx);
                             n += sizes[i];
                         }
                         L -= 17;
-                        if ((tc) == 0)
+                        if (tc == 0)
                         {
                             if (BuildHuffman(z._readCtx.ErrorCtx, (Huffman*)z._huff_dc.Ptr + th, sizes) == 0)
                                 return 0;
@@ -1717,7 +1717,7 @@ namespace MonoGame.Imaging
                             Huffman* h = (Huffman*)z._huff_ac.Ptr + th;
                             v = h->values;
                         }
-                        for (i = 0; (i) < (n); ++i)
+                        for (i = 0; i < n; ++i)
                         {
                             v[i] = GetByte(z._readCtx);
                         }
@@ -1725,54 +1725,54 @@ namespace MonoGame.Imaging
                             BuildFastAc((short*)z._fastAc[th].Ptr, (Huffman*)z._huff_ac.Ptr + th);
                         L -= n;
                     }
-                    return (L) == 0 ? 1 : 0;
+                    return L == 0 ? 1 : 0;
             }
 
-            if ((((m) >= (0xE0)) && (m <= 0xEF)) || ((m) == (0xFE)))
+            if (((m >= 0xE0) && (m <= 0xEF)) || (m == 0xFE))
             {
                 L = Get16be(z._readCtx);
-                if ((L) < 2)
+                if (L < 2)
                 {
-                    if ((m) == (0xFE))
+                    if (m == 0xFE)
                         return z._readCtx.Error(ImagingError.BadCOMLength);
                     else
                         return z._readCtx.Error(ImagingError.BadAPPLength);
                 }
                 L -= 2;
-                if (((m) == (0xE0)) && ((L) >= 5))
+                if ((m == 0xE0) && (L >= 5))
                 {
                     byte* tag = stackalloc byte[5];
-                    tag[0] = (byte)('J');
-                    tag[1] = (byte)('F');
-                    tag[2] = (byte)('I');
-                    tag[3] = (byte)('F');
-                    tag[4] = (byte)('\0');
+                    tag[0] = (byte)'J';
+                    tag[1] = (byte)'F';
+                    tag[2] = (byte)'I';
+                    tag[3] = (byte)'F';
+                    tag[4] = (byte)'\0';
                     int ok = 1;
                     int i;
-                    for (i = 0; (i) < 5; ++i)
+                    for (i = 0; i < 5; ++i)
                     {
                         if (GetByte(z._readCtx) != tag[i]) ok = 0;
                     }
                     L -= 5;
-                    if ((ok) != 0) z.jfif = 1;
+                    if (ok != 0) z.jfif = 1;
                 }
-                else if (((m) == (0xEE)) && ((L) >= 12))
+                else if ((m == 0xEE) && (L >= 12))
                 {
                     byte* tag = stackalloc byte[6];
-                    tag[0] = (byte)('A');
-                    tag[1] = (byte)('d');
-                    tag[2] = (byte)('o');
-                    tag[3] = (byte)('b');
-                    tag[4] = (byte)('e');
-                    tag[5] = (byte)('\0');
+                    tag[0] = (byte)'A';
+                    tag[1] = (byte)'d';
+                    tag[2] = (byte)'o';
+                    tag[3] = (byte)'b';
+                    tag[4] = (byte)'e';
+                    tag[5] = (byte)'\0';
                     int ok = 1;
                     int i;
-                    for (i = 0; (i) < 6; ++i)
+                    for (i = 0; i < 6; ++i)
                     {
                         if (GetByte(z._readCtx) != tag[i]) ok = 0;
                     }
                     L -= 6;
-                    if ((ok) != 0)
+                    if (ok != 0)
                     {
                         GetByte(z._readCtx);
                         Get16be(z._readCtx);
@@ -1793,27 +1793,27 @@ namespace MonoGame.Imaging
             int i;
             int Ls = Get16be(z._readCtx);
             z.scan_n = GetByte(z._readCtx);
-            if ((((z.scan_n) < 1) || ((z.scan_n) > 4)) || ((z.scan_n) > (z._readCtx.SourceChannels)))
+            if ((z.scan_n < 1) || (z.scan_n > 4) || (z.scan_n > z._readCtx.SourceChannels))
                 return z._readCtx.Error(ImagingError.BadSOSComponentCount);
             if (Ls != 6 + 2 * z.scan_n)
                 return z._readCtx.Error(ImagingError.BadSOSLength);
 
             int* zOrderP = (int*)z._order.Ptr;
-            for (i = 0; (i) < (z.scan_n); ++i)
+            for (i = 0; i < z.scan_n; ++i)
             {
                 int id = GetByte(z._readCtx);
                 int which;
                 int q = GetByte(z._readCtx);
-                for (which = 0; (which) < (z._readCtx.SourceChannels); ++which)
+                for (which = 0; which < z._readCtx.SourceChannels; ++which)
                 {
-                    if ((z.JpgImgComp[which].id) == (id)) break;
+                    if (z.JpgImgComp[which].id == id) break;
                 }
-                if ((which) == (z._readCtx.SourceChannels)) return 0;
+                if (which == z._readCtx.SourceChannels) return 0;
                 z.JpgImgComp[which].hd = q >> 4;
-                if ((z.JpgImgComp[which].hd) > 3)
+                if (z.JpgImgComp[which].hd > 3)
                     return z._readCtx.Error(ImagingError.BadDCHuff);
                 z.JpgImgComp[which].ha = q & 15;
-                if ((z.JpgImgComp[which].ha) > 3)
+                if (z.JpgImgComp[which].ha > 3)
                     return z._readCtx.Error(ImagingError.BadACHuff);
                 zOrderP[i] = which;
             }
@@ -1824,10 +1824,10 @@ namespace MonoGame.Imaging
             aa = GetByte(z._readCtx);
             z.succ_high = aa >> 4;
             z.succ_low = aa & 15;
-            if ((z.progressive) != 0)
+            if (z.progressive != 0)
             {
-                if ((((((z.spec_start) > (63)) || ((z.spec_end) > (63))) || ((z.spec_start) > (z.spec_end))) ||
-                     ((z.succ_high) > (13))) || ((z.succ_low) > (13)))
+                if ((z.spec_start > 63) || (z.spec_end > 63) || (z.spec_start > z.spec_end) ||
+                     (z.succ_high > 13) || (z.succ_low > 13))
                     return z._readCtx.Error(ImagingError.BadSOS);
             }
             else
@@ -1846,19 +1846,19 @@ namespace MonoGame.Imaging
         {
             for (int i = 0; i < ncomp; ++i)
             {
-                if ((z.JpgImgComp[i].raw_data) != null)
+                if (z.JpgImgComp[i].raw_data != null)
                 {
                     Free(z.JpgImgComp[i].raw_data);
                     z.JpgImgComp[i].raw_data = null;
                     z.JpgImgComp[i].data = null;
                 }
-                if ((z.JpgImgComp[i].raw_coeff) != null)
+                if (z.JpgImgComp[i].raw_coeff != null)
                 {
                     Free(z.JpgImgComp[i].raw_coeff);
                     z.JpgImgComp[i].raw_coeff = null;
                     z.JpgImgComp[i].coeff = null;
                 }
-                if ((z.JpgImgComp[i].linebuf) != null)
+                if (z.JpgImgComp[i].linebuf != null)
                 {
                     Free(z.JpgImgComp[i].linebuf);
                     z.JpgImgComp[i].linebuf = null;
@@ -1875,27 +1875,27 @@ namespace MonoGame.Imaging
             int h_max = 1;
             int v_max = 1;
             int Lf = Get16be(s);
-            if ((Lf) < 11)
+            if (Lf < 11)
                 return z._readCtx.Error(ImagingError.BadSOFLength);
 
             int p = GetByte(s);
             if (p != 8)
                 return z._readCtx.Error(ImagingError.Only8Bit);
 
-            s.Height = (uint)(Get16be(s));
-            if ((s.Height) == 0)
+            s.Height = (uint)Get16be(s);
+            if (s.Height == 0)
                 return z._readCtx.Error(ImagingError.ZeroHeight);
 
-            s.Width = (uint)(Get16be(s));
-            if ((s.Width) == 0)
+            s.Width = (uint)Get16be(s);
+            if (s.Width == 0)
                 return z._readCtx.Error(ImagingError.ZeroWidth);
 
             int c = GetByte(s);
-            if (((c != 3) && (c != 1)) && (c != 4))
+            if ((c != 3) && (c != 1) && (c != 4))
                 return z._readCtx.Error(ImagingError.BadComponentCount);
             s.SourceChannels = c;
 
-            for (i = 0; (i) < (c); ++i)
+            for (i = 0; i < c; ++i)
             {
                 z.JpgImgComp[i].data = null;
                 z.JpgImgComp[i].linebuf = null;
@@ -1904,38 +1904,38 @@ namespace MonoGame.Imaging
                 return z._readCtx.Error(ImagingError.BadSOFLength);
 
             z.rgb = 0;
-            for (i = 0; (i) < (s.SourceChannels); ++i)
+            for (i = 0; i < s.SourceChannels; ++i)
             {
                 byte* rgb = stackalloc byte[3];
-                rgb[0] = (byte)('R');
-                rgb[1] = (byte)('G');
-                rgb[2] = (byte)('B');
+                rgb[0] = (byte)'R';
+                rgb[1] = (byte)'G';
+                rgb[2] = (byte)'B';
                 z.JpgImgComp[i].id = GetByte(s);
-                if (((s.SourceChannels) == 3) && ((z.JpgImgComp[i].id) == (rgb[i])))
+                if ((s.SourceChannels == 3) && (z.JpgImgComp[i].id == rgb[i]))
                     ++z.rgb;
 
                 int q = GetByte(s);
                 z.JpgImgComp[i].h = q >> 4;
-                if ((z.JpgImgComp[i].h == 0) || ((z.JpgImgComp[i].h) > 4))
+                if ((z.JpgImgComp[i].h == 0) || (z.JpgImgComp[i].h > 4))
                     return z._readCtx.Error(ImagingError.BadH);
                 z.JpgImgComp[i].v = q & 15;
-                if ((z.JpgImgComp[i].v == 0) || ((z.JpgImgComp[i].v) > 4))
+                if ((z.JpgImgComp[i].v == 0) || (z.JpgImgComp[i].v > 4))
                     return z._readCtx.Error(ImagingError.BadV);
                 z.JpgImgComp[i].tq = GetByte(s);
-                if ((z.JpgImgComp[i].tq) > 3)
+                if (z.JpgImgComp[i].tq > 3)
                     return z._readCtx.Error(ImagingError.BadTQ);
             }
             if (scan != STBI__SCAN_load)
                 return 1;
-            if (ValidSizes_mad3((int)(s.Width), (int)(s.Height), s.SourceChannels, 0) == 0)
+            if (ValidSizes_mad3((int)s.Width, (int)s.Height, s.SourceChannels, 0) == 0)
                 return z._readCtx.Error(ImagingError.TooLarge);
 
-            for (i = 0; (i) < (s.SourceChannels); ++i)
+            for (i = 0; i < s.SourceChannels; ++i)
             {
-                if ((z.JpgImgComp[i].h) > (h_max))
+                if (z.JpgImgComp[i].h > h_max)
                     h_max = z.JpgImgComp[i].h;
 
-                if ((z.JpgImgComp[i].v) > (v_max))
+                if (z.JpgImgComp[i].v > v_max)
                     v_max = z.JpgImgComp[i].v;
             }
 
@@ -1957,18 +1957,18 @@ namespace MonoGame.Imaging
                 z.JpgImgComp[i].linebuf = null;
                 z.JpgImgComp[i].raw_data = MAlloc_mad2(z.JpgImgComp[i].w2, z.JpgImgComp[i].h2, 15);
 
-                if ((z.JpgImgComp[i].raw_data) == null)
+                if (z.JpgImgComp[i].raw_data == null)
                     return FreeJpgComponents(z, i + 1, z._readCtx.Error(ImagingError.OutOfMemory));
-                z.JpgImgComp[i].data = (byte*)((((long)z.JpgImgComp[i].raw_data + 15) & ~15));
+                z.JpgImgComp[i].data = (byte*)(((long)z.JpgImgComp[i].raw_data + 15) & ~15);
 
-                if ((z.progressive) != 0)
+                if (z.progressive != 0)
                 {
                     z.JpgImgComp[i].coeff_w = z.JpgImgComp[i].w2 / 8;
                     z.JpgImgComp[i].coeff_h = z.JpgImgComp[i].h2 / 8;
                     z.JpgImgComp[i].raw_coeff = MAlloc_mad3(z.JpgImgComp[i].w2, z.JpgImgComp[i].h2, 2, 15);
-                    if ((z.JpgImgComp[i].raw_coeff) == null)
+                    if (z.JpgImgComp[i].raw_coeff == null)
                         return FreeJpgComponents(z, i + 1, z._readCtx.Error(ImagingError.OutOfMemory));
-                    z.JpgImgComp[i].coeff = (short*)((((long)z.JpgImgComp[i].raw_coeff + 15) & ~15));
+                    z.JpgImgComp[i].coeff = (short*)(((long)z.JpgImgComp[i].raw_coeff + 15) & ~15);
                 }
             }
             return 1;
@@ -1984,23 +1984,23 @@ namespace MonoGame.Imaging
             if (m != 0xd8)
                 return z._readCtx.Error(ImagingError.NoSOI);
 
-            if ((scan) == (STBI__SCAN_type))
+            if (scan == STBI__SCAN_type)
                 return 1;
 
             m = GetMarker(z);
-            while (!((((m) == (0xc0)) || ((m) == (0xc1))) || ((m) == (0xc2))))
+            while (!((m == 0xc0) || (m == 0xc1) || (m == 0xc2)))
             {
                 if (ProcessMarker(z, m) == 0)
                     return 0;
                 m = GetMarker(z);
-                while ((m) == (0xff))
+                while (m == 0xff)
                 {
-                    if ((AtEoF(z._readCtx)) != 0)
+                    if (AtEoF(z._readCtx) != 0)
                         return z._readCtx.Error(ImagingError.NoSOF);
                     m = GetMarker(z);
                 }
             }
-            z.progressive = (m) == (0xc2) ? 1 : 0;
+            z.progressive = m == 0xc2 ? 1 : 0;
             if (ProcessFrameHeader(z, scan) == 0)
                 return 0;
             return 1;
@@ -2009,7 +2009,7 @@ namespace MonoGame.Imaging
         public static int DecodeJpgImage(JpgImage j)
         {
             int m;
-            for (m = 0; (m) < 4; m++)
+            for (m = 0; m < 4; m++)
             {
                 j.JpgImgComp[m].raw_data = null;
                 j.JpgImgComp[m].raw_coeff = null;
@@ -2018,21 +2018,21 @@ namespace MonoGame.Imaging
             if (DecodeJpgHeader(j, STBI__SCAN_load) == 0)
                 return 0;
             m = GetMarker(j);
-            while (!((m) == (0xd9)))
+            while (!(m == 0xd9))
             {
-                if (((m) == (0xda)))
+                if (m == 0xda)
                 {
                     if (ProcessScanHeader(j) == 0)
                         return 0;
                     if (ParseEntropyCodedData(j) == 0)
                         return 0;
 
-                    if ((j._marker) == (0xff))
+                    if (j._marker == 0xff)
                     {
                         while (AtEoF(j._readCtx) == 0)
                         {
                             int x = GetByte(j._readCtx);
-                            if ((x) == (255))
+                            if (x == 255)
                             {
                                 j._marker = GetByte(j._readCtx);
                                 break;
@@ -2040,10 +2040,10 @@ namespace MonoGame.Imaging
                         }
                     }
                 }
-                else if (((m) == (0xdc)))
+                else if (m == 0xdc)
                 {
                     int Ld = Get16be(j._readCtx);
-                    uint NL = (uint)(Get16be(j._readCtx));
+                    uint NL = (uint)Get16be(j._readCtx);
                     if (Ld != 4)
                         j._readCtx.Error(ImagingError.BadDNLLength);
                     if (NL != j._readCtx.Height)
@@ -2056,7 +2056,7 @@ namespace MonoGame.Imaging
                 }
                 m = GetMarker(j);
             }
-            if ((j.progressive) != 0)
+            if (j.progressive != 0)
                 FinishJpg(j);
             return 1;
         }
@@ -2068,9 +2068,9 @@ namespace MonoGame.Imaging
 
         public static byte* ResampleRow_v2(byte* _out_, byte* in_near, byte* in_far, int w, int hs)
         {
-            for (int i = 0; (i) < (w); ++i)
+            for (int i = 0; i < w; ++i)
             {
-                _out_[i] = ((byte)((3 * in_near[i] + in_far[i] + 2) >> 2));
+                _out_[i] = (byte)((3 * in_near[i] + in_far[i] + 2) >> 2);
             }
             return _out_;
         }
@@ -2078,53 +2078,53 @@ namespace MonoGame.Imaging
         public static byte* ResampleRow_h2(byte* _out_, byte* in_near, byte* in_far, int w, int hs)
         {
             byte* input = in_near;
-            if ((w) == 1)
+            if (w == 1)
             {
                 _out_[0] = _out_[1] = input[0];
                 return _out_;
             }
 
             _out_[0] = input[0];
-            _out_[1] = ((byte)((input[0] * 3 + input[1] + 2) >> 2));
+            _out_[1] = (byte)((input[0] * 3 + input[1] + 2) >> 2);
             int i;
-            for (i = 1; (i) < (w - 1); ++i)
+            for (i = 1; i < (w - 1); ++i)
             {
                 int n = 3 * input[i] + 2;
-                _out_[i * 2 + 0] = ((byte)((n + input[i - 1]) >> 2));
-                _out_[i * 2 + 1] = ((byte)((n + input[i + 1]) >> 2));
+                _out_[i * 2 + 0] = (byte)((n + input[i - 1]) >> 2);
+                _out_[i * 2 + 1] = (byte)((n + input[i + 1]) >> 2);
             }
-            _out_[i * 2 + 0] = ((byte)((input[w - 2] * 3 + input[w - 1] + 2) >> 2));
+            _out_[i * 2 + 0] = (byte)((input[w - 2] * 3 + input[w - 1] + 2) >> 2);
             _out_[i * 2 + 1] = input[w - 1];
             return _out_;
         }
 
         public static byte* ResampleRow_hv2(byte* _out_, byte* in_near, byte* in_far, int w, int hs)
         {
-            if ((w) == 1)
+            if (w == 1)
             {
-                _out_[0] = _out_[1] = ((byte)((3 * in_near[0] + in_far[0] + 2) >> 2));
+                _out_[0] = _out_[1] = (byte)((3 * in_near[0] + in_far[0] + 2) >> 2);
                 return _out_;
             }
 
             int t0;
             int t1 = 3 * in_near[0] + in_far[0];
-            _out_[0] = ((byte)((t1 + 2) >> 2));
-            for (int i = 1; (i) < (w); ++i)
+            _out_[0] = (byte)((t1 + 2) >> 2);
+            for (int i = 1; i < w; ++i)
             {
                 t0 = t1;
                 t1 = 3 * in_near[i] + in_far[i];
-                _out_[i * 2 - 1] = ((byte)((3 * t0 + t1 + 8) >> 4));
-                _out_[i * 2] = ((byte)((3 * t1 + t0 + 8) >> 4));
+                _out_[i * 2 - 1] = (byte)((3 * t0 + t1 + 8) >> 4);
+                _out_[i * 2] = (byte)((3 * t1 + t0 + 8) >> 4);
             }
-            _out_[w * 2 - 1] = ((byte)((t1 + 2) >> 2));
+            _out_[w * 2 - 1] = (byte)((t1 + 2) >> 2);
             return _out_;
         }
 
         public static byte* GenericResampleRow(byte* _out_, byte* in_near, byte* in_far, int w, int hs)
         {
-            for (int i = 0; (i) < (w); ++i)
+            for (int i = 0; i < w; ++i)
             {
-                for (int j = 0; (j) < (hs); ++j)
+                for (int j = 0; j < hs; ++j)
                 {
                     _out_[i * hs + j] = in_near[i];
                 }
@@ -2134,45 +2134,45 @@ namespace MonoGame.Imaging
 
         public static void YCbCrToRGBRow(byte* _out_, byte* y, byte* pcb, byte* pcr, int count, int step)
         {
-            for (int i = 0; (i) < (count); ++i)
+            for (int i = 0; i < count; ++i)
             {
                 int y_fixed = (y[i] << 20) + (1 << 19);
                 int cr = pcr[i] - 128;
                 int cb = pcb[i] - 128;
-                int r = y_fixed + cr * (((int)((1.40200f) * 4096.0f + 0.5f)) << 8);
+                int r = y_fixed + cr * (((int)(1.40200f * 4096.0f + 0.5f)) << 8);
                 int g = 
-                    (int)(y_fixed + (cr * -(((int)((0.71414f) * 4096.0f + 0.5f)) << 8)) +
-                    ((cb * -(((int)((0.34414f) * 4096.0f + 0.5f)) << 8)) & 0xffff0000));
-                int b = y_fixed + cb * (((int)((1.77200f) * 4096.0f + 0.5f)) << 8);
+                    (int)(y_fixed + (cr * -(((int)(0.71414f * 4096.0f + 0.5f)) << 8)) +
+                    ((cb * -(((int)(0.34414f * 4096.0f + 0.5f)) << 8)) & 0xffff0000));
+                int b = y_fixed + cb * (((int)(1.77200f * 4096.0f + 0.5f)) << 8);
                 r >>= 20;
                 g >>= 20;
                 b >>= 20;
 
-                if (((uint)(r)) > (255))
+                if (((uint)r) > 255)
                 {
-                    if ((r) < 0)
+                    if (r < 0)
                         r = 0;
                     else
                         r = 255;
                 }
-                if (((uint)(g)) > (255))
+                if (((uint)g) > 255)
                 {
-                    if ((g) < 0)
+                    if (g < 0)
                         g = 0;
                     else
                         g = 255;
                 }
-                if (((uint)(b)) > (255))
+                if (((uint)b) > 255)
                 {
-                    if ((b) < 0)
+                    if (b < 0)
                         b = 0;
                     else
                         b = 255;
                 }
 
-                _out_[0] = ((byte)(r));
-                _out_[1] = ((byte)(g));
-                _out_[2] = ((byte)(b));
+                _out_[0] = (byte)r;
+                _out_[1] = (byte)g;
+                _out_[2] = (byte)b;
                 _out_[3] = 255;
                 _out_ += step;
             }
@@ -2200,8 +2200,8 @@ namespace MonoGame.Imaging
         {
             ReadContext s = z._readCtx;
             s.SourceChannels = 0;
-            if (((req_comp) < 0) || ((req_comp) > 4))
-                return (s.Error(ImagingError.BadReqComp)) != 0 ? (byte*)null : null;
+            if ((req_comp < 0) || (req_comp > 4))
+                return s.Error(ImagingError.BadReqComp) != 0 ? (byte*)null : null;
 
             if (DecodeJpgImage(z) == 0)
             {
@@ -2209,7 +2209,7 @@ namespace MonoGame.Imaging
                 return null;
             }
 
-            int n = (req_comp) != 0 ? req_comp : (s.SourceChannels) >= 3 ? 3 : 1;
+            int n = req_comp != 0 ? req_comp : s.SourceChannels >= 3 ? 3 : 1;
             int is_rgb = (s.SourceChannels == 3) && (z.rgb == 3 || (z.app14_color_transform == 0 && z.jfif == 0)) ? 1 : 0;
 
             int decode_n;
@@ -2231,7 +2231,7 @@ namespace MonoGame.Imaging
                 if (z.JpgImgComp[k].linebuf == null)
                 {
                     CleanupJpg(z);
-                    return (s.Error(ImagingError.OutOfMemory)) != 0 ? (byte*)null : null;
+                    return s.Error(ImagingError.OutOfMemory) != 0 ? (byte*)null : null;
                 }
                 r.hs = z.img_h_max / z.JpgImgComp[k].h;
                 r.vs = z.img_v_max / z.JpgImgComp[k].v;
@@ -2239,49 +2239,49 @@ namespace MonoGame.Imaging
                 r.w_lores = (int)((s.Width + r.hs - 1) / r.hs);
                 r.ypos = 0;
                 r.line0 = r.line1 = z.JpgImgComp[k].data;
-                if (((r.hs) == 1) && ((r.vs) == 1))
+                if ((r.hs == 1) && (r.vs == 1))
                     r.resampleDelegate = ResampleRow1;
-                else if (((r.hs) == 1) && ((r.vs) == 2)) r.resampleDelegate = ResampleRow_v2;
-                else if (((r.hs) == 2) && ((r.vs) == 1)) r.resampleDelegate = ResampleRow_h2;
-                else if (((r.hs) == 2) && ((r.vs) == 2)) r.resampleDelegate = z._resampleRow_HV2_kernel;
+                else if ((r.hs == 1) && (r.vs == 2)) r.resampleDelegate = ResampleRow_v2;
+                else if ((r.hs == 2) && (r.vs == 1)) r.resampleDelegate = ResampleRow_h2;
+                else if ((r.hs == 2) && (r.vs == 2)) r.resampleDelegate = z._resampleRow_HV2_kernel;
                 else r.resampleDelegate = GenericResampleRow;
             }
 
-            output = MAlloc_mad3(n, (int)(s.Width), (int)(s.Height), 1);
+            output = MAlloc_mad3(n, (int)s.Width, (int)s.Height, 1);
             if (output == null)
             {
                 CleanupJpg(z);
-                return (s.Error(ImagingError.OutOfMemory)) != 0 ? (byte*)null : null;
+                return s.Error(ImagingError.OutOfMemory) != 0 ? (byte*)null : null;
             }
 
-            for (int j = 0; (j) < (s.Height); ++j)
+            for (int j = 0; j < s.Height; ++j)
             {
                 byte* _out_ = output + n * s.Width * j;
-                for (int k = 0; (k) < (decode_n); ++k)
+                for (int k = 0; k < decode_n; ++k)
                 {
                     ref Resample r = ref res_comp[k];
-                    int y_bot = (r.ystep) >= (r.vs >> 1) ? 1 : 0;
+                    int y_bot = r.ystep >= (r.vs >> 1) ? 1 : 0;
 
                     coutput[k] = r.resampleDelegate(
-                        z.JpgImgComp[k].linebuf, (y_bot) != 0 ? r.line1 : r.line0,
-                        (y_bot) != 0 ? r.line0 : r.line1,
+                        z.JpgImgComp[k].linebuf, y_bot != 0 ? r.line1 : r.line0,
+                        y_bot != 0 ? r.line0 : r.line1,
                         r.w_lores, r.hs);
 
-                    if ((++r.ystep) >= (r.vs))
+                    if ((++r.ystep) >= r.vs)
                     {
                         r.ystep = 0;
                         r.line0 = r.line1;
-                        if ((++r.ypos) < (z.JpgImgComp[k].y)) r.line1 += z.JpgImgComp[k].w2;
+                        if ((++r.ypos) < z.JpgImgComp[k].y) r.line1 += z.JpgImgComp[k].w2;
                     }
                 }
-                if ((n) >= 3)
+                if (n >= 3)
                 {
                     byte* y = coutput[0];
-                    if ((s.SourceChannels) == 3)
+                    if (s.SourceChannels == 3)
                     {
-                        if ((is_rgb) != 0)
+                        if (is_rgb != 0)
                         {
-                            for (i = 0; (i) < (s.Width); ++i)
+                            for (i = 0; i < s.Width; ++i)
                             {
                                 _out_[0] = y[i];
                                 _out_[1] = coutput[1][i];
@@ -2292,14 +2292,14 @@ namespace MonoGame.Imaging
                         }
                         else
                         {
-                            YCbCrToRGBRow(_out_, y, coutput[1], coutput[2], (int)(s.Width), n);
+                            YCbCrToRGBRow(_out_, y, coutput[1], coutput[2], (int)s.Width, n);
                         }
                     }
-                    else if ((s.SourceChannels) == 4)
+                    else if (s.SourceChannels == 4)
                     {
-                        if ((z.app14_color_transform) == 0)
+                        if (z.app14_color_transform == 0)
                         {
-                            for (i = 0; (i) < (s.Width); ++i)
+                            for (i = 0; i < s.Width; ++i)
                             {
                                 byte m = coutput[3][i];
                                 _out_[0] = Blinn_8x8(coutput[0][i], m);
@@ -2309,10 +2309,10 @@ namespace MonoGame.Imaging
                                 _out_ += n;
                             }
                         }
-                        else if ((z.app14_color_transform) == 2)
+                        else if (z.app14_color_transform == 2)
                         {
-                            YCbCrToRGBRow(_out_, y, coutput[1], coutput[2], (int)(s.Width), n);
-                            for (i = 0; (i) < (s.Width); ++i)
+                            YCbCrToRGBRow(_out_, y, coutput[1], coutput[2], (int)s.Width, n);
+                            for (i = 0; i < s.Width; ++i)
                             {
                                 byte m = coutput[3][i];
                                 _out_[0] = Blinn_8x8((byte)(255 - _out_[0]), m);
@@ -2323,11 +2323,11 @@ namespace MonoGame.Imaging
                         }
                         else
                         {
-                            YCbCrToRGBRow(_out_, y, coutput[1], coutput[2], (int)(s.Width), n);
+                            YCbCrToRGBRow(_out_, y, coutput[1], coutput[2], (int)s.Width, n);
                         }
                     }
                     else
-                        for (i = 0; (i) < (s.Width); ++i)
+                        for (i = 0; i < s.Width; ++i)
                         {
                             _out_[0] = _out_[1] = _out_[2] = y[i];
                             _out_[3] = 255;
@@ -2336,10 +2336,10 @@ namespace MonoGame.Imaging
                 }
                 else
                 {
-                    if ((is_rgb) != 0)
+                    if (is_rgb != 0)
                     {
-                        if ((n) == 1)
-                            for (i = 0; (i) < (s.Width); ++i)
+                        if (n == 1)
+                            for (i = 0; i < s.Width; ++i)
                             {
                                 *_out_++ =
 
@@ -2348,7 +2348,7 @@ namespace MonoGame.Imaging
                             }
                         else
                         {
-                            for (i = 0; (i) < (s.Width); ++i, _out_ += 2)
+                            for (i = 0; i < s.Width; ++i, _out_ += 2)
                             {
                                 _out_[0] =
 
@@ -2358,9 +2358,9 @@ namespace MonoGame.Imaging
                             }
                         }
                     }
-                    else if (((s.SourceChannels) == 4) && ((z.app14_color_transform) == 0))
+                    else if ((s.SourceChannels == 4) && (z.app14_color_transform == 0))
                     {
-                        for (i = 0; (i) < (s.Width); ++i)
+                        for (i = 0; i < s.Width; ++i)
                         {
                             byte m = coutput[3][i];
                             byte r = Blinn_8x8(coutput[0][i], m);
@@ -2371,9 +2371,9 @@ namespace MonoGame.Imaging
                             _out_ += n;
                         }
                     }
-                    else if (((s.SourceChannels) == 4) && ((z.app14_color_transform) == 2))
+                    else if ((s.SourceChannels == 4) && (z.app14_color_transform == 2))
                     {
-                        for (i = 0; (i) < (s.Width); ++i)
+                        for (i = 0; i < s.Width; ++i)
                         {
                             _out_[0] =
                                 Blinn_8x8((byte)(255 - coutput[0][i]), coutput[3][i]);
@@ -2384,13 +2384,13 @@ namespace MonoGame.Imaging
                     else
                     {
                         byte* y = coutput[0];
-                        if ((n) == 1)
-                            for (i = 0; (i) < (s.Width); ++i)
+                        if (n == 1)
+                            for (i = 0; i < s.Width; ++i)
                             {
                                 _out_[i] = y[i];
                             }
                         else
-                            for (i = 0; (i) < (s.Width); ++i)
+                            for (i = 0; i < s.Width; ++i)
                             {
                                 *_out_++ = y[i];
                                 *_out_++ = 255;
@@ -2400,10 +2400,10 @@ namespace MonoGame.Imaging
             }
 
             CleanupJpg(z);
-            *out_x = (int)(s.Width);
-            *out_y = (int)(s.Height);
-            if ((comp) != null)
-                *comp = (s.SourceChannels) >= 3 ? 3 : 1;
+            *out_x = (int)s.Width;
+            *out_y = (int)s.Height;
+            if (comp != null)
+                *comp = s.SourceChannels >= 3 ? 3 : 1;
 
             return output;
         }
@@ -2436,9 +2436,9 @@ namespace MonoGame.Imaging
                 return 0;
             }
 
-            if ((x) != null) *x = (int)(j._readCtx.Width);
-            if ((y) != null) *y = (int)(j._readCtx.Height);
-            if ((comp) != null) *comp = (j._readCtx.SourceChannels) >= 3 ? 3 : 1;
+            if (x != null) *x = (int)j._readCtx.Width;
+            if (y != null) *y = (int)j._readCtx.Height;
+            if (comp != null) *comp = j._readCtx.SourceChannels >= 3 ? 3 : 1;
             return 1;
         }
 
@@ -2472,24 +2472,24 @@ namespace MonoGame.Imaging
             int* sizes = stackalloc int[17];
             MemSet(sizes, 0, sizeof(int));
             MemSet(z->fast, 0, (1 << 9) * sizeof(ushort));
-            for (i = 0; (i) < (num); ++i)
+            for (i = 0; i < num; ++i)
             {
                 ++sizes[sizelist[i]];
             }
             sizes[0] = 0;
-            for (i = 1; (i) < (16); ++i)
+            for (i = 1; i < 16; ++i)
             {
-                if ((sizes[i]) > (1 << i))
+                if (sizes[i] > (1 << i))
                     return ec.Error(ImagingError.BadSizes);
             }
             code = 0;
-            for (i = 1; (i) < (16); ++i)
+            for (i = 1; i < 16; ++i)
             {
                 next_code[i] = code;
-                z->firstcode[i] = ((ushort)(code));
-                z->firstsymbol[i] = ((ushort)(k));
+                z->firstcode[i] = (ushort)code;
+                z->firstsymbol[i] = (ushort)k;
                 code = code + sizes[i];
-                if ((sizes[i]) != 0)
+                if (sizes[i] != 0)
                     if ((code - 1) >= (1 << i))
                         return ec.Error(ImagingError.BadCodeLengths);
                 z->maxcode[i] = code << (16 - i);
@@ -2497,19 +2497,19 @@ namespace MonoGame.Imaging
                 k += sizes[i];
             }
             z->maxcode[16] = 0x10000;
-            for (i = 0; (i) < (num); ++i)
+            for (i = 0; i < num; ++i)
             {
                 int s = sizelist[i];
-                if ((s) != 0)
+                if (s != 0)
                 {
                     int c = next_code[s] - z->firstcode[s] + z->firstsymbol[s];
                     ushort fastv = (ushort)((s << 9) | i);
-                    z->size[c] = ((byte)(s));
-                    z->value[c] = ((ushort)(i));
+                    z->size[c] = (byte)s;
+                    z->value[c] = (ushort)i;
                     if (s <= 9)
                     {
                         int j = BitReverse(next_code[s], s);
-                        while ((j) < (1 << 9))
+                        while (j < (1 << 9))
                         {
                             z->fast[j] = fastv;
                             j += 1 << s;
@@ -2523,7 +2523,7 @@ namespace MonoGame.Imaging
 
         public static byte GetZ8(ZBuffer* z)
         {
-            if ((z->zbuffer) >= (z->zbuffer_end)) return 0;
+            if (z->zbuffer >= z->zbuffer_end) return 0;
             return *z->zbuffer++;
         }
 
@@ -2531,7 +2531,7 @@ namespace MonoGame.Imaging
         {
             do
             {
-                z->code_buffer |= (uint)(GetZ8(z)) << z->num_bits;
+                z->code_buffer |= (uint)GetZ8(z) << z->num_bits;
                 z->num_bits += 8;
             } while (z->num_bits <= 24);
         }
@@ -2539,7 +2539,7 @@ namespace MonoGame.Imaging
         public static uint ReceiveZ(ZBuffer* z, int n)
         {
             uint k;
-            if ((z->num_bits) < (n)) FillZBits(z);
+            if (z->num_bits < n) FillZBits(z);
             k = (uint)(z->code_buffer & ((1 << n) - 1));
             z->code_buffer >>= n;
             z->num_bits -= n;
@@ -2551,12 +2551,12 @@ namespace MonoGame.Imaging
             int b;
             int s;
             int k;
-            k = BitReverse((int)(a->code_buffer), 16);
+            k = BitReverse((int)a->code_buffer, 16);
             for (s = 9 + 1; ; ++s)
             {
-                if ((k) < (z->maxcode[s])) break;
+                if (k < z->maxcode[s]) break;
             }
-            if ((s) == (16))
+            if (s == 16)
                 return -1;
             b = (k >> (16 - s)) - z->firstcode[s] + z->firstsymbol[s];
             a->code_buffer >>= s;
@@ -2568,9 +2568,9 @@ namespace MonoGame.Imaging
         {
             int b;
             int s;
-            if ((a->num_bits) < (16)) FillZBits(a);
+            if (a->num_bits < 16) FillZBits(a);
             b = z->fast[a->code_buffer & ((1 << 9) - 1)];
-            if ((b) != 0)
+            if (b != 0)
             {
                 s = b >> 9;
                 a->code_buffer >>= s;
@@ -2590,9 +2590,9 @@ namespace MonoGame.Imaging
             if (z->z_expandable == 0)
                 return ec.Error(ImagingError.OutputBufferLimit);
 
-            cur = ((int)(z->zout - (int)z->zout_start.Ptr));
-            limit = old_limit = ((int)(z->zout_end - (int)z->zout_start.Ptr));
-            while ((cur + n) > (limit))
+            cur = (int)(z->zout - (int)z->zout_start.Ptr);
+            limit = old_limit = (int)(z->zout_end - (int)z->zout_start.Ptr);
+            while ((cur + n) > limit)
             {
                 limit *= 2;
             }
@@ -2609,58 +2609,58 @@ namespace MonoGame.Imaging
             for (; ; )
             {
                 int z = HuffmanDecodeZ(a, &a->z_length);
-                if ((z) < (256))
+                if (z < 256)
                 {
-                    if ((z) < 0)
+                    if (z < 0)
                         return ec.Error(ImagingError.BadHuffmanCode);
-                    if ((zout) >= (a->zout_end))
+                    if (zout >= a->zout_end)
                     {
                         if (ExpandZ(ec, a, zout, 1) == 0)
                             return 0;
                         zout = a->zout;
                     }
-                    *zout++ = ((sbyte)(z));
+                    *zout++ = (sbyte)z;
                 }
                 else
                 {
                     byte* p;
                     int len;
                     int dist;
-                    if ((z) == (256))
+                    if (z == 256)
                     {
                         a->zout = zout;
                         return 1;
                     }
                     z -= 257;
                     len = LengthBaseZ[z];
-                    if ((LengthExtraZ[z]) != 0) len += (int)(ReceiveZ(a, LengthExtraZ[z]));
+                    if (LengthExtraZ[z] != 0) len += (int)ReceiveZ(a, LengthExtraZ[z]);
                     z = HuffmanDecodeZ(a, &a->z_distance);
-                    if ((z) < 0)
+                    if (z < 0)
                         return ec.Error(ImagingError.BadHuffmanCode);
                     dist = DistBaseZ[z];
-                    if ((DistExtraZ[z]) != 0) dist += (int)(ReceiveZ(a, DistExtraZ[z]));
-                    if ((zout - (sbyte*)a->zout_start.Ptr) < (dist))
+                    if (DistExtraZ[z] != 0) dist += (int)ReceiveZ(a, DistExtraZ[z]);
+                    if ((zout - (sbyte*)a->zout_start.Ptr) < dist)
                         return ec.Error(ImagingError.BadDist);
-                    if ((zout + len) > (a->zout_end))
+                    if ((zout + len) > a->zout_end)
                     {
                         if (ExpandZ(ec, a, zout, len) == 0)
                             return 0;
                         zout = a->zout;
                     }
                     p = (byte*)(zout - dist);
-                    if ((dist) == 1)
+                    if (dist == 1)
                     {
                         byte v = *p;
-                        if ((len) != 0)
+                        if (len != 0)
                         {
-                            do *zout++ = (sbyte)(v); while ((--len) != 0);
+                            do *zout++ = (sbyte)v; while ((--len) != 0);
                         }
                     }
                     else
                     {
-                        if ((len) != 0)
+                        if (len != 0)
                         {
-                            do *zout++ = (sbyte)(*p++); while ((--len) != 0);
+                            do *zout++ = (sbyte)*p++; while ((--len) != 0);
                         }
                     }
                 }
@@ -2679,40 +2679,40 @@ namespace MonoGame.Imaging
             int hclen = (int)(ReceiveZ(a, 4) + 4);
             int ntot = hlit + hdist;
             MemSet(codelength_sizes, 0, 19 * sizeof(byte));
-            for (i = 0; (i) < (hclen); ++i)
+            for (i = 0; i < hclen; ++i)
             {
-                int s = (int)(ReceiveZ(a, 3));
-                codelength_sizes[LengthDezigzag[i]] = ((byte)(s));
+                int s = (int)ReceiveZ(a, 3);
+                codelength_sizes[LengthDezigzag[i]] = (byte)s;
             }
             if (BuildHuffmanZ(ec, &z_codelength, codelength_sizes, 19) == 0) return 0;
             n = 0;
-            while ((n) < (ntot))
+            while (n < ntot)
             {
                 int c = HuffmanDecodeZ(a, &z_codelength);
-                if (((c) < 0) || ((c) >= (19)))
+                if ((c < 0) || (c >= 19))
                     return ec.Error(ImagingError.BadCodeLengths);
 
-                if ((c) < (16))
-                    lencodes[n++] = ((byte)(c));
+                if (c < 16)
+                    lencodes[n++] = (byte)c;
                 else
                 {
                     byte fill = 0;
-                    if ((c) == (16))
+                    if (c == 16)
                     {
                         c = (int)(ReceiveZ(a, 2) + 3);
-                        if ((n) == 0)
+                        if (n == 0)
                             return ec.Error(ImagingError.BadCodeLengths);
                         fill = lencodes[n - 1];
                     }
-                    else if ((c) == (17))
+                    else if (c == 17)
                         c = (int)(ReceiveZ(a, 3) + 3);
                     else
                     {
                         c = (int)(ReceiveZ(a, 7) + 11);
                     }
-                    if ((ntot - n) < (c))
+                    if ((ntot - n) < c)
                         return ec.Error(ImagingError.BadCodeLengths);
-                    MemSet(lencodes + n, fill, (ulong)(c));
+                    MemSet(lencodes + n, fill, (ulong)c);
                     n += c;
                 }
             }
@@ -2735,13 +2735,13 @@ namespace MonoGame.Imaging
             if ((a->num_bits & 7) != 0)
                 ReceiveZ(a, a->num_bits & 7);
             int k = 0;
-            while ((a->num_bits) > 0)
+            while (a->num_bits > 0)
             {
-                header[k++] = ((byte)(a->code_buffer & 255));
+                header[k++] = (byte)(a->code_buffer & 255);
                 a->code_buffer >>= 8;
                 a->num_bits -= 8;
             }
-            while ((k) < 4)
+            while (k < 4)
             {
                 header[k++] = GetZ8(a);
             }
@@ -2751,10 +2751,10 @@ namespace MonoGame.Imaging
             if (nlen != (len ^ 0xffff))
                 return ec.Error(ImagingError.ZlibCorrupt);
 
-            if ((a->zbuffer + len) > (a->zbuffer_end))
+            if ((a->zbuffer + len) > a->zbuffer_end)
                 return ec.Error(ImagingError.ReadPastBuffer);
 
-            if ((a->zout + len) > (a->zout_end))
+            if ((a->zout + len) > a->zout_end)
                 if (ExpandZ(ec, a, a->zout, len) == 0)
                     return 0;
 
@@ -2782,25 +2782,25 @@ namespace MonoGame.Imaging
         {
             int final;
             int type;
-            if ((parse_header) != 0) if (ParseZlibHeader(ec, a) == 0) return 0;
+            if (parse_header != 0) if (ParseZlibHeader(ec, a) == 0) return 0;
             a->num_bits = 0;
             a->code_buffer = 0;
             do
             {
-                final = (int)(ReceiveZ(a, 1));
-                type = (int)(ReceiveZ(a, 2));
-                if ((type) == 0)
+                final = (int)ReceiveZ(a, 1);
+                type = (int)ReceiveZ(a, 2);
+                if (type == 0)
                 {
                     if (ParseUncompressedBlockZ(ec, a) == 0)
                         return 0;
                 }
-                else if ((type) == 3)
+                else if (type == 3)
                 {
                     return 0;
                 }
                 else
                 {
-                    if ((type) == 1)
+                    if (type == 1)
                     {
                         fixed (byte* b = stbi__zdefault_length)
                         {
@@ -2869,12 +2869,12 @@ namespace MonoGame.Imaging
         {
             ZBuffer a = new ZBuffer();
             var p = MAlloc(initial_size);
-            a.zbuffer = (byte*)(buffer);
-            a.zbuffer_end = (byte*)(buffer) + len;
-            if ((DoZlib(ec, &a, p, initial_size, 1, parse_header)) != 0)
+            a.zbuffer = (byte*)buffer;
+            a.zbuffer_end = (byte*)buffer + len;
+            if (DoZlib(ec, &a, p, initial_size, 1, parse_header) != 0)
             {
-                if ((outlen) != null)
-                    *outlen = ((int)(a.zout - (sbyte*)a.zout_start.Ptr));
+                if (outlen != null)
+                    *outlen = (int)(a.zout - (sbyte*)a.zout_start.Ptr);
                 return a.zout_start.Ptr;
             }
             else
@@ -2946,7 +2946,7 @@ namespace MonoGame.Imaging
         public static int CheckPngHeader(ReadContext s)
         {
             int i;
-            for (i = 0; (i) < 8; ++i)
+            for (i = 0; i < 8; ++i)
             {
                 if (GetByte(s) != PngSig[i])
                     return s.Error(ImagingError.BadPngSignature);
@@ -2973,7 +2973,7 @@ namespace MonoGame.Imaging
         public static int CreateRawPngImage(PngImage a, byte* raw, uint raw_len,
             int out_n, uint x, uint y, int depth, int color)
         {
-            int bytes = depth == (16) ? 2 : 1;
+            int bytes = depth == 16 ? 2 : 1;
             ReadContext s = a._readCtx;
             uint i;
             uint j;
@@ -2984,28 +2984,28 @@ namespace MonoGame.Imaging
             int img_n = s.SourceChannels;
             int output_bytes = out_n * bytes;
             int filter_bytes = img_n * bytes;
-            int width = (int)(x);
-            a._out = (byte*)(MAlloc_mad3((int)(x), (int)(y), output_bytes, 0));
+            int width = (int)x;
+            a._out = (byte*)MAlloc_mad3((int)x, (int)y, output_bytes, 0);
             if (a._out == null) return s.Error(ImagingError.OutOfMemory);
             img_width_bytes = (uint)(((img_n * x * depth) + 7) >> 3);
             img_len = (img_width_bytes + 1) * y;
-            if ((raw_len) < (img_len)) return s.Error(ImagingError.NotEnoughPixels);
-            for (j = 0; (j) < (y); ++j)
+            if (raw_len < img_len) return s.Error(ImagingError.NotEnoughPixels);
+            for (j = 0; j < y; ++j)
             {
                 byte* cur = a._out + stride * j;
                 byte* prior;
                 int filter = *raw++;
-                if ((filter) > 4)
+                if (filter > 4)
                     return s.Error(ImagingError.InvalidFilter);
                 if (depth < 8)
                 {
                     cur += x * out_n - img_width_bytes;
                     filter_bytes = 1;
-                    width = (int)(img_width_bytes);
+                    width = (int)img_width_bytes;
                 }
                 prior = cur - stride;
-                if ((j) == 0) filter = FirstRowFilter[filter];
-                for (k = 0; (k) < (filter_bytes); ++k)
+                if (j == 0) filter = FirstRowFilter[filter];
+                for (k = 0; k < filter_bytes; ++k)
                 {
                     switch (filter)
                     {
@@ -3016,13 +3016,13 @@ namespace MonoGame.Imaging
                             cur[k] = raw[k];
                             break;
                         case STBI__F_up:
-                            cur[k] = ((byte)((raw[k] + prior[k]) & 255));
+                            cur[k] = (byte)((raw[k] + prior[k]) & 255);
                             break;
                         case STBI__F_avg:
-                            cur[k] = ((byte)((raw[k] + (prior[k] >> 1)) & 255));
+                            cur[k] = (byte)((raw[k] + (prior[k] >> 1)) & 255);
                             break;
                         case STBI__F_paeth:
-                            cur[k] = ((byte)((raw[k] + PaethFilter(0, prior[k], 0)) & 255));
+                            cur[k] = (byte)((raw[k] + PaethFilter(0, prior[k], 0)) & 255);
                             break;
                         case FAvgFirst:
                             cur[k] = raw[k];
@@ -3039,7 +3039,7 @@ namespace MonoGame.Imaging
                     cur += out_n;
                     prior += out_n;
                 }
-                else if (depth == (16))
+                else if (depth == 16)
                 {
                     if (img_n != out_n)
                     {
@@ -3056,7 +3056,7 @@ namespace MonoGame.Imaging
                     cur += 1;
                     prior += 1;
                 }
-                if ((depth < 8) || ((img_n) == (out_n)))
+                if ((depth < 8) || (img_n == out_n))
                 {
                     int nk = (width - 1) * filter_bytes;
                     switch (filter)
@@ -3065,47 +3065,47 @@ namespace MonoGame.Imaging
                             MemCopy(cur, raw, nk);
                             break;
                         case FSub:
-                            for (k = 0; (k) < (nk); ++k)
+                            for (k = 0; k < nk; ++k)
                             {
-                                cur[k] = ((byte)((raw[k] + cur[k - filter_bytes]) & 255));
+                                cur[k] = (byte)((raw[k] + cur[k - filter_bytes]) & 255);
                             }
                             break;
                         case STBI__F_up:
-                            for (k = 0; (k) < (nk); ++k)
+                            for (k = 0; k < nk; ++k)
                             {
-                                cur[k] = ((byte)((raw[k] + prior[k]) & 255));
+                                cur[k] = (byte)((raw[k] + prior[k]) & 255);
                             }
                             break;
                         case STBI__F_avg:
-                            for (k = 0; (k) < (nk); ++k)
+                            for (k = 0; k < nk; ++k)
                             {
-                                cur[k] = ((byte)((raw[k] + ((prior[k] + cur[k - filter_bytes]) >> 1)) & 255));
+                                cur[k] = (byte)((raw[k] + ((prior[k] + cur[k - filter_bytes]) >> 1)) & 255);
                             }
                             break;
                         case STBI__F_paeth:
-                            for (k = 0; (k) < (nk); ++k)
+                            for (k = 0; k < nk; ++k)
                             {
                                 cur[k] =
-                                    ((byte)
+                                    (byte)
                                         ((raw[k] +
                                           PaethFilter(cur[k - filter_bytes], prior[k],
                                               prior[k - filter_bytes])) &
-                                         255));
+                                         255);
                             }
                             break;
                         case FAvgFirst:
-                            for (k = 0; (k) < (nk); ++k)
+                            for (k = 0; k < nk; ++k)
                             {
-                                cur[k] = ((byte)((raw[k] + (cur[k - filter_bytes] >> 1)) & 255));
+                                cur[k] = (byte)((raw[k] + (cur[k - filter_bytes] >> 1)) & 255);
                             }
                             break;
                         case FPaethFirst:
-                            for (k = 0; (k) < (nk); ++k)
+                            for (k = 0; k < nk; ++k)
                             {
                                 cur[k] =
-                                    ((byte)
+                                    (byte)
                                         ((raw[k] + PaethFilter(cur[k - filter_bytes], 0, 0)) &
-                                         255));
+                                         255);
                             }
                             break;
                     }
@@ -3117,11 +3117,11 @@ namespace MonoGame.Imaging
                     {
                         case FNone:
                             for (i = x - 1;
-                                (i) >= 1;
+                                i >= 1;
                                 --i, cur[filter_bytes] = 255, raw += filter_bytes, cur += output_bytes,
                                     prior += output_bytes)
                             {
-                                for (k = 0; (k) < (filter_bytes); ++k)
+                                for (k = 0; k < filter_bytes; ++k)
                                 {
                                     cur[k] = raw[k];
                                 }
@@ -3129,89 +3129,89 @@ namespace MonoGame.Imaging
                             break;
                         case FSub:
                             for (i = x - 1;
-                                (i) >= 1;
+                                i >= 1;
                                 --i, cur[filter_bytes] = 255, raw += filter_bytes, cur += output_bytes,
                                     prior += output_bytes)
                             {
-                                for (k = 0; (k) < (filter_bytes); ++k)
+                                for (k = 0; k < filter_bytes; ++k)
                                 {
-                                    cur[k] = ((byte)((raw[k] + cur[k - output_bytes]) & 255));
+                                    cur[k] = (byte)((raw[k] + cur[k - output_bytes]) & 255);
                                 }
                             }
                             break;
                         case STBI__F_up:
                             for (i = x - 1;
-                                (i) >= 1;
+                                i >= 1;
                                 --i, cur[filter_bytes] = 255, raw += filter_bytes, cur += output_bytes,
                                     prior += output_bytes)
                             {
-                                for (k = 0; (k) < (filter_bytes); ++k)
+                                for (k = 0; k < filter_bytes; ++k)
                                 {
-                                    cur[k] = ((byte)((raw[k] + prior[k]) & 255));
+                                    cur[k] = (byte)((raw[k] + prior[k]) & 255);
                                 }
                             }
                             break;
                         case STBI__F_avg:
                             for (i = x - 1;
-                                (i) >= 1;
+                                i >= 1;
                                 --i, cur[filter_bytes] = 255, raw += filter_bytes, cur += output_bytes,
                                     prior += output_bytes)
                             {
-                                for (k = 0; (k) < (filter_bytes); ++k)
+                                for (k = 0; k < filter_bytes; ++k)
                                 {
-                                    cur[k] = ((byte)((raw[k] + ((prior[k] + cur[k - output_bytes]) >> 1)) & 255));
+                                    cur[k] = (byte)((raw[k] + ((prior[k] + cur[k - output_bytes]) >> 1)) & 255);
                                 }
                             }
                             break;
                         case STBI__F_paeth:
                             for (i = x - 1;
-                                (i) >= 1;
+                                i >= 1;
                                 --i, cur[filter_bytes] = 255, raw += filter_bytes, cur += output_bytes,
                                     prior += output_bytes)
                             {
-                                for (k = 0; (k) < (filter_bytes); ++k)
+                                for (k = 0; k < filter_bytes; ++k)
                                 {
                                     cur[k] =
-                                        ((byte)
+                                        (byte)
                                             ((raw[k] +
                                               PaethFilter(cur[k - output_bytes], prior[k],
                                                   prior[k - output_bytes])) &
-                                             255));
+                                             255);
                                 }
                             }
                             break;
                         case FAvgFirst:
                             for (i = x - 1;
-                                (i) >= 1;
+                                i >= 1;
                                 --i, cur[filter_bytes] = 255, raw += filter_bytes, cur += output_bytes,
                                     prior += output_bytes)
                             {
-                                for (k = 0; (k) < (filter_bytes); ++k)
+                                for (k = 0; k < filter_bytes; ++k)
                                 {
-                                    cur[k] = ((byte)((raw[k] + (cur[k - output_bytes] >> 1)) & 255));
+                                    cur[k] = (byte)((raw[k] + (cur[k - output_bytes] >> 1)) & 255);
                                 }
                             }
                             break;
                         case FPaethFirst:
                             for (i = x - 1;
-                                (i) >= 1;
+                                i >= 1;
                                 --i, cur[filter_bytes] = 255, raw += filter_bytes, cur += output_bytes,
                                     prior += output_bytes)
                             {
-                                for (k = 0; (k) < (filter_bytes); ++k)
+                                for (k = 0; k < filter_bytes; ++k)
                                 {
                                     cur[k] =
-                                        ((byte)
+                                        (byte)
                                             ((raw[k] + PaethFilter(cur[k - output_bytes], 0, 0)) &
-                                             255));
+                                             255);
                                 }
                             }
                             break;
                     }
-                    if (depth == (16))
+                    if (depth == 16)
                     {
                         cur = a._out + stride * j;
-                        for (i = 0; (i) < (x); ++i, cur += output_bytes)
+                        for (i = 0; i < x; ++i, cur += output_bytes)
                         {
                             cur[filter_bytes + 1] = 255;
                         }
@@ -3220,36 +3220,36 @@ namespace MonoGame.Imaging
             }
             if (depth < 8)
             {
-                for (j = 0; (j) < (y); ++j)
+                for (j = 0; j < y; ++j)
                 {
                     byte* cur = a._out + stride * j;
                     byte* _in_ = a._out + stride * j + x * out_n - img_width_bytes;
                     byte scale = (byte)((color == 0) ? DepthScaleTable[depth] : 1);
                     if (depth == 4)
                     {
-                        for (k = (int)(x * img_n); (k) >= 2; k -= 2, ++_in_)
+                        for (k = (int)(x * img_n); k >= 2; k -= 2, ++_in_)
                         {
                             *cur++ = (byte)(scale * (*_in_ >> 4));
                             *cur++ = (byte)(scale * ((*_in_) & 0x0f));
                         }
-                        if ((k) > 0) *cur++ = (byte)(scale * (*_in_ >> 4));
+                        if (k > 0) *cur++ = (byte)(scale * (*_in_ >> 4));
                     }
                     else if (depth == 2)
                     {
-                        for (k = (int)(x * img_n); (k) >= 4; k -= 4, ++_in_)
+                        for (k = (int)(x * img_n); k >= 4; k -= 4, ++_in_)
                         {
                             *cur++ = (byte)(scale * (*_in_ >> 6));
                             *cur++ = (byte)(scale * ((*_in_ >> 4) & 0x03));
                             *cur++ = (byte)(scale * ((*_in_ >> 2) & 0x03));
                             *cur++ = (byte)(scale * ((*_in_) & 0x03));
                         }
-                        if ((k) > 0) *cur++ = (byte)(scale * (*_in_ >> 6));
-                        if ((k) > 1) *cur++ = (byte)(scale * ((*_in_ >> 4) & 0x03));
-                        if ((k) > 2) *cur++ = (byte)(scale * ((*_in_ >> 2) & 0x03));
+                        if (k > 0) *cur++ = (byte)(scale * (*_in_ >> 6));
+                        if (k > 1) *cur++ = (byte)(scale * ((*_in_ >> 4) & 0x03));
+                        if (k > 2) *cur++ = (byte)(scale * ((*_in_ >> 2) & 0x03));
                     }
                     else if (depth == 1)
                     {
-                        for (k = (int)(x * img_n); (k) >= 8; k -= 8, ++_in_)
+                        for (k = (int)(x * img_n); k >= 8; k -= 8, ++_in_)
                         {
                             *cur++ = (byte)(scale * (*_in_ >> 7));
                             *cur++ = (byte)(scale * ((*_in_ >> 6) & 0x01));
@@ -3260,21 +3260,21 @@ namespace MonoGame.Imaging
                             *cur++ = (byte)(scale * ((*_in_ >> 1) & 0x01));
                             *cur++ = (byte)(scale * ((*_in_) & 0x01));
                         }
-                        if ((k) > 0) *cur++ = (byte)(scale * (*_in_ >> 7));
-                        if ((k) > 1) *cur++ = (byte)(scale * ((*_in_ >> 6) & 0x01));
-                        if ((k) > 2) *cur++ = (byte)(scale * ((*_in_ >> 5) & 0x01));
-                        if ((k) > 3) *cur++ = (byte)(scale * ((*_in_ >> 4) & 0x01));
-                        if ((k) > 4) *cur++ = (byte)(scale * ((*_in_ >> 3) & 0x01));
-                        if ((k) > 5) *cur++ = (byte)(scale * ((*_in_ >> 2) & 0x01));
-                        if ((k) > 6) *cur++ = (byte)(scale * ((*_in_ >> 1) & 0x01));
+                        if (k > 0) *cur++ = (byte)(scale * (*_in_ >> 7));
+                        if (k > 1) *cur++ = (byte)(scale * ((*_in_ >> 6) & 0x01));
+                        if (k > 2) *cur++ = (byte)(scale * ((*_in_ >> 5) & 0x01));
+                        if (k > 3) *cur++ = (byte)(scale * ((*_in_ >> 4) & 0x01));
+                        if (k > 4) *cur++ = (byte)(scale * ((*_in_ >> 3) & 0x01));
+                        if (k > 5) *cur++ = (byte)(scale * ((*_in_ >> 2) & 0x01));
+                        if (k > 6) *cur++ = (byte)(scale * ((*_in_ >> 1) & 0x01));
                     }
                     if (img_n != out_n)
                     {
                         int q;
                         cur = a._out + stride * j;
-                        if ((img_n) == 1)
+                        if (img_n == 1)
                         {
-                            for (q = (int)(x - 1); (q) >= 0; --q)
+                            for (q = (int)(x - 1); q >= 0; --q)
                             {
                                 cur[q * 2 + 1] = 255;
                                 cur[q * 2 + 0] = cur[q];
@@ -3282,7 +3282,7 @@ namespace MonoGame.Imaging
                         }
                         else
                         {
-                            for (q = (int)(x - 1); (q) >= 0; --q)
+                            for (q = (int)(x - 1); q >= 0; --q)
                             {
                                 cur[q * 4 + 3] = 255;
                                 cur[q * 4 + 2] = cur[q * 3 + 2];
@@ -3293,11 +3293,11 @@ namespace MonoGame.Imaging
                     }
                 }
             }
-            else if (depth == (16))
+            else if (depth == 16)
             {
                 byte* cur = a._out;
-                ushort* cur16 = (ushort*)(cur);
-                for (i = 0; (i) < (x * y * out_n); ++i, cur16++, cur += 2)
+                ushort* cur16 = (ushort*)cur;
+                for (i = 0; i < (x * y * out_n); ++i, cur16++, cur += 2)
                 {
                     *cur16 = (ushort)((cur[0] << 8) | cur[1]);
                 }
@@ -3309,7 +3309,7 @@ namespace MonoGame.Imaging
         public static int CreatePngImage(PngImage a, byte* image_data, uint image_data_len, int out_n,
             int depth, int color, int interlaced)
         {
-            int bytes = depth == (16) ? 2 : 1;
+            int bytes = depth == 16 ? 2 : 1;
             int out_bytes = out_n * bytes;
             byte* final;
             int p;
@@ -3319,8 +3319,8 @@ namespace MonoGame.Imaging
                         CreateRawPngImage(a, image_data, image_data_len, out_n,
                             a._readCtx.Width,
                             a._readCtx.Height, depth, color);
-            final = (byte*)(MAlloc_mad3((int)(a._readCtx.Width), (int)(a._readCtx.Height), out_bytes, 0));
-            for (p = 0; (p) < 7; ++p)
+            final = (byte*)MAlloc_mad3((int)a._readCtx.Width, (int)a._readCtx.Height, out_bytes, 0);
+            for (p = 0; p < 7; ++p)
             {
                 int* xorig = stackalloc int[7];
                 xorig[0] = 0;
@@ -3360,20 +3360,20 @@ namespace MonoGame.Imaging
                 int y;
                 x = (int)((a._readCtx.Width - xorig[p] + xspc[p] - 1) / xspc[p]);
                 y = (int)((a._readCtx.Height - yorig[p] + yspc[p] - 1) / yspc[p]);
-                if (((x) != 0) && ((y) != 0))
+                if ((x != 0) && (y != 0))
                 {
                     uint img_len = (uint)(((((a._readCtx.SourceChannels * x * depth) + 7) >> 3) + 1) * y);
                     if (
-                        CreateRawPngImage(a, image_data, image_data_len, out_n, (uint)(x),
-                            (uint)(y),
+                        CreateRawPngImage(a, image_data, image_data_len, out_n, (uint)x,
+                            (uint)y,
                             depth, color) == 0)
                     {
                         Free(final);
                         return 0;
                     }
-                    for (j = 0; (j) < (y); ++j)
+                    for (j = 0; j < y; ++j)
                     {
-                        for (i = 0; (i) < (x); ++i)
+                        for (i = 0; i < x; ++i)
                         {
                             int out_y = j * yspc[p] + yorig[p];
                             int out_x = i * xspc[p] + xorig[p];
@@ -3398,19 +3398,19 @@ namespace MonoGame.Imaging
             uint i;
             uint pixel_count = s.Width * s.Height;
             byte* p = z._out;
-            if ((out_n) == 2)
+            if (out_n == 2)
             {
-                for (i = 0; (i) < (pixel_count); ++i)
+                for (i = 0; i < pixel_count; ++i)
                 {
-                    p[1] = (byte)((p[0]) == (tc[0]) ? 0 : 255);
+                    p[1] = (byte)(p[0] == tc[0] ? 0 : 255);
                     p += 2;
                 }
             }
             else
             {
-                for (i = 0; (i) < (pixel_count); ++i)
+                for (i = 0; i < pixel_count; ++i)
                 {
-                    if ((((p[0]) == (tc[0])) && ((p[1]) == (tc[1]))) && ((p[2]) == (tc[2]))) p[3] = 0;
+                    if ((p[0] == tc[0]) && (p[1] == tc[1]) && (p[2] == tc[2])) p[3] = 0;
                     p += 4;
                 }
             }
@@ -3423,20 +3423,20 @@ namespace MonoGame.Imaging
             ReadContext s = z._readCtx;
             uint i;
             uint pixel_count = s.Width * s.Height;
-            ushort* p = (ushort*)(z._out);
-            if ((out_n) == 2)
+            ushort* p = (ushort*)z._out;
+            if (out_n == 2)
             {
-                for (i = 0; (i) < (pixel_count); ++i)
+                for (i = 0; i < pixel_count; ++i)
                 {
-                    p[1] = (ushort)((p[0]) == (tc[0]) ? 0 : 65535);
+                    p[1] = (ushort)(p[0] == tc[0] ? 0 : 65535);
                     p += 2;
                 }
             }
             else
             {
-                for (i = 0; (i) < (pixel_count); ++i)
+                for (i = 0; i < pixel_count; ++i)
                 {
-                    if ((((p[0]) == (tc[0])) && ((p[1]) == (tc[1]))) && ((p[2]) == (tc[2]))) p[3] = 0;
+                    if ((p[0] == tc[0]) && (p[1] == tc[1]) && (p[2] == tc[2])) p[3] = 0;
                     p += 4;
                 }
             }
@@ -3450,9 +3450,9 @@ namespace MonoGame.Imaging
             byte* orig = a._out;
             byte* p = MAlloc_mad2((int)pixel_count, pal_img_n, 0);
             byte* temp_out = p;
-            if ((pal_img_n) == 3)
+            if (pal_img_n == 3)
             {
-                for (uint i = 0; (i) < (pixel_count); ++i)
+                for (uint i = 0; i < pixel_count; ++i)
                 {
                     int n = orig[i] * 4;
                     p[0] = palette[n];
@@ -3463,7 +3463,7 @@ namespace MonoGame.Imaging
             }
             else
             {
-                for (uint i = 0; (i) < (pixel_count); ++i)
+                for (uint i = 0; i < pixel_count; ++i)
                 {
                     int n = orig[i] * 4;
                     p[0] = palette[n];
@@ -3495,9 +3495,9 @@ namespace MonoGame.Imaging
             uint i;
             uint pixel_count = s.Width * s.Height;
             byte* p = z._out;
-            if ((s.OutChannels) == 3)
+            if (s.OutChannels == 3)
             {
-                for (i = 0; (i) < (pixel_count); ++i)
+                for (i = 0; i < pixel_count; ++i)
                 {
                     byte t = p[0];
                     p[0] = p[2];
@@ -3507,13 +3507,13 @@ namespace MonoGame.Imaging
             }
             else
             {
-                if ((UnpremultiplyOnLoad) != 0)
+                if (UnpremultiplyOnLoad != 0)
                 {
-                    for (i = 0; (i) < (pixel_count); ++i)
+                    for (i = 0; i < pixel_count; ++i)
                     {
                         byte a = p[3];
                         byte t = p[0];
-                        if ((a) != 0)
+                        if (a != 0)
                         {
                             byte half = (byte)(a / 2);
                             p[0] = (byte)((p[2] * 255 + half) / a);
@@ -3530,7 +3530,7 @@ namespace MonoGame.Imaging
                 }
                 else
                 {
-                    for (i = 0; (i) < (pixel_count); ++i)
+                    for (i = 0; i < pixel_count; ++i)
                     {
                         byte t = p[0];
                         p[0] = p[2];
@@ -3566,7 +3566,7 @@ namespace MonoGame.Imaging
             if (CheckPngHeader(s) == 0)
                 return 0;
 
-            if ((scan) == (STBI__SCAN_type))
+            if (scan == STBI__SCAN_type)
                 return 1;
 
             for (; ; )
@@ -3574,74 +3574,89 @@ namespace MonoGame.Imaging
                 PngChunk c = GetChunkHeader(s);
                 switch (c.Type)
                 {
-                    case ((('C') << 24) + (('g') << 16) + (('B') << 8) + ('I')):
+                    case ('C' << 24) + ('g' << 16) + ('B' << 8) + 'I':
                         is_iphone = 1;
-                        Skip(s, (int)(c.Length));
+                        Skip(s, (int)c.Length);
                         break;
-                    case ((('I') << 24) + (('H') << 16) + (('D') << 8) + ('R')):
+
+                    case ('I' << 24) + ('H' << 16) + ('D' << 8) + 'R':
                         {
                             int comp;
                             int filter;
                             if (first == 0)
                                 return s.Error(ImagingError.MultipleIHDR);
                             first = 0;
+
                             if (c.Length != 13)
                                 return s.Error(ImagingError.BadIHDRLength);
+
                             s.Width = Get32be(s);
-                            if ((s.Width) > (1 << 24))
+                            if (s.Width > (1 << 24))
                                 return s.Error(ImagingError.TooLarge);
+
                             s.Height = Get32be(s);
-                            if ((s.Height) > (1 << 24))
+                            if (s.Height > (1 << 24))
                                 return s.Error(ImagingError.TooLarge);
+
                             z.depth = GetByte(s);
-                            if (((((z.depth != 1) && (z.depth != 2)) && (z.depth != 4)) && (z.depth != 8)) &&
+                            if ((z.depth != 1) && (z.depth != 2) && (z.depth != 4) && (z.depth != 8) &&
                                 (z.depth != 16))
                                 return s.Error(ImagingError.Bit_1_2_4_8_16_Only);
+
                             color = GetByte(s);
                             if (color > 6)
                                 return s.Error(ImagingError.BadCType);
-                            if ((color == 3) && ((z.depth) == (16)))
+                            if ((color == 3) && (z.depth == 16))
                                 return s.Error(ImagingError.BadCType);
                             if (color == 3) pal_img_n = 3;
                             else if ((color & 1) != 0)
                                 return s.Error(ImagingError.BadCType);
+
                             comp = GetByte(s);
-                            if ((comp) != 0)
+                            if (comp != 0)
                                 return s.Error(ImagingError.BadCompMethod);
                             filter = GetByte(s);
-                            if ((filter) != 0)
+                            if (filter != 0)
                                 return s.Error(ImagingError.BadFilterMethod);
+
                             interlace = GetByte(s);
-                            if ((interlace) > 1)
+                            if (interlace > 1)
                                 return s.Error(ImagingError.BadInterlaceMethod);
-                            if ((s.Width == 0) || (s.Height == 0))
+
+                            if (s.Width == 0 || s.Height == 0)
                                 return s.Error(ImagingError.ZeroPixelImage);
+
                             if (pal_img_n == 0)
                             {
                                 s.SourceChannels = ((color & 2) != 0 ? 3 : 1) + ((color & 4) != 0 ? 1 : 0);
-                                if (((1 << 30) / s.Width / s.SourceChannels) < (s.Height))
+                                if (((1 << 30) / s.Width / s.SourceChannels) < s.Height)
                                     return s.Error(ImagingError.TooLarge);
-                                if ((scan) == (STBI__SCAN_header))
+
+                                if (scan == STBI__SCAN_header)
                                     return 1;
                             }
                             else
                             {
                                 s.SourceChannels = 1;
-                                if (((1 << 30) / s.Width / 4) < (s.Height))
+                                if (((1 << 30) / s.Width / 4) < s.Height)
                                     return s.Error(ImagingError.TooLarge);
                             }
                             break;
                         }
-                    case ((('P') << 24) + (('L') << 16) + (('T') << 8) + ('E')):
+
+                    case ('P' << 24) + ('L' << 16) + ('T' << 8) + 'E':
                         {
-                            if ((first) != 0)
+                            if (first != 0)
                                 return s.Error(ImagingError.FirstNotIHDR);
-                            if ((c.Length) > (256 * 3))
+
+                            if (c.Length > 256 * 3)
                                 return s.Error(ImagingError.InvalidPLTE);
+
                             pal_len = c.Length / 3;
                             if (pal_len * 3 != c.Length)
                                 return s.Error(ImagingError.InvalidPLTE);
-                            for (i = 0; (i) < (pal_len); ++i)
+
+                            for (i = 0; i < pal_len; ++i)
                             {
                                 palette[i * 4 + 0] = GetByte(s);
                                 palette[i * 4 + 1] = GetByte(s);
@@ -3650,145 +3665,172 @@ namespace MonoGame.Imaging
                             }
                             break;
                         }
-                    case ((('t') << 24) + (('R') << 16) + (('N') << 8) + ('S')):
+
+                    case ('t' << 24) + ('R' << 16) + ('N' << 8) + 'S':
                         {
-                            if ((first) != 0)
+                            if (first != 0)
                                 return s.Error(ImagingError.FirstNotIHDR);
-                            if ((z._idata).Ptr != null)
+
+                            if (z._idata.Ptr != null)
                                 return s.Error(ImagingError.TRNSAfterIDAT);
-                            if ((pal_img_n) != 0)
+
+                            if (pal_img_n != 0)
                             {
-                                if ((scan) == (STBI__SCAN_header))
+                                if (scan == STBI__SCAN_header)
                                 {
                                     s.SourceChannels = 4;
                                     return 1;
                                 }
-                                if ((pal_len) == 0)
+
+                                if (pal_len == 0)
                                     return s.Error(ImagingError.TRNSBeforePLTE);
-                                if ((c.Length) > (pal_len))
+
+                                if (c.Length > pal_len)
                                     return s.Error(ImagingError.BadTRNSLength);
+
                                 pal_img_n = 4;
-                                for (i = 0; (i) < (c.Length); ++i)
-                                {
+                                for (i = 0; i < c.Length; ++i)
                                     palette[i * 4 + 3] = GetByte(s);
-                                }
                             }
                             else
                             {
                                 if ((s.SourceChannels & 1) == 0)
                                     return s.Error(ImagingError.TRNSWithAlpha);
-                                if (c.Length != (uint)(s.SourceChannels) * 2)
+
+                                if (c.Length != (uint)s.SourceChannels * 2)
                                     return s.Error(ImagingError.BadTRNSLength);
+
                                 has_trans = 1;
-                                if ((z.depth) == (16))
+                                if (z.depth == 16)
                                 {
-                                    for (k = 0; (k) < (s.SourceChannels); ++k)
-                                    {
-                                        tc16[k] = ((ushort)(Get16be(s)));
-                                    }
+                                    for (k = 0; k < s.SourceChannels; ++k)
+                                        tc16[k] = (ushort)Get16be(s);
                                 }
                                 else
                                 {
-                                    for (k = 0; (k) < (s.SourceChannels); ++k)
-                                    {
+                                    for (k = 0; k < s.SourceChannels; ++k)
                                         tc[k] = (byte)((byte)(Get16be(s) & 255) * DepthScaleTable[z.depth]);
-                                    }
                                 }
                             }
                             break;
                         }
-                    case ((('I') << 24) + (('D') << 16) + (('A') << 8) + ('T')):
+
+                    case ('I' << 24) + ('D' << 16) + ('A' << 8) + 'T':
                         {
-                            if ((first) != 0)
+                            if (first != 0)
                                 return s.Error(ImagingError.FirstNotIHDR);
-                            if (((pal_img_n) != 0) && (pal_len == 0))
+
+                            if ((pal_img_n != 0) && (pal_len == 0))
                                 return s.Error(ImagingError.NoPLTE);
 
-                            if ((scan) == (STBI__SCAN_header))
+                            if (scan == STBI__SCAN_header)
                             {
                                 s.SourceChannels = pal_img_n;
                                 return 1;
                             }
-                            if (((int)(ioff + c.Length)) < ((int)(ioff)))
+
+                            if (((int)(ioff + c.Length)) < (int)ioff)
                                 return 0;
-                            if ((ioff + c.Length) > (idata_limit))
+
+                            if ((ioff + c.Length) > idata_limit)
                             {
-                                uint idata_limit_old = idata_limit;
-                                if ((idata_limit) == 0) idata_limit = (c.Length) > (4096) ? c.Length : 4096;
-                                while ((ioff + c.Length) > (idata_limit))
-                                {
+                                //uint idata_limit_old = idata_limit;
+                                if (idata_limit == 0)
+                                    idata_limit = c.Length > 4096 ? c.Length : 4096;
+
+                                while ((ioff + c.Length) > idata_limit)
                                     idata_limit *= 2;
-                                }
+
                                 z._idata = ReAlloc(z._idata, idata_limit);
                             }
+
                             if (GetRawData(s, (byte*)z._idata.Ptr + ioff, (int)c.Length) == 0)
-                                return 
-                                    s.Error(ImagingError.OutOfData);
+                                return s.Error(ImagingError.OutOfData);
+
                             ioff += c.Length;
                             break;
                         }
-                    case ((('I') << 24) + (('E') << 16) + (('N') << 8) + ('D')):
+
+                    case ('I' << 24) + ('E' << 16) + ('N' << 8) + 'D':
                         {
                             uint raw_len;
                             uint bpl;
-                            if ((first) != 0)
+                            if (first != 0)
                                 return s.Error(ImagingError.FirstNotIHDR);
+
                             if (scan != STBI__SCAN_load)
                                 return 1;
-                            if ((z._idata.Ptr) == null)
+
+                            if (z._idata.Ptr == null)
                                 return s.Error(ImagingError.NoIDAT);
 
                             bpl = (uint)((s.Width * z.depth + 7) / 8);
                             raw_len = (uint)(bpl * s.Height * s.SourceChannels + s.Height);
-                            z._expanded = (byte*) (ZlibDecodeMAlloc_GuessSizeHeaderFlag(
-                                s.ErrorCtx, (sbyte*)(z._idata.Ptr), (int)(ioff), (int)(raw_len), (int*)(&raw_len), is_iphone != 0 ? 0 : 1));
-                            if ((z._expanded) == null)
+                            z._expanded = (byte*) ZlibDecodeMAlloc_GuessSizeHeaderFlag(
+                                s.ErrorCtx, (sbyte*)z._idata.Ptr, (int)ioff, (int)raw_len, (int*)&raw_len, is_iphone != 0 ? 0 : 1);
+
+                            if (z._expanded == null)
                                 return 0;
+
                             Free(z._idata);
                             z._idata = default;
-                            if (((((req_comp) == (s.SourceChannels + 1)) && (req_comp != 3)) && (pal_img_n == 0)) ||
-                                ((has_trans) != 0))
+
+                            if ((req_comp == (s.SourceChannels + 1) && req_comp != 3 && pal_img_n == 0) ||  has_trans != 0)
                                 s.OutChannels = s.SourceChannels + 1;
-                            else s.OutChannels = s.SourceChannels;
+                            else
+                                s.OutChannels = s.SourceChannels;
+
                             if (CreatePngImage(z, z._expanded, raw_len, s.OutChannels, z.depth, color, interlace) == 0)
                                 return 0;
-                            if ((has_trans) != 0)
+
+                            if (has_trans != 0)
                             {
-                                if ((z.depth) == (16))
+                                if (z.depth == 16)
                                 {
-                                    if (ComputeTransparency16(z, tc16, s.OutChannels) == 0) return 0;
+                                    if (ComputeTransparency16(z, tc16, s.OutChannels) == 0)
+                                        return 0;
                                 }
                                 else
                                 {
-                                    if (ComputeTransparency(z, tc, s.OutChannels) == 0) return 0;
+                                    if (ComputeTransparency(z, tc, s.OutChannels) == 0)
+                                        return 0;
                                 }
                             }
-                            if ((((is_iphone) != 0) && ((DeIPhoneFlag) != 0)) && ((s.OutChannels) > 2))
+
+                            if ((is_iphone != 0) && (DeIPhoneFlag != 0) && (s.OutChannels > 2))
                                 DeIPhone(z);
-                            if ((pal_img_n) != 0)
+
+                            if (pal_img_n != 0)
                             {
                                 s.SourceChannels = pal_img_n;
                                 s.OutChannels = pal_img_n;
-                                if ((req_comp) >= 3) s.OutChannels = req_comp;
-                                if (ExpandPngPalette(z, palette, (int)(pal_len), s.OutChannels) == 0)
+
+                                if (req_comp >= 3)
+                                    s.OutChannels = req_comp;
+
+                                if (ExpandPngPalette(z, palette, (int)pal_len, s.OutChannels) == 0)
                                     return 0;
                             }
-                            else if ((has_trans) != 0)
+
+                            else if (has_trans != 0)
                             {
-                                ++s.SourceChannels;
+                                s.SourceChannels++;
                             }
+
                             Free(z._expanded);
                             z._expanded = null;
+
                             return 1;
                         }
+
                     default:
-                        if ((first) != 0)
+                        if (first != 0)
                             return s.Error(ImagingError.FirstNotIHDR);
+
                         if ((c.Type & (1 << 29)) == 0)
-                        {
                             return s.Error(ImagingError.PngChunkUnknown);
-                        }
-                        Skip(s, (int)(c.Length));
+
+                        Skip(s, (int)c.Length);
                         break;
                 }
                 Get32be(s);
@@ -3800,31 +3842,34 @@ namespace MonoGame.Imaging
             ReadContext s = p._readCtx;
 
             void* result = null;
-            if (((req_comp) < 0) || ((req_comp) > 4))
-                return (s.Error(ImagingError.BadReqComp)) != 0 ? (byte*)null : null;
+            if (req_comp < 0 || req_comp > 4)
+                return s.Error(ImagingError.BadReqComp) != 0 ? (byte*)null : null;
 
             if (ParsePngFile(p, STBI__SCAN_load, req_comp) != 0)
             {
-                if ((p.depth) < 8)
+                if (p.depth < 8)
                     ri->BitsPerChannel = 8;
                 else
                     ri->BitsPerChannel = p.depth;
+
                 result = p._out;
                 p._out = null;
-                if (((req_comp) != 0) && (req_comp != s.OutChannels))
+
+                if (req_comp != 0 && req_comp != s.OutChannels)
                 {
-                    if ((ri->BitsPerChannel) == 8)
+                    if (ri->BitsPerChannel == 8)
                         result = ConvertToFormat8(
-                            s.ErrorCtx, (byte*)(result), s.OutChannels, req_comp, s.Width, s.Height);
+                            s.ErrorCtx, (byte*)result, s.OutChannels, req_comp, s.Width, s.Height);
                     else
                         result = ConvertToFormat16(
-                            s.ErrorCtx, (ushort*)(result), s.OutChannels, req_comp, s.Width, s.Height);
+                            s.ErrorCtx, (ushort*)result, s.OutChannels, req_comp, s.Width, s.Height);
 
                     s.OutChannels = req_comp;
-                    if ((result) == null) return result;
+                    if (result == null)
+                        return result;
                 }
-                *x = (int)(s.Width);
-                *y = (int)(s.Height);
+                *x = (int)s.Width;
+                *y = (int)s.Height;
 
                 if (n != null)
                     *n = s.SourceChannels;
@@ -3863,9 +3908,15 @@ namespace MonoGame.Imaging
                 return 0;
             }
 
-            if ((x) != null) *x = (int)(p._readCtx.Width);
-            if ((y) != null) *y = (int)(p._readCtx.Height);
-            if ((comp) != null) *comp = p._readCtx.SourceChannels;
+            if (x != null)
+                *x = (int)p._readCtx.Width;
+
+            if (y != null)
+                *y = (int)p._readCtx.Height;
+
+            if (comp != null)
+                *comp = p._readCtx.SourceChannels;
+
             return 1;
         }
 
@@ -3886,7 +3937,7 @@ namespace MonoGame.Imaging
             Get16le(s);
             Get16le(s);
             Get32le(s);
-            int sz = (int)(Get32le(s));
+            int sz = (int)Get32le(s);
             return (sz == 12 || sz == 40 || sz == 56 || sz == 108 || sz == 124) ? 1 : 0;
         }
 
@@ -3900,32 +3951,32 @@ namespace MonoGame.Imaging
         public static int HighBit(uint z)
         {
             int n = 0;
-            if ((z) == 0) return -1;
-            if ((z) >= (0x10000))
+            if (z == 0) return -1;
+            if (z >= 0x10000)
             {
                 n += 16;
                 z >>= 16;
             }
 
-            if ((z) >= (0x00100))
+            if (z >= 0x00100)
             {
                 n += 8;
                 z >>= 8;
             }
 
-            if ((z) >= (0x00010))
+            if (z >= 0x00010)
             {
                 n += 4;
                 z >>= 4;
             }
 
-            if ((z) >= (0x00004))
+            if (z >= 0x00004)
             {
                 n += 2;
                 z >>= 2;
             }
 
-            if ((z) >= (0x00002))
+            if (z >= 0x00002)
             {
                 n += 1;
                 z >>= 1;
@@ -3948,13 +3999,13 @@ namespace MonoGame.Imaging
         {
             int result;
             int z = 0;
-            if ((shift) < 0)
+            if (shift < 0)
                 v <<= -shift;
             else
                 v >>= shift;
             result = v;
             z = bits;
-            while ((z) < 8)
+            while (z < 8)
             {
                 result += v >> z;
                 z += bits;
@@ -3966,21 +4017,21 @@ namespace MonoGame.Imaging
         {
             int hsz;
             if ((GetByte(s) != 'B') || (GetByte(s) != 'M'))
-                return (s.Error(ImagingError.NotBmp)) != 0 ? (byte*)null : null;
+                return s.Error(ImagingError.NotBmp) != 0 ? (byte*)null : null;
             Get32le(s);
             Get16le(s);
             Get16le(s);
-            info->offset = (int)(Get32le(s));
-            info->hsz = hsz = (int)(Get32le(s));
+            info->offset = (int)Get32le(s);
+            info->hsz = hsz = (int)Get32le(s);
             info->mr = info->mg = info->mb = info->ma = 0;
 
-            if (((((hsz != 12) && (hsz != 40)) && (hsz != 56)) && (hsz != 108)) && (hsz != 124))
-                return (s.Error(ImagingError.UnknownBmp)) != 0 ? (byte*)null : null;
+            if ((hsz != 12) && (hsz != 40) && (hsz != 56) && (hsz != 108) && (hsz != 124))
+                return s.Error(ImagingError.UnknownBmp) != 0 ? (byte*)null : null;
 
-            if ((hsz) == 12)
+            if (hsz == 12)
             {
-                s.Width = (uint)(Get16le(s));
-                s.Height = (uint)(Get16le(s));
+                s.Width = (uint)Get16le(s);
+                s.Height = (uint)Get16le(s);
             }
             else
             {
@@ -3989,36 +4040,36 @@ namespace MonoGame.Imaging
             }
 
             if (Get16le(s) != 1)
-                return (s.Error(ImagingError.BadBmp)) != 0 ? (byte*)null : null;
+                return s.Error(ImagingError.BadBmp) != 0 ? (byte*)null : null;
 
             info->bpp = Get16le(s);
-            if ((info->bpp) == 1)
-                return (s.Error(ImagingError.Monochrome)) != 0 ? (byte*)null : null;
+            if (info->bpp == 1)
+                return s.Error(ImagingError.Monochrome) != 0 ? (byte*)null : null;
 
             if (hsz != 12)
             {
-                int compress = (int)(Get32le(s));
-                if (((compress) == 1) || ((compress) == 2))
-                    return (s.Error(ImagingError.BmpRLE)) != 0 ? (byte*)null : null;
+                int compress = (int)Get32le(s);
+                if ((compress == 1) || (compress == 2))
+                    return s.Error(ImagingError.BmpRLE) != 0 ? (byte*)null : null;
                 Get32le(s);
                 Get32le(s);
                 Get32le(s);
                 Get32le(s);
                 Get32le(s);
-                if (((hsz) == (40)) || ((hsz) == (56)))
+                if ((hsz == 40) || (hsz == 56))
                 {
-                    if ((hsz) == (56))
+                    if (hsz == 56)
                     {
                         Get32le(s);
                         Get32le(s);
                         Get32le(s);
                         Get32le(s);
                     }
-                    if (((info->bpp) == (16)) || ((info->bpp) == (32)))
+                    if ((info->bpp == 16) || (info->bpp == 32))
                     {
-                        if ((compress) == 0)
+                        if (compress == 0)
                         {
-                            if ((info->bpp) == (32))
+                            if (info->bpp == 32)
                             {
                                 info->mr = 0xffu << 16;
                                 info->mg = 0xffu << 8;
@@ -4033,35 +4084,35 @@ namespace MonoGame.Imaging
                                 info->mb = 31u << 0;
                             }
                         }
-                        else if ((compress) == 3)
+                        else if (compress == 3)
                         {
                             info->mr = Get32le(s);
                             info->mg = Get32le(s);
                             info->mb = Get32le(s);
-                            if (((info->mr) == (info->mg)) && ((info->mg) == (info->mb)))
+                            if ((info->mr == info->mg) && (info->mg == info->mb))
                             {
-                                return (s.Error(ImagingError.BadBmp)) != 0 ? (byte*)null : null;
+                                return s.Error(ImagingError.BadBmp) != 0 ? (byte*)null : null;
                             }
                         }
                         else
-                            return (s.Error(ImagingError.BadBmp)) != 0 ? (byte*)null : null;
+                            return s.Error(ImagingError.BadBmp) != 0 ? (byte*)null : null;
                     }
                 }
                 else
                 {
                     int i;
                     if ((hsz != 108) && (hsz != 124))
-                        return (s.Error(ImagingError.BadBmp)) != 0 ? (byte*)null : null;
+                        return s.Error(ImagingError.BadBmp) != 0 ? (byte*)null : null;
                     info->mr = Get32le(s);
                     info->mg = Get32le(s);
                     info->mb = Get32le(s);
                     info->ma = Get32le(s);
                     Get32le(s);
-                    for (i = 0; (i) < 12; ++i)
+                    for (i = 0; i < 12; ++i)
                     {
                         Get32le(s);
                     }
-                    if ((hsz) == (124))
+                    if (hsz == 124)
                     {
                         Get32le(s);
                         Get32le(s);
@@ -4109,43 +4160,43 @@ namespace MonoGame.Imaging
                 all_a = 255
             };
 
-            if ((ParseBmpHeader(s, &info)) == null)
+            if (ParseBmpHeader(s, &info) == null)
                 return null;
 
-            flip_vertically = ((int)(s.Height)) > 0 ? 1 : 0;
-            s.Height = (uint)(Abs((int)(s.Height)));
+            flip_vertically = ((int)s.Height) > 0 ? 1 : 0;
+            s.Height = (uint)Abs((int)s.Height);
             mr = info.mr;
             mg = info.mg;
             mb = info.mb;
             ma = info.ma;
             all_a = info.all_a;
-            if ((info.hsz) == 12)
+            if (info.hsz == 12)
             {
-                if ((info.bpp) < (24)) psize = (info.offset - 14 - 24) / 3;
+                if (info.bpp < 24) psize = (info.offset - 14 - 24) / 3;
             }
             else
             {
-                if ((info.bpp) < (16)) psize = (info.offset - 14 - info.hsz) >> 2;
+                if (info.bpp < 16) psize = (info.offset - 14 - info.hsz) >> 2;
             }
 
-            s.SourceChannels = (ma) != 0 ? 4 : 3;
-            if (((req_comp) != 0) && ((req_comp) >= 3))
+            s.SourceChannels = ma != 0 ? 4 : 3;
+            if ((req_comp != 0) && (req_comp >= 3))
                 target = req_comp;
             else
                 target = s.SourceChannels;
-            if (ValidSizes_mad3(target, (int)(s.Width), (int)(s.Height), 0) == 0)
-                return (s.Error(ImagingError.TooLarge)) != 0 ? (byte*)null : null;
-            _out_ = (byte*)(MAlloc_mad3(target, (int)(s.Width), (int)(s.Height), 0));
-            if (_out_ == null) return (s.Error(ImagingError.OutOfMemory)) != 0 ? (byte*)null : null;
-            if ((info.bpp) < (16))
+            if (ValidSizes_mad3(target, (int)s.Width, (int)s.Height, 0) == 0)
+                return s.Error(ImagingError.TooLarge) != 0 ? (byte*)null : null;
+            _out_ = (byte*)MAlloc_mad3(target, (int)s.Width, (int)s.Height, 0);
+            if (_out_ == null) return s.Error(ImagingError.OutOfMemory) != 0 ? (byte*)null : null;
+            if (info.bpp < 16)
             {
                 int z = 0;
-                if (((psize) == 0) || ((psize) > (256)))
+                if ((psize == 0) || (psize > 256))
                 {
                     Free(_out_);
-                    return (s.Error(ImagingError.Invalid)) != 0 ? (byte*)null : null;
+                    return s.Error(ImagingError.Invalid) != 0 ? (byte*)null : null;
                 }
-                for (i = 0; (i) < (psize); ++i)
+                for (i = 0; i < psize; ++i)
                 {
                     pal[i * 4 + 2] = GetByte(s);
                     pal[i * 4 + 1] = GetByte(s);
@@ -4153,22 +4204,22 @@ namespace MonoGame.Imaging
                     if (info.hsz != 12) GetByte(s);
                     pal[i * 4 + 3] = 255;
                 }
-                Skip(s, info.offset - 14 - info.hsz - psize * ((info.hsz) == 12 ? 3 : 4));
-                if ((info.bpp) == 4) width = (int)((s.Width + 1) >> 1);
-                else if ((info.bpp) == 8) width = (int)(s.Width);
+                Skip(s, info.offset - 14 - info.hsz - psize * (info.hsz == 12 ? 3 : 4));
+                if (info.bpp == 4) width = (int)((s.Width + 1) >> 1);
+                else if (info.bpp == 8) width = (int)s.Width;
                 else
                 {
                     Free(_out_);
-                    return (s.Error(ImagingError.BadBPP)) != 0 ? (byte*)null : null;
+                    return s.Error(ImagingError.BadBPP) != 0 ? (byte*)null : null;
                 }
                 pad = (-width) & 3;
-                for (j = 0; (j) < ((int)(s.Height)); ++j)
+                for (j = 0; j < ((int)s.Height); ++j)
                 {
-                    for (i = 0; (i) < ((int)(s.Width)); i += 2)
+                    for (i = 0; i < ((int)s.Width); i += 2)
                     {
                         int v = GetByte(s);
                         int v2 = 0;
-                        if ((info.bpp) == 4)
+                        if (info.bpp == 4)
                         {
                             v2 = v & 15;
                             v >>= 4;
@@ -4176,14 +4227,14 @@ namespace MonoGame.Imaging
                         _out_[z++] = pal[v * 4 + 0];
                         _out_[z++] = pal[v * 4 + 1];
                         _out_[z++] = pal[v * 4 + 2];
-                        if ((target) == 4) _out_[z++] = 255;
-                        if ((i + 1) == ((int)(s.Width)))
+                        if (target == 4) _out_[z++] = 255;
+                        if ((i + 1) == ((int)s.Width))
                             break;
-                        v = ((info.bpp) == 8) ? GetByte(s) : v2;
+                        v = (info.bpp == 8) ? GetByte(s) : v2;
                         _out_[z++] = pal[v * 4 + 0];
                         _out_[z++] = pal[v * 4 + 1];
                         _out_[z++] = pal[v * 4 + 2];
-                        if ((target) == 4) _out_[z++] = 255;
+                        if (target == 4) _out_[z++] = 255;
                     }
                     Skip(s, pad);
                 }
@@ -4201,25 +4252,25 @@ namespace MonoGame.Imaging
                 int z = 0;
                 int easy = 0;
                 Skip(s, info.offset - 14 - info.hsz);
-                if ((info.bpp) == (24)) width = (int)(3 * s.Width);
-                else if ((info.bpp) == (16)) width = (int)(2 * s.Width);
+                if (info.bpp == 24) width = (int)(3 * s.Width);
+                else if (info.bpp == 16) width = (int)(2 * s.Width);
                 else width = 0;
                 pad = (-width) & 3;
-                if ((info.bpp) == (24))
+                if (info.bpp == 24)
                 {
                     easy = 1;
                 }
-                else if ((info.bpp) == (32))
+                else if (info.bpp == 32)
                 {
-                    if (((((mb) == (0xff)) && ((mg) == (0xff00))) && ((mr) == (0x00ff0000))) && ((ma) == (0xff000000)))
+                    if ((mb == 0xff) && (mg == 0xff00) && (mr == 0x00ff0000) && (ma == 0xff000000))
                         easy = 2;
                 }
                 if (easy == 0)
                 {
-                    if (((mr == 0) || (mg == 0)) || (mb == 0))
+                    if ((mr == 0) || (mg == 0) || (mb == 0))
                     {
                         Free(_out_);
-                        return (s.Error(ImagingError.BadMasks)) != 0 ? (byte*)null : null;
+                        return s.Error(ImagingError.BadMasks) != 0 ? (byte*)null : null;
                     }
                     rshift = HighBit(mr) - 7;
                     rcount = BitCount(mr);
@@ -4230,59 +4281,59 @@ namespace MonoGame.Imaging
                     ashift = HighBit(ma) - 7;
                     acount = BitCount(ma);
                 }
-                for (j = 0; (j) < ((int)(s.Height)); ++j)
+                for (j = 0; j < ((int)s.Height); ++j)
                 {
-                    if ((easy) != 0)
+                    if (easy != 0)
                     {
-                        for (i = 0; (i) < ((int)(s.Width)); ++i)
+                        for (i = 0; i < ((int)s.Width); ++i)
                         {
                             byte a;
                             _out_[z + 2] = GetByte(s);
                             _out_[z + 1] = GetByte(s);
                             _out_[z + 0] = GetByte(s);
                             z += 3;
-                            a = (byte)((easy) == 2 ? GetByte(s) : 255);
+                            a = (byte)(easy == 2 ? GetByte(s) : 255);
                             all_a |= a;
-                            if ((target) == 4) _out_[z++] = a;
+                            if (target == 4) _out_[z++] = a;
                         }
                     }
                     else
                     {
                         int bpp = info.bpp;
-                        for (i = 0; (i) < ((int)(s.Width)); ++i)
+                        for (i = 0; i < ((int)s.Width); ++i)
                         {
-                            uint v = (bpp) == (16) ? (uint)(Get16le(s)) : Get32le(s);
+                            uint v = bpp == 16 ? (uint)Get16le(s) : Get32le(s);
                             int a;
                             _out_[z++] =
-                                ((byte)((ShiftSigned((int)(v & mr), rshift, rcount)) & 255));
+                                (byte)((ShiftSigned((int)(v & mr), rshift, rcount)) & 255);
                             _out_[z++] =
-                                ((byte)((ShiftSigned((int)(v & mg), gshift, gcount)) & 255));
+                                (byte)((ShiftSigned((int)(v & mg), gshift, gcount)) & 255);
                             _out_[z++] =
-                                ((byte)((ShiftSigned((int)(v & mb), bshift, bcount)) & 255));
+                                (byte)((ShiftSigned((int)(v & mb), bshift, bcount)) & 255);
                             a =
 
-                                    (ma) != 0 ? ShiftSigned((int)(v & ma), ashift, acount) : 255;
-                            all_a |= (uint)(a);
-                            if ((target) == 4) _out_[z++] = ((byte)((a) & 255));
+                                    ma != 0 ? ShiftSigned((int)(v & ma), ashift, acount) : 255;
+                            all_a |= (uint)a;
+                            if (target == 4) _out_[z++] = (byte)((a) & 255);
                         }
                     }
                     Skip(s, pad);
                 }
             }
 
-            if (((target) == 4) && ((all_a) == 0))
-                for (i = (int)(4 * s.Width * s.Height - 1); (i) >= 0; i -= 4)
+            if ((target == 4) && (all_a == 0))
+                for (i = (int)(4 * s.Width * s.Height - 1); i >= 0; i -= 4)
                 {
                     _out_[i] = 255;
                 }
-            if ((flip_vertically) != 0)
+            if (flip_vertically != 0)
             {
                 byte t;
-                for (j = 0; (j) < ((int)(s.Height) >> 1); ++j)
+                for (j = 0; j < ((int)s.Height >> 1); ++j)
                 {
                     byte* p1 = _out_ + j * s.Width * target;
                     byte* p2 = _out_ + (s.Height - 1 - j) * s.Width * target;
-                    for (i = 0; (i) < ((int)(s.Width) * target); ++i)
+                    for (i = 0; i < ((int)s.Width * target); ++i)
                     {
                         t = p1[i];
                         p1[i] = p2[i];
@@ -4291,15 +4342,15 @@ namespace MonoGame.Imaging
                 }
             }
 
-            if (((req_comp) != 0) && (req_comp != target))
+            if ((req_comp != 0) && (req_comp != target))
             {
                 _out_ = ConvertToFormat8(s.ErrorCtx, _out_, target, req_comp, s.Width, s.Height);
-                if ((_out_) == null)
+                if (_out_ == null)
                     return _out_;
             }
 
-            *x = (int)(s.Width);
-            *y = (int)(s.Height);
+            *x = (int)s.Width;
+            *y = (int)s.Height;
             if (comp != null)
                 *comp = s.SourceChannels;
             return _out_;
@@ -4307,15 +4358,15 @@ namespace MonoGame.Imaging
 
         public static int GetTgaComp(int bits_per_pixel, int is_grey, int* is_rgb16)
         {
-            if ((is_rgb16) != null) *is_rgb16 = 0;
+            if (is_rgb16 != null) *is_rgb16 = 0;
             switch (bits_per_pixel)
             {
                 case 8:
                     return STBI_grey;
                 case 15:
                 case 16:
-                    if (((bits_per_pixel) == (16)) && ((is_grey) != 0)) return STBI_grey_alpha;
-                    if ((is_rgb16) != null) *is_rgb16 = 1;
+                    if ((bits_per_pixel == 16) && (is_grey != 0)) return STBI_grey_alpha;
+                    if (is_rgb16 != null) *is_rgb16 = 1;
                     return STBI_rgb;
                 case 24:
                 case 32:
@@ -4338,14 +4389,14 @@ namespace MonoGame.Imaging
             int tga_colormap_type;
             GetByte(s);
             tga_colormap_type = GetByte(s);
-            if ((tga_colormap_type) > 1)
+            if (tga_colormap_type > 1)
             {
                 Rewind(s);
                 return 0;
             }
 
             tga_image_type = GetByte(s);
-            if ((tga_colormap_type) == 1)
+            if (tga_colormap_type == 1)
             {
                 if ((tga_image_type != 1) && (tga_image_type != 9))
                 {
@@ -4354,7 +4405,7 @@ namespace MonoGame.Imaging
                 }
                 Skip(s, 4);
                 sz = GetByte(s);
-                if (((((sz != 8) && (sz != 15)) && (sz != 16)) && (sz != 24)) && (sz != 32))
+                if ((sz != 8) && (sz != 15) && (sz != 16) && (sz != 24) && (sz != 32))
                 {
                     Rewind(s);
                     return 0;
@@ -4364,7 +4415,7 @@ namespace MonoGame.Imaging
             }
             else
             {
-                if ((((tga_image_type != 2) && (tga_image_type != 3)) && (tga_image_type != 10)) &&
+                if ((tga_image_type != 2) && (tga_image_type != 3) && (tga_image_type != 10) &&
                     (tga_image_type != 11))
                 {
                     Rewind(s);
@@ -4375,14 +4426,14 @@ namespace MonoGame.Imaging
             }
 
             tga_w = Get16le(s);
-            if ((tga_w) < 1)
+            if (tga_w < 1)
             {
                 Rewind(s);
                 return 0;
             }
 
             tga_h = Get16le(s);
-            if ((tga_h) < 1)
+            if (tga_h < 1)
             {
                 Rewind(s);
                 return 0;
@@ -4404,7 +4455,7 @@ namespace MonoGame.Imaging
                 tga_comp =
 
                         GetTgaComp(tga_bits_per_pixel,
-                            (((tga_image_type) == 3)) || (((tga_image_type) == 11)) ? 1 : 0, null);
+                            tga_image_type == 3 || tga_image_type == 11 ? 1 : 0, null);
             }
 
             if (tga_comp == 0)
@@ -4413,9 +4464,9 @@ namespace MonoGame.Imaging
                 return 0;
             }
 
-            if ((x) != null) *x = tga_w;
-            if ((y) != null) *y = tga_h;
-            if ((comp) != null) *comp = tga_comp;
+            if (x != null) *x = tga_w;
+            if (y != null) *y = tga_h;
+            if (comp != null) *comp = tga_comp;
             return 1;
         }
 
@@ -4426,27 +4477,27 @@ namespace MonoGame.Imaging
             int tga_color_type;
             GetByte(s);
             tga_color_type = GetByte(s);
-            if ((tga_color_type) > 1) goto errorEnd;
+            if (tga_color_type > 1) goto errorEnd;
             sz = GetByte(s);
-            if ((tga_color_type) == 1)
+            if (tga_color_type == 1)
             {
                 if ((sz != 1) && (sz != 9)) goto errorEnd;
                 Skip(s, 4);
                 sz = GetByte(s);
-                if (((((sz != 8) && (sz != 15)) && (sz != 16)) && (sz != 24)) && (sz != 32)) goto errorEnd;
+                if ((sz != 8) && (sz != 15) && (sz != 16) && (sz != 24) && (sz != 32)) goto errorEnd;
                 Skip(s, 4);
             }
             else
             {
-                if ((((sz != 2) && (sz != 3)) && (sz != 10)) && (sz != 11)) goto errorEnd;
+                if ((sz != 2) && (sz != 3) && (sz != 10) && (sz != 11)) goto errorEnd;
                 Skip(s, 9);
             }
 
-            if ((Get16le(s)) < 1) goto errorEnd;
-            if ((Get16le(s)) < 1) goto errorEnd;
+            if (Get16le(s) < 1) goto errorEnd;
+            if (Get16le(s) < 1) goto errorEnd;
             sz = GetByte(s);
-            if ((((tga_color_type) == 1) && (sz != 8)) && (sz != 16)) goto errorEnd;
-            if (((((sz != 8) && (sz != 15)) && (sz != 16)) && (sz != 24)) && (sz != 32)) goto errorEnd;
+            if ((tga_color_type == 1) && (sz != 8) && (sz != 16)) goto errorEnd;
+            if ((sz != 8) && (sz != 15) && (sz != 16) && (sz != 24) && (sz != 32)) goto errorEnd;
             res = 1;
             errorEnd:
             ;
@@ -4456,14 +4507,14 @@ namespace MonoGame.Imaging
 
         public static void ReadRgb16Tga(ReadContext s, byte* _out_)
         {
-            ushort px = (ushort)(Get16le(s));
+            ushort px = (ushort)Get16le(s);
             ushort fiveBitMask = 31;
             int r = (px >> 10) & fiveBitMask;
             int g = (px >> 5) & fiveBitMask;
             int b = px & fiveBitMask;
-            _out_[0] = ((byte)((r * 255) / 31));
-            _out_[1] = ((byte)((g * 255) / 31));
-            _out_[2] = ((byte)((b * 255) / 31));
+            _out_[0] = (byte)(r * 255 / 31);
+            _out_[1] = (byte)(g * 255 / 31);
+            _out_[2] = (byte)(b * 255 / 31);
         }
 
         public static void* LoadTga(ReadContext s, int* x, int* y, int* comp, int req_comp, ResultInfo* ri)
@@ -4493,51 +4544,51 @@ namespace MonoGame.Imaging
             int RLE_count = 0;
             int RLE_repeating = 0;
             int read_next_pixel = 1;
-            if ((tga_image_type) >= 8)
+            if (tga_image_type >= 8)
             {
                 tga_image_type -= 8;
                 tga_is_RLE = 1;
             }
 
             tga_inverted = 1 - ((tga_inverted >> 5) & 1);
-            if ((tga_indexed) != 0)
+            if (tga_indexed != 0)
                 tga_comp = GetTgaComp(tga_palette_bits, 0, &tga_rgb16);
             else
                 tga_comp =
-                    GetTgaComp(tga_bits_per_pixel, (tga_image_type) == 3 ? 1 : 0, &tga_rgb16);
-            if (tga_comp == 0) return (s.Error(ImagingError.BadFormat)) != 0 ? (byte*)null : null;
+                    GetTgaComp(tga_bits_per_pixel, tga_image_type == 3 ? 1 : 0, &tga_rgb16);
+            if (tga_comp == 0) return s.Error(ImagingError.BadFormat) != 0 ? (byte*)null : null;
             *x = tga_width;
             *y = tga_height;
-            if ((comp) != null) *comp = tga_comp;
+            if (comp != null) *comp = tga_comp;
             if (ValidSizes_mad3(tga_width, tga_height, tga_comp, 0) == 0)
-                return (s.Error(ImagingError.TooLarge)) != 0 ? (byte*)null : null;
-            tga_data = (byte*)(MAlloc_mad3(tga_width, tga_height, tga_comp, 0));
-            if (tga_data == null) return (s.Error(ImagingError.OutOfMemory)) != 0 ? (byte*)null : null;
+                return s.Error(ImagingError.TooLarge) != 0 ? (byte*)null : null;
+            tga_data = (byte*)MAlloc_mad3(tga_width, tga_height, tga_comp, 0);
+            if (tga_data == null) return s.Error(ImagingError.OutOfMemory) != 0 ? (byte*)null : null;
             Skip(s, tga_offset);
-            if (((tga_indexed == 0) && (tga_is_RLE == 0)) && (tga_rgb16 == 0))
+            if ((tga_indexed == 0) && (tga_is_RLE == 0) && (tga_rgb16 == 0))
             {
-                for (i = 0; (i) < (tga_height); ++i)
+                for (i = 0; i < tga_height; ++i)
                 {
-                    int row = (tga_inverted) != 0 ? tga_height - i - 1 : i;
+                    int row = tga_inverted != 0 ? tga_height - i - 1 : i;
                     byte* tga_row = tga_data + row * tga_width * tga_comp;
                     GetRawData(s, tga_row, tga_width * tga_comp);
                 }
             }
             else
             {
-                if ((tga_indexed) != 0)
+                if (tga_indexed != 0)
                 {
                     Skip(s, tga_palette_start);
                     tga_palette = MAlloc_mad2(tga_palette_len, tga_comp, 0);
                     if (tga_palette == null)
                     {
                         Free(tga_data);
-                        return (s.Error(ImagingError.OutOfMemory)) != 0 ? (byte*)null : null;
+                        return s.Error(ImagingError.OutOfMemory) != 0 ? (byte*)null : null;
                     }
-                    if ((tga_rgb16) != 0)
+                    if (tga_rgb16 != 0)
                     {
                         byte* pal_entry = tga_palette;
-                        for (i = 0; (i) < (tga_palette_len); ++i)
+                        for (i = 0; i < tga_palette_len; ++i)
                         {
                             ReadRgb16Tga(s, pal_entry);
                             pal_entry += tga_comp;
@@ -4547,14 +4598,14 @@ namespace MonoGame.Imaging
                     {
                         Free(tga_data);
                         Free(tga_palette);
-                        return (s.Error(ImagingError.BadPalette)) != 0 ? (byte*)null : null;
+                        return s.Error(ImagingError.BadPalette) != 0 ? (byte*)null : null;
                     }
                 }
-                for (i = 0; (i) < (tga_width * tga_height); ++i)
+                for (i = 0; i < (tga_width * tga_height); ++i)
                 {
-                    if ((tga_is_RLE) != 0)
+                    if (tga_is_RLE != 0)
                     {
-                        if ((RLE_count) == 0)
+                        if (RLE_count == 0)
                         {
                             int RLE_cmd = GetByte(s);
                             RLE_count = 1 + (RLE_cmd & 127);
@@ -4570,47 +4621,47 @@ namespace MonoGame.Imaging
                     {
                         read_next_pixel = 1;
                     }
-                    if ((read_next_pixel) != 0)
+                    if (read_next_pixel != 0)
                     {
-                        if ((tga_indexed) != 0)
+                        if (tga_indexed != 0)
                         {
-                            int pal_idx = ((tga_bits_per_pixel) == 8) ? GetByte(s) : Get16le(s);
-                            if ((pal_idx) >= (tga_palette_len))
+                            int pal_idx = (tga_bits_per_pixel == 8) ? GetByte(s) : Get16le(s);
+                            if (pal_idx >= tga_palette_len)
                             {
                                 pal_idx = 0;
                             }
                             pal_idx *= tga_comp;
-                            for (j = 0; (j) < (tga_comp); ++j)
+                            for (j = 0; j < tga_comp; ++j)
                             {
                                 raw_data[j] = tga_palette[pal_idx + j];
                             }
                         }
-                        else if ((tga_rgb16) != 0)
+                        else if (tga_rgb16 != 0)
                         {
                             ReadRgb16Tga(s, raw_data);
                         }
                         else
                         {
-                            for (j = 0; (j) < (tga_comp); ++j)
+                            for (j = 0; j < tga_comp; ++j)
                             {
                                 raw_data[j] = GetByte(s);
                             }
                         }
                         read_next_pixel = 0;
                     }
-                    for (j = 0; (j) < (tga_comp); ++j)
+                    for (j = 0; j < tga_comp; ++j)
                     {
                         tga_data[i * tga_comp + j] = raw_data[j];
                     }
                     --RLE_count;
                 }
-                if ((tga_inverted) != 0)
+                if (tga_inverted != 0)
                 {
-                    for (j = 0; (j * 2) < (tga_height); ++j)
+                    for (j = 0; (j * 2) < tga_height; ++j)
                     {
                         int index1 = j * tga_width * tga_comp;
                         int index2 = (tga_height - 1 - j) * tga_width * tga_comp;
-                        for (i = tga_width * tga_comp; (i) > 0; --i)
+                        for (i = tga_width * tga_comp; i > 0; --i)
                         {
                             byte temp = tga_data[index1];
                             tga_data[index1] = tga_data[index2];
@@ -4626,10 +4677,10 @@ namespace MonoGame.Imaging
                 }
             }
 
-            if (((tga_comp) >= 3) && (tga_rgb16 == 0))
+            if ((tga_comp >= 3) && (tga_rgb16 == 0))
             {
                 byte* tga_pixel = tga_data;
-                for (i = 0; (i) < (tga_width * tga_height); ++i)
+                for (i = 0; i < (tga_width * tga_height); ++i)
                 {
                     byte temp = tga_pixel[0];
                     tga_pixel[0] = tga_pixel[2];
@@ -4638,7 +4689,7 @@ namespace MonoGame.Imaging
                 }
             }
 
-            if (((req_comp) != 0) && (req_comp != tga_comp))
+            if ((req_comp != 0) && (req_comp != tga_comp))
                 tga_data = ConvertToFormat8(
                     s.ErrorCtx, tga_data, tga_comp, req_comp, (uint)tga_width, (uint)tga_height);
 
@@ -4670,7 +4721,7 @@ namespace MonoGame.Imaging
 
         public static int ParseGifHeader(ReadContext s, GifImage g, int* comp, int is_info)
         {
-            if ((((GetByte(s) != 'G') || (GetByte(s) != 'I')) || (GetByte(s) != 'F')) || (GetByte(s) != '8'))
+            if ((GetByte(s) != 'G') || (GetByte(s) != 'I') || (GetByte(s) != 'F') || (GetByte(s) != '8'))
                 return s.Error(ImagingError.NotGif);
             
             byte version = GetByte(s);
@@ -4690,7 +4741,7 @@ namespace MonoGame.Imaging
             if (comp != null)
                 *comp = 4;
 
-            if ((is_info) != 0)
+            if (is_info != 0)
                 return 1;
 
             if ((g.flags & 0x80) != 0)
@@ -4721,16 +4772,16 @@ namespace MonoGame.Imaging
         public static void GetGifCode(GifImage g, ushort code)
         {
             GifLzw* gCodesP = (GifLzw*)g.codes.Ptr;
-            if ((gCodesP[code].Prefix) >= 0)
-                GetGifCode(g, (ushort)(gCodesP[code].Prefix));
+            if (gCodesP[code].Prefix >= 0)
+                GetGifCode(g, (ushort)gCodesP[code].Prefix);
 
-            if ((g.cur_y) >= (g.max_y))
+            if (g.cur_y >= g.max_y)
                 return;
 
             byte* p = &g._out_[g.cur_x + g.cur_y];
             byte* c = &g.color_table[gCodesP[code].Suffix * 4];
 
-            if ((c[3]) >= (128))
+            if (c[3] >= 128)
             {
                 p[0] = c[2];
                 p[1] = c[1];
@@ -4739,11 +4790,11 @@ namespace MonoGame.Imaging
             }
 
             g.cur_x += 4;
-            if ((g.cur_x) >= (g.max_x))
+            if (g.cur_x >= g.max_x)
             {
                 g.cur_x = g.start_x;
                 g.cur_y += g.step;
-                while (((g.cur_y) >= (g.max_y)) && ((g.parse) > 0))
+                while ((g.cur_y >= g.max_y) && (g.parse > 0))
                 {
                     g.step = (1 << g.parse) * g.line_size;
                     g.cur_y = g.start_y + (g.step >> 1);
@@ -4766,9 +4817,9 @@ namespace MonoGame.Imaging
             int valid_bits = 0;
             for (int init_code = 0; init_code < clear; init_code++)
             {
-                ((GifLzw*)(g.codes.Ptr))[init_code].Prefix = -1;
-                ((GifLzw*)(g.codes.Ptr))[init_code].First = ((byte)(init_code));
-                ((GifLzw*)(g.codes.Ptr))[init_code].Suffix = ((byte)(init_code));
+                ((GifLzw*)g.codes.Ptr)[init_code].Prefix = -1;
+                ((GifLzw*)g.codes.Ptr)[init_code].First = (byte)init_code;
+                ((GifLzw*)g.codes.Ptr)[init_code].Suffix = (byte)init_code;
             }
             int avail = clear + 2;
             int oldcode = -1;
@@ -4776,12 +4827,12 @@ namespace MonoGame.Imaging
             int len = 0;
             for (; ; )
             {
-                if ((valid_bits) < (codesize))
+                if (valid_bits < codesize)
                 {
-                    if ((len) == 0)
+                    if (len == 0)
                     {
                         len = GetByte(s);
-                        if ((len) == 0)
+                        if (len == 0)
                             return g._out_;
                     }
                     --len;
@@ -4793,7 +4844,7 @@ namespace MonoGame.Imaging
                     int code = bits & codemask;
                     bits >>= codesize;
                     valid_bits -= codesize;
-                    if ((code) == (clear))
+                    if (code == clear)
                     {
                         codesize = lzw_cs + 1;
                         codemask = (1 << codesize) - 1;
@@ -4801,7 +4852,7 @@ namespace MonoGame.Imaging
                         oldcode = -1;
                         first = 0;
                     }
-                    else if ((code) == (clear + 1))
+                    else if (code == (clear + 1))
                     {
                         Skip(s, len);
                         while ((len = GetByte(s)) > 0)
@@ -4812,24 +4863,24 @@ namespace MonoGame.Imaging
                     }
                     else if (code <= avail)
                     {
-                        if ((first) != 0)
-                            return (s.Error(ImagingError.NoClearCode)) != 0 ? (byte*)null : null;
-                        if ((oldcode) >= 0)
+                        if (first != 0)
+                            return s.Error(ImagingError.NoClearCode) != 0 ? (byte*)null : null;
+                        if (oldcode >= 0)
                         {
                             GifLzw* p = (GifLzw*)g.codes.Ptr + avail++;
-                            if ((avail) > (4096))
-                                return (s.Error(ImagingError.TooManyCodes)) != 0 ? (byte*)null : null;
+                            if (avail > 4096)
+                                return s.Error(ImagingError.TooManyCodes) != 0 ? (byte*)null : null;
                             
                             GifLzw* gCodesP = (GifLzw*)g.codes.Ptr;
 
-                            p->Prefix = ((short)(oldcode));
+                            p->Prefix = (short)oldcode;
                             p->First = gCodesP[oldcode].First;
-                            p->Suffix = ((code) == (avail)) ? p->First : gCodesP[code].First;
+                            p->Suffix = (code == avail) ? p->First : gCodesP[code].First;
                         }
-                        else if ((code) == (avail))
-                            return (s.Error(ImagingError.IllegalRasterCode)) != 0 ? (byte*)null : null;
+                        else if (code == avail)
+                            return s.Error(ImagingError.IllegalRasterCode) != 0 ? (byte*)null : null;
 
-                        GetGifCode(g, (ushort)(code));
+                        GetGifCode(g, (ushort)code);
                         if (((avail & codemask) == 0) && (avail <= 0x0FFF))
                         {
                             codesize++;
@@ -4839,7 +4890,7 @@ namespace MonoGame.Imaging
                     }
                     else
                     {
-                        return (s.Error(ImagingError.IllegalRasterCode)) != 0 ? (byte*)null : null;
+                        return s.Error(ImagingError.IllegalRasterCode) != 0 ? (byte*)null : null;
                     }
                 }
             }
@@ -4850,9 +4901,9 @@ namespace MonoGame.Imaging
             int x;
             int y;
             byte* c = (byte*)g.pal.Ptr + g.bgindex;
-            for (y = y0; (y) < (y1); y += 4 * g.w)
+            for (y = y0; y < y1; y += 4 * g.w)
             {
-                for (x = x0; (x) < (x1); x += 4)
+                for (x = x0; x < x1; x += 4)
                 {
                     byte* p = &g._out_[y + x];
                     p[0] = c[2];
@@ -4867,13 +4918,13 @@ namespace MonoGame.Imaging
         {
             int i;
             byte* prev_out = null;
-            if (((g._out_) == null) && (ParseGifHeader(s, g, comp, 0) == 0))
+            if ((g._out_ == null) && (ParseGifHeader(s, g, comp, 0) == 0))
                 return null;
             if (ValidSizes_mad3(g.w, g.h, 4, 0) == 0)
-                return (s.Error(ImagingError.TooLarge)) != 0 ? (byte*)null : null;
+                return s.Error(ImagingError.TooLarge) != 0 ? (byte*)null : null;
             prev_out = g._out_;
             g._out_ = MAlloc_mad3(4, g.w, g.h, 0);
-            if ((g._out_) == null)
+            if (g._out_ == null)
                 return s.Error(ImagingError.OutOfMemory) != 0 ? (byte*)null : null;
             switch ((g.eflags & 0x1C) >> 2)
             {
@@ -4881,19 +4932,19 @@ namespace MonoGame.Imaging
                     FillGifBackground(g, 0, 0, 4 * g.w, 4 * g.w * g.h);
                     break;
                 case 1:
-                    if ((prev_out) != null)
+                    if (prev_out != null)
                         MemCopy(g._out_, prev_out, 4 * g.w * g.h);
                     g.old_out = prev_out;
                     break;
                 case 2:
-                    if ((prev_out) != null)
+                    if (prev_out != null)
                         MemCopy(g._out_, prev_out, 4 * g.w * g.h);
                     FillGifBackground(g, g.start_x, g.start_y, g.max_x, g.max_y);
                     break;
                 case 3:
-                    if ((g.old_out) != null)
+                    if (g.old_out != null)
                     {
-                        for (i = g.start_y; (i) < (g.max_y); i += 4 * g.w)
+                        for (i = g.start_y; i < g.max_y; i += 4 * g.w)
                         {
                             MemCopy(&g._out_[i + g.start_x], &g.old_out[i + g.start_x], g.max_x - g.start_x);
                         }
@@ -4917,8 +4968,8 @@ namespace MonoGame.Imaging
                             w = Get16le(s);
                             h = Get16le(s);
 
-                            if (((x + w) > (g.w)) || ((y + h) > (g.h)))
-                                return (s.Error(ImagingError.BadImageDescriptor)) != 0 ? (byte*)null : null;
+                            if (((x + w) > g.w) || ((y + h) > g.h))
+                                return s.Error(ImagingError.BadImageDescriptor) != 0 ? (byte*)null : null;
 
                             g.line_size = g.w * 4;
                             g.start_x = x * 4;
@@ -4948,7 +4999,7 @@ namespace MonoGame.Imaging
                             }
                             else if ((g.flags & 0x80) != 0)
                             {
-                                if (((g.transparent) >= 0) && (g.eflags & 0x01) != 0)
+                                if ((g.transparent >= 0) && (g.eflags & 0x01) != 0)
                                 {
                                     prev_trans = gPalP[g.transparent * 4 + 3];
                                     gPalP[g.transparent * 4 + 3] = 0;
@@ -4956,24 +5007,24 @@ namespace MonoGame.Imaging
                                 g.color_table = g.pal.Ptr;
                             }
                             else
-                                return (s.Error(ImagingError.MissingColorTable)) != 0 ? (byte*)null : null;
+                                return s.Error(ImagingError.MissingColorTable) != 0 ? (byte*)null : null;
 
                             byte* o = ProcessGifRaster(s, g);
                             if (o == null)
                                 return null;
 
                             if (prev_trans != -1)
-                                gPalP[g.transparent * 4 + 3] = ((byte)(prev_trans));
+                                gPalP[g.transparent * 4 + 3] = (byte)prev_trans;
 
                             return o;
                         }
                     case 0x21:
                         {
                             int len;
-                            if ((GetByte(s)) == (0xF9))
+                            if (GetByte(s) == 0xF9)
                             {
                                 len = GetByte(s);
-                                if ((len) == 4)
+                                if (len == 4)
                                 {
                                     g.eflags = GetByte(s);
                                     g.delay = Get16le(s);
@@ -5011,10 +5062,10 @@ namespace MonoGame.Imaging
                 *x = g.w;
                 *y = g.h;
 
-                if (((req_comp) != 0) && (req_comp != 4))
-                    u = ConvertToFormat8(s.ErrorCtx, u, 4, req_comp, (uint)(g.w), (uint)(g.h));
+                if ((req_comp != 0) && (req_comp != 4))
+                    u = ConvertToFormat8(s.ErrorCtx, u, 4, req_comp, (uint)g.w, (uint)g.h);
             }
-            else if ((g._out_) != null)
+            else if (g._out_ != null)
                 Free(g._out_);
 
             g.Dispose();

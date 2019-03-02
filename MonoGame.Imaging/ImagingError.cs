@@ -4,6 +4,10 @@ namespace MonoGame.Imaging
     public enum ImagingError
     {
         NoImageInfo,
+        NoReadContext,
+        NullPointer,
+        Exception,
+
         OutOfMemory,
         UnknownImageType,
         Zero,
