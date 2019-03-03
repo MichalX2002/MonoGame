@@ -12,8 +12,14 @@ namespace MonoGame.Imaging
             AssertNotDisposed();
             lock (SyncRoot)
             {
+                if (_lastReadCtxFailed || _lastLoadFailed)
+                    return false;
+
                 if (!IsLoaded)
+                {
                     IsLoaded = LoadInternal();
+                    _lastLoadFailed = !IsLoaded;
+                }
                 return IsLoaded;
             }
         }
@@ -158,12 +164,16 @@ namespace MonoGame.Imaging
             {
                 AssertNotDisposed();
 
-                if (_lastReadCtxFailed || IsLoaded)
+                if (!Load())
                     return default;
-
-                Load();
+                
                 return _pointer;
             }
+        }
+        
+        public unsafe IntPtr GetPointer()
+        {
+            return (IntPtr)GetDataPointer().Ptr;
         }
 
         private unsafe ReadContext GetReadContext(Stream stream, byte[] buffer)

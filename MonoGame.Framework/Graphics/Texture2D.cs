@@ -326,17 +326,24 @@ namespace Microsoft.Xna.Framework.Graphics
                     int channels = (int)img.PixelFormat;
 
                     if (data == IntPtr.Zero || channels != 4)
-                        throw new InvalidDataException($"Could not decode stream {img.Info}: \n" + img.Errors);
+                    {
+                        string msg = "Could not decode stream.";
+                        if (img.Errors.Count > 0)
+                            msg += "\n " + img.Errors;
+
+                        var exc = new InvalidDataException(msg);
+                        exc.Data.Add("ImageInfo", img.Info);
+                        throw exc;
+                    }
 
                     int pixels = img.Width * img.Height;
                     int length = channels * pixels;
                     unsafe
                     {
-                        // XNA blacks out any pixels with an alpha of zero.
-
                         byte* src = (byte*)data;
                         for (int i = 0; i < length; i += 4)
                         {
+                            // XNA blacks out any pixels with an alpha of zero.
                             if (src[i + 3] == 0)
                             {
                                 src[i + 0] = 0;
@@ -346,14 +353,14 @@ namespace Microsoft.Xna.Framework.Graphics
                         }
                     }
 
-                    Texture2D texture = new Texture2D(graphicsDevice, img.Width, img.Height);
+                    var texture = new Texture2D(graphicsDevice, img.Width, img.Height);
                     texture.SetData(data, 0, channels, pixels);
                     return texture;
                 }
             }
             catch (Exception e)
             {
-                throw new InvalidOperationException("This image format is not supported", e);
+                throw new InvalidOperationException("This image format is not supported.", e);
             }
         }
 

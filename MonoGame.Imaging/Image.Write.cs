@@ -61,7 +61,7 @@ namespace MonoGame.Imaging
 
             if (data == IntPtr.Zero)
                 throw new InvalidOperationException(
-                    $"No image data is present in this {nameof(Image)} instance.");
+                    $"No image data is present in this {nameof(Image)}.");
 
             w = info.Width;
             h = info.Height;
@@ -122,7 +122,7 @@ namespace MonoGame.Imaging
                 }
                 catch(Exception exc)
                 {
-                    Errors.AddError(ImagingError.SaveException, exc);
+                    TriggerError(ImagingError.SaveException, exc);
                     throw;
                 }
                 finally

@@ -17,6 +17,7 @@ namespace MonoGame.Imaging
         private bool _leavePointerOpen;
 
         private bool _lastReadCtxFailed;
+        private bool _lastLoadFailed;
         private MarshalPointer _pointer;
         private ImagePixelFormat _desiredFormat;
         private ImageInfo _cachedImageInfo;
@@ -35,7 +36,7 @@ namespace MonoGame.Imaging
         public ImagePixelFormat DesiredPixelFormat => Info.DesiredPixelFormat;
 
         public event ErrorDelegate ErrorOccurred;
-        public ErrorContext Errors { get; private set; }
+        public ErrorContext Errors { get; } = new ErrorContext();
 
         public Image(Stream stream, ImagePixelFormat desiredFormat, bool leaveOpen)
         {
@@ -55,8 +56,7 @@ namespace MonoGame.Imaging
                 default:
                     throw new ArgumentException(desiredFormat + " is not valid.", nameof(desiredFormat));
             }
-
-            Errors = new ErrorContext();
+            
             _infoBuffer = _memoryManager.GetMemoryStream();
             _leavePointerOpen = false;
         }
@@ -114,11 +114,6 @@ namespace MonoGame.Imaging
                 default:
                     throw new ArgumentException(pixelFormat + " is not valid.", nameof(pixelFormat));
             }
-        }
-
-        public unsafe IntPtr GetPointer()
-        {
-            return (IntPtr)GetDataPointer().Ptr;
         }
 
         private void TriggerError()
