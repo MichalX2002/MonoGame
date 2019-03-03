@@ -200,19 +200,18 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
             byte[] data = null;
             using (var img = new Image(File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read), false))
             {
-                if (img.GetPointer() == IntPtr.Zero || img.Info == null || img.Info.IsValid() == false)
+                if (img.GetPointer() == IntPtr.Zero || img.Info == null || !img.Info.IsValid())
                     throw new InvalidDataException("Could not decode image.");
-
-                int length = img.PointerLength;
+                
+                width = img.Info.Width;
+                height = img.Info.Height;
+                int length = (int)img.PixelFormat * width * height;
                 data = new byte[length];
                 unsafe
                 {
                     fixed (byte* dataPointer = data)
                         Buffer.MemoryCopy((void*)img.GetPointer(), dataPointer, length, length);
                 }
-
-                width = img.Info.Width;
-                height = img.Info.Height;
             }
 
             var face = new PixelBitmapContent<Color>(width, height);

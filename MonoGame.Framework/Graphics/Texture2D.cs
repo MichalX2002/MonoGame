@@ -320,7 +320,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             try
             {
-                using (var img = new Image(stream, ImagePixelFormat.RgbWithAlpha, true))
+                using (var img = new Image(stream, ImagePixelFormat.RgbWithAlpha, leaveOpen: true))
                 {
                     IntPtr data = img.GetPointer();
                     int channels = (int)img.PixelFormat;
@@ -328,7 +328,8 @@ namespace Microsoft.Xna.Framework.Graphics
                     if (data == IntPtr.Zero || channels != 4)
                         throw new InvalidDataException($"Could not decode stream {img.Info}: \n" + img.Errors);
 
-                    int length = img.PointerLength;
+                    int pixels = img.Width * img.Height;
+                    int length = channels * pixels;
                     unsafe
                     {
                         // XNA blacks out any pixels with an alpha of zero.
@@ -346,7 +347,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     }
 
                     Texture2D texture = new Texture2D(graphicsDevice, img.Width, img.Height);
-                    texture.SetData(data, 0, channels, length / channels);
+                    texture.SetData(data, 0, channels, pixels);
                     return texture;
                 }
             }
