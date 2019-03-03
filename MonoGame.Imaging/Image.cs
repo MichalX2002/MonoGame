@@ -1,5 +1,6 @@
 ﻿using MonoGame.Utilities.IO;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -22,10 +23,9 @@ namespace MonoGame.Imaging
         private MemoryStream _infoBuffer;
         
         public bool IsDisposed { get; private set; }
-        public object SyncRoot { get; } = new object();
         public bool IsLoaded { get; private set; }
-
-        public int PointerLength { get; private set; }
+        public object SyncRoot { get; } = new object();
+        
         public ImageInfo Info => GetImageInfo();
         public int Width => Info.Width;
         public int Height => Info.Height;
@@ -59,7 +59,6 @@ namespace MonoGame.Imaging
             Errors = new ErrorContext();
             _infoBuffer = _memoryManager.GetMemoryStream();
             _leavePointerOpen = false;
-            PointerLength = -1;
         }
 
         public Image(Stream stream, bool leaveOpen) : this(stream, ImagePixelFormat.Source, leaveOpen)
@@ -78,9 +77,8 @@ namespace MonoGame.Imaging
         {
             _pointer = new MarshalPointer(data, leavePointerOpen, width * height * (int)pixelFormat);
             _leavePointerOpen = leavePointerOpen;
-
-            PointerLength = width * height * (int)pixelFormat;
             _cachedImageInfo = new ImageInfo(width, height, pixelFormat, pixelFormat, ImageFormat.Pointer);
+            IsLoaded = true;
         }
 
         public Image(IntPtr data, int width, int height, ImagePixelFormat pixelFormat) :
@@ -88,7 +86,6 @@ namespace MonoGame.Imaging
         {
             if (data == IntPtr.Zero)
                 throw new ArgumentException("Pointer is zero.", nameof(data));
-
             CheckPixelFormat(pixelFormat);
         }
 
@@ -103,6 +100,7 @@ namespace MonoGame.Imaging
             return Marshal.AllocHGlobal(width * height * (int)pixelFormat);
         }
 
+        [DebuggerHidden]
         private static void CheckPixelFormat(ImagePixelFormat pixelFormat)
         {
             switch (pixelFormat)
@@ -128,6 +126,19 @@ namespace MonoGame.Imaging
             ErrorOccurred?.Invoke(Errors);
         }
 
+        private void TriggerError(ImagingError error, Exception exception)
+        {
+            Errors.AddError(error, exception);
+            TriggerError();
+        }
+
+        private void TriggerError(ImagingError error)
+        {
+            Errors.AddError(error);
+            TriggerError();
+        }
+
+        [DebuggerHidden]
         private void AssertNotDisposed()
         {
             if (IsDisposed)
@@ -152,7 +163,7 @@ namespace MonoGame.Imaging
                 {
                     CloseStream();
 
-                    if (_leavePointerOpen == false)
+                    if (!_leavePointerOpen)
                         _pointer.Free();
                     _pointer = default;
 

@@ -8,7 +8,7 @@ namespace MonoGame.Imaging
     {
         private void CheckImageInfo(ImageInfo info)
         {
-            if (info == null || info.IsValid() == false)
+            if (info == null || !info.IsValid())
                 throw new InvalidOperationException(
                     $"No image info is present in this {nameof(Image)} instance.");
         }
@@ -73,6 +73,8 @@ namespace MonoGame.Imaging
         {
             lock (SyncRoot)
             {
+                AssertNotDisposed();
+
                 var buffer = _memoryManager.GetBlock();
                 var bufferStream = _memoryManager.GetWriteBufferedStream(output, true);
                 try
@@ -120,7 +122,7 @@ namespace MonoGame.Imaging
                 }
                 catch(Exception exc)
                 {
-                    Console.WriteLine(exc);
+                    Errors.AddError(ImagingError.SaveException, exc);
                     throw;
                 }
                 finally

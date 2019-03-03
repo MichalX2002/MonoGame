@@ -13,8 +13,8 @@ namespace MonoGame.Imaging
 
         public static void WriteFv(WriteContext s, string fmt, params int[] v)
         {
-            var vindex = 0;
-            for (var i = 0; i < fmt.Length; ++i)
+            int vindex = 0;
+            for (int i = 0; i < fmt.Length; ++i)
             {
                 switch (fmt[i])
                 {
@@ -27,19 +27,21 @@ namespace MonoGame.Imaging
                             WriteChar(s, x);
                             break;
                         }
+
                     case '2':
                         {
-                            var x = v[vindex++];
-                            var b = stackalloc byte[2];
+                            int x = v[vindex++];
+                            byte* b = stackalloc byte[2];
                             b[0] = (byte)(x & 0xff);
                             b[1] = (byte)((x >> 8) & 0xff);
                             s.Write(s.Stream, b, s.Buffer, 2);
                             break;
                         }
+
                     case '4':
                         {
-                            var x = v[vindex++];
-                            var b = stackalloc byte[4];
+                            int x = v[vindex++];
+                            byte* b = stackalloc byte[4];
                             b[0] = (byte)(x & 0xff);
                             b[1] = (byte)((x >> 8) & 0xff);
                             b[2] = (byte)((x >> 16) & 0xff);
@@ -51,12 +53,8 @@ namespace MonoGame.Imaging
             }
         }
 
-        public static void WriteF(WriteContext s, string fmt, params int[] v)
-        {
-            WriteFv(s, fmt, v);
-        }
-
-        public static int WriteFile(WriteContext s, int rgb_dir, int vdir, int x, int y,
+        public static int WriteFile(
+            WriteContext s, int rgb_dir, int vdir, int x, int y,
             int comp, int expand_mono, void* data, int alpha, int pad, string fmt, params int[] v)
         {
             if ((y < 0) || (x < 0))
@@ -72,8 +70,7 @@ namespace MonoGame.Imaging
             int x,
             int y,
             int comp,
-            void* data
-            )
+            void* data)
         {
             return WriteBmpCore(s, x, y, comp, data);
         }
@@ -83,8 +80,7 @@ namespace MonoGame.Imaging
             int x,
             int y,
             int comp,
-            void* data
-            )
+            void* data)
         {
             return WriteTgaCore(s, x, y, comp, data);
         }

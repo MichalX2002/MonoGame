@@ -31,10 +31,16 @@ namespace MonoGame.Imaging
 
         private bool LoadInternal()
         {
+            unsafe
+            {
+                if (_pointer.Ptr != null && _pointer.Size != 0)
+                    throw new InvalidOperationException("The internal pointer is not zero.");
+            }
+
             ImageInfo info = GetImageInfo();
             if (info == null)
             {
-                Errors.AddError(ImagingError.NoImageInfo);
+                TriggerError(ImagingError.NoImageInfo);
                 return false;
             }
 
@@ -45,7 +51,7 @@ namespace MonoGame.Imaging
                 ReadContext rc = GetReadContext(stream, buffer);
                 if (rc == null)
                 {
-                    Errors.AddError(ImagingError.NoReadContext);
+                    TriggerError(ImagingError.NoReadContext);
                     return false;
                 }
 
@@ -56,17 +62,19 @@ namespace MonoGame.Imaging
                 IntPtr result = Imaging.LoadFromInfo8(rc, info, bpp);
                 if (result == IntPtr.Zero)
                 {
-                    Errors.AddError(ImagingError.NullPointer);
+                    TriggerError(ImagingError.NullPointer);
                     return false;
                 }
 
+                int pixels = info.Width * info.Height;
+                int bytes;
+
                 if (info.PixelFormat == ImagePixelFormat.RgbWithAlpha && bpp == 3)
                 {
-                    int pixels = info.Width * info.Height;
-                    PointerLength = pixels * 4;
+                    bytes = pixels * 4;
 
                     IntPtr oldResult = result;
-                    result = Marshal.AllocHGlobal(PointerLength);
+                    result = Marshal.AllocHGlobal(bytes);
 
                     unsafe
                     {
@@ -83,15 +91,15 @@ namespace MonoGame.Imaging
                     Imaging.Free(oldResult);
                 }
                 else
-                    PointerLength = info.Width * info.Height * bpp;
+                    bytes = pixels * bpp;
 
-                _pointer = new MarshalPointer(result, PointerLength);
+                _pointer = new MarshalPointer(result, bytes);
                 TryRemovePngSigError(info);
                 return true;
             }
-            catch
+            catch(Exception exc)
             {
-                Errors.AddError(ImagingError.Exception);
+                TriggerError(ImagingError.LoadException, exc);
                 return false;
             }
             finally
@@ -110,14 +118,14 @@ namespace MonoGame.Imaging
                 ReadContext rc = GetReadContext(_sourceStream, buffer);
                 if (rc == null)
                 {
-                    Errors.AddError(ImagingError.NoReadContext);
+                    TriggerError(ImagingError.NoReadContext);
                     return null;
                 }
 
                 var info = Imaging.GetImageInfo(_desiredFormat, rc);
                 if (info == null || !info.IsValid())
                 {
-                    Errors.AddError(ImagingError.NoImageInfo);
+                    TriggerError(ImagingError.NoImageInfo);
                     return null;
                 }
 
@@ -127,9 +135,9 @@ namespace MonoGame.Imaging
                 _infoBuffer = null;
                 return info;
             }
-            catch
+            catch(Exception exc)
             {
-                Errors.AddError(ImagingError.Exception);
+                TriggerError(ImagingError.LoadException, exc);
                 return null;
             }
             finally
@@ -167,6 +175,8 @@ namespace MonoGame.Imaging
 
                 var callbacks = new ReadCallbacks(ReadCallback, EoFCallback);
                 var context = Imaging.GetReadContext(stream, Errors, callbacks, buffer);
+                if (Errors.Count > 0)
+                    TriggerError(ImagingError.GetReadContext);
 
                 _lastReadCtxFailed = context == null;
                 return context;

@@ -371,7 +371,7 @@ namespace MonoGame.Imaging
                 return 0;
 
 
-            if (s.WriteTgaWithRLE == false)
+            if (!s.WriteTgaWithRLE)
             {
                 return WriteFile(s, -1, -1, (int)(x), (int)(y), (int)(comp), 0, data,
                     has_alpha,
@@ -381,21 +381,20 @@ namespace MonoGame.Imaging
             }
             else
             {
-                int i;
-                int j;
-                int k;
-                WriteF(s, "111 221 2222 11", 0, 0, (int)(format + 8), 0, 0,
-                    0,
-                    0, 0, (int)(x), (int)(y), (int)((colorbytes + has_alpha) * 8), (int)(has_alpha * 8));
-                for (j = (int)(y - 1); (j) >= 0; --j)
+                WriteFv(
+                    s, "111 221 2222 11", 0, 0, (int)(format + 8), 0, 0,
+                    0, 0, 0, (int)(x), (int)(y), (int)((colorbytes + has_alpha) * 8), (int)(has_alpha * 8));
+
+                for (int j = (int)(y - 1); (j) >= 0; --j)
                 {
                     byte* row = (byte*)(data) + j * x * comp;
                     int len;
-                    for (i = 0; (i) < (x); i += len)
+                    for (int i = 0; (i) < (x); i += len)
                     {
                         byte* begin = row + i * comp;
                         int diff = 1;
                         len = 1;
+
                         if (i < (x - 1))
                         {
                             ++len;
@@ -403,7 +402,7 @@ namespace MonoGame.Imaging
                             if ((diff) != 0)
                             {
                                 byte* prev = begin;
-                                for (k = i + 2; (k < x) && (len < 128); ++k)
+                                for (int k = i + 2; (k < x) && (len < 128); ++k)
                                 {
                                     if (MemCmp(prev, row + k * comp, comp) != 0)
                                     {
@@ -419,16 +418,12 @@ namespace MonoGame.Imaging
                             }
                             else
                             {
-                                for (k = (int)(i + 2); ((k) < (x)) && ((len) < (128)); ++k)
+                                for (int k = (int)(i + 2); ((k) < (x)) && ((len) < (128)); ++k)
                                 {
                                     if (MemCmp(begin, row + k * comp, comp) == 0)
-                                    {
                                         ++len;
-                                    }
                                     else
-                                    {
                                         break;
-                                    }
                                 }
                             }
                         }
@@ -436,10 +431,8 @@ namespace MonoGame.Imaging
                         {
                             byte header = (byte)((len - 1) & 0xff);
                             WriteChar(s, header);
-                            for (k = 0; (k) < (len); ++k)
-                            {
+                            for (int k = 0; (k) < (len); ++k)
                                 WritePixel(s, -1, comp, has_alpha, 0, begin + k * comp);
-                            }
                         }
                         else
                         {
@@ -507,9 +500,8 @@ namespace MonoGame.Imaging
             while (*bitcount >= 8)
             {
                 if (data == null || ((int*)(data) - 2)[1] + 1 >= ((int*)(data) - 2)[0])
-                {
                     SbGrowF((void**)(&(data)), 1, sizeof(byte));
-                }
+
                 (data)[((int*)(data) - 2)[1]++] = ((byte)((*bitbuffer) & 0xff));
                 *bitbuffer >>= 8;
                 *bitcount -= 8;
@@ -564,6 +556,7 @@ namespace MonoGame.Imaging
             byte*** hash_table = (byte***)MAlloc(16384 * sizeof(byte**)).Ptr;
             if (quality < 5)
                 quality = 5;
+
             if ((((_out_) == null) || ((((int*)(_out_) - 2)[1] + 1) >= (((int*)(_out_) - 2)[0]))))
             {
                 SbGrowF((void**)(&(_out_)), 1, sizeof(byte));
@@ -819,9 +812,8 @@ namespace MonoGame.Imaging
             uint crc = (uint)(~0u);
             int i;
             for (i = 0; i < len; ++i)
-            {
                 crc = (uint)((crc >> 8) ^ CrcTable[buffer[i] ^ (crc & 0xff)]);
-            }
+
             return (uint)(~crc);
         }
 
@@ -866,9 +858,11 @@ namespace MonoGame.Imaging
             int zlen;
             if ((stride_bytes) == 0)
                 stride_bytes = (int)(x * n);
+
             filt = (byte*)MAlloc((x * n + 1) * y).Ptr;
             if (filt == null)
                 return null;
+
             line_buffer = (sbyte*)MAlloc(x * n).Ptr;
             if (line_buffer == null)
             {
