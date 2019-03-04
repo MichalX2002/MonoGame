@@ -121,9 +121,6 @@
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Math\Ray.cs" />
     <Compile Include="Math\Rectangle.cs" />
-    <Compile Include="TextInputEventArgs.cs">
-      <Platforms>Angle,Linux,MacOS,Windows,WindowsGL,WindowsUniversal</Platforms>
-    </Compile>
     <Compile Include="Threading.cs">
       <Platforms>Android,Angle,iOS,Linux,MacOS,WindowsGL,tvOS</Platforms>
     </Compile>

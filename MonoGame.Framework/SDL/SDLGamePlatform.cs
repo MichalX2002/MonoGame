@@ -22,7 +22,7 @@ namespace Microsoft.Xna.Framework
         private readonly List<Keys> _keys;
 
         private int _isExiting;
-        private SdlGameWindow _view;
+        private SdlGameWindow _window;
 
         public SdlGamePlatform(Game game) : base(game)
         {
@@ -55,7 +55,7 @@ namespace Microsoft.Xna.Framework
             Sdl.DisableScreenSaver();
 
             GamePad.InitDatabase();
-            Window = _view = new SdlGameWindow(_game);
+            Window = _window = new SdlGameWindow(_game);
         }
 
         public override void BeforeInitialize ()
@@ -67,7 +67,7 @@ namespace Microsoft.Xna.Framework
 
         protected override void OnIsMouseVisibleChanged()
         {
-            _view.SetCursorVisible(_game.IsMouseVisible);
+            _window.SetCursorVisible(_game.IsMouseVisible);
         }
 
         internal override void OnPresentationChanged(PresentationParameters pp)
@@ -99,116 +99,118 @@ namespace Microsoft.Xna.Framework
         {
             while (Sdl.PollEvent(out Sdl.Event ev) == 1)
             {
-                if (ev.Type == Sdl.EventType.Quit)
+                switch (ev.Type)
                 {
+                    case Sdl.EventType.Quit:
+                        _isExiting++;
+                        break;
+
+                    case Sdl.EventType.JoyDeviceAdded:
+                        Joystick.AddDevice(ev.JoystickDevice.Which);
+                        break;
+
+                    case Sdl.EventType.JoyDeviceRemoved:
+                        Joystick.RemoveDevice(ev.JoystickDevice.Which);
+                        break;
+
+                    case Sdl.EventType.ControllerDeviceRemoved:
+                        GamePad.RemoveDevice(ev.ControllerDevice.Which);
+                        break;
+
+                    case Sdl.EventType.MouseMotion:
+                        Window.MouseState.X = ev.Motion.X;
+                        Window.MouseState.Y = ev.Motion.Y;
+                        break;
+
+                    case Sdl.EventType.MouseWheel:
+                        const int wheelDelta = 120;
+                        Mouse.ScrollY += ev.Wheel.Y * wheelDelta;
+                        Mouse.ScrollX += ev.Wheel.X * wheelDelta;
+                        break;
+
+                    case Sdl.EventType.KeyDown:
+                        Keys key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
+                        if (!_keys.Contains(key))
+                            _keys.Add(key);
+
+                        if (char.IsControl((char)ev.Key.Keysym.Sym))
+                            _window.CallTextInput(ev.Key.Keysym.Sym, key);
+                        break;
+
+                    case Sdl.EventType.KeyUp:
+                        _keys.Remove(KeyboardUtil.ToXna(ev.Key.Keysym.Sym));
+                        break;
+
+                    case Sdl.EventType.TextInput:
+                        if (!_window.IsTextInputHandled)
+                            break;
+                        ProcessTextInputEvent(ev.Text);
+                        break;
+
+                    case Sdl.EventType.WindowEvent:
+                        if (ev.Window.WindowID != _window.ID)
+                            break;
+                        ProcessWindowEvent(ev.Window);
+                        break;
+                }
+            }
+        }
+
+        private unsafe static int GetCharacter32(char* chars, ref int offset, int count)
+        {
+            char firstChar = chars[offset];
+            return char.IsHighSurrogate(firstChar) && ++offset < count
+                ? char.ConvertToUtf32(firstChar, chars[offset])
+                : firstChar;
+        }
+
+        private unsafe void ProcessTextInputEvent(Sdl.Keyboard.TextInputEvent inputEvent)
+        {
+            int len = 0;
+            while (Marshal.ReadByte((IntPtr)inputEvent.Text, len) != 0)
+                len++;
+
+            int charCount = Encoding.UTF8.GetCharCount(inputEvent.Text, len);
+            char* chars = stackalloc char[charCount];
+            int decodedChars = Encoding.UTF8.GetChars(inputEvent.Text, len, chars, charCount);
+
+            for (int i = 0; i < decodedChars; i++)
+            {
+                int character = GetCharacter32(chars, ref i, decodedChars);
+                _window.CallTextInput(character, KeyboardUtil.ToXna(character));
+            }
+        }
+
+        private void ProcessWindowEvent(Sdl.Window.Event windowEvent)
+        {
+            switch (windowEvent.EventID)
+            {
+                case Sdl.Window.EventId.Resized:
+                case Sdl.Window.EventId.SizeChanged:
+                    _window.ClientResize(windowEvent.Data1, windowEvent.Data2);
+                    break;
+
+                case Sdl.Window.EventId.FocusGained:
+                    IsActive = true;
+                    break;
+
+                case Sdl.Window.EventId.FocusLost:
+                    IsActive = false;
+                    break;
+
+                case Sdl.Window.EventId.Moved:
+                    _window.Moved();
+                    break;
+
+                case Sdl.Window.EventId.Close:
                     _isExiting++;
-                }
-                else if (ev.Type == Sdl.EventType.JoyDeviceAdded)
-                {
-                    Joystick.AddDevice(ev.JoystickDevice.Which);
-                }
-                else if (ev.Type == Sdl.EventType.ControllerDeviceRemoved)
-                {
-                    GamePad.RemoveDevice(ev.ControllerDevice.Which);
-                }
-                else if (ev.Type == Sdl.EventType.JoyDeviceRemoved)
-                {
-                    Joystick.RemoveDevice(ev.JoystickDevice.Which);
-                }
-                else if (ev.Type == Sdl.EventType.MouseWheel)
-                {
-                    const int wheelDelta = 120;
-                    Mouse.ScrollY += ev.Wheel.Y * wheelDelta;
-                    Mouse.ScrollX += ev.Wheel.X * wheelDelta;
-                }
-                else if (ev.Type == Sdl.EventType.MouseMotion)
-                {
-                    Window.MouseState.X = ev.Motion.X;
-                    Window.MouseState.Y = ev.Motion.Y;
-                }
-                else if (ev.Type == Sdl.EventType.KeyDown)
-                {
-                    var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
-                    if (!_keys.Contains(key))
-                        _keys.Add(key);
-
-                    char character = (char)ev.Key.Keysym.Sym;
-                    if (char.IsControl(character))
-                        _view.CallTextInput(character, key);
-                }
-                else if (ev.Type == Sdl.EventType.KeyUp)
-                {
-                    var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
-                    _keys.Remove(key);
-                }
-                else if (ev.Type == Sdl.EventType.TextInput)
-                {
-                    if (_view.IsTextInputHandled)
-                    {
-                        int len = 0;
-                        int utf8character = 0; // using an int to encode multibyte characters longer than 2 bytes
-                        byte currentByte = 0;
-                        int charByteSize = 0; // UTF8 char lenght to decode
-                        unsafe
-                        {
-                            while ((currentByte = Marshal.ReadByte((IntPtr)ev.Text.Text, len)) != 0)
-                            {
-                                // we're reading the first UTF8 byte, we need to check if it's multibyte
-                                if (charByteSize == 0)
-                                {
-                                    if (currentByte < 192)
-                                        charByteSize = 1;
-                                    else if (currentByte < 224)
-                                        charByteSize = 2;
-                                    else if (currentByte < 240)
-                                        charByteSize = 3;
-                                    else
-                                        charByteSize = 4;
-
-                                    utf8character = 0;
-                                }
-
-                                // assembling the character
-                                utf8character <<= 8;
-                                utf8character |= currentByte;
-
-                                charByteSize--;
-                                if (charByteSize == 0) // finished decoding the current character
-                                {
-                                    var key = KeyboardUtil.ToXna(utf8character);
-                                    // multibyte conversion might fail here, because the char type only handles UTF8 up to 2-byte characters
-                                    // we should switch to a String parameter for this event to fully support UTF8
-                                    // as-is, it won't support CJK characters and will produce wrong results
-                                    _view.CallTextInput((char)utf8character, key);
-                                }
-
-                                len++;
-                            }
-                        }
-                    }
-                }
-                else if (ev.Type == Sdl.EventType.WindowEvent)
-                {
-                    if (ev.Window.WindowID == _view.Id)
-                    {
-                        if (ev.Window.EventID == Sdl.Window.EventId.Resized || ev.Window.EventID == Sdl.Window.EventId.SizeChanged)
-                            _view.ClientResize(ev.Window.Data1, ev.Window.Data2);
-                        else if (ev.Window.EventID == Sdl.Window.EventId.FocusGained)
-                            IsActive = true;
-                        else if (ev.Window.EventID == Sdl.Window.EventId.FocusLost)
-                            IsActive = false;
-                        else if (ev.Window.EventID == Sdl.Window.EventId.Moved)
-                            _view.Moved();
-                        else if (ev.Window.EventID == Sdl.Window.EventId.Close)
-                            _isExiting++;
-                    }
-                }
+                    break;
             }
         }
 
         public override void StartRunLoop()
         {
-            throw new NotSupportedException("The desktop platform does not support asynchronous run loops");
+            throw new NotSupportedException("The desktop platform does not support asynchronous run loops.");
         }
 
         public override void Exit()
@@ -236,17 +238,17 @@ namespace Microsoft.Xna.Framework
 
         public override void BeginScreenDeviceChange(bool willBeFullScreen)
         {
-            _view.BeginScreenDeviceChange(willBeFullScreen);
+            _window.BeginScreenDeviceChange(willBeFullScreen);
         }
 
         public override void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight)
         {
-            _view.EndScreenDeviceChange(screenDeviceName, clientWidth, clientHeight);
+            _window.EndScreenDeviceChange(screenDeviceName, clientWidth, clientHeight);
         }
 
         public override void Log(string message)
         {
-            Console.WriteLine(message);
+            Debug.WriteLine(message);
         }
 
         public override void Present()
@@ -257,13 +259,12 @@ namespace Microsoft.Xna.Framework
 
         protected override void Dispose(bool disposing)
         {
-            if (_view != null)
+            if (_window != null)
             {
-                _view.Dispose();
-                _view = null;
+                _window.Dispose();
+                _window = null;
 
                 Joystick.CloseDevices();
-
                 Sdl.Quit();
             }
 

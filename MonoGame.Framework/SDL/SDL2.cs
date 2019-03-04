@@ -10,6 +10,7 @@ using System.Diagnostics;
 using MonoGame.Utilities;
 using Microsoft.Xna.Framework.Input;
 
+[Guid("DA23ADEA-3FBC-41B8-B748-F378E9C7BB24")]
 internal static class Sdl
 {
     public static IntPtr NativeLibrary = GetNativeLibrary();
@@ -129,24 +130,15 @@ internal static class Sdl
     [StructLayout(LayoutKind.Explicit, Size = 56)]
     public struct Event
     {
-        [FieldOffset(0)]
-        public EventType Type;
-        [FieldOffset(0)]
-        public Window.Event Window;
-        [FieldOffset(0)]
-        public Keyboard.Event Key;
-        [FieldOffset(0)]
-        public Mouse.MotionEvent Motion;
-        [FieldOffset(0)]
-        public Keyboard.TextEditingEvent Edit;
-        [FieldOffset(0)]
-        public Keyboard.TextInputEvent Text;
-        [FieldOffset(0)]
-        public Mouse.WheelEvent Wheel;
-        [FieldOffset(0)]
-        public Joystick.DeviceEvent JoystickDevice;
-        [FieldOffset(0)]
-        public GameController.DeviceEvent ControllerDevice;
+        [FieldOffset(0)] public EventType Type;
+        [FieldOffset(0)] public Window.Event Window;
+        [FieldOffset(0)] public Keyboard.Event Key;
+        [FieldOffset(0)] public Mouse.MotionEvent Motion;
+        [FieldOffset(0)] public Keyboard.TextEditingEvent Edit;
+        [FieldOffset(0)] public Keyboard.TextInputEvent Text;
+        [FieldOffset(0)] public Mouse.WheelEvent Wheel;
+        [FieldOffset(0)] public Joystick.DeviceEvent JoystickDevice;
+        [FieldOffset(0)] public GameController.DeviceEvent ControllerDevice;
     }
 
     public struct Rectangle
@@ -166,7 +158,7 @@ internal static class Sdl
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate int d_sdl_init(int flags);
-    public static d_sdl_init SDL_Init = FuncLoader.LoadFunction<d_sdl_init>(NativeLibrary, "SDL_Init");
+    private static d_sdl_init SDL_Init = FuncLoader.LoadFunction<d_sdl_init>(NativeLibrary, "SDL_Init");
 
     public static void Init(int flags)
     {
