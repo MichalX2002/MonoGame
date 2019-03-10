@@ -9,6 +9,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
     /// <summary>
     /// Represents a processed Song object.
     /// </summary>
+    [CompressedContent]
     public sealed class SongContent
     {
         internal string fileName;

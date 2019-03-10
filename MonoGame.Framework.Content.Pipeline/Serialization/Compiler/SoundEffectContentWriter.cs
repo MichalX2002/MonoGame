@@ -30,17 +30,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
             byte[] buffer = RecyclableMemoryManager.Instance.GetBlock();
             try
             {
-                long leftToRead = value.dataLength;
+                int leftToRead = value.dataLength;
                 int read;
-                while (leftToRead > 0 && (read = value.data.Read(buffer, 0, (int)Math.Min(leftToRead, buffer.Length))) > 0)
+                while (leftToRead > 0 && (read = value.data.Read(buffer, 0, Math.Min(leftToRead, buffer.Length))) > 0)
                 {
                     output.Write(buffer, 0, read);
                     leftToRead -= read;
                 }
-            }
-            catch
-            {
-                throw;
             }
             finally
             {

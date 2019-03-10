@@ -463,6 +463,7 @@
     <Compile Include="ProcessorParameterCollection.cs" />
     <Compile Include="TargetPlatform.cs" />
     <Compile Include="TextureImporter.cs" />
+    <Compile Include="UncompressedContentAttribute.cs" />
     <Compile Include="VideoContent.cs" />
     <Compile Include="WavImporter.cs" />
     <Compile Include="WmaImporter.cs" />

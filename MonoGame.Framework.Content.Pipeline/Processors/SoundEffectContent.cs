@@ -9,6 +9,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
     /// <summary>
     /// Represents a processed sound effect.
     /// </summary>
+    [CompressedContent]
     public sealed class SoundEffectContent
     {
         internal byte[] format;

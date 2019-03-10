@@ -791,9 +791,13 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
             if (_compiler == null)
                 _compiler = new ContentCompiler();
 
+            var type = content.GetType();
+            var attrib = type.GetCustomAttribute<CompressedContentAttribute>(true);
+            bool compress = attrib != null ? false : CompressContent;
+
             // Write the XNB.
             using (var fs = new FileStream(pipelineEvent.DestFile, FileMode.Create, FileAccess.Write, FileShare.None))
-                _compiler.Compile(fs, content, Platform, Profile, CompressContent, OutputDirectory, outputFileDir);
+                _compiler.Compile(fs, content, Platform, Profile, compress, OutputDirectory, outputFileDir);
 
             // Store the last write time of the output XNB here
             // so we can verify it hasn't been tampered with.

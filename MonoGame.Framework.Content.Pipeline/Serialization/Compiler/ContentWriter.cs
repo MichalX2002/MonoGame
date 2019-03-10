@@ -135,7 +135,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
                 bodyStream.Position = 0;
                 bodyStream.WriteTo(contentStream);
                 contentStream.Position = 0;
-
+                
                 // Before we write the header, try to compress the body stream. If compression fails, we want to
                 // turn off the compressContent flag so the correct flags are written in the header
                 MemoryStream compressedStream = null;
