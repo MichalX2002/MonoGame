@@ -28,7 +28,7 @@ namespace Microsoft.Xna.Framework
                 d => d.Visible,
                 (d, handler) => d.VisibleChanged += handler,
                 (d, handler) => d.VisibleChanged -= handler,
-                (d1 ,d2) => Comparer<int>.Default.Compare(d1.DrawOrder, d2.DrawOrder),
+                (d1, d2) => Comparer<int>.Default.Compare(d1.DrawOrder, d2.DrawOrder),
                 (d, handler) => d.DrawOrderChanged += handler,
                 (d, handler) => d.DrawOrderChanged -= handler);
 
@@ -52,7 +52,7 @@ namespace Microsoft.Xna.Framework
         private bool _shouldExit;
         private bool _suppressDraw;
 
-        partial void PlatformConstruct();       
+        partial void PlatformConstruct();
 
         public Game()
         {
@@ -81,11 +81,11 @@ namespace Microsoft.Xna.Framework
             Dispose(false);
         }
 
-		[Conditional("DEBUG")]
-		internal void Log(string Message)
-		{
-			if (Platform != null) Platform.Log(Message);
-		}
+        [Conditional("DEBUG")]
+        internal void Log(string Message)
+        {
+            if (Platform != null) Platform.Log(Message);
+        }
 
         #region IDisposable Implementation
 
@@ -165,7 +165,7 @@ namespace Microsoft.Xna.Framework
         [CLSCompliant(false)]
         public static AndroidGameActivity Activity { get; internal set; }
 #endif
-        
+
         internal static Game Instance { get; private set; }
 
         public LaunchParameters LaunchParameters { get; private set; }
@@ -259,7 +259,7 @@ namespace Microsoft.Xna.Framework
         }
 
         #endregion Properties
-        
+
         // FIXME: Internal members should be eliminated.
         // Currently Game.Initialized is used by the Mac game window class to
         // determine whether to raise DeviceResetting and DeviceReset on
@@ -305,7 +305,7 @@ namespace Microsoft.Xna.Framework
         {
             _suppressDraw = true;
         }
-        
+
         public void RunOneFrame()
         {
             if (Platform == null)
@@ -316,17 +316,17 @@ namespace Microsoft.Xna.Framework
 
             if (!Initialized)
             {
-                DoInitialize ();
+                DoInitialize();
                 _gameTimer = Stopwatch.StartNew();
                 Initialized = true;
             }
 
-            BeginRun();            
+            BeginRun();
 
             //Not quite right..
-            Tick ();
+            Tick();
 
-            EndRun ();
+            EndRun();
 
         }
 
@@ -378,7 +378,7 @@ namespace Microsoft.Xna.Framework
         private Stopwatch _gameTimer;
         private long _previousTicks = 0;
         private int _updateFrameLag;
-    
+
 #if WINDOWS_UAP
         private readonly object _locker = new object();
 #endif
@@ -390,7 +390,7 @@ namespace Microsoft.Xna.Framework
             // any change fully in both the fixed and variable timestep 
             // modes across multiple devices and platforms.
 
-        RetryTick:
+            RetryTick:
 
             if (!IsActive && (InactiveSleepTime.TotalMilliseconds >= 1.0))
             {
@@ -410,11 +410,11 @@ namespace Microsoft.Xna.Framework
             if (IsFixedTimeStep && _accumulatedElapsedTime < TargetElapsedTime)
             {
                 // Sleep for as long as possible without overshooting the update time
-                var sleepTime = (TargetElapsedTime - _accumulatedElapsedTime);
+                TimeSpan sleepTime = (TargetElapsedTime - _accumulatedElapsedTime);
 #if WINDOWS
                 MonoGame.Utilities.TimerHelper.SleepForNoMoreThan(sleepTime.TotalMilliseconds);
-#elif DESKTOPGL
-                Thread.Sleep(sleepTime); 
+#else
+                Thread.Sleep(sleepTime);
 #endif
 
                 // Keep looping until it's time to perform the next update
@@ -485,9 +485,9 @@ namespace Microsoft.Xna.Framework
                 Platform.Exit();
         }
 
-#endregion
+        #endregion
 
-#region Protected Methods
+        #region Protected Methods
 
         protected virtual bool BeginDraw() { return true; }
         protected virtual void EndDraw()
@@ -539,28 +539,28 @@ namespace Microsoft.Xna.Framework
         protected virtual void Update(GameTime gameTime)
         {
             _updateables.ForEachFilteredItem(UpdateAction, gameTime);
-		}
+        }
 
         protected virtual void OnExiting(object sender, EventArgs args)
         {
             EventHelpers.Raise(sender, Exiting, args);
         }
-		
-		protected virtual void OnActivated(object sender, EventArgs args)
-		{
-			AssertNotDisposed();
+
+        protected virtual void OnActivated(object sender, EventArgs args)
+        {
+            AssertNotDisposed();
             EventHelpers.Raise(sender, Activated, args);
-		}
-		
-		protected virtual void OnDeactivated(object sender, EventArgs args)
-		{
-			AssertNotDisposed();
+        }
+
+        protected virtual void OnDeactivated(object sender, EventArgs args)
+        {
+            AssertNotDisposed();
             EventHelpers.Raise(sender, Deactivated, args);
-		}
+        }
 
-#endregion Protected Methods
+        #endregion Protected Methods
 
-#region Event Handlers
+        #region Event Handlers
 
         private void Components_ComponentAdded(
             object sender, GameComponentCollectionEventArgs e)
@@ -584,12 +584,12 @@ namespace Microsoft.Xna.Framework
             var platform = (GamePlatform)sender;
             platform.AsyncRunLoopEnded -= Platform_AsyncRunLoopEnded;
             EndRun();
-			DoExiting();
+            DoExiting();
         }
 
-#endregion Event Handlers
+        #endregion Event Handlers
 
-#region Internal Methods
+        #region Internal Methods
 
         // FIXME: We should work toward eliminating internal methods.  They
         //        break entirely the possibility that additional platforms could
@@ -598,18 +598,18 @@ namespace Microsoft.Xna.Framework
 #if !(WINDOWS && DIRECTX)
         internal void InternalApplyChanges(GraphicsDeviceManager manager)
         {
-			Platform.BeginScreenDeviceChange(GraphicsDevice.PresentationParameters.IsFullScreen);
+            Platform.BeginScreenDeviceChange(GraphicsDevice.PresentationParameters.IsFullScreen);
 
             if (GraphicsDevice.PresentationParameters.IsFullScreen)
                 Platform.EnterFullScreen();
             else
                 Platform.ExitFullScreen();
             var viewport = new Viewport(0, 0,
-			                            GraphicsDevice.PresentationParameters.BackBufferWidth,
-			                            GraphicsDevice.PresentationParameters.BackBufferHeight);
+                                        GraphicsDevice.PresentationParameters.BackBufferWidth,
+                                        GraphicsDevice.PresentationParameters.BackBufferHeight);
 
             GraphicsDevice.Viewport = viewport;
-			Platform.EndScreenDeviceChange(string.Empty, viewport.Width, viewport.Height);
+            Platform.EndScreenDeviceChange(string.Empty, viewport.Width, viewport.Height);
         }
 #endif
 
@@ -619,7 +619,7 @@ namespace Microsoft.Xna.Framework
             if (Platform.BeforeUpdate(gameTime))
             {
                 FrameworkDispatcher.Update();
-				
+
                 Update(gameTime);
 
                 //The TouchPanel needs to know the time for when touches arrive
@@ -658,13 +658,13 @@ namespace Microsoft.Xna.Framework
             Components.ComponentRemoved += Components_ComponentRemoved;
         }
 
-		internal void DoExiting()
-		{
-			OnExiting(this, EventArgs.Empty);
-			UnloadContent();
-		}
+        internal void DoExiting()
+        {
+            OnExiting(this, EventArgs.Empty);
+            UnloadContent();
+        }
 
-#endregion Internal Methods
+        #endregion Internal Methods
 
         internal GraphicsDeviceManager InternalGraphicsDeviceManager
         {
@@ -691,7 +691,7 @@ namespace Microsoft.Xna.Framework
         //       Components.ComponentAdded.
         private void InitializeExistingComponents()
         {
-            for(int i = 0; i < Components.Count; ++i)
+            for (int i = 0; i < Components.Count; ++i)
                 Components[i].Initialize();
         }
 

@@ -4,6 +4,7 @@
 
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
+using Microsoft.Xna.Framework.Utilities;
 using System;
 using System.ComponentModel;
 
@@ -12,6 +13,13 @@ namespace Microsoft.Xna.Framework
     public abstract class GameWindow
     {
         public delegate void TextInputEventDelegate(object sender, int character, Keys key);
+
+        private TaskbarProgressState _taskbarState;
+        private TaskbarProgressValue _taskbarProgress;
+        internal TaskbarList _taskbarList;
+
+        private string _title;
+        internal bool _allowAltF4 = true;
 
         #region Properties
 
@@ -23,9 +31,29 @@ namespace Microsoft.Xna.Framework
         public abstract bool HasClipboardText { get; }
         public abstract string ClipboardText { get; set; }
 
-        //public abstract bool IsMaximized { get; set; }
+        public bool IsTaskbarProgressSupported => _taskbarList != null;
 
-        internal bool _allowAltF4 = true;
+        public virtual TaskbarProgressState TaskbarState
+        {
+            get => _taskbarState;
+            set
+            {
+                _taskbarState = value;
+                if (_taskbarList != null)
+                    _taskbarList.SetProgressState(_taskbarState);
+            }
+        }
+
+        public virtual TaskbarProgressValue TaskbarProgress
+        {
+            get => _taskbarProgress;
+            set
+            {
+                _taskbarProgress = value;
+                if (_taskbarList != null)
+                    _taskbarList.SetProgressValue(_taskbarProgress);
+            }
+        }
 
         /// <summary>
         /// Gets or sets a bool that enables usage of Alt+F4 for window closing on desktop platforms. Value is true by default.
@@ -46,7 +74,6 @@ namespace Microsoft.Xna.Framework
 
         public abstract string ScreenDeviceName { get; }
 
-        private string _title;
         /// <summary>
         /// Gets or sets the title of the game window.
         /// </summary>

@@ -29,7 +29,7 @@ namespace MonoGame.Utilities
             {
                 PlatformID pid = Environment.OSVersion.Platform;
 
-                switch (pid) 
+                switch (pid)
                 {
                     case PlatformID.Win32NT:
                     case PlatformID.Win32S:
@@ -37,33 +37,38 @@ namespace MonoGame.Utilities
                     case PlatformID.WinCE:
                         os = OS.Windows;
                         break;
+
                     case PlatformID.MacOSX:
                         os = OS.MacOSX;
                         break;
-                    case PlatformID.Unix:
 
+                    case PlatformID.Unix:
                         // Mac can return a value of Unix sometimes, We need to double check it.
                         IntPtr buf = IntPtr.Zero;
                         try
                         {
-                            buf = Marshal.AllocHGlobal (8192);
-
-                            if (uname (buf) == 0) {
-                                string sos = Marshal.PtrToStringAnsi (buf);
+                            buf = Marshal.AllocHGlobal(8192);
+                            if (uname(buf) == 0)
+                            {
+                                string sos = Marshal.PtrToStringAnsi(buf);
                                 if (sos == "Darwin")
                                 {
                                     os = OS.MacOSX;
                                     return;
                                 }
                             }
-                        } catch {
-                        } finally {
-                            if (buf != IntPtr.Zero)
-                                Marshal.FreeHGlobal (buf);
                         }
-
+                        catch
+                        {
+                        }
+                        finally
+                        {
+                            if (buf != IntPtr.Zero)
+                                Marshal.FreeHGlobal(buf);
+                        }
                         os = OS.Linux;
                         break;
+
                     default:
                         os = OS.Unknown;
                         break;

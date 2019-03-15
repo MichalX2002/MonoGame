@@ -81,6 +81,7 @@ namespace Microsoft.Xna.Framework
         public override void RunLoop()
         {
             Sdl.Window.Show(Window.Handle);
+            InitTaskbarList();
 
             while (true)
             {
@@ -92,6 +93,15 @@ namespace Microsoft.Xna.Framework
 
                 if (_isExiting > 0)
                     break;
+            }
+        }
+
+        private void InitTaskbarList()
+        {
+            if (CurrentPlatform.OS == OS.Windows)
+            {
+                using (var process = Process.GetCurrentProcess())
+                    _window.InitTaskbarList(process.MainWindowHandle);
             }
         }
 

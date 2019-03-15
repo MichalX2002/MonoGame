@@ -2,12 +2,12 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
-using System.IO;
-using System.Reflection;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Utilities;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace Microsoft.Xna.Framework
 {
@@ -18,11 +18,14 @@ namespace Microsoft.Xna.Framework
             get => !IsBorderless && _resizable;
             set
             {
-                if (Sdl.Patch > 4)
+                if (Sdl.Major >= 2 && Sdl.Minor >= 0 && Sdl.Patch > 4)
                     Sdl.Window.SetResizable(_handle, value);
                 else
-                    throw new Exception("SDL 2.0.4 does not support changing resizable parameter of the window after it's already been created, please use a newer version of it.");
-
+                {
+                    string version = string.Join(".", Sdl.Major, Sdl.Minor, Sdl.Patch);
+                    throw new Exception(
+                        $"SDL {version} does not support changing the resizable parameter of the window after it's already been created.");
+                }
                 _resizable = value;
             }
         }
@@ -71,22 +74,6 @@ namespace Microsoft.Xna.Framework
         public override bool HasClipboardText => Sdl.HasClipboardText();
         public override string ClipboardText { get => Sdl.GetClipboardText(); set => Sdl.SetClipboardText(value); }
 
-        //public override bool IsMaximized
-        //{
-        //    get => (Sdl.Window.GetWindowFlags(_handle) & Sdl.Window.State.Maximized) != 0;
-        //    set
-        //    {
-        //        if (value)
-        //        {
-        //
-        //            Sdl.Window.SetSize(_handle, 1920, 1080);
-        //            Sdl.Window.MaximizeWindow(_handle);
-        //        }
-        //        else
-        //            Sdl.Window.RestoreWindow(_handle);
-        //    }
-        //}
-
         public static GameWindow Instance;
         public uint? ID;
         public bool IsFullScreen;
@@ -116,8 +103,7 @@ namespace Microsoft.Xna.Framework
             // when running NUnit tests entry assembly can be null
             if (Assembly.GetEntryAssembly() != null)
             {
-                using (
-                    var stream =
+                using (var stream =
                         Assembly.GetEntryAssembly().GetManifestResourceStream(Assembly.GetEntryAssembly().EntryPoint.DeclaringType.Namespace + ".Icon.bmp") ??
                         Assembly.GetEntryAssembly().GetManifestResourceStream("Icon.bmp") ??
                         Assembly.GetExecutingAssembly().GetManifestResourceStream("MonoGame.bmp"))
@@ -127,17 +113,26 @@ namespace Microsoft.Xna.Framework
                         {
                             try
                             {
-                                var src = Sdl.RwFromMem(br.ReadBytes((int)stream.Length), (int)stream.Length);
+                                int length = (int)stream.Length;
+                                var src = Sdl.RwFromMem(br.ReadBytes(length), length);
                                 _icon = Sdl.LoadBMP_RW(src, 1);
                             }
-                            catch { }
+                            catch
+                            {
+                            }
                         }
                 }
             }
 
             _handle = Sdl.Window.Create("", 0, 0,
-                GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight,
-                Sdl.Window.State.Hidden);
+                GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight, Sdl.Window.State.Hidden);
+        }
+
+        internal void InitTaskbarList(IntPtr windowHandle)
+        {
+            _taskbarList = new Utilities.TaskbarList(windowHandle);
+            _taskbarList.SetProgressState(TaskbarState);
+            _taskbarList.SetProgressValue(TaskbarProgress);
         }
 
         internal void CreateWindow()
@@ -161,11 +156,10 @@ namespace Microsoft.Xna.Framework
                 winy |= GetMouseDisplay();
             }
 
-            _handle = Sdl.Window.Create(AssemblyHelper.GetDefaultWindowTitle(),
-                winx, winy, _width, _height, initflags);
+            _handle = Sdl.Window.Create(
+                AssemblyHelper.GetDefaultWindowTitle(), winx, winy, _width, _height, initflags);
 
             ID = Sdl.Window.GetWindowId(_handle);
-
             if (_icon != IntPtr.Zero)
                 Sdl.Window.SetIcon(_handle, _icon);
 
@@ -244,7 +238,7 @@ namespace Microsoft.Xna.Framework
                 _height = displayRect.Height;
             }
 
-            Sdl.Window.GetBorderSize(_handle, out int miny, out int minx, out int ignore, out ignore);
+            Sdl.Window.GetBorderSize(_handle, out int miny, out int minx, out _, out _);
 
             var centerX = Math.Max(prevBounds.X + ((prevBounds.Width - clientWidth) / 2), minx);
             var centerY = Math.Max(prevBounds.Y + ((prevBounds.Height - clientHeight) / 2), miny);
@@ -253,7 +247,7 @@ namespace Microsoft.Xna.Framework
             {
                 // We need to get the display information again in case
                 // the resolution of it was changed.
-                Sdl.Display.GetBounds (displayIndex, out displayRect);
+                Sdl.Display.GetBounds(displayIndex, out displayRect);
 
                 // This centering only occurs when exiting fullscreen
                 // so it should center the window on the current display.
@@ -292,7 +286,8 @@ namespace Microsoft.Xna.Framework
             // SDL reports many resize events even if the Size didn't change.
             // Only call the code below if it actually changed.
             if (_game.GraphicsDevice.PresentationParameters.BackBufferWidth == width &&
-                _game.GraphicsDevice.PresentationParameters.BackBufferHeight == height) {
+                _game.GraphicsDevice.PresentationParameters.BackBufferHeight == height)
+            {
                 return;
             }
             _game.GraphicsDevice.PresentationParameters.BackBufferWidth = width;
