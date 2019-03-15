@@ -38,9 +38,11 @@ namespace Microsoft.Xna.Framework
             get => _taskbarState;
             set
             {
-                _taskbarState = value;
-                if (_taskbarList != null)
-                    _taskbarList.SetProgressState(_taskbarState);
+                if (_taskbarList != null && _taskbarState != value)
+                {
+                    _taskbarState = value;
+                    _taskbarList.SetProgressState(value);
+                }
             }
         }
 
@@ -49,9 +51,11 @@ namespace Microsoft.Xna.Framework
             get => _taskbarProgress;
             set
             {
-                _taskbarProgress = value;
-                if (_taskbarList != null)
-                    _taskbarList.SetProgressValue(_taskbarProgress);
+                if (_taskbarList != null && !_taskbarProgress.Equals(value))
+                {
+                    _taskbarProgress = value;
+                    _taskbarList.SetProgressValue(value);
+                }
             }
         }
 

@@ -2,7 +2,7 @@
 
 namespace Microsoft.Xna.Framework
 {
-    public readonly struct TaskbarProgressValue
+    public readonly struct TaskbarProgressValue : IEquatable<TaskbarProgressValue>
     {
         public long Completed { get; }
         public long Total { get; }
@@ -17,6 +17,12 @@ namespace Microsoft.Xna.Framework
 
             Completed = completed;
             Total = total;
+        }
+
+        public bool Equals(TaskbarProgressValue other)
+        {
+            return Completed == other.Completed 
+                && Total == other.Total;
         }
     }
 }

@@ -131,8 +131,8 @@ namespace Microsoft.Xna.Framework
         internal void InitTaskbarList(IntPtr windowHandle)
         {
             _taskbarList = new Utilities.TaskbarList(windowHandle);
-            _taskbarList.SetProgressState(TaskbarState);
             _taskbarList.SetProgressValue(TaskbarProgress);
+            _taskbarList.SetProgressState(TaskbarState);
         }
 
         internal void CreateWindow()
