@@ -14,22 +14,25 @@ namespace Microsoft.Xna.Framework
     {
         public delegate void TextInputEventDelegate(object sender, int character, Keys key);
 
-        private TaskbarProgressState _taskbarState;
-        private TaskbarProgressValue _taskbarProgress;
-        internal TaskbarList _taskbarList;
-
         private string _title;
         internal bool _allowAltF4 = true;
+
+        internal MouseState MouseState;
+        internal TouchPanelState TouchPanelState;
 
         #region Properties
 
         [DefaultValue(false)]
         public abstract bool AllowUserResizing { get; set; }
-
         public abstract Rectangle ClientBounds { get; }
 
         public abstract bool HasClipboardText { get; }
         public abstract string ClipboardText { get; set; }
+
+        #region Windows Taskbar Progress 
+        private TaskbarProgressState _taskbarState;
+        private TaskbarProgressValue _taskbarProgress;
+        internal TaskbarList _taskbarList;
 
         public bool IsTaskbarProgressSupported => _taskbarList != null;
 
@@ -58,6 +61,7 @@ namespace Microsoft.Xna.Framework
                 }
             }
         }
+        #endregion
 
         /// <summary>
         /// Gets or sets a bool that enables usage of Alt+F4 for window closing on desktop platforms. Value is true by default.
@@ -73,9 +77,7 @@ namespace Microsoft.Xna.Framework
 #endif
 
         public abstract DisplayOrientation CurrentOrientation { get; }
-
         public abstract IntPtr Handle { get; }
-
         public abstract string ScreenDeviceName { get; }
 
         /// <summary>
@@ -109,9 +111,6 @@ namespace Microsoft.Xna.Framework
             get => false;
             set => throw new NotImplementedException();
         }
-
-        internal MouseState MouseState;
-        internal TouchPanelState TouchPanelState;
 
         protected GameWindow()
         {
