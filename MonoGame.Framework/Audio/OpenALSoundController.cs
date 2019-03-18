@@ -69,6 +69,7 @@ namespace Microsoft.Xna.Framework.Audio
     {
         private static object _initMutex = new object();
         private static OpenALSoundController _instance;
+        private static bool _closed;
         private IntPtr _device;
         private IntPtr _context;
         private int[] allSourcesArray;
@@ -108,6 +109,9 @@ namespace Microsoft.Xna.Framework.Audio
         {
             get
             {
+                if (_closed)
+                    throw new ObjectDisposedException(nameof(OpenALSoundController));
+
                 if (_instance == null)
                     throw new NoAudioHardwareException(
                         "OpenAL context has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
@@ -331,6 +335,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (_instance != null)
             {
                 _instance.Dispose();
+                _closed = true;
                 _instance = null;
             }
         }
@@ -347,6 +352,7 @@ namespace Microsoft.Xna.Framework.Audio
                 Alc.DestroyContext (_context);
                 _context = IntPtr.Zero;
             }
+
             if (_device != IntPtr.Zero)
             {
                 Alc.CloseDevice (_device);
@@ -385,6 +391,8 @@ namespace Microsoft.Xna.Framework.Audio
 
                     if (Filter != 0 && Efx.IsInitialized)
                         Efx.DeleteFilter(Filter);
+
+                    SoundEffectInstancePool.DisposeInstances();
 
                     Microphone.StopMicrophones();
                     CleanUpOpenAL();                    

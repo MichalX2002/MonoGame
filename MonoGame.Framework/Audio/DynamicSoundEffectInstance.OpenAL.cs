@@ -12,11 +12,9 @@ namespace Microsoft.Xna.Framework.Audio
     public sealed partial class DynamicSoundEffectInstance : SoundEffectInstance
     {
         private Queue<OALSoundBuffer> _queuedBuffers;
-        private ALFormat _format;
 
         private void PlatformCreate()
         {
-            _format = _channels == AudioChannels.Mono ? ALFormat.Mono16 : ALFormat.Stereo16;
             InitializeSound();
 
             SourceId = controller.ReserveSource();
@@ -77,7 +75,7 @@ namespace Microsoft.Xna.Framework.Audio
             try
             {
                 IntPtr ptr = handle.AddrOfPinnedObject() + offset;
-                PlatformSubmitBuffer(ptr, count);
+                PlatformSubmitBuffer(ptr, count, false);
             }
             finally
             {
@@ -91,7 +89,7 @@ namespace Microsoft.Xna.Framework.Audio
             try
             {
                 IntPtr ptr = handle.AddrOfPinnedObject() + offset * sizeof(short);
-                PlatformSubmitBuffer(ptr, count * sizeof(short));
+                PlatformSubmitBuffer(ptr, count * sizeof(short), false);
             }
             finally
             {
@@ -99,13 +97,39 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        private void PlatformSubmitBuffer(IntPtr buffer, int size)
+        private void PlatformSubmitBuffer(float[] buffer, int offset, int count)
+        {
+            if (!OpenALSoundController.Instance.SupportsIeee)
+                throw new NotSupportedException("Float data is not supported.");
+
+            var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+            try
+            {
+                IntPtr ptr = handle.AddrOfPinnedObject() + offset * sizeof(float);
+                PlatformSubmitBuffer(ptr, count * sizeof(float), true);
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }
+
+        private ALFormat GetALFormat(bool useFloat)
+        {
+            if (_channels == AudioChannels.Mono)
+                return useFloat ? ALFormat.MonoFloat32 : ALFormat.Mono16;
+            else
+                return useFloat ? ALFormat.StereoFloat32 : ALFormat.Stereo16;
+        }
+
+        private void PlatformSubmitBuffer(IntPtr buffer, int bytes, bool useFloat)
         {
             // Get a buffer
-            OALSoundBuffer oalBuffer = new OALSoundBuffer();
+            var oalBuffer = new OALSoundBuffer();
 
             // Bind the data
-            oalBuffer.BindDataBuffer(buffer, _format, size, _sampleRate);
+            ALFormat format = GetALFormat(useFloat);
+            oalBuffer.BindDataBuffer(buffer, format, bytes, _sampleRate);
 
             // Queue the buffer
             AL.SourceQueueBuffer(SourceId, oalBuffer.OpenALDataBuffer);
@@ -137,10 +161,9 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 while (_queuedBuffers.Count > 0)
                 {
-                    var buffer = _queuedBuffers.Dequeue();
+                    OALSoundBuffer buffer = _queuedBuffers.Dequeue();
                     buffer.Dispose();
                 }
-
                 DynamicSoundEffectInstanceManager.RemoveInstance(this);
             }
         }

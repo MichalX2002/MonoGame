@@ -22,7 +22,6 @@ namespace Microsoft.Xna.Framework.Audio
         int pauseCount;
         
         internal OpenALSoundController controller;
-        
         internal bool HasSourceId = false;
 
 #region Initialization
@@ -163,7 +162,7 @@ namespace Microsoft.Xna.Framework.Audio
 
                 // Reset the SendFilter to 0 if we are NOT using reverb since 
                 // sources are recycled
-                if (OpenALSoundController.Instance.SupportsEfx)
+                if (controller.SupportsEfx)
                 {
                     OpenALSoundController.Efx.BindSourceToAuxiliarySlot(SourceId, 0, 0, 0);
                     ALHelper.CheckError("Failed to unset reverb.");
