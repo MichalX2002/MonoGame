@@ -118,7 +118,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             // this should be 10ms aligned
             // this assumes 16bit mono data
-            return SoundEffect.GetSampleDuration(sizeInBytes, SampleRate, AudioChannels.Mono);
+            return SoundEffect.GetSampleDuration(sizeInBytes, 16, SampleRate, AudioChannels.Mono);
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             // this should be 10ms aligned
             // this assumes 16bit mono data
-            return SoundEffect.GetSampleSizeInBytes(duration, SampleRate, AudioChannels.Mono);
+            return SoundEffect.GetSampleSizeInBytes(duration, 16, SampleRate, AudioChannels.Mono);
         }
 
         /// <summary>

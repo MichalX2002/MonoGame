@@ -100,10 +100,10 @@ namespace Microsoft.Xna.Framework.Audio
             _pitch = 0.0f;            
         }
 
-        internal SoundEffectInstance(byte[] buffer, int sampleRate, int channels) : this()
-        {
-            PlatformInitialize(buffer, sampleRate, channels);
-        }
+        //internal SoundEffectInstance(byte[] buffer, int sampleRate, int channels) : this()
+        //{
+        //    PlatformInitialize(buffer, sampleRate, channels);
+        //}
 		
         /// <summary>
         /// Converts the XNA [-1, 1] pitch range to OpenAL pitch (0, INF) or Android SoundPool playback rate [0.5, 2].

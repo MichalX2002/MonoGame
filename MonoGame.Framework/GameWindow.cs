@@ -185,7 +185,7 @@ namespace Microsoft.Xna.Framework
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
         protected void OnTextInput(object sender, int character, Keys key)
         {
-            TextInput.Invoke(sender, character, key);
+            TextInput?.Invoke(sender, character, key);
         }
 #endif
 

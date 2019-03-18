@@ -188,7 +188,7 @@ namespace Microsoft.Xna.Framework.Audio
                 throw new ArgumentException(
                     "Ensure that the loopStart+loopLength region lies within the sample range.", nameof(loopLength));
 
-            _duration = GetSampleDuration(count, sampleRate, channels);
+            _duration = GetSampleDuration(count, 16, sampleRate, channels);
 
             PlatformInitializePcm(buffer, offset, count, 16, sampleRate, channels, loopStart, loopLength);
         }
@@ -252,44 +252,52 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
         /// <summary>
-        /// Returns the duration for 16-bit PCM audio.
+        /// Returns the duration for PCM audio.
         /// </summary>
-        /// <param name="sizeInBytes">The length of the audio data in bytes.</param>
-        /// <param name="sampleRate">Sample rate, in Hertz (Hz). Must be between 8000 Hz and 48000 Hz</param>
+        /// <param name="sampleCount">The amount of samples.</param>
+        /// <param name="sampleSize">The size of one sample in bits.</param>
+        /// <param name="sampleRate">Sample rate in hertz (Hz). Must be between 8000 Hz and 48000 Hz</param>
         /// <param name="channels">Number of channels in the audio data.</param>
         /// <returns>The duration of the audio data.</returns>
-        public static TimeSpan GetSampleDuration(int sizeInBytes, int sampleRate, AudioChannels channels)
+        public static TimeSpan GetSampleDuration(
+            int sampleCount, int sampleSize, int sampleRate, AudioChannels channels)
         {
-            if (sizeInBytes < 0)
-                throw new ArgumentException("Buffer size cannot be negative.", nameof(sizeInBytes));
-            if (sampleRate < 8000 || sampleRate > 48000)
-                throw new ArgumentOutOfRangeException(nameof(sampleRate));
+            if (sampleCount < 0)
+                throw new ArgumentOutOfRangeException(
+                    nameof(sampleCount), "Element count cannot be negative.");
 
-            var numChannels = (int)channels;
+            if (sampleSize <= 0)
+                throw new ArgumentException(
+                    "Element size must be above zero.", nameof(sampleSize));
+
+            if (sampleRate <= 0)
+                throw new ArgumentOutOfRangeException(
+                    nameof(sampleRate), "Sample rate must be above zero.");
+
+            int numChannels = (int)channels;
             if (numChannels != 1 && numChannels != 2)
                 throw new ArgumentOutOfRangeException(nameof(channels));
 
-            if (sizeInBytes == 0)
+            if (sampleCount == 0)
                 return TimeSpan.Zero;
 
             // Reference
             // http://tinyurl.com/hq9slfy
 
-            var dur = sizeInBytes / (sampleRate * numChannels * 16f / 8f);
-
-            var duration = TimeSpan.FromSeconds(dur);
-
-            return duration;
+            double dur = sampleCount / (sampleRate * numChannels * sampleSize / 8.0);
+            return TimeSpan.FromTicks((long)(dur * TimeSpan.TicksPerSecond));
         }
 
         /// <summary>
-        /// Returns the data size in bytes for 16bit PCM audio.
+        /// Returns the data size in bytes for PCM audio.
         /// </summary>
         /// <param name="duration">The total duration of the audio data.</param>
-        /// <param name="sampleRate">Sample rate, in Hertz (Hz), of audio data. Must be between 8,000 and 48,000 Hz.</param>
+        /// <param name="sampleSize">The size of one sample in bits.</param>
+        /// <param name="sampleRate">Sample rate in hertz (Hz), of audio data. Must be between 8,000 and 48,000 Hz.</param>
         /// <param name="channels">Number of channels in the audio data.</param>
         /// <returns>The size in bytes of a single sample of audio data.</returns>
-        public static int GetSampleSizeInBytes(TimeSpan duration, int sampleRate, AudioChannels channels)
+        public static int GetSampleSizeInBytes(
+            TimeSpan duration, int sampleSize, int sampleRate, AudioChannels channels)
         {
             if (duration < TimeSpan.Zero || duration > TimeSpan.FromMilliseconds(0x7FFFFFF))
                 throw new ArgumentOutOfRangeException(nameof(duration));
@@ -303,8 +311,7 @@ namespace Microsoft.Xna.Framework.Audio
             // Reference
             // http://tinyurl.com/hq9slfy
 
-            var sizeInBytes = duration.TotalSeconds * (sampleRate * numChannels * 16f / 8f);
-
+            double sizeInBytes = duration.TotalSeconds * (sampleRate * numChannels * sampleSize / 8.0);
             return (int)sizeInBytes;
         }
 

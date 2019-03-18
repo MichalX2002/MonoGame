@@ -100,23 +100,25 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// Returns the duration of an audio buffer of the specified size, based on the settings of this instance.
         /// </summary>
-        /// <param name="sizeInBytes">Size of the buffer, in bytes.</param>
+        /// <param name="sampleCount">The amount of samples.</param>
+        /// <param name="sampleSize">The size of one sample in bits.</param>
         /// <returns>The playback length of the buffer.</returns>
-        public TimeSpan GetSampleDuration(int sizeInBytes)
+        public TimeSpan GetSampleDuration(int sampleCount, int sampleSize)
         {
             AssertNotDisposed();
-            return SoundEffect.GetSampleDuration(sizeInBytes, _sampleRate, _channels);
+            return SoundEffect.GetSampleDuration(sampleCount, sampleSize, _sampleRate, _channels);
         }
 
         /// <summary>
         /// Returns the size, in bytes, of a buffer of the specified duration, based on the settings of this instance.
         /// </summary>
         /// <param name="duration">The playback length of the buffer.</param>
+        /// <param name="sampleSize">The size of one sample in bits.</param>
         /// <returns>The data size of the buffer, in bytes.</returns>
-        public int GetSampleSizeInBytes(TimeSpan duration)
+        public int GetSampleSizeInBytes(TimeSpan duration, int sampleSize)
         {
             AssertNotDisposed();
-            return SoundEffect.GetSampleSizeInBytes(duration, _sampleRate, _channels);
+            return SoundEffect.GetSampleSizeInBytes(duration, sampleSize, _sampleRate, _channels);
         }
 
         /// <summary>
@@ -240,6 +242,18 @@ namespace Microsoft.Xna.Framework.Audio
         /// The buffer length must conform to alignment requirements for the audio format.
         /// </remarks>
         /// <param name="buffer">The buffer containing PCM audio data.</param>
+        public void SubmitBuffer(float[] buffer)
+        {
+            SubmitBuffer(buffer, 0, buffer.Length);
+        }
+
+        /// <summary>
+        /// Queues an audio buffer for playback.
+        /// </summary>
+        /// <remarks>
+        /// The buffer length must conform to alignment requirements for the audio format.
+        /// </remarks>
+        /// <param name="buffer">The buffer containing PCM audio data.</param>
         /// <param name="offset">The starting position of audio data.</param>
         /// <param name="count">The amount of elements to use.</param>
         public void SubmitBuffer(byte[] buffer, int offset, int count)
@@ -272,10 +286,29 @@ namespace Microsoft.Xna.Framework.Audio
             PlatformSubmitBuffer(buffer, offset, count);
         }
 
+        /// <summary>
+        /// Queues an audio buffer for playback.
+        /// </summary>
+        /// <remarks>
+        /// The buffer length must conform to alignment requirements for the audio format.
+        /// </remarks>
+        /// <param name="buffer">The buffer containing PCM audio data.</param>
+        /// <param name="offset">The starting position of audio data.</param>
+        /// <param name="count">The amount of elements to use.</param>
+        public void SubmitBuffer(float[] buffer, int offset, int count)
+        {
+            AssertNotDisposed();
+
+            int elementsPerSample = (int)_channels;
+            CheckSubmitArguments(buffer, offset, count, elementsPerSample);
+
+            PlatformSubmitBuffer(buffer, offset, count);
+        }
+
         #endregion
 
         #region Nonpublic Functions
-        
+
         private void CheckSubmitArguments<T>(T[] buffer, int offset, int count, int elementsPerSample)
         {
             if (buffer == null || buffer.Length == 0)

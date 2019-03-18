@@ -54,7 +54,6 @@ namespace Microsoft.Xna.Framework.Audio
                 }
 
                 _playingInstances.Remove(inst);
-
             }
         }
 
@@ -107,7 +106,6 @@ namespace Microsoft.Xna.Framework.Audio
                 }
 
                 return inst;
-
             }
         }
 
@@ -119,7 +117,6 @@ namespace Microsoft.Xna.Framework.Audio
         {
             lock (_syncRoot)
             {
-
                 SoundEffectInstance inst = null;
 
                 // Cleanup instances which have finished playing.                    
@@ -151,6 +148,20 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
+        internal static void DisposeInstances()
+        {
+            lock (_syncRoot)
+            {
+                foreach (var instance in _playingInstances)
+                    instance.Dispose();
+                _playingInstances.Clear();
+
+                foreach (var instance in _pooledInstances)
+                    instance.Dispose();
+                _pooledInstances.Clear();
+            }
+        }
+
         /// <summary>
         /// Iterates the list of playing instances, stop them and return them to the pool if they are instances of the given SoundEffect.
         /// </summary>
@@ -159,7 +170,6 @@ namespace Microsoft.Xna.Framework.Audio
         {
             lock (_syncRoot)
             {
-
                 SoundEffectInstance inst = null;
 
                 for (var x = 0; x < _playingInstances.Count;)
