@@ -361,12 +361,10 @@ namespace MonoGame.OpenAL
 
         internal static void GenSources(int[] sources)
         {
-            uint[] temp = new uint[sources.Length];
-            alGenSources(temp.Length, temp);
-            for (int i = 0; i < temp.Length; i++)
-            {
-                sources[i] = (int)temp[i];
-            }
+            uint[] tmp = new uint[sources.Length];
+            alGenSources(tmp.Length, tmp);
+            for (int i = 0; i < tmp.Length; i++)
+                sources[i] = (int)tmp[i];
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

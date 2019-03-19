@@ -28,6 +28,28 @@ namespace Microsoft.Xna.Framework.Audio
             return _queuedBuffers.Count;
         }
 
+        private int PlatformGetBufferedSamples()
+        {
+            AL.GetError();
+
+            if (_queuedBuffers.Count == 0)
+                return default;
+
+            int total = 0;
+            foreach(var buff in _queuedBuffers)
+            {
+                AL.GetBuffer(buff.OpenALDataBuffer, ALGetBufferi.Size, out int size);
+                ALHelper.CheckError("Failed to get size of queued buffers.");
+                total += size;
+            }
+
+            AL.GetSource(SourceId, ALGetSourcei.SampleOffset, out int offset);
+            ALHelper.CheckError("Failed to get sample offset in source.");
+            total -= offset;
+
+            return total;
+        }
+
         private void PlatformPlay()
         {
             AL.GetError();
