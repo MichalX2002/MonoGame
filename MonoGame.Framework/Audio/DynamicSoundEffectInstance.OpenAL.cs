@@ -31,16 +31,19 @@ namespace Microsoft.Xna.Framework.Audio
         private int PlatformGetBufferedSamples()
         {
             AL.GetError();
-
-            if (_queuedBuffers.Count == 0)
-                return default;
-
             int total = 0;
-            foreach(var buff in _queuedBuffers)
+
+            lock (_queuedBuffers)
             {
-                AL.GetBuffer(buff.OpenALDataBuffer, ALGetBufferi.Size, out int size);
-                ALHelper.CheckError("Failed to get size of queued buffers.");
-                total += size;
+                if (_queuedBuffers.Count == 0)
+                    return 0;
+
+                foreach (var buff in _queuedBuffers)
+                {
+                    AL.GetBuffer(buff.OpenALDataBuffer, ALGetBufferi.Size, out int size);
+                    ALHelper.CheckError("Failed to get size of queued buffers.");
+                    total += size;
+                }
             }
 
             AL.GetSource(SourceId, ALGetSourcei.SampleOffset, out int offset);
@@ -84,10 +87,14 @@ namespace Microsoft.Xna.Framework.Audio
 
             // Remove all queued buffers
             AL.Source(SourceId, ALSourcei.Buffer, 0);
-            while (_queuedBuffers.Count > 0)
+
+            lock (_queuedBuffers)
             {
-                var buffer = _queuedBuffers.Dequeue();
-                buffer.Dispose();
+                while (_queuedBuffers.Count > 0)
+                {
+                    var buffer = _queuedBuffers.Dequeue();
+                    buffer.Dispose();
+                }
             }
         }
 
@@ -156,7 +163,9 @@ namespace Microsoft.Xna.Framework.Audio
             // Queue the buffer
             AL.SourceQueueBuffer(SourceId, oalBuffer.OpenALDataBuffer);
             ALHelper.CheckError();
-            _queuedBuffers.Enqueue(oalBuffer);
+
+            lock (_queuedBuffers)
+                _queuedBuffers.Enqueue(oalBuffer);
 
             // If the source has run out of buffers, restart it
             var sourceState = AL.GetSourceState(SourceId);
@@ -178,13 +187,16 @@ namespace Microsoft.Xna.Framework.Audio
                 ALHelper.CheckError("Failed to stop the source.");
                 controller.RecycleSource(SourceId);
             }
-            
+
             if (disposing)
             {
-                while (_queuedBuffers.Count > 0)
+                lock (_queuedBuffers)
                 {
-                    OALSoundBuffer buffer = _queuedBuffers.Dequeue();
-                    buffer.Dispose();
+                    while (_queuedBuffers.Count > 0)
+                    {
+                        OALSoundBuffer buffer = _queuedBuffers.Dequeue();
+                        buffer.Dispose();
+                    }
                 }
                 DynamicSoundEffectInstanceManager.RemoveInstance(this);
             }
@@ -202,10 +214,14 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 AL.SourceUnqueueBuffers(SourceId, numBuffers);
                 ALHelper.CheckError("Failed to unqueue buffers.");
-                for (int i = 0; i < numBuffers; i++)
+
+                lock (_queuedBuffers)
                 {
-                    var buffer = _queuedBuffers.Dequeue();
-                    buffer.Dispose();
+                    for (int i = 0; i < numBuffers; i++)
+                    {
+                        var buffer = _queuedBuffers.Dequeue();
+                        buffer.Dispose();
+                    }
                 }
             }
 
