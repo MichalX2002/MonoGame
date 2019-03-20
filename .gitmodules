@@ -6,6 +6,6 @@
 	path = ThirdParty/NVorbis
 	url=https://github.com/MichalX2002/MonoGame.NVorbis.git
 
-[submodule "ThirdParty/SDL_GameControllerDB"]
-	path = ThirdParty/SDL_GameControllerDB
-	url = https://github.com/gabomdq/SDL_GameControllerDB.git
+[submodule "SDL_GameControllerDB"]
+	path = SDL_GameControllerDB
+	url = https://github.com/gabomdq/SDL_GameControllerDB
