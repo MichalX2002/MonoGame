@@ -9,7 +9,7 @@ namespace Microsoft.Xna.Framework.Media
 {
     internal class OggStreamer : IDisposable
     {
-        public readonly XRamExtension XRam = new XRamExtension();
+        //public readonly XRamExtension XRam = new XRamExtension();
         public readonly EffectsExtension Efx = OpenALSoundController.Efx;
 
         const float DefaultUpdateRate = 15;
@@ -106,18 +106,17 @@ namespace Microsoft.Xna.Framework.Media
             lock (iterationMutex)
                 return _streams.Remove(stream);
         }
-        
-        public bool FillBuffer(OggStream stream, int bufferId)
+
+        public bool FillBuffer(OggStream stream, OALSoundBuffer buffer)
         {
-            int readSamples;
             lock (readMutex)
             {
                 var reader = stream.Reader;
-                readSamples = reader.ReadSamples(readSampleBuffer, 0, BufferSize);
-                
+                int readSamples = reader.ReadSamples(readSampleBuffer, 0, BufferSize);
+
                 if (readSamples > 0)
                 {
-                    if (AL.IsExtensionPresent("AL_EXT_FLOAT32"))
+                    if (!OpenALSoundController.Instance.SupportsFloat32)
                     {
                         var format = reader.Channels == 1 ? ALFormat.MonoFloat32 : ALFormat.StereoFloat32;
                         AL.BufferData(bufferId, format, readSampleBuffer, 0, readSamples, reader.SampleRate);
@@ -125,16 +124,12 @@ namespace Microsoft.Xna.Framework.Media
                     else
                     {
                         CastBuffer(readSampleBuffer, castBuffer, readSamples);
-                        var format = reader.Channels == 1 ? ALFormat.Mono16 : ALFormat.Stereo16;
-                        AL.BufferData(bufferId, format, castBuffer, 0, readSamples, reader.SampleRate);
+                        var f
+                        buffer.BufferData();
                     }
-                    ALHelper.CheckError("Failed to fill buffer, readSamples = {0}, SampleRate = {1}.", readSamples, reader.SampleRate);
-
-                    if (readSamples > 0)
-                        stream.AddPart(readSampleBuffer, readSamples, BufferSize);
                 }
+                return readSamples == 0;
             }
-            return readSamples == 0;
         }
 
         static void CastBuffer(float[] src, short[] dst, int count)
@@ -183,7 +178,7 @@ namespace Microsoft.Xna.Framework.Media
 
                     lock (stream._stopMutex)
                     {
-                        if (stream.Preparing)
+                        if (stream.IsPreparing)
                             continue;
 
                         lock (iterationMutex)
@@ -227,9 +222,6 @@ namespace Microsoft.Xna.Framework.Media
 
             if (processed > 0)
             {
-                for (int i = 0; i < processed && stream._parts.Count > 0; i++)
-                    stream.RemovePart(0);
-
                 tmpBuffers = AL.SourceGetAndUnqueueBuffers(stream._alSourceId, processed);
                 tmpBufferOffset = 0;
                 tmpBufferCount = tmpBuffers.Length;
@@ -274,8 +266,8 @@ namespace Microsoft.Xna.Framework.Media
                 lock (iterationMutex)
                     _streams.Remove(stream);
 
-                if (stream.FinishedAction != null)
-                    stream.FinishedAction.Invoke();
+                if (stream.OnFinished != null)
+                    stream.OnFinished.Invoke();
             }
             else if (!finished && buffersFilled > 0) // queue only successfully filled buffers
             {

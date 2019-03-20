@@ -8,11 +8,11 @@ namespace Microsoft.Xna.Framework.Media
 {
     public static partial class MediaPlayer
     {
-		// Need to hold onto this to keep track of how many songs
-		// have played when in shuffle mode
-		private static int _numSongsInQueuePlayed = 0;
-		private static MediaState _state = MediaState.Stopped;
-		private static float _volume = 1.0f;
+        // Need to hold onto this to keep track of how many songs
+        // have played when in shuffle mode
+        private static int _numSongsInQueuePlayed = 0;
+        private static MediaState _state = MediaState.Stopped;
+        private static float _volume = 1.0f;
         private static float _pitch = 0.0f;
         private static bool _isVisualizationEnabled;
         private static bool _isMuted;
@@ -30,6 +30,20 @@ namespace Microsoft.Xna.Framework.Media
         #region Properties
 
         public static MediaQueue Queue { get; } = new MediaQueue();
+
+        public static bool IsRunningSlowly => PlatformGetIsRunningSlowly();
+
+        public static float StreamingUpdateTime => PlatformGetUpdateTime();
+
+        public static bool GameHasControl => PlatformGetGameHasControl();
+
+        public static TimeSpan PlayPosition => PlatformGetPlayPosition();
+
+        public static bool IsVisualizationEnabled
+        {
+            get => PlatformGetIsVisualizationEnabled();
+            set => PlatformSetIsVisualizationEnabled(value);
+        }
 
         public static bool IsMuted
         {
@@ -49,14 +63,6 @@ namespace Microsoft.Xna.Framework.Media
             set => PlatformSetIsShuffled(value);
         }
 
-        public static bool IsVisualizationEnabled
-        {
-            get => PlatformGetIsVisualizationEnabled();
-            set => PlatformSetIsVisualizationEnabled(value);
-        }
-
-        public static TimeSpan PlayPosition => PlatformGetPlayPosition();
-
         public static MediaState State
         {
             get => PlatformGetState();
@@ -69,9 +75,6 @@ namespace Microsoft.Xna.Framework.Media
                 }
             }
         }
-
-        public static bool GameHasControl => PlatformGetGameHasControl();
-
 
         public static float Volume
         {
@@ -93,9 +96,6 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
-        public static bool IsRunningSlowly => PlatformGetIsRunningSlowly();
-
-        public static float UpdateTime => PlatformGetUpdateTime();
 
         #endregion
 
@@ -136,17 +136,17 @@ namespace Microsoft.Xna.Framework.Media
                 EventHelpers.Raise(null, ActiveSongChanged, EventArgs.Empty);
         }
 
-		public static void Play(SongCollection collection, int index = 0)
+        public static void Play(SongCollection collection, int index = 0)
         {
             var previousSong = index < Queue.Count ? Queue[index] : null;
             Queue.Clear();
             _numSongsInQueuePlayed = 0;
 
-			foreach(var song in collection)
-				Queue.Add(song);
-			
-			Queue.ActiveSongIndex = index;
-			PlaySong(Queue.ActiveSong, null);
+            foreach (var song in collection)
+                Queue.Add(song);
+
+            Queue.ActiveSongIndex = index;
+            PlaySong(Queue.ActiveSong, null);
 
             if (previousSong != Queue.ActiveSong)
                 EventHelpers.Raise(null, ActiveSongChanged, EventArgs.Empty);
@@ -162,23 +162,23 @@ namespace Microsoft.Xna.Framework.Media
         }
 
         internal static void OnSongFinishedPlaying(object sender, EventArgs args)
-		{
-			// TODO: Check args to see if song sucessfully played
-			_numSongsInQueuePlayed++;
-			
-			if (_numSongsInQueuePlayed >= Queue.Count)
-			{
-				_numSongsInQueuePlayed = 0;
-				if (!IsRepeating)
-				{
-					Stop();
-					EventHelpers.Raise(null, ActiveSongChanged, EventArgs.Empty);
-					return;
-				}
-			}
+        {
+            // TODO: Check args to see if song sucessfully played
+            _numSongsInQueuePlayed++;
 
-			MoveNext();
-		}
+            if (_numSongsInQueuePlayed >= Queue.Count)
+            {
+                _numSongsInQueuePlayed = 0;
+                if (!IsRepeating)
+                {
+                    Stop();
+                    EventHelpers.Raise(null, ActiveSongChanged, EventArgs.Empty);
+                    return;
+                }
+            }
+
+            MoveNext();
+        }
 
         public static void Resume()
         {
@@ -186,7 +186,7 @@ namespace Microsoft.Xna.Framework.Media
                 return;
 
             PlatformResume();
-			State = MediaState.Playing;
+            State = MediaState.Playing;
         }
 
         public static void Stop()
@@ -195,27 +195,27 @@ namespace Microsoft.Xna.Framework.Media
                 return;
 
             PlatformStop();
-			State = MediaState.Stopped;
-		}
-		
-		public static void MoveNext()
-		{
-			NextSong(1);
-		}
-		
-		public static void MovePrevious()
-		{
-			NextSong(-1);
-		}
-		
-		private static void NextSong(int direction)
-		{
+            State = MediaState.Stopped;
+        }
+
+        public static void MoveNext()
+        {
+            NextSong(1);
+        }
+
+        public static void MovePrevious()
+        {
+            NextSong(-1);
+        }
+
+        private static void NextSong(int direction)
+        {
             Stop();
 
             if (IsRepeating && Queue.ActiveSongIndex >= Queue.Count - 1)
             {
                 Queue.ActiveSongIndex = 0;
-                
+
                 // Setting direction to 0 will force the first song
                 // in the queue to be played.
                 // if we're on "shuffle", then it'll pick a random one
@@ -223,20 +223,17 @@ namespace Microsoft.Xna.Framework.Media
                 direction = 0;
             }
 
-			var nextSong = Queue.GetNextSong(direction, IsShuffled);
+            var nextSong = Queue.GetNextSong(direction, IsShuffled);
 
             if (nextSong != null)
                 PlaySong(nextSong, null);
 
             EventHelpers.Raise(null, ActiveSongChanged, EventArgs.Empty);
-		}
+        }
 
         public static void GetVisualizationData(VisualizationData data)
         {
-            if (IsVisualizationEnabled)
-            {
-                PlatformGetVisualizationData(data);
-            }
+            PlatformGetVisualizationData(data);
         }
     }
 }

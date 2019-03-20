@@ -39,11 +39,7 @@ namespace Microsoft.Xna.Framework.Audio
                     return 0;
 
                 foreach (var buff in _queuedBuffers)
-                {
-                    AL.GetBuffer(buff.BufferID, ALGetBufferi.Size, out int size);
-                    ALHelper.CheckError("Failed to get size of queued buffers.");
-                    total += size;
-                }
+                    total += buff.SampleCount;
             }
 
             AL.GetSource(SourceID, ALGetSourcei.SampleOffset, out int offset);
@@ -93,7 +89,7 @@ namespace Microsoft.Xna.Framework.Audio
                 while (_queuedBuffers.Count > 0)
                 {
                     var buffer = _queuedBuffers.Dequeue();
-                    OALSoundBuffer.Pool.Return(buffer);
+                    OALSoundBufferPool.Return(buffer);
                 }
             }
         }
@@ -128,7 +124,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformSubmitBuffer(float[] buffer, int offset, int count)
         {
-            if (!OpenALSoundController.Instance.SupportsIeee)
+            if (!OpenALSoundController.Instance.SupportsFloat32)
                 throw new NotSupportedException("Float data is not supported.");
 
             var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
@@ -143,21 +139,13 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        private ALFormat GetALFormat(bool useFloat)
-        {
-            if (_channels == AudioChannels.Mono)
-                return useFloat ? ALFormat.MonoFloat32 : ALFormat.Mono16;
-            else
-                return useFloat ? ALFormat.StereoFloat32 : ALFormat.Stereo16;
-        }
-
         private void PlatformSubmitBuffer(IntPtr buffer, int bytes, bool useFloat)
         {
             // Get a buffer
-            var alBuffer = OALSoundBuffer.Pool.Rent();
+            var alBuffer = OALSoundBufferPool.Rent();
 
             // Bind the data
-            ALFormat format = GetALFormat(useFloat);
+            ALFormat format = ALHelper.GetALFormat(_channels, useFloat);
             alBuffer.BufferData(buffer, format, bytes, _sampleRate);
 
             // Queue the buffer
@@ -195,7 +183,7 @@ namespace Microsoft.Xna.Framework.Audio
                     while (_queuedBuffers.Count > 0)
                     {
                         var buffer = _queuedBuffers.Dequeue();
-                        OALSoundBuffer.Pool.Return(buffer);
+                        OALSoundBufferPool.Return(buffer);
                     }
                 }
                 DynamicSoundEffectInstanceManager.RemoveInstance(this);
@@ -220,7 +208,7 @@ namespace Microsoft.Xna.Framework.Audio
                     for (int i = 0; i < numBuffers; i++)
                     {
                         var buffer = _queuedBuffers.Dequeue();
-                        OALSoundBuffer.Pool.Return(buffer);
+                        OALSoundBufferPool.Return(buffer);
                     }
                 }
             }

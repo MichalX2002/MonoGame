@@ -26,9 +26,9 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal void CheckALCError(string operation)
         {
-            AlcError error = Alc.GetErrorForDevice(_captureDevice);
+            ALCError error = ALC.GetErrorForDevice(_captureDevice);
 
-            if (error == AlcError.NoError)
+            if (error == ALCError.NoError)
                 return;
 
             string errorFmt = "OpenAL Error: {0}";
@@ -46,11 +46,11 @@ namespace Microsoft.Xna.Framework.Audio
             Default = null;
 
             // default device
-            string defaultDevice = Alc.GetString(IntPtr.Zero, AlcGetString.CaptureDefaultDeviceSpecifier);
+            string defaultDevice = ALC.GetString(IntPtr.Zero, ALCGetString.CaptureDefaultDeviceSpecifier);
 
 #if true //DESKTOPGL
             // enumarating capture devices
-            IntPtr deviceList = Alc.alcGetString(IntPtr.Zero, (int)AlcGetString.CaptureDeviceSpecifier);
+            IntPtr deviceList = ALC.alcGetString(IntPtr.Zero, (int)ALCGetString.CaptureDeviceSpecifier);
 
             // we need to marshal a string array
             string deviceIdentifier = Marshal.PtrToStringAnsi(deviceList);
@@ -78,7 +78,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (State == MicrophoneState.Started)
                 return;
 
-            _captureDevice = Alc.CaptureOpenDevice(
+            _captureDevice = ALC.CaptureOpenDevice(
                 Name,
                 (uint)SampleRate,
                 ALFormat.Mono16,
@@ -87,7 +87,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             if (_captureDevice != IntPtr.Zero)
             {
-                Alc.CaptureStart(_captureDevice);
+                ALC.CaptureStart(_captureDevice);
                 CheckALCError("Failed to start capture.");
 
                 State = MicrophoneState.Started;
@@ -102,12 +102,12 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if (State == MicrophoneState.Started)
             {
-                Alc.CaptureStop(_captureDevice);
+                ALC.CaptureStop(_captureDevice);
                 CheckALCError("Failed to stop capture.");
 
                 Update(); // to ensure that BufferReady doesn't get invoked after Stop()
 
-                Alc.CaptureCloseDevice(_captureDevice);
+                ALC.CaptureCloseDevice(_captureDevice);
                 CheckALCError("Failed to close capture device.");
 
                 _captureDevice = IntPtr.Zero;
@@ -126,7 +126,7 @@ namespace Microsoft.Xna.Framework.Audio
             if(_queuedSampleCountBuffer == null)
                 _queuedSampleCountBuffer = new int[1];
 
-            Alc.GetInteger(_captureDevice, AlcGetInteger.CaptureSamples, 1, _queuedSampleCountBuffer);
+            ALC.GetInteger(_captureDevice, ALCGetInteger.CaptureSamples, 1, _queuedSampleCountBuffer);
             CheckALCError("Failed to query capture samples.");
 
             return _queuedSampleCountBuffer[0];
@@ -151,7 +151,7 @@ namespace Microsoft.Xna.Framework.Audio
                 GCHandle handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
                 try
                 {
-                    Alc.CaptureSamples(_captureDevice, handle.AddrOfPinnedObject() + offset, sampleCount);
+                    ALC.CaptureSamples(_captureDevice, handle.AddrOfPinnedObject() + offset, sampleCount);
                     CheckALCError("Failed to capture samples.");
 
                     return sampleCount * 2; // 16bit adjust

@@ -62,7 +62,8 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        public double Duration => Size / (Bits / 8f * Channels) / SampleRate;
+        public int SampleCount => (int)(Size / (Bits / 8.0 * Channels));
+        public double Duration => SampleCount / SampleRate;
 
         public OALSoundBuffer()
         {
@@ -138,50 +139,6 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 ClearBuffer();
                 IsDisposed = true;
-            }
-        }
-
-        internal static class Pool
-        {
-            private static Queue<OALSoundBuffer> _pool = new Queue<OALSoundBuffer>();
-
-            public static OALSoundBuffer Rent()
-            {
-                lock (_pool)
-                {
-                    if (_pool.Count > 0)
-                        return _pool.Dequeue();
-                }
-                return new OALSoundBuffer();
-            }
-
-            public static void Return(OALSoundBuffer buffer)
-            {
-                if (buffer == null)
-                    throw new ArgumentNullException(nameof(buffer));
-
-                if (buffer.IsDisposed)
-                    throw new ObjectDisposedException(nameof(OALSoundBuffer));
-
-                lock (_pool)
-                {
-                    if (_pool.Count < 32 && !_pool.Contains(buffer))
-                    {
-                        _pool.Enqueue(buffer);
-                        buffer.ClearBuffer();
-                    }
-                    else
-                        buffer.Dispose();
-                }
-            }
-
-            public static void Clear()
-            {
-                lock (_pool)
-                {
-                    while (_pool.Count > 0)
-                        _pool.Dequeue().Dispose();
-                }
             }
         }
     }

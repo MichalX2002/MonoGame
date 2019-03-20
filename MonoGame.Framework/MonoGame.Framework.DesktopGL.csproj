@@ -47,6 +47,12 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audio\OpenAL\OpenAL.ALC.cs" />
+    <Compile Include="Audio\OpenAL\OpenAL.Efx.cs" />
+    <Compile Include="Audio\OpenAL\OpenAL.Enums.cs" />
+    <Compile Include="Audio\OpenAL\OpenAL.XRam.cs" />
+    <Compile Include="Audio\OpenAL\OpenALHelper.cs" />
+    <Compile Include="Audio\OpenAL\OALSoundBufferPool.cs" />
     <Compile Include="Math\IShapeF.cs" />
     <Compile Include="Math\PointF.cs" />
     <Compile Include="Math\RectangleF.cs" />
@@ -70,7 +76,6 @@
     <Compile Include="Graphics\Vertices\VertexBufferBase.OpenGL.cs" />
     <Compile Include="Input\KeyModifier.cs" />
     <Compile Include="Media\SongPart.cs" />
-    <Compile Include="Media\SongPartPool.cs" />
     <Compile Include="Media\VisualizationData.cs" />
     <Compile Include="ServiceProviderExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -164,16 +169,16 @@
     <Compile Include="Audio\DynamicSoundEffectInstanceManager.cs" />
     <Compile Include="Audio\InstancePlayLimitException.cs" />
     <Compile Include="Audio\NoAudioHardwareException.cs" />
-    <Compile Include="Audio\OALSoundBuffer.cs">
+    <Compile Include="Audio\OpenAL\OALSoundBuffer.cs">
       <Services>OpenALAudio</Services>
     </Compile>
     <Compile Include="Media\OggStream.cs">
       <Platforms>WindowsGL,Linux,MacOS</Platforms>
     </Compile>
-    <Compile Include="Audio\OpenAL.cs">
+    <Compile Include="Audio\OpenAL\OpenAL.cs">
       <Services>OpenALAudio</Services>
     </Compile>
-    <Compile Include="Audio\OpenALSoundController.cs">
+    <Compile Include="Audio\OpenAL\OpenALSoundController.cs">
       <Services>OpenALAudio</Services>
     </Compile>
     <Compile Include="Audio\SoundEffect.cs" />

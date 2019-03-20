@@ -54,7 +54,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformInitializeIeeeFloat(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
         {
-            if (!OpenALSoundController.Instance.SupportsIeee)
+            if (!OpenALSoundController.Instance.SupportsFloat32)
             {
                 // If 32-bit IEEE float is not supported, convert to 16-bit signed PCM
                 buffer = AudioLoader.ConvertFloatTo16(buffer, offset, count);

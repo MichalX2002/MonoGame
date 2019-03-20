@@ -25,14 +25,17 @@ namespace Microsoft.Xna.Framework
                     Sdl.GL.SetAttribute(Sdl.GL.Attribute.DepthSize, 0);
                     Sdl.GL.SetAttribute(Sdl.GL.Attribute.StencilSize, 0);
                     break;
+
                 case DepthFormat.Depth16:
                     Sdl.GL.SetAttribute(Sdl.GL.Attribute.DepthSize, 16);
                     Sdl.GL.SetAttribute(Sdl.GL.Attribute.StencilSize, 0);
                     break;
+
                 case DepthFormat.Depth24:
                     Sdl.GL.SetAttribute(Sdl.GL.Attribute.DepthSize, 24);
                     Sdl.GL.SetAttribute(Sdl.GL.Attribute.StencilSize, 0);
                     break;
+
                 case DepthFormat.Depth24Stencil8:
                     Sdl.GL.SetAttribute(Sdl.GL.Attribute.DepthSize, 24);
                     Sdl.GL.SetAttribute(Sdl.GL.Attribute.StencilSize, 8);

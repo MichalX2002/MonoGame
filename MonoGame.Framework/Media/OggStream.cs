@@ -17,40 +17,28 @@ namespace Microsoft.Xna.Framework.Media
 {
     internal class OggStream : IDisposable
     {
-        const int DefaultBufferCount = 3;
-
         internal readonly object _stopMutex = new object();
         internal readonly object _prepareMutex = new object();
 
         internal readonly int _alSourceId;
-        internal readonly int[] _alBufferIds;
-        internal readonly List<SongPart> _parts;
+        private readonly int _alFilterId;
+        internal readonly Queue<OALSoundBuffer> _buffers;
 
-        readonly int _alFilterId;
-        readonly string _oggFileName;
-
-        internal VorbisReader Reader { get; private set; }
-        internal bool Ready { get; private set; }
-        internal bool Preparing { get; private set; }
-
-        public Action FinishedAction { get; private set; }
-        public int BufferCount { get; private set; }
+        float _lowPassHfGain;
+        float _volume;
+        float _pitch;
         
-        public OggStream(string filename, Action finishedAction = null, int bufferCount = DefaultBufferCount)
+        internal VorbisReader Reader { get; private set; }
+        internal bool IsReady { get; private set; }
+        internal bool IsPreparing { get; private set; }
+        public Action OnFinished { get; private set; }
+        
+        public OggStream(string fileName, Action onFinished = null)
         {
-            _oggFileName = filename;
-            FinishedAction = finishedAction;
-            BufferCount = bufferCount;
+            OnFinished = onFinished;
 
-            _alBufferIds = AL.GenBuffers(bufferCount);
-            ALHelper.CheckError("Failed to generate buffers.");
             _alSourceId = OpenALSoundController.Instance.ReserveSource();
-
-            if (OggStreamer.Instance.XRam.IsInitialized)
-            {
-                OggStreamer.Instance.XRam.SetBufferMode(BufferCount, ref _alBufferIds[0], XRamExtension.XRamStorage.Hardware);
-                ALHelper.CheckError("Failed to activate XRam.");
-            }
+            Reader = new VorbisReader(File.OpenRead(fileName), true);
 
             Volume = 1;
             Pitch = 1;
@@ -59,19 +47,19 @@ namespace Microsoft.Xna.Framework.Media
             {
                 _alFilterId = OggStreamer.Instance.Efx.GenFilter();
                 ALHelper.CheckError("Failed to generate Efx filter.");
+
                 OggStreamer.Instance.Efx.Filter(_alFilterId, EfxFilteri.FilterType, (int)EfxFilterType.Lowpass);
                 ALHelper.CheckError("Failed to set Efx filter type.");
+
                 OggStreamer.Instance.Efx.Filter(_alFilterId, EfxFilterf.LowpassGain, 1);
                 ALHelper.CheckError("Failed to set Efx filter value.");
                 LowPassHFGain = 1;
             }
-
-            _parts = new List<SongPart>();
         }
 
         public void Prepare()
         {
-            if (Preparing)
+            if (IsPreparing)
                 return;
 
             var state = AL.GetSourceState(_alSourceId);
@@ -94,11 +82,11 @@ namespace Microsoft.Xna.Framework.Media
                         break;
                 }
 
-                if (!Ready)
+                if (!IsReady)
                 {
                     lock (_prepareMutex)
                     {
-                        Preparing = true;
+                        IsPreparing = true;
                         Open(precache: true);
                     }
                 }
@@ -130,7 +118,7 @@ namespace Microsoft.Xna.Framework.Media
                     AL.SourcePlay(_alSourceId);
                     ALHelper.CheckError("Failed to play source.");
 
-                    Preparing = false;
+                    IsPreparing = false;
                     OggStreamer.Instance.AddStream(this);
                     break;
             }
@@ -213,15 +201,14 @@ namespace Microsoft.Xna.Framework.Media
             return Reader.TotalTime;
         }
 
-        float lowPassHfGain;
         public float LowPassHFGain
         {
-            get => lowPassHfGain;
+            get => _lowPassHfGain;
             set
             {
                 if (OggStreamer.Instance.Efx.IsInitialized)
                 {
-                    OggStreamer.Instance.Efx.Filter(_alFilterId, EfxFilterf.LowpassGainHF, lowPassHfGain = value);
+                    OggStreamer.Instance.Efx.Filter(_alFilterId, EfxFilterf.LowpassGainHF, _lowPassHfGain = value);
                     ALHelper.CheckError("Failed to set Efx filter.");
 
                     OggStreamer.Instance.Efx.BindFilterToSource(_alSourceId, _alFilterId);
@@ -230,7 +217,6 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
-        float _volume;
         public float Volume
         {
             get => _volume;
@@ -241,7 +227,6 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
-        float _pitch;
         public float Pitch
         {
             get => _pitch;
@@ -292,34 +277,14 @@ namespace Microsoft.Xna.Framework.Media
                     Empty();
                 }
             }
-
-            for (int i = 0; i < _parts.Count; i++)
-                SongPartPool.Return(_parts[i]);
-            _parts.Clear();
-        }
-
-        internal void AddPart(float[] buffer, int count, int partBufferSize)
-        {
-            var part = SongPartPool.Rent(partBufferSize);
-            part.SetData(buffer, count);
-            _parts.Add(part);
-        }
-
-        internal void RemovePart(int index)
-        {
-            SongPartPool.Return(_parts[index]);
-            _parts.RemoveAt(index);
         }
 
         internal void Open(bool precache = false)
         {
-            if(Reader == null)
-                Reader = new VorbisReader(File.OpenRead(_oggFileName), true);
-
             if (precache)
                 FillOneBuffer();
 
-            Ready = true;
+            IsReady = true;
         }
 
         private void FillOneBuffer()
@@ -342,7 +307,7 @@ namespace Microsoft.Xna.Framework.Media
                 Reader.Dispose();
                 Reader = null;
             }
-            Ready = false;
+            IsReady = false;
         }
 
         public void Dispose()
