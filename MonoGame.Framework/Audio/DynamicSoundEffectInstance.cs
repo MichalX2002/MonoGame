@@ -325,14 +325,17 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if (buffer == null || buffer.Length == 0)
                 throw new ArgumentException("Buffer may not be null or empty.");
+
             if (count <= 0)
                 throw new ArgumentException("Number of elements must be greater than zero.");
+
             if (offset + count > buffer.Length)
                 throw new ArgumentException("Buffer is shorter than the specified number of elements from the offset.");
 
             // Ensure that the buffer length and start position match alignment.
             if (count % elementsPerSample != 0)
                 throw new ArgumentException("Number of elements does not match format alignment.");
+
             if (offset % elementsPerSample != 0)
                 throw new ArgumentException("Offset into the buffer does not match format alignment.");
         }
@@ -366,9 +369,7 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 var eventCount = (_buffersNeeded < 3) ? _buffersNeeded : 3;
                 for (int i = 0; i < eventCount; i++)
-                {
                     bufferNeededHandler(this, EventArgs.Empty);
-                }
             }
 
             _buffersNeeded = 0;

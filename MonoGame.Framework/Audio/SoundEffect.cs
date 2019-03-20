@@ -268,11 +268,11 @@ namespace Microsoft.Xna.Framework.Audio
 
             if (sampleSize <= 0)
                 throw new ArgumentException(
-                    "Element size must be above zero.", nameof(sampleSize));
+                    "Element size must be greater than zero.", nameof(sampleSize));
 
             if (sampleRate <= 0)
                 throw new ArgumentOutOfRangeException(
-                    nameof(sampleRate), "Sample rate must be above zero.");
+                    nameof(sampleRate), "Sample rate must be greater than zero.");
 
             int numChannels = (int)channels;
             if (numChannels != 1 && numChannels != 2)
