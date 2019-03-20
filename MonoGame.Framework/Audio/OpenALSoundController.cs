@@ -438,8 +438,8 @@ namespace Microsoft.Xna.Framework.Audio
 #if !DIRECTX
         public void FreeSource(SoundEffectInstance inst)
         {
-            RecycleSource(inst.SourceId);
-            inst.SourceId = 0;
+            RecycleSource(inst.SourceID);
+            inst.SourceID = 0;
             inst.HasSourceId = false;
             inst.SoundState = SoundState.Stopped;
 		}

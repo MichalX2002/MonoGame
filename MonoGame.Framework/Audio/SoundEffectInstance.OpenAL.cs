@@ -13,7 +13,7 @@ namespace Microsoft.Xna.Framework.Audio
 		private bool _looped = false;
 		private float _alVolume = 1f;
 
-		internal int SourceId;
+		internal int SourceID;
         private float reverb = 0f;
         bool applyFilter = false;
         EfxFilterType filterType;
@@ -63,12 +63,12 @@ namespace Microsoft.Xna.Framework.Audio
             finalVel = Vector3.Transform(finalVel, orientation);
 
             // set the position based on relative positon
-            AL.Source(SourceId, ALSource3f.Position, finalPos.X, finalPos.Y, finalPos.Z);
+            AL.Source(SourceID, ALSource3f.Position, finalPos.X, finalPos.Y, finalPos.Z);
             ALHelper.CheckError("Failed to set source position.");
-            AL.Source(SourceId, ALSource3f.Velocity, finalVel.X, finalVel.Y, finalVel.Z);
+            AL.Source(SourceID, ALSource3f.Velocity, finalVel.X, finalVel.Y, finalVel.Z);
             ALHelper.CheckError("Failed to set source velocity.");
 
-            AL.Source(SourceId, ALSourcef.ReferenceDistance, SoundEffect.DistanceScale);
+            AL.Source(SourceID, ALSourcef.ReferenceDistance, SoundEffect.DistanceScale);
             ALHelper.CheckError("Failed to set source distance scale.");
             AL.DopplerFactor(SoundEffect.DopplerScale);
             ALHelper.CheckError("Failed to set Doppler scale.");
@@ -81,7 +81,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             if (pauseCount == 0)
             {
-                AL.SourcePause(SourceId);
+                AL.SourcePause(SourceID);
                 ALHelper.CheckError("Failed to pause source.");
             }
             ++pauseCount;
@@ -90,44 +90,44 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformPlay()
         {
-            SourceId = 0;
+            SourceID = 0;
             HasSourceId = false;
-            SourceId = controller.ReserveSource();
+            SourceID = controller.ReserveSource();
             HasSourceId = true;
 
-            int bufferId = _effect.SoundBuffer.OpenALDataBuffer;
-            AL.Source(SourceId, ALSourcei.Buffer, bufferId);
+            int bufferId = _effect.SoundBuffer.BufferID;
+            AL.Source(SourceID, ALSourcei.Buffer, bufferId);
             ALHelper.CheckError("Failed to bind buffer to source.");
 
             // Send the position, gain, looping, pitch, and distance model to the OpenAL driver.
             if (!HasSourceId)
 				return;
 
-            AL.Source(SourceId, ALSourcei.SourceRelative, 1);
+            AL.Source(SourceID, ALSourcei.SourceRelative, 1);
             ALHelper.CheckError("Failed set source relative.");
             // Distance Model
 			AL.DistanceModel (ALDistanceModel.InverseDistanceClamped);
             ALHelper.CheckError("Failed set source distance.");
 			// Pan
-			AL.Source (SourceId, ALSource3f.Position, _pan, 0f, 0f);
+			AL.Source (SourceID, ALSource3f.Position, _pan, 0f, 0f);
             ALHelper.CheckError("Failed to set source pan.");
             // Velocity
-			AL.Source (SourceId, ALSource3f.Velocity, 0f, 0f, 0f);
+			AL.Source (SourceID, ALSource3f.Velocity, 0f, 0f, 0f);
             ALHelper.CheckError("Failed to set source pan.");
 			// Volume
-            AL.Source(SourceId, ALSourcef.Gain, _alVolume);
+            AL.Source(SourceID, ALSourcef.Gain, _alVolume);
             ALHelper.CheckError("Failed to set source volume.");
 			// Looping
-			AL.Source (SourceId, ALSourceb.Looping, IsLooped);
+			AL.Source (SourceID, ALSourceb.Looping, IsLooped);
             ALHelper.CheckError("Failed to set source loop state.");
 			// Pitch
-			AL.Source (SourceId, ALSourcef.Pitch, XnaPitchToAlPitch(_pitch));
+			AL.Source (SourceID, ALSourcef.Pitch, XnaPitchToAlPitch(_pitch));
             ALHelper.CheckError("Failed to set source pitch.");
 
             ApplyReverb ();
             ApplyFilter ();
 
-            AL.SourcePlay(SourceId);
+            AL.SourcePlay(SourceID);
             ALHelper.CheckError("Failed to play source.");
 
             SoundState = SoundState.Playing;
@@ -146,7 +146,7 @@ namespace Microsoft.Xna.Framework.Audio
                 --pauseCount;
                 if (pauseCount == 0)
                 {
-                    AL.SourcePlay(SourceId);
+                    AL.SourcePlay(SourceID);
                     ALHelper.CheckError("Failed to play source.");
                 }
             }
@@ -157,19 +157,19 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if (HasSourceId)
             {
-                AL.SourceStop(SourceId);
+                AL.SourceStop(SourceID);
                 ALHelper.CheckError("Failed to stop source.");
 
                 // Reset the SendFilter to 0 if we are NOT using reverb since 
                 // sources are recycled
                 if (controller.SupportsEfx)
                 {
-                    OpenALSoundController.Efx.BindSourceToAuxiliarySlot(SourceId, 0, 0, 0);
+                    OpenALSoundController.Efx.BindSourceToAuxiliarySlot(SourceID, 0, 0, 0);
                     ALHelper.CheckError("Failed to unset reverb.");
-                    AL.Source(SourceId, ALSourcei.EfxDirectFilter, 0);
+                    AL.Source(SourceID, ALSourcei.EfxDirectFilter, 0);
                     ALHelper.CheckError("Failed to unset filter.");
                 }
-                AL.Source(SourceId, ALSourcei.Buffer, 0);
+                AL.Source(SourceID, ALSourcei.Buffer, 0);
                 ALHelper.CheckError("Failed to free source from buffer.");
 
                 controller.FreeSource(this);
@@ -183,7 +183,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             if (HasSourceId)
             {
-                AL.Source(SourceId, ALSourceb.Looping, _looped);
+                AL.Source(SourceID, ALSourceb.Looping, _looped);
                 ALHelper.CheckError("Failed to set source loop state.");
             }
         }
@@ -197,7 +197,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if (HasSourceId)
             {
-                AL.Source(SourceId, ALSource3f.Position, value, 0.0f, 0.1f);
+                AL.Source(SourceID, ALSource3f.Position, value, 0.0f, 0.1f);
                 ALHelper.CheckError("Failed to set source pan.");
             }
         }
@@ -206,7 +206,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if (HasSourceId)
             {
-                AL.Source(SourceId, ALSourcef.Pitch, XnaPitchToAlPitch(value));
+                AL.Source(SourceID, ALSourcef.Pitch, XnaPitchToAlPitch(value));
                 ALHelper.CheckError("Failed to set source pitch.");
             }
         }
@@ -216,7 +216,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (!HasSourceId)
                 return SoundState.Stopped;
             
-            var alState = AL.GetSourceState(SourceId);
+            var alState = AL.GetSourceState(SourceID);
             ALHelper.CheckError("Failed to get source state.");
 
             switch (alState)
@@ -244,7 +244,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             if (HasSourceId)
             {
-                AL.Source(SourceId, ALSourcef.Gain, _alVolume);
+                AL.Source(SourceID, ALSourcef.Gain, _alVolume);
                 ALHelper.CheckError("Failed to set source volume.");
             }
         }
@@ -266,7 +266,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if (reverb > 0f && SoundEffect.ReverbSlot != 0)
             {
-                OpenALSoundController.Efx.BindSourceToAuxiliarySlot(SourceId, (int)SoundEffect.ReverbSlot, 0, 0);
+                OpenALSoundController.Efx.BindSourceToAuxiliarySlot(SourceID, (int)SoundEffect.ReverbSlot, 0, 0);
                 ALHelper.CheckError("Failed to set reverb.");
             }
         }
@@ -297,7 +297,7 @@ namespace Microsoft.Xna.Framework.Audio
                     ALHelper.CheckError("Failed to set BandpassGainLF.");
                     break;
                 }
-                AL.Source(SourceId, ALSourcei.EfxDirectFilter, controller.Filter);
+                AL.Source(SourceID, ALSourcei.EfxDirectFilter, controller.Filter);
                 ALHelper.CheckError("Failed to set DirectFilter.");
             }
         }

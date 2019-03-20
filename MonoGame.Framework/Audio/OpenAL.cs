@@ -47,6 +47,7 @@ namespace MonoGame.OpenAL
 
     internal enum ALGetBufferi
     {
+        Frequency = 0x2001,
         Bits = 0x2002,
         Channels = 0x2003,
         Size = 0x2004,
@@ -311,6 +312,13 @@ namespace MonoGame.OpenAL
                 alDeleteBuffers(n, pbuffers);
             }
         }
+
+        internal unsafe static void DeleteBuffer(int buffer)
+        {
+            int* tmp = stackalloc int[1];
+            tmp[0] = buffer;
+            alDeleteBuffers(1, tmp);
+        }
         
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_albufferi(int buffer, ALBufferi param, int value);
@@ -333,24 +341,20 @@ namespace MonoGame.OpenAL
         internal unsafe delegate void d_algenbuffers(int count, int* buffers);
         internal static d_algenbuffers alGenBuffers = FuncLoader.LoadFunction<d_algenbuffers>(NativeLibrary, "alGenBuffers");
 
-        internal unsafe static void GenBuffers(int count, out int[] buffers)
+        internal static unsafe int GenBuffer()
         {
-            buffers = new int[count];
-            fixed (int* ptr = &buffers[0])
+            int* tmp = stackalloc int[1];
+            alGenBuffers(1, tmp);
+            return tmp[0];
+        }
+
+        internal static unsafe int[] GenBuffers(int count)
+        {
+            int[] ret = new int[count];
+            fixed(int* ptr = ret)
             {
                 alGenBuffers(count, ptr);
             }
-        }
-
-        internal static void GenBuffers(int count, out int buffer)
-        {
-            GenBuffers(count, out int[] ret);
-            buffer = ret[0];
-        }
-
-        internal static int[] GenBuffers(int count)
-        {
-            GenBuffers(count, out int[] ret);
             return ret;
         }
 
@@ -361,12 +365,10 @@ namespace MonoGame.OpenAL
 
         internal static void GenSources(int[] sources)
         {
-            uint[] temp = new uint[sources.Length];
-            alGenSources(temp.Length, temp);
-            for (int i = 0; i < temp.Length; i++)
-            {
-                sources[i] = (int)temp[i];
-            }
+            uint[] tmp = new uint[sources.Length];
+            alGenSources(tmp.Length, tmp);
+            for (int i = 0; i < tmp.Length; i++)
+                sources[i] = (int)tmp[i];
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -501,7 +503,7 @@ namespace MonoGame.OpenAL
             AL.alSourceQueueBuffers(sourceId, 1, &buffer);
         }
         
-        internal static unsafe int[] SourceUnqueueBuffers(int sourceId, int numEntries)
+        internal static unsafe int[] SourceGetAndUnqueueBuffers(int sourceId, int numEntries)
         {
             if (numEntries <= 0)
                 throw new ArgumentOutOfRangeException(nameof(numEntries), "Must be greater than zero.");
@@ -512,6 +514,15 @@ namespace MonoGame.OpenAL
                 alSourceUnqueueBuffers(sourceId, numEntries, ptr);
             }
             return array;
+        }
+
+        internal static unsafe void SourceUnqueueBuffers(int sourceID, int numEntries)
+        {
+            if (numEntries <= 0)
+                throw new ArgumentOutOfRangeException(nameof(numEntries), "Must be greater than zero.");
+
+            int* tmp = stackalloc int[numEntries];
+            alSourceUnqueueBuffers(sourceID, numEntries, tmp);
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

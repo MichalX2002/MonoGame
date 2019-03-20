@@ -12,6 +12,12 @@ namespace Microsoft.Xna.Framework.Audio
     /// </summary>
     public sealed partial class DynamicSoundEffectInstance : SoundEffectInstance
     {
+        private const int TargetPendingBufferCount = 3;
+        private int _buffersNeeded;
+        private int _sampleRate;
+        private AudioChannels _channels;
+        private SoundState _state;
+
         #region Public Properties
 
         /// <summary>
@@ -21,12 +27,12 @@ namespace Microsoft.Xna.Framework.Audio
         public override bool IsLooped
         {
             get => false;
-
             set
             {
                 AssertNotDisposed();
-                if (value == true)
-                    throw new InvalidOperationException("IsLooped cannot be set true. Submit looped audio data to implement looping.");
+                if (value)
+                    throw new InvalidOperationException(
+                        "IsLooped cannot be set true. Submit looped audio data to implement looping.");
             }
         }
 
@@ -52,6 +58,18 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
         /// <summary>
+        /// Returns the number of samples queued for playback.
+        /// </summary>
+        public int BufferedSamples
+        {
+            get
+            {
+                AssertNotDisposed();
+                return PlatformGetBufferedSamples();
+            }
+        }
+
+        /// <summary>
         /// The event that occurs when the number of queued audio buffers is less than or equal to 2.
         /// </summary>
         /// <remarks>
@@ -60,12 +78,6 @@ namespace Microsoft.Xna.Framework.Audio
         public event EventHandler<EventArgs> BufferNeeded;
 
         #endregion
-
-        private const int TargetPendingBufferCount = 3;
-        private int _buffersNeeded;
-        private int _sampleRate;
-        private AudioChannels _channels;
-        private SoundState _state;
 
         #region Public Constructor
 
@@ -313,14 +325,17 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if (buffer == null || buffer.Length == 0)
                 throw new ArgumentException("Buffer may not be null or empty.");
+
             if (count <= 0)
                 throw new ArgumentException("Number of elements must be greater than zero.");
+
             if (offset + count > buffer.Length)
                 throw new ArgumentException("Buffer is shorter than the specified number of elements from the offset.");
 
             // Ensure that the buffer length and start position match alignment.
             if (count % elementsPerSample != 0)
                 throw new ArgumentException("Number of elements does not match format alignment.");
+
             if (offset % elementsPerSample != 0)
                 throw new ArgumentException("Offset into the buffer does not match format alignment.");
         }
@@ -354,9 +369,7 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 var eventCount = (_buffersNeeded < 3) ? _buffersNeeded : 3;
                 for (int i = 0; i < eventCount; i++)
-                {
                     bufferNeededHandler(this, EventArgs.Empty);
-                }
             }
 
             _buffersNeeded = 0;

@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime;
 using System.Threading;
 #if WINDOWS_UAP
 using System.Threading.Tasks;
@@ -363,6 +364,9 @@ namespace Microsoft.Xna.Framework
                 case GameRunBehavior.Synchronous:
                     // XNA runs one Update even before showing the window
                     DoUpdate(new GameTime());
+
+                    GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
 
                     Platform.RunLoop();
                     EndRun();

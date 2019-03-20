@@ -48,8 +48,8 @@ namespace Microsoft.Xna.Framework.Audio
             var format = AudioLoader.GetSoundFormat(AudioLoader.FormatPcm, (int)channels, sampleBits);
 
             // bind buffer
-            SoundBuffer = new OALSoundBuffer();
-            SoundBuffer.BindDataBuffer(buffer, format, count, sampleRate);
+            SoundBuffer = OALSoundBuffer.Pool.Rent();
+            SoundBuffer.BufferData(buffer, format, count, sampleRate);
         }
 
         private void PlatformInitializeIeeeFloat(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
@@ -65,8 +65,8 @@ namespace Microsoft.Xna.Framework.Audio
             var format = AudioLoader.GetSoundFormat(AudioLoader.FormatIeee, (int)channels, 32);
 
             // bind buffer
-            SoundBuffer = new OALSoundBuffer();
-            SoundBuffer.BindDataBuffer(buffer, format, count, sampleRate);
+            SoundBuffer = OALSoundBuffer.Pool.Rent();
+            SoundBuffer.BufferData(buffer, format, count, sampleRate);
         }
 
         private void PlatformInitializeAdpcm(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int blockAlignment, int loopStart, int loopLength)
@@ -83,10 +83,10 @@ namespace Microsoft.Xna.Framework.Audio
             int sampleAlignment = AudioLoader.SampleAlignment(format, blockAlignment);
 
             // bind buffer
-            SoundBuffer = new OALSoundBuffer();
+            SoundBuffer = OALSoundBuffer.Pool.Rent();
             // Buffer length must be aligned with the block alignment
             int alignedCount = count - (count % blockAlignment);
-            SoundBuffer.BindDataBuffer(buffer, format, alignedCount, sampleRate, sampleAlignment);
+            SoundBuffer.BufferData(buffer, format, alignedCount, sampleRate, sampleAlignment);
         }
 
         private void PlatformInitializeIma4(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int blockAlignment, int loopStart, int loopLength)
@@ -103,8 +103,8 @@ namespace Microsoft.Xna.Framework.Audio
             int sampleAlignment = AudioLoader.SampleAlignment(format, blockAlignment);
 
             // bind buffer
-            SoundBuffer = new OALSoundBuffer();
-            SoundBuffer.BindDataBuffer(buffer, format, count, sampleRate, sampleAlignment);
+            SoundBuffer = OALSoundBuffer.Pool.Rent();
+            SoundBuffer.BufferData(buffer, format, count, sampleRate, sampleAlignment);
         }
 
         private void PlatformInitializeFormat(byte[] header, byte[] buffer, int bufferSize, int loopStart, int loopLength)
@@ -219,7 +219,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if (SoundBuffer != null)
             {
-                SoundBuffer.Dispose();
+                OALSoundBuffer.Pool.Return(SoundBuffer);
                 SoundBuffer = null;
             }
         }
@@ -238,6 +238,8 @@ namespace Microsoft.Xna.Framework.Audio
                 OpenALSoundController.Efx.DeleteAuxiliaryEffectSlot((int)ReverbSlot);
                 OpenALSoundController.Efx.DeleteEffect((int)ReverbEffect);
             }
+
+            OALSoundBuffer.Pool.Clear();
             OpenALSoundController.DestroyInstance();
         }
     }

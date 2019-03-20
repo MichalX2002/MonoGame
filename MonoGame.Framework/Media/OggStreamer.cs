@@ -230,7 +230,7 @@ namespace Microsoft.Xna.Framework.Media
                 for (int i = 0; i < processed && stream._parts.Count > 0; i++)
                     stream.RemovePart(0);
 
-                tmpBuffers = AL.SourceUnqueueBuffers(stream._alSourceId, processed);
+                tmpBuffers = AL.SourceGetAndUnqueueBuffers(stream._alSourceId, processed);
                 tmpBufferOffset = 0;
                 tmpBufferCount = tmpBuffers.Length;
                 ALHelper.CheckError("Failed to unqueue buffers.");
