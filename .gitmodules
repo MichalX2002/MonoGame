@@ -9,6 +9,6 @@
 [submodule "ThirdParty/SDL_GameControllerDB"]
 	path = ThirdParty/SDL_GameControllerDB
 	url = https://github.com/gabomdq/SDL_GameControllerDB
-[submodule "MonoGame.Framework/ThirdParty/SDL_GameControllerDB"]
-	path = MonoGame.Framework/ThirdParty/SDL_GameControllerDB
+[submodule "ThirdParty/SDL_GameControllerDB"]
+	path = ThirdParty/SDL_GameControllerDB
 	url = https://github.com/gabomdq/SDL_GameControllerDB
