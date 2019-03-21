@@ -51,8 +51,8 @@
     <Compile Include="Audio\OpenAL\OpenAL.Efx.cs" />
     <Compile Include="Audio\OpenAL\OpenAL.Enums.cs" />
     <Compile Include="Audio\OpenAL\OpenAL.XRam.cs" />
-    <Compile Include="Audio\OpenAL\OpenALHelper.cs" />
-    <Compile Include="Audio\OpenAL\OALSoundBufferPool.cs" />
+    <Compile Include="Audio\OpenAL\ALHelper.cs" />
+    <Compile Include="Audio\OpenAL\ALSoundBufferPool.cs" />
     <Compile Include="Math\IShapeF.cs" />
     <Compile Include="Math\PointF.cs" />
     <Compile Include="Math\RectangleF.cs" />
@@ -169,7 +169,7 @@
     <Compile Include="Audio\DynamicSoundEffectInstanceManager.cs" />
     <Compile Include="Audio\InstancePlayLimitException.cs" />
     <Compile Include="Audio\NoAudioHardwareException.cs" />
-    <Compile Include="Audio\OpenAL\OALSoundBuffer.cs">
+    <Compile Include="Audio\OpenAL\ALSoundBuffer.cs">
       <Services>OpenALAudio</Services>
     </Compile>
     <Compile Include="Media\OggStream.cs">
@@ -178,7 +178,7 @@
     <Compile Include="Audio\OpenAL\OpenAL.cs">
       <Services>OpenALAudio</Services>
     </Compile>
-    <Compile Include="Audio\OpenAL\OpenALSoundController.cs">
+    <Compile Include="Audio\OpenAL\ALSoundController.cs">
       <Services>OpenALAudio</Services>
     </Compile>
     <Compile Include="Audio\SoundEffect.cs" />

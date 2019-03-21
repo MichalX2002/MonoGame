@@ -21,10 +21,10 @@ namespace Microsoft.Xna.Framework.Audio
         float frequency;
         int pauseCount;
         
-        internal OpenALSoundController controller;
-        internal bool HasSourceId = false;
+        internal ALSoundController controller;
+        internal bool HasSourceID = false;
 
-#region Initialization
+        #region Initialization
 
         /// <summary>
         /// Creates a standalone SoundEffectInstance from given wavedata.
@@ -40,14 +40,14 @@ namespace Microsoft.Xna.Framework.Audio
         /// </summary>
         internal void InitializeSound()
         {
-            controller = OpenALSoundController.Instance;
+            controller = ALSoundController.Instance;
         }
 
-#endregion // Initialization
+        #endregion
 
         private void PlatformApply3D(AudioListener listener, AudioEmitter emitter)
         {
-            if (!HasSourceId)
+            if (!HasSourceID)
                 return;
             AL.GetListener(ALListener3f.Position, out float x, out float y, out float z);
             ALHelper.CheckError("Failed to get source position.");
@@ -76,7 +76,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformPause()
         {
-            if (!HasSourceId || SoundState != SoundState.Playing)
+            if (!HasSourceID || SoundState != SoundState.Playing)
                 return;
 
             if (pauseCount == 0)
@@ -91,16 +91,16 @@ namespace Microsoft.Xna.Framework.Audio
         private void PlatformPlay()
         {
             SourceID = 0;
-            HasSourceId = false;
+            HasSourceID = false;
             SourceID = controller.ReserveSource();
-            HasSourceId = true;
+            HasSourceID = true;
 
             int bufferId = _effect.SoundBuffer.BufferID;
             AL.Source(SourceID, ALSourcei.Buffer, bufferId);
             ALHelper.CheckError("Failed to bind buffer to source.");
 
             // Send the position, gain, looping, pitch, and distance model to the OpenAL driver.
-            if (!HasSourceId)
+            if (!HasSourceID)
 				return;
 
             AL.Source(SourceID, ALSourcei.SourceRelative, 1);
@@ -135,7 +135,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformResume()
         {
-            if (!HasSourceId)
+            if (!HasSourceID)
             {
                 Play();
                 return;
@@ -155,7 +155,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformStop(bool immediate)
         {
-            if (HasSourceId)
+            if (HasSourceID)
             {
                 AL.SourceStop(SourceID);
                 ALHelper.CheckError("Failed to stop source.");
@@ -164,7 +164,7 @@ namespace Microsoft.Xna.Framework.Audio
                 // sources are recycled
                 if (controller.SupportsEfx)
                 {
-                    OpenALSoundController.Efx.BindSourceToAuxiliarySlot(SourceID, 0, 0, 0);
+                    ALSoundController.Efx.BindSourceToAuxiliarySlot(SourceID, 0, 0, 0);
                     ALHelper.CheckError("Failed to unset reverb.");
                     AL.Source(SourceID, ALSourcei.EfxDirectFilter, 0);
                     ALHelper.CheckError("Failed to unset filter.");
@@ -181,7 +181,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             _looped = value;
 
-            if (HasSourceId)
+            if (HasSourceID)
             {
                 AL.Source(SourceID, ALSourceb.Looping, _looped);
                 ALHelper.CheckError("Failed to set source loop state.");
@@ -195,7 +195,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformSetPan(float value)
         {
-            if (HasSourceId)
+            if (HasSourceID)
             {
                 AL.Source(SourceID, ALSource3f.Position, value, 0.0f, 0.1f);
                 ALHelper.CheckError("Failed to set source pan.");
@@ -204,7 +204,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformSetPitch(float value)
         {
-            if (HasSourceId)
+            if (HasSourceID)
             {
                 AL.Source(SourceID, ALSourcef.Pitch, XnaPitchToAlPitch(value));
                 ALHelper.CheckError("Failed to set source pitch.");
@@ -213,7 +213,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private SoundState PlatformGetState()
         {
-            if (!HasSourceId)
+            if (!HasSourceID)
                 return SoundState.Stopped;
             
             var alState = AL.GetSourceState(SourceID);
@@ -242,7 +242,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             _alVolume = value;
 
-            if (HasSourceId)
+            if (HasSourceID)
             {
                 AL.Source(SourceID, ALSourcef.Gain, _alVolume);
                 ALHelper.CheckError("Failed to set source volume.");
@@ -251,7 +251,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal void PlatformSetReverbMix(float mix)
         {
-            if (!OpenALSoundController.Efx.IsInitialized)
+            if (!ALSoundController.Efx.IsInitialized)
                 return;
 
             reverb = mix;
@@ -266,7 +266,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if (reverb > 0f && SoundEffect.ReverbSlot != 0)
             {
-                OpenALSoundController.Efx.BindSourceToAuxiliarySlot(SourceID, (int)SoundEffect.ReverbSlot, 0, 0);
+                ALSoundController.Efx.BindSourceToAuxiliarySlot(SourceID, (int)SoundEffect.ReverbSlot, 0, 0);
                 ALHelper.CheckError("Failed to set reverb.");
             }
         }
@@ -277,7 +277,7 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 var freq = frequency / 20000f;
                 var lf = 1.0f - freq;
-                var efx = OpenALSoundController.Efx;
+                var efx = ALSoundController.Efx;
                 efx.Filter(controller.Filter, EfxFilteri.FilterType, (int)filterType);
                 ALHelper.CheckError("Failed to set filter.");
                 switch (filterType)
@@ -304,7 +304,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal void PlatformSetFilter(FilterMode mode, float filterQ, float frequency)
         {
-            if (!OpenALSoundController.Efx.IsInitialized)
+            if (!ALSoundController.Efx.IsInitialized)
                 return;
 
             applyFilter = true;
@@ -331,7 +331,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal void PlatformClearFilter()
         {
-            if (!OpenALSoundController.Efx.IsInitialized)
+            if (!ALSoundController.Efx.IsInitialized)
                 return;
 
             applyFilter = false;

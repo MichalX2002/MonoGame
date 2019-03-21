@@ -367,7 +367,7 @@ namespace Microsoft.Xna.Framework
 
                     GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
                     GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
-
+                    
                     Platform.RunLoop();
                     EndRun();
                     DoExiting();

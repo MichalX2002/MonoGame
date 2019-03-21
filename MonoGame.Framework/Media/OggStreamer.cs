@@ -9,22 +9,21 @@ namespace Microsoft.Xna.Framework.Media
 {
     internal class OggStreamer : IDisposable
     {
-        //public readonly XRamExtension XRam = new XRamExtension();
-        public readonly EffectsExtension Efx = OpenALSoundController.Efx;
+        public readonly EffectsExtension Efx = ALSoundController.Efx;
 
-        const float DefaultUpdateRate = 15;
+        const float DefaultUpdateRate = 16;
         const int DefaultBufferSize = 44100 * 2;
 
         internal static readonly object singletonMutex = new object();
         readonly object iterationMutex = new object();
         readonly object readMutex = new object();
 
-        readonly float[] readSampleBuffer;
-        readonly short[] castBuffer;
+        readonly float[] _readBuffer;
+        readonly short[] _castBuffer;
 
         readonly HashSet<OggStream> _streams = new HashSet<OggStream>();
 
-        readonly Thread underlyingThread;
+        readonly Thread _thread;
         Stopwatch threadWatch;
         int nextTimingIndex;
         bool pendingFinish;
@@ -68,16 +67,16 @@ namespace Microsoft.Xna.Framework.Media
                 threadWatch = new Stopwatch();
                 ThreadTiming = new float[(int)(UpdateRate < 1 ? 1 : UpdateRate)];
 
-                underlyingThread = new Thread(EnsureBuffersFilled)
+                _thread = new Thread(EnsureBuffersFilled)
                 {
                     Name = "Song Streaming Thread",
                     Priority = ThreadPriority.BelowNormal
                 };
-                underlyingThread.Start();
+                _thread.Start();
             }
 
-            readSampleBuffer = new float[BufferSize];
-            castBuffer = new short[BufferSize];
+            _readBuffer = new float[BufferSize];
+            _castBuffer = new short[BufferSize];
         }
 
         public void Dispose()
@@ -90,7 +89,7 @@ namespace Microsoft.Xna.Framework.Media
                 lock (iterationMutex)
                     _streams.Clear();
 
-                underlyingThread.Join(1000);
+                _thread.Join(1000);
                 Instance = null;
             }
         }
@@ -107,25 +106,27 @@ namespace Microsoft.Xna.Framework.Media
                 return _streams.Remove(stream);
         }
 
-        public bool FillBuffer(OggStream stream, OALSoundBuffer buffer)
+        public bool FillBuffer(OggStream stream, ALSoundBuffer buffer)
         {
             lock (readMutex)
             {
                 var reader = stream.Reader;
-                int readSamples = reader.ReadSamples(readSampleBuffer, 0, BufferSize);
+                int readSamples = reader.ReadSamples(_readBuffer, 0, BufferSize);
 
                 if (readSamples > 0)
                 {
-                    if (!OpenALSoundController.Instance.SupportsFloat32)
+                    var channels = (AudioChannels)reader.Channels;
+                    bool useFloat = ALSoundController.Instance.SupportsFloat32;
+                    ALFormat format = ALHelper.GetALFormat(channels, useFloat);
+
+                    if (useFloat)
                     {
-                        var format = reader.Channels == 1 ? ALFormat.MonoFloat32 : ALFormat.StereoFloat32;
-                        AL.BufferData(bufferId, format, readSampleBuffer, 0, readSamples, reader.SampleRate);
+                        buffer.BufferData(_readBuffer, readSamples, format, reader.SampleRate);
                     }
                     else
                     {
-                        CastBuffer(readSampleBuffer, castBuffer, readSamples);
-                        var f
-                        buffer.BufferData();
+                        CastBuffer(_readBuffer, _castBuffer, readSamples);
+                        buffer.BufferData(_castBuffer, readSamples, format, reader.SampleRate);
                     }
                 }
                 return readSamples == 0;

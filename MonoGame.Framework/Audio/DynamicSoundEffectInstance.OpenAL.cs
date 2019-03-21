@@ -11,16 +11,20 @@ namespace Microsoft.Xna.Framework.Audio
 {
     public sealed partial class DynamicSoundEffectInstance : SoundEffectInstance
     {
-        private Queue<OALSoundBuffer> _queuedBuffers;
+        private Queue<ALSoundBuffer> _queuedBuffers;
 
         private void PlatformCreate()
         {
             InitializeSound();
 
             SourceID = controller.ReserveSource();
-            HasSourceId = true;
 
-            _queuedBuffers = new Queue<OALSoundBuffer>();
+            // Ensure that the source is not looped (due to source recycling)
+            AL.Source(SourceID, ALSourceb.Looping, false);
+            ALHelper.CheckError("Failed to set source loop state.");
+
+            HasSourceID = true;
+            _queuedBuffers = new Queue<ALSoundBuffer>();
         }
 
         private int PlatformGetPendingBufferCount()
@@ -52,11 +56,6 @@ namespace Microsoft.Xna.Framework.Audio
         private void PlatformPlay()
         {
             AL.GetError();
-
-            // Ensure that the source is not looped (due to source recycling)
-            AL.Source(SourceID, ALSourceb.Looping, false);
-            ALHelper.CheckError("Failed to set source loop state.");
-
             AL.SourcePlay(SourceID);
             ALHelper.CheckError("Failed to play the source.");
         }
@@ -89,7 +88,7 @@ namespace Microsoft.Xna.Framework.Audio
                 while (_queuedBuffers.Count > 0)
                 {
                     var buffer = _queuedBuffers.Dequeue();
-                    OALSoundBufferPool.Return(buffer);
+                    ALSoundBufferPool.Return(buffer);
                 }
             }
         }
@@ -100,7 +99,7 @@ namespace Microsoft.Xna.Framework.Audio
             try
             {
                 IntPtr ptr = handle.AddrOfPinnedObject() + offset;
-                PlatformSubmitBuffer(ptr, count, false);
+                PlatformSubmitBuffer(ptr, count, useFloat: false);
             }
             finally
             {
@@ -114,7 +113,7 @@ namespace Microsoft.Xna.Framework.Audio
             try
             {
                 IntPtr ptr = handle.AddrOfPinnedObject() + offset * sizeof(short);
-                PlatformSubmitBuffer(ptr, count * sizeof(short), false);
+                PlatformSubmitBuffer(ptr, count * sizeof(short), useFloat: false);
             }
             finally
             {
@@ -124,14 +123,15 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformSubmitBuffer(float[] buffer, int offset, int count)
         {
-            if (!OpenALSoundController.Instance.SupportsFloat32)
-                throw new NotSupportedException("Float data is not supported.");
-
+            if (!ALSoundController.Instance.SupportsFloat32)
+                throw new InvalidOperationException(
+                    "Float32 data is not supported by this OpenAL driver.");
+            
             var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
             try
             {
                 IntPtr ptr = handle.AddrOfPinnedObject() + offset * sizeof(float);
-                PlatformSubmitBuffer(ptr, count * sizeof(float), true);
+                PlatformSubmitBuffer(ptr, count * sizeof(float), useFloat: true);
             }
             finally
             {
@@ -139,21 +139,21 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        private void PlatformSubmitBuffer(IntPtr buffer, int bytes, bool useFloat)
+        private void PlatformSubmitBuffer(IntPtr data, int bytes, bool useFloat)
         {
-            // Get a buffer
-            var alBuffer = OALSoundBufferPool.Rent();
+            AL.GetError();
+            var buffer = ALSoundBufferPool.Rent();
 
             // Bind the data
             ALFormat format = ALHelper.GetALFormat(_channels, useFloat);
-            alBuffer.BufferData(buffer, format, bytes, _sampleRate);
+            buffer.BufferData(data, bytes, format, _sampleRate);
 
             // Queue the buffer
-            AL.SourceQueueBuffer(SourceID, alBuffer.BufferID);
-            ALHelper.CheckError();
+            AL.SourceQueueBuffer(SourceID, buffer.BufferID);
+            ALHelper.CheckError("Failed to queue buffer.");
 
             lock (_queuedBuffers)
-                _queuedBuffers.Enqueue(alBuffer);
+                _queuedBuffers.Enqueue(buffer);
 
             // If the source has run out of buffers, restart it
             var sourceState = AL.GetSourceState(SourceID);
@@ -173,7 +173,10 @@ namespace Microsoft.Xna.Framework.Audio
                 AL.SourceStop(SourceID);
                 AL.Source(SourceID, ALSourcei.Buffer, 0);
                 ALHelper.CheckError("Failed to stop the source.");
+
                 controller.RecycleSource(SourceID);
+                SourceID = 0;
+                HasSourceID = false;
             }
 
             if (disposing)
@@ -183,7 +186,7 @@ namespace Microsoft.Xna.Framework.Audio
                     while (_queuedBuffers.Count > 0)
                     {
                         var buffer = _queuedBuffers.Dequeue();
-                        OALSoundBufferPool.Return(buffer);
+                        ALSoundBufferPool.Return(buffer);
                     }
                 }
                 DynamicSoundEffectInstanceManager.RemoveInstance(this);
@@ -208,7 +211,7 @@ namespace Microsoft.Xna.Framework.Audio
                     for (int i = 0; i < numBuffers; i++)
                     {
                         var buffer = _queuedBuffers.Dequeue();
-                        OALSoundBufferPool.Return(buffer);
+                        ALSoundBufferPool.Return(buffer);
                     }
                 }
             }

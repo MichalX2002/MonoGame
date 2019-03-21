@@ -22,7 +22,7 @@ namespace Microsoft.Xna.Framework.Media
 
         internal readonly int _alSourceId;
         private readonly int _alFilterId;
-        internal readonly Queue<OALSoundBuffer> _buffers;
+        internal readonly Queue<ALSoundBuffer> _buffers;
 
         float _lowPassHfGain;
         float _volume;
@@ -37,7 +37,7 @@ namespace Microsoft.Xna.Framework.Media
         {
             OnFinished = onFinished;
 
-            _alSourceId = OpenALSoundController.Instance.ReserveSource();
+            _alSourceId = ALSoundController.Instance.ReserveSource();
             Reader = new VorbisReader(File.OpenRead(fileName), true);
 
             Volume = 1;
@@ -331,7 +331,7 @@ namespace Microsoft.Xna.Framework.Media
             AL.Source(_alSourceId, ALSourcei.Buffer, 0);
             ALHelper.CheckError("Failed to free source from buffers.");
 
-            OpenALSoundController.Instance.RecycleSource(_alSourceId);
+            ALSoundController.Instance.RecycleSource(_alSourceId);
 
             AL.DeleteBuffers(_alBufferIds);
             ALHelper.CheckError("Failed to delete buffer.");

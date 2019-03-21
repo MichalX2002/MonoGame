@@ -223,6 +223,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if ((offset + count > data.Length) || ((count % 3) != 0))
                 throw new ArgumentException("Invalid 24-bit PCM data received");
+
             // Sample count includes both channels if stereo
             var sampleCount = count / 3;
             var outData = new byte[sampleCount * sizeof(short)];
