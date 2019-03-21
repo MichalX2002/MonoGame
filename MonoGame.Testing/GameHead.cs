@@ -40,13 +40,10 @@ namespace MonoGame.Testings
 
             //MediaPlayer.ActiveSongChanged += MediaPlayer_ActiveSongChanged;
             MediaPlayer.Volume = 0.1f;
-            MediaPlayer.Pitch = 0f;
+            MediaPlayer.Pitch = 1f;
             MediaPlayer.IsRepeating = true;
             
-            MediaPlayer.Play(_songs);
-            
-            MediaPlayer.IsVisualizationEnabled = true;
-            _visData = new VisualizationData(VisualizationData.MAX_SAMPLES / 2);
+            MediaPlayer.Play(_songs[0]);
         }
 
         private void MediaPlayer_ActiveSongChanged(object s, EventArgs e)
@@ -65,13 +62,16 @@ namespace MonoGame.Testings
             //_dynamicSound.BufferNeeded += _dynamicSound_BufferNeeded;
             //_dynamicSound.Play();
 
+            var w = new System.Diagnostics.Stopwatch();
+            w.Restart();
             _songs = new SongCollection
             {
                 //Content.Load<Song>("sinus"),
-                Content.Load<Song>("No More Magic")
+                Content.Load<Song>("Win Jingle")
             };
-
-            var w = new System.Diagnostics.Stopwatch();
+            w.Stop();
+            Console.WriteLine("Song Load Time: " + w.ElapsedMilliseconds + "ms");
+            
             w.Restart();
             var wtef = Content.Load<SoundEffect>("sinus");
             w.Stop();
@@ -171,16 +171,14 @@ namespace MonoGame.Testings
         {
         }
 
-        float f;
+        float f = 1;
 
         protected override void Update(GameTime time)
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
-            //MediaPlayer.GetVisualizationData(_visData);
-
-            f -= time.Delta;
+            
+            //f -= time.Delta;
             if(f <= 0)
             {
                 var instance = _hitReflectSound.CreateInstance();

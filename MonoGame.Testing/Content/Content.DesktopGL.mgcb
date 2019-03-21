@@ -19,15 +19,15 @@
 /processorParam:Quality=Best
 /build:hit_reflect_0.mp3
 
-#begin No More Magic.ogg
-/importer:OggImporter
-/processor:SongProcessor
-/processorParam:Quality=Best
-/build:No More Magic.ogg
-
 #begin sinus.ogg
 /importer:OggImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:sinus.ogg
+
+#begin Win Jingle.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Win Jingle.ogg
 

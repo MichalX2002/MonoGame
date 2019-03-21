@@ -11,7 +11,7 @@ namespace Microsoft.Xna.Framework.Audio
 {
     public sealed partial class DynamicSoundEffectInstance : SoundEffectInstance
     {
-        private Queue<ALSoundBuffer> _queuedBuffers;
+        private Queue<ALBuffer> _queuedBuffers;
 
         private void PlatformCreate()
         {
@@ -24,7 +24,7 @@ namespace Microsoft.Xna.Framework.Audio
             ALHelper.CheckError("Failed to set source loop state.");
 
             HasSourceID = true;
-            _queuedBuffers = new Queue<ALSoundBuffer>();
+            _queuedBuffers = new Queue<ALBuffer>();
         }
 
         private int PlatformGetPendingBufferCount()
@@ -88,7 +88,7 @@ namespace Microsoft.Xna.Framework.Audio
                 while (_queuedBuffers.Count > 0)
                 {
                     var buffer = _queuedBuffers.Dequeue();
-                    ALSoundBufferPool.Return(buffer);
+                    ALBufferPool.Return(buffer);
                 }
             }
         }
@@ -123,7 +123,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformSubmitBuffer(float[] buffer, int offset, int count)
         {
-            if (!ALSoundController.Instance.SupportsFloat32)
+            if (!ALController.Instance.SupportsFloat32)
                 throw new InvalidOperationException(
                     "Float32 data is not supported by this OpenAL driver.");
             
@@ -142,7 +142,7 @@ namespace Microsoft.Xna.Framework.Audio
         private void PlatformSubmitBuffer(IntPtr data, int bytes, bool useFloat)
         {
             AL.GetError();
-            var buffer = ALSoundBufferPool.Rent();
+            var buffer = ALBufferPool.Rent();
 
             // Bind the data
             ALFormat format = ALHelper.GetALFormat(_channels, useFloat);
@@ -186,7 +186,7 @@ namespace Microsoft.Xna.Framework.Audio
                     while (_queuedBuffers.Count > 0)
                     {
                         var buffer = _queuedBuffers.Dequeue();
-                        ALSoundBufferPool.Return(buffer);
+                        ALBufferPool.Return(buffer);
                     }
                 }
                 DynamicSoundEffectInstanceManager.RemoveInstance(this);
@@ -211,7 +211,7 @@ namespace Microsoft.Xna.Framework.Audio
                     for (int i = 0; i < numBuffers; i++)
                     {
                         var buffer = _queuedBuffers.Dequeue();
-                        ALSoundBufferPool.Return(buffer);
+                        ALBufferPool.Return(buffer);
                     }
                 }
             }

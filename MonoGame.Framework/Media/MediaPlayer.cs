@@ -32,11 +32,8 @@ namespace Microsoft.Xna.Framework.Media
         public static MediaQueue Queue { get; } = new MediaQueue();
 
         public static bool IsRunningSlowly => PlatformGetIsRunningSlowly();
-
-        public static float StreamingUpdateTime => PlatformGetUpdateTime();
-
+        public static float StreamingUpdateTime => PlatformGetStreamingUpdateTime();
         public static bool GameHasControl => PlatformGetGameHasControl();
-
         public static TimeSpan PlayPosition => PlatformGetPlayPosition();
 
         public static bool IsVisualizationEnabled

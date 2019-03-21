@@ -17,7 +17,7 @@ namespace Microsoft.Xna.Framework.Media
         private void PlatformInitialize(string fileName)
         {
             // init OpenAL if need be
-            ALSoundController.EnsureInitialized();
+            ALController.EnsureInitialized();
 
             stream = new OggStream(fileName, OnFinishedPlaying);
             stream.Prepare();

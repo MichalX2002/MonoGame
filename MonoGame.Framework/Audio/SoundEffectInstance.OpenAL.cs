@@ -21,7 +21,7 @@ namespace Microsoft.Xna.Framework.Audio
         float frequency;
         int pauseCount;
         
-        internal ALSoundController controller;
+        internal ALController controller;
         internal bool HasSourceID = false;
 
         #region Initialization
@@ -40,7 +40,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// </summary>
         internal void InitializeSound()
         {
-            controller = ALSoundController.Instance;
+            controller = ALController.Instance;
         }
 
         #endregion
@@ -164,7 +164,7 @@ namespace Microsoft.Xna.Framework.Audio
                 // sources are recycled
                 if (controller.SupportsEfx)
                 {
-                    ALSoundController.Efx.BindSourceToAuxiliarySlot(SourceID, 0, 0, 0);
+                    ALController.Efx.BindSourceToAuxiliarySlot(SourceID, 0, 0, 0);
                     ALHelper.CheckError("Failed to unset reverb.");
                     AL.Source(SourceID, ALSourcei.EfxDirectFilter, 0);
                     ALHelper.CheckError("Failed to unset filter.");
@@ -251,7 +251,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal void PlatformSetReverbMix(float mix)
         {
-            if (!ALSoundController.Efx.IsInitialized)
+            if (!ALController.Efx.IsInitialized)
                 return;
 
             reverb = mix;
@@ -266,7 +266,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if (reverb > 0f && SoundEffect.ReverbSlot != 0)
             {
-                ALSoundController.Efx.BindSourceToAuxiliarySlot(SourceID, (int)SoundEffect.ReverbSlot, 0, 0);
+                ALController.Efx.BindSourceToAuxiliarySlot(SourceID, (int)SoundEffect.ReverbSlot, 0, 0);
                 ALHelper.CheckError("Failed to set reverb.");
             }
         }
@@ -277,7 +277,7 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 var freq = frequency / 20000f;
                 var lf = 1.0f - freq;
-                var efx = ALSoundController.Efx;
+                var efx = ALController.Efx;
                 efx.Filter(controller.Filter, EfxFilteri.FilterType, (int)filterType);
                 ALHelper.CheckError("Failed to set filter.");
                 switch (filterType)
@@ -304,7 +304,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal void PlatformSetFilter(FilterMode mode, float filterQ, float frequency)
         {
-            if (!ALSoundController.Efx.IsInitialized)
+            if (!ALController.Efx.IsInitialized)
                 return;
 
             applyFilter = true;
@@ -331,7 +331,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal void PlatformClearFilter()
         {
-            if (!ALSoundController.Efx.IsInitialized)
+            if (!ALController.Efx.IsInitialized)
                 return;
 
             applyFilter = false;

@@ -17,11 +17,11 @@ namespace Microsoft.Xna.Framework.Audio
 {
     public sealed partial class SoundEffect : IDisposable
     {
-        internal const int MAX_PLAYING_INSTANCES = ALSoundController.MAX_NUMBER_OF_SOURCES;
+        internal const int MAX_PLAYING_INSTANCES = ALController.MAX_NUMBER_OF_SOURCES;
         internal static uint ReverbSlot = 0;
         internal static uint ReverbEffect = 0;
 
-        internal ALSoundBuffer SoundBuffer;
+        internal ALBuffer SoundBuffer;
 
         #region Public Constructors
 
@@ -47,13 +47,13 @@ namespace Microsoft.Xna.Framework.Audio
             var format = AudioLoader.GetSoundFormat(AudioLoader.FormatPcm, (int)channels, sampleBits);
 
             // bind buffer
-            SoundBuffer = ALSoundBufferPool.Rent();
+            SoundBuffer = ALBufferPool.Rent();
             SoundBuffer.BufferData(buffer, count, format, sampleRate);
         }
 
         private void PlatformInitializeIeeeFloat(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
         {
-            if (!ALSoundController.Instance.SupportsFloat32)
+            if (!ALController.Instance.SupportsFloat32)
             {
                 // If 32-bit IEEE float is not supported, convert to 16-bit signed PCM
                 buffer = AudioLoader.ConvertFloatTo16(buffer, offset, count);
@@ -64,13 +64,13 @@ namespace Microsoft.Xna.Framework.Audio
             var format = AudioLoader.GetSoundFormat(AudioLoader.FormatIeee, (int)channels, 32);
 
             // bind buffer
-            SoundBuffer = ALSoundBufferPool.Rent();
+            SoundBuffer = ALBufferPool.Rent();
             SoundBuffer.BufferData(buffer, count, format, sampleRate);
         }
 
         private void PlatformInitializeAdpcm(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int blockAlignment, int loopStart, int loopLength)
         {
-            if (!ALSoundController.Instance.SupportsAdpcm)
+            if (!ALController.Instance.SupportsAdpcm)
             {
                 // If MS-ADPCM is not supported, convert to 16-bit signed PCM
                 buffer = AudioLoader.ConvertMsAdpcmToPcm(buffer, offset, count, (int)channels, blockAlignment);
@@ -82,7 +82,7 @@ namespace Microsoft.Xna.Framework.Audio
             int sampleAlignment = AudioLoader.SampleAlignment(format, blockAlignment);
 
             // bind buffer
-            SoundBuffer = ALSoundBufferPool.Rent();
+            SoundBuffer = ALBufferPool.Rent();
             // Buffer length must be aligned with the block alignment
             int alignedCount = count - (count % blockAlignment);
             SoundBuffer.BufferData(buffer, alignedCount, format, sampleRate, sampleAlignment);
@@ -90,7 +90,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformInitializeIma4(byte[] buffer, int offset, int count, int sampleRate, AudioChannels channels, int blockAlignment, int loopStart, int loopLength)
         {
-            if (!ALSoundController.Instance.SupportsIma4)
+            if (!ALController.Instance.SupportsIma4)
             {
                 // If IMA/ADPCM is not supported, convert to 16-bit signed PCM
                 buffer = AudioLoader.ConvertIma4ToPcm(buffer, offset, count, (int)channels, blockAlignment);
@@ -102,7 +102,7 @@ namespace Microsoft.Xna.Framework.Audio
             int sampleAlignment = AudioLoader.SampleAlignment(format, blockAlignment);
 
             // bind buffer
-            SoundBuffer = ALSoundBufferPool.Rent();
+            SoundBuffer = ALBufferPool.Rent();
             SoundBuffer.BufferData(buffer, count, format, sampleRate, sampleAlignment);
         }
 
@@ -171,13 +171,13 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal static void PlatformSetReverbSettings(ReverbSettings reverbSettings)
         {
-            if (!ALSoundController.Efx.IsInitialized)
+            if (!ALController.Efx.IsInitialized)
                 return;
 
             if (ReverbEffect != 0)
                 return;
             
-            var efx = ALSoundController.Efx;
+            var efx = ALController.Efx;
             efx.GenAuxiliaryEffectSlots (1, out ReverbSlot);
             efx.GenEffect (out ReverbEffect);
             efx.Effect (ReverbEffect, EfxEffecti.EffectType, (int)EfxEffectType.Reverb);
@@ -222,7 +222,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if (SoundBuffer != null)
             {
-                ALSoundBufferPool.Return(SoundBuffer);
+                ALBufferPool.Return(SoundBuffer);
                 SoundBuffer = null;
             }
         }
@@ -231,19 +231,19 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal static void PlatformInitialize()
         {
-            ALSoundController.EnsureInitialized();
+            ALController.EnsureInitialized();
         }
 
         internal static void PlatformShutdown()
         {
             if (ReverbEffect != 0)
             {
-                ALSoundController.Efx.DeleteAuxiliaryEffectSlot((int)ReverbSlot);
-                ALSoundController.Efx.DeleteEffect((int)ReverbEffect);
+                ALController.Efx.DeleteAuxiliaryEffectSlot((int)ReverbSlot);
+                ALController.Efx.DeleteEffect((int)ReverbEffect);
             }
 
-            ALSoundBufferPool.Clear();
-            ALSoundController.DestroyInstance();
+            ALBufferPool.Clear();
+            ALController.DestroyInstance();
         }
     }
 }
