@@ -24,7 +24,6 @@ namespace Microsoft.Xna.Framework.Media
 			{
 				if (Songs.Count == 0 || ActiveSongIndex < 0)
 					return null;
-				
 				return Songs[ActiveSongIndex];
 			}
 		}

@@ -6,7 +6,7 @@ using System;
 
 namespace Microsoft.Xna.Framework.Media
 {
-    public sealed partial class Song : IEquatable<Song>, IDisposable
+    public sealed partial class Song : IDisposable
     {
         private int _playCount = 0;
         private TimeSpan _duration = TimeSpan.Zero;
@@ -87,45 +87,11 @@ namespace Microsoft.Xna.Framework.Media
             };
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        public bool Equals(Song song)
-        {
-            return song != null && Name == song.Name;
-        }
-        
-        public override bool Equals(object obj)
-        {
-            if (obj is Song song)
-                return Equals(song);
-            return false;
-        }
-
-        public static bool operator ==(Song song1, Song song2)
-        {
-            if (song1 is null)
-                return song2 is null;
-
-            return song1.Equals(song2);
-        }
-
-        public static bool operator !=(Song song1, Song song2)
-        {
-            return !(song1 == song2);
-        }
-
         void Dispose(bool disposing)
         {
             if (!IsDisposed)
             {
-                if (disposing)
-                {
-                    PlatformDispose(disposing);
-                }
-
+                PlatformDispose(disposing);
                 IsDisposed = true;
             }
         }
