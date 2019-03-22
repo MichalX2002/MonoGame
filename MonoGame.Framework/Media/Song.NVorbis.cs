@@ -22,23 +22,26 @@ namespace Microsoft.Xna.Framework.Media
             stream = new OggStream(fileName, OnFinishedPlaying);
             stream.Prepare();
 
-            _duration = stream.GetLength();
+            if(!_duration.HasValue)
+                _duration = stream.GetLength();
         }
         
-        internal void SetEventHandler(FinishedPlayingHandler handler) { }
+        internal void SetEventHandler(FinishedPlayingHandler handler)
+        {
+        }
 
         internal void OnFinishedPlaying()
         {
-            MediaPlayer.OnSongFinishedPlaying(null, null);
+            MediaPlayer.OnSongFinishedPlaying();
         }
 		
         void PlatformDispose(bool disposing)
         {
-            if (stream == null)
-                return;
-
-            stream.Dispose();
-            stream = null;
+            if (stream != null)
+            {
+                stream.Dispose();
+                stream = null;
+            }
         }
 
         internal void Play(TimeSpan? startPosition)
@@ -137,7 +140,9 @@ namespace Microsoft.Xna.Framework.Media
 
         private TimeSpan PlatformGetDuration()
         {
-            return _duration;
+            if (_duration.HasValue)
+                return _duration.Value;
+            return TimeSpan.Zero;
         }
 
         private bool PlatformIsProtected()
@@ -148,11 +153,6 @@ namespace Microsoft.Xna.Framework.Media
         private bool PlatformIsRated()
         {
             return false;
-        }
-
-        private string PlatformGetName()
-        {
-            return Path.GetFileNameWithoutExtension(FilePath);
         }
 
         private int PlatformGetPlayCount()

@@ -43,13 +43,15 @@ namespace MonoGame.Testings
             MediaPlayer.Pitch = 1f;
             MediaPlayer.IsRepeating = true;
             
-            MediaPlayer.Play(_songs[0]);
+            MediaPlayer.Play(_songs);
         }
 
         private void MediaPlayer_ActiveSongChanged(object s, EventArgs e)
         {
             Console.WriteLine(MediaPlayer.Queue.ActiveSong.Name);
         }
+
+        private System.Diagnostics.Stopwatch w;
 
         protected override void LoadContent()
         {
@@ -62,20 +64,23 @@ namespace MonoGame.Testings
             //_dynamicSound.BufferNeeded += _dynamicSound_BufferNeeded;
             //_dynamicSound.Play();
 
-            var w = new System.Diagnostics.Stopwatch();
+            w = new System.Diagnostics.Stopwatch();
             w.Restart();
-            _songs = new SongCollection
-            {
-                //Content.Load<Song>("sinus"),
-                Content.Load<Song>("Win Jingle")
-            };
+            var song1 = Content.Load<Song>("sinus");
             w.Stop();
             Console.WriteLine("Song Load Time: " + w.ElapsedMilliseconds + "ms");
-            
+
             w.Restart();
-            var wtef = Content.Load<SoundEffect>("sinus");
+            var song2 = Content.Load<Song>("Win Jingle");
             w.Stop();
-            Console.WriteLine("Load Time: " + w.ElapsedMilliseconds + "ms");
+            Console.WriteLine("Song Load Time: " + w.ElapsedMilliseconds + "ms");
+
+            _songs = new SongCollection { song1, song2 };
+
+            //w.Restart();
+            //var wtef = Content.Load<SoundEffect>("sinus");
+            //w.Stop();
+            //Console.WriteLine("Load Time: " + w.ElapsedMilliseconds + "ms");
 
             w.Restart();
             _hitReflectSound = Content.Load<SoundEffect>("hit_reflect_0");
@@ -171,21 +176,26 @@ namespace MonoGame.Testings
         {
         }
 
-        float f = 1;
+        float f = 0;
 
         protected override void Update(GameTime time)
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             
-            //f -= time.Delta;
-            if(f <= 0)
+            f += time.Delta;
+            if(f >= 3)
             {
-                var instance = _hitReflectSound.CreateInstance();
-                instance.Pitch = -0.6f;
-                instance.Play();
+                //var instance = _hitReflectSound.CreateInstance();
+                //instance.Pitch = -0.6f;
+                //instance.Play();
                 
-                f = 2.5f;
+                f = 0f;
+
+                w.Restart();
+                MediaPlayer.MoveNext();
+                w.Stop();
+                Console.WriteLine("Moved next in " + w.Elapsed.Milliseconds + "ms");
             }
 
             base.Update(time);

@@ -148,7 +148,7 @@ namespace MonoGame.Utilities.IO
                     _stream.Dispose();
                 _stream = null;
 
-                _manager.ReturnBlock(_buffer, null);
+                _manager.ReturnBlock(_buffer);
                 _buffer = null;
 
                 _disposed = true;

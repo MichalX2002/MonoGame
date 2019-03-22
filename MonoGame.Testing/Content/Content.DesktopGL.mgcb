@@ -21,7 +21,7 @@
 
 #begin sinus.ogg
 /importer:OggImporter
-/processor:SoundEffectProcessor
+/processor:SongProcessor
 /processorParam:Quality=Best
 /build:sinus.ogg
 

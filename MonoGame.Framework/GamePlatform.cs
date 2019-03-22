@@ -60,7 +60,10 @@ namespace Microsoft.Xna.Framework
                 if (_isActive != value)
                 {
                     _isActive = value;
-                    EventHelpers.Raise(this, _isActive ? Activated : Deactivated, EventArgs.Empty);
+                    if (_isActive)
+                        Activated?.Invoke(Game);
+                    else
+                        Deactivated?.Invoke(Game);
                 }
             }
         }
@@ -101,9 +104,9 @@ namespace Microsoft.Xna.Framework
 
         #region Events
 
-        public event EventHandler<EventArgs> AsyncRunLoopEnded;
-        public event EventHandler<EventArgs> Activated;
-        public event EventHandler<EventArgs> Deactivated;
+        public event SenderDelegate<GamePlatform> AsyncRunLoopEnded;
+        public event SenderDelegate<Game> Activated;
+        public event SenderDelegate<Game> Deactivated;
 
         /// <summary>
         /// Raises the AsyncRunLoopEnded event. This method must be called by
@@ -112,7 +115,7 @@ namespace Microsoft.Xna.Framework
         /// </summary>
         protected void RaiseAsyncRunLoopEnded()
         {
-            EventHelpers.Raise(this, AsyncRunLoopEnded, EventArgs.Empty);
+            AsyncRunLoopEnded?.Invoke(this);
         }
 
         #endregion Events

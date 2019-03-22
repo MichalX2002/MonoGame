@@ -75,7 +75,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <remarks>
         /// This event may occur when <see cref="Play()"/> is called or during playback when a buffer is completed.
         /// </remarks>
-        public event EventHandler<EventArgs> BufferNeeded;
+        public event SenderDelegate<DynamicSoundEffectInstance> BufferNeeded;
 
         #endregion
 
@@ -369,7 +369,7 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 var eventCount = (_buffersNeeded < 3) ? _buffersNeeded : 3;
                 for (int i = 0; i < eventCount; i++)
-                    bufferNeededHandler(this, EventArgs.Empty);
+                    bufferNeededHandler?.Invoke(this);
             }
 
             _buffersNeeded = 0;

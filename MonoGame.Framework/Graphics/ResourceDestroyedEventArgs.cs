@@ -2,7 +2,7 @@
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    public sealed class ResourceDestroyedEventArgs : EventArgs
+    public sealed class ResourceDestroyedEvent : EventArgs
     {
         /// <summary>
         /// The name of the destroyed resource.

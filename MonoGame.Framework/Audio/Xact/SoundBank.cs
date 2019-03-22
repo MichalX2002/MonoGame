@@ -308,7 +308,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// This event is triggered when the SoundBank is disposed.
         /// </summary>
-        public event EventHandler<EventArgs> Disposing;
+        public event SenderDelegate<SoundBank> Disposing;
 
         /// <summary>
         /// Is true if the SoundBank has been disposed.
@@ -339,7 +339,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (disposing)
             {
                 IsInUse = false;
-                EventHelpers.Raise(this, Disposing, EventArgs.Empty);
+                Disposing?.Invoke(this);
             }
         }
     }

@@ -95,7 +95,7 @@ namespace Microsoft.Xna.Framework
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-            EventHelpers.Raise(this, Disposed, EventArgs.Empty);
+            Disposed?.Invoke(this);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -269,10 +269,10 @@ namespace Microsoft.Xna.Framework
 
         #region Events
 
-        public event EventHandler<EventArgs> Activated;
-        public event EventHandler<EventArgs> Deactivated;
-        public event EventHandler<EventArgs> Disposed;
-        public event EventHandler<EventArgs> Exiting;
+        public event SenderDelegate<Game> Activated;
+        public event SenderDelegate<Game> Deactivated;
+        public event SenderDelegate<Game> Disposed;
+        public event SenderDelegate<Game> Exiting;
 
 #if WINDOWS_UAP
         [CLSCompliant(false)]
@@ -545,21 +545,21 @@ namespace Microsoft.Xna.Framework
             _updateables.ForEachFilteredItem(UpdateAction, gameTime);
         }
 
-        protected virtual void OnExiting(object sender, EventArgs args)
+        protected virtual void OnExiting(Game sender)
         {
-            EventHelpers.Raise(sender, Exiting, args);
+            Exiting?.Invoke(sender);
         }
 
-        protected virtual void OnActivated(object sender, EventArgs args)
+        protected virtual void OnActivated(Game sender)
         {
             AssertNotDisposed();
-            EventHelpers.Raise(sender, Activated, args);
+            Activated?.Invoke(sender);
         }
 
-        protected virtual void OnDeactivated(object sender, EventArgs args)
+        protected virtual void OnDeactivated(Game sender)
         {
             AssertNotDisposed();
-            EventHelpers.Raise(sender, Deactivated, args);
+            Deactivated?.Invoke(sender);
         }
 
         #endregion Protected Methods
@@ -567,7 +567,7 @@ namespace Microsoft.Xna.Framework
         #region Event Handlers
 
         private void Components_ComponentAdded(
-            object sender, GameComponentCollectionEventArgs e)
+            object sender, GameComponentCollectionEvent e)
         {
             // Since we only subscribe to ComponentAdded after the graphics
             // devices are set up, it is safe to just blindly call Initialize.
@@ -576,17 +576,16 @@ namespace Microsoft.Xna.Framework
         }
 
         private void Components_ComponentRemoved(
-            object sender, GameComponentCollectionEventArgs e)
+            object sender, GameComponentCollectionEvent e)
         {
             DecategorizeComponent(e.GameComponent);
         }
 
-        private void Platform_AsyncRunLoopEnded(object sender, EventArgs e)
+        private void Platform_AsyncRunLoopEnded(GamePlatform sender)
         {
             AssertNotDisposed();
-
-            var platform = (GamePlatform)sender;
-            platform.AsyncRunLoopEnded -= Platform_AsyncRunLoopEnded;
+            
+            sender.AsyncRunLoopEnded -= Platform_AsyncRunLoopEnded;
             EndRun();
             DoExiting();
         }
@@ -664,7 +663,7 @@ namespace Microsoft.Xna.Framework
 
         internal void DoExiting()
         {
-            OnExiting(this, EventArgs.Empty);
+            OnExiting(this);
             UnloadContent();
         }
 
@@ -748,18 +747,18 @@ namespace Microsoft.Xna.Framework
 
             private readonly Predicate<T> _filter;
             private readonly Comparison<T> _sort;
-            private readonly Action<T, EventHandler<EventArgs>> _filterChangedSubscriber;
-            private readonly Action<T, EventHandler<EventArgs>> _filterChangedUnsubscriber;
-            private readonly Action<T, EventHandler<EventArgs>> _sortChangedSubscriber;
-            private readonly Action<T, EventHandler<EventArgs>> _sortChangedUnsubscriber;
+            private readonly Action<T, SenderDelegate<object>> _filterChangedSubscriber;
+            private readonly Action<T, SenderDelegate<object>> _filterChangedUnsubscriber;
+            private readonly Action<T, SenderDelegate<object>> _sortChangedSubscriber;
+            private readonly Action<T, SenderDelegate<object>> _sortChangedUnsubscriber;
 
             public SortingFilteringCollection(
                 Predicate<T> filter,
-                Action<T, EventHandler<EventArgs>> filterChangedSubscriber,
-                Action<T, EventHandler<EventArgs>> filterChangedUnsubscriber,
+                Action<T, SenderDelegate<object>> filterChangedSubscriber,
+                Action<T, SenderDelegate<object>> filterChangedUnsubscriber,
                 Comparison<T> sort,
-                Action<T, EventHandler<EventArgs>> sortChangedSubscriber,
-                Action<T, EventHandler<EventArgs>> sortChangedUnsubscriber)
+                Action<T, SenderDelegate<object>> sortChangedSubscriber,
+                Action<T, SenderDelegate<object>> sortChangedUnsubscriber)
             {
                 _items = new List<T>();
                 _addJournal = new List<AddJournalEntry<T>>();
@@ -947,12 +946,12 @@ namespace Microsoft.Xna.Framework
                 _shouldRebuildCache = true;
             }
 
-            private void Item_FilterPropertyChanged(object sender, EventArgs e)
+            private void Item_FilterPropertyChanged(object sender)
             {
                 InvalidateCache();
             }
 
-            private void Item_SortPropertyChanged(object sender, EventArgs e)
+            private void Item_SortPropertyChanged(object sender)
             {
                 var item = (T)sender;
                 var index = _items.IndexOf(item);

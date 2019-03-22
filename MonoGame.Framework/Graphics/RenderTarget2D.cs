@@ -9,14 +9,10 @@ namespace Microsoft.Xna.Framework.Graphics
 	public partial class RenderTarget2D : Texture2D, IRenderTarget
 	{
 		public DepthFormat DepthStencilFormat { get; private set; }
-		
 		public int MultiSampleCount { get; private set; }
-		
 		public RenderTargetUsage RenderTargetUsage { get; private set; }
-
         public bool IsContentLost => false;
-
-        public event EventHandler<EventArgs> ContentLost;
+        public event SenderDelegate<RenderTarget2D> ContentLost;
 		
         private bool SuppressEventHandlerWarningsUntilEventsAreProperlyImplemented()
         {

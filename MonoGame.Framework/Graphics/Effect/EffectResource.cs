@@ -47,8 +47,8 @@ namespace Microsoft.Xna.Framework.Graphics
                             var buffer = RecyclableMemoryManager.Instance.GetBlock();   //
                             int read;                                                   //
                             while ((read = stream.Read(buffer, 0, buffer.Length)) != 0) // instead of CopyTo
-                                ms.Write(buffer, 0, read);                       //
-                            RecyclableMemoryManager.Instance.ReturnBlock(buffer, null); //
+                                ms.Write(buffer, 0, read);                              //
+                            RecyclableMemoryManager.Instance.ReturnBlock(buffer);       //
 
                             _bytecode = ms.ToArray();
                         }

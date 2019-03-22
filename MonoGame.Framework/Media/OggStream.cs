@@ -22,18 +22,20 @@ namespace Microsoft.Xna.Framework.Media
 
         internal readonly int _alSourceID;
         private readonly int _alFilterId;
-        internal readonly Queue<ALBuffer> _queuedBuffers;
+        private readonly Queue<ALBuffer> _queuedBuffers;
 
         float _lowPassHfGain;
         float _volume;
         float _pitch;
+
+        public bool IsLooped { get; set; }
         
         internal VorbisReader Reader { get; private set; }
         internal bool IsReady { get; private set; }
         internal bool IsPreparing { get; private set; }
         public Action OnFinished { get; private set; }
 
-        public bool IsLooped { get; set; }
+        public int BufferCount => _queuedBuffers.Count;
 
         public OggStream(string fileName, Action onFinished = null)
         {
@@ -195,7 +197,6 @@ namespace Microsoft.Xna.Framework.Media
         {
             if (Reader == null)
                 return TimeSpan.Zero;
-
             return Reader.DecodedTime;
         }
 
@@ -256,7 +257,7 @@ namespace Microsoft.Xna.Framework.Media
                 try
                 {
                     while (_queuedBuffers.Count > 0)
-                        DequeueBuffer();
+                        DequeueAndReturnBuffer();
 
                     AL.SourceUnqueueBuffers(_alSourceID, queued);
                     ALHelper.CheckError("Failed to unqueue buffers (first attempt).");
@@ -298,11 +299,16 @@ namespace Microsoft.Xna.Framework.Media
                 AL.SourceQueueBuffer(_alSourceID, buffer.BufferID);
                 ALHelper.CheckError("Failed to queue buffer.");
 
-                _queuedBuffers.Enqueue(buffer);
+                EnqueueBuffer(buffer);
             }
         }
 
-        public void DequeueBuffer()
+        public void EnqueueBuffer(ALBuffer buffer)
+        {
+            _queuedBuffers.Enqueue(buffer);
+        }
+
+        public void DequeueAndReturnBuffer()
         {
             var buffer = _queuedBuffers.Dequeue();
             ALBufferPool.Return(buffer);
@@ -347,7 +353,7 @@ namespace Microsoft.Xna.Framework.Media
             ALController.Instance.RecycleSource(_alSourceID);
 
             while (_queuedBuffers.Count > 0)
-                DequeueBuffer();
+                DequeueAndReturnBuffer();
 
             if (OggStreamer.Instance.Efx.IsInitialized)
             {

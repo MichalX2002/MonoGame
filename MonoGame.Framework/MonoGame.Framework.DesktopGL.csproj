@@ -44,6 +44,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.2\lib\netstandard2.0\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.4.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
@@ -53,6 +66,7 @@
     <Compile Include="Audio\OpenAL\OpenAL.XRam.cs" />
     <Compile Include="Audio\OpenAL\ALHelper.cs" />
     <Compile Include="Audio\OpenAL\ALBufferPool.cs" />
+    <Compile Include="Delegates.cs" />
     <Compile Include="Math\IShapeF.cs" />
     <Compile Include="Math\PointF.cs" />
     <Compile Include="Math\RectangleF.cs" />
@@ -95,11 +109,10 @@
     <Compile Include="Math\CurveTangent.cs" />
     <Compile Include="DisplayOrientation.cs" />
     <Compile Include="DrawableGameComponent.cs" />
-    <Compile Include="EventHelpers.cs" />
     <Compile Include="FrameworkDispatcher.cs" />
     <Compile Include="FrameworkResources.cs" />
     <Compile Include="GameComponentCollection.cs" />
-    <Compile Include="GameComponentCollectionEventArgs.cs" />
+    <Compile Include="GameComponentCollectionEvent.cs" />
     <Compile Include="GameComponent.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GamePlatform.cs" />
@@ -122,10 +135,11 @@
     <Compile Include="Math\PlaneIntersectionType.cs" />
     <Compile Include="PlayerIndex.cs" />
     <Compile Include="Math\Point.cs" />
-    <Compile Include="PreparingDeviceSettingsEventArgs.cs" />
+    <Compile Include="PreparingDeviceSettingsEvent.cs" />
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Math\Ray.cs" />
     <Compile Include="Math\Rectangle.cs" />
+    <Compile Include="Input\TextInputEvent.cs" />
     <Compile Include="Threading.cs">
       <Platforms>Android,Angle,iOS,Linux,MacOS,WindowsGL,tvOS</Platforms>
     </Compile>
@@ -686,12 +700,12 @@
       <Link>Utilities\NVorbis\Mdct.cs</Link>
       <Services>NVorbis</Services>
     </Compile>
-    <Compile Include="..\ThirdParty\NVorbis\NVorbis\NewStreamEventArgs.cs">
-      <Link>Utilities\NVorbis\NewStreamEventArgs.cs</Link>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\NewStreamEvent.cs">
+      <Link>Utilities\NVorbis\NewStreamEvent.cs</Link>
       <Services>NVorbis</Services>
     </Compile>
-    <Compile Include="..\ThirdParty\NVorbis\NVorbis\ParameterChangeEventArgs.cs">
-      <Link>Utilities\NVorbis\ParameterChangeEventArgs.cs</Link>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\ParameterChangeEvent.cs">
+      <Link>Utilities\NVorbis\ParameterChangeEvent.cs</Link>
       <Services>NVorbis</Services>
     </Compile>
     <Compile Include="..\ThirdParty\NVorbis\NVorbis\RingBuffer.cs">
@@ -825,6 +839,7 @@
     </None>
     <Compile Include="Graphics\Vertices\VertexBuffer.OpenGL.cs" />
     <Compile Include="Graphics\Vertices\BufferBase.OpenGL.cs" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MonoGame.bmp">

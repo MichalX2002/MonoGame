@@ -8,19 +8,20 @@ namespace Microsoft.Xna.Framework.Media
 {
     public static partial class MediaPlayer
     {
+        public delegate void StateChangedDelegate();
+
         // Need to hold onto this to keep track of how many songs
         // have played when in shuffle mode
         private static int _numSongsInQueuePlayed = 0;
         private static MediaState _state = MediaState.Stopped;
         private static float _volume = 1.0f;
         private static float _pitch = 0.0f;
-        private static bool _isVisualizationEnabled;
         private static bool _isMuted;
         private static bool _isRepeating;
         private static bool _isShuffled;
 
-        public static event EventHandler<EventArgs> ActiveSongChanged;
-        public static event EventHandler<EventArgs> MediaStateChanged;
+        public static event StateChangedDelegate ActiveSongChanged;
+        public static event StateChangedDelegate MediaStateChanged;
 
         static MediaPlayer()
         {
@@ -68,7 +69,7 @@ namespace Microsoft.Xna.Framework.Media
                 if (_state != value)
                 {
                     _state = value;
-                    EventHelpers.Raise(null, MediaStateChanged, EventArgs.Empty);
+                    MediaStateChanged?.Invoke();
                 }
             }
         }
@@ -130,7 +131,7 @@ namespace Microsoft.Xna.Framework.Media
             PlaySong(song, startPosition);
 
             if (previousSong != song)
-                EventHelpers.Raise(null, ActiveSongChanged, EventArgs.Empty);
+                ActiveSongChanged?.Invoke();
         }
 
         public static void Play(SongCollection collection, int index = 0)
@@ -146,7 +147,7 @@ namespace Microsoft.Xna.Framework.Media
             PlaySong(Queue.ActiveSong, null);
 
             if (previousSong != Queue.ActiveSong)
-                EventHelpers.Raise(null, ActiveSongChanged, EventArgs.Empty);
+                ActiveSongChanged?.Invoke();
         }
 
         private static void PlaySong(Song song, TimeSpan? startPosition)
@@ -158,7 +159,7 @@ namespace Microsoft.Xna.Framework.Media
             State = MediaState.Playing;
         }
 
-        internal static void OnSongFinishedPlaying(object sender, EventArgs args)
+        internal static void OnSongFinishedPlaying()
         {
             // TODO: Check args to see if song sucessfully played
             _numSongsInQueuePlayed++;
@@ -169,7 +170,7 @@ namespace Microsoft.Xna.Framework.Media
                 if (!IsRepeating)
                 {
                     Stop();
-                    EventHelpers.Raise(null, ActiveSongChanged, EventArgs.Empty);
+                    ActiveSongChanged?.Invoke();
                     return;
                 }
             }
@@ -225,7 +226,7 @@ namespace Microsoft.Xna.Framework.Media
             if (nextSong != null)
                 PlaySong(nextSong, null);
 
-            EventHelpers.Raise(null, ActiveSongChanged, EventArgs.Empty);
+            ActiveSongChanged?.Invoke();
         }
 
         public static void GetVisualizationData(VisualizationData data)

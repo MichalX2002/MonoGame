@@ -211,7 +211,7 @@
       <Name>Lidgren.Network.DesktopGL</Name>
     </ProjectReference>
     <ProjectReference Include="MonoGame.Framework.DesktopGL.csproj">
-      <Project>{6D75E618-19CA-4C51-9546-F10965FBC0B8}</Project>
+      <Project>{6d75e618-19ca-4c51-9546-f10965fbc0b8}</Project>
       <Name>MonoGame.Framework.DesktopGL</Name>
     </ProjectReference>
   </ItemGroup>
