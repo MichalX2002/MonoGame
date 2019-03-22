@@ -13,13 +13,13 @@ namespace Microsoft.Xna.Framework
         /// Event that is triggered when a <see cref="GameComponent"/> is added
         /// to this <see cref="GameComponentCollection"/>.
         /// </summary>
-        public event EventHandler<GameComponentCollectionEventArgs> ComponentAdded;
+        public event EventDelegate<GameComponentCollection, GameComponentCollectionEvent> ComponentAdded;
 
         /// <summary>
         /// Event that is triggered when a <see cref="GameComponent"/> is removed
         /// from this <see cref="GameComponentCollection"/>.
         /// </summary>
-        public event EventHandler<GameComponentCollectionEventArgs> ComponentRemoved;
+        public event EventDelegate<GameComponentCollection, GameComponentCollectionEvent> ComponentRemoved;
 
         /// <summary>
         /// Removes every <see cref="GameComponent"/> from this <see cref="GameComponentCollection"/>.
@@ -28,7 +28,7 @@ namespace Microsoft.Xna.Framework
         protected override void ClearItems()
         {
             for (int i = 0; i < base.Count; i++)
-                this.OnComponentRemoved(new GameComponentCollectionEventArgs(base[i]));
+                this.OnComponentRemoved(new GameComponentCollectionEvent(base[i]));
 
             base.ClearItems();
         }
@@ -40,17 +40,17 @@ namespace Microsoft.Xna.Framework
 
             base.InsertItem(index, item);
             if (item != null)
-                this.OnComponentAdded(new GameComponentCollectionEventArgs(item));
+                this.OnComponentAdded(new GameComponentCollectionEvent(item));
         }
 
-        private void OnComponentAdded(GameComponentCollectionEventArgs eventArgs)
+        private void OnComponentAdded(GameComponentCollectionEvent data)
         {
-            EventHelpers.Raise(this, ComponentAdded, eventArgs);
+            ComponentAdded?.Invoke(this, data);
         }
 
-        private void OnComponentRemoved(GameComponentCollectionEventArgs eventArgs)
+        private void OnComponentRemoved(GameComponentCollectionEvent data)
         {
-            EventHelpers.Raise(this, ComponentRemoved, eventArgs);
+            ComponentRemoved?.Invoke(this, data);
         }
 
         protected override void RemoveItem(int index)
@@ -58,7 +58,7 @@ namespace Microsoft.Xna.Framework
             IGameComponent gameComponent = base[index];
             base.RemoveItem(index);
             if (gameComponent != null)
-                this.OnComponentRemoved(new GameComponentCollectionEventArgs(gameComponent));
+                this.OnComponentRemoved(new GameComponentCollectionEvent(gameComponent));
         }
 
         protected override void SetItem(int index, IGameComponent item)

@@ -1,12 +1,16 @@
-﻿using System;
-
+﻿
 namespace Microsoft.Xna.Framework.Graphics
 {
-    public sealed class ResourceCreatedEventArgs : EventArgs
+    public readonly struct ResourceCreatedEvent
     {
         /// <summary>
         /// The newly created resource object.
         /// </summary>
-        public Object Resource { get; internal set; }
+        public object Resource { get; }
+
+        public ResourceCreatedEvent(object resource)
+        {
+            Resource = resource;
+        }
     }
 }

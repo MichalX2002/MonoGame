@@ -74,7 +74,7 @@ namespace Microsoft.Xna.Framework.Audio
                 int read;                                                   //
                 while ((read = stream.Read(buffer, 0, buffer.Length)) != 0) // instead of CopyTo
                     memStream.Write(buffer, 0, read);                       //
-                RecyclableMemoryManager.Instance.ReturnBlock(buffer, null); //
+                RecyclableMemoryManager.Instance.ReturnBlock(buffer);       //
 
                 memStream.Seek(0, SeekOrigin.Begin);
                 stream.Dispose();
@@ -372,7 +372,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// This event is triggered when the AudioEngine is disposed.
         /// </summary>
-        public event EventHandler<EventArgs> Disposing;
+        public event SenderDelegate<AudioEngine> Disposing;
 
         /// <summary>
         /// Is true if the AudioEngine has been disposed.
@@ -404,7 +404,7 @@ namespace Microsoft.Xna.Framework.Audio
             // audio cues to stop here?
 
             if (disposing)
-                EventHelpers.Raise(this, Disposing, EventArgs.Empty);
+                Disposing?.Invoke(this);
         }
     }
 }

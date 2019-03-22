@@ -36,7 +36,7 @@ namespace Microsoft.Xna.Framework.Graphics
         int IRenderTarget.Height => size;
 
         public bool IsContentLost => false;
-        public event EventHandler<EventArgs> ContentLost;
+        public event SenderDelegate<RenderTargetCube> ContentLost;
 		
         /// <summary>
         /// Initializes a new instance of the <see cref="RenderTargetCube"/> class.

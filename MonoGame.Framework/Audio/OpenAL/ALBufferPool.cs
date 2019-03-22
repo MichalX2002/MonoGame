@@ -5,14 +5,14 @@ namespace Microsoft.Xna.Framework.Audio
 {
     internal static class ALBufferPool
     {
-        private static Queue<ALBuffer> _pool = new Queue<ALBuffer>();
+        private static Stack<ALBuffer> _pool = new Stack<ALBuffer>();
 
         public static ALBuffer Rent()
         {
             lock (_pool)
             {
                 if (_pool.Count > 0)
-                    return _pool.Dequeue();
+                    return _pool.Pop();
             }
             return new ALBuffer();
         }
@@ -30,7 +30,7 @@ namespace Microsoft.Xna.Framework.Audio
                 if (_pool.Count < 32 && !_pool.Contains(buffer))
                 {
                     buffer.ClearBuffer();
-                    _pool.Enqueue(buffer);
+                    _pool.Push(buffer);
                 }
                 else
                     buffer.Dispose();
@@ -42,7 +42,7 @@ namespace Microsoft.Xna.Framework.Audio
             lock (_pool)
             {
                 while (_pool.Count > 0)
-                    _pool.Dequeue().Dispose();
+                    _pool.Pop().Dispose();
             }
         }
     }

@@ -377,7 +377,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// This event is triggered when the WaveBank is disposed.
         /// </summary>
-        public event EventHandler<EventArgs> Disposing;
+        public event SenderDelegate<WaveBank> Disposing;
 
         /// <summary>
         /// Is true if the WaveBank has been disposed.
@@ -391,11 +391,6 @@ namespace Microsoft.Xna.Framework.Audio
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-        }
-
-        ~WaveBank()
-        {
-            Dispose(false);
         }
 
         private void Dispose(bool disposing)
@@ -412,8 +407,13 @@ namespace Microsoft.Xna.Framework.Audio
 
                 IsPrepared = false;
                 IsInUse = false;
-                EventHelpers.Raise(this, Disposing, EventArgs.Empty);
+                Disposing?.Invoke(this);
             }
+        }
+
+        ~WaveBank()
+        {
+            Dispose(false);
         }
     }
 }

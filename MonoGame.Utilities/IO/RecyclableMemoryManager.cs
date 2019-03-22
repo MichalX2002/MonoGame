@@ -500,11 +500,11 @@ namespace MonoGame.Utilities.IO
         }
 
         /// <summary>
-        /// Returns a block to the pool
+        /// Returns a block to the pool.
         /// </summary>
-        /// <param name="block">Collection of blocks to return to the pool</param>
-        /// <exception cref="ArgumentNullException">block is null</exception>
-        /// <exception cref="ArgumentException">block is the wrong size for this memory manager</exception>
+        /// <param name="block">The block to return to the pool.</param>
+        /// <exception cref="ArgumentNullException">block is null.</exception>
+        /// <exception cref="ArgumentException">block is the wrong size for this memory manager.</exception>
         public void ReturnBlock(byte[] block, string tag)
         {
             if (block == null)
@@ -527,6 +527,17 @@ namespace MonoGame.Utilities.IO
             }
 
             //ReportUsageReport(this.smallPoolInUseSize, this.smallPoolFreeSize, this.LargePoolInUseSize, this.LargePoolFreeSize);
+        }
+
+        /// <summary>
+        /// Returns a block to the pool.
+        /// </summary>
+        /// <param name="block">The block to return to the pool.</param>
+        /// <exception cref="ArgumentNullException">block is null.</exception>
+        /// <exception cref="ArgumentException">block is the wrong size for this memory manager.</exception>
+        public void ReturnBlock(byte[] block)
+        {
+            ReturnBlock(block, null);
         }
 
         internal void ReportBlockCreated()

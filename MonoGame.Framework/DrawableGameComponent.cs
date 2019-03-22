@@ -22,7 +22,7 @@ namespace Microsoft.Xna.Framework
                 if (_drawOrder != value)
                 {
                     _drawOrder = value;
-                    OnDrawOrderChanged(this, EventArgs.Empty);
+                    OnDrawOrderChanged();
                 }
             }
         }
@@ -35,13 +35,13 @@ namespace Microsoft.Xna.Framework
                 if (_visible != value)
                 {
                     _visible = value;
-                    OnVisibleChanged(this, EventArgs.Empty);
+                    OnVisibleChanged();
                 }
             }
         }
 
-        public event EventHandler<EventArgs> DrawOrderChanged;
-        public event EventHandler<EventArgs> VisibleChanged;
+        public event SenderDelegate<object> DrawOrderChanged;
+        public event SenderDelegate<object> VisibleChanged;
 
         public DrawableGameComponent(Game game) : base(game)
         {
@@ -62,14 +62,14 @@ namespace Microsoft.Xna.Framework
 
         public virtual void Draw(GameTime gameTime) { }
 
-        protected virtual void OnVisibleChanged(object sender, EventArgs args)
+        protected virtual void OnVisibleChanged()
         {
-            EventHelpers.Raise(sender, VisibleChanged, args);
+            VisibleChanged?.Invoke(this);
         }
 
-        protected virtual void OnDrawOrderChanged(object sender, EventArgs args)
+        protected virtual void OnDrawOrderChanged()
         {
-            EventHelpers.Raise(sender, DrawOrderChanged, args);
+            DrawOrderChanged?.Invoke(this);
         }
     }
 }

@@ -100,14 +100,14 @@ namespace Microsoft.Xna.Framework.Graphics
         private readonly List<WeakReference> _resources = new List<WeakReference>();
 
 		// TODO Graphics Device events need implementing
-		public event EventHandler<EventArgs> DeviceLost;
-		public event EventHandler<EventArgs> DeviceReset;
-		public event EventHandler<EventArgs> DeviceResetting;
-		public event EventHandler<ResourceCreatedEventArgs> ResourceCreated;
-		public event EventHandler<ResourceDestroyedEventArgs> ResourceDestroyed;
-        public event EventHandler<EventArgs> Disposing;
+		public event SenderDelegate<GraphicsDevice> DeviceLost;
+		public event SenderDelegate<GraphicsDevice> DeviceReset;
+		public event SenderDelegate<GraphicsDevice> DeviceResetting;
+		public event EventDelegate<GraphicsDevice, ResourceCreatedEvent> ResourceCreated;
+		public event EventDelegate<GraphicsDevice, ResourceDestroyedEvent> ResourceDestroyed;
+        public event SenderDelegate<GraphicsDevice> Disposing;
 
-        internal event EventHandler<PresentationEventArgs> PresentationChanged;
+        internal event EventDelegate<GraphicsDevice, PresentationEventArgs> PresentationChanged;
 
         private int _maxVertexBufferSlots;
         internal int MaxTextureSlots;
@@ -257,9 +257,9 @@ namespace Microsoft.Xna.Framework.Graphics
                 // for very large numbers. That doesn't matter because
                 // the number will get clamped below anyway in this case.
                 var msc = multiSampleCount;
-                msc = msc | (msc >> 1);
-                msc = msc | (msc >> 2);
-                msc = msc | (msc >> 4);
+                msc |= (msc >> 1);
+                msc |= (msc >> 2);
+                msc |= (msc >> 4);
                 msc -= (msc >> 1);
                 // and clamp it to what the device can handle
                 if (msc > GraphicsCapabilities.MaxMultiSampleCount)
@@ -534,7 +534,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 }
 
                 IsDisposed = true;
-                EventHelpers.Raise(this, Disposing, EventArgs.Empty);
+                Disposing?.Invoke(this);
             }
         }
 
@@ -577,13 +577,13 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             PlatformReset();
 
-            EventHelpers.Raise(this, DeviceResetting, EventArgs.Empty);
+            DeviceResetting?.Invoke(this);
 
             // Update the back buffer.
             OnPresentationChanged();
             
-            EventHelpers.Raise(this, PresentationChanged, new PresentationEventArgs(PresentationParameters));
-            EventHelpers.Raise(this, DeviceReset, EventArgs.Empty);
+            PresentationChanged?.Invoke(this, new PresentationEventArgs(PresentationParameters));
+            DeviceReset?.Invoke(this);
        }
 
         public void Reset(PresentationParameters presentationParameters)
@@ -599,7 +599,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         internal void OnDeviceResetting()
         {
-            EventHelpers.Raise(this, DeviceResetting, EventArgs.Empty);
+            DeviceResetting?.Invoke(this);
 
             lock (_resourcesLock)
             {
@@ -620,7 +620,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         internal void OnDeviceReset()
         {
-            EventHelpers.Raise(this, DeviceReset, EventArgs.Empty);
+            DeviceReset?.Invoke(this);
         }
 
         public DisplayMode DisplayMode => Adapter.CurrentDisplayMode;

@@ -12,7 +12,8 @@ namespace Microsoft.Xna.Framework
 {
     public abstract class GameWindow
     {
-        public delegate void TextInputEventDelegate(object sender, int character, Keys key);
+        public delegate void TextInputEventDelegate(TextInputEvent ev);
+        public delegate void StateChangedDelegate();
 
         private string _title;
         internal bool _allowAltF4 = true;
@@ -121,9 +122,9 @@ namespace Microsoft.Xna.Framework
 
         #region Events
 
-        public event EventHandler<EventArgs> ClientSizeChanged;
-        public event EventHandler<EventArgs> OrientationChanged;
-        public event EventHandler<EventArgs> ScreenDeviceNameChanged;
+        public event StateChangedDelegate ClientSizeChanged;
+        public event StateChangedDelegate OrientationChanged;
+        public event StateChangedDelegate ScreenDeviceNameChanged;
 
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL|| ANGLE
 
@@ -160,16 +161,17 @@ namespace Microsoft.Xna.Framework
 
         internal void OnClientSizeChanged()
         {
-            EventHelpers.Raise(this, ClientSizeChanged, EventArgs.Empty);
+            ClientSizeChanged?.Invoke();
         }
 
         protected void OnDeactivated()
         {
+
         }
 
         protected void OnOrientationChanged()
         {
-            EventHelpers.Raise(this, OrientationChanged, EventArgs.Empty);
+            OrientationChanged?.Invoke();
         }
 
         protected void OnPaint()
@@ -178,13 +180,13 @@ namespace Microsoft.Xna.Framework
 
         protected void OnScreenDeviceNameChanged()
         {
-            EventHelpers.Raise(this, ScreenDeviceNameChanged, EventArgs.Empty);
+            ScreenDeviceNameChanged?.Invoke();
         }
 
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
-        protected void OnTextInput(object sender, int character, Keys key)
+        protected void OnTextInput(TextInputEvent ev)
         {
-            TextInput?.Invoke(sender, character, key);
+            TextInput?.Invoke(ev);
         }
 #endif
 

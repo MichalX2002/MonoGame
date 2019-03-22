@@ -3,13 +3,15 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.IO;
 
 namespace Microsoft.Xna.Framework.Media
 {
     public sealed partial class Song : IEquatable<Song>, IDisposable
     {
         private int _playCount = 0;
-        private TimeSpan _duration = TimeSpan.Zero;
+        private TimeSpan? _duration;
+        internal string _name;
 
         private static float _masterVolume = 1f;
         public static float MasterVolume
@@ -20,17 +22,18 @@ namespace Microsoft.Xna.Framework.Media
                 if (value < 0.0f || value > 1.0f)
                     throw new ArgumentOutOfRangeException();
 
-                if (_masterVolume == value)
-                    return;
-
-                _masterVolume = value;
-                MediaPlayer.Queue.UpdateMasterVolume();
+                if (_masterVolume != value)
+                {
+                    _masterVolume = value;
+                    MediaPlayer.Queue.UpdateMasterVolume();
+                }
             }
         }
 
         public bool IsDisposed { get; private set; }
 
         internal string FilePath { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// Gets the Album on which the Song appears.
@@ -50,26 +53,26 @@ namespace Microsoft.Xna.Framework.Media
         public TimeSpan Duration => PlatformGetDuration();
         public bool IsProtected => PlatformIsProtected();
         public bool IsRated => PlatformIsRated();
-        public string Name => PlatformGetName();
         public int PlayCount => PlatformGetPlayCount();
         public int Rating => PlatformGetRating();
         public int TrackNumber => PlatformGetTrackNumber();
 
 #if ANDROID || OPENAL || WEB || IOS
-        internal delegate void FinishedPlayingHandler(object sender, EventArgs args);
+        internal delegate void FinishedPlayingHandler();
 #if !(DESKTOPGL || DIRECTX)
         event FinishedPlayingHandler DonePlaying;
 #endif
 #endif
-        internal Song(string fileName, int durationMS) : this(fileName)
+
+        internal Song(string fileName, string name, int durationMS) : this(fileName, name)
         {
             _duration = TimeSpan.FromMilliseconds(durationMS);
         }
 
-        internal Song(string fileName)
+        internal Song(string fileName, string name)
         {
             FilePath = fileName;
-
+            Name = name ?? Path.GetFileNameWithoutExtension(fileName);
             PlatformInitialize(fileName);
         }
 
@@ -81,10 +84,8 @@ namespace Microsoft.Xna.Framework.Media
         /// <returns></returns>
         public static Song FromUri(string name, Uri uri)
         {
-            return new Song(uri.OriginalString)
-            {
-                FilePath = name
-            };
+            string path = Path.GetFullPath(uri.OriginalString);
+            return new Song(path, name);
         }
 
         public override int GetHashCode()
@@ -94,7 +95,10 @@ namespace Microsoft.Xna.Framework.Media
 
         public bool Equals(Song song)
         {
-            return song != null && Name == song.Name;
+            return 
+                song != null && 
+                FilePath == song.FilePath &&
+                Name == song.Name;
         }
         
         public override bool Equals(object obj)
@@ -121,11 +125,7 @@ namespace Microsoft.Xna.Framework.Media
         {
             if (!IsDisposed)
             {
-                if (disposing)
-                {
-                    PlatformDispose(disposing);
-                }
-
+                PlatformDispose(disposing);
                 IsDisposed = true;
             }
         }

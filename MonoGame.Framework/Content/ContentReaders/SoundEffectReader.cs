@@ -129,7 +129,7 @@ namespace Microsoft.Xna.Framework.Content
                 finally
                 {
                     memoryBuffer.Dispose();
-                    RecyclableMemoryManager.Instance.ReturnBlock(block, null);
+                    RecyclableMemoryManager.Instance.ReturnBlock(block);
                 }
             }
 

@@ -6,9 +6,9 @@ using System;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    internal class PresentationEventArgs : EventArgs
+    internal readonly struct PresentationEventArgs
     {
-        public PresentationParameters PresentationParameters { get; private set; }
+        public PresentationParameters PresentationParameters { get; }
 
         public PresentationEventArgs(PresentationParameters presentationParameters)
         {

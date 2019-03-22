@@ -12,7 +12,7 @@ namespace Microsoft.Xna.Framework.Media
         public readonly EffectsExtension Efx = ALController.Efx;
 
         const float DefaultUpdateRate = 8;
-        const int DefaultBufferSize = 44100 * 2;
+        const int DefaultBufferSize = 48000;
         const int MaxBuffers = 3;
 
         internal static readonly object _singletonMutex = new object();
@@ -218,7 +218,7 @@ namespace Microsoft.Xna.Framework.Media
             AL.GetSource(stream._alSourceID, ALGetSourcei.BuffersProcessed, out int processed);
             ALHelper.CheckError("Failed to fetch processed buffers.");
 
-            int requested = Math.Max(MaxBuffers - stream._queuedBuffers.Count, 0);
+            int requested = Math.Max(MaxBuffers - stream.BufferCount, 0);
             if (processed == 0 && requested == 0)
                 return false;
             
@@ -228,14 +228,14 @@ namespace Microsoft.Xna.Framework.Media
                 ALHelper.CheckError("Failed to unqueue buffers.");
 
                 for (int i = 0; i < processed; i++)
-                    stream.DequeueBuffer();
+                    stream.DequeueAndReturnBuffer();
             }
 
             for (int i = 0; i < requested; i++)
             {
                 if (TryReadBuffer(stream, out ALBuffer buffer))
                 {
-                    stream._queuedBuffers.Enqueue(buffer);
+                    stream.EnqueueBuffer(buffer);
                     AL.SourceQueueBuffer(stream._alSourceID, buffer.BufferID);
                 }
                 else

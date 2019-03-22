@@ -130,14 +130,14 @@ namespace Microsoft.Xna.Framework
             _shouldApplyChanges = false;
 
             // hook up reset events
-            GraphicsDevice.DeviceReset     += (sender, args) => OnDeviceReset(args);
-            GraphicsDevice.DeviceResetting += (sender, args) => OnDeviceResetting(args);
+            GraphicsDevice.DeviceReset     += (sender) => OnDeviceReset();
+            GraphicsDevice.DeviceResetting += (sender) => OnDeviceResetting();
 
             // update the touchpanel display size when the graphicsdevice is reset
             GraphicsDevice.DeviceReset += UpdateTouchPanel;
             GraphicsDevice.PresentationChanged += OnPresentationChanged;
 
-            OnDeviceCreated(EventArgs.Empty);
+            OnDeviceCreated();
         }
 
         void IGraphicsDeviceManager.CreateDevice()
@@ -165,31 +165,31 @@ namespace Microsoft.Xna.Framework
 
         #region IGraphicsDeviceService Members
 
-        public event EventHandler<EventArgs> DeviceCreated;
-        public event EventHandler<EventArgs> DeviceDisposing;
-        public event EventHandler<EventArgs> DeviceReset;
-        public event EventHandler<EventArgs> DeviceResetting;
-        public event EventHandler<PreparingDeviceSettingsEventArgs> PreparingDeviceSettings;
-        public event EventHandler<EventArgs> Disposed;
+        public event SenderDelegate<GraphicsDeviceManager> DeviceCreated;
+        public event SenderDelegate<GraphicsDeviceManager> DeviceDisposing;
+        public event SenderDelegate<GraphicsDeviceManager> DeviceReset;
+        public event SenderDelegate<GraphicsDeviceManager> DeviceResetting;
+        public event EventDelegate<GraphicsDeviceManager, PreparingDeviceSettingsEvent> PreparingDeviceSettings;
+        public event SenderDelegate<GraphicsDeviceManager> Disposed;
 
-        protected void OnDeviceDisposing(EventArgs e)
+        protected void OnDeviceDisposing()
         {
-            EventHelpers.Raise(this, DeviceDisposing, e);
+            DeviceDisposing?.Invoke(this);
         }
 
-        protected void OnDeviceResetting(EventArgs e)
+        protected void OnDeviceResetting()
         {
-            EventHelpers.Raise(this, DeviceResetting, e);
+            DeviceResetting?.Invoke(this);
         }
 
-        internal void OnDeviceReset(EventArgs e)
+        internal void OnDeviceReset()
         {
-            EventHelpers.Raise(this, DeviceReset, e);
+            DeviceReset?.Invoke(this);
         }
 
-        internal void OnDeviceCreated(EventArgs e)
+        internal void OnDeviceCreated()
         {
-            EventHelpers.Raise(this, DeviceCreated, e);
+            DeviceCreated?.Invoke(this);
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace Microsoft.Xna.Framework
             if (preparingDeviceSettingsHandler != null)
             {
                 // this allows users to overwrite settings through the argument
-                var args = new PreparingDeviceSettingsEventArgs(gdi);
+                var args = new PreparingDeviceSettingsEvent(gdi);
                 preparingDeviceSettingsHandler(this, args);
 
                 if (gdi.PresentationParameters == null || gdi.Adapter == null)
@@ -239,7 +239,7 @@ namespace Microsoft.Xna.Framework
                     }
                 }
                 _disposed = true;
-                EventHelpers.Raise(this, Disposed, EventArgs.Empty);
+                Disposed?.Invoke(this);
             }
         }
 
@@ -324,7 +324,7 @@ namespace Microsoft.Xna.Framework
         private void DisposeGraphicsDevice()
         {
             GraphicsDevice.Dispose();
-            EventHelpers.Raise(this, DeviceDisposing, EventArgs.Empty);
+            DeviceDisposing?.Invoke(this);
             GraphicsDevice = null;
         }
 
@@ -343,7 +343,7 @@ namespace Microsoft.Xna.Framework
             _initialized = true;
         }
 
-        private void UpdateTouchPanel(object sender, EventArgs eventArgs)
+        private void UpdateTouchPanel(GraphicsDevice sender)
         {
             TouchPanel.DisplayWidth = GraphicsDevice.PresentationParameters.BackBufferWidth;
             TouchPanel.DisplayHeight = GraphicsDevice.PresentationParameters.BackBufferHeight;

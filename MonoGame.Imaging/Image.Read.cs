@@ -111,7 +111,7 @@ namespace MonoGame.Imaging
             finally
             {
                 stream.Dispose();
-                _memoryManager.ReturnBlock(buffer, null);
+                _memoryManager.ReturnBlock(buffer);
                 CloseStream();
             }
         }
@@ -148,7 +148,7 @@ namespace MonoGame.Imaging
             }
             finally
             {
-                _memoryManager.ReturnBlock(buffer, null);
+                _memoryManager.ReturnBlock(buffer);
             }
         }
 
