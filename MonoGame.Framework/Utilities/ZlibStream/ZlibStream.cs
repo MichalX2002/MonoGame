@@ -86,7 +86,7 @@
 
 //------------------------------------------------------------------------------
 
-using MonoGame.Utilities.IO;
+using MonoGame.Utilities.Memory;
 using System;
 using System.IO;
 
