@@ -33,7 +33,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             string errorFmt = "OpenAL Error: {0}";
 
-            throw new NoMicrophoneConnectedException(String.Format("{0} - {1}",
+            throw new NoMicrophoneException(String.Format("{0} - {1}",
                             operation,
                             string.Format(errorFmt, error)));
         }
@@ -94,7 +94,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
 			else
             {
-                throw new NoMicrophoneConnectedException("Failed to open capture device.");
+                throw new NoMicrophoneException("Failed to open capture device.");
             }
         }
 

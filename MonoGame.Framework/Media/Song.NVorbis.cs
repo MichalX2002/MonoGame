@@ -3,16 +3,15 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.IO;
 using Microsoft.Xna.Framework.Audio;
 
 namespace Microsoft.Xna.Framework.Media
 {
-    public sealed partial class Song : IEquatable<Song>, IDisposable
+    public sealed partial class Song : IDisposable
     {
         internal OggStream stream;
         private float _volume = 1f;
-        private float _pitch = 0f;
+        private float _pitch = 1f;
 
         private void PlatformInitialize(string fileName)
         {
@@ -25,17 +24,13 @@ namespace Microsoft.Xna.Framework.Media
             if(!_duration.HasValue)
                 _duration = stream.GetLength();
         }
-        
-        internal void SetEventHandler(FinishedPlayingHandler handler)
+
+        private void OnFinishedPlaying()
         {
+            OnFinish?.Invoke();
         }
 
-        internal void OnFinishedPlaying()
-        {
-            MediaPlayer.OnSongFinishedPlaying();
-        }
-		
-        void PlatformDispose(bool disposing)
+        private void PlatformDispose(bool disposing)
         {
             if (stream != null)
             {
@@ -44,98 +39,95 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
-        internal void Play(TimeSpan? startPosition)
+        private void PlatformPlay(TimeSpan? startPosition)
         {
-            if (stream == null)
-                return;
-
-            stream.Play();
-            if (startPosition != null)
-                stream.SeekToPosition((TimeSpan)startPosition);
-
-            _playCount++;
-        }
-
-        internal void Resume()
-        {
-            if (stream == null)
-                return;
-
-            stream.Resume();
-        }
-
-        internal void Pause()
-        {
-            if (stream == null)
-                return;
-
-            stream.Pause();
-        }
-
-        internal void Stop()
-        {
-            if (stream == null)
-                return;
-
-            stream.Stop();
-            _playCount = 0;
-        }
-
-        internal float Volume
-        {
-            get
+            if (stream != null)
             {
-                if (stream == null)
-                    return 0.0f;
-                return _volume; 
-            }
-            set
-            {
-                _volume = value;
-                if (stream != null)
-                    stream.Volume = _volume * _masterVolume;
+                if (startPosition.HasValue)
+                    PlatformSetPosition(startPosition.Value);
+
+                stream.Play();
+
+                _playCount++;
             }
         }
 
-        internal float Pitch
+        private void PlatformResume()
         {
-            get
+            if (stream != null)
+                stream.Resume();
+        }
+
+        private void PlatformPause()
+        {
+            if (stream != null)
+                stream.Pause();
+        }
+
+        private void PlatformStop()
+        {
+            if (stream != null)
+                stream.Stop();
+        }
+
+        private TimeSpan PlatformGetPosition()
+        {
+            return stream != null ? stream.GetPosition() : TimeSpan.Zero;
+        }
+
+        private MediaState PlatformGetState()
+        {
+            switch (stream.GetState())
             {
-                if (stream == null)
-                    return 0.0f;
-                return _pitch;
+                case ALSourceState.Paused:
+                    return MediaState.Paused;
+
+                case ALSourceState.Playing:
+                    return MediaState.Playing;
+
+                default:
+                    return MediaState.Stopped;
             }
-            set
+        }
+
+        private void PlatformSetPosition(TimeSpan time)
+        {
+            if (stream != null)
             {
-                _pitch = SoundEffectInstance.XnaPitchToAlPitch(value);
+                var initialState = stream.GetState();
+                
+                stream.SeekToPosition(time);
+
+                if (initialState == ALSourceState.Playing)
+                    stream.Play();
+            }
+        }
+
+        private float PlatformGetVolume()
+        {
+            return stream != null ? _volume : 0;
+        }
+
+        private void PlatformSetVolume(float value)
+        {
+            _volume = value;
+            if (stream != null)
+                stream.Volume = _volume * _masterVolume;
+        }
+
+        private float PlatformGetPitch()
+        {
+            return stream != null ? _pitch : 0;
+        }
+
+        private void PlatformSetPitch(float value)
+        {
+            if (_pitch != value)
+            {
+                _pitch = value;
                 if (stream != null)
                     stream.Pitch = _pitch;
             }
-        }
-
-        public TimeSpan Position
-        {
-            get
-            {
-                if (stream == null)
-                    return TimeSpan.FromSeconds(0.0);
-                return stream.GetPosition();
-            }
-        }
-
-        private Album PlatformGetAlbum()
-        {
-            return null;
-        }
-
-        private Artist PlatformGetArtist()
-        {
-            return null;
-        }
-
-        private Genre PlatformGetGenre()
-        {
-            return null;
         }
 
         private TimeSpan PlatformGetDuration()
@@ -145,29 +137,9 @@ namespace Microsoft.Xna.Framework.Media
             return TimeSpan.Zero;
         }
 
-        private bool PlatformIsProtected()
-        {
-            return false;
-        }
-
-        private bool PlatformIsRated()
-        {
-            return false;
-        }
-
         private int PlatformGetPlayCount()
         {
             return _playCount;
-        }
-
-        private int PlatformGetRating()
-        {
-            return 0;
-        }
-
-        private int PlatformGetTrackNumber()
-        {
-            return 0;
         }
     }
 }

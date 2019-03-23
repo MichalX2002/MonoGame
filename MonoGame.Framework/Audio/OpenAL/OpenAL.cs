@@ -322,19 +322,6 @@ namespace MonoGame.OpenAL
         {
             AL.alSourceQueueBuffers(sourceId, 1, &buffer);
         }
-        
-        internal static unsafe int[] SourceGetAndUnqueueBuffers(int sourceId, int numEntries)
-        {
-            if (numEntries <= 0)
-                throw new ArgumentOutOfRangeException(nameof(numEntries), "Must be greater than zero.");
-
-            int[] array = new int[numEntries];
-            fixed (int* ptr = array)
-            {
-                alSourceUnqueueBuffers(sourceId, numEntries, ptr);
-            }
-            return array;
-        }
 
         internal static unsafe void SourceUnqueueBuffers(int sourceID, int numEntries)
         {

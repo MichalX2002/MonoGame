@@ -4,8 +4,8 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Media
-{
+namespace Microsoft.Xna.Framework.Mediax
+{/*
     public static partial class MediaPlayer
     {
         public delegate void StateChangedDelegate();
@@ -222,7 +222,6 @@ namespace Microsoft.Xna.Framework.Media
             }
 
             var nextSong = Queue.GetNextSong(direction, IsShuffled);
-
             if (nextSong != null)
                 PlaySong(nextSong, null);
 
@@ -233,6 +232,6 @@ namespace Microsoft.Xna.Framework.Media
         {
             PlatformGetVisualizationData(data);
         }
-    }
+    }*/
 }
 

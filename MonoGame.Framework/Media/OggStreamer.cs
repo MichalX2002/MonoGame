@@ -2,6 +2,7 @@
 using MonoGame.OpenAL;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading;
 
@@ -11,8 +12,8 @@ namespace Microsoft.Xna.Framework.Media
     {
         public readonly EffectsExtension Efx = ALController.Efx;
 
-        const float DefaultUpdateRate = 8;
-        const int DefaultBufferSize = 48000;
+        const float DefaultUpdateRate = 10;
+        const int DefaultBufferSize = 8000;
         const int MaxBuffers = 3;
 
         internal static readonly object _singletonMutex = new object();
@@ -22,6 +23,7 @@ namespace Microsoft.Xna.Framework.Media
         readonly float[] _readBuffer;
         readonly short[] _castBuffer;
         readonly HashSet<OggStream> _streams;
+        readonly TimeSpan[] _threadTiming;
 
         readonly Thread _thread;
         Stopwatch threadWatch;
@@ -31,7 +33,7 @@ namespace Microsoft.Xna.Framework.Media
 
         public float UpdateRate { get; }
         public int BufferSize { get; }
-        public float[] ThreadTiming { get; }
+        public ReadOnlyCollection<TimeSpan> ThreadTiming { get; }
 
         private static OggStreamer _instance;
         public static OggStreamer Instance
@@ -65,7 +67,8 @@ namespace Microsoft.Xna.Framework.Media
                 Instance = this;
 
                 threadWatch = new Stopwatch();
-                ThreadTiming = new float[(int)(UpdateRate < 1 ? 1 : UpdateRate)];
+                _threadTiming = new TimeSpan[(int)(UpdateRate < 1 ? 1 : UpdateRate)];
+                ThreadTiming = new ReadOnlyCollection<TimeSpan>(_threadTiming);
 
                 _thread = new Thread(EnsureBuffersFilled)
                 {
@@ -112,7 +115,7 @@ namespace Microsoft.Xna.Framework.Media
             lock (_readMutex)
             {
                 var reader = stream.Reader;
-                int readSamples = reader.ReadSamples(_readBuffer, 0, BufferSize);
+                int readSamples = reader.ReadSamples(_readBuffer);
 
                 if (readSamples > 0)
                 {
@@ -204,8 +207,8 @@ namespace Microsoft.Xna.Framework.Media
                 }
 
                 threadWatch.Stop();
-                ThreadTiming[nextTimingIndex++] = (float)threadWatch.Elapsed.TotalSeconds;
-                if (nextTimingIndex >= ThreadTiming.Length)
+                _threadTiming[nextTimingIndex++] = threadWatch.Elapsed;
+                if (nextTimingIndex >= _threadTiming.Length)
                     nextTimingIndex = 0;
             }
         }
@@ -236,7 +239,6 @@ namespace Microsoft.Xna.Framework.Media
                 if (TryReadBuffer(stream, out ALBuffer buffer))
                 {
                     stream.EnqueueBuffer(buffer);
-                    AL.SourceQueueBuffer(stream._alSourceID, buffer.BufferID);
                 }
                 else
                 {

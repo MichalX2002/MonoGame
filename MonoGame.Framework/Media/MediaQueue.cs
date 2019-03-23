@@ -5,8 +5,8 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Media
-{
+namespace Microsoft.Xna.Framework.Mediax
+{/*
 	public sealed class MediaQueue
 	{
         private Random random = new Random();
@@ -82,6 +82,6 @@ namespace Microsoft.Xna.Framework.Media
                 song.Volume = song.Volume;
             }
         }
-	}
+	}*/
 }
 

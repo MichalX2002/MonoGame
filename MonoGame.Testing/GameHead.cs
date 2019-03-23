@@ -18,12 +18,12 @@ namespace MonoGame.Testings
         private GraphicsDeviceManager _graphicsManager;
         private SpriteBatch _spriteBatch;
         private Texture2D _pixel;
+        private SpriteFont _font;
 
-        private SongCollection _songs;
-        private VisualizationData _visData;
+        private Song _song1;
+        private Song _song2;
 
-        private short[] _dynamicBuff;
-        private DynamicSoundEffectInstance _dynamicSound;
+        private SoundEffect _hitReflectSound;
 
         public GameHead()
         {
@@ -38,17 +38,8 @@ namespace MonoGame.Testings
 
             base.Initialize();
 
-            //MediaPlayer.ActiveSongChanged += MediaPlayer_ActiveSongChanged;
-            MediaPlayer.Volume = 0.1f;
-            MediaPlayer.Pitch = 1f;
-            MediaPlayer.IsRepeating = true;
-            
-            MediaPlayer.Play(_songs);
-        }
-
-        private void MediaPlayer_ActiveSongChanged(object s, EventArgs e)
-        {
-            Console.WriteLine(MediaPlayer.Queue.ActiveSong.Name);
+            //_song1.Play();
+            //_song2.Play();
         }
 
         private System.Diagnostics.Stopwatch w;
@@ -59,56 +50,27 @@ namespace MonoGame.Testings
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
             _pixel.SetData(new Color[] { Color.White });
 
-            //_dynamicBuff = new short[44100];
-            //_dynamicSound = new DynamicSoundEffectInstance(44100, AudioChannels.Stereo);
-            //_dynamicSound.BufferNeeded += _dynamicSound_BufferNeeded;
-            //_dynamicSound.Play();
-
+            _font = Content.Load<SpriteFont>("arial");
+            
             w = new System.Diagnostics.Stopwatch();
             w.Restart();
-            var song1 = Content.Load<Song>("sinus");
+            _song1 = Content.Load<Song>("sinus");
+            _song1.Volume = 0.5f;
             w.Stop();
             Console.WriteLine("Song Load Time: " + w.ElapsedMilliseconds + "ms");
 
             w.Restart();
-            var song2 = Content.Load<Song>("Win Jingle");
+            _song2 = Content.Load<Song>("Win Jingle");
+            _song2.Volume = 0.5f;
             w.Stop();
             Console.WriteLine("Song Load Time: " + w.ElapsedMilliseconds + "ms");
-
-            _songs = new SongCollection { song1, song2 };
-
-            //w.Restart();
-            //var wtef = Content.Load<SoundEffect>("sinus");
-            //w.Stop();
-            //Console.WriteLine("Load Time: " + w.ElapsedMilliseconds + "ms");
 
             w.Restart();
             _hitReflectSound = Content.Load<SoundEffect>("hit_reflect_0");
             w.Stop();
             Console.WriteLine("Load Time: " + w.ElapsedMilliseconds + "ms");
-
-            //wtef.Play();
-
-            /*
-            var def = Microphone.Default;
-            def.BufferReady += Def_BufferReady;
-            
-            def.Start();
-            */
         }
-
-        SoundEffect _hitReflectSound;
-
-        //private void _dynamicSound_BufferNeeded(object sender, EventArgs e)
-        //{
-        //    var instance = sender as DynamicSoundEffectInstance;
-        //
-        //    GenerateMusic(_dynamicBuff, _dynamicBuff.Length / 2);
-        //    instance.SubmitBuffer(_dynamicBuff);
-        //
-        //    Console.WriteLine("Enqueued " + _dynamicBuff.Length + " samples, " + _dynamicSound.PendingBufferCount + " pending buffers");
-        //}
-
+        
         //int ix = 0;
         //int j = 0;
         //int a1, b1, a2, b2;
@@ -154,24 +116,7 @@ namespace MonoGame.Testings
         //    Rw = 18000 * (Rw & 65535) + (Rw >> 16);
         //    return (Rz << 16) + Rw;
         //}
-
-        //private void Def_BufferReady(Microphone source, int sampleCount)
-        //{
-        //    byte[] data = new byte[sampleCount * sizeof(short)];
-        //    int readSamples = source.GetData(data) / sizeof(short);
-        //    short[] audio = new short[readSamples];
-        //
-        //    Buffer.BlockCopy(data, 0, audio, 0, readSamples * sizeof(short));
-        //    samples.InsertRange(0, audio);
-        //
-        //    const int threshold = 4410 * 15;
-        //    if(samples.Count > threshold)
-        //    {
-        //        int diff = samples.Count - threshold;
-        //        samples.RemoveRange(samples.Count - diff, diff);
-        //    }
-        //}
-
+        
         protected override void UnloadContent()
         {
         }
@@ -184,65 +129,39 @@ namespace MonoGame.Testings
                 Exit();
             
             f += time.Delta;
-            if(f >= 3)
+            if(f >= 2)
             {
                 //var instance = _hitReflectSound.CreateInstance();
                 //instance.Pitch = -0.6f;
                 //instance.Play();
-                
+
                 f = 0f;
 
                 w.Restart();
-                MediaPlayer.MoveNext();
+                _song2.Play(TimeSpan.Zero);
                 w.Stop();
-                Console.WriteLine("Moved next in " + w.Elapsed.Milliseconds + "ms");
+                Console.WriteLine("Moved next in " + w.Elapsed.TotalMilliseconds.ToString("0.00") + "ms");
             }
 
             base.Update(time);
         }
-
-        const float baseScale = 1f;
-
-        List<short> samples = new List<short>();
-
+        
         protected override void Draw(GameTime time)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            //DrawAudioVis();
-
-            base.Draw(time);
-        }
-
-        private void DrawAudioVis()
-        {
-            float yOrigin = GraphicsDevice.Viewport.Height / 2f;
-
             _spriteBatch.Begin();
 
-            for (int i = 0; i < _visData.Samples.Count; i += 16)
-            {
-                float x = i * baseScale / 24f + 10;
+            double avg = 0;
+            foreach (var value in Song.ThreadUpdateTiming)
+                avg += value.TotalMilliseconds;
+            avg /= Song.ThreadUpdateTiming.Count;
 
-                float sample = _visData.Samples[i];
-                //float sample = samples[i] / short.MaxValue;
-
-                DrawLine(sample, i, x, yOrigin);
-            }
+            _spriteBatch.DrawString(_font, "Timing: " + avg.ToString("0.0"), new Vector2(10, 5), Color.White);
 
             _spriteBatch.End();
-        }
 
-        void DrawLine(float sample, int i, float x, float yOrigin)
-        {
-            float scl = sample * 299f + baseScale;
-            float yOff = scl > 0 ? -scl : 0;
-        
-            var pos = new Vector2(x, yOrigin + yOff);
-            var color = new Color(255 - i / 150 + 20, 255 - i / 200, 255 - 150 - i / 150);
-            var scale = new Vector2(baseScale + 1f, Math.Abs(scl));
-        
-            _spriteBatch.Draw(_pixel, pos, null, color, 0, Vector2.Zero, scale, SpriteEffects.None, 0);
+            base.Draw(time);
         }
     }
 }

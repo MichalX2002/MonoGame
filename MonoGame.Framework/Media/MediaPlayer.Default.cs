@@ -12,8 +12,8 @@ using AudioToolbox;
 using AVFoundation;
 #endif
 
-namespace Microsoft.Xna.Framework.Media
-{
+namespace Microsoft.Xna.Framework.Mediax
+{/*
     public static partial class MediaPlayer
     {
         #region Properties
@@ -192,6 +192,6 @@ namespace Microsoft.Xna.Framework.Media
             return 0;
 #endif
         }
-    }
+    }*/
 }
 

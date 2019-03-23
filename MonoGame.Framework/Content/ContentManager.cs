@@ -10,7 +10,7 @@ using System.Reflection;
 using MonoGame.Utilities;
 using Microsoft.Xna.Framework.Graphics;
 using System.Globalization;
-using MonoGame.Utilities.IO;
+using MonoGame.Utilities.Memory;
 
 #if !WINDOWS_UAP
 using Microsoft.Xna.Framework.Audio;

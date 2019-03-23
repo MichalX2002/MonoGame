@@ -20,7 +20,7 @@
 // THE SOFTWARE.
 // ---------------------------------------------------------------------
 
-namespace MonoGame.Utilities.IO
+namespace MonoGame.Utilities.Memory
 {
     using System;
     using System.Collections.Concurrent;
@@ -388,9 +388,7 @@ namespace MonoGame.Utilities.IO
             {
                 int index = 0;
                 while ((this.LargeBufferMultiple << index) < length)
-                {
                     ++index;
-                }
                 return index;
             }
             else

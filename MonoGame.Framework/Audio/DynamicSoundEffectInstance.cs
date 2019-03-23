@@ -70,7 +70,7 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
         /// <summary>
-        /// The event that occurs when the number of queued audio buffers is less than or equal to 2.
+        /// The event that occurs when the number of queued audio buffers is low.
         /// </summary>
         /// <remarks>
         /// This event may occur when <see cref="Play()"/> is called or during playback when a buffer is completed.
@@ -367,7 +367,7 @@ namespace Microsoft.Xna.Framework.Audio
             var bufferNeededHandler = BufferNeeded;
             if (bufferNeededHandler != null)
             {
-                var eventCount = (_buffersNeeded < 3) ? _buffersNeeded : 3;
+                int eventCount = (_buffersNeeded < 3) ? _buffersNeeded : 3;
                 for (int i = 0; i < eventCount; i++)
                     bufferNeededHandler?.Invoke(this);
             }

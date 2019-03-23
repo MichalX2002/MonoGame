@@ -3,16 +3,13 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
 
 namespace Microsoft.Xna.Framework.Media
 {
     public sealed partial class Song : IDisposable
     {
-        private int _playCount = 0;
-        private TimeSpan? _duration;
-        internal string _name;
-
         private static float _masterVolume = 1f;
         public static float MasterVolume
         {
@@ -23,47 +20,29 @@ namespace Microsoft.Xna.Framework.Media
                     throw new ArgumentOutOfRangeException();
 
                 if (_masterVolume != value)
-                {
                     _masterVolume = value;
-                    MediaPlayer.Queue.UpdateMasterVolume();
-                }
             }
         }
 
+        public static ReadOnlyCollection<TimeSpan> ThreadUpdateTiming => OggStreamer.Instance.ThreadTiming;
+
+        public delegate void FinishedPlayingHandler();
+        public event FinishedPlayingHandler OnFinish;
+
+        private int _playCount = 0;
+        private TimeSpan? _duration;
+        internal string _name;
+
         public bool IsDisposed { get; private set; }
-
-        internal string FilePath { get; private set; }
+        internal string FilePath { get; }
         public string Name { get; }
-
-        /// <summary>
-        /// Gets the Album on which the Song appears.
-        /// </summary>
-        public Album Album => PlatformGetAlbum();
-
-        /// <summary>
-        /// Gets the Artist of the Song.
-        /// </summary>
-        public Artist Artist => PlatformGetArtist();
-
-        /// <summary>
-        /// Gets the Genre of the Song.
-        /// </summary>
-        public Genre Genre => PlatformGetGenre();
-
+        
         public TimeSpan Duration => PlatformGetDuration();
-        public bool IsProtected => PlatformIsProtected();
-        public bool IsRated => PlatformIsRated();
         public int PlayCount => PlatformGetPlayCount();
-        public int Rating => PlatformGetRating();
-        public int TrackNumber => PlatformGetTrackNumber();
-
-#if ANDROID || OPENAL || WEB || IOS
-        internal delegate void FinishedPlayingHandler();
-#if !(DESKTOPGL || DIRECTX)
-        event FinishedPlayingHandler DonePlaying;
-#endif
-#endif
-
+        public float Volume { get => PlatformGetVolume(); set => PlatformSetVolume(value); }
+        public float Pitch { get => PlatformGetPitch(); set => PlatformSetPitch(value); }
+        public MediaState State => PlatformGetState();
+        
         internal Song(string fileName, string name, int durationMS) : this(fileName, name)
         {
             _duration = TimeSpan.FromMilliseconds(durationMS);
@@ -77,7 +56,7 @@ namespace Microsoft.Xna.Framework.Media
         }
 
         /// <summary>
-        /// Returns a song that can be played via <see cref="MediaPlayer"/>.
+        /// Returns a song that can be played.
         /// </summary>
         /// <param name="name">The name for the song. See <see cref="Name"/>.</param>
         /// <param name="uri">The path to the song file.</param>
@@ -86,6 +65,26 @@ namespace Microsoft.Xna.Framework.Media
         {
             string path = Path.GetFullPath(uri.OriginalString);
             return new Song(path, name);
+        }
+
+        public void Play(TimeSpan? startPosition = null)
+        {
+            PlatformPlay(startPosition);
+        }
+
+        public void Pause()
+        {
+            PlatformPause();
+        }
+
+        public void Resume()
+        {
+            PlatformResume();
+        }
+
+        public void Stop()
+        {
+            PlatformStop();
         }
 
         void Dispose(bool disposing)

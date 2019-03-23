@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
-using MonoGame.Utilities.IO;
+using MonoGame.Utilities.Memory;
 using System;
 using System.Collections.Generic;
 using System.IO;

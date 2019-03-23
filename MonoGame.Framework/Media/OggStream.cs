@@ -21,189 +21,22 @@ namespace Microsoft.Xna.Framework.Media
         internal readonly object _prepareMutex = new object();
 
         internal readonly int _alSourceID;
-        private readonly int _alFilterId;
+        private readonly int _alFilterID;
         private readonly Queue<ALBuffer> _queuedBuffers;
 
-        float _lowPassHfGain;
-        float _volume;
-        float _pitch;
+        private float _lowPassHfGain;
+        private float _volume;
+        private float _pitch;
 
         public bool IsLooped { get; set; }
         
+        private string FilePath { get; }
         internal VorbisReader Reader { get; private set; }
         internal bool IsReady { get; private set; }
         internal bool IsPreparing { get; private set; }
         public Action OnFinished { get; private set; }
 
         public int BufferCount => _queuedBuffers.Count;
-
-        public OggStream(string fileName, Action onFinished = null)
-        {
-            OnFinished = onFinished;
-
-            _alSourceID = ALController.Instance.ReserveSource();
-            Reader = new VorbisReader(File.OpenRead(fileName), true);
-            _queuedBuffers = new Queue<ALBuffer>();
-
-            Volume = 1;
-            Pitch = 1;
-
-            if (OggStreamer.Instance.Efx.IsInitialized)
-            {
-                _alFilterId = OggStreamer.Instance.Efx.GenFilter();
-                ALHelper.CheckError("Failed to generate Efx filter.");
-
-                OggStreamer.Instance.Efx.Filter(_alFilterId, EfxFilteri.FilterType, (int)EfxFilterType.Lowpass);
-                ALHelper.CheckError("Failed to set Efx filter type.");
-
-                OggStreamer.Instance.Efx.Filter(_alFilterId, EfxFilterf.LowpassGain, 1);
-                ALHelper.CheckError("Failed to set Efx filter value.");
-                LowPassHFGain = 1;
-            }
-        }
-
-        public void Prepare()
-        {
-            if (IsPreparing)
-                return;
-
-            var state = AL.GetSourceState(_alSourceID);
-            ALHelper.CheckError("Failed to get source state.");
-
-            lock (_stopMutex)
-            {
-                switch (state)
-                {
-                    case ALSourceState.Playing:
-                    case ALSourceState.Paused:
-                        return;
-
-                    case ALSourceState.Stopped:
-                        lock (_prepareMutex)
-                        {
-                            //Close();
-                            Empty();
-                        }
-                        break;
-                }
-
-                if (!IsReady)
-                {
-                    lock (_prepareMutex)
-                    {
-                        IsPreparing = true;
-                        Open(precache: true);
-                    }
-                }
-                else
-                {
-                    Reader.DecodedPosition = 0;
-                    FillOneBuffer();
-                }
-            }
-        }
-
-        public void Play()
-        {
-            var state = AL.GetSourceState(_alSourceID);
-            ALHelper.CheckError("Failed to get source state.");
-
-            switch (state)
-            {
-                case ALSourceState.Playing:
-                    return;
-
-                case ALSourceState.Paused:
-                    Resume();
-                    return;
-
-                default:
-                    Prepare();
-
-                    AL.SourcePlay(_alSourceID);
-                    ALHelper.CheckError("Failed to play source.");
-
-                    IsPreparing = false;
-                    OggStreamer.Instance.AddStream(this);
-                    break;
-            }
-        }
-
-        public void Pause()
-        {
-            var state = AL.GetSourceState(_alSourceID);
-            ALHelper.CheckError("Failed to get source state.");
-            if (state != ALSourceState.Playing)
-                return;
-
-            OggStreamer.Instance.RemoveStream(this);
-            AL.SourcePause(_alSourceID);
-            ALHelper.CheckError("Failed to pause source.");
-        }
-
-        public void Resume()
-        {
-            var state = AL.GetSourceState(_alSourceID);
-            ALHelper.CheckError("Failed to get source state.");
-            if (state != ALSourceState.Paused)
-                return;
-
-            OggStreamer.Instance.AddStream(this);
-            AL.SourcePlay(_alSourceID);
-            ALHelper.CheckError("Failed to play source.");
-        }
-
-        public void Stop()
-        {
-            var state = AL.GetSourceState(_alSourceID);
-            ALHelper.CheckError("Failed to get source state.");
-
-            if (state == ALSourceState.Playing || state == ALSourceState.Paused)
-                StopPlayback();
-
-            lock (_stopMutex)
-            {
-                OggStreamer.Instance.RemoveStream(this);
-
-                lock (_prepareMutex)
-                {
-                    if (state != ALSourceState.Initial)
-                        Empty(); // force the queued buffers to be unqueued to avoid issues on Mac
-                }
-            }
-            AL.Source(_alSourceID, ALSourcei.Buffer, 0);
-            ALHelper.CheckError("Failed to free source from buffers.");
-        }
-
-        public void SeekToPosition(TimeSpan pos)
-        {
-            Reader.DecodedTime = pos;
-            SeekStopSource();
-        }
-
-        public void SeekToPosition(long pos)
-        {
-            Reader.DecodedPosition = pos;
-            SeekStopSource();
-        }
-
-        private void SeekStopSource()
-        {
-            AL.SourceStop(_alSourceID);
-            ALHelper.CheckError("Failed to stop source.");
-        }
-
-        public TimeSpan GetPosition()
-        {
-            if (Reader == null)
-                return TimeSpan.Zero;
-            return Reader.DecodedTime;
-        }
-
-        public TimeSpan GetLength()
-        {
-            return Reader.TotalTime;
-        }
 
         public float LowPassHFGain
         {
@@ -212,10 +45,10 @@ namespace Microsoft.Xna.Framework.Media
             {
                 if (OggStreamer.Instance.Efx.IsInitialized)
                 {
-                    OggStreamer.Instance.Efx.Filter(_alFilterId, EfxFilterf.LowpassGainHF, _lowPassHfGain = value);
+                    OggStreamer.Instance.Efx.Filter(_alFilterID, EfxFilterf.LowpassGainHF, _lowPassHfGain = value);
                     ALHelper.CheckError("Failed to set Efx filter.");
 
-                    OggStreamer.Instance.Efx.BindFilterToSource(_alSourceID, _alFilterId);
+                    OggStreamer.Instance.Efx.BindFilterToSource(_alSourceID, _alFilterID);
                     ALHelper.CheckError("Failed to bind Efx filter to source.");
                 }
             }
@@ -241,53 +74,217 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
+        public OggStream(string fileName, Action onFinished = null)
+        {
+            OnFinished = onFinished;
+            FilePath = fileName;
+
+            _queuedBuffers = new Queue<ALBuffer>();
+            _alSourceID = ALController.Instance.ReserveSource();
+            
+            if (OggStreamer.Instance.Efx.IsInitialized)
+            {
+                _alFilterID = OggStreamer.Instance.Efx.GenFilter();
+                ALHelper.CheckError("Failed to generate Efx filter.");
+
+                OggStreamer.Instance.Efx.Filter(_alFilterID, EfxFilteri.FilterType, (int)EfxFilterType.Lowpass);
+                ALHelper.CheckError("Failed to set Efx filter type.");
+
+                OggStreamer.Instance.Efx.Filter(_alFilterID, EfxFilterf.LowpassGain, 1);
+                ALHelper.CheckError("Failed to set Efx filter value.");
+                LowPassHFGain = 1;
+            }
+
+            Volume = 1;
+            Pitch = 1;
+        }
+
+        public void Prepare()
+        {
+            if (IsPreparing)
+                return;
+
+            var state = GetState();
+            lock (_stopMutex)
+            {
+                switch (state)
+                {
+                    case ALSourceState.Playing:
+                    case ALSourceState.Paused:
+                        return;
+
+                    case ALSourceState.Stopped:
+                        lock (_prepareMutex)
+                            Empty();
+                        break;
+                }
+
+                if (!IsReady)
+                {
+                    lock (_prepareMutex)
+                    {
+                        IsPreparing = true;
+                        Open(precache: true);
+                    }
+                }
+                else
+                {
+                    FillOneBuffer();
+                }
+
+                IsPreparing = false;
+                OggStreamer.Instance.AddStream(this);
+            }
+        }
+
+        public void Play()
+        {
+            var state = GetState();
+            switch (state)
+            {
+                case ALSourceState.Playing:
+                    return;
+
+                case ALSourceState.Paused:
+                    Resume();
+                    return;
+
+                default:
+                    Prepare();
+
+                    AL.SourcePlay(_alSourceID);
+                    ALHelper.CheckError("Failed to play source.");
+                    break;
+            }
+        }
+
+        public void Pause()
+        {
+            var state = GetState();
+            if (state != ALSourceState.Playing)
+                return;
+
+            OggStreamer.Instance.RemoveStream(this);
+            AL.SourcePause(_alSourceID);
+            ALHelper.CheckError("Failed to pause source.");
+        }
+
+        public void Resume()
+        {
+            var state = GetState();
+            if (state != ALSourceState.Paused)
+                return;
+
+            OggStreamer.Instance.AddStream(this);
+            AL.SourcePlay(_alSourceID);
+            ALHelper.CheckError("Failed to play source.");
+        }
+
         void StopPlayback()
         {
             AL.SourceStop(_alSourceID);
             ALHelper.CheckError("Failed to stop source.");
         }
 
-        void Empty()
+        public void Stop()
         {
-            AL.GetSource(_alSourceID, ALGetSourcei.BuffersQueued, out int queued);
-            ALHelper.CheckError("Failed to fetch queued buffers.");
-
-            if (queued > 0)
+            lock (_stopMutex)
             {
-                try
+                StopPlayback();
+
+                lock (_prepareMutex)
                 {
-                    while (_queuedBuffers.Count > 0)
-                        DequeueAndReturnBuffer();
-
-                    AL.SourceUnqueueBuffers(_alSourceID, queued);
-                    ALHelper.CheckError("Failed to unqueue buffers (first attempt).");
-                }
-                catch (InvalidOperationException)
-                {
-                    // This is a bug in the OpenAL implementation, salvage what we can
-                    AL.GetSource(_alSourceID, ALGetSourcei.BuffersProcessed, out int processed);
-                    ALHelper.CheckError("Failed to fetch processed buffers.");
-                    
-                    if (processed > 0)
-                    {
-                        AL.SourceUnqueueBuffers(_alSourceID, processed);
-                        ALHelper.CheckError("Failed to unqueue buffers (second attempt).");
-                    }
-
-                    // Try turning it off again?
-                    AL.SourceStop(_alSourceID);
-                    ALHelper.CheckError("Failed to stop source.");
-
+                    OggStreamer.Instance.RemoveStream(this);
                     Empty();
                 }
+
+                AL.Source(_alSourceID, ALSourcei.Buffer, 0);
+                ALHelper.CheckError("Failed to free source from buffers.");
+
+                while(_queuedBuffers.Count > 0)
+                    DequeueAndReturnBuffer();
             }
+        }
+
+        void Empty(int attempts = 0)
+        {
+            AL.GetSource(_alSourceID, ALGetSourcei.BuffersProcessed, out int processed);
+            ALHelper.CheckError("Failed to fetch processed buffers.");
+
+            try
+            {
+                if (processed > 0)
+                {
+                    AL.SourceUnqueueBuffers(_alSourceID, processed);
+                    ALHelper.CheckError("Failed to unqueue buffers (first attempt).");
+
+                    for (int i = 0; i < processed; i++)
+                        DequeueAndReturnBuffer();
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                if (processed > 0)
+                {
+                    AL.SourceUnqueueBuffers(_alSourceID, processed);
+                    ALHelper.CheckError("Failed to unqueue buffers (second attempt).");
+                }
+
+                // Try turning it off again?
+                AL.SourceStop(_alSourceID);
+                ALHelper.CheckError("Failed to stop source.");
+
+                if(attempts < 5)
+                    Empty(attempts++);
+            }
+        }
+        
+        public void SeekToPosition(TimeSpan pos)
+        {
+            Reader.DecodedTime = pos;
+            SeekReset();
+        }
+
+        public void SeekToPosition(long pos)
+        {
+            Reader.DecodedPosition = pos;
+            SeekReset();
+        }
+
+        private void SeekReset()
+        {
+            lock (_stopMutex)
+            {
+                Stop();
+            }
+        }
+        
+        public TimeSpan GetPosition()
+        {
+            if (Reader == null)
+                return TimeSpan.Zero;
+            return Reader.DecodedTime;
+        }
+
+        public ALSourceState GetState()
+        {
+            var state = AL.GetSourceState(_alSourceID);
+            ALHelper.CheckError("Failed to get source state.");
+            return state;
+        }
+
+        public TimeSpan GetLength()
+        {
+            return Reader.TotalTime;
         }
 
         internal void Open(bool precache = false)
         {
+            if(Reader == null)
+                Reader = new VorbisReader(File.OpenRead(FilePath), leaveOpen: false);
+
             if (precache)
                 FillOneBuffer();
-
             IsReady = true;
         }
 
@@ -295,16 +292,14 @@ namespace Microsoft.Xna.Framework.Media
         {
             // Fill first buffer synchronously
             if (OggStreamer.Instance.TryReadBuffer(this, out ALBuffer buffer))
-            {
-                AL.SourceQueueBuffer(_alSourceID, buffer.BufferID);
-                ALHelper.CheckError("Failed to queue buffer.");
-
                 EnqueueBuffer(buffer);
-            }
         }
 
         public void EnqueueBuffer(ALBuffer buffer)
         {
+            AL.SourceQueueBuffer(_alSourceID, buffer.BufferID);
+            ALHelper.CheckError("Failed to queue buffer.");
+
             _queuedBuffers.Enqueue(buffer);
         }
 
@@ -331,9 +326,7 @@ namespace Microsoft.Xna.Framework.Media
 
         public void Dispose()
         {
-            var state = AL.GetSourceState(_alSourceID);
-            ALHelper.CheckError("Failed to get the source state.");
-
+            var state = GetState();
             if (state == ALSourceState.Playing || state == ALSourceState.Paused)
                 StopPlayback();
 
@@ -350,14 +343,14 @@ namespace Microsoft.Xna.Framework.Media
             AL.Source(_alSourceID, ALSourcei.Buffer, 0);
             ALHelper.CheckError("Failed to free source from buffers.");
 
-            ALController.Instance.RecycleSource(_alSourceID);
-
             while (_queuedBuffers.Count > 0)
                 DequeueAndReturnBuffer();
 
+            ALController.Instance.RecycleSource(_alSourceID);
+            
             if (OggStreamer.Instance.Efx.IsInitialized)
             {
-                OggStreamer.Instance.Efx.DeleteFilter(_alFilterId);
+                OggStreamer.Instance.Efx.DeleteFilter(_alFilterID);
                 ALHelper.CheckError("Failed to delete EFX filter.");
             }
         }

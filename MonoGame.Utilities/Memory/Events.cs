@@ -20,7 +20,7 @@
 // THE SOFTWARE.
 // ---------------------------------------------------------------------
 
-namespace MonoGame.Utilities.IO
+namespace MonoGame.Utilities.Memory
 {
     using System;
     using System.Diagnostics.Tracing;

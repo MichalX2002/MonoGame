@@ -14,8 +14,6 @@ namespace Microsoft.Xna.Framework.Audio
     /// </remarks>
     public partial class SoundEffectInstance : IDisposable
     {
-        public static bool UseXnaPitch { get; set; } = false;
-
         internal bool _isPooled = true;
         internal bool _isXAct;
         internal bool _isDynamic;
@@ -23,6 +21,11 @@ namespace Microsoft.Xna.Framework.Audio
         private float _pan;
         private float _volume;
         private float _pitch;
+
+        public bool IsDisposed { get; private set; } 
+
+        /// <summary>Gets the SoundEffectInstance's current playback state.</summary>
+        public virtual SoundState State => PlatformGetState();
 
         /// <summary>Enables or Disables whether the SoundEffectInstance should repeat after playback.</summary>
         /// <remarks>This value has no effect on an already playing sound.</remarks>
@@ -87,42 +90,11 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        /// <summary>Gets the SoundEffectInstance's current playback state.</summary>
-        public virtual SoundState State => PlatformGetState();
-
-        /// <summary>Indicates whether the object is disposed.</summary>
-        public bool IsDisposed { get; private set; } = false;
-
         internal SoundEffectInstance()
         {
             _pan = 0.0f;
             _volume = 1.0f;
             _pitch = 0.0f;            
-        }
-
-        //internal SoundEffectInstance(byte[] buffer, int sampleRate, int channels) : this()
-        //{
-        //    PlatformInitialize(buffer, sampleRate, channels);
-        //}
-		
-        /// <summary>
-        /// Converts the XNA [-1, 1] pitch range to OpenAL pitch (0, INF) or Android SoundPool playback rate [0.5, 2].
-        /// <param name="xnaPitch">The pitch of the sound in the Microsoft XNA range.</param>
-        /// </summary>
-        internal static float XnaPitchToAlPitch(float xnaPitch)
-        {
-            if(UseXnaPitch)
-                return (float)Math.Pow(2, xnaPitch);
-            return xnaPitch + 1f;
-        }
-
-        /// <summary>
-        /// Releases unmanaged resources and performs other cleanup operations before the
-        /// <see cref="SoundEffectInstance"/> is reclaimed by garbage collection.
-        /// </summary>
-        ~SoundEffectInstance()
-        {
-            Dispose(false);
         }
 
         /// <summary>Applies 3D positioning to the SoundEffectInstance using a single listener.</summary>
@@ -198,13 +170,6 @@ namespace Microsoft.Xna.Framework.Audio
             PlatformStop(immediate);
         }
 
-        /// <summary>Releases the resources held by this <see cref="SoundEffectInstance"/>.</summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         /// <summary>
         /// Releases the resources held by this <see cref="SoundEffectInstance"/>.
         /// </summary>
@@ -222,6 +187,24 @@ namespace Microsoft.Xna.Framework.Audio
                 PlatformDispose(disposing);
                 IsDisposed = true;
             }
+        }
+
+        /// <summary>
+        /// Releases the resources held by this <see cref="SoundEffectInstance"/>.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases unmanaged resources and performs other cleanup operations before the
+        /// <see cref="SoundEffectInstance"/> is reclaimed by garbage collection.
+        /// </summary>
+        ~SoundEffectInstance()
+        {
+            Dispose(false);
         }
     }
 }

@@ -6,19 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework.Audio;
-using MonoGame.Utilities.IO;
+using MonoGame.Utilities.Memory;
 using NVorbis;
 
 namespace Microsoft.Xna.Framework.Content
 {
 	internal class SoundEffectReader : ContentTypeReader<SoundEffect>
 	{
-		[ThreadStatic]
-		private float[] _floatBuffer;
-        
-        [ThreadStatic]
-        private byte[] _primitiveBuffer;
-
 		protected internal override SoundEffect Read(ContentReader input, SoundEffect existingInstance)
 		{
 			// XNB format for SoundEffect...
@@ -66,11 +60,7 @@ namespace Microsoft.Xna.Framework.Content
 
             if (format == 1)
             {
-                if (_floatBuffer == null)
-                    _floatBuffer = new float[1024 * 4];
-
-                if (_primitiveBuffer == null)
-                    _primitiveBuffer = new byte[2];
+                Span<float> floatBuffer = stackalloc float[1024 * 4];
 
                 using (var reader = new VorbisReader(input.BaseStream, false))
                 {
@@ -82,19 +72,18 @@ namespace Microsoft.Xna.Framework.Content
                     {
                         int totalSamples = 0;
                         int samplesRead;
-                        while ((samplesRead = reader.ReadSamples(_floatBuffer, 0, _floatBuffer.Length)) > 0)
+                        while ((samplesRead = reader.ReadSamples(floatBuffer)) > 0)
                         {
                             for (int i = 0; i < samplesRead; i++)
                             {
-                                int tmp = (int)(32767f * _floatBuffer[i]);
+                                int tmp = (int)(32767f * floatBuffer[i]);
                                 if (tmp > short.MaxValue)
                                     tmp = short.MaxValue;
                                 else if (tmp < short.MinValue)
                                     tmp = short.MinValue;
 
-                                _primitiveBuffer[0] = (byte)tmp;
-                                _primitiveBuffer[1] = (byte)(tmp >> 8);
-                                memoryBuffer.Write(_primitiveBuffer, 0, 2);
+                                memoryBuffer.WriteByte((byte)tmp);
+                                memoryBuffer.WriteByte((byte)(tmp >> 8));
                             }
                             totalSamples += samplesRead;
                         }

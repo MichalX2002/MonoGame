@@ -1,4 +1,4 @@
-﻿using MonoGame.Utilities.IO;
+﻿using MonoGame.Utilities.Memory;
 
 namespace MonoGame.Imaging
 {

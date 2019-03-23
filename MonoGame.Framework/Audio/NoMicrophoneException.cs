@@ -12,17 +12,17 @@ namespace Microsoft.Xna.Framework.Audio
     /// The exception thrown when no audio hardware is present, or driver issues are detected.
     /// </summary>
     [DataContract]
-    public sealed class NoMicrophoneConnectedException : Exception
+    public sealed class NoMicrophoneException : Exception
     {
         /// <param name="msg">A message describing the error.</param>
-        public NoMicrophoneConnectedException(string msg)
+        public NoMicrophoneException(string msg)
             : base(msg)
         {
         }
 
         /// <param name="msg">A message describing the error.</param>
         /// <param name="innerException">The exception that is the underlying cause of the current exception. If not null, the current exception is raised in a try/catch block that handled the innerException.</param>
-        public NoMicrophoneConnectedException(string msg, Exception innerException)
+        public NoMicrophoneException(string msg, Exception innerException)
             : base(msg, innerException)
         {
         }
