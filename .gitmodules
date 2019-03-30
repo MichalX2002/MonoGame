@@ -9,3 +9,6 @@
 [submodule "ThirdParty/SDL_GameControllerDB"]
 	path = ThirdParty/SDL_GameControllerDB
 	url = https://github.com/gabomdq/SDL_GameControllerDB
+[submodule "ThirdParty/Lidgren.Network"]
+	path = ThirdParty/Lidgren.Network
+	url = https://github.com/TechnologicalPizza/lidgren-network-gen3

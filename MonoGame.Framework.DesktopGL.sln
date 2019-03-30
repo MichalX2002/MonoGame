@@ -6,13 +6,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Framework.DesktopG
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Imaging", "MonoGame.Imaging\MonoGame.Imaging.csproj", "{4344DACF-E2A9-4699-A89E-89DEDBA6D941}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lidgren.Network.DesktopGL", "ThirdParty\Lidgren.Network\Lidgren.Network.DesktopGL.csproj", "{AE483C29-042E-4226-BA52-D247CE7676DA}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Utilities", "MonoGame.Utilities\MonoGame.Utilities.csproj", "{D046ADDA-B87B-4AB2-9DAD-FA886D3E2014}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Imaging.Tests", "MonoGame.Imaging.Tests\MonoGame.Imaging.Tests.csproj", "{8627DE8C-7B2C-4CF8-9725-01BA0BF04CC9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Testing.DesktopGL", "MonoGame.Testing\MonoGame.Testing.DesktopGL.csproj", "{AEEADB59-7F50-496A-9524-A81A876AE70E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lidgren.Network.DesktopGL", "ThirdParty\Lidgren.Network\Lidgren.Network\Lidgren.Network.DesktopGL.csproj", "{AE483C29-042E-4226-BA52-D247CE7676DA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,10 +28,6 @@ Global
 		{4344DACF-E2A9-4699-A89E-89DEDBA6D941}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4344DACF-E2A9-4699-A89E-89DEDBA6D941}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4344DACF-E2A9-4699-A89E-89DEDBA6D941}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AE483C29-042E-4226-BA52-D247CE7676DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AE483C29-042E-4226-BA52-D247CE7676DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AE483C29-042E-4226-BA52-D247CE7676DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AE483C29-042E-4226-BA52-D247CE7676DA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D046ADDA-B87B-4AB2-9DAD-FA886D3E2014}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D046ADDA-B87B-4AB2-9DAD-FA886D3E2014}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D046ADDA-B87B-4AB2-9DAD-FA886D3E2014}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -44,6 +40,10 @@ Global
 		{AEEADB59-7F50-496A-9524-A81A876AE70E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AEEADB59-7F50-496A-9524-A81A876AE70E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AEEADB59-7F50-496A-9524-A81A876AE70E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE483C29-042E-4226-BA52-D247CE7676DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE483C29-042E-4226-BA52-D247CE7676DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE483C29-042E-4226-BA52-D247CE7676DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE483C29-042E-4226-BA52-D247CE7676DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
