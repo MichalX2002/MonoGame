@@ -80,9 +80,9 @@ namespace Microsoft.Xna.Framework.Graphics
                 if ((w == 1 && h == 1) || !mipmap)
                     break;
                 if (w > 1)
-                    w = w / 2;
+                    w /= 2;
                 if (h > 1)
-                    h = h / 2;
+                    h /= 2;
                 ++level;
             }
         }

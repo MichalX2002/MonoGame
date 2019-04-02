@@ -224,7 +224,7 @@ namespace Microsoft.Xna.Framework.Input
         private static uint CountBits(uint v)
         {
             // http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
-            v = v - ((v >> 1) & 0x55555555);                    // reuse input as temporary
+            v -= ((v >> 1) & 0x55555555);                    // reuse input as temporary
             v = (v & 0x33333333) + ((v >> 2) & 0x33333333);     // temp
             return ((v + (v >> 4) & 0xF0F0F0F) * 0x1010101) >> 24; // count
         }

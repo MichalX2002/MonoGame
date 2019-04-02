@@ -403,7 +403,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     GraphicsExtensions.CheckGLError();
                     _lastClearColor = color;
                 }
-                bufferMask = bufferMask | ClearBufferMask.ColorBufferBit;
+                bufferMask |= ClearBufferMask.ColorBufferBit;
             }
             if ((options & ClearOptions.Stencil) == ClearOptions.Stencil)
             {
@@ -413,7 +413,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     GraphicsExtensions.CheckGLError();
                     _lastClearStencil = stencil;
                 }
-                bufferMask = bufferMask | ClearBufferMask.StencilBufferBit;
+                bufferMask |= ClearBufferMask.StencilBufferBit;
             }
 
             if ((options & ClearOptions.DepthBuffer) == ClearOptions.DepthBuffer)
@@ -424,7 +424,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     GraphicsExtensions.CheckGLError();
                     _lastClearDepth = depth;
                 }
-                bufferMask = bufferMask | ClearBufferMask.DepthBufferBit;
+                bufferMask |= ClearBufferMask.DepthBufferBit;
             }
 
 #if MONOMAC

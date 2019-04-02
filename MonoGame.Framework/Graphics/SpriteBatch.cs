@@ -325,7 +325,7 @@ namespace Microsoft.Xna.Framework.Graphics
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, layerDepth);
 
-            origin = origin * scale;
+            origin *= scale;
 
             float w, h;
             if (sourceRectangle.HasValue)

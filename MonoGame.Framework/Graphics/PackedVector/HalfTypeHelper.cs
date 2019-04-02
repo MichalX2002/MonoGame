@@ -42,7 +42,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
                     return (UInt16)s;
                 }
 
-                m = m | 0x00800000;
+                m |= 0x00800000;
 
                 int t = 14 - e;
                 int a = (1 << (t - 1)) - 1;
@@ -96,7 +96,7 @@ namespace Microsoft.Xna.Framework.Graphics.PackedVector
                     while ((mantissa & 1024) == 0)
                     {
                         exp--;
-                        mantissa = mantissa << 1;
+                        mantissa <<= 1;
                     }
                     mantissa &= 0xfffffbff;
                     rst = (((uint)value & 0x8000) << 16) | ((exp + 127) << 23) | (mantissa << 13);

@@ -1478,22 +1478,22 @@ namespace Microsoft.Xna.Framework
         /// <returns>The result of dividing the matrix.</returns>
         public static Matrix Divide(Matrix matrix1, Matrix matrix2)
         {
-            matrix1.M11 = matrix1.M11 / matrix2.M11;
-            matrix1.M12 = matrix1.M12 / matrix2.M12;
-            matrix1.M13 = matrix1.M13 / matrix2.M13;
-            matrix1.M14 = matrix1.M14 / matrix2.M14;
-            matrix1.M21 = matrix1.M21 / matrix2.M21;
-            matrix1.M22 = matrix1.M22 / matrix2.M22;
-            matrix1.M23 = matrix1.M23 / matrix2.M23;
-            matrix1.M24 = matrix1.M24 / matrix2.M24;
-            matrix1.M31 = matrix1.M31 / matrix2.M31;
-            matrix1.M32 = matrix1.M32 / matrix2.M32;
-            matrix1.M33 = matrix1.M33 / matrix2.M33;
-            matrix1.M34 = matrix1.M34 / matrix2.M34;
-            matrix1.M41 = matrix1.M41 / matrix2.M41;
-            matrix1.M42 = matrix1.M42 / matrix2.M42;
-            matrix1.M43 = matrix1.M43 / matrix2.M43;
-            matrix1.M44 = matrix1.M44 / matrix2.M44;
+            matrix1.M11 /= matrix2.M11;
+            matrix1.M12 /= matrix2.M12;
+            matrix1.M13 /= matrix2.M13;
+            matrix1.M14 /= matrix2.M14;
+            matrix1.M21 /= matrix2.M21;
+            matrix1.M22 /= matrix2.M22;
+            matrix1.M23 /= matrix2.M23;
+            matrix1.M24 /= matrix2.M24;
+            matrix1.M31 /= matrix2.M31;
+            matrix1.M32 /= matrix2.M32;
+            matrix1.M33 /= matrix2.M33;
+            matrix1.M34 /= matrix2.M34;
+            matrix1.M41 /= matrix2.M41;
+            matrix1.M42 /= matrix2.M42;
+            matrix1.M43 /= matrix2.M43;
+            matrix1.M44 /= matrix2.M44;
             return matrix1;
         }
 
@@ -1532,22 +1532,22 @@ namespace Microsoft.Xna.Framework
         public static Matrix Divide(Matrix matrix1, float divider)
         {
             float num = 1f / divider;
-            matrix1.M11 = matrix1.M11 * num;
-            matrix1.M12 = matrix1.M12 * num;
-            matrix1.M13 = matrix1.M13 * num;
-            matrix1.M14 = matrix1.M14 * num;
-            matrix1.M21 = matrix1.M21 * num;
-            matrix1.M22 = matrix1.M22 * num;
-            matrix1.M23 = matrix1.M23 * num;
-            matrix1.M24 = matrix1.M24 * num;
-            matrix1.M31 = matrix1.M31 * num;
-            matrix1.M32 = matrix1.M32 * num;
-            matrix1.M33 = matrix1.M33 * num;
-            matrix1.M34 = matrix1.M34 * num;
-            matrix1.M41 = matrix1.M41 * num;
-            matrix1.M42 = matrix1.M42 * num;
-            matrix1.M43 = matrix1.M43 * num;
-            matrix1.M44 = matrix1.M44 * num;
+            matrix1.M11 *= num;
+            matrix1.M12 *= num;
+            matrix1.M13 *= num;
+            matrix1.M14 *= num;
+            matrix1.M21 *= num;
+            matrix1.M22 *= num;
+            matrix1.M23 *= num;
+            matrix1.M24 *= num;
+            matrix1.M31 *= num;
+            matrix1.M32 *= num;
+            matrix1.M33 *= num;
+            matrix1.M34 *= num;
+            matrix1.M41 *= num;
+            matrix1.M42 *= num;
+            matrix1.M43 *= num;
+            matrix1.M44 *= num;
             return matrix1;
         }
 
@@ -1737,22 +1737,22 @@ namespace Microsoft.Xna.Framework
         /// <returns>>The result of linear interpolation of the specified matrixes.</returns>
         public static Matrix Lerp(Matrix matrix1, Matrix matrix2, float amount)
         {
-            matrix1.M11 = matrix1.M11 + ((matrix2.M11 - matrix1.M11) * amount);
-            matrix1.M12 = matrix1.M12 + ((matrix2.M12 - matrix1.M12) * amount);
-            matrix1.M13 = matrix1.M13 + ((matrix2.M13 - matrix1.M13) * amount);
-            matrix1.M14 = matrix1.M14 + ((matrix2.M14 - matrix1.M14) * amount);
-            matrix1.M21 = matrix1.M21 + ((matrix2.M21 - matrix1.M21) * amount);
-            matrix1.M22 = matrix1.M22 + ((matrix2.M22 - matrix1.M22) * amount);
-            matrix1.M23 = matrix1.M23 + ((matrix2.M23 - matrix1.M23) * amount);
-            matrix1.M24 = matrix1.M24 + ((matrix2.M24 - matrix1.M24) * amount);
-            matrix1.M31 = matrix1.M31 + ((matrix2.M31 - matrix1.M31) * amount);
-            matrix1.M32 = matrix1.M32 + ((matrix2.M32 - matrix1.M32) * amount);
-            matrix1.M33 = matrix1.M33 + ((matrix2.M33 - matrix1.M33) * amount);
-            matrix1.M34 = matrix1.M34 + ((matrix2.M34 - matrix1.M34) * amount);
-            matrix1.M41 = matrix1.M41 + ((matrix2.M41 - matrix1.M41) * amount);
-            matrix1.M42 = matrix1.M42 + ((matrix2.M42 - matrix1.M42) * amount);
-            matrix1.M43 = matrix1.M43 + ((matrix2.M43 - matrix1.M43) * amount);
-            matrix1.M44 = matrix1.M44 + ((matrix2.M44 - matrix1.M44) * amount);
+            matrix1.M11 += ((matrix2.M11 - matrix1.M11) * amount);
+            matrix1.M12 += ((matrix2.M12 - matrix1.M12) * amount);
+            matrix1.M13 += ((matrix2.M13 - matrix1.M13) * amount);
+            matrix1.M14 += ((matrix2.M14 - matrix1.M14) * amount);
+            matrix1.M21 += ((matrix2.M21 - matrix1.M21) * amount);
+            matrix1.M22 += ((matrix2.M22 - matrix1.M22) * amount);
+            matrix1.M23 += ((matrix2.M23 - matrix1.M23) * amount);
+            matrix1.M24 += ((matrix2.M24 - matrix1.M24) * amount);
+            matrix1.M31 += ((matrix2.M31 - matrix1.M31) * amount);
+            matrix1.M32 += ((matrix2.M32 - matrix1.M32) * amount);
+            matrix1.M33 += ((matrix2.M33 - matrix1.M33) * amount);
+            matrix1.M34 += ((matrix2.M34 - matrix1.M34) * amount);
+            matrix1.M41 += ((matrix2.M41 - matrix1.M41) * amount);
+            matrix1.M42 += ((matrix2.M42 - matrix1.M42) * amount);
+            matrix1.M43 += ((matrix2.M43 - matrix1.M43) * amount);
+            matrix1.M44 += ((matrix2.M44 - matrix1.M44) * amount);
             return matrix1;
         }
 
@@ -1984,22 +1984,22 @@ namespace Microsoft.Xna.Framework
         /// <returns>Sum of the matrixes.</returns>
         public static Matrix operator +(Matrix matrix1, Matrix matrix2)
         {
-            matrix1.M11 = matrix1.M11 + matrix2.M11;
-            matrix1.M12 = matrix1.M12 + matrix2.M12;
-            matrix1.M13 = matrix1.M13 + matrix2.M13;
-            matrix1.M14 = matrix1.M14 + matrix2.M14;
-            matrix1.M21 = matrix1.M21 + matrix2.M21;
-            matrix1.M22 = matrix1.M22 + matrix2.M22;
-            matrix1.M23 = matrix1.M23 + matrix2.M23;
-            matrix1.M24 = matrix1.M24 + matrix2.M24;
-            matrix1.M31 = matrix1.M31 + matrix2.M31;
-            matrix1.M32 = matrix1.M32 + matrix2.M32;
-            matrix1.M33 = matrix1.M33 + matrix2.M33;
-            matrix1.M34 = matrix1.M34 + matrix2.M34;
-            matrix1.M41 = matrix1.M41 + matrix2.M41;
-            matrix1.M42 = matrix1.M42 + matrix2.M42;
-            matrix1.M43 = matrix1.M43 + matrix2.M43;
-            matrix1.M44 = matrix1.M44 + matrix2.M44;
+            matrix1.M11 += matrix2.M11;
+            matrix1.M12 += matrix2.M12;
+            matrix1.M13 += matrix2.M13;
+            matrix1.M14 += matrix2.M14;
+            matrix1.M21 += matrix2.M21;
+            matrix1.M22 += matrix2.M22;
+            matrix1.M23 += matrix2.M23;
+            matrix1.M24 += matrix2.M24;
+            matrix1.M31 += matrix2.M31;
+            matrix1.M32 += matrix2.M32;
+            matrix1.M33 += matrix2.M33;
+            matrix1.M34 += matrix2.M34;
+            matrix1.M41 += matrix2.M41;
+            matrix1.M42 += matrix2.M42;
+            matrix1.M43 += matrix2.M43;
+            matrix1.M44 += matrix2.M44;
             return matrix1;
         }
 
@@ -2011,22 +2011,22 @@ namespace Microsoft.Xna.Framework
         /// <returns>The result of dividing the matrixes.</returns>
         public static Matrix operator /(Matrix matrix1, Matrix matrix2)
         {
-            matrix1.M11 = matrix1.M11 / matrix2.M11;
-            matrix1.M12 = matrix1.M12 / matrix2.M12;
-            matrix1.M13 = matrix1.M13 / matrix2.M13;
-            matrix1.M14 = matrix1.M14 / matrix2.M14;
-            matrix1.M21 = matrix1.M21 / matrix2.M21;
-            matrix1.M22 = matrix1.M22 / matrix2.M22;
-            matrix1.M23 = matrix1.M23 / matrix2.M23;
-            matrix1.M24 = matrix1.M24 / matrix2.M24;
-            matrix1.M31 = matrix1.M31 / matrix2.M31;
-            matrix1.M32 = matrix1.M32 / matrix2.M32;
-            matrix1.M33 = matrix1.M33 / matrix2.M33;
-            matrix1.M34 = matrix1.M34 / matrix2.M34;
-            matrix1.M41 = matrix1.M41 / matrix2.M41;
-            matrix1.M42 = matrix1.M42 / matrix2.M42;
-            matrix1.M43 = matrix1.M43 / matrix2.M43;
-            matrix1.M44 = matrix1.M44 / matrix2.M44;
+            matrix1.M11 /= matrix2.M11;
+            matrix1.M12 /= matrix2.M12;
+            matrix1.M13 /= matrix2.M13;
+            matrix1.M14 /= matrix2.M14;
+            matrix1.M21 /= matrix2.M21;
+            matrix1.M22 /= matrix2.M22;
+            matrix1.M23 /= matrix2.M23;
+            matrix1.M24 /= matrix2.M24;
+            matrix1.M31 /= matrix2.M31;
+            matrix1.M32 /= matrix2.M32;
+            matrix1.M33 /= matrix2.M33;
+            matrix1.M34 /= matrix2.M34;
+            matrix1.M41 /= matrix2.M41;
+            matrix1.M42 /= matrix2.M42;
+            matrix1.M43 /= matrix2.M43;
+            matrix1.M44 /= matrix2.M44;
             return matrix1;
         }
 
@@ -2039,22 +2039,22 @@ namespace Microsoft.Xna.Framework
         public static Matrix operator /(Matrix matrix, float divider)
         {
             float num = 1f / divider;
-            matrix.M11 = matrix.M11 * num;
-            matrix.M12 = matrix.M12 * num;
-            matrix.M13 = matrix.M13 * num;
-            matrix.M14 = matrix.M14 * num;
-            matrix.M21 = matrix.M21 * num;
-            matrix.M22 = matrix.M22 * num;
-            matrix.M23 = matrix.M23 * num;
-            matrix.M24 = matrix.M24 * num;
-            matrix.M31 = matrix.M31 * num;
-            matrix.M32 = matrix.M32 * num;
-            matrix.M33 = matrix.M33 * num;
-            matrix.M34 = matrix.M34 * num;
-            matrix.M41 = matrix.M41 * num;
-            matrix.M42 = matrix.M42 * num;
-            matrix.M43 = matrix.M43 * num;
-            matrix.M44 = matrix.M44 * num;
+            matrix.M11 *= num;
+            matrix.M12 *= num;
+            matrix.M13 *= num;
+            matrix.M14 *= num;
+            matrix.M21 *= num;
+            matrix.M22 *= num;
+            matrix.M23 *= num;
+            matrix.M24 *= num;
+            matrix.M31 *= num;
+            matrix.M32 *= num;
+            matrix.M33 *= num;
+            matrix.M34 *= num;
+            matrix.M41 *= num;
+            matrix.M42 *= num;
+            matrix.M43 *= num;
+            matrix.M44 *= num;
             return matrix;
         }
 
@@ -2152,22 +2152,22 @@ namespace Microsoft.Xna.Framework
         /// <returns>Result of the matrix multiplication with a scalar.</returns>
         public static Matrix operator *(Matrix matrix, float scaleFactor)
         {
-            matrix.M11 = matrix.M11 * scaleFactor;
-            matrix.M12 = matrix.M12 * scaleFactor;
-            matrix.M13 = matrix.M13 * scaleFactor;
-            matrix.M14 = matrix.M14 * scaleFactor;
-            matrix.M21 = matrix.M21 * scaleFactor;
-            matrix.M22 = matrix.M22 * scaleFactor;
-            matrix.M23 = matrix.M23 * scaleFactor;
-            matrix.M24 = matrix.M24 * scaleFactor;
-            matrix.M31 = matrix.M31 * scaleFactor;
-            matrix.M32 = matrix.M32 * scaleFactor;
-            matrix.M33 = matrix.M33 * scaleFactor;
-            matrix.M34 = matrix.M34 * scaleFactor;
-            matrix.M41 = matrix.M41 * scaleFactor;
-            matrix.M42 = matrix.M42 * scaleFactor;
-            matrix.M43 = matrix.M43 * scaleFactor;
-            matrix.M44 = matrix.M44 * scaleFactor;
+            matrix.M11 *= scaleFactor;
+            matrix.M12 *= scaleFactor;
+            matrix.M13 *= scaleFactor;
+            matrix.M14 *= scaleFactor;
+            matrix.M21 *= scaleFactor;
+            matrix.M22 *= scaleFactor;
+            matrix.M23 *= scaleFactor;
+            matrix.M24 *= scaleFactor;
+            matrix.M31 *= scaleFactor;
+            matrix.M32 *= scaleFactor;
+            matrix.M33 *= scaleFactor;
+            matrix.M34 *= scaleFactor;
+            matrix.M41 *= scaleFactor;
+            matrix.M42 *= scaleFactor;
+            matrix.M43 *= scaleFactor;
+            matrix.M44 *= scaleFactor;
             return matrix;
         }
 
@@ -2179,22 +2179,22 @@ namespace Microsoft.Xna.Framework
         /// <returns>Result of the matrix subtraction.</returns>
         public static Matrix operator -(Matrix matrix1, Matrix matrix2)
         {
-            matrix1.M11 = matrix1.M11 - matrix2.M11;
-            matrix1.M12 = matrix1.M12 - matrix2.M12;
-            matrix1.M13 = matrix1.M13 - matrix2.M13;
-            matrix1.M14 = matrix1.M14 - matrix2.M14;
-            matrix1.M21 = matrix1.M21 - matrix2.M21;
-            matrix1.M22 = matrix1.M22 - matrix2.M22;
-            matrix1.M23 = matrix1.M23 - matrix2.M23;
-            matrix1.M24 = matrix1.M24 - matrix2.M24;
-            matrix1.M31 = matrix1.M31 - matrix2.M31;
-            matrix1.M32 = matrix1.M32 - matrix2.M32;
-            matrix1.M33 = matrix1.M33 - matrix2.M33;
-            matrix1.M34 = matrix1.M34 - matrix2.M34;
-            matrix1.M41 = matrix1.M41 - matrix2.M41;
-            matrix1.M42 = matrix1.M42 - matrix2.M42;
-            matrix1.M43 = matrix1.M43 - matrix2.M43;
-            matrix1.M44 = matrix1.M44 - matrix2.M44;
+            matrix1.M11 -= matrix2.M11;
+            matrix1.M12 -= matrix2.M12;
+            matrix1.M13 -= matrix2.M13;
+            matrix1.M14 -= matrix2.M14;
+            matrix1.M21 -= matrix2.M21;
+            matrix1.M22 -= matrix2.M22;
+            matrix1.M23 -= matrix2.M23;
+            matrix1.M24 -= matrix2.M24;
+            matrix1.M31 -= matrix2.M31;
+            matrix1.M32 -= matrix2.M32;
+            matrix1.M33 -= matrix2.M33;
+            matrix1.M34 -= matrix2.M34;
+            matrix1.M41 -= matrix2.M41;
+            matrix1.M42 -= matrix2.M42;
+            matrix1.M43 -= matrix2.M43;
+            matrix1.M44 -= matrix2.M44;
             return matrix1;
         }
 
@@ -2232,22 +2232,22 @@ namespace Microsoft.Xna.Framework
         /// <returns>The result of the matrix subtraction.</returns>
         public static Matrix Subtract(Matrix matrix1, Matrix matrix2)
         {
-            matrix1.M11 = matrix1.M11 - matrix2.M11;
-            matrix1.M12 = matrix1.M12 - matrix2.M12;
-            matrix1.M13 = matrix1.M13 - matrix2.M13;
-            matrix1.M14 = matrix1.M14 - matrix2.M14;
-            matrix1.M21 = matrix1.M21 - matrix2.M21;
-            matrix1.M22 = matrix1.M22 - matrix2.M22;
-            matrix1.M23 = matrix1.M23 - matrix2.M23;
-            matrix1.M24 = matrix1.M24 - matrix2.M24;
-            matrix1.M31 = matrix1.M31 - matrix2.M31;
-            matrix1.M32 = matrix1.M32 - matrix2.M32;
-            matrix1.M33 = matrix1.M33 - matrix2.M33;
-            matrix1.M34 = matrix1.M34 - matrix2.M34;
-            matrix1.M41 = matrix1.M41 - matrix2.M41;
-            matrix1.M42 = matrix1.M42 - matrix2.M42;
-            matrix1.M43 = matrix1.M43 - matrix2.M43;
-            matrix1.M44 = matrix1.M44 - matrix2.M44;
+            matrix1.M11 -= matrix2.M11;
+            matrix1.M12 -= matrix2.M12;
+            matrix1.M13 -= matrix2.M13;
+            matrix1.M14 -= matrix2.M14;
+            matrix1.M21 -= matrix2.M21;
+            matrix1.M22 -= matrix2.M22;
+            matrix1.M23 -= matrix2.M23;
+            matrix1.M24 -= matrix2.M24;
+            matrix1.M31 -= matrix2.M31;
+            matrix1.M32 -= matrix2.M32;
+            matrix1.M33 -= matrix2.M33;
+            matrix1.M34 -= matrix2.M34;
+            matrix1.M41 -= matrix2.M41;
+            matrix1.M42 -= matrix2.M42;
+            matrix1.M43 -= matrix2.M43;
+            matrix1.M44 -= matrix2.M44;
             return matrix1;
         }
 

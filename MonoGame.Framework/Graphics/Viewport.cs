@@ -164,9 +164,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		    float a = (((source.X * matrix.M14) + (source.Y * matrix.M24)) + (source.Z * matrix.M34)) + matrix.M44;
 		    if (!WithinEpsilon(a, 1f))
 		    {
-		        vector.X = vector.X / a;
-		        vector.Y = vector.Y / a;
-		        vector.Z = vector.Z / a;
+		        vector.X /= a;
+		        vector.Y /= a;
+		        vector.Z /= a;
 		    }
 		    vector.X = (((vector.X + 1f) * 0.5f) * this.Width) + this.X;
 		    vector.Y = (((-vector.Y + 1f) * 0.5f) * this.height) + this.y;
@@ -193,9 +193,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		    float a = (((source.X * matrix.M14) + (source.Y * matrix.M24)) + (source.Z * matrix.M34)) + matrix.M44;
 		    if (!WithinEpsilon(a, 1f))
 		    {
-		        vector.X = vector.X / a;
-		        vector.Y = vector.Y / a;
-		        vector.Z = vector.Z / a;
+		        vector.X /= a;
+		        vector.Y /= a;
+		        vector.Z /= a;
 		    }
 		    return vector;
 

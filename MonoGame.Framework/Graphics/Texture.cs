@@ -45,7 +45,7 @@ namespace Microsoft.Xna.Framework.Graphics
             int size = Math.Max(Math.Max(width, height), depth);
             while (size > 1)
             {
-                size = size / 2;
+                size /= 2;
                 levels++;
             }
             return levels;

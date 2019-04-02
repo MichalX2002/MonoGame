@@ -91,7 +91,7 @@ namespace Microsoft.Xna.Framework.Input
                         hash = (hash * 397) ^ axis;
 
                     for (int i = 0; i < Buttons.Length; i++)
-                        hash = hash ^ ((int)Buttons[i] << (i % 32));
+                        hash ^= ((int)Buttons[i] << (i % 32));
 
                     foreach (var hat in Hats)
                         hash = (hash * 397) ^ hat.GetHashCode();
