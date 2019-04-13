@@ -79,9 +79,6 @@ namespace Microsoft.Xna.Framework.Graphics
             int oldVertexCount = _vertexBufferBytes / 4 / sizeof(VertexPositionColorTexture);
             if (itemCount > oldVertexCount)
             {
-                if (_vertexBufferBytes != 0)
-                    GC.RemoveMemoryPressure(_vertexBufferBytes);
-
                 // 1 batch item has 4 vertices
                 _vertexBufferBytes = itemCount * 4 * sizeof(VertexPositionColorTexture);
 
@@ -90,7 +87,6 @@ namespace Microsoft.Xna.Framework.Graphics
                 else
                     _vertexBuffer = Marshal.ReAllocHGlobal(_vertexBuffer, (IntPtr)_vertexBufferBytes);
 
-                GC.AddMemoryPressure(_vertexBufferBytes);
                 _vertexBufferPtr = (VertexPositionColorTexture*)_vertexBuffer;
             }
 
@@ -98,9 +94,6 @@ namespace Microsoft.Xna.Framework.Graphics
             int oldIndexCount = _indexBufferBytes / 6 / sizeof(ushort);
             if (itemCount > oldIndexCount)
             {
-                if (_indexBufferBytes != 0)
-                    GC.RemoveMemoryPressure(_indexBufferBytes);
-
                 // 1 batch item needs 6 indices
                 _indexBufferBytes = itemCount * 6 * sizeof(ushort);
 
@@ -108,8 +101,6 @@ namespace Microsoft.Xna.Framework.Graphics
                     _indexBuffer = Marshal.AllocHGlobal(_indexBufferBytes);
                 else
                     _indexBuffer = Marshal.ReAllocHGlobal(_indexBuffer, (IntPtr)_indexBufferBytes);
-
-                GC.AddMemoryPressure(_indexBufferBytes);
 
                 ushort* indexPtr = (ushort*)_indexBuffer;
                 for (int i = 0; i < itemCount; i++, indexPtr += 6)
@@ -282,12 +273,11 @@ namespace Microsoft.Xna.Framework.Graphics
             if (!IsDisposed)
             {
                 _vertexBufferPtr = null;
+
                 if (_vertexBuffer != IntPtr.Zero)
                 {
                     Marshal.FreeHGlobal(_vertexBuffer);
                     _vertexBuffer = IntPtr.Zero;
-
-                    GC.RemoveMemoryPressure(_vertexBufferBytes);
                     _vertexBufferBytes = 0;
                 }
 
@@ -295,8 +285,6 @@ namespace Microsoft.Xna.Framework.Graphics
                 {
                     Marshal.FreeHGlobal(_indexBuffer);
                     _indexBuffer = IntPtr.Zero;
-
-                    GC.RemoveMemoryPressure(_indexBufferBytes);
                     _indexBufferBytes = 0;
                 }
                 

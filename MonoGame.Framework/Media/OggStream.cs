@@ -238,23 +238,21 @@ namespace Microsoft.Xna.Framework.Media
                     Empty(attempts++);
             }
         }
-        
+
         public void SeekToPosition(TimeSpan pos)
         {
-            Reader.DecodedTime = pos;
-            SeekReset();
+            lock (_prepareMutex)
+            {
+                Reader.DecodedTime = pos;
+                Stop();
+            }
         }
 
         public void SeekToPosition(long pos)
         {
-            Reader.DecodedPosition = pos;
-            SeekReset();
-        }
-
-        private void SeekReset()
-        {
-            lock (_stopMutex)
+            lock (_prepareMutex)
             {
+                Reader.DecodedPosition = pos;
                 Stop();
             }
         }

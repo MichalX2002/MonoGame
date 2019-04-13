@@ -23,12 +23,11 @@ namespace Microsoft.Xna.Framework.Media
         readonly float[] _readBuffer;
         readonly short[] _castBuffer;
         readonly HashSet<OggStream> _streams;
-        readonly TimeSpan[] _threadTiming;
+        readonly List<TimeSpan> _threadTiming;
 
         readonly Thread _thread;
-        Stopwatch threadWatch;
-        int nextTimingIndex;
-        bool pendingFinish;
+        Stopwatch _threadWatch;
+        bool _pendingFinish;
         volatile bool _cancelled;
 
         public float UpdateRate { get; }
@@ -58,7 +57,7 @@ namespace Microsoft.Xna.Framework.Media
         {
             UpdateRate = updateRate;
             BufferSize = bufferSize;
-            pendingFinish = false;
+            _pendingFinish = false;
 
             lock (_singletonMutex)
             {
@@ -66,9 +65,9 @@ namespace Microsoft.Xna.Framework.Media
                     throw new InvalidOperationException("Already running.");
                 Instance = this;
 
-                threadWatch = new Stopwatch();
-                _threadTiming = new TimeSpan[(int)(UpdateRate < 1 ? 1 : UpdateRate)];
-                ThreadTiming = new ReadOnlyCollection<TimeSpan>(_threadTiming);
+                _threadWatch = new Stopwatch();
+                _threadTiming = new List<TimeSpan>((int)(UpdateRate < 1 ? 1 : UpdateRate));
+                ThreadTiming = _threadTiming.AsReadOnly();
 
                 _thread = new Thread(EnsureBuffersFilled)
                 {
@@ -148,10 +147,11 @@ namespace Microsoft.Xna.Framework.Media
             {
                 int tmp = (int)(32767f * src[i]);
                 if (tmp > short.MaxValue)
-                    tmp = short.MaxValue;
+                    dst[i] = short.MaxValue;
                 else if (tmp < short.MinValue)
-                    tmp = short.MinValue;
-                dst[i] = (short)tmp;
+                    dst[i] = short.MinValue;
+                else
+                    dst[i] = (short)tmp;
             }
         }
 
@@ -165,7 +165,7 @@ namespace Microsoft.Xna.Framework.Media
                 if (_cancelled)
                     break;
 
-                threadWatch.Restart();
+                _threadWatch.Restart();
 
                 localStreams.Clear();
                 lock (_iterationMutex)
@@ -206,10 +206,10 @@ namespace Microsoft.Xna.Framework.Media
                     }
                 }
 
-                threadWatch.Stop();
-                _threadTiming[nextTimingIndex++] = threadWatch.Elapsed;
-                if (nextTimingIndex >= _threadTiming.Length)
-                    nextTimingIndex = 0;
+                _threadWatch.Stop();
+                _threadTiming.Add(_threadWatch.Elapsed);
+                if (_threadTiming.Count >= _threadTiming.Capacity)
+                    _threadTiming.RemoveAt(0);
             }
         }
 
@@ -253,15 +253,15 @@ namespace Microsoft.Xna.Framework.Media
                     }
                     else
                     {
-                        pendingFinish = true;
+                        _pendingFinish = true;
                         break;
                     }
                 }
             }
 
-            if (pendingFinish && queued == 0)
+            if (_pendingFinish && queued == 0)
             {
-                pendingFinish = false;
+                _pendingFinish = false;
                 lock (_iterationMutex)
                     _streams.Remove(stream);
 
