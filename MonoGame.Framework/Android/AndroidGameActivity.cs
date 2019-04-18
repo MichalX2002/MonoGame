@@ -18,8 +18,11 @@ namespace Microsoft.Xna.Framework
         private ScreenReceiver screenReceiver;
         private OrientationListener _orientationListener;
 
+        public static event SenderDelegate<AndroidGameActivity> Paused;
+        public static event SenderDelegate<AndroidGameActivity> Resumed;
+
         public bool AutoPauseAndResumeMediaPlayer = true;
-        public bool RenderOnUIThread = true; 
+        public bool RenderOnUIThread = true;
 
 		/// <summary>
 		/// OnCreate called when the activity is launched from cold or after the app
@@ -46,8 +49,6 @@ namespace Microsoft.Xna.Framework
 			Game.Activity = this;
 		}
 
-        public static event EventHandler Paused;
-
 		public override void OnConfigurationChanged (Android.Content.Res.Configuration newConfig)
 		{
 			// we need to refresh the viewport here.
@@ -57,17 +58,16 @@ namespace Microsoft.Xna.Framework
         protected override void OnPause()
         {
             base.OnPause();
-            EventHelpers.Raise(this, Paused, EventArgs.Empty);
+            Paused?.Invoke(this);
 
             if (_orientationListener.CanDetectOrientation())
                 _orientationListener.Disable();
         }
 
-        public static event EventHandler Resumed;
         protected override void OnResume()
         {
             base.OnResume();
-            EventHelpers.Raise(this, Resumed, EventArgs.Empty);
+            Resumed?.Invoke(this);
 
             if (Game != null)
             {

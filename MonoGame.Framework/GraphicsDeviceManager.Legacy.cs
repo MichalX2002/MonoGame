@@ -43,10 +43,7 @@ namespace Microsoft.Xna.Framework
 
         public GraphicsDeviceManager(Game game)
         {
-            if (game == null)
-                throw new ArgumentNullException("The game cannot be null!");
-
-            _game = game;
+            _game = game ?? throw new ArgumentNullException("The game cannot be null!");
 
             _supportedOrientations = DisplayOrientation.Default;
 
@@ -61,7 +58,7 @@ namespace Microsoft.Xna.Framework
             _preferredBackBufferHeight = Math.Min(_game.Window.ClientBounds.Height, _game.Window.ClientBounds.Width);
 #endif
 
-            _preferredBackBufferFormat = SurfaceFormat.Color;
+            _preferredBackBufferFormat = SurfaceFormat.Rgba32;
             _preferredDepthStencilFormat = DepthFormat.Depth24;
             _synchronizedWithVerticalRetrace = true;
 
@@ -85,7 +82,7 @@ namespace Microsoft.Xna.Framework
         {
             Initialize();
 
-            OnDeviceCreated(EventArgs.Empty);
+            OnDeviceCreated();
         }
 
         public bool BeginDraw()
@@ -108,38 +105,38 @@ namespace Microsoft.Xna.Framework
 
         #region IGraphicsDeviceService Members
 
-        public event EventHandler<EventArgs> DeviceCreated;
-        public event EventHandler<EventArgs> DeviceDisposing;
-        public event EventHandler<EventArgs> DeviceReset;
-        public event EventHandler<EventArgs> DeviceResetting;
-        public event EventHandler<PreparingDeviceSettingsEventArgs> PreparingDeviceSettings;
+        public event SenderDelegate<GraphicsDeviceManager> DeviceCreated;
+        public event SenderDelegate<GraphicsDeviceManager> DeviceDisposing;
+        public event SenderDelegate<GraphicsDeviceManager> DeviceReset;
+        public event SenderDelegate<GraphicsDeviceManager> DeviceResetting;
+        public event EventDelegate<GraphicsDeviceManager, PreparingDeviceSettingsEvent> PreparingDeviceSettings;
 
         // FIXME: Why does the GraphicsDeviceManager not know enough about the
         //        GraphicsDevice to raise these events without help?
-        internal void OnDeviceDisposing(EventArgs e)
+        internal void OnDeviceDisposing()
         {
-            EventHelpers.Raise(this, DeviceDisposing, e);
+            DeviceDisposing?.Invoke(this);
         }
 
         // FIXME: Why does the GraphicsDeviceManager not know enough about the
         //        GraphicsDevice to raise these events without help?
-        internal void OnDeviceResetting(EventArgs e)
+        internal void OnDeviceResetting()
         {
-            EventHelpers.Raise(this, DeviceResetting, e);
+            DeviceResetting?.Invoke(this);
         }
 
         // FIXME: Why does the GraphicsDeviceManager not know enough about the
         //        GraphicsDevice to raise these events without help?
-        internal void OnDeviceReset(EventArgs e)
+        internal void OnDeviceReset()
         {
-            EventHelpers.Raise(this, DeviceReset, e);
+            DeviceReset?.Invoke(this);
         }
 
         // FIXME: Why does the GraphicsDeviceManager not know enough about the
         //        GraphicsDevice to raise these events without help?
-        internal void OnDeviceCreated(EventArgs e)
+        internal void OnDeviceCreated()
         {
-            EventHelpers.Raise(this, DeviceCreated, e);
+            DeviceCreated?.Invoke(this);
         }
 
         #endregion
@@ -361,7 +358,7 @@ namespace Microsoft.Xna.Framework
                 gdi.GraphicsProfile = GraphicsProfile; // Microsoft defaults this to Reach.
                 gdi.Adapter = GraphicsAdapter.DefaultAdapter;
                 gdi.PresentationParameters = presentationParameters;
-                PreparingDeviceSettingsEventArgs pe = new PreparingDeviceSettingsEventArgs(gdi);
+                var pe = new PreparingDeviceSettingsEvent(gdi);
                 preparingDeviceSettingsHandler(this, pe);
                 presentationParameters = pe.GraphicsDeviceInformation.PresentationParameters;
                 GraphicsProfile = pe.GraphicsDeviceInformation.GraphicsProfile;

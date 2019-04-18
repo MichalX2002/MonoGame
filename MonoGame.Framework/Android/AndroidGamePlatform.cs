@@ -11,8 +11,7 @@ namespace Microsoft.Xna.Framework
 {
     class AndroidGamePlatform : GamePlatform
     {
-        public AndroidGamePlatform(Game game)
-            : base(game)
+        public AndroidGamePlatform(Game game) : base(game)
         {
             System.Diagnostics.Debug.Assert(Game.Activity != null, "Must set Game.Activity before creating the Game instance");
             Game.Activity.Game = Game;
@@ -21,8 +20,6 @@ namespace Microsoft.Xna.Framework
 
             _gameWindow = new AndroidGameWindow(Game.Activity, game);
             Window = _gameWindow;
-
-            MediaLibrary.Context = Game.Activity;
         }
 
         protected override void Dispose(bool disposing)
@@ -112,35 +109,30 @@ namespace Microsoft.Xna.Framework
         public override void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight)
         {
             // Force the Viewport to be correctly set
-            Game.graphicsDeviceManager.ResetClientBounds();
+            Game.InternalGraphicsDeviceManager.ResetClientBounds();
         }
 
         // EnterForeground
-        void Activity_Resumed(object sender, EventArgs e)
+        void Activity_Resumed(AndroidGameActivity activity)
         {
             if (!IsActive)
             {
                 IsActive = true;
                 _gameWindow.GameView.Resume();
-                if (_MediaPlayer_PrevState == MediaState.Playing && Game.Activity.AutoPauseAndResumeMediaPlayer)
-                    MediaPlayer.Resume();
+
                 if (!_gameWindow.GameView.IsFocused)
                     _gameWindow.GameView.RequestFocus();
             }
         }
 
-        MediaState _MediaPlayer_PrevState = MediaState.Stopped;
         // EnterBackground
-        void Activity_Paused(object sender, EventArgs e)
+        void Activity_Paused(AndroidGameActivity activity)
         {
             if (IsActive)
             {
                 IsActive = false;
-                _MediaPlayer_PrevState = MediaPlayer.State;
                 _gameWindow.GameView.Pause();
                 _gameWindow.GameView.ClearFocus();
-                if (Game.Activity.AutoPauseAndResumeMediaPlayer)
-                    MediaPlayer.Pause();
             }
         }
 

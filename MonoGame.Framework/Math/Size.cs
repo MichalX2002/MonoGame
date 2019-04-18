@@ -66,6 +66,15 @@ namespace Microsoft.Xna.Framework
         }
 
         /// <summary>
+        /// Gets a two-component <see cref="Vector2"/> representation for this object.
+        /// </summary>
+        /// <returns></returns>
+        public Vector2 ToVector2()
+        {
+            return new Vector2(Width, Height);
+        }
+
+        /// <summary>
         ///     Compares two <see cref="Size" /> structures. The result specifies
         ///     whether the values of the <see cref="Width" /> and <see cref="Height" />
         ///     fields of the two <see cref="Size" /> structures are equal.
@@ -262,7 +271,7 @@ namespace Microsoft.Xna.Framework
         {
             return new Vector2(size.Width, size.Height);
         }
-        
+
         /// <summary>
         ///     Performs an explicit conversion from a <see cref="Size" /> to a <see cref="Point" />.
         /// </summary>

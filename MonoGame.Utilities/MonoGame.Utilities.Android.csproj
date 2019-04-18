@@ -8,12 +8,12 @@
     <ProjectGuid>{F23BFEB3-2856-43B0-A1B0-BAE164D62811}</ProjectGuid>
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
-    <RootNamespace>Lidgren.Network</RootNamespace>
-    <AssemblyName>Lidgren.Network</AssemblyName>
+    <RootNamespace>MonoGame.Utilities</RootNamespace>
+    <AssemblyName>MonoGame.Utilities</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>
     </NoWarn>
-    <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.4</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <LangVersion>Default</LangVersion>
     <FileAlignment>512</FileAlignment>
@@ -33,51 +33,54 @@
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
     <OutputPath>bin\Android\AnyCPU\Debug</OutputPath>
     <IntermediateOutputPath>obj\Android\AnyCPU\Debug</IntermediateOutputPath>
-    <DocumentationFile>bin\Android\AnyCPU\Debug\Lidgren.Network.xml</DocumentationFile>
+    <DocumentationFile>bin\Android\AnyCPU\Debug\MonoGame.Utilities.xml</DocumentationFile>
     <DefineConstants>DEBUG;ANDROID;UNITY_4_5</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>0</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
     <MonoDroidLinkMode>None</MonoDroidLinkMode>
     <AndroidLinkMode>None</AndroidLinkMode>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
     <DebugType>none</DebugType>
     <OutputPath>bin\Android\AnyCPU\Release</OutputPath>
     <IntermediateOutputPath>obj\Android\AnyCPU\Release</IntermediateOutputPath>
-    <DocumentationFile>bin\Android\AnyCPU\Release\Lidgren.Network.xml</DocumentationFile>
+    <DocumentationFile>bin\Android\AnyCPU\Release\MonoGame.Utilities.xml</DocumentationFile>
     <DefineConstants>ANDROID;UNITY_4_5</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>0</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
     <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
     <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Android">
-      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\ReferenceAssemblies\Microsoft\Framework\MonoAndroid\v6.0\Mono.Android.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\ReferenceAssemblies\Microsoft\Framework\MonoAndroid\v4.4\Mono.Android.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\ILongEqualityComparer.cs" />
     <Compile Include="Collections\ILongHashable.cs" />
-    <Compile Include="Collections\IRefEqualityComparer.cs" />
     <Compile Include="Collections\IRefEquatable.cs" />
-    <Compile Include="Collections\QuickDictionary.cs" />
-    <Compile Include="Collections\RefEqualityComparer.cs" />
-    <Compile Include="IO\Events.cs" />
-    <Compile Include="IO\RecyclableMemoryManager.cs" />
-    <Compile Include="IO\RecyclableMemoryStream.cs" />
-    <Compile Include="IO\RecyclableReadBufferedStream.cs" />
-    <Compile Include="IO\RecyclableWriteBufferedStream.cs" />
-    <Compile Include="Resources\Resource.Designer.cs">
-      <Platforms>Android,Ouya</Platforms>
-    </Compile>
+    <Compile Include="Collections\LongDictionary.cs" />
+    <Compile Include="Collections\LongDictionary.KeyCollection.cs" />
+    <Compile Include="Collections\LongDictionary.ValueCollection.cs" />
+    <Compile Include="Collections\LongEqualityComparer.cs" />
+    <Compile Include="Collections\LongEqualityComparer.Double.cs" />
+    <Compile Include="Collections\LongEqualityComparer.Int64.cs" />
+    <Compile Include="Collections\LongEqualityComparer.Ptr.cs" />
+    <Compile Include="Collections\LongEqualityComparer.String.cs" />
+    <Compile Include="Memory\Events.cs" />
+    <Compile Include="Memory\RecyclableMemoryManager.cs" />
+    <Compile Include="Memory\RecyclableMemoryStream.cs" />
+    <Compile Include="Memory\RecyclableReadBufferedStream.cs" />
+    <Compile Include="Memory\RecyclableWriteBufferedStream.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

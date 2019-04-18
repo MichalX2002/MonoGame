@@ -344,16 +344,16 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
 #if ANDROID
-		void Activity_Paused(object sender, EventArgs e)
+		void Activity_Paused(MonoGameAndroidGameView view)
 		{
 			// Pause all currently playing sounds by pausing the mixer
-			Alc.DevicePause(_device);
+			ALC.DevicePause(_device);
 		}
 
-		void Activity_Resumed(object sender, EventArgs e)
-		{
+		void Activity_Resumed(MonoGameAndroidGameView view)
+        {
 			// Resume all sounds that were playing when the activity was paused
-			Alc.DeviceResume(_device);
+			ALC.DeviceResume(_device);
 		}
 #endif
 

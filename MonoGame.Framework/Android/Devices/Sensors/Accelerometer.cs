@@ -75,12 +75,12 @@ namespace Microsoft.Devices.Sensors
             sensor = sensorManager.GetDefaultSensor(SensorType.Accelerometer);
         }
 
-        void ActivityPaused(object sender, EventArgs eventArgs)
+        void ActivityPaused(AndroidGameActivity activity)
         {
             sensorManager.UnregisterListener(listener, sensor);
         }
 
-        void ActivityResumed(object sender, EventArgs eventArgs)
+        void ActivityResumed(AndroidGameActivity activity)
         {
             sensorManager.RegisterListener(listener, sensor, SensorDelay.Game);
         }
@@ -147,7 +147,8 @@ namespace Microsoft.Devices.Sensors
                 {
                     if (started)
                         Stop();
-                    --instanceCount;
+
+                    instanceCount--;
                     if (instanceCount == 0)
                     {
                         sensor = null;
@@ -188,8 +189,7 @@ namespace Microsoft.Devices.Sensors
                         }
                         finally
                         {
-                            IDisposable d = values as IDisposable;
-                            if (d != null)
+                            if (values is IDisposable d)
                                 d.Dispose();
                         }
                     }

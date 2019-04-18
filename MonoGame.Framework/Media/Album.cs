@@ -44,7 +44,10 @@ namespace Microsoft.Xna.Framework.Media
         /// <summary>
         /// Gets a value indicating whether the Album has associated album art.
         /// </summary>
-        public bool HasArt =>
+        public bool HasArt
+        {
+            get
+            {
 #if WINDOWS_UAP
                 return this.thumbnail != null;
 #elif IOS && !TVOS
@@ -55,7 +58,8 @@ namespace Microsoft.Xna.Framework.Media
 #else
                 false;
 #endif
-
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether the object is disposed.

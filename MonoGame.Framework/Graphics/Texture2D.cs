@@ -5,8 +5,8 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using MonoGame.Imaging;
 using MonoGame.Utilities;
+using MonoGame.Imaging;
 
 namespace Microsoft.Xna.Framework.Graphics
 {

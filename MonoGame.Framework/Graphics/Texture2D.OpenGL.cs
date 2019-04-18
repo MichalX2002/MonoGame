@@ -5,14 +5,16 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using MonoGame.Imaging;
-using MonoGame.Utilities.Png;
 
 #if IOS
 using UIKit;
 using CoreGraphics;
 using Foundation;
 using System.Drawing;
+#endif
+
+#if DESKTOPGL
+using MonoGame.Imaging;
 #endif
 
 #if OPENGL
@@ -49,7 +51,7 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 if (glFormat == GLPixelFormat.CompressedTextureFormats)
                 {
-                    int imageSize = 0;
+                    int imageSize;
                     // PVRTC has explicit calculations for imageSize
                     // https://www.khronos.org/registry/OpenGL/extensions/IMG/IMG_texture_compression_pvrtc.txt
                     if (format == SurfaceFormat.RgbPvrtc2Bpp || format == SurfaceFormat.RgbaPvrtc2Bpp)
@@ -468,7 +470,7 @@ namespace Microsoft.Xna.Framework.Graphics
             Texture2D texture = null;
             Threading.BlockOnUIThread(() =>
             {
-                texture = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
+                texture = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Rgba32);
                 texture.SetData(pixels);
             });
 

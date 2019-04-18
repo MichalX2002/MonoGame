@@ -2,7 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using System.IO;
 using Microsoft.Xna.Framework.Media;
 using MonoGame.Utilities;
@@ -15,7 +14,7 @@ namespace Microsoft.Xna.Framework.Content
 		{
 			var path = input.ReadString();
 			
-			if (!String.IsNullOrEmpty(path))
+			if (!string.IsNullOrEmpty(path))
 			{
                 // Add the ContentManager's RootDirectory
                 var dirPath = Path.Combine(input.ContentManager.RootDirectoryFullPath, input.AssetName);
@@ -25,8 +24,7 @@ namespace Microsoft.Xna.Framework.Content
 			}
 			
 			int durationMs = input.ReadObject<int>();
-
-            return new Song(path, null, durationMs); 
+            return new Song(path, null); 
 		}
 	}
 }

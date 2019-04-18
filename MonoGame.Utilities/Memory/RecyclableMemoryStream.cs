@@ -402,14 +402,10 @@ namespace MonoGame.Utilities.Memory
             this.CheckDisposed();
 
             if (this.largeBuffer != null)
-            {
                 return this.largeBuffer;
-            }
 
             if (this.blocks.Count == 1)
-            {
                 return this.blocks[0];
-            }
 
             // Buffer needs to reflect the capacity, not the length, because
             // it's possible that people will manipulate the buffer directly
@@ -432,9 +428,9 @@ namespace MonoGame.Utilities.Memory
         }
 
         /// <summary>
-        /// Returns a new array with a copy of the buffer's contents. You should almost certainly be using GetBuffer combined with the Length to 
-        /// access the bytes in this stream. Calling ToArray will destroy the benefits of pooled buffers, but it is included
-        /// for the sake of completeness.
+        /// Returns a new array with a copy of the buffer's contents. You should almost certainly be using GetBuffer combined 
+        /// with the Length to access the bytes in this stream. Calling ToArray will destroy the benefits of pooled buffers,
+        /// but it is included for the sake of completeness.
         /// </summary>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
 #pragma warning disable CS0809

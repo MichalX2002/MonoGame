@@ -4,9 +4,12 @@
 
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
-using Microsoft.Xna.Framework.Utilities;
 using System;
 using System.ComponentModel;
+
+#if DIRECTX || DESKTOPGL
+using Microsoft.Xna.Framework.Utilities;
+#endif
 
 namespace Microsoft.Xna.Framework
 {
@@ -21,8 +24,7 @@ namespace Microsoft.Xna.Framework
         internal MouseState MouseState;
         internal TouchPanelState TouchPanelState;
 
-        #region Properties
-
+#region Properties
         [DefaultValue(false)]
         public abstract bool AllowUserResizing { get; set; }
         public abstract Rectangle ClientBounds { get; }
@@ -30,7 +32,8 @@ namespace Microsoft.Xna.Framework
         public abstract bool HasClipboardText { get; }
         public abstract string ClipboardText { get; set; }
 
-        #region Windows Taskbar Progress 
+#region Windows Taskbar Progress
+#if DIRECTX || DESKTOPGL
         private TaskbarProgressState _taskbarState;
         private TaskbarProgressValue _taskbarProgress;
         internal TaskbarList _taskbarList;
@@ -62,7 +65,8 @@ namespace Microsoft.Xna.Framework
                 }
             }
         }
-        #endregion
+#endif
+#endregion
 
         /// <summary>
         /// Gets or sets a bool that enables usage of Alt+F4 for window closing on desktop platforms. Value is true by default.
@@ -118,15 +122,15 @@ namespace Microsoft.Xna.Framework
             TouchPanelState = new TouchPanelState(this);
         }
 
-        #endregion Properties
+#endregion Properties
 
-        #region Events
+#region Events
 
         public event StateChangedDelegate ClientSizeChanged;
         public event StateChangedDelegate OrientationChanged;
         public event StateChangedDelegate ScreenDeviceNameChanged;
 
-#if WINDOWS || WINDOWS_UAP || DESKTOPGL|| ANGLE
+#if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
 
         /// <summary>
 		/// Use this event to retrieve text for objects like textbox's.
@@ -143,7 +147,7 @@ namespace Microsoft.Xna.Framework
         internal bool IsTextInputHandled { get { return TextInput != null; } }
 #endif
 
-        #endregion Events
+#endregion Events
 
         public abstract void BeginScreenDeviceChange(bool willBeFullScreen);
 

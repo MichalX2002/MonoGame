@@ -34,11 +34,11 @@ namespace Microsoft.Xna.Framework.Input.Touch
 #if WINDOWS_UAP
                 // Is a touch device present?
                 // Iterate through all pointer devices and find the maximum number of concurrent touches possible
-                maximumTouchCount = 0;
+                MaximumTouchCount = 0;
                 var pointerDevices = Windows.Devices.Input.PointerDevice.GetPointerDevices();
                 foreach (var pointerDevice in pointerDevices)
                 {
-                    maximumTouchCount = Math.Max(maximumTouchCount, (int)pointerDevice.MaxContacts);
+                    MaximumTouchCount = Math.Max(MaximumTouchCount, (int)pointerDevice.MaxContacts);
 
                     if (pointerDevice.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Touch)
                         isConnected = true;
@@ -51,18 +51,18 @@ namespace Microsoft.Xna.Framework.Input.Touch
                 var pm = Game.Activity.PackageManager;
                 isConnected = pm.HasSystemFeature(PackageManager.FeatureTouchscreen);
                 if (pm.HasSystemFeature(PackageManager.FeatureTouchscreenMultitouchJazzhand))
-                    maximumTouchCount = 5;
+                    MaximumTouchCount = 5;
                 else if (pm.HasSystemFeature(PackageManager.FeatureTouchscreenMultitouchDistinct))
-                    maximumTouchCount = 2;
+                    MaximumTouchCount = 2;
                 else
-                    maximumTouchCount = 1;
+                    MaximumTouchCount = 1;
 #elif IOS
                 //iPhone supports 5, iPad 11
                 isConnected = true;
                 if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone)
-                    maximumTouchCount = 5;
+                    MaximumTouchCount = 5;
                 else //Pad
-                    maximumTouchCount = 11;
+                    MaximumTouchCount = 11;
 #else
                 //Touch isn't implemented in OpenTK, so no linux or mac https://github.com/opentk/opentk/issues/80
                 isConnected = false;

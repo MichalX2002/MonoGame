@@ -1,9 +1,14 @@
 ﻿using MonoGame.Utilities.Memory;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MonoGame.Imaging.Tests
 {
@@ -108,7 +113,7 @@ namespace MonoGame.Imaging.Tests
             Console.ReadKey();
         }
 
-        static void TestEntry(MemoryStream ms, 
+        static void TestEntry(MemoryStream ms,
             SaveConfiguration config, ZipArchive archive, string name)
         {
             Stopwatch watch = new Stopwatch();
@@ -133,7 +138,7 @@ namespace MonoGame.Imaging.Tests
                         watch.Restart();
                         ImageInfo imageInfo = img.Info;
                         watch.Stop();
-                        if(tries > 0)
+                        if (tries > 0)
                             infoReadTime += watch.Elapsed.TotalMilliseconds;
 
                         //Console.WriteLine(name + ": " + (img.LastGetInfoFailed ? "Failed to read info" : "Retrieved info successfully"));
@@ -151,7 +156,7 @@ namespace MonoGame.Imaging.Tests
                         else
                         {
                             //Console.WriteLine("Saving " + img.PointerLength + " bytes...");
-                            
+
                             watch.Restart();
 
                             ms.Position = 0;

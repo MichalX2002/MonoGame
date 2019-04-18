@@ -12,7 +12,7 @@
     <AssemblyName>MonoGame.Framework</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>1591,0436</NoWarn>
-    <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.4</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <LangVersion>Default</LangVersion>
     <FileAlignment>512</FileAlignment>
@@ -37,7 +37,7 @@
     <Prefer32Bit>false</Prefer32Bit>
     <MonoDroidLinkMode>None</MonoDroidLinkMode>
     <AndroidLinkMode>None</AndroidLinkMode>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -51,7 +51,7 @@
     <Prefer32Bit>false</Prefer32Bit>
     <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
     <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Android" />
@@ -61,7 +61,22 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Android\Audio\AudioDecoder.cs" />
+    <Compile Include="Audio\NoMicrophoneException.cs" />
+    <Compile Include="Audio\OpenAL\ALBuffer.cs" />
+    <Compile Include="Audio\OpenAL\ALBufferPool.cs" />
+    <Compile Include="Audio\OpenAL\ALController.cs" />
+    <Compile Include="Audio\OpenAL\ALHelper.cs" />
+    <Compile Include="Audio\OpenAL\OpenAL.ALC.cs" />
+    <Compile Include="Audio\OpenAL\OpenAL.cs" />
+    <Compile Include="Audio\OpenAL\OpenAL.Efx.cs" />
+    <Compile Include="Audio\OpenAL\OpenAL.Enums.cs" />
+    <Compile Include="Audio\OpenAL\OpenAL.XRam.cs" />
+    <Compile Include="Content\ContentReaders\SoundEffectReader.Android.cs" />
+    <Compile Include="Delegates.cs" />
     <Compile Include="DisplayOrientation.cs" />
+    <Compile Include="ExceptionHelper.cs" />
+    <Compile Include="GameComponentCollectionEvent.cs" />
     <Compile Include="Graphics\Vertices\BufferBase.cs" />
     <Compile Include="Graphics\Vertices\BufferBase.OpenGL.cs" />
     <Compile Include="Graphics\Vertices\IndexBufferBase.cs" />
@@ -76,6 +91,7 @@
     <Compile Include="Graphics\Vertices\UnsafeVertexBuffer.OpenGL.cs" />
     <Compile Include="Graphics\Vertices\VertexBufferBase.cs" />
     <Compile Include="Graphics\Vertices\VertexBufferBase.OpenGL.cs" />
+    <Compile Include="Input\TextInputEvent.cs" />
     <Compile Include="Math\BoundingBox.cs" />
     <Compile Include="Math\BoundingFrustum.cs" />
     <Compile Include="Math\BoundingSphere.cs" />
@@ -86,29 +102,33 @@
     <Compile Include="Math\CurveKeyCollection.cs" />
     <Compile Include="Math\CurveLoopType.cs" />
     <Compile Include="Math\CurveTangent.cs" />
+    <Compile Include="Math\IShapeF.cs" />
     <Compile Include="Math\MathHelper.cs" />
     <Compile Include="Math\Matrix.cs" />
     <Compile Include="Math\Plane.cs" />
     <Compile Include="Math\PlaneIntersectionType.cs" />
     <Compile Include="Math\Point.cs" />
+    <Compile Include="Math\PointF.cs" />
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Math\Ray.cs" />
     <Compile Include="Math\Rectangle.cs" />
+    <Compile Include="Math\RectangleF.cs" />
+    <Compile Include="Math\Size.cs" />
+    <Compile Include="Math\SizeF.cs" />
     <Compile Include="Math\Vector2.cs" />
     <Compile Include="Math\Vector3.cs" />
     <Compile Include="Math\Vector4.cs" />
     <Compile Include="Media\VisualizationData.cs" />
+    <Compile Include="PreparingDeviceSettingsEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.Android.cs">
       <Platforms>Android</Platforms>
     </Compile>
     <Compile Include="Color.cs" />
     <Compile Include="DrawableGameComponent.cs" />
-    <Compile Include="EventHelpers.cs" />
     <Compile Include="FrameworkDispatcher.cs" />
     <Compile Include="FrameworkResources.cs" />
     <Compile Include="GameComponentCollection.cs" />
-    <Compile Include="GameComponentCollectionEventArgs.cs" />
     <Compile Include="GameComponent.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GamePlatform.cs" />
@@ -127,11 +147,11 @@
     <Compile Include="LaunchParameters.cs" />
     <Compile Include="NamespaceDocs.cs" />
     <Compile Include="PlayerIndex.cs" />
-    <Compile Include="PreparingDeviceSettingsEventArgs.cs" />
     <Compile Include="PrimaryThreadLoader.cs">
       <Platforms>Android,MacOS</Platforms>
     </Compile>
     <Compile Include="ReusableItemList.cs" />
+    <Compile Include="ServiceProviderExtensions.cs" />
     <Compile Include="Threading.cs">
       <Platforms>Android,Angle,iOS,Linux,MacOS,WindowsGL,tvOS</Platforms>
     </Compile>
@@ -152,15 +172,6 @@
     <Compile Include="Audio\DynamicSoundEffectInstanceManager.cs" />
     <Compile Include="Audio\InstancePlayLimitException.cs" />
     <Compile Include="Audio\NoAudioHardwareException.cs" />
-    <Compile Include="Audio\OALSoundBuffer.cs">
-      <Services>OpenALAudio</Services>
-    </Compile>
-    <Compile Include="Audio\OpenAL.cs">
-      <Services>OpenALAudio</Services>
-    </Compile>
-    <Compile Include="Audio\OpenALSoundController.cs">
-      <Services>OpenALAudio</Services>
-    </Compile>
     <Compile Include="Audio\SoundEffect.cs" />
     <Compile Include="Audio\SoundEffect.OpenAL.cs">
       <Services>OpenALAudio</Services>
@@ -175,7 +186,6 @@
     <Compile Include="Audio\Microphone.OpenAL.cs">
       <Services>OpenALAudio</Services>
     </Compile>
-    <Compile Include="Audio\NoMicrophoneConnectedException.cs" />
     <Compile Include="Audio\Xact\AudioCategory.cs" />
     <Compile Include="Audio\Xact\AudioEngine.cs" />
     <Compile Include="Audio\Xact\AudioStopOptions.cs" />
@@ -252,7 +262,6 @@
       <ExcludePlatforms>Web</ExcludePlatforms>
     </Compile>
     <Compile Include="Content\ContentReaders\SongReader.cs" />
-    <Compile Include="Content\ContentReaders\SoundEffectReader.cs" />
     <Compile Include="Content\ContentReaders\SpriteFontReader.cs" />
     <Compile Include="Content\ContentReaders\StringReader.cs" />
     <Compile Include="Content\ContentReaders\Texture2DReader.cs" />
@@ -566,25 +575,9 @@
     <Compile Include="Input\Touch\TouchPanel.cs" />
     <Compile Include="Input\Touch\TouchPanelCapabilities.cs" />
     <Compile Include="Input\Touch\TouchPanelState.cs" />
-    <Compile Include="Media\Album.cs" />
-    <Compile Include="Media\AlbumCollection.cs" />
-    <Compile Include="Media\Artist.cs" />
-    <Compile Include="Media\Genre.cs" />
-    <Compile Include="Media\MediaLibrary.cs" />
-    <Compile Include="Media\MediaLibrary.Android.cs">
-      <Platforms>Android</Platforms>
-    </Compile>
-    <Compile Include="Media\MediaPlayer.cs" />
-    <Compile Include="Media\MediaPlayer.Default.cs">
-      <Platforms>Angle,WindowsGL,Linux,MacOS,iOS,Android,Web,tvOS</Platforms>
-    </Compile>
-    <Compile Include="Media\MediaQueue.cs" />
-    <Compile Include="Media\MediaSource.cs" />
-    <Compile Include="Media\MediaSourceType.cs" />
     <Compile Include="Media\MediaState.cs" />
     <Compile Include="Media\PlaylistCollection.cs" />
     <Compile Include="Media\Playlist.cs" />
-    <Compile Include="Media\SongCollection.cs" />
     <Compile Include="Media\Song.cs" />
     <Compile Include="Media\Song.Android.cs">
       <Platforms>Android</Platforms>
@@ -594,12 +587,6 @@
       <ExcludePlatforms>Angle,Linux,WindowsGL,Web,tvOS</ExcludePlatforms>
     </Compile>
     <Compile Include="Media\Video.Android.cs">
-      <Platforms>Android</Platforms>
-    </Compile>
-    <Compile Include="Media\VideoPlayer.cs">
-      <ExcludePlatforms>Angle,Linux,WindowsGL,Web,tvOS</ExcludePlatforms>
-    </Compile>
-    <Compile Include="Media\VideoPlayer.Android.cs">
       <Platforms>Android</Platforms>
     </Compile>
     <Compile Include="Microsoft\Devices\Sensors\AccelerometerFailedException.cs">
@@ -623,12 +610,10 @@
     <Compile Include="Microsoft\Devices\Sensors\SensorFailedException.cs">
       <Platforms>Android,iOS</Platforms>
     </Compile>
-    <Compile Include="Microsoft\Devices\Sensors\SensorReadingEventArgs.cs">
-      <Platforms>Android,iOS</Platforms>
-    </Compile>
     <Compile Include="Microsoft\Devices\Sensors\SensorState.cs">
       <Platforms>Android,iOS</Platforms>
     </Compile>
+    <Compile Include="Utilities\FuncLoader.Android.cs" />
     <Compile Include="Utilities\Hash.cs" />
     <Compile Include="Utilities\FileHelpers.cs" />
     <Compile Include="Utilities\ReflectionHelpers.cs" />
@@ -637,9 +622,6 @@
     </Compile>
     <Compile Include="Utilities\Lz4Stream\Lz4DecoderStream.cs" />
     <Compile Include="Utilities\LzxStream\LzxDecoderStream.cs" />
-    <Compile Include="Utilities\Png\PngCommon.cs" />
-    <Compile Include="Utilities\Png\PngReader.cs" />
-    <Compile Include="Utilities\Png\PngWriter.cs" />
     <Compile Include="Utilities\ByteBufferPool.cs" />
     <Compile Include="Android\AndroidCompatibility.cs">
       <Platforms>Android</Platforms>

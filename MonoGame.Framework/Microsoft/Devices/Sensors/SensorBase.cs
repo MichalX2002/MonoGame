@@ -7,69 +7,53 @@ using System;
 
 namespace Microsoft.Devices.Sensors
 {
-	public abstract class SensorBase<TSensorReading> : IDisposable
-		where TSensorReading : ISensorReading
+	public abstract class SensorBase<TReading> : IDisposable
+		where TReading : ISensorReading
 	{
 #if IOS
         [CLSCompliant(false)]
         protected static readonly CoreMotion.CMMotionManager motionManager = new CoreMotion.CMMotionManager();
 #endif
         bool disposed;
-		private TimeSpan timeBetweenUpdates;
-	    private TSensorReading currentValue;
-        private SensorReadingEventArgs<TSensorReading> eventArgs = new SensorReadingEventArgs<TSensorReading>(default(TSensorReading));
+		private TimeSpan _timeBetweenUpdates;
+	    private TReading currentValue;
 
-		public TSensorReading CurrentValue 
+		public TReading CurrentValue
         {
-            get { return currentValue; }
-		    protected set
-		    {
-		        currentValue = value;
+            get => currentValue;
+            protected set
+            {
+                currentValue = value;
+                CurrentValueChanged?.Invoke(this, currentValue);
+            }
+        }
 
-                var handler = CurrentValueChanged;
-
-                if (handler != null)
-                {
-                    eventArgs.SensorReading = value;
-                    handler(this, eventArgs);
-                }
-		    }
-		}
-		public bool IsDataValid { get; protected set; }
+        public bool IsDataValid { get; protected set; }
 		public TimeSpan TimeBetweenUpdates
-		{
-			get { return this.timeBetweenUpdates; }
-			set
-			{
-				if (this.timeBetweenUpdates != value)
-				{
-					this.timeBetweenUpdates = value;
-					EventHelpers.Raise(this, TimeBetweenUpdatesChanged, EventArgs.Empty);
-				}
-			}
-		}
+        {
+            get => _timeBetweenUpdates;
+            set
+            {
+                if (_timeBetweenUpdates != value)
+                {
+                    _timeBetweenUpdates = value;
+                    TimeBetweenUpdatesChanged?.Invoke(this);
+                }
+            }
+        }
 
-		public event EventHandler<SensorReadingEventArgs<TSensorReading>> CurrentValueChanged;
-		protected event EventHandler<EventArgs> TimeBetweenUpdatesChanged;
+        public event EventDelegate<SensorBase<TReading>, TReading> CurrentValueChanged;
+		protected event SenderDelegate<SensorBase<TReading>> TimeBetweenUpdatesChanged;
         protected bool IsDisposed { get { return disposed; } }
 
 		public SensorBase()
 		{
 			this.TimeBetweenUpdates = TimeSpan.FromMilliseconds(2);
-		}
-
-        ~SensorBase()
-        {
-            Dispose(false);
         }
 
-		public void Dispose()
-        {
-            if (disposed)
-                throw new ObjectDisposedException(GetType().Name);
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+        public abstract void Start();
+
+        public abstract void Stop();
 
         /// <summary>
         /// Derived classes override this method to dispose of managed and unmanaged resources.
@@ -80,9 +64,16 @@ namespace Microsoft.Devices.Sensors
             disposed = true;
         }
 
-		public abstract void Start();
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		public abstract void Stop();
-	}
+        ~SensorBase()
+        {
+            Dispose(false);
+        }
+    }
 }
 

@@ -1,6 +1,5 @@
 using System;
 using Android.Content;
-using Microsoft.Xna.Framework.Media;
 using Android.App;
 
 namespace Microsoft.Xna.Framework
@@ -23,7 +22,7 @@ namespace Microsoft.Xna.Framework
                 // will not be broadcast. We need to check if the lock is currently active
                 // and if not re-enable the game related functions.
                 // http://stackoverflow.com/questions/4260794/how-to-tell-if-device-is-sleeping
-                KeyguardManager keyguard = (KeyguardManager)context.GetSystemService(Context.KeyguardService);
+                var keyguard = context.GetSystemService(Context.KeyguardService) as KeyguardManager;
                 if (!keyguard.InKeyguardRestrictedInputMode())
                     OnUnlocked();
 			}
@@ -36,14 +35,12 @@ namespace Microsoft.Xna.Framework
 
         private void OnLocked()
         {
-            ScreenReceiver.ScreenLocked = true;
-            MediaPlayer.IsMuted = true;
+            ScreenLocked = true;
         }
 
         private void OnUnlocked()
         {
-            ScreenReceiver.ScreenLocked = false;
-            MediaPlayer.IsMuted = false;
+            ScreenLocked = false;
             ((AndroidGameWindow)Game.Instance.Window).GameView.Resume();
         }
     }

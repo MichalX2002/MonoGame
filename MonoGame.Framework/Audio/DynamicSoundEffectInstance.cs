@@ -148,7 +148,7 @@ namespace Microsoft.Xna.Framework.Audio
                 // Add the instance to the pool
                 if (!SoundEffectInstancePool.SoundsAvailable)
                     throw new InstancePlayLimitException();
-                SoundEffectInstancePool.Remove(this);
+                SoundEffectInstancePool.AddToPlaying(this);
 
                 PlatformPlay();
                 _state = SoundState.Playing;
@@ -182,7 +182,7 @@ namespace Microsoft.Xna.Framework.Audio
                 // Add the instance to the pool
                 if (!SoundEffectInstancePool.SoundsAvailable)
                     throw new InstancePlayLimitException();
-                SoundEffectInstancePool.Remove(this);
+                SoundEffectInstancePool.AddToPlaying(this);
             }
 
             PlatformResume();
@@ -219,7 +219,7 @@ namespace Microsoft.Xna.Framework.Audio
                 PlatformStop();
                 _state = SoundState.Stopped;
 
-                SoundEffectInstancePool.Add(this);
+                SoundEffectInstancePool.Return(this);
             }
         }
 

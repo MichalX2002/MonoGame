@@ -58,10 +58,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public RenderTargetBinding(RenderTarget2D renderTarget)
 		{
-			if (renderTarget == null) 
-				throw new ArgumentNullException(nameof(renderTarget));
-
-			RenderTarget = renderTarget;
+            RenderTarget = renderTarget ?? throw new ArgumentNullException(nameof(renderTarget));
             _arraySlice = (int)CubeMapFace.PositiveX;
             _depthFormat = renderTarget.DepthStencilFormat;
 		}

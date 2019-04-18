@@ -137,15 +137,10 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 if (!SoundEffectInstancePool.SoundsAvailable)
                     throw new InstancePlayLimitException();
-
-                SoundEffectInstancePool.Remove(this);
+                SoundEffectInstancePool.AddToPlaying(this);
             }
             
-            // For non-XAct sounds we need to be sure the latest
-            // master volume level is applied before playback.
-            if (!_isXAct)
-                PlatformSetVolume(_volume * SoundEffect.MasterVolume);
-
+            Volume = Volume;
             PlatformPlay();
         }
 

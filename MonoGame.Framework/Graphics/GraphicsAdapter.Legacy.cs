@@ -63,8 +63,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
         }
 
-        string _description = string.Empty;
-        public string Description { get => _description; private set => _description = value; }
+        public string Description { get; private set; } = string.Empty;
 
         public DisplayMode CurrentDisplayMode
         {
@@ -76,7 +75,7 @@ namespace Microsoft.Xna.Framework.Graphics
                        SurfaceFormat.Color);
 #elif ANDROID
                 View view = ((AndroidGameWindow)Game.Instance.Window).GameView;
-                return new DisplayMode(view.Width, view.Height, SurfaceFormat.Color);
+                return new DisplayMode(view.Width, view.Height, SurfaceFormat.Rgba32);
 #elif DESKTOPGL
                 var displayIndex = Sdl.Display.GetWindowDisplayIndex(SdlGameWindow.Instance.Handle);
 
@@ -90,10 +89,10 @@ namespace Microsoft.Xna.Framework.Graphics
                     int width = GetDeviceCaps(dc, HORZRES);
                     int height = GetDeviceCaps(dc, VERTRES);
                     graphics.ReleaseHdc(dc);
-                    return new DisplayMode(width, height, SurfaceFormat.Color);
+                    return new DisplayMode(width, height, SurfaceFormat.Rgba32);
                 }
 #else
-                return new DisplayMode(800, 600, SurfaceFormat.Color);
+                return new DisplayMode(800, 600, SurfaceFormat.Rgba32);
 #endif
             }
         }

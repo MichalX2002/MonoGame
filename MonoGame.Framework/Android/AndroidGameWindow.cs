@@ -23,9 +23,8 @@ namespace Microsoft.Xna.Framework
         private DisplayOrientation _supportedOrientations = DisplayOrientation.Default;
         private DisplayOrientation _currentOrientation;
 
-        public override bool IsMaximized { get => true; set => throw new NotImplementedException(); }
-        public override IntPtr Handle { get { return IntPtr.Zero; } }
-
+        public override IntPtr Handle => IntPtr.Zero;
+        public bool IsScreenLocked => ScreenReceiver.ScreenLocked;
 
         public void SetResumer(IResumeManager resumer)
         {
@@ -93,9 +92,8 @@ namespace Microsoft.Xna.Framework
                 {
                     _game.GraphicsDevice.Clear(Color.Black);
                     if (GameView.IsResuming && Resumer != null)
-                    {
                         Resumer.Draw();
-                    }
+
                     _game.Platform.Present();
                 }
             }
@@ -315,9 +313,7 @@ namespace Microsoft.Xna.Framework
                     // Android doesn't fire Released events for existing touches
                     // so we need to clear them out.
                     if (wasPortrait != requestPortrait)
-                    {
                         TouchPanelState.ReleaseAllTouches();
-                    }
 
                     OnOrientationChanged();
                 }

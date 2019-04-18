@@ -7,11 +7,13 @@ namespace MonoGame.Utilities
 {
     internal class FuncLoader
     {
+#pragma warning disable IDE1006 // Naming Styles
         [DllImport("dl")]
         public static extern IntPtr dlopen(string path, int flags);
 
         [DllImport("dl")]
         public static extern IntPtr dlsym(IntPtr handle, string symbol);
+#pragma warning restore IDE1006 // Naming Styles
 
         private const int RTLD_LAZY = 0x0001;
 
@@ -43,20 +45,17 @@ namespace MonoGame.Utilities
         public static T LoadFunction<T>(IntPtr library, string function, bool throwIfNotFound = false)
         {
             var ret = dlsym(library, function);
-
             if (ret == IntPtr.Zero)
             {
                 if (throwIfNotFound)
                     throw new EntryPointNotFoundException(function);
-
-                return default(T);
+                return default;
             }
 
-            // TODO: Use the function bellow once Protobuild gets axed
+            // TODO: Use the function below once Protobuild gets axed
             // requires .NET Framework 4.5.1 and its useful for corert
             // return Marshal.GetDelegateForFunctionPointer<T>(ret);
-
-            return (T)(object)Marshal.GetDelegateForFunctionPointer(ret, typeof(T));
+            return Marshal.GetDelegateForFunctionPointer<T>(ret);
         }
     }
 }

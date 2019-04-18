@@ -20,33 +20,38 @@ namespace Microsoft.Xna.Framework.Media
                     throw new ArgumentOutOfRangeException();
 
                 if (_masterVolume != value)
+                {
                     _masterVolume = value;
+                    PlatformMasterVolumeChanged();
+                }
             }
         }
 
-        public static ReadOnlyCollection<TimeSpan> ThreadUpdateTiming => OggStreamer.Instance.ThreadTiming;
+        public static ReadOnlyCollection<TimeSpan> ThreadUpdateTiming
+        {
+            get
+            {
+#if DIRECTX || DESKTOPGL
+                return OggStreamer.Instance.ThreadTiming;
+#else
+                return null;
+#endif
+            }
+        }
 
-        public delegate void FinishedPlayingHandler();
-        public event FinishedPlayingHandler OnFinish;
-
-        private int _playCount = 0;
-        private TimeSpan? _duration;
-        internal string _name;
+        public event SenderDelegate<Song> OnFinish;
 
         public bool IsDisposed { get; private set; }
         internal string FilePath { get; }
         public string Name { get; }
-        
+
+        public MediaState State => PlatformGetState();
         public TimeSpan Duration => PlatformGetDuration();
-        public int PlayCount => PlatformGetPlayCount();
+        public TimeSpan Position { get => PlatformGetPosition(); set => PlatformSetPosition(value); }
+
         public float Volume { get => PlatformGetVolume(); set => PlatformSetVolume(value); }
         public float Pitch { get => PlatformGetPitch(); set => PlatformSetPitch(value); }
-        public MediaState State => PlatformGetState();
-        
-        internal Song(string fileName, string name, int durationMS) : this(fileName, name)
-        {
-            _duration = TimeSpan.FromMilliseconds(durationMS);
-        }
+        public bool IsLooping { get => PlatformGetLooping(); set => PlatformSetLooping(value); }
 
         internal Song(string fileName, string name)
         {
@@ -56,12 +61,12 @@ namespace Microsoft.Xna.Framework.Media
         }
 
         /// <summary>
-        /// Returns a song that can be played.
+        /// Creates a <see cref="Song"/> that can be played by streaming the resource.
         /// </summary>
-        /// <param name="name">The name for the song. See <see cref="Name"/>.</param>
         /// <param name="uri">The path to the song file.</param>
+        /// <param name="name">The name for the song. See <see cref="Name"/>.</param>
         /// <returns></returns>
-        public static Song FromUri(string name, Uri uri)
+        public static Song FromUri(Uri uri, string name = null)
         {
             string path = Path.GetFullPath(uri.OriginalString);
             return new Song(path, name);

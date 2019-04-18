@@ -42,11 +42,10 @@ namespace Microsoft.Xna.Framework.Audio
         /// list of playing instances.
         /// </summary>
         /// <param name="inst">The SoundEffectInstance</param>
-        internal static void Add(SoundEffectInstance inst)
+        internal static void Return(SoundEffectInstance inst)
         {
             lock (_syncRoot)
             {
-
                 if (inst._isPooled)
                 {
                     _pooledInstances.Add(inst);
@@ -61,7 +60,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// Adds the SoundEffectInstance to the list of playing instances.
         /// </summary>
         /// <param name="inst">The SoundEffectInstance to add to the playing list.</param>
-        internal static void Remove(SoundEffectInstance inst)
+        internal static void AddToPlaying(SoundEffectInstance inst)
         {
             lock (_syncRoot)
                 _playingInstances.Add(inst);
@@ -138,7 +137,7 @@ namespace Microsoft.Xna.Framework.Audio
                         if (!inst.IsDisposed)
                             inst.Stop(true); // force stopping it to free its AL source
 #endif
-                        Add(inst);
+                        Return(inst);
                         continue;
                     }
 
@@ -178,13 +177,12 @@ namespace Microsoft.Xna.Framework.Audio
                     if (inst._effect == effect)
                     {
                         inst.Stop(true); // stop immediatly
-                        Add(inst);
+                        Return(inst);
                         continue;
                     }
 
                     x++;
                 }
-
             }
         }
 

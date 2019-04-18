@@ -61,7 +61,6 @@ namespace Microsoft.Xna.Framework.Content
             if (format == 1)
             {
                 Span<float> floatBuffer = stackalloc float[1024 * 4];
-
                 using (var reader = new VorbisReader(input.BaseStream, false))
                 {
                     long bytes = reader.TotalSamples * reader.Channels * sizeof(short);

@@ -22,7 +22,7 @@ namespace Microsoft.Xna.Framework.Media
             throw new NotImplementedException();
         }
 
-        private void PlatformGetState(ref MediaState result)
+        private MediaState PlatformGetState()
         {
         }
 

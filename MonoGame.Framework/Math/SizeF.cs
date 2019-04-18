@@ -60,6 +60,15 @@ namespace Microsoft.Xna.Framework
         }
 
         /// <summary>
+        /// Gets a two-component <see cref="Size"/> representation for this object.
+        /// </summary>
+        /// <returns></returns>
+        public Size ToSize()
+        {
+            return new Size((int)Width, (int)Height);
+        }
+
+        /// <summary>
         ///     Compares two <see cref="SizeF" /> structures. The result specifies
         ///     whether the values of the <see cref="Width" /> and <see cref="Height" />
         ///     fields of the two <see cref="PointF" /> structures are equal.
@@ -270,17 +279,17 @@ namespace Microsoft.Xna.Framework
             return new SizeF(vector.X, vector.Y);
         }
 
-        ///// <summary>
-        /////     Performs an implicit conversion from a <see cref="Size" /> to a <see cref="Size2" />.
-        ///// </summary>
-        ///// <param name="size">The size.</param>
-        ///// <returns>
-        /////     The resulting <see cref="Size2" />.
-        ///// </returns>
-        //public static implicit operator Size2(Size size)
-        //{
-        //    return new Size2(size.Width, size.Height);
-        //}
+        /// <summary>
+        ///     Performs an implicit conversion from a <see cref="SizeF" /> to a <see cref="Size" />.
+        /// </summary>
+        /// <param name="size">The vector.</param>
+        /// <returns>
+        ///     The resulting <see cref="SizeF" />.
+        /// </returns>
+        public static explicit operator Size(SizeF size)
+        {
+            return size.ToSize();
+        }
 
         /// <summary>
         ///     Performs an explicit conversion from a <see cref="SizeF" /> to a <see cref="Point" />.

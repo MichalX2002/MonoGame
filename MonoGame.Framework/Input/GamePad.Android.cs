@@ -60,9 +60,8 @@ namespace Microsoft.Xna.Framework.Input
             keyMap[14] = (int)Keycode.ButtonStart;
             keyMap[15] = (int)Keycode.Back;
 
-            bool[] hasMap = new bool[16];
             // get a bool[] with indices matching the keyMap
-            hasMap = device.HasKeys(keyMap);
+            bool[] hasMap = device.HasKeys(keyMap);
 
             capabilities.HasAButton = hasMap[0];
             capabilities.HasBButton = hasMap[1];

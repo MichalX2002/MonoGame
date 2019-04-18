@@ -2,209 +2,232 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using Microsoft.Xna.Framework.Audio;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Microsoft.Xna.Framework.Media
 {
-    public sealed partial class Song : IEquatable<Song>, IDisposable
+    public sealed partial class Song : IDisposable
     {
-        static Android.Media.MediaPlayer _androidPlayer;
-        static Song _playingSong;
+        private static HashSet<Song> _playingSongs = new HashSet<Song>();
 
-        private Album album;
-        private Artist artist;
-        private Genre genre;
-        private string name;
-        private TimeSpan duration;
-        private TimeSpan position;
-
-        [CLSCompliant(false)]
-        public Android.Net.Uri AssetUri { get; }
-
-        static Song()
-        {
-            _androidPlayer = new Android.Media.MediaPlayer();
-            _androidPlayer.Completion += AndroidPlayer_Completion;
-        }
-
-        internal Song(Album album, Artist artist, Genre genre, string name, TimeSpan duration, Android.Net.Uri assetUri)
-        {
-            this.album = album;
-            this.artist = artist;
-            this.genre = genre;
-            this.name = name;
-            this.duration = duration;
-            AssetUri = assetUri;
-        }
+        private readonly object _playMutex = new object();
+        private Android.Media.MediaPlayer _androidPlayer;
+        private string _fileName;
+        private bool _looping;
+        private bool _paused;
+        private float _volume = 1f;
+        private TimeSpan _duration;
 
         private void PlatformInitialize(string fileName)
         {
-            // Nothing to do here
+            _fileName = fileName;
+            _androidPlayer = new Android.Media.MediaPlayer();
+            _androidPlayer.Completion += OnPlayerCompletion;
         }
 
-        static void AndroidPlayer_Completion(object sender, EventArgs e)
+        private void OnPlayerCompletion(object sender, EventArgs e)
         {
-            var playingSong = _playingSong;
-            _playingSong = null;
-
-            if (playingSong != null && playingSong.DonePlaying != null)
-                playingSong.DonePlaying(sender, e);
+            OnFinish?.Invoke(this);
         }
 
-        /// <summary>
-        /// Set the event handler for "Finished Playing". Done this way to prevent multiple bindings.
-        /// </summary>
-        internal void SetEventHandler(FinishedPlayingHandler handler)
+        private static void PlatformMasterVolumeChanged()
         {
-            if (DonePlaying != null)
-                return;
-            DonePlaying += handler;
-        }
-
-        private void PlatformDispose(bool disposing)
-        {
-            // Appears to be a noOp on Android
-        }
-
-        internal void Play(TimeSpan? startPosition)
-        {
-            // Prepare the player
-            _androidPlayer.Reset();
-
-            if (AssetUri != null)
+            lock (_playingSongs)
             {
-                _androidPlayer.SetDataSource(MediaLibrary.Context, AssetUri);
+                foreach (var song in _playingSongs)
+                    song.SetPlayerVolume(song._volume);
             }
-            else
+        }
+
+        private void PlatformPlay(TimeSpan? startPosition)
+        {
+            lock (_playMutex)
             {
-                var afd = Game.Activity.Assets.OpenFd(Name);
-                if (afd == null)
+                if (_paused)
+                {
+                    PlayInternal(startPosition);
                     return;
-
-                _androidPlayer.SetDataSource(afd.FileDescriptor, afd.StartOffset, afd.Length);
+                }
             }
 
+            var fd = Game.Activity.Assets.OpenFd(_fileName);
+            try
+            {
+                if (fd == null)
+                    throw new FileNotFoundException("Could not open file.", _fileName);
+                _androidPlayer.Reset();
+                _androidPlayer.SetDataSource(fd.FileDescriptor, fd.StartOffset, fd.Length);
+                _duration = TimeSpan.FromMilliseconds(_androidPlayer.Duration);
+            }
+            finally
+            {
+                if (fd != null)
+                    fd.Dispose();
+            }
+
+            lock (_playMutex)
+                PlayInternal(startPosition);
+        }
+
+        private void PlayInternal(TimeSpan? position)
+        {
+            if (_androidPlayer == null)
+                throw new ObjectDisposedException(nameof(Song));
+
+            _androidPlayer.Looping = _looping;
+            SetPlayerVolume(_volume);
+
+            if (position.HasValue)
+                PlatformSetPosition(position.Value);
 
             _androidPlayer.Prepare();
-            _androidPlayer.Looping = MediaPlayer.IsRepeating;
-            _playingSong = this;
 
-            if (startPosition.HasValue)
-                Position = startPosition.Value;
-            _androidPlayer.Start();
-            _playCount++;
-        }
-
-        internal void Resume()
-        {
-            _androidPlayer.Start();
-        }
-
-        internal void Pause()
-        {
-            _androidPlayer.Pause();
-        }
-
-        internal void Stop()
-        {
-            _androidPlayer.Stop();
-            _playingSong = null;
-            _playCount = 0;
-            position = TimeSpan.Zero;
-        }
-
-        internal float Volume
-        {
-            get
+            lock (_playMutex)
             {
-                return 0.0f;
-            }
+                _androidPlayer.Start();
+                _paused = false;
 
-            set
-            {
-                _androidPlayer.SetVolume(value, value);
+                lock (_playingSongs)
+                    _playingSongs.Add(this);
             }
         }
 
-        internal float Pitch
+        private void PlatformResume()
         {
-            get
+            lock (_playMutex)
             {
-                return _androidPlayer.PlaybackParams.Pitch;
-            }
-            set
-            {
-                float p = SoundEffectInstance.XnaPitchToAlPitch(value);
-                _androidPlayer.PlaybackParams.SetPitch(p);
-            }
-        }
+                if (_androidPlayer == null)
+                    throw new ObjectDisposedException(nameof(Song));
 
-        public TimeSpan Position
-        {
-            get
-            {
-                if (_playingSong == this && _androidPlayer.IsPlaying)
-                    position = TimeSpan.FromMilliseconds(_androidPlayer.CurrentPosition);
+                if (_paused)
+                {
+                    SetPlayerVolume(_volume);
+                    _androidPlayer.Start();
+                    _paused = false;
 
-                return position;
-            }
-            set
-            {
-                _androidPlayer.SeekTo((int)value.TotalMilliseconds);   
+                    lock (_playingSongs)
+                        _playingSongs.Add(this);
+                }
             }
         }
 
-
-        private Album PlatformGetAlbum()
+        private void PlatformPause()
         {
-            return album;
+            lock (_playMutex)
+            {
+                if (_androidPlayer == null)
+                    throw new ObjectDisposedException(nameof(Song));
+
+                if (_androidPlayer.IsPlaying)
+                {
+                    _androidPlayer.Pause();
+                    _paused = true;
+
+                    lock (_playingSongs)
+                        _playingSongs.Remove(this);
+                }
+            }
         }
 
-        private Artist PlatformGetArtist()
+        private void PlatformStop()
         {
-            return artist;
+            lock (_playMutex)
+            {
+                if (_androidPlayer == null)
+                    throw new ObjectDisposedException(nameof(Song));
+
+                _androidPlayer.Stop();
+                _paused = false;
+
+                lock (_playingSongs)
+                    _playingSongs.Remove(this);
+            }
         }
 
-        private Genre PlatformGetGenre()
+        private float PlatformGetVolume()
         {
-            return genre;
+            return _volume;
+        }
+
+        private void PlatformSetVolume(float value)
+        {
+            SetPlayerVolume(value);
+            _volume = value;
+        }
+
+        private void SetPlayerVolume(float value)
+        {
+            var player = _androidPlayer;
+            if (player != null)
+                player.SetVolume(value * _masterVolume, value * _masterVolume);
+        }
+
+        private float PlatformGetPitch()
+        {
+            throw new NotSupportedException();
+        }
+
+        private void PlatformSetPitch(float value)
+        {
+            throw new NotSupportedException();
+        }
+
+        private bool PlatformGetLooping()
+        {
+            return _looping;
+        }
+
+        private void PlatformSetLooping(bool value)
+        {
+            if (_androidPlayer == null)
+                throw new ObjectDisposedException(nameof(Song));
+
+            _looping = value;
+            _androidPlayer.Looping = value;
+        }
+
+        private MediaState PlatformGetState()
+        {
+            if (_androidPlayer != null)
+            {
+                if (_androidPlayer.IsPlaying)
+                    return MediaState.Playing;
+                if (_paused)
+                    return MediaState.Paused;
+            }
+            return MediaState.Stopped;
+        }
+
+        public TimeSpan PlatformGetPosition()
+        {
+            return TimeSpan.FromMilliseconds(_androidPlayer.CurrentPosition);
+        }
+
+        public void PlatformSetPosition(TimeSpan value)
+        {
+            _androidPlayer.SeekTo((int)value.TotalMilliseconds);
         }
 
         private TimeSpan PlatformGetDuration()
         {
-            return AssetUri != null ? duration : _duration;
+            return _duration;
         }
 
-        private bool PlatformIsProtected()
+        private void PlatformDispose(bool disposing)
         {
-            return false;
-        }
+            lock (_playMutex)
+            {
+                lock(_playingSongs)
+                    _playingSongs.Remove(this);
 
-        private bool PlatformIsRated()
-        {
-            return false;
-        }
-
-        private string PlatformGetName()
-        {
-            return name ?? Path.GetFileNameWithoutExtension(AssetUri.Path);
-        }
-
-        private int PlatformGetPlayCount()
-        {
-            return _playCount;
-        }
-
-        private int PlatformGetRating()
-        {
-            return 0;
-        }
-
-        private int PlatformGetTrackNumber()
-        {
-            return 0;
+                if (_androidPlayer != null)
+                {
+                    _androidPlayer.Dispose();
+                    _androidPlayer = null;
+                }
+            }
         }
     }
 }

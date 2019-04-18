@@ -12,7 +12,7 @@
     <AssemblyName>MonoGame.Framework.Net</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>1591,0436</NoWarn>
-    <TargetFrameworkVersion>v6.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.4</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <LangVersion>Default</LangVersion>
     <FileAlignment>512</FileAlignment>
@@ -220,10 +220,6 @@
     <ProjectReference Include="..\ThirdParty\Lidgren.Network\Lidgren.Network.Android.csproj">
       <Project>{565129E0-4EE5-4F6F-B403-C3484C9740BE}</Project>
       <Name>Lidgren.Network.Android</Name>
-    </ProjectReference>
-    <ProjectReference Include="MonoGame.Framework.Android.csproj">
-      <Project>{BA9476CF-99BA-4D03-92F2-73D2C5E58883}</Project>
-      <Name>MonoGame.Framework.Android</Name>
     </ProjectReference>
   </ItemGroup>
   <ProjectExtensions>
