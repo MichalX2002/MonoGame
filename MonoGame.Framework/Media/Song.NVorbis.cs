@@ -9,9 +9,8 @@ namespace Microsoft.Xna.Framework.Media
 {
     public sealed partial class Song : IDisposable
     {
-        internal OggStream stream;
-        private float _volume = 1f;
-        private float _pitch = 1f;
+        internal OggStream _stream;
+        private float _volume;
         private TimeSpan _duration;
 
         private void PlatformInitialize(string fileName)
@@ -19,63 +18,74 @@ namespace Microsoft.Xna.Framework.Media
             // init OpenAL if need be
             ALController.EnsureInitialized();
 
-            stream = new OggStream(fileName, OnFinishedPlaying);
-            stream.Prepare();
-            _duration = stream.GetLength();
+            _stream = new OggStream(this, fileName, OnFinishedPlaying);
+            _stream.Prepare();
+            _duration = _stream.GetLength();
         }
 
         private void OnFinishedPlaying()
         {
-            OnFinish?.Invoke();
+            OnFinish?.Invoke(this);
         }
 
-        private void PlatformDispose(bool disposing)
+        private static void PlatformMasterVolumeChanged()
         {
-            if (stream != null)
+            var streamer = OggStreamer.Instance;
+            lock (streamer._iterationMutex)
             {
-                stream.Dispose();
-                stream = null;
+                foreach (var stream in streamer._streams)
+                    stream.Volume = stream.Parent._volume * _masterVolume;
             }
         }
 
         private void PlatformPlay(TimeSpan? startPosition)
         {
-            if (stream != null)
+            if (_stream != null)
             {
                 if (startPosition.HasValue)
                     PlatformSetPosition(startPosition.Value);
 
-                stream.Play();
-                _playCount++;
+                _stream.Play();
             }
+        }
+
+        private bool PlatformGetLooping()
+        {
+            return _stream != null ? _stream.IsLooped : false;
+        }
+
+        private void PlatformSetLooping(bool value)
+        {
+            if (_stream != null)
+                _stream.IsLooped = value;
         }
 
         private void PlatformResume()
         {
-            if (stream != null)
-                stream.Resume();
+            if (_stream != null)
+                _stream.Resume();
         }
 
         private void PlatformPause()
         {
-            if (stream != null)
-                stream.Pause();
+            if (_stream != null)
+                _stream.Pause();
         }
 
         private void PlatformStop()
         {
-            if (stream != null)
-                stream.Stop();
+            if (_stream != null)
+                _stream.Stop();
         }
 
         private TimeSpan PlatformGetPosition()
         {
-            return stream != null ? stream.GetPosition() : TimeSpan.Zero;
+            return _stream != null ? _stream.GetPosition() : TimeSpan.Zero;
         }
 
         private MediaState PlatformGetState()
         {
-            switch (stream.GetState())
+            switch (_stream.GetState())
             {
                 case ALSourceState.Paused:
                     return MediaState.Paused;
@@ -90,42 +100,40 @@ namespace Microsoft.Xna.Framework.Media
 
         private void PlatformSetPosition(TimeSpan time)
         {
-            if (stream != null)
+            if (_stream != null)
             {
-                var initialState = stream.GetState();
-                
-                stream.SeekToPosition(time);
+                var initialState = _stream.GetState();
+
+                _stream.SeekToPosition(time);
 
                 if (initialState == ALSourceState.Playing)
-                    stream.Play();
+                    _stream.Play();
             }
         }
 
         private float PlatformGetVolume()
         {
-            return stream != null ? _volume : 0;
+            return _stream != null ? _volume : 0;
         }
 
         private void PlatformSetVolume(float value)
         {
             _volume = value;
-            if (stream != null)
-                stream.Volume = _volume * _masterVolume;
+            if (_stream != null)
+                _stream.Volume = _volume * _masterVolume;
         }
 
         private float PlatformGetPitch()
         {
-            return stream != null ? _pitch : 0;
+            if (_stream != null)
+                return _stream.Pitch;
+            return 0;
         }
 
         private void PlatformSetPitch(float value)
         {
-            if (_pitch != value)
-            {
-                _pitch = value;
-                if (stream != null)
-                    stream.Pitch = _pitch;
-            }
+            if (_stream != null)
+                _stream.Pitch = value;
         }
 
         private TimeSpan PlatformGetDuration()
@@ -133,9 +141,13 @@ namespace Microsoft.Xna.Framework.Media
             return _duration;
         }
 
-        private int PlatformGetPlayCount()
+        private void PlatformDispose(bool disposing)
         {
-            return _playCount;
+            if (_stream != null)
+            {
+                _stream.Dispose();
+                _stream = null;
+            }
         }
     }
 }

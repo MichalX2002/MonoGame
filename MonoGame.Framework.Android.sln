@@ -4,9 +4,9 @@ VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Framework.Android", "MonoGame.Framework\MonoGame.Framework.Android.csproj", "{BA9476CF-99BA-4D03-92F2-73D2C5E58883}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Utilities.Android", "MonoGame.Utilities\MonoGame.Utilities.Android.csproj", "{F23BFEB3-2856-43B0-A1B0-BAE164D62811}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Imaging", "MonoGame.Imaging\MonoGame.Imaging.csproj", "{65283A99-F01E-425D-A991-878DA43020C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Imaging.Android", "MonoGame.Imaging\MonoGame.Imaging.Android.csproj", "{FD4FAA48-4062-46A6-9F7B-D1E470D7805B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Utilities", "MonoGame.Utilities\MonoGame.Utilities.csproj", "{11AE16AB-940D-4D16-86EC-141D1EEC21FD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lidgren.Network.Android", "ThirdParty\Lidgren.Network\Lidgren.Network\Lidgren.Network.Android.csproj", "{565129E0-4EE5-4F6F-B403-C3484C9740BE}"
 EndProject
@@ -20,14 +20,14 @@ Global
 		{BA9476CF-99BA-4D03-92F2-73D2C5E58883}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA9476CF-99BA-4D03-92F2-73D2C5E58883}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA9476CF-99BA-4D03-92F2-73D2C5E58883}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F23BFEB3-2856-43B0-A1B0-BAE164D62811}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F23BFEB3-2856-43B0-A1B0-BAE164D62811}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F23BFEB3-2856-43B0-A1B0-BAE164D62811}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F23BFEB3-2856-43B0-A1B0-BAE164D62811}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FD4FAA48-4062-46A6-9F7B-D1E470D7805B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FD4FAA48-4062-46A6-9F7B-D1E470D7805B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FD4FAA48-4062-46A6-9F7B-D1E470D7805B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FD4FAA48-4062-46A6-9F7B-D1E470D7805B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65283A99-F01E-425D-A991-878DA43020C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65283A99-F01E-425D-A991-878DA43020C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65283A99-F01E-425D-A991-878DA43020C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65283A99-F01E-425D-A991-878DA43020C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11AE16AB-940D-4D16-86EC-141D1EEC21FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11AE16AB-940D-4D16-86EC-141D1EEC21FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11AE16AB-940D-4D16-86EC-141D1EEC21FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11AE16AB-940D-4D16-86EC-141D1EEC21FD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{565129E0-4EE5-4F6F-B403-C3484C9740BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{565129E0-4EE5-4F6F-B403-C3484C9740BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{565129E0-4EE5-4F6F-B403-C3484C9740BE}.Release|Any CPU.ActiveCfg = Release|Any CPU

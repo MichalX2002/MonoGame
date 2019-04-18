@@ -17,12 +17,12 @@ namespace Microsoft.Xna.Framework.Media
         const int MaxBuffers = 3;
 
         internal static readonly object _singletonMutex = new object();
-        readonly object _iterationMutex = new object();
+        internal readonly object _iterationMutex = new object();
         readonly object _readMutex = new object();
 
         readonly float[] _readBuffer;
         readonly short[] _castBuffer;
-        readonly HashSet<OggStream> _streams;
+        internal readonly HashSet<OggStream> _streams;
         readonly List<TimeSpan> _threadTiming;
 
         readonly Thread _thread;

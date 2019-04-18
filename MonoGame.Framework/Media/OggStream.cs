@@ -30,6 +30,7 @@ namespace Microsoft.Xna.Framework.Media
 
         public bool IsLooped { get; set; }
         
+        internal Song Parent { get; }
         private string FilePath { get; }
         internal VorbisReader Reader { get; private set; }
         internal bool IsReady { get; private set; }
@@ -74,8 +75,9 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
-        public OggStream(string fileName, Action onFinished = null)
+        public OggStream(Song parent, string fileName, Action onFinished = null)
         {
+            Parent = parent;
             OnFinished = onFinished;
             FilePath = fileName;
 

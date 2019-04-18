@@ -667,16 +667,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.Android.csproj">
-      <Project>{fd4faa48-4062-46a6-9f7b-d1e470d7805b}</Project>
-      <Name>MonoGame.Imaging.Android</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.Android.csproj">
-      <Project>{f23bfeb3-2856-43b0-a1b0-bae164d62811}</Project>
-      <Name>MonoGame.Utilities.Android</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Graphics\Effect\Resources\AlphaTestEffect.ogl.mgfxo">
       <Services>_GLCompatible</Services>
     </EmbeddedResource>
@@ -714,10 +704,16 @@
       <Link>libs\x86_64\libopenal32.so</Link>
     </EmbeddedNativeLibrary>
   </ItemGroup>
-  <ItemGroup />
-  <ItemGroup />
-  <ItemGroup />
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj">
+      <Project>{65283a99-f01e-425d-a991-878da43020c4}</Project>
+      <Name>MonoGame.Imaging</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj">
+      <Project>{11ae16ab-940d-4d16-86ec-141d1eec21fd}</Project>
+      <Name>MonoGame.Utilities</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup />
   <ItemGroup />
   <ItemGroup />
