@@ -195,23 +195,21 @@ namespace Microsoft.Xna.Framework.Audio
 				{
 					Android.Util.Log.Debug("OAL", Game.Activity.PackageManager.HasSystemFeature(PackageManager.FeatureAudioLowLatency) ? "Supports low latency audio playback." : "Does not support low latency audio playback.");
 
-					var audioManager = Game.Activity.GetSystemService(Context.AudioService) as AudioManager;
-					if (audioManager != null)
-					{
-						var result = audioManager.GetProperty(AudioManager.PropertyOutputSampleRate);
-						if (!string.IsNullOrEmpty(result))
-							frequency = int.Parse(result, CultureInfo.InvariantCulture);
-						result = audioManager.GetProperty(AudioManager.PropertyOutputFramesPerBuffer);
-						if (!string.IsNullOrEmpty(result))
-							updateSize = int.Parse(result, CultureInfo.InvariantCulture);
-					}
+                    if (Game.Activity.GetSystemService(Context.AudioService) is AudioManager audioManager)
+                    {
+                        var result = audioManager.GetProperty(AudioManager.PropertyOutputSampleRate);
+                        if (!string.IsNullOrEmpty(result))
+                            frequency = int.Parse(result, CultureInfo.InvariantCulture);
 
-					// If 4.4 or higher, then we don't need to double buffer on the application side.
-					// See http://stackoverflow.com/a/15006327
-					if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Kitkat)
-					{
+                        result = audioManager.GetProperty(AudioManager.PropertyOutputFramesPerBuffer);
+                        if (!string.IsNullOrEmpty(result))
+                            updateSize = int.Parse(result, CultureInfo.InvariantCulture);
+                    }
+
+                    // If 4.4 or higher, then we don't need to double buffer on the application side.
+                    // See http://stackoverflow.com/a/15006327
+                    if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Kitkat)
 						updateBuffers = 1;
-					}
 				}
 				else
 				{

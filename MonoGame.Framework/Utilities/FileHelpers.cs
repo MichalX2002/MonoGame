@@ -48,7 +48,6 @@ namespace MonoGame.Utilities
 
             // Get a uri for filePath using the file:// schema and no host.
             var src = new Uri("file://" + UrlEncode(filePath));
-
             var dst = new Uri(src, UrlEncode(relativeFile));
 
             // The uri now contains the path to the relativeFile with 
@@ -65,7 +64,7 @@ namespace MonoGame.Utilities
 
         private static string UrlEncode(string url)
         {
-            var encoder = new UTF8Encoding();
+            var encoder = Encoding.UTF8;
             var safeline = new StringBuilder(encoder.GetByteCount(url) * 3);
 
             foreach (var c in url)

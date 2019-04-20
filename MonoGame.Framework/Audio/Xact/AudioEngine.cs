@@ -51,36 +51,16 @@ namespace Microsoft.Xna.Framework.Audio
         public const int ContentVersion = 39;
 
         /// <param name="settingsFile">Path to a XACT settings file.</param>
-        public AudioEngine(string settingsFile)
-            : this(settingsFile, TimeSpan.Zero, "")
-        {            
+        public AudioEngine(string settingsFile) : this(settingsFile, TimeSpan.Zero, "")
+        {
         }
 
-        internal static Stream OpenStream(string filePath, bool useMemoryStream = false)
+        internal static Stream OpenStream(string filePath)
         {
             var stream = TitleContainer.OpenStream(filePath);
-
-            // Read the asset into memory in one go. This results in a ~50% reduction
-            // in load times on Android due to slow Android asset streams.
 #if ANDROID
-            useMemoryStream = true;
+            stream = RecyclableMemoryManager.Instance.GetReadBufferedStream(stream, leaveOpen: false);
 #endif
-
-            if (useMemoryStream)
-            {
-                var memStream = RecyclableMemoryManager.Instance.GetMemoryStream();
-
-                var buffer = RecyclableMemoryManager.Instance.GetBlock();   //
-                int read;                                                   //
-                while ((read = stream.Read(buffer, 0, buffer.Length)) != 0) // instead of CopyTo
-                    memStream.Write(buffer, 0, read);                       //
-                RecyclableMemoryManager.Instance.ReturnBlock(buffer);       //
-
-                memStream.Seek(0, SeekOrigin.Begin);
-                stream.Dispose();
-                stream = memStream;
-            }
-
             return stream;
         }
 
@@ -95,8 +75,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             // Read the xact settings file
             // Credits to alisci01 for initial format documentation
-            using (var stream = OpenStream(settingsFile))
-            using (var reader = new BinaryReader(stream)) 
+            using (var reader = new BinaryReader(OpenStream(settingsFile))) 
             {
                 uint magic = reader.ReadUInt32 ();
                 if (magic != 0x46534758) //'XGFS'

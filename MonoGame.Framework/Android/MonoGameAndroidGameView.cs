@@ -577,7 +577,6 @@ namespace Microsoft.Xna.Framework
 
                 case InternalState.Running_GameThread: // when we are running game 
                     ProcessStateRunning(token);
-
                     break;
 
                 case InternalState.ForceRecreateSurface:

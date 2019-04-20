@@ -592,7 +592,7 @@ namespace MonoGame.Utilities.Memory
         /// Retrieve a new MemoryStream object with no tag and a default initial capacity.
         /// </summary>
         /// <returns>A MemoryStream.</returns>
-        public MemoryStream GetMemoryStream()
+        public RecyclableMemoryStream GetMemoryStream()
         {
             return new RecyclableMemoryStream(this);
         }
@@ -612,7 +612,7 @@ namespace MonoGame.Utilities.Memory
         /// </summary>
         /// <param name="tag">A tag which can be used to track the source of the stream.</param>
         /// <returns>A MemoryStream.</returns>
-        public MemoryStream GetMemoryStream(string tag)
+        public RecyclableMemoryStream GetMemoryStream(string tag)
         {
             return new RecyclableMemoryStream(this, tag);
         }
@@ -623,7 +623,7 @@ namespace MonoGame.Utilities.Memory
         /// <param name="tag">A tag which can be used to track the source of the stream.</param>
         /// <param name="requiredSize">The minimum desired capacity for the stream.</param>
         /// <returns>A MemoryStream.</returns>
-        public MemoryStream GetMemoryStream(string tag, int requiredSize)
+        public RecyclableMemoryStream GetMemoryStream(string tag, int requiredSize)
         {
             return new RecyclableMemoryStream(this, tag, requiredSize);
         }
@@ -640,7 +640,7 @@ namespace MonoGame.Utilities.Memory
         /// <param name="requiredSize">The minimum desired capacity for the stream.</param>
         /// <param name="asContiguousBuffer">Whether to attempt to use a single contiguous buffer.</param>
         /// <returns>A MemoryStream.</returns>
-        public MemoryStream GetMemoryStream(string tag, int requiredSize, bool asContiguousBuffer)
+        public RecyclableMemoryStream GetMemoryStream(string tag, int requiredSize, bool asContiguousBuffer)
         {
             if (!asContiguousBuffer || requiredSize <= this.BlockSize)
             {
@@ -660,7 +660,7 @@ namespace MonoGame.Utilities.Memory
         /// <param name="offset">The offset from the start of the buffer to copy from.</param>
         /// <param name="count">The number of bytes to copy from the buffer.</param>
         /// <returns>A MemoryStream.</returns>
-        public MemoryStream GetMemoryStream(string tag, byte[] buffer, int offset, int count)
+        public RecyclableMemoryStream GetMemoryStream(string tag, byte[] buffer, int offset, int count)
         {
             RecyclableMemoryStream stream = null;
             try

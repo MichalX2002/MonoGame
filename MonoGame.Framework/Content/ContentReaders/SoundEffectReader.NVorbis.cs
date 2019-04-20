@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework.Audio;
 using MonoGame.Utilities.Memory;
@@ -60,41 +59,15 @@ namespace Microsoft.Xna.Framework.Content
 
             if (format == 1)
             {
-                Span<float> floatBuffer = stackalloc float[1024 * 4];
-                using (var reader = new VorbisReader(input.BaseStream, false))
-                {
-                    long bytes = reader.TotalSamples * reader.Channels * sizeof(short);
-                    if (bytes > int.MaxValue)
-                        throw new InvalidDataException("Size of decoded audio data exceeds " + int.MaxValue + " bytes.");
+                byte[] data = AudioLoader.Load(
+                    input.BaseStream, out ALFormat alFormat, out int sampleRate, out int channels,
+                    out int blockAlignment, out int bitsPerSample, out int samplesPerBlock, out int sampleCount);
 
-                    using (var memoryBuffer = RecyclableMemoryManager.Instance.GetMemoryStream(null, (int)bytes))
-                    {
-                        int totalSamples = 0;
-                        int samplesRead;
-                        while ((samplesRead = reader.ReadSamples(floatBuffer)) > 0)
-                        {
-                            for (int i = 0; i < samplesRead; i++)
-                            {
-                                int tmp = (int)(32767f * floatBuffer[i]);
-                                if (tmp > short.MaxValue)
-                                    tmp = short.MaxValue;
-                                else if (tmp < short.MinValue)
-                                    tmp = short.MinValue;
+                if(alFormat == ALFormat.MonoFloat32 || alFormat == ALFormat.StereoFloat32)
+                    BitConverter.GetBytes((short)3).CopyTo(header, 0);
 
-                                memoryBuffer.WriteByte((byte)tmp);
-                                memoryBuffer.WriteByte((byte)(tmp >> 8));
-                            }
-                            totalSamples += samplesRead;
-                        }
-
-                        // this buffer becomes unusable after disposing
-                        // the recyclable memory stream
-                        byte[] data = memoryBuffer.GetBuffer();
-
-                        // data gets uploaded synchronously
-                        effect = CreateEffect(data, (int)memoryBuffer.Length);
-                    }
-                }
+                // data gets uploaded synchronously
+                effect = CreateEffect(data, data.Length);
             }
             else
             {

@@ -35,7 +35,7 @@ namespace Microsoft.Xna.Framework.Audio
             if (string.IsNullOrEmpty(fileName))
                 throw new ArgumentNullException(nameof(fileName));
 
-            using (var stream = AudioEngine.OpenStream(fileName, true))
+            using (var stream = AudioEngine.OpenStream(fileName))
             using (var reader = new BinaryReader(stream))
             {
                 // Thanks to Liandril for "xactxtract" for some of the offsets.

@@ -214,7 +214,10 @@ namespace Microsoft.Xna.Framework.Audio
         /// Creates a new SoundEffectInstance for this SoundEffect.
         /// </summary>
         /// <returns>A new SoundEffectInstance for this SoundEffect.</returns>
-        /// <remarks>Creating a SoundEffectInstance before calling SoundEffectInstance.Play() allows you to access advanced playback features, such as volume, pitch, and 3D positioning.</remarks>
+        /// <remarks>
+        /// Creating a SoundEffectInstance before calling SoundEffectInstance.Play()
+        /// allows you to access advanced playback features, such as volume, pitch, and 3D positioning.
+        /// </remarks>
         public SoundEffectInstance CreateInstance()
         {
             var inst = new SoundEffectInstance();

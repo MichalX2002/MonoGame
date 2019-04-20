@@ -31,7 +31,7 @@
     <OutputPath>bin\Android\AnyCPU\Debug</OutputPath>
     <IntermediateOutputPath>obj\Android\AnyCPU\Debug</IntermediateOutputPath>
     <DocumentationFile>bin\Android\AnyCPU\Debug\MonoGame.Framework.xml</DocumentationFile>
-    <DefineConstants>DEBUG;OPENGL;OPENAL;TRACE;ANDROID;GLES</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;OPENGL;OPENAL;ANDROID;GLES;NET45;NVORBIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -45,7 +45,7 @@
     <OutputPath>bin\Android\AnyCPU\Release</OutputPath>
     <IntermediateOutputPath>obj\Android\AnyCPU\Release</IntermediateOutputPath>
     <DocumentationFile>bin\Android\AnyCPU\Release\MonoGame.Framework.xml</DocumentationFile>
-    <DefineConstants>OPENGL;OPENAL;TRACE;ANDROID;GLES</DefineConstants>
+    <DefineConstants>TRACE;OPENGL;OPENAL;ANDROID;GLES;NET45;NVORBIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -62,6 +62,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Android\Audio\AudioDecoder.cs" />
+    <Compile Include="Android\Audio\MediaCodecPool.cs" />
+    <Compile Include="Audio\AudioLoader.NVorbis.cs" />
     <Compile Include="Audio\NoMicrophoneException.cs" />
     <Compile Include="Audio\OpenAL\ALBuffer.cs" />
     <Compile Include="Audio\OpenAL\ALBufferPool.cs" />
@@ -72,7 +74,7 @@
     <Compile Include="Audio\OpenAL\OpenAL.Efx.cs" />
     <Compile Include="Audio\OpenAL\OpenAL.Enums.cs" />
     <Compile Include="Audio\OpenAL\OpenAL.XRam.cs" />
-    <Compile Include="Content\ContentReaders\SoundEffectReader.Android.cs" />
+    <Compile Include="Content\ContentReaders\SoundEffectReader.NVorbis.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="DisplayOrientation.cs" />
     <Compile Include="ExceptionHelper.cs" />
@@ -616,6 +618,8 @@
     <Compile Include="Utilities\FuncLoader.Android.cs" />
     <Compile Include="Utilities\Hash.cs" />
     <Compile Include="Utilities\FileHelpers.cs" />
+    <Compile Include="Utilities\LengthStream.cs" />
+    <Compile Include="Utilities\PrefixedStream.cs" />
     <Compile Include="Utilities\ReflectionHelpers.cs" />
     <Compile Include="Utilities\ReflectionHelpers.Default.cs">
       <Platforms>Android,iOS,WindowsUniversal,tvOS</Platforms>
@@ -664,6 +668,118 @@
     </Compile>
     <Compile Include="Resources\Resource.Designer.cs">
       <Platforms>Android,Ouya</Platforms>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\BufferedReadStream.cs">
+      <Link>Utilities\NVorbis\BufferedReadStream.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\BufferPool.cs">
+      <Link>Utilities\NVorbis\BufferPool.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\DataPacket.cs">
+      <Link>Utilities\NVorbis\DataPacket.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\Huffman.cs">
+      <Link>Utilities\NVorbis\Huffman.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\IContainerReader.cs">
+      <Link>Utilities\NVorbis\IContainerReader.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\IPacketProvider.cs">
+      <Link>Utilities\NVorbis\IPacketProvider.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\IVorbisStreamStatus.cs">
+      <Link>Utilities\NVorbis\IVorbisStreamStatus.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\Mdct.cs">
+      <Link>Utilities\NVorbis\Mdct.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\NewStreamEvent.cs">
+      <Link>Utilities\NVorbis\NewStreamEvent.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\ParameterChangeEvent.cs">
+      <Link>Utilities\NVorbis\ParameterChangeEvent.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\RingBuffer.cs">
+      <Link>Utilities\NVorbis\RingBuffer.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\StreamReadBuffer.cs">
+      <Link>Utilities\NVorbis\StreamReadBuffer.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\Utils.cs">
+      <Link>Utilities\NVorbis\Utils.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\VorbisCodebook.cs">
+      <Link>Utilities\NVorbis\VorbisCodebook.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\VorbisFloor.cs">
+      <Link>Utilities\NVorbis\VorbisFloor.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\VorbisMapping.cs">
+      <Link>Utilities\NVorbis\VorbisMapping.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\VorbisMode.cs">
+      <Link>Utilities\NVorbis\VorbisMode.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\VorbisReader.cs">
+      <Link>Utilities\NVorbis\VorbisReader.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\ArrayExtensions.cs">
+      <Link>Utilities\NVorbis\ArrayExtensions.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\VorbisResidue.cs">
+      <Link>Utilities\NVorbis\VorbisResidue.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\VorbisStreamDecoder.cs">
+      <Link>Utilities\NVorbis\VorbisStreamDecoder.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\VorbisTime.cs">
+      <Link>Utilities\NVorbis\VorbisTime.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\Ogg\OggContainerReader.cs">
+      <Link>Utilities\NVorbis\Ogg\OggContainerReader.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\Ogg\OggCrc.cs">
+      <Link>Utilities\NVorbis\Ogg\OggCrc.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\Ogg\OggPacket.cs">
+      <Link>Utilities\NVorbis\Ogg\OggPacket.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\Ogg\OggPacketPool.cs">
+      <Link>Utilities\NVorbis\Ogg\OggPacketPool.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\Ogg\OggPacketReader.cs">
+      <Link>Utilities\NVorbis\Ogg\OggPacketReader.cs</Link>
+      <Services>NVorbis</Services>
+    </Compile>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\Ogg\OggPageFlags.cs">
+      <Link>Utilities\NVorbis\Ogg\OggPageFlags.cs</Link>
+      <Services>NVorbis</Services>
     </Compile>
   </ItemGroup>
   <ItemGroup>

@@ -22,7 +22,6 @@ namespace MonoGame.Utilities
             lock (_freeBuffers)
             {
                 int index = FirstLargerThan(size);
-
                 if (index == -1)
                     result = new byte[size];
                 else

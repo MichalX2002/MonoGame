@@ -260,15 +260,9 @@ namespace Microsoft.Xna.Framework.Content
                 else
 #endif                
                 stream = TitleContainer.OpenStream(assetPath);
+
 #if ANDROID
-                // Read the asset into memory in one go. This results in a ~50% reduction
-                // in load times on Android due to slow Android asset streams.
-                
-                var memStream = RecyclableMemoryManager.Instance.GetMemoryStream();
-                stream.CopyTo(memStream);
-                memStream.Seek(0, SeekOrigin.Begin);
-                stream.Dispose();
-                stream = memStream;
+                stream = RecyclableMemoryManager.Instance.GetReadBufferedStream(stream, leaveOpen: false);
 #endif
             }
             catch (FileNotFoundException fileNotFound)

@@ -23,7 +23,7 @@
     <OutputPath>bin\DesktopGL\AnyCPU\Debug\</OutputPath>
     <IntermediateOutputPath>obj\WindowsGL\AnyCPU\Debug</IntermediateOutputPath>
     <DocumentationFile>bin\DesktopGL\AnyCPU\Debug\MonoGame.Framework.xml</DocumentationFile>
-    <DefineConstants>TRACE;DEBUG;OPENGL;OPENAL;XNADESIGNPROVIDED;DESKTOPGL;SUPPORTS_EFX;NET45</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;OPENGL;OPENAL;XNADESIGNPROVIDED;DESKTOPGL;SUPPORTS_EFX;NET45;NET45;NVORBIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -35,7 +35,7 @@
     <OutputPath>bin\DesktopGL\AnyCPU\Release\</OutputPath>
     <IntermediateOutputPath>obj\WindowsGL\AnyCPU\Release</IntermediateOutputPath>
     <DocumentationFile>bin\DesktopGL\AnyCPU\Release\MonoGame.Framework.xml</DocumentationFile>
-    <DefineConstants>TRACE;OPENGL;OPENAL;XNADESIGNPROVIDED;DESKTOPGL;SUPPORTS_EFX;NET45</DefineConstants>
+    <DefineConstants>TRACE;OPENGL;OPENAL;XNADESIGNPROVIDED;DESKTOPGL;SUPPORTS_EFX;NET45;NET45;NVORBIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -60,6 +60,7 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audio\AudioLoader.NVorbis.cs" />
     <Compile Include="Audio\OpenAL\OpenAL.ALC.cs" />
     <Compile Include="Audio\OpenAL\OpenAL.Efx.cs" />
     <Compile Include="Audio\OpenAL\OpenAL.Enums.cs" />
@@ -151,9 +152,11 @@
     <Compile Include="Utilities\Crc32.cs" />
     <Compile Include="Utilities\CrcCalculatorStream.cs" />
     <Compile Include="Utilities\InteropHelpers.cs" />
+    <Compile Include="Utilities\LengthStream.cs" />
     <Compile Include="Utilities\Png\PngCommon.cs" />
     <Compile Include="Utilities\Png\PngReader.cs" />
     <Compile Include="Utilities\Png\PngWriter.cs" />
+    <Compile Include="Utilities\PrefixedStream.cs" />
     <Compile Include="Utilities\ReflectionHelpers.Default.cs" />
     <Compile Include="Utilities\TaskbarList.cs" />
     <Compile Include="Utilities\TaskbarProgress.cs" />

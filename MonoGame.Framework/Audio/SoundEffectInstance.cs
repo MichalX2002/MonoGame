@@ -27,7 +27,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>Gets the SoundEffectInstance's current playback state.</summary>
         public virtual SoundState State => PlatformGetState();
 
-        /// <summary>Enables or Disables whether the SoundEffectInstance should repeat after playback.</summary>
+        /// <summary>Enables or Disables whether the <see cref="SoundEffectInstance"/> should repeat after playback.</summary>
         /// <remarks>This value has no effect on an already playing sound.</remarks>
         public virtual bool IsLooped
         {
@@ -35,7 +35,7 @@ namespace Microsoft.Xna.Framework.Audio
             set => PlatformSetIsLooped(value);
         }
 
-        /// <summary>Gets or sets the pan, or speaker balance..</summary>
+        /// <summary>Gets or sets the pan, or speaker balance.</summary>
         /// <value>Pan value ranging from -1.0 (left speaker) to 0.0 (centered), 1.0 (right speaker). Values outside of this range will throw an exception.</value>
         public float Pan
         {
@@ -51,14 +51,13 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
         /// <summary>Gets or sets the pitch adjustment.</summary>
-        /// <value>Pitch adjustment, ranging from -1.0 (down an octave) to 0.0 (no change) to 1.0 (up an octave). Values outside of this range will throw an Exception.</value>
         public float Pitch
         {
             get => _pitch;
             set
             {
                 // XAct sounds effects don't have pitch limits
-                if (!_isXAct && (value < -1.0f || value > 1.0f))
+                if (!_isXAct && value <= 0.0f)
                     throw new ArgumentOutOfRangeException();
 
                 _pitch = value;

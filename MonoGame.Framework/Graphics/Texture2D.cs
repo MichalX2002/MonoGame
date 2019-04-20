@@ -358,6 +358,10 @@ namespace Microsoft.Xna.Framework.Graphics
                     return texture;
                 }
             }
+            catch (TimeoutException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 throw new InvalidOperationException("This image format is not supported.", e);
