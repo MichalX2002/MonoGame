@@ -60,8 +60,8 @@ namespace Microsoft.Xna.Framework.Content
             if (format == 1)
             {
                 byte[] data = AudioLoader.Load(
-                    input.BaseStream, out ALFormat alFormat, out int sampleRate, out int channels,
-                    out int blockAlignment, out int bitsPerSample, out int samplesPerBlock, out int sampleCount);
+                    input.BaseStream, out ALFormat alFormat, out _, out _,
+                    out _, out _, out _, out _);
 
                 if(alFormat == ALFormat.MonoFloat32 || alFormat == ALFormat.StereoFloat32)
                     BitConverter.GetBytes((short)3).CopyTo(header, 0);

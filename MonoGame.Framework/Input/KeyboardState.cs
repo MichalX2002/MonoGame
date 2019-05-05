@@ -253,7 +253,7 @@ namespace Microsoft.Xna.Framework.Input
             if (keys4 != 0) index = AddKeysToArray(keys4, 4 * 32, buffer, index);
             if (keys5 != 0) index = AddKeysToArray(keys5, 5 * 32, buffer, index);
             if (keys6 != 0) index = AddKeysToArray(keys6, 6 * 32, buffer, index);
-            if (keys7 != 0) index = AddKeysToArray(keys7, 7 * 32, buffer, index);
+            if (keys7 != 0) _ = AddKeysToArray(keys7, 7 * 32, buffer, index);
 
             return count;
         }

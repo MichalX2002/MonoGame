@@ -61,7 +61,7 @@ namespace MonoGame.Utilities
                 if (throwIfNotFound)
                     throw new EntryPointNotFoundException(function);
 
-                return default(T);
+                return default;
             }
 
 #if NETSTANDARD

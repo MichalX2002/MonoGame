@@ -173,7 +173,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// must be within the <paramref name="data"/> array bounds.</param>
 		public void SetData<T>(T[] data, int startIndex, int elementCount) where T : struct
         {
-            SetData(0, data, startIndex, elementCount, 0);
+            SetData(0, data, startIndex, elementCount, ReflectionHelpers.SizeOf<T>.Get());
         }
 
         /// <summary>

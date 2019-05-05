@@ -4,9 +4,12 @@
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MonoGame.Utilities;
-using MonoGame.Imaging;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -173,7 +176,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="elementCount"></param>
 		public void SetData<T>(T[] data, int startIndex, int elementCount) where T : struct
         {
-            ValidateParams(0, 0, null, data, startIndex, elementCount, out Rectangle checkedRect);
+            ValidateParams(0, 0, null, data, startIndex, elementCount, out _);
             PlatformSetData(0, data, startIndex, elementCount);
         }
 
@@ -184,7 +187,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="data"></param>
         public void SetData<T>(T[] data) where T : struct
         {
-            ValidateParams(0, 0, null, data, 0, data.Length, out Rectangle checkedRect);
+            ValidateParams(0, 0, null, data, 0, data.Length, out _);
             PlatformSetData(0, data, 0, data.Length);
         }
 
@@ -311,65 +314,44 @@ namespace Microsoft.Xna.Framework.Graphics
         ///  the images should be identical. This call does not premultiply the image alpha, but areas of zero alpha will
         ///  result in black color data.
         /// </remarks>
-        public static Texture2D FromStream(GraphicsDevice graphicsDevice, Stream stream)
+        public static Texture2D FromStream(GraphicsDevice graphicsDevice, Stream stream, Configuration configuration)
         {
             if (graphicsDevice == null)
                 throw new ArgumentNullException(nameof(graphicsDevice));
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
-            try
+            using (var image = Image.Load<Rgba32>(configuration, stream))
             {
-                using (var img = new Image(stream, ImagePixelFormat.RgbWithAlpha, leaveOpen: true))
+                int channels = image.PixelType.BitsPerPixel / 8;
+                if (channels != 4)
+                    throw new InvalidDataException();
+
+                int pixels = image.Width * image.Height;
+                int length = channels * pixels;
+                unsafe
                 {
-                    IntPtr data = img.GetPointer();
-                    int channels = (int)img.PixelFormat;
-
-                    if (data == IntPtr.Zero || channels != 4)
+                    byte* src = (byte*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(image.GetPixelSpan()));
+                    for (int i = 0; i < length; i += 4)
                     {
-                        string msg = "Could not decode stream.";
-                        if (img.Errors.Count > 0)
-                            msg += "\n " + img.Errors;
-
-                        var exc = new InvalidDataException(msg);
-                        exc.Data.Add("ImageInfo", img.Info);
-                        throw exc;
-                    }
-
-                    int pixels = img.Width * img.Height;
-                    int length = channels * pixels;
-                    unsafe
-                    {
-                        byte* src = (byte*)data;
-                        for (int i = 0; i < length; i += 4)
+                        // XNA blacks out any pixels with an alpha of zero.
+                        if (src[i + 3] == 0)
                         {
-                            // XNA blacks out any pixels with an alpha of zero.
-                            if (src[i + 3] == 0)
-                            {
-                                src[i + 0] = 0;
-                                src[i + 1] = 0;
-                                src[i + 2] = 0;
-                            }
+                            src[i + 0] = 0;
+                            src[i + 1] = 0;
+                            src[i + 2] = 0;
                         }
                     }
 
-                    var texture = new Texture2D(graphicsDevice, img.Width, img.Height);
-                    texture.SetData(data, 0, channels, pixels);
+                    var texture = new Texture2D(graphicsDevice, image.Width, image.Height);
+                    texture.SetData((IntPtr)src, 0, channels, pixels);
                     return texture;
                 }
-            }
-            catch (TimeoutException)
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                throw new InvalidOperationException("This image format is not supported.", e);
             }
         }
 
         /// <summary>
-        /// Converts the texture to a JPG image
+        /// Saves the texture as a JPEG image.
         /// </summary>
         /// <param name="stream">Destination for the image</param>
         /// <param name="width"></param>
@@ -380,7 +362,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         /// <summary>
-        /// Converts the texture to a PNG image
+        /// Saves the texture as a PNG image.
         /// </summary>
         /// <param name="stream">Destination for the image</param>
         /// <param name="width"></param>

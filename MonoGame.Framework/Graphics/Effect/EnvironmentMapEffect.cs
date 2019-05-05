@@ -436,17 +436,17 @@ namespace Microsoft.Xna.Framework.Graphics
             DirectionalLight0 = new DirectionalLight(Parameters["DirLight0Direction"],
                                           Parameters["DirLight0DiffuseColor"],
                                           null,
-                                          (cloneSource != null) ? cloneSource.DirectionalLight0 : null);
+                                          cloneSource?.DirectionalLight0);
 
             DirectionalLight1 = new DirectionalLight(Parameters["DirLight1Direction"],
                                           Parameters["DirLight1DiffuseColor"],
                                           null,
-                                          (cloneSource != null) ? cloneSource.DirectionalLight1 : null);
+                                          cloneSource?.DirectionalLight1);
 
             light2 = new DirectionalLight(Parameters["DirLight2Direction"],
                                           Parameters["DirLight2DiffuseColor"],
                                           null,
-                                          (cloneSource != null) ? cloneSource.light2 : null);
+                                          cloneSource?.light2);
         }
 
 

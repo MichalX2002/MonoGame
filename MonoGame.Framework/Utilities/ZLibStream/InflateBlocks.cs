@@ -542,7 +542,7 @@ namespace MonoGame.Utilities
                     case InflateBlockMode.DRY:
                         writeAt = q;
                         r = Flush(r);
-                        q = writeAt; m = q < readAt ? readAt - q - 1 : end - q;
+                        q = writeAt; _ = q < readAt ? readAt - q - 1 : end - q;
                         if (readAt != writeAt)
                         {
                             bitb = b; bitk = k;

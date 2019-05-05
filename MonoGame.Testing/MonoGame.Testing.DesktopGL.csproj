@@ -123,10 +123,6 @@
       <Project>{6d75e618-19ca-4c51-9546-f10965fbc0b8}</Project>
       <Name>MonoGame.Framework.DesktopGL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj">
-      <Project>{4344dacf-e2a9-4699-a89e-89dedba6d941}</Project>
-      <Name>MonoGame.Imaging</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj">
       <Project>{d046adda-b87b-4ab2-9dad-fa886d3e2014}</Project>
       <Name>MonoGame.Utilities</Name>

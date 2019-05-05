@@ -23,7 +23,7 @@ namespace MonoGame.OpenGL
                 if (throwIfNotFound)
                     throw new EntryPointNotFoundException(function);
 
-                return default(T);
+                return default;
             }
 
 #if NETSTANDARD

@@ -83,7 +83,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 // take care of shader compiler optimization
                 int len = rows * columns * elementSize;
                 if (_buffer.Length - offset > len)
-                len = _buffer.Length - offset;
+                    _ = _buffer.Length - offset;
                 Buffer.BlockCopy(data as Array, 0, _buffer, offset, rows*columns*elementSize);
             } else
             {

@@ -1321,7 +1321,7 @@ namespace MonoGame.Utilities
 
             if (match_available != 0)
             {
-                bflush = _tr_tally(0, window[strstart - 1] & 0xff);
+                _ = _tr_tally(0, window[strstart - 1] & 0xff);
                 match_available = 0;
             }
             flush_block_only(flush == FlushType.Finish);

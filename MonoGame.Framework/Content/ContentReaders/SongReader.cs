@@ -22,8 +22,8 @@ namespace Microsoft.Xna.Framework.Content
                 // Resolve the relative path
                 path = FileHelpers.ResolveRelativePath(dirPath, path);
 			}
-			
-			int durationMs = input.ReadObject<int>();
+
+            _ = input.ReadObject<int>();
             return new Song(path, null); 
 		}
 	}

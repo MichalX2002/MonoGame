@@ -29,7 +29,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             byte[] buffer = AudioLoader.Load(
                 stream, out ALFormat format, out int freq, out int channels, out int blockAlignment, 
-                out int bitsPerSample, out int samplesPerBlock, out int sampleCount);
+                out int bitsPerSample, out _, out int sampleCount);
 
             duration = TimeSpan.FromSeconds(sampleCount / (float)freq);
 
@@ -239,7 +239,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         internal static void PlatformShutdown()
         {
-            if (ReverbEffect != 0)
+            if (_systemState == SoundSystemState.Initialized && ReverbEffect != 0)
             {
                 ALController.Efx.DeleteAuxiliaryEffectSlot((int)ReverbSlot);
                 ALController.Efx.DeleteEffect((int)ReverbEffect);

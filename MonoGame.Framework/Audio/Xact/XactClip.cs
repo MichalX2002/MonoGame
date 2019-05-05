@@ -55,7 +55,7 @@ namespace Microsoft.Xna.Framework.Audio
                 // TODO: eventInfo still has 11 bits that are unknown!
                 var eventId = eventInfo & 0x1F;
                 var timeStamp = ((eventInfo >> 5) & 0xFFFF) * 0.001f;
-                var unknown = eventInfo >> 21;
+                _ = eventInfo >> 21;
 
                 switch (eventId) {
                 case 0:
@@ -69,17 +69,17 @@ namespace Microsoft.Xna.Framework.Audio
 
                     // Event flags
                     var eventFlags = clipReader.ReadByte();
-                    var playRelease = (eventFlags & 0x01) == 0x01;
-                    var panEnabled = (eventFlags & 0x02) == 0x02;
-                    var useCenterSpeaker = (eventFlags & 0x04) == 0x04;
+                        _ = (eventFlags & 0x01) == 0x01;
+                        _ = (eventFlags & 0x02) == 0x02;
+                        _ = (eventFlags & 0x04) == 0x04;
 
-                    int trackIndex = clipReader.ReadUInt16();
+                        int trackIndex = clipReader.ReadUInt16();
                     int waveBankIndex = clipReader.ReadByte();					
                     var loopCount = clipReader.ReadByte();
-                    var panAngle = clipReader.ReadUInt16() / 100.0f;
-                    var panArc = clipReader.ReadUInt16() / 100.0f;
-                    
-                    _events[i] = new PlayWaveEvent(
+                        _ = clipReader.ReadUInt16() / 100.0f;
+                        _ = clipReader.ReadUInt16() / 100.0f;
+
+                        _events[i] = new PlayWaveEvent(
                         this,
                         timeStamp, 
                         randomOffset,
@@ -105,16 +105,16 @@ namespace Microsoft.Xna.Framework.Audio
 
                     // Event flags
                     var eventFlags = clipReader.ReadByte();
-                    var playRelease = (eventFlags & 0x01) == 0x01;
-                    var panEnabled = (eventFlags & 0x02) == 0x02;
-                    var useCenterSpeaker = (eventFlags & 0x04) == 0x04;
+                        _ = (eventFlags & 0x01) == 0x01;
+                        _ = (eventFlags & 0x02) == 0x02;
+                        _ = (eventFlags & 0x04) == 0x04;
 
-                    var loopCount = clipReader.ReadByte();
-                    var panAngle = clipReader.ReadUInt16() / 100.0f;
-                    var panArc = clipReader.ReadUInt16() / 100.0f;
+                        var loopCount = clipReader.ReadByte();
+                        _ = clipReader.ReadUInt16() / 100.0f;
+                        _ = clipReader.ReadUInt16() / 100.0f;
 
-                    // The number of tracks for the variations.
-                    var numTracks = clipReader.ReadUInt16();
+                        // The number of tracks for the variations.
+                        var numTracks = clipReader.ReadUInt16();
 
                     // Not sure what most of this is.
                     var moreFlags = clipReader.ReadByte();
@@ -168,18 +168,18 @@ namespace Microsoft.Xna.Framework.Audio
 
                     // Event flags
                     var eventFlags = clipReader.ReadByte();
-                    var playRelease = (eventFlags & 0x01) == 0x01;
-                    var panEnabled = (eventFlags & 0x02) == 0x02;
-                    var useCenterSpeaker = (eventFlags & 0x04) == 0x04;
+                        _ = (eventFlags & 0x01) == 0x01;
+                        _ = (eventFlags & 0x02) == 0x02;
+                        _ = (eventFlags & 0x04) == 0x04;
 
-                    int trackIndex = clipReader.ReadUInt16();
+                        int trackIndex = clipReader.ReadUInt16();
                     int waveBankIndex = clipReader.ReadByte();
                     var loopCount = clipReader.ReadByte();
-                    var panAngle = clipReader.ReadUInt16() / 100.0f;
-                    var panArc = clipReader.ReadUInt16() / 100.0f;
+                        _ = clipReader.ReadUInt16() / 100.0f;
+                        _ = clipReader.ReadUInt16() / 100.0f;
 
-                    // Pitch variation range
-                    var minPitch = clipReader.ReadInt16() / 1000.0f;
+                        // Pitch variation range
+                        var minPitch = clipReader.ReadInt16() / 1000.0f;
                     var maxPitch = clipReader.ReadInt16() / 1000.0f;
 
                     // Volume variation range
@@ -238,16 +238,16 @@ namespace Microsoft.Xna.Framework.Audio
 
                     // Event flags
                     var eventFlags = clipReader.ReadByte();
-                    var playRelease = (eventFlags & 0x01) == 0x01;
-                    var panEnabled = (eventFlags & 0x02) == 0x02;
-                    var useCenterSpeaker = (eventFlags & 0x04) == 0x04;
+                        _ = (eventFlags & 0x01) == 0x01;
+                        _ = (eventFlags & 0x02) == 0x02;
+                        _ = (eventFlags & 0x04) == 0x04;
 
-                    var loopCount = clipReader.ReadByte();
-                    var panAngle = clipReader.ReadUInt16() / 100.0f;
-                    var panArc = clipReader.ReadUInt16() / 100.0f;
+                        var loopCount = clipReader.ReadByte();
+                        _ = clipReader.ReadUInt16() / 100.0f;
+                        _ = clipReader.ReadUInt16() / 100.0f;
 
-                    // Pitch variation range
-                    var minPitch = clipReader.ReadInt16() / 1000.0f;
+                        // Pitch variation range
+                        var minPitch = clipReader.ReadInt16() / 1000.0f;
                     var maxPitch = clipReader.ReadInt16() / 1000.0f;
 
                     // Volume variation range

@@ -13,14 +13,20 @@ using Foundation;
 using System.Drawing;
 #endif
 
-#if DESKTOPGL
-using MonoGame.Imaging;
-#endif
-
 #if OPENGL
 using MonoGame.OpenGL;
 using GLPixelFormat = MonoGame.OpenGL.PixelFormat;
 using MonoGame.Utilities;
+
+#if DESKTOPGL
+using SixLabors.ImageSharp;
+using SixLabors.Memory;
+using SixLabors.ImageSharp.PixelFormats;
+using System.Runtime.CompilerServices;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Jpeg;
+#endif
 
 #if ANDROID
 using Android.Graphics;
@@ -508,7 +514,7 @@ namespace Microsoft.Xna.Framework.Graphics
         private void PlatformSaveAsJpeg(Stream stream, int width, int height)
         {
 #if DESKTOPGL
-            SaveAsImage(stream, width, height, ImageSaveFormat.Png);
+            SaveAsImage(stream, width, height, JpegFormat.Instance, Configuration.Default);
 #elif ANDROID
             SaveAsImage(stream, width, height, Bitmap.CompressFormat.Jpeg);
 #else
@@ -519,7 +525,7 @@ namespace Microsoft.Xna.Framework.Graphics
         private void PlatformSaveAsPng(Stream stream, int width, int height)
         {
 #if DESKTOPGL
-            SaveAsImage(stream, width, height, ImageSaveFormat.Png);
+            SaveAsImage(stream, width, height, PngFormat.Instance, Configuration.Default);
 #elif ANDROID
             SaveAsImage(stream, width, height, Bitmap.CompressFormat.Png);
 #else
@@ -529,31 +535,28 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
 #if DESKTOPGL
-        internal void SaveAsImage(Stream stream, int width, int height, ImageSaveFormat format)
+        internal void SaveAsImage(Stream stream, int width, int height, IImageFormat format, Configuration configuration)
         {
-	        if (stream == null)
-		        throw new ArgumentNullException(nameof(stream));
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
 
-	        if (width <= 0)
-		        throw new ArgumentOutOfRangeException(nameof(width), "Texture width must be greater than zero.");
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException(nameof(width), "Texture width must be greater than zero.");
 
-	        if (height <= 0)
-		        throw new ArgumentOutOfRangeException(nameof(height), "Texture height must be greater than zero.");
-            
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException(nameof(height), "Texture height must be greater than zero.");
+
             int elementCount = width * height;
-            IntPtr buffer = Marshal.AllocHGlobal(elementCount * 4);
-            try
+            var memory = configuration.MemoryAllocator.Allocate<Rgba32>(elementCount, AllocationOptions.None);
+           
+            unsafe
             {
-                PlatformGetData(0, 0, new Rectangle(0, 0, width, height), buffer, 0, 4, elementCount);
+                var ptr = (IntPtr)Unsafe.AsPointer(ref MemoryMarshal.GetReference(memory.Memory.Span));
+                PlatformGetData(0, 0, new Rectangle(0, 0, width, height), ptr, 0, 4, elementCount);
+            }
 
-                using (var img = new Image(buffer, width, height, (ImagePixelFormat)4))
-                    img.Save(stream, format);
-            }
-            finally
-            {
-                if (buffer != null)
-                    Marshal.FreeHGlobal(buffer);
-            }
+            using (var img = Image.WrapMemory(configuration, memory, width, height))
+                img.Save(stream, format);
         }
 #elif ANDROID
         private void SaveAsImage(Stream stream, int width, int height, Bitmap.CompressFormat format)

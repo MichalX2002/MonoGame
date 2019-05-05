@@ -343,7 +343,7 @@ namespace MonoGame.Utilities.Collections
 
         public bool Remove(TKey key)
         {
-            return TryRemove(key, out var temp);
+            return TryRemove(key, out _);
         }
 
         public bool TryRemove(TKey key, out TValue value)

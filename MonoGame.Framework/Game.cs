@@ -85,7 +85,8 @@ namespace Microsoft.Xna.Framework
         [Conditional("DEBUG")]
         internal void Log(string Message)
         {
-            if (Platform != null) Platform.Log(Message);
+            if (Platform != null)
+                Platform.Log(Message);
         }
 
         #region IDisposable Implementation
@@ -118,9 +119,9 @@ namespace Microsoft.Xna.Framework
                         _content = null;
                     }
 
-                    if (_graphicsDeviceManager != null)
+                    if (_graphicsDeviceManager is GraphicsDeviceManager gdm)
                     {
-                        (_graphicsDeviceManager as GraphicsDeviceManager).Dispose();
+                        gdm.Dispose();
                         _graphicsDeviceManager = null;
                     }
 
@@ -136,8 +137,7 @@ namespace Microsoft.Xna.Framework
 
                     ContentTypeReaderManager.ClearTypeCreators();
 
-                    if (SoundEffect._systemState == SoundEffect.SoundSystemState.Initialized)
-                        SoundEffect.PlatformShutdown();
+                    SoundEffect.PlatformShutdown();
                 }
 #if ANDROID
                 Activity = null;

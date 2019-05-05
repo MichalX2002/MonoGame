@@ -36,7 +36,7 @@ namespace Microsoft.Xna.Framework.Graphics
             if (graphicsDevice != null)
             {
                 graphicsDevice.Adapter.QueryRenderTargetFormat(graphicsDevice.GraphicsProfile, preferredFormat, DepthFormat.None, 0,
-                    out selectedFormat, out DepthFormat selectedDepthFormat, out int selectedMultiSampleCount);
+                    out selectedFormat, out _, out _);
             }
 
             return selectedFormat;

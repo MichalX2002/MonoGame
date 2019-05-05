@@ -163,7 +163,7 @@ namespace Microsoft.Xna.Framework
                         //go back on curve from end and target start 
                         // start-> end / end -> start
                         cycle = GetNumberOfCycle(position);
-                        virtualPos = position - (cycle * (last.Position - first.Position));
+                        _ = position - (cycle * (last.Position - first.Position));
                         if (0 == cycle % 2f)//if pair
                             virtualPos = position - (cycle * (last.Position - first.Position));
                         else
