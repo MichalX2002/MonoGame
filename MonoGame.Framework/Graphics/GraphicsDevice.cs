@@ -853,7 +853,6 @@ namespace Microsoft.Xna.Framework.Graphics
         internal Shader VertexShader
         {
             get => _vertexShader;
-
             set
             {
                 if (_vertexShader == value)
@@ -868,7 +867,6 @@ namespace Microsoft.Xna.Framework.Graphics
         internal Shader PixelShader
         {
             get => _pixelShader;
-
             set
             {
                 if (_pixelShader == value)
@@ -993,14 +991,13 @@ namespace Microsoft.Xna.Framework.Graphics
             if (primitiveCount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(primitiveCount));
 
-            var vertexCount = GetElementCountArray(primitiveType, primitiveCount);
-
+            int vertexCount = GetElementCountArray(primitiveType, primitiveCount);
             PlatformDrawPrimitives(primitiveType, vertexStart, vertexCount);
 
             unchecked
             {
                 _graphicsMetrics._drawCount++;
-                _graphicsMetrics._primitiveCount +=  primitiveCount;
+                _graphicsMetrics._primitiveCount += primitiveCount;
             }
         }
 

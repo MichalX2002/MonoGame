@@ -77,24 +77,27 @@ namespace Microsoft.Xna.Framework.Graphics
                     case ResourceType.Texture:
                         GL.DeleteTextures(1, ref handle);
                         break;
+
                     case ResourceType.Buffer:
                         GL.DeleteBuffers(1, ref handle);
                         break;
+
                     case ResourceType.Shader:
                         if (GL.IsShader(handle))
                             GL.DeleteShader(handle);
                         break;
+
                     case ResourceType.Program:
                         if (GL.IsProgram(handle))
-                        {
                             GL.DeleteProgram(handle);
-                        }
                         break;
-                    case ResourceType.Query:
+
 #if !GLES
+                    case ResourceType.Query:
                         GL.DeleteQueries(1, ref handle);
-#endif
                         break;
+#endif
+
                     case ResourceType.Framebuffer:
                         GL.DeleteFramebuffers(1, ref handle);
                         break;
@@ -201,7 +204,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 // If instancing is not supported, but InstanceFrequency of the buffer is not zero, throw an exception
                 if (!GraphicsCapabilities.SupportsInstancing && vertexBufferBinding.InstanceFrequency > 0)
-                    throw new PlatformNotSupportedException("Instanced geometry drawing requires at least OpenGL 3.2 or GLES 3.2. Try upgrading your graphics drivers.");
+                    throw new PlatformNotSupportedException(
+                        "Instanced geometry drawing requires at least OpenGL 3.2 or GLES 3.2. Try upgrading your graphics drivers.");
 
                 var elements = attrInfo.Elements;
                 for (int i = 0, count = elements.Count; i < count; i++)
@@ -238,10 +242,8 @@ namespace Microsoft.Xna.Framework.Graphics
                 for (var slot = 0; slot < vertexBufferCount; slot++)
                 {
                     var elements = _bufferBindingInfos[slot].AttributeInfo.Elements;
-                    for (int i = 0, count = elements.Count; i < count; i++)
-                    {
+                    for (int i = 0, c = elements.Count; i < c; i++)
                         _newEnabledVertexAttributes[elements[i].AttributeLocation] = true;
-                    }
                 }
             }
             SetVertexAttributeArray(_newEnabledVertexAttributes);
@@ -1081,19 +1083,22 @@ namespace Microsoft.Xna.Framework.Graphics
 
             // Pin the buffers.
             var vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
+            try
+            {
+                // Setup the vertex declaration to point at the VB data.
+                vertexDeclaration.GraphicsDevice = this;
+                vertexDeclaration.Apply(_vertexShader, vbHandle.AddrOfPinnedObject(), ShaderProgramHash);
 
-            // Setup the vertex declaration to point at the VB data.
-            vertexDeclaration.GraphicsDevice = this;
-            vertexDeclaration.Apply(_vertexShader, vbHandle.AddrOfPinnedObject(), ShaderProgramHash);
+                //Draw
+                GL.DrawArrays(PrimitiveTypeGL(primitiveType), vertexOffset, vertexCount);
+                GraphicsExtensions.CheckGLError();
 
-            //Draw
-            GL.DrawArrays(PrimitiveTypeGL(primitiveType),
-                          vertexOffset,
-                          vertexCount);
-            GraphicsExtensions.CheckGLError();
-
-            // Release the handles.
-            vbHandle.Free();
+            }
+            finally
+            {
+                // Release the handles.
+                vbHandle.Free();
+            }
         }
 
         private void PlatformDrawPrimitives(PrimitiveType primitiveType, int vertexStart, int vertexCount)

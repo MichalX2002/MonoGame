@@ -42,14 +42,15 @@ namespace Microsoft.Xna.Framework.Graphics
             return attrInfo;
         }
 
-
 		internal void Apply(Shader shader, IntPtr offset, int programHash)
 		{
             var attrInfo = GetAttributeInfo(shader, programHash);
+            var elements = attrInfo.Elements;
 
             // Apply the vertex attribute info
-            foreach (var element in attrInfo.Elements)
+            for (int i = 0, c = elements.Count; i < c; i++)
             {
+                var element = elements[i];
                 GL.VertexAttribPointer(element.AttributeLocation,
                     element.NumberOfElements,
                     element.VertexAttribPointerType,
