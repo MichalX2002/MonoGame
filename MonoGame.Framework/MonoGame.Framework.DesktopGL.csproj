@@ -21,9 +21,9 @@
     <DebugType>full</DebugType>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
     <OutputPath>bin\DesktopGL\AnyCPU\Debug\</OutputPath>
-    <IntermediateOutputPath>obj\WindowsGL\AnyCPU\Debug</IntermediateOutputPath>
+    <IntermediateOutputPath>obj\DesktopGL\AnyCPU\Debug</IntermediateOutputPath>
     <DocumentationFile>bin\DesktopGL\AnyCPU\Debug\MonoGame.Framework.xml</DocumentationFile>
-    <DefineConstants>TRACE;DEBUG;OPENGL;OPENAL;XNADESIGNPROVIDED;DESKTOPGL;SUPPORTS_EFX;NET45;NET45;NVORBIS</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;OPENGL;OPENAL;XNADESIGNPROVIDED;DESKTOPGL;SUPPORTS_EFX;NVORBIS;NET45</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -33,9 +33,9 @@
     <Optimize>true</Optimize>
     <DebugType>portable</DebugType>
     <OutputPath>bin\DesktopGL\AnyCPU\Release\</OutputPath>
-    <IntermediateOutputPath>obj\WindowsGL\AnyCPU\Release</IntermediateOutputPath>
+    <IntermediateOutputPath>obj\DesktopGL\AnyCPU\Release</IntermediateOutputPath>
     <DocumentationFile>bin\DesktopGL\AnyCPU\Release\MonoGame.Framework.xml</DocumentationFile>
-    <DefineConstants>TRACE;OPENGL;OPENAL;XNADESIGNPROVIDED;DESKTOPGL;SUPPORTS_EFX;NET45;NET45;NVORBIS</DefineConstants>
+    <DefineConstants>TRACE;OPENGL;OPENAL;XNADESIGNPROVIDED;DESKTOPGL;SUPPORTS_EFX;NVORBIS;NET45</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -89,12 +89,6 @@
     <Compile Include="Graphics\Vertices\BufferBase.cs" />
     <Compile Include="Graphics\Vertices\IndexBufferBase.cs" />
     <Compile Include="Graphics\Vertices\IndexBufferBase.OpenGL.cs" />
-    <Compile Include="Graphics\Vertices\UnsafeDynamicIndexBuffer.cs" />
-    <Compile Include="Graphics\Vertices\UnsafeDynamicVertexBuffer.cs" />
-    <Compile Include="Graphics\Vertices\UnsafeIndexBuffer.cs" />
-    <Compile Include="Graphics\Vertices\UnsafeIndexBuffer.OpenGL.cs" />
-    <Compile Include="Graphics\Vertices\UnsafeVertexBuffer.cs" />
-    <Compile Include="Graphics\Vertices\UnsafeVertexBuffer.OpenGL.cs" />
     <Compile Include="Graphics\Vertices\VertexBufferBase.cs" />
     <Compile Include="Graphics\Vertices\VertexBufferBase.OpenGL.cs" />
     <Compile Include="Input\KeyModifier.cs" />
@@ -102,7 +96,7 @@
     <Compile Include="ServiceProviderExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.DesktopGL.cs">
-      <Platforms>WindowsGL,Linux</Platforms>
+      <Platforms>DesktopGL, Linux</Platforms>
     </Compile>
     <Compile Include="Math\BoundingBox.cs" />
     <Compile Include="Math\BoundingFrustum.cs" />
@@ -125,7 +119,7 @@
     <Compile Include="Game.cs" />
     <Compile Include="GamePlatform.cs" />
     <Compile Include="GamePlatform.Desktop.cs">
-      <Platforms>Angle,Linux,MacOS,Windows,WindowsGL,WindowsUniversal</Platforms>
+      <Platforms>Angle,Linux,MacOS,Windows,DesktopGL,WindowsUniversal</Platforms>
     </Compile>
     <Compile Include="GameRunBehavior.cs" />
     <Compile Include="GameServiceContainer.cs" />
@@ -149,11 +143,11 @@
     <Compile Include="Math\Rectangle.cs" />
     <Compile Include="Input\TextInputEvent.cs" />
     <Compile Include="Threading.cs">
-      <Platforms>Android,Angle,iOS,Linux,MacOS,WindowsGL,tvOS</Platforms>
+      <Platforms>Android,Angle,iOS,Linux,MacOS,DesktopGL,tvOS</Platforms>
     </Compile>
     <Compile Include="TitleContainer.cs" />
     <Compile Include="TitleContainer.Desktop.cs">
-      <Platforms>Angle,Linux,Windows,WindowsGL,Web,MacOS</Platforms>
+      <Platforms>Angle,Linux,Windows,DesktopGL,Web,MacOS</Platforms>
     </Compile>
     <Compile Include="Utilities\Crc32.cs" />
     <Compile Include="Utilities\CrcCalculatorStream.cs" />
@@ -199,7 +193,7 @@
       <Services>OpenALAudio</Services>
     </Compile>
     <Compile Include="Media\OggStream.cs">
-      <Platforms>WindowsGL,Linux,MacOS</Platforms>
+      <Platforms>DesktopGL,Linux,MacOS</Platforms>
     </Compile>
     <Compile Include="Audio\OpenAL\OpenAL.cs">
       <Services>OpenALAudio</Services>
@@ -243,7 +237,7 @@
     <Compile Include="Audio\Xact\VolumeEvent.cs" />
     <Compile Include="Audio\Xact\WaveBank.cs" />
     <Compile Include="Audio\Xact\WaveBank.Default.cs">
-      <Platforms>Android,Angle,iOS,Linux,MacOS,Windows,WindowsGL,WindowsUniversal,Web,tvOS</Platforms>
+      <Platforms>Android,Angle,iOS,Linux,MacOS,Windows,DesktopGL,WindowsUniversal,Web,tvOS</Platforms>
     </Compile>
     <Compile Include="Audio\Xact\XactClip.cs" />
     <Compile Include="Audio\Xact\XactHelpers.cs" />
@@ -328,7 +322,7 @@
     <Compile Include="Content\ContentTypeReaderManager.cs" />
     <Compile Include="Content\LzxDecoder.cs" />
     <Compile Include="Content\ResourceContentManager.cs">
-      <Platforms>Angle,Android,iOS,Linux,Windows,WindowsGL,tvOS</Platforms>
+      <Platforms>Angle,Android,iOS,Linux,Windows,DesktopGL,tvOS</Platforms>
     </Compile>
     <Compile Include="Graphics\ClearOptions.cs" />
     <Compile Include="Graphics\ColorWriteChannels.cs" />
@@ -337,10 +331,10 @@
     <Compile Include="Graphics\DeviceNotResetException.cs" />
     <Compile Include="GraphicsDeviceInformation.cs" />
     <Compile Include="GraphicsDeviceManager.cs">
-      <Platforms>Windows,WindowsGL,Linux,WindowsUniversal,Web,MacOS</Platforms>
+      <Platforms>Windows,DesktopGL,Linux,WindowsUniversal,Web,MacOS</Platforms>
     </Compile>
     <Compile Include="GraphicsDeviceManager.SDL.cs">
-      <Platforms>WindowsGL,Linux,MacOS</Platforms>
+      <Platforms>DesktopGL,Linux,MacOS</Platforms>
     </Compile>
     <Compile Include="Graphics\GraphicsMetrics.cs" />
     <Compile Include="Graphics\DirectionalLight.cs" />
@@ -380,14 +374,14 @@
     </Compile>
     <Compile Include="Graphics\Effect\SpriteEffect.cs" />
     <Compile Include="Graphics\GraphicsAdapter.Legacy.cs">
-      <Platforms>Android,Angle,iOS,Linux,MacOS,WindowsGL,tvOS,Web</Platforms>
+      <Platforms>Android,Angle,iOS,Linux,MacOS,DesktopGL,tvOS,Web</Platforms>
     </Compile>
     <Compile Include="Graphics\GraphicsCapabilities.cs" />
     <Compile Include="Graphics\GraphicsCapabilities.OpenGL.cs">
       <Services>OpenGLGraphics,ANGLEGraphics</Services>
     </Compile>
     <Compile Include="Graphics\GraphicsContext.SDL.cs">
-      <Platforms>WindowsGL,Linux,MacOS</Platforms>
+      <Platforms>DesktopGL,Linux,MacOS</Platforms>
     </Compile>
     <Compile Include="Graphics\GraphicsDebug.cs" />
     <Compile Include="Graphics\GraphicsDebug.Default.cs">
@@ -426,13 +420,13 @@
       <ExcludePlatforms>iOS,Android</ExcludePlatforms>
     </Compile>
     <Compile Include="Graphics\OpenGL.cs">
-      <Platforms>WindowsGL,Linux,iOS,MacOS,Android,Ouya,tvOS</Platforms>
+      <Platforms>DesktopGL,Linux,iOS,MacOS,Android,Ouya,tvOS</Platforms>
     </Compile>
     <Compile Include="Graphics\OpenGL.Common.cs">
-      <Platforms>WindowsGL,Linux,Android,Ouya</Platforms>
+      <Platforms>DesktopGL,Linux,Android,Ouya</Platforms>
     </Compile>
     <Compile Include="Graphics\OpenGL.SDL.cs">
-      <Platforms>WindowsGL,Linux,MacOS</Platforms>
+      <Platforms>DesktopGL,Linux,MacOS</Platforms>
     </Compile>
     <Compile Include="Graphics\PackedVector\Alpha8.cs" />
     <Compile Include="Graphics\PackedVector\Bgr565.cs" />
@@ -483,7 +477,7 @@
       <Services>OpenGLGraphics</Services>
     </Compile>
     <Compile Include="Graphics\Shader\ShaderProgramCache.cs">
-      <Platforms>Android,Angle,iOS,Linux,MacOS,WindowsGL,tvOS</Platforms>
+      <Platforms>Android,Angle,iOS,Linux,MacOS,DesktopGL,tvOS</Platforms>
     </Compile>
     <Compile Include="Graphics\Shader\ShaderStage.cs" />
     <Compile Include="Graphics\SpriteEffects.cs" />
@@ -563,13 +557,13 @@
     <Compile Include="Graphics\Vertices\VertexPositionTexture.cs" />
     <Compile Include="Graphics\Viewport.cs" />
     <Compile Include="Graphics\WindowInfo.SDL.cs">
-      <Platforms>WindowsGL,Linux,MacOS</Platforms>
+      <Platforms>DesktopGL,Linux,MacOS</Platforms>
     </Compile>
     <Compile Include="Input\Buttons.cs" />
     <Compile Include="Input\ButtonState.cs" />
     <Compile Include="Input\GamePad.cs" />
     <Compile Include="Input\GamePad.SDL.cs">
-      <Platforms>Linux,WindowsGL,MacOS</Platforms>
+      <Platforms>Linux,DesktopGL,MacOS</Platforms>
     </Compile>
     <Compile Include="Input\GamePadButtons.cs" />
     <Compile Include="Input\GamePadCapabilities.cs" />
@@ -584,24 +578,24 @@
     <Compile Include="Input\JoystickHat.cs" />
     <Compile Include="Input\JoystickState.cs" />
     <Compile Include="Input\Joystick.SDL.cs">
-      <Platforms>Linux,WindowsGL,MacOS</Platforms>
+      <Platforms>Linux,DesktopGL,MacOS</Platforms>
     </Compile>
     <Compile Include="Input\Keyboard.cs">
       <ExcludePlatforms>Android</ExcludePlatforms>
     </Compile>
     <Compile Include="Input\Keyboard.SDL.cs">
-      <Platforms>WindowsGL,Linux,MacOS</Platforms>
+      <Platforms>DesktopGL,Linux,MacOS</Platforms>
     </Compile>
     <Compile Include="Input\KeyboardState.cs" />
     <Compile Include="Input\Keys.cs" />
     <Compile Include="Input\KeyState.cs" />
     <Compile Include="Input\Mouse.cs" />
     <Compile Include="Input\Mouse.SDL.cs">
-      <Platforms>WindowsGL,Linux,MacOS</Platforms>
+      <Platforms>DesktopGL,Linux,MacOS</Platforms>
     </Compile>
     <Compile Include="Input\MouseCursor.cs" />
     <Compile Include="Input\MouseCursor.SDL.cs">
-      <Platforms>Linux,WindowsGL,MacOS</Platforms>
+      <Platforms>Linux,DesktopGL,MacOS</Platforms>
     </Compile>
     <Compile Include="Input\MouseState.cs" />
     <Compile Include="Input\Touch\GestureSample.cs" />
@@ -614,18 +608,18 @@
     <Compile Include="Input\Touch\TouchPanelState.cs" />
     <Compile Include="Media\MediaPlayer.cs" />
     <Compile Include="Media\MediaPlayer.Default.cs">
-      <Platforms>Angle,WindowsGL,Linux,MacOS,iOS,Android,Web,tvOS</Platforms>
+      <Platforms>Angle,DesktopGL,Linux,MacOS,iOS,Android,Web,tvOS</Platforms>
     </Compile>
     <Compile Include="Media\MediaQueue.cs" />
     <Compile Include="Media\Song.cs" />
     <Compile Include="Media\Song.NVorbis.cs">
-      <Platforms>WindowsGL,Linux,MacOS</Platforms>
+      <Platforms>DesktopGL,Linux,MacOS</Platforms>
     </Compile>
     <Compile Include="Utilities\AssemblyHelper.cs">
-      <Platforms>Angle,Linux,MacOS,Windows,WindowsGL</Platforms>
+      <Platforms>Angle,Linux,MacOS,Windows,DesktopGL</Platforms>
     </Compile>
     <Compile Include="Utilities\CurrentPlatform.cs">
-      <Platforms>Windows,MacOS,WindowsGL,Linux</Platforms>
+      <Platforms>Windows,MacOS,DesktopGL,Linux</Platforms>
     </Compile>
     <Compile Include="Utilities\Hash.cs" />
     <Compile Include="Utilities\FileHelpers.cs" />
@@ -635,19 +629,19 @@
     <Compile Include="Utilities\ZlibStream\ZlibStream.cs" />
     <Compile Include="Utilities\ByteBufferPool.cs" />
     <Compile Include="Utilities\FuncLoader.Desktop.cs">
-      <Platforms>Angle,Linux,WindowsGL,MacOS</Platforms>
+      <Platforms>Angle,Linux,DesktopGL,MacOS</Platforms>
     </Compile>
     <Compile Include="SDL\SDLGamePlatform.cs">
-      <Platforms>Angle,Linux,WindowsGL,MacOS</Platforms>
+      <Platforms>Angle,Linux,DesktopGL,MacOS</Platforms>
     </Compile>
     <Compile Include="SDL\SDLGameWindow.cs">
-      <Platforms>Angle,Linux,WindowsGL,MacOS</Platforms>
+      <Platforms>Angle,Linux,DesktopGL,MacOS</Platforms>
     </Compile>
     <Compile Include="SDL\SDL2.cs">
-      <Platforms>WindowsGL,Linux,MacOS</Platforms>
+      <Platforms>DesktopGL,Linux,MacOS</Platforms>
     </Compile>
     <Compile Include="Input\KeyboardUtil.SDL.cs">
-      <Platforms>Angle,Linux,WindowsGL,MacOS</Platforms>
+      <Platforms>Angle,Linux,DesktopGL,MacOS</Platforms>
     </Compile>
     <Compile Include="Design\VectorConversion.cs">
       <Services>_XNADesignProvided</Services>
@@ -776,57 +770,57 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\ThirdParty\Dependencies\Config\DesktopGL\MonoGame.Framework.dll.config">
-      <Platforms>WindowsGL,Linux,MacOS</Platforms>
+      <Platforms>DesktopGL,Linux,MacOS</Platforms>
       <Link>MonoGame.Framework.dll.config</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\ThirdParty\Dependencies\SDL\Windows\x86\SDL2.dll">
-      <Platforms>WindowsGL,Linux</Platforms>
+      <Platforms>DesktopGL,Linux</Platforms>
       <Link>x86\SDL2.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\ThirdParty\Dependencies\SDL\Windows\x64\SDL2.dll">
-      <Platforms>WindowsGL,Linux</Platforms>
+      <Platforms>DesktopGL,Linux</Platforms>
       <Link>x64\SDL2.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\ThirdParty\Dependencies\openal-soft\Windows\x86\soft_oal.dll">
-      <Platforms>WindowsGL,Linux</Platforms>
+      <Platforms>DesktopGL,Linux</Platforms>
       <Link>x86\soft_oal.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\ThirdParty\Dependencies\openal-soft\Windows\x64\soft_oal.dll">
-      <Platforms>WindowsGL,Linux</Platforms>
+      <Platforms>DesktopGL,Linux</Platforms>
       <Link>x64\soft_oal.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\ThirdParty\Dependencies\SDL\Linux\x86\libSDL2-2.0.so.0">
-      <Platforms>WindowsGL,Linux</Platforms>
+      <Platforms>DesktopGL,Linux</Platforms>
       <Link>x86\libSDL2-2.0.so.0</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\ThirdParty\Dependencies\SDL\Linux\x64\libSDL2-2.0.so.0">
-      <Platforms>WindowsGL,Linux</Platforms>
+      <Platforms>DesktopGL,Linux</Platforms>
       <Link>x64\libSDL2-2.0.so.0</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\ThirdParty\Dependencies\openal-soft\Linux\x86\libopenal.so.1">
-      <Platforms>WindowsGL,Linux</Platforms>
+      <Platforms>DesktopGL,Linux</Platforms>
       <Link>x86\libopenal.so.1</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\ThirdParty\Dependencies\openal-soft\Linux\x64\libopenal.so.1">
-      <Platforms>WindowsGL,Linux</Platforms>
+      <Platforms>DesktopGL,Linux</Platforms>
       <Link>x64\libopenal.so.1</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\ThirdParty\Dependencies\SDL\MacOS\Universal\libSDL2-2.0.0.dylib">
-      <Platforms>WindowsGL,Linux,MacOS</Platforms>
+      <Platforms>DesktopGL,Linux,MacOS</Platforms>
       <Link>libSDL2-2.0.0.dylib</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\ThirdParty\Dependencies\openal-soft\MacOS\Universal\libopenal.1.dylib">
-      <Platforms>WindowsGL,Linux,MacOS</Platforms>
+      <Platforms>DesktopGL,Linux,MacOS</Platforms>
       <Link>libopenal.1.dylib</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -837,10 +831,10 @@
   <ItemGroup>
     <EmbeddedResource Include="MonoGame.bmp">
       <LogicalName>MonoGame.bmp</LogicalName>
-      <Platforms>Angle,Linux,WindowsGL,MacOS</Platforms>
+      <Platforms>Angle,Linux,DesktopGL,MacOS</Platforms>
     </EmbeddedResource>
     <EmbeddedResource Include="..\ThirdParty\SDL_GameControllerDB\gamecontrollerdb.txt">
-      <Platforms>Angle,Linux,WindowsGL,MacOS</Platforms>
+      <Platforms>Angle,Linux,DesktopGL,MacOS</Platforms>
       <LogicalName>gamecontrollerdb.txt</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Graphics\Effect\Resources\AlphaTestEffect.ogl.mgfxo">
@@ -864,11 +858,10 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj">
-      <Project>{D046ADDA-B87B-4AB2-9DAD-FA886D3E2014}</Project>
+      <Project>{d046adda-b87b-4ab2-9dad-fa886d3e2014}</Project>
       <Name>MonoGame.Utilities</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup />
   <ItemGroup />
   <ItemGroup />

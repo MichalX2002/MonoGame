@@ -142,10 +142,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public void SetData(IntPtr data, int elementCount, SetDataOptions options)
         {
-            if (data == IntPtr.Zero)
-                throw new ArgumentNullException(nameof(data));
-
-            PlatformSetData(0, data, 0, elementCount, options);
+            SetData(0, data, 0, elementCount, options);
         }
 
         public void SetData(
@@ -155,6 +152,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new ArgumentNullException(nameof(data));
 
             PlatformSetData(offsetInBytes, data, startIndex, elementCount, options);
+            IndexCount = elementCount;
         }
     }
 }

@@ -34,6 +34,8 @@ namespace Microsoft.Xna.Framework
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set(int index, in T value)
         {
+            if (index >= _length)
+                throw new ArgumentOutOfRangeException(nameof(index));
             Ptr[index] = value;
         }
 
@@ -58,7 +60,7 @@ namespace Microsoft.Xna.Framework
                 if (_ptr != IntPtr.Zero)
                     _ptr = Marshal.ReAllocHGlobal(_ptr, (IntPtr)Bytes);
                 else
-                    Marshal.AllocHGlobal(Bytes);
+                    _ptr = Marshal.AllocHGlobal(Bytes);
             }
         }
 

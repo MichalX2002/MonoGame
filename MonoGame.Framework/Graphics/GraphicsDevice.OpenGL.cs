@@ -1057,16 +1057,13 @@ namespace Microsoft.Xna.Framework.Graphics
             ApplyState(true);
 
             var shortIndices = _indexBuffer.IndexElementSize == IndexElementSize.SixteenBits;
-
             var indexElementType = shortIndices ? DrawElementsType.UnsignedShort : DrawElementsType.UnsignedInt;
-            var indexElementSize = shortIndices ? 2 : 4;
-            var indexOffsetInBytes = new IntPtr(startIndex * indexElementSize);
+            var indexOffsetInBytes = new IntPtr(startIndex * (shortIndices ? 2 : 4));
             var indexElementCount = GetElementCountArray(primitiveType, primitiveCount);
-            var target = PrimitiveTypeGL(primitiveType);
-
+            
             ApplyAttribs(_vertexShader, baseVertex);
 
-            GL.DrawElements(target, indexElementCount, indexElementType, indexOffsetInBytes);
+            GL.DrawElements(PrimitiveTypeGL(primitiveType), indexElementCount, indexElementType, indexOffsetInBytes);
             GraphicsExtensions.CheckGLError();
         }
 
@@ -1179,31 +1176,6 @@ namespace Microsoft.Xna.Framework.Graphics
                 vbHandle.Free();
                 ibHandle.Free();
             }
-        }
-
-        private void PlatformDrawUserIndexedPrimitives(
-            PrimitiveType primitiveType, IntPtr vertexData, int vertexOffset,
-            int indexOffset, int primitiveCount, VertexDeclaration declaration)
-        {
-            ApplyState(true);
-
-            // Unbind current VBOs.
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            GraphicsExtensions.CheckGLError();
-
-            IntPtr vertexAddr = vertexData + declaration.VertexStride * vertexOffset;
-
-            // Setup the vertex declaration to point at the data.
-            declaration.GraphicsDevice = this;
-            declaration.Apply(_vertexShader, vertexAddr, ShaderProgramHash);
-
-            var shortIndices = _indexBuffer.IndexElementSize == IndexElementSize.SixteenBits;
-            var indexElementType = shortIndices ? DrawElementsType.UnsignedShort : DrawElementsType.UnsignedInt;
-            var indexOffsetInBytes = new IntPtr(indexOffset * (shortIndices ? 2 : 4));
-            var indexElementCount = GetElementCountArray(primitiveType, primitiveCount);
-            
-            GL.DrawElements(PrimitiveTypeGL(primitiveType), indexElementCount, indexElementType, indexOffsetInBytes);
-            GraphicsExtensions.CheckGLError();
         }
 
         private void InternalDrawUserIndexedPrimitives(

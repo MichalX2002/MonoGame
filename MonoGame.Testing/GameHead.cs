@@ -51,7 +51,7 @@ namespace MonoGame.Testings
             _pixel.SetData(new Color[] { Color.White });
 
             _font = Content.Load<SpriteFont>("arial");
-            
+
             w = new System.Diagnostics.Stopwatch();
             w.Restart();
             _song1 = Content.Load<Song>("sinus");
@@ -61,7 +61,7 @@ namespace MonoGame.Testings
 
             w.Restart();
             _song2 = Content.Load<Song>("Win Jingle");
-            _song2.Volume = 0.5f;
+            _song2.Volume = 0.2f;
             w.Stop();
             Console.WriteLine("Song Load Time: " + w.ElapsedMilliseconds + "ms");
 
@@ -70,7 +70,7 @@ namespace MonoGame.Testings
             w.Stop();
             Console.WriteLine("Load Time: " + w.ElapsedMilliseconds + "ms");
         }
-        
+
         //int ix = 0;
         //int j = 0;
         //int a1, b1, a2, b2;
@@ -116,7 +116,7 @@ namespace MonoGame.Testings
         //    Rw = 18000 * (Rw & 65535) + (Rw >> 16);
         //    return (Rz << 16) + Rw;
         //}
-        
+
         protected override void UnloadContent()
         {
         }
@@ -127,9 +127,9 @@ namespace MonoGame.Testings
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            
+
             f += time.Delta;
-            if(f >= 2)
+            if (f >= 5)
             {
                 //var instance = _hitReflectSound.CreateInstance();
                 //instance.Pitch = -0.6f;
@@ -138,28 +138,37 @@ namespace MonoGame.Testings
                 f = 0f;
 
                 w.Restart();
-                _song2.Play(TimeSpan.Zero);
+                //_song2.Play(TimeSpan.Zero);
                 w.Stop();
                 Console.WriteLine("Moved next in " + w.Elapsed.TotalMilliseconds.ToString("0.00") + "ms");
             }
 
             base.Update(time);
         }
-        
+
         protected override void Draw(GameTime time)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _spriteBatch.Begin();
-
+            
             double avg = 0;
             foreach (var value in Song.ThreadUpdateTiming)
                 avg += value.TotalMilliseconds;
             avg /= Song.ThreadUpdateTiming.Count;
-
+            
             _spriteBatch.DrawString(_font, "Timing: " + avg.ToString("0.0"), new Vector2(10, 5), Color.White);
 
-            _spriteBatch.End();
+            using (var tex = new Texture2D(GraphicsDevice, 1, 1))
+            {
+                tex.SetData(new[] { Color.White });
+                _spriteBatch.Draw(tex, new RectangleF(150, 50, 20, 20), Color.Red);
+                _spriteBatch.Draw(tex, new RectangleF(150, 100, 20, 20), Color.Green);
+                _spriteBatch.Draw(tex, new RectangleF(150, 150, 20, 20), Color.Blue);
+                _spriteBatch.Draw(tex, new RectangleF(150, 200, 20, 20), Color.Yellow);
+
+                _spriteBatch.End();
+            }
 
             base.Draw(time);
         }

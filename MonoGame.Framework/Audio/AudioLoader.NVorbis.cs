@@ -78,7 +78,8 @@ namespace Microsoft.Xna.Framework.Audio
                         totalSamples += samplesRead;
                     }
 
-                    if (totalSamples != reader.TotalSamples)
+                    long readerSamples = reader.TotalSamples;
+                    if (readerSamples != long.MaxValue && totalSamples < readerSamples)
                         throw new InvalidDataException(
                             "Reached end of stream before reading expected amount of samples.");
 

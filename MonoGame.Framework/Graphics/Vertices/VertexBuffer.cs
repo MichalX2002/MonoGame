@@ -225,7 +225,7 @@ namespace Microsoft.Xna.Framework.Graphics
             if (vertexStride == 0)
                 vertexStride = elementSize;
 
-            var vertexByteSize = VertexCount * VertexDeclaration.VertexStride;
+            var vertexByteSize = elementCount * VertexDeclaration.VertexStride;
             if (elementSize > vertexByteSize)
                 throw new ArgumentOutOfRangeException(
                     nameof(elementSize), "Vertex stride can not be larger than the vertex buffer size.");
@@ -234,6 +234,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new InvalidOperationException("The vertex stride is larger than the vertex buffer.");
 
             PlatformSetData(offsetInBytes, data, startIndex, elementCount, elementSize, vertexStride, options);
+            VertexCount = elementCount;
         }
     }
 }

@@ -38,6 +38,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         private IndexBuffer _indexBuffer;
 
+        private DynamicVertexBuffer _vertexBuffer;
+
         public bool IsDisposed { get; private set; }
 
         public SpriteBatcher(GraphicsDevice device)
@@ -45,6 +47,8 @@ namespace Microsoft.Xna.Framework.Graphics
             _device = device ?? throw new ArgumentNullException(nameof(device));
 
             _indexBuffer = new IndexBuffer(device, IndexElementSize.SixteenBits, 0, BufferUsage.WriteOnly);
+            _vertexBuffer = new DynamicVertexBuffer(device, VertexPositionColorTexture.VertexDeclaration, 0, BufferUsage.WriteOnly);
+
             _textureList = new Texture2D[InitialBatchSize];
             _sortKeyList = new UnmanagedPointer<float>(InitialBatchSize);
             _quadList = new UnmanagedPointer<SpriteQuad>(InitialBatchSize);
@@ -75,7 +79,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 try
                 {
                     ushort* indexPtr = (ushort*)tmpMemory;
-                    for (int i = 0; i < newIndexCount; i++, indexPtr += 6)
+                    for (int i = 0, v = 0; i < newIndexCount; i += 6, v += 4)
                     {
                         /*
                          *  TL    TR    0,1,2,3 = index offsets for vertex indices
@@ -89,16 +93,15 @@ namespace Microsoft.Xna.Framework.Graphics
                          */
 
                         // Triangle 1
-                        *(indexPtr) = (ushort)(i * 4);
-                        *(indexPtr + 1) = (ushort)(i * 4 + 1);
-                        *(indexPtr + 2) = (ushort)(i * 4 + 2);
-
+                        indexPtr[i + 0] = (ushort)(v + 0);
+                        indexPtr[i + 1] = (ushort)(v + 1);
+                        indexPtr[i + 2] = (ushort)(v + 2);
+                        
                         // Triangle 2
-                        *(indexPtr + 3) = (ushort)(i * 4 + 1);
-                        *(indexPtr + 4) = (ushort)(i * 4 + 3);
-                        *(indexPtr + 5) = (ushort)(i * 4 + 2);
+                        indexPtr[i + 3] = (ushort)(v + 1);
+                        indexPtr[i + 4] = (ushort)(v + 3);
+                        indexPtr[i + 5] = (ushort)(v + 2);
                     }
-
                     _indexBuffer.SetData(tmpMemory, newIndexCount, SetDataOptions.Discard);
                 }
                 finally
@@ -150,15 +153,16 @@ namespace Microsoft.Xna.Framework.Graphics
                     break;
             }
             
-            int itemCount = _quadCount;
+            int itemsLeft = _quadCount;
+            int lastVertex = 0;
 
             // Iterate through the batches, doing clamped sets of vertices only.
-            while (itemCount > 0)
+            while (itemsLeft > 0)
             {
                 int vertexCount = 0;
                 Texture2D tex = null;
 
-                int itemsToProcess = itemCount;
+                int itemsToProcess = itemsLeft;
                 if (itemsToProcess > MaxBatchSize)
                     itemsToProcess = MaxBatchSize;
 
@@ -166,22 +170,24 @@ namespace Microsoft.Xna.Framework.Graphics
                 for (int i = 0; i < itemsToProcess; i++, vertexCount += 4)
                 {
                     // if the texture changed, we need to flush and bind the new texture
-                    int texIndex = _quadCount - itemCount;
-                    if (!ReferenceEquals(_textureList[texIndex], tex))
+                    int offset = _quadCount - itemsLeft;
+                    if (!ReferenceEquals(_textureList[offset], tex))
                     {
-                        FlushVertexArray(vertexCount, effect, tex);
+                        FlushVertexArray(lastVertex, vertexCount, effect, tex);
+                        lastVertex = offset * 4;
 
                         vertexCount = 0;
-                        tex = _textureList[texIndex];
+                        tex = _textureList[offset];
                         _device.Textures[0] = tex;
                     }
 
                     // Update our count to continue culling down large batches
-                    itemCount--;
+                    itemsLeft--;
                 }
 
-                // flush the remaining vertexArray data
-                FlushVertexArray(vertexCount, effect, tex);
+                // flush the remaining data
+                FlushVertexArray(lastVertex, vertexCount, effect, tex);
+                lastVertex = (_quadCount - itemsLeft) * 4;
             }
             
             unchecked
@@ -197,12 +203,14 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="vertexCount">The amount of vertices to draw.</param>
         /// <param name="effect">The custom effect to apply to the geometry.</param>
         /// <param name="texture">The texture to draw.</param>
-        private void FlushVertexArray(int vertexCount, Effect effect, Texture texture)
+        private void FlushVertexArray(int offset, int count, Effect effect, Texture texture)
         {
-            if (vertexCount == 0)
+            if (count == 0)
                 return;
 
-            var old = _device.Indices;
+            _vertexBuffer.SetData(0, _quadList.SafePtr, offset, count, sizeof(VertexPositionColorTexture), 0, SetDataOptions.Discard);
+
+            _device.SetVertexBuffer(_vertexBuffer);
             _device.Indices = _indexBuffer;
 
             // If the effect is not null, then apply each pass and render the geometry
@@ -216,18 +224,14 @@ namespace Microsoft.Xna.Framework.Graphics
                     // ends up in Textures[0].
                     _device.Textures[0] = texture;
 
-                    _device.DrawUserIndexedPrimitives<VertexPositionColorTexture>(
-                        PrimitiveType.TriangleList, _quadList.SafePtr, 0, 0, vertexCount / 2);
+                    _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, offset, 0, count / 2);
                 }
             }
             else
             {
                 // If no custom effect is defined, then simply render.
-                _device.DrawUserIndexedPrimitives<VertexPositionColorTexture>(
-                        PrimitiveType.TriangleList, _quadList.SafePtr, 0, 0, vertexCount / 2);
+                _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, offset, 0, count / 2);
             }
-
-            _device.Indices = old;
         }
 
         protected virtual void Dispose(bool disposing)

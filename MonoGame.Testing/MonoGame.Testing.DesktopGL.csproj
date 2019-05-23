@@ -115,9 +115,6 @@
     <MonoGameContentReference Include="Content\Content.DesktopGL.mgcb" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj">
       <Project>{6d75e618-19ca-4c51-9546-f10965fbc0b8}</Project>
       <Name>MonoGame.Framework.DesktopGL</Name>
@@ -126,6 +123,9 @@
       <Project>{d046adda-b87b-4ab2-9dad-fa886d3e2014}</Project>
       <Name>MonoGame.Utilities</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\MonoGame.Content.Builder.targets" />
