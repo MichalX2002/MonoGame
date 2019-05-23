@@ -1,4 +1,8 @@
-﻿using MonoGame.OpenGL;
+﻿// MonoGame - Copyright (C) The MonoGame Team
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
+
+using MonoGame.OpenGL;
 using System;
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -19,12 +23,13 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             if (_vbo == 0)
             {
-                int sizeInBytes = IndexCount * _indexElementSize;
-
                 GL.GenBuffers(1, out _vbo);
                 GraphicsExtensions.CheckGLError();
+
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, _vbo);
                 GraphicsExtensions.CheckGLError();
+
+                int sizeInBytes = IndexCount * _indexElementSize;
                 GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)sizeInBytes, IntPtr.Zero, _usageHint);
                 GraphicsExtensions.CheckGLError();
             }
@@ -76,17 +81,22 @@ namespace Microsoft.Xna.Framework.Graphics
         private void SetDataInternal(
             int offsetInBytes, IntPtr data, int startIndex, int elementCount, SetDataOptions options)
         {
-            GenerateIfRequired();
+            if (options != SetDataOptions.Discard && IndexCount < elementCount)
+                throw new ArgumentException(
+                    $"Options suggested not overwriting and the buffer (of size " +
+                    $"{IndexCount}) was too small for {nameof(elementCount)} ({elementCount})." +
+                    $"Use {nameof(SetDataOptions.Discard)} to allow resizing of the buffer.", nameof(options));
 
-            IntPtr dataPtr = new IntPtr(data.ToInt64() + startIndex * _indexElementSize);
-            int bufferSize = IndexCount * _indexElementSize;
+            GenerateIfRequired();
 
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, _vbo);
             GraphicsExtensions.CheckGLError();
 
+            int bufferSize = elementCount * _indexElementSize;
             DiscardCheck(BufferTarget.ElementArrayBuffer, options, (IntPtr)bufferSize);
-
+            
             IntPtr size = new IntPtr(_indexElementSize * elementCount);
+            IntPtr dataPtr = new IntPtr(data.ToInt64() + startIndex * _indexElementSize);
             GL.BufferSubData(BufferTarget.ElementArrayBuffer, (IntPtr)offsetInBytes, size, dataPtr);
             GraphicsExtensions.CheckGLError();
         }
@@ -94,9 +104,8 @@ namespace Microsoft.Xna.Framework.Graphics
         protected override void Dispose(bool disposing)
         {
             if (!IsDisposed)
-            {
                 GraphicsDevice.DisposeBuffer(_vbo);
-            }
+            
             base.Dispose(disposing);
         }
     }

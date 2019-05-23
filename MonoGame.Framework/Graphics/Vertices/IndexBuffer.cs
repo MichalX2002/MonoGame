@@ -8,7 +8,7 @@ using MonoGame.Utilities;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    public partial class IndexBuffer : IndexBufferBase
+    public class IndexBuffer : IndexBufferBase
     {
         public BufferUsage BufferUsage { get; private set; }
 
@@ -138,6 +138,14 @@ namespace Microsoft.Xna.Framework.Graphics
         public void SetData<T>(T[] data) where T : struct
         {
             SetData(data, 0, data.Length);
+        }
+
+        public void SetData(IntPtr data, int elementCount, SetDataOptions options)
+        {
+            if (data == IntPtr.Zero)
+                throw new ArgumentNullException(nameof(data));
+
+            PlatformSetData(0, data, 0, elementCount, options);
         }
 
         public void SetData(

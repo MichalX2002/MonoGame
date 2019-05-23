@@ -1077,6 +1077,7 @@ namespace Microsoft.Xna.Framework.Graphics
             // Unbind current VBOs.
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GraphicsExtensions.CheckGLError();
+
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
             GraphicsExtensions.CheckGLError();
             _indexBufferDirty = true;
@@ -1180,6 +1181,31 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
+        private void PlatformDrawUserIndexedPrimitives(
+            PrimitiveType primitiveType, IntPtr vertexData, int vertexOffset,
+            int indexOffset, int primitiveCount, VertexDeclaration declaration)
+        {
+            ApplyState(true);
+
+            // Unbind current VBOs.
+            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GraphicsExtensions.CheckGLError();
+
+            IntPtr vertexAddr = vertexData + declaration.VertexStride * vertexOffset;
+
+            // Setup the vertex declaration to point at the data.
+            declaration.GraphicsDevice = this;
+            declaration.Apply(_vertexShader, vertexAddr, ShaderProgramHash);
+
+            var shortIndices = _indexBuffer.IndexElementSize == IndexElementSize.SixteenBits;
+            var indexElementType = shortIndices ? DrawElementsType.UnsignedShort : DrawElementsType.UnsignedInt;
+            var indexOffsetInBytes = new IntPtr(indexOffset * (shortIndices ? 2 : 4));
+            var indexElementCount = GetElementCountArray(primitiveType, primitiveCount);
+            
+            GL.DrawElements(PrimitiveTypeGL(primitiveType), indexElementCount, indexElementType, indexOffsetInBytes);
+            GraphicsExtensions.CheckGLError();
+        }
+
         private void InternalDrawUserIndexedPrimitives(
             PrimitiveType primitiveType, IntPtr vertexData, int vertexOffset, int numVertices,
             IndexElementSize indexSize, IntPtr indexData, int indexOffset, int primitiveCount, VertexDeclaration declaration)
@@ -1204,8 +1230,10 @@ namespace Microsoft.Xna.Framework.Graphics
             var glIndexType = indexSize == IndexElementSize.SixteenBits ? DrawElementsType.UnsignedShort : DrawElementsType.UnsignedInt;
 
             GL.DrawElements(
-                PrimitiveTypeGL(primitiveType), GetElementCountArray(primitiveType, primitiveCount),
-                glIndexType, indexData + (indexOffset * glIndexSize));
+                PrimitiveTypeGL(primitiveType),
+                GetElementCountArray(primitiveType, primitiveCount),
+                glIndexType, 
+                indexData + (indexOffset * glIndexSize));
             GraphicsExtensions.CheckGLError();
         }
 
@@ -1216,10 +1244,8 @@ namespace Microsoft.Xna.Framework.Graphics
             ApplyState(true);
 
             var shortIndices = _indexBuffer.IndexElementSize == IndexElementSize.SixteenBits;
-
             var indexElementType = shortIndices ? DrawElementsType.UnsignedShort : DrawElementsType.UnsignedInt;
-            var indexElementSize = shortIndices ? 2 : 4;
-            var indexOffsetInBytes = new IntPtr(startIndex * indexElementSize);
+            var indexOffsetInBytes = new IntPtr(startIndex * (shortIndices ? 2 : 4));
             var indexElementCount = GetElementCountArray(primitiveType, primitiveCount);
             var target = PrimitiveTypeGL(primitiveType);
 

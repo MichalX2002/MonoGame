@@ -372,8 +372,10 @@ namespace MonoGame.Utilities
                             p--; // can always return one
                         }
 
-                        blocks.writeAt = q; r = blocks.Flush(r);
-                        q = blocks.writeAt; m = q < blocks.readAt ? blocks.readAt - q - 1 : blocks.end - q;
+                        blocks.writeAt = q;
+                        r = blocks.Flush(r);
+                        q = blocks.writeAt;
+                        m = q < blocks.readAt ? blocks.readAt - q - 1 : blocks.end - q;
 
                         if (blocks.readAt != blocks.writeAt)
                         {

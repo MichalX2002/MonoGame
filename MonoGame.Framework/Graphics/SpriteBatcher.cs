@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -16,55 +18,36 @@ namespace Microsoft.Xna.Framework.Graphics
          * caution when making changes to this class.
          */
 
-        /// <summary>
-        /// Initial size for the batch item list.
-        /// </summary>
         private const int InitialBatchSize = 256;
 
         /// <summary>
-        /// The maximum number of batch items that can be processed per iteration
+        /// The maximum number of batch items that can be 
+        /// drawn at once with <see cref="FlushVertexArray"/>.
         /// </summary>
-        private const int MaxBatchSize = ushort.MaxValue / 6 - 1; // 6 = 4 vertices unique and 2 shared, per quad
+        private const int MaxBatchSize = ushort.MaxValue / 4;
 
-        /// <summary>
-        /// The list of batch items to process.
-        /// </summary>
-        private SpriteBatchItem[] _batchItemList;
-
-        /// <summary>
-        /// Amount of batched items.
-        /// </summary>
-        private int _batchItemCount;
-
-        /// <summary>
-        /// The target graphics device.
-        /// </summary>
         private readonly GraphicsDevice _device;
+
+        private int _quadCount;
+        private Texture2D[] _textureList;
+        private UnmanagedPointer<float> _sortKeyList;
+        private UnmanagedPointer<SpriteQuad> _quadList;
         
         /// <summary>
-        /// Buffer for copying vertices from the enqueued batch items 
-        /// and then drawing them.
+        /// The index buffer values are constant and more indices are added as needed.
         /// </summary>
-        private int _vertexBufferBytes;
-        private IntPtr _vertexBuffer;
-        private VertexPositionColorTexture* _vertexBufferPtr;
-
-        /// <summary>
-        /// Index buffer; the values in this buffer are 
-        /// constant and more indices are added as needed.
-        /// </summary>
-        private int _indexBufferBytes;
-        private IntPtr _indexBuffer;
+        private IndexBuffer _indexBuffer;
 
         public bool IsDisposed { get; private set; }
 
         public SpriteBatcher(GraphicsDevice device)
         {
-            _device = device;
+            _device = device ?? throw new ArgumentNullException(nameof(device));
 
-            _batchItemList = new SpriteBatchItem[InitialBatchSize];
-            for (int i = 0; i < InitialBatchSize; i++)
-                _batchItemList[i] = new SpriteBatchItem();
+            _indexBuffer = new IndexBuffer(device, IndexElementSize.SixteenBits, 0, BufferUsage.WriteOnly);
+            _textureList = new Texture2D[InitialBatchSize];
+            _sortKeyList = new UnmanagedPointer<float>(InitialBatchSize);
+            _quadList = new UnmanagedPointer<SpriteQuad>(InitialBatchSize);
 
             EnsureCapacity(InitialBatchSize);
         }
@@ -76,80 +59,70 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         private void EnsureCapacity(int itemCount)
         {
-            int oldVertexCount = _vertexBufferBytes / 4 / sizeof(VertexPositionColorTexture);
-            if (itemCount > oldVertexCount)
-            {
-                // 1 batch item has 4 vertices
-                _vertexBufferBytes = itemCount * 4 * sizeof(VertexPositionColorTexture);
+            _sortKeyList.Length = itemCount;
+            _quadList.Length = itemCount;
 
-                if (_vertexBuffer == IntPtr.Zero)
-                    _vertexBuffer = Marshal.AllocHGlobal(_vertexBufferBytes);
-                else
-                    _vertexBuffer = Marshal.ReAllocHGlobal(_vertexBuffer, (IntPtr)_vertexBufferBytes);
-
-                _vertexBufferPtr = (VertexPositionColorTexture*)_vertexBuffer;
-            }
+            if (_textureList.Length < itemCount)
+                Array.Resize(ref _textureList, itemCount);
 
             // 1 batch item needs 6 indices
-            int oldIndexCount = _indexBufferBytes / 6 / sizeof(ushort);
-            if (itemCount > oldIndexCount)
+            int newIndexCount = itemCount * 6;
+            int oldIndexCount = _indexBuffer.IndexCount;
+            if (newIndexCount > oldIndexCount)
             {
                 // 1 batch item needs 6 indices
-                _indexBufferBytes = itemCount * 6 * sizeof(ushort);
-
-                if(_indexBuffer == IntPtr.Zero)
-                    _indexBuffer = Marshal.AllocHGlobal(_indexBufferBytes);
-                else
-                    _indexBuffer = Marshal.ReAllocHGlobal(_indexBuffer, (IntPtr)_indexBufferBytes);
-
-                ushort* indexPtr = (ushort*)_indexBuffer;
-                for (int i = 0; i < itemCount; i++, indexPtr += 6)
+                IntPtr tmpMemory = Marshal.AllocHGlobal(newIndexCount * sizeof(ushort));
+                try
                 {
-                    /*
-                     *  TL    TR    0,1,2,3 = index offsets for vertex indices
-                     *   0----1     TL,TR,BL,BR are vertex references in SpriteBatchItem.   
-                     *   |   /|    
-                     *   |  / |
-                     *   | /  |
-                     *   |/   |
-                     *   2----3
-                     *  BL    BR
-                     */
+                    ushort* indexPtr = (ushort*)tmpMemory;
+                    for (int i = 0; i < newIndexCount; i++, indexPtr += 6)
+                    {
+                        /*
+                         *  TL    TR    0,1,2,3 = index offsets for vertex indices
+                         *   0----1     TL,TR,BL,BR are vertex references in SpriteBatchItem.   
+                         *   |   /|    
+                         *   |  / |
+                         *   | /  |
+                         *   |/   |
+                         *   2----3
+                         *  BL    BR
+                         */
 
-                    // Triangle 1
-                    *(indexPtr) = (ushort)(i * 4);
-                    *(indexPtr + 1) = (ushort)(i * 4 + 1);
-                    *(indexPtr + 2) = (ushort)(i * 4 + 2);
+                        // Triangle 1
+                        *(indexPtr) = (ushort)(i * 4);
+                        *(indexPtr + 1) = (ushort)(i * 4 + 1);
+                        *(indexPtr + 2) = (ushort)(i * 4 + 2);
 
-                    // Triangle 2
-                    *(indexPtr + 3) = (ushort)(i * 4 + 1);
-                    *(indexPtr + 4) = (ushort)(i * 4 + 3);
-                    *(indexPtr + 5) = (ushort)(i * 4 + 2);
+                        // Triangle 2
+                        *(indexPtr + 3) = (ushort)(i * 4 + 1);
+                        *(indexPtr + 4) = (ushort)(i * 4 + 3);
+                        *(indexPtr + 5) = (ushort)(i * 4 + 2);
+                    }
+
+                    _indexBuffer.SetData(tmpMemory, newIndexCount, SetDataOptions.Discard);
                 }
-
+                finally
+                {
+                    Marshal.FreeHGlobal(tmpMemory);
+                }
             }
         }
 
-        /// <summary>
-        /// Reuse a previously allocated SpriteBatchItem from the item pool. 
-        /// if there is none available grow the pool and initialize new items.
-        /// </summary>
-        /// <returns></returns>
-        public SpriteBatchItem CreateBatchItem()
+        public void PushQuad(Texture2D texture, in SpriteQuad quad, float sortKey)
         {
-            if (_batchItemCount >= _batchItemList.Length)
+            if (_quadCount >= _quadList.Length)
             {
-                int oldSize = _batchItemList.Length;
+                int oldSize = _quadList.Length;
                 int newSize = oldSize + oldSize / 2; // grow by x1.5
                 newSize = (newSize + 255) & (~255); // grow in chunks of 256.
 
-                Array.Resize(ref _batchItemList, newSize);
-                for (int i = oldSize; i < newSize; i++)
-                    _batchItemList[i] = new SpriteBatchItem();
-
                 EnsureCapacity(newSize);
             }
-            return _batchItemList[_batchItemCount++];
+
+            _textureList[_quadCount] = texture;
+            _quadList[_quadCount] = quad;
+            _sortKeyList[_quadCount] = sortKey;
+            _quadCount++;
         }
 
         /// <summary>
@@ -164,7 +137,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new ObjectDisposedException(nameof(effect));
 
             // nothing to do
-            if (_batchItemCount == 0)
+            if (_quadCount == 0)
                 return;
 
             // sort the batch items
@@ -173,50 +146,38 @@ namespace Microsoft.Xna.Framework.Graphics
                 case SpriteSortMode.Texture:
                 case SpriteSortMode.FrontToBack:
                 case SpriteSortMode.BackToFront:
-                    Array.Sort(_batchItemList, 0, _batchItemCount);
+                    UnmanagedSort.Sort(_sortKeyList.Ptr, _quadList.Ptr, 0, _quadCount);
                     break;
             }
             
-            int batchCount = _batchItemCount;
+            int itemCount = _quadCount;
 
             // Iterate through the batches, doing clamped sets of vertices only.
-            while (batchCount > 0)
+            while (itemCount > 0)
             {
                 int vertexCount = 0;
                 Texture2D tex = null;
 
-                int batchesToProcess = batchCount;
-                if (batchesToProcess > MaxBatchSize)
-                    batchesToProcess = MaxBatchSize;
+                int itemsToProcess = itemCount;
+                if (itemsToProcess > MaxBatchSize)
+                    itemsToProcess = MaxBatchSize;
 
                 // Draw the batches
-                var vertexPtr = _vertexBufferPtr;
-                for (int i = 0; i < batchesToProcess; i++, vertexCount += 4, vertexPtr += 4)
+                for (int i = 0; i < itemsToProcess; i++, vertexCount += 4)
                 {
-                    SpriteBatchItem item = _batchItemList[_batchItemCount - batchCount];
                     // if the texture changed, we need to flush and bind the new texture
-                    if (!ReferenceEquals(item.Texture, tex))
+                    int texIndex = _quadCount - itemCount;
+                    if (!ReferenceEquals(_textureList[texIndex], tex))
                     {
                         FlushVertexArray(vertexCount, effect, tex);
 
                         vertexCount = 0;
-                        vertexPtr = _vertexBufferPtr;
-
-                        tex = item.Texture;
+                        tex = _textureList[texIndex];
                         _device.Textures[0] = tex;
                     }
 
-                    // store the SpriteBatchItem data in our vertex buffer
-                    *(vertexPtr) = item.VertexTL;
-                    *(vertexPtr + 1) = item.VertexTR;
-                    *(vertexPtr + 2) = item.VertexBL;
-                    *(vertexPtr + 3) = item.VertexBR;
-
-                    // Release the texture.
-                    item.Texture = null;
-
                     // Update our count to continue culling down large batches
-                    batchCount--;
+                    itemCount--;
                 }
 
                 // flush the remaining vertexArray data
@@ -225,11 +186,9 @@ namespace Microsoft.Xna.Framework.Graphics
             
             unchecked
             {
-                _device._graphicsMetrics._spriteCount += _batchItemCount;
+                _device._graphicsMetrics._spriteCount += _quadCount;
             }
-
-            // return items to the pool.  
-            _batchItemCount = 0;
+            _quadCount = 0;
         }
 
         /// <summary>
@@ -243,6 +202,9 @@ namespace Microsoft.Xna.Framework.Graphics
             if (vertexCount == 0)
                 return;
 
+            var old = _device.Indices;
+            _device.Indices = _indexBuffer;
+
             // If the effect is not null, then apply each pass and render the geometry
             if (effect != null)
             {
@@ -255,38 +217,25 @@ namespace Microsoft.Xna.Framework.Graphics
                     _device.Textures[0] = texture;
 
                     _device.DrawUserIndexedPrimitives<VertexPositionColorTexture>(
-                        PrimitiveType.TriangleList, _vertexBuffer, 0, vertexCount,
-                        IndexElementSize.SixteenBits, _indexBuffer, 0, vertexCount / 2);
+                        PrimitiveType.TriangleList, _quadList.SafePtr, 0, 0, vertexCount / 2);
                 }
             }
             else
             {
                 // If no custom effect is defined, then simply render.
                 _device.DrawUserIndexedPrimitives<VertexPositionColorTexture>(
-                    PrimitiveType.TriangleList, _vertexBuffer, 0, vertexCount,
-                    IndexElementSize.SixteenBits, _indexBuffer, 0, vertexCount / 2);
+                        PrimitiveType.TriangleList, _quadList.SafePtr, 0, 0, vertexCount / 2);
             }
+
+            _device.Indices = old;
         }
 
         protected virtual void Dispose(bool disposing)
         {
             if (!IsDisposed)
             {
-                _vertexBufferPtr = null;
-
-                if (_vertexBuffer != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(_vertexBuffer);
-                    _vertexBuffer = IntPtr.Zero;
-                    _vertexBufferBytes = 0;
-                }
-
-                if(_indexBuffer != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(_indexBuffer);
-                    _indexBuffer = IntPtr.Zero;
-                    _indexBufferBytes = 0;
-                }
+                _quadList.Dispose();
+                _sortKeyList.Dispose();
                 
                 IsDisposed = true;
             }

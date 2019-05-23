@@ -85,7 +85,7 @@
     <Compile Include="ExceptionHelper.cs" />
     <Compile Include="Graphics\SpriteBatch.cs" />
     <Compile Include="Graphics\SpriteBatcher.cs" />
-    <Compile Include="Graphics\SpriteBatchItem.cs" />
+    <Compile Include="Graphics\SpriteQuad.cs" />
     <Compile Include="Graphics\Vertices\BufferBase.cs" />
     <Compile Include="Graphics\Vertices\IndexBufferBase.cs" />
     <Compile Include="Graphics\Vertices\IndexBufferBase.OpenGL.cs" />
@@ -107,7 +107,7 @@
     <Compile Include="Math\BoundingBox.cs" />
     <Compile Include="Math\BoundingFrustum.cs" />
     <Compile Include="Math\BoundingSphere.cs" />
-    <Compile Include="Color.cs" />
+    <Compile Include="Math\Color.cs" />
     <Compile Include="Math\ContainmentType.cs" />
     <Compile Include="Math\CurveContinuity.cs" />
     <Compile Include="Math\Curve.cs" />
@@ -167,6 +167,8 @@
     <Compile Include="Utilities\TaskbarList.cs" />
     <Compile Include="Utilities\TaskbarProgress.cs" />
     <Compile Include="Utilities\TaskbarProgressState.cs" />
+    <Compile Include="Utilities\UnmanagedPointer.cs" />
+    <Compile Include="Utilities\UnmanangedSort.cs" />
     <Compile Include="Utilities\ZlibStream\DeflateManager.cs" />
     <Compile Include="Utilities\ZlibStream\GZipStream.cs" />
     <Compile Include="Utilities\ZlibStream\InflateBlocks.cs" />
@@ -539,9 +541,6 @@
     <Compile Include="Graphics\Vertices\DynamicIndexBuffer.cs" />
     <Compile Include="Graphics\Vertices\DynamicVertexBuffer.cs" />
     <Compile Include="Graphics\Vertices\IndexBuffer.cs" />
-    <Compile Include="Graphics\Vertices\IndexBuffer.OpenGL.cs">
-      <Services>OpenGLGraphics</Services>
-    </Compile>
     <Compile Include="Graphics\Vertices\IndexElementSize.cs" />
     <Compile Include="Graphics\Vertices\IVertexType.cs" />
     <Compile Include="Graphics\Vertices\PrimitiveType.cs" />

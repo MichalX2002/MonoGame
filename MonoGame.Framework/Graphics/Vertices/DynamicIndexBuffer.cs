@@ -15,22 +15,20 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public bool IsContentLost => false;
 
-        public DynamicIndexBuffer(GraphicsDevice graphicsDevice, IndexElementSize indexElementSize, int indexCount, BufferUsage usage) :
-			base(graphicsDevice, indexElementSize, indexCount, usage, true)
+        public DynamicIndexBuffer(
+            GraphicsDevice graphicsDevice, IndexElementSize elementSize, int indexCount, BufferUsage usage) :
+			base(graphicsDevice, elementSize, indexCount, usage, dynamic: true)
 		{
 		}
 
-   		public DynamicIndexBuffer(GraphicsDevice graphicsDevice, Type indexType, int indexCount, BufferUsage usage) :
-            base(graphicsDevice, indexType, indexCount, usage, true)
+   		public DynamicIndexBuffer(
+            GraphicsDevice graphicsDevice, Type indexType, int indexCount, BufferUsage usage) :
+            base(graphicsDevice, indexType, indexCount, usage, dynamic: true)
         {
         }
-
-        //public void SetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, SetDataOptions options) where T : struct
-        //{
-        //    base.SetData(offsetInBytes, data, startIndex, elementCount, options);
-        //}
         
-        public void SetData<T>(T[] data, int startIndex, int elementCount, SetDataOptions options) where T : struct
+        public void SetData<T>(T[] data, int startIndex, int elementCount, SetDataOptions options) 
+            where T : struct
         {
             base.SetData(0, data, startIndex, elementCount, options);
         }

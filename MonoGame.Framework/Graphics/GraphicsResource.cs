@@ -79,7 +79,6 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             // Dispose of managed objects as well
             Dispose(true);
-            // Since we have been manually disposed, do not call the finalizer on this object
             GC.SuppressFinalize(this);
         }
 

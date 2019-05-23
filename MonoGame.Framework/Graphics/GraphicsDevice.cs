@@ -1004,19 +1004,55 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Draw primitives of the specified type by indexing into the given array of vertices with 16-bit indices.
         /// </summary>
+        /// <param name="primitiveType">The type of primitives to draw with the vertices.</param>
+        /// <param name="vertexData">An array of vertices to draw.</param>
+        /// <param name="vertexOffset">The index in the array of the first vertex to draw.</param>
+        /// <param name="indexOffset">The index in the array of indices of the first index to use.</param>
+        /// <param name="primitiveCount">The number of primitives to draw.</param>
+        /// <param name="declaration">The layout of the vertices.</param>
+        public void DrawUserIndexedPrimitives(
+            PrimitiveType primitiveType, IntPtr vertexData, int vertexOffset, 
+            int indexOffset, int primitiveCount, VertexDeclaration declaration)
+        {
+            PlatformDrawUserIndexedPrimitives(
+                primitiveType, vertexData, vertexOffset, indexOffset, primitiveCount, declaration);
+        }
+
+        /// <summary>
+        /// Draw primitives of the specified type by indexing into the given array of vertices with 16-bit indices.
+        /// </summary>
         /// <typeparam name="T">The type of the vertices.</typeparam>
         /// <param name="primitiveType">The type of primitives to draw with the vertices.</param>
         /// <param name="vertexData">An array of vertices to draw.</param>
         /// <param name="vertexOffset">The index in the array of the first vertex to draw.</param>
-        /// <param name="indexOffset">The index in the array of indices of the first index to use</param>
+        /// <param name="indexOffset">The index in the array of indices of the first index to use.</param>
+        /// <param name="primitiveCount">The number of primitives to draw.</param>
+        public void DrawUserIndexedPrimitives<T>(
+            PrimitiveType primitiveType, IntPtr vertexData, int vertexOffset,
+            int indexOffset, int primitiveCount) where T : struct, IVertexType
+        {
+            PlatformDrawUserIndexedPrimitives(
+                primitiveType, vertexData, vertexOffset, indexOffset, primitiveCount, VertexDeclarationCache<T>.VertexDeclaration);
+        }
+
+        /// <summary>
+        /// Draw primitives of the specified type by indexing into the given array of vertices with 16-bit indices.
+        /// </summary>
+        /// <typeparam name="T">The type of the vertices.</typeparam>
+        /// <param name="primitiveType">The type of primitives to draw with the vertices.</param>
+        /// <param name="vertexData">An array of vertices to draw.</param>
+        /// <param name="vertexOffset">The index in the array of the first vertex to draw.</param>
+        /// <param name="indexOffset">The index in the array of indices of the first index to use.</param>
         /// <param name="primitiveCount">The number of primitives to draw.</param>
         /// <param name="numVertices">The number of vertices to draw.</param>
         /// <param name="indexData">The index data.</param>
         /// <remarks>The <see cref="VertexDeclaration"/> will be found by getting <see cref="IVertexType.VertexDeclaration"/>
         /// from an instance of <typeparamref name="T"/> and cached for subsequent calls.</remarks>
-        /// <remarks>All indices in the vertex buffer are interpreted relative to the specified <paramref name="vertexOffset"/>.
+        /// <remarks>
+        /// All indices in the vertex buffer are interpreted relative to the specified <paramref name="vertexOffset"/>.
         /// For example a value of zero in the array of indices points to the vertex at index <paramref name="vertexOffset"/>
-        /// in the array of vertices.</remarks>
+        /// in the array of vertices.
+        /// </remarks>
         public void DrawUserIndexedPrimitives<T>(
             PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices,
             ushort[] indexData, int indexOffset, int primitiveCount) where T : struct, IVertexType
