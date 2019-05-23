@@ -2,9 +2,6 @@
 {
     public interface IVertexType
     {
-        VertexDeclaration VertexDeclaration
-        {
-            get;
-        }
+        VertexDeclaration VertexDeclaration { get; }
     }
 }
