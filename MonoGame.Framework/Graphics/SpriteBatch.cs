@@ -48,6 +48,35 @@ namespace Microsoft.Xna.Framework.Graphics
             _beginCalled = false;
         }
 
+        /// <summary>
+        /// Reuse a previously allocated <see cref="SpriteBatchItem"/> from the item pool. 
+        /// If there is none available, the pool grows and initializes new items.
+        /// </summary>
+        /// <returns></returns>
+        public SpriteBatchItem GetBatchItem(Texture2D texture)
+        {
+            var item = _batcher.GetBatchItem();
+            item.Texture = texture;
+            return item;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void FlipTexCoords(ref Vector4 texCoord, SpriteEffects effects)
+        {
+            if ((effects & SpriteEffects.FlipVertically) != 0)
+            {
+                var tmp = texCoord.W;
+                texCoord.W = texCoord.Y;
+                texCoord.Y = tmp;
+            }
+            if ((effects & SpriteEffects.FlipHorizontally) != 0)
+            {
+                var tmp = texCoord.Z;
+                texCoord.Z = texCoord.X;
+                texCoord.X = tmp;
+            }
+        }
+
         public float GetSortKey(Texture2D texture, float depth)
         {
             // set SortKey based on SpriteSortMode.
@@ -168,41 +197,62 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new InvalidOperationException("DrawString was called, but Begin has not yet been called. Begin must be called successfully before you can call DrawString.");
         }
 
-        public void Draw(Texture2D texture, in SpriteQuad quad, float depth)
+        public void DrawRef(
+            Texture2D texture,
+            ref VertexPositionColorTexture vertexTL,
+            ref VertexPositionColorTexture vertexTR,
+            ref VertexPositionColorTexture vertexBL,
+            ref VertexPositionColorTexture vertexBR,
+            float depth)
         {
-            float sortKey = GetSortKey(texture, depth);
-            PushQuad(texture, quad, sortKey);
+            var item = GetBatchItem(texture);
+            item.SortKey = GetSortKey(texture, depth);
+
+            item.VertexTL = vertexTL;
+            item.VertexTR = vertexTR;
+            item.VertexBL = vertexBL;
+            item.VertexBR = vertexBR;
+
             FlushIfNeeded();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void PushQuad(Texture2D texture, in SpriteQuad quad, float sortKey)
+        public void DrawRef(
+            Texture2D texture,
+            ref VertexPositionColorTexture vertexTL,
+            ref VertexPositionColorTexture vertexTR,
+            ref VertexPositionColorTexture vertexBL,
+            ref VertexPositionColorTexture vertexBR)
         {
-            _batcher.PushQuad(texture, quad, sortKey);
+            DrawRef(texture, ref vertexTL, ref vertexTR, ref vertexBL, ref vertexBR, vertexTL.Position.Z);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void FlushIfNeeded()
+        public void Draw(
+            Texture2D texture,
+            VertexPositionColorTexture vertexTL,
+            VertexPositionColorTexture vertexTR,
+            VertexPositionColorTexture vertexBL,
+            VertexPositionColorTexture vertexBR,
+            float depth)
         {
-            if (_sortMode == SpriteSortMode.Immediate)
-                _batcher.DrawBatch(_sortMode, _effect);
+            var item = GetBatchItem(texture);
+            item.SortKey = GetSortKey(texture, depth);
+
+            item.VertexTL = vertexTL;
+            item.VertexTR = vertexTR;
+            item.VertexBL = vertexBL;
+            item.VertexBR = vertexBR;
+
+            FlushIfNeeded();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void FlipTexCoords(ref Vector4 texCoord, SpriteEffects effects)
+        public void Draw(
+            Texture2D texture,
+            VertexPositionColorTexture vertexTL,
+            VertexPositionColorTexture vertexTR,
+            VertexPositionColorTexture vertexBL,
+            VertexPositionColorTexture vertexBR)
         {
-            if ((effects & SpriteEffects.FlipVertically) != 0)
-            {
-                var tmp = texCoord.W;
-                texCoord.W = texCoord.Y;
-                texCoord.Y = tmp;
-            }
-            if ((effects & SpriteEffects.FlipHorizontally) != 0)
-            {
-                var tmp = texCoord.Z;
-                texCoord.Z = texCoord.X;
-                texCoord.X = tmp;
-            }
+            Draw(texture, vertexTL, vertexTR, vertexBL, vertexBR, vertexTL.Position.Z);
         }
 
         /// <summary>
@@ -285,8 +335,12 @@ namespace Microsoft.Xna.Framework.Graphics
             float layerDepth)
         {
             CheckArgs(texture);
+
+            Vector4 texCoord;
+            var item = GetBatchItem(texture);
+            item.SortKey = GetSortKey(texture, layerDepth);
+
             origin *= scale;
-            var texCoord = new Vector4();
 
             float w, h;
             if (sourceRectangle.HasValue)
@@ -303,40 +357,37 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 w = texture.Width * scale.X;
                 h = texture.Height * scale.Y;
-                texCoord.XY = Vector2.Zero;
-                texCoord.ZW = Vector2.One;
+                texCoord = new Vector4(0, 0, 1, 1);
             }
 
             FlipTexCoords(ref texCoord, effects);
 
-            SpriteQuad quad;
             if (rotation == 0f)
             {
-                quad = SpriteQuad.Create(
-                    position.Y - origin.Y,
-                    position.X - origin.X,
-                    w,
-                    h,
-                    color,
-                    texCoord,
-                    layerDepth);
+                item.Set(position.X - origin.X,
+                        position.Y - origin.Y,
+                        w,
+                        h,
+                        color,
+                        texCoord,
+                        layerDepth);
             }
             else
             {
-                quad = SpriteQuad.Create(
-                    position.X,
-                    position.Y,
-                    -origin.X,
-                    -origin.Y,
-                    w,
-                    h,
-                    (float)Math.Sin(rotation),
-                    (float)Math.Cos(rotation),
-                    color,
-                    texCoord,
-                    layerDepth);
+                item.Set(position.X,
+                        position.Y,
+                        -origin.X,
+                        -origin.Y,
+                        w,
+                        h,
+                        (float)Math.Sin(rotation),
+                        (float)Math.Cos(rotation),
+                        color,
+                        texCoord,
+                        layerDepth);
             }
-            Draw(texture, quad, layerDepth);
+
+            FlushIfNeeded();
         }
 
         /// <summary>
@@ -387,8 +438,11 @@ namespace Microsoft.Xna.Framework.Graphics
             float layerDepth)
         {
             CheckArgs(texture);
-            var texCoord = new Vector4();
 
+            var item = GetBatchItem(texture);
+            item.SortKey = GetSortKey(texture, layerDepth);
+
+            Vector4 texCoord;
             if (sourceRectangle.HasValue)
             {
                 RectangleF srcRect = sourceRectangle.Value;
@@ -408,8 +462,7 @@ namespace Microsoft.Xna.Framework.Graphics
             }
             else
             {
-                texCoord.XY = Vector2.Zero;
-                texCoord.ZW = Vector2.One;
+                texCoord = new Vector4(0, 0, 1, 1);
 
                 origin.X = origin.X * destinationRectangle.Width * texture.TexelWidth;
                 origin.Y = origin.Y * destinationRectangle.Height * texture.TexelHeight;
@@ -417,34 +470,42 @@ namespace Microsoft.Xna.Framework.Graphics
 
             FlipTexCoords(ref texCoord, effects);
 
-            SpriteQuad quad;
             if (rotation == 0f)
             {
-                quad = SpriteQuad.Create(
-                    destinationRectangle.X - origin.X,
-                    destinationRectangle.Y - origin.Y,
-                    destinationRectangle.Width,
-                    destinationRectangle.Height,
-                    color,
-                    texCoord,
-                    layerDepth);
+                item.Set(destinationRectangle.X - origin.X,
+                        destinationRectangle.Y - origin.Y,
+                        destinationRectangle.Width,
+                        destinationRectangle.Height,
+                        color,
+                        texCoord,
+                        layerDepth);
             }
             else
             {
-                quad = SpriteQuad.Create(
-                    destinationRectangle.X,
-                    destinationRectangle.Y,
-                    -origin.X,
-                    -origin.Y,
-                    destinationRectangle.Width,
-                    destinationRectangle.Height,
-                    (float)Math.Sin(rotation),
-                    (float)Math.Cos(rotation),
-                    color,
-                    texCoord,
-                    layerDepth);
+                item.Set(destinationRectangle.X,
+                        destinationRectangle.Y,
+                        -origin.X,
+                        -origin.Y,
+                        destinationRectangle.Width,
+                        destinationRectangle.Height,
+                        (float)Math.Sin(rotation),
+                        (float)Math.Cos(rotation),
+                        color,
+                        texCoord,
+                        layerDepth);
             }
-            Draw(texture, quad, layerDepth);
+
+            FlushIfNeeded();
+        }
+
+
+        /// <summary>
+        /// Call the end of a draw operation for <see cref="SpriteSortMode.Immediate"/>.
+        /// </summary>
+        public void FlushIfNeeded()
+        {
+            if (_sortMode == SpriteSortMode.Immediate)
+                _batcher.DrawBatch(_sortMode, _effect);
         }
 
         /// <summary>
@@ -457,8 +518,11 @@ namespace Microsoft.Xna.Framework.Graphics
         public void Draw(Texture2D texture, Vector2 position, RectangleF? sourceRectangle, Color color)
         {
             CheckArgs(texture);
-            var texCoord = new Vector4();
 
+            var item = GetBatchItem(texture);
+            item.SortKey = GetSortKey(texture, 0);
+
+            Vector4 texCoord;
             Vector2 size;
             if (sourceRectangle.HasValue)
             {
@@ -472,20 +536,18 @@ namespace Microsoft.Xna.Framework.Graphics
             else
             {
                 size = new Vector2(texture.Width, texture.Height);
-                texCoord.XY = Vector2.Zero;
-                texCoord.ZW = Vector2.One;
+                texCoord = new Vector4(0, 0, 1, 1);
             }
 
-            var quad = SpriteQuad.Create(
-                position.X,
-                position.Y,
-                size.X,
-                size.Y,
-                color,
-                texCoord,
-                0);
+            item.Set(position.X,
+                     position.Y,
+                     size.X,
+                     size.Y,
+                     color,
+                     texCoord,
+                     0);
 
-            Draw(texture, quad, 0);
+            FlushIfNeeded();
         }
 
         /// <summary>
@@ -498,8 +560,11 @@ namespace Microsoft.Xna.Framework.Graphics
         public void Draw(Texture2D texture, RectangleF destinationRectangle, RectangleF? sourceRectangle, Color color)
         {
             CheckArgs(texture);
-            var texCoord = new Vector4();
 
+            var item = GetBatchItem(texture);
+            item.SortKey = GetSortKey(texture, 0);
+
+            Vector4 texCoord;
             if (sourceRectangle.HasValue)
             {
                 RectangleF srcRect = sourceRectangle.Value;
@@ -510,20 +575,18 @@ namespace Microsoft.Xna.Framework.Graphics
             }
             else
             {
-                texCoord.XY = Vector2.Zero;
-                texCoord.ZW = Vector2.One;
+                texCoord = new Vector4(0, 0, 1, 1);
             }
 
-            var quad = SpriteQuad.Create(
-                destinationRectangle.X,
-                destinationRectangle.Y,
-                destinationRectangle.Width,
-                destinationRectangle.Height,
-                color,
-                texCoord,
-                0);
+            item.Set(destinationRectangle.X,
+                     destinationRectangle.Y,
+                     destinationRectangle.Width,
+                     destinationRectangle.Height,
+                     color,
+                     texCoord,
+                     0);
 
-            Draw(texture, quad, 0);
+            FlushIfNeeded();
         }
 
         /// <summary>
@@ -536,16 +599,18 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             CheckArgs(texture);
 
-            var quad = SpriteQuad.Create(
-                position.X,
-                position.Y,
-                texture.Width,
-                texture.Height,
-                color,
-                new Vector4(0, 0, 1, 1),
-                0);
+            var item = GetBatchItem(texture);
+            item.SortKey = GetSortKey(texture, 0);
 
-            Draw(texture, quad, 0);
+            item.Set(position.X,
+                     position.Y,
+                     texture.Width,
+                     texture.Height,
+                     color,
+                     new Vector4(0, 0, 1, 1),
+                     0);
+
+            FlushIfNeeded();
         }
 
         /// <summary>
@@ -558,16 +623,18 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             CheckArgs(texture);
 
-            var quad = SpriteQuad.Create(
-                destinationRectangle.X,
-                destinationRectangle.Y,
-                destinationRectangle.Width,
-                destinationRectangle.Height,
-                color,
-                new Vector4(0, 0, 1, 1),
-                0);
+            var item = GetBatchItem(texture);
+            item.SortKey = GetSortKey(texture, 0);
 
-            Draw(texture, quad, 0);
+            item.Set(destinationRectangle.X,
+                     destinationRectangle.Y,
+                     destinationRectangle.Width,
+                     destinationRectangle.Height,
+                     color,
+                     new Vector4(0, 0, 1, 1),
+                     0);
+
+            FlushIfNeeded();
         }
 
         /// <summary>
@@ -580,16 +647,18 @@ namespace Microsoft.Xna.Framework.Graphics
         public unsafe void DrawString(SpriteFont spriteFont, string text, Vector2 position, Color color)
         {
             CheckArgs(spriteFont, text);
+
             float sortKey = GetSortKey(spriteFont.Texture, 0);
-            var texCoord = new Vector4();
 
             var offset = Vector2.Zero;
             var firstGlyphOfLine = true;
+
             fixed (SpriteFont.Glyph* pGlyphs = spriteFont.Glyphs)
             {
                 for (var i = 0; i < text.Length; ++i)
                 {
-                    char c = text[i];
+                    var c = text[i];
+
                     if (c == '\r')
                         continue;
 
@@ -622,20 +691,22 @@ namespace Microsoft.Xna.Framework.Graphics
                     p.Y += pCurrentGlyph->Cropping.Y;
                     p += position;
 
+                    var item = GetBatchItem(spriteFont.Texture);
+                    item.SortKey = sortKey;
+
+                    var texCoord = new Vector4();
                     texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.TexelWidth;
                     texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.TexelHeight;
                     texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.TexelWidth;
-                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.TexelHeight;
+                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.TexelHeight;
 
-                    var quad = SpriteQuad.Create(p.X,
+                    item.Set(p.X,
                              p.Y,
                              pCurrentGlyph->BoundsInTexture.Width,
                              pCurrentGlyph->BoundsInTexture.Height,
                              color,
                              texCoord,
                              0);
-
-                    PushQuad(spriteFont.Texture, quad, sortKey);
 
                     offset.X += pCurrentGlyph->Width + pCurrentGlyph->RightSideBearing;
                 }
@@ -682,6 +753,7 @@ namespace Microsoft.Xna.Framework.Graphics
             float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
         {
             CheckArgs(spriteFont, text);
+            float sortKey = GetSortKey(spriteFont.Texture, layerDepth);
 
             var flipAdjustment = Vector2.Zero;
             var flippedVert = (effects & SpriteEffects.FlipVertically) == SpriteEffects.FlipVertically;
@@ -726,7 +798,6 @@ namespace Microsoft.Xna.Framework.Graphics
                 transformation.M42 = (((flipAdjustment.X - origin.X) * transformation.M12) + (flipAdjustment.Y - origin.Y) * transformation.M22) + position.Y;
             }
 
-            float sortKey = GetSortKey(spriteFont.Texture, layerDepth);
             var offset = Vector2.Zero;
             var firstGlyphOfLine = true;
 
@@ -734,7 +805,8 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 for (var i = 0; i < text.Length; ++i)
                 {
-                    char c = text[i];
+                    var c = text[i];
+
                     if (c == '\r')
                         continue;
 
@@ -762,7 +834,7 @@ namespace Microsoft.Xna.Framework.Graphics
                         offset.X += spriteFont.Spacing + pCurrentGlyph->LeftSideBearing;
                     }
 
-                    Vector2 p = offset;
+                    var p = offset;
 
                     if (flippedHorz)
                         p.X += pCurrentGlyph->BoundsInTexture.Width;
@@ -774,43 +846,41 @@ namespace Microsoft.Xna.Framework.Graphics
 
                     Vector2.Transform(ref p, ref transformation, out p);
 
-                    var texCoord = new Vector4
-                    {
-                        X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.TexelWidth,
-                        Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.TexelHeight,
-                        Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.TexelWidth,
-                        W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.TexelHeight
-                    };
+                    var item = GetBatchItem(spriteFont.Texture);
+                    item.SortKey = sortKey;
+
+                    var texCoord = new Vector4();
+                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.TexelWidth;
+                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.TexelHeight;
+                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.TexelWidth;
+                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.TexelHeight;
+
                     FlipTexCoords(ref texCoord, effects);
 
-                    SpriteQuad quad;
                     if (rotation == 0f)
                     {
-                        quad = SpriteQuad.Create(
-                            p.X,
-                            p.Y,
-                            pCurrentGlyph->BoundsInTexture.Width * scale.X,
-                            pCurrentGlyph->BoundsInTexture.Height * scale.Y,
-                            color,
-                            texCoord,
-                            layerDepth);
+                        item.Set(p.X,
+                                p.Y,
+                                pCurrentGlyph->BoundsInTexture.Width * scale.X,
+                                pCurrentGlyph->BoundsInTexture.Height * scale.Y,
+                                color,
+                                texCoord,
+                                layerDepth);
                     }
                     else
                     {
-                        quad = SpriteQuad.Create(
-                            p.X,
-                            p.Y,
-                            0,
-                            0,
-                            pCurrentGlyph->BoundsInTexture.Width * scale.X,
-                            pCurrentGlyph->BoundsInTexture.Height * scale.Y,
-                            sin,
-                            cos,
-                            color,
-                            texCoord,
-                            layerDepth);
+                        item.Set(p.X,
+                                p.Y,
+                                0,
+                                0,
+                                pCurrentGlyph->BoundsInTexture.Width * scale.X,
+                                pCurrentGlyph->BoundsInTexture.Height * scale.Y,
+                                sin,
+                                cos,
+                                color,
+                                texCoord,
+                                layerDepth);
                     }
-                    PushQuad(spriteFont.Texture, quad, sortKey);
 
                     offset.X += pCurrentGlyph->Width + pCurrentGlyph->RightSideBearing;
                 }
@@ -832,14 +902,16 @@ namespace Microsoft.Xna.Framework.Graphics
             CheckArgs(spriteFont, text);
 
             float sortKey = GetSortKey(spriteFont.Texture, 0);
+
             var offset = Vector2.Zero;
             var firstGlyphOfLine = true;
 
             fixed (SpriteFont.Glyph* pGlyphs = spriteFont.Glyphs)
             {
-                for (int i = 0; i < text.Length; ++i)
+                for (var i = 0; i < text.Length; ++i)
                 {
-                    char c = text[i];
+                    var c = text[i];
+
                     if (c == '\r')
                         continue;
 
@@ -872,24 +944,22 @@ namespace Microsoft.Xna.Framework.Graphics
                     p.Y += pCurrentGlyph->Cropping.Y;
                     p += position;
 
-                    var texCoord = new Vector4
-                    {
-                        X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.TexelWidth,
-                        Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.TexelHeight,
-                        Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.TexelWidth,
-                        W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.TexelHeight
-                    };
+                    var item = GetBatchItem(spriteFont.Texture);
+                    item.SortKey = sortKey;
 
-                    var quad = SpriteQuad.Create(
-                        p.X,
-                        p.Y,
-                        pCurrentGlyph->BoundsInTexture.Width,
-                        pCurrentGlyph->BoundsInTexture.Height,
-                        color,
-                        texCoord,
-                        0);
+                    var texCoord = new Vector4();
+                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.TexelWidth;
+                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.TexelHeight;
+                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.TexelWidth;
+                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.TexelHeight;
 
-                    PushQuad(spriteFont.Texture, quad, sortKey);
+                    item.Set(p.X,
+                             p.Y,
+                             pCurrentGlyph->BoundsInTexture.Width,
+                             pCurrentGlyph->BoundsInTexture.Height,
+                             color,
+                             texCoord,
+                             0);
 
                     offset.X += pCurrentGlyph->Width + pCurrentGlyph->RightSideBearing;
                 }
@@ -935,11 +1005,9 @@ namespace Microsoft.Xna.Framework.Graphics
             float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
         {
             CheckArgs(spriteFont, text);
-
             float sortKey = GetSortKey(spriteFont.Texture, 0);
 
             var flipAdjustment = Vector2.Zero;
-
             var flippedVert = (effects & SpriteEffects.FlipVertically) == SpriteEffects.FlipVertically;
             var flippedHorz = (effects & SpriteEffects.FlipHorizontally) == SpriteEffects.FlipHorizontally;
 
@@ -987,9 +1055,10 @@ namespace Microsoft.Xna.Framework.Graphics
 
             fixed (SpriteFont.Glyph* pGlyphs = spriteFont.Glyphs)
             {
-                for (int i = 0; i < text.Length; ++i)
+                for (var i = 0; i < text.Length; ++i)
                 {
-                    char c = text[i];
+                    var c = text[i];
+
                     if (c == '\r')
                         continue;
 
@@ -1017,7 +1086,7 @@ namespace Microsoft.Xna.Framework.Graphics
                         offset.X += spriteFont.Spacing + pCurrentGlyph->LeftSideBearing;
                     }
 
-                    Vector2 p = offset;
+                    var p = offset;
 
                     if (flippedHorz)
                         p.X += pCurrentGlyph->BoundsInTexture.Width;
@@ -1029,44 +1098,41 @@ namespace Microsoft.Xna.Framework.Graphics
 
                     Vector2.Transform(ref p, ref transformation, out p);
 
-                    var texCoord = new Vector4
-                    {
-                        X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.TexelWidth,
-                        Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.TexelHeight,
-                        Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.TexelWidth,
-                        W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.TexelHeight
-                    };
+                    var item = GetBatchItem(spriteFont.Texture);
+                    item.SortKey = sortKey;
+
+                    var texCoord = new Vector4();
+                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.TexelWidth;
+                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.TexelHeight;
+                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.TexelWidth;
+                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.TexelHeight;
 
                     FlipTexCoords(ref texCoord, effects);
 
-                    SpriteQuad quad;
                     if (rotation == 0f)
                     {
-                        quad = SpriteQuad.Create(
-                            p.X,
-                            p.Y,
-                            pCurrentGlyph->BoundsInTexture.Width * scale.X,
-                            pCurrentGlyph->BoundsInTexture.Height * scale.Y,
-                            color,
-                            texCoord,
-                            layerDepth);
+                        item.Set(p.X,
+                                p.Y,
+                                pCurrentGlyph->BoundsInTexture.Width * scale.X,
+                                pCurrentGlyph->BoundsInTexture.Height * scale.Y,
+                                color,
+                                texCoord,
+                                layerDepth);
                     }
                     else
                     {
-                        quad = SpriteQuad.Create(
-                            p.X,
-                            p.Y,
-                            0,
-                            0,
-                            pCurrentGlyph->BoundsInTexture.Width * scale.X,
-                            pCurrentGlyph->BoundsInTexture.Height * scale.Y,
-                            sin,
-                            cos,
-                            color,
-                            texCoord,
-                            layerDepth);
+                        item.Set(p.X,
+                                p.Y,
+                                0,
+                                0,
+                                pCurrentGlyph->BoundsInTexture.Width * scale.X,
+                                pCurrentGlyph->BoundsInTexture.Height * scale.Y,
+                                sin,
+                                cos,
+                                color,
+                                texCoord,
+                                layerDepth);
                     }
-                    PushQuad(spriteFont.Texture, quad, sortKey);
 
                     offset.X += pCurrentGlyph->Width + pCurrentGlyph->RightSideBearing;
                 }
@@ -1084,13 +1150,16 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             if (!IsDisposed)
             {
-                _spritePass = null;
-
-                if (_spriteEffect != null)
+                if (disposing)
                 {
-                    _spriteEffect.Dispose();
-                    _spriteEffect = null;
+                    if (_spriteEffect != null)
+                    {
+                        _spriteEffect.Dispose();
+                        _spriteEffect = null;
+                    }
                 }
+
+                _spritePass = null;
 
                 if (_batcher != null)
                 {

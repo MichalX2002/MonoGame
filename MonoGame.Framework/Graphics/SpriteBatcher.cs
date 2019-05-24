@@ -29,9 +29,8 @@ namespace Microsoft.Xna.Framework.Graphics
         private readonly GraphicsDevice _device;
 
         private int _quadCount;
-        private Texture2D[] _textureList;
-        private UnmanagedPointer<float> _sortKeyList;
-        private UnmanagedPointer<SpriteQuad> _quadList;
+        private SpriteBatchItem[] _batchItems;
+        private UnmanagedPointer<VertexPositionColorTexture> _itemVertexBuffer;
         
         /// <summary>
         /// The index buffer values are constant and more indices are added as needed.
@@ -49,9 +48,10 @@ namespace Microsoft.Xna.Framework.Graphics
             _indexBuffer = new IndexBuffer(device, IndexElementSize.SixteenBits, 0, BufferUsage.WriteOnly);
             _vertexBuffer = new DynamicVertexBuffer(device, VertexPositionColorTexture.VertexDeclaration, 0, BufferUsage.WriteOnly);
 
-            _textureList = new Texture2D[InitialBatchSize];
-            _sortKeyList = new UnmanagedPointer<float>(InitialBatchSize);
-            _quadList = new UnmanagedPointer<SpriteQuad>(InitialBatchSize);
+            _itemVertexBuffer = new UnmanagedPointer<VertexPositionColorTexture>(InitialBatchSize * 4);
+            _batchItems = new SpriteBatchItem[InitialBatchSize];
+            for (int i = 0; i < InitialBatchSize; i++)
+                _batchItems[i] = new SpriteBatchItem();
 
             EnsureCapacity(InitialBatchSize);
         }
@@ -63,14 +63,16 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         private void EnsureCapacity(int itemCount)
         {
-            _sortKeyList.Length = itemCount;
-            _quadList.Length = itemCount;
+            int oldSize = _batchItems.Length;
+            Array.Resize(ref _batchItems, itemCount);
+            for (int i = oldSize; i < _batchItems.Length; i++)
+                _batchItems[i] = new SpriteBatchItem();
 
-            if (_textureList.Length < itemCount)
-                Array.Resize(ref _textureList, itemCount);
+            int min = Math.Min(itemCount, MaxBatchSize) * 4; // 4 vertices per item
+            if (min > _itemVertexBuffer.Length)
+                _itemVertexBuffer.Length = min;
 
-            // 1 batch item needs 6 indices
-            int newIndexCount = itemCount * 6;
+            int newIndexCount = itemCount * 6; // 6 indices per item
             int oldIndexCount = _indexBuffer.IndexCount;
             if (newIndexCount > oldIndexCount)
             {
@@ -96,7 +98,7 @@ namespace Microsoft.Xna.Framework.Graphics
                         indexPtr[i + 0] = (ushort)(v + 0);
                         indexPtr[i + 1] = (ushort)(v + 1);
                         indexPtr[i + 2] = (ushort)(v + 2);
-                        
+
                         // Triangle 2
                         indexPtr[i + 3] = (ushort)(v + 1);
                         indexPtr[i + 4] = (ushort)(v + 3);
@@ -111,21 +113,16 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        public void PushQuad(Texture2D texture, in SpriteQuad quad, float sortKey)
+        public SpriteBatchItem GetBatchItem()
         {
-            if (_quadCount >= _quadList.Length)
+            if (_quadCount >= _batchItems.Length)
             {
-                int oldSize = _quadList.Length;
+                int oldSize = _batchItems.Length;
                 int newSize = oldSize + oldSize / 2; // grow by x1.5
                 newSize = (newSize + 255) & (~255); // grow in chunks of 256.
-
                 EnsureCapacity(newSize);
             }
-
-            _textureList[_quadCount] = texture;
-            _quadList[_quadCount] = quad;
-            _sortKeyList[_quadCount] = sortKey;
-            _quadCount++;
+            return _batchItems[_quadCount++];
         }
 
         /// <summary>
@@ -149,14 +146,13 @@ namespace Microsoft.Xna.Framework.Graphics
                 case SpriteSortMode.Texture:
                 case SpriteSortMode.FrontToBack:
                 case SpriteSortMode.BackToFront:
-                    UnmanagedSort.Sort(_sortKeyList.Ptr, _quadList.Ptr, 0, _quadCount);
+                    Array.Sort(_batchItems, 0, _quadCount);
                     break;
             }
-            
-            int itemsLeft = _quadCount;
-            int lastVertex = 0;
 
-            // Iterate through the batches, doing clamped sets of vertices only.
+            // iterate through the batches, doing clamped sets of vertices at the time
+            VertexPositionColorTexture* quadBufferPtr = _itemVertexBuffer.Ptr;
+            int itemsLeft = _quadCount;
             while (itemsLeft > 0)
             {
                 int vertexCount = 0;
@@ -166,28 +162,33 @@ namespace Microsoft.Xna.Framework.Graphics
                 if (itemsToProcess > MaxBatchSize)
                     itemsToProcess = MaxBatchSize;
 
-                // Draw the batches
+                // draw the batches
                 for (int i = 0; i < itemsToProcess; i++, vertexCount += 4)
                 {
-                    // if the texture changed, we need to flush and bind the new texture
                     int offset = _quadCount - itemsLeft;
-                    if (!ReferenceEquals(_textureList[offset], tex))
+                    var item = _batchItems[offset];
+
+                    // if the texture changed, we need to flush and bind the new texture
+                    if (!ReferenceEquals(item.Texture, tex))
                     {
-                        FlushVertexArray(lastVertex, vertexCount, effect, tex);
-                        lastVertex = offset * 4;
+                        FlushVertexArray(vertexCount, effect, tex);
 
                         vertexCount = 0;
-                        tex = _textureList[offset];
+                        tex = item.Texture;
                         _device.Textures[0] = tex;
                     }
+                    item.Texture = null; // release texture from item
 
-                    // Update our count to continue culling down large batches
-                    itemsLeft--;
+                    quadBufferPtr[vertexCount + 0] = item.VertexTL;
+                    quadBufferPtr[vertexCount + 1] = item.VertexTR;
+                    quadBufferPtr[vertexCount + 2] = item.VertexBL;
+                    quadBufferPtr[vertexCount + 3] = item.VertexBR;
+
+                    itemsLeft--; // update our count to continue culling down large batches
                 }
 
                 // flush the remaining data
-                FlushVertexArray(lastVertex, vertexCount, effect, tex);
-                lastVertex = (_quadCount - itemsLeft) * 4;
+                FlushVertexArray(vertexCount, effect, tex);
             }
             
             unchecked
@@ -200,15 +201,16 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Sends the triangle list to the graphics device. Here is where the actual drawing starts.
         /// </summary>
-        /// <param name="vertexCount">The amount of vertices to draw.</param>
+        /// <param name="count">The amount of vertices to draw.</param>
         /// <param name="effect">The custom effect to apply to the geometry.</param>
         /// <param name="texture">The texture to draw.</param>
-        private void FlushVertexArray(int offset, int count, Effect effect, Texture texture)
+        private void FlushVertexArray(int count, Effect effect, Texture texture)
         {
             if (count == 0)
                 return;
 
-            _vertexBuffer.SetData(0, _quadList.SafePtr, offset, count, sizeof(VertexPositionColorTexture), 0, SetDataOptions.Discard);
+            _vertexBuffer.SetData(
+                0, _itemVertexBuffer.SafePtr, 0, count, sizeof(VertexPositionColorTexture), 0, SetDataOptions.Discard);
 
             _device.SetVertexBuffer(_vertexBuffer);
             _device.Indices = _indexBuffer;
@@ -224,13 +226,13 @@ namespace Microsoft.Xna.Framework.Graphics
                     // ends up in Textures[0].
                     _device.Textures[0] = texture;
 
-                    _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, offset, 0, count / 2);
+                    _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, count / 2);
                 }
             }
             else
             {
                 // If no custom effect is defined, then simply render.
-                _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, offset, 0, count / 2);
+                _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, count / 2);
             }
         }
 
@@ -238,9 +240,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             if (!IsDisposed)
             {
-                _quadList.Dispose();
-                _sortKeyList.Dispose();
-                
+                _itemVertexBuffer.Dispose();
                 IsDisposed = true;
             }
         }

@@ -8,18 +8,17 @@ namespace Microsoft.Xna.Framework
         where T : unmanaged
     {
         private int _length;
-        private IntPtr _ptr;
 
         public bool IsDisposed { get; private set; }
-        public IntPtr SafePtr => _ptr;
-        public T* Ptr => (T*)_ptr;
+        public IntPtr SafePtr { get; private set; }
+        public T* Ptr => (T*)SafePtr;
         public int Bytes => _length * sizeof(T);
         public int Length { get => _length; set => ReAlloc(value); }
 
         public T this[int index]
         {
             get => Ptr[index];
-            set => Set(index, value);
+            set => Set(index, ref value);
         }
 
         public UnmanagedPointer(int length)
@@ -32,7 +31,7 @@ namespace Microsoft.Xna.Framework
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set(int index, in T value)
+        public void Set(int index, ref T value)
         {
             if (index >= _length)
                 throw new ArgumentOutOfRangeException(nameof(index));
@@ -57,19 +56,19 @@ namespace Microsoft.Xna.Framework
                     return;
                 }
 
-                if (_ptr != IntPtr.Zero)
-                    _ptr = Marshal.ReAllocHGlobal(_ptr, (IntPtr)Bytes);
+                if (SafePtr != IntPtr.Zero)
+                    SafePtr = Marshal.ReAllocHGlobal(SafePtr, (IntPtr)Bytes);
                 else
-                    _ptr = Marshal.AllocHGlobal(Bytes);
+                    SafePtr = Marshal.AllocHGlobal(Bytes);
             }
         }
 
         private void FreePtr()
         {
-            if (_ptr != IntPtr.Zero)
+            if (SafePtr != IntPtr.Zero)
             {
-                Marshal.FreeHGlobal(_ptr);
-                _ptr = IntPtr.Zero;
+                Marshal.FreeHGlobal(SafePtr);
+                SafePtr = IntPtr.Zero;
             }
         }
 
