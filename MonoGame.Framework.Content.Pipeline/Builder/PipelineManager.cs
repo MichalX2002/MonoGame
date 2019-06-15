@@ -14,7 +14,6 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Globalization;
 using Microsoft.Xna.Framework.Content.Pipeline.Builder.Convertors;
 using System.Diagnostics;
-using MonoGame.Utilities.IO;
 
 namespace MonoGame.Framework.Content.Pipeline.Builder
 {

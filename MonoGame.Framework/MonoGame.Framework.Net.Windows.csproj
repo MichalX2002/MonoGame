@@ -206,10 +206,6 @@
       <Project>{de48723f-d255-49f6-8372-aef8b059d5e7}</Project>
       <Name>MonoGame.Utilities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ThirdParty\Lidgren.Network\Lidgren.Network.Windows.csproj">
-      <Project>{AE483C29-042E-4226-BA52-D247CE7676DA}</Project>
-      <Name>Lidgren.Network.Windows</Name>
-    </ProjectReference>
     <ProjectReference Include="MonoGame.Framework.Windows.csproj">
       <Project>{7DE47032-A904-4C29-BD22-2D235E8D91BA}</Project>
       <Name>MonoGame.Framework.Windows</Name>

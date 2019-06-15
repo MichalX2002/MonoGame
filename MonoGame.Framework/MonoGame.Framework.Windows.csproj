@@ -124,18 +124,16 @@
     <Compile Include="Media\SongPart.cs" />
     <Compile Include="Media\SongPartPool.cs" />
     <Compile Include="Media\VisualizationData.cs" />
+    <Compile Include="PreparingDeviceSettingsEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.Windows.cs">
       <Platforms>Windows</Platforms>
     </Compile>
-    <Compile Include="Color.cs" />
     <Compile Include="DisplayOrientation.cs" />
     <Compile Include="DrawableGameComponent.cs" />
-    <Compile Include="EventHelpers.cs" />
     <Compile Include="FrameworkDispatcher.cs" />
     <Compile Include="FrameworkResources.cs" />
     <Compile Include="GameComponentCollection.cs" />
-    <Compile Include="GameComponentCollectionEventArgs.cs" />
     <Compile Include="GameComponent.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GamePlatform.cs" />
@@ -154,7 +152,6 @@
     <Compile Include="LaunchParameters.cs" />
     <Compile Include="NamespaceDocs.cs" />
     <Compile Include="PlayerIndex.cs" />
-    <Compile Include="PreparingDeviceSettingsEventArgs.cs" />
     <Compile Include="ReusableItemList.cs" />
     <Compile Include="ServiceProviderExtensions.cs" />
     <Compile Include="TextInputEventArgs.cs">
