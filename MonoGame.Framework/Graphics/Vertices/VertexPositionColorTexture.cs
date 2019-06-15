@@ -12,7 +12,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public Vector3 Position;
         public Color Color;
         public Vector2 TextureCoordinate;
-        
+                
         static VertexPositionColorTexture()
         {
             VertexDeclaration = new VertexDeclaration(new VertexElement[]
@@ -48,7 +48,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public static bool operator ==(VertexPositionColorTexture left, VertexPositionColorTexture right)
         {
-            return (((left.Position == right.Position) && (left.Color == right.Color)) && (left.TextureCoordinate == right.TextureCoordinate));
+            return (left.Position == right.Position) && (left.Color == right.Color) && (left.TextureCoordinate == right.TextureCoordinate);
         }
 
         public static bool operator !=(VertexPositionColorTexture left, VertexPositionColorTexture right)
@@ -58,13 +58,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public override bool Equals(object obj)
         {
-            if (obj == null)
-                return false;
-
-            if (obj.GetType() != base.GetType())
-                return false;
-
-            return (this == ((VertexPositionColorTexture)obj));
+            if (obj is VertexPositionColorTexture v)
+                    return v == this;
+            return false;
         }
     }
 }

@@ -5,10 +5,10 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading;
 
 namespace MonoGame.Testings
@@ -52,23 +52,23 @@ namespace MonoGame.Testings
 
             _font = Content.Load<SpriteFont>("arial");
 
-            w = new System.Diagnostics.Stopwatch();
-            w.Restart();
-            _song1 = Content.Load<Song>("sinus");
-            _song1.Volume = 0.5f;
-            w.Stop();
-            Console.WriteLine("Song Load Time: " + w.ElapsedMilliseconds + "ms");
-
-            w.Restart();
-            _song2 = Content.Load<Song>("Win Jingle");
-            _song2.Volume = 0.2f;
-            w.Stop();
-            Console.WriteLine("Song Load Time: " + w.ElapsedMilliseconds + "ms");
-
-            w.Restart();
-            _hitReflectSound = Content.Load<SoundEffect>("hit_reflect_0");
-            w.Stop();
-            Console.WriteLine("Load Time: " + w.ElapsedMilliseconds + "ms");
+            //w = new System.Diagnostics.Stopwatch();
+            //w.Restart();
+            //_song1 = Content.Load<Song>("sinus");
+            //_song1.Volume = 0.5f;
+            //w.Stop();
+            //Console.WriteLine("Song Load Time: " + w.ElapsedMilliseconds + "ms");
+            //
+            //w.Restart();
+            //_song2 = Content.Load<Song>("Win Jingle");
+            //_song2.Volume = 0.2f;
+            //w.Stop();
+            //Console.WriteLine("Song Load Time: " + w.ElapsedMilliseconds + "ms");
+            //
+            //w.Restart();
+            //_hitReflectSound = Content.Load<SoundEffect>("hit_reflect_0");
+            //w.Stop();
+            //Console.WriteLine("Load Time: " + w.ElapsedMilliseconds + "ms");
         }
 
         //int ix = 0;
