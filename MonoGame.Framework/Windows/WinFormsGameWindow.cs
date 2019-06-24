@@ -257,7 +257,7 @@ namespace MonoGame.Framework
             MouseState.ScrollWheelValue += mouseEventArgs.Delta;
         }
 
-        private void OnMouseHorizontalScroll(object sender, HorizontalMouseWheelEventArgs mouseEventArgs)
+        private void OnMouseHorizontalScroll(object sender, HorizontalMouseWheelEvent mouseEventArgs)
         {
             MouseState.HorizontalScrollWheelValue += mouseEventArgs.Delta;
         }
@@ -270,8 +270,8 @@ namespace MonoGame.Framework
             if (!Form.Visible)
                 return;
 
-            GetCursorPos(out POINTSTRUCT pos);
-            MapWindowPoints(new HandleRef(null, IntPtr.Zero), new HandleRef(Form, Form.Handle), out pos, 1);
+            GetCursorPos(out _);
+            MapWindowPoints(new HandleRef(null, IntPtr.Zero), new HandleRef(Form, Form.Handle), out POINTSTRUCT pos, 1);
             var clientPos = new Point(pos.X, pos.Y);
             var withinClient = Form.ClientRectangle.Contains(clientPos);
             var buttons = Control.MouseButtons;
@@ -338,8 +338,8 @@ namespace MonoGame.Framework
 
         private void OnKeyPress(object sender, KeyPressEventArgs e)
         {
-            var key = (Keys) (VkKeyScanEx(e.KeyChar, InputLanguage.CurrentInputLanguage.Handle) & 0xff);
-            OnTextInput(sender, e.KeyChar, key);
+            var key = (Keys)(VkKeyScanEx(e.KeyChar, InputLanguage.CurrentInputLanguage.Handle) & 0xff);
+            OnTextInput(this, new TextInputEvent(e.KeyChar, key));
         }
 
         internal void Initialize(int width, int height)
@@ -469,13 +469,12 @@ namespace MonoGame.Framework
         // Run game loop when the app becomes Idle.
         private void TickOnIdle(object sender, EventArgs e)
         {
-            var nativeMsg = new NativeMessage();
             do
             {
                 UpdateWindows();
                 Game.Tick();
             }
-            while (!PeekMessage(out nativeMsg, IntPtr.Zero, 0, 0, 0) && Form != null && Form.IsDisposed == false);
+            while (!PeekMessage(out _, IntPtr.Zero, 0, 0, 0) && Form != null && Form.IsDisposed == false);
         }
 
         internal void UpdateWindows()

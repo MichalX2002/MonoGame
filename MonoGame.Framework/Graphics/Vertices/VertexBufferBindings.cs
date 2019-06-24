@@ -13,7 +13,7 @@ namespace Microsoft.Xna.Framework.Graphics
     /// </summary>
     internal sealed partial class VertexBufferBindings : VertexInputLayout
     {
-        private readonly VertexBufferBase[] _vertexBuffers;
+        private readonly VertexBuffer[] _vertexBuffers;
         private readonly int[] _vertexOffsets;
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public VertexBufferBindings(int maxVertexBufferSlots)
             : base(new VertexDeclaration[maxVertexBufferSlots], new int[maxVertexBufferSlots], 0)
         {
-            _vertexBuffers = new VertexBufferBase[maxVertexBufferSlots];
+            _vertexBuffers = new VertexBuffer[maxVertexBufferSlots];
             _vertexOffsets = new int[maxVertexBufferSlots];
         }
 
@@ -59,10 +59,10 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <see langword="true"/> if the input layout was changed; otherwise,
         /// <see langword="false"/>.
         /// </returns>
-        public bool Set(VertexBufferBase vertexBuffer, int vertexOffset)
+        public bool Set(VertexBuffer vertexBuffer, int vertexOffset)
         {
             Debug.Assert(vertexBuffer != null);
-            Debug.Assert(0 <= vertexOffset && vertexOffset < vertexBuffer.VertexCount);
+            Debug.Assert(0 <= vertexOffset && vertexOffset < vertexBuffer.Capacity);
 
             if (Count == 1
                 && InstanceFrequencies[0] == 0
@@ -157,6 +157,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public VertexBufferBinding[] Get()
         {
             var bindings = new VertexBufferBinding[Count];
+
             for (int i = 0; i < bindings.Length; i++)
                 bindings[i] = new VertexBufferBinding(
                     _vertexBuffers[i],

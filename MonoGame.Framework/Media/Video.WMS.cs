@@ -89,16 +89,19 @@ namespace Microsoft.Xna.Framework.Media
 
         private void PlatformDispose(bool disposing)
         {
-            if (_topology != null)
+            if (disposing)
             {
-                _topology.Dispose();
-                _topology = null;
-            }
+                if (_topology != null)
+                {
+                    _topology.Dispose();
+                    _topology = null;
+                }
 
-            if (SampleGrabber != null)
-            {
-                SampleGrabber.Dispose();
-                SampleGrabber = null;
+                if (SampleGrabber != null)
+                {
+                    SampleGrabber.Dispose();
+                    SampleGrabber = null;
+                }
             }
         }
     }

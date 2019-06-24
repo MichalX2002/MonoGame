@@ -40,8 +40,8 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        public event SenderDelegate<object> DrawOrderChanged;
-        public event SenderDelegate<object> VisibleChanged;
+        public event SenderEvent<object> DrawOrderChanged;
+        public event SenderEvent<object> VisibleChanged;
 
         public DrawableGameComponent(Game game) : base(game)
         {

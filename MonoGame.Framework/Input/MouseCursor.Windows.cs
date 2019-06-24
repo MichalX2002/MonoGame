@@ -3,6 +3,8 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using Microsoft.Xna.Framework.Graphics;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -39,31 +41,41 @@ namespace Microsoft.Xna.Framework.Input
             Hand = new MouseCursor(Cursors.Hand);
         }
 
-        private static MouseCursor PlatformFromTexture2D(Texture2D texture, int originx, int originy)
+        private static unsafe MouseCursor PlatformFromImage(
+            ReadOnlySpan<Rgba32> data, int width, int height, int stride, Point origin)
         {
-            var w = texture.Width;
-            var h = texture.Height;
-            Cursor cursor = null;
-            var bytes = new byte[w * h * 4];
-            texture.GetData(bytes);
-            var gcHandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-            try
+            // the bitmap can not be constructed from Rgba data directly
+            using (var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb))
             {
-                using (var bitmap = new Bitmap(w, h, h * 4, PixelFormat.Format32bppArgb, gcHandle.AddrOfPinnedObject()))
+                var rect = new System.Drawing.Rectangle(0, 0, width, height);
+                var bmpData = bitmap.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                try
                 {
-                    IconInfo iconInfo = new IconInfo();
-                    GetIconInfo(bitmap.GetHicon(), ref iconInfo);
-                    iconInfo.xHotspot = originx;
-                    iconInfo.yHotspot = originy;
-                    iconInfo.fIcon = false;
-                    cursor = new Cursor(CreateIconIndirect(ref iconInfo));
+                    var dst = new Span<Bgra32>((void*)bmpData.Scan0, bmpData.Stride * bmpData.Height / 4);
+                    for (int row = 0; row < bmpData.Height; row++)
+                    {
+                        int dstRowOffset = row * bmpData.Stride / 4;
+                        int srcRowOffset = row * stride / 4;
+
+                        for (int x = 0; x < bmpData.Width; x++)
+                            dst[x + dstRowOffset].FromRgba32(data[x + srcRowOffset]);
+                    }
                 }
+                finally
+                {
+                    bitmap.UnlockBits(bmpData);
+                }
+
+                var iconInfo = new IconInfo();
+                GetIconInfo(bitmap.GetHicon(), ref iconInfo);
+
+                iconInfo.xHotspot = origin.X;
+                iconInfo.yHotspot = origin.Y;
+                iconInfo.fIcon = false;
+
+                var cursor = new Cursor(CreateIconIndirect(ref iconInfo));
+                return new MouseCursor(cursor, needsDisposing: true);
             }
-            finally
-            {
-                gcHandle.Free();
-            }
-            return new MouseCursor(cursor, needsDisposing: true);
         }
 
         private void PlatformDispose()

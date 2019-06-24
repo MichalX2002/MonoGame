@@ -2,61 +2,74 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
+using System.Runtime.Serialization;
+
 namespace Microsoft.Xna.Framework.Graphics
 {
     /// <summary>
-    /// A snapshot of rendering statistics from <see cref="GraphicsDevice.Metrics"/> to be used for runtime debugging and profiling.
+    /// A snapshot of rendering statistics from <see cref="GraphicsDevice.Metrics"/> to
+    /// be used for runtime debugging and profiling.
     /// </summary>
+    [Serializable, DataContract]
     public struct GraphicsMetrics
     {
-        internal long _clearCount;
-        internal long _drawCount;
-        internal long _pixelShaderCount;
-        internal long _primitiveCount;
-        internal long _spriteCount;
-        internal long _targetCount;
-        internal long _textureCount;
-        internal long _vertexShaderCount;
+        [DataMember(Name = "ClearCount")] internal long _clearCount;
+        [DataMember(Name = "DrawCount")] internal long _drawCount;
+        [DataMember(Name = "PrimitiveCount")] internal long _primitiveCount;
+        [DataMember(Name = "SpriteCount")] internal long _spriteCount;
+        [DataMember(Name = "TargetCount")] internal long _targetCount;
+        [DataMember(Name = "TextureCount")] internal long _textureCount;
+        [DataMember(Name = "VertexShaderCount")] internal long _vertexShaderCount;
+        [DataMember(Name = "PixelShaderCount")] internal long _pixelShaderCount;
 
         /// <summary>
         /// Number of times Clear was called.
         /// </summary>
+        [IgnoreDataMember]
         public long ClearCount => _clearCount;
 
         /// <summary>
         /// Number of times Draw was called.
         /// </summary>
+        [IgnoreDataMember]
         public long DrawCount => _drawCount;
-
-        /// <summary>
-        /// Number of times the pixel shader was changed on the GPU.
-        /// </summary>
-        public long PixelShaderCount => _pixelShaderCount;
 
         /// <summary>
         /// Number of rendered primitives.
         /// </summary>
+        [IgnoreDataMember]
         public long PrimitiveCount => _primitiveCount;
 
         /// <summary>
         /// Number of sprites and text characters rendered via <see cref="SpriteBatch"/>.
         /// </summary>
+        [IgnoreDataMember]
         public long SpriteCount => _spriteCount;
 
         /// <summary>
         /// Number of times a target was changed on the GPU.
         /// </summary>
+        [IgnoreDataMember]
         public long TargetCount => _targetCount;
 
         /// <summary>
         /// Number of times a texture was changed on the GPU.
         /// </summary>
+        [IgnoreDataMember]
         public long TextureCount => _textureCount;
 
         /// <summary>
         /// Number of times the vertex shader was changed on the GPU.
         /// </summary>
+        [IgnoreDataMember]
         public long VertexShaderCount => _vertexShaderCount;
+
+        /// <summary>
+        /// Number of times the pixel shader was changed on the GPU.
+        /// </summary>
+        [IgnoreDataMember]
+        public long PixelShaderCount => _pixelShaderCount;
 
         /// <summary>
         /// Returns the difference between two sets of metrics.
@@ -70,11 +83,11 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 _clearCount = value1._clearCount - value2._clearCount,
                 _drawCount = value1._drawCount - value2._drawCount,
-                _pixelShaderCount = value1._pixelShaderCount - value2._pixelShaderCount,
                 _primitiveCount = value1._primitiveCount - value2._primitiveCount,
                 _spriteCount = value1._spriteCount - value2._spriteCount,
                 _targetCount = value1._targetCount - value2._targetCount,
                 _textureCount = value1._textureCount - value2._textureCount,
+                _pixelShaderCount = value1._pixelShaderCount - value2._pixelShaderCount,
                 _vertexShaderCount = value1._vertexShaderCount - value2._vertexShaderCount
             };
         }
@@ -89,13 +102,13 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             return new GraphicsMetrics()
             {
-                _clearCount =  value1._clearCount + value2._clearCount,
+                _clearCount = value1._clearCount + value2._clearCount,
                 _drawCount = value1._drawCount + value2._drawCount,
-                _pixelShaderCount = value1._pixelShaderCount + value2._pixelShaderCount,
                 _primitiveCount = value1._primitiveCount + value2._primitiveCount,
                 _spriteCount = value1._spriteCount + value2._spriteCount,
                 _targetCount = value1._targetCount + value2._targetCount,
                 _textureCount = value1._textureCount + value2._textureCount,
+                _pixelShaderCount = value1._pixelShaderCount + value2._pixelShaderCount,
                 _vertexShaderCount = value1._vertexShaderCount + value2._vertexShaderCount
             };
         }

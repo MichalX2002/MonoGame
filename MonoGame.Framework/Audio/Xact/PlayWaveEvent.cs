@@ -261,6 +261,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             if (_clip.UseReverb)
                 _wav.PlatformSetReverbMix(_clipReverbMix);
+
             if (_clip.FilterEnabled)
                 _wav.PlatformSetFilter(_clip.FilterMode, _trackFilterQFactor, _trackFilterFrequency);
         }

@@ -12,7 +12,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public PresentationEventArgs(PresentationParameters presentationParameters)
         {
-            PresentationParameters = presentationParameters;
+            PresentationParameters = presentationParameters ?? throw new ArgumentNullException(nameof(presentationParameters));
         }
     }
 }

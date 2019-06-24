@@ -135,8 +135,8 @@ namespace Microsoft.Xna.Framework.Content
             {
                 return (input, parent) =>
                 {
-                    Action<object> action = value => setter(parent, value);
-                    input.ReadSharedResource(action);
+                    void action(object value) => setter(parent, value);
+                    input.ReadSharedResource((Action<object>)action);
                 };
             }
 

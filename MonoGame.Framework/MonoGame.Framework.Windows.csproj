@@ -23,11 +23,11 @@
     <OutputPath>bin\Windows\AnyCPU\Debug</OutputPath>
     <IntermediateOutputPath>obj\Windows\AnyCPU\Debug</IntermediateOutputPath>
     <DocumentationFile>bin\Windows\AnyCPU\Debug\MonoGame.Framework.xml</DocumentationFile>
-    <DefineConstants>TRACE;DEBUG;XNADESIGNPROVIDED;WINDOWS;DIRECTX;OPENAL;NET45</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;XNADESIGNPROVIDED;WINDOWS;DIRECTX;OPENAL;NET45;NET45;NVORBIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -35,15 +35,28 @@
     <OutputPath>bin\Windows\AnyCPU\Release</OutputPath>
     <IntermediateOutputPath>obj\Windows\AnyCPU\Release</IntermediateOutputPath>
     <DocumentationFile>bin\Windows\AnyCPU\Release\MonoGame.Framework.xml</DocumentationFile>
-    <DefineConstants>TRACE;XNADESIGNPROVIDED;WINDOWS;DIRECTX;OPENAL;NET45</DefineConstants>
+    <DefineConstants>TRACE;XNADESIGNPROVIDED;WINDOWS;DIRECTX;OPENAL;NET45;NET45;NVORBIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.3</LangVersion>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.3\lib\netstandard2.0\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.6.0-preview5.19224.8\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.6.0-preview6.19303.8\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -74,26 +87,47 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audio\AudioLoader.cs" />
+    <Compile Include="Audio\AudioLoader.NVorbis.cs" />
     <Compile Include="Audio\Microphone.OpenAL.cs" />
-    <Compile Include="Audio\OALSoundBuffer.cs" />
-    <Compile Include="Audio\OpenAL.cs" />
-    <Compile Include="Audio\OpenALSoundController.cs" />
+    <Compile Include="Audio\OpenAL\ALBuffer.cs" />
+    <Compile Include="Audio\OpenAL\ALBufferPool.cs" />
+    <Compile Include="Audio\OpenAL\ALController.cs" />
+    <Compile Include="Audio\OpenAL\ALHelper.cs" />
+    <Compile Include="Audio\OpenAL\OpenAL.ALC.cs" />
+    <Compile Include="Audio\OpenAL\OpenAL.cs" />
+    <Compile Include="Audio\OpenAL\OpenAL.Efx.cs" />
+    <Compile Include="Audio\OpenAL\OpenAL.Enums.cs" />
+    <Compile Include="Audio\OpenAL\OpenAL.XRam.cs" />
+    <Compile Include="Content\ContentReaders\SoundEffectReader.cs" />
+    <Compile Include="Delegates.cs" />
     <Compile Include="ExceptionHelper.cs" />
+    <Compile Include="GameComponentCollectionEvent.cs" />
+    <Compile Include="Graphics\Model\Model.cs" />
+    <Compile Include="Graphics\Model\ModelBone.cs" />
+    <Compile Include="Graphics\Model\ModelBoneCollection.cs" />
+    <Compile Include="Graphics\Model\ModelEffectCollection.cs" />
+    <Compile Include="Graphics\Model\ModelMesh.cs" />
+    <Compile Include="Graphics\Model\ModelMeshCollection.cs" />
+    <Compile Include="Graphics\Model\ModelMeshPart.cs" />
+    <Compile Include="Graphics\Model\ModelMeshPartCollection.cs" />
     <Compile Include="Graphics\SpriteBatch.cs" />
     <Compile Include="Graphics\SpriteBatcher.cs" />
     <Compile Include="Graphics\SpriteBatchItem.cs" />
+    <Compile Include="Graphics\Texture\IRenderTarget.cs" />
+    <Compile Include="Graphics\Texture\Texture.cs" />
+    <Compile Include="Graphics\Texture\Texture2D.cs" />
+    <Compile Include="Graphics\Texture\Texture3D.cs" />
+    <Compile Include="Graphics\Texture\TextureCollection.cs" />
+    <Compile Include="Graphics\Texture\TextureCube.cs" />
     <Compile Include="Graphics\Vertices\BufferBase.cs" />
-    <Compile Include="Graphics\Vertices\IndexBufferBase.cs" />
-    <Compile Include="Graphics\Vertices\IndexBufferBase.DirectX.cs" />
-    <Compile Include="Graphics\Vertices\UnsafeDynamicIndexBuffer.cs" />
-    <Compile Include="Graphics\Vertices\UnsafeDynamicVertexBuffer.cs" />
-    <Compile Include="Graphics\Vertices\UnsafeIndexBuffer.cs" />
-    <Compile Include="Graphics\Vertices\UnsafeVertexBuffer.cs" />
-    <Compile Include="Graphics\Vertices\VertexBufferBase.cs" />
+    <Compile Include="Graphics\Vertices\IndexBuffer.DirectX.cs" />
     <Compile Include="Input\KeyModifier.cs" />
+    <Compile Include="Input\TextInputEvent.cs" />
     <Compile Include="Math\BoundingBox.cs" />
     <Compile Include="Math\BoundingFrustum.cs" />
     <Compile Include="Math\BoundingSphere.cs" />
+    <Compile Include="Math\Color.cs" />
     <Compile Include="Math\ContainmentType.cs" />
     <Compile Include="Math\Curve.cs" />
     <Compile Include="Math\CurveContinuity.cs" />
@@ -121,8 +155,6 @@
     <Compile Include="Media\OggStream.cs" />
     <Compile Include="Media\OggStreamer.cs" />
     <Compile Include="Media\Song.NVorbis.cs" />
-    <Compile Include="Media\SongPart.cs" />
-    <Compile Include="Media\SongPartPool.cs" />
     <Compile Include="Media\VisualizationData.cs" />
     <Compile Include="PreparingDeviceSettingsEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -152,11 +184,6 @@
     <Compile Include="LaunchParameters.cs" />
     <Compile Include="NamespaceDocs.cs" />
     <Compile Include="PlayerIndex.cs" />
-    <Compile Include="ReusableItemList.cs" />
-    <Compile Include="ServiceProviderExtensions.cs" />
-    <Compile Include="TextInputEventArgs.cs">
-      <Platforms>Angle,Linux,MacOS,Windows,WindowsGL,WindowsUniversal</Platforms>
-    </Compile>
     <Compile Include="TitleContainer.cs" />
     <Compile Include="TitleContainer.Desktop.cs">
       <Platforms>Angle,Linux,Windows,WindowsGL,Web,MacOS</Platforms>
@@ -164,8 +191,16 @@
     <Compile Include="Utilities\CRC32.cs" />
     <Compile Include="Utilities\CrcCalculatorStream.cs" />
     <Compile Include="Utilities\FuncLoader.Desktop.cs" />
+    <Compile Include="Utilities\PrefixedStream.cs" />
     <Compile Include="Utilities\ReflectionHelpers.Default.cs" />
+    <Compile Include="Utilities\ReusableItemList.cs" />
+    <Compile Include="Utilities\ServiceProviderExtensions.cs" />
+    <Compile Include="Utilities\TaskbarList.cs" />
+    <Compile Include="Utilities\TaskbarProgress.cs" />
+    <Compile Include="Utilities\TaskbarProgressState.cs" />
+    <Compile Include="Utilities\Threading.cs" />
     <Compile Include="Utilities\TimerHelper.cs" />
+    <Compile Include="Utilities\UnmanagedPointer.cs" />
     <Compile Include="Utilities\ZlibStream\DeflateManager.cs" />
     <Compile Include="Utilities\ZlibStream\GZipStream.cs" />
     <Compile Include="Utilities\ZlibStream\InflateBlocks.cs" />
@@ -197,7 +232,6 @@
     <Compile Include="Audio\SoundEffectInstancePool.cs" />
     <Compile Include="Audio\SoundState.cs" />
     <Compile Include="Audio\Microphone.cs" />
-    <Compile Include="Audio\NoMicrophoneConnectedException.cs" />
     <Compile Include="Audio\Xact\AudioCategory.cs" />
     <Compile Include="Audio\Xact\AudioEngine.cs" />
     <Compile Include="Audio\Xact\AudioStopOptions.cs" />
@@ -274,7 +308,6 @@
       <ExcludePlatforms>Web</ExcludePlatforms>
     </Compile>
     <Compile Include="Content\ContentReaders\SongReader.cs" />
-    <Compile Include="Content\ContentReaders\SoundEffectReader.cs" />
     <Compile Include="Content\ContentReaders\SpriteFontReader.cs" />
     <Compile Include="Content\ContentReaders\StringReader.cs" />
     <Compile Include="Content\ContentReaders\Texture2DReader.cs" />
@@ -312,11 +345,11 @@
     </Compile>
     <Compile Include="Graphics\ClearOptions.cs" />
     <Compile Include="Graphics\ColorWriteChannels.cs" />
-    <Compile Include="Graphics\CubeMapFace.cs" />
+    <Compile Include="Graphics\Texture\CubeMapFace.cs" />
     <Compile Include="Graphics\DeviceLostException.cs" />
     <Compile Include="Graphics\DeviceNotResetException.cs" />
-    <Compile Include="GraphicsDeviceInformation.cs" />
-    <Compile Include="GraphicsDeviceManager.cs">
+    <Compile Include="Graphics\GraphicsDeviceInformation.cs" />
+    <Compile Include="Graphics\GraphicsDeviceManager.cs">
       <Platforms>Windows,WindowsGL,Linux,WindowsUniversal,Web,MacOS</Platforms>
     </Compile>
     <Compile Include="Graphics\GraphicsMetrics.cs" />
@@ -381,16 +414,7 @@
     <Compile Include="Graphics\GraphicsResource.cs" />
     <Compile Include="Graphics\IGraphicsContext.cs" />
     <Compile Include="Graphics\IGraphicsDeviceService.cs" />
-    <Compile Include="Graphics\IRenderTarget.cs" />
     <Compile Include="Graphics\IWindowInfo.cs" />
-    <Compile Include="Graphics\ModelBoneCollection.cs" />
-    <Compile Include="Graphics\ModelBone.cs" />
-    <Compile Include="Graphics\Model.cs" />
-    <Compile Include="Graphics\ModelEffectCollection.cs" />
-    <Compile Include="Graphics\ModelMeshCollection.cs" />
-    <Compile Include="Graphics\ModelMesh.cs" />
-    <Compile Include="Graphics\ModelMeshPartCollection.cs" />
-    <Compile Include="Graphics\ModelMeshPart.cs" />
     <Compile Include="Graphics\NoSuitableGraphicsDeviceException.cs" />
     <Compile Include="Graphics\OcclusionQuery.cs">
       <ExcludePlatforms>iOS,Android</ExcludePlatforms>
@@ -420,22 +444,22 @@
     <Compile Include="Graphics\PresentationEventArgs.cs" />
     <Compile Include="Graphics\PresentationParameters.cs" />
     <Compile Include="Graphics\PresentInterval.cs" />
-    <Compile Include="Graphics\RenderTarget2D.cs" />
-    <Compile Include="Graphics\RenderTarget2D.DirectX.cs">
+    <Compile Include="Graphics\Texture\RenderTarget2D.cs" />
+    <Compile Include="Graphics\Texture\RenderTarget2D.DirectX.cs">
       <Services>DirectXGraphics</Services>
     </Compile>
-    <Compile Include="Graphics\RenderTarget3D.cs">
+    <Compile Include="Graphics\Texture\RenderTarget3D.cs">
       <Services>DirectXGraphics</Services>
     </Compile>
-    <Compile Include="Graphics\RenderTarget3D.DirectX.cs">
+    <Compile Include="Graphics\Texture\RenderTarget3D.DirectX.cs">
       <Services>DirectXGraphics</Services>
     </Compile>
-    <Compile Include="Graphics\RenderTargetBinding.cs" />
-    <Compile Include="Graphics\RenderTargetCube.cs" />
-    <Compile Include="Graphics\RenderTargetCube.DirectX.cs">
+    <Compile Include="Graphics\Texture\RenderTargetBinding.cs" />
+    <Compile Include="Graphics\Texture\RenderTargetCube.cs" />
+    <Compile Include="Graphics\Texture\RenderTargetCube.DirectX.cs">
       <Services>DirectXGraphics</Services>
     </Compile>
-    <Compile Include="Graphics\RenderTargetUsage.cs" />
+    <Compile Include="Graphics\Texture\RenderTargetUsage.cs" />
     <Compile Include="Graphics\ResourceCreatedEventArgs.cs" />
     <Compile Include="Graphics\ResourceDestroyedEventArgs.cs" />
     <Compile Include="Graphics\SamplerStateCollection.cs" />
@@ -483,28 +507,23 @@
     <Compile Include="Graphics\States\TextureAddressMode.cs" />
     <Compile Include="Graphics\States\TextureFilter.cs" />
     <Compile Include="Graphics\States\TextureFilterMode.cs" />
-    <Compile Include="Graphics\SurfaceFormat.cs" />
-    <Compile Include="Graphics\SwapChainRenderTarget.cs">
+    <Compile Include="Graphics\Texture\SurfaceFormat.cs" />
+    <Compile Include="Graphics\Texture\SwapChainRenderTarget.cs">
       <Platforms>Windows</Platforms>
     </Compile>
-    <Compile Include="Graphics\Texture2D.cs" />
-    <Compile Include="Graphics\Texture2D.DirectX.cs">
+    <Compile Include="Graphics\Texture\Texture2D.DirectX.cs">
       <Services>DirectXGraphics</Services>
     </Compile>
-    <Compile Include="Graphics\Texture3D.cs" />
-    <Compile Include="Graphics\Texture3D.DirectX.cs">
+    <Compile Include="Graphics\Texture\Texture3D.DirectX.cs">
       <Services>DirectXGraphics</Services>
     </Compile>
-    <Compile Include="Graphics\TextureCollection.cs" />
-    <Compile Include="Graphics\TextureCollection.DirectX.cs">
+    <Compile Include="Graphics\Texture\TextureCollection.DirectX.cs">
       <Services>DirectXGraphics</Services>
     </Compile>
-    <Compile Include="Graphics\Texture.cs" />
-    <Compile Include="Graphics\Texture.DirectX.cs">
+    <Compile Include="Graphics\Texture\Texture.DirectX.cs">
       <Services>DirectXGraphics</Services>
     </Compile>
-    <Compile Include="Graphics\TextureCube.cs" />
-    <Compile Include="Graphics\TextureCube.DirectX.cs">
+    <Compile Include="Graphics\Texture\TextureCube.DirectX.cs">
       <Services>DirectXGraphics</Services>
     </Compile>
     <Compile Include="Graphics\Vertices\BufferUsage.cs" />
@@ -591,14 +610,6 @@
     <Compile Include="Input\Touch\TouchPanel.cs" />
     <Compile Include="Input\Touch\TouchPanelCapabilities.cs" />
     <Compile Include="Input\Touch\TouchPanelState.cs" />
-    <Compile Include="Media\Album.cs" />
-    <Compile Include="Media\AlbumCollection.cs" />
-    <Compile Include="Media\Artist.cs" />
-    <Compile Include="Media\Genre.cs" />
-    <Compile Include="Media\MediaLibrary.cs" />
-    <Compile Include="Media\MediaLibrary.Default.cs">
-      <ExcludePlatforms>iOS,Android,WindowsUniversal</ExcludePlatforms>
-    </Compile>
     <Compile Include="Media\MediaManagerState.cs">
       <Platforms>Windows</Platforms>
     </Compile>
@@ -609,7 +620,6 @@
     <Compile Include="Media\MediaState.cs" />
     <Compile Include="Media\PlaylistCollection.cs" />
     <Compile Include="Media\Playlist.cs" />
-    <Compile Include="Media\SongCollection.cs" />
     <Compile Include="Media\Song.cs" />
     <Compile Include="Media\VideoSoundtrackType.cs" />
     <Compile Include="Media\Video.cs">
@@ -636,9 +646,6 @@
     <Compile Include="Utilities\Lz4Stream\Lz4DecoderStream.cs" />
     <Compile Include="Utilities\LzxStream\LzxDecoderStream.cs" />
     <Compile Include="Utilities\ZlibStream\ZlibStream.cs" />
-    <Compile Include="Utilities\Png\PngCommon.cs" />
-    <Compile Include="Utilities\Png\PngReader.cs" />
-    <Compile Include="Utilities\Png\PngWriter.cs" />
     <Compile Include="Utilities\ByteBufferPool.cs" />
     <Compile Include="..\ThirdParty\NVorbis\NVorbis\BufferedReadStream.cs">
       <Link>Utilities\NVorbis\BufferedReadStream.cs</Link>
@@ -672,12 +679,12 @@
       <Link>Utilities\NVorbis\Mdct.cs</Link>
       <Services>NVorbis</Services>
     </Compile>
-    <Compile Include="..\ThirdParty\NVorbis\NVorbis\NewStreamEventArgs.cs">
-      <Link>Utilities\NVorbis\NewStreamEventArgs.cs</Link>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\NewStreamEvent.cs">
+      <Link>Utilities\NVorbis\NewStreamEvent.cs</Link>
       <Services>NVorbis</Services>
     </Compile>
-    <Compile Include="..\ThirdParty\NVorbis\NVorbis\ParameterChangeEventArgs.cs">
-      <Link>Utilities\NVorbis\ParameterChangeEventArgs.cs</Link>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\ParameterChangeEvent.cs">
+      <Link>Utilities\NVorbis\ParameterChangeEvent.cs</Link>
       <Services>NVorbis</Services>
     </Compile>
     <Compile Include="..\ThirdParty\NVorbis\NVorbis\RingBuffer.cs">
@@ -755,7 +762,7 @@
     <Compile Include="Windows\SharpDXHelper.cs">
       <Platforms>Windows,WindowsUniversal</Platforms>
     </Compile>
-    <Compile Include="Windows\HorizontalMouseWheelEventArgs.cs">
+    <Compile Include="Windows\HorizontalMouseWheelEvent.cs">
       <Platforms>Windows</Platforms>
     </Compile>
     <Compile Include="Windows\WinFormsGameForm.cs">
@@ -812,9 +819,11 @@
       <Link>libopenal.1.dylib</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Graphics\Vertices\VertexBufferBase.DirectX.cs" />
+    <Compile Include="Graphics\Vertices\VertexBuffer.DirectX.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Graphics\Effect\Resources\AlphaTestEffect.dx11.mgfxo">
@@ -844,6 +853,14 @@
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj">
       <Project>{de48723f-d255-49f6-8372-aef8b059d5e7}</Project>
       <Name>MonoGame.Utilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThirdParty\SixLabors\Core\src\SixLabors.Core\SixLabors.Core.csproj">
+      <Project>{6d6d0394-6283-475c-b0ce-387e1d6176b4}</Project>
+      <Name>SixLabors.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThirdParty\SixLabors\ImageSharp\src\ImageSharp\SixLabors.ImageSharp.csproj">
+      <Project>{182cc7b0-b57c-45de-b4ae-7b1fe5a39add}</Project>
+      <Name>SixLabors.ImageSharp</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

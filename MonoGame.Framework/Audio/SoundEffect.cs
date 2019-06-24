@@ -4,6 +4,7 @@
 ﻿
 using System;
 using System.IO;
+using MonoGame.Utilities.Memory;
 
 namespace Microsoft.Xna.Framework.Audio
 {
@@ -41,41 +42,44 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
         // Only used from SoundEffectReader.
-        internal SoundEffect(byte[] header, byte[] buffer, int bufferSize, int durationMs, int loopStart, int loopLength)
+        internal SoundEffect(ReadOnlySpan<byte> header, ReadOnlySpan<byte> data, int durationMs, int loopStart, int loopLength)
         {
             Initialize();
             if (_systemState != SoundSystemState.Initialized)
-                throw new NoAudioHardwareException("Audio has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
+                throw new NoAudioHardwareException(
+                    "Audio has failed to initialize. Call SoundEffect.Initialize() before operation to get more specific errors.");
 
             _duration = TimeSpan.FromMilliseconds(durationMs);
 
             // Peek at the format... handle regular PCM data.
-            var format = BitConverter.ToInt16(header, 0);
+            var format = header.ToInt16();
             if (format == 1)
             {
-                var channels = BitConverter.ToInt16(header, 2);
-                var sampleRate = BitConverter.ToInt32(header, 4);
-                var bitsPerSample = BitConverter.ToInt16(header, 14);
-                PlatformInitializePcm(buffer, 0, bufferSize, bitsPerSample, sampleRate, (AudioChannels)channels, loopStart, loopLength);
+                var channels = header.Slice(2).ToInt16();
+                var sampleRate = header.Slice(4).ToInt32();
+                var bitsPerSample = header.Slice(14).ToInt16();
+                PlatformInitializePcm(data, bitsPerSample, sampleRate, (AudioChannels)channels, loopStart, loopLength);
                 return;
             }
 
             // Everything else is platform specific.
-            PlatformInitializeFormat(header, buffer, bufferSize, loopStart, loopLength);
+            PlatformInitializeFormat(header, data, loopStart, loopLength);
         }
 
         // Only used from XACT WaveBank.
-        internal SoundEffect(MiniFormatTag codec, byte[] buffer, int channels, int sampleRate, int blockAlignment, int loopStart, int loopLength)
+        internal SoundEffect(
+            MiniFormatTag codec, ReadOnlySpan<byte> buffer, int channels, int sampleRate, int blockAlignment, int loopStart, int loopLength)
         {
             Initialize();
             if (_systemState != SoundSystemState.Initialized)
-                throw new NoAudioHardwareException("Audio has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
+                throw new NoAudioHardwareException(
+                    "Audio has failed to initialize. Call SoundEffect.Initialize() before operation to get more specific errors.");
 
             // Handle the common case... the rest is platform specific.
             if (codec == MiniFormatTag.Pcm)
             {
                 _duration = TimeSpan.FromSeconds((float)buffer.Length / (sampleRate * blockAlignment));
-                PlatformInitializePcm(buffer, 0, buffer.Length, 16, sampleRate, (AudioChannels)channels, loopStart, loopLength);
+                PlatformInitializePcm(buffer, 16, sampleRate, (AudioChannels)channels, loopStart, loopLength);
                 return;
             }
 
@@ -98,7 +102,8 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// Initializes the sound system for SoundEffect support.
         /// This method is automatically called when a SoundEffect is loaded, a DynamicSoundEffectInstance is created, or Microphone.All is queried.
-        /// You can however call this method manually (preferably in, or before the Game constructor) to catch any Exception that may occur during the sound system initialization (and act accordingly).
+        /// You can however call this method manually (preferably in, or before the Game constructor) to
+        /// catch any Exception that may occur during the sound system initialization (and act accordingly).
         /// </summary>
         public static void Initialize()
         {
@@ -124,55 +129,48 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// Create a sound effect.
         /// </summary>
-        /// <param name="buffer">The buffer with the sound data.</param>
+        /// <param name="data">The buffer with the sound data.</param>
         /// <param name="sampleRate">The sound data sample rate in hertz.</param>
         /// <param name="channels">The number of channels in the sound data.</param>
         /// <remarks>This only supports uncompressed 16bit PCM wav data.</remarks>
-        public SoundEffect(byte[] buffer, int sampleRate, AudioChannels channels)
-             : this(buffer, 0, buffer != null ? buffer.Length : 0, sampleRate, channels, 0, 0)
+        public SoundEffect(Span<byte> data, int sampleRate, AudioChannels channels)
+             : this(data, sampleRate, channels, 0, 0)
         {
         }
 
         /// <summary>
         /// Create a sound effect.
         /// </summary>
-        /// <param name="buffer">The buffer with the sound data.</param>
-        /// <param name="offset">The offset to the start of the sound data in bytes.</param>
-        /// <param name="count">The length of the sound data in bytes.</param>
+        /// <param name="data">The buffer with the sound data.</param>
         /// <param name="sampleRate">The sound data sample rate in hertz.</param>
         /// <param name="channels">The number of channels in the sound data.</param>
         /// <param name="loopStart">The position where the sound should begin looping in samples.</param>
         /// <param name="loopLength">The duration of the sound data loop in samples.</param>
         /// <remarks>This only supports uncompressed 16bit PCM wav data.</remarks>
         public SoundEffect(
-            byte[] buffer, int offset, int count,
-            int sampleRate, AudioChannels channels, int loopStart, int loopLength)
+            ReadOnlySpan<byte> data, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
         {
             if (sampleRate < 8000 || sampleRate > 48000)
                 throw new ArgumentOutOfRangeException(nameof(sampleRate));
             if ((int)channels != 1 && (int)channels != 2)
                 throw new ArgumentOutOfRangeException(nameof(channels));
 
-            if (buffer == null || buffer.Length == 0)
-                throw new ArgumentException("Ensure that the buffer length is non-zero.", nameof(buffer));
+            if (data.Length == 0)
+                throw new ArgumentException("Ensure that the buffer length is non-zero.", nameof(data));
 
             var blockAlign = (int)channels * 2;
-            if ((buffer.Length % blockAlign) != 0)
+            if ((data.Length % blockAlign) != 0)
                 throw new ArgumentException(
-                    "Ensure that the buffer meets the block alignment requirements for the number of channels.", nameof(buffer));
+                    "Ensure that the buffer meets the block alignment requirements for the number of channels.", nameof(data));
 
-            if (count <= 0)
-                throw new ArgumentException("Ensure that the count is greater than zero.", nameof(count));
-            if ((count % blockAlign) != 0)
+            if (data.Length <= 0)
+                throw new ArgumentException("Ensure that the buffer length is greater than zero.", nameof(data));
+
+            if (data.Length % blockAlign != 0)
                 throw new ArgumentException(
-                    "Ensure that the count meets the block alignment requirements for the number of channels.", nameof(count));
+                    "Ensure that the buffer length meets the block alignment requirements for the number of channels.", nameof(data));
 
-            if (offset < 0)
-                throw new ArgumentException("The offset cannot be negative.", nameof(offset));
-            if (((ulong)count + (ulong)offset) > (ulong)buffer.Length)
-                throw new ArgumentException("Ensure that the offset+count region lines within the buffer.", nameof(offset));
-
-            var totalSamples = buffer.Length / blockAlign;
+            var totalSamples = data.Length / blockAlign;
 
             if (loopStart < 0)
                 throw new ArgumentException("The loopStart cannot be negative.", nameof(loopStart));
@@ -188,9 +186,9 @@ namespace Microsoft.Xna.Framework.Audio
                 throw new ArgumentException(
                     "Ensure that the loopStart+loopLength region lies within the sample range.", nameof(loopLength));
 
-            _duration = GetSampleDuration(count, 16, sampleRate, channels);
+            _duration = GetSampleDuration(data.Length, 16, sampleRate, channels);
 
-            PlatformInitializePcm(buffer, offset, count, 16, sampleRate, channels, loopStart, loopLength);
+            PlatformInitializePcm(data, 16, sampleRate, channels, loopStart, loopLength);
         }
 
         #endregion
@@ -499,11 +497,13 @@ namespace Microsoft.Xna.Framework.Audio
         /// Releases the resources held by this <see cref="SoundEffect"/>.
         /// </summary>
         /// <param name="disposing">If set to <c>true</c>, Dispose was called explicitly.</param>
-        /// <remarks>If the disposing parameter is true, the Dispose method was called explicitly. This
+        /// <remarks>
+        /// If the disposing parameter is true, the Dispose method was called explicitly. This
         /// means that managed objects referenced by this instance should be disposed or released as
         /// required.  If the disposing parameter is false, Dispose was called by the finalizer and
         /// no managed objects should be touched because we do not know if they are still valid or
-        /// not at that time.  Unmanaged resources should always be released.</remarks>
+        /// not at that time.  Unmanaged resources should always be released.
+        /// </remarks>
         void Dispose(bool disposing)
         {
             if (!IsDisposed)

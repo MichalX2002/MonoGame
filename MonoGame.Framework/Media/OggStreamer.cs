@@ -13,18 +13,18 @@ namespace Microsoft.Xna.Framework.Media
         public readonly EffectsExtension Efx = ALController.Efx;
 
         const float DefaultUpdateRate = 10;
-        const int DefaultBufferSize = 8000;
+        const int DefaultBufferSize = 10000;
         const int MaxBuffers = 3;
 
         internal static readonly object _singletonMutex = new object();
         internal readonly object _iterationMutex = new object();
         readonly object _readMutex = new object();
 
-        readonly float[] _readBuffer;
-        readonly short[] _castBuffer;
+        readonly UnmanagedPointer<float> _readBuffer;
+        readonly UnmanagedPointer<short> _castBuffer;
         internal readonly HashSet<OggStream> _streams;
-        readonly List<TimeSpan> _threadTiming;
-
+        readonly TimeSpan[] _threadTiming;
+        
         readonly Thread _thread;
         Stopwatch _threadWatch;
         bool _pendingFinish;
@@ -32,7 +32,7 @@ namespace Microsoft.Xna.Framework.Media
 
         public float UpdateRate { get; }
         public int BufferSize { get; }
-        public ReadOnlyCollection<TimeSpan> ThreadTiming { get; }
+        public ReadOnlyCollection<TimeSpan> UpdateTime { get; }
 
         private static OggStreamer _instance;
         public static OggStreamer Instance
@@ -66,8 +66,8 @@ namespace Microsoft.Xna.Framework.Media
                 Instance = this;
 
                 _threadWatch = new Stopwatch();
-                _threadTiming = new List<TimeSpan>((int)(UpdateRate < 1 ? 1 : UpdateRate));
-                ThreadTiming = _threadTiming.AsReadOnly();
+                _threadTiming = new TimeSpan[(int)(UpdateRate < 1 ? 1 : UpdateRate)];
+                UpdateTime = new ReadOnlyCollection<TimeSpan>(_threadTiming);
 
                 _thread = new Thread(EnsureBuffersFilled)
                 {
@@ -77,8 +77,8 @@ namespace Microsoft.Xna.Framework.Media
                 _thread.Start();
             }
 
-            _readBuffer = new float[BufferSize];
-            _castBuffer = new short[BufferSize];
+            _readBuffer = new UnmanagedPointer<float>(BufferSize);
+            _castBuffer = new UnmanagedPointer<short>(BufferSize);
             _streams = new HashSet<OggStream>();
         }
 
@@ -114,7 +114,7 @@ namespace Microsoft.Xna.Framework.Media
             lock (_readMutex)
             {
                 var reader = stream.Reader;
-                int readSamples = reader.ReadSamples(_readBuffer);
+                int readSamples = reader.ReadSamples(_readBuffer.Span);
 
                 if (readSamples > 0)
                 {
@@ -124,26 +124,30 @@ namespace Microsoft.Xna.Framework.Media
                     bool useFloat = ALController.Instance.SupportsFloat32;
                     ALFormat format = ALHelper.GetALFormat(channels, useFloat);
 
+                    var dataSpan = _readBuffer.Span.Slice(0, readSamples);
                     if (useFloat)
                     {
-                        buffer.BufferData(_readBuffer, readSamples, format, reader.SampleRate);
+                        buffer.BufferData<float>(dataSpan, format, reader.SampleRate);
                     }
                     else
                     {
-                        CastBuffer(_readBuffer, _castBuffer, readSamples);
-                        buffer.BufferData(_castBuffer, readSamples, format, reader.SampleRate);
+                        var castSpan = _castBuffer.Span.Slice(0, readSamples);
+                        CastBuffer(dataSpan, castSpan);
+                        buffer.BufferData<short>(castSpan, format, reader.SampleRate);
                     }
                     return true;
                 }
             }
-
             buffer = null;
             return false;
         }
 
-        static void CastBuffer(float[] src, short[] dst, int count)
+        static void CastBuffer(Span<float> src, Span<short> dst)
         {
-            for (int i = 0; i < count; i++)
+            if (src.Length != dst.Length)
+                throw new ArgumentException("Non-equal span length.");
+
+            for (int i = 0; i < src.Length; i++)
             {
                 int tmp = (int)(32767f * src[i]);
                 if (tmp > short.MaxValue)
@@ -207,9 +211,9 @@ namespace Microsoft.Xna.Framework.Media
                 }
 
                 _threadWatch.Stop();
-                _threadTiming.Add(_threadWatch.Elapsed);
-                if (_threadTiming.Count >= _threadTiming.Capacity)
-                    _threadTiming.RemoveAt(0);
+
+                Array.Copy(_threadTiming, 0, _threadTiming, 1, _threadTiming.Length - 1);
+                _threadTiming[0] = _threadWatch.Elapsed;
             }
         }
 
@@ -265,8 +269,7 @@ namespace Microsoft.Xna.Framework.Media
                 lock (_iterationMutex)
                     _streams.Remove(stream);
 
-                if (stream.OnFinished != null)
-                    stream.OnFinished.Invoke();
+                stream.OnFinished?.Invoke();
             }
             else if (!stream.IsLooped)
             {

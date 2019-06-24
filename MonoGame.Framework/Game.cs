@@ -57,8 +57,6 @@ namespace Microsoft.Xna.Framework
 
         public Game()
         {
-            Instance = this;
-
             LaunchParameters = new LaunchParameters();
             Services = new GameServiceContainer();
             Components = new GameComponentCollection();
@@ -74,7 +72,6 @@ namespace Microsoft.Xna.Framework
 
             // Allow some optional per-platform construction to occur too.
             PlatformConstruct();
-
         }
 
         ~Game()
@@ -143,7 +140,6 @@ namespace Microsoft.Xna.Framework
                 Activity = null;
 #endif
                 _isDisposed = true;
-                Instance = null;
             }
         }
 
@@ -166,8 +162,6 @@ namespace Microsoft.Xna.Framework
         [CLSCompliant(false)]
         public static AndroidGameActivity Activity { get; internal set; }
 #endif
-
-        internal static Game Instance { get; private set; }
 
         public LaunchParameters LaunchParameters { get; private set; }
         public GameComponentCollection Components { get; private set; }
@@ -251,7 +245,6 @@ namespace Microsoft.Xna.Framework
                 if (_graphicsDeviceService == null)
                 {
                     _graphicsDeviceService = Services.GetService<IGraphicsDeviceService>();
-
                     if (_graphicsDeviceService == null)
                         throw new InvalidOperationException("No Graphics Device Service");
                 }
@@ -269,10 +262,10 @@ namespace Microsoft.Xna.Framework
 
         #region Events
 
-        public event SenderDelegate<Game> Activated;
-        public event SenderDelegate<Game> Deactivated;
-        public event SenderDelegate<Game> Disposed;
-        public event SenderDelegate<Game> Exiting;
+        public event SenderEvent<Game> Activated;
+        public event SenderEvent<Game> Deactivated;
+        public event SenderEvent<Game> Disposed;
+        public event SenderEvent<Game> Exiting;
 
 #if WINDOWS_UAP
         [CLSCompliant(false)]
@@ -747,18 +740,18 @@ namespace Microsoft.Xna.Framework
 
             private readonly Predicate<T> _filter;
             private readonly Comparison<T> _sort;
-            private readonly Action<T, SenderDelegate<object>> _filterChangedSubscriber;
-            private readonly Action<T, SenderDelegate<object>> _filterChangedUnsubscriber;
-            private readonly Action<T, SenderDelegate<object>> _sortChangedSubscriber;
-            private readonly Action<T, SenderDelegate<object>> _sortChangedUnsubscriber;
+            private readonly Action<T, SenderEvent<object>> _filterChangedSubscriber;
+            private readonly Action<T, SenderEvent<object>> _filterChangedUnsubscriber;
+            private readonly Action<T, SenderEvent<object>> _sortChangedSubscriber;
+            private readonly Action<T, SenderEvent<object>> _sortChangedUnsubscriber;
 
             public SortingFilteringCollection(
                 Predicate<T> filter,
-                Action<T, SenderDelegate<object>> filterChangedSubscriber,
-                Action<T, SenderDelegate<object>> filterChangedUnsubscriber,
+                Action<T, SenderEvent<object>> filterChangedSubscriber,
+                Action<T, SenderEvent<object>> filterChangedUnsubscriber,
                 Comparison<T> sort,
-                Action<T, SenderDelegate<object>> sortChangedSubscriber,
-                Action<T, SenderDelegate<object>> sortChangedUnsubscriber)
+                Action<T, SenderEvent<object>> sortChangedSubscriber,
+                Action<T, SenderEvent<object>> sortChangedUnsubscriber)
             {
                 _items = new List<T>();
                 _addJournal = new List<AddJournalEntry<T>>();

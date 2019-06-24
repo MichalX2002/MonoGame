@@ -83,7 +83,8 @@
     <_PostBuildHookHostPlatform>$(Platform)</_PostBuildHookHostPlatform>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetDir)" "C:\Program Files (x86)\MSBuild\MonoGame\"
+    <PostBuildEvent>mkdir "C:\Program Files (x86)\MSBuild\MonoGame\"
+copy /Y "$(TargetDir)" "C:\Program Files (x86)\MSBuild\MonoGame\"
 </PostBuildEvent>
   </PropertyGroup>
   <Target Name="PostBuildHooks" Inputs="@(IntermediateAssembly);@(ReferencePath)" Outputs="@(IntermediateAssembly);$(_PostBuildHookTimestamp)" AfterTargets="CoreCompile" BeforeTargets="AfterCompile">

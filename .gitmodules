@@ -12,3 +12,12 @@
 [submodule "ThirdParty/Lidgren.Network"]
 	path = ThirdParty/Lidgren.Network
 	url = https://github.com/TechnologicalPizza/lidgren-network-gen3
+[submodule "ThirdParty/SixLabors/Core"]
+	path = ThirdParty/SixLabors/Core
+	url = https://github.com/TechnologicalPizza/SixLabors.Core
+[submodule "ThirdParty/SixLabors/ImageSharp"]
+	path = ThirdParty/SixLabors/ImageSharp
+	url = https://github.com/TechnologicalPizza/SixLabors.ImageSharp
+[submodule "ThirdParty/SixLabors/Drawing"]
+	path = ThirdParty/SixLabors/Drawing
+	url = https://github.com/TechnologicalPizza/SixLabors.Drawing

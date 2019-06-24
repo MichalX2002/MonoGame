@@ -143,10 +143,13 @@ namespace Microsoft.Xna.Framework.Media
 
         private void PlatformDispose(bool disposing)
         {
-            if (_stream != null)
+            if (disposing)
             {
-                _stream.Dispose();
-                _stream = null;
+                if (_stream != null)
+                {
+                    _stream.Dispose();
+                    _stream = null;
+                }
             }
         }
     }

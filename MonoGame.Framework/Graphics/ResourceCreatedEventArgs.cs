@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace Microsoft.Xna.Framework.Graphics
 {
     public readonly struct ResourceCreatedEvent
@@ -10,7 +12,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public ResourceCreatedEvent(object resource)
         {
-            Resource = resource;
+            Resource = resource ?? throw new ArgumentNullException(nameof(resource));
         }
     }
 }

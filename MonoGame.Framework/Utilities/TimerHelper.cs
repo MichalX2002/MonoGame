@@ -16,7 +16,7 @@ namespace MonoGame.Utilities
 
         static TimerHelper()
         {
-            NtQueryTimerResolution(out uint min, out uint max, out uint current);
+            NtQueryTimerResolution(out _, out uint max, out _);
             LowestSleepThreshold = 1.0 + (max / 10000.0);
         }
 
@@ -25,7 +25,7 @@ namespace MonoGame.Utilities
         /// </summary>
         public static double GetCurrentResolution()
         {
-            NtQueryTimerResolution(out uint min, out uint max, out uint current);
+            NtQueryTimerResolution(out _, out _, out uint current);
             return current / 10000.0;
         }
 

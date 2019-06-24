@@ -2,12 +2,8 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using MonoGame.Utilities.IO;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
+using MonoGame.Utilities.Memory;
 using System.IO;
-using System.Linq;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
 {
@@ -16,9 +12,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
     /// </summary>
     public sealed class AudioFormat
     {
-        int format;
-        byte[] nativeWaveFormat;
-
         /// <summary>
         /// Gets the average bytes processed per second.
         /// </summary>
@@ -47,13 +40,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
         /// Gets the format of the audio content.
         /// </summary>
         /// <value>If the audio has not been processed, the format tag of the source content; otherwise, the new format tag.</value>
-        public int Format { get { return format; } }
+        public int Format { get; }
 
         /// <summary>
         /// Gets the raw byte buffer for the format. For non-PCM formats, this buffer contains important format-specific information beyond the basic format information exposed in other properties of the AudioFormat type.
         /// </summary>
         /// <value>The raw byte buffer represented in a collection.</value>
-        public byte[] NativeWaveFormat { get { return nativeWaveFormat; } }
+        public byte[] NativeWaveFormat { get; }
 
         /// <summary>
         /// Gets the sample rate of the audio content.
@@ -69,14 +62,14 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
             int format,
             int sampleRate)
         {
-            this.AverageBytesPerSecond = averageBytesPerSecond;
-            this.BitsPerSample = bitsPerSample;
-            this.BlockAlign = blockAlign;
-            this.ChannelCount = channelCount;
-            this.format = format;
-            this.SampleRate = sampleRate;
+            AverageBytesPerSecond = averageBytesPerSecond;
+            BitsPerSample = bitsPerSample;
+            BlockAlign = blockAlign;
+            ChannelCount = channelCount;
+            Format = format;
+            SampleRate = sampleRate;
 
-            this.nativeWaveFormat = this.ConstructNativeWaveFormat();
+            NativeWaveFormat = ConstructNativeWaveFormat();
         }
 
         private byte[] ConstructNativeWaveFormat()
@@ -84,12 +77,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
             using (var memory = RecyclableMemoryManager.Instance.GetMemoryStream())
             using (var writer = new BinaryWriter(memory))
             {
-                writer.Write((short)this.format);
-                writer.Write((short)this.ChannelCount);
-                writer.Write((int)this.SampleRate);
-                writer.Write((int)this.AverageBytesPerSecond);
-                writer.Write((short)this.BlockAlign);
-                writer.Write((short)this.BitsPerSample);
+                writer.Write((short)Format);
+                writer.Write((short)ChannelCount);
+                writer.Write((int)SampleRate);
+                writer.Write((int)AverageBytesPerSecond);
+                writer.Write((short)BlockAlign);
+                writer.Write((short)BitsPerSample);
                 writer.Write((short)0);
 
                 return memory.ToArray();

@@ -24,7 +24,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         public bool IsDisposed { get; private set; } 
 
-        /// <summary>Gets the SoundEffectInstance's current playback state.</summary>
+        /// <summary>Gets the instance's current playback state.</summary>
         public virtual SoundState State => PlatformGetState();
 
         /// <summary>Enables or Disables whether the <see cref="SoundEffectInstance"/> should repeat after playback.</summary>

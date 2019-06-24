@@ -333,7 +333,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// This event is triggered when the Cue is disposed.
         /// </summary>
-        public event SenderDelegate<Cue> Disposing;
+        public event SenderEvent<Cue> Disposing;
 
         /// <summary>
         /// Is true if the Cue has been disposed.

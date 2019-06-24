@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Content.Pipeline.Utilities.LZ4;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Framework.Content.Pipeline.Builder;
 using System.Collections.Generic;
-using MonoGame.Utilities.IO;
+using MonoGame.Utilities.Memory;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
 {

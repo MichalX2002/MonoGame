@@ -176,7 +176,9 @@
       <Platforms>Windows</Platforms>
     </Compile>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
   <ItemGroup />
   <ItemGroup />
   <ItemGroup />

@@ -81,8 +81,8 @@
     <_PostBuildHookHostPlatform>$(Platform)</_PostBuildHookHostPlatform>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>mkdir "C:\Program Files (x86)\MSBuild\MonoGame\Tools\"
+copy /Y "$(TargetDir)" "C:\Program Files (x86)\MSBuild\MonoGame\Tools\"</PostBuildEvent>
   </PropertyGroup>
   <Target Name="PostBuildHooks" Inputs="@(IntermediateAssembly);@(ReferencePath)" Outputs="@(IntermediateAssembly);$(_PostBuildHookTimestamp)" AfterTargets="CoreCompile" BeforeTargets="AfterCompile">
     <Touch Files="$(_PostBuildHookTimestamp)" AlwaysCreate="True" />

@@ -43,12 +43,14 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public override string ToString()
         {
-            return "{{Position:" + this.Position + " Color:" + this.Color + " TextureCoordinate:" + this.TextureCoordinate + "}}";
+            return "{Position:" + this.Position + " Color:" + this.Color + " TextureCoordinate:" + this.TextureCoordinate + "}";
         }
 
         public static bool operator ==(VertexPositionColorTexture left, VertexPositionColorTexture right)
         {
-            return (left.Position == right.Position) && (left.Color == right.Color) && (left.TextureCoordinate == right.TextureCoordinate);
+            return (left.Position == right.Position) 
+                && (left.Color == right.Color) 
+                && (left.TextureCoordinate == right.TextureCoordinate);
         }
 
         public static bool operator !=(VertexPositionColorTexture left, VertexPositionColorTexture right)

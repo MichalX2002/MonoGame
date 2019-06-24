@@ -4,237 +4,168 @@
 
 using MonoGame.Utilities;
 using System;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    public partial class VertexBuffer : VertexBufferBase
+    public partial class VertexBuffer : BufferBase
     {
-		public BufferUsage BufferUsage { get; private set; }
-		
-		protected VertexBuffer(GraphicsDevice graphicsDevice, VertexDeclaration vertexDeclaration, int vertexCount, BufferUsage bufferUsage, bool dynamic)
-		{
+        public BufferUsage BufferUsage { get; private set; }
+        public VertexDeclaration VertexDeclaration { get; protected set; }
+
+        #region Constructors
+
+        protected VertexBuffer(
+            GraphicsDevice graphicsDevice, VertexDeclaration vertexDeclaration, int capacity, BufferUsage bufferUsage, bool dynamic) :
+            base(capacity)
+        {
             this.GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
                 nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
-            this.VertexDeclaration = vertexDeclaration;
-            this.VertexCount = vertexCount;
+
             this.BufferUsage = bufferUsage;
+            this.VertexDeclaration = vertexDeclaration;
 
             // Make sure the graphics device is assigned in the vertex declaration.
             if (vertexDeclaration.GraphicsDevice != graphicsDevice)
                 vertexDeclaration.GraphicsDevice = graphicsDevice;
 
             _isDynamic = dynamic;
-
             PlatformConstruct();
-		}
+        }
 
         public VertexBuffer(GraphicsDevice graphicsDevice, VertexDeclaration vertexDeclaration, int vertexCount, BufferUsage bufferUsage) :
-			this(graphicsDevice, vertexDeclaration, vertexCount, bufferUsage, false)
+            this(graphicsDevice, vertexDeclaration, vertexCount, bufferUsage, false)
         {
         }
-		
-		public VertexBuffer(GraphicsDevice graphicsDevice, Type type, int vertexCount, BufferUsage bufferUsage) :
-			this(graphicsDevice, VertexDeclaration.FromType(type), vertexCount, bufferUsage, false)
-		{
+
+        public VertexBuffer(GraphicsDevice graphicsDevice, Type type, int vertexCount, BufferUsage bufferUsage) :
+            this(graphicsDevice, VertexDeclaration.FromType(type), vertexCount, bufferUsage, false)
+        {
         }
+
+        #endregion
+
+        #region GetData
 
         /// <summary>
-        /// Get the vertex data froom this VertexBuffer.
+        /// Get the vertex data from this vertex buffer with an optional buffer offset.
         /// </summary>
         /// <typeparam name="T">The struct you want to fill.</typeparam>
+        /// <param name="destination">The span to be filled.</param>
         /// <param name="offsetInBytes">The offset to the first element in the vertex buffer in bytes.</param>
-        /// <param name="data">An array of T's to be filled.</param>
-        /// <param name="startIndex">The index to start filling the data array.</param>
-        /// <param name="elementCount">The number of T's to get.</param>
-        /// <param name="vertexStride">The size of how a vertex buffer element should be interpreted.</param>
-        ///
+        /// <param name="destinationStride">The size of how a vertex buffer element should be interpreted.</param>
         /// <remarks>
-        /// Note that this pulls data from VRAM into main memory and because of that is a very expensive operation.
+        /// Note that this pulls data from VRAM into main memory and because of that it's an expensive operation.
         /// It is often a better idea to keep a copy of the data in main memory.
         /// </remarks>
-        ///
-        /// <remarks>
-        /// <p>Using this operation it is easy to get certain vertex elements from a VertexBuffer.</p>
-        /// <p>
-        /// For example to get the texture coordinates from a VertexBuffer of <see cref="VertexPositionTexture"/> you can call 
-        /// GetData(4 * 3, data, elementCount, 20). 'data'should be an array of <see cref="Vector2"/> in this example.
-        /// The offsetInBytes is the number of bytes taken up by the <see cref="VertexPositionTexture.Position"/> of the vertex.
-        /// For vertexStride we pass the size of a <see cref="VertexPositionTexture"/>.
-        /// </p>
-        /// </remarks>
-        public void GetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, int vertexStride = 0) where T : struct
+        public void GetData<T>(
+            int offsetInBytes, Span<T> destination, int destinationStride = 0)
+            where T : unmanaged
         {
-            var elementSizeInBytes = ReflectionHelpers.SizeOf<T>.Get();
-            if (vertexStride == 0)
-                vertexStride = elementSizeInBytes;
+            if (destinationStride == 0)
+                destinationStride = ReflectionHelpers.SizeOf<T>.Get();
 
-            var vertexByteSize = VertexCount * VertexDeclaration.VertexStride;
-            if (vertexStride > vertexByteSize)
+            var vertexByteSize = Capacity * VertexDeclaration.VertexStride;
+            if (destinationStride > vertexByteSize)
                 throw new ArgumentOutOfRangeException(
-                    nameof(vertexStride), "Vertex stride can not be larger than the vertex buffer size.");
-
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
-            if (data.Length < (startIndex + elementCount))
-                throw new ArgumentOutOfRangeException(nameof(elementCount), "This parameter must be a valid index within the array.");
+                    nameof(destinationStride), "Vertex stride can not be larger than the vertex buffer size.");
 
             if (BufferUsage == BufferUsage.WriteOnly)
                 throw new NotSupportedException(
                     $"Calling {nameof(GetData)} on a resource that was created with {BufferUsage.WriteOnly} is not supported.");
 
-            if (elementCount > 1 && elementCount * vertexStride > vertexByteSize)
+            if (destination.Length * destinationStride > vertexByteSize)
                 throw new InvalidOperationException(
-                    $"The {nameof(data)} array is not the correct size for the amount of data requested.");
+                    "The span is not the correct size for the amount of data requested.");
 
-            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            try
-            {
-                IntPtr ptr = handle.AddrOfPinnedObject();
-                PlatformGetData(offsetInBytes, ptr, startIndex, elementCount, elementSizeInBytes, vertexStride);
-            }
-            finally
-            {
-                handle.Free();
-            }
+            PlatformGetData(offsetInBytes, destination, destinationStride);
         }
 
-        public void GetData<T>(T[] data, int startIndex, int elementCount) where T : struct
+        public void GetData<T>(Span<T> destination, int vertexStride = 0)
+            where T : unmanaged
         {
-            this.GetData(0, data, startIndex, elementCount, 0);
+            GetData(0, destination, vertexStride);
         }
 
-        public void GetData<T>(T[] data) where T : struct
-        {
-            var elementSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
-            this.GetData(0, data, 0, data.Length, elementSizeInByte);
-        }
+        #endregion
+
+        #region SetData
 
         /// <summary>
-        /// Sets the vertex buffer data, specifying the index at which to start copying from the source data array,
-        /// the number of elements to copy from the source data array, 
-        /// and how far apart elements from the source data array should be when they are copied into the vertex buffer.
+        /// Sets the vertex buffer data.
         /// </summary>
         /// <typeparam name="T">Type of elements in the data array.</typeparam>
-        /// <param name="offsetInBytes">Offset in bytes from the beginning of the vertex buffer to the start of the copied data.</param>
-        /// <param name="data">Data array.</param>
-        /// <param name="startIndex">Index at which to start copying from <paramref name="data"/>.
-        /// Must be within the <paramref name="data"/> array bounds.</param>
-        /// <param name="elementCount">Number of elements to copy from <paramref name="data"/>.
-        /// The combination of <paramref name="startIndex"/> and <paramref name="elementCount"/> 
-        /// must be within the <paramref name="data"/> array bounds.</param>
-        /// <param name="vertexStride">Specifies how far apart, in bytes, elements from <paramref name="data"/> should be when 
+        /// <param name="offsetInBytes">Offset in bytes from the beginning of the vertex buffer to start copying to.</param>
+        /// <param name="data">The span of vertex data.</param>
+        /// <param name="dataStride">
+        /// Specifies how far apart, in bytes, elements from <paramref name="data"/> should be when 
         /// they are copied into the vertex buffer.
-        /// In almost all cases this should be <c>sizeof(T)</c>, to create a tightly-packed vertex buffer.
         /// If you specify <c>sizeof(T)</c>, elements from <paramref name="data"/> will be copied into the 
         /// vertex buffer with no padding between each element.
         /// If you specify a value greater than <c>sizeof(T)</c>, elements from <paramref name="data"/> will be copied 
         /// into the vertex buffer with padding between each element.
         /// If you specify <c>0</c> for this parameter, it will be treated as if you had specified <c>sizeof(T)</c>.
-        /// With the exception of <c>0</c>, you must specify a value greater than or equal to <c>sizeof(T)</c>.</param>
+        /// With the exception of <c>0</c>, you must specify a value greater than or equal to <c>sizeof(T)</c>.
+        /// </param>
+        /// <param name="options">The options to use when flushing the data.</param>
         /// <remarks>
-        /// If <c>T</c> is <c>VertexPositionTexture</c>, but you want to set only the position component of the vertex data,
-        /// you would call this method as follows:
-        /// <code>
-        /// Vector3[] positions = new Vector3[numVertices];
-        /// vertexBuffer.SetData(0, positions, 0, numVertices, vertexBuffer.VertexDeclaration.VertexStride);
-        /// </code>
-        /// 
-        /// Continuing from the previous example, if you want to set only the texture coordinate component of the vertex data,
+        /// Example: If you only want to set the texture coordinate component of the vertex data,
         /// you would call this method as follows (note the use of <paramref name="offsetInBytes"/>:
         /// <code>
-        /// Vector2[] texCoords = new Vector2[numVertices];
-        /// vertexBuffer.SetData(12, texCoords, 0, numVertices, vertexBuffer.VertexDeclaration.VertexStride);
+        /// var texCoords = new Vector2[vertexCount];
+        /// vertexBuffer.SetData(offsetInBytes: 12, texCoords);
         /// </code>
         /// </remarks>
-        /// <remarks>
-        /// If you provide a <c>byte[]</c> in the <paramref name="data"/> parameter, then you should almost certainly
-        /// set <paramref name="vertexStride"/> to <c>1</c>, to avoid leaving any padding between the <c>byte</c> values
-        /// when they are copied into the vertex buffer.
-        /// </remarks>
-        public void SetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, int vertexStride) where T : struct
+        public unsafe void SetData<T>(
+            int offsetInBytes, ReadOnlySpan<T> data, int dataStride = 0, SetDataOptions options = SetDataOptions.None)
+            where T : unmanaged
         {
-            SetData(offsetInBytes, data, startIndex, elementCount, vertexStride, SetDataOptions.None);
-        }
-
-        /// <summary>
-        /// Sets the vertex buffer data, specifying the index at which to start copying from the source data array,
-        /// and the number of elements to copy from the source data array. This is the same as calling 
-        /// <see cref="SetData{T}(int, T[], int, int, int)"/>  with <c>offsetInBytes</c> equal to <c>0</c>,
-        /// and <c>vertexStride</c> equal to <c>sizeof(T)</c>.
-        /// </summary>
-        /// <typeparam name="T">Type of elements in the data array.</typeparam>
-        /// <param name="data">Data array.</param>
-        /// <param name="startIndex">Index at which to start copying from <paramref name="data"/>.
-        /// Must be within the <paramref name="data"/> array bounds.</param>
-        /// <param name="elementCount">Number of elements to copy from <paramref name="data"/>.
-        /// The combination of <paramref name="startIndex"/> and <paramref name="elementCount"/> 
-        /// must be within the <paramref name="data"/> array bounds.</param>
-		public void SetData<T>(T[] data, int startIndex, int elementCount) where T : struct
-        {
-            SetData(0, data, startIndex, elementCount, ReflectionHelpers.SizeOf<T>.Get());
-        }
-
-        /// <summary>
-        /// Sets the vertex buffer data. This is the same as calling <see cref="SetData{T}(int, T[], int, int, int)"/> 
-        /// with <c>offsetInBytes</c> and <c>startIndex</c> equal to <c>0</c>, <c>elementCount</c> equal to <c>data.Length</c>, 
-        /// and <c>vertexStride</c> equal to <c>sizeof(T)</c>.
-        /// </summary>
-        /// <typeparam name="T">Type of elements in the data array.</typeparam>
-        /// <param name="data">Data array.</param>
-        public void SetData<T>(T[] data) where T : struct
-        {
-            SetData(data, 0, data.Length);
-        }
-
-        protected void SetData<T>(
-            int offsetInBytes, T[] data, int startIndex, int elementCount, int vertexStride, SetDataOptions options)
-        {
-            if (data == null)
+            if (data.IsEmpty)
                 throw new ArgumentNullException(nameof(data));
 
-            int elementSize = ReflectionHelpers.SizeOf<T>.Get();
-            if (vertexStride < elementSize)
+            if (dataStride == 0)
+                dataStride = sizeof(T);
+
+            var vertexByteSize = data.Length * VertexDeclaration.VertexStride;
+            if (dataStride > vertexByteSize)
                 throw new ArgumentOutOfRangeException(
-                    $"The vertex stride must be greater than or equal to the size of the specified data ({elementSize}).");
+                    nameof(dataStride), "Data stride can not be larger than the vertex buffer size.");
 
-            if (startIndex + elementCount > data.Length || elementCount <= 0)
-                throw new ArgumentOutOfRangeException(nameof(data),
-                    $"The array specified in the {nameof(data)} parameter is not the correct size for the amount of data requested.");
-
-            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            try
-            {
-                IntPtr ptr = handle.AddrOfPinnedObject();
-                SetData(0, ptr, 0, data.Length, elementSize, vertexStride, SetDataOptions.None);
-            }
-            finally
-            {
-                handle.Free();
-            }
-        }
-
-        public void SetData(
-            int offsetInBytes, IntPtr data, int startIndex,
-            int elementCount, int elementSize, int vertexStride, SetDataOptions options)
-        {
-            if (data == IntPtr.Zero)
-                throw new ArgumentNullException(nameof(data));
-
-            if (vertexStride == 0)
-                vertexStride = elementSize;
-
-            var vertexByteSize = elementCount * VertexDeclaration.VertexStride;
-            if (elementSize > vertexByteSize)
-                throw new ArgumentOutOfRangeException(
-                    nameof(elementSize), "Vertex stride can not be larger than the vertex buffer size.");
-
-            if (elementCount > 1 && elementCount * elementSize > vertexByteSize)
+            if (data.Length > 1 && data.Length * sizeof(T) > vertexByteSize)
                 throw new InvalidOperationException("The vertex stride is larger than the vertex buffer.");
 
-            PlatformSetData(offsetInBytes, data, startIndex, elementCount, elementSize, vertexStride, options);
-            VertexCount = elementCount;
+            if (dataStride < sizeof(T))
+                throw new ArgumentOutOfRangeException(
+                    $"The data stride must be greater than or equal to the size of the specified data ({sizeof(T)}).");
+
+            PlatformSetData(offsetInBytes, data, dataStride, options);
+            Count = data.Length * sizeof(T) / VertexDeclaration.VertexStride;
         }
+
+        public unsafe void SetData<T>(
+            ReadOnlySpan<T> data, int dataStride = 0, SetDataOptions options = SetDataOptions.None)
+            where T : unmanaged
+        {
+            SetData(0, data, dataStride, options);
+        }
+
+        #region Span<T> Overloads
+
+        public unsafe void SetData<T>(
+            int offsetInBytes, Span<T> data, int dataStride = 0, SetDataOptions options = SetDataOptions.None)
+            where T : unmanaged
+        {
+            SetData(offsetInBytes, (ReadOnlySpan<T>)data, dataStride, options);
+        }
+
+        public unsafe void SetData<T>(
+            Span<T> data, int vertexStride = 0, SetDataOptions options = SetDataOptions.None)
+            where T : unmanaged
+        {
+            SetData(0, data, vertexStride, options);
+        }
+
+        #endregion
+
+        #endregion
     }
 }

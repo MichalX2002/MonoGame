@@ -16,5 +16,9 @@
   <ItemGroup>
     <Compile Remove="Collections\IRefEquatable.cs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Memory" Version="4.5.3" />
+  </ItemGroup>
   
 </Project>

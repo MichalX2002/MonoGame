@@ -9,14 +9,13 @@ namespace Microsoft.Xna.Framework.Graphics
     /// <summary>
     /// Defines how a vertex buffer is bound to the graphics device for rendering.
     /// </summary>
-    public struct VertexBufferBinding
+    public readonly struct VertexBufferBinding
     {
-
         /// <summary>
         /// Gets the vertex buffer.
         /// </summary>
         /// <value>The vertex buffer.</value>
-        public VertexBufferBase VertexBuffer { get; }
+        public VertexBuffer VertexBuffer { get; }
 
         /// <summary>
         /// Gets the index of the first vertex in the vertex buffer to use.
@@ -39,7 +38,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// Creates an instance of <see cref="VertexBufferBinding"/>.
         /// </summary>
         /// <param name="vertexBuffer">The vertex buffer to bind.</param>
-        public VertexBufferBinding(VertexBufferBase vertexBuffer)
+        public VertexBufferBinding(VertexBuffer vertexBuffer)
             : this(vertexBuffer, 0, 0)
         {
         }
@@ -51,7 +50,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="vertexOffset">
         /// The index of the first vertex in the vertex buffer to use.
         /// </param>
-        public VertexBufferBinding(VertexBufferBase vertexBuffer, int vertexOffset)
+        public VertexBufferBinding(VertexBuffer vertexBuffer, int vertexOffset)
             : this(vertexBuffer, vertexOffset, 0)
         {
         }
@@ -74,11 +73,11 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="vertexOffset"/> or <paramref name="instanceFrequency"/> is invalid.
         /// </exception>
-        public VertexBufferBinding(VertexBufferBase vertexBuffer, int vertexOffset, int instanceFrequency)
+        public VertexBufferBinding(VertexBuffer vertexBuffer, int vertexOffset, int instanceFrequency)
         {
             if (vertexBuffer == null)
                 throw new ArgumentNullException(nameof(vertexBuffer));
-            if (vertexOffset < 0 || vertexOffset >= vertexBuffer.VertexCount)
+            if (vertexOffset < 0 || vertexOffset >= vertexBuffer.Capacity)
                 throw new ArgumentOutOfRangeException(nameof(vertexOffset));
             if (instanceFrequency < 0)
                 throw new ArgumentOutOfRangeException(nameof(instanceFrequency));

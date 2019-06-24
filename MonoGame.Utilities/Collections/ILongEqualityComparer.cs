@@ -2,7 +2,7 @@
 
 namespace MonoGame.Utilities.Collections
 {
-    public interface ILongEqualityComparer<T> : IEqualityComparer<T>
+    public interface ILongEqualityComparer<in T> : IEqualityComparer<T>
     {
         long GetLongHashCode(T obj);
     }

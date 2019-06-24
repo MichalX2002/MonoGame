@@ -6,8 +6,8 @@ namespace Microsoft.Xna.Framework
 {
     public interface IDrawable
     {
-		event SenderDelegate<object> DrawOrderChanged;
-        event SenderDelegate<object> VisibleChanged;
+		event SenderEvent<object> DrawOrderChanged;
+        event SenderEvent<object> VisibleChanged;
 
         int DrawOrder { get; }
         bool Visible { get; }

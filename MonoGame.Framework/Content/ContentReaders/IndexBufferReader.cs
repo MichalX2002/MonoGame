@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Microsoft.Xna.Framework.Content
@@ -14,6 +15,7 @@ namespace Microsoft.Xna.Framework.Content
 
             bool sixteenBits = input.ReadBoolean();
             int dataSize = input.ReadInt32();
+
             byte[] data = input.ContentManager.GetScratchBuffer(dataSize);
             input.Read(data, 0, dataSize);
 
@@ -25,7 +27,7 @@ namespace Microsoft.Xna.Framework.Content
                     dataSize / (sixteenBits ? 2 : 4), BufferUsage.None);
             }
 
-            indexBuffer.SetData(data, 0, dataSize);
+            indexBuffer.SetData(data.AsSpan().Slice(0, dataSize));
             return indexBuffer;
         }
     }

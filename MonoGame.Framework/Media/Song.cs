@@ -27,19 +27,19 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
-        public static ReadOnlyCollection<TimeSpan> ThreadUpdateTiming
+        public static ReadOnlyCollection<TimeSpan> UpdateTime
         {
             get
             {
 #if DIRECTX || DESKTOPGL
-                return OggStreamer.Instance.ThreadTiming;
+                return OggStreamer.Instance.UpdateTime;
 #else
                 return null;
 #endif
             }
         }
 
-        public event SenderDelegate<Song> OnFinish;
+        public event SenderEvent<Song> OnFinish;
 
         public bool IsDisposed { get; private set; }
         internal string FilePath { get; }

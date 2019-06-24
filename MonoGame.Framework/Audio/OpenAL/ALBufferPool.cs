@@ -27,7 +27,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             lock (_pool)
             {
-                if (_pool.Count < 32 && !_pool.Contains(buffer))
+                if (_pool.Count < 256 && !_pool.Contains(buffer))
                 {
                     buffer.ClearBuffer();
                     _pool.Push(buffer);

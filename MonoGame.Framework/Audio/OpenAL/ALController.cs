@@ -125,7 +125,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
             catch (Exception ex)
             {
-                throw (new NoAudioHardwareException("Failed to init OpenALSoundController", ex));
+                throw new NoAudioHardwareException("Failed to initialize OpenAL.", ex);
             }
         }
 
@@ -222,7 +222,7 @@ namespace Microsoft.Xna.Framework.Audio
 				const int AlcUpdateSize = 0x1014;
 				const int AlcUpdateBuffers = 0x1015;
 
-				int[] attribute = new[]
+				Span<int> attribute = stackalloc int[]
 				{
 					AlcFrequency, frequency,
 					AlcUpdateSize, updateSize,
@@ -327,9 +327,8 @@ namespace Microsoft.Xna.Framework.Audio
 #if !DIRECTX
         public void FreeSource(SoundEffectInstance inst)
         {
-            RecycleSource(inst.SourceID);
-            inst.SourceID = 0;
-            inst.HasSourceID = false;
+            RecycleSource(inst.SourceID.Value);
+            inst.SourceID = null;
             inst.SoundState = SoundState.Stopped;
         }
 #endif
@@ -398,16 +397,17 @@ namespace Microsoft.Xna.Framework.Audio
                     if (_oggstreamer != null)
                         _oggstreamer.Dispose();
 #endif
-                    for (int i = 0; i < _allSources.Length; i++)
-                    {
-                        AL.DeleteSource(_allSources[i]);
-                        ALHelper.CheckError("Failed to delete source.");
-                    }
 
                     if (Filter != 0 && Efx.IsInitialized)
                         Efx.DeleteFilter(Filter);
 
                     SoundEffectInstancePool.DisposeInstances();
+
+                    for (int i = 0; i < _allSources.Length; i++)
+                    {
+                        AL.DeleteSource(_allSources[i]);
+                        ALHelper.CheckError("Failed to delete source.");
+                    }
 
                     Microphone.StopMicrophones();
                     DestroyContexts();

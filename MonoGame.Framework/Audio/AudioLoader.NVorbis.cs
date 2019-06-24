@@ -8,11 +8,12 @@ namespace Microsoft.Xna.Framework.Audio
 {
     internal static partial class AudioLoader
     {
-        private static byte[] LoadVorbis(
+        private static MemoryStream LoadVorbis(
             Stream stream, out ALFormat format, out int frequency, out int channels, 
             out int blockAlignment, out int bitsPerSample, out int samplesPerBlock, out int sampleCount)
         {
             byte[] block = null;
+            MemoryStream result = null;
             var reader = new VorbisReader(stream, leaveOpen: false);
             try
             {
@@ -44,51 +45,55 @@ namespace Microsoft.Xna.Framework.Audio
                 Span<float> sampleBuffer = stackalloc float[block.Length / 4];
                 Span<byte> sampleBufferBytes = MemoryMarshal.AsBytes(sampleBuffer);
 
-                using (var memoryBuffer = RecyclableMemoryManager.Instance.GetMemoryStream(null, (int)outputBytes))
+                result = RecyclableMemoryManager.Instance.GetMemoryStream(null, (int)outputBytes);
+                int totalSamples = 0;
+                int samplesRead;
+                while ((samplesRead = reader.ReadSamples(sampleBuffer)) > 0)
                 {
-                    int totalSamples = 0;
-                    int samplesRead;
-                    while ((samplesRead = reader.ReadSamples(sampleBuffer)) > 0)
+                    if (floatOutput)
                     {
-                        if (floatOutput)
-                        {
-                            // we can copy directly to output
-                            int len = samplesRead * sizeof(float);
-                            var src = sampleBufferBytes.Slice(0, len);
-                            src.CopyTo(blockBytes);
-                            memoryBuffer.Write(block, 0, len);
-                        }
-                        else
-                        {
-                            // we need to convert float to short
-                            for (int i = 0; i < samplesRead; i++)
-                            {
-                                int tmp = (int)(32767f * sampleBuffer[i]);
-                                if (tmp > short.MaxValue)
-                                    blockShorts[i] = short.MaxValue;
-                                else if (tmp < short.MinValue)
-                                    blockShorts[i] = short.MinValue;
-                                else
-                                    blockShorts[i] = (short)tmp;
-                            }
-
-                            int len = samplesRead * sizeof(short);
-                            memoryBuffer.Write(block, 0, len);
-                        }
-                        totalSamples += samplesRead;
+                        // we can copy directly to output
+                        int len = samplesRead * sizeof(float);
+                        var src = sampleBufferBytes.Slice(0, len);
+                        src.CopyTo(blockBytes);
+                        result.Write(block, 0, len);
                     }
+                    else
+                    {
+                        // we need to convert float to short
+                        for (int i = 0; i < samplesRead; i++)
+                        {
+                            int tmp = (int)(32767f * sampleBuffer[i]);
+                            if (tmp > short.MaxValue)
+                                blockShorts[i] = short.MaxValue;
+                            else if (tmp < short.MinValue)
+                                blockShorts[i] = short.MinValue;
+                            else
+                                blockShorts[i] = (short)tmp;
+                        }
 
-                    long readerSamples = reader.TotalSamples;
-                    if (readerSamples != long.MaxValue && totalSamples < readerSamples)
-                        throw new InvalidDataException(
-                            "Reached end of stream before reading expected amount of samples.");
-
-                    return memoryBuffer.ToArray();
+                        int len = samplesRead * sizeof(short);
+                        result.Write(block, 0, len);
+                    }
+                    totalSamples += samplesRead;
                 }
+
+                long readerSamples = reader.TotalSamples;
+                if (readerSamples != long.MaxValue && totalSamples < readerSamples)
+                    throw new InvalidDataException(
+                        "Reached end of stream before reading expected amount of samples.");
+
+                result.Position = 0;
+                return result;
+            }
+            catch
+            {
+                result?.Dispose();
+                throw;
             }
             finally
             {
-                if(block != null)
+                if (block != null)
                     RecyclableMemoryManager.Instance.ReturnBlock(block);
                 reader?.Dispose();
             }

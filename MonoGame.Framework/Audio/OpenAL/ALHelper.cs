@@ -28,15 +28,15 @@ namespace Microsoft.Xna.Framework.Audio
                 || format == ALFormat.StereoMSAdpcm);
         }
 
-        public static ALFormat GetALFormat(AudioChannels channels, bool useFloat)
+        public static ALFormat GetALFormat(AudioChannels channels, bool isFloat)
         {
             switch (channels)
             {
                 case AudioChannels.Mono:
-                    return useFloat ? ALFormat.MonoFloat32 : ALFormat.Mono16;
+                    return isFloat ? ALFormat.MonoFloat32 : ALFormat.Mono16;
 
                 case AudioChannels.Stereo:
-                    return useFloat ? ALFormat.StereoFloat32 : ALFormat.Stereo16;
+                    return isFloat ? ALFormat.StereoFloat32 : ALFormat.Stereo16;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(channels), "Only mono and stereo channels are supported.");

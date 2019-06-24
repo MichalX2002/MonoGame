@@ -3,32 +3,36 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Runtime.InteropServices;
 using MonoGame.Utilities;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    public class IndexBuffer : IndexBufferBase
+    public partial class IndexBuffer : BufferBase
     {
-        public BufferUsage BufferUsage { get; private set; }
+        internal int _indexElementSize;
+
+        public BufferUsage BufferUsage { get; }
+        public IndexElementSize IndexElementSize { get; }
+
+        #region Constructors
 
         protected IndexBuffer(
-            GraphicsDevice graphicsDevice, IndexElementSize indexElementSize, int indexCount, BufferUsage usage, bool dynamic)
+            GraphicsDevice graphicsDevice, IndexElementSize indexElementSize, int capacity, BufferUsage usage, bool dynamic) :
+            base(capacity)
         {
-            this.GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
+            GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
                 nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
 
-            this.IndexElementSize = indexElementSize;
-            this.IndexCount = indexCount;
-            this.BufferUsage = usage;
+            BufferUsage = usage;
+            IndexElementSize = indexElementSize;
+            _indexElementSize = (IndexElementSize == IndexElementSize.SixteenBits ? 2 : 4);
 
             _isDynamic = dynamic;
-
             PlatformConstruct();
         }
 
         protected IndexBuffer(GraphicsDevice graphicsDevice, Type indexType, int indexCount, BufferUsage usage, bool dynamic)
-         : this(graphicsDevice, SizeForType(graphicsDevice, indexType), indexCount, usage, dynamic)
+           : this(graphicsDevice, SizeForType(graphicsDevice, indexType), indexCount, usage, dynamic)
         {
         }
 
@@ -43,18 +47,99 @@ namespace Microsoft.Xna.Framework.Graphics
         {
         }
 
+        #endregion
+
+        #region GetData
+
+        public unsafe void GetData<T>(int offsetInBytes, Span<T> destination) where T : unmanaged
+        {
+            if (BufferUsage == BufferUsage.WriteOnly)
+                throw new NotSupportedException(
+                    $"Calling {nameof(GetData)} on a resource that was created with {BufferUsage.WriteOnly} is not supported.");
+
+            int bufferBytes = Capacity * _indexElementSize;
+            int requestedBytes = destination.Length * sizeof(T);
+
+            if (requestedBytes > bufferBytes)
+                throw new ArgumentOutOfRangeException(
+                    nameof(destination), "More bytes than the buffer contains were requested.");
+
+            if (offsetInBytes + requestedBytes > bufferBytes)
+                throw new ArgumentOutOfRangeException(
+                    nameof(offsetInBytes), "The requested range reaches beyond the buffer.");
+
+            PlatformGetData(offsetInBytes, destination);
+        }
+
+        public void GetData<T>(Span<T> destination) where T : unmanaged
+        {
+            GetData(0, destination);
+        }
+
+        #endregion
+
+        #region SetData
+
+        public unsafe void SetData<T>(
+            int offsetInBytes, ReadOnlySpan<T> data, SetDataOptions options = SetDataOptions.None)
+            where T : unmanaged
+        {
+            if (data.IsEmpty)
+                throw new ArgumentNullException(nameof(data));
+
+            int bufferBytes = Capacity * _indexElementSize;
+            int requestedBytes = data.Length * sizeof(T);
+
+            if (requestedBytes > bufferBytes)
+                throw new ArgumentOutOfRangeException(
+                    nameof(data), "The buffer doesn't have enough capacity.");
+
+            if (offsetInBytes + requestedBytes > bufferBytes)
+                throw new ArgumentOutOfRangeException(
+                    nameof(offsetInBytes), "The range reaches beyond the buffer.");
+
+            PlatformSetData(offsetInBytes, data, options);
+            Count = data.Length * sizeof(T) / _indexElementSize;
+        }
+
+        public void SetData<T>(ReadOnlySpan<T> data, SetDataOptions options = SetDataOptions.None)
+            where T : unmanaged
+        {
+            SetData(0, data, options);
+        }
+
+        #region Span<T> Overloads
+
+        public void SetData<T>(
+            int offsetInBytes, Span<T> data, SetDataOptions options = SetDataOptions.None)
+            where T : unmanaged
+        {
+            SetData(offsetInBytes, (ReadOnlySpan<T>)data, options);
+        }
+
+        public void SetData<T>(Span<T> data, SetDataOptions options = SetDataOptions.None)
+            where T : unmanaged
+        {
+            SetData(0, data, options);
+        }
+
+        #endregion
+
+        #endregion
+
         /// <summary>
-        /// Gets the relevant IndexElementSize enum value for the given type.
+        /// Gets the relevant <see cref="Graphics.IndexElementSize"/> value for the given type.
         /// </summary>
         /// <param name="graphicsDevice">The graphics device.</param>
         /// <param name="type">The type to use for the index buffer</param>
-        /// <returns>The IndexElementSize enum value that matches the type</returns>
-        static IndexElementSize SizeForType(GraphicsDevice graphicsDevice, Type type)
+        /// <returns>The <see cref="Graphics.IndexElementSize"/> value that matches the type.</returns>
+        private static IndexElementSize SizeForType(GraphicsDevice graphicsDevice, Type type)
         {
             switch (ReflectionHelpers.ManagedSizeOf(type))
             {
                 case 2:
                     return IndexElementSize.SixteenBits;
+
                 case 4:
                     if (graphicsDevice.GraphicsProfile == GraphicsProfile.Reach)
                         throw new NotSupportedException(
@@ -66,93 +151,6 @@ namespace Microsoft.Xna.Framework.Graphics
                     throw new ArgumentOutOfRangeException(
                         nameof(type), "Index buffers can only be created for types that are sixteen or thirty two bits in length.");
             }
-        }
-
-        public void GetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount) where T : struct
-        {
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
-            if (data.Length < (startIndex + elementCount))
-                throw new InvalidOperationException(
-                    $"The array specified in the {nameof(data)} parameter is not the correct size for the amount of data requested.");
-
-            if (BufferUsage == BufferUsage.WriteOnly)
-                throw new NotSupportedException(
-                    $"This {nameof(IndexBuffer)} was created with a usage type of {BufferUsage.WriteOnly}. " +
-                    $"Calling {nameof(GetData)} on a resource that was created with {BufferUsage.WriteOnly} is not supported.");
-
-            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            try
-            {
-                IntPtr ptr = handle.AddrOfPinnedObject();
-                PlatformGetData(offsetInBytes, ptr, startIndex, elementCount);
-            }
-            finally
-            {
-                handle.Free();
-            }
-        }
-
-        public void GetData<T>(T[] data, int startIndex, int elementCount) where T : struct
-        {
-            this.GetData(0, data, startIndex, elementCount);
-        }
-
-        public void GetData<T>(T[] data) where T : struct
-        {
-            this.GetData(0, data, 0, data.Length);
-        }
-
-        protected void SetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, SetDataOptions options) where T : struct
-        {
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
-            if (data.Length < (startIndex + elementCount))
-                throw new InvalidOperationException(
-                    $"The array specified in the {nameof(data)} parameter is not the correct size for the amount of data requested.");
-
-            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            try
-            {
-                IntPtr ptr = handle.AddrOfPinnedObject();
-                SetData(offsetInBytes, ptr, startIndex, elementCount, options);
-            }
-            finally
-            {
-                handle.Free();
-            }
-        }
-
-        public void SetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount) where T : struct
-        {
-            SetData(offsetInBytes, data, startIndex, elementCount, SetDataOptions.None);
-        }
-
-        public void SetData<T>(T[] data, int startIndex, int elementCount) where T : struct
-        {
-            SetData(0, data, startIndex, elementCount);
-        }
-
-        public void SetData<T>(T[] data) where T : struct
-        {
-            SetData(data, 0, data.Length);
-        }
-
-        public void SetData(IntPtr data, int elementCount, SetDataOptions options)
-        {
-            SetData(0, data, 0, elementCount, options);
-        }
-
-        public void SetData(
-            int offsetInBytes, IntPtr data, int startIndex, int elementCount, SetDataOptions options)
-        {
-            if (data == IntPtr.Zero)
-                throw new ArgumentNullException(nameof(data));
-
-            PlatformSetData(offsetInBytes, data, startIndex, elementCount, options);
-            IndexCount = elementCount;
         }
     }
 }

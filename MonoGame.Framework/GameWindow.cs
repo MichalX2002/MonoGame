@@ -15,7 +15,6 @@ namespace Microsoft.Xna.Framework
 {
     public abstract class GameWindow
     {
-        public delegate void TextInputEventDelegate(TextInputEvent ev);
         public delegate void StateChangedDelegate();
 
         private string _title;
@@ -142,7 +141,7 @@ namespace Microsoft.Xna.Framework
 		/// <remarks>
 		/// This event is only supported on the Windows DirectX, Windows OpenGL and Linux platforms.
 		/// </remarks>
-		public event TextInputEventDelegate TextInput;
+		public event DataEvent<GameWindow, TextInputEvent> TextInput;
 
         internal bool IsTextInputHandled { get { return TextInput != null; } }
 #endif
@@ -188,9 +187,9 @@ namespace Microsoft.Xna.Framework
         }
 
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
-        protected void OnTextInput(TextInputEvent ev)
+        protected void OnTextInput(GameWindow window, TextInputEvent ev)
         {
-            TextInput?.Invoke(ev);
+            TextInput?.Invoke(window, ev);
         }
 #endif
 

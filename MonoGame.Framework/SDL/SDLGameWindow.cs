@@ -301,7 +301,7 @@ namespace Microsoft.Xna.Framework
 
         public void CallTextInput(int character, Keys key)
         {
-            OnTextInput(new TextInputEvent(this, character, key));
+            OnTextInput(this, new TextInputEvent(character, key));
         }
 
         protected internal override void SetSupportedOrientations(DisplayOrientation orientations)

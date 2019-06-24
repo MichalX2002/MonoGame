@@ -251,10 +251,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         {
             if (filename == null)
                 throw new ArgumentNullException("filename");
-            if (context == null)
-                throw new ArgumentNullException("context");
-
-            _context = context;
+            _context = context ?? throw new ArgumentNullException("context");
 
             if (CurrentPlatform.OS == OS.Linux)
             {

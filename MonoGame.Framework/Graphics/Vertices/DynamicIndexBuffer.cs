@@ -26,12 +26,6 @@ namespace Microsoft.Xna.Framework.Graphics
             base(graphicsDevice, indexType, indexCount, usage, dynamic: true)
         {
         }
-        
-        public void SetData<T>(T[] data, int startIndex, int elementCount, SetDataOptions options) 
-            where T : struct
-        {
-            base.SetData(0, data, startIndex, elementCount, options);
-        }
     }
 }
 

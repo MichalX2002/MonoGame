@@ -52,7 +52,7 @@ namespace Microsoft.Xna.Framework.Windows
 
         #region Events
 
-        public event EventHandler<HorizontalMouseWheelEventArgs> MouseHorizontalWheel;
+        public event DataEvent<WinFormsGameForm, HorizontalMouseWheelEvent> MouseHorizontalWheel;
 
         #endregion
 
@@ -134,10 +134,8 @@ namespace Microsoft.Xna.Framework.Windows
                     state = TouchLocationState.Moved;
                     break;
                 case WM_MOUSEHWHEEL:
-                    var delta = (short)(((ulong)m.WParam >> 16) & 0xffff); ;
-                    var handler = MouseHorizontalWheel;
-
-                    handler?.Invoke(this, new HorizontalMouseWheelEventArgs(delta));
+                    var delta = (short)(((ulong)m.WParam >> 16) & 0xffff);
+                    MouseHorizontalWheel?.Invoke(this, new HorizontalMouseWheelEvent(delta));
                     break;
                 case WM_ENTERSIZEMOVE:
                     IsResizing = true;

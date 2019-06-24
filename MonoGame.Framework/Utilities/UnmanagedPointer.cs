@@ -11,9 +11,12 @@ namespace Microsoft.Xna.Framework
 
         public bool IsDisposed { get; private set; }
         public IntPtr SafePtr { get; private set; }
-        public T* Ptr => (T*)SafePtr;
         public int Bytes => _length * sizeof(T);
         public int Length { get => _length; set => ReAlloc(value); }
+
+        [CLSCompliant(false)]
+        public T* Ptr => (T*)SafePtr;
+        public Span<T> Span => new Span<T>(Ptr, Length);
 
         public T this[int index]
         {

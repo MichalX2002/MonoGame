@@ -40,10 +40,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
         /// <param name="targetType"></param>
         protected ContentTypeWriter(Type targetType)
         {
-            if (targetType == null)
-                throw new ArgumentNullException();
-
-            TargetType = targetType;
+            TargetType = targetType ?? throw new ArgumentNullException();
         }
         
         /// <summary>

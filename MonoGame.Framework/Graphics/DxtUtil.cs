@@ -38,7 +38,6 @@
 // */
 // #endregion License
 // 
-using System;
 using System.IO;
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -72,7 +71,8 @@ namespace Microsoft.Xna.Framework.Graphics
             return imageData;
         }
 
-        private static void DecompressDxt1Block(BinaryReader imageReader, int x, int y, int blockCountX, int width, int height, byte[] imageData)
+        private static void DecompressDxt1Block(
+            BinaryReader imageReader, int x, int y, int blockCountX, int width, int height, byte[] imageData)
         {
             ushort c0 = imageReader.ReadUInt16();
             ushort c1 = imageReader.ReadUInt16();
@@ -97,16 +97,19 @@ namespace Microsoft.Xna.Framework.Graphics
 								g = g0;
 								b = b0;
 								break;
+
 							case 1:
 								r = r1;
 								g = g1;
 								b = b1;
 								break;
+
                             case 2:
 								r = (byte)((2 * r0 + r1) / 3);
 								g = (byte)((2 * g0 + g1) / 3);
 								b = (byte)((2 * b0 + b1) / 3);
 								break;
+
                             case 3:
 								r = (byte)((r0 + 2 * r1) / 3);
 								g = (byte)((g0 + 2 * g1) / 3);
@@ -123,16 +126,19 @@ namespace Microsoft.Xna.Framework.Graphics
 								g = g0;
 								b = b0;
 								break;
+
 							case 1:
 								r = r1;
 								g = g1;
 								b = b1;
 								break;
+
 							case 2:
 								r = (byte)((r0 + r1) / 2);
 								g = (byte)((g0 + g1) / 2);
 								b = (byte)((b0 + b1) / 2);
 								break;
+
 							case 3:
 								r = 0;
 								g = 0;
@@ -183,7 +189,8 @@ namespace Microsoft.Xna.Framework.Graphics
             return imageData;
         }
 
-        private static void DecompressDxt3Block(BinaryReader imageReader, int x, int y, int blockCountX, int width, int height, byte[] imageData)
+        private static void DecompressDxt3Block(
+            BinaryReader imageReader, int x, int y, int blockCountX, int width, int height, byte[] imageData)
         {
             byte a0 = imageReader.ReadByte();
 			byte a1 = imageReader.ReadByte();
@@ -328,7 +335,8 @@ namespace Microsoft.Xna.Framework.Graphics
             return imageData;
         }
 
-        private static void DecompressDxt5Block(BinaryReader imageReader, int x, int y, int blockCountX, int width, int height, byte[] imageData)
+        private static void DecompressDxt5Block(
+            BinaryReader imageReader, int x, int y, int blockCountX, int width, int height, byte[] imageData)
         {
             byte alpha0 = imageReader.ReadByte();
             byte alpha1 = imageReader.ReadByte();
@@ -351,36 +359,37 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 for (int blockX = 0; blockX < 4; blockX++)
                 {
-					byte r = 0, g = 0, b = 0, a = 255;
+                    byte r = 0, g = 0, b = 0;
                     uint index = (lookupTable >> 2 * (4 * blockY + blockX)) & 0x03;
                     
                     uint alphaIndex = (uint)((alphaMask >> 3 * (4 * blockY + blockX)) & 0x07);
+                    byte a;
                     if (alphaIndex == 0)
-					{
+                    {
                         a = alpha0;
                     }
-					else if (alphaIndex == 1)
-					{
+                    else if (alphaIndex == 1)
+                    {
                         a = alpha1;
                     }
-					else if (alpha0 > alpha1)
-					{
+                    else if (alpha0 > alpha1)
+                    {
                         a = (byte)(((8 - alphaIndex) * alpha0 + (alphaIndex - 1) * alpha1) / 7);
                     }
-					else if (alphaIndex == 6)
-					{
+                    else if (alphaIndex == 6)
+                    {
                         a = 0;
                     }
-					else if (alphaIndex == 7)
-					{
+                    else if (alphaIndex == 7)
+                    {
                         a = 0xff;
                     }
-					else
-					{
+                    else
+                    {
                         a = (byte)(((6 - alphaIndex) * alpha0 + (alphaIndex - 1) * alpha1) / 5);
                     }
 
-					switch (index)
+                    switch (index)
 					{
 						case 0:
 							r = r0;
@@ -420,13 +429,13 @@ namespace Microsoft.Xna.Framework.Graphics
         		
 		private static void ConvertRgb565ToRgb888(ushort color, out byte r, out byte g, out byte b)
 		{
-			int temp;
+            int temp = (color >> 11) * 255 + 16;
+            r = (byte)((temp / 32 + temp) / 32);
 
-			temp = (color >> 11) * 255 + 16;
-			r = (byte)((temp / 32 + temp) / 32);
 			temp = ((color & 0x07E0) >> 5) * 255 + 32;
 			g = (byte)((temp / 64 + temp) / 64);
-			temp = (color & 0x001F) * 255 + 16;
+
+            temp = (color & 0x001F) * 255 + 16;
 			b = (byte)((temp / 32 + temp) / 32);
 		}
 	}

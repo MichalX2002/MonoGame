@@ -348,10 +348,10 @@ namespace Microsoft.Xna.Framework.Graphics
                 RectangleF srcRect = sourceRectangle.Value;
                 w = srcRect.Width * scale.X;
                 h = srcRect.Height * scale.Y;
-                texCoord.X = srcRect.X * texture.TexelWidth;
-                texCoord.Y = srcRect.Y * texture.TexelHeight;
-                texCoord.Z = (srcRect.X + srcRect.Width) * texture.TexelWidth;
-                texCoord.W = (srcRect.Y + srcRect.Height) * texture.TexelHeight;
+                texCoord.X = srcRect.X * texture.Texel.X;
+                texCoord.Y = srcRect.Y * texture.Texel.Y;
+                texCoord.Z = (srcRect.X + srcRect.Width) * texture.Texel.X;
+                texCoord.W = (srcRect.Y + srcRect.Height) * texture.Texel.Y;
             }
             else
             {
@@ -446,26 +446,26 @@ namespace Microsoft.Xna.Framework.Graphics
             if (sourceRectangle.HasValue)
             {
                 RectangleF srcRect = sourceRectangle.Value;
-                texCoord.X = srcRect.X * texture.TexelWidth;
-                texCoord.Y = srcRect.Y * texture.TexelHeight;
-                texCoord.Z = (srcRect.X + srcRect.Width) * texture.TexelWidth;
-                texCoord.W = (srcRect.Y + srcRect.Height) * texture.TexelHeight;
+                texCoord.X = srcRect.X * texture.Texel.X;
+                texCoord.Y = srcRect.Y * texture.Texel.Y;
+                texCoord.Z = (srcRect.X + srcRect.Width) * texture.Texel.X;
+                texCoord.W = (srcRect.Y + srcRect.Height) * texture.Texel.Y;
 
                 if (srcRect.Width != 0)
                     origin.X = origin.X * destinationRectangle.Width / srcRect.Width;
                 else
-                    origin.X = origin.X * destinationRectangle.Width * texture.TexelWidth;
+                    origin.X = origin.X * destinationRectangle.Width * texture.Texel.X;
                 if (srcRect.Height != 0)
                     origin.Y = origin.Y * destinationRectangle.Height / srcRect.Height;
                 else
-                    origin.Y = origin.Y * destinationRectangle.Height * texture.TexelHeight;
+                    origin.Y = origin.Y * destinationRectangle.Height * texture.Texel.Y;
             }
             else
             {
                 texCoord = new Vector4(0, 0, 1, 1);
 
-                origin.X = origin.X * destinationRectangle.Width * texture.TexelWidth;
-                origin.Y = origin.Y * destinationRectangle.Height * texture.TexelHeight;
+                origin.X = origin.X * destinationRectangle.Width * texture.Texel.X;
+                origin.Y = origin.Y * destinationRectangle.Height * texture.Texel.Y;
             }
 
             FlipTexCoords(ref texCoord, effects);
@@ -528,10 +528,10 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 RectangleF srcRect = sourceRectangle.Value;
                 size = new Vector2(srcRect.Width, srcRect.Height);
-                texCoord.X = srcRect.X * texture.TexelWidth;
-                texCoord.Y = srcRect.Y * texture.TexelHeight;
-                texCoord.Z = (srcRect.X + srcRect.Width) * texture.TexelWidth;
-                texCoord.W = (srcRect.Y + srcRect.Height) * texture.TexelHeight;
+                texCoord.X = srcRect.X * texture.Texel.X;
+                texCoord.Y = srcRect.Y * texture.Texel.Y;
+                texCoord.Z = (srcRect.X + srcRect.Width) * texture.Texel.X;
+                texCoord.W = (srcRect.Y + srcRect.Height) * texture.Texel.Y;
             }
             else
             {
@@ -568,10 +568,10 @@ namespace Microsoft.Xna.Framework.Graphics
             if (sourceRectangle.HasValue)
             {
                 RectangleF srcRect = sourceRectangle.Value;
-                texCoord.X = srcRect.X * texture.TexelWidth;
-                texCoord.Y = srcRect.Y * texture.TexelHeight;
-                texCoord.Z = (srcRect.X + srcRect.Width) * texture.TexelWidth;
-                texCoord.W = (srcRect.Y + srcRect.Height) * texture.TexelHeight;
+                texCoord.X = srcRect.X * texture.Texel.X;
+                texCoord.Y = srcRect.Y * texture.Texel.Y;
+                texCoord.Z = (srcRect.X + srcRect.Width) * texture.Texel.X;
+                texCoord.W = (srcRect.Y + srcRect.Height) * texture.Texel.Y;
             }
             else
             {
@@ -647,7 +647,6 @@ namespace Microsoft.Xna.Framework.Graphics
         public unsafe void DrawString(SpriteFont spriteFont, string text, Vector2 position, Color color)
         {
             CheckArgs(spriteFont, text);
-
             float sortKey = GetSortKey(spriteFont.Texture, 0);
 
             var offset = Vector2.Zero;
@@ -695,10 +694,10 @@ namespace Microsoft.Xna.Framework.Graphics
                     item.SortKey = sortKey;
 
                     var texCoord = new Vector4();
-                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.TexelWidth;
-                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.TexelHeight;
-                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.TexelWidth;
-                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.TexelHeight;
+                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.Texel.X;
+                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.Texel.Y;
+                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.Texel.X;
+                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y;
 
                     item.Set(p.X,
                              p.Y,
@@ -850,10 +849,10 @@ namespace Microsoft.Xna.Framework.Graphics
                     item.SortKey = sortKey;
 
                     var texCoord = new Vector4();
-                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.TexelWidth;
-                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.TexelHeight;
-                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.TexelWidth;
-                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.TexelHeight;
+                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.Texel.X;
+                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.Texel.Y;
+                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.Texel.X;
+                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y;
 
                     FlipTexCoords(ref texCoord, effects);
 
@@ -948,10 +947,10 @@ namespace Microsoft.Xna.Framework.Graphics
                     item.SortKey = sortKey;
 
                     var texCoord = new Vector4();
-                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.TexelWidth;
-                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.TexelHeight;
-                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.TexelWidth;
-                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.TexelHeight;
+                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.Texel.X;
+                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.Texel.Y;
+                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.Texel.X;
+                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y;
 
                     item.Set(p.X,
                              p.Y,
@@ -1102,10 +1101,10 @@ namespace Microsoft.Xna.Framework.Graphics
                     item.SortKey = sortKey;
 
                     var texCoord = new Vector4();
-                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.TexelWidth;
-                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.TexelHeight;
-                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.TexelWidth;
-                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.TexelHeight;
+                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.Texel.X;
+                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.Texel.Y;
+                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.Texel.X;
+                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y;
 
                     FlipTexCoords(ref texCoord, effects);
 

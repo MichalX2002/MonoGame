@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using Color = Microsoft.Xna.Framework.Color;
 
 namespace MonoGame.Testings
 {
@@ -20,10 +23,16 @@ namespace MonoGame.Testings
         private Texture2D _pixel;
         private SpriteFont _font;
 
+        private Stopwatch _watch;
+
         private Song _song1;
         private Song _song2;
 
-        private SoundEffect _hitReflectSound;
+        private SoundEffect _winJingle;
+
+        private MouseCursor _grotCursor;
+
+        private DynamicSoundEffectInstance _dynamicSound;
 
         public GameHead()
         {
@@ -42,23 +51,29 @@ namespace MonoGame.Testings
             //_song2.Play();
         }
 
-        private System.Diagnostics.Stopwatch w;
-
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
-            _pixel.SetData(new Color[] { Color.White });
+            _pixel.SetData(new Color[] { Color.White }.AsSpan());
 
             _font = Content.Load<SpriteFont>("arial");
 
-            //w = new System.Diagnostics.Stopwatch();
-            //w.Restart();
-            //_song1 = Content.Load<Song>("sinus");
-            //_song1.Volume = 0.5f;
-            //w.Stop();
-            //Console.WriteLine("Song Load Time: " + w.ElapsedMilliseconds + "ms");
-            //
+            _watch = new Stopwatch();
+            
+            _watch.Restart();
+            _song1 = Content.Load<Song>("sinus");
+            _song1.Volume = 0.2f;
+            _watch.Stop();
+            Console.WriteLine("sinus Load Time: " + _watch.ElapsedMilliseconds + "ms");
+
+            _winJingle = Content.Load<SoundEffect>("Win Jingle");
+
+            using (var img = Texture2D.LoadImage(File.OpenRead("risgrot.png")))
+                _grotCursor = MouseCursor.FromImage(img, new Point(img.Width - 1, img.Height / 2));
+
+            Mouse.SetCursor(_grotCursor);
+
             //w.Restart();
             //_song2 = Content.Load<Song>("Win Jingle");
             //_song2.Volume = 0.2f;
@@ -69,6 +84,39 @@ namespace MonoGame.Testings
             //_hitReflectSound = Content.Load<SoundEffect>("hit_reflect_0");
             //w.Stop();
             //Console.WriteLine("Load Time: " + w.ElapsedMilliseconds + "ms");
+
+            testMusicStream = new FileStream("test.raw", FileMode.Open);
+
+            _dynamicSound = new DynamicSoundEffectInstance(44100, AudioChannels.Stereo);
+            _dynamicSound.BufferNeeded += _dynamicSound_BufferNeeded;
+            _dynamicSound.Pitch = 2;
+
+            //_dynamicSound_BufferNeeded(_dynamicSound);
+            //_dynamicSound_BufferNeeded(_dynamicSound);
+
+            _dynamicSound.Play();
+        }
+
+        private FileStream testMusicStream;
+
+        private void _dynamicSound_BufferNeeded(DynamicSoundEffectInstance sender)
+        {
+            if (testMusicStream == null)
+                return;
+
+            byte[] buffer = new byte[44100];
+            int read = testMusicStream.Read(buffer, 0, buffer.Length);
+
+            if (read == 0)
+            {
+                testMusicStream.Dispose();
+                testMusicStream = null;
+                Console.WriteLine("reached end of stream");
+                return;
+            }
+
+            sender.SubmitBuffer(buffer.AsSpan(0, read));
+            Console.WriteLine("Read " + read + " bytes");
         }
 
         //int ix = 0;
@@ -121,7 +169,7 @@ namespace MonoGame.Testings
         {
         }
 
-        float f = 0;
+        float f = 5;
 
         protected override void Update(GameTime time)
         {
@@ -129,19 +177,37 @@ namespace MonoGame.Testings
                 Exit();
 
             f += time.Delta;
-            if (f >= 5)
+            if (f >= 3f + new Random().NextDouble() * 2)
             {
                 //var instance = _hitReflectSound.CreateInstance();
                 //instance.Pitch = -0.6f;
                 //instance.Play();
 
+                //var instance = _winJingle.CreateInstance();
+                //instance.Volume = 0.15f;
+                //instance.Pitch = 1.2f;
+                //instance.Play();
+
                 f = 0f;
 
-                w.Restart();
-                //_song2.Play(TimeSpan.Zero);
-                w.Stop();
-                Console.WriteLine("Moved next in " + w.Elapsed.TotalMilliseconds.ToString("0.00") + "ms");
+                //w.Restart();
+                //_song1.Play(TimeSpan.Zero);
+                //w.Stop();
+                //Console.WriteLine("Moved next in " + w.Elapsed.TotalMilliseconds.ToString("0.00") + "ms");
+
+                int w = GraphicsDevice.PresentationParameters.BackBufferWidth;
+                int h = GraphicsDevice.PresentationParameters.BackBufferHeight;
+                var data = new Rgba32[w * h];
+                GraphicsDevice.GetBackBufferData(new Rectangle(0, 0, w, h), data.AsSpan());
+
+                using (var image = Image.WrapMemory(data.AsMemory(), w, h))
+                using (var fs = new FileStream("yo mom.png", FileMode.Create))
+                {
+                    image.SaveAsPng(fs);
+                }
             }
+
+            Console.WriteLine(_dynamicSound.BufferedSamples);
 
             base.Update(time);
         }
@@ -153,20 +219,20 @@ namespace MonoGame.Testings
             _spriteBatch.Begin();
             
             double avg = 0;
-            foreach (var value in Song.ThreadUpdateTiming)
+            foreach (var value in Song.UpdateTime)
                 avg += value.TotalMilliseconds;
-            avg /= Song.ThreadUpdateTiming.Count;
+            avg /= Song.UpdateTime.Count;
             
-            _spriteBatch.DrawString(_font, "Timing: " + avg.ToString("0.0"), new Vector2(10, 5), Color.White);
+            _spriteBatch.DrawString(_font, "Timing: " + avg.ToString("0.00"), new Vector2(10, 5), Color.White);
 
             using (var tex = new Texture2D(GraphicsDevice, 1, 1))
             {
-                tex.SetData(new[] { Color.White });
+                tex.SetData(new[] { Color.White }.AsSpan());
                 _spriteBatch.Draw(tex, new RectangleF(150, 50, 20, 20), Color.Red);
                 _spriteBatch.Draw(tex, new RectangleF(150, 100, 20, 20), Color.Green);
                 _spriteBatch.Draw(tex, new RectangleF(150, 150, 20, 20), Color.Blue);
                 _spriteBatch.Draw(tex, new RectangleF(150, 200, 20, 20), Color.Yellow);
-
+            
                 _spriteBatch.End();
             }
 

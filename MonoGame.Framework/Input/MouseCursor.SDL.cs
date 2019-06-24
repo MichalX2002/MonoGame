@@ -5,6 +5,9 @@
 using System;
 using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework.Graphics;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Microsoft.Xna.Framework.Input
 {
@@ -31,37 +34,34 @@ namespace Microsoft.Xna.Framework.Input
             Hand = new MouseCursor(Sdl.Mouse.SystemCursor.Hand);
         }
 
-        private static MouseCursor PlatformFromTexture2D(Texture2D texture, int originx, int originy)
+        private static unsafe MouseCursor PlatformFromImage(
+            ReadOnlySpan<Rgba32> data, int width, int height, int stride, Point origin)
         {
-            IntPtr surface = IntPtr.Zero;
-            IntPtr handle = IntPtr.Zero;
+            var surface = IntPtr.Zero;
+            var handle = IntPtr.Zero;
             try
             {
-                int elementCount = texture.Width * texture.Height;
-                IntPtr byteBuffer = Marshal.AllocHGlobal(elementCount * 4);
-                try
+                fixed (Rgba32* ptr = &MemoryMarshal.GetReference(data))
                 {
-                    texture.GetData(0, 0, texture._bounds, byteBuffer, 0, 4, elementCount);
-                    surface = Sdl.CreateRGBSurfaceFrom(byteBuffer, texture.Width, texture.Height, 32, texture.Width * 4, 0x000000ff, 0x0000FF00, 0x00FF0000, 0xFF000000);
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(byteBuffer);
+                    surface = Sdl.CreateRGBSurfaceFrom(
+                        (IntPtr)ptr, width, height, 32, stride,
+                        0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
                 }
 
                 if (surface == IntPtr.Zero)
-                    throw new InvalidOperationException("Failed to create surface for mouse cursor: " + Sdl.GetError());
+                    throw new InvalidOperationException(
+                        "Failed to create surface for mouse cursor.", new Exception(Sdl.GetError()));
 
-                handle = Sdl.Mouse.CreateColorCursor(surface, originx, originy);
+                handle = Sdl.Mouse.CreateColorCursor(surface, origin.X, origin.Y);
                 if (handle == IntPtr.Zero)
-                    throw new InvalidOperationException("Failed to set surface for mouse cursor: " + Sdl.GetError());
+                    throw new InvalidOperationException(
+                        "Failed to set surface for mouse cursor.", new Exception(Sdl.GetError()));
             }
             finally
             {
                 if (surface != IntPtr.Zero)
                     Sdl.FreeSurface(surface);
             }
-
             return new MouseCursor(handle);
         }
 
@@ -69,7 +69,6 @@ namespace Microsoft.Xna.Framework.Input
         {
             if (Handle == IntPtr.Zero)
                 return;
-            
             Sdl.Mouse.FreeCursor(Handle);
             Handle = IntPtr.Zero;
         }

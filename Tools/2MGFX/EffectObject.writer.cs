@@ -5,7 +5,7 @@
 using System.IO;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using MonoGame.Utilities.IO;
+using MonoGame.Utilities.Memory;
 
 namespace TwoMGFX
 {

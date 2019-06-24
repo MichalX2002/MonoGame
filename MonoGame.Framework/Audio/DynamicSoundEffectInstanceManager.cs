@@ -29,10 +29,13 @@ namespace Microsoft.Xna.Framework.Audio
         {
             for (int i = _playingInstances.Count - 1; i >= 0; i--)
             {
-                if (_playingInstances[i].TryGetTarget(out _))
+                if (_playingInstances[i].TryGetTarget(out var target))
                 {
-                    _playingInstances.RemoveAt(i);
-                    return;
+                    if (target == instance)
+                    {
+                        _playingInstances.RemoveAt(i);
+                        return;
+                    }
                 }
             }
         }

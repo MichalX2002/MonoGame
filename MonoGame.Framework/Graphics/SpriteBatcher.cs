@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -28,16 +26,14 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private readonly GraphicsDevice _device;
 
-        private int _quadCount;
+        private int _itemCount;
         private SpriteBatchItem[] _batchItems;
-        private UnmanagedPointer<VertexPositionColorTexture> _itemVertexBuffer;
+        private UnmanagedPointer<VertexPositionColorTexture> _vertexBuffer;
         
         /// <summary>
         /// The index buffer values are constant and more indices are added as needed.
         /// </summary>
-        private IndexBuffer _indexBuffer;
-
-        private DynamicVertexBuffer _vertexBuffer;
+        private UnmanagedPointer<ushort> _indexBuffer;
 
         public bool IsDisposed { get; private set; }
 
@@ -45,13 +41,9 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             _device = device ?? throw new ArgumentNullException(nameof(device));
 
-            _indexBuffer = new IndexBuffer(device, IndexElementSize.SixteenBits, 0, BufferUsage.WriteOnly);
-            _vertexBuffer = new DynamicVertexBuffer(device, VertexPositionColorTexture.VertexDeclaration, 0, BufferUsage.WriteOnly);
-
-            _itemVertexBuffer = new UnmanagedPointer<VertexPositionColorTexture>(InitialBatchSize * 4);
-            _batchItems = new SpriteBatchItem[InitialBatchSize];
-            for (int i = 0; i < InitialBatchSize; i++)
-                _batchItems[i] = new SpriteBatchItem();
+            _vertexBuffer = new UnmanagedPointer<VertexPositionColorTexture>();
+            _indexBuffer = new UnmanagedPointer<ushort>();
+            _batchItems = Array.Empty<SpriteBatchItem>();
 
             EnsureCapacity(InitialBatchSize);
         }
@@ -68,61 +60,55 @@ namespace Microsoft.Xna.Framework.Graphics
             for (int i = oldSize; i < _batchItems.Length; i++)
                 _batchItems[i] = new SpriteBatchItem();
 
-            int min = Math.Min(itemCount, MaxBatchSize) * 4; // 4 vertices per item
-            if (min > _itemVertexBuffer.Length)
-                _itemVertexBuffer.Length = min;
+            int min = Math.Min(itemCount, MaxBatchSize);
 
-            int newIndexCount = itemCount * 6; // 6 indices per item
-            int oldIndexCount = _indexBuffer.IndexCount;
-            if (newIndexCount > oldIndexCount)
+            int minVertices = min * 4; // 4 vertices per item
+            if (minVertices > _vertexBuffer.Length)
+                _vertexBuffer.Length = minVertices;
+
+            int minIndices = min * 6; // 6 indices per item
+            if (minIndices > _indexBuffer.Length)
             {
+                _indexBuffer.Length = minIndices;
+
                 // 1 batch item needs 6 indices
-                IntPtr tmpMemory = Marshal.AllocHGlobal(newIndexCount * sizeof(ushort));
-                try
+                ushort* indexPtr = _indexBuffer.Ptr;
+                for (int i = 0, v = 0; i < minIndices; i += 6, v += 4)
                 {
-                    ushort* indexPtr = (ushort*)tmpMemory;
-                    for (int i = 0, v = 0; i < newIndexCount; i += 6, v += 4)
-                    {
-                        /*
-                         *  TL    TR    0,1,2,3 = index offsets for vertex indices
-                         *   0----1     TL,TR,BL,BR are vertex references in SpriteBatchItem.   
-                         *   |   /|    
-                         *   |  / |
-                         *   | /  |
-                         *   |/   |
-                         *   2----3
-                         *  BL    BR
-                         */
+                    /*
+                     *  TL    TR    0,1,2,3 = index offsets for vertex indices
+                     *   0----1     TL,TR,BL,BR are vertex references in SpriteBatchItem.   
+                     *   |   /|    
+                     *   |  / |
+                     *   | /  |
+                     *   |/   |
+                     *   2----3
+                     *  BL    BR
+                     */
 
-                        // Triangle 1
-                        indexPtr[i + 0] = (ushort)(v + 0);
-                        indexPtr[i + 1] = (ushort)(v + 1);
-                        indexPtr[i + 2] = (ushort)(v + 2);
+                    // Triangle 1
+                    indexPtr[i + 0] = (ushort)(v + 0);
+                    indexPtr[i + 1] = (ushort)(v + 1);
+                    indexPtr[i + 2] = (ushort)(v + 2);
 
-                        // Triangle 2
-                        indexPtr[i + 3] = (ushort)(v + 1);
-                        indexPtr[i + 4] = (ushort)(v + 3);
-                        indexPtr[i + 5] = (ushort)(v + 2);
-                    }
-                    _indexBuffer.SetData(tmpMemory, newIndexCount, SetDataOptions.Discard);
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(tmpMemory);
+                    // Triangle 2
+                    indexPtr[i + 3] = (ushort)(v + 1);
+                    indexPtr[i + 4] = (ushort)(v + 3);
+                    indexPtr[i + 5] = (ushort)(v + 2);
                 }
             }
         }
 
         public SpriteBatchItem GetBatchItem()
         {
-            if (_quadCount >= _batchItems.Length)
+            if (_itemCount >= _batchItems.Length)
             {
                 int oldSize = _batchItems.Length;
                 int newSize = oldSize + oldSize / 2; // grow by x1.5
                 newSize = (newSize + 255) & (~255); // grow in chunks of 256.
                 EnsureCapacity(newSize);
             }
-            return _batchItems[_quadCount++];
+            return _batchItems[_itemCount++];
         }
 
         /// <summary>
@@ -137,7 +123,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new ObjectDisposedException(nameof(effect));
 
             // nothing to do
-            if (_quadCount == 0)
+            if (_itemCount == 0)
                 return;
 
             // sort the batch items
@@ -146,34 +132,34 @@ namespace Microsoft.Xna.Framework.Graphics
                 case SpriteSortMode.Texture:
                 case SpriteSortMode.FrontToBack:
                 case SpriteSortMode.BackToFront:
-                    Array.Sort(_batchItems, 0, _quadCount);
+                    Array.Sort(_batchItems, 0, _itemCount);
                     break;
             }
 
             // iterate through the batches, doing clamped sets of vertices at the time
-            VertexPositionColorTexture* quadBufferPtr = _itemVertexBuffer.Ptr;
-            int itemsLeft = _quadCount;
+            VertexPositionColorTexture* quadBufferPtr = _vertexBuffer.Ptr;
+            int itemsLeft = _itemCount;
             while (itemsLeft > 0)
             {
-                int vertexCount = 0;
-                Texture2D tex = null;
-
                 int itemsToProcess = itemsLeft;
                 if (itemsToProcess > MaxBatchSize)
                     itemsToProcess = MaxBatchSize;
 
+                int vertexCount = 0;
+                Texture2D tex = null;
+
                 // draw the batches
                 for (int i = 0; i < itemsToProcess; i++, vertexCount += 4)
                 {
-                    int offset = _quadCount - itemsLeft;
+                    int offset = _itemCount - itemsLeft;
                     var item = _batchItems[offset];
 
                     // if the texture changed, we need to flush and bind the new texture
                     if (!ReferenceEquals(item.Texture, tex))
                     {
                         FlushVertexArray(vertexCount, effect, tex);
-
                         vertexCount = 0;
+
                         tex = item.Texture;
                         _device.Textures[0] = tex;
                     }
@@ -193,9 +179,9 @@ namespace Microsoft.Xna.Framework.Graphics
             
             unchecked
             {
-                _device._graphicsMetrics._spriteCount += _quadCount;
+                _device._graphicsMetrics._spriteCount += _itemCount;
             }
-            _quadCount = 0;
+            _itemCount = 0;
         }
 
         /// <summary>
@@ -209,11 +195,7 @@ namespace Microsoft.Xna.Framework.Graphics
             if (count == 0)
                 return;
 
-            _vertexBuffer.SetData(
-                0, _itemVertexBuffer.SafePtr, 0, count, sizeof(VertexPositionColorTexture), 0, SetDataOptions.Discard);
-
-            _device.SetVertexBuffer(_vertexBuffer);
-            _device.Indices = _indexBuffer;
+            var vertices = _vertexBuffer.Span.Slice(0, count);
 
             // If the effect is not null, then apply each pass and render the geometry
             if (effect != null)
@@ -226,13 +208,15 @@ namespace Microsoft.Xna.Framework.Graphics
                     // ends up in Textures[0].
                     _device.Textures[0] = texture;
 
-                    _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, count / 2);
+                    _device.DrawUserIndexedPrimitives<VertexPositionColorTexture, ushort>(
+                        PrimitiveType.TriangleList, vertices, _indexBuffer.Span, count / 2);
                 }
             }
             else
             {
                 // If no custom effect is defined, then simply render.
-                _device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, count / 2);
+                _device.DrawUserIndexedPrimitives<VertexPositionColorTexture, ushort>(
+                    PrimitiveType.TriangleList, vertices, _indexBuffer.Span, count / 2);
             }
         }
 
@@ -240,7 +224,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             if (!IsDisposed)
             {
-                _itemVertexBuffer.Dispose();
+                _vertexBuffer.Dispose();
                 IsDisposed = true;
             }
         }

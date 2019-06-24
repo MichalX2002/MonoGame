@@ -5,7 +5,7 @@
 namespace Microsoft.Xna.Framework.Graphics
 {
     /// <summary>
-    /// Defines size for index in every buffer that derives from <see cref="IndexBufferBase"/>.
+    /// Defines the size for indices in an <see cref="IndexBuffer"/>.
     /// </summary>
 	public enum IndexElementSize
 	{
@@ -13,6 +13,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// 16-bit short/ushort value been used.
         /// </summary>
 		SixteenBits,
+
         /// <summary>
         /// 32-bit int/uint value been used.
         /// </summary>

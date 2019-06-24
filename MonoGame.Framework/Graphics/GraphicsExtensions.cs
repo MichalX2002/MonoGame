@@ -522,7 +522,7 @@ namespace Microsoft.Xna.Framework.Graphics
             var supportsFloat = graphicsDevice.GraphicsCapabilities.SupportsFloatTextures;
             var supportsHalfFloat = graphicsDevice.GraphicsCapabilities.SupportsHalfFloatTextures;
             var supportsNormalized = graphicsDevice.GraphicsCapabilities.SupportsNormalized;
-            var isGLES2 = GL.BoundApi == GL.RenderApi.ES && graphicsDevice.glMajorVersion == 2;
+            var isGLES2 = GL.BoundApi == GL.RenderApi.ES && graphicsDevice._glMajorVersion == 2;
 
             switch (format)
             {

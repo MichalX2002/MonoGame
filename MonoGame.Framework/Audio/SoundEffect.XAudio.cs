@@ -9,6 +9,7 @@ using SharpDX;
 using SharpDX.XAudio2;
 using SharpDX.Multimedia;
 using SharpDX.X3DAudio;
+using MonoGame.Utilities.Memory;
 
 namespace Microsoft.Xna.Framework.Audio
 {
@@ -95,10 +96,9 @@ namespace Microsoft.Xna.Framework.Audio
         /// </summary>
         internal static void PlatformInitialize()
         {
+            ALController.EnsureInitialized();
             try
             {
-                OpenALSoundController.EnsureInitialized();
-
                 if (Device == null)
                 {
 #if !WINDOWS_UAP && DEBUG
@@ -152,35 +152,31 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        private static DataStream ToDataStream(int offset, byte[] buffer, int length)
+        private static DataStream ToDataStream(ReadOnlySpan<byte> buffer)
         {
-            if (offset == 0 && buffer.Length == length)
-                return DataStream.Create(buffer, true, false);
-
-            // NOTE: We make a copy here because old versions of 
-            // DataStream.Create didn't work correctly for offsets.
-            var data = new byte[length - offset];
-            Buffer.BlockCopy(buffer, offset, data, 0, length - offset);
+            // NOTE: old versions of DataStream.Create didn't work correctly for offsets
+            
+            var data = new byte[buffer.Length];
+            buffer.CopyTo(data);
 
             return DataStream.Create(data, true, false);
         }
 
-        private void PlatformInitializePcm(byte[] buffer, int offset, int count, int sampleBits, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
+        private void PlatformInitializePcm(
+            ReadOnlySpan<byte> buffer, int sampleBits, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
         {
             CreateBuffers(
                 new WaveFormat(sampleRate, sampleBits, (int)channels),
-                ToDataStream(offset, buffer, count),
-                loopStart,
-                loopLength);
+                ToDataStream(buffer), loopStart, loopLength);
         }
 
-        private void PlatformInitializeFormat(byte[] header, byte[] buffer, int bufferSize, int loopStart, int loopLength)
+        private void PlatformInitializeFormat(ReadOnlySpan<byte> header, ReadOnlySpan<byte> buffer, int loopStart, int loopLength)
         {
-            var format = BitConverter.ToInt16(header, 0);
-            var channels = BitConverter.ToInt16(header, 2);
-            var sampleRate = BitConverter.ToInt32(header, 4);
-            var blockAlignment = BitConverter.ToInt16(header, 12);
-            var sampleBits = BitConverter.ToInt16(header, 14);
+            short format = header.ToInt16();
+            short channels = header.Slice(2).ToInt16();
+            int sampleRate = header.Slice(4).ToInt32();
+            short blockAlignment = header.Slice(12).ToInt16();
+            short sampleBits = header.Slice(14).ToInt16();
 
             WaveFormat waveFormat;
             if (format == 1)
@@ -190,34 +186,29 @@ namespace Microsoft.Xna.Framework.Audio
             else if (format == 3)
                 waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channels);
             else
-                throw new NotSupportedException("Unsupported wave format!");
+                throw new NotSupportedException("Unsupported wave format.");
 
-            CreateBuffers(waveFormat,
-                            ToDataStream(0, buffer, bufferSize),
-                            loopStart,
-                            loopLength);
+            CreateBuffers(waveFormat, ToDataStream(buffer), loopStart, loopLength);
         }
 
-        private void PlatformInitializeXact(MiniFormatTag codec, byte[] buffer, int channels, int sampleRate, int blockAlignment, int loopStart, int loopLength, out TimeSpan duration)
+        private void PlatformInitializeXact(
+            MiniFormatTag codec, ReadOnlySpan<byte> buffer, int channels, int sampleRate, int blockAlignment,
+            int loopStart, int loopLength, out TimeSpan duration)
         {
             if (codec == MiniFormatTag.Adpcm)
             {
                 duration = TimeSpan.FromSeconds((float)loopLength / sampleRate);
 
-                CreateBuffers(new WaveFormatAdpcm(sampleRate, channels, blockAlignment),
-                                ToDataStream(0, buffer, buffer.Length),
-                                loopStart,
-                                loopLength);
-
+                var format = new WaveFormatAdpcm(sampleRate, channels, blockAlignment);
+                CreateBuffers(format, ToDataStream(buffer), loopStart, loopLength);
                 return;
             }
-
-            throw new NotSupportedException("Unsupported sound format!");
+            throw new NotSupportedException("Unsupported sound format.");
         }
 
         private void PlatformLoadAudioStream(Stream stream, out TimeSpan duration)
         {
-            SoundStream soundStream = null;
+            SoundStream soundStream;
             try
             {
                 soundStream = new SoundStream(stream);
@@ -228,7 +219,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
 
             var dataStream = soundStream.ToDataStream();
-            int sampleCount = 0;
+            int sampleCount;
             switch (soundStream.Format.Encoding)
             {
                 case WaveFormatEncoding.Adpcm:
@@ -237,17 +228,20 @@ namespace Microsoft.Xna.Framework.Audio
                         sampleCount = ((int)dataStream.Length / soundStream.Format.BlockAlign) * samplesPerBlock;
                     }
                     break;
+
                 case WaveFormatEncoding.Pcm:
                 case WaveFormatEncoding.IeeeFloat:
                     sampleCount = (int)(dataStream.Length / ((soundStream.Format.Channels * soundStream.Format.BitsPerSample) / 8));
                     break;
+
                 default:
-                    throw new ArgumentException("Ensure that the specified stream contains valid PCM, MS-ADPCM or IEEE Float wave data.");
+                    throw new ArgumentException(
+                        "Ensure that the specified stream contains valid PCM, MS-ADPCM or IEEE Float wave data.");
             }
 
             CreateBuffers(soundStream.Format, dataStream, 0, sampleCount);
 
-            duration = TimeSpan.FromSeconds((float)sampleCount / (float)soundStream.Format.SampleRate);
+            duration = TimeSpan.FromSeconds(sampleCount / (float)soundStream.Format.SampleRate);
         }
 
         private void CreateBuffers(WaveFormat format, DataStream dataStream, int loopStart, int loopLength)
@@ -262,7 +256,7 @@ namespace Microsoft.Xna.Framework.Audio
                 Flags = BufferFlags.EndOfStream,
                 PlayBegin = loopStart,
                 PlayLength = loopLength,
-                Context = new IntPtr(42),
+                Context = new IntPtr(42)
             };
 
             _loopedBuffer = new AudioBuffer
@@ -273,7 +267,7 @@ namespace Microsoft.Xna.Framework.Audio
                 LoopBegin = loopStart,
                 LoopLength = loopLength,
                 LoopCount = AudioBuffer.LoopInfinite,
-                Context = new IntPtr(42),
+                Context = new IntPtr(42)
             };
         }
 
@@ -387,7 +381,7 @@ namespace Microsoft.Xna.Framework.Audio
             _device3DDirty = true;
             _speakers = Speakers.Stereo;
             
-            OpenALSoundController.DestroyInstance();
+            ALController.DestroyInstance();
         }
     }
 }

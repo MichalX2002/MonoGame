@@ -27,9 +27,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         protected ChildCollection(TParent parent)
             : base()
         {
-            if (parent == null)
-                throw new ArgumentNullException("parent");
-            this.parent = parent;
+            this.parent = parent ?? throw new ArgumentNullException("parent");
         }
 
         /// <summary>

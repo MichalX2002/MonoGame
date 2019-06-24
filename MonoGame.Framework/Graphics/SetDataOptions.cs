@@ -13,10 +13,12 @@ namespace Microsoft.Xna.Framework.Graphics
         /// The SetData can overwrite the portions of existing data.
         /// </summary>
         None,
+
         /// <summary>
         /// The SetData will discard the entire buffer. A pointer to a new memory area is returned and rendering from the previous area does not stall.
         /// </summary>
         Discard,
+
         /// <summary>
         /// The SetData operation will not overwrite existing data. This allows the driver to return immediately from a SetData operation and continue rendering.
         /// </summary>

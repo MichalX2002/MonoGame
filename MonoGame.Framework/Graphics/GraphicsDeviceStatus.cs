@@ -13,14 +13,15 @@ namespace Microsoft.Xna.Framework.Graphics
         /// The device is normal.
         /// </summary>
         Normal,
+
         /// <summary>
         /// The device has been lost.
         /// </summary>
         Lost,
+
         /// <summary>
         /// The device has not been reset.
         /// </summary>
         NotReset
     }
 }
-

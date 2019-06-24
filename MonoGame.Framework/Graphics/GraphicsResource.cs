@@ -45,23 +45,45 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public abstract class GraphicsResource : IDisposable
     {
-
         // The GraphicsDevice property should only be accessed in Dispose(bool) if the disposing
         // parameter is true. If disposing is false, the GraphicsDevice may or may not be
         // disposed yet.
-        GraphicsDevice graphicsDevice;
+        private GraphicsDevice _graphicsDevice;
 
         private WeakReference _selfReference;
 
-        internal GraphicsResource()
+        public bool IsDisposed { get; private set; }
+        public string Name { get; set; }
+        public object Tag { get; set; }
+
+        public event SenderEvent<GraphicsResource> Disposing;
+
+        public GraphicsDevice GraphicsDevice
         {
-            
+            get => _graphicsDevice;
+            internal set
+            {
+                Debug.Assert(value != null);
+
+                if (_graphicsDevice == value)
+                    return;
+
+                // VertexDeclaration objects can be bound to multiple GraphicsDevice objects
+                // during their lifetime. But only one GraphicsDevice should retain ownership.
+                if (_graphicsDevice != null)
+                {
+                    _graphicsDevice.RemoveResourceReference(_selfReference);
+                    _selfReference = null;
+                }
+                _graphicsDevice = value;
+
+                _selfReference = new WeakReference(this);
+                _graphicsDevice.AddResourceReference(_selfReference);
+            }
         }
 
-        ~GraphicsResource()
+        internal GraphicsResource()
         {
-            // Pass false so the managed objects are not released
-            Dispose(false);
         }
 
         /// <summary>
@@ -73,6 +95,19 @@ namespace Microsoft.Xna.Framework.Graphics
         internal protected virtual void GraphicsDeviceResetting()
         {
 
+        }
+
+        [DebuggerHidden]
+        protected static void AssertIsOnUIThreadForSpan()
+        {
+            if (!Threading.IsOnUIThread())
+                throw new NotSupportedException(
+                    "This method (which utilizes Span<T>) can only be called on the UI thread.");
+        }
+
+        public override string ToString()
+        {
+            return string.IsNullOrEmpty(Name) ? base.ToString() : Name;
         }
 
         public void Dispose()
@@ -105,53 +140,20 @@ namespace Microsoft.Xna.Framework.Graphics
                     Disposing?.Invoke(this);
 
                 // Remove from the global list of graphics resources
-                if (graphicsDevice != null)
-                    graphicsDevice.RemoveResourceReference(_selfReference);
+                if (_graphicsDevice != null)
+                    _graphicsDevice.RemoveResourceReference(_selfReference);
 
                 _selfReference = null;
-                graphicsDevice = null;
+                _graphicsDevice = null;
                 IsDisposed = true;
             }
         }
 
-		public event SenderDelegate<GraphicsResource> Disposing;
-		
-		public GraphicsDevice GraphicsDevice
+        ~GraphicsResource()
         {
-            get => graphicsDevice;
-
-            internal set
-            {
-                Debug.Assert(value != null);
-
-                if (graphicsDevice == value)
-                    return;
-
-                // VertexDeclaration objects can be bound to multiple GraphicsDevice objects
-                // during their lifetime. But only one GraphicsDevice should retain ownership.
-                if (graphicsDevice != null)
-                {
-                    graphicsDevice.RemoveResourceReference(_selfReference);
-                    _selfReference = null;
-                }
-
-                graphicsDevice = value;
-
-                _selfReference = new WeakReference(this);
-                graphicsDevice.AddResourceReference(_selfReference);
-            }
+            // Pass false so the managed objects are not released
+            Dispose(false);
         }
-
-        public bool IsDisposed { get; private set; }
-
-        public string Name { get; set; }
-		
-		public Object Tag { get; set; }
-
-        public override string ToString()
-        {
-            return string.IsNullOrEmpty(Name) ? base.ToString() : Name;
-        }
-	}
+    }
 }
 

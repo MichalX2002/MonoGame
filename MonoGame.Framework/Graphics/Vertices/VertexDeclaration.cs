@@ -33,6 +33,7 @@ namespace Microsoft.Xna.Framework.Graphics
         private sealed class Data : IEquatable<Data>
         {
             private readonly int _hashCode;
+
             public readonly int VertexStride;
             public VertexElement[] Elements;
 
@@ -66,9 +67,9 @@ namespace Microsoft.Xna.Framework.Graphics
                 if (ReferenceEquals(this, other))
                     return true;
 
-                if (_hashCode != other._hashCode
-                    || VertexStride != other.VertexStride
-                    || Elements.Length != other.Elements.Length)
+                if (_hashCode != other._hashCode ||
+                    VertexStride != other.VertexStride ||
+                    Elements.Length != other.Elements.Length)
                 {
                     return false;
                 }
@@ -122,7 +123,6 @@ namespace Microsoft.Xna.Framework.Graphics
             _data = data;
         }
         #endregion
-
 
         private readonly Data _data;
 
@@ -184,17 +184,16 @@ namespace Microsoft.Xna.Framework.Graphics
 				if (max < start)
 					max = start;
 			}
-
 			return max;
 		}
 
         /// <summary>
-        /// Returns the VertexDeclaration for Type.
+        /// Returns the <see cref="VertexDeclaration"/> for Type.
         /// </summary>
-        /// <param name="vertexType">A value type which implements the IVertexType interface.</param>
-        /// <returns>The VertexDeclaration.</returns>
+        /// <param name="vertexType">A value type which implements the <see cref="IVertexType"/> interface.</param>
+        /// <returns>The <see cref="VertexDeclaration"/>.</returns>
         /// <remarks>
-        /// Prefer to use VertexDeclarationCache when the declaration lookup
+        /// Prefer to use <see cref="VertexDeclarationCache{T}"/> when the declaration lookup
         /// can be performed with a templated type.
         /// </remarks>
 		internal static VertexDeclaration FromType(Type vertexType)
@@ -203,9 +202,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new ArgumentNullException(nameof(vertexType));
 
             if (!ReflectionHelpers.IsValueType(vertexType))
-            {
 				throw new ArgumentException("Must be value type.", nameof(vertexType));
-			}
 
             var type = Activator.CreateInstance(vertexType) as IVertexType;
             var vertexDeclaration = type.VertexDeclaration;
@@ -215,7 +212,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     $"{nameof(vertexType)} does not inherit {nameof(IVertexType)}.", nameof(vertexType));
 
 			if (vertexDeclaration == null)
-				throw new Exception($"{nameof(IVertexType)}.{nameof(VertexDeclaration)} cannot be null.");
+				throw new Exception($"{nameof(IVertexType)}.{nameof(IVertexType.VertexDeclaration)} cannot be null.");
 
 			return vertexDeclaration;
 		}

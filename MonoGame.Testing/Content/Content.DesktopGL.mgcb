@@ -34,7 +34,7 @@
 
 #begin Win Jingle.ogg
 /importer:OggImporter
-/processor:SongProcessor
+/processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:Win Jingle.ogg
 

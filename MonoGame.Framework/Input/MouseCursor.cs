@@ -4,6 +4,9 @@
 
 using System;
 using Microsoft.Xna.Framework.Graphics;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Microsoft.Xna.Framework.Input
 {
@@ -76,16 +79,60 @@ namespace Microsoft.Xna.Framework.Input
         /// Creates a mouse cursor from the specified texture.
         /// </summary>
         /// <param name="texture">Texture to use as the cursor image.</param>
-        /// <param name="originx">X cordinate of the image that will be used for mouse position.</param>
-        /// <param name="originy">Y cordinate of the image that will be used for mouse position.</param>
-        public static MouseCursor FromTexture2D(Texture2D texture, int originx, int originy)
+        /// <param name="origin">The coordinates of the image that will be used for mouse position.</param>
+        /// <param name="sourceRectangle">The part of the texture to use as the cursor.</param>
+        public static MouseCursor FromTexture2D(
+            Texture2D texture, Point origin, Rectangle? sourceRectangle = null)
         {
             if (texture.Format != SurfaceFormat.Rgba32 && texture.Format != SurfaceFormat.ColorSRgb)
                 throw new ArgumentException(
                     $"Only {SurfaceFormat.Rgba32} or {SurfaceFormat.ColorSRgb} textures are accepted for mouse cursors.",
                     nameof(texture));
 
-            return PlatformFromTexture2D(texture, originx, originy);
+            var rect = sourceRectangle ?? texture.Bounds;
+            var textureData = new Rgba32[rect.Width * rect.Height];
+            texture.GetData(textureData.AsSpan(), sourceRectangle);
+
+            using (var image = Image.WrapMemory(textureData.AsMemory(), rect.Width, rect.Height))
+                return FromImage(image, origin, sourceRectangle);
+        }
+
+        /// <summary>
+        /// Creates a mouse cursor from the specified image.
+        /// </summary>
+        /// <typeparam name="TPixel">The pixel type of the image.</typeparam>
+        /// <param name="image">Image to use as the cursor image.</param>
+        /// <param name="origin">The coordinates of the image that will be used for mouse position.</param>
+        /// <param name="sourceRectangle">The part of the image to use as the cursor.</param>
+        [CLSCompliant(false)]
+        public static MouseCursor FromImage<TPixel>(
+            Image<TPixel> image, Point origin, Rectangle? sourceRectangle = null)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            var rect = sourceRectangle ?? new Rectangle(0, 0, image.Width, image.Height);
+
+            Span<Rgba32> imageData;
+            if (image is Image<Rgba32> rgbaImage)
+            {
+                // CreateRGBSurfaceFrom takes pitch which defines bytes per row so we
+                // don't need to worry about indexing if the image is larger than the srcRect
+                imageData = rgbaImage.GetPixelSpan();
+            }
+            else
+            {
+                var buffer = new Rgba32[rect.Width * rect.Height];
+                var pixels = image.GetPixelSpan();
+                for (int y = 0; y < rect.Height; y++)
+                {
+                    var clippedPixelRow = pixels.Slice(rect.Y + y, rect.Width);
+                    for (int x = 0; x < rect.Width; x++)
+                        clippedPixelRow[rect.X + x].ToRgba32(ref buffer[x + y * rect.Height]);
+                }
+                imageData = buffer;
+            }
+
+            int stride = image.Width * image.PixelType.BitsPerPixel / 8; // bytes per row
+            return PlatformFromImage(imageData, rect.Width, rect.Height, stride, origin);
         }
 
         public IntPtr Handle { get; private set; }

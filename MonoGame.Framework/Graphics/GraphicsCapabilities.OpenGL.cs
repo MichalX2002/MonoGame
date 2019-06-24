@@ -39,7 +39,7 @@ namespace Microsoft.Xna.Framework.Graphics
             // Unfortunately non PoT texture support is patchy even on desktop systems and we can't
             // rely on the fact that GL2.0+ supposedly supports npot in the core.
             // Reference: http://aras-p.info/blog/2012/10/17/non-power-of-two-textures/
-            SupportsNonPowerOfTwo = device._maxTextureSize >= 8192;
+            SupportsNonPowerOfTwo = device.MaxTexture2DSize >= 8192;
 #endif
 
             SupportsTextureFilterAnisotropic = GL.Extensions.Contains("GL_EXT_texture_filter_anisotropic");
@@ -77,7 +77,7 @@ namespace Microsoft.Xna.Framework.Graphics
 #else
             // if we're on GL 3.0+, frame buffer extensions are guaranteed to be present, but extensions may be missing
             // it is then safe to assume that GL_ARB_framebuffer_object is present so that the standard function are loaded
-            SupportsFramebufferObjectARB = device.glMajorVersion >= 3 || GL.Extensions.Contains("GL_ARB_framebuffer_object");
+            SupportsFramebufferObjectARB = device._glMajorVersion >= 3 || GL.Extensions.Contains("GL_ARB_framebuffer_object");
             SupportsFramebufferObjectEXT = GL.Extensions.Contains("GL_EXT_framebuffer_object");
 #endif
             // Anisotropic filtering
@@ -97,9 +97,9 @@ namespace Microsoft.Xna.Framework.Graphics
             SupportsNormalized = GL.BoundApi == GL.RenderApi.ES && (device.glMajorVersion >= 3 && GL.Extensions.Contains("GL_EXT_texture_norm16"));
 #else
             SupportsSRgb = GL.Extensions.Contains("GL_EXT_texture_sRGB") && GL.Extensions.Contains("GL_EXT_framebuffer_sRGB");
-            SupportsFloatTextures = GL.BoundApi == GL.RenderApi.GL && (device.glMajorVersion >= 3 || GL.Extensions.Contains("GL_ARB_texture_float"));
-            SupportsHalfFloatTextures = GL.BoundApi == GL.RenderApi.GL && (device.glMajorVersion >= 3 || GL.Extensions.Contains("GL_ARB_half_float_pixel"));;
-            SupportsNormalized = GL.BoundApi == GL.RenderApi.GL && (device.glMajorVersion >= 3 || GL.Extensions.Contains("GL_EXT_texture_norm16"));;
+            SupportsFloatTextures = GL.BoundApi == GL.RenderApi.GL && (device._glMajorVersion >= 3 || GL.Extensions.Contains("GL_ARB_texture_float"));
+            SupportsHalfFloatTextures = GL.BoundApi == GL.RenderApi.GL && (device._glMajorVersion >= 3 || GL.Extensions.Contains("GL_ARB_half_float_pixel"));;
+            SupportsNormalized = GL.BoundApi == GL.RenderApi.GL && (device._glMajorVersion >= 3 || GL.Extensions.Contains("GL_EXT_texture_norm16"));;
 #endif
 
             // TODO: Implement OpenGL support for texture arrays

@@ -68,58 +68,9 @@ namespace Microsoft.Xna.Framework.Audio
         {
         }
 
-        public void BufferData(
-            float[] data, int count, ALFormat format, int sampleRate, int sampleAlignment = 0)
-        {
-            AssertNotDisposed();
-            var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            try
-            {
-                IntPtr ptr = handle.AddrOfPinnedObject();
-                int bytes = count * sizeof(float);
-                BufferData(ptr, bytes, format, sampleRate, sampleAlignment);
-            }
-            finally
-            {
-                handle.Free();
-            }
-        }
-
-        public void BufferData(
-            short[] data, int count, ALFormat format, int sampleRate, int sampleAlignment = 0)
-        {
-            AssertNotDisposed();
-            var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            try
-            {
-                IntPtr ptr = handle.AddrOfPinnedObject();
-                int bytes = count * sizeof(short);
-                BufferData(ptr, bytes, format, sampleRate, sampleAlignment);
-            }
-            finally
-            {
-                handle.Free();
-            }
-        }
-
-        public void BufferData(
-            byte[] data, int bytes, ALFormat format, int sampleRate, int sampleAlignment = 0)
-        {
-            AssertNotDisposed();
-            var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            try
-            {
-                IntPtr ptr = handle.AddrOfPinnedObject();
-                BufferData(ptr, bytes, format, sampleRate, sampleAlignment);
-            }
-            finally
-            {
-                handle.Free();
-            }
-        }
-
-        public void BufferData(
-            IntPtr data, int bytes, ALFormat format, int sampleRate, int sampleAlignment = 0)
+        public unsafe void BufferData<T>(
+            ReadOnlySpan<T> data, ALFormat format, int sampleRate, int sampleAlignment = 0)
+            where T : unmanaged
         {
             AssertNotDisposed();
             AL.GetError();
@@ -145,8 +96,11 @@ namespace Microsoft.Xna.Framework.Audio
                 ALHelper.CheckError("Failed to set buffer alignment.");
             }
 
-            AL.BufferData(BufferID, format, data, bytes, sampleRate);
-            ALHelper.CheckError("Failed to fill buffer.");
+            fixed (void* ptr = &MemoryMarshal.GetReference(data))
+            {
+                AL.BufferData(BufferID, format, (IntPtr)ptr, sizeof(T) * data.Length, sampleRate);
+                ALHelper.CheckError("Failed to fill buffer.");
+            }
         }
 
         [System.Diagnostics.DebuggerHidden]

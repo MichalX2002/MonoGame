@@ -434,17 +434,21 @@ namespace Microsoft.Xna.Framework.Content
 		{
 		    // Look for disposable assets.
 		    foreach (var disposable in disposableAssets)
-		    {
-		        if (disposable != null)
-		            disposable.Dispose();
-		    }
+                disposable?.Dispose();
 			disposableAssets.Clear();
 		    loadedAssets.Clear();
 		}
 
         internal byte[] GetScratchBuffer(int size)
-        {            
-            size = Math.Max(size, 1024 * 1024 + 1024 * 8);
+        {
+            const int mb = 1024 * 1024;
+
+            // round to nearest megabyte
+            size = (int)Math.Round((double)size / mb) * mb;
+
+            // to a maximum of 16 megabytes
+            size = Math.Max(size, mb * 16);
+
             if (scratchBuffer == null || scratchBuffer.Length < size)
                 scratchBuffer = new byte[size];
             return scratchBuffer;

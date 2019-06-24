@@ -534,6 +534,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <NativeBinary>True</NativeBinary>
     </None>
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

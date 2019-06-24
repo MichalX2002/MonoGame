@@ -3,16 +3,16 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
 
 namespace Microsoft.Xna.Framework.Audio
 {
     /// <summary>
-    /// A <see cref="SoundEffectInstance"/> for which the audio buffer is provided by the game at run time.
+    /// A <see cref="SoundEffectInstance"/> for which the audio data is provided dynamically at run time.
     /// </summary>
     public sealed partial class DynamicSoundEffectInstance : SoundEffectInstance
     {
         private const int TargetPendingBufferCount = 3;
+
         private int _buffersNeeded;
         private int _sampleRate;
         private AudioChannels _channels;
@@ -21,8 +21,8 @@ namespace Microsoft.Xna.Framework.Audio
         #region Public Properties
 
         /// <summary>
-        /// This value has no effect on DynamicSoundEffectInstance.
-        /// It may not be set.
+        /// This value has no effect on <see cref="DynamicSoundEffectInstance"/>.
+        /// Trying to set it will throw <see cref="InvalidOperationException"/>.
         /// </summary>
         public override bool IsLooped
         {
@@ -60,7 +60,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// Returns the number of samples queued for playback.
         /// </summary>
-        public int BufferedSamples
+        public long BufferedSamples
         {
             get
             {
@@ -75,7 +75,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <remarks>
         /// This event may occur when <see cref="Play()"/> is called or during playback when a buffer is completed.
         /// </remarks>
-        public event SenderDelegate<DynamicSoundEffectInstance> BufferNeeded;
+        public event SenderEvent<DynamicSoundEffectInstance> BufferNeeded;
 
         #endregion
 
@@ -98,7 +98,7 @@ namespace Microsoft.Xna.Framework.Audio
             _channels = channels;
             _state = SoundState.Stopped;
             PlatformCreate();
-            
+
             // This instance is added to the pool so that its volume reflects master volume changes
             // and it contributes to the playing instances limit, but the source/voice is not owned by the pool.
             _isPooled = false;
@@ -134,7 +134,7 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
         /// <summary>
-        /// Plays or resumes the DynamicSoundEffectInstance.
+        /// Plays or resumes the sound instance.
         /// </summary>
         public override void Play()
         {
@@ -148,18 +148,25 @@ namespace Microsoft.Xna.Framework.Audio
                 // Add the instance to the pool
                 if (!SoundEffectInstancePool.SoundsAvailable)
                     throw new InstancePlayLimitException();
+
                 SoundEffectInstancePool.AddToPlaying(this);
 
                 PlatformPlay();
                 _state = SoundState.Playing;
 
-                CheckBufferCount();
+                int tries = TargetPendingBufferCount;
+                while (tries > 0)
+                {
+                    CheckBufferCount();
+                    tries--;
+                }
+
                 DynamicSoundEffectInstanceManager.AddInstance(this);
             }
         }
 
         /// <summary>
-        /// Pauses playback of the DynamicSoundEffectInstance.
+        /// Pauses playback of the sound instance.
         /// </summary>
         public override void Pause()
         {
@@ -169,7 +176,7 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
         /// <summary>
-        /// Resumes playback of the DynamicSoundEffectInstance.
+        /// Resumes playback of the sound instance.
         /// </summary>
         public override void Resume()
         {
@@ -190,7 +197,7 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
         /// <summary>
-        /// Immediately stops playing the DynamicSoundEffectInstance.
+        /// Immediately stops playing the sound instance.
         /// </summary>
         /// <remarks>
         /// Calling this also releases all queued buffers.
@@ -201,17 +208,17 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
         /// <summary>
-        /// Stops playing the DynamicSoundEffectInstance.
-        /// If the <paramref name="immediate"/> parameter is false, this call has no effect.
+        /// Stops playing the sound instance.
+        /// If the <paramref name="immediate"/> parameter is <see langword="false"/>, this call has no effect.
         /// </summary>
         /// <remarks>
-        /// Calling this also releases all queued buffers.
+        /// Calling this releases all queued buffers.
         /// </remarks>
-        /// <param name="immediate">When set to false, this call has no effect.</param>
+        /// <param name="immediate">When set to <see langword="false"/>, this call has no effect.</param>
         public override void Stop(bool immediate)
         {
             AssertNotDisposed();
-            
+
             if (immediate)
             {
                 DynamicSoundEffectInstanceManager.RemoveInstance(this);
@@ -224,121 +231,35 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
         /// <summary>
-        /// Queues an audio buffer for playback.
+        /// Queues audio data for playback.
+        /// The data is treated as 16-bit unless the type is <see cref="float"/>,
+        /// then it will be treated as 32-bit.
         /// </summary>
         /// <remarks>
-        /// The buffer length must conform to alignment requirements for the audio format.
+        /// The span length must conform to alignment requirements for the audio format.
         /// </remarks>
-        /// <param name="buffer">The buffer containing PCM audio data.</param>
-        public void SubmitBuffer(byte[] buffer)
-        {
-            SubmitBuffer(buffer, 0, buffer.Length);
-        }
-
-        /// <summary>
-        /// Queues an audio buffer for playback.
-        /// </summary>
-        /// <remarks>
-        /// The buffer length must conform to alignment requirements for the audio format.
-        /// </remarks>
-        /// <param name="buffer">The buffer containing PCM audio data.</param>
-        public void SubmitBuffer(short[] buffer)
-        {
-            SubmitBuffer(buffer, 0, buffer.Length);
-        }
-
-        /// <summary>
-        /// Queues an audio buffer for playback.
-        /// </summary>
-        /// <remarks>
-        /// The buffer length must conform to alignment requirements for the audio format.
-        /// </remarks>
-        /// <param name="buffer">The buffer containing PCM audio data.</param>
-        public void SubmitBuffer(float[] buffer)
-        {
-            SubmitBuffer(buffer, 0, buffer.Length);
-        }
-
-        /// <summary>
-        /// Queues an audio buffer for playback.
-        /// </summary>
-        /// <remarks>
-        /// The buffer length must conform to alignment requirements for the audio format.
-        /// </remarks>
-        /// <param name="buffer">The buffer containing PCM audio data.</param>
-        /// <param name="offset">The starting position of audio data.</param>
-        /// <param name="count">The amount of elements to use.</param>
-        public void SubmitBuffer(byte[] buffer, int offset, int count)
+        /// <typeparam name="T">The type of audio data. Use <see cref="float"/> for 32-bit PCM.</typeparam>
+        /// <param name="data">The span containing PCM audio data.</param>
+        public void SubmitBuffer<T>(ReadOnlySpan<T> data)
+            where T : unmanaged
         {
             AssertNotDisposed();
 
-            // The data must be 16-bit, so the length is a multiple of 2 (mono) or 4 (stereo).
-            int elementsPerSample = 2 * (int)_channels;
-            CheckSubmitArguments(buffer, offset, count, elementsPerSample);
+            if (data.IsEmpty)
+                throw new ArgumentException("Span is empty.", nameof(data));
 
-            PlatformSubmitBuffer(buffer, offset, count);
+            PlatformSubmitBuffer(data);
         }
 
-        /// <summary>
-        /// Queues an audio buffer for playback.
-        /// </summary>
-        /// <remarks>
-        /// The buffer length must conform to alignment requirements for the audio format.
-        /// </remarks>
-        /// <param name="buffer">The buffer containing PCM audio data.</param>
-        /// <param name="offset">The starting position of audio data.</param>
-        /// <param name="count">The amount of elements to use.</param>
-        public void SubmitBuffer(short[] buffer, int offset, int count)
+        public void SubmitBuffer<T>(Span<T> data)
+            where T : unmanaged
         {
-            AssertNotDisposed();
-
-            int elementsPerSample = (int)_channels;
-            CheckSubmitArguments(buffer, offset, count, elementsPerSample);
-
-            PlatformSubmitBuffer(buffer, offset, count);
-        }
-
-        /// <summary>
-        /// Queues an audio buffer for playback.
-        /// </summary>
-        /// <remarks>
-        /// The buffer length must conform to alignment requirements for the audio format.
-        /// </remarks>
-        /// <param name="buffer">The buffer containing PCM audio data.</param>
-        /// <param name="offset">The starting position of audio data.</param>
-        /// <param name="count">The amount of elements to use.</param>
-        public void SubmitBuffer(float[] buffer, int offset, int count)
-        {
-            AssertNotDisposed();
-
-            int elementsPerSample = (int)_channels;
-            CheckSubmitArguments(buffer, offset, count, elementsPerSample);
-
-            PlatformSubmitBuffer(buffer, offset, count);
+            SubmitBuffer((ReadOnlySpan<T>)data);
         }
 
         #endregion
 
         #region Nonpublic Functions
-
-        private void CheckSubmitArguments<T>(T[] buffer, int offset, int count, int elementsPerSample)
-        {
-            if (buffer == null || buffer.Length == 0)
-                throw new ArgumentException("Buffer may not be null or empty.");
-
-            if (count <= 0)
-                throw new ArgumentException("Number of elements must be greater than zero.");
-
-            if (offset + count > buffer.Length)
-                throw new ArgumentException("Buffer is shorter than the specified number of elements from the offset.");
-
-            // Ensure that the buffer length and start position match alignment.
-            if (count % elementsPerSample != 0)
-                throw new ArgumentException("Number of elements does not match format alignment.");
-
-            if (offset % elementsPerSample != 0)
-                throw new ArgumentException("Offset into the buffer does not match format alignment.");
-        }
 
         private void AssertNotDisposed()
         {
@@ -354,7 +275,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void CheckBufferCount()
         {
-            if ((PendingBufferCount < TargetPendingBufferCount) && (_state == SoundState.Playing))
+            if (PendingBufferCount < TargetPendingBufferCount && _state == SoundState.Playing)
                 _buffersNeeded++;
         }
 

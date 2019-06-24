@@ -27,15 +27,12 @@ namespace Microsoft.Xna.Framework.Audio
         internal void CheckALCError(string operation)
         {
             ALCError error = ALC.GetErrorForDevice(_captureDevice);
-
             if (error == ALCError.NoError)
                 return;
 
             string errorFmt = "OpenAL Error: {0}";
-
-            throw new NoMicrophoneException(String.Format("{0} - {1}",
-                            operation,
-                            string.Format(errorFmt, error)));
+            throw new NoAudioHardwareException(string.Format("{0} - {1}",
+                operation, string.Format(errorFmt, error)));
         }
        
         internal static void PopulateCaptureDevices()
@@ -94,7 +91,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
 			else
             {
-                throw new NoMicrophoneException("Failed to open capture device.");
+                throw new NoAudioHardwareException("Failed to open capture device.");
             }
         }
 
@@ -115,30 +112,23 @@ namespace Microsoft.Xna.Framework.Audio
             State = MicrophoneState.Stopped;
         }
 
-        [ThreadStatic]
-        private static int[] _queuedSampleCountBuffer;
-
         internal int GetQueuedSampleCount()
         {
             if (State == MicrophoneState.Stopped || BufferReady == null)
                 return 0;
 
-            if(_queuedSampleCountBuffer == null)
-                _queuedSampleCountBuffer = new int[1];
-
-            ALC.GetInteger(_captureDevice, ALCGetInteger.CaptureSamples, 1, _queuedSampleCountBuffer);
+            Span<int> queuedSampleCountBuffer = stackalloc int[1];
+            ALC.GetInteger(_captureDevice, ALCGetInteger.CaptureSamples, 1, queuedSampleCountBuffer);
             CheckALCError("Failed to query capture samples.");
 
-            return _queuedSampleCountBuffer[0];
+            return queuedSampleCountBuffer[0];
         }
 
         internal void Update()
         {
             int sampleCount = GetQueuedSampleCount();
             if (sampleCount > 0)
-            {
                 BufferReady.Invoke(this, sampleCount);
-            }
         }
 
         internal int PlatformGetData(byte[] buffer, int offset, int count)

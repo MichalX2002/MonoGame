@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Threading;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using SharpDX;
 using SharpDX.MediaFoundation;
 using SharpDX.Win32;
@@ -11,72 +9,40 @@ namespace Microsoft.Xna.Framework.Media
 {
     public sealed partial class VideoPlayer : IDisposable
     {
-        private static MediaSession _session;
-        private static AudioStreamVolume _volumeController;
-        private static PresentationClock _clock;
+        private MediaSession _session;
+        private AudioStreamVolume _volumeController;
+        private PresentationClock _clock;
 
         // HACK: Need SharpDX to fix this.
         private static Guid AudioStreamVolumeGuid;
 
-        private static Callback _callback;
-
-        private class Callback : IAsyncCallback
-        {
-            private VideoPlayer _player;
-
-            public Callback(VideoPlayer player)
-            {
-                _player = player;
-            }
-
-            public void Dispose()
-            {
-            }
-
-            public IDisposable Shadow { get; set; }
-            public void Invoke(AsyncResult asyncResultRef)
-            {
-                var ev = _session.EndGetEvent(asyncResultRef);
-
-                // Trigger an "on Video Ended" event here if needed
-
-                if (ev.TypeInfo == MediaEventTypes.SessionTopologyStatus && ev.Get(EventAttributeKeys.TopologyStatus) == TopologyStatus.Ready)
-                    _player.OnTopologyReady();
-
-                _session.BeginGetEvent(this, null);
-            }
-
-            public AsyncCallbackFlags Flags { get; private set; }
-            public WorkQueueId WorkQueueId { get; private set; }
-        }
+        private Callback _callback;
 
         private Texture2D _videoCache;
 
         private void PlatformInitialize()
         {
             // The GUID is specified in a GuidAttribute attached to the class
-            AudioStreamVolumeGuid = Guid.Parse(((GuidAttribute)typeof(AudioStreamVolume).GetCustomAttributes(typeof(GuidAttribute), false)[0]).Value);
+            AudioStreamVolumeGuid = Guid.Parse(
+                ((GuidAttribute)typeof(AudioStreamVolume).GetCustomAttributes(typeof(GuidAttribute), false)[0]).Value);
 
             MediaManagerState.CheckStartup();
             MediaFactory.CreateMediaSession(null, out _session);
-
         }
 
         private Texture2D PlatformGetTexture()
         {
             var sampleGrabber = Video.SampleGrabber;
-
             var texData = sampleGrabber.TextureData;
-
             if (texData == null)
                 return null;
 
-            // NOTE: It's entirely possible that we could lose the d3d context and therefore lose this texture, but it's better than allocating a new texture each call!
+            // NOTE: It's entirely possible that we could lose the d3d context and therefore lose this texture,
+            // but it's better than allocating a new texture each call!
             if (_videoCache == null)
-                _videoCache = new Texture2D(Game.Instance.GraphicsDevice, Video.Width, Video.Height, false, SurfaceFormat.Bgr32);
+                _videoCache = new Texture2D(GraphicsDevice, Video.Width, Video.Height, false, SurfaceFormat.Bgr32);
 
-            _videoCache.SetData(texData);
-            
+            _videoCache.SetData(texData.AsSpan());
             return _videoCache;
         }
 
@@ -122,7 +88,7 @@ namespace Microsoft.Xna.Framework.Media
                 _clock.Dispose();
             }
 
-            //create the callback if it hasn't been created yet
+            // create the callback if it hasn't been created yet
             if (_callback == null)
             {
                 _callback = new Callback(this);
@@ -139,11 +105,15 @@ namespace Microsoft.Xna.Framework.Media
             var varStart = new Variant();
             _session.Start(null, varStart);
 
-            // we need to dispose of the old texture if we have one
-            if (_videoCache != null)
-                _videoCache.Dispose();
             // Create cached texture
-            _videoCache = new Texture2D(Game.Instance.GraphicsDevice, Video.Width, Video.Height, false, SurfaceFormat.Bgr32);
+            if (_videoCache == null || _videoCache.Width != Video.Width || _videoCache.Height != Video.Height)
+            {
+
+                // we need to dispose of the old texture if we have one
+                _videoCache?.Dispose();
+
+                _videoCache = new Texture2D(GraphicsDevice, Video.Width, Video.Height, false, SurfaceFormat.Bgr32);
+            }
         }
 
         private void PlatformResume()
@@ -156,15 +126,11 @@ namespace Microsoft.Xna.Framework.Media
             _session.ClearTopologies();
             _session.Stop();
             _session.Close();
-            if (_volumeController != null)
-            {
-                _volumeController.Dispose();
-                _volumeController = null;
-            }
-            if (_clock != null)
-            {
-                _clock.Dispose();
-            }
+
+            _volumeController?.Dispose();
+            _volumeController = null;
+
+            _clock?.Dispose();
             _clock = null;
         }
 
@@ -177,9 +143,7 @@ namespace Microsoft.Xna.Framework.Media
                     volume = 0.0f;
 
                 for (int i = 0; i < _volumeController.ChannelCount; i++)
-                {
                     _volumeController.SetChannelVolume(i, volume);
-                }
             }
         }
 
@@ -211,9 +175,10 @@ namespace Microsoft.Xna.Framework.Media
 
         private void PlatformDispose(bool disposing)
         {
-            if (_videoCache != null)
+            if (disposing)
             {
-                _videoCache.Dispose();
+                if (_videoCache != null)
+                    _videoCache.Dispose();
             }
         }
 
@@ -227,6 +192,37 @@ namespace Microsoft.Xna.Framework.Media
             _volumeController = CppObject.FromPointer<AudioStreamVolume>(volumeObjectPtr);
 
             SetChannelVolumes();
+        }
+
+        private class Callback : IAsyncCallback
+        {
+            private VideoPlayer _player;
+
+            public IDisposable Shadow { get; set; }
+            public AsyncCallbackFlags Flags { get; private set; }
+            public WorkQueueId WorkQueueId { get; private set; }
+
+            public Callback(VideoPlayer player)
+            {
+                _player = player;
+            }
+
+            public void Invoke(AsyncResult asyncResultRef)
+            {
+                var ev = _player._session.EndGetEvent(asyncResultRef);
+
+                // Trigger an "on Video Ended" event here if needed
+
+                if (ev.TypeInfo == MediaEventTypes.SessionTopologyStatus && 
+                    ev.Get(EventAttributeKeys.TopologyStatus) == TopologyStatus.Ready)
+                    _player.OnTopologyReady();
+
+                _player._session.BeginGetEvent(this, null);
+            }
+
+            public void Dispose()
+            {
+            }
         }
     }
 }
