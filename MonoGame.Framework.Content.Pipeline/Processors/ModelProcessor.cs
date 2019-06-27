@@ -8,7 +8,7 @@ using System.ComponentModel;
 using System.Linq;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 {
@@ -362,7 +362,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         }
 
         // From the XNA CPU Skinning Sample under Ms-PL, (c) Microsoft Corporation
-        private static void ConvertWeights(BoneWeightCollection weights, Dictionary<string, int> boneIndices, Byte4[] outIndices, Vector4[] outWeights, int vertexIndex)
+        private static void ConvertWeights(
+            BoneWeightCollection weights, Dictionary<string, int> boneIndices,
+            Byte4[] outIndices, Vector4[] outWeights, int vertexIndex)
         {
             // we only handle 4 weights per bone
             const int maxWeights = 4;

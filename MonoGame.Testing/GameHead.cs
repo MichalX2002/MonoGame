@@ -30,6 +30,8 @@ namespace MonoGame.Testings
 
         private SoundEffect _winJingle;
 
+        private Texture2D _testTexture;
+
         private MouseCursor _grotCursor;
 
         private DynamicSoundEffectInstance _dynamicSound;
@@ -49,6 +51,8 @@ namespace MonoGame.Testings
 
             //_song1.Play();
             //_song2.Play();
+
+            Window.TaskbarState = TaskbarProgressState.Indeterminate;
         }
 
         protected override void LoadContent()
@@ -60,7 +64,7 @@ namespace MonoGame.Testings
             _font = Content.Load<SpriteFont>("arial");
 
             _watch = new Stopwatch();
-            
+
             _watch.Restart();
             _song1 = Content.Load<Song>("sinus");
             _song1.Volume = 0.2f;
@@ -69,9 +73,11 @@ namespace MonoGame.Testings
 
             _winJingle = Content.Load<SoundEffect>("Win Jingle");
 
-            using (var img = Texture2D.LoadImage(File.OpenRead("risgrot.png")))
-                _grotCursor = MouseCursor.FromImage(img, new Point(img.Width - 1, img.Height / 2));
+            _testTexture = Content.Load<Texture2D>("test");
 
+            using (var fs = File.OpenRead("risgrot.png"))
+            using (var img = Texture2D.LoadImage(fs))
+                _grotCursor = MouseCursor.FromImage(img, new Point(img.Width - 1, img.Height / 2));
             Mouse.SetCursor(_grotCursor);
 
             //w.Restart();
@@ -85,21 +91,16 @@ namespace MonoGame.Testings
             //w.Stop();
             //Console.WriteLine("Load Time: " + w.ElapsedMilliseconds + "ms");
 
-            testMusicStream = new FileStream("test.raw", FileMode.Open);
-
+            //testMusicStream = new FileStream("test.raw", FileMode.Open);
             _dynamicSound = new DynamicSoundEffectInstance(44100, AudioChannels.Stereo);
-            _dynamicSound.BufferNeeded += _dynamicSound_BufferNeeded;
+            _dynamicSound.BufferNeeded += DynamicSound_BufferNeeded;
             _dynamicSound.Pitch = 2;
-
-            //_dynamicSound_BufferNeeded(_dynamicSound);
-            //_dynamicSound_BufferNeeded(_dynamicSound);
-
-            _dynamicSound.Play();
+            //_dynamicSound.Play();
         }
 
         private FileStream testMusicStream;
 
-        private void _dynamicSound_BufferNeeded(DynamicSoundEffectInstance sender)
+        private void DynamicSound_BufferNeeded(DynamicSoundEffectInstance sender)
         {
             if (testMusicStream == null)
                 return;
@@ -183,10 +184,10 @@ namespace MonoGame.Testings
                 //instance.Pitch = -0.6f;
                 //instance.Play();
 
-                //var instance = _winJingle.CreateInstance();
-                //instance.Volume = 0.15f;
-                //instance.Pitch = 1.2f;
-                //instance.Play();
+                var instance = _winJingle.CreateInstance();
+                instance.Volume = 0.05f;
+                instance.Pitch = 1.2f;
+                instance.Play();
 
                 f = 0f;
 
@@ -195,19 +196,17 @@ namespace MonoGame.Testings
                 //w.Stop();
                 //Console.WriteLine("Moved next in " + w.Elapsed.TotalMilliseconds.ToString("0.00") + "ms");
 
-                int w = GraphicsDevice.PresentationParameters.BackBufferWidth;
-                int h = GraphicsDevice.PresentationParameters.BackBufferHeight;
-                var data = new Rgba32[w * h];
-                GraphicsDevice.GetBackBufferData(new Rectangle(0, 0, w, h), data.AsSpan());
-
-                using (var image = Image.WrapMemory(data.AsMemory(), w, h))
-                using (var fs = new FileStream("yo mom.png", FileMode.Create))
-                {
-                    image.SaveAsPng(fs);
-                }
+                //int w = GraphicsDevice.PresentationParameters.BackBufferWidth;
+                //int h = GraphicsDevice.PresentationParameters.BackBufferHeight;
+                //var data = new Rgba32[w * h];
+                //GraphicsDevice.GetBackBufferData(new Rectangle(0, 0, w, h), data.AsSpan());
+                //
+                //using (var image = Image.WrapMemory(data.AsMemory(), w, h))
+                //using (var fs = new FileStream("yo mom.png", FileMode.Create))
+                //{
+                //    image.SaveAsPng(fs);
+                //}
             }
-
-            Console.WriteLine(_dynamicSound.BufferedSamples);
 
             base.Update(time);
         }
@@ -217,26 +216,35 @@ namespace MonoGame.Testings
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _spriteBatch.Begin();
-            
+
             double avg = 0;
             foreach (var value in Song.UpdateTime)
                 avg += value.TotalMilliseconds;
             avg /= Song.UpdateTime.Count;
-            
-            _spriteBatch.DrawString(_font, "Timing: " + avg.ToString("0.00"), new Vector2(10, 5), Color.White);
 
-            using (var tex = new Texture2D(GraphicsDevice, 1, 1))
-            {
-                tex.SetData(new[] { Color.White }.AsSpan());
-                _spriteBatch.Draw(tex, new RectangleF(150, 50, 20, 20), Color.Red);
-                _spriteBatch.Draw(tex, new RectangleF(150, 100, 20, 20), Color.Green);
-                _spriteBatch.Draw(tex, new RectangleF(150, 150, 20, 20), Color.Blue);
-                _spriteBatch.Draw(tex, new RectangleF(150, 200, 20, 20), Color.Yellow);
-            
-                _spriteBatch.End();
-            }
+            _spriteBatch.Draw(_testTexture, new Vector2(0, 0), Color.White);
+
+            DrawShadedString(_font, "Timing: " + avg.ToString("0.00"), new Vector2(10, 5), Color.White, Color.Black);
+
+            //using (var tex = new Texture2D(GraphicsDevice, 1, 1))
+            //{
+            //    tex.SetData(new[] { Color.White }.AsSpan());
+            //    _spriteBatch.Draw(tex, new RectangleF(150, 50, 20, 20), Color.Red);
+            //    _spriteBatch.Draw(tex, new RectangleF(150, 100, 20, 20), Color.Green);
+            //    _spriteBatch.Draw(tex, new RectangleF(150, 150, 20, 20), Color.Blue);
+            //    _spriteBatch.Draw(tex, new RectangleF(150, 200, 20, 20), Color.Yellow);
+
+            _spriteBatch.End();
+
+            //}
 
             base.Draw(time);
+        }
+
+        private void DrawShadedString(SpriteFont font, string value, Vector2 position, Color textColor, Color backgroundColor)
+        {
+            _spriteBatch.DrawString(font, value, position + new Vector2(1f), backgroundColor);
+            _spriteBatch.DrawString(font, value, position, textColor);
         }
     }
 }

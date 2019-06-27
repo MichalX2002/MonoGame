@@ -5,30 +5,39 @@
 namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 {
     /// <summary>
-    /// Specifies the target output (of type SurfaceFormat) of the texture processor. Used by TextureProcessor.TextureFormat.
+    /// Specifies the target output type of the texture processor.
+    /// Used by <see cref="TextureProcessor.TextureFormat"/>.
     /// </summary>
     public enum TextureProcessorOutputFormat
     {
         /// <summary>
-        /// The SurfaceFormat value, of the input TextureContent object, is converted to Color by the processor. Typically used for 2D graphics and overlays.
+        /// The SurfaceFormat value of the input TextureContent object is converted to Color by the processor.
+        /// Typically used for 2D graphics and overlays.
         /// </summary>
         Color,
 
         /// <summary>
-        /// The SurfaceFormat value, of the input TextureContent object, is converted to an appropriate DXT compression by the processor. If the input texture
-        /// contains fractional alpha values, it is converted to DXT5 format (8 bits per texel); otherwise it is converted to DXT1 (4 bits per texel). This
-        /// conversion reduces the resource's size on the graphics card. Typically used for 3D textures such as 3D model textures.
+        /// The SurfaceFormat value of the input TextureContent object,
+        /// is converted to an appropriate DXT compression by the processor. 
+        /// If the input texture contains fractional alpha values,
+        /// it is converted to DXT5 format (8 bits per texel);
+        /// otherwise it is converted to DXT1 (4 bits per texel).
+        /// This conversion reduces the resource's size on the graphics card.
+        /// Typically used for 3D textures such as 3D model textures.
         /// </summary>
         DxtCompressed,
 
         /// <summary>
-        /// The SurfaceFormat value, of the input TextureContent object, is not changed by the processor. Typically used for textures processed by an external tool.
+        /// The SurfaceFormat value of the input TextureContent object is not changed by the processor.
+        /// Typically used for textures processed by an external tool.
         /// </summary>
         NoChange,
 
         /// <summary>
-        /// The SurfaceFormat value, of the input TextureContent object, is converted to an appropriate compressed format for the target platform.
-        /// This can include PVRTC for iOS, DXT for desktop, Windows 8 and Windows Phone 8, and ETC1 or BGRA4444 for Android.
+        /// The SurfaceFormat value of the input TextureContent object
+        /// is converted to an appropriate compressed format for the target platform.
+        /// This can include PVRTC for iOS, DXT for desktop,
+        /// Windows 8 and Windows Phone 8, and ETC1 or BGRA4444 for Android.
         /// </summary>
         Compressed,
 
@@ -38,7 +47,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         Color16Bit,
 
         /// <summary>
-        /// The input texture is compressed using ETC1 texture compression.  Used on Android platforms.
+        /// The input texture is compressed using ETC1 texture compression. Used on Android platforms.
         /// </summary>
         Etc1Compressed,
 
@@ -48,8 +57,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         PvrCompressed,
 
         /// <summary>
-        /// The input texture is compressed using ATI texture compression.  Used on some Android platforms.
+        /// The input texture is compressed using ATI texture compression. Used on some Android platforms.
         /// </summary>
-        AtcCompressed,
+        AtcCompressed
     }
 }

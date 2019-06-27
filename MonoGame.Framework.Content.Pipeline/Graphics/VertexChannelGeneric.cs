@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using Microsoft.Xna.Framework.Design;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,50 +22,26 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Gets the strongly-typed list for the base class to access.
         /// </summary>
-        internal override IList Items
-        {
-            get
-            {
-                return items;
-            }
-        }
+        internal override IList Items => items;
 
         /// <summary>
         /// Gets the type of data contained in this channel.
         /// </summary>
-        public override Type ElementType
-        {
-            get
-            {
-                return typeof(T);
-            }
-        }
+        public override Type ElementType => typeof(T);
 
         /// <summary>
         /// Gets or sets the element at the specified index.
         /// </summary>
         public new T this[int index]
         {
-            get
-            {
-                return items[index];
-            }
-            set
-            {
-                items[index] = value;
-            }
+            get => items[index];
+            set => items[index] = value;
         }
 
         /// <summary>
         /// true if this object is read-only; false otherwise.
         /// </summary>
-        bool ICollection<T>.IsReadOnly
-        {
-            get
-            {
-                return false;
-            }
-        }
+        bool ICollection<T>.IsReadOnly => false;
 
         /// <summary>
         /// Creates an instance of VertexChannel.

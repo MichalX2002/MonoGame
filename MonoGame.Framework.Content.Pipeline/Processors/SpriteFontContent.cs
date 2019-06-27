@@ -9,11 +9,11 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 	public class SpriteFontContent
     {
         public string FontName = string.Empty;
-        FontDescriptionStyle Style = FontDescriptionStyle.Regular;
+        private FontDescriptionStyle Style = FontDescriptionStyle.Regular;
         public float FontSize;
         public Texture2DContent Texture = new Texture2DContent();
-        public List<Rectangle> Glyphs = new List<Rectangle>();
-        public List<Rectangle> Cropping = new List<Rectangle>();
+        public List<Rectangle> Regions = new List<Rectangle>();
+        public List<Rectangle> Croppings = new List<Rectangle>();
         public List<char> CharacterMap = new List<char>();
         public int VerticalLineSpacing;
         public float HorizontalSpacing;

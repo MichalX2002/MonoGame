@@ -5,8 +5,8 @@
 using System;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
 using System.IO;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline
 {
@@ -186,7 +186,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
             switch (format)
             {
                 case SurfaceFormat.Rgba32:
-                    return new PixelBitmapContent<Color>(width, height);
+                    return new PixelBitmapContent<Rgba32>(width, height);
 
                 case SurfaceFormat.Bgra4444:
                     return new PixelBitmapContent<Bgra4444>(width, height);
@@ -207,7 +207,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                     return new Dxt5BitmapContent(width, height);
 
                 case SurfaceFormat.Vector4:
-                    return new PixelBitmapContent<Vector4>(width, height);
+                    return new PixelBitmapContent<RgbaVector>(width, height);
             }
             throw new ContentLoadException("Unsupported SurfaceFormat " + format);
         }
@@ -216,9 +216,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         {
             // It is recommended that the dwPitchOrLinearSize field is ignored and we calculate it ourselves
             // https://msdn.microsoft.com/en-us/library/bb943991.aspx
-            int pitch = 0;
-            int rows = 0;
 
+            int pitch;
+            int rows;
             switch (format)
             {
                 case SurfaceFormat.Rgba32:

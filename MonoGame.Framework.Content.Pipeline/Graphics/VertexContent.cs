@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 {

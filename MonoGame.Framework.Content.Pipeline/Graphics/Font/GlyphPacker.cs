@@ -4,29 +4,28 @@
 
 using System;
 using System.Collections.Generic;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 {
 	// Helper for arranging many small bitmaps onto a single larger surface.
 	internal static class GlyphPacker
 	{
-		public static BitmapContent ArrangeGlyphs(Glyph[] sourceGlyphs, bool requirePOT, bool requireSquare)
+		public static PixelBitmapContent<Rgba32> ArrangeGlyphs(
+            List<Glyph> sourceGlyphs, bool requirePOT, bool requireSquare)
 		{
 			// Build up a list of all the glyphs needing to be arranged.
 			var glyphs = new List<ArrangedGlyph>();
 
-			for (int i = 0; i < sourceGlyphs.Length; i++)
-			{
-                var glyph = new ArrangedGlyph
-                {
-                    Source = sourceGlyphs[i],
+			foreach(var sourceGlyph in sourceGlyphs)
+            { 
+                glyphs.Add(new ArrangedGlyph(
+                    sourceGlyph,
 
                     // Leave a one pixel border around every glyph in the output bitmap.
-                    Width = sourceGlyphs[i].Subrect.Width + 2,
-                    Height = sourceGlyphs[i].Subrect.Height + 2
-                };
-
-                glyphs.Add(glyph);
+                    sourceGlyph.Subrect.Width + 2,
+                    sourceGlyph.Subrect.Height + 2
+                ));
 			}
 
 			// Sort so the largest glyphs get arranged first.
@@ -57,9 +56,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 		}
 
 		// Once arranging is complete, copies each glyph to its chosen position in the single larger output bitmap.
-		static BitmapContent CopyGlyphsToOutput(List<ArrangedGlyph> glyphs, int width, int height)
+		static PixelBitmapContent<Rgba32> CopyGlyphsToOutput(
+            List<ArrangedGlyph> glyphs, int width, int height)
 		{
-            var output = new PixelBitmapContent<Color>(width, height);
+            var output = new PixelBitmapContent<Rgba32>(width, height);
 
 			foreach (var glyph in glyphs)
 			{
@@ -78,17 +78,21 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
 
 		// Internal helper class keeps track of a glyph while it is being arranged.
-		class ArrangedGlyph
+		private class ArrangedGlyph
 		{
-			public Glyph Source;
-
+			public readonly Glyph Source;
+			public readonly int Width;
+			public readonly int Height;
 			public int X;
 			public int Y;
 
-			public int Width;
-			public int Height;
-		}
-
+            public ArrangedGlyph(Glyph source, int width, int height)
+            {
+                Source = source;
+                Width = width;
+                Height = height;
+            }
+        }
 
 		// Works out where to position a single glyph.
 		static void PositionGlyph(List<ArrangedGlyph> glyphs, int index, int outputWidth)
@@ -100,7 +104,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 			{
 				// Is this position free for us to use?
 				int intersects = FindIntersectingGlyph(glyphs, index, x, y);
-
 				if (intersects < 0)
 				{
 					glyphs[index].X = x;
@@ -165,7 +168,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
 
 		// Heuristic guesses what might be a good output width for a list of glyphs.
-		static int GuessOutputWidth(Glyph[] sourceGlyphs)
+		static int GuessOutputWidth(List<Glyph> sourceGlyphs)
 		{
 			int maxWidth = 0;
 			int totalSize = 0;

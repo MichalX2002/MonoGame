@@ -5,7 +5,7 @@
 using System;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using Microsoft.Xna.Framework.Graphics;
-
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 {
@@ -113,16 +113,16 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             format = GetTextureFormatForPlatform(format, context.TargetPlatform);
 
             // Make sure we're in a floating point format
-            content.ConvertBitmapType(typeof(PixelBitmapContent<Vector4>));
+            content.ConvertBitmapType(typeof(PixelBitmapContent<RgbaVector>));
 
             switch (format)
             {
                 case TextureProcessorOutputFormat.AtcCompressed:
-                    GraphicsUtil.CompressAti(context, content, isSpriteFont);
+                    GraphicsUtil.CompressAti(content, isSpriteFont);
                     break;
 
                 case TextureProcessorOutputFormat.Color16Bit:
-                    GraphicsUtil.CompressColor16Bit(context, content);
+                    GraphicsUtil.CompressColor16Bit(content);
                     break;
 
                 case TextureProcessorOutputFormat.DxtCompressed:

@@ -17,8 +17,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
         protected internal override void Write(ContentWriter output, SpriteFontContent value)
         {
             output.WriteObject(value.Texture);
-            output.WriteObject(value.Glyphs);
-            output.WriteObject(value.Cropping);
+            output.WriteObject(value.Regions);
+            output.WriteObject(value.Croppings);
             output.WriteObject(value.CharacterMap);
             output.Write(value.VerticalLineSpacing);
             output.Write(value.HorizontalSpacing);

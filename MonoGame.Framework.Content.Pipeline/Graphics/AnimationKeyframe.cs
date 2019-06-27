@@ -3,18 +3,16 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
-    /// Provides methods and properties for managing a keyframe. A keyframe describes the position of an animation channel at a single point in time.
+    /// Provides methods and properties for managing a keyframe. 
+    /// A keyframe describes the position of an animation channel at a single point in time.
     /// </summary>
     public sealed class AnimationKeyframe : IComparable<AnimationKeyframe>
     {
-        Matrix transform;
+        private Matrix _transform;
 
         /// <summary>
         /// Gets the time offset from the start of the animation to the position described by this keyframe.
@@ -26,14 +24,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// </summary>
         public Matrix Transform
         {
-            get
-            {
-                return transform;
-            }
-            set
-            {
-                transform = value;
-            }
+            get => _transform;
+            set => _transform = value;
         }
 
         /// <summary>
@@ -44,7 +36,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         public AnimationKeyframe(TimeSpan time, Matrix transform)
         {
             this.Time = time;
-            this.transform = transform;
+            this._transform = transform;
         }
 
         /// <summary>

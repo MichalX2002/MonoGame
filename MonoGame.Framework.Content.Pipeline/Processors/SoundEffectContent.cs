@@ -13,7 +13,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
     public sealed class SoundEffectContent
     {
         internal byte[] format;
-        internal FileStream data;
+        internal Stream data;
         internal int dataLength;
         internal int loopStart;
         internal int loopLength;
@@ -28,7 +28,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         /// <param name="loopStart">The start of the loop segment (must be block aligned).</param>
         /// <param name="loopLength">The length of the loop segment (must be block aligned).</param>
         /// <param name="duration">The duration of the wave file in milliseconds.</param>
-        internal SoundEffectContent(byte[] format, FileStream data, int dataLength, int loopStart, int loopLength, int duration)
+        internal SoundEffectContent(byte[] format, Stream data, int dataLength, int loopStart, int loopLength, int duration)
         {
             this.format = format;
             this.data = data;

@@ -6,6 +6,7 @@ using System;
 using System.ComponentModel;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Graphics;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 {
@@ -51,7 +52,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                 var originalType = input.Faces[0][0].GetType();
                 try
                 {
-                    input.ConvertBitmapType(typeof(PixelBitmapContent<Vector4>));
+                    input.ConvertBitmapType(typeof(PixelBitmapContent<RgbaVector>));
                 }
                 catch (Exception ex)
                 {
@@ -67,22 +68,27 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                     var face = input.Faces[f];
                     for (int m = 0; m < face.Count; ++m)
                     {
-                        var bmp = (PixelBitmapContent<Vector4>)face[m];
+                        var bmp = (PixelBitmapContent<RgbaVector>)face[m];
 
                         if (ColorKeyEnabled)
                         {
-                            bmp.ReplaceColor(ColorKeyColor.ToVector4(), Vector4.Zero);
+                            var v4 = ColorKeyColor.ToVector4();
+                            var original = new RgbaVector(v4.X, v4.Y, v4.Z, v4.W);
+                            bmp.ReplaceColor(original, new RgbaVector(0, 0, 0, 0));
                         }
 
                         if (ResizeToPowerOfTwo)
                         {
-                            if (!GraphicsUtil.IsPowerOfTwo(bmp.Width) || !GraphicsUtil.IsPowerOfTwo(bmp.Height) || (MakeSquare && bmp.Height != bmp.Width))
+                            if (!GraphicsUtil.IsPowerOfTwo(bmp.Width) ||
+                                !GraphicsUtil.IsPowerOfTwo(bmp.Height) ||
+                                (MakeSquare && bmp.Height != bmp.Width))
                             {
                                 var newWidth = GraphicsUtil.GetNextPowerOfTwo(bmp.Width);
                                 var newHeight = GraphicsUtil.GetNextPowerOfTwo(bmp.Height);
                                 if (MakeSquare)
                                     newWidth = newHeight = Math.Max(newWidth, newHeight);
-                                var resized = new PixelBitmapContent<Vector4>(newWidth, newHeight);
+
+                                var resized = new PixelBitmapContent<RgbaVector>(newWidth, newHeight);
                                 BitmapContent.Copy(bmp, resized);
                                 bmp = resized;
                             }
@@ -90,17 +96,19 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                         else if (MakeSquare && bmp.Height != bmp.Width)
                         {
                             var newSize = Math.Max(bmp.Width, bmp.Height);
-                            var resized = new PixelBitmapContent<Vector4>(newSize, newSize);
+                            var resized = new PixelBitmapContent<RgbaVector>(newSize, newSize);
                             BitmapContent.Copy(bmp, resized);
                         }
 
                         if (PremultiplyAlpha)
                         {
-                            for (int y = 0; y < bmp.Height; ++y)
+                            var pixels = bmp.GetPixelSpan();
+                            for (int i = 0; i < pixels.Length; i++)
                             {
-                                var row = bmp.GetRow(y);
-                                for (int x = 0; x < bmp.Width; ++x)
-                                    row[x] = Color.FromNonPremultiplied(row[x]).ToVector4();
+                                ref RgbaVector pixel = ref pixels[i];
+                                pixel.R *= pixel.A;
+                                pixel.G *= pixel.A;
+                                pixel.B *= pixel.A;
                             }
                         }
 

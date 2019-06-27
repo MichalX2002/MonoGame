@@ -9,7 +9,8 @@ namespace Microsoft.Xna.Framework.Input
 {
     public static partial class Keyboard
     {
-        static List<Keys> _keys;
+        private static List<Keys> _keys;
+
         public static ReadOnlyCollection<Keys> KeyList { get; private set; }
         public static KeyModifier Modifiers { get; internal set; }
 
@@ -20,7 +21,7 @@ namespace Microsoft.Xna.Framework.Input
                                      (Modifiers & KeyModifier.NumLock) == KeyModifier.NumLock);
         }
 
-        internal static void SetKeys(List<Keys> keys)
+        internal static void SetKeyList(List<Keys> keys)
         {
             _keys = keys;
             KeyList = _keys.AsReadOnly();

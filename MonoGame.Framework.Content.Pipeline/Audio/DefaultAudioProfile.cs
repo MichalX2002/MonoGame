@@ -6,6 +6,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using MonoGame.Utilities;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
 {
@@ -79,8 +80,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
                 string.Format("-i \"{0}\" -show_format -show_entries streams -v quiet -of flat", sourceFile),
                 out string ffprobeStdout,
                 out string ffprobeStderr);
+
             if (ffprobeExitCode != 0)
-                throw new InvalidOperationException("ffprobe exited with non-zero exit code.");
+                throw new InvalidOperationException(
+                    "ffprobe exited with non-zero exit code.", new Exception(ffprobeStderr));
 
             // Set default values if information is not available.
             int averageBytesPerSecond = 0;
@@ -165,16 +168,19 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
                     case "u8p":
                         bitsPerSample = 8;
                         break;
+
                     case "s16":
                     case "s16p":
                         bitsPerSample = 16;
                         break;
+
                     case "s32":
                     case "s32p":
                     case "flt":
                     case "fltp":
                         bitsPerSample = 32;
                         break;
+
                     case "dbl":
                     case "dblp":
                         bitsPerSample = 64;
@@ -323,7 +329,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
                 throw new InvalidOperationException("ffmpeg exited with non-zero exit code: \n" + ffmpegStdout + "\n" + ffmpegStderr);          
         }
 
-        public static ConversionQuality ConvertToFormat(AudioContent content, ConversionFormat formatType, ConversionQuality quality, string saveToFile)
+        public static ConversionQuality ConvertToFormat(
+            AudioContent content, ConversionFormat formatType, ConversionQuality quality, string saveToFile)
         {
             if (saveToFile != null)
             {
@@ -333,6 +340,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
             }
             
             string outputFile = saveToFile ?? Path.GetTempFileName();
+            FileStream result = null;
             try
             {
                 string ffmpegCodecName, ffmpegMuxerName;
@@ -426,13 +434,15 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
                 if (ffmpegExitCode != 0)
                     throw new InvalidOperationException("ffmpeg exited with non-zero exit code: \n" + ffmpegStdout + "\n" + ffmpegStderr);
 
-                ProbeFormat(outputFile, out AudioFileType audioFileType, out AudioFormat audioFormat, out TimeSpan duration, out int loopStart, out int loopLength);
+                ProbeFormat(
+                    outputFile, out AudioFileType audioFileType, out AudioFormat audioFormat,
+                    out TimeSpan duration, out int loopStart, out int loopLength);
 
-                FileStream data = File.OpenRead(outputFile);
-                SkipRiffWaveHeader(data, out long dataLength, out AudioFormat riffAudioFormat);
+                result = File.OpenRead(outputFile);
+                SkipRiffWaveHeader(result, out long dataLength, out AudioFormat riffAudioFormat);
                 if (dataLength > int.MaxValue)
                 {
-                    data.Dispose();
+                    result.Dispose();
                     throw new InvalidDataException("Size of raw audio data exceeded " + int.MaxValue + " bytes.");
                 }
 
@@ -450,12 +460,22 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
                     loopLength += samplesPerBlock - remainder;
                 }
 
-                content.SetData(data, (int)dataLength, audioFormat, duration, loopStart, loopLength);
+                var wrap = new DisposeCallbackStream(result);
+                wrap.OnDispose += (s, disposing) =>
+                {
+                    if (saveToFile == null) // we used a tmp path instead
+                        ExternalTool.DeleteFile(outputFile); // so delete that tmp file
+                };
+                content.SetData(wrap, (int)dataLength, audioFormat, duration, loopStart, loopLength);
             }
-            finally
+            catch
             {
-                if(saveToFile == null) // we used a tmp path instead
+                result?.Dispose();
+
+                if (saveToFile == null) // we used a tmp path instead
                     ExternalTool.DeleteFile(outputFile); // so delete that tmp file
+
+                throw;
             }
 
             return quality;

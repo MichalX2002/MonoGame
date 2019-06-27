@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SharpFont;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 {
@@ -97,7 +98,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             BitmapContent glyphBitmap = null;
 			if (face.Glyph.Bitmap.Width > 0 && face.Glyph.Bitmap.Rows > 0)
             {
-                glyphBitmap = new PixelBitmapContent<byte>(face.Glyph.Bitmap.Width, face.Glyph.Bitmap.Rows);
+                glyphBitmap = new PixelBitmapContent<Alpha8>(face.Glyph.Bitmap.Width, face.Glyph.Bitmap.Rows);
 				byte[] gpixelAlphas = new byte[face.Glyph.Bitmap.Width * face.Glyph.Bitmap.Rows];
                 //if the character bitmap has 1bpp we have to expand the buffer data to get the 8bpp pixel data
                 //each byte in bitmap.bufferdata contains the value of to 8 pixels in the row
@@ -137,7 +138,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 				gHA = gHA > 0 ? gHA : gVA;
 				gVA = gVA > 0 ? gVA : gHA;
 
-                glyphBitmap = new PixelBitmapContent<byte>(gHA, gVA);
+                glyphBitmap = new PixelBitmapContent<Alpha8>(gHA, gVA);
 			}
 
             // not sure about this at all

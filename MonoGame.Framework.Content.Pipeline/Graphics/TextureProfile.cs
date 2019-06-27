@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 {
@@ -49,7 +50,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <param name="content">The content to be compressed.</param>
         /// <param name="format">The user requested format for compression.</param>
         /// <param name="isSpriteFont">If the texture has represents a sprite font, i.e. is greyscale and has sharp black/white contrast.</param>
-        public void ConvertTexture(ContentProcessorContext context, TextureContent content, TextureProcessorOutputFormat format, bool isSpriteFont)
+        public void ConvertTexture(
+            ContentProcessorContext context, TextureContent content, TextureProcessorOutputFormat format, bool isSpriteFont)
         {
             // We do nothing in this case.
             if (format == TextureProcessorOutputFormat.NoChange)
@@ -58,14 +60,14 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             // If this is color just make sure the format is right and return it.
             if (format == TextureProcessorOutputFormat.Color)
             {
-                content.ConvertBitmapType(typeof(PixelBitmapContent<Color>));
+                content.ConvertBitmapType(typeof(PixelBitmapContent<Rgba32>));
                 return;
             }
 
             // Handle this common compression format.
             if (format == TextureProcessorOutputFormat.Color16Bit)
             {
-                GraphicsUtil.CompressColor16Bit(context, content);
+                GraphicsUtil.CompressColor16Bit(content);
                 return;
             }
 

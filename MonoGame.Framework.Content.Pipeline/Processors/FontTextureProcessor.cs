@@ -7,125 +7,133 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 {
-	[ContentProcessorAttribute(DisplayName="Font Texture - MonoGame")]
-	public class FontTextureProcessor : ContentProcessor<Texture2DContent, SpriteFontContent>
-	{
-		private Color transparentPixel = Color.Magenta;
+    [ContentProcessor(DisplayName = "Font Texture - MonoGame")]
+    public class FontTextureProcessor : ContentProcessor<Texture2DContent, SpriteFontContent>
+    {
+        private static readonly Rgba32 _transparentPixel = Rgba32.Magenta;
 
-		[DefaultValue(' ')]
-		public virtual char FirstCharacter { get; set; }
+        [DefaultValue(' ')]
+        public virtual char FirstCharacter { get; set; }
 
-		[DefaultValue (true)]
-		public virtual bool PremultiplyAlpha { get; set; }
+        [DefaultValue(true)]
+        public virtual bool PremultiplyAlpha { get; set; }
 
-		public virtual TextureProcessorOutputFormat TextureFormat { get; set; }
+        public virtual TextureProcessorOutputFormat TextureFormat { get; set; }
 
-		public FontTextureProcessor ()
-		{
-		    FirstCharacter = ' ';
-		    PremultiplyAlpha = true;
-		}
+        public FontTextureProcessor()
+        {
+            FirstCharacter = ' ';
+            PremultiplyAlpha = true;
+        }
 
-		protected virtual char GetCharacterForIndex (int index)
-		{
-			return (char)(((int)FirstCharacter) + index);
-		}
+        protected virtual char GetCharacterForIndex(int index)
+        {
+            return (char)((FirstCharacter) + index);
+        }
 
-        private List<Glyph> ExtractGlyphs(PixelBitmapContent<Color> bitmap)
-		{
-			var glyphs = new List<Glyph>(); 
-			var regions = new List<Rectangle>();
-			for (int y = 0; y < bitmap.Height; y++)
+        private List<Glyph> ExtractGlyphs(PixelBitmapContent<Rgba32> bitmap)
+        {
+            var glyphs = new List<Glyph>();
+            var regions = new List<Rectangle>();
+
+            int width = bitmap.Width;
+            var pixels = bitmap.GetPixelSpan();
+            for (int y = 0; y < bitmap.Height; y++)
             {
-				for (int x = 0; x < bitmap.Width; x++)
+                for (int x = 0; x < width; x++)
                 {
-					if (bitmap.GetPixel(x, y) != transparentPixel)
+                    if (pixels[x + y * width] != _transparentPixel)
                     {
-						// if we don't have a region that has this pixel already
-						var re = regions.Find(r => {
-							return r.Contains(x, y); 
-						});
-						if (re == Rectangle.Empty)
+                        // if we don't have a region that has this pixel already
+                        var re = regions.Find(r =>
                         {
-							// we have found the top, left of a image. 
-							// we now need to scan for the 'bounds'
-							int top = y;
-							int bottom = y;
-							int left = x;
-							int right = x;
-							while (bitmap.GetPixel(right, bottom) != transparentPixel)
-								right++;
-							while (bitmap.GetPixel(left, bottom) != transparentPixel)
-								bottom++;
-							// we got a glyph :)
-							regions.Add(new Rectangle(left, top, right - left, bottom - top));
-							x = right;
-						}
+                            return r.Contains(x, y);
+                        });
+
+                        if (re == Rectangle.Empty)
+                        {
+                            // we have found the top, left of a image. 
+                            // we now need to scan for the 'bounds'
+                            int top = y;
+                            int bottom = y;
+                            int left = x;
+                            int right = x;
+
+                            while (pixels[right + bottom * width] != _transparentPixel)
+                                right++;
+
+                            while (pixels[left + bottom * width] != _transparentPixel)
+                                bottom++;
+
+                            // we got a glyph :)
+                            regions.Add(new Rectangle(left, top, right - left, bottom - top));
+                            x = right;
+                        }
                         else
                         {
-							x += re.Width;
-						}
-					}
-				}
-			}
+                            x += re.Width;
+                        }
+                    }
+                }
+            }
 
-			for (int i = 0; i < regions.Count; i++)
+            for (int i = 0; i < regions.Count; i++)
             {
-				var rect = regions[i];
-                var newBitmap = new PixelBitmapContent<Color>(rect.Width, rect.Height);
+                var rect = regions[i];
+                var newBitmap = new PixelBitmapContent<Rgba32>(rect.Width, rect.Height);
                 BitmapContent.Copy(bitmap, rect, newBitmap, new Rectangle(0, 0, rect.Width, rect.Height));
-				var glyph = new Glyph(GetCharacterForIndex (i), newBitmap);
-			    glyph.CharacterWidths.B = glyph.Bitmap.Width;
-			    glyphs.Add(glyph);
-                //newbitmap.Save (GetCharacterForIndex(i)+".png", System.Drawing.Imaging.ImageFormat.Png);
-			}
-			return glyphs ;
-		}
 
-		public override SpriteFontContent Process(Texture2DContent input, ContentProcessorContext context)
-		{
-			var output = new SpriteFontContent();
+                var glyph = new Glyph(GetCharacterForIndex(i), newBitmap);
+                glyph.CharacterWidths.B = glyph.Bitmap.Width;
+                glyphs.Add(glyph);
+            }
+            return glyphs;
+        }
 
-			// extract the glyphs from the texture and map them to a list of characters.
-			// we need to call GtCharacterForIndex for each glyph in the Texture to 
-			// get the char for that glyph, by default we start at ' ' then '!' and then ASCII
-			// after that.
+        public override SpriteFontContent Process(Texture2DContent input, ContentProcessorContext context)
+        {
+            // extract the glyphs from the texture and map them to a list of characters.
+            // we need to call GtCharacterForIndex for each glyph in the Texture to 
+            // get the char for that glyph, by default we start at ' ' then '!' and then ASCII
+            // after that.
             BitmapContent face = input.Faces[0][0];
             face.TryGetFormat(out SurfaceFormat faceFormat);
             if (faceFormat != SurfaceFormat.Rgba32)
             {
-                var colorFace = new PixelBitmapContent<Color>(face.Width, face.Height);
+                var colorFace = new PixelBitmapContent<Rgba32>(face.Width, face.Height);
                 BitmapContent.Copy(face, colorFace);
                 face = colorFace;
             }
 
-            var glyphs = ExtractGlyphs((PixelBitmapContent<Color>)face);
-			// Optimize.
-			foreach (var glyph in glyphs)
+            var output = new SpriteFontContent();
+            var glyphs = ExtractGlyphs((PixelBitmapContent<Rgba32>)face);
+            // Optimize.
+            foreach (var glyph in glyphs)
             {
-				GlyphCropper.Crop(glyph);
+                GlyphCropper.Crop(glyph);
                 output.VerticalLineSpacing = Math.Max(output.VerticalLineSpacing, glyph.Subrect.Height);
-			}
+            }
 
             // Get the platform specific texture profile.
             var texProfile = TextureProfile.ForPlatform(context.TargetPlatform);
             texProfile.Requirements(context, TextureFormat, out bool requiresPot, out bool requiresSquare);
 
-            face = GlyphPacker.ArrangeGlyphs(glyphs.ToArray(), requiresPot, requiresSquare);
-			
-			foreach (var glyph in glyphs)
+            face = GlyphPacker.ArrangeGlyphs(glyphs, requiresPot, requiresSquare);
+
+            foreach (var glyph in glyphs)
             {
-				output.CharacterMap.Add(glyph.Character);
-				output.Glyphs.Add(new Rectangle (glyph.Subrect.X, glyph.Subrect.Y, glyph.Subrect.Width, glyph.Subrect.Height));
-                output.Cropping.Add(new Rectangle((int)glyph.XOffset, (int)glyph.YOffset, glyph.Width, glyph.Height));
-				var abc = glyph.CharacterWidths;
-				output.Kerning.Add(new Vector3(abc.A, abc.B, abc.C));
-			}
-			
-			output.Texture.Faces[0].Add(face);
+                output.CharacterMap.Add(glyph.Character);
+                output.Regions.Add(new Rectangle(glyph.Subrect.X, glyph.Subrect.Y, glyph.Subrect.Width, glyph.Subrect.Height));
+                output.Croppings.Add(new Rectangle((int)glyph.XOffset, (int)glyph.YOffset, glyph.Width, glyph.Height));
+                var abc = glyph.CharacterWidths;
+                output.Kerning.Add(new Vector3(abc.A, abc.B, abc.C));
+            }
+
+            output.Texture.Faces[0].Add(face);
 
             var bmp = output.Texture.Faces[0][0];
             if (PremultiplyAlpha)
@@ -154,7 +162,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             // Perform the final texture conversion.
             texProfile.ConvertTexture(context, output.Texture, TextureFormat, true);
 
-			return output;
-		}
-	}
+            return output;
+        }
+    }
 }

@@ -48,7 +48,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                 context.Logger.LogMessage("Failed to convert using \"{0}\" quality, used \"{1}\" quality", Quality, finalQuality);
 
             return new SoundEffectContent(
-                input.Format.NativeWaveFormat, input.Data, input.DataLength, input.LoopStart, input.LoopLength, (int)input.Duration.TotalMilliseconds);
+                input.Format.NativeWaveFormat, input.Data, input.DataLength, 
+                input.LoopStart, input.LoopLength, (int)input.Duration.TotalMilliseconds);
         }
     }
 }

@@ -190,14 +190,16 @@
     </Compile>
     <Compile Include="Utilities\CRC32.cs" />
     <Compile Include="Utilities\CrcCalculatorStream.cs" />
+    <Compile Include="Utilities\DisposeCallbackStream.cs" />
     <Compile Include="Utilities\FuncLoader.Desktop.cs" />
     <Compile Include="Utilities\PrefixedStream.cs" />
     <Compile Include="Utilities\ReflectionHelpers.Default.cs" />
     <Compile Include="Utilities\ReusableItemList.cs" />
     <Compile Include="Utilities\ServiceProviderExtensions.cs" />
-    <Compile Include="Utilities\TaskbarList.cs" />
-    <Compile Include="Utilities\TaskbarProgress.cs" />
-    <Compile Include="Utilities\TaskbarProgressState.cs" />
+    <Compile Include="Utilities\TaskbarList\TaskbarList.COM.cs" />
+    <Compile Include="Utilities\TaskbarList\TaskbarList.cs" />
+    <Compile Include="Utilities\TaskbarList\TaskbarProgress.cs" />
+    <Compile Include="Utilities\TaskbarList\TaskbarProgressState.cs" />
     <Compile Include="Utilities\Threading.cs" />
     <Compile Include="Utilities\TimerHelper.cs" />
     <Compile Include="Utilities\UnmanagedPointer.cs" />
@@ -422,25 +424,6 @@
     <Compile Include="Graphics\OcclusionQuery.DirectX.cs">
       <Services>DirectXGraphics</Services>
     </Compile>
-    <Compile Include="Graphics\PackedVector\Alpha8.cs" />
-    <Compile Include="Graphics\PackedVector\Bgr565.cs" />
-    <Compile Include="Graphics\PackedVector\Bgra4444.cs" />
-    <Compile Include="Graphics\PackedVector\Bgra5551.cs" />
-    <Compile Include="Graphics\PackedVector\Byte4.cs" />
-    <Compile Include="Graphics\PackedVector\HalfSingle.cs" />
-    <Compile Include="Graphics\PackedVector\HalfTypeHelper.cs" />
-    <Compile Include="Graphics\PackedVector\HalfVector2.cs" />
-    <Compile Include="Graphics\PackedVector\HalfVector4.cs" />
-    <Compile Include="Graphics\PackedVector\IPackedVector.cs" />
-    <Compile Include="Graphics\PackedVector\NormalizedByte2.cs" />
-    <Compile Include="Graphics\PackedVector\NormalizedByte4.cs" />
-    <Compile Include="Graphics\PackedVector\NormalizedShort2.cs" />
-    <Compile Include="Graphics\PackedVector\NormalizedShort4.cs" />
-    <Compile Include="Graphics\PackedVector\Rg32.cs" />
-    <Compile Include="Graphics\PackedVector\Rgba64.cs" />
-    <Compile Include="Graphics\PackedVector\Rgba1010102.cs" />
-    <Compile Include="Graphics\PackedVector\Short2.cs" />
-    <Compile Include="Graphics\PackedVector\Short4.cs" />
     <Compile Include="Graphics\PresentationEventArgs.cs" />
     <Compile Include="Graphics\PresentationParameters.cs" />
     <Compile Include="Graphics\PresentInterval.cs" />
@@ -846,10 +829,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj">
-      <Project>{b2b538a9-ad83-4484-a908-698503f4652f}</Project>
-      <Name>MonoGame.Imaging</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj">
       <Project>{de48723f-d255-49f6-8372-aef8b059d5e7}</Project>
       <Name>MonoGame.Utilities</Name>

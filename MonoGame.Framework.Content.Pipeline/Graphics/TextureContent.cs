@@ -13,7 +13,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
     /// </summary>
     public abstract class TextureContent : ContentItem
     {
-
         /// <summary>
         /// Collection of image faces that hold a single mipmap chain for a regular 2D texture, six chains for a cube map, or an arbitrary number for volume and array textures.
         /// </summary>
@@ -35,20 +34,20 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         public void ConvertBitmapType(Type newBitmapType)
         {
             if (newBitmapType == null)
-                throw new ArgumentNullException("newBitmapType");
+                throw new ArgumentNullException(nameof(newBitmapType));
 
-            if (!newBitmapType.IsSubclassOf(typeof (BitmapContent)))
-                throw new ArgumentException(string.Format("Type '{0}' is not a subclass of BitmapContent.", newBitmapType));
+            if (!newBitmapType.IsSubclassOf(typeof(BitmapContent)))
+                throw new ArgumentException($"Type '{newBitmapType}' is not a subclass of BitmapContent.");
 
             if (newBitmapType.IsAbstract)
-                throw new ArgumentException(string.Format("Type '{0}' is abstract and cannot be allocated.", newBitmapType));
+                throw new ArgumentException($"Type '{newBitmapType}' is abstract and cannot be allocated.");
 
             if (newBitmapType.ContainsGenericParameters)
-                throw new ArgumentException(string.Format("Type '{0}' contains generic parameters and cannot be allocated.", newBitmapType));
+                throw new ArgumentException($"Type '{newBitmapType}' contains generic parameters and cannot be allocated.");
 
-            if (newBitmapType.GetConstructor(new Type[2] {typeof (int), typeof (int)}) == null)
-                throw new ArgumentException(string.Format("Type '{0} does not have a constructor with signature (int, int) and cannot be allocated.",
-                                                          newBitmapType));
+            if (newBitmapType.GetConstructor(new Type[2] { typeof(int), typeof(int) }) == null)
+                throw new ArgumentException(
+                    $"Type '{newBitmapType} does not have a constructor with signature (int, int) and cannot be allocated.");
 
             foreach (var mipChain in Faces)
             {
@@ -57,13 +56,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                     var src = mipChain[i];
                     if (src.GetType() != newBitmapType)
                     {
-                        var dst = (BitmapContent)Activator.CreateInstance(newBitmapType, new object[] { src.Width,src.Height });
+                        var dst = (BitmapContent)Activator.CreateInstance(newBitmapType, new object[] { src.Width, src.Height });
                         BitmapContent.Copy(src, dst);
                         mipChain[i] = dst;
                     }
                 }
             }
-        }        
+        }
 
         /// <summary>
         /// Generates a full set of mipmaps for the texture.
@@ -86,6 +85,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 var faceType = faceBitmap.GetType();
                 int width = faceBitmap.Width;
                 int height = faceBitmap.Height;
+
                 while (width > 1 || height > 1)
                 {
                     if (width > 1)

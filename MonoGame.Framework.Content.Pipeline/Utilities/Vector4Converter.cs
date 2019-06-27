@@ -13,7 +13,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Utilities
     /// <summary>
     /// Helper class used by PixelBitmapContent.TryCopyFrom and TryCopyTo to convert between non-PackedValue types and Vector4.
     /// </summary>
-    class Vector4Converter :
+    internal class Vector4Converter :
         IVector4Converter<byte>,
         IVector4Converter<short>,
         IVector4Converter<int>,

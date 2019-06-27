@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -44,10 +45,13 @@ namespace Microsoft.Xna.Framework.Input
                     {
                         try
                         {
-                            var src = Sdl.RwFromMem(reader.ReadBytes((int)stream.Length), (int)stream.Length);
+                            IntPtr src = Sdl.RwFromMem(reader.ReadBytes((int)stream.Length), (int)stream.Length);
                             Sdl.GameController.AddMappingFromRw(src, 1);
                         }
-                        catch { }
+                        catch(Exception exc)
+                        {
+                            Debug.WriteLine("Failed to read game controller mappings: " + exc);
+                        }
                     }
                 }
             }

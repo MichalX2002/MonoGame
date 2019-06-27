@@ -3,7 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 {
@@ -13,37 +13,37 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         // Checks whether an area of a bitmap contains entirely the specified alpha value.
         public static bool IsAlphaEntirely(byte expectedAlpha, BitmapContent bitmap, Rectangle? region = null)
 		{
-            var bitmapRegion = region.HasValue ? region.Value : new Rectangle(0, 0, bitmap.Width, bitmap.Height);
-            // Works with PixelBitmapContent<byte> at this stage
-            if (bitmap is PixelBitmapContent<byte>)
+            var bitmapRegion = region ?? new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+            if (bitmap is PixelBitmapContent<Alpha8> alphaBmp)
             {
-                var bmp = bitmap as PixelBitmapContent<byte>;
                 for (int y = 0; y < bitmapRegion.Height; y++)
                 {
+                    var row = alphaBmp.GetRowSpan(bitmapRegion.Y + y);
                     for (int x = 0; x < bitmapRegion.Width; x++)
                     {
-                        var alpha = bmp.GetPixel(bitmapRegion.X + x, bitmapRegion.Y + y);
-                        if (alpha != expectedAlpha)
+                        if (row[bitmapRegion.X + x].PackedValue != expectedAlpha)
                             return false;
                     }
                 }
                 return true;
             }
-            else if (bitmap is PixelBitmapContent<Color>)
+            else if (bitmap is PixelBitmapContent<Rgba32> rgbaBmp)
             {
-                var bmp = bitmap as PixelBitmapContent<Color>;
                 for (int y = 0; y < bitmapRegion.Height; y++)
                 {
+                    var row = rgbaBmp.GetRowSpan(bitmapRegion.Y + y);
                     for (int x = 0; x < bitmapRegion.Width; x++)
                     {
-                        var alpha = bmp.GetPixel(bitmapRegion.X + x, bitmapRegion.Y + y).A;
-                        if (alpha != expectedAlpha)
+                        if (row[bitmapRegion.X + x].A != expectedAlpha)
                             return false;
                     }
                 }
                 return true;
             }
-            throw new ArgumentException("Expected PixelBitmapContent<byte> or PixelBitmapContent<Color>, got " + bitmap.GetType().Name, "bitmap");
+
+            throw new ArgumentException(
+                "Expected PixelBitmapContent<Alpha8> or PixelBitmapContent<Rgba32> but got " +
+                bitmap.GetType().Name, nameof(bitmap));
 		}
 	}
 }

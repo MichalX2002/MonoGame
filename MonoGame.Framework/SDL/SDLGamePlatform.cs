@@ -24,22 +24,22 @@ namespace Microsoft.Xna.Framework
         private int _isExiting;
         private SdlGameWindow _window;
 
+        private Sdl.Window.SDL_SysWMinfo wmInfo;
+
         public SdlGamePlatform(Game game) : base(game)
         {
             _game = game;
             _keys = new List<Keys>();
-            Keyboard.SetKeys(_keys);
+            Keyboard.SetKeyList(_keys);
 
-            Sdl.GetVersion(out Sdl.Version sversion);
+            Sdl.GetVersion(out Sdl.Version sdlVersion);
+            Sdl.Major = sdlVersion.Major;
+            Sdl.Minor = sdlVersion.Minor;
+            Sdl.Patch = sdlVersion.Patch;
 
-            Sdl.Major = sversion.Major;
-            Sdl.Minor = sversion.Minor;
-            Sdl.Patch = sversion.Patch;
-
-            var version = 100 * Sdl.Major + 10 * Sdl.Minor + Sdl.Patch;
-
+            int version = 100 * Sdl.Major + 10 * Sdl.Minor + Sdl.Patch;
             if (version <= 204)
-                Debug.WriteLine ("Please use SDL 2.0.5 or higher.");
+                Debug.WriteLine("Please use SDL 2.0.5 or higher.");
 
             // Needed so VS can debug the project on Windows
             if (version >= 205 && CurrentPlatform.OS == OS.Windows && Debugger.IsAttached)
@@ -56,6 +56,9 @@ namespace Microsoft.Xna.Framework
 
             GamePad.InitDatabase();
             Window = _window = new SdlGameWindow(_game);
+
+            wmInfo.version = sdlVersion;
+            Sdl.Window.GetWindowWMInfo(_window.Handle, ref wmInfo);
         }
 
         public override void BeforeInitialize ()

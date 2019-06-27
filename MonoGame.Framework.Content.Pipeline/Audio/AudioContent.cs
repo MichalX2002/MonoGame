@@ -33,28 +33,14 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
         /// </summary>
         public AudioFileType FileType => _fileType;
 
-        /*
         /// <summary>
         /// The current raw audio data without header information.
         /// </summary>
-        /// <remarks>
-        /// This changes from the source data to the output data after conversion.
-        /// For MP3 and WMA files this throws an exception to match XNA behavior.
-        /// </remarks>
-        public byte[] Data
-        {
-            get
-            {
-                if (_disposed)
-                    throw new ObjectDisposedException(nameof(Data));
-                if (_data == null)
-                    throw new InvalidContentException("Could not read the audio data from file \"" + Path.GetFileName(FileName) + "\".");
-                return _data;
-            }
-        }
-        */
-
-        public FileStream Data { get; private set; }
+        public Stream Data { get; private set; }
+        
+        /// <summary>
+        /// The amount of audio data bytes in the <see cref="Data"/> stream.
+        /// </summary>
         public int DataLength { get; private set; }
 
         /// <summary>
@@ -158,7 +144,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
             DefaultAudioProfile.ConvertToFormat(this, formatType, quality, saveToFile);
         }
 
-        public void SetData(FileStream data, int dataLength, AudioFormat format, TimeSpan duration, int loopStart, int loopLength)
+        public void SetData(
+            Stream data, int dataLength, AudioFormat format, TimeSpan duration, int loopStart, int loopLength)
         {
             Data = data ?? throw new ArgumentNullException(nameof(data));
             _format = format ?? throw new ArgumentNullException(nameof(format));
@@ -174,6 +161,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
             {
                 Data?.Dispose();
                 Data = null;
+
                 DataLength = -1;
                 _disposed = true;
             }

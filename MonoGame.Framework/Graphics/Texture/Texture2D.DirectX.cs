@@ -3,22 +3,11 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.IO;
 using System.Runtime.InteropServices;
-using MonoGame.Imaging;
-using MonoGame.Utilities;
-using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
-using SharpDX.WIC;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
 using Resource = SharpDX.Direct3D11.Resource;
-
-#if WINDOWS_UAP
-using Windows.Graphics.Imaging;
-using Windows.Storage.Streams;
-using System.Threading.Tasks;
-#endif
 
 namespace Microsoft.Xna.Framework.Graphics
 {

@@ -23,7 +23,8 @@ namespace Microsoft.Xna.Framework
         internal MouseState MouseState;
         internal TouchPanelState TouchPanelState;
 
-#region Properties
+        #region Properties
+
         [DefaultValue(false)]
         public abstract bool AllowUserResizing { get; set; }
         public abstract Rectangle ClientBounds { get; }
@@ -31,8 +32,10 @@ namespace Microsoft.Xna.Framework
         public abstract bool HasClipboardText { get; }
         public abstract string ClipboardText { get; set; }
 
-#region Windows Taskbar Progress
+        #region Windows Taskbar Progress
+
 #if DIRECTX || DESKTOPGL
+
         private TaskbarProgressState _taskbarState;
         private TaskbarProgressValue _taskbarProgress;
         internal TaskbarList _taskbarList;
@@ -45,10 +48,8 @@ namespace Microsoft.Xna.Framework
             set
             {
                 if (_taskbarList != null && _taskbarState != value)
-                {
-                    _taskbarState = value;
                     _taskbarList.SetProgressState(value);
-                }
+                _taskbarState = value;
             }
         }
 
@@ -58,13 +59,13 @@ namespace Microsoft.Xna.Framework
             set
             {
                 if (_taskbarList != null && !_taskbarProgress.Equals(value))
-                {
-                    _taskbarProgress = value;
                     _taskbarList.SetProgressValue(value);
-                }
+                _taskbarProgress = value;
             }
         }
-#endif
+
+        #endif
+
 #endregion
 
         /// <summary>
@@ -121,9 +122,9 @@ namespace Microsoft.Xna.Framework
             TouchPanelState = new TouchPanelState(this);
         }
 
-#endregion Properties
+        #endregion Properties
 
-#region Events
+        #region Events
 
         public event StateChangedDelegate ClientSizeChanged;
         public event StateChangedDelegate OrientationChanged;
@@ -132,9 +133,8 @@ namespace Microsoft.Xna.Framework
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
 
         /// <summary>
-		/// Use this event to retrieve text for objects like textbox's.
-		/// This event is not raised by noncharacter keys.
-		/// This event also supports key repeat.
+		/// Use this event to retrieve text for objects like textboxes.
+		/// This event is not raised by non-character keys and supports key repeat.
 		/// For more information this event is based off:
 		/// http://msdn.microsoft.com/en-AU/library/system.windows.forms.control.keypress.aspx
 		/// </summary>
@@ -146,7 +146,7 @@ namespace Microsoft.Xna.Framework
         internal bool IsTextInputHandled { get { return TextInput != null; } }
 #endif
 
-#endregion Events
+        #endregion Events
 
         public abstract void BeginScreenDeviceChange(bool willBeFullScreen);
 

@@ -1224,7 +1224,8 @@ namespace Microsoft.Xna.Framework
         }
 
         /// <summary>
-        /// Translate a non-premultipled alpha <see cref="Color"/> to a <see cref="Color"/> that contains premultiplied alpha.
+        /// Translate a non-premultipled alpha <see cref="Vector4"/> color to a
+        /// <see cref="Color"/> that contains premultiplied alpha.
         /// </summary>
         /// <param name="vector">A <see cref="Vector4"/> representing color.</param>
         /// <returns>A <see cref="Color"/> which contains premultiplied alpha data.</returns>
@@ -1234,7 +1235,7 @@ namespace Microsoft.Xna.Framework
         }
 
         /// <summary>
-        /// Translate a non-premultipled alpha <see cref="Color"/> to a <see cref="Color"/> that contains premultiplied alpha.
+        /// Translate a non-premultipled alpha color to a <see cref="Color"/> that contains premultiplied alpha.
         /// </summary>
         /// <param name="r">Red component value.</param>
         /// <param name="g">Green component value.</param>
