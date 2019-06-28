@@ -165,12 +165,12 @@ namespace Microsoft.Xna.Framework
 
         #region IGraphicsDeviceService Members
 
-        public event SenderEvent<GraphicsDeviceManager> DeviceCreated;
-        public event SenderEvent<GraphicsDeviceManager> DeviceDisposing;
-        public event SenderEvent<GraphicsDeviceManager> DeviceReset;
-        public event SenderEvent<GraphicsDeviceManager> DeviceResetting;
-        public event DataEvent<GraphicsDeviceManager, PreparingDeviceSettingsEvent> PreparingDeviceSettings;
-        public event SenderEvent<GraphicsDeviceManager> Disposed;
+        public event SenderDelegate<GraphicsDeviceManager> DeviceCreated;
+        public event SenderDelegate<GraphicsDeviceManager> DeviceDisposing;
+        public event SenderDelegate<GraphicsDeviceManager> DeviceReset;
+        public event SenderDelegate<GraphicsDeviceManager> DeviceResetting;
+        public event MessageDelegate<GraphicsDeviceManager, PreparingDeviceSettingsEvent> PreparingDeviceSettings;
+        public event SenderDelegate<GraphicsDeviceManager> Disposed;
 
         protected void OnDeviceDisposing()
         {

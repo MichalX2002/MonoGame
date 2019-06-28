@@ -351,7 +351,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// This event is triggered when the AudioEngine is disposed.
         /// </summary>
-        public event SenderEvent<AudioEngine> Disposing;
+        public event SenderDelegate<AudioEngine> Disposing;
 
         /// <summary>
         /// Is true if the AudioEngine has been disposed.

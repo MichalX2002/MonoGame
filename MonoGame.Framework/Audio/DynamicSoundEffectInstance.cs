@@ -75,7 +75,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <remarks>
         /// This event may occur when <see cref="Play()"/> is called or during playback when a buffer is completed.
         /// </remarks>
-        public event SenderEvent<DynamicSoundEffectInstance> BufferNeeded;
+        public event SenderDelegate<DynamicSoundEffectInstance> BufferNeeded;
 
         #endregion
 

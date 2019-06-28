@@ -333,13 +333,13 @@ namespace Microsoft.Xna.Framework.Graphics
         #region Events
 
         // TODO Graphics Device events need implementing
-        internal event DataEvent<GraphicsDevice, PresentationEventArgs> PresentationChanged;
-        public event SenderEvent<GraphicsDevice> DeviceLost;
-        public event SenderEvent<GraphicsDevice> DeviceReset;
-        public event SenderEvent<GraphicsDevice> DeviceResetting;
-        public event DataEvent<GraphicsDevice, ResourceCreatedEvent> ResourceCreated;
-        public event DataEvent<GraphicsDevice, ResourceDestroyedEvent> ResourceDestroyed;
-        public event SenderEvent<GraphicsDevice> Disposing;
+        internal event MessageDelegate<GraphicsDevice, PresentationEventArgs> PresentationChanged;
+        public event SenderDelegate<GraphicsDevice> DeviceLost;
+        public event SenderDelegate<GraphicsDevice> DeviceReset;
+        public event SenderDelegate<GraphicsDevice> DeviceResetting;
+        public event MessageDelegate<GraphicsDevice, ResourceCreatedEvent> ResourceCreated;
+        public event MessageDelegate<GraphicsDevice, ResourceDestroyedEvent> ResourceDestroyed;
+        public event SenderDelegate<GraphicsDevice> Disposing;
 
         #endregion
 

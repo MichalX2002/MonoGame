@@ -39,8 +39,8 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        public event SenderEvent<object> EnabledChanged;
-        public event SenderEvent<object> UpdateOrderChanged;
+        public event SenderDelegate<object> EnabledChanged;
+        public event SenderDelegate<object> UpdateOrderChanged;
 
         public GameComponent(Game game)
         {

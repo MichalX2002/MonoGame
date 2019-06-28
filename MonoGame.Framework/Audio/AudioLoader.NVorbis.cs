@@ -12,25 +12,15 @@ namespace Microsoft.Xna.Framework.Audio
             Stream stream, out ALFormat format, out int frequency, out int channels, 
             out int blockAlignment, out int bitsPerSample, out int samplesPerBlock, out int sampleCount)
         {
-            byte[] block = null;
+            byte[] bufferBlock = null;
             MemoryStream result = null;
             var reader = new VorbisReader(stream, leaveOpen: false);
             try
             {
-                sampleCount = (int)reader.TotalSamples;
-                channels = reader.Channels;
-                frequency = reader.SampleRate;
-                blockAlignment = 0;
-                samplesPerBlock = 0;
-
                 bool floatOutput = ALController.Instance.SupportsFloat32;
-                int sampleSize = (floatOutput ? sizeof(float) : sizeof(short));
-                bitsPerSample = sampleSize * 8;
+                int sampleSize = floatOutput ? 4 : 2; // sizeof(float) : sizeof(short);
 
-                long outputBytes = sampleCount * channels * sampleSize;
-                if (outputBytes > int.MaxValue)
-                    throw new InvalidDataException("Size of decoded audio data exceeds " + int.MaxValue + " bytes.");
-
+                channels = reader.Channels;
                 if (channels == 1)
                     format = floatOutput ? ALFormat.MonoFloat32 : ALFormat.Mono16;
                 else if (channels == 2)
@@ -38,14 +28,27 @@ namespace Microsoft.Xna.Framework.Audio
                 else
                     throw new NotSupportedException("Only mono and stereo is supported.");
 
-                block = RecyclableMemoryManager.Instance.GetBlock();
-                Span<byte> blockBytes = block.AsSpan();
-                Span<short> blockShorts = MemoryMarshal.Cast<byte, short>(blockBytes);
+                sampleCount = (int)reader.TotalSamples;
+                frequency = reader.SampleRate;
+                blockAlignment = 0;
+                samplesPerBlock = 0;
+                bitsPerSample = sampleSize * 8;
 
-                Span<float> sampleBuffer = stackalloc float[block.Length / 4];
-                Span<byte> sampleBufferBytes = MemoryMarshal.AsBytes(sampleBuffer);
+                long outputBytes = sampleCount * channels * sampleSize;
+                if (outputBytes > int.MaxValue)
+                    throw new InvalidDataException("Size of decoded audio data exceeds " + int.MaxValue + " bytes.");
 
                 result = RecyclableMemoryManager.Instance.GetMemoryStream(null, (int)outputBytes);
+                bufferBlock = RecyclableMemoryManager.Instance.GetBlock();
+
+                Span<byte> bufferBlockBytes = bufferBlock.AsSpan();
+                Span<short> bufferBlockShorts = MemoryMarshal.Cast<byte, short>(bufferBlockBytes);
+                
+                int sampleBufferSize = bufferBlock.Length / 4;
+                Span<float> sampleBuffer = sampleBufferSize <= 1024 * 20 ? 
+                    stackalloc float[sampleBufferSize] : new float[sampleBufferSize];
+                Span<byte> sampleBufferBytes = MemoryMarshal.AsBytes(sampleBuffer);
+
                 int totalSamples = 0;
                 int samplesRead;
                 while ((samplesRead = reader.ReadSamples(sampleBuffer)) > 0)
@@ -53,27 +56,20 @@ namespace Microsoft.Xna.Framework.Audio
                     if (floatOutput)
                     {
                         // we can copy directly to output
-                        int len = samplesRead * sizeof(float);
-                        var src = sampleBufferBytes.Slice(0, len);
-                        src.CopyTo(blockBytes);
-                        result.Write(block, 0, len);
+                        int bytes = samplesRead * sizeof(float);
+                        var src = sampleBufferBytes.Slice(0, bytes);
+                        src.CopyTo(bufferBlockBytes);
+                        result.Write(bufferBlock, 0, bytes);
                     }
                     else
                     {
                         // we need to convert float to short
-                        for (int i = 0; i < samplesRead; i++)
-                        {
-                            int tmp = (int)(32767f * sampleBuffer[i]);
-                            if (tmp > short.MaxValue)
-                                blockShorts[i] = short.MaxValue;
-                            else if (tmp < short.MinValue)
-                                blockShorts[i] = short.MinValue;
-                            else
-                                blockShorts[i] = (short)tmp;
-                        }
+                        var src = sampleBuffer.Slice(0, samplesRead);
+                        var dst = bufferBlockShorts.Slice(0, samplesRead);
+                        ConvertSamplesToInt16(src, dst);
 
-                        int len = samplesRead * sizeof(short);
-                        result.Write(block, 0, len);
+                        int bytes = samplesRead * sizeof(short);
+                        result.Write(bufferBlock, 0, bytes);
                     }
                     totalSamples += samplesRead;
                 }
@@ -93,8 +89,8 @@ namespace Microsoft.Xna.Framework.Audio
             }
             finally
             {
-                if (block != null)
-                    RecyclableMemoryManager.Instance.ReturnBlock(block);
+                if (bufferBlock != null)
+                    RecyclableMemoryManager.Instance.ReturnBlock(bufferBlock);
                 reader?.Dispose();
             }
         }

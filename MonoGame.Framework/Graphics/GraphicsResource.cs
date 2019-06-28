@@ -56,7 +56,7 @@ namespace Microsoft.Xna.Framework.Graphics
         public string Name { get; set; }
         public object Tag { get; set; }
 
-        public event SenderEvent<GraphicsResource> Disposing;
+        public event SenderDelegate<GraphicsResource> Disposing;
 
         public GraphicsDevice GraphicsDevice
         {

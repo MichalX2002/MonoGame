@@ -13,126 +13,126 @@ using Microsoft.Xna.Framework.Utilities;
 
 namespace Microsoft.Xna.Framework
 {
-    public abstract class GameWindow
-    {
-        public delegate void StateChangedDelegate();
+	public abstract class GameWindow
+	{
+		public delegate void StateChangedDelegate();
 
-        private string _title;
-        internal bool _allowAltF4 = true;
+		private string _title;
+		internal bool _allowAltF4 = true;
 
-        internal MouseState MouseState;
-        internal TouchPanelState TouchPanelState;
+		internal MouseState MouseState;
+		internal TouchPanelState TouchPanelState;
 
-        #region Properties
+		#region Properties
 
-        [DefaultValue(false)]
-        public abstract bool AllowUserResizing { get; set; }
-        public abstract Rectangle ClientBounds { get; }
+		[DefaultValue(false)]
+		public abstract bool AllowUserResizing { get; set; }
+		public abstract Rectangle ClientBounds { get; }
 
-        public abstract bool HasClipboardText { get; }
-        public abstract string ClipboardText { get; set; }
+		public abstract bool HasClipboardText { get; }
+		public abstract string ClipboardText { get; set; }
 
-        #region Windows Taskbar Progress
+		#region Windows Taskbar Progress
 
 #if DIRECTX || DESKTOPGL
 
-        private TaskbarProgressState _taskbarState;
-        private TaskbarProgressValue _taskbarProgress;
-        internal TaskbarList _taskbarList;
+		private TaskbarProgressState _taskbarState;
+		private TaskbarProgressValue _taskbarProgress;
+		internal TaskbarList _taskbarList;
 
-        public bool IsTaskbarProgressSupported => _taskbarList != null;
+		public bool IsTaskbarProgressSupported => _taskbarList != null;
 
-        public virtual TaskbarProgressState TaskbarState
-        {
-            get => _taskbarState;
-            set
-            {
-                if (_taskbarList != null && _taskbarState != value)
-                    _taskbarList.SetProgressState(value);
-                _taskbarState = value;
-            }
-        }
+		public virtual TaskbarProgressState TaskbarState
+		{
+			get => _taskbarState;
+			set
+			{
+				if (_taskbarList != null && _taskbarState != value)
+					_taskbarList.SetProgressState(value);
+				_taskbarState = value;
+			}
+		}
 
-        public virtual TaskbarProgressValue TaskbarProgress
-        {
-            get => _taskbarProgress;
-            set
-            {
-                if (_taskbarList != null && !_taskbarProgress.Equals(value))
-                    _taskbarList.SetProgressValue(value);
-                _taskbarProgress = value;
-            }
-        }
+		public virtual TaskbarProgressValue TaskbarProgress
+		{
+			get => _taskbarProgress;
+			set
+			{
+				if (_taskbarList != null && !_taskbarProgress.Equals(value))
+					_taskbarList.SetProgressValue(value);
+				_taskbarProgress = value;
+			}
+		}
 
-        #endif
+		#endif
 
 #endregion
 
-        /// <summary>
-        /// Gets or sets a bool that enables usage of Alt+F4 for window closing on desktop platforms. Value is true by default.
-        /// </summary>
-        public virtual bool AllowAltF4 { get => _allowAltF4; set => _allowAltF4 = value; }
+		/// <summary>
+		/// Gets or sets a bool that enables usage of Alt+F4 for window closing on desktop platforms. Value is true by default.
+		/// </summary>
+		public virtual bool AllowAltF4 { get => _allowAltF4; set => _allowAltF4 = value; }
 
 #if (WINDOWS && !WINDOWS_UAP) || DESKTOPGL
-        /// <summary>
-        /// The location of this window on the desktop, eg: global coordinate space
-        /// which stretches across all screens.
-        /// </summary>
-        public abstract Point Position { get; set; }
+		/// <summary>
+		/// The location of this window on the desktop, eg: global coordinate space
+		/// which stretches across all screens.
+		/// </summary>
+		public abstract Point Position { get; set; }
 #endif
 
-        public abstract DisplayOrientation CurrentOrientation { get; }
-        public abstract IntPtr Handle { get; }
-        public abstract string ScreenDeviceName { get; }
+		public abstract DisplayOrientation CurrentOrientation { get; }
+		public abstract IntPtr Handle { get; }
+		public abstract string ScreenDeviceName { get; }
 
-        /// <summary>
-        /// Gets or sets the title of the game window.
-        /// </summary>
-        /// <remarks>
-        /// For Windows 8 and Windows 10 UWP this has no effect. For these platforms the title should be
-        /// set by using the DisplayName property found in the app manifest file.
-        /// </remarks>
-        public string Title
-        {
-            get => _title;
-            set
-            {
-                if (_title != value)
-                {
-                    SetTitle(value);
-                    _title = value;
-                }
-            }
-        }
+		/// <summary>
+		/// Gets or sets the title of the game window.
+		/// </summary>
+		/// <remarks>
+		/// For Windows 8 and Windows 10 UWP this has no effect. For these platforms the title should be
+		/// set by using the DisplayName property found in the app manifest file.
+		/// </remarks>
+		public string Title
+		{
+			get => _title;
+			set
+			{
+				if (_title != value)
+				{
+					SetTitle(value);
+					_title = value;
+				}
+			}
+		}
 
-        /// <summary>
-        /// Determines whether the border of the window is visible. Currently only supported on the WinDX and WinGL/Linux platforms.
-        /// </summary>
-        /// <exception cref="NotImplementedException">
-        /// Thrown when trying to use this property on a platform other than the WinDX and WinGL/Linux platforms.
-        /// </exception>
-        public virtual bool IsBorderless
-        {
-            get => false;
-            set => throw new NotImplementedException();
-        }
+		/// <summary>
+		/// Determines whether the border of the window is visible. Currently only supported on the WinDX and WinGL/Linux platforms.
+		/// </summary>
+		/// <exception cref="NotImplementedException">
+		/// Thrown when trying to use this property on a platform other than the WinDX and WinGL/Linux platforms.
+		/// </exception>
+		public virtual bool IsBorderless
+		{
+			get => false;
+			set => throw new NotImplementedException();
+		}
 
-        protected GameWindow()
-        {
-            TouchPanelState = new TouchPanelState(this);
-        }
+		protected GameWindow()
+		{
+			TouchPanelState = new TouchPanelState(this);
+		}
 
-        #endregion Properties
+		#endregion Properties
 
-        #region Events
+		#region Events
 
-        public event StateChangedDelegate ClientSizeChanged;
-        public event StateChangedDelegate OrientationChanged;
-        public event StateChangedDelegate ScreenDeviceNameChanged;
+		public event SenderDelegate<GameWindow> ClientSizeChanged;
+		public event SenderDelegate<GameWindow> OrientationChanged;
+		public event SenderDelegate<GameWindow> ScreenDeviceNameChanged;
 
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
 
-        /// <summary>
+		/// <summary>
 		/// Use this event to retrieve text for objects like textboxes.
 		/// This event is not raised by non-character keys and supports key repeat.
 		/// For more information this event is based off:
@@ -141,69 +141,69 @@ namespace Microsoft.Xna.Framework
 		/// <remarks>
 		/// This event is only supported on the Windows DirectX, Windows OpenGL and Linux platforms.
 		/// </remarks>
-		public event DataEvent<GameWindow, TextInputEvent> TextInput;
+		public event MessageDelegate<GameWindow, TextInputEvent> TextInput;
 
-        internal bool IsTextInputHandled { get { return TextInput != null; } }
+        internal bool IsTextInputHandled => TextInput != null;
+
 #endif
 
         #endregion Events
 
         public abstract void BeginScreenDeviceChange(bool willBeFullScreen);
 
-        public abstract void EndScreenDeviceChange(
-            string screenDeviceName, int clientWidth, int clientHeight);
+		public abstract void EndScreenDeviceChange(
+			string screenDeviceName, int clientWidth, int clientHeight);
 
-        public void EndScreenDeviceChange(string screenDeviceName)
-        {
-            EndScreenDeviceChange(screenDeviceName, ClientBounds.Width, ClientBounds.Height);
-        }
+		public void EndScreenDeviceChange(string screenDeviceName)
+		{
+			EndScreenDeviceChange(screenDeviceName, ClientBounds.Width, ClientBounds.Height);
+		}
 
-        protected void OnActivated()
-        {
-        }
+		protected void OnActivated()
+		{
+		}
 
-        internal void OnClientSizeChanged()
-        {
-            ClientSizeChanged?.Invoke();
-        }
+		internal void OnClientSizeChanged()
+		{
+			ClientSizeChanged?.Invoke(this);
+		}
 
-        protected void OnDeactivated()
-        {
+		protected void OnDeactivated()
+		{
+		}
 
-        }
+		protected void OnOrientationChanged()
+		{
+			OrientationChanged?.Invoke(this);
+		}
 
-        protected void OnOrientationChanged()
-        {
-            OrientationChanged?.Invoke();
-        }
+		protected void OnPaint()
+		{
+		}
 
-        protected void OnPaint()
-        {
-        }
-
-        protected void OnScreenDeviceNameChanged()
-        {
-            ScreenDeviceNameChanged?.Invoke();
-        }
+		protected void OnScreenDeviceNameChanged()
+		{
+			ScreenDeviceNameChanged?.Invoke(this);
+		}
 
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
-        protected void OnTextInput(GameWindow window, TextInputEvent ev)
-        {
-            TextInput?.Invoke(window, ev);
-        }
+		protected void OnTextInput(GameWindow window, TextInputEvent ev)
+		{
+			TextInput?.Invoke(window, ev);
+		}
 #endif
 
-        protected internal abstract void SetSupportedOrientations(DisplayOrientation orientations);
-        protected abstract void SetTitle(string title);
+		protected internal abstract void SetSupportedOrientations(DisplayOrientation orientations);
+		protected abstract void SetTitle(string title);
 
 #if DIRECTX && WINDOWS
-        public static GameWindow Create(Game game, int width, int height)
-        {
-            var window = new MonoGame.Framework.WinFormsGameWindow((MonoGame.Framework.WinFormsGamePlatform)game.Platform);
-            window.Initialize(width, height);
+		public static GameWindow Create(Game game, int width, int height)
+		{
+			var window = new MonoGame.Framework.WinFormsGameWindow((MonoGame.Framework.WinFormsGamePlatform)game.Platform);
+			window.Initialize(width, height);
 
-            return window;
-        }
+			return window;
+		}
 #endif
-    }
+	}
 }

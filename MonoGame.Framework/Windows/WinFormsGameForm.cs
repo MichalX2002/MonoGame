@@ -52,7 +52,7 @@ namespace Microsoft.Xna.Framework.Windows
 
         #region Events
 
-        public event DataEvent<WinFormsGameForm, HorizontalMouseWheelEvent> MouseHorizontalWheel;
+        public event MessageDelegate<WinFormsGameForm, HorizontalMouseWheelEvent> MouseHorizontalWheel;
 
         #endregion
 

@@ -5,12 +5,10 @@
 using System;
 using System.IO;
 using Microsoft.Xna.Framework.Audio;
-using MonoGame.Utilities.Memory;
-using NVorbis;
 
 namespace Microsoft.Xna.Framework.Content
 {
-	internal class SoundEffectReader : ContentTypeReader<SoundEffect>
+    internal class SoundEffectReader : ContentTypeReader<SoundEffect>
 	{
 		protected internal override SoundEffect Read(ContentReader input, SoundEffect existingInstance)
 		{

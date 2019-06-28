@@ -12,7 +12,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		public int MultiSampleCount { get; private set; }
 		public RenderTargetUsage RenderTargetUsage { get; private set; }
         public bool IsContentLost => false;
-        public event SenderEvent<RenderTarget2D> ContentLost;
+        public event SenderDelegate<RenderTarget2D> ContentLost;
 		
         private bool SuppressEventHandlerWarningsUntilEventsAreProperlyImplemented()
         {

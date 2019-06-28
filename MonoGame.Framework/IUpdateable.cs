@@ -6,8 +6,8 @@ namespace Microsoft.Xna.Framework
 {
 	public interface IUpdateable
 	{
-		event SenderEvent<object> EnabledChanged;
-		event SenderEvent<object> UpdateOrderChanged;
+		event SenderDelegate<object> EnabledChanged;
+		event SenderDelegate<object> UpdateOrderChanged;
 	
 		bool Enabled { get; }
 		int UpdateOrder { get; }

@@ -74,11 +74,6 @@ namespace Microsoft.Xna.Framework
             PlatformConstruct();
         }
 
-        ~Game()
-        {
-            Dispose(false);
-        }
-
         [Conditional("DEBUG")]
         internal void Log(string Message)
         {
@@ -88,7 +83,19 @@ namespace Microsoft.Xna.Framework
 
         #region IDisposable Implementation
 
+        [DebuggerNonUserCode]
+        private void AssertNotDisposed()
+        {
+            if (_isDisposed)
+            {
+                string name = GetType().Name;
+                throw new ObjectDisposedException(
+                    name, string.Format("The {0} object was used after being Disposed.", name));
+            }
+        }
+
         private bool _isDisposed;
+
         public void Dispose()
         {
             Dispose(true);
@@ -143,15 +150,9 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        [DebuggerNonUserCode]
-        private void AssertNotDisposed()
+        ~Game()
         {
-            if (_isDisposed)
-            {
-                string name = GetType().Name;
-                throw new ObjectDisposedException(
-                    name, string.Format("The {0} object was used after being Disposed.", name));
-            }
+            Dispose(false);
         }
 
         #endregion IDisposable Implementation
@@ -194,7 +195,6 @@ namespace Microsoft.Xna.Framework
             {
                 if (value < TimeSpan.Zero)
                     throw new ArgumentOutOfRangeException(nameof(value), "The time must be positive.");
-
                 _inactiveSleepTime = value;
             }
         }
@@ -212,7 +212,6 @@ namespace Microsoft.Xna.Framework
                     throw new ArgumentOutOfRangeException(nameof(value), "The time must be positive.");
                 if (value < _targetElapsedTime)
                     throw new ArgumentOutOfRangeException(nameof(value), "The time must be at least TargetElapsedTime.");
-
                 _maxElapsedTime = value;
             }
         }
@@ -225,7 +224,6 @@ namespace Microsoft.Xna.Framework
                 // Give GamePlatform implementations an opportunity to override
                 // the new value.
                 value = Platform.TargetElapsedTimeChanging(value);
-
                 if (value <= TimeSpan.Zero)
                     throw new ArgumentOutOfRangeException(
                         "The time must be positive and non-zero.", default(Exception));
@@ -262,10 +260,10 @@ namespace Microsoft.Xna.Framework
 
         #region Events
 
-        public event SenderEvent<Game> Activated;
-        public event SenderEvent<Game> Deactivated;
-        public event SenderEvent<Game> Disposed;
-        public event SenderEvent<Game> Exiting;
+        public event SenderDelegate<Game> Activated;
+        public event SenderDelegate<Game> Deactivated;
+        public event SenderDelegate<Game> Disposed;
+        public event SenderDelegate<Game> Exiting;
 
 #if WINDOWS_UAP
         [CLSCompliant(false)]
@@ -740,18 +738,18 @@ namespace Microsoft.Xna.Framework
 
             private readonly Predicate<T> _filter;
             private readonly Comparison<T> _sort;
-            private readonly Action<T, SenderEvent<object>> _filterChangedSubscriber;
-            private readonly Action<T, SenderEvent<object>> _filterChangedUnsubscriber;
-            private readonly Action<T, SenderEvent<object>> _sortChangedSubscriber;
-            private readonly Action<T, SenderEvent<object>> _sortChangedUnsubscriber;
+            private readonly Action<T, SenderDelegate<object>> _filterChangedSubscriber;
+            private readonly Action<T, SenderDelegate<object>> _filterChangedUnsubscriber;
+            private readonly Action<T, SenderDelegate<object>> _sortChangedSubscriber;
+            private readonly Action<T, SenderDelegate<object>> _sortChangedUnsubscriber;
 
             public SortingFilteringCollection(
                 Predicate<T> filter,
-                Action<T, SenderEvent<object>> filterChangedSubscriber,
-                Action<T, SenderEvent<object>> filterChangedUnsubscriber,
+                Action<T, SenderDelegate<object>> filterChangedSubscriber,
+                Action<T, SenderDelegate<object>> filterChangedUnsubscriber,
                 Comparison<T> sort,
-                Action<T, SenderEvent<object>> sortChangedSubscriber,
-                Action<T, SenderEvent<object>> sortChangedUnsubscriber)
+                Action<T, SenderDelegate<object>> sortChangedSubscriber,
+                Action<T, SenderDelegate<object>> sortChangedUnsubscriber)
             {
                 _items = new List<T>();
                 _addJournal = new List<AddJournalEntry<T>>();

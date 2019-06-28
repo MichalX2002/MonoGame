@@ -56,9 +56,6 @@ namespace Microsoft.Xna.Framework
 
             GamePad.InitDatabase();
             Window = _window = new SdlGameWindow(_game);
-
-            wmInfo.version = sdlVersion;
-            Sdl.Window.GetWindowWMInfo(_window.Handle, ref wmInfo);
         }
 
         public override void BeforeInitialize ()

@@ -27,6 +27,7 @@
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>false</Prefer32Bit>
     <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\$(MonoGamePlatform)\$(Platform)\$(Configuration)\</OutputPath>
@@ -137,10 +138,6 @@
     <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj">
       <Project>{6d75e618-19ca-4c51-9546-f10965fbc0b8}</Project>
       <Name>MonoGame.Framework.DesktopGL</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj">
-      <Project>{d046adda-b87b-4ab2-9dad-fa886d3e2014}</Project>
-      <Name>MonoGame.Utilities</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThirdParty\SixLabors\ImageSharp\src\ImageSharp\SixLabors.ImageSharp.csproj">
       <Project>{4196FDAF-6F4A-4A15-A4F5-0D52E0E54E7A}</Project>

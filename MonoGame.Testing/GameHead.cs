@@ -38,6 +38,8 @@ namespace MonoGame.Testings
 
         public GameHead()
         {
+            GC.Collect();
+
             _graphicsManager = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
         }
@@ -68,6 +70,7 @@ namespace MonoGame.Testings
             _watch.Restart();
             _song1 = Content.Load<Song>("sinus");
             _song1.Volume = 0.2f;
+            _song1.Pitch = 1.5f;
             _watch.Stop();
             Console.WriteLine("sinus Load Time: " + _watch.ElapsedMilliseconds + "ms");
 
@@ -85,7 +88,7 @@ namespace MonoGame.Testings
             //_song2.Volume = 0.2f;
             //w.Stop();
             //Console.WriteLine("Song Load Time: " + w.ElapsedMilliseconds + "ms");
-            //
+            
             //w.Restart();
             //_hitReflectSound = Content.Load<SoundEffect>("hit_reflect_0");
             //w.Stop();
@@ -178,23 +181,23 @@ namespace MonoGame.Testings
                 Exit();
 
             f += time.Delta;
-            if (f >= 3f + new Random().NextDouble() * 2)
+            if (f >= 4f)
             {
+                f = 0f;
+
                 //var instance = _hitReflectSound.CreateInstance();
                 //instance.Pitch = -0.6f;
                 //instance.Play();
 
-                var instance = _winJingle.CreateInstance();
-                instance.Volume = 0.05f;
-                instance.Pitch = 1.2f;
-                instance.Play();
+                //var instance = _winJingle.CreateInstance();
+                //instance.Volume = 0.05f;
+                //instance.Pitch = 1.2f;
+                //instance.Play();
 
-                f = 0f;
-
-                //w.Restart();
-                //_song1.Play(TimeSpan.Zero);
-                //w.Stop();
-                //Console.WriteLine("Moved next in " + w.Elapsed.TotalMilliseconds.ToString("0.00") + "ms");
+                _watch.Restart();
+                _song1.Play(TimeSpan.Zero);
+                _watch.Stop();
+                Console.WriteLine("Moved next in " + _watch.Elapsed.TotalMilliseconds.ToString("0.00") + "ms");
 
                 //int w = GraphicsDevice.PresentationParameters.BackBufferWidth;
                 //int h = GraphicsDevice.PresentationParameters.BackBufferHeight;
@@ -218,13 +221,13 @@ namespace MonoGame.Testings
             _spriteBatch.Begin();
 
             double avg = 0;
-            foreach (var value in Song.UpdateTime)
-                avg += value.TotalMilliseconds;
+            for (int i = 0; i < Song.UpdateTime.Count; i++)
+                avg += Song.UpdateTime[i].TotalMilliseconds;
             avg /= Song.UpdateTime.Count;
 
             _spriteBatch.Draw(_testTexture, new Vector2(0, 0), Color.White);
 
-            DrawShadedString(_font, "Timing: " + avg.ToString("0.00"), new Vector2(10, 5), Color.White, Color.Black);
+            DrawShadedString(_font, "Timing: " + avg.ToString("0.0000"), new Vector2(10, 5), Color.White, Color.Black);
 
             //using (var tex = new Texture2D(GraphicsDevice, 1, 1))
             //{

@@ -189,10 +189,26 @@
       <Platforms>Angle,Linux,Windows,WindowsGL,Web,MacOS</Platforms>
     </Compile>
     <Compile Include="Utilities\CRC32.cs" />
-    <Compile Include="Utilities\CrcCalculatorStream.cs" />
-    <Compile Include="Utilities\DisposeCallbackStream.cs" />
     <Compile Include="Utilities\FuncLoader.Desktop.cs" />
-    <Compile Include="Utilities\PrefixedStream.cs" />
+    <Compile Include="Utilities\IO\CrcCalculatorStream.cs" />
+    <Compile Include="Utilities\IO\DisposeCallbackStream.cs" />
+    <Compile Include="Utilities\IO\LengthedStream.cs" />
+    <Compile Include="Utilities\IO\Lz4DecoderStream.cs" />
+    <Compile Include="Utilities\IO\LzxDecoderStream.cs" />
+    <Compile Include="Utilities\IO\PrefixedStream.cs" />
+    <Compile Include="Utilities\IO\ZLibStream\DeflateManager.cs" />
+    <Compile Include="Utilities\IO\ZLibStream\GZipStream.cs" />
+    <Compile Include="Utilities\IO\ZLibStream\InflateBlocks.cs" />
+    <Compile Include="Utilities\IO\ZLibStream\InflateCodes.cs" />
+    <Compile Include="Utilities\IO\ZLibStream\InflateManager.cs" />
+    <Compile Include="Utilities\IO\ZLibStream\InfTree.cs" />
+    <Compile Include="Utilities\IO\ZLibStream\Iso88591Encoding.cs" />
+    <Compile Include="Utilities\IO\ZLibStream\Tree.cs" />
+    <Compile Include="Utilities\IO\ZLibStream\ZlibCodec.cs" />
+    <Compile Include="Utilities\IO\ZLibStream\ZlibStream.cs" />
+    <Compile Include="Utilities\IO\ZLibStream\ZlibStreamBase.cs" />
+    <Compile Include="Utilities\Memory\ByteBufferPool.cs" />
+    <Compile Include="Utilities\Memory\UnmanagedPointer.cs" />
     <Compile Include="Utilities\ReflectionHelpers.Default.cs" />
     <Compile Include="Utilities\ReusableItemList.cs" />
     <Compile Include="Utilities\ServiceProviderExtensions.cs" />
@@ -202,17 +218,6 @@
     <Compile Include="Utilities\TaskbarList\TaskbarProgressState.cs" />
     <Compile Include="Utilities\Threading.cs" />
     <Compile Include="Utilities\TimerHelper.cs" />
-    <Compile Include="Utilities\UnmanagedPointer.cs" />
-    <Compile Include="Utilities\ZlibStream\DeflateManager.cs" />
-    <Compile Include="Utilities\ZlibStream\GZipStream.cs" />
-    <Compile Include="Utilities\ZlibStream\InflateBlocks.cs" />
-    <Compile Include="Utilities\ZlibStream\InflateCodes.cs" />
-    <Compile Include="Utilities\ZlibStream\InflateManager.cs" />
-    <Compile Include="Utilities\ZlibStream\InfTree.cs" />
-    <Compile Include="Utilities\ZlibStream\Iso88591Encoding.cs" />
-    <Compile Include="Utilities\ZlibStream\Tree.cs" />
-    <Compile Include="Utilities\ZlibStream\ZlibCodec.cs" />
-    <Compile Include="Utilities\ZlibStream\ZlibStreamBase.cs" />
     <Compile Include="Audio\AudioChannels.cs" />
     <Compile Include="Audio\AudioEmitter.cs" />
     <Compile Include="Audio\AudioListener.cs" />
@@ -626,10 +631,6 @@
     <Compile Include="Utilities\Hash.cs" />
     <Compile Include="Utilities\FileHelpers.cs" />
     <Compile Include="Utilities\ReflectionHelpers.cs" />
-    <Compile Include="Utilities\Lz4Stream\Lz4DecoderStream.cs" />
-    <Compile Include="Utilities\LzxStream\LzxDecoderStream.cs" />
-    <Compile Include="Utilities\ZlibStream\ZlibStream.cs" />
-    <Compile Include="Utilities\ByteBufferPool.cs" />
     <Compile Include="..\ThirdParty\NVorbis\NVorbis\BufferedReadStream.cs">
       <Link>Utilities\NVorbis\BufferedReadStream.cs</Link>
       <Services>NVorbis</Services>
@@ -830,7 +831,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj">
-      <Project>{de48723f-d255-49f6-8372-aef8b059d5e7}</Project>
+      <Project>{86082a6f-d255-4099-b001-67fe366ab5c2}</Project>
       <Name>MonoGame.Utilities</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThirdParty\SixLabors\Core\src\SixLabors.Core\SixLabors.Core.csproj">

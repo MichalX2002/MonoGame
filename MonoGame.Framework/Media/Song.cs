@@ -39,7 +39,7 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
-        public event SenderEvent<Song> OnFinish;
+        public event SenderDelegate<Song> OnFinish;
 
         public bool IsDisposed { get; private set; }
         internal string FilePath { get; }

@@ -112,10 +112,6 @@
       <Project>{7de47032-a904-4c29-bd22-2d235e8d91ba}</Project>
       <Name>MonoGame.Framework.Windows</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj">
-      <Project>{d046adda-b87b-4ab2-9dad-fa886d3e2014}</Project>
-      <Name>MonoGame.Utilities</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ThirdParty\SixLabors\ImageSharp\src\ImageSharp\SixLabors.ImageSharp.csproj">
       <Project>{182cc7b0-b57c-45de-b4ae-7b1fe5a39add}</Project>
       <Name>SixLabors.ImageSharp</Name>

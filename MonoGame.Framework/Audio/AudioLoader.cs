@@ -3,10 +3,8 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using MonoGame.OpenAL;
 using MonoGame.Utilities;
 using MonoGame.Utilities.Memory;
 
@@ -356,6 +354,23 @@ namespace Microsoft.Xna.Framework.Audio
                 }
             }
             return outData;
+        }
+
+        public static void ConvertSamplesToInt16(ReadOnlySpan<float> src, Span<short> dst)
+        {
+            if (src.Length != dst.Length)
+                throw new ArgumentException("Non-equal span length.");
+
+            for (int i = 0; i < src.Length; i++)
+            {
+                int tmp = (int)(32767f * src[i]);
+                if (tmp > short.MaxValue)
+                    dst[i] = short.MaxValue;
+                else if (tmp < short.MinValue)
+                    dst[i] = short.MinValue;
+                else
+                    dst[i] = (short)tmp;
+            }
         }
 
         #region IMA4 decoding

@@ -1,6 +1,6 @@
-﻿using MonoGame.Utilities.Memory;
-using System;
+﻿using System;
 using System.IO;
+using MonoGame.Utilities.Memory;
 
 namespace MonoGame.Utilities
 {

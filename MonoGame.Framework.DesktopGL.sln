@@ -2,8 +2,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28714.193
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Utilities", "MonoGame.Utilities\MonoGame.Utilities.csproj", "{D046ADDA-B87B-4AB2-9DAD-FA886D3E2014}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Testing.DesktopGL", "MonoGame.Testing\MonoGame.Testing.DesktopGL.csproj", "{AEEADB59-7F50-496A-9524-A81A876AE70E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lidgren.Network", "ThirdParty\Lidgren.Network\Lidgren.Network\Lidgren.Network.csproj", "{AE483C29-042E-4226-BA52-D247CE7676DA}"
@@ -14,16 +12,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SixLabors.Core", "ThirdPart
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SixLabors.ImageSharp", "ThirdParty\SixLabors\ImageSharp\src\ImageSharp\SixLabors.ImageSharp.csproj", "{4196FDAF-6F4A-4A15-A4F5-0D52E0E54E7A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Utilities", "MonoGame.Utilities\MonoGame.Utilities.csproj", "{E8D7B5C4-C5A1-44E3-A55E-E340BBAB391C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D046ADDA-B87B-4AB2-9DAD-FA886D3E2014}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D046ADDA-B87B-4AB2-9DAD-FA886D3E2014}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D046ADDA-B87B-4AB2-9DAD-FA886D3E2014}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D046ADDA-B87B-4AB2-9DAD-FA886D3E2014}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AEEADB59-7F50-496A-9524-A81A876AE70E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AEEADB59-7F50-496A-9524-A81A876AE70E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AEEADB59-7F50-496A-9524-A81A876AE70E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -44,6 +40,10 @@ Global
 		{4196FDAF-6F4A-4A15-A4F5-0D52E0E54E7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4196FDAF-6F4A-4A15-A4F5-0D52E0E54E7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4196FDAF-6F4A-4A15-A4F5-0D52E0E54E7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8D7B5C4-C5A1-44E3-A55E-E340BBAB391C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8D7B5C4-C5A1-44E3-A55E-E340BBAB391C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8D7B5C4-C5A1-44E3-A55E-E340BBAB391C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8D7B5C4-C5A1-44E3-A55E-E340BBAB391C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

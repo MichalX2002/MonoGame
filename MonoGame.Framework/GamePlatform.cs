@@ -104,9 +104,9 @@ namespace Microsoft.Xna.Framework
 
         #region Events
 
-        public event SenderEvent<GamePlatform> AsyncRunLoopEnded;
-        public event SenderEvent<Game> Activated;
-        public event SenderEvent<Game> Deactivated;
+        public event SenderDelegate<GamePlatform> AsyncRunLoopEnded;
+        public event SenderDelegate<Game> Activated;
+        public event SenderDelegate<Game> Deactivated;
 
         /// <summary>
         /// Raises the AsyncRunLoopEnded event. This method must be called by

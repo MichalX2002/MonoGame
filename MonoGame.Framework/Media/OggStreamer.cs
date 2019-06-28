@@ -12,29 +12,29 @@ namespace Microsoft.Xna.Framework.Media
     {
         public readonly EffectsExtension Efx = ALController.Efx;
 
-        const float DefaultUpdateRate = 10;
-        const int DefaultBufferSize = 10000;
+        const float DefaultUpdateRate = 8;
+        const int DefaultBufferSize = 12000;
         const int MaxBuffers = 3;
 
         internal static readonly object _singletonMutex = new object();
         internal readonly object _iterationMutex = new object();
         readonly object _readMutex = new object();
 
-        readonly UnmanagedPointer<float> _readBuffer;
-        readonly UnmanagedPointer<short> _castBuffer;
+        private UnmanagedPointer<float> _readBuffer;
+        private UnmanagedPointer<short> _castBuffer;
         internal readonly HashSet<OggStream> _streams;
         readonly TimeSpan[] _threadTiming;
-        
-        readonly Thread _thread;
-        Stopwatch _threadWatch;
-        bool _pendingFinish;
-        volatile bool _cancelled;
+        private static OggStreamer _instance;
+
+        private readonly Thread _thread;
+        private Stopwatch _threadWatch;
+        private bool _pendingFinish;
+        private volatile bool _cancelled;
 
         public float UpdateRate { get; }
         public int BufferSize { get; }
         public ReadOnlyCollection<TimeSpan> UpdateTime { get; }
 
-        private static OggStreamer _instance;
         public static OggStreamer Instance
         {
             get
@@ -46,54 +46,49 @@ namespace Microsoft.Xna.Framework.Media
                     return _instance;
                 }
             }
-            private set
-            {
-                lock (_singletonMutex)
-                    _instance = value;
-            }
         }
 
         public OggStreamer(int bufferSize = DefaultBufferSize, float updateRate = DefaultUpdateRate)
         {
-            UpdateRate = updateRate;
-            BufferSize = bufferSize;
-            _pendingFinish = false;
-
             lock (_singletonMutex)
             {
                 if (_instance != null)
-                    throw new InvalidOperationException("Already running.");
-                Instance = this;
-
-                _threadWatch = new Stopwatch();
-                _threadTiming = new TimeSpan[(int)(UpdateRate < 1 ? 1 : UpdateRate)];
-                UpdateTime = new ReadOnlyCollection<TimeSpan>(_threadTiming);
-
-                _thread = new Thread(EnsureBuffersFilled)
-                {
-                    Name = "Song Streaming Thread",
-                    Priority = ThreadPriority.BelowNormal
-                };
-                _thread.Start();
+                    throw new InvalidOperationException("An instance has already been created.");
+                _instance = this;
             }
+
+            UpdateRate = updateRate;
+            BufferSize = bufferSize;
 
             _readBuffer = new UnmanagedPointer<float>(BufferSize);
             _castBuffer = new UnmanagedPointer<short>(BufferSize);
             _streams = new HashSet<OggStream>();
+
+            _threadWatch = new Stopwatch();
+            _threadTiming = new TimeSpan[(int)(UpdateRate < 1 ? 1 : UpdateRate)];
+            UpdateTime = new ReadOnlyCollection<TimeSpan>(_threadTiming);
+
+            _thread = new Thread(SongStreamingThread)
+            {
+                Name = "Song Streaming Thread",
+                Priority = ThreadPriority.BelowNormal
+            };
+            _thread.Start();
         }
 
         public void Dispose()
         {
             lock (_singletonMutex)
             {
-                Debug.Assert(Instance == this, "Two instances running, somehow...?");
+                Debug.Assert(
+                    _instance == this, "Something assigned a new instance without locking the singleton mutex.");
 
                 _cancelled = true;
                 lock (_iterationMutex)
                     _streams.Clear();
 
                 _thread.Join(1000);
-                Instance = null;
+                _instance = null;
             }
         }
 
@@ -118,12 +113,11 @@ namespace Microsoft.Xna.Framework.Media
 
                 if (readSamples > 0)
                 {
-                    buffer = ALBufferPool.Rent();
-
                     var channels = (AudioChannels)reader.Channels;
                     bool useFloat = ALController.Instance.SupportsFloat32;
                     ALFormat format = ALHelper.GetALFormat(channels, useFloat);
 
+                    buffer = ALBufferPool.Rent();
                     var dataSpan = _readBuffer.Span.Slice(0, readSamples);
                     if (useFloat)
                     {
@@ -132,7 +126,7 @@ namespace Microsoft.Xna.Framework.Media
                     else
                     {
                         var castSpan = _castBuffer.Span.Slice(0, readSamples);
-                        CastBuffer(dataSpan, castSpan);
+                        AudioLoader.ConvertSamplesToInt16(dataSpan, castSpan);
                         buffer.BufferData<short>(castSpan, format, reader.SampleRate);
                     }
                     return true;
@@ -142,39 +136,26 @@ namespace Microsoft.Xna.Framework.Media
             return false;
         }
 
-        static void CastBuffer(Span<float> src, Span<short> dst)
-        {
-            if (src.Length != dst.Length)
-                throw new ArgumentException("Non-equal span length.");
-
-            for (int i = 0; i < src.Length; i++)
-            {
-                int tmp = (int)(32767f * src[i]);
-                if (tmp > short.MaxValue)
-                    dst[i] = short.MaxValue;
-                else if (tmp < short.MinValue)
-                    dst[i] = short.MinValue;
-                else
-                    dst[i] = (short)tmp;
-            }
-        }
-
-        void EnsureBuffersFilled()
+        private void SongStreamingThread()
         {
             var localStreams = new List<OggStream>();
+            var lastTickElapsed = TimeSpan.Zero;
 
             while (!_cancelled)
             {
-                Thread.Sleep((int)(1000 / ((UpdateRate <= 0) ? 1 : UpdateRate)));
+                var updateDelay = TimeSpan.FromSeconds(1 / ((UpdateRate <= 0) ? 1 : UpdateRate));
+                var toSleep = updateDelay - lastTickElapsed;
+                if (toSleep.TotalMilliseconds > 0)
+                    Thread.Sleep(toSleep);
+
                 if (_cancelled)
                     break;
 
                 _threadWatch.Restart();
-
                 localStreams.Clear();
                 lock (_iterationMutex)
                 {
-                    foreach(var stream in _streams)
+                    foreach (var stream in _streams)
                         localStreams.Add(stream);
                 }
 
@@ -212,8 +193,10 @@ namespace Microsoft.Xna.Framework.Media
 
                 _threadWatch.Stop();
 
-                Array.Copy(_threadTiming, 0, _threadTiming, 1, _threadTiming.Length - 1);
+                // move all elements forward one index and update the first element
+                Array.Copy(_threadTiming, 0, _threadTiming, destinationIndex: 1, _threadTiming.Length - 1);
                 _threadTiming[0] = _threadWatch.Elapsed;
+                lastTickElapsed = _threadWatch.Elapsed;
             }
         }
 
@@ -228,7 +211,7 @@ namespace Microsoft.Xna.Framework.Media
             int requested = Math.Max(MaxBuffers - stream.BufferCount, 0);
             if (processed == 0 && requested == 0)
                 return false;
-            
+
             if (processed > 0)
             {
                 AL.SourceUnqueueBuffers(stream._alSourceID, processed);
@@ -252,7 +235,7 @@ namespace Microsoft.Xna.Framework.Media
                         //stream.Close();
                         //stream.Open();
 
-                        // we dont support non-seekable streams anyway
+                        // we don't support non-seekable streams anyway
                         stream.SeekToPosition(0);
                     }
                     else

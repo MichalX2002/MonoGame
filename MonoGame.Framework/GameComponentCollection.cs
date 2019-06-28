@@ -13,13 +13,13 @@ namespace Microsoft.Xna.Framework
         /// Event that is triggered when a <see cref="GameComponent"/> is added
         /// to this <see cref="GameComponentCollection"/>.
         /// </summary>
-        public event DataEvent<GameComponentCollection, GameComponentCollectionEvent> ComponentAdded;
+        public event MessageDelegate<GameComponentCollection, GameComponentCollectionEvent> ComponentAdded;
 
         /// <summary>
         /// Event that is triggered when a <see cref="GameComponent"/> is removed
         /// from this <see cref="GameComponentCollection"/>.
         /// </summary>
-        public event DataEvent<GameComponentCollection, GameComponentCollectionEvent> ComponentRemoved;
+        public event MessageDelegate<GameComponentCollection, GameComponentCollectionEvent> ComponentRemoved;
 
         /// <summary>
         /// Removes every <see cref="GameComponent"/> from this <see cref="GameComponentCollection"/>.

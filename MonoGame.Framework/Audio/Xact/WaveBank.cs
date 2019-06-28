@@ -377,7 +377,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// This event is triggered when the WaveBank is disposed.
         /// </summary>
-        public event SenderEvent<WaveBank> Disposing;
+        public event SenderDelegate<WaveBank> Disposing;
 
         /// <summary>
         /// Is true if the WaveBank has been disposed.
