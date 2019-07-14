@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using System.IO;
 using Microsoft.Xna.Framework.Media;
 using MonoGame.Utilities;
@@ -24,7 +25,7 @@ namespace Microsoft.Xna.Framework.Content
 			}
 
             _ = input.ReadObject<int>();
-            return new Song(path, null); 
+            return Song.FromUri(new Uri(path), null); 
 		}
 	}
 }

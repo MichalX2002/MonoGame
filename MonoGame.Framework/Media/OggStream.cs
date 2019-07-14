@@ -23,21 +23,21 @@ namespace Microsoft.Xna.Framework.Media
         internal readonly int _alSourceID;
         private readonly int _alFilterID;
         private readonly Queue<ALBuffer> _queuedBuffers;
+        private readonly bool _leaveInnerStreamOpen;
+        private Stream _stream;
 
         private float _lowPassHfGain;
         private float _volume;
         private float _pitch;
 
-        public bool IsLooped { get; set; }
-        
         internal Song Parent { get; }
-        private string FilePath { get; }
         internal VorbisReader Reader { get; private set; }
         internal bool IsReady { get; private set; }
         internal bool IsPreparing { get; private set; }
-        public Action OnFinished { get; private set; }
 
-        public int BufferCount => _queuedBuffers.Count;
+        public bool IsLooped { get; set; }
+        public Action OnFinished { get; private set; }
+        public int QueuedBufferCount => _queuedBuffers.Count;
 
         public float LowPassHFGain
         {
@@ -75,11 +75,13 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
-        public OggStream(Song parent, string fileName, Action onFinished = null)
+        public OggStream(
+            Song parent, Stream stream, bool leaveOpen, Action onFinished = null)
         {
             Parent = parent;
             OnFinished = onFinished;
-            FilePath = fileName;
+            _leaveInnerStreamOpen = leaveOpen;
+            _stream = stream;
 
             _queuedBuffers = new Queue<ALBuffer>();
             _alSourceID = ALController.Instance.ReserveSource();
@@ -101,7 +103,7 @@ namespace Microsoft.Xna.Framework.Media
             Pitch = 1;
         }
 
-        public void Prepare()
+        public void Prepare(bool immediate)
         {
             if (IsPreparing)
                 return;
@@ -126,12 +128,12 @@ namespace Microsoft.Xna.Framework.Media
                     lock (_prepareMutex)
                     {
                         IsPreparing = true;
-                        Open(precache: true);
+                        Open(precache: immediate);
                     }
                 }
-                else
+                else if(immediate)
                 {
-                    FillOneBuffer();
+                    FillAndEnqueueBuffer();
                 }
 
                 IsPreparing = false;
@@ -139,7 +141,7 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
-        public void Play()
+        public void Play(bool immediate)
         {
             var state = GetState();
             switch (state)
@@ -152,7 +154,7 @@ namespace Microsoft.Xna.Framework.Media
                     return;
 
                 default:
-                    Prepare();
+                    Prepare(immediate);
 
                     AL.SourcePlay(_alSourceID);
                     ALHelper.CheckError("Failed to play source.");
@@ -198,6 +200,7 @@ namespace Microsoft.Xna.Framework.Media
                 {
                     OggStreamer.Instance.RemoveStream(this);
                     Empty();
+                    Reader.DecodedPosition = 0;
                 }
 
                 AL.Source(_alSourceID, ALSourcei.Buffer, 0);
@@ -213,6 +216,7 @@ namespace Microsoft.Xna.Framework.Media
             AL.GetSource(_alSourceID, ALGetSourcei.BuffersProcessed, out int processed);
             ALHelper.CheckError("Failed to fetch processed buffers.");
 
+            // there are multiple attempts as some OpenAL implementations are faulty
             try
             {
                 if (processed > 0)
@@ -241,20 +245,15 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
+        /// <summary>
+        /// Seeking stops playback and empties buffers.
+        /// </summary>
+        /// <param name="pos"></param>
         public void SeekToPosition(TimeSpan pos)
         {
             lock (_prepareMutex)
             {
                 Reader.DecodedTime = pos;
-                Stop();
-            }
-        }
-
-        public void SeekToPosition(long pos)
-        {
-            lock (_prepareMutex)
-            {
-                Reader.DecodedPosition = pos;
                 Stop();
             }
         }
@@ -280,18 +279,19 @@ namespace Microsoft.Xna.Framework.Media
 
         internal void Open(bool precache = false)
         {
-            if(Reader == null)
-                Reader = new VorbisReader(File.OpenRead(FilePath), leaveOpen: false);
-
+            if (Reader == null)
+            {
+                Reader = new VorbisReader(_stream, _leaveInnerStreamOpen);
+                _stream = null;
+            }
             if (precache)
-                FillOneBuffer();
+                FillAndEnqueueBuffer();
             IsReady = true;
         }
 
-        private void FillOneBuffer()
+        private void FillAndEnqueueBuffer()
         {
-            // Fill first buffer synchronously
-            if (OggStreamer.Instance.TryReadBuffer(this, out ALBuffer buffer))
+            if (OggStreamer.Instance.TryFillBuffer(this, out ALBuffer buffer))
                 EnqueueBuffer(buffer);
         }
 
@@ -322,6 +322,12 @@ namespace Microsoft.Xna.Framework.Media
                 Reader = null;
             }
             IsReady = false;
+
+            if (_stream != null && !_leaveInnerStreamOpen)
+            {
+                _stream.Dispose();
+                _stream = null;
+            }
         }
 
         public void Dispose()
@@ -333,10 +339,8 @@ namespace Microsoft.Xna.Framework.Media
             lock (_prepareMutex)
             {
                 OggStreamer.Instance.RemoveStream(this);
-
                 if (state != ALSourceState.Initial)
                     Empty();
-
                 Close();
             }
 

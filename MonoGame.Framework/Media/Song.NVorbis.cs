@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.IO;
 using Microsoft.Xna.Framework.Audio;
 
 namespace Microsoft.Xna.Framework.Media
@@ -12,20 +13,22 @@ namespace Microsoft.Xna.Framework.Media
         internal OggStream _stream;
         private float _volume;
         private TimeSpan _duration;
+        private bool _isAtEnd;
 
-        private void PlatformInitialize(string fileName)
+        private void PlatformInitialize(Stream stream, bool leaveOpen)
         {
             // init OpenAL if need be
             ALController.EnsureInitialized();
 
-            _stream = new OggStream(this, fileName, OnFinishedPlaying);
-            _stream.Prepare();
+            _stream = new OggStream(this, stream, leaveOpen, OnFinishedPlaying);
+            _stream.Prepare(immediate: true);
             _duration = _stream.GetLength();
         }
 
         private void OnFinishedPlaying()
         {
             OnFinish?.Invoke(this);
+            _isAtEnd = true;
         }
 
         private static void PlatformMasterVolumeChanged()
@@ -38,23 +41,27 @@ namespace Microsoft.Xna.Framework.Media
             }
         }
 
-        private void PlatformPlay(TimeSpan? startPosition)
+        private void PlatformPlay(bool immediate, TimeSpan? startPosition)
         {
             if (_stream != null)
             {
+                if (_isAtEnd && !startPosition.HasValue)
+                    startPosition = TimeSpan.Zero;
+                _isAtEnd = false;
+
                 if (startPosition.HasValue)
                     PlatformSetPosition(startPosition.Value);
 
-                _stream.Play();
+                _stream.Play(immediate);
             }
         }
 
-        private bool PlatformGetLooping()
+        private bool PlatformGetLooped()
         {
             return _stream != null ? _stream.IsLooped : false;
         }
 
-        private void PlatformSetLooping(bool value)
+        private void PlatformSetLooped(bool value)
         {
             if (_stream != null)
                 _stream.IsLooped = value;
@@ -107,7 +114,7 @@ namespace Microsoft.Xna.Framework.Media
                 _stream.SeekToPosition(time);
 
                 if (initialState == ALSourceState.Playing)
-                    _stream.Play();
+                    _stream.Play(immediate: true);
             }
         }
 

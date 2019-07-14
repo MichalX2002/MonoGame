@@ -4,6 +4,10 @@ MonoGame.Framework/obj/
 MonoGame.Framework.Content.Pipeline/bin/
 MonoGame.Framework.Content.Pipeline/obj/
 
+#Random stuff
+MonoGame.Testing/Content/Ending.ogg
+MonoGame.Testing/Content/Title Screen.ogg
+
 #OS junk files
 [Tt]humbs.db
 *.DS_Store

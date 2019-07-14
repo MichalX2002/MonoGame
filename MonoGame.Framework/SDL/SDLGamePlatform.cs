@@ -24,8 +24,6 @@ namespace Microsoft.Xna.Framework
         private int _isExiting;
         private SdlGameWindow _window;
 
-        private Sdl.Window.SDL_SysWMinfo wmInfo;
-
         public SdlGamePlatform(Game game) : base(game)
         {
             _game = game;

@@ -73,10 +73,9 @@ namespace Microsoft.Xna.Framework.Audio
             where T : unmanaged
         {
             AssertNotDisposed();
-            AL.GetError();
 
             if ((format == ALFormat.MonoFloat32 || format == ALFormat.StereoFloat32) && !ALController.Instance.SupportsFloat32)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Float data is not supported by this OpenAL driver.");
 
             if ((format == ALFormat.MonoMSAdpcm || format == ALFormat.StereoMSAdpcm) && !ALController.Instance.SupportsAdpcm)
                 throw new InvalidOperationException("MS-ADPCM is not supported by this OpenAL driver.");
@@ -96,7 +95,7 @@ namespace Microsoft.Xna.Framework.Audio
                 ALHelper.CheckError("Failed to set buffer alignment.");
             }
 
-            fixed (void* ptr = &MemoryMarshal.GetReference(data))
+            fixed (T* ptr = &MemoryMarshal.GetReference(data))
             {
                 AL.BufferData(BufferID, format, (IntPtr)ptr, sizeof(T) * data.Length, sampleRate);
                 ALHelper.CheckError("Failed to fill buffer.");

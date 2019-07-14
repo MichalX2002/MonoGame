@@ -8,11 +8,20 @@ using MonoGame.Utilities.Memory;
 
 namespace Microsoft.Xna.Framework.Audio
 {
-    /// <summary>Represents a loaded sound resource.</summary>
+    /// <summary>Represents a loaded sound resource that can be played.</summary>
     /// <remarks>
-    /// <para>A SoundEffect represents the buffer used to hold audio data and metadata. SoundEffectInstances are used to play from SoundEffects. Multiple SoundEffectInstance objects can be created and played from the same SoundEffect object.</para>
-    /// <para>The only limit on the number of loaded SoundEffects is restricted by available memory. When a SoundEffect is disposed, all SoundEffectInstances created from it will become invalid.</para>
-    /// <para>SoundEffect.Play() can be used for 'fire and forget' sounds. If advanced playback controls like volume or pitch is required, use SoundEffect.CreateInstance().</para>
+    /// <para>
+    /// A SoundEffect represents the buffer used to hold audio data and metadata. 
+    /// SoundEffectInstances are used to play from SoundEffects. 
+    /// Multiple SoundEffectInstance objects can be created and played from the same SoundEffect object.
+    /// </para>
+    /// <para>
+    /// The only limit on the number of loaded SoundEffects is restricted by available memory. 
+    /// When a SoundEffect is disposed, all SoundEffectInstances created from it will become invalid.</para>
+    /// <para>
+    /// SoundEffect.Play() can be used for 'fire and forget' sounds. 
+    /// If advanced playback controls like volume or pitch is required, use SoundEffect.CreateInstance().
+    /// </para>
     /// </remarks>
     public sealed partial class SoundEffect : IDisposable
     {
@@ -20,19 +29,22 @@ namespace Microsoft.Xna.Framework.Audio
 
         #region Internal Constructors
 
-        // Only used from SoundEffect.FromStream.
+        /// <summary>
+        /// Only used by <see cref="FromStream"/>.
+        /// </summary>
+        /// <param name="stream"></param>
         private SoundEffect(Stream stream)
         {
             Initialize();
             if (_systemState != SoundSystemState.Initialized)
-                throw new NoAudioHardwareException("Audio has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
+                throw new NoAudioHardwareException(
+                    "The sound system has failed to initialize. " +
+                    $"Call {nameof(Initialize)} before any sound operation to get more specific errors.");
             
-            // TODO: add more audio formats, Ogg/Vorbis is a great candidate as we already use it with Songs
+            // TODO: add more audio formats
             /*
-              The Stream object must point to the head of a valid PCM wave file.
-              This wave file must be in the RIFF bitstream format.
-              The audio format has the following restrictions:
-              Must be a PCM wave file
+              The audio has the following restrictions:
+              Must be a PCM wave or Ogg Vorbis file
               Can only be mono or stereo
               Must be 8 or 16 bit
               Sample rate must be between 8,000 Hz and 48,000 Hz
@@ -42,7 +54,8 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
         // Only used from SoundEffectReader.
-        internal SoundEffect(ReadOnlySpan<byte> header, ReadOnlySpan<byte> data, int durationMs, int loopStart, int loopLength)
+        internal SoundEffect(ReadOnlySpan<byte> header, ReadOnlySpan<byte> data,
+            int durationMs, int loopStart, int loopLength)
         {
             Initialize();
             if (_systemState != SoundSystemState.Initialized)
@@ -68,7 +81,8 @@ namespace Microsoft.Xna.Framework.Audio
 
         // Only used from XACT WaveBank.
         internal SoundEffect(
-            MiniFormatTag codec, ReadOnlySpan<byte> buffer, int channels, int sampleRate, int blockAlignment, int loopStart, int loopLength)
+            MiniFormatTag codec, ReadOnlySpan<byte> buffer, int channels, int sampleRate,
+            int blockAlignment, int loopStart, int loopLength)
         {
             Initialize();
             if (_systemState != SoundSystemState.Initialized)
@@ -100,10 +114,13 @@ namespace Microsoft.Xna.Framework.Audio
         internal static SoundSystemState _systemState = SoundSystemState.NotInitialized;
 
         /// <summary>
-        /// Initializes the sound system for SoundEffect support.
-        /// This method is automatically called when a SoundEffect is loaded, a DynamicSoundEffectInstance is created, or Microphone.All is queried.
-        /// You can however call this method manually (preferably in, or before the Game constructor) to
-        /// catch any Exception that may occur during the sound system initialization (and act accordingly).
+        /// Initializes the sound system.
+        /// This method is automatically called when a <see cref="SoundEffect"/> is loaded,
+        /// a <see cref="DynamicSoundEffectInstance"/> is created, or <see cref="Microphone.All "/> is queried.
+        /// <para>
+        /// You can however call this method manually (preferably inside or before the <see cref="Game"/> constructor) to
+        /// catch any exception that may occur during the sound system initialization (and act accordingly).
+        /// </para>
         /// </summary>
         public static void Initialize()
         {
@@ -170,18 +187,18 @@ namespace Microsoft.Xna.Framework.Audio
                 throw new ArgumentException(
                     "Ensure that the buffer length meets the block alignment requirements for the number of channels.", nameof(data));
 
-            var totalSamples = data.Length / blockAlign;
+            int totalSamples = data.Length / blockAlign;
 
             if (loopStart < 0)
-                throw new ArgumentException("The loopStart cannot be negative.", nameof(loopStart));
+                throw new ArgumentException("Value cannot not be negative.", nameof(loopStart));
             if (loopStart > totalSamples)
-                throw new ArgumentException("The loopStart cannot be greater than the total number of samples.", nameof(loopStart));
+                throw new ArgumentException("Value cannot be greater than the total number of samples.", nameof(loopStart));
 
             if (loopLength == 0)
                 loopLength = totalSamples - loopStart;
 
             if (loopLength < 0)
-                throw new ArgumentException("The loopLength cannot be negative.", nameof(loopLength));
+                throw new ArgumentException("Value cannot be negative.", nameof(loopLength));
             if (((ulong)loopStart + (ulong)loopLength) > (ulong)totalSamples)
                 throw new ArgumentException(
                     "Ensure that the loopStart+loopLength region lies within the sample range.", nameof(loopLength));
@@ -193,27 +210,14 @@ namespace Microsoft.Xna.Framework.Audio
 
         #endregion
 
-        #region Finalizer
-
-        /// <summary>
-        /// Releases unmanaged resources and performs other cleanup operations before the
-        /// <see cref="SoundEffect"/> is reclaimed by garbage collection.
-        /// </summary>
-        ~SoundEffect()
-        {
-            Dispose(false);
-        }
-
-        #endregion
-
         #region Additional SoundEffect/SoundEffectInstance Creation Methods
 
         /// <summary>
-        /// Creates a new SoundEffectInstance for this SoundEffect.
+        /// Creates a sound effect instance for this sound effect.
         /// </summary>
-        /// <returns>A new SoundEffectInstance for this SoundEffect.</returns>
+        /// <returns>A new sound effect instance.</returns>
         /// <remarks>
-        /// Creating a SoundEffectInstance before calling SoundEffectInstance.Play()
+        /// Creating a sound effect instance instead of calling <see cref="SoundEffectInstance.Play"></see>
         /// allows you to access advanced playback features, such as volume, pitch, and 3D positioning.
         /// </remarks>
         public SoundEffectInstance CreateInstance()
@@ -228,19 +232,21 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
         /// <summary>
-        /// Creates a new SoundEffect object based on the specified data stream.
+        /// Creates a sound effect based on the data from the specified stream.
         /// </summary>
-        /// <param name="stream">A stream containing the wave data.</param>
-        /// <returns>A new SoundEffect object.</returns>
-        /// <remarks>The stream must point to the head of a valid wave file in the RIFF bitstream format.  The formats supported are:
+        /// <param name="stream">A stream containing PCM wave or Ogg Vorbis data.</param>
+        /// <returns>A new sound effect.</returns>
+        /// <remarks>
+        /// The stream must point to the start of a valid audio file. The formats supported are:
         /// <list type="bullet">
         /// <item>
-        /// <description>8-bit unsigned PCM</description>
-        /// <description>16-bit signed PCM</description>
-        /// <description>24-bit signed PCM</description>
-        /// <description>32-bit IEEE float PCM</description>
-        /// <description>MS-ADPCM 4-bit compressed</description>
-        /// <description>IMA/ADPCM (IMA4) 4-bit compressed</description>
+        ///     <description>Ogg Vorbis</description>
+        ///     <description>8-bit unsigned PCM</description>
+        ///     <description>16-bit signed PCM</description>
+        ///     <description>24-bit signed PCM</description>
+        ///     <description>32-bit IEEE float PCM</description>
+        ///     <description>MS-ADPCM 4-bit compressed</description>
+        ///     <description>IMA/ADPCM (IMA4) 4-bit compressed</description>
         /// </item>
         /// </list>
         /// </remarks>
@@ -248,12 +254,11 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
-
             return new SoundEffect(stream);
         }
 
         /// <summary>
-        /// Returns the duration for PCM audio.
+        /// Returns the duration for PCM audio samples.
         /// </summary>
         /// <param name="sampleCount">The amount of samples.</param>
         /// <param name="sampleSize">The size of one sample in bits.</param>
@@ -290,7 +295,7 @@ namespace Microsoft.Xna.Framework.Audio
         }
 
         /// <summary>
-        /// Returns the data size in bytes for PCM audio.
+        /// Returns the data size in bytes for PCM audio samples.
         /// </summary>
         /// <param name="duration">The total duration of the audio data.</param>
         /// <param name="sampleSize">The size of one sample in bits.</param>
@@ -320,12 +325,12 @@ namespace Microsoft.Xna.Framework.Audio
 
         #region Play
 
-        /// <summary>Gets an internal SoundEffectInstance and plays it.</summary>
-        /// <returns>True if a SoundEffectInstance was successfully played, false if not.</returns>
+        /// <summary>Gets a sound effect instance and plays it.</summary>
+        /// <returns>true if a instance was successfully played, false if not.</returns>
         /// <remarks>
-        /// <para>Play returns false if more SoundEffectInstances are currently playing then the platform allows.</para>
-        /// <para>To loop a sound or apply 3D effects, call SoundEffect.CreateInstance() and SoundEffectInstance.Play() instead.</para>
-        /// <para>SoundEffectInstances used by SoundEffect.Play() are pooled internally.</para>
+        /// <para>Play returns false if more instances are currently playing then the platform allows.</para>
+        /// <para>To loop a sound or apply 3D effects, use instances from <see cref="CreateInstance"/> instead.</para>
+        /// <para>Instances used by SoundEffect.Play() are pooled internally.</para>
         /// </remarks>
         public bool Play()
         {
@@ -338,15 +343,15 @@ namespace Microsoft.Xna.Framework.Audio
             return true;
         }
 
-        /// <summary>Gets an internal SoundEffectInstance and plays it with the specified volume, pitch, and panning.</summary>
-        /// <returns>True if a SoundEffectInstance was successfully created and played, false if not.</returns>
+        /// <summary>Gets an sound effect instance and plays it with the specified volume, pitch, and panning.</summary>
+        /// <returns>true if a instance was successfully played, false if not.</returns>
         /// <param name="volume">Volume, ranging from 0.0 (silence) to 1.0 (full volume). Volume during playback is scaled by SoundEffect.MasterVolume.</param>
-        /// <param name="pitch">Pitch adjustment, ranging from -1.0 (down an octave) to 0.0 (no change) to 1.0 (up an octave).</param>
+        /// <param name="pitch">Pitch adjustment, ranging from 0.0 (down an octave) to 1.0 (no change) to 2.0 (up an octave).</param>
         /// <param name="pan">Panning, ranging from -1.0 (left speaker) to 0.0 (centered), 1.0 (right speaker).</param>
         /// <remarks>
-        /// <para>Play returns false if more SoundEffectInstances are currently playing then the platform allows.</para>
-        /// <para>To apply looping or simulate 3D audio, call SoundEffect.CreateInstance() and SoundEffectInstance.Play() instead.</para>
-        /// <para>SoundEffectInstances used by SoundEffect.Play() are pooled internally.</para>
+        /// <para>Play returns false if more instances are currently playing then the platform allows.</para>
+        /// <para>To apply looping or simulate 3D audio, use instances from <see cref="CreateInstance"/> instead.</para>
+        /// <para>Instances used by SoundEffect.Play() are pooled internally.</para>
         /// </remarks>
         public bool Play(float volume, float pitch, float pan)
         {
@@ -484,27 +489,19 @@ namespace Microsoft.Xna.Framework.Audio
         #region IDisposable Members
 
         /// <summary>Indicates whether the object is disposed.</summary>
-        public bool IsDisposed { get; private set; } = false;
+        public bool IsDisposed { get; private set; }
 
-        /// <summary>Releases the resources held by this <see cref="SoundEffect"/>.</summary>
+        /// <summary>
+        /// Releases the resources held by this <see cref="SoundEffect"/>.
+        /// Instances currently playing will stop immediately and become invalid.
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Releases the resources held by this <see cref="SoundEffect"/>.
-        /// </summary>
-        /// <param name="disposing">If set to <c>true</c>, Dispose was called explicitly.</param>
-        /// <remarks>
-        /// If the disposing parameter is true, the Dispose method was called explicitly. This
-        /// means that managed objects referenced by this instance should be disposed or released as
-        /// required.  If the disposing parameter is false, Dispose was called by the finalizer and
-        /// no managed objects should be touched because we do not know if they are still valid or
-        /// not at that time.  Unmanaged resources should always be released.
-        /// </remarks>
-        void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!IsDisposed)
             {
@@ -512,6 +509,11 @@ namespace Microsoft.Xna.Framework.Audio
                 PlatformDispose(disposing);
                 IsDisposed = true;
             }
+        }
+
+        ~SoundEffect()
+        {
+            Dispose(false);
         }
 
         #endregion

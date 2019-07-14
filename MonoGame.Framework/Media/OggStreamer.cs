@@ -12,9 +12,9 @@ namespace Microsoft.Xna.Framework.Media
     {
         public readonly EffectsExtension Efx = ALController.Efx;
 
-        const float DefaultUpdateRate = 8;
-        const int DefaultBufferSize = 12000;
-        const int MaxBuffers = 3;
+        public const float DefaultUpdateRate = 20;
+        public const int DefaultBufferSize = 8000;
+        public const int MaxQueuedBuffers = 4;
 
         internal static readonly object _singletonMutex = new object();
         internal readonly object _iterationMutex = new object();
@@ -104,7 +104,7 @@ namespace Microsoft.Xna.Framework.Media
                 return _streams.Remove(stream);
         }
 
-        public bool TryReadBuffer(OggStream stream, out ALBuffer buffer)
+        public bool TryFillBuffer(OggStream stream, out ALBuffer buffer)
         {
             lock (_readMutex)
             {
@@ -202,16 +202,8 @@ namespace Microsoft.Xna.Framework.Media
 
         private bool FillStream(OggStream stream)
         {
-            AL.GetSource(stream._alSourceID, ALGetSourcei.BuffersQueued, out int queued);
-            ALHelper.CheckError("Failed to fetch queued buffers.");
-
             AL.GetSource(stream._alSourceID, ALGetSourcei.BuffersProcessed, out int processed);
             ALHelper.CheckError("Failed to fetch processed buffers.");
-
-            int requested = Math.Max(MaxBuffers - stream.BufferCount, 0);
-            if (processed == 0 && requested == 0)
-                return false;
-
             if (processed > 0)
             {
                 AL.SourceUnqueueBuffers(stream._alSourceID, processed);
@@ -221,11 +213,20 @@ namespace Microsoft.Xna.Framework.Media
                     stream.DequeueAndReturnBuffer();
             }
 
+            int requested = Math.Max(MaxQueuedBuffers - stream.QueuedBufferCount, 0);
+            if (requested == 0)
+                return false;
+
+            AL.GetSource(stream._alSourceID, ALGetSourcei.BuffersQueued, out int queued);
+            ALHelper.CheckError("Failed to fetch queued buffers.");
+
+            int buffersFilled = 0;
             for (int i = 0; i < requested; i++)
             {
-                if (TryReadBuffer(stream, out ALBuffer buffer))
+                if (TryFillBuffer(stream, out ALBuffer buffer))
                 {
                     stream.EnqueueBuffer(buffer);
+                    buffersFilled++;
                 }
                 else
                 {
@@ -236,7 +237,7 @@ namespace Microsoft.Xna.Framework.Media
                         //stream.Open();
 
                         // we don't support non-seekable streams anyway
-                        stream.SeekToPosition(0);
+                        stream.Reader.DecodedPosition = 0;
                     }
                     else
                     {
@@ -253,6 +254,10 @@ namespace Microsoft.Xna.Framework.Media
                     _streams.Remove(stream);
 
                 stream.OnFinished?.Invoke();
+            }
+            else if (buffersFilled > 0)
+            {
+                return true;
             }
             else if (!stream.IsLooped)
             {
