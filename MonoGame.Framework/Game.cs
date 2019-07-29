@@ -477,7 +477,10 @@ namespace Microsoft.Xna.Framework
             }
 
             if (_shouldExit)
+            {
                 Platform.Exit();
+                _shouldExit = false; //prevents perpetual exiting on platforms supporting resume.
+            }
         }
 
         #endregion
@@ -524,7 +527,6 @@ namespace Microsoft.Xna.Framework
 
         protected virtual void Draw(GameTime gameTime)
         {
-
             _drawables.ForEachFilteredItem(DrawAction, gameTime);
         }
 
@@ -598,9 +600,10 @@ namespace Microsoft.Xna.Framework
                 Platform.EnterFullScreen();
             else
                 Platform.ExitFullScreen();
-            var viewport = new Viewport(0, 0,
-                                        GraphicsDevice.PresentationParameters.BackBufferWidth,
-                                        GraphicsDevice.PresentationParameters.BackBufferHeight);
+            var viewport = new Viewport(
+                0, 0,
+                GraphicsDevice.PresentationParameters.BackBufferWidth,
+                GraphicsDevice.PresentationParameters.BackBufferHeight);
 
             GraphicsDevice.Viewport = viewport;
             Platform.EndScreenDeviceChange(string.Empty, viewport.Width, viewport.Height);

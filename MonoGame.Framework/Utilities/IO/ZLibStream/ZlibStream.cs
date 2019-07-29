@@ -388,11 +388,11 @@ namespace MonoGame.Utilities
         /// </summary>
         virtual public FlushType FlushMode
         {
-            get => (this._baseStream._flushMode);
+            get => (_baseStream._flushMode);
             set
             {
                 if (_disposed) throw new ObjectDisposedException(nameof(ZlibStream));
-                this._baseStream._flushMode = value;
+                _baseStream._flushMode = value;
             }
         }
 
@@ -415,23 +415,23 @@ namespace MonoGame.Utilities
         /// </remarks>
         public int BufferSize
         {
-            get => this._baseStream._bufferSize;
+            get => _baseStream._bufferSize;
             set
             {
                 if (_disposed) throw new ObjectDisposedException(nameof(ZlibStream));
-                if (this._baseStream._workingBuffer != null)
+                if (_baseStream._workingBuffer != null)
                     throw new ZlibException("The working buffer is already set.");
                 if (value < ZlibConstants.WorkingBufferSizeMin)
                     throw new ZlibException(String.Format("Don't be silly. {0} bytes?? Use a bigger buffer, at least {1}.", value, ZlibConstants.WorkingBufferSizeMin));
-                this._baseStream._bufferSize = value;
+                _baseStream._bufferSize = value;
             }
         }
 
         /// <summary> Returns the total number of bytes input so far.</summary>
-        virtual public long TotalIn => this._baseStream._z.TotalBytesIn;
+        virtual public long TotalIn => _baseStream._z.TotalBytesIn;
 
         /// <summary> Returns the total number of bytes output so far.</summary>
-        virtual public long TotalOut => this._baseStream._z.TotalBytesOut;
+        virtual public long TotalOut => _baseStream._z.TotalBytesOut;
 
         #endregion
 
@@ -466,8 +466,8 @@ namespace MonoGame.Utilities
             {
                 if (!_disposed)
                 {
-                    if (disposing && (this._baseStream != null))
-                        this._baseStream.Dispose();
+                    if (disposing && (_baseStream != null))
+                        _baseStream.Dispose();
                     _disposed = true;
                 }
             }
@@ -545,10 +545,10 @@ namespace MonoGame.Utilities
         {
             get
             {
-                if (this._baseStream._streamMode == ZlibBaseStream.StreamMode.Writer)
-                    return this._baseStream._z.TotalBytesOut;
-                if (this._baseStream._streamMode == ZlibBaseStream.StreamMode.Reader)
-                    return this._baseStream._z.TotalBytesIn;
+                if (_baseStream._streamMode == ZlibBaseStream.StreamMode.Writer)
+                    return _baseStream._z.TotalBytesOut;
+                if (_baseStream._streamMode == ZlibBaseStream.StreamMode.Reader)
+                    return _baseStream._z.TotalBytesIn;
                 return 0;
             }
 

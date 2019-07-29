@@ -35,8 +35,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		internal Matrix transform;
 		public Matrix Transform
         {
-            get => this.transform;
-            set => this.transform = value;
+            get => transform;
+            set => transform = value;
         }
 
         /// <summary>

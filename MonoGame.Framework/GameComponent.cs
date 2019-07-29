@@ -44,7 +44,7 @@ namespace Microsoft.Xna.Framework
 
         public GameComponent(Game game)
         {
-            this.Game = game;
+            Game = game;
         }
 
         ~GameComponent()
@@ -84,7 +84,7 @@ namespace Microsoft.Xna.Framework
         // TODO: Should be removed, as it is not part of XNA 4.0
         public int CompareTo(GameComponent other)
         {
-            return other.UpdateOrder - this.UpdateOrder;
+            return other.UpdateOrder - UpdateOrder;
         }
 
         #endregion

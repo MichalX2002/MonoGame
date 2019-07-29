@@ -76,9 +76,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			var globalScale = Matrix.CreateScale(0.01f);
 			
-			foreach(var node in this.Root.Children)
+			foreach(var node in Root.Children)
 			{
-				BuildHierarchy(node, this.Root.Transform * globalScale, 0);
+				BuildHierarchy(node, Root.Transform * globalScale, 0);
 			}
 		}
 		
@@ -109,7 +109,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="projection">The projection transform.</param>
         public void Draw(Matrix world, Matrix view, Matrix projection) 
 		{       
-            int boneCount = this.Bones.Count;
+            int boneCount = Bones.Count;
 			
 			if (sharedDrawBoneMatrices == null ||
 				sharedDrawBoneMatrices.Length < boneCount)
@@ -146,12 +146,12 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			if (destinationBoneTransforms == null)
 				throw new ArgumentNullException(nameof(destinationBoneTransforms));
-            if (destinationBoneTransforms.Length < this.Bones.Count)
+            if (destinationBoneTransforms.Length < Bones.Count)
 				throw new ArgumentOutOfRangeException(nameof(destinationBoneTransforms));
-            int count = this.Bones.Count;
+            int count = Bones.Count;
 			for (int index1 = 0; index1 < count; ++index1)
 			{
-                ModelBone modelBone = (this.Bones)[index1];
+                ModelBone modelBone = (Bones)[index1];
 				if (modelBone.Parent == null)
 				{
 					destinationBoneTransforms[index1] = modelBone.transform;

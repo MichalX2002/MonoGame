@@ -4,9 +4,7 @@
 
 using System;
 using Microsoft.Xna.Framework.Graphics;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Advanced;
-using SixLabors.ImageSharp.PixelFormats;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
 
 namespace Microsoft.Xna.Framework.Input
 {
@@ -15,6 +13,8 @@ namespace Microsoft.Xna.Framework.Input
     /// </summary>
     public partial class MouseCursor : IDisposable
     {
+        #region Predefined Cursors
+
         /// <summary>
         /// Gets the default arrow cursor.
         /// </summary>
@@ -75,6 +75,12 @@ namespace Microsoft.Xna.Framework.Input
         /// </summary>
         public static MouseCursor Hand { get; private set; }
 
+        #endregion
+
+        private bool _disposed;
+
+        public IntPtr Handle { get; private set; }
+
         /// <summary>
         /// Creates a mouse cursor from the specified texture.
         /// </summary>
@@ -90,7 +96,7 @@ namespace Microsoft.Xna.Framework.Input
                     nameof(texture));
 
             var rect = sourceRectangle ?? texture.Bounds;
-            var textureData = new Rgba32[rect.Width * rect.Height];
+            var textureData = new Color[rect.Width * rect.Height];
             texture.GetData(textureData.AsSpan(), sourceRectangle);
 
             using (var image = Image.WrapMemory(textureData.AsMemory(), rect.Width, rect.Height))
@@ -107,12 +113,12 @@ namespace Microsoft.Xna.Framework.Input
         [CLSCompliant(false)]
         public static MouseCursor FromImage<TPixel>(
             Image<TPixel> image, Point origin, Rectangle? sourceRectangle = null)
-            where TPixel : unmanaged, IPixel<TPixel>
+            where TPixel : unmanaged, IPackedVector<TPixel>
         {
             var rect = sourceRectangle ?? new Rectangle(0, 0, image.Width, image.Height);
 
-            Span<Rgba32> imageData;
-            if (image is Image<Rgba32> rgbaImage)
+            Span<Color> imageData;
+            if (image is Image<Color> rgbaImage)
             {
                 // CreateRGBSurfaceFrom takes pitch which defines bytes per row so we
                 // don't need to worry about indexing if the image is larger than the srcRect
@@ -120,7 +126,7 @@ namespace Microsoft.Xna.Framework.Input
             }
             else
             {
-                var buffer = new Rgba32[rect.Width * rect.Height];
+                var buffer = new Color[rect.Width * rect.Height];
                 var pixels = image.GetPixelSpan();
                 for (int y = 0; y < rect.Height; y++)
                 {
@@ -134,10 +140,6 @@ namespace Microsoft.Xna.Framework.Input
             int stride = image.Width * image.PixelType.BitsPerPixel / 8; // bytes per row
             return PlatformFromImage(imageData, rect.Width, rect.Height, stride, origin);
         }
-
-        public IntPtr Handle { get; private set; }
-
-        private bool _disposed;
 
         static MouseCursor()
         {

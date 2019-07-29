@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using MonoGame.Utilities.Memory;
 
 namespace Microsoft.Xna.Framework.Graphics
 {

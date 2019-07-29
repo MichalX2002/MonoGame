@@ -107,7 +107,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         #endregion
 
-        #region Public Functions
+        #region Public Methods
 
         /// <summary>
         /// Returns the duration of an audio buffer of the specified size, based on the settings of this instance.
@@ -259,7 +259,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         #endregion
 
-        #region Nonpublic Functions
+        #region Nonpublic Methods
 
         private void AssertNotDisposed()
         {

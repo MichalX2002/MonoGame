@@ -94,7 +94,8 @@ namespace Microsoft.Xna.Framework.Audio
             get
             {
 #if IOS || ANDROID
-                // always true on mobile, this can't be queried on any platform (it was most probably only set to true if the headset was plugged in an XInput controller)
+                // always true on mobile, this can't be queried on any platform 
+                // (it was most probably only set to true if the headset was plugged in an XInput controller)
                 return true;
 #else
                 return false;
@@ -152,23 +153,19 @@ namespace Microsoft.Xna.Framework.Audio
         /// <summary>
         /// Gets the latest available data from the microphone.
         /// </summary>
-        /// <param name="buffer">Buffer, in bytes, of the captured data (16-bit PCM).</param>
-        /// <returns>The buffer size, in bytes, of the captured data.</returns>
-        public int GetData(byte[] buffer)
+        /// <typeparam name="T">
+        /// The type of the buffer elements. 
+        /// Can be <see langword="byte"></see> or any other type with size divisible by 2.
+        /// </typeparam>
+        /// <param name="buffer">Buffer for the captured 16-bit PCM data.</param>
+        /// <returns>The amount of 16-bit samples captured.</returns>
+        public unsafe int GetData<T>(Span<T> buffer) where T : unmanaged
         {
-            return GetData(buffer, 0, buffer.Length);
-        }
+            if (typeof(T) != typeof(byte) && sizeof(T) % 2 != 0)
+                throw new ArgumentException(
+                    "The size of the generic argument is not divisible by 2.", nameof(T));
 
-        /// <summary>
-        /// Gets the latest available data from the microphone.
-        /// </summary>
-        /// <param name="buffer">Buffer, in bytes, of the captured data (16-bit PCM).</param>
-        /// <param name="offset">Byte offset.</param>
-        /// <param name="count">Amount, in bytes.</param>
-        /// <returns>The buffer size, in bytes, of the captured data.</returns>
-        public int GetData(byte[] buffer, int offset, int count)
-        {
-            return PlatformGetData(buffer, offset, count);
+            return PlatformGetData(buffer);
         }
 
         #endregion

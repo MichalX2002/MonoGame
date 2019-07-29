@@ -32,11 +32,11 @@ namespace MonoGame.Utilities
 
             private Config(int goodLength, int maxLazy, int niceLength, int maxChainLength, DeflateFlavor flavor)
             {
-                this.GoodLength = goodLength;
-                this.MaxLazy = maxLazy;
-                this.NiceLength = niceLength;
-                this.MaxChainLength = maxChainLength;
-                this.Flavor = flavor;
+                GoodLength = goodLength;
+                MaxLazy = maxLazy;
+                NiceLength = niceLength;
+                MaxChainLength = maxChainLength;
+                Flavor = flavor;
             }
 
             internal static Config Lookup(CompressionLevel level)
@@ -823,10 +823,10 @@ namespace MonoGame.Utilities
 
         // Copy without compression as much as possible from the input stream, return
         // the current block state.
-        // This function does not insert new strings in the dictionary since
-        // uncompressible data is probably not useful. This function is used
+        // This method does not insert new strings in the dictionary since
+        // uncompressible data is probably not useful. This method is used
         // only for the level=0 compression option.
-        // NOTE: this function should be optimized to avoid extra copying from
+        // NOTE: this method should be optimized to avoid extra copying from
         // window to pending_buf.
         internal BlockState DeflateNone(FlushType flush)
         {
@@ -1488,8 +1488,8 @@ namespace MonoGame.Utilities
             // The middle slice, of 32k, is used for distance codes.
             // The final 16k are length codes.
 
-            this.compressionLevel = level;
-            this.compressionStrategy = strategy;
+            compressionLevel = level;
+            compressionStrategy = strategy;
 
             Reset();
             return ZlibConstants.Z_OK;

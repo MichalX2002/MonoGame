@@ -10,8 +10,8 @@ namespace Microsoft.Xna.Framework.Graphics
         public static readonly VertexDeclaration VertexDeclaration;
         public VertexPositionTexture(Vector3 position, Vector2 textureCoordinate)
         {
-            this.Position = position;
-            this.TextureCoordinate = textureCoordinate;
+            Position = position;
+            TextureCoordinate = textureCoordinate;
         }
 
         VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
@@ -26,7 +26,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public override string ToString()
         {
-            return "{{Position:" + this.Position + " TextureCoordinate:" + this.TextureCoordinate + "}}";
+            return "{{Position:" + Position + " TextureCoordinate:" + TextureCoordinate + "}}";
         }
 
         public static bool operator ==(VertexPositionTexture left, VertexPositionTexture right)

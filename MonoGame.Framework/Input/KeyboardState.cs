@@ -151,12 +151,8 @@ namespace Microsoft.Xna.Framework.Input
             keys7 = 0;
 
             if (keys != null)
-            {
                 for (int i = 0; i < keys.Length; i++)
-                {
                     InternalSetKey(keys[i]);
-                }
-            }
         }
 
         /// <summary>
@@ -221,6 +217,17 @@ namespace Microsoft.Xna.Framework.Input
 
         #region GetPressedKeys()
 
+        /// <summary>
+        /// Returns the number of pressed keys in this <see cref="KeyboardState"/>.
+        /// </summary>
+        /// <returns>An integer representing the number of keys currently pressed in this <see cref="KeyboardState"/>.</returns>
+        public int GetPressedKeyCount()
+        {
+            uint count = CountBits(keys0) + CountBits(keys1) + CountBits(keys2) + CountBits(keys3)
+                    + CountBits(keys4) + CountBits(keys5) + CountBits(keys6) + CountBits(keys7);
+            return (int)count;
+        }
+
         private static uint CountBits(uint v)
         {
             // http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
@@ -239,25 +246,6 @@ namespace Microsoft.Xna.Framework.Input
             return index;
         }
 
-        public int GetPressedKeys(Keys[] buffer)
-        {
-            int count = GetCount();
-            if (count > buffer.Length)
-                throw new ArgumentException("Insufficient capacity.", nameof(buffer));
-            
-            int index = 0;
-            if (keys0 != 0) index = AddKeysToArray(keys0, 0 * 32, buffer, index);
-            if (keys1 != 0) index = AddKeysToArray(keys1, 1 * 32, buffer, index);
-            if (keys2 != 0) index = AddKeysToArray(keys2, 2 * 32, buffer, index);
-            if (keys3 != 0) index = AddKeysToArray(keys3, 3 * 32, buffer, index);
-            if (keys4 != 0) index = AddKeysToArray(keys4, 4 * 32, buffer, index);
-            if (keys5 != 0) index = AddKeysToArray(keys5, 5 * 32, buffer, index);
-            if (keys6 != 0) index = AddKeysToArray(keys6, 6 * 32, buffer, index);
-            if (keys7 != 0) _ = AddKeysToArray(keys7, 7 * 32, buffer, index);
-
-            return count;
-        }
-
         /// <summary>
         /// Returns an array of values holding keys that are currently being pressed.
         /// </summary>
@@ -267,6 +255,42 @@ namespace Microsoft.Xna.Framework.Input
             Keys[] keys = new Keys[GetCount()];
             GetPressedKeys(keys);
             return keys;
+        }
+
+        /// <summary>
+        /// Fills an array of values holding keys that are currently being pressed.
+        /// </summary>
+        /// <param name="keys">
+        /// The keys array to fill.
+        /// This array is not cleared, and it must be equal to or larger than the number of keys pressed.
+        /// </param>
+        /// <returns></returns>
+        public int GetPressedKeys(Keys[] keys)
+        {
+            if (keys == null)
+                throw new ArgumentNullException(nameof(keys));
+
+            uint count = CountBits(keys0) + CountBits(keys1) + CountBits(keys2) + CountBits(keys3)
+                    + CountBits(keys4) + CountBits(keys5) + CountBits(keys6) + CountBits(keys7);
+
+            if (count > keys.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(keys),
+                    "The supplied array cannot fit the number of pressed keys. " +
+                    "Call GetPressedKeyCount() to get the number of pressed keys.");
+            }
+
+            int index = 0;
+            if (keys0 != 0 && index < keys.Length) index = AddKeysToArray(keys0, 0 * 32, keys, index);
+            if (keys1 != 0 && index < keys.Length) index = AddKeysToArray(keys1, 1 * 32, keys, index);
+            if (keys2 != 0 && index < keys.Length) index = AddKeysToArray(keys2, 2 * 32, keys, index);
+            if (keys3 != 0 && index < keys.Length) index = AddKeysToArray(keys3, 3 * 32, keys, index);
+            if (keys4 != 0 && index < keys.Length) index = AddKeysToArray(keys4, 4 * 32, keys, index);
+            if (keys5 != 0 && index < keys.Length) index = AddKeysToArray(keys5, 5 * 32, keys, index);
+            if (keys6 != 0 && index < keys.Length) index = AddKeysToArray(keys6, 6 * 32, keys, index);
+            if (keys7 != 0 && index < keys.Length) index = AddKeysToArray(keys7, 7 * 32, keys, index);
+
+            return (int)count;
         }
 
         #endregion

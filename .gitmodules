@@ -25,3 +25,12 @@
 [submodule "ThirdParty/SixLabors/Drawing"]
 	path = ThirdParty/SixLabors/Drawing
 	url = https://github.com/TechnologicalPizza/SixLabors.Drawing
+[submodule "ThirdParty/StbSharp/Image"]
+	path = ThirdParty/StbSharp/Image
+	url = https://github.com/TechnologicalPizza/StbSharp.Image
+[submodule "ThirdParty/StbSharp/Shared"]
+	path = ThirdParty/StbSharp/Shared
+	url = https://github.com/TechnologicalPizza/StbSharp.Shared
+[submodule "ThirdParty/StbSharp/ImageWrite"]
+	path = ThirdParty/StbSharp/ImageWrite
+	url = https://github.com/TechnologicalPizza/StbSharp.ImageWrite

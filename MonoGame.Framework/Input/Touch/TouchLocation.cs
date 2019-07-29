@@ -276,16 +276,26 @@ namespace Microsoft.Xna.Framework.Input.Touch
 
         internal void AgeState()
         {
-            Debug.Assert(State == TouchLocationState.Pressed, "Can only age the state of touches that are in the Pressed State");
-
-            _previousState = State;
-            _previousPosition = _position;
-            _previousPressure = Pressure;
-
-            if (SameFrameReleased)
-                State = TouchLocationState.Released;
+            if (State == TouchLocationState.Moved)
+            {
+                _previousState = State;
+                _previousPosition = _position;
+                _previousPressure = Pressure;
+            }
             else
-                State = TouchLocationState.Moved;
+            {
+                Debug.Assert(State == TouchLocationState.Pressed,
+                    "Can only age the state of touches that are in the Pressed State");
+
+                _previousState = State;
+                _previousPosition = _position;
+                _previousPressure = Pressure;
+
+                if (SameFrameReleased)
+                    State = TouchLocationState.Released;
+                else
+                    State = TouchLocationState.Moved;
+            }
         }
     }
 }

@@ -105,8 +105,8 @@ namespace MonoGame.Utilities.Memory
         {
             get
             {
-                this.CheckDisposed();
-                return this.id;
+                CheckDisposed();
+                return id;
             }
         }
 
@@ -118,8 +118,8 @@ namespace MonoGame.Utilities.Memory
         {
             get
             {
-                this.CheckDisposed();
-                return this.tag;
+                CheckDisposed();
+                return tag;
             }
         }
 
@@ -131,8 +131,8 @@ namespace MonoGame.Utilities.Memory
         {
             get
             {
-                this.CheckDisposed();
-                return this.memoryManager;
+                CheckDisposed();
+                return memoryManager;
             }
         }
 
@@ -185,21 +185,21 @@ namespace MonoGame.Utilities.Memory
             : base(Array.Empty<byte>())
         {
             this.memoryManager = memoryManager;
-            this.id = Guid.NewGuid();
+            id = Guid.NewGuid();
             this.tag = tag;
 
             if (requestedSize < memoryManager.BlockSize)
                 requestedSize = memoryManager.BlockSize;
 
             if (initialLargeBuffer == null)
-                this.EnsureCapacity(requestedSize);
+                EnsureCapacity(requestedSize);
             else
-                this.largeBuffer = initialLargeBuffer;
+                largeBuffer = initialLargeBuffer;
 
             if (this.memoryManager.GenerateCallStacks)
-                this.AllocationStack = Environment.StackTrace;
+                AllocationStack = Environment.StackTrace;
 
-            RecyclableMemoryManager.Events.Writer.MemoryStreamCreated(this.id, this.tag, requestedSize);
+            RecyclableMemoryManager.Events.Writer.MemoryStreamCreated(id, this.tag, requestedSize);
             this.memoryManager.ReportStreamCreated();
         }
         #endregion
@@ -207,7 +207,7 @@ namespace MonoGame.Utilities.Memory
         #region Dispose and Finalize
         ~RecyclableMemoryStream()
         {
-            this.Dispose(false);
+            Dispose(false);
         }
 
         /// <summary>
@@ -218,32 +218,32 @@ namespace MonoGame.Utilities.Memory
             Justification = "We have different disposal semantics, so SuppressFinalize is in a different spot.")]
         protected override void Dispose(bool disposing)
         {
-            if (Interlocked.CompareExchange(ref this.disposedState, 1, 0) != 0)
+            if (Interlocked.CompareExchange(ref disposedState, 1, 0) != 0)
             {
                 string doubleDisposeStack = null;
-                if (this.memoryManager.GenerateCallStacks)
+                if (memoryManager.GenerateCallStacks)
                     doubleDisposeStack = Environment.StackTrace;
 
                 RecyclableMemoryManager.Events.Writer.MemoryStreamDoubleDispose(
-                    this.id, this.tag, this.AllocationStack, this.DisposeStack, doubleDisposeStack);
+                    id, tag, AllocationStack, DisposeStack, doubleDisposeStack);
                 return;
             }
 
-            RecyclableMemoryManager.Events.Writer.MemoryStreamDisposed(this.id, this.tag);
+            RecyclableMemoryManager.Events.Writer.MemoryStreamDisposed(id, tag);
 
-            if (this.memoryManager.GenerateCallStacks)
-                this.DisposeStack = Environment.StackTrace;
+            if (memoryManager.GenerateCallStacks)
+                DisposeStack = Environment.StackTrace;
 
             if (disposing)
             {
-                this.memoryManager.ReportStreamDisposed();
+                memoryManager.ReportStreamDisposed();
                 GC.SuppressFinalize(this);
             }
             else
             {
                 // We're being finalized.
 
-                RecyclableMemoryManager.Events.Writer.MemoryStreamFinalized(this.id, this.tag, this.AllocationStack);
+                RecyclableMemoryManager.Events.Writer.MemoryStreamFinalized(id, tag, AllocationStack);
 
 #if !NETSTANDARD1_4
                 if (AppDomain.CurrentDomain.IsFinalizingForUnload())
@@ -256,22 +256,22 @@ namespace MonoGame.Utilities.Memory
                 }
 #endif
 
-                this.memoryManager.ReportStreamFinalized();
+                memoryManager.ReportStreamFinalized();
             }
 
-            this.memoryManager.ReportStreamLength(this.length);
+            memoryManager.ReportStreamLength(length);
 
-            if (this.largeBuffer != null)
-                this.memoryManager.ReturnLargeBuffer(this.largeBuffer, this.tag);
+            if (largeBuffer != null)
+                memoryManager.ReturnLargeBuffer(largeBuffer, tag);
 
-            if (this.dirtyBuffers != null)
+            if (dirtyBuffers != null)
             {
-                foreach (var buffer in this.dirtyBuffers)
-                    this.memoryManager.ReturnLargeBuffer(buffer, this.tag);
+                foreach (var buffer in dirtyBuffers)
+                    memoryManager.ReturnLargeBuffer(buffer, tag);
             }
 
-            this.memoryManager.ReturnBlocks(this.blocks, this.tag);
-            this.blocks.Clear();
+            memoryManager.ReturnBlocks(blocks, tag);
+            blocks.Clear();
 
             base.Dispose(disposing);
         }
@@ -285,7 +285,7 @@ namespace MonoGame.Utilities.Memory
         public override void Close()
 #endif
         {
-            this.Dispose(true);
+            Dispose(true);
         }
         #endregion
 
@@ -304,19 +304,19 @@ namespace MonoGame.Utilities.Memory
         {
             get
             {
-                this.CheckDisposed();
-                if (this.largeBuffer != null)
+                CheckDisposed();
+                if (largeBuffer != null)
                 {
-                    return this.largeBuffer.Length;
+                    return largeBuffer.Length;
                 }
 
-                long size = (long)this.blocks.Count * this.memoryManager.BlockSize;
+                long size = (long)blocks.Count * memoryManager.BlockSize;
                 return (int)Math.Min(int.MaxValue, size);
             }
             set
             {
-                this.CheckDisposed();
-                this.EnsureCapacity(value);
+                CheckDisposed();
+                EnsureCapacity(value);
             }
         }
 
@@ -330,8 +330,8 @@ namespace MonoGame.Utilities.Memory
         {
             get
             {
-                this.CheckDisposed();
-                return this.length;
+                CheckDisposed();
+                return length;
             }
         }
 
@@ -345,12 +345,12 @@ namespace MonoGame.Utilities.Memory
         {
             get
             {
-                this.CheckDisposed();
-                return this.position;
+                CheckDisposed();
+                return position;
             }
             set
             {
-                this.CheckDisposed();
+                CheckDisposed();
                 if (value < 0)
                 {
                     throw new ArgumentOutOfRangeException("value", "value must be non-negative");
@@ -361,19 +361,19 @@ namespace MonoGame.Utilities.Memory
                     throw new ArgumentOutOfRangeException("value", "value cannot be more than " + MaxStreamLength);
                 }
 
-                this.position = (int)value;
+                position = (int)value;
             }
         }
 
         /// <summary>
         /// Whether the stream can currently read
         /// </summary>
-        public override bool CanRead => !this.Disposed;
+        public override bool CanRead => !Disposed;
 
         /// <summary>
         /// Whether the stream can currently seek
         /// </summary>
-        public override bool CanSeek => !this.Disposed;
+        public override bool CanSeek => !Disposed;
 
         /// <summary>
         /// Always false
@@ -383,7 +383,7 @@ namespace MonoGame.Utilities.Memory
         /// <summary>
         /// Whether the stream can currently write
         /// </summary>
-        public override bool CanWrite => !this.Disposed;
+        public override bool CanWrite => !Disposed;
 
         /// <summary>
         /// Returns a single buffer containing the contents of the stream.
@@ -399,32 +399,32 @@ namespace MonoGame.Utilities.Memory
         public override byte[] GetBuffer()
 #endif
         {
-            this.CheckDisposed();
+            CheckDisposed();
 
-            if (this.largeBuffer != null)
-                return this.largeBuffer;
+            if (largeBuffer != null)
+                return largeBuffer;
 
-            if (this.blocks.Count == 1)
-                return this.blocks[0];
+            if (blocks.Count == 1)
+                return blocks[0];
 
             // Buffer needs to reflect the capacity, not the length, because
             // it's possible that people will manipulate the buffer directly
             // and set the length afterward. Capacity sets the expectation
             // for the size of the buffer.
-            var newBuffer = this.memoryManager.GetLargeBuffer(this.Capacity, this.tag);
+            var newBuffer = memoryManager.GetLargeBuffer(Capacity, tag);
 
             // InternalRead will check for existence of largeBuffer, so make sure we
             // don't set it until after we've copied the data.
-            this.InternalRead(newBuffer, 0, this.length, 0);
-            this.largeBuffer = newBuffer;
+            InternalRead(newBuffer, 0, length, 0);
+            largeBuffer = newBuffer;
 
-            if (this.blocks.Count > 0 && this.memoryManager.AggressiveBufferReturn)
+            if (blocks.Count > 0 && memoryManager.AggressiveBufferReturn)
             {
-                this.memoryManager.ReturnBlocks(this.blocks, this.tag);
-                this.blocks.Clear();
+                memoryManager.ReturnBlocks(blocks, tag);
+                blocks.Clear();
             }
 
-            return this.largeBuffer;
+            return largeBuffer;
         }
 
         /// <summary>
@@ -440,8 +440,8 @@ namespace MonoGame.Utilities.Memory
         public override bool TryGetBuffer(out ArraySegment<byte> buffer)
 #endif
         {
-            this.CheckDisposed();
-            buffer = new ArraySegment<byte>(this.GetBuffer(), 0, (int)this.Length);
+            CheckDisposed();
+            buffer = new ArraySegment<byte>(GetBuffer(), 0, (int)Length);
             // GetBuffer has no failure modes, so this should always succeed
             return true;
         }
@@ -456,13 +456,13 @@ namespace MonoGame.Utilities.Memory
         [Obsolete("This method has degraded performance vs. GetBuffer and should be avoided.")]
         public override byte[] ToArray()
         {
-            this.CheckDisposed();
-            var newBuffer = new byte[this.Length];
+            CheckDisposed();
+            var newBuffer = new byte[Length];
 
-            this.InternalRead(newBuffer, 0, this.length, 0);
-            string stack = this.memoryManager.GenerateCallStacks ? Environment.StackTrace : null;
-            RecyclableMemoryManager.Events.Writer.MemoryStreamToArray(this.id, this.tag, stack, 0);
-            this.memoryManager.ReportStreamToArray();
+            InternalRead(newBuffer, 0, length, 0);
+            string stack = memoryManager.GenerateCallStacks ? Environment.StackTrace : null;
+            RecyclableMemoryManager.Events.Writer.MemoryStreamToArray(id, tag, stack, 0);
+            memoryManager.ReportStreamToArray();
 
             return newBuffer;
         }
@@ -481,7 +481,7 @@ namespace MonoGame.Utilities.Memory
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
         public override int Read(byte[] buffer, int offset, int count)
         {
-            return this.SafeRead(buffer, offset, count, ref this.position);
+            return SafeRead(buffer, offset, count, ref position);
         }
 
         /// <summary>
@@ -498,7 +498,7 @@ namespace MonoGame.Utilities.Memory
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
         public int SafeRead(byte[] buffer, int offset, int count, ref int streamPosition)
         {
-            this.CheckDisposed();
+            CheckDisposed();
             if (buffer == null)
             {
                 throw new ArgumentNullException(nameof(buffer));
@@ -519,7 +519,7 @@ namespace MonoGame.Utilities.Memory
                 throw new ArgumentException("buffer length must be at least offset + count");
             }
 
-            int amountRead = this.InternalRead(buffer, offset, count, streamPosition);
+            int amountRead = InternalRead(buffer, offset, count, streamPosition);
             streamPosition += amountRead;
             return amountRead;
         }
@@ -536,7 +536,7 @@ namespace MonoGame.Utilities.Memory
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
         public override void Write(byte[] buffer, int offset, int count)
         {
-            this.CheckDisposed();
+            CheckDisposed();
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
 
@@ -550,23 +550,23 @@ namespace MonoGame.Utilities.Memory
             if (count + offset > buffer.Length)
                 throw new ArgumentException("count must be greater than buffer.Length - offset");
 
-            int blockSize = this.memoryManager.BlockSize;
-            long end = (long)this.position + count;
+            int blockSize = memoryManager.BlockSize;
+            long end = (long)position + count;
             // Check for overflow
             if (end > MaxStreamLength)
                 throw new IOException("Maximum capacity exceeded");
 
-            this.EnsureCapacity((int)end);
+            EnsureCapacity((int)end);
 
-            if (this.largeBuffer == null)
+            if (largeBuffer == null)
             {
                 int bytesRemaining = count;
                 int bytesWritten = 0;
-                var blockAndOffset = this.GetBlockAndRelativeOffset(this.position);
+                var blockAndOffset = GetBlockAndRelativeOffset(position);
 
                 while (bytesRemaining > 0)
                 {
-                    byte[] currentBlock = this.blocks[blockAndOffset.Block];
+                    byte[] currentBlock = blocks[blockAndOffset.Block];
                     int remainingInBlock = blockSize - blockAndOffset.Offset;
                     int amountToWriteInBlock = Math.Min(remainingInBlock, bytesRemaining);
 
@@ -582,10 +582,10 @@ namespace MonoGame.Utilities.Memory
             }
             else
             {
-                Buffer.BlockCopy(buffer, offset, this.largeBuffer, this.position, count);
+                Buffer.BlockCopy(buffer, offset, largeBuffer, position, count);
             }
-            this.position = (int)end;
-            this.length = Math.Max(this.position, this.length);
+            position = (int)end;
+            length = Math.Max(position, length);
         }
 
         /// <summary>
@@ -593,7 +593,7 @@ namespace MonoGame.Utilities.Memory
         /// </summary>
         public override string ToString()
         {
-            return $"Id = {this.Id}, Tag = {this.Tag}, Length = {this.Length:N0} bytes";
+            return $"Id = {Id}, Tag = {Tag}, Length = {Length:N0} bytes";
         }
 
         /// <summary>
@@ -603,9 +603,9 @@ namespace MonoGame.Utilities.Memory
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
         public override void WriteByte(byte value)
         {
-            this.CheckDisposed();
-            this.byteBuffer[0] = value;
-            this.Write(this.byteBuffer, 0, 1);
+            CheckDisposed();
+            byteBuffer[0] = value;
+            Write(byteBuffer, 0, 1);
         }
 
         /// <summary>
@@ -615,7 +615,7 @@ namespace MonoGame.Utilities.Memory
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
         public override int ReadByte()
         {
-            return this.SafeReadByte(ref this.position);
+            return SafeReadByte(ref position);
         }
 
         /// <summary>
@@ -626,20 +626,20 @@ namespace MonoGame.Utilities.Memory
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
         public int SafeReadByte(ref int streamPosition)
         {
-            this.CheckDisposed();
-            if (streamPosition == this.length)
+            CheckDisposed();
+            if (streamPosition == length)
             {
                 return -1;
             }
             byte value;
-            if (this.largeBuffer == null)
+            if (largeBuffer == null)
             {
-                var blockAndOffset = this.GetBlockAndRelativeOffset(streamPosition);
-                value = this.blocks[blockAndOffset.Block][blockAndOffset.Offset];
+                var blockAndOffset = GetBlockAndRelativeOffset(streamPosition);
+                value = blocks[blockAndOffset.Block][blockAndOffset.Offset];
             }
             else
             {
-                value = this.largeBuffer[streamPosition];
+                value = largeBuffer[streamPosition];
             }
             streamPosition++;
             return value;
@@ -652,19 +652,19 @@ namespace MonoGame.Utilities.Memory
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
         public override void SetLength(long value)
         {
-            this.CheckDisposed();
+            CheckDisposed();
             if (value < 0 || value > MaxStreamLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(value),
                                                       "value must be non-negative and at most " + MaxStreamLength);
             }
 
-            this.EnsureCapacity((int)value);
+            EnsureCapacity((int)value);
 
-            this.length = (int)value;
-            if (this.position > value)
+            length = (int)value;
+            if (position > value)
             {
-                this.position = (int)value;
+                position = (int)value;
             }
         }
 
@@ -680,7 +680,7 @@ namespace MonoGame.Utilities.Memory
         /// <exception cref="IOException">Attempt to set negative position</exception>
         public override long Seek(long offset, SeekOrigin loc)
         {
-            this.CheckDisposed();
+            CheckDisposed();
             if (offset > MaxStreamLength)
                 throw new ArgumentOutOfRangeException(nameof(offset), "offset cannot be larger than " + MaxStreamLength);
 
@@ -691,10 +691,10 @@ namespace MonoGame.Utilities.Memory
                     newPosition = (int)offset;
                     break;
                 case SeekOrigin.Current:
-                    newPosition = (int)offset + this.position;
+                    newPosition = (int)offset + position;
                     break;
                 case SeekOrigin.End:
-                    newPosition = (int)offset + this.length;
+                    newPosition = (int)offset + length;
                     break;
                 default:
                     throw new ArgumentException("Invalid seek origin", nameof(loc));
@@ -703,8 +703,8 @@ namespace MonoGame.Utilities.Memory
             if (newPosition < 0)
                 throw new IOException("Seek before beginning");
 
-            this.position = newPosition;
-            return this.position;
+            position = newPosition;
+            return position;
         }
 
         /// <summary>
@@ -714,19 +714,19 @@ namespace MonoGame.Utilities.Memory
         /// <remarks>Important: This does a synchronous write, which may not be desired in some situations</remarks>
         public override void WriteTo(Stream stream)
         {
-            this.CheckDisposed();
+            CheckDisposed();
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
-            if (this.largeBuffer == null)
+            if (largeBuffer == null)
             {
                 int currentBlock = 0;
-                int bytesRemaining = this.length;
+                int bytesRemaining = length;
 
                 while (bytesRemaining > 0)
                 {
-                    int amountToCopy = Math.Min(this.blocks[currentBlock].Length, bytesRemaining);
-                    stream.Write(this.blocks[currentBlock], 0, amountToCopy);
+                    int amountToCopy = Math.Min(blocks[currentBlock].Length, bytesRemaining);
+                    stream.Write(blocks[currentBlock], 0, amountToCopy);
 
                     bytesRemaining -= amountToCopy;
 
@@ -734,41 +734,41 @@ namespace MonoGame.Utilities.Memory
                 }
             }
             else
-                stream.Write(this.largeBuffer, 0, this.length);
+                stream.Write(largeBuffer, 0, length);
         }
         #endregion
 
         #region Helper Methods
-        private bool Disposed => Interlocked.Read(ref this.disposedState) != 0;
+        private bool Disposed => Interlocked.Read(ref disposedState) != 0;
 
         private void CheckDisposed()
         {
-            if (this.Disposed)
+            if (Disposed)
             {
-                throw new ObjectDisposedException($"The stream with Id {this.id} and Tag {this.tag} is disposed.");
+                throw new ObjectDisposedException($"The stream with Id {id} and Tag {tag} is disposed.");
             }
         }
 
         private int InternalRead(byte[] buffer, int offset, int count, int fromPosition)
         {
-            if (this.length - fromPosition <= 0)
+            if (length - fromPosition <= 0)
             {
                 return 0;
             }
 
             int amountToCopy;
 
-            if (this.largeBuffer == null)
+            if (largeBuffer == null)
             {
-                var blockAndOffset = this.GetBlockAndRelativeOffset(fromPosition);
+                var blockAndOffset = GetBlockAndRelativeOffset(fromPosition);
                 int bytesWritten = 0;
-                int bytesRemaining = Math.Min(count, this.length - fromPosition);
+                int bytesRemaining = Math.Min(count, length - fromPosition);
 
                 while (bytesRemaining > 0)
                 {
-                    amountToCopy = Math.Min(this.blocks[blockAndOffset.Block].Length - blockAndOffset.Offset,
+                    amountToCopy = Math.Min(blocks[blockAndOffset.Block].Length - blockAndOffset.Offset,
                                                 bytesRemaining);
-                    Buffer.BlockCopy(this.blocks[blockAndOffset.Block], blockAndOffset.Offset, buffer,
+                    Buffer.BlockCopy(blocks[blockAndOffset.Block], blockAndOffset.Offset, buffer,
                                      bytesWritten + offset, amountToCopy);
 
                     bytesWritten += amountToCopy;
@@ -779,8 +779,8 @@ namespace MonoGame.Utilities.Memory
                 }
                 return bytesWritten;
             }
-            amountToCopy = Math.Min(count, this.length - fromPosition);
-            Buffer.BlockCopy(this.largeBuffer, fromPosition, buffer, offset, amountToCopy);
+            amountToCopy = Math.Min(count, length - fromPosition);
+            Buffer.BlockCopy(largeBuffer, fromPosition, buffer, offset, amountToCopy);
             return amountToCopy;
         }
 
@@ -791,44 +791,44 @@ namespace MonoGame.Utilities.Memory
 
             public BlockAndOffset(int block, int offset)
             {
-                this.Block = block;
-                this.Offset = offset;
+                Block = block;
+                Offset = offset;
             }
         }
 
         private BlockAndOffset GetBlockAndRelativeOffset(int offset)
         {
-            var blockSize = this.memoryManager.BlockSize;
+            var blockSize = memoryManager.BlockSize;
             return new BlockAndOffset(offset / blockSize, offset % blockSize);
         }
 
         private void EnsureCapacity(int newCapacity)
         {
-            if (newCapacity > this.memoryManager.MaximumStreamCapacity && this.memoryManager.MaximumStreamCapacity > 0)
+            if (newCapacity > memoryManager.MaximumStreamCapacity && memoryManager.MaximumStreamCapacity > 0)
             {
                 RecyclableMemoryManager.Events.Writer.MemoryStreamOverCapacity(newCapacity,
-                                                                                    this.memoryManager
-                                                                                        .MaximumStreamCapacity, this.tag,
-                                                                                    this.AllocationStack);
+                                                                                    memoryManager
+                                                                                        .MaximumStreamCapacity, tag,
+                                                                                    AllocationStack);
                 throw new InvalidOperationException("Requested capacity is too large: " + newCapacity + ". Limit is " +
-                                                    this.memoryManager.MaximumStreamCapacity);
+                                                    memoryManager.MaximumStreamCapacity);
             }
 
-            if (this.largeBuffer != null)
+            if (largeBuffer != null)
             {
-                if (newCapacity > this.largeBuffer.Length)
+                if (newCapacity > largeBuffer.Length)
                 {
-                    var newBuffer = this.memoryManager.GetLargeBuffer(newCapacity, this.tag);
-                    this.InternalRead(newBuffer, 0, this.length, 0);
-                    this.ReleaseLargeBuffer();
-                    this.largeBuffer = newBuffer;
+                    var newBuffer = memoryManager.GetLargeBuffer(newCapacity, tag);
+                    InternalRead(newBuffer, 0, length, 0);
+                    ReleaseLargeBuffer();
+                    largeBuffer = newBuffer;
                 }
             }
             else
             {
-                while (this.Capacity < newCapacity)
+                while (Capacity < newCapacity)
                 {
-                    blocks.Add((this.memoryManager.GetBlock()));
+                    blocks.Add((memoryManager.GetBlock()));
                 }
             }
         }
@@ -838,21 +838,21 @@ namespace MonoGame.Utilities.Memory
         /// </summary>
         private void ReleaseLargeBuffer()
         {
-            if (this.memoryManager.AggressiveBufferReturn)
+            if (memoryManager.AggressiveBufferReturn)
             {
-                this.memoryManager.ReturnLargeBuffer(this.largeBuffer, this.tag);
+                memoryManager.ReturnLargeBuffer(largeBuffer, tag);
             }
             else
             {
-                if (this.dirtyBuffers == null)
+                if (dirtyBuffers == null)
                 {
                     // We most likely will only ever need space for one
-                    this.dirtyBuffers = new List<byte[]>(1);
+                    dirtyBuffers = new List<byte[]>(1);
                 }
-                this.dirtyBuffers.Add(this.largeBuffer);
+                dirtyBuffers.Add(largeBuffer);
             }
 
-            this.largeBuffer = null;
+            largeBuffer = null;
         }
         #endregion
     }

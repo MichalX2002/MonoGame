@@ -28,7 +28,7 @@ namespace Microsoft.Xna.Framework
         protected override void ClearItems()
         {
             for (int i = 0; i < base.Count; i++)
-                this.OnComponentRemoved(new GameComponentCollectionEvent(base[i]));
+                OnComponentRemoved(new GameComponentCollectionEvent(base[i]));
 
             base.ClearItems();
         }
@@ -40,7 +40,7 @@ namespace Microsoft.Xna.Framework
 
             base.InsertItem(index, item);
             if (item != null)
-                this.OnComponentAdded(new GameComponentCollectionEvent(item));
+                OnComponentAdded(new GameComponentCollectionEvent(item));
         }
 
         private void OnComponentAdded(GameComponentCollectionEvent data)
@@ -58,7 +58,7 @@ namespace Microsoft.Xna.Framework
             IGameComponent gameComponent = base[index];
             base.RemoveItem(index);
             if (gameComponent != null)
-                this.OnComponentRemoved(new GameComponentCollectionEvent(gameComponent));
+                OnComponentRemoved(new GameComponentCollectionEvent(gameComponent));
         }
 
         protected override void SetItem(int index, IGameComponent item)

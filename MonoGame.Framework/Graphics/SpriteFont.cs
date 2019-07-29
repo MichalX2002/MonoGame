@@ -388,9 +388,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
             public CharacterRegion(char start, int startIndex)
             {
-                this.Start = start;                
-                this.End = start;
-                this.StartIndex = startIndex;
+                Start = start;                
+                End = start;
+                StartIndex = startIndex;
             }
         }
 	}

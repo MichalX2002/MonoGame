@@ -18,7 +18,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public VertexPositionColor(Vector3 position, Color color)
 		{
-			this.Position = position;
+			Position = position;
 			Color = color;
 		}
 
@@ -34,7 +34,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 	    public override string ToString()
 		{
-            return "{{Position:" + this.Position + " Color:" + this.Color + "}}";
+            return "{{Position:" + Position + " Color:" + Color + "}}";
 		}
 
 		public static bool operator == (VertexPositionColor left, VertexPositionColor right)

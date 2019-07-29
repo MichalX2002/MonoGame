@@ -508,11 +508,11 @@ namespace MonoGame.Utilities
         /// </summary>
         virtual internal FlushType FlushMode
         {
-            get => (this._baseStream._flushMode);
+            get => (_baseStream._flushMode);
             set
             {
                 if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
-                this._baseStream._flushMode = value;
+                _baseStream._flushMode = value;
             }
         }
 
@@ -535,24 +535,24 @@ namespace MonoGame.Utilities
         /// </remarks>
         internal int BufferSize
         {
-            get => this._baseStream._bufferSize;
+            get => _baseStream._bufferSize;
             set
             {
                 if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
-                if (this._baseStream._workingBuffer != null)
+                if (_baseStream._workingBuffer != null)
                     throw new ZlibException("The working buffer is already set.");
                 if (value < ZlibConstants.WorkingBufferSizeMin)
                     throw new ZlibException(String.Format("Don't be silly. {0} bytes?? Use a bigger buffer, at least {1}.", value, ZlibConstants.WorkingBufferSizeMin));
-                this._baseStream._bufferSize = value;
+                _baseStream._bufferSize = value;
             }
         }
 
 
         /// <summary> Returns the total number of bytes input so far.</summary>
-        virtual internal long TotalIn => this._baseStream._z.TotalBytesIn;
+        virtual internal long TotalIn => _baseStream._z.TotalBytesIn;
 
         /// <summary> Returns the total number of bytes output so far.</summary>
-        virtual internal long TotalOut => this._baseStream._z.TotalBytesOut;
+        virtual internal long TotalOut => _baseStream._z.TotalBytesOut;
 
         #endregion
 
@@ -587,10 +587,10 @@ namespace MonoGame.Utilities
             {
                 if (!_disposed)
                 {
-                    if (disposing && (this._baseStream != null))
+                    if (disposing && (_baseStream != null))
                     {
-                        this._baseStream.Dispose();
-                        this.Crc32 = _baseStream.Crc32;
+                        _baseStream.Dispose();
+                        Crc32 = _baseStream.Crc32;
                     }
                     _disposed = true;
                 }
@@ -670,10 +670,10 @@ namespace MonoGame.Utilities
         {
             get
             {
-                if (this._baseStream._streamMode == ZlibBaseStream.StreamMode.Writer)
-                    return this._baseStream._z.TotalBytesOut + _headerByteCount;
-                if (this._baseStream._streamMode == ZlibBaseStream.StreamMode.Reader)
-                    return this._baseStream._z.TotalBytesIn + this._baseStream._gzipHeaderByteCount;
+                if (_baseStream._streamMode == ZlibBaseStream.StreamMode.Writer)
+                    return _baseStream._z.TotalBytesOut + _headerByteCount;
+                if (_baseStream._streamMode == ZlibBaseStream.StreamMode.Reader)
+                    return _baseStream._z.TotalBytesIn + _baseStream._gzipHeaderByteCount;
                 return 0;
             }
 
@@ -778,7 +778,7 @@ namespace MonoGame.Utilities
             if (_baseStream._streamMode == ZlibBaseStream.StreamMode.Undefined)
             {
                 //Console.WriteLine("GZipStream: First write");
-                if (_baseStream._wantCompress)
+                if (_baseStream.WantCompress)
                 {
                     // first write in compression, therefore, emit the GZIP header
                     _headerByteCount = EmitHeader();
@@ -879,7 +879,7 @@ namespace MonoGame.Utilities
         /// </param>
         ///
         /// <returns>The string in compressed form</returns>
-        internal static byte[] CompressString(String s)
+        internal static byte[] CompressString(string s)
         {
             using (var ms = RecyclableMemoryManager.Instance.GetMemoryStream())
             {

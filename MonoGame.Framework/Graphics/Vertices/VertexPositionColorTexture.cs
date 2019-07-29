@@ -43,7 +43,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public override string ToString()
         {
-            return "{Position:" + this.Position + " Color:" + this.Color + " TextureCoordinate:" + this.TextureCoordinate + "}";
+            return "{Position:" + Position + " Color:" + Color + " TextureCoordinate:" + TextureCoordinate + "}";
         }
 
         public static bool operator ==(VertexPositionColorTexture left, VertexPositionColorTexture right)

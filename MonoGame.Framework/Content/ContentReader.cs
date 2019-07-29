@@ -27,10 +27,10 @@ namespace Microsoft.Xna.Framework.Content
         internal ContentReader(ContentManager manager, Stream stream, GraphicsDevice graphicsDevice, string assetName, int version, Action<IDisposable> recordDisposableObject)
             : base(stream)
         {
-            this.GraphicsDevice = graphicsDevice;
+            GraphicsDevice = graphicsDevice;
             this.recordDisposableObject = recordDisposableObject;
-            this.ContentManager = manager;
-            this.AssetName = assetName;
+            ContentManager = manager;
+            AssetName = assetName;
 			this.version = version;
         }
 

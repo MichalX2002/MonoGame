@@ -398,7 +398,7 @@ namespace Microsoft.Xna.Framework.Content
                 var typeOfValue = asset.Value.GetType();
 
                 // This never executes as asset.Key is never null. This just forces the 
-                // linker to include the ReloadAsset function when AOT compiled.
+                // linker to include the ReloadAsset method when AOT compiled.
                 if (asset.Key == null)
                     ReloadAsset(asset.Key, Convert.ChangeType(asset.Value, typeOfValue));
                 

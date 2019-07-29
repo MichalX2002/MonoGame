@@ -152,17 +152,17 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             return new PresentationParameters
             {
-                BackBufferFormat = this.BackBufferFormat,
-                BackBufferHeight = this.BackBufferHeight,
-                BackBufferWidth = this.BackBufferWidth,
-                DeviceWindowHandle = this.DeviceWindowHandle,
-                DepthStencilFormat = this.DepthStencilFormat,
-                IsFullScreen = this.IsFullScreen,
-                HardwareModeSwitch = this.HardwareModeSwitch,
-                MultiSampleCount = this.MultiSampleCount,
-                PresentationInterval = this.PresentationInterval,
-                DisplayOrientation = this.DisplayOrientation,
-                RenderTargetUsage = this.RenderTargetUsage
+                BackBufferFormat = BackBufferFormat,
+                BackBufferHeight = BackBufferHeight,
+                BackBufferWidth = BackBufferWidth,
+                DeviceWindowHandle = DeviceWindowHandle,
+                DepthStencilFormat = DepthStencilFormat,
+                IsFullScreen = IsFullScreen,
+                HardwareModeSwitch = HardwareModeSwitch,
+                MultiSampleCount = MultiSampleCount,
+                PresentationInterval = PresentationInterval,
+                DisplayOrientation = DisplayOrientation,
+                RenderTargetUsage = RenderTargetUsage
             };
         }
 

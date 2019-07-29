@@ -51,7 +51,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public int Height { get; }
 
-        public int Width => this.width;
+        public int Width => width;
 
         public Rectangle TitleSafeArea => GraphicsDevice.GetTitleSafeArea(0, 0, width, Height);
 
@@ -62,8 +62,8 @@ namespace Microsoft.Xna.Framework.Graphics
         internal DisplayMode(int width, int height, SurfaceFormat format)
         {
             this.width = width;
-            this.Height = height;
-            this.Format = format;
+            Height = height;
+            Format = format;
         }
 
         #endregion Constructors
@@ -101,12 +101,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public override int GetHashCode()
         {
-            return (this.width.GetHashCode() ^ this.Height.GetHashCode() ^ this.Format.GetHashCode());
+            return (width.GetHashCode() ^ Height.GetHashCode() ^ Format.GetHashCode());
         }
 
         public override string ToString()
         {
-            return "{Width:" + this.width + " Height:" + this.Height + " Format:" + this.Format + " AspectRatio:" + this.AspectRatio + "}";
+            return "{Width:" + width + " Height:" + Height + " Format:" + Format + " AspectRatio:" + AspectRatio + "}";
         }
 
         #endregion Public Methods

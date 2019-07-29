@@ -139,9 +139,9 @@
       <Project>{6d75e618-19ca-4c51-9546-f10965fbc0b8}</Project>
       <Name>MonoGame.Framework.DesktopGL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ThirdParty\SixLabors\ImageSharp\src\ImageSharp\SixLabors.ImageSharp.csproj">
-      <Project>{4196FDAF-6F4A-4A15-A4F5-0D52E0E54E7A}</Project>
-      <Name>SixLabors.ImageSharp</Name>
+    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj">
+      <Project>{e8d7b5c4-c5a1-44e3-a55e-e340bbab391c}</Project>
+      <Name>MonoGame.Utilities</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

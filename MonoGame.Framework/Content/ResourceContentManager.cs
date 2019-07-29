@@ -16,7 +16,7 @@ namespace Microsoft.Xna.Framework.Content
 
         protected override Stream OpenStream(string assetName)
         {
-            object obj = this.resource.GetObject(assetName);
+            object obj = resource.GetObject(assetName);
             if (obj == null)
                 throw new ContentLoadException("Resource not found.");
                 

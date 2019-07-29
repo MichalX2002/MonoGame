@@ -141,7 +141,7 @@ namespace MonoGame.Utilities
         /// <returns>Z_OK if everything goes well.</returns>
         internal int InitializeInflate()
         {
-            return InitializeInflate(this.WindowBits);
+            return InitializeInflate(WindowBits);
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace MonoGame.Utilities
         /// <returns>Z_OK if everything goes well.</returns>
         internal int InitializeInflate(bool expectRfc1950Header)
         {
-            return InitializeInflate(this.WindowBits, expectRfc1950Header);
+            return InitializeInflate(WindowBits, expectRfc1950Header);
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace MonoGame.Utilities
         /// <returns>Z_OK if all goes well.</returns>
         internal int InitializeInflate(int windowBits)
         {
-            this.WindowBits = windowBits;
+            WindowBits = windowBits;
             return InitializeInflate(windowBits, true);
         }
 
@@ -200,7 +200,7 @@ namespace MonoGame.Utilities
         /// <returns>Z_OK if everything goes well.</returns>
         internal int InitializeInflate(int windowBits, bool expectRfc1950Header)
         {
-            this.WindowBits = windowBits;
+            WindowBits = windowBits;
             if (dstate != null) throw new ZlibException("You may not call InitializeInflate() after calling InitializeDeflate().");
             istate = new InflateManager(expectRfc1950Header);
             return istate.Initialize(this, windowBits);
@@ -362,7 +362,7 @@ namespace MonoGame.Utilities
         /// <returns>Z_OK if all goes well.</returns>
         internal int InitializeDeflate(CompressionLevel level)
         {
-            this.CompressLevel = level;
+            CompressLevel = level;
             return _InternalInitializeDeflate(true);
         }
 
@@ -383,7 +383,7 @@ namespace MonoGame.Utilities
         /// <returns>Z_OK if all goes well.</returns>
         internal int InitializeDeflate(CompressionLevel level, bool wantRfc1950Header)
         {
-            this.CompressLevel = level;
+            CompressLevel = level;
             return _InternalInitializeDeflate(wantRfc1950Header);
         }
 
@@ -400,8 +400,8 @@ namespace MonoGame.Utilities
         /// <returns>Z_OK if all goes well.</returns>
         internal int InitializeDeflate(CompressionLevel level, int bits)
         {
-            this.CompressLevel = level;
-            this.WindowBits = bits;
+            CompressLevel = level;
+            WindowBits = bits;
             return _InternalInitializeDeflate(true);
         }
 
@@ -417,8 +417,8 @@ namespace MonoGame.Utilities
         /// <returns>Z_OK if all goes well.</returns>
         internal int InitializeDeflate(CompressionLevel level, int bits, bool wantRfc1950Header)
         {
-            this.CompressLevel = level;
-            this.WindowBits = bits;
+            CompressLevel = level;
+            WindowBits = bits;
             return _InternalInitializeDeflate(wantRfc1950Header);
         }
 
@@ -432,7 +432,7 @@ namespace MonoGame.Utilities
                 WantRfc1950HeaderBytes = wantRfc1950Header
             };
 
-            return dstate.Initialize(this, this.CompressLevel, this.WindowBits, this.Strategy);
+            return dstate.Initialize(this, CompressLevel, WindowBits, Strategy);
         }
 
         /// <summary>
@@ -575,7 +575,7 @@ namespace MonoGame.Utilities
         }
 
         // Flush as much pending output as possible. All deflate() output goes
-        // through this function so some applications may wish to modify it
+        // through this method so some applications may wish to modify it
         // to avoid allocating a large strm->next_out buffer and copying into it.
         // (See also read_buf()).
         internal void flush_pending()
@@ -611,7 +611,7 @@ namespace MonoGame.Utilities
 
         // Read a new buffer from the current input stream, update the adler32
         // and total number of bytes read.  All deflate() input goes through
-        // this function so some applications may wish to modify it to avoid
+        // this method so some applications may wish to modify it to avoid
         // allocating a large strm->next_in buffer and copying from it.
         // (See also flush_pending()).
         internal int read_buf(byte[] buf, int start, int size)

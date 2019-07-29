@@ -28,8 +28,6 @@ namespace Microsoft.Xna.Framework.Graphics
         EffectPass _spritePass;
         #endregion
 
-        public static bool NeedsHalfPixelOffset { get; internal set; }
-
         /// <summary>
         /// Constructs a <see cref="SpriteBatch"/>.
         /// </summary>
@@ -37,7 +35,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="graphicsDevice"/> is null.</exception>
         public SpriteBatch(GraphicsDevice graphicsDevice)
         {
-            this.GraphicsDevice = graphicsDevice ??
+            GraphicsDevice = graphicsDevice ??
                 throw new ArgumentNullException("graphicsDevice", FrameworkResources.ResourceCreationWhenDeviceIsNull);
 
             _spriteEffect = new SpriteEffect(graphicsDevice);

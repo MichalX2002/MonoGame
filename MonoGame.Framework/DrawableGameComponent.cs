@@ -12,7 +12,7 @@ namespace Microsoft.Xna.Framework
         private int _drawOrder;
         private bool _visible = true;
 
-        public Graphics.GraphicsDevice GraphicsDevice => this.Game.GraphicsDevice;
+        public Graphics.GraphicsDevice GraphicsDevice => Game.GraphicsDevice;
 
         public int DrawOrder
         {

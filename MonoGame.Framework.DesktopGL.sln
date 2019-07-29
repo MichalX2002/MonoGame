@@ -1,3 +1,4 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28714.193
@@ -8,11 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lidgren.Network", "ThirdPar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Framework.DesktopGL", "MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj", "{6D75E618-19CA-4C51-9546-F10965FBC0B8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SixLabors.Core", "ThirdParty\SixLabors\Core\src\SixLabors.Core\SixLabors.Core.csproj", "{E731214F-575E-496E-AC36-3F9479099E57}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SixLabors.ImageSharp", "ThirdParty\SixLabors\ImageSharp\src\ImageSharp\SixLabors.ImageSharp.csproj", "{4196FDAF-6F4A-4A15-A4F5-0D52E0E54E7A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Utilities", "MonoGame.Utilities\MonoGame.Utilities.csproj", "{E8D7B5C4-C5A1-44E3-A55E-E340BBAB391C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Imaging", "MonoGame.Imaging\MonoGame.Imaging.csproj", "{FE044107-5D62-4E98-A2EB-F99F3BEB8DC3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Imaging.Tests", "MonoGame.Imaging.Tests\MonoGame.Imaging.Tests.csproj", "{8627DE8C-7B2C-4CF8-9725-01BA0BF04CC9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,18 +33,18 @@ Global
 		{6D75E618-19CA-4C51-9546-F10965FBC0B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D75E618-19CA-4C51-9546-F10965FBC0B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D75E618-19CA-4C51-9546-F10965FBC0B8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E731214F-575E-496E-AC36-3F9479099E57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E731214F-575E-496E-AC36-3F9479099E57}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E731214F-575E-496E-AC36-3F9479099E57}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E731214F-575E-496E-AC36-3F9479099E57}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4196FDAF-6F4A-4A15-A4F5-0D52E0E54E7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4196FDAF-6F4A-4A15-A4F5-0D52E0E54E7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4196FDAF-6F4A-4A15-A4F5-0D52E0E54E7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4196FDAF-6F4A-4A15-A4F5-0D52E0E54E7A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E8D7B5C4-C5A1-44E3-A55E-E340BBAB391C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E8D7B5C4-C5A1-44E3-A55E-E340BBAB391C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E8D7B5C4-C5A1-44E3-A55E-E340BBAB391C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E8D7B5C4-C5A1-44E3-A55E-E340BBAB391C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE044107-5D62-4E98-A2EB-F99F3BEB8DC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE044107-5D62-4E98-A2EB-F99F3BEB8DC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE044107-5D62-4E98-A2EB-F99F3BEB8DC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE044107-5D62-4E98-A2EB-F99F3BEB8DC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8627DE8C-7B2C-4CF8-9725-01BA0BF04CC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8627DE8C-7B2C-4CF8-9725-01BA0BF04CC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8627DE8C-7B2C-4CF8-9725-01BA0BF04CC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8627DE8C-7B2C-4CF8-9725-01BA0BF04CC9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

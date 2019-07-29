@@ -811,11 +811,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public void SetValue(Texture value)
         {
-            if (this.ParameterType != EffectParameterType.Texture &&
-                this.ParameterType != EffectParameterType.Texture1D &&
-                this.ParameterType != EffectParameterType.Texture2D &&
-                this.ParameterType != EffectParameterType.Texture3D &&
-                this.ParameterType != EffectParameterType.TextureCube)
+            if (ParameterType != EffectParameterType.Texture &&
+                ParameterType != EffectParameterType.Texture1D &&
+                ParameterType != EffectParameterType.Texture2D &&
+                ParameterType != EffectParameterType.Texture3D &&
+                ParameterType != EffectParameterType.TextureCube)
             {
                 throw new InvalidCastException();
             }

@@ -18,11 +18,11 @@ namespace Microsoft.Xna.Framework.Graphics
             GraphicsDevice graphicsDevice, VertexDeclaration vertexDeclaration, int capacity, BufferUsage bufferUsage, bool dynamic) :
             base(capacity)
         {
-            this.GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
+            GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
                 nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
 
-            this.BufferUsage = bufferUsage;
-            this.VertexDeclaration = vertexDeclaration;
+            BufferUsage = bufferUsage;
+            VertexDeclaration = vertexDeclaration;
 
             // Make sure the graphics device is assigned in the vertex declaration.
             if (vertexDeclaration.GraphicsDevice != graphicsDevice)
