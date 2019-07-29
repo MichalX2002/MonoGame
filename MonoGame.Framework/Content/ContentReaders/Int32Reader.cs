@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
 	internal class Int32Reader : ContentTypeReader<int>
     {

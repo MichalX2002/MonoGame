@@ -40,7 +40,7 @@
 // 
 using System.IO;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
 	internal static class DxtUtil
 	{

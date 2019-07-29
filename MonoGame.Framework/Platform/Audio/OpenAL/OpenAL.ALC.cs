@@ -3,7 +3,7 @@ using System;
 using System.Runtime.InteropServices;
 using FL = MonoGame.Utilities.FuncLoader;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     internal unsafe class ALC
     {

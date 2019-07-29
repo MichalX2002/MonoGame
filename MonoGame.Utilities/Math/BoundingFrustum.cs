@@ -5,7 +5,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Defines a viewing frustum for intersection operations.

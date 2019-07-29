@@ -38,10 +38,10 @@
 // */
 #endregion License
 
-using Microsoft.Xna.Framework;
+using MonoGame.Framework;
 using System;
 
-namespace Microsoft.Xna.Framework.Input.Touch
+namespace MonoGame.Framework.Input.Touch
 {
     /// <summary>
     /// Represents data from a multi-touch gesture over a span of time.

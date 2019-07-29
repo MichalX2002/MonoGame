@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     public static class ServiceProviderExtensions
     {

@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     /// <summary>
     ///  Represents a single instance of a playing, paused, or stopped sound.

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
+using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging
 {

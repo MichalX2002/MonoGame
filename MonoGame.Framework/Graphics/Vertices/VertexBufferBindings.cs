@@ -6,7 +6,7 @@ using System;
 using System.Diagnostics;
 
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Stores the vertex buffers to be bound to the input assembler stage.

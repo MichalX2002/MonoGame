@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.GamerServices
+namespace MonoGame.Framework.GamerServices
 {
     public class GameUpdateRequiredException : Exception
     {

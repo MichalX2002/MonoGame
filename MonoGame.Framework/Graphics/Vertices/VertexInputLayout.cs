@@ -6,7 +6,7 @@ using System;
 using System.Diagnostics;
 
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Stores the vertex layout (input elements) for the input assembler stage.

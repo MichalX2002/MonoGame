@@ -4,10 +4,10 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework.Content;
+using MonoGame.Framework.Content;
 using MonoGame.Utilities;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     internal class ListReader<T> : ContentTypeReader<List<T>>
     {

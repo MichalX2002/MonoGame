@@ -7,7 +7,7 @@ using System.Diagnostics;
 using MonoGame.OpenGL;
 using ExtTextureFilterAnisotropic = MonoGame.OpenGL.TextureParameterName;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
   public partial class SamplerState
   {

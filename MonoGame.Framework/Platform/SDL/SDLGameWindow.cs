@@ -2,14 +2,14 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using MonoGame.Framework.Graphics;
+using MonoGame.Framework.Input;
 using MonoGame.Utilities;
 using System;
 using System.IO;
 using System.Reflection;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     internal class SdlGameWindow : GameWindow, IDisposable
     {

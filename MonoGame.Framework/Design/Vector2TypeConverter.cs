@@ -6,7 +6,7 @@ using System;
 using System.ComponentModel;
 using System.Globalization;
 
-namespace Microsoft.Xna.Framework.Design
+namespace MonoGame.Framework.Design
 {
     public class Vector2TypeConverter : TypeConverter
     {

@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     public class LaunchParameters : Dictionary<string, string>
     {

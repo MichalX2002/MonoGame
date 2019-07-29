@@ -1,4 +1,4 @@
-﻿namespace Microsoft.Xna.Framework.Graphics
+﻿namespace MonoGame.Framework.Graphics
 {
     internal enum ShaderStage
     {

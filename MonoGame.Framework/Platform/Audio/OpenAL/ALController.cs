@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using MonoGame.OpenAL;
-using Microsoft.Xna.Framework.Media;
+using MonoGame.Framework.Media;
 
 #if ANDROID
 using System.Globalization;
@@ -17,7 +17,7 @@ using AudioToolbox;
 using AVFoundation;
 #endif
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     internal sealed class ALController : IDisposable
     {

@@ -1,5 +1,5 @@
 ﻿
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     /// <summary>
     /// Specifies a type of dead zone processing to apply to Xbox 360 Controller

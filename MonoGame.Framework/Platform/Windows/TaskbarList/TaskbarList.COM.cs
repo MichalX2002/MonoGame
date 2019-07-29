@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Xna.Framework.Utilities
+namespace MonoGame.Framework.Utilities
 {
     internal partial class TaskbarList
     {

@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Represents a texture cube that can be used as a render target.

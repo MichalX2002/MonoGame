@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Defines the different tangent types to be calculated for <see cref="CurveKey"/> points in a <see cref="Curve"/>.

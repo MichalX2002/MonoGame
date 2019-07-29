@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     /// <summary> 
     /// Supports querying the game controllers and setting the vibration motors.

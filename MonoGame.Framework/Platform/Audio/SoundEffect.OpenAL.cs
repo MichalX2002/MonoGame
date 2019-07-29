@@ -15,7 +15,7 @@ using AudioToolbox;
 using AudioUnit;
 #endif
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     public sealed partial class SoundEffect : IDisposable
     {

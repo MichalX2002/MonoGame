@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     public class DrawableGameComponent : GameComponent, IDrawable
     {

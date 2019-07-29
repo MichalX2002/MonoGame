@@ -4,7 +4,7 @@
 
 using System.IO;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     struct DspParameter
     {

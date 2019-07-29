@@ -3,9 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework.Audio;
+using MonoGame.Framework.Audio;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Helper class for processing internal framework events.

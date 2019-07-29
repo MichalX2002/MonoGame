@@ -2,7 +2,7 @@ using System;
 using System.Runtime.Serialization;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

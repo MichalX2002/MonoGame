@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using MonoGame.Utilities;
 using MonoGame.Utilities.Memory;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     internal static partial class AudioLoader
     {

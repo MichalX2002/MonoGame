@@ -2,16 +2,16 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Input.Touch;
+using MonoGame.Framework.Input;
+using MonoGame.Framework.Input.Touch;
 using System;
 using System.ComponentModel;
 
 #if DIRECTX || DESKTOPGL
-using Microsoft.Xna.Framework.Utilities;
+using MonoGame.Framework.Utilities;
 #endif
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
 	public abstract class GameWindow
 	{

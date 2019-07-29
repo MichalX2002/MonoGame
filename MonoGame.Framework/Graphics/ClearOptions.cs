@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Defines the buffers for clearing when calling <see cref="GraphicsDevice.Clear(ClearOptions, Color, float, int)"/> operation.

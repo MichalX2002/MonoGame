@@ -5,7 +5,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// A snapshot of rendering statistics from <see cref="GraphicsDevice.Metrics"/> to

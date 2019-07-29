@@ -40,7 +40,7 @@ purpose and non-infringement.
 
 using System;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     public class ContentLoadException : Exception
     {

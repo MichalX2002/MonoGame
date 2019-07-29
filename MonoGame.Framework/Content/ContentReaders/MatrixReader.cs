@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     class MatrixReader : ContentTypeReader<Matrix>
     {

@@ -4,7 +4,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Xna.Framework.Graphics.PackedVector
+namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
     /// Helper methods for packing and unpacking floating point values

@@ -12,7 +12,7 @@ using MonoGame.OpenGL;
 
 using System.Security;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     // ARB_framebuffer_object implementation
     partial class GraphicsDevice

@@ -4,9 +4,9 @@
 
 using System;
 using System.IO;
-using Microsoft.Xna.Framework.Audio;
+using MonoGame.Framework.Audio;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     internal class SoundEffectReader : ContentTypeReader<SoundEffect>
 	{

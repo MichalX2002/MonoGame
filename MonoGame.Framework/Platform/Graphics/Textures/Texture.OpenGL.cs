@@ -4,7 +4,7 @@
 
 using MonoGame.OpenGL;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     public abstract partial class Texture
     {

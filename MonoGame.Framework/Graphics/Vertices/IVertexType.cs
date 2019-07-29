@@ -1,4 +1,4 @@
-﻿namespace Microsoft.Xna.Framework.Graphics
+﻿namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Used to attach a vertex declaration to a vertex type so 

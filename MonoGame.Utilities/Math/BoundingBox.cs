@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     [DataContract]
     [DebuggerDisplay("{DebugDisplayString,nq}")]

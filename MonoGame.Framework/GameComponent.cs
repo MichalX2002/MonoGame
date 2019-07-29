@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {   
     public class GameComponent : IGameComponent, IUpdateable, IComparable<GameComponent>, IDisposable
     {

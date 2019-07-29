@@ -10,7 +10,7 @@ using System.Linq;
 using System.Reflection;
 using MonoGame.Utilities;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     static partial class GamePad
     {

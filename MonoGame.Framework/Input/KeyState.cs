@@ -38,7 +38,7 @@
 // */
 #endregion License
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
 	/// <summary>
 	/// Identifies the state of a keyboard key.

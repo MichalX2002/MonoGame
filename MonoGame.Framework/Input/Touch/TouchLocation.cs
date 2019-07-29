@@ -44,7 +44,7 @@ using System.Diagnostics;
 #endregion Using clause
 
 
-namespace Microsoft.Xna.Framework.Input.Touch
+namespace MonoGame.Framework.Input.Touch
 {
     public struct TouchLocation : IEquatable<TouchLocation>
     {

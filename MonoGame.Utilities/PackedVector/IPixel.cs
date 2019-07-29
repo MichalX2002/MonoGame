@@ -1,5 +1,6 @@
+using MonoGame.Framework;
 
-namespace Microsoft.Xna.Framework.Graphics.PackedVector
+namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
     /// Base interface for pixels, defining the conversion operations to be implemented by a pixel type.

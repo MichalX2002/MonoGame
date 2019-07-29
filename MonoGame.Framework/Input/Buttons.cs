@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     /// <summary>
     /// Defines the buttons on gamepad.

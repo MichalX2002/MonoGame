@@ -5,7 +5,7 @@
 using System;
 using System.IO;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     public abstract class ContentTypeReader
     {

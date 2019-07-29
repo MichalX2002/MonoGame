@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     /// <summary>
     /// A <see cref="SoundEffectInstance"/> for which the audio data is provided dynamically at run time.

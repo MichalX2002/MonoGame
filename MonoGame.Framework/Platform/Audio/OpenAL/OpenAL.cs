@@ -4,7 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using Microsoft.Xna.Framework.Audio;
+using MonoGame.Framework.Audio;
 using MonoGame.Utilities;
 using System.IO;
 

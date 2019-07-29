@@ -3,8 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using MonoGame.Framework;
 
-namespace Microsoft.Xna.Framework.Graphics.PackedVector
+namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
     /// Packed vector type containing a single 8 bit normalized W values that is ranging from 0 to 1.

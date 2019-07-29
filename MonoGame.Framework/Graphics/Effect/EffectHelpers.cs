@@ -11,7 +11,7 @@
 using System;
 //#endregion
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Track which effect parameters need to be recomputed during the next OnApply.

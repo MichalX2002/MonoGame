@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     /// <summary>
     /// This is used to specify the version when deserializing this object at runtime.

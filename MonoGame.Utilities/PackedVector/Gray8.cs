@@ -1,7 +1,9 @@
 // Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
-namespace Microsoft.Xna.Framework.Graphics.PackedVector
+using MonoGame.Framework;
+
+namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
     /// Packed pixel type containing a single 8 bit normalized gray values.

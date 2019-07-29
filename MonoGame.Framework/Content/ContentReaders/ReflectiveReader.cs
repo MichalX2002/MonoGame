@@ -9,7 +9,7 @@ using System.Linq;
 using System.Reflection;
 using MonoGame.Utilities;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     internal class ReflectiveReader<T> : ContentTypeReader
     {

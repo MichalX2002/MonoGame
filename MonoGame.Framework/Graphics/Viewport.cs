@@ -5,7 +5,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Describes the view bounds for render-target surface.

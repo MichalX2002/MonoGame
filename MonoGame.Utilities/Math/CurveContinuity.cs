@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Defines the continuity of keys on a <see cref="Curve"/>.

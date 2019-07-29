@@ -6,7 +6,7 @@ using System;
 using System.IO;
 using MonoGame.Utilities.Memory;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     /// <summary>Represents a loaded sound resource that can be played.</summary>
     /// <remarks>

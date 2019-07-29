@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     [DebuggerDisplay("{DebugDisplayString}")]
     public class EffectParameter

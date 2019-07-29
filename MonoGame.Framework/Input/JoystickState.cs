@@ -5,7 +5,7 @@
 using System.Linq;
 using System.Text;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     /// <summary>
     /// Describes current joystick state.

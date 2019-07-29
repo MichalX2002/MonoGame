@@ -40,7 +40,9 @@
 //
 // Author: Kenneth James Pouncey
 
-namespace Microsoft.Xna.Framework.Graphics.PackedVector
+using MonoGame.Framework;
+
+namespace MonoGame.Utilities.PackedVector
 {
     // http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.graphics.packedvector.ipackedvector.aspx
     public interface IPackedVector

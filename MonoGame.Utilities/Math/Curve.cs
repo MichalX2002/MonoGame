@@ -6,7 +6,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Contains a collection of <see cref="CurveKey"/> points in 2D space and provides methods for evaluating features of the curve they define.

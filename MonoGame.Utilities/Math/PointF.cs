@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     // Real-Time Collision Detection, Christer Ericson, 2005. Chapter 3.2; A Math and Geometry Primer - Coordinate Systems and Points. pg 35
 

@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Contains commonly used precalculated values and mathematical operations.

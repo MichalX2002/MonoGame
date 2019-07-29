@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     internal static class ContentExtensions
     {

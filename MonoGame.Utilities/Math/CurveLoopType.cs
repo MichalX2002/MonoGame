@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Defines how the <see cref="Curve"/> value is determined for position before first point or after the end point on the <see cref="Curve"/>.

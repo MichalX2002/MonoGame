@@ -8,16 +8,16 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using MonoGame.Utilities;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 using System.Globalization;
 using MonoGame.Utilities.Memory;
 
 #if !WINDOWS_UAP
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Media;
+using MonoGame.Framework.Audio;
+using MonoGame.Framework.Media;
 #endif
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
 	public partial class ContentManager : IDisposable
 	{

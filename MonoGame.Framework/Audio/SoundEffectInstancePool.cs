@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     internal static class SoundEffectInstancePool
     {

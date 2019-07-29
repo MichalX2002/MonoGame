@@ -2,11 +2,10 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Numerics;
-using System.Runtime.CompilerServices;
+using MonoGame.Framework;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Xna.Framework.Graphics.PackedVector
+namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
     /// Unpacked pixel type containing four 16-bit floating-point values typically ranging from 0 to 1.

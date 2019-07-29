@@ -13,7 +13,7 @@ using OpenTK.Graphics;
 using MonoGame.OpenGL;
 #endif
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     public partial class GraphicsDevice
     {

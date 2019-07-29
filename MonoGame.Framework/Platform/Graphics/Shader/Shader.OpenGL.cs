@@ -7,7 +7,7 @@ using System.IO;
 using System.Diagnostics;
 using MonoGame.OpenGL;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     internal partial class Shader
     {

@@ -6,7 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Input.Touch
+namespace MonoGame.Framework.Input.Touch
 {
     /// <summary>
     /// Provides state information for a touch screen enabled device.

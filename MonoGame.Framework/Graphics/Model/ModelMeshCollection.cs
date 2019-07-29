@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Represents a collection of ModelMesh objects.

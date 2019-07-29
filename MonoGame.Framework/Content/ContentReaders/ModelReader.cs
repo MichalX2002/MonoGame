@@ -4,11 +4,11 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
+using MonoGame.Framework.Graphics;
+using MonoGame.Framework.Content;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     internal class ModelReader : ContentTypeReader<Model>
 	{

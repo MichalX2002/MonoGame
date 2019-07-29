@@ -40,7 +40,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Input.Touch
+namespace MonoGame.Framework.Input.Touch
 {
     /// <summary>
     /// Allows retrieval of information from Touch Panel device.

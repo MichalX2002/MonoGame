@@ -1,5 +1,5 @@
 ﻿
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     public enum TaskbarProgressState
     {

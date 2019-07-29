@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Runtime.Serialization;
 using MonoGame.Utilities;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Describes a 2D-vector.

@@ -7,7 +7,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     public sealed partial class Song : IDisposable
     {

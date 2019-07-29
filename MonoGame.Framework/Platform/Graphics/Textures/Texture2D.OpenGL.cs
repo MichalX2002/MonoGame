@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using MonoGame.OpenGL;
 using GLPixelFormat = MonoGame.OpenGL.PixelFormat;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     public partial class Texture2D : Texture
     {

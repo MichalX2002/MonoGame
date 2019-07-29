@@ -1,4 +1,4 @@
-﻿namespace Microsoft.Xna.Framework
+﻿namespace MonoGame.Framework
 {
     /// <summary>
     ///     Base class for shapes.

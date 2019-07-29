@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Describes a sphere in 3D-space for bounding operations.

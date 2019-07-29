@@ -7,7 +7,7 @@ using MonoGame.OpenGL;
 using GetParamName = MonoGame.OpenGL.GetPName;
 #endif
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
 
     internal partial class GraphicsCapabilities

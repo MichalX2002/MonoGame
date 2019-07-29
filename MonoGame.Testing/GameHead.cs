@@ -1,8 +1,8 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
+﻿using MonoGame.Framework;
+using MonoGame.Framework.Audio;
+using MonoGame.Framework.Graphics;
+using MonoGame.Framework.Input;
+using MonoGame.Framework.Media;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

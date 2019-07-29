@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework.Audio;
+﻿using MonoGame.Framework.Audio;
 using MonoGame.OpenAL;
 using MonoGame.Utilities.Memory;
 using System;
@@ -7,7 +7,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     internal class OggStreamer : IDisposable
     {

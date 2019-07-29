@@ -5,7 +5,7 @@
 using System;
 using System.IO;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     /// <summary>Represents a collection of wave files.</summary>
     public partial class WaveBank : IDisposable

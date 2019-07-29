@@ -4,8 +4,9 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using MonoGame.Framework;
 
-namespace Microsoft.Xna.Framework.Graphics.PackedVector
+namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
     /// Packed pixel type containing four 16-bit unsigned normalized values ranging from 0 to 65535.

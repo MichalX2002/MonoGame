@@ -40,7 +40,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Input.Touch
+namespace MonoGame.Framework.Input.Touch
 {
     /// <summary>
     /// Enumuration of values that represent different gestures that can be processed by <see cref="TouchPanel.ReadGesture"/>.

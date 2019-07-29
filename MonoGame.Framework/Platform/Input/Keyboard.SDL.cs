@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     public static partial class Keyboard
     {

@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using MonoGame.Utilities;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     public sealed class ContentTypeReaderManager
     {

@@ -9,7 +9,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
 
-namespace Microsoft.Xna.Framework.Graphics 
+namespace MonoGame.Framework.Graphics 
 {
 
 	public sealed class SpriteFont 

@@ -40,7 +40,7 @@
 // 
 using System;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// The common effect light rendering parameters.

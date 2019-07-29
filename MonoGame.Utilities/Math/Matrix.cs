@@ -6,7 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Represents the right-handed 4x4 floating point matrix, which can store translation, scale and rotation information.

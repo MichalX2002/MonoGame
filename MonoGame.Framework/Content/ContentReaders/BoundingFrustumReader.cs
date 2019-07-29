@@ -3,9 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework;
+using MonoGame.Framework;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     internal class BoundingFrustumReader : ContentTypeReader<BoundingFrustum>
     {

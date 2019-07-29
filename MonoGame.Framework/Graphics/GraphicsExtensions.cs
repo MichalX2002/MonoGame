@@ -15,7 +15,7 @@ using OpenTK.Graphics;
 #endif
 #endif
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     static class GraphicsExtensions
     {

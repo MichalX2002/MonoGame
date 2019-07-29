@@ -42,7 +42,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
 	// http://msdn.microsoft.com/en-us/library/ff434403.aspx
 	public struct RenderTargetBinding

@@ -8,7 +8,7 @@ using MonoGame.OpenGL;
 using GLPixelFormat = MonoGame.OpenGL.PixelFormat;
 using MonoGame.Utilities;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     public partial class TextureCube
     {

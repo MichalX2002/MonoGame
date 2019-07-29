@@ -8,12 +8,12 @@
 #endregion
 
 #region Using Statements
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework;
+using MonoGame.Framework.Graphics;
 using System;
 #endregion
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Built-in effect that supports alpha testing.

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using MonoGame.OpenGL;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
 
     internal class ShaderProgram

@@ -13,7 +13,7 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.Memory;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     public partial class Texture2D : Texture
     {

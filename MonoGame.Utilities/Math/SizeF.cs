@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     ///     A two dimensional size defined by two real numbers, a width and a height.

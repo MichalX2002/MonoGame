@@ -5,7 +5,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     public partial class MouseCursor
     {

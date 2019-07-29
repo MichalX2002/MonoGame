@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct VertexPositionColorTexture : IVertexType

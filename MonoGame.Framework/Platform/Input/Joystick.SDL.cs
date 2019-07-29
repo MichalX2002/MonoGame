@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     static partial class Joystick
     {

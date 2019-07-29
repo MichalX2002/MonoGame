@@ -10,10 +10,10 @@ using Windows.UI.Xaml.Controls;
 
 #if IOS
 using UIKit;
-using Microsoft.Xna.Framework.Input.Touch;
+using MonoGame.Framework.Input.Touch;
 #endif
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     public class PresentationParameters
     {

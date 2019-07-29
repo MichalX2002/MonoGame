@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     internal class EffectsExtension
     {

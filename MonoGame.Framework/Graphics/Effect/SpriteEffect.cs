@@ -5,7 +5,7 @@
 // Microsoft XNA Community Game Platform
 // Copyright (C) Microsoft Corporation. All rights reserved.
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// The default effect used by SpriteBatch.

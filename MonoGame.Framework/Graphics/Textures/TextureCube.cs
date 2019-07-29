@@ -5,7 +5,7 @@
 using System;
 using MonoGame.Utilities;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
 	public partial class TextureCube : Texture
 	{

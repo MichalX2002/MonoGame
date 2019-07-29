@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
 
 	public sealed class ModelMeshPartCollection : ReadOnlyCollection<ModelMeshPart>

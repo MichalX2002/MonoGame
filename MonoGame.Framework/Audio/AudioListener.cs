@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     /// <summary>
     /// Represents a 3D audio listener. Used when simulating 3D Audio.

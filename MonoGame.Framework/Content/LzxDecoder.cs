@@ -46,7 +46,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
 	using System.IO;
 	

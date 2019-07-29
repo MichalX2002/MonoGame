@@ -2,8 +2,9 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using MonoGame.Framework;
 
-namespace Microsoft.Xna.Framework.Graphics.PackedVector
+namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
     /// Packed pixel type containing unsigned normalized values ranging from 0 to 1.

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Resources;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     public class ResourceContentManager : ContentManager
     {

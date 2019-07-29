@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     public readonly struct ResourceCreatedEvent
     {

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
 	public abstract partial class Texture : GraphicsResource
 	{

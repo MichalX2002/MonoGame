@@ -39,9 +39,9 @@
 // #endregion License
 // 
 using System;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
 	public sealed class DirectionalLight
 	{

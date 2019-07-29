@@ -6,10 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Content;
+using MonoGame.Framework.Graphics;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
 	internal class BooleanReader : ContentTypeReader<bool>
     {

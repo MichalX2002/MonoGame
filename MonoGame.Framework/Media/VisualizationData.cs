@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     public class VisualizationData
     {

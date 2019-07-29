@@ -8,7 +8,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using MonoGame.Utilities;
-using Microsoft.Xna.Framework.Input;
+using MonoGame.Framework.Input;
 using FL = MonoGame.Utilities.FuncLoader;
 
 [Guid("DA23ADEA-3FBC-41B8-B748-F378E9C7BB24")]

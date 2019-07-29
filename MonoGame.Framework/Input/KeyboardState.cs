@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     /// <summary>
     /// Holds the state of keystrokes by a keyboard.

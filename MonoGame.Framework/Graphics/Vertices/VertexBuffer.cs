@@ -5,7 +5,7 @@
 using MonoGame.Utilities;
 using System;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     public partial class VertexBuffer : BufferBase
     {

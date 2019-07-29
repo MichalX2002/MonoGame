@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using MonoGame.Utilities.Memory;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// This class handles the queueing of batch items into the GPU by creating the triangle tesselations

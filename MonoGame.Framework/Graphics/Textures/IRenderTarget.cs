@@ -36,7 +36,7 @@
 // purpose and non-infringement.
 #endregion License
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Represents a render target.

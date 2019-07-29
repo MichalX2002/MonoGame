@@ -5,7 +5,7 @@
 using System;
 using System.IO;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
 
     // TODO: We should convert the types below 

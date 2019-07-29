@@ -1,6 +1,6 @@
-﻿using Microsoft.Xna.Framework.Input;
+﻿using MonoGame.Framework.Input;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     public readonly struct TextInputEvent
     {

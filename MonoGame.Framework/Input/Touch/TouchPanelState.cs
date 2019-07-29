@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Input.Touch
+namespace MonoGame.Framework.Input.Touch
 {
     public class TouchPanelState
     {

@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using MonoGame.Utilities;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     public class GameServiceContainer : IServiceProvider
     {

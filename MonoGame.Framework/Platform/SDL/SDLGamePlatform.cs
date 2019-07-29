@@ -7,12 +7,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using MonoGame.Framework.Graphics;
+using MonoGame.Framework.Input;
 using MonoGame.Utilities;
 using System.Text;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     internal class SdlGamePlatform : GamePlatform
     {

@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using MonoGame.OpenAL;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     public sealed partial class DynamicSoundEffectInstance : SoundEffectInstance
     {

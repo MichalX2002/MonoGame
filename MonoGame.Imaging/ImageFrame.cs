@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
+using MonoGame.Utilities.PackedVector;
 using MonoGame.Utilities.Memory;
 
 namespace MonoGame.Imaging

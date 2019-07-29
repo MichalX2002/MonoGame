@@ -6,7 +6,7 @@ using System;
 using System.Runtime.InteropServices;
 using MonoGame.OpenAL;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     internal class ALBuffer : IDisposable
     {

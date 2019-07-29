@@ -1,7 +1,7 @@
 ﻿using MonoGame.OpenAL;
 using System;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     internal static class ALHelper
     {

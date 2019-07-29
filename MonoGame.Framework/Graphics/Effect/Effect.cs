@@ -6,7 +6,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
 	public class Effect : GraphicsResource
     {

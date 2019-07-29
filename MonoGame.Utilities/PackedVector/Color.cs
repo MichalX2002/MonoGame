@@ -6,11 +6,11 @@ using System;
 using System.Text;
 using System.Runtime.Serialization;
 using System.Diagnostics;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
+using MonoGame.Utilities.PackedVector;
 using System.Runtime.CompilerServices;
 
 // use this namespace as we want Color to be easily accessible
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Packed pixel type containing four 8-bit unsigned normalized values, ranging from 0 to 255.

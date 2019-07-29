@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// A basic 3D model with per mesh parent bones.

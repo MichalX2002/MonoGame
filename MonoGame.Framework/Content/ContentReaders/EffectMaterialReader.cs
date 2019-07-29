@@ -5,10 +5,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 using MonoGame.Utilities;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
 	internal class EffectMaterialReader : ContentTypeReader<EffectMaterial>
 	{

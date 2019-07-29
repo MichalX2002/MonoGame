@@ -40,7 +40,7 @@ purpose and non-infringement.
 
 using System;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     /// <summary>Described the playback state of a <see cref="SoundEffectInstance"/>.</summary>
     public enum SoundState

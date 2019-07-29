@@ -32,7 +32,7 @@ using System;
 using System.Globalization;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     [DataContract]
     public class DisplayMode

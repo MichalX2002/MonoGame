@@ -39,7 +39,7 @@ purpose and non-infringement.
 #endregion License
 
 using System;
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
 	public class EffectMaterial : Effect
 	{

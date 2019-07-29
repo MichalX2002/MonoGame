@@ -5,7 +5,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
 
     /// <summary>

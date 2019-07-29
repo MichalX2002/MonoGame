@@ -3,10 +3,10 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
+using MonoGame.Framework.Graphics;
+using MonoGame.Utilities.PackedVector;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     /// <summary>
     /// Describes a mouse cursor.

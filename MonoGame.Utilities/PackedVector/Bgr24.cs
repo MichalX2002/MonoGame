@@ -1,12 +1,10 @@
 // Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
-using System;
-using System.Numerics;
-using System.Runtime.CompilerServices;
+using MonoGame.Framework;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Xna.Framework.Graphics.PackedVector
+namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
     /// Pixel type containing three 8-bit unsigned normalized values ranging from 0 to 255.

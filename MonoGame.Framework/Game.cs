@@ -11,13 +11,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
 #endif
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input.Touch;
+using MonoGame.Framework.Audio;
+using MonoGame.Framework.Content;
+using MonoGame.Framework.Graphics;
+using MonoGame.Framework.Input.Touch;
 
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     public partial class Game : IDisposable
     {

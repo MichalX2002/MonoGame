@@ -5,7 +5,7 @@
 using System;
 using System.Collections.ObjectModel;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     public sealed class GameComponentCollection : Collection<IGameComponent>
     {

@@ -3,9 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     class IndexBufferReader : ContentTypeReader<IndexBuffer>
     {

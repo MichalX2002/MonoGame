@@ -2,10 +2,9 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Numerics;
-using System.Runtime.CompilerServices;
+using MonoGame.Framework;
 
-namespace Microsoft.Xna.Framework.Graphics.PackedVector
+namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
     /// Packed pixel type containing two 16-bit floating-point values.

@@ -4,9 +4,9 @@
 
 using System;
 
-using Microsoft.Xna.Framework.Content;
+using MonoGame.Framework.Content;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
 	internal class Int64Reader : ContentTypeReader<long>
 	{

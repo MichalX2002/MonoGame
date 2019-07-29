@@ -1,7 +1,7 @@
-
 using System.Runtime.CompilerServices;
+using MonoGame.Framework;
 
-namespace Microsoft.Xna.Framework.Graphics.PackedVector
+namespace MonoGame.Utilities.PackedVector
 {
     public static class VectorMaths
     {

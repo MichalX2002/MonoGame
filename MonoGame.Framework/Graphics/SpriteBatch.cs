@@ -6,7 +6,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Helper class for drawing text strings and sprites in one or more optimized batches.

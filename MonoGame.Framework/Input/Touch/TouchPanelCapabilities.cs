@@ -11,7 +11,7 @@ using UIKit;
 #endif
 
 
-namespace Microsoft.Xna.Framework.Input.Touch
+namespace MonoGame.Framework.Input.Touch
 {
     /// <summary>
     /// Allows retrieval of capabilities information from touch panel device.
