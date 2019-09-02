@@ -5,7 +5,7 @@
 using System;
 using System.Collections;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 {
     class NonGenericIListSerializer : ContentTypeSerializer
     {
@@ -14,10 +14,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
         {
         }
 
-        public override bool CanDeserializeIntoExistingObject
-        {
-            get { return true; }
-        }
+        public override bool CanDeserializeIntoExistingObject => true;
 
         public override bool ObjectIsEmpty(object value)
         {

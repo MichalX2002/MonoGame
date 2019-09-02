@@ -64,13 +64,13 @@ namespace MonoGame.Framework.Graphics
             int min = Math.Min(itemCount, MaxBatchSize);
 
             int minVertices = min * 4; // 4 vertices per item
-            if (minVertices > _vertexBuffer.Length)
-                _vertexBuffer.Length = minVertices;
+            if (minVertices > _vertexBuffer.Capacity)
+                _vertexBuffer.Capacity = minVertices;
 
             int minIndices = min * 6; // 6 indices per item
-            if (minIndices > _indexBuffer.Length)
+            if (minIndices > _indexBuffer.Capacity)
             {
-                _indexBuffer.Length = minIndices;
+                _indexBuffer.Capacity = minIndices;
 
                 // 1 batch item needs 6 indices
                 ushort* indexPtr = _indexBuffer.Ptr;

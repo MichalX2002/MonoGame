@@ -6,12 +6,12 @@ using System;
 using System.Collections.ObjectModel;
 using System.Reflection;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline
+namespace MonoGame.Framework.Content.Pipeline
 {
     /// <summary>
     /// Represents a processor parameter. Processor parameters are automatically discovered by the content pipeline. Therefore, only custom processor developers should use this class directly.
     /// </summary>
-    [SerializableAttribute]
+    [Serializable]
     public sealed class ProcessorParameter
     {
         PropertyInfo propInfo;
@@ -34,13 +34,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         /// <summary>
         /// Gets a value indicating whether the parameter is an enumeration.
         /// </summary>
-        public bool IsEnum
-        {
-            get
-            {
-                return PossibleEnumValues != null;
-            }
-        }
+        public bool IsEnum => PossibleEnumValues != null;
 
         /// <summary>
         /// Available options for enumerated type parameters. For parameters of other types, this value is null.
@@ -50,24 +44,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         /// <summary>
         /// Name of the property, as defined in the C# code.
         /// </summary>
-        public string PropertyName
-        {
-            get
-            {
-                return propInfo.Name;
-            }
-        }
+        public string PropertyName => propInfo.Name;
 
         /// <summary>
         /// Type of the parameter.
         /// </summary>
-        public string PropertyType
-        {
-            get
-            {
-                return propInfo.PropertyType.Name;
-            }
-        }
+        public string PropertyType => propInfo.PropertyType.Name;
 
         /// <summary>
         /// Constructs a ProcessorParameter instance.

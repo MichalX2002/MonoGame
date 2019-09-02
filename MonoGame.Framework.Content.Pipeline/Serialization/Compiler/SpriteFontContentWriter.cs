@@ -6,10 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Content.Pipeline.Graphics;
+using MonoGame.Framework.Graphics;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     [ContentTypeWriter]
     public class SpriteFontContentWriter : ContentTypeWriter<SpriteFontContent>

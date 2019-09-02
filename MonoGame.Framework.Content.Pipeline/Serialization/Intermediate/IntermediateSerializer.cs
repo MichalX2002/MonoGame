@@ -9,18 +9,18 @@ using System.Diagnostics;
 using System.Linq;
 using System.Xml;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 {
-    // The intermediate serializer implementation is based on testing XNA behavior and the following sources:
-    //
-    // http://msdn.microsoft.com/en-us/library/Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate.aspx
-    // http://blogs.msdn.com/b/shawnhar/archive/2008/08/12/everything-you-ever-wanted-to-know-about-intermediateserializer.aspx
-    // http://blogs.msdn.com/b/shawnhar/archive/2008/08/26/customizing-intermediateserializer-part-1.aspx
-    // http://blogs.msdn.com/b/shawnhar/archive/2008/08/26/customizing-intermediateserializer-part-2.aspx
-    // http://blogs.msdn.com/b/shawnhar/archive/2008/08/27/why-intermediateserializer-control-attributes-are-not-part-of-the-content-pipeline.aspx
-    //
-
-    
+    /// <summary>
+    /// The intermediate serializer implementation is based on testing XNA behavior and the sources in Remarks.
+    /// </summary>
+    /// <remarks>
+    /// <para>http://msdn.microsoft.com/en-us/library/MonoGame.Framework.Content.Pipeline.Serialization.Intermediate.aspx</para>
+    /// <para>http://blogs.msdn.com/b/shawnhar/archive/2008/08/12/everything-you-ever-wanted-to-know-about-intermediateserializer.aspx</para>
+    /// <para>http://blogs.msdn.com/b/shawnhar/archive/2008/08/26/customizing-intermediateserializer-part-1.aspx</para>
+    /// <para>http://blogs.msdn.com/b/shawnhar/archive/2008/08/26/customizing-intermediateserializer-part-2.aspx</para>
+    /// <para>http://blogs.msdn.com/b/shawnhar/archive/2008/08/27/why-intermediateserializer-control-attributes-are-not-part-of-the-content-pipeline.aspx</para>
+    /// </remarks>
     public class IntermediateSerializer
     {
         /// <summary>
@@ -78,8 +78,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
         {
             var serializer = new IntermediateSerializer();
             var reader = new IntermediateReader(serializer, input, referenceRelocationPath);
-            var asset = default(T);
-
+            T asset;
             try
             {
                 if (!reader.MoveToElement("XnaContent"))
@@ -108,7 +107,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             {
                 throw reader.NewInvalidContentException(xmlException, "An error occured parsing.");
             }
-
             return asset;
         }
 
@@ -254,7 +252,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             {
                 var arrayType = typeName.Substring(0, typeName.Length - 2);
                 foundType = FindType(arrayType);
-                return foundType == null ? null : foundType.MakeArrayType();
+                return foundType?.MakeArrayType();
             }
 
             // Expand any namespaces in the asset type
@@ -274,7 +272,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
                 var genericArguments = genericArgumentsArray.Select(FindType).ToArray();
 
                 foundType = FindType(typeNameWithoutArguments + "`" + genericArguments.Length);
-                return (foundType == null) ? null : foundType.MakeGenericType(genericArguments);
+                return foundType?.MakeGenericType(genericArguments);
             }
 
             foundType = (from assembly in AppDomain.CurrentDomain.GetAssemblies()

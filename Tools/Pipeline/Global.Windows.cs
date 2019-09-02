@@ -25,7 +25,7 @@ namespace MonoGame.Tools.Pipeline
         {
             var ret = new BitmapImage();
 
-            using (var stream = RecyclableMemoryManager.Instance.GetMemoryStream())
+            using (var stream = RecyclableMemoryManager.Default.GetMemoryStream())
             {
                 bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                 stream.Position = 0;

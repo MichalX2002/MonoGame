@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Provides properties for managing a bone weight.
@@ -21,14 +21,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// </summary>
         public float Weight
         {
-            get
-            {
-                return weight;
-            }
-            internal set
-            {
-                weight = value;
-            }
+            get => weight;
+            internal set => weight = value;
         }
 
         /// <summary>

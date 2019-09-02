@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     public sealed class ModelMeshPartContentCollection : ReadOnlyCollection<ModelMeshPartContent>
     {

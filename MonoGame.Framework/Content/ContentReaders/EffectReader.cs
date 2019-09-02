@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System.IO;
 using MonoGame.Framework.Graphics;
 
 namespace MonoGame.Framework.Content
@@ -16,12 +17,21 @@ namespace MonoGame.Framework.Content
         {
             int dataSize = input.ReadInt32();
             byte[] data = input.ContentManager.GetScratchBuffer(dataSize);
-            input.Read(data, 0, dataSize);
-            var effect = new Effect(input.GraphicsDevice, data, 0, dataSize)
+            try
             {
-                Name = input.AssetName
-            };
-            return effect;
+                if (input.Read(data, 0, dataSize) != dataSize)
+                    throw new InvalidDataException();
+
+                var effect = new Effect(input.GraphicsDevice, data, 0, dataSize)
+                {
+                    Name = input.AssetName
+                };
+                return effect;
+            }
+            finally
+            {
+                input.ContentManager.ReturnScratchBuffer(data);
+            }
         }
     }
 }

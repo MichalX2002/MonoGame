@@ -7,7 +7,7 @@ using Eto.Forms;
 
 namespace MonoGame.Tools.Pipeline
 {
-    [CellAttribute(typeof(char))]
+    [Cell(typeof(char))]
     public class CellChar : CellBase
     {
         public override void OnCreate()

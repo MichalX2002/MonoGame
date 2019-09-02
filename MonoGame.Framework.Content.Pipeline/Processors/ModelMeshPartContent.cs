@@ -2,10 +2,10 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Content.Pipeline.Graphics;
+using MonoGame.Framework.Graphics;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     public sealed class ModelMeshPartContent
     {
@@ -33,18 +33,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 
         public int PrimitiveCount { get; }
 
-        public int StartIndex
-        {
-            get { return _startIndex; }
-        }
+        public int StartIndex => _startIndex;
 
         public object Tag { get; set; }
 
         public VertexBufferContent VertexBuffer { get; }
 
-        public int VertexOffset
-        {
-            get { return _vertexOffset; }
-        }
+        public int VertexOffset => _vertexOffset;
     }
 }

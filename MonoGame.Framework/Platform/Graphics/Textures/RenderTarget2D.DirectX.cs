@@ -6,7 +6,7 @@ using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using Resource = SharpDX.Direct3D11.Resource;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     public partial class RenderTarget2D
     {

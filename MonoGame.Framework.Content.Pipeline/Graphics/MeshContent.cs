@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Provides properties and methods that define various aspects of a mesh.
@@ -19,13 +19,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Gets the list of vertex position values.
         /// </summary>
-        public PositionCollection Positions
-        {
-            get
-            {
-                return positions;
-            }
-        }
+        public PositionCollection Positions => positions;
 
         /// <summary>
         /// Initializes a new instance of MeshContent.
@@ -39,7 +33,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Applies a transform directly to position and normal channels. Node transforms are unaffected.
         /// </summary>
-        internal void TransformContents(ref Matrix xform)
+        internal void TransformContents(in Matrix xform)
         {
             // Transform positions
             for (int i = 0; i < positions.Count; i++)
@@ -48,7 +42,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             // Transform all vectors too:
             // Normals are "tangent covectors", which need to be transformed using the
             // transpose of the inverse matrix!
-            Matrix inverseTranspose = Matrix.Transpose(Matrix.Invert(xform));
+            var inverseTranspose = Matrix.Transpose(Matrix.Invert(xform));
             foreach (var geom in Geometry)
             {
                 foreach (var channel in geom.Vertices.Channels)
@@ -63,8 +57,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                         for (int i = 0; i < vector3Channel.Count; i++)
                         {
                             Vector3 normal = vector3Channel[i];
-                            Vector3.TransformNormal(ref normal, ref inverseTranspose, out normal);
-                            Vector3.Normalize(ref normal, out normal);
+                            normal = Vector3.TransformNormal(normal, inverseTranspose);
+                            normal = Vector3.Normalize(normal);
                             vector3Channel[i] = normal;
                         }
                     }
@@ -72,7 +66,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             }
 
             // Swap winding order when faces are mirrored.
-            if (MeshHelper.IsLeftHanded(ref xform))
+            if (MeshHelper.IsLeftHanded(xform))
                 MeshHelper.SwapWindingOrder(this);
         }
     }

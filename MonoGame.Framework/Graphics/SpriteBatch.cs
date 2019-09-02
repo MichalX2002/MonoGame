@@ -172,7 +172,8 @@ namespace MonoGame.Framework.Graphics
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
             if (!_beginCalled)
-                throw new InvalidOperationException("Draw was called, but Begin has not yet been called. Begin must be called successfully before you can call Draw.");
+                throw new InvalidOperationException(
+                    "Draw was called, but Begin has not yet been called. Begin must be called successfully before you can call Draw.");
         }
 
         void CheckArgs(SpriteFont spriteFont, string text)
@@ -182,7 +183,8 @@ namespace MonoGame.Framework.Graphics
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
             if (!_beginCalled)
-                throw new InvalidOperationException("DrawString was called, but Begin has not yet been called. Begin must be called successfully before you can call DrawString.");
+                throw new InvalidOperationException(
+                    "DrawString was called, but Begin has not yet been called. Begin must be called successfully before you can call DrawString.");
         }
 
         void CheckArgs(SpriteFont spriteFont, StringBuilder text)
@@ -192,44 +194,14 @@ namespace MonoGame.Framework.Graphics
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
             if (!_beginCalled)
-                throw new InvalidOperationException("DrawString was called, but Begin has not yet been called. Begin must be called successfully before you can call DrawString.");
-        }
-
-        public void DrawRef(
-            Texture2D texture,
-            ref VertexPositionColorTexture vertexTL,
-            ref VertexPositionColorTexture vertexTR,
-            ref VertexPositionColorTexture vertexBL,
-            ref VertexPositionColorTexture vertexBR,
-            float depth)
-        {
-            var item = GetBatchItem(texture);
-            item.SortKey = GetSortKey(texture, depth);
-
-            item.VertexTL = vertexTL;
-            item.VertexTR = vertexTR;
-            item.VertexBL = vertexBL;
-            item.VertexBR = vertexBR;
-
-            FlushIfNeeded();
-        }
-
-        public void DrawRef(
-            Texture2D texture,
-            ref VertexPositionColorTexture vertexTL,
-            ref VertexPositionColorTexture vertexTR,
-            ref VertexPositionColorTexture vertexBL,
-            ref VertexPositionColorTexture vertexBR)
-        {
-            DrawRef(texture, ref vertexTL, ref vertexTR, ref vertexBL, ref vertexBR, vertexTL.Position.Z);
+                throw new InvalidOperationException(
+                    "DrawString was called, but Begin has not yet been called. Begin must be called successfully before you can call DrawString.");
         }
 
         public void Draw(
             Texture2D texture,
-            VertexPositionColorTexture vertexTL,
-            VertexPositionColorTexture vertexTR,
-            VertexPositionColorTexture vertexBL,
-            VertexPositionColorTexture vertexBR,
+            in VertexPositionColorTexture vertexTL, in VertexPositionColorTexture vertexTR,
+            in VertexPositionColorTexture vertexBL, in VertexPositionColorTexture vertexBR,
             float depth)
         {
             var item = GetBatchItem(texture);
@@ -245,10 +217,8 @@ namespace MonoGame.Framework.Graphics
 
         public void Draw(
             Texture2D texture,
-            VertexPositionColorTexture vertexTL,
-            VertexPositionColorTexture vertexTR,
-            VertexPositionColorTexture vertexBL,
-            VertexPositionColorTexture vertexBR)
+            in VertexPositionColorTexture vertexTL, in VertexPositionColorTexture vertexTR,
+            in VertexPositionColorTexture vertexBL, in VertexPositionColorTexture vertexBR)
         {
             Draw(texture, vertexTL, vertexTR, vertexBL, vertexBR, vertexTL.Position.Z);
         }
@@ -266,8 +236,13 @@ namespace MonoGame.Framework.Graphics
         /// <param name="color">An optional color mask. Uses <see cref="Color.White"/> if null.</param>
         /// <param name="effects">The optional drawing modificators. <see cref="SpriteEffects.None"/> by default.</param>
         /// <param name="layerDepth">An optional depth of the layer of this sprite. 0 by default.</param>
-        /// <exception cref="InvalidOperationException">Throwns if both <paramref name="position"/> and <paramref name="destinationRectangle"/> been used.</exception>
-        /// <remarks>This overload uses optional parameters. This overload requires only one of <paramref name="position"/> and <paramref name="destinationRectangle"/> been used.</remarks>
+        /// <exception cref="ArgumentException">
+        /// Throwns if both <paramref name="position"/> and <paramref name="destinationRectangle"/> been used.
+        /// </exception>
+        /// <remarks>
+        /// This overload uses optional parameters. 
+        /// This overload requires only one of <paramref name="position"/> and <paramref name="destinationRectangle"/> been used.
+        /// </remarks>
         [Obsolete("In future versions this method can be removed.")]
         public void Draw(
             Texture2D texture,
@@ -295,17 +270,17 @@ namespace MonoGame.Framework.Graphics
             // If both drawRectangle and position are null, or if both have been assigned a value, raise an error
             if ((destinationRectangle.HasValue) == (position.HasValue))
             {
-                throw new InvalidOperationException("Expected drawRectangle or position, but received neither or both.");
+                throw new ArgumentException("Expected drawRectangle or position, but received neither or both.");
             }
             else if (position != null)
             {
                 // Call Draw() using position
-                Draw(texture, (Vector2)position, sourceRectangle, (Color)color, rotation, (Vector2)origin, (Vector2)scale, effects, layerDepth);
+                Draw(texture, position.Value, sourceRectangle, color.Value, rotation, origin.Value, scale.Value, effects, layerDepth);
             }
             else
             {
                 // Call Draw() using drawRectangle
-                Draw(texture, (RectangleF)destinationRectangle, sourceRectangle, (Color)color, rotation, (Vector2)origin, effects, layerDepth);
+                Draw(texture, destinationRectangle.Value, sourceRectangle, color.Value, rotation, origin.Value, effects, layerDepth);
             }
         }
 
@@ -322,24 +297,17 @@ namespace MonoGame.Framework.Graphics
         /// <param name="effects">Modificators for drawing. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this sprite.</param>
         public void Draw(
-            Texture2D texture,
-            Vector2 position,
-            RectangleF? sourceRectangle,
-            Color color,
-            float rotation,
-            Vector2 origin,
-            Vector2 scale,
-            SpriteEffects effects,
-            float layerDepth)
+            Texture2D texture, Vector2 position, in RectangleF? sourceRectangle, Color color,
+            float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
         {
             CheckArgs(texture);
 
-            Vector4 texCoord;
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, layerDepth);
 
             origin *= scale;
 
+            Vector4 texCoord;
             float w, h;
             if (sourceRectangle.HasValue)
             {
@@ -362,27 +330,16 @@ namespace MonoGame.Framework.Graphics
 
             if (rotation == 0f)
             {
-                item.Set(position.X - origin.X,
-                        position.Y - origin.Y,
-                        w,
-                        h,
-                        color,
-                        texCoord,
-                        layerDepth);
+                item.Set(
+                    position.X - origin.X, position.Y - origin.Y, w, h,
+                    color, texCoord, layerDepth);
             }
             else
             {
-                item.Set(position.X,
-                        position.Y,
-                        -origin.X,
-                        -origin.Y,
-                        w,
-                        h,
-                        (float)Math.Sin(rotation),
-                        (float)Math.Cos(rotation),
-                        color,
-                        texCoord,
-                        layerDepth);
+                item.Set(
+                    position.X, position.Y, -origin.X, -origin.Y, w, h,
+                    (float)Math.Sin(rotation), (float)Math.Cos(rotation),
+                    color, texCoord, layerDepth);
             }
 
             FlushIfNeeded();
@@ -403,7 +360,7 @@ namespace MonoGame.Framework.Graphics
         public void Draw(
             Texture2D texture,
             Vector2 position,
-            RectangleF? sourceRectangle,
+            in RectangleF? sourceRectangle,
             Color color,
             float rotation,
             Vector2 origin,
@@ -427,8 +384,8 @@ namespace MonoGame.Framework.Graphics
         /// <param name="layerDepth">A depth of the layer of this sprite.</param>
         public void Draw(
             Texture2D texture,
-            RectangleF destinationRectangle,
-            RectangleF? sourceRectangle,
+            in RectangleF destinationRectangle,
+            in RectangleF? sourceRectangle,
             Color color,
             float rotation,
             Vector2 origin,
@@ -440,62 +397,53 @@ namespace MonoGame.Framework.Graphics
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, layerDepth);
 
+            float originX, originY;
             Vector4 texCoord;
             if (sourceRectangle.HasValue)
             {
                 RectangleF srcRect = sourceRectangle.Value;
-                texCoord.X = srcRect.X * texture.Texel.X;
-                texCoord.Y = srcRect.Y * texture.Texel.Y;
-                texCoord.Z = (srcRect.X + srcRect.Width) * texture.Texel.X;
-                texCoord.W = (srcRect.Y + srcRect.Height) * texture.Texel.Y;
+                texCoord = new Vector4(
+                    srcRect.X * texture.Texel.X,
+                    srcRect.Y * texture.Texel.Y,
+                    (srcRect.X + srcRect.Width) * texture.Texel.X,
+                    (srcRect.Y + srcRect.Height) * texture.Texel.Y);
 
-                if (srcRect.Width != 0)
-                    origin.X = origin.X * destinationRectangle.Width / srcRect.Width;
-                else
-                    origin.X = origin.X * destinationRectangle.Width * texture.Texel.X;
-                if (srcRect.Height != 0)
-                    origin.Y = origin.Y * destinationRectangle.Height / srcRect.Height;
-                else
-                    origin.Y = origin.Y * destinationRectangle.Height * texture.Texel.Y;
+                originX = srcRect.Width != 0 
+                    ? origin.X * destinationRectangle.Width / srcRect.Width
+                    : origin.X * destinationRectangle.Width * texture.Texel.X;
+
+                originY = srcRect.Height != 0
+                    ? origin.Y * destinationRectangle.Height / srcRect.Height
+                    : origin.Y * destinationRectangle.Height * texture.Texel.Y;
             }
             else
             {
                 texCoord = new Vector4(0, 0, 1, 1);
 
-                origin.X = origin.X * destinationRectangle.Width * texture.Texel.X;
-                origin.Y = origin.Y * destinationRectangle.Height * texture.Texel.Y;
+                originX = origin.X * destinationRectangle.Width * texture.Texel.X;
+                originY = origin.Y * destinationRectangle.Height * texture.Texel.Y;
             }
 
             FlipTexCoords(ref texCoord, effects);
 
             if (rotation == 0f)
             {
-                item.Set(destinationRectangle.X - origin.X,
-                        destinationRectangle.Y - origin.Y,
-                        destinationRectangle.Width,
-                        destinationRectangle.Height,
-                        color,
-                        texCoord,
-                        layerDepth);
+                item.Set(
+                    destinationRectangle.X - originX, destinationRectangle.Y - originY,
+                    destinationRectangle.Width, destinationRectangle.Height,
+                    color, texCoord, layerDepth);
             }
             else
             {
-                item.Set(destinationRectangle.X,
-                        destinationRectangle.Y,
-                        -origin.X,
-                        -origin.Y,
-                        destinationRectangle.Width,
-                        destinationRectangle.Height,
-                        (float)Math.Sin(rotation),
-                        (float)Math.Cos(rotation),
-                        color,
-                        texCoord,
-                        layerDepth);
+                item.Set(
+                    destinationRectangle.X, destinationRectangle.Y, -originX, -originY,
+                    destinationRectangle.Width, destinationRectangle.Height,
+                    (float)Math.Sin(rotation), (float)Math.Cos(rotation),
+                    color, texCoord, layerDepth);
             }
 
             FlushIfNeeded();
         }
-
 
         /// <summary>
         /// Call the end of a draw operation for <see cref="SpriteSortMode.Immediate"/>.
@@ -513,7 +461,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="position">The drawing location on screen.</param>
         /// <param name="sourceRectangle">An optional region on the texture which will be rendered. If null - draws full texture.</param>
         /// <param name="color">A color mask.</param>
-        public void Draw(Texture2D texture, Vector2 position, RectangleF? sourceRectangle, Color color)
+        public void Draw(Texture2D texture, Vector2 position, in RectangleF? sourceRectangle, Color color)
         {
             CheckArgs(texture);
 
@@ -521,29 +469,29 @@ namespace MonoGame.Framework.Graphics
             item.SortKey = GetSortKey(texture, 0);
 
             Vector4 texCoord;
-            Vector2 size;
+            float w;
+            float h;
             if (sourceRectangle.HasValue)
             {
                 RectangleF srcRect = sourceRectangle.Value;
-                size = new Vector2(srcRect.Width, srcRect.Height);
-                texCoord.X = srcRect.X * texture.Texel.X;
-                texCoord.Y = srcRect.Y * texture.Texel.Y;
-                texCoord.Z = (srcRect.X + srcRect.Width) * texture.Texel.X;
-                texCoord.W = (srcRect.Y + srcRect.Height) * texture.Texel.Y;
+                w = srcRect.Width;
+                h = srcRect.Height;
+                texCoord = new Vector4(
+                    srcRect.X * texture.Texel.X,
+                    srcRect.Y * texture.Texel.Y,
+                    (srcRect.X + srcRect.Width) * texture.Texel.X,
+                    (srcRect.Y + srcRect.Height) * texture.Texel.Y);
             }
             else
             {
-                size = new Vector2(texture.Width, texture.Height);
+                w = texture.Width;
+                h = texture.Height;
                 texCoord = new Vector4(0, 0, 1, 1);
             }
 
-            item.Set(position.X,
-                     position.Y,
-                     size.X,
-                     size.Y,
-                     color,
-                     texCoord,
-                     0);
+            item.Set(
+                position.X, position.Y, w, h,
+                color, texCoord, 0);
 
             FlushIfNeeded();
         }
@@ -555,7 +503,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="destinationRectangle">The drawing bounds on screen.</param>
         /// <param name="sourceRectangle">An optional region on the texture which will be rendered. If null - draws full texture.</param>
         /// <param name="color">A color mask.</param>
-        public void Draw(Texture2D texture, RectangleF destinationRectangle, RectangleF? sourceRectangle, Color color)
+        public void Draw(Texture2D texture, in RectangleF destinationRectangle, in RectangleF? sourceRectangle, Color color)
         {
             CheckArgs(texture);
 
@@ -566,23 +514,21 @@ namespace MonoGame.Framework.Graphics
             if (sourceRectangle.HasValue)
             {
                 RectangleF srcRect = sourceRectangle.Value;
-                texCoord.X = srcRect.X * texture.Texel.X;
-                texCoord.Y = srcRect.Y * texture.Texel.Y;
-                texCoord.Z = (srcRect.X + srcRect.Width) * texture.Texel.X;
-                texCoord.W = (srcRect.Y + srcRect.Height) * texture.Texel.Y;
+                texCoord = new Vector4(
+                    srcRect.X * texture.Texel.X,
+                    srcRect.Y * texture.Texel.Y,
+                    (srcRect.X + srcRect.Width) * texture.Texel.X,
+                    (srcRect.Y + srcRect.Height) * texture.Texel.Y);
             }
             else
             {
                 texCoord = new Vector4(0, 0, 1, 1);
             }
 
-            item.Set(destinationRectangle.X,
-                     destinationRectangle.Y,
-                     destinationRectangle.Width,
-                     destinationRectangle.Height,
-                     color,
-                     texCoord,
-                     0);
+            item.Set(
+                destinationRectangle.X, destinationRectangle.Y,
+                destinationRectangle.Width, destinationRectangle.Height,
+                color, texCoord, 0);
 
             FlushIfNeeded();
         }
@@ -600,13 +546,10 @@ namespace MonoGame.Framework.Graphics
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, 0);
 
-            item.Set(position.X,
-                     position.Y,
-                     texture.Width,
-                     texture.Height,
-                     color,
-                     new Vector4(0, 0, 1, 1),
-                     0);
+            item.Set(
+                position.X, position.Y,
+                texture.Width, texture.Height,
+                color, new Vector4(0, 0, 1, 1), 0);
 
             FlushIfNeeded();
         }
@@ -617,20 +560,17 @@ namespace MonoGame.Framework.Graphics
         /// <param name="texture">A texture.</param>
         /// <param name="destinationRectangle">The drawing bounds on screen.</param>
         /// <param name="color">A color mask.</param>
-        public void Draw(Texture2D texture, RectangleF destinationRectangle, Color color)
+        public void Draw(Texture2D texture, in RectangleF destinationRectangle, Color color)
         {
             CheckArgs(texture);
 
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, 0);
 
-            item.Set(destinationRectangle.X,
-                     destinationRectangle.Y,
-                     destinationRectangle.Width,
-                     destinationRectangle.Height,
-                     color,
-                     new Vector4(0, 0, 1, 1),
-                     0);
+            item.Set(
+                destinationRectangle.X, destinationRectangle.Y,
+                destinationRectangle.Width, destinationRectangle.Height,
+                color, new Vector4(0, 0, 1, 1), 0);
 
             FlushIfNeeded();
         }
@@ -691,19 +631,15 @@ namespace MonoGame.Framework.Graphics
                     var item = GetBatchItem(spriteFont.Texture);
                     item.SortKey = sortKey;
 
-                    var texCoord = new Vector4();
-                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.Texel.X;
-                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.Texel.Y;
-                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.Texel.X;
-                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y;
+                    var texCoord = new Vector4(
+                        pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.Texel.X,
+                        pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
+                        (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
+                        (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
 
-                    item.Set(p.X,
-                             p.Y,
-                             pCurrentGlyph->BoundsInTexture.Width,
-                             pCurrentGlyph->BoundsInTexture.Height,
-                             color,
-                             texCoord,
-                             0);
+                    item.Set(
+                        p.X, p.Y, pCurrentGlyph->BoundsInTexture.Width, pCurrentGlyph->BoundsInTexture.Height,
+                        color, texCoord, 0);
 
                     offset.X += pCurrentGlyph->Width + pCurrentGlyph->RightSideBearing;
                 }
@@ -729,8 +665,7 @@ namespace MonoGame.Framework.Graphics
             SpriteFont spriteFont, string text, Vector2 position, Color color,
             float rotation, Vector2 origin, float scale, SpriteEffects effects, float layerDepth)
         {
-            var scaleVec = new Vector2(scale, scale);
-            DrawString(spriteFont, text, position, color, rotation, origin, scaleVec, effects, layerDepth);
+            DrawString(spriteFont, text, position, color, rotation, origin, new Vector2(scale), effects, layerDepth);
         }
 
         /// <summary>
@@ -758,15 +693,12 @@ namespace MonoGame.Framework.Graphics
 
             if (flippedVert || flippedHorz)
             {
-                var source = new SpriteFont.CharacterSource(text);
-                spriteFont.MeasureString(ref source, out Vector2 size);
-
+                Vector2 size = spriteFont.MeasureString(text);
                 if (flippedHorz)
                 {
                     origin.X *= -1;
                     flipAdjustment.X = -size.X;
                 }
-
                 if (flippedVert)
                 {
                     origin.Y *= -1;
@@ -800,9 +732,9 @@ namespace MonoGame.Framework.Graphics
 
             fixed (SpriteFont.Glyph* pGlyphs = spriteFont.Glyphs)
             {
-                for (var i = 0; i < text.Length; ++i)
+                for (int i = 0; i < text.Length; ++i)
                 {
-                    var c = text[i];
+                    char c = text[i];
 
                     if (c == '\r')
                         continue;
@@ -831,7 +763,7 @@ namespace MonoGame.Framework.Graphics
                         offset.X += spriteFont.Spacing + pCurrentGlyph->LeftSideBearing;
                     }
 
-                    var p = offset;
+                    Vector2 p = offset;
 
                     if (flippedHorz)
                         p.X += pCurrentGlyph->BoundsInTexture.Width;
@@ -841,42 +773,39 @@ namespace MonoGame.Framework.Graphics
                         p.Y += pCurrentGlyph->BoundsInTexture.Height - spriteFont.LineSpacing;
                     p.Y += pCurrentGlyph->Cropping.Y;
 
-                    Vector2.Transform(ref p, ref transformation, out p);
+                    p = Vector2.Transform(p, transformation);
 
                     var item = GetBatchItem(spriteFont.Texture);
                     item.SortKey = sortKey;
 
-                    var texCoord = new Vector4();
-                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.Texel.X;
-                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.Texel.Y;
-                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.Texel.X;
-                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y;
+                    var texCoord = new Vector4(
+                        pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.Texel.X,
+                        pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
+                        (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
+                        (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
 
                     FlipTexCoords(ref texCoord, effects);
 
                     if (rotation == 0f)
                     {
-                        item.Set(p.X,
-                                p.Y,
-                                pCurrentGlyph->BoundsInTexture.Width * scale.X,
-                                pCurrentGlyph->BoundsInTexture.Height * scale.Y,
-                                color,
-                                texCoord,
-                                layerDepth);
+                        item.Set(
+                            p.X, p.Y,
+                            pCurrentGlyph->BoundsInTexture.Width * scale.X,
+                            pCurrentGlyph->BoundsInTexture.Height * scale.Y,
+                            color,
+                            texCoord,
+                            layerDepth);
                     }
                     else
                     {
-                        item.Set(p.X,
-                                p.Y,
-                                0,
-                                0,
-                                pCurrentGlyph->BoundsInTexture.Width * scale.X,
-                                pCurrentGlyph->BoundsInTexture.Height * scale.Y,
-                                sin,
-                                cos,
-                                color,
-                                texCoord,
-                                layerDepth);
+                        item.Set(
+                            p.X, p.Y, 0, 0,
+                            pCurrentGlyph->BoundsInTexture.Width * scale.X,
+                            pCurrentGlyph->BoundsInTexture.Height * scale.Y,
+                            sin, cos,
+                            color,
+                            texCoord,
+                            layerDepth);
                     }
 
                     offset.X += pCurrentGlyph->Width + pCurrentGlyph->RightSideBearing;
@@ -944,19 +873,15 @@ namespace MonoGame.Framework.Graphics
                     var item = GetBatchItem(spriteFont.Texture);
                     item.SortKey = sortKey;
 
-                    var texCoord = new Vector4();
-                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.Texel.X;
-                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.Texel.Y;
-                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.Texel.X;
-                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y;
+                    var texCoord = new Vector4(
+                        pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.Texel.X,
+                        pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
+                        (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
+                        (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
 
-                    item.Set(p.X,
-                             p.Y,
-                             pCurrentGlyph->BoundsInTexture.Width,
-                             pCurrentGlyph->BoundsInTexture.Height,
-                             color,
-                             texCoord,
-                             0);
+                    item.Set(
+                        p.X, p.Y, pCurrentGlyph->BoundsInTexture.Width, pCurrentGlyph->BoundsInTexture.Height, 
+                        color, texCoord, 0);
 
                     offset.X += pCurrentGlyph->Width + pCurrentGlyph->RightSideBearing;
                 }
@@ -978,8 +903,8 @@ namespace MonoGame.Framework.Graphics
         /// <param name="effects">Modificators for drawing. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this string.</param>
         public void DrawString(
-            SpriteFont spriteFont, StringBuilder text, Vector2 position, Color color,
-            float rotation, Vector2 origin, float scale, SpriteEffects effects, float layerDepth)
+            SpriteFont spriteFont, StringBuilder text, in Vector2 position, in Color color,
+            float rotation, in Vector2 origin, float scale, SpriteEffects effects, float layerDepth)
         {
             var scaleVec = new Vector2(scale, scale);
             DrawString(spriteFont, text, position, color, rotation, origin, scaleVec, effects, layerDepth);
@@ -1010,15 +935,12 @@ namespace MonoGame.Framework.Graphics
 
             if (flippedVert || flippedHorz)
             {
-                var source = new SpriteFont.CharacterSource(text);
-                spriteFont.MeasureString(ref source, out Vector2 size);
-
+                Vector2 size = spriteFont.MeasureString(text);
                 if (flippedHorz)
                 {
                     origin.X *= -1;
                     flipAdjustment.X = -size.X;
                 }
-
                 if (flippedVert)
                 {
                     origin.Y *= -1;
@@ -1050,7 +972,7 @@ namespace MonoGame.Framework.Graphics
             var offset = Vector2.Zero;
             var firstGlyphOfLine = true;
 
-            fixed (SpriteFont.Glyph* pGlyphs = spriteFont.Glyphs)
+            fixed (SpriteFont.Glyph* glyphPtr = spriteFont.Glyphs)
             {
                 for (var i = 0; i < text.Length; ++i)
                 {
@@ -1068,70 +990,59 @@ namespace MonoGame.Framework.Graphics
                     }
 
                     var currentGlyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
-                    var pCurrentGlyph = pGlyphs + currentGlyphIndex;
+                    var currGlyphPtr = glyphPtr + currentGlyphIndex;
 
                     // The first character on a line might have a negative left side bearing.
                     // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
                     //  so that text does not hang off the left side of its rectangle.
                     if (firstGlyphOfLine)
                     {
-                        offset.X = Math.Max(pCurrentGlyph->LeftSideBearing, 0);
+                        offset.X = Math.Max(currGlyphPtr->LeftSideBearing, 0);
                         firstGlyphOfLine = false;
                     }
                     else
                     {
-                        offset.X += spriteFont.Spacing + pCurrentGlyph->LeftSideBearing;
+                        offset.X += spriteFont.Spacing + currGlyphPtr->LeftSideBearing;
                     }
 
                     var p = offset;
 
                     if (flippedHorz)
-                        p.X += pCurrentGlyph->BoundsInTexture.Width;
-                    p.X += pCurrentGlyph->Cropping.X;
+                        p.X += currGlyphPtr->BoundsInTexture.Width;
+                    p.X += currGlyphPtr->Cropping.X;
 
                     if (flippedVert)
-                        p.Y += pCurrentGlyph->BoundsInTexture.Height - spriteFont.LineSpacing;
-                    p.Y += pCurrentGlyph->Cropping.Y;
+                        p.Y += currGlyphPtr->BoundsInTexture.Height - spriteFont.LineSpacing;
+                    p.Y += currGlyphPtr->Cropping.Y;
 
-                    Vector2.Transform(ref p, ref transformation, out p);
+                    p = Vector2.Transform(p, transformation);
 
                     var item = GetBatchItem(spriteFont.Texture);
                     item.SortKey = sortKey;
 
-                    var texCoord = new Vector4();
-                    texCoord.X = pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.Texel.X;
-                    texCoord.Y = pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.Texel.Y;
-                    texCoord.Z = (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.Texel.X;
-                    texCoord.W = (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y;
+                    var texCoord = new Vector4(
+                        currGlyphPtr->BoundsInTexture.X * spriteFont.Texture.Texel.X,
+                        currGlyphPtr->BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
+                        (currGlyphPtr->BoundsInTexture.X + currGlyphPtr->BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
+                        (currGlyphPtr->BoundsInTexture.Y + currGlyphPtr->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
 
                     FlipTexCoords(ref texCoord, effects);
 
                     if (rotation == 0f)
                     {
-                        item.Set(p.X,
-                                p.Y,
-                                pCurrentGlyph->BoundsInTexture.Width * scale.X,
-                                pCurrentGlyph->BoundsInTexture.Height * scale.Y,
-                                color,
-                                texCoord,
-                                layerDepth);
+                        item.Set(
+                            p.X, p.Y, currGlyphPtr->BoundsInTexture.Width * scale.X, currGlyphPtr->BoundsInTexture.Height * scale.Y,
+                            color, texCoord, layerDepth);
                     }
                     else
                     {
-                        item.Set(p.X,
-                                p.Y,
-                                0,
-                                0,
-                                pCurrentGlyph->BoundsInTexture.Width * scale.X,
-                                pCurrentGlyph->BoundsInTexture.Height * scale.Y,
-                                sin,
-                                cos,
-                                color,
-                                texCoord,
-                                layerDepth);
+                        item.Set(
+                            p.X, p.Y, 0, 0,
+                            currGlyphPtr->BoundsInTexture.Width * scale.X, currGlyphPtr->BoundsInTexture.Height * scale.Y,
+                            sin, cos, color, texCoord, layerDepth);
                     }
 
-                    offset.X += pCurrentGlyph->Width + pCurrentGlyph->RightSideBearing;
+                    offset.X += currGlyphPtr->Width + currGlyphPtr->RightSideBearing;
                 }
             }
 

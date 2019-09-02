@@ -5,7 +5,7 @@
 using MonoGame.Utilities.Memory;
 using System.IO;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
+namespace MonoGame.Framework.Content.Pipeline.Audio
 {
     /// <summary>
     /// Encapsulates the native audio format (WAVEFORMATEX) information of the audio content.
@@ -74,7 +74,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
 
         private byte[] ConstructNativeWaveFormat()
         {
-            using (var memory = RecyclableMemoryManager.Instance.GetMemoryStream())
+            using (var memory = RecyclableMemoryManager.Default.GetMemoryStream())
             using (var writer = new BinaryWriter(memory))
             {
                 writer.Write((short)Format);

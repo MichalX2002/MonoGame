@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     public abstract partial class Texture
     {
@@ -31,7 +31,6 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             if (_texture == null)
                 _texture = CreateTexture();
-
             return _texture;
         }
 
@@ -39,7 +38,6 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             if (_resourceView == null)
                 _resourceView = CreateShaderResourceView();
-
             return _resourceView;
         }
 

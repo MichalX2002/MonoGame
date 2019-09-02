@@ -16,20 +16,21 @@ namespace MonoGame.Framework.Graphics
 
 		public static readonly VertexDeclaration VertexDeclaration;
 
+        VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
+
 		public VertexPositionColor(Vector3 position, Color color)
 		{
 			Position = position;
 			Color = color;
 		}
 
-        VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
-
         public override int GetHashCode()
 	    {
-	        unchecked
-	        {
-	            return (Position.GetHashCode() * 397) ^ Color.GetHashCode();
-	        }
+            unchecked
+            {
+                int code = Position.GetHashCode();
+                return code * 23 + Color.GetHashCode();
+            }
 	    }
 
 	    public override string ToString()

@@ -27,7 +27,6 @@ namespace MonoGame.Framework.Content
         private Dictionary<string, object> loadedAssets = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 		private List<IDisposable> disposableAssets = new List<IDisposable>();
         private bool disposed;
-        private byte[] scratchBuffer;
 
 		private static object ContentManagerLock = new object();
         private static List<WeakReference> ContentManagers = new List<WeakReference>();
@@ -170,7 +169,6 @@ namespace MonoGame.Framework.Content
                 if (disposing)
                     Unload();
 
-                scratchBuffer = null;
 				disposed = true;
 			}
         }
@@ -441,17 +439,12 @@ namespace MonoGame.Framework.Content
 
         internal byte[] GetScratchBuffer(int size)
         {
-            const int mb = 1024 * 1024;
+            return RecyclableMemoryManager.Default.GetLargeBuffer(size, nameof(ContentManager));
+        }
 
-            // round to nearest megabyte
-            size = (int)Math.Round((double)size / mb) * mb;
-
-            // to a maximum of 16 megabytes
-            size = Math.Max(size, mb * 16);
-
-            if (scratchBuffer == null || scratchBuffer.Length < size)
-                scratchBuffer = new byte[size];
-            return scratchBuffer;
+        internal void ReturnScratchBuffer(byte[] buffer)
+        {
+            RecyclableMemoryManager.Default.ReturnLargeBuffer(buffer, nameof(ContentManager));
         }
 	}
 }

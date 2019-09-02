@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     /// <summary>
     /// Provides methods and properties for managing a design-time vertex buffer that holds packed vertex data.
@@ -23,7 +23,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         /// Gets the array containing the raw bytes of the packed vertex data. Use this method to get and set the contents of the vertex buffer.
         /// </summary>
         /// <value>Raw data of the packed vertex data.</value>
-        public byte[] VertexData { get { return stream.ToArray(); } }
+        public byte[] VertexData => stream.ToArray();
 
         /// <summary>
         /// Gets and sets the associated VertexDeclarationContent object.
@@ -36,7 +36,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         /// </summary>
         public VertexBufferContent()
         {
-            stream = RecyclableMemoryManager.Instance.GetMemoryStream();
+            stream = RecyclableMemoryManager.Default.GetMemoryStream();
             VertexDeclaration = new VertexDeclarationContent();
         }
 
@@ -46,7 +46,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         /// <param name="size">The size of the vertex buffer content, in bytes.</param>
         public VertexBufferContent(int size) : base()
         {
-            stream = RecyclableMemoryManager.Instance.GetMemoryStream(null, size);
+            stream = RecyclableMemoryManager.Default.GetMemoryStream(null, size);
             VertexDeclaration = new VertexDeclarationContent();
         }
 

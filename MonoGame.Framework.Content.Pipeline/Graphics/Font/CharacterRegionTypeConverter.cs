@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Globalization;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
 	public class CharacterRegionTypeConverter : TypeConverter
 	{

@@ -2,10 +2,9 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System.IO;
 using SharpDX.Direct3D11;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     internal partial class Shader
     {
@@ -17,10 +16,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal byte[] Bytecode { get; private set; }
 
-        internal InputLayoutCache InputLayouts
-        {
-            get { return _inputLayouts; }
-        }
+        internal InputLayoutCache InputLayouts => _inputLayouts;
 
         internal VertexShader VertexShader
         {

@@ -5,7 +5,7 @@
 using System;
 using TOutput = System.UInt32;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     /// <summary>
     /// Writes the unsigned integer value to the output.

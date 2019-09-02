@@ -2,9 +2,9 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using Microsoft.Xna.Framework.Content.Pipeline.Processors;
+using MonoGame.Framework.Content.Pipeline.Processors;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     public class EffectMaterialContent : MaterialContent
     {
@@ -13,14 +13,14 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
         public ExternalReference<EffectContent> Effect
         {
-            get { return GetReferenceTypeProperty<ExternalReference<EffectContent>>(EffectKey); }
-            set { SetProperty(EffectKey, value); }
+            get => GetReferenceTypeProperty<ExternalReference<EffectContent>>(EffectKey);
+            set => SetProperty(EffectKey, value);
         }
 
         public ExternalReference<CompiledEffectContent> CompiledEffect
         {
-            get { return GetReferenceTypeProperty<ExternalReference<CompiledEffectContent>>(CompiledEffectKey); }
-            set { SetProperty(CompiledEffectKey, value); }
+            get => GetReferenceTypeProperty<ExternalReference<CompiledEffectContent>>(CompiledEffectKey);
+            set => SetProperty(CompiledEffectKey, value);
         }
     }
 }

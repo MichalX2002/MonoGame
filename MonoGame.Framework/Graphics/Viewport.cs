@@ -13,37 +13,19 @@ namespace MonoGame.Framework.Graphics
     [DataContract]
     public struct Viewport
     {
-        private int y;
-        private int height;
-        private float maxDepth;
-
         #region Properties
 
         /// <summary>
-        /// The height of the bounds in pixels.
+        /// The x coordinate of the beginning of this viewport.
         /// </summary>
         [DataMember]
-        public int Height
-        {
-            get => height;
-            set => height = value;
-        }
+        public int X { get; set; }
 
         /// <summary>
-        /// The upper limit of depth of this viewport.
+        /// The y coordinate of the beginning of this viewport.
         /// </summary>
         [DataMember]
-        public float MaxDepth
-        {
-            get => maxDepth;
-            set => maxDepth = value;
-        }
-
-        /// <summary>
-        /// The lower limit of depth of this viewport.
-        /// </summary>
-        [DataMember]
-        public float MinDepth { get; set; }
+        public int Y { get; set; }
 
         /// <summary>
         /// The width of the bounds in pixels.
@@ -52,58 +34,57 @@ namespace MonoGame.Framework.Graphics
         public int Width { get; set; }
 
         /// <summary>
-        /// The y coordinate of the beginning of this viewport.
+        /// The height of the bounds in pixels.
         /// </summary>
         [DataMember]
-        public int Y
-        {
-            get => y;
-            set => y = value;
-        }
+        public int Height { get; set; }
 
         /// <summary>
-        /// The x coordinate of the beginning of this viewport.
+        /// The lower limit of depth of this viewport.
         /// </summary>
         [DataMember]
-        public int X { get; set; }
+        public float MinDepth { get; set; }
+
+        /// <summary>
+        /// The upper limit of depth of this viewport.
+        /// </summary>
+        [DataMember]
+        public float MaxDepth { get; set; }
 
         #endregion
 
         /// <summary>
         /// Gets the aspect ratio of this <see cref="Viewport"/>, which is width / height. 
         /// </summary>
-        public float AspectRatio 
-		{
-			get
-			{
-				if ((height != 0) && (Width != 0))
-				{
-					return Width / (float)height;
-				}
-				return 0f;
-			}
-		}
-		
+        public float AspectRatio
+        {
+            get
+            {
+                if ((Height != 0) && (Width != 0))
+                    return Width / (float)Height;
+                return 0f;
+            }
+        }
+
         /// <summary>
         /// Gets or sets a boundary of this <see cref="Viewport"/>.
         /// </summary>
-		public Rectangle Bounds
+        public Rectangle Bounds
         {
-            get => new Rectangle(X, y, Width, height);
-
+            get => new Rectangle(X, Y, Width, Height);
             set
             {
                 X = value.X;
-                y = value.Y;
+                Y = value.Y;
                 Width = value.Width;
-                height = value.Height;
+                Height = value.Height;
             }
         }
 
         /// <summary>
         /// Returns the subset of the viewport that is guaranteed to be visible on a lower quality display.
         /// </summary>
-		public Rectangle TitleSafeArea => GraphicsDevice.GetTitleSafeArea(X, y, Width, height);
+		public Rectangle TitleSafeArea => GraphicsDevice.GetTitleSafeArea(X, Y, Width, Height);
 
         /// <summary>
         /// Constructs a viewport from the given values. The <see cref="MinDepth"/> will be 0.0 and <see cref="MaxDepth"/> will be 1.0.
@@ -113,14 +94,14 @@ namespace MonoGame.Framework.Graphics
         /// <param name="width">The width of the view bounds in pixels.</param>
         /// <param name="height">The height of the view bounds in pixels.</param>
         public Viewport(int x, int y, int width, int height)
-		{
-			X = x;
-		    this.y = y;
-		    Width = width;
-		    this.height = height;
-		    MinDepth = 0.0f;
-		    maxDepth = 1.0f;
-		}
+        {
+            X = x;
+            Y = y;
+            Width = width;
+            Height = height;
+            MinDepth = 0.0f;
+            MaxDepth = 1.0f;
+        }
 
         /// <summary>
         /// Constructs a viewport from the given values.
@@ -131,23 +112,23 @@ namespace MonoGame.Framework.Graphics
         /// <param name="height">The height of the view bounds in pixels.</param>
         /// <param name="minDepth">The lower limit of depth.</param>
         /// <param name="maxDepth">The upper limit of depth.</param>
-        public Viewport(int x, int y, int width, int height,float minDepth,float maxDepth)
+        public Viewport(int x, int y, int width, int height, float minDepth, float maxDepth)
         {
             X = x;
-            this.y = y;
+            Y = y;
             Width = width;
-            this.height = height;
+            Height = height;
             MinDepth = minDepth;
-            this.maxDepth = maxDepth;
+            MaxDepth = maxDepth;
         }
 
         /// <summary>
         /// Creates a new instance of <see cref="Viewport"/> struct.
         /// </summary>
         /// <param name="bounds">A <see cref="Rectangle"/> that defines the location and size of the <see cref="Viewport"/> in a render target.</param>
-		public Viewport(Rectangle bounds) : this(bounds.X, bounds.Y, bounds.Width, bounds.Height)
-		{
-		}
+		public Viewport(in Rectangle bounds) : this(bounds.X, bounds.Y, bounds.Width, bounds.Height)
+        {
+        }
 
         /// <summary>
         /// Projects a <see cref="Vector3"/> from world space into screen space.
@@ -157,21 +138,21 @@ namespace MonoGame.Framework.Graphics
         /// <param name="view">The view <see cref="Matrix"/>.</param>
         /// <param name="world">The world <see cref="Matrix"/>.</param>
         /// <returns></returns>
-        public Vector3 Project(Vector3 source, Matrix projection, Matrix view, Matrix world)
+        public Vector3 Project(in Vector3 source, in Matrix projection, in Matrix view, in Matrix world)
         {
             Matrix matrix = Matrix.Multiply(Matrix.Multiply(world, view), projection);
-		    Vector3 vector = Vector3.Transform(source, matrix);
-		    float a = (((source.X * matrix.M14) + (source.Y * matrix.M24)) + (source.Z * matrix.M34)) + matrix.M44;
-		    if (!WithinEpsilon(a, 1f))
-		    {
-		        vector.X /= a;
-		        vector.Y /= a;
-		        vector.Z /= a;
-		    }
-		    vector.X = (((vector.X + 1f) * 0.5f) * Width) + X;
-		    vector.Y = (((-vector.Y + 1f) * 0.5f) * height) + y;
-		    vector.Z = (vector.Z * (maxDepth - MinDepth)) + MinDepth;
-		    return vector;
+            Vector3 vector = Vector3.Transform(source, matrix);
+            float a = (((source.X * matrix.M14) + (source.Y * matrix.M24)) + (source.Z * matrix.M34)) + matrix.M44;
+            if (!WithinEpsilon(a, 1f))
+            {
+                vector.X /= a;
+                vector.Y /= a;
+                vector.Z /= a;
+            }
+            vector.X = (((vector.X + 1f) * 0.5f) * Width) + X;
+            vector.Y = (((-vector.Y + 1f) * 0.5f) * Height) + Y;
+            vector.Z = (vector.Z * (MaxDepth - MinDepth)) + MinDepth;
+            return vector;
         }
 
         /// <summary>
@@ -183,39 +164,39 @@ namespace MonoGame.Framework.Graphics
         /// <param name="view">The view <see cref="Matrix"/>.</param>
         /// <param name="world">The world <see cref="Matrix"/>.</param>
         /// <returns></returns>
-        public Vector3 Unproject(Vector3 source, Matrix projection, Matrix view, Matrix world)
+        public Vector3 Unproject(in Vector3 source, in Matrix projection, in Matrix view, in Matrix world)
         {
-             Matrix matrix = Matrix.Invert(Matrix.Multiply(Matrix.Multiply(world, view), projection));
-		    source.X = (((source.X - X) / Width) * 2f) - 1f;
-		    source.Y = -((((source.Y - y) / height) * 2f) - 1f);
-		    source.Z = (source.Z - MinDepth) / (maxDepth - MinDepth);
-		    Vector3 vector = Vector3.Transform(source, matrix);
-		    float a = (((source.X * matrix.M14) + (source.Y * matrix.M24)) + (source.Z * matrix.M34)) + matrix.M44;
-		    if (!WithinEpsilon(a, 1f))
-		    {
-		        vector.X /= a;
-		        vector.Y /= a;
-		        vector.Z /= a;
-		    }
-		    return vector;
+            Matrix matrix = Matrix.Invert(Matrix.Multiply(Matrix.Multiply(world, view), projection));
+            Vector3 usource = new Vector3(
+                (((source.X - X) / Width) * 2f) - 1f,
+                -((((source.Y - Y) / Height) * 2f) - 1f),
+                (source.Z - MinDepth) / (MaxDepth - MinDepth));
 
+            Vector3 vector = Vector3.Transform(usource, matrix);
+            float a = (((usource.X * matrix.M14) + (usource.Y * matrix.M24)) + (usource.Z * matrix.M34)) + matrix.M44;
+            if (!WithinEpsilon(a, 1f))
+            {
+                vector.X /= a;
+                vector.Y /= a;
+                vector.Z /= a;
+            }
+            return vector;
         }
-		
-		private static bool WithinEpsilon(float a, float b)
-		{
-		    float num = a - b;
-		    return ((-1.401298E-45f <= num) && (num <= float.Epsilon));
-		}
+
+        private static bool WithinEpsilon(float a, float b)
+        {
+            float num = a - b;
+            return ((-1.401298E-45f <= num) && (num <= float.Epsilon));
+        }
 
         /// <summary>
-        /// Returns a <see cref="String"/> representation of this <see cref="Viewport"/> in the format:
+        /// Returns a <see cref="string"/> representation of this <see cref="Viewport"/> in the format:
         /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>] Width:[<see cref="Width"/>] Height:[<see cref="Height"/>] MinDepth:[<see cref="MinDepth"/>] MaxDepth:[<see cref="MaxDepth"/>]}
         /// </summary>
-        /// <returns>A <see cref="String"/> representation of this <see cref="Viewport"/>.</returns>
-        public override string ToString ()
-	    {
-	        return "{X:" + X + " Y:" + y + " Width:" + Width + " Height:" + height + " MinDepth:" + MinDepth + " MaxDepth:" + maxDepth + "}";
-	    }
+        /// <returns>A <see cref="string"/> representation of this <see cref="Viewport"/>.</returns>
+        public override string ToString()
+        {
+            return "{X:" + X + " Y:" + Y + " Width:" + Width + " Height:" + Height + " MinDepth:" + MinDepth + " MaxDepth:" + MaxDepth + "}";
+        }
     }
 }
-

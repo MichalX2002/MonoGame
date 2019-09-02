@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 {
     [ContentTypeSerializer]
     class ColorSerializer : ElementSerializer<Color>

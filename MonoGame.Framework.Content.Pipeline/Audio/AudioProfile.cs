@@ -6,11 +6,12 @@ using System;
 using System.Linq;
 
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
+namespace MonoGame.Framework.Content.Pipeline.Audio
 {
     public abstract class AudioProfile
     {
-        private static readonly LoadedTypeCollection<AudioProfile> _profiles = new LoadedTypeCollection<AudioProfile>();
+        private static readonly LoadedTypeCollection<AudioProfile> _profiles =
+            new LoadedTypeCollection<AudioProfile>();
 
         /// <summary>
         /// Find the profile for this target platform.
@@ -23,7 +24,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
             if (profile != null)
                 return profile;
 
-            throw new PipelineException("There is no supported audio profile for the '" + platform + "' platform!");
+            throw new PipelineException(
+                "There is no supported audio profile for the '" + platform + "' platform!");
         }
 
         /// <summary>
@@ -38,7 +40,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
         /// <param name="quality">The suggested audio quality level.</param>
         /// <param name="content">The audio content to convert.</param>
         /// <returns>The quality used for conversion which could be different from the suggested quality.</returns>
-        public abstract ConversionQuality ConvertAudio(TargetPlatform platform, ConversionQuality quality, AudioContent content);
+        public abstract ConversionQuality ConvertAudio(
+            TargetPlatform platform, ConversionQuality quality, AudioContent content);
 
         /// <summary>
         /// Converts the audio content to a streaming format that works on targeted platform.
@@ -46,12 +49,15 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
         /// <param name="platform">The platform to build the audio content for.</param>
         /// <param name="quality">The suggested audio quality level.</param>
         /// <param name="content">he audio content to convert.</param>
-        /// <param name="outputFileName"></param>
+        /// <param name="inputFile">The input file name. This may change varying on platform and profile.</param>
+        /// <param name="outputFile">The output file name, changed by platform and profile.</param>
         /// <returns>The quality used for conversion which could be different from the suggested quality.</returns>
-        public abstract ConversionQuality ConvertStreamingAudio(TargetPlatform platform, ConversionQuality quality, AudioContent content, ref string outputFileName);
+        public abstract ConversionQuality ConvertStreamingAudio(
+            TargetPlatform platform, ConversionQuality quality, AudioContent content, 
+            string inputFile, out string outputFile);
 
-
-        protected static int QualityToSampleRate(ConversionFormat format, ConversionQuality quality, int sourceSampleRate)
+        protected static int QualityToSampleRate(
+            ConversionFormat format, ConversionQuality quality, int sourceSampleRate)
         {
             switch (quality)
             {

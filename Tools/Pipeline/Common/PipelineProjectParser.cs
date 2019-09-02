@@ -9,8 +9,8 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using MGCB;
-using Microsoft.Xna.Framework.Content.Pipeline;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Content.Pipeline;
+using MonoGame.Framework.Graphics;
 using PathHelper = MonoGame.Framework.Content.Pipeline.Builder.PathHelper;
 
 namespace MonoGame.Tools.Pipeline
@@ -33,50 +33,50 @@ namespace MonoGame.Tools.Pipeline
             Name = "outputDir",
             ValueName = "directoryPath",
             Description = "The directory where all content is written.")]
-        public string OutputDir { set { _project.OutputDir = value; } }
+        public string OutputDir { set => _project.OutputDir = value; }
 
         [CommandLineParameter(
             Name = "intermediateDir",
             ValueName = "directoryPath",
             Description = "The directory where all intermediate files are written.")]
-        public string IntermediateDir { set { _project.IntermediateDir = value; } }
+        public string IntermediateDir { set => _project.IntermediateDir = value; }
 
         [CommandLineParameter(
             Name = "reference",
             ValueName = "assemblyNameOrFile",
             Description = "Adds an assembly reference for resolving content importers, processors, and writers.")]
-        public List<string> References 
+        public List<string> References
         {
-            set { _project.References = value; }
-            get { return _project.References; } 
+            set => _project.References = value;
+            get => _project.References;
         }
 
         [CommandLineParameter(
             Name = "platform",
             ValueName = "targetPlatform",
             Description = "Set the target platform for this build.  Defaults to Windows.")]
-        public TargetPlatform Platform { set { _project.Platform = value; } }
+        public TargetPlatform Platform { set => _project.Platform = value; }
 
         [CommandLineParameter(
             Name = "profile",
             ValueName = "graphicsProfile",
             Description = "Set the target graphics profile for this build.  Defaults to HiDef.")]
-        public GraphicsProfile Profile { set { _project.Profile = value; } }
+        public GraphicsProfile Profile { set => _project.Profile = value; }
 
         [CommandLineParameter(
             Name = "config",
             ValueName = "string",
             Description = "The optional build config string from the build system.")]
-        public string Config { set { _project.Config = value; } }
+        public string Config { set => _project.Config = value; }
 
-        #pragma warning disable 414
+#pragma warning disable 414
 
         // Allow a MGCB file containing the /rebuild parameter to be imported without error
         [CommandLineParameter(
             Name = "rebuild",
             ValueName = "bool",
             Description = "Forces a rebuild of the project.")]
-        public bool Rebuild { set { _rebuild = value; } }
+        public bool Rebuild { set => _rebuild = value; }
         private bool _rebuild;
 
         // Allow a MGCB file containing the /clean parameter to be imported without error
@@ -84,7 +84,7 @@ namespace MonoGame.Tools.Pipeline
             Name = "clean",
             ValueName = "bool",
             Description = "Removes intermediate and output files.")]
-        public bool Clean { set { _clean = value; } }
+        public bool Clean { set => _clean = value; }
         private bool _clean;
 
         #pragma warning restore 414
@@ -93,7 +93,7 @@ namespace MonoGame.Tools.Pipeline
             Name = "compress",
             ValueName = "bool",
             Description = "Content files can be compressed for smaller file sizes.")]
-        public bool Compress { set { _project.Compress = value; } }
+        public bool Compress { set => _project.Compress = value; }
 
         [CommandLineParameter(
             Name = "importer",
@@ -107,7 +107,7 @@ namespace MonoGame.Tools.Pipeline
             Description = "Defines the class name of the content processor for processing imported content.")]
         public string Processor
         {
-            get { return _processor; }
+            get => _processor;
             set
             {
                 _processor = value;
@@ -461,13 +461,7 @@ namespace MonoGame.Tools.Pipeline
             }
         }
 
-        private string ProjectDirectory
-        {
-            get
-            {
-                return _project.Location;                
-            }
-        }
+        private string ProjectDirectory => _project.Location;
 
         private void ReadIncludeReference(XmlReader io, out string include, out string hintPath)
         {

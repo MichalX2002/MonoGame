@@ -3,9 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
+using MonoGame.Framework.Content.Pipeline.Graphics;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline
+namespace MonoGame.Framework.Content.Pipeline
 {
     /// <summary>
     /// Provides methods for reading DirectX Object (.x) files for use in the Content Pipeline.

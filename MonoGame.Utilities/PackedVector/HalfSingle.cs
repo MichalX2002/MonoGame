@@ -14,14 +14,19 @@ namespace MonoGame.Utilities.PackedVector
     /// </summary>
     public struct HalfSingle : IPixel, IPackedVector<ushort>
     {
+        public ushort PackedValue;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="HalfSingle"/> struct.
         /// </summary>
         /// <param name="single">The single component.</param>
         public HalfSingle(float single) => PackedValue = HalfTypeHelper.Pack(single);
 
-        /// <inheritdoc/>
-        public ushort PackedValue { get; set; }
+        ushort IPackedVector<ushort>.PackedValue
+        {
+            get => PackedValue;
+            set => PackedValue = value;
+        }
 
         /// <summary>
         /// Compares two <see cref="HalfSingle"/> objects for equality.
@@ -90,17 +95,14 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc />
         public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
 
-        /// <inheritdoc />
-        public void ToColor(ref Color dest)
-        {
-            dest.FromScaledVector4(ToScaledVector4());
-        }
-
         /// <inheritdoc/>
         public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
 
         /// <inheritdoc/>
         public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
+
+        /// <inheritdoc />
+        public void ToColor(ref Color dest) => dest.FromScaledVector4(ToScaledVector4());
 
         /// <summary>
         /// Expands the packed representation into a <see cref="float"/>.

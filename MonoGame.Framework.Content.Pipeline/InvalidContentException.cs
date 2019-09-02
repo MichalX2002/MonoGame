@@ -5,12 +5,12 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline
+namespace MonoGame.Framework.Content.Pipeline
 {
     /// <summary>
     /// Thrown when errors are encountered in content during processing.
     /// </summary>
-    [SerializableAttribute]
+    [Serializable]
     public class InvalidContentException : Exception
     {
         /// <summary>

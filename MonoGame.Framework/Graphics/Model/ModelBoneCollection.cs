@@ -14,10 +14,8 @@ namespace MonoGame.Framework.Graphics
     /// </summary>
     public class ModelBoneCollection : ReadOnlyCollection<ModelBone>
     {
-        public ModelBoneCollection(IList<ModelBone> list)
-            : base(list)
+        public ModelBoneCollection(IList<ModelBone> list) : base(list)
         {
-
         }
 
         /// <summary>

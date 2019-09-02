@@ -4,10 +4,10 @@
 
 using System;
 using System.Linq;
-using Microsoft.Xna.Framework.Media;
 using System.Globalization;
+using MonoGame.Framework.Media;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline
+namespace MonoGame.Framework.Content.Pipeline
 {
     /// <summary>
     /// Provides a base class for all video objects.
@@ -30,7 +30,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         /// <summary>
         /// Gets or sets the file name for this video.
         /// </summary>
-        [ContentSerializerAttribute]
+        [ContentSerializer]
         public string Filename { get; set; }
 
         /// <summary>
@@ -46,13 +46,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         /// <summary>
         /// Gets or sets the type of soundtrack accompanying the video.
         /// </summary>
-        [ContentSerializerAttribute]
+        [ContentSerializer]
         public VideoSoundtrackType VideoSoundtrackType { get; set; }
 
         /// <summary>
         /// Gets the width of this video.
         /// </summary>
-        public int Width { get { return _width; } }
+        public int Width => _width;
 
         /// <summary>
         /// Initializes a new copy of the VideoContent class for the specified video file.
@@ -62,7 +62,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         {
             Filename = filename;
             var result = ExternalTool.Run("ffprobe",
-                string.Format("-i \"{0}\" -show_format -select_streams v -show_streams -print_format ini", Filename), out string stdout, out string stderr);
+                string.Format("-i \"{0}\" -show_format -select_streams v -show_streams -print_format ini", Filename), 
+                out string stdout, out string stderr);
 
             var lines = stdout.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             foreach (var line in lines)
@@ -92,7 +93,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
 
                     case "r_frame_rate":
                         var frac = value.Split('/');
-                        FramesPerSecond = float.Parse(frac[0], CultureInfo.InvariantCulture) / float.Parse(frac[1], CultureInfo.InvariantCulture);
+                        FramesPerSecond = float.Parse(
+                            frac[0], CultureInfo.InvariantCulture) / float.Parse(frac[1], CultureInfo.InvariantCulture);
                         break;
                 }
             }

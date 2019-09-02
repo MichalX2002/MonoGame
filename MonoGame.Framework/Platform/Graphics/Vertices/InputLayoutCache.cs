@@ -9,7 +9,7 @@ using System.Linq;
 using SharpDX;
 using SharpDX.Direct3D11;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Caches DirectX input layouts for the input assembler stage.

@@ -20,61 +20,44 @@ namespace MonoGame.Framework.Graphics
             if (mipMap)
                 throw new NotImplementedException("Texture3D does not yet support mipmaps.");
 
-            void Construct()
-            {
-                GL.GenTextures(1, out _glTexture);
-                GraphicsExtensions.CheckGLError();
+            GL.GenTextures(1, out _glTexture);
+            GraphicsExtensions.CheckGLError();
 
-                GL.BindTexture(_glTarget, _glTexture);
-                GraphicsExtensions.CheckGLError();
+            GL.BindTexture(_glTarget, _glTexture);
+            GraphicsExtensions.CheckGLError();
 
-                format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
+            format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
 
-                GL.TexImage3D(_glTarget, 0, glInternalFormat, width, height, depth, 0, glFormat, glType, IntPtr.Zero);
-                GraphicsExtensions.CheckGLError();
-            }
-
-            if (Threading.IsOnUIThread())
-                Construct();
-            else
-                Threading.BlockOnUIThread(Construct);
+            GL.TexImage3D(_glTarget, 0, glInternalFormat, width, height, depth, 0, glFormat, glType, IntPtr.Zero);
+            GraphicsExtensions.CheckGLError();
 #endif
         }
 
-        private void PlatformSetData<T>(
+        private unsafe void PlatformSetData<T>(
             int level,
             int left, int top, int right, int bottom, int front, int back,
-            T[] data, int startIndex, int elementCount, int width, int height, int depth)
+            int width, int height, int depth, ReadOnlySpan<T> data)
+            where T : unmanaged
         {
 #if GLES
             throw new NotSupportedException("OpenGL ES 2.0 doesn't support 3D textures.");
 #else
-            void Set()
-            {
-                var elementSizeInByte = Marshal.SizeOf(typeof(T));
-                var dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-                var dataPtr = (IntPtr)(dataHandle.AddrOfPinnedObject().ToInt64() + startIndex * elementSizeInByte);
 
+            fixed (T* ptr = &MemoryMarshal.GetReference(data))
+            {
                 GL.BindTexture(_glTarget, _glTexture);
                 GraphicsExtensions.CheckGLError();
-                GL.TexSubImage3D(_glTarget, level, left, top, front, width, height, depth, glFormat, glType, dataPtr);
+
+                GL.TexSubImage3D(_glTarget, level, left, top, front, width, height, depth, glFormat, glType, (IntPtr)ptr);
                 GraphicsExtensions.CheckGLError();
-
-                dataHandle.Free();
             }
-
-            if (Threading.IsOnUIThread())
-                Set();
-            else
-                Threading.BlockOnUIThread(Set);
 #endif
         }
 
         private void PlatformGetData<T>(
-            int level, 
-            int left, int top, int right, int bottom, int front, int back, 
-            T[] data, int startIndex, int elementCount)
-            where T : struct
+            int level, int left, int top, int right, int bottom, int front, int back, 
+            Span<T> destination)
+            where T : unmanaged
         {
             throw new NotImplementedException();
         }

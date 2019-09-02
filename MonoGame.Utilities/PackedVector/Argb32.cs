@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using MonoGame.Framework;
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -77,8 +78,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <param name="g">The green component.</param>
         /// <param name="b">The blue component.</param>
         /// <param name="a">The alpha component.</param>
-        public Argb32(float r, float g, float b, float a = 1)
-            : this() => Pack(r, g, b, a);
+        public Argb32(float r, float g, float b, float a = 1) : this() => Pack(r, g, b, a);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Argb32"/> struct.
@@ -86,8 +86,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <param name="vector">
         /// The vector containing the components for the packed vector.
         /// </param>
-        public Argb32(Vector3 vector)
-            : this() => Pack(ref vector);
+        public Argb32(Vector3 vector) : this() => Pack(ref vector);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Argb32"/> struct.
@@ -95,8 +94,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <param name="vector">
         /// The vector containing the components for the packed vector.
         /// </param>
-        public Argb32(Vector4 vector)
-            : this() => Pack(ref vector);
+        public Argb32(Vector4 vector) : this() => Pack(ref vector);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Argb32"/> struct.
@@ -104,24 +102,15 @@ namespace MonoGame.Utilities.PackedVector
         /// <param name="packed">
         /// The packed value.
         /// </param>
-        public Argb32(uint packed)
-            : this() => Argb = packed;
-
-        /// <summary>
-        /// Gets or sets the packed representation of the Argb32 struct.
-        /// </summary>
-        public uint Argb
-        {
-            get => Unsafe.As<Argb32, uint>(ref this);
-
-            set => Unsafe.As<Argb32, uint>(ref this) = value;
-        }
+        [CLSCompliant(false)]
+        public Argb32(uint packed) : this() => PackedValue = packed;
 
         /// <inheritdoc/>
+        [CLSCompliant(false)]
         public uint PackedValue
         {
-            get => Argb;
-            set => Argb = value;
+            get => Unsafe.As<Argb32, uint>(ref this);
+            set => Unsafe.As<Argb32, uint>(ref this) = value;
         }
 
         /// <summary>
@@ -169,7 +158,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromVector4(Vector4 vector) => Pack(ref vector);
 
         /// <inheritdoc/>
-        public Vector4 ToVector4() => new Vector4(R, G, B, A) / VectorMaths.MaxBytes;
+        public Vector4 ToVector4() => new Vector4(R, G, B, A) / PackedVectorHelper.MaxBytes;
 
         /// <inheritdoc/>
         public void FromArgb32(Argb32 source) => PackedValue = source.PackedValue;
@@ -207,7 +196,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc/>
         public void FromGray16(Gray16 source)
         {
-            byte rgb = VectorMaths.DownScale16To8Bit(source.PackedValue);
+            byte rgb = PackedVectorHelper.DownScale16To8Bit(source.PackedValue);
             R = rgb;
             G = rgb;
             B = rgb;
@@ -244,26 +233,26 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc/>
         public void FromRgb48(Rgb48 source)
         {
-            R = VectorMaths.DownScale16To8Bit(source.R);
-            G = VectorMaths.DownScale16To8Bit(source.G);
-            B = VectorMaths.DownScale16To8Bit(source.B);
+            R = PackedVectorHelper.DownScale16To8Bit(source.R);
+            G = PackedVectorHelper.DownScale16To8Bit(source.G);
+            B = PackedVectorHelper.DownScale16To8Bit(source.B);
             A = byte.MaxValue;
         }
 
         /// <inheritdoc/>
         public void FromRgba64(Rgba64 source)
         {
-            R = VectorMaths.DownScale16To8Bit(source.R);
-            G = VectorMaths.DownScale16To8Bit(source.G);
-            B = VectorMaths.DownScale16To8Bit(source.B);
-            A = VectorMaths.DownScale16To8Bit(source.A);
+            R = PackedVectorHelper.DownScale16To8Bit(source.R);
+            G = PackedVectorHelper.DownScale16To8Bit(source.G);
+            B = PackedVectorHelper.DownScale16To8Bit(source.B);
+            A = PackedVectorHelper.DownScale16To8Bit(source.A);
         }
 
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj is Argb32 argb32 && Equals(argb32);
 
         /// <inheritdoc/>
-        public bool Equals(Argb32 other) => Argb == other.Argb;
+        public bool Equals(Argb32 other) => PackedValue == other.PackedValue;
 
         /// <summary>
         /// Gets a string representation of the packed vector.
@@ -272,7 +261,7 @@ namespace MonoGame.Utilities.PackedVector
         public override string ToString() => $"Argb({A}, {R}, {G}, {B})";
 
         /// <inheritdoc/>
-        public override int GetHashCode() => Argb.GetHashCode();
+        public override int GetHashCode() => PackedValue.GetHashCode();
 
         /// <summary>
         /// Packs the four floats into a color.
@@ -303,9 +292,9 @@ namespace MonoGame.Utilities.PackedVector
         /// <param name="vector">The vector containing the values to pack.</param>
         private void Pack(ref Vector4 vector)
         {
-            vector *= VectorMaths.MaxBytes;
-            vector += VectorMaths.Half;
-            vector = Vector4.Clamp(vector, Vector4.Zero, VectorMaths.MaxBytes);
+            vector *= PackedVectorHelper.MaxBytes;
+            vector += PackedVectorHelper.Half;
+            vector = Vector4.Clamp(vector, Vector4.Zero, PackedVectorHelper.MaxBytes);
 
             R = (byte)vector.X;
             G = (byte)vector.Y;

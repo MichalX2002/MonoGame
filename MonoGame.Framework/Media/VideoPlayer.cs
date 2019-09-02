@@ -8,9 +8,9 @@ using System.Threading;
 #if WINDOWS_UAP
 using System.Threading.Tasks;
 #endif
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     public sealed partial class VideoPlayer : IDisposable
     {
@@ -35,7 +35,7 @@ namespace Microsoft.Xna.Framework.Media
         /// </summary>
         public bool IsLooped
         {
-            get { return _isLooped; }
+            get => _isLooped;
             set
             {
                 if (_isLooped == value)
@@ -51,7 +51,7 @@ namespace Microsoft.Xna.Framework.Media
         /// </summary>
         public bool IsMuted
         {
-            get { return _isMuted; }
+            get => _isMuted;
             set
             {
                 if (_isMuted == value)
@@ -100,7 +100,7 @@ namespace Microsoft.Xna.Framework.Media
         /// </summary>
         public float Volume
         {
-            get { return _volume; }
+            get => _volume;
 
             set
             {

@@ -6,7 +6,7 @@ namespace MonoGame.Framework
     public static class EnumExtensions
     {
         /// <summary>
-        /// Determines whether the specified value has flags.
+        /// Determines whether a value has the specified flags.
         /// </summary>
         /// <typeparam name="TEnum">The type of the enum.</typeparam>
         /// <param name="value">The value.</param>
@@ -75,22 +75,30 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Determines whether the specified value has multiple flags.
+        /// Determines whether a value has any of the given flags.
         /// </summary>
         /// <typeparam name="TEnum">The type of the enum.</typeparam>
-        /// <param name="value">The value.</param>
-        /// <param name="flags">The flags.</param>
-        /// <returns>
-        ///  <c>true</c> if the specified value has any flag; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool HasFlags<TEnum>(this TEnum value, params TEnum[] flags) where TEnum : Enum
+        /// <param name="value"></param>
+        /// <param name="flags"></param>
+        /// <returns><c>true</c> if the specified value has any flag; otherwise, <c>false</c>.</returns>
+        public static bool HasFlags<TEnum>(this TEnum value, ReadOnlySpan<TEnum> flags) where TEnum : Enum
         {
             for (int i = 0; i < flags.Length; i++)
-            {
                 if (EnumExtensionsInternal<TEnum>.HasFlagsDelegate(value, flags[i]))
                     return true;
-            }
             return false;
+        }
+
+        /// <summary>
+        /// Determines whether a value has any of the given flags.
+        /// </summary>
+        /// <typeparam name="TEnum">The type of the enum.</typeparam>
+        /// <param name="value"></param>
+        /// <param name="flags"></param>
+        /// <returns><c>true</c> if the specified value has any flag; otherwise, <c>false</c>.</returns>
+        public static bool HasFlags<TEnum>(this TEnum value, params TEnum[] flags) where TEnum : Enum
+        {
+            return HasFlags(value, flags);
         }
 
         private static class EnumExtensionsInternal<TEnum> where TEnum : Enum

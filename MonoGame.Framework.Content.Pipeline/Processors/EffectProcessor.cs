@@ -6,14 +6,14 @@ using System;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Content.Pipeline.Graphics;
+using MonoGame.Framework.Graphics;
 using MonoGame.Utilities.Memory;
 #if WINDOWS
 using TwoMGFX;
 #endif
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     /// <summary>
     /// Processes a string representation to a platform-specific compiled effect.
@@ -28,13 +28,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         /// The debug mode for compiling effects.
         /// </summary>
         /// <value>The debug mode to use when compiling effects.</value>
-        public virtual EffectProcessorDebugMode DebugMode { get { return debugMode; } set { debugMode = value; } }
+        public virtual EffectProcessorDebugMode DebugMode { get => debugMode; set => debugMode = value; }
 
         /// <summary>
         /// Define assignments for the effect.
         /// </summary>
         /// <value>A list of define assignments delimited by semicolons.</value>
-        public virtual string Defines { get { return defines; } set { defines = value; } }
+        public virtual string Defines { get => defines; set => defines = value; }
 
         /// <summary>
         /// Initializes a new instance of EffectProcessor.
@@ -113,7 +113,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             CompiledEffectContent result;
             try
             {
-                using (var stream = RecyclableMemoryManager.Instance.GetMemoryStream())
+                using (var stream = RecyclableMemoryManager.Default.GetMemoryStream())
                 {
                     using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
                         effect.Write(writer, options);

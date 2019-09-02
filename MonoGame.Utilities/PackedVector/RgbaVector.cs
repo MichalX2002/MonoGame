@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Unpacked pixel type containing four 16-bit floating-point values typically ranging from 0 to 1.
+    /// Unpacked pixel type containing four 32-bit floating-point values typically ranging from 0 to 1.
     /// The color components are stored in red, green, blue, and alpha order.
     /// <para>
     /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
@@ -119,14 +119,14 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc/>
         public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
 
-        /// <inheritdoc />
-        public void ToColor(ref Color dest) => dest.FromScaledVector4(ToScaledVector4());
-
         /// <inheritdoc/>
         public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
 
         /// <inheritdoc/>
         public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
+
+        /// <inheritdoc />
+        public void ToColor(ref Color dest) => dest.FromScaledVector4(ToScaledVector4());
 
         /// <summary>
         /// Converts the value of this instance to a hexadecimal string.
@@ -135,8 +135,8 @@ namespace MonoGame.Utilities.PackedVector
         public string ToHex()
         {
             // Hex is RRGGBBAA
-            Vector4 vector = ToVector4() * VectorMaths.MaxBytes;
-            vector += VectorMaths.Half;
+            Vector4 vector = ToVector4() * PackedVectorHelper.MaxBytes;
+            vector += PackedVectorHelper.Half;
             uint hexOrder = (uint)((byte)vector.W | (byte)vector.Z << 8 | (byte)vector.Y << 16 | (byte)vector.X << 24);
             return hexOrder.ToString("X8");
         }

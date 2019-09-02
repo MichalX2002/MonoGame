@@ -31,7 +31,7 @@ namespace MonoGame.Framework.Audio
                 return;
 
             string errorFmt = "OpenAL Error: {0}";
-            throw new NoAudioHardwareException(string.Format("{0} - {1}",
+            throw new AudioHardwareException(string.Format("{0} - {1}",
                 operation, string.Format(errorFmt, error)));
         }
        
@@ -91,7 +91,7 @@ namespace MonoGame.Framework.Audio
             }
 			else
             {
-                throw new NoAudioHardwareException("Failed to open capture device.");
+                throw new AudioHardwareException("Failed to open capture device.");
             }
         }
 

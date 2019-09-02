@@ -59,7 +59,7 @@ namespace MonoGame.Framework.Input
         }
 
         /// <summary>
-        /// Sets the cursor image to the specified MouseCursor.
+        /// Sets the cursor image to the specified <see cref="MouseCursor"/>.
         /// </summary>
         /// <param name="cursor">Mouse cursor to use for the cursor image.</param>
         public static void SetCursor(MouseCursor cursor)

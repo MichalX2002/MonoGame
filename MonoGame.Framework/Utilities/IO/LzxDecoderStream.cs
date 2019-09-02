@@ -11,12 +11,12 @@ namespace MonoGame.Utilities
 {
     internal class LzxDecoderStream : Stream
     {
-        LzxDecoder dec;
-        MemoryStream decompressedStream;
+        LzxDecoder _decoder;
+        RecyclableMemoryStream _decompressedStream;
 
         public LzxDecoderStream(Stream input, int decompressedSize, int compressedSize)
         {
-            dec = new LzxDecoder(16);
+            _decoder = new LzxDecoder(16);
 
             // TODO: Rewrite using block decompression like Lz4DecoderStream
             Decompress(input, decompressedSize, compressedSize);
@@ -27,7 +27,7 @@ namespace MonoGame.Utilities
         {
             // thanks to ShinAli (https://bitbucket.org/alisci01/xnbdecompressor)
             // default window size for XNB encoded files is 64Kb (need 16 bits to represent it)
-            decompressedStream = RecyclableMemoryManager.Instance.GetMemoryStream(null, decompressedSize);
+            _decompressedStream = RecyclableMemoryManager.Default.GetMemoryStream(decompressedSize);
             long startPos = stream.Position;
             long pos = startPos;
             
@@ -63,7 +63,7 @@ namespace MonoGame.Utilities
                 if (block_size == 0 || frame_size == 0)
                     break;
 
-                dec.Decompress(stream, block_size, decompressedStream, frame_size);
+                _decoder.Decompress(stream, block_size, _decompressedStream, frame_size);
                 pos += block_size;
 
                 // reset the position of the input just incase the bit buffer
@@ -71,28 +71,26 @@ namespace MonoGame.Utilities
                 stream.Seek(pos, SeekOrigin.Begin);
             }
 
-            if (decompressedStream.Position != decompressedSize)
+            if (_decompressedStream.Position != decompressedSize)
                 throw new ContentLoadException("Decompression failed.");
 
-            decompressedStream.Seek(0, SeekOrigin.Begin);
+            _decompressedStream.Seek(0, SeekOrigin.Begin);
         }
 
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
             if(disposing)
-            {                
-                decompressedStream.Dispose();
-            }            
-            dec = null;
-            decompressedStream = null;
+                _decompressedStream.Dispose();
+            _decompressedStream = null;
+            _decoder = null;
         }
 
         #region Stream internals
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            return decompressedStream.Read(buffer, offset, count);
+            return _decompressedStream.Read(buffer, offset, count);
         }
 
         public override bool CanRead => true;

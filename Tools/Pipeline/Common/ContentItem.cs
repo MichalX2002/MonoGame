@@ -4,8 +4,7 @@
 
 using System.ComponentModel;
 using System.Globalization;
-using Microsoft.Xna.Framework.Content.Pipeline;
-using Microsoft.Xna.Framework.Content.Pipeline.Builder.Convertors;
+using MonoGame.Framework.Content.Pipeline;
 
 namespace MonoGame.Tools.Pipeline
 {
@@ -37,23 +36,11 @@ namespace MonoGame.Tools.Pipeline
 
         [Category("Common")]
         [Description("The file name of this item.")]
-        public string Name 
-        { 
-            get
-            {
-                return System.IO.Path.GetFileName(OriginalPath);
-            }
-        }
+        public string Name => System.IO.Path.GetFileName(OriginalPath);
 
         [Category("Common")]
         [Description("The folder where this item is located.")]
-        public string Location
-        {
-            get
-            {
-                return System.IO.Path.GetDirectoryName(OriginalPath);
-            }
-        }
+        public string Location => System.IO.Path.GetDirectoryName(OriginalPath);
 
         #endregion
 
@@ -62,7 +49,7 @@ namespace MonoGame.Tools.Pipeline
         [Description("The way to process this content item.")]
         public BuildAction BuildAction
         {
-            get { return _buildAction; }
+            get => _buildAction;
             set
             {
                 if (_buildAction == value)
@@ -80,7 +67,7 @@ namespace MonoGame.Tools.Pipeline
         [TypeConverter(typeof(ImporterConverter))]
         public ImporterTypeDescription Importer
         {
-            get { return _importer; }
+            get => _importer;
 
             set
             {
@@ -88,7 +75,7 @@ namespace MonoGame.Tools.Pipeline
                     return;
 
                 _importer = value;
-                ImporterName = _importer.TypeName;                
+                ImporterName = _importer.TypeName;
 
                 // Validate that our processor can accept input content of the type output by the new importer.
                 if ((_processor == null || _processor.InputType != _importer.OutputType) && _processor != PipelineTypes.MissingProcessor)
@@ -107,16 +94,16 @@ namespace MonoGame.Tools.Pipeline
         [TypeConverter(typeof(ProcessorConverter))]
         public ProcessorTypeDescription Processor
         {
-            get { return _processor; }
+            get => _processor;
 
             set
             {
                 if (_processor == value)
                     return;
-                
+
                 _processor = value;
                 ProcessorName = _processor.TypeName;
-                
+
                 // When the processor changes reset our parameters
                 // to the default for the processor type.
                 ProcessorParams.Clear();

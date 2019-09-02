@@ -5,14 +5,13 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 {
     class ArraySerializer<T> : ContentTypeSerializer<T[]>
     {
         private readonly ListSerializer<T> _listSerializer;
 
-        public ArraySerializer() :
-            base("array")
+        public ArraySerializer() : base("array")
         {
             _listSerializer = new ListSerializer<T>();
         }

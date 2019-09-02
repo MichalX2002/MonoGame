@@ -460,7 +460,7 @@ namespace MonoGame.Framework.Graphics
                     return new ColorFormat(8, 8, 8, 0);
                 case SurfaceFormat.Bgra32:
                 case SurfaceFormat.Rgba32:
-                case SurfaceFormat.ColorSRgb:
+                case SurfaceFormat.Rgba32SRgb:
                     return new ColorFormat(8, 8, 8, 8);
                 case SurfaceFormat.Rgba1010102:
                     return new ColorFormat(10, 10, 10, 2);
@@ -537,7 +537,7 @@ namespace MonoGame.Framework.Graphics
                     glFormat = PixelFormat.Rgba;
                     glType = PixelType.UnsignedByte;
                     break;
-                case SurfaceFormat.ColorSRgb:
+                case SurfaceFormat.Rgba32SRgb:
                     if (!supportsSRgb)
                         goto case SurfaceFormat.Rgba32;
                     glInternalFormat = PixelInternalFormat.Srgb;
@@ -813,7 +813,7 @@ namespace MonoGame.Framework.Graphics
                 case SurfaceFormat.NormalizedByte2:
                     return 2;
                 case SurfaceFormat.Rgba32:
-                case SurfaceFormat.ColorSRgb:
+                case SurfaceFormat.Rgba32SRgb:
                 case SurfaceFormat.Single:
                 case SurfaceFormat.Rg32:
                 case SurfaceFormat.HalfVector2:

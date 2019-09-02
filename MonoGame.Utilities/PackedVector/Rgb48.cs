@@ -8,7 +8,7 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed pixel type containing three 16-bit unsigned normalized values ranging from 0 to 635535.
+    /// Packed pixel type containing three 16-bit unsigned normalized values ranging from 0 to 65535.
     /// <para>
     /// Ranges from [0, 0, 0, 1] to [1, 1, 1, 1] in vector form.
     /// </para>
@@ -21,16 +21,19 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets or sets the red component.
         /// </summary>
+        [CLSCompliant(false)]
         public ushort R;
 
         /// <summary>
         /// Gets or sets the green component.
         /// </summary>
+        [CLSCompliant(false)]
         public ushort G;
 
         /// <summary>
         /// Gets or sets the blue component.
         /// </summary>
+        [CLSCompliant(false)]
         public ushort B;
 
         /// <summary>
@@ -39,12 +42,25 @@ namespace MonoGame.Utilities.PackedVector
         /// <param name="r">The red component.</param>
         /// <param name="g">The green component.</param>
         /// <param name="b">The blue component.</param>
-        public Rgb48(ushort r, ushort g, ushort b)
-            : this()
+        [CLSCompliant(false)]
+        public Rgb48(ushort r, ushort g, ushort b) 
         {
             R = r;
             G = g;
             B = b;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Rgb48"/> struct.
+        /// </summary>
+        /// <param name="r">The red component.</param>
+        /// <param name="g">The green component.</param>
+        /// <param name="b">The blue component.</param>
+        public Rgb48(int r, int g, int b)
+        {
+            R = (ushort)MathHelper.Clamp(r, 0, ushort.MaxValue);
+            G = (ushort)MathHelper.Clamp(g, 0, ushort.MaxValue);
+            B = (ushort)MathHelper.Clamp(b, 0, ushort.MaxValue);
         }
 
         /// <summary>
@@ -90,25 +106,25 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc />
         public void FromArgb32(Argb32 source)
         {
-            R = VectorMaths.UpScale8To16Bit(source.R);
-            G = VectorMaths.UpScale8To16Bit(source.G);
-            B = VectorMaths.UpScale8To16Bit(source.B);
+            R = PackedVectorHelper.UpScale8To16Bit(source.R);
+            G = PackedVectorHelper.UpScale8To16Bit(source.G);
+            B = PackedVectorHelper.UpScale8To16Bit(source.B);
         }
 
         /// <inheritdoc />
         public void FromBgr24(Bgr24 source)
         {
-            R = VectorMaths.UpScale8To16Bit(source.R);
-            G = VectorMaths.UpScale8To16Bit(source.G);
-            B = VectorMaths.UpScale8To16Bit(source.B);
+            R = PackedVectorHelper.UpScale8To16Bit(source.R);
+            G = PackedVectorHelper.UpScale8To16Bit(source.G);
+            B = PackedVectorHelper.UpScale8To16Bit(source.B);
         }
 
         /// <inheritdoc />
         public void FromBgra32(Bgra32 source)
         {
-            R = VectorMaths.UpScale8To16Bit(source.R);
-            G = VectorMaths.UpScale8To16Bit(source.G);
-            B = VectorMaths.UpScale8To16Bit(source.B);
+            R = PackedVectorHelper.UpScale8To16Bit(source.R);
+            G = PackedVectorHelper.UpScale8To16Bit(source.G);
+            B = PackedVectorHelper.UpScale8To16Bit(source.B);
         }
 
         /// <inheritdoc/>
@@ -120,7 +136,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc/>
         public void FromGray8(Gray8 source)
         {
-            ushort rgb = VectorMaths.UpScale8To16Bit(source.PackedValue);
+            ushort rgb = PackedVectorHelper.UpScale8To16Bit(source.PackedValue);
             R = rgb;
             G = rgb;
             B = rgb;
@@ -137,17 +153,17 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc />
         public void FromRgb24(Rgb24 source)
         {
-            R = VectorMaths.UpScale8To16Bit(source.R);
-            G = VectorMaths.UpScale8To16Bit(source.G);
-            B = VectorMaths.UpScale8To16Bit(source.B);
+            R = PackedVectorHelper.UpScale8To16Bit(source.R);
+            G = PackedVectorHelper.UpScale8To16Bit(source.G);
+            B = PackedVectorHelper.UpScale8To16Bit(source.B);
         }
 
         /// <inheritdoc />
         public void FromColor(Color source)
         {
-            R = VectorMaths.UpScale8To16Bit(source.R);
-            G = VectorMaths.UpScale8To16Bit(source.G);
-            B = VectorMaths.UpScale8To16Bit(source.B);
+            R = PackedVectorHelper.UpScale8To16Bit(source.R);
+            G = PackedVectorHelper.UpScale8To16Bit(source.G);
+            B = PackedVectorHelper.UpScale8To16Bit(source.B);
         }
 
         /// <inheritdoc/>
@@ -156,9 +172,9 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc />
         public void ToColor(ref Color dest)
         {
-            dest.R = VectorMaths.DownScale16To8Bit(R);
-            dest.G = VectorMaths.DownScale16To8Bit(G);
-            dest.B = VectorMaths.DownScale16To8Bit(B);
+            dest.R = PackedVectorHelper.DownScale16To8Bit(R);
+            dest.G = PackedVectorHelper.DownScale16To8Bit(G);
+            dest.B = PackedVectorHelper.DownScale16To8Bit(B);
             dest.A = byte.MaxValue;
         }
 

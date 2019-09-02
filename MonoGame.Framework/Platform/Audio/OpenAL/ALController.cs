@@ -59,6 +59,7 @@ namespace MonoGame.Framework.Audio
         public int Filter { get; private set; }
 
         public static EffectsExtension Efx => EffectsExtension.Instance;
+
         public static ALController Instance
         {
             get
@@ -67,8 +68,9 @@ namespace MonoGame.Framework.Audio
                     throw new ObjectDisposedException(nameof(ALController));
 
                 if (_instance == null)
-                    throw new NoAudioHardwareException(
-                        "OpenAL context has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
+                    throw new AudioHardwareException(
+                        "OpenAL context has failed to initialize.");
+
                 return _instance;
             }
         }
@@ -83,7 +85,7 @@ namespace MonoGame.Framework.Audio
                     "Couldn't initialize OpenAL because the native binaries couldn't be found.");
 
             if (!Open())
-                throw new NoAudioHardwareException(
+                throw new AudioHardwareException(
                     "OpenAL device could not be initialized, see console output for details.");
 
             if (ALC.IsExtensionPresent(_device, "ALC_EXT_CAPTURE"))
@@ -116,14 +118,18 @@ namespace MonoGame.Framework.Audio
             {
                 throw;
             }
-            catch (NoAudioHardwareException)
+            catch (AudioHardwareException)
             {
                 throw;
             }
             catch (Exception ex)
             {
-                throw new NoAudioHardwareException("Failed to initialize OpenAL.", ex);
+                throw new AudioHardwareException("Failed to initialize OpenAL.", ex);
             }
+
+#if DESKTOPGL || DIRECTX
+            _oggstreamer = new OggStreamer();
+#endif
         }
 
         /// <summary>
@@ -148,7 +154,7 @@ namespace MonoGame.Framework.Audio
                 }
                 catch (Exception ex)
                 {
-                    throw new NoAudioHardwareException("OpenAL device could not be initialized.", ex);
+                    throw new AudioHardwareException("OpenAL device could not be initialized.", ex);
                 }
 
                 ALCHelper.CheckError("Could not open OpenAL device.");
@@ -262,10 +268,6 @@ namespace MonoGame.Framework.Audio
 
                 _context = ALC.CreateContext(_device, attribute);
                 ALCHelper.CheckError("Could not create OpenAL context.");
-
-#if DESKTOPGL || DIRECTX
-                _oggstreamer = new OggStreamer();
-#endif
 
                 if (_context != IntPtr.Zero)
                 {
@@ -400,11 +402,8 @@ namespace MonoGame.Framework.Audio
 
                     SoundEffectInstancePool.DisposeInstances();
 
-                    for (int i = 0; i < _allSources.Length; i++)
-                    {
-                        AL.DeleteSource(_allSources[i]);
-                        ALHelper.CheckError("Failed to delete source.");
-                    }
+                    AL.DeleteSources(_allSources);
+                    ALHelper.CheckError("Failed to delete source.");
 
                     Microphone.StopMicrophones();
                     DestroyContexts();

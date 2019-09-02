@@ -103,8 +103,9 @@ namespace MonoGame.Framework.Graphics
                 Threading.BlockOnUIThread(Construct);
         }
 
-        private void PlatformGetData<T>(
-            CubeMapFace cubeMapFace, int level, Rectangle rect, T[] data, int startIndex, int elementCount) where T : struct
+        private unsafe void PlatformGetData<T>(
+            CubeMapFace cubeMapFace, int level, Rectangle rect, T[] data, int startIndex, int elementCount)
+            where T : unmanaged
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
@@ -112,10 +113,9 @@ namespace MonoGame.Framework.Graphics
 #if OPENGL && DESKTOPGL
             void Get()
             {
-                int tSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
-                GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+                var dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
                 IntPtr dataPointer = dataHandle.AddrOfPinnedObject();
-                int dstSize = data.Length * tSizeInByte;
+                int dstSize = data.Length * sizeof(T);
 
                 try
                 {
@@ -125,31 +125,31 @@ namespace MonoGame.Framework.Graphics
                     if (glFormat == GLPixelFormat.CompressedTextureFormats)
                     {
                         // Note: for compressed format Format.GetSize() returns the size of a 4x4 block
-                        var pixelToT = Format.GetSize() / tSizeInByte;
+                        var pixelToT = Format.GetSize() / sizeof(T);
                         var tFullWidth = Math.Max(Size >> level, 1) / 4 * pixelToT;
-                        IntPtr temp = Marshal.AllocHGlobal(Math.Max(Size >> level, 1) / 4 * tFullWidth * tSizeInByte);
+                        IntPtr temp = Marshal.AllocHGlobal(Math.Max(Size >> level, 1) / 4 * tFullWidth * sizeof(T));
                         GL.GetCompressedTexImage(target, level, temp);
                         GraphicsExtensions.CheckGLError();
 
                         var rowCount = rect.Height / 4;
-                        var tRectWidth = rect.Width / 4 * Format.GetSize() / tSizeInByte;
+                        var tRectWidth = rect.Width / 4 * Format.GetSize() / sizeof(T);
                         for (var r = 0; r < rowCount; r++)
                         {
                             var tempStart = rect.X / 4 * pixelToT + (rect.Top / 4 + r) * tFullWidth;
                             var dataStart = startIndex + r * tRectWidth;
 
-                            CopyMemory(temp, tempStart, dataPointer, dataStart, dstSize, tRectWidth, tSizeInByte);
+                            CopyMemory(temp, tempStart, dataPointer, dataStart, dstSize, tRectWidth, sizeof(T));
                         }
                     }
                     else
                     {
                         // we need to convert from our format size to the size of T here
-                        var tFullWidth = Math.Max(Size >> level, 1) * Format.GetSize() / tSizeInByte;
-                        IntPtr temp = Marshal.AllocHGlobal(Math.Max(Size >> level, 1) * tFullWidth * tSizeInByte);
+                        var tFullWidth = Math.Max(Size >> level, 1) * Format.GetSize() / sizeof(T);
+                        IntPtr temp = Marshal.AllocHGlobal(Math.Max(Size >> level, 1) * tFullWidth * sizeof(T));
                         GL.GetTexImage(target, level, glFormat, glType, temp);
                         GraphicsExtensions.CheckGLError();
 
-                        var pixelToT = Format.GetSize() / tSizeInByte;
+                        var pixelToT = Format.GetSize() / sizeof(T);
                         var rowCount = rect.Height;
                         var tRectWidth = rect.Width * pixelToT;
                         for (var r = 0; r < rowCount; r++)
@@ -157,7 +157,7 @@ namespace MonoGame.Framework.Graphics
                             var tempStart = rect.X * pixelToT + (r + rect.Top) * tFullWidth;
                             var dataStart = startIndex + r * tRectWidth;
 
-                            CopyMemory(temp, tempStart, dataPointer, dataStart, dstSize, tRectWidth, tSizeInByte);
+                            CopyMemory(temp, tempStart, dataPointer, dataStart, dstSize, tRectWidth, sizeof(T));
                         }
                     }
                 }
@@ -175,16 +175,16 @@ namespace MonoGame.Framework.Graphics
 #endif
         }
 
-        private void PlatformSetData<T>(CubeMapFace face, int level, Rectangle rect, T[] data, int startIndex, int elementCount)
+        private unsafe void PlatformSetData<T>(CubeMapFace face, int level, Rectangle rect, T[] data, int startIndex, int elementCount)
+            where T : unmanaged
         {
             void Set()
             {
-                var elementSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
                 var dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
                 // Use try..finally to make sure dataHandle is freed in case of an error
                 try
                 {
-                    var startBytes = startIndex * elementSizeInByte;
+                    var startBytes = startIndex * sizeof(T);
                     var dataPtr = new IntPtr(dataHandle.AddrOfPinnedObject().ToInt64() + startBytes);
 
                     GL.BindTexture(TextureTarget.TextureCubeMap, _glTexture);
@@ -194,7 +194,7 @@ namespace MonoGame.Framework.Graphics
                     if (glFormat == GLPixelFormat.CompressedTextureFormats)
                     {
                         GL.CompressedTexSubImage2D(target, level, rect.X, rect.Y, rect.Width, rect.Height,
-                             glInternalFormat, elementCount * elementSizeInByte, dataPtr);
+                             glInternalFormat, elementCount * sizeof(T), dataPtr);
                         GraphicsExtensions.CheckGLError();
                     }
                     else

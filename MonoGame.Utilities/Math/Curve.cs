@@ -3,31 +3,31 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace MonoGame.Framework
 {
     /// <summary>
-    /// Contains a collection of <see cref="CurveKey"/> points in 2D space and provides methods for evaluating features of the curve they define.
+    /// Contains a collection of <see cref="CurveKey"/> points in 2D space and
+    /// provides methods for evaluating features of the curve they define.
     /// </summary>
     // TODO : [TypeConverter(typeof(ExpandableObjectConverter))]
     [DataContract]
     public class Curve
     {
-
-        #region Private Fields
-        private CurveKeyCollection _keys;
-
-        #endregion
-
         #region Public Properties
+
+        /// <summary>
+        /// The collection of curve keys.
+        /// </summary>
+        [DataMember]
+        public CurveKeyCollection Keys { get; private set; }
 
         /// <summary>
         /// Returns <c>true</c> if this curve is constant (has zero or one points); <c>false</c> otherwise.
         /// </summary>
         [DataMember]
-        public bool IsConstant => _keys.Count <= 1;
+        public bool IsConstant => Keys.Count <= 1;
 
         /// <summary>
         /// Defines how to handle weighting values that are less than the first control point in the curve.
@@ -41,12 +41,6 @@ namespace MonoGame.Framework
         [DataMember]
         public CurveLoopType PostLoop { get; set; }
 
-        /// <summary>
-        /// The collection of curve keys.
-        /// </summary>
-        [DataMember]
-        public CurveKeyCollection Keys => _keys;
-
         #endregion
 
         #region Public Constructors
@@ -56,7 +50,7 @@ namespace MonoGame.Framework
         /// </summary>
         public Curve()
         {
-            _keys = new CurveKeyCollection();
+            Keys = new CurveKeyCollection();
         }
 
         #endregion
@@ -69,14 +63,12 @@ namespace MonoGame.Framework
         /// <returns>A copy of this curve.</returns>
         public Curve Clone()
         {
-            Curve curve = new Curve
+            return new Curve
             {
-                _keys = _keys.Clone(),
+                Keys = Keys.Clone(),
                 PreLoop = PreLoop,
                 PostLoop = PostLoop
             };
-
-            return curve;
         }
 
         /// <summary>
@@ -86,18 +78,14 @@ namespace MonoGame.Framework
         /// <returns>Value at the position on this <see cref="Curve"/>.</returns>
         public float Evaluate(float position)
         {
-            if (_keys.Count == 0)
-            {
+            if (Keys.Count == 0)
             	return 0f;
-            }
-						
-            if (_keys.Count == 1)
-            {
-            	return _keys[0].Value;
-            }
-			
-            CurveKey first = _keys[0];
-            CurveKey last = _keys[_keys.Count - 1];
+
+            if (Keys.Count == 1)
+            	return Keys[0].Value;
+
+            CurveKey first = Keys[0];
+            CurveKey last = Keys[Keys.Count - 1];
 
             if (position < first.Position)
             {
@@ -163,7 +151,7 @@ namespace MonoGame.Framework
                         //go back on curve from end and target start 
                         // start-> end / end -> start
                         cycle = GetNumberOfCycle(position);
-                        _ = position - (cycle * (last.Position - first.Position));
+                        //virtualPos = position - (cycle * (last.Position - first.Position));
                         if (0 == cycle % 2f)//if pair
                             virtualPos = position - (cycle * (last.Position - first.Position));
                         else
@@ -193,9 +181,7 @@ namespace MonoGame.Framework
 		public void ComputeTangents(CurveTangent tangentInType, CurveTangent tangentOutType)
 		{
             for (var i = 0; i < Keys.Count; ++i)
-            {
                 ComputeTangent(i, tangentInType, tangentOutType);
-            }
 		}
 
         /// <summary>
@@ -218,7 +204,7 @@ namespace MonoGame.Framework
         {
             // See http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.curvetangent.aspx
 
-            var key = _keys[keyIndex];
+            var key = Keys[keyIndex];
 
             float p0, p, p1;
             p0 = p = p1 = key.Position;
@@ -228,14 +214,14 @@ namespace MonoGame.Framework
 
             if ( keyIndex > 0 )
             {
-                p0 = _keys[keyIndex - 1].Position;
-                v0 = _keys[keyIndex - 1].Value;
+                p0 = Keys[keyIndex - 1].Position;
+                v0 = Keys[keyIndex - 1].Value;
             }
 
-            if (keyIndex < _keys.Count-1)
+            if (keyIndex < Keys.Count-1)
             {
-                p1 = _keys[keyIndex + 1].Position;
-                v1 = _keys[keyIndex + 1].Value;
+                p1 = Keys[keyIndex + 1].Position;
+                v1 = Keys[keyIndex + 1].Value;
             }
 
             switch (tangentInType)
@@ -279,7 +265,7 @@ namespace MonoGame.Framework
 
         private int GetNumberOfCycle(float position)
         {
-            float cycle = (position - _keys[0].Position) / (_keys[_keys.Count - 1].Position - _keys[0].Position);
+            float cycle = (position - Keys[0].Position) / (Keys[Keys.Count - 1].Position - Keys[0].Position);
             if (cycle < 0f)
                 cycle--;
             return (int)cycle;
@@ -288,9 +274,9 @@ namespace MonoGame.Framework
         private float GetCurvePosition(float position)
         {
             //only for position in curve
-            CurveKey prev = _keys[0];
+            CurveKey prev = Keys[0];
             CurveKey next;
-            for (int i = 1; i < _keys.Count; ++i)
+            for (int i = 1; i < Keys.Count; ++i)
             {
                 next = Keys[i];
                 if (next.Position >= position)
@@ -298,11 +284,10 @@ namespace MonoGame.Framework
                     if (prev.Continuity == CurveContinuity.Step)
                     {
                         if (position >= 1f)
-                        {
                             return next.Value;
-                        }
                         return prev.Value;
                     }
+
                     float t = (position - prev.Position) / (next.Position - prev.Position);//to have t in [0,1]
                     float ts = t * t;
                     float tss = ts * t;

@@ -1,7 +1,6 @@
 // MonoGame - Copyright (C) The MonoGame Team
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
-
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -9,12 +8,11 @@ using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
-using MonoGame.Utilities;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
-	public partial class TextureCube
-	{
+    public partial class TextureCube
+    {
         private bool _renderTarget;
         private bool _mipMap;
 
@@ -53,13 +51,15 @@ namespace Microsoft.Xna.Framework.Graphics
             return new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, description);
         }
 
-        private void PlatformGetData<T>(CubeMapFace cubeMapFace, int level, Rectangle rect, T[] data, int startIndex, int elementCount) where T : struct
+        private unsafe void PlatformGetData<T>(
+            CubeMapFace cubeMapFace, int level, Rectangle rect, T[] data, int startIndex, int elementCount)
+            where T : unmanaged
         {
             // Create a temp staging resource for copying the data.
             // 
             // TODO: Like in Texture2D, we should probably be pooling these staging resources
             // and not creating a new one each time.
-            //
+
             var min = _format.IsCompressedFormat() ? 4 : 1;
             var levelSize = Math.Max(Size >> level, min);
 
@@ -112,11 +112,10 @@ namespace Microsoft.Xna.Framework.Graphics
                             // We need to copy each row separatly and skip trailing zeros.
                             stream.Seek(0, SeekOrigin.Begin);
 
-                            var elementSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
                             for (var row = 0; row < rows; row++)
                             {
                                 int i;
-                                for (i = row * rowSize / elementSizeInByte; i < (row + 1) * rowSize / elementSizeInByte; i++)
+                                for (i = row * rowSize / sizeof(T); i < (row + 1) * rowSize / sizeof(T); i++)
                                     data[i + startIndex] = stream.Read<T>();
 
                                 if (i >= elementCount)
@@ -134,18 +133,16 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        private void PlatformSetData<T>(CubeMapFace face, int level, Rectangle rect, T[] data, int startIndex, int elementCount)
+        private unsafe void PlatformSetData<T>(
+            CubeMapFace face, int level, Rectangle rect, T[] data, int startIndex, int elementCount)
+            where T : unmanaged
         {
-            var elementSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
             var dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            // Use try..finally to make sure dataHandle is freed in case of an error
             try
             {
-                var dataPtr = (IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startIndex*elementSizeInByte);
+                var dataPtr = (IntPtr)(dataHandle.AddrOfPinnedObject().ToInt64() + startIndex * sizeof(T));
                 var box = new DataBox(dataPtr, GetPitch(rect.Width), 0);
-
                 var subresourceIndex = CalculateSubresourceIndex(face, level);
-
                 var region = new ResourceRegion
                 {
                     Top = rect.Top,
@@ -166,10 +163,9 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-	    private int CalculateSubresourceIndex(CubeMapFace face, int level)
-	    {
-	        return (int) face * _levelCount + level;
-	    }
-	}
+        private int CalculateSubresourceIndex(CubeMapFace face, int level)
+        {
+            return (int)face * _levelCount + level;
+        }
+    }
 }
-

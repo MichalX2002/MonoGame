@@ -2,14 +2,15 @@
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     public static partial class KeyboardInput
     {
         private static Form _dialog;
         private static TaskCompletionSource<string> _tcs;
         
-        private static Task<string> PlatformShow(string title, string description, string defaultText, bool usePasswordMode)
+        private static Task<string> PlatformShow(
+            string title, string description, string defaultText, bool usePasswordMode)
         {
             _tcs = new TaskCompletionSource<string>();
 

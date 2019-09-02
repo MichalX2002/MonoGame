@@ -145,7 +145,7 @@ namespace MonoGame.Framework.Audio
                 AL.Source(SourceID.Value, ALSourcei.Buffer, 0);
                 ALHelper.CheckError("Failed to free source from buffer.");
 
-                _controller.FreeSource(this);
+                _controller.RecycleSource(SourceID.Value);
             }
             SoundState = SoundState.Stopped;
         }

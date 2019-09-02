@@ -58,18 +58,18 @@ namespace MonoGame.Framework.Media
                 _instance = this;
             }
 
+            BufferSize = bufferSize;
+            UpdateRate = updateRate;
+
+            _threadTiming = new TimeSpan[(int)(UpdateRate < 1 ? 1 : UpdateRate)];
+            UpdateTime = new ReadOnlyCollection<TimeSpan>(_threadTiming);
+
             _streams = new HashSet<OggStream>();
             _threadWatch = new Stopwatch();
 
             _readBuffer = new UnmanagedPointer<float>(BufferSize);
             if (!ALController.Instance.SupportsFloat32)
                 _castBuffer = new UnmanagedPointer<short>(BufferSize);
-
-            BufferSize = bufferSize;
-            UpdateRate = updateRate;
-
-            _threadTiming = new TimeSpan[(int)(UpdateRate < 1 ? 1 : UpdateRate)];
-            UpdateTime = new ReadOnlyCollection<TimeSpan>(_threadTiming);
 
             _thread = new Thread(SongStreamingThread)
             {

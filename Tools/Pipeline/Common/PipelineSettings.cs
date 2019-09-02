@@ -19,7 +19,7 @@ namespace MonoGame.Tools.Pipeline
 
         public List<string> ProjectHistory;
         public string StartupProject;
-        public Microsoft.Xna.Framework.Point Size;
+        public Framework.Point Size;
         public int HSeparator, VSeparator;
         public bool Maximized, DebugMode, PropertyGroupSort;
         public bool FilterOutput, FilterShowSkipped, FilterShowSuccessful, FilterShowCleaned, AutoScrollBuildOutput;

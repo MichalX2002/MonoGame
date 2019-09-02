@@ -14,6 +14,9 @@ namespace MonoGame.Utilities.PackedVector
     /// </summary>
     public struct HalfVector2 : IPixel, IPackedVector<uint>
     {
+        [CLSCompliant(false)]
+        public uint PackedValue;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="HalfVector2"/> struct.
         /// </summary>
@@ -27,8 +30,11 @@ namespace MonoGame.Utilities.PackedVector
         /// <param name="vector">A vector containing the initial values for the components.</param>
         public HalfVector2(Vector2 vector) => PackedValue = Pack(vector.X, vector.Y);
 
-        /// <inheritdoc/>
-        public uint PackedValue { get; set; }
+        uint IPackedVector<uint>.PackedValue
+        {
+            get => PackedValue;
+            set => PackedValue = value;
+        }
 
         /// <summary>
         /// Compares two <see cref="HalfVector2"/> objects for equality.
@@ -53,8 +59,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector)
         {
-            Vector2 scaled = new Vector2(vector.X, vector.Y) * 2F;
-            scaled -= Vector2.One;
+            var scaled = new Vector2(vector.X * 2f - 1, vector.Y * 2f - 1);
             PackedValue = Pack(scaled.X, scaled.Y);
         }
 

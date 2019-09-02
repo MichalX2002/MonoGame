@@ -9,17 +9,15 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Input.Touch;
-using Microsoft.Xna.Framework.Windows;
-using ButtonState = Microsoft.Xna.Framework.Input.ButtonState;
-using Keys = Microsoft.Xna.Framework.Input.Keys;
-using Point = System.Drawing.Point;
-using Rectangle = Microsoft.Xna.Framework.Rectangle;
-using Size = System.Drawing.Size;
-using XnaPoint = Microsoft.Xna.Framework.Point;
+using MonoGame.Framework.Graphics;
+using MonoGame.Framework.Input;
+using MonoGame.Framework.Input.Touch;
+using MonoGame.Framework.Windows;
+using MonoGame.Utilities;
+using ButtonState = MonoGame.Framework.Input.ButtonState;
+using Keys = MonoGame.Framework.Input.Keys;
+using DrawingPoint = System.Drawing.Point;
+using DrawingSize = System.Drawing.Size;
 
 namespace MonoGame.Framework
 {
@@ -37,7 +35,7 @@ namespace MonoGame.Framework
         private bool _isMouseHidden;
         private bool _isMouseInBounds;
 
-        private Point _locationBeforeFullScreen;
+        private DrawingPoint _locationBeforeFullScreen;
         // flag to indicate that we're switching to/from full screen and should ignore resize events
         private bool _switchingFullScreen;
 
@@ -46,20 +44,19 @@ namespace MonoGame.Framework
 
 
         private bool _isResizeTickEnabled;
-        private readonly System.Timers.Timer _resizeTickTimer;
+        private System.Timers.Timer _resizeTickTimer;
 
         internal Game Game { get; private set; }
 
-        
-        public override IntPtr Handle { get { return Form.Handle; } }
-
-        public override string ScreenDeviceName { get { return string.Empty; } }
+        public override IntPtr Handle => Form.Handle;
+        public override string ScreenDeviceName => string.Empty;
+        public override DisplayOrientation CurrentOrientation => DisplayOrientation.Default;
 
         public override Rectangle ClientBounds
         {
             get
             {
-                var position = Form.PointToScreen(Point.Empty);
+                var position = Form.PointToScreen(DrawingPoint.Empty);
                 var size = Form.ClientSize;
                 return new Rectangle(position.X, position.Y, size.Width, size.Height);
             }
@@ -67,7 +64,7 @@ namespace MonoGame.Framework
 
         public override bool AllowUserResizing
         {
-            get { return _isResizable; }
+            get => _isResizable;
             set
             {
                 if (_isResizable != value)
@@ -85,26 +82,21 @@ namespace MonoGame.Framework
 
         public override bool AllowAltF4
         {
-             get { return base.AllowAltF4; }
-             set
-             {
-                 Form.AllowAltF4 = value;
-                 base.AllowAltF4 = value;
-             }
+            get => base.AllowAltF4;
+            set
+            {
+                Form.AllowAltF4 = value;
+                base.AllowAltF4 = value;
+            }
         }
 
-        public override DisplayOrientation CurrentOrientation
+        public override Point Position
         {
-            get { return DisplayOrientation.Default; }
-        }
-
-        public override XnaPoint Position
-        {
-            get { return new XnaPoint(Form.Location.X, Form.Location.Y); }
+            get => new Point(Form.Location.X, Form.Location.Y);
             set
             {
                 _wasMoved = true;
-                Form.Location = new Point(value.X, value.Y);
+                Form.Location = new DrawingPoint(value.X, value.Y);
                 RefreshAdapter();
             }
         }
@@ -115,7 +107,7 @@ namespace MonoGame.Framework
 
         public override bool IsBorderless
         {
-            get { return _isBorderless; }
+            get => _isBorderless;
             set
             {
                 if (_isBorderless != value)
@@ -143,10 +135,11 @@ namespace MonoGame.Framework
             Game = platform.Game;
 
             Form = new WinFormsGameForm(this);
-            ChangeClientSize(new Size(GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight));
+            ChangeClientSize(new DrawingSize(
+                GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight));
 
             SetIcon();
-            Title = Utilities.AssemblyHelper.GetDefaultWindowTitle();
+            Title = AssemblyHelper.GetDefaultWindowTitle();
 
             Form.MaximizeBox = false;
             Form.FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -272,7 +265,7 @@ namespace MonoGame.Framework
 
             GetCursorPos(out _);
             MapWindowPoints(new HandleRef(null, IntPtr.Zero), new HandleRef(Form, Form.Handle), out POINTSTRUCT pos, 1);
-            var clientPos = new Point(pos.X, pos.Y);
+            var clientPos = new DrawingPoint(pos.X, pos.Y);
             var withinClient = Form.ClientRectangle.Contains(clientPos);
             var buttons = Control.MouseButtons;
 
@@ -344,12 +337,12 @@ namespace MonoGame.Framework
 
         internal void Initialize(int width, int height)
         {
-            ChangeClientSize(new Size(width, height));
+            ChangeClientSize(new DrawingSize(width, height));
         }
 
         internal void Initialize(PresentationParameters pp)
         {
-            ChangeClientSize(new Size(pp.BackBufferWidth, pp.BackBufferHeight));
+            ChangeClientSize(new DrawingSize(pp.BackBufferWidth, pp.BackBufferHeight));
 
             if (pp.IsFullScreen)
             {
@@ -507,7 +500,7 @@ namespace MonoGame.Framework
             public Point p;
         }
 
-        internal void ChangeClientSize(Size clientBounds)
+        internal void ChangeClientSize(DrawingSize clientBounds)
         {
             var prevIsResizing = Form.IsResizing;
             // make sure we don't see the events from this as a user resize
@@ -543,7 +536,11 @@ namespace MonoGame.Framework
                     Form.Dispose();
                     Form = null;
                 }
+
+                _resizeTickTimer?.Dispose();
+                _resizeTickTimer = null;
             }
+
             _platform = null;
             Game = null;
             Mouse.WindowHandle = IntPtr.Zero;
@@ -599,7 +596,7 @@ namespace MonoGame.Framework
                 raiseClientSizeChanged = true;
             }
 
-            ChangeClientSize(new Size(pp.BackBufferWidth, pp.BackBufferHeight));
+            ChangeClientSize(new DrawingSize(pp.BackBufferWidth, pp.BackBufferHeight));
 
             if (raiseClientSizeChanged)
                 OnClientSizeChanged();

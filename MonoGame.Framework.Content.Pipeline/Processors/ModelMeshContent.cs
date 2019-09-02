@@ -3,9 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System.Collections.Generic;
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
+using MonoGame.Framework.Content.Pipeline.Graphics;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     public sealed class ModelMeshContent
     {
@@ -31,10 +31,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 
         public ModelBoneContent ParentBone { get; }
 
-        public MeshContent SourceMesh
-        {
-            get { return _sourceMesh; }
-        }
+        public MeshContent SourceMesh => _sourceMesh;
 
         public object Tag { get; set; }
     }

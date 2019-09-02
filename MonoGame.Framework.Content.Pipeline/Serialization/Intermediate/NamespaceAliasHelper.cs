@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 {
     internal class NamespaceAliasHelper
     {

@@ -8,14 +8,17 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed vector type containing a single 8 bit normalized W values that is ranging from 0 to 1.
+    /// Packed vector type containing a single 8 bit normalized W value that ranges from 0 to 1.
     /// </summary>
     public partial struct Alpha8 : IPixel, IPackedVector<byte>, IEquatable<Alpha8>
     {
-        /// <summary>
-        /// Gets and sets the packed value.
-        /// </summary>
-        public byte PackedValue { get; set; }
+        public byte Value;
+
+        byte IPackedVector<byte>.PackedValue
+        {
+            get => Value;
+            set => Value = value;
+        }
 
         /// <summary>
         /// Creates a new instance of Alpha8.
@@ -23,7 +26,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <param name="alpha">The alpha component</param>
         public Alpha8(byte alpha)
         {
-            PackedValue = alpha;
+            Value = alpha;
         }
 
         /// <summary>
@@ -32,7 +35,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <param name="alpha">The alpha component</param>
         public Alpha8(float alpha)
         {
-            PackedValue = Pack(alpha);
+            Value = Pack(alpha);
         }
 
         #region IPixel Implementation
@@ -45,37 +48,37 @@ namespace MonoGame.Utilities.PackedVector
         public Vector4 ToScaledVector4() => ToVector4();
 
         /// <inheritdoc />
-        public void FromVector4(Vector4 vector) => PackedValue = Pack(vector.W);
+        public void FromVector4(Vector4 vector) => Value = Pack(vector.W);
 
         /// <inheritdoc />
-        public Vector4 ToVector4() => new Vector4(0, 0, 0, PackedValue / 255F);
+        public Vector4 ToVector4() => new Vector4(0, 0, 0, Value / 255F);
 
         /// <inheritdoc/>
-        public void FromArgb32(Argb32 source) => PackedValue = source.A;
+        public void FromArgb32(Argb32 source) => Value = source.A;
 
         /// <inheritdoc/>
-        public void FromBgr24(Bgr24 source) => PackedValue = byte.MaxValue;
+        public void FromBgr24(Bgr24 source) => Value = byte.MaxValue;
 
         /// <inheritdoc/>
-        public void FromBgra32(Bgra32 source) => PackedValue = source.A;
+        public void FromBgra32(Bgra32 source) => Value = source.A;
 
         /// <inheritdoc/>
         public void FromBgra5551(Bgra5551 source) => FromScaledVector4(source.ToScaledVector4());
 
         /// <inheritdoc/>
-        public void FromGray8(Gray8 source) => PackedValue = byte.MaxValue;
+        public void FromGray8(Gray8 source) => Value = byte.MaxValue;
 
         /// <inheritdoc/>
-        public void FromGray16(Gray16 source) => PackedValue = byte.MaxValue;
+        public void FromGray16(Gray16 source) => Value = byte.MaxValue;
 
         /// <inheritdoc/>
-        public void FromRgb24(Rgb24 source) => PackedValue = byte.MaxValue;
+        public void FromRgb24(Rgb24 source) => Value = byte.MaxValue;
 
         /// <inheritdoc />
-        public void FromColor(Color source) => PackedValue = source.A;
+        public void FromColor(Color source) => Value = source.A;
 
         /// <inheritdoc/>
-        public void FromRgb48(Rgb48 source) => PackedValue = byte.MaxValue;
+        public void FromRgb48(Rgb48 source) => Value = byte.MaxValue;
 
         /// <inheritdoc/>
         public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
@@ -84,7 +87,7 @@ namespace MonoGame.Utilities.PackedVector
         public void ToColor(ref Color dest)
         {
             dest = default;
-            dest.A = PackedValue;
+            dest.A = Value;
         }
 		
         #endregion
@@ -93,7 +96,7 @@ namespace MonoGame.Utilities.PackedVector
         /// Gets the packed vector in float format.
         /// </summary>
         /// <returns>The packed vector in Vector3 format</returns>
-        public float ToAlpha() => PackedValue / 255.0f;
+        public float ToAlpha() => Value / 255.0f;
 
         /// <summary>
         /// Compares an object with the packed vector.
@@ -107,23 +110,23 @@ namespace MonoGame.Utilities.PackedVector
         /// </summary>
         /// <param name="other">The Alpha8 packed vector to compare.</param>
         /// <returns>True if the packed vectors are equal.</returns>
-        public bool Equals(Alpha8 other) => PackedValue == other.PackedValue;
+        public bool Equals(Alpha8 other) => Value == other.Value;
 
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
         /// <returns>A string representation of the packed vector.</returns>
-        public override string ToString() => (PackedValue / 255f).ToString();
+        public override string ToString() => (Value / 255f).ToString();
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
         /// <returns>The hash code for the packed vector.</returns>
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override int GetHashCode() => Value.GetHashCode();
 
-        public static bool operator ==(Alpha8 lhs, Alpha8 rhs) => lhs.PackedValue == rhs.PackedValue;
+        public static bool operator ==(Alpha8 lhs, Alpha8 rhs) => lhs.Value == rhs.Value;
 
-        public static bool operator !=(Alpha8 lhs, Alpha8 rhs) => lhs.PackedValue != rhs.PackedValue;
+        public static bool operator !=(Alpha8 lhs, Alpha8 rhs) => lhs.Value != rhs.Value;
 
         private static byte Pack(float alpha)
         {

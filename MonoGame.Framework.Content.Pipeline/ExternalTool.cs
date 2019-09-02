@@ -8,7 +8,7 @@ using System.IO;
 using System.Threading;
 using MonoGame.Utilities;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline
+namespace MonoGame.Framework.Content.Pipeline
 {
     /// <summary>
     /// Helper to run an external tool installed in the system. Useful for when
@@ -26,7 +26,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
             return result;
         }
 
-        public static int Run(string command, string arguments, out string stdout, out string stderr, string stdin = null)
+        public static int Run(
+            string command, string arguments,
+            out string stdout, out string stderr, string stdin = null)
         {
             // This particular case is likely to be the most common and thus
             // warrants its own specific error message rather than falling
@@ -39,40 +41,31 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
             // lambdas (for the thread functions), so we have to store
             // the data in a temporary variable and then assign these
             // variables to the out parameters.
-            var stdoutTemp = string.Empty;
-            var stderrTmp = string.Empty;
-
-            var processInfo = new ProcessStartInfo
-            {
-                Arguments = arguments,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                ErrorDialog = false,
-                FileName = fullPath,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                RedirectStandardInput = true,
-            };
+            string stdoutTemp = string.Empty;
+            string stderrTmp = string.Empty;
 
             EnsureExecutable(fullPath);
 
             using (var process = new Process())
             {
-                process.StartInfo = processInfo;
+                process.StartInfo = new ProcessStartInfo
+                {
+                    Arguments = arguments,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    ErrorDialog = false,
+                    FileName = fullPath,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    RedirectStandardInput = true,
+                };
                 process.Start();
 
                 // We have to run these in threads, because using ReadToEnd
                 // on one stream can deadlock if the other stream's buffer is full.
-                var stdoutThread = new Thread(() =>
-                {
-                    stdoutTemp = process.StandardOutput.ReadToEnd();
-                });
-
-                var stderrThread = new Thread(() =>
-                {
-                    stderrTmp = process.StandardError.ReadToEnd();
-                });
+                var stdoutThread = new Thread(() => stdoutTemp = process.StandardOutput.ReadToEnd());
+                var stderrThread = new Thread(() => stderrTmp = process.StandardError.ReadToEnd());
 
                 stdoutThread.Start();
                 stderrThread.Start();
@@ -90,7 +83,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
 
                 stdout = stdoutTemp;
                 stderr = stderrTmp;
-
                 return process.ExitCode;
             }
         }
@@ -129,7 +121,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                         return fullExeName;
                 }
             }
-
             return null;
         }
 
@@ -160,7 +151,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         }
 
         /// <summary>
-        /// Safely deletes the file if it exists.
+        /// Safely tries to delete the specified file.
         /// </summary>
         /// <param name="filePath">The path to the file to delete.</param>
         public static void DeleteFile(string filePath)
@@ -170,7 +161,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
                 File.Delete(filePath);
             }
             catch (Exception)
-            {                    
+            {              
             }
         }
     }

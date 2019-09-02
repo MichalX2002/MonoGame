@@ -5,7 +5,7 @@
 using System;
 using System.Collections.ObjectModel;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Provides methods for maintaining a mipmap chain.

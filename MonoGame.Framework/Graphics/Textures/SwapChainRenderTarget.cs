@@ -6,7 +6,7 @@ using SharpDX.Direct3D11;
 #endif
 
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
 #if WINDOWS && DIRECTX
 

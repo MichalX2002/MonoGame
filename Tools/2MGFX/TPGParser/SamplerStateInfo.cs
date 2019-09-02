@@ -1,6 +1,6 @@
 ﻿using System;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework;
+using MonoGame.Framework.Graphics;
 
 namespace TwoMGFX.TPGParser
 {

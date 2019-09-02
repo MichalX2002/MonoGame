@@ -11,8 +11,8 @@ namespace MonoGame.Tools.Pipeline
     {
         public string Title
         {
-            get { return label.Text; }
-            set { label.Text = value; }
+            get => label.Text;
+            set => label.Text = value;
         }
 
         public List<Command> Commands;

@@ -32,14 +32,13 @@ namespace MonoGame.Framework.Media
 
         public static ReadOnlyCollection<TimeSpan> UpdateTime
         {
-            get
-            {
+            get =>
 #if DIRECTX || DESKTOPGL
-                return OggStreamer.Instance.UpdateTime;
+                OggStreamer.Instance.UpdateTime;
 #else
                 return null;
 #endif
-            }
+
         }
 
         #endregion

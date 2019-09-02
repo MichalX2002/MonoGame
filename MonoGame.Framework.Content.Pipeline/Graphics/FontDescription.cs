@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     internal class CharacterCollection : ICollection<char>
     {
@@ -47,15 +47,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             _items.CopyTo(array, arrayIndex);
         }
 
-        public int Count
-        {
-            get { return _items.Count; }
-        }
+        public int Count => _items.Count;
 
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
+        public bool IsReadOnly => false;
 
         public bool Remove(char item)
         {
@@ -98,35 +92,29 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 		/// </summary>
         [ContentSerializer(AllowNull = false)]
 		public string FontName
-		{
-			get
-			{
-				return fontName;
-			}
-			set
-			{
-				if (string.IsNullOrEmpty(value))
-					throw new ArgumentNullException("FontName is null or an empty string.");
-				fontName = value;
-			}
-		}
+        {
+            get => fontName;
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    throw new ArgumentNullException("FontName is null or an empty string.");
+                fontName = value;
+            }
+        }
 
-		/// <summary>
-		/// Gets or sets the size, in points, of the font.
-		/// </summary>
-		public float Size
-		{
-			get
-			{
-				return size;
-			}
-			set
-			{
-				if (value <= 0.0f)
-					throw new ArgumentOutOfRangeException("Size must be greater than zero.");
-				size = value;
-			}
-		}
+        /// <summary>
+        /// Gets or sets the size, in points, of the font.
+        /// </summary>
+        public float Size
+        {
+            get => size;
+            set
+            {
+                if (value <= 0.0f)
+                    throw new ArgumentOutOfRangeException("Size must be greater than zero.");
+                size = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the amount of space, in pixels, to insert between letters in a string.
@@ -140,14 +128,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         [ContentSerializer(Optional = true)]
         public bool UseKerning
         {
-            get
-            {
-                return useKerning;
-            }
-            set
-            {
-                useKerning = value;
-            }
+            get => useKerning;
+            set => useKerning = value;
         }
 
         /// <summary>
@@ -159,7 +141,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// Gets or sets the default character for the font.
         /// </summary>
         [ContentSerializer(Optional = true)]
-        public Nullable<char> DefaultCharacter { get; set; }
+        public char? DefaultCharacter { get; set; }
 
         [ContentSerializer(CollectionItemName = "CharacterRegion")]
         internal CharacterRegion[] CharacterRegions
@@ -204,10 +186,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 		
 	    [ContentSerializerIgnore]
 	    public ICollection<char> Characters
-	    {
-	        get { return characters; } 
-            internal set { characters = new CharacterCollection(value); }
-	    }
+        {
+            get => characters;
+            internal set => characters = new CharacterCollection(value);
+        }
 
         internal FontDescription()
         {

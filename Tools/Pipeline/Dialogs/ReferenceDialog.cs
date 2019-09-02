@@ -30,7 +30,7 @@ namespace MonoGame.Tools.Pipeline
         private FileFilter _dllFileFilter, _allFileFilter;
         private SelectableFilterCollection<RefItem> _dataStore;
 
-        public ReferenceDialog(IController controller, string[] refs)
+        public ReferenceDialog(IController controller, IEnumerable<string> refs)
         {
             InitializeComponent();
 
@@ -65,15 +65,14 @@ namespace MonoGame.Tools.Pipeline
         {
             References = new List<string>();
 
-            var items = _dataStore.GetEnumerator();
-            while (items.MoveNext())
-                References.Add(_controller.GetRelativePath(items.Current.Location));
+            foreach (var item in _dataStore)
+                References.Add(_controller.GetRelativePath(item.Location));
             base.Close();
         }
 
         private void Grid1_SelectionChanged(object sender, EventArgs e)
         {
-            buttonRemove.Enabled = grid1.SelectedItems.ToList().Count > 0;
+            buttonRemove.Enabled = grid1.SelectedItems.Count() > 0;
         }
 
         private void Grid1_KeyDown(object sender, KeyEventArgs e)
@@ -84,25 +83,25 @@ namespace MonoGame.Tools.Pipeline
 
         private void ButtonAdd_Click(object sender, EventArgs e)
         {
-            var dialog = new OpenFileDialog
+            using (var dialog = new OpenFileDialog
             {
                 Directory = new Uri(_controller.ProjectItem.Location),
                 MultiSelect = true
-            };
-            dialog.Filters.Add(_dllFileFilter);
-            dialog.Filters.Add(_allFileFilter);
-            dialog.CurrentFilter = _dllFileFilter;
+            })
+            {
+                dialog.Filters.Add(_dllFileFilter);
+                dialog.Filters.Add(_allFileFilter);
+                dialog.CurrentFilter = _dllFileFilter;
 
-            if (dialog.ShowDialog(this) == DialogResult.Ok)
-                foreach (var fileName in dialog.Filenames)
-                    _dataStore.Add(new RefItem(Path.GetFileName(fileName), fileName));
+                if (dialog.ShowDialog(this) == DialogResult.Ok)
+                    foreach (var fileName in dialog.Filenames)
+                        _dataStore.Add(new RefItem(Path.GetFileName(fileName), fileName));
+            }
         }
 
         private void ButtonRemove_Click(object sender, EventArgs e)
         {
-            var selectedItems = grid1.SelectedItems.ToArray();
-            
-            foreach (var item in selectedItems)
+            foreach (var item in grid1.SelectedItems)
                 _dataStore.Remove(item as RefItem);
         }
 

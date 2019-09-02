@@ -8,7 +8,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.Xna.Framework.Content.Pipeline;
+using MonoGame.Framework.Content.Pipeline;
 using TwoMGFX.TPGParser;
 
 namespace TwoMGFX
@@ -31,10 +31,7 @@ namespace TwoMGFX
         /// <summary>
         /// Returns all the loaded shader profiles.
         /// </summary>
-        public static IEnumerable<ShaderProfile> All
-        {
-            get { return _profiles; }
-        }
+        public static IEnumerable<ShaderProfile> All => _profiles;
 
         /// <summary>
         /// Returns the name of the shader profile.

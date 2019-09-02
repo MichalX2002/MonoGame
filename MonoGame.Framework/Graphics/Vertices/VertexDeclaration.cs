@@ -136,9 +136,8 @@ namespace MonoGame.Framework.Graphics
         /// Initializes a new instance of the <see cref="VertexDeclaration"/> class.
         /// </summary>
         /// <param name="elements">The vertex elements.</param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="elements"/> is <see langword="null"/> or empty.
-        /// </exception>
+        /// <exception cref="ArgumentNullException"><paramref name="elements"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentEmptyException"><paramref name="elements"/> is empty.</exception>
         public VertexDeclaration(params VertexElement[] elements)
             : this(GetVertexStride(elements), elements)
 		{
@@ -149,13 +148,12 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="vertexStride">The size of a vertex (including padding) in bytes.</param>
         /// <param name="elements">The vertex elements.</param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="elements"/> is <see langword="null"/> or empty.
-        /// </exception>
+        /// <exception cref="ArgumentNullException"><paramref name="elements"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentEmptyException"><paramref name="elements"/> is empty.</exception>
         public VertexDeclaration(int vertexStride, params VertexElement[] elements)
         {
-            if ((elements == null) || (elements.Length == 0))
-                throw new ArgumentNullException(nameof(elements), "Elements cannot be empty.");
+            if (elements == null) throw new ArgumentNullException(nameof(elements));
+            if (elements.Length == 0) throw new ArgumentEmptyException(nameof(elements));
 
             lock (_vertexDeclarationCache)
             {

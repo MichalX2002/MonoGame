@@ -134,7 +134,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc/>
         public void FromGray16(Gray16 source)
         {
-            byte rgb = VectorMaths.DownScale16To8Bit(source.PackedValue);
+            byte rgb = PackedVectorHelper.DownScale16To8Bit(source.PackedValue);
             R = rgb;
             G = rgb;
             B = rgb;
@@ -163,17 +163,17 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc/>
         public void FromRgb48(Rgb48 source)
         {
-            R = VectorMaths.DownScale16To8Bit(source.R);
-            G = VectorMaths.DownScale16To8Bit(source.G);
-            B = VectorMaths.DownScale16To8Bit(source.B);
+            R = PackedVectorHelper.DownScale16To8Bit(source.R);
+            G = PackedVectorHelper.DownScale16To8Bit(source.G);
+            B = PackedVectorHelper.DownScale16To8Bit(source.B);
         }
 
         /// <inheritdoc/>
         public void FromRgba64(Rgba64 source)
         {
-            R = VectorMaths.DownScale16To8Bit(source.R);
-            G = VectorMaths.DownScale16To8Bit(source.G);
-            B = VectorMaths.DownScale16To8Bit(source.B);
+            R = PackedVectorHelper.DownScale16To8Bit(source.R);
+            G = PackedVectorHelper.DownScale16To8Bit(source.G);
+            B = PackedVectorHelper.DownScale16To8Bit(source.B);
         }
 
         /// <inheritdoc/>

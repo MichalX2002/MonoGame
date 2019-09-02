@@ -4,7 +4,7 @@
 
 using System.IO;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     /// <summary>
     /// Represents a processed sound effect.

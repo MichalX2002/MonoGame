@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using MonoGame.Utilities.Memory;
 
 #if ANGLE
 using OpenTK.Graphics;
@@ -453,6 +454,11 @@ namespace MonoGame.Framework.Graphics
             BlendState = prevBlendState;
         }
 
+        private void PlatformFlush()
+        {
+            GL.Flush();
+        }
+
         private void PlatformReset()
         {
         }
@@ -577,7 +583,7 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        private void PlatformSetViewport(ref Viewport value)
+        private void PlatformSetViewport(in Viewport value)
         {
             if (IsRenderTargetBound)
                 GL.Viewport(value.X, value.Y, value.Width, value.Height);
@@ -591,7 +597,6 @@ namespace MonoGame.Framework.Graphics
             // In OpenGL we have to re-apply the special "posFixup"
             // vertex shader uniform if the viewport changes.
             VertexShaderDirty = true;
-
         }
 
         private void PlatformApplyDefaultRenderTarget()
@@ -636,14 +641,14 @@ namespace MonoGame.Framework.Graphics
                 {
                     unchecked
                     {
-                        int hash = 17;
+                        int code = 17;
                         foreach (var item in array)
                         {
                             if (item.RenderTarget != null)
-                                hash = hash * 23 + item.RenderTarget.GetHashCode();
-                            hash = hash * 23 + item.ArraySlice.GetHashCode();
+                                code = code * 23 + item.RenderTarget.GetHashCode();
+                            code = code * 23 + item.ArraySlice.GetHashCode();
                         }
-                        return hash;
+                        return code;
                     }
                 }
                 return 0;
@@ -965,8 +970,8 @@ namespace MonoGame.Framework.Graphics
             _posFixup[1] = 1.0f;
             if (!GraphicsDeviceManager.UseStandardPixelAddressing)
             {
-                _posFixup[2] = (63.0f/64.0f)/Viewport.Width;
-                _posFixup[3] = -(63.0f/64.0f)/Viewport.Height;
+                _posFixup[2] = (63.0f / 64.0f) / Viewport.Width;
+                _posFixup[3] = -(63.0f / 64.0f) / Viewport.Height;
             }
             else
             {
@@ -1178,31 +1183,51 @@ namespace MonoGame.Framework.Graphics
             GraphicsExtensions.CheckGLError();
         }
 
-        private unsafe void PlatformGetBackBufferData<T>(Rectangle rectangle, Span<T> destination)
+        private unsafe void PlatformGetBackBufferData<T>(Rectangle rect, Span<T> destination)
             where T : unmanaged
         {
             fixed (T* ptr = &MemoryMarshal.GetReference(destination))
             {
-                int flippedY = PresentationParameters.BackBufferHeight - rectangle.Y - rectangle.Height;
+                int flippedY = PresentationParameters.BackBufferHeight - rect.Bottom;
                 GL.ReadPixels(
-                    rectangle.X, flippedY, rectangle.Width, rectangle.Height,
+                    rect.X, flippedY, rect.Width, rect.Height,
                     PixelFormat.Rgba, PixelType.UnsignedByte, (IntPtr)ptr);
             }
 
-            // buffer is returned upside down, so we swap the rows around when copying over
-            int elementSize = Marshal.SizeOf(typeof(T));
-            int rowSize = rectangle.Width * PresentationParameters.BackBufferFormat.GetSize() / elementSize;
-            Span<T> rowBuffer = stackalloc T[rowSize];
+            // ReadPixels returns data upside down, so we must swap rows around
+            int rowBytes = rect.Width * PresentationParameters.BackBufferFormat.GetSize();
+            int rowSize = rowBytes / sizeof(T);
+            int count = destination.Length;
 
-            for (int dy = 0; dy < rectangle.Height / 2; dy++)
+            Span<byte> buffer = stackalloc byte[Math.Min(4096, rowBytes)];
+            var rowBuffer = MemoryMarshal.Cast<byte, T>(buffer);
+
+            for (int dy = 0; dy < rect.Height / 2; dy++)
             {
-                var bottomRow = destination.Slice((rectangle.Height - dy - 1) * rowSize, rowSize);
-                bottomRow.CopyTo(rowBuffer);
+                int left = Math.Min(count, rowSize);
+                if (left == 0)
+                    break;
 
+                int offset = 0;
                 var topRow = destination.Slice(dy * rowSize, rowSize);
-                topRow.CopyTo(bottomRow);
+                var bottomRow = destination.Slice((rect.Height - dy - 1) * rowSize, rowSize);
 
-                rowBuffer.CopyTo(topRow);
+                while (left > 0)
+                {
+                    int toCopy = Math.Min(left, rowBuffer.Length);
+
+                    var bottomRowSlice = bottomRow.Slice(offset, toCopy);
+                    bottomRowSlice.CopyTo(rowBuffer);
+
+                    var topRowSlice = topRow.Slice(offset, toCopy);
+                    topRowSlice.CopyTo(bottomRowSlice);
+
+                    rowBuffer.Slice(0, toCopy).CopyTo(topRowSlice);
+
+                    count -= toCopy;
+                    offset += toCopy;
+                    left -= toCopy;
+                }
             }
         }
 
@@ -1211,7 +1236,8 @@ namespace MonoGame.Framework.Graphics
             return new Rectangle(x, y, width, height);
         }
 
-        internal void PlatformSetMultiSamplingToMaximum(PresentationParameters presentationParameters, out int quality)
+        internal void PlatformSetMultiSamplingToMaximum(
+            PresentationParameters presentationParameters, out int quality)
         {
             presentationParameters.MultiSampleCount = 4;
             quality = 0;
@@ -1235,7 +1261,9 @@ namespace MonoGame.Framework.Graphics
             public int InstanceFrequency;
             public int Vbo;
 
-            public BufferBindingInfo(VertexDeclaration.VertexDeclarationAttributeInfo attributeInfo, IntPtr vertexOffset, int instanceFrequency, int vbo)
+            public BufferBindingInfo(
+                VertexDeclaration.VertexDeclarationAttributeInfo attributeInfo,
+                IntPtr vertexOffset, int instanceFrequency, int vbo)
             {
                 AttributeInfo = attributeInfo;
                 VertexOffset = vertexOffset;
@@ -1259,7 +1287,7 @@ namespace MonoGame.Framework.Graphics
         //    width = closest.Width;
         //    height = closest.Height;
         //}
-
+        //
         //private void GetDisplayResolution(out int width, out int height)
         //{
         //    Sdl.Display.GetCurrentDisplayMode(0, out Sdl.Display.Mode mode);

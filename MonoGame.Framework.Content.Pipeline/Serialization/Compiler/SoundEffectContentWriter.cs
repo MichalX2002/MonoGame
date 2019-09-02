@@ -2,11 +2,11 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using Microsoft.Xna.Framework.Content.Pipeline.Processors;
+using MonoGame.Framework.Content.Pipeline.Processors;
 using MonoGame.Utilities.Memory;
 using System;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     [ContentTypeWriter]
     class SoundEffectWriter : BuiltInContentWriter<SoundEffectContent>
@@ -27,7 +27,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
 
             output.Write(value.dataLength);
 
-            byte[] buffer = RecyclableMemoryManager.Instance.GetBlock();
+            byte[] buffer = RecyclableMemoryManager.Default.GetBlock();
             try
             {
                 int leftToRead = value.dataLength;
@@ -40,7 +40,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
             }
             finally
             {
-                RecyclableMemoryManager.Instance.ReturnBlock(buffer, null);
+                RecyclableMemoryManager.Default.ReturnBlock(buffer, null);
                 value.data.Dispose();
             }
         }

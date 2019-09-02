@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     /// <summary>
     /// Writes the dictionary to the output.
@@ -25,10 +25,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
             _valueWriter = output.GetTypeWriter(typeof(V));
         }
 
-        public override bool CanDeserializeIntoExistingObject
-        {
-            get { return true; }
-        }
+        public override bool CanDeserializeIntoExistingObject => true;
 
         protected internal override void Write(ContentWriter output, Dictionary<K,V> value)
         {

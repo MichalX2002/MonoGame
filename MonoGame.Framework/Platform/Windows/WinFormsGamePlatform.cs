@@ -4,11 +4,8 @@
 
 using System;
 using System.Diagnostics;
-using System.Drawing;
-using Microsoft.Xna.Framework;
-using System.Windows.Forms;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using MonoGame.Framework.Graphics;
+using MonoGame.Framework.Media;
 
 namespace MonoGame.Framework
 {
@@ -26,10 +23,7 @@ namespace MonoGame.Framework
             Window = _window;
         }
 
-        public override GameRunBehavior DefaultRunBehavior
-        {
-            get { return GameRunBehavior.Synchronous; }
-        }
+        public override GameRunBehavior DefaultRunBehavior => GameRunBehavior.Synchronous;
 
         protected override void OnIsMouseVisibleChanged()
         {
@@ -64,7 +58,7 @@ namespace MonoGame.Framework
 
         public override void StartRunLoop()
         {
-            throw new NotSupportedException("The Windows platform does not support asynchronous run loops");
+            throw new NotSupportedException("The Windows platform does not support asynchronous run loops.");
         }
         
         public override void Exit()
@@ -128,7 +122,7 @@ namespace MonoGame.Framework
                     _window = null;
                     Window = null;
                 }
-                Microsoft.Xna.Framework.Media.MediaManagerState.CheckShutdown();
+                MediaManagerState.CheckShutdown();
             }
 
             base.Dispose(disposing);

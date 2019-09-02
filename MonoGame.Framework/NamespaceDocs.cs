@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     /// <summary>
     /// Provides functionality to handle input from keyboards, mice, gamepads, etc.
@@ -13,7 +13,7 @@ namespace Microsoft.Xna.Framework.Input
     }
 }
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     /// <summary>
     /// Support for playing sound effects and XACT audio.
@@ -24,7 +24,7 @@ namespace Microsoft.Xna.Framework.Audio
     }
 }
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     /// <summary>
     /// The runtime support for loading content pipeline content.

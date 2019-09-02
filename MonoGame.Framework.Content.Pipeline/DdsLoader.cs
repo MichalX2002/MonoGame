@@ -3,12 +3,12 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Content.Pipeline.Graphics;
+using MonoGame.Framework.Graphics;
 using System.IO;
-using SixLabors.ImageSharp.PixelFormats;
+using MonoGame.Utilities.PackedVector;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline
+namespace MonoGame.Framework.Content.Pipeline
 {
     /// <summary>
     /// Loader class for DDS format image files.
@@ -186,7 +186,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
             switch (format)
             {
                 case SurfaceFormat.Rgba32:
-                    return new PixelBitmapContent<Rgba32>(width, height);
+                    return new PixelBitmapContent<Color>(width, height);
 
                 case SurfaceFormat.Bgra4444:
                     return new PixelBitmapContent<Bgra4444>(width, height);

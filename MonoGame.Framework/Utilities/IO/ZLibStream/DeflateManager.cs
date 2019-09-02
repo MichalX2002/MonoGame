@@ -68,7 +68,7 @@ namespace MonoGame.Utilities
 
         private CompressFunc DeflateFunction;
 
-        private static readonly System.String[] _ErrorMessage = new System.String[]
+        private static readonly string[] _ErrorMessage = new string[]
         {
             "need dictionary",
             "stream end",
@@ -1455,7 +1455,7 @@ namespace MonoGame.Utilities
                 throw new ZlibException("windowBits must be in the range 9..15.");
 
             if (memLevel < 1 || memLevel > MEM_LEVEL_MAX)
-                throw new ZlibException(String.Format("memLevel must be in the range 1.. {0}", MEM_LEVEL_MAX));
+                throw new ZlibException(string.Format("memLevel must be in the range 1.. {0}", MEM_LEVEL_MAX));
 
             _codec.dstate = this;
 
@@ -1626,7 +1626,7 @@ namespace MonoGame.Utilities
                 (status == FINISH_STATE && flush != FlushType.Finish))
             {
                 _codec.Message = _ErrorMessage[ZlibConstants.Z_NEED_DICT - (ZlibConstants.Z_STREAM_ERROR)];
-                throw new ZlibException(String.Format("Something is fishy. [{0}]", _codec.Message));
+                throw new ZlibException(string.Format("Something is fishy. [{0}]", _codec.Message));
             }
             if (_codec.AvailableBytesOut == 0)
             {

@@ -10,10 +10,10 @@ using System.Linq;
 using System.Reflection;
 using Assimp;
 using Assimp.Unmanaged;
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
+using MonoGame.Framework.Content.Pipeline.Graphics;
 using MonoGame.Utilities;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline
+namespace MonoGame.Framework.Content.Pipeline
 {
     [ContentImporter(
         ".dae", // Collada
@@ -256,14 +256,15 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
             if (CurrentPlatform.OS == OS.Linux)
             {
                 var targetDir = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory.FullName;
-
                 try
                 {
                     AssimpLibrary.Instance.LoadLibrary(
                         Path.Combine(targetDir, "libassimp.so"),
                         Path.Combine(targetDir, "libassimp.so"));
                 }
-                catch { }
+                catch
+                {
+                }
             }
 
             _identity = new ContentIdentity(filename, _importerName);

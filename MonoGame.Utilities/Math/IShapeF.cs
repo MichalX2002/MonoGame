@@ -1,10 +1,10 @@
 ﻿namespace MonoGame.Framework
 {
     /// <summary>
-    ///     Base class for shapes.
+    /// Base interace for different shapes.
     /// </summary>
     /// <remarks>
-    ///     Created to allow checking intersection between shapes of different types.
+    /// Created to allow checking intersection between shapes of different types.
     /// </remarks>
     public interface IShapeF
     {

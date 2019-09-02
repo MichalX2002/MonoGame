@@ -5,7 +5,7 @@
 using System;
 using System.Collections.ObjectModel;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     public sealed partial class GraphicsAdapter : IDisposable
     {
@@ -40,15 +40,9 @@ namespace Microsoft.Xna.Framework.Graphics
             _adapters[0].IsDefaultAdapter = true;
         }
 
-        public static GraphicsAdapter DefaultAdapter
-        {
-            get { return _adapters[0]; }
-        }
-        
-        public static ReadOnlyCollection<GraphicsAdapter> Adapters 
-        {
-            get  { return _adapters; }
-        }
+        public static GraphicsAdapter DefaultAdapter => _adapters[0];
+
+        public static ReadOnlyCollection<GraphicsAdapter> Adapters => _adapters;
 
         /// <summary>
         /// Used to request creation of the reference graphics device, 
@@ -61,8 +55,8 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </remarks>
         public static bool UseReferenceDevice
         {
-            get { return UseDriverType == DriverType.Reference; }
-            set { UseDriverType = value ? DriverType.Reference : DriverType.Hardware; }
+            get => UseDriverType == DriverType.Reference;
+            set => UseDriverType = value ? DriverType.Reference : DriverType.Hardware;
         }
 
         /// <summary>

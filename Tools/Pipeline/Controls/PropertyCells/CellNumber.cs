@@ -8,15 +8,15 @@ using Eto.Forms;
 
 namespace MonoGame.Tools.Pipeline
 {
-    [CellAttribute(typeof(short))]
-    [CellAttribute(typeof(int))]
-    [CellAttribute(typeof(long))]
-    [CellAttribute(typeof(ushort))]
-    [CellAttribute(typeof(uint))]
-    [CellAttribute(typeof(ulong))]
-    [CellAttribute(typeof(float))]
-    [CellAttribute(typeof(double))]
-    [CellAttribute(typeof(decimal))]
+    [Cell(typeof(short))]
+    [Cell(typeof(int))]
+    [Cell(typeof(long))]
+    [Cell(typeof(ushort))]
+    [Cell(typeof(uint))]
+    [Cell(typeof(ulong))]
+    [Cell(typeof(float))]
+    [Cell(typeof(double))]
+    [Cell(typeof(decimal))]
     public class CellNumber : CellBase
     {
         private TypeConverter _converter;

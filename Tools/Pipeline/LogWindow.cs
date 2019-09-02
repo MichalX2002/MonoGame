@@ -19,8 +19,8 @@ namespace MonoGame.Tools.Pipeline
 
         public string LogText
         {
-            get { return _textAreaLog.Text; }
-            set { _textAreaLog.Text = value; }
+            get => _textAreaLog.Text;
+            set => _textAreaLog.Text = value;
         }
 
         private void LogWindow_Closed(object sender, EventArgs e)

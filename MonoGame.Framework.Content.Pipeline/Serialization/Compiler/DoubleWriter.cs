@@ -5,7 +5,7 @@
 using System;
 using TOutput = System.Double;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     /// <summary>
     /// Writes the double precision floating point value to the output.

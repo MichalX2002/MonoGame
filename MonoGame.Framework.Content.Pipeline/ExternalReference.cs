@@ -6,7 +6,7 @@ using MonoGame.Framework.Content.Pipeline.Builder;
 using System;
 using System.IO;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline
+namespace MonoGame.Framework.Content.Pipeline
 {
     /// <summary>
     /// Specifies external references to a data file for the content item.

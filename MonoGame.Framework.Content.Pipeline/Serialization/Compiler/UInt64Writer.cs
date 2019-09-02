@@ -5,7 +5,7 @@
 using System;
 using TOutput = System.UInt64;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     /// <summary>
     /// Writes the unsigned long value to the output.

@@ -89,19 +89,15 @@ namespace MonoGame.Framework.Audio
         /// Note: XNA could know if a headset microphone was plugged in an Xbox 360 controller but MonoGame can't.
         /// Hence, this is always true on mobile platforms, and always false otherwise.
         /// </summary>
-        public bool IsHeadset
-        {
-            get
-            {
+        public bool IsHeadset =>
 #if IOS || ANDROID
                 // always true on mobile, this can't be queried on any platform 
                 // (it was most probably only set to true if the headset was plugged in an XInput controller)
                 return true;
 #else
-                return false;
+                false;
 #endif
-            }
-        }
+
 
         internal Microphone(string name)
         {

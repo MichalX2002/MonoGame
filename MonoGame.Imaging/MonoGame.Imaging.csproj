@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -17,16 +17,48 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Coding\Encoding\Png\**" />
+    <Compile Remove="Image\Processing\Extensions\**" />
     <Compile Remove="old\**" />
+    <EmbeddedResource Remove="Coding\Encoding\Png\**" />
+    <EmbeddedResource Remove="Image\Processing\Extensions\**" />
     <EmbeddedResource Remove="old\**" />
+    <None Remove="Coding\Encoding\Png\**" />
+    <None Remove="Image\Processing\Extensions\**" />
     <None Remove="old\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="ColorEncoding.cs" />
+    <Compile Remove="ImageReader.cs" />
+    <Compile Remove="Utilities\ImageWriter.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\GlobalSuppressions.cs" Link="StbSharp\ImageWrite\GlobalSuppressions.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\StbImageWrite.cs" Link="StbSharp\ImageWrite\StbImageWrite.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\StbImageWrite.Generated.cs" Link="StbSharp\ImageWrite\StbImageWrite.Generated.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\Image\src\StbImageSharp\GlobalSuppressions.cs" Link="StbSharp\Image\GlobalSuppressions.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\Image\src\StbImageSharp\StbImage.cs" Link="StbSharp\Image\StbImage.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\Image\src\StbImageSharp\StbImage.Generated.cs" Link="StbSharp\Image\StbImage.Generated.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\CRuntime.cs" Link="StbSharp\Shared\CRuntime.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\GlobalSuppressions.cs" Link="StbSharp\Shared\GlobalSuppressions.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\IMemoryResult.cs" Link="StbSharp\Shared\IMemoryResult.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\IPixelProvider.cs" Link="StbSharp\Shared\IPixelProvider.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\MemoryStatistics.cs" Link="StbSharp\Shared\MemoryStatistics.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Memory" Version="4.5.3" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.6.0-preview8.19405.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="StbSharp\Image\" />
+    <Folder Include="StbSharp\Shared\" />
   </ItemGroup>
 </Project>

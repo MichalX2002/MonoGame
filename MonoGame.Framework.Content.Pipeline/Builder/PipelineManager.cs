@@ -8,11 +8,10 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Xna.Framework.Content.Pipeline;
-using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Content.Pipeline.Serialization.Compiler;
+using MonoGame.Framework.Graphics;
 using System.Globalization;
-using Microsoft.Xna.Framework.Content.Pipeline.Builder.Convertors;
+using MonoGame.Framework.Content.Pipeline.Builder.Converters;
 using System.Diagnostics;
 
 namespace MonoGame.Framework.Content.Pipeline.Builder
@@ -106,22 +105,22 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
             OutputDirectory = PathHelper.NormalizeDirectory(outputDir);
             IntermediateDirectory = PathHelper.NormalizeDirectory(intermediateDir);
 
-	        RegisterCustomConverters();
+            RegisterCustomConverters();
 
             // Load the previous content stats.            
             ContentStats = new ContentStatsCollection();
             ContentStats.PreviousStats = ContentStatsCollection.Read(intermediateDir);
         }
 
-	    public void AssignTypeConverter<TType, TTypeConverter> ()
-	    {
-		    TypeDescriptor.AddAttributes (typeof (TType), new TypeConverterAttribute (typeof (TTypeConverter)));
-	    }
+        public void AssignTypeConverter<TType, TTypeConverter>()
+        {
+            TypeDescriptor.AddAttributes(typeof(TType), new TypeConverterAttribute(typeof(TTypeConverter)));
+        }
 
-	    private void RegisterCustomConverters ()
-	    {
-		    AssignTypeConverter<Microsoft.Xna.Framework.Color, StringToColorConverter> ();
-	    }
+        private void RegisterCustomConverters()
+        {
+            AssignTypeConverter<Color, StringToColorConverter>();
+        }
 
         public void AddAssembly(string assemblyFilePath)
         {
@@ -157,9 +156,9 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
                 try
                 {
                     Assembly a;
-                    if (string.IsNullOrEmpty(assemblyPath))                                            
-                        a = Assembly.GetExecutingAssembly();                    
-                    else                    
+                    if (string.IsNullOrEmpty(assemblyPath))
+                        a = Assembly.GetExecutingAssembly();
+                    else
                         a = Assembly.LoadFrom(assemblyPath);
 
                     exportedTypes = a.GetTypes();
@@ -182,12 +181,12 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
 
                 foreach (var t in exportedTypes)
                 {
-                    if (t.IsAbstract) 
+                    if (t.IsAbstract)
                         continue;
 
                     if (t.GetInterface(@"IContentImporter") != null)
                     {
-                        var attributes = t.GetCustomAttributes(typeof (ContentImporterAttribute), false);
+                        var attributes = t.GetCustomAttributes(typeof(ContentImporterAttribute), false);
                         if (attributes.Length != 0)
                         {
                             var importerAttribute = attributes[0] as ContentImporterAttribute;
@@ -216,7 +215,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
                     }
                     else if (t.GetInterface(@"IContentProcessor") != null)
                     {
-                        var attributes = t.GetCustomAttributes(typeof (ContentProcessorAttribute), false);
+                        var attributes = t.GetCustomAttributes(typeof(ContentProcessorAttribute), false);
                         if (attributes.Length != 0)
                         {
                             var processorAttribute = attributes[0] as ContentProcessorAttribute;
@@ -230,7 +229,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
                     }
                     else if (t.GetInterface(@"ContentTypeWriter") != null)
                     {
-						// TODO: This doesn't work... how do i find these?
+                        // TODO: This doesn't work... how do i find these?
                         _writers.Add(t);
                     }
                 }
@@ -244,7 +243,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
 
             List<Type> types = new List<Type>();
 
-            foreach (var item in _importers) 
+            foreach (var item in _importers)
             {
                 types.Add(item.type);
             }
@@ -256,14 +255,14 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
         {
             if (_processors == null)
                 ResolveAssemblies();
-            
+
             List<Type> types = new List<Type>();
-            
-            foreach (var item in _processors) 
+
+            foreach (var item in _processors)
             {
                 types.Add(item.type);
             }
-            
+
             return types.ToArray();
         }
 
@@ -536,7 +535,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
         {
             sourceFilepath = PathHelper.Normalize(sourceFilepath);
             ResolveOutputFilepath(sourceFilepath, ref outputFilepath);
-            
+
             ResolveImporterAndProcessor(sourceFilepath, ref importerName, ref processorName);
 
             // Record what we're building and how.
@@ -570,12 +569,12 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
             // Keep track of all build events. (Required to resolve automatic names "AssetName_n".)
             TrackPipelineBuildEvent(pipelineEvent);
 
-            var rebuild = pipelineEvent.NeedsRebuild(this, cachedEvent);            
+            var rebuild = pipelineEvent.NeedsRebuild(this, cachedEvent);
             if (rebuild)
                 Logger.LogMessage("{0}", pipelineEvent.SourceFile);
             else
                 Logger.LogMessage("Skipping {0}", pipelineEvent.SourceFile);
-            
+
             Logger.Indent();
             try
             {
@@ -673,7 +672,8 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
                 }
                 catch (Exception inner)
                 {
-                    throw new PipelineException(string.Format("Importer '{0}' had unexpected failure!", pipelineEvent.Importer), inner);
+                    throw new PipelineException(
+                        string.Format("Importer '{0}' had unexpected failure!", pipelineEvent.Importer), inner);
                 }
             }
             else

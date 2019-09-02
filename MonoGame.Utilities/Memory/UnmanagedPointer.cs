@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 
 namespace MonoGame.Utilities.Memory
 {
-    public unsafe class UnmanagedPointer<T> : IDisposable
+    public unsafe class UnmanagedPointer<T> : IMemory<T>, IDisposable
         where T : unmanaged
     {
         private int _length;
-        private IntPtr _safePtr;
+        private T* _ptr;
         private object _allocMutex = new object();
 
         #region Properties + Indexer
@@ -30,7 +30,7 @@ namespace MonoGame.Utilities.Memory
         /// <summary>
         /// Gets or sets the length of the pointer in elements.
         /// </summary>
-        public int Length
+        public int Capacity
         {
             get
             {
@@ -40,23 +40,20 @@ namespace MonoGame.Utilities.Memory
             set => ReAlloc(value);
         }
 
-        public IntPtr SafePtr
-        {
-            get
-            {
-                AssertNotDisposed();
-                return _safePtr;
-            }
-        }
-
+        [CLSCompliant(false)]
         public T* Ptr
         {
             get
             {
                 AssertNotDisposed();
-                return (T*)_safePtr;
+                if (_ptr == null)
+                    throw new InvalidOperationException(
+                        "There is no underlying memory allocated.");
+                return _ptr;
             }
         }
+
+        public IntPtr SafePtr => (IntPtr)Ptr;
 
         public Span<T> Span => new Span<T>(Ptr, _length);
 
@@ -64,9 +61,10 @@ namespace MonoGame.Utilities.Memory
         {
             get
             {
+                T* ptr = Ptr;
                 if (index < 0 || index >= _length)
                     throw new ArgumentOutOfRangeException(nameof(index));
-                return ref Ptr[index];
+                return ref ptr[index];
             }
         }
 
@@ -75,12 +73,15 @@ namespace MonoGame.Utilities.Memory
         #region Constructors
 
         /// <summary>
-        /// Constructs the unmanaged pointer with a specified length.
+        /// Constructs the unmanaged pointer with a specified length,
+        /// optionally zero-filling the allocated memory.
         /// </summary>
         /// <param name="length">The size in elements.</param>
-        public UnmanagedPointer(int length)
+        /// <param name="zeroFill">
+        /// <see langword="true"/> to zero-fill the allocated memory.</param>
+        public UnmanagedPointer(int length, bool zeroFill = false)
         {
-            ReAlloc(length);
+            ReAlloc(length, zeroFill);
         }
 
         /// <summary>
@@ -92,17 +93,36 @@ namespace MonoGame.Utilities.Memory
 
         #endregion
 
+        public void Clear()
+        {
+            Span.Clear();
+        }
+
+        public void Fill(T value)
+        {
+            Span.Fill(value);
+        }
+
+        public void Fill(byte value)
+        {
+            MemoryMarshal.AsBytes(Span).Fill(value);
+        }
+
         #region Helpers
 
-        private void ReAlloc(int length)
+        /// <summary>
+        /// Resizes the underlying memory block, 
+        /// optionally zero-filling newly allocated memory.
+        /// </summary>
+        /// <param name="length">The new size in elements. Can be zero to free memory.</param>
+        /// <param name="zeroFill"><see langword="true"/> to zero-fill the allocated memory.</param>
+        public void ReAlloc(int length, bool zeroFill = false)
         {
             lock (_allocMutex)
             {
                 AssertNotDisposed();
-
-                if (length < 0)
-                    throw new ArgumentOutOfRangeException("Value must be above zero.", nameof(length));
-
+                CommonArgumentGuard.AssertAtleastZero(length, nameof(length));
+                
                 if (_length != length)
                 {
                     int oldLength = _length;
@@ -117,17 +137,20 @@ namespace MonoGame.Utilities.Memory
                         ClearPressure(oldLength);
                         GC.AddMemoryPressure(ByteLength);
 
-                        if (_safePtr != IntPtr.Zero)
-                            _safePtr = Marshal.ReAllocHGlobal(_safePtr, (IntPtr)ByteLength);
+                        if (_ptr != null)
+                            _ptr = (T*)Marshal.ReAllocHGlobal((IntPtr)_ptr, (IntPtr)ByteLength);
                         else
-                            _safePtr = Marshal.AllocHGlobal(ByteLength);
+                            _ptr = (T*)Marshal.AllocHGlobal(ByteLength);
+
+                        if (zeroFill && length > oldLength)
+                            Span.Slice(oldLength, length - oldLength).Clear();
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Clears GC memory pressure.
+        /// Informs the runtime that memory has been released.
         /// </summary>
         /// <param name="oldLength"></param>
         private void ClearPressure(int oldLength)
@@ -137,15 +160,15 @@ namespace MonoGame.Utilities.Memory
         }
 
         /// <summary>
-        /// Frees pointer, clears GC memory pressure, and sets length to zero.
+        /// Frees pointer, informs the runtime about released memory, and sets length to zero.
         /// </summary>
         /// <param name="oldLength"></param>
         private void FreePtr(int oldLength)
         {
-            if (_safePtr != IntPtr.Zero)
+            if (_ptr != null)
             {
-                Marshal.FreeHGlobal(_safePtr);
-                _safePtr = IntPtr.Zero;
+                Marshal.FreeHGlobal((IntPtr)_ptr);
+                _ptr = null;
 
                 ClearPressure(oldLength);
                 _length = 0;

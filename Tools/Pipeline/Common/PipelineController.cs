@@ -43,18 +43,9 @@ namespace MonoGame.Tools.Pipeline
             "",
         };
 
-        public IEnumerable<ContentItemTemplate> Templates
-        {
-            get { return _templateItems; }
-        }
+        public IEnumerable<ContentItemTemplate> Templates => _templateItems;
 
-        public PipelineProject ProjectItem
-        {
-            get
-            {
-                return _project;
-            }
-        }
+        public PipelineProject ProjectItem => _project;
 
         public string ProjectLocation
         {
@@ -69,10 +60,7 @@ namespace MonoGame.Tools.Pipeline
             }
         }
 
-        public string ProjectOutputDir
-        {
-            get { return _project.OutputDir; }
-        }
+        public string ProjectOutputDir => _project.OutputDir;
 
         public List<IProjectItem> SelectedItems { get; private set; }
 
@@ -82,13 +70,7 @@ namespace MonoGame.Tools.Pipeline
 
         public bool ProjectDirty { get; set; }
 
-        public bool ProjectBuilding 
-        {
-            get
-            {
-                return _buildTask != null && !_buildTask.IsCompleted;
-            }
-        }
+        public bool ProjectBuilding => _buildTask != null && !_buildTask.IsCompleted;
 
         public IView View { get; private set; }
 
@@ -885,9 +867,9 @@ namespace MonoGame.Tools.Pipeline
 
         private readonly ActionStack _actionStack;
 
-        public bool CanUndo { get { return _actionStack.CanUndo; } }
+        public bool CanUndo => _actionStack.CanUndo;
 
-        public bool CanRedo { get { return _actionStack.CanRedo; } }
+        public bool CanRedo => _actionStack.CanRedo;
 
         public void Undo()
         {

@@ -9,11 +9,11 @@
 
 #region Using Statements
 using System.Collections.Generic;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
+using MonoGame.Framework.Content;
+using MonoGame.Framework.Content.Pipeline.Graphics;
 #endregion
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Normally, when you add a .spritefont file to your project, this data is

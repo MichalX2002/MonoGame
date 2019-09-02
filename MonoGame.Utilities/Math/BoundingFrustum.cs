@@ -13,16 +13,6 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebugDisplayString,nq}")]
     public class BoundingFrustum : IEquatable<BoundingFrustum>
     {
-        #region Private Fields
-
-        private Matrix _matrix;
-        private readonly Vector3[] _corners = new Vector3[CornerCount];
-        private readonly Plane[] _planes = new Plane[PlaneCount];
-
-        #endregion
-
-        #region Public Fields
-
         /// <summary>
         /// The number of planes in the frustum.
         /// </summary>
@@ -33,7 +23,9 @@ namespace MonoGame.Framework
         /// </summary>
         public const int CornerCount = 8;
 
-        #endregion
+        private Matrix _matrix;
+        private readonly Vector3[] _corners = new Vector3[CornerCount];
+        private readonly Plane[] _planes = new Plane[PlaneCount];
 
         #region Properties
 
@@ -46,8 +38,8 @@ namespace MonoGame.Framework
             set
             {
                 _matrix = value;
-                CreatePlanes();    // FIXME: The odds are the planes will be used a lot more often than the matrix
-                CreateCorners();   // is updated, so this should help performance. I hope ;)
+                CreatePlanes();  // FIXME: The odds are the planes will be used a lot more often than the matrix
+                CreateCorners(); // is updated, so this should help performance. I hope ;)
             }
         }
 
@@ -99,8 +91,6 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #region Constructors
-
         /// <summary>
         /// Constructs the frustum by extracting the view planes from a matrix.
         /// </summary>
@@ -111,8 +101,6 @@ namespace MonoGame.Framework
             CreatePlanes();
             CreateCorners();
         }
-
-        #endregion
 
         #region Operators
 
@@ -130,7 +118,7 @@ namespace MonoGame.Framework
             if (Equals(b, null))
                 return (Equals(a, null));
 
-            return a._matrix == (b._matrix);
+            return a._matrix == b._matrix;
         }
 
         /// <summary>
@@ -154,55 +142,43 @@ namespace MonoGame.Framework
         /// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingBox"/>.
         /// </summary>
         /// <param name="box">A <see cref="BoundingBox"/> for testing.</param>
-        /// <returns>Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingBox"/>.</returns>
-        public ContainmentType Contains(BoundingBox box)
+        /// <returns>Containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingBox"/>.</returns>
+        public ContainmentType Contains(in BoundingBox box)
         {
-            Contains(ref box, out ContainmentType result);
-            return result;
-        }
-
-        /// <summary>
-        /// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingBox"/>.
-        /// </summary>
-        /// <param name="box">A <see cref="BoundingBox"/> for testing.</param>
-        /// <param name="result">Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingBox"/> as an output parameter.</param>
-        public void Contains(ref BoundingBox box, out ContainmentType result)
-        {
-            var intersects = false;
-            for (var i = 0; i < PlaneCount; ++i)
+            bool intersects = false;
+            for (var i = 0; i < _planes.Length; ++i)
             {
-                box.Intersects(ref _planes[i], out PlaneIntersectionType planeIntersectionType);
-                switch (planeIntersectionType)
+                switch (box.Intersects(_planes[i]))
                 {
-                case PlaneIntersectionType.Front:
-                    result = ContainmentType.Disjoint; 
-                    return;
-                case PlaneIntersectionType.Intersecting:
-                    intersects = true;
-                    break;
+                    case PlaneIntersectionType.Front:
+                        return ContainmentType.Disjoint;
+
+                    case PlaneIntersectionType.Intersecting:
+                        intersects = true;
+                        break;
                 }
             }
-            result = intersects ? ContainmentType.Intersects : ContainmentType.Contains;
+            return intersects ? ContainmentType.Intersects : ContainmentType.Contains;
         }
 
         /// <summary>
         /// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingFrustum"/>.
         /// </summary>
         /// <param name="frustum">A <see cref="BoundingFrustum"/> for testing.</param>
-        /// <returns>Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingFrustum"/>.</returns>
+        /// <returns>Containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingFrustum"/>.</returns>
         public ContainmentType Contains(BoundingFrustum frustum)
         {
-            if (this == frustum)                // We check to see if the two frustums are equal
-                return ContainmentType.Contains;// If they are, there's no need to go any further.
+            if (this == frustum)                 // We check to see if the two frustums are equal
+                return ContainmentType.Contains; // If they are, there's no need to go any further.
 
-            var intersects = false;
-            for (var i = 0; i < PlaneCount; ++i)
+            bool intersects = false;
+            for (var i = 0; i < _planes.Length; ++i)
             {
-                frustum.Intersects(ref _planes[i], out PlaneIntersectionType planeIntersectionType);
-                switch (planeIntersectionType)
+                switch (frustum.Intersects(_planes[i]))
                 {
                     case PlaneIntersectionType.Front:
                         return ContainmentType.Disjoint;
+
                     case PlaneIntersectionType.Intersecting:
                         intersects = true;
                         break;
@@ -215,67 +191,39 @@ namespace MonoGame.Framework
         /// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingSphere"/>.
         /// </summary>
         /// <param name="sphere">A <see cref="BoundingSphere"/> for testing.</param>
-        /// <returns>Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingSphere"/>.</returns>
-        public ContainmentType Contains(BoundingSphere sphere)
+        /// <returns>Containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingSphere"/>.</returns>
+        public ContainmentType Contains(in BoundingSphere sphere)
         {
-            Contains(ref sphere, out ContainmentType result);
-            return result;
-        }
-
-        /// <summary>
-        /// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingSphere"/>.
-        /// </summary>
-        /// <param name="sphere">A <see cref="BoundingSphere"/> for testing.</param>
-        /// <param name="result">Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingSphere"/> as an output parameter.</param>
-        public void Contains(ref BoundingSphere sphere, out ContainmentType result)
-        {
-            var intersects = false;
-            for (var i = 0; i < PlaneCount; ++i) 
+            bool intersects = false;
+            for (int i = 0; i < _planes.Length; ++i)
             {
-
                 // TODO: we might want to inline this for performance reasons
-                sphere.Intersects(ref _planes[i], out PlaneIntersectionType planeIntersectionType);
-                switch (planeIntersectionType)
+                switch (sphere.Intersects(_planes[i]))
                 {
-                case PlaneIntersectionType.Front:
-                    result = ContainmentType.Disjoint; 
-                    return;
-                case PlaneIntersectionType.Intersecting:
-                    intersects = true;
-                    break;
+                    case PlaneIntersectionType.Front:
+                        return ContainmentType.Disjoint;
+                        
+                    case PlaneIntersectionType.Intersecting:
+                        intersects = true;
+                        break;
                 }
             }
-            result = intersects ? ContainmentType.Intersects : ContainmentType.Contains;
+            return intersects ? ContainmentType.Intersects : ContainmentType.Contains;
         }
 
         /// <summary>
         /// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="Vector3"/>.
         /// </summary>
         /// <param name="point">A <see cref="Vector3"/> for testing.</param>
-        /// <returns>Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="Vector3"/>.</returns>
+        /// <returns>Containment between this <see cref="BoundingFrustum"/> and specified <see cref="Vector3"/>.</returns>
         public ContainmentType Contains(Vector3 point)
         {
-            Contains(ref point, out ContainmentType result);
-            return result;
-        }
-
-        /// <summary>
-        /// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="Vector3"/>.
-        /// </summary>
-        /// <param name="point">A <see cref="Vector3"/> for testing.</param>
-        /// <param name="result">Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="Vector3"/> as an output parameter.</param>
-        public void Contains(ref Vector3 point, out ContainmentType result)
-        {
-            for (var i = 0; i < PlaneCount; ++i)
+            for (var i = 0; i < _planes.Length; ++i)
             {
-                // TODO: we might want to inline this for performance reasons
-                if (PlaneHelper.ClassifyPoint(ref point, ref _planes[i]) > 0)
-                {   
-                    result = ContainmentType.Disjoint;
-                    return;
-                }
+                if (PlaneHelper.ClassifyPoint(point, _planes[i]) > 0)
+                    return ContainmentType.Disjoint;
             }
-            result = ContainmentType.Contains;
+            return ContainmentType.Contains;
         }
 
         #endregion
@@ -293,26 +241,20 @@ namespace MonoGame.Framework
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="BoundingFrustum"/>.
         /// </summary>
-        /// <param name="obj">The <see cref="Object"/> to compare.</param>
+        /// <param name="obj">The <see cref="object"/> to compare.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
         public override bool Equals(object obj)
         {
-            return (obj is BoundingFrustum) && this == ((BoundingFrustum)obj);
+            return obj is BoundingFrustum other && this == other;
         }
 
         /// <summary>
-        /// Returns a copy of internal corners array.
+        /// Copies the frustum corners into an array.
         /// </summary>
-        /// <returns>The array of corners.</returns>
-        public Vector3[] GetCorners()
-        {
-            return (Vector3[])_corners.Clone();
-        }
-
-        /// <summary>
-        /// Returns a copy of internal corners array.
-        /// </summary>
-        /// <param name="corners">The array which values will be replaced to corner values of this instance. It must have size of <see cref="CornerCount"/>.</param>
+        /// <param name="corners">
+        /// The destination array for this frustum's corners.
+        /// It must have size of <see cref="CornerCount"/>.
+        /// </param>
 		public void GetCorners(Vector3[] corners)
         {
 			if (corners == null)
@@ -322,6 +264,15 @@ namespace MonoGame.Framework
                 throw new ArgumentOutOfRangeException(nameof(corners), "Not enough corners.");
 
             _corners.CopyTo(corners, 0);
+        }
+
+        /// <summary>
+        /// Returns a span of this frustum's corners.
+        /// </summary>
+        /// <returns>The span of corners.</returns>
+        public ReadOnlySpan<Vector3> GetCorners()
+        {
+            return _corners.AsSpan();
         }
 
         /// <summary>
@@ -337,29 +288,17 @@ namespace MonoGame.Framework
         /// Gets whether or not a specified <see cref="BoundingBox"/> intersects with this <see cref="BoundingFrustum"/>.
         /// </summary>
         /// <param name="box">A <see cref="BoundingBox"/> for intersection test.</param>
-        /// <returns><c>true</c> if specified <see cref="BoundingBox"/> intersects with this <see cref="BoundingFrustum"/>; <c>false</c> otherwise.</returns>
-        public bool Intersects(BoundingBox box)
+        /// <returns>Whether the <see cref="BoundingBox"/> intersects with this <see cref="BoundingFrustum"/>.</returns>
+        public bool Intersects(in BoundingBox box)
         {
-            Intersects(ref box, out bool result);
-            return result;
-        }
-
-        /// <summary>
-        /// Gets whether or not a specified <see cref="BoundingBox"/> intersects with this <see cref="BoundingFrustum"/>.
-        /// </summary>
-        /// <param name="box">A <see cref="BoundingBox"/> for intersection test.</param>
-        /// <param name="result"><c>true</c> if specified <see cref="BoundingBox"/> intersects with this <see cref="BoundingFrustum"/>; <c>false</c> otherwise as an output parameter.</param>
-        public void Intersects(ref BoundingBox box, out bool result)
-        {
-            Contains(ref box, out ContainmentType containment);
-            result = containment != ContainmentType.Disjoint;
+            return Contains(box) != ContainmentType.Disjoint;
 		}
 
         /// <summary>
         /// Gets whether or not a specified <see cref="BoundingFrustum"/> intersects with this <see cref="BoundingFrustum"/>.
         /// </summary>
         /// <param name="frustum">An other <see cref="BoundingFrustum"/> for intersection test.</param>
-        /// <returns><c>true</c> if other <see cref="BoundingFrustum"/> intersects with this <see cref="BoundingFrustum"/>; <c>false</c> otherwise.</returns>
+        /// <returns>Whether the <see cref="BoundingFrustum"/> intersects with this <see cref="BoundingFrustum"/>.</returns>
         public bool Intersects(BoundingFrustum frustum)
         {
             return Contains(frustum) != ContainmentType.Disjoint;
@@ -369,22 +308,10 @@ namespace MonoGame.Framework
         /// Gets whether or not a specified <see cref="BoundingSphere"/> intersects with this <see cref="BoundingFrustum"/>.
         /// </summary>
         /// <param name="sphere">A <see cref="BoundingSphere"/> for intersection test.</param>
-        /// <returns><c>true</c> if specified <see cref="BoundingSphere"/> intersects with this <see cref="BoundingFrustum"/>; <c>false</c> otherwise.</returns>
-        public bool Intersects(BoundingSphere sphere)
+        /// <returns>Whether the <see cref="BoundingSphere"/> intersects with this <see cref="BoundingFrustum"/>.</returns>
+        public bool Intersects(in BoundingSphere sphere)
         {
-            Intersects(ref sphere, out bool result);
-            return result;
-        }
-
-        /// <summary>
-        /// Gets whether or not a specified <see cref="BoundingSphere"/> intersects with this <see cref="BoundingFrustum"/>.
-        /// </summary>
-        /// <param name="sphere">A <see cref="BoundingSphere"/> for intersection test.</param>
-        /// <param name="result"><c>true</c> if specified <see cref="BoundingSphere"/> intersects with this <see cref="BoundingFrustum"/>; <c>false</c> otherwise as an output parameter.</param>
-        public void Intersects(ref BoundingSphere sphere, out bool result)
-        {
-            Contains(ref sphere, out ContainmentType containment);
-            result = containment != ContainmentType.Disjoint;
+            return Contains(sphere) != ContainmentType.Disjoint;
         }
 
         /// <summary>
@@ -392,65 +319,42 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="plane">A <see cref="Plane"/> for intersection test.</param>
         /// <returns>A plane intersection type.</returns>
-        public PlaneIntersectionType Intersects(Plane plane)
+        public PlaneIntersectionType Intersects(in Plane plane)
         {
-            Intersects(ref plane, out PlaneIntersectionType result);
-            return result;
-        }
-
-        /// <summary>
-        /// Gets type of intersection between specified <see cref="Plane"/> and this <see cref="BoundingFrustum"/>.
-        /// </summary>
-        /// <param name="plane">A <see cref="Plane"/> for intersection test.</param>
-        /// <param name="result">A plane intersection type as an output parameter.</param>
-        public void Intersects(ref Plane plane, out PlaneIntersectionType result)
-        {
-            result = plane.Intersects(ref _corners[0]);
+            var result = plane.Intersects(_corners[0]);
             for (int i = 1; i < _corners.Length; i++)
-                if (plane.Intersects(ref _corners[i]) != result)
+                if (plane.Intersects(_corners[i]) != result)
                     result = PlaneIntersectionType.Intersecting;
-        }
-        
-        /// <summary>
-        /// Gets the distance of intersection of <see cref="Ray"/> and this <see cref="BoundingFrustum"/> or null if no intersection happens.
-        /// </summary>
-        /// <param name="ray">A <see cref="Ray"/> for intersection test.</param>
-        /// <returns>Distance at which ray intersects with this <see cref="BoundingFrustum"/> or null if no intersection happens.</returns>
-        public float? Intersects(Ray ray)
-        {
-            Intersects(ref ray, out float? result);
             return result;
         }
 
         /// <summary>
-        /// Gets the distance of intersection of <see cref="Ray"/> and this <see cref="BoundingFrustum"/> or null if no intersection happens.
+        /// Gets the distance of intersection of <see cref="Ray"/> and this <see cref="BoundingFrustum"/>.
         /// </summary>
         /// <param name="ray">A <see cref="Ray"/> for intersection test.</param>
-        /// <param name="result">Distance at which ray intersects with this <see cref="BoundingFrustum"/> or null if no intersection happens as an output parameter.</param>
-        public void Intersects(ref Ray ray, out float? result)
+        /// <param name="distance">Distance at which ray intersects with this <see cref="BoundingFrustum"/>.</param>
+        /// <returns>Whether the <see cref="Ray"/> intersects the <see cref="BoundingFrustum"/>.</returns>
+        public bool Intersects(in Ray ray, out float distance)
         {
-            Contains(ref ray.Position, out ContainmentType ctype);
-
-            switch (ctype)
+            distance = 0.0f;
+            switch (Contains(ray.Position))
             {
-                case ContainmentType.Disjoint:
-                    result = null;
-                    return;
-                case ContainmentType.Contains:
-                    result = 0.0f;
-                    return;
+                case ContainmentType.Disjoint: return false;
+                case ContainmentType.Contains: return true;
+
                 case ContainmentType.Intersects:
                     throw new NotImplementedException();
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        } 
+        }
 
         /// <summary>
-        /// Returns a <see cref="String"/> representation of this <see cref="BoundingFrustum"/> in the format:
+        /// Returns a <see cref="string"/> representation of this <see cref="BoundingFrustum"/> in the format:
         /// {Near:[nearPlane] Far:[farPlane] Left:[leftPlane] Right:[rightPlane] Top:[topPlane] Bottom:[bottomPlane]}
         /// </summary>
-        /// <returns><see cref="String"/> representation of this <see cref="BoundingFrustum"/>.</returns>
+        /// <returns><see cref="string"/> representation of this <see cref="BoundingFrustum"/>.</returns>
         public override string ToString()
         {
             return "{Near: " + _planes[0] +
@@ -468,14 +372,14 @@ namespace MonoGame.Framework
 
         private void CreateCorners()
         {
-            IntersectionPoint(ref _planes[0], ref _planes[2], ref _planes[4], out _corners[0]);
-            IntersectionPoint(ref _planes[0], ref _planes[3], ref _planes[4], out _corners[1]);
-            IntersectionPoint(ref _planes[0], ref _planes[3], ref _planes[5], out _corners[2]);
-            IntersectionPoint(ref _planes[0], ref _planes[2], ref _planes[5], out _corners[3]);
-            IntersectionPoint(ref _planes[1], ref _planes[2], ref _planes[4], out _corners[4]);
-            IntersectionPoint(ref _planes[1], ref _planes[3], ref _planes[4], out _corners[5]);
-            IntersectionPoint(ref _planes[1], ref _planes[3], ref _planes[5], out _corners[6]);
-            IntersectionPoint(ref _planes[1], ref _planes[2], ref _planes[5], out _corners[7]);
+            _corners[0] = IntersectionPoint(_planes[0], _planes[2], _planes[4]);
+            _corners[1] = IntersectionPoint(_planes[0], _planes[3], _planes[4]);
+            _corners[2] = IntersectionPoint(_planes[0], _planes[3], _planes[5]);
+            _corners[3] = IntersectionPoint(_planes[0], _planes[2], _planes[5]);
+            _corners[4] = IntersectionPoint(_planes[1], _planes[2], _planes[4]);
+            _corners[5] = IntersectionPoint(_planes[1], _planes[3], _planes[4]);
+            _corners[6] = IntersectionPoint(_planes[1], _planes[3], _planes[5]);
+            _corners[7] = IntersectionPoint(_planes[1], _planes[2], _planes[5]);
         }
 
         private void CreatePlanes()
@@ -495,33 +399,20 @@ namespace MonoGame.Framework
             NormalizePlane(ref _planes[5]);
         }
 
-        private static void IntersectionPoint(ref Plane a, ref Plane b, ref Plane c, out Vector3 result)
+        private static Vector3 IntersectionPoint(in Plane a, in Plane b, in Plane c)
         {
-
-            Vector3.Cross(ref b.Normal, ref c.Normal, out Vector3 cross);
-
-            Vector3.Dot(ref a.Normal, ref cross, out float f);
-            f *= -1.0f;
+            Vector3 bcCross = Vector3.Cross(b.Normal, c.Normal);
+            Vector3 v1 = bcCross * a.D;
+            Vector3 v2 = Vector3.Cross(c.Normal, a.Normal) * b.D;
+            Vector3 v3 = Vector3.Cross(a.Normal, b.Normal) * c.D;
             
-            Vector3.Cross(ref b.Normal, ref c.Normal, out cross);
-            Vector3.Multiply(ref cross, a.D, out Vector3 v1);
-            //v1 = (a.D * (Vector3.Cross(b.Normal, c.Normal)));
-            
-            
-            Vector3.Cross(ref c.Normal, ref a.Normal, out cross);
-            Vector3.Multiply(ref cross, b.D, out Vector3 v2);
-            //v2 = (b.D * (Vector3.Cross(c.Normal, a.Normal)));
-            
-            
-            Vector3.Cross(ref a.Normal, ref b.Normal, out cross);
-            Vector3.Multiply(ref cross, c.D, out Vector3 v3);
-            //v3 = (c.D * (Vector3.Cross(a.Normal, b.Normal)));
-            
-            result.X = (v1.X + v2.X + v3.X) / f;
-            result.Y = (v1.Y + v2.Y + v3.Y) / f;
-            result.Z = (v1.Z + v2.Z + v3.Z) / f;
+            float f = Vector3.Dot(a.Normal, bcCross) * -1.0f;
+            return new Vector3(
+                (v1.X + v2.X + v3.X) / f,
+                (v1.Y + v2.Y + v3.Y) / f,
+                (v1.Z + v2.Z + v3.Z) / f);
         }
-        
+
         private void NormalizePlane(ref Plane p)
         {
             float factor = 1f / p.Normal.Length();

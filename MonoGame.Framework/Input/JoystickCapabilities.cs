@@ -75,18 +75,18 @@ namespace MonoGame.Framework.Input
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="object"/> is equal to the current <see cref="T:Microsoft.Xna.Framework.Input.JoystickCapabilities"/>.
+        /// Determines whether the specified <see cref="object"/> is equal to the current <see cref="JoystickCapabilities"/>.
         /// </summary>
-        /// <param name="obj">The <see cref="object"/> to compare with the current <see cref="T:Microsoft.Xna.Framework.Input.JoystickCapabilities"/>.</param>
+        /// <param name="obj">The <see cref="object"/> to compare with the current <see cref="JoystickCapabilities"/>.</param>
         /// <returns><c>true</c> if the specified <see cref="object"/> is equal to the current
-        /// <see cref="T:Microsoft.Xna.Framework.Input.JoystickCapabilities"/>; otherwise, <c>false</c>.</returns>
+        /// <see cref="JoystickCapabilities"/>; otherwise, <c>false</c>.</returns>
         public override bool Equals(object obj)
         {
             return (obj is JoystickCapabilities) && (this == (JoystickCapabilities)obj);
         }
 
         /// <summary>
-        /// Serves as a hash function for a <see cref="T:Microsoft.Xna.Framework.Input.JoystickCapabilities"/> object.
+        /// Serves as a hash function for a <see cref="JoystickCapabilities"/> object.
         /// </summary>
         /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
         /// hash table.</returns>
@@ -96,9 +96,9 @@ namespace MonoGame.Framework.Input
         }
 
         /// <summary>
-        /// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:Microsoft.Xna.Framework.Input.JoystickCapabilities"/>.
+        /// Returns a string that represents the current <see cref="JoystickCapabilities"/>.
         /// </summary>
-        /// <returns>A <see cref="T:System.String"/> that represents the current <see cref="T:Microsoft.Xna.Framework.Input.JoystickCapabilities"/>.</returns>
+        /// <returns>A string that represents the current <see cref="JoystickCapabilities"/>.</returns>
         public override string ToString()
         {
             return "[JoystickCapabilities: IsConnected=" + IsConnected + ", Identifier=" + Identifier + ", IsGamepad=" + IsGamepad + " , AxisCount=" + AxisCount + ", ButtonCount=" + ButtonCount + ", HatCount=" + HatCount + "]";

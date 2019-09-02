@@ -8,7 +8,7 @@ using Eto.Forms;
 
 namespace MonoGame.Tools.Pipeline
 {
-    [CellAttribute(typeof(Microsoft.Xna.Framework.Color))]
+    [Cell(typeof(Framework.Color))]
     public class CellColor : CellBase
     {
         private Color color;
@@ -17,7 +17,7 @@ namespace MonoGame.Tools.Pipeline
         {
             if (Value != null)
             {
-                var tmp = (Microsoft.Xna.Framework.Color)Value;
+                var tmp = (Framework.Color)Value;
                 color = new Color(tmp.R / 255f, tmp.G / 255f, tmp.B / 255f, tmp.A / 255f);
             }
             else
@@ -33,7 +33,7 @@ namespace MonoGame.Tools.Pipeline
 
             if (dialog.ShowDialog(control) == DialogResult.Ok && _eventHandler != null && dialog.Color != color)
             {
-                var col = new Microsoft.Xna.Framework.Color(dialog.Color.Rb, dialog.Color.Gb, dialog.Color.Bb, dialog.Color.Ab);
+                var col = new Framework.Color(dialog.Color.Rb, dialog.Color.Gb, dialog.Color.Bb, dialog.Color.Ab);
                 _eventHandler(col, EventArgs.Empty);
             }
         }
@@ -41,7 +41,8 @@ namespace MonoGame.Tools.Pipeline
         public override void DrawCell(Graphics g, Rectangle rec, int separatorPos, bool selected)
         {
             var border = rec.Height / 5;
-            g.FillRectangle(color, separatorPos + border, rec.Y + border, rec.Width - separatorPos - 2 * border, rec.Height - 2 * border);
+            g.FillRectangle(
+                color, separatorPos + border, rec.Y + border, rec.Width - separatorPos - 2 * border, rec.Height - 2 * border);
         }
     }
 }

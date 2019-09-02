@@ -98,10 +98,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromColor(Color source) => FromVector4(source.ToVector4());
 
         /// <inheritdoc />
-        public void ToColor(ref Color dest)
-        {
-            dest.FromScaledVector4(ToScaledVector4());
-        }
+        public void ToColor(ref Color dest) => dest.FromScaledVector4(ToScaledVector4());
 
         /// <inheritdoc/>
         public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());

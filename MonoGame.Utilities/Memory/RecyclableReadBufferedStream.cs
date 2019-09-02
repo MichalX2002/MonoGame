@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace MonoGame.Utilities.Memory
@@ -94,16 +95,10 @@ namespace MonoGame.Utilities.Memory
             return _buffer[_readPos++];
         }
 
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            Throw();
-        }
+        public override void Write(byte[] buffer, int offset, int count) => Throw();
+        public override void WriteByte(byte value) => Throw();
 
-        public override void WriteByte(byte value)
-        {
-            Throw();
-        }
-
+        [DebuggerHidden]
         private void Throw()
         {
             throw new NotSupportedException(
@@ -114,8 +109,7 @@ namespace MonoGame.Utilities.Memory
         public override long Seek(long offset, SeekOrigin origin)
         {
             if (!CanSeek)
-                throw new NotSupportedException(
-                    "The underlying stream is currently not seekable.");
+                throw new InvalidOperationException("The underlying stream is not seekable.");
 
             _readPos = 0;
             return _stream.Seek(offset, origin);
@@ -127,20 +121,21 @@ namespace MonoGame.Utilities.Memory
             _stream.SetLength(value);
         }
 
-        public override void Flush()
-        {
-        }
+        public override void Flush() => throw new NotSupportedException();
 
         protected override void Dispose(bool disposing)
         {
             if (!_disposed)
             {
                 if (!_leaveOpen)
-                    _stream.Dispose();
+                    _stream?.Dispose();
                 _stream = null;
 
-                _manager.ReturnBlock(_buffer);
-                _buffer = null;
+                if (_buffer != null)
+                {
+                    _manager.ReturnBlock(_buffer);
+                    _buffer = null;
+                }
 
                 _disposed = true;
             }

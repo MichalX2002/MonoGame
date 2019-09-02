@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System;
+using MonoGame.Framework.Content.Pipeline;
 
 namespace MonoGame.Tools.Pipeline
 {
@@ -76,10 +77,9 @@ namespace MonoGame.Tools.Pipeline
                         item.OriginalPath = item.DestinationPath = _includes[i].RelativeDestPath;
                     }
 
-                    var citem = item as ContentItem;
-                    if (citem != null)
+                    if (item is ContentItem citem)
                     {
-                        citem.ProcessorParams = new Microsoft.Xna.Framework.Content.Pipeline.OpaqueDataDictionary();
+                        citem.ProcessorParams = new OpaqueDataDictionary();
                         citem.Observer = _con;
 
                         citem.ResolveTypes();

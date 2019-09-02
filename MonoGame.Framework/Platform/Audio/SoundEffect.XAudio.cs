@@ -11,7 +11,7 @@ using SharpDX.Multimedia;
 using SharpDX.X3DAudio;
 using MonoGame.Utilities.Memory;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     partial class SoundEffect
     {
@@ -31,7 +31,7 @@ namespace Microsoft.Xna.Framework.Audio
         [CLSCompliant(false)]
         public static Speakers Speakers
         {
-            get { return _speakers; }
+            get => _speakers;
 
             set
             {

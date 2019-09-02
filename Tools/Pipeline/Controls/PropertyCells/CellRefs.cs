@@ -6,13 +6,14 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using Eto.Forms;
-using Eto.Drawing;
 
 namespace MonoGame.Tools.Pipeline
 {
-    [CellAttribute(typeof(List<string>), Name = "References")]
+    [Cell(typeof(List<string>), Name = "References")]
     public class CellRefs : CellBase
     {
+        private static char[] _newLineChars = Environment.NewLine.ToCharArray();
+
         public override void OnCreate()
         {
             if (Value == null)
@@ -24,17 +25,19 @@ namespace MonoGame.Tools.Pipeline
             foreach (var value in list)
                 displayValue += Environment.NewLine + Path.GetFileNameWithoutExtension (value);
 
-            DisplayValue = (Value as List<string>).Count > 0 ? displayValue.Trim(Environment.NewLine.ToCharArray()) : "None";
-            Height = Height * Math.Max(list.Count, 1);
+            DisplayValue = list.Count > 0 ? displayValue.Trim(_newLineChars) : "None";
+            Height *= Math.Max(list.Count, 1);
         }
 
         public override void Edit(PixelLayout control)
         {
-            var dialog = new ReferenceDialog(PipelineController.Instance, (Value as List<string>).ToArray());
-            if (dialog.ShowModal(control) && _eventHandler != null)
+            using (var dialog = new ReferenceDialog(PipelineController.Instance, Value as List<string>))
             {
-                _eventHandler(dialog.References, EventArgs.Empty);
-                PipelineController.Instance.OnReferencesModified();
+                if (dialog.ShowModal(control) && _eventHandler != null)
+                {
+                    _eventHandler(dialog.References, EventArgs.Empty);
+                    PipelineController.Instance.OnReferencesModified();
+                }
             }
         }
     }

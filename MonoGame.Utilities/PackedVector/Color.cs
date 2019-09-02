@@ -9,7 +9,6 @@ using System.Diagnostics;
 using MonoGame.Utilities.PackedVector;
 using System.Runtime.CompilerServices;
 
-// use this namespace as we want Color to be easily accessible
 namespace MonoGame.Framework
 {
     /// <summary>
@@ -89,14 +88,11 @@ namespace MonoGame.Framework
 
         internal string DebugDisplayString
         {
-            get
-            {
-                return string.Concat(
+            get => string.Concat(
                     R.ToString(), "  ",
                     G.ToString(), "  ",
                     B.ToString(), "  ",
                     A.ToString());
-            }
         }
 
         #endregion
@@ -215,24 +211,23 @@ namespace MonoGame.Framework
         #region IPixel Implementation
 
         /// <inheritdoc />
-        public void ToRgba64(ref Rgba64 destination)
-        {
-            destination.R = VectorMaths.UpScale8To16Bit(R);
-            destination.G = VectorMaths.UpScale8To16Bit(G);
-            destination.B = VectorMaths.UpScale8To16Bit(B);
-            destination.A = VectorMaths.UpScale8To16Bit(A);
-        }
+        public Rgba64 ToRgba64() => new Rgba64(
+            PackedVectorHelper.UpScale8To16Bit(R),
+            PackedVectorHelper.UpScale8To16Bit(G),
+            PackedVectorHelper.UpScale8To16Bit(B),
+            PackedVectorHelper.UpScale8To16Bit(A));
 
         /// <inheritdoc />
-        public void ToColor(ref Color destination) => destination = this;
+        public void ToGray8(ref Gray8 dest) => dest.PackedValue = A;
 
         /// <inheritdoc />
-        public void ToRgb24(ref Rgb24 destination)
-        {
-            destination.R = R;
-            destination.G = G;
-            destination.B = B;
-        }
+        public void ToGrayAlpha16(ref GrayAlpha16 dest) => dest = ToGrayAlpha16();
+
+        /// <inheritdoc />
+        public void ToRgb24(ref Rgb24 dest) => dest = ToRgb24();
+
+        /// <inheritdoc />
+        public void ToColor(ref Color dest) => dest = this;
 
         /// <inheritdoc />
         public Vector4 ToVector4() => new Vector4(R / 255f, G / 255f, B / 255f, A / 255f);
@@ -243,9 +238,9 @@ namespace MonoGame.Framework
         /// <inheritdoc />
         public void FromVector4(Vector4 vector)
         {
-            vector *= VectorMaths.MaxBytes;
-            vector += VectorMaths.Half;
-            vector = Vector4.Clamp(vector, Vector4.Zero, VectorMaths.MaxBytes);
+            vector *= PackedVectorHelper.MaxBytes;
+            vector += PackedVectorHelper.Half;
+            vector = Vector4.Clamp(vector, Vector4.Zero, PackedVectorHelper.MaxBytes);
 
             R = (byte)vector.X;
             G = (byte)vector.Y;
@@ -265,9 +260,9 @@ namespace MonoGame.Framework
         /// <inheritdoc />
         public void FromRgb48(Rgb48 source)
         {
-            R = VectorMaths.DownScale16To8Bit(source.R);
-            G = VectorMaths.DownScale16To8Bit(source.G);
-            B = VectorMaths.DownScale16To8Bit(source.B);
+            R = PackedVectorHelper.DownScale16To8Bit(source.R);
+            G = PackedVectorHelper.DownScale16To8Bit(source.G);
+            B = PackedVectorHelper.DownScale16To8Bit(source.B);
             A = byte.MaxValue;
         }
 
@@ -322,65 +317,54 @@ namespace MonoGame.Framework
         /// <inheritdoc />
         public void FromGray16(Gray16 source)
         {
-            byte rgb = VectorMaths.DownScale16To8Bit(source.PackedValue);
-            R = rgb;
-            G = rgb;
-            B = rgb;
+            byte lum = PackedVectorHelper.DownScale16To8Bit(source.PackedValue);
+            R = lum;
+            G = lum;
+            B = lum;
             A = byte.MaxValue;
         }
 
         #endregion
 
+        /// <inheritdoc />
+        public void FromGrayAlpha(GrayAlpha16 source)
+        {
+            R = source.L;
+            G = source.L;
+            B = source.L;
+            A = source.A;
+        }
+
         /// <summary>
         /// Convert to <see cref="Bgra32"/>.
         /// </summary>
         /// <returns>The <see cref="Bgra32"/>.</returns>
-        public Bgra32 ToBgra32()
-        {
-            byte r = VectorMaths.DownScale16To8Bit(R);
-            byte g = VectorMaths.DownScale16To8Bit(G);
-            byte b = VectorMaths.DownScale16To8Bit(B);
-            byte a = VectorMaths.DownScale16To8Bit(A);
-            return new Bgra32(r, g, b, a);
-        }
+        public Bgra32 ToBgra32() => new Bgra32(R, G, B, A);
 
         /// <summary>
         /// Convert to <see cref="Argb32"/>.
         /// </summary>
         /// <returns>The <see cref="Argb32"/>.</returns>
-        public Argb32 ToArgb32()
-        {
-            byte r = VectorMaths.DownScale16To8Bit(R);
-            byte g = VectorMaths.DownScale16To8Bit(G);
-            byte b = VectorMaths.DownScale16To8Bit(B);
-            byte a = VectorMaths.DownScale16To8Bit(A);
-            return new Argb32(r, g, b, a);
-        }
+        public Argb32 ToArgb32() => new Argb32(R, G, B, A);
 
         /// <summary>
         /// Convert to <see cref="Rgb24"/>.
         /// </summary>
         /// <returns>The <see cref="Rgb24"/>.</returns>
-        public Rgb24 ToRgb24()
-        {
-            byte r = VectorMaths.DownScale16To8Bit(R);
-            byte g = VectorMaths.DownScale16To8Bit(G);
-            byte b = VectorMaths.DownScale16To8Bit(B);
-            return new Rgb24(r, g, b);
-        }
+        public Rgb24 ToRgb24() => new Rgb24(R, G, B);
 
         /// <summary>
         /// Convert to <see cref="Bgr24"/>.
         /// </summary>
         /// <returns>The <see cref="Bgr24"/>.</returns>
-        public Bgr24 ToBgr24()
-        {
-            byte r = VectorMaths.DownScale16To8Bit(R);
-            byte g = VectorMaths.DownScale16To8Bit(G);
-            byte b = VectorMaths.DownScale16To8Bit(B);
-            return new Bgr24(r, g, b);
-        }
-
+        public Bgr24 ToBgr24() => new Bgr24(R, G, B);
+    
+        /// <summary>
+        /// Convert to <see cref="GrayAlpha16"/>.
+        /// </summary>
+        /// <returns>The <see cref="GrayAlpha16"/>.</returns>
+        public GrayAlpha16 ToGrayAlpha16() => new GrayAlpha16(PackedVectorHelper.Get8BitBT709Luminance(R, G, B), A);
+        
         /// <summary>
         /// Gets a <see cref="Vector3"/> representation for this object.
         /// </summary>

@@ -1,4 +1,5 @@
-﻿using MonoGame.Utilities.Memory;
+﻿using MonoGame.Utilities.IO;
+using MonoGame.Utilities.Memory;
 using System;
 using System.IO;
 
@@ -529,7 +530,7 @@ namespace MonoGame.Utilities
             // workitem 8460
             byte[] working = new byte[1024];
             var encoding = System.Text.Encoding.UTF8;
-            using (var output = RecyclableMemoryManager.Instance.GetMemoryStream())
+            using (var output = RecyclableMemoryManager.Default.GetMemoryStream())
             {
                 using (decompressor)
                 {
@@ -548,7 +549,7 @@ namespace MonoGame.Utilities
         {
             // workitem 8460
             byte[] working = new byte[1024];
-            using (var output = RecyclableMemoryManager.Instance.GetMemoryStream())
+            using (var output = RecyclableMemoryManager.Default.GetMemoryStream())
             {
                 using (decompressor)
                 {

@@ -5,7 +5,9 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using MonoGame.Utilities;
+using MonoGame.Utilities.IO;
 using MonoGame.Utilities.Memory;
 
 namespace MonoGame.Framework.Audio
@@ -77,9 +79,9 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Decode audio samples from stream.
+        /// Decodes audio samples from a stream.
         /// </summary>
-        /// <param name="stream">The stream positioned at the start of the WAV file.</param>
+        /// <param name="stream">The encoded stream .</param>
         /// <param name="format">Gets the OpenAL format enumeration value.</param>
         /// <param name="frequency">Gets the frequency or sample rate.</param>
         /// <param name="channels">Gets the number of channels.</param>
@@ -88,49 +90,48 @@ namespace MonoGame.Framework.Audio
         /// <param name="samplesPerBlock">Gets the number of samples per block.</param>
         /// <param name="sampleCount">Gets the total number of samples.</param>
         /// <returns>The stream containing the waveform data or compressed blocks.</returns>
-        public static MemoryStream Load(
+        public static RecyclableMemoryStream Load(
             Stream stream, out ALFormat format, out int frequency, out int channels,
             out int blockAlignment, out int bitsPerSample, out int samplesPerBlock, out int sampleCount)
         {
-            using (var reader = new BinaryReader(stream))
+            string signature;
+            using (var reader = new BinaryReader(stream, Encoding.UTF8, true))
+                signature = new string(reader.ReadChars(4));
+
+            if (stream.CanSeek)
+                stream.Seek(0, SeekOrigin.Begin);
+            else
             {
-                string signature = new string(reader.ReadChars(4));
+                byte[] sigBytes = Encoding.UTF8.GetBytes(signature);
+                stream = new PrefixedStream(sigBytes, stream, leaveOpen: false);
+            }
 
-                if (stream.CanSeek)
-                    stream.Seek(0, SeekOrigin.Begin);
-                else
+            using (var buffered = RecyclableMemoryManager.Default.GetReadBufferedStream(stream, false))
+            {
+                switch (signature)
                 {
-                    byte[] sigBytes = System.Text.Encoding.UTF8.GetBytes(signature);
-                    stream = new PrefixedStream(sigBytes, stream, leaveOpen: false);
-                }
-
-                using (var buffered = RecyclableMemoryManager.Instance.GetReadBufferedStream(stream, false))
-                {
-                    switch (signature)
-                    {
 #if NVORBIS
-                        case "OggS":
-                            return LoadVorbis(
-                                buffered, out format, out frequency, out channels, out blockAlignment,
-                                out bitsPerSample, out samplesPerBlock, out sampleCount);
+                    case "OggS":
+                        return LoadVorbis(
+                            buffered, out format, out frequency, out channels, out blockAlignment,
+                            out bitsPerSample, out samplesPerBlock, out sampleCount);
 #endif
 
-                        case "RIFF":
-                            return LoadWave(
-                                buffered, out format, out frequency, out channels, out blockAlignment,
-                                out bitsPerSample, out samplesPerBlock, out sampleCount);
+                    case "RIFF":
+                        return LoadWave(
+                            buffered, out format, out frequency, out channels, out blockAlignment,
+                            out bitsPerSample, out samplesPerBlock, out sampleCount);
 
-                        default:
-                            throw new NotSupportedException($"Unknown file signature ({signature}).");
-                    }
+                    default:
+                        throw new NotSupportedException($"Unknown file signature ({signature}).");
                 }
             }
         }
 
-        public static MemoryStream ReadBytes(Stream stream, int bytes)
+        public static RecyclableMemoryStream ReadBytes(Stream stream, int bytes)
         {
-            var result = RecyclableMemoryManager.Instance.GetMemoryStream("AudioLoader", bytes);
-            byte[] buffer = RecyclableMemoryManager.Instance.GetBlock();
+            var result = RecyclableMemoryManager.Default.GetMemoryStream(nameof(ReadBytes), bytes);
+            byte[] buffer = RecyclableMemoryManager.Default.GetBlock();
             try
             {
                 int left = bytes;
@@ -157,11 +158,11 @@ namespace MonoGame.Framework.Audio
             }
             finally
             {
-                RecyclableMemoryManager.Instance.ReturnBlock(buffer);
+                RecyclableMemoryManager.Default.ReturnBlock(buffer);
             }
         }
 
-        private static MemoryStream LoadWave(
+        private static RecyclableMemoryStream LoadWave(
             Stream stream, out ALFormat format, out int frequency, out int channels,
             out int blockAlignment, out int bitsPerSample, out int samplesPerBlock, out int sampleCount)
         {
@@ -176,7 +177,7 @@ namespace MonoGame.Framework.Audio
                 if (wformat != "WAVE")
                     throw new ArgumentException("Specified stream is not a wave file.");
 
-                MemoryStream audioData = null;
+                RecyclableMemoryStream audioData = null;
                 int audioFormat = 0;
                 channels = 0;
                 bitsPerSample = 0;
@@ -299,8 +300,12 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        // Convert buffer containing 24-bit signed PCM wav data to a 16-bit signed PCM buffer
-        internal static unsafe byte[] Convert24To16<T>(ReadOnlySpan<T> span) where T : unmanaged
+        /// <summary>
+        /// Convert buffer containing 24-bit signed PCM wav data to a 16-bit signed PCM buffer
+        /// </summary>
+        internal static unsafe byte[] Convert24To16<T>(
+            ReadOnlySpan<T> span, out string bufferTag, out int size) 
+            where T : unmanaged
         {
             ReadOnlySpan<byte> byteSpan = MemoryMarshal.AsBytes(span);
             if (byteSpan.Length % 3 != 0)
@@ -308,7 +313,13 @@ namespace MonoGame.Framework.Audio
 
             // Sample count includes both channels if stereo
             int sampleCount = byteSpan.Length / 3;
-            byte[] outData = new byte[sampleCount * sizeof(short)];
+            size = sampleCount * sizeof(short);
+            bool isRecyclable = size > RecyclableMemoryManager.Default.MaximumLargeBufferSize;
+
+            bufferTag = isRecyclable ? nameof(Convert24To16) : null;
+            byte[] outData = isRecyclable ?
+                RecyclableMemoryManager.Default.GetLargeBuffer(size, bufferTag) : new byte[size];
+
             fixed (byte* src = &MemoryMarshal.GetReference(byteSpan))
             {
                 fixed (byte* dst = &outData[0])

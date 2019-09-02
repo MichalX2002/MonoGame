@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 {
     [ContentTypeSerializer]
     class NullableSerializer<T> : ContentTypeSerializer<T?> where T : struct
@@ -28,7 +28,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
 
         protected internal override void Serialize(IntermediateWriter output, T? value, ContentSerializerAttribute format)
         {
-            output.WriteRawObject<T>(value.Value, _format, _serializer);
+            output.WriteRawObject(value.Value, _format, _serializer);
         }
     }
 }

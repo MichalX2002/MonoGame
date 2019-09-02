@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Provides a base class for graphics types that define local coordinate systems.
@@ -28,13 +28,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Gets the set of animations belonging to this node.
         /// </summary>
-        public AnimationContentDictionary Animations
-        {
-            get
-            {
-                return animations;
-            }
-        }
+        public AnimationContentDictionary Animations => animations;
 
         /// <summary>
         /// Gets the children of the NodeContent object.

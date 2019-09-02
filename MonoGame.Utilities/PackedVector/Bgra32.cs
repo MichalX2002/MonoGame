@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using MonoGame.Framework;
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -39,16 +40,6 @@ namespace MonoGame.Utilities.PackedVector
         public byte A;
 
         /// <summary>
-        /// The maximum byte value.
-        /// </summary>
-        private static readonly Vector4 MaxBytes = new Vector4(255);
-
-        /// <summary>
-        /// The half vector value.
-        /// </summary>
-        private static readonly Vector4 Half = new Vector4(0.5F);
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="Bgra32"/> struct.
         /// </summary>
         /// <param name="r">The red component.</param>
@@ -77,21 +68,12 @@ namespace MonoGame.Utilities.PackedVector
             A = a;
         }
 
-        /// <summary>
-        /// Gets or sets the packed representation of the Bgra32 struct.
-        /// </summary>
-        public uint Bgra
-        {
-            get => Unsafe.As<Bgra32, uint>(ref this);
-
-            set => Unsafe.As<Bgra32, uint>(ref this) = value;
-        }
-
         /// <inheritdoc/>
+        [CLSCompliant(false)]
         public uint PackedValue
         {
-            get => Bgra;
-            set => Bgra = value;
+            get => Unsafe.As<Bgra32, uint>(ref this);
+            set => Unsafe.As<Bgra32, uint>(ref this) = value;
         }
 
         /// <summary>
@@ -141,7 +123,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromVector4(Vector4 vector) => Pack(ref vector);
 
         /// <inheritdoc/>
-        public Vector4 ToVector4() => new Vector4(R, G, B, A) / MaxBytes;
+        public Vector4 ToVector4() => new Vector4(R, G, B, A) / PackedVectorHelper.MaxBytes;
 
         /// <inheritdoc/>
         public void FromArgb32(Argb32 source)
@@ -179,7 +161,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc/>
         public void FromGray16(Gray16 source)
         {
-            byte rgb = VectorMaths.DownScale16To8Bit(source.PackedValue);
+            byte rgb = PackedVectorHelper.DownScale16To8Bit(source.PackedValue);
             R = rgb;
             G = rgb;
             B = rgb;
@@ -216,29 +198,29 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc/>
         public void FromRgb48(Rgb48 source)
         {
-            R = VectorMaths.DownScale16To8Bit(source.R);
-            G = VectorMaths.DownScale16To8Bit(source.G);
-            B = VectorMaths.DownScale16To8Bit(source.B);
+            R = PackedVectorHelper.DownScale16To8Bit(source.R);
+            G = PackedVectorHelper.DownScale16To8Bit(source.G);
+            B = PackedVectorHelper.DownScale16To8Bit(source.B);
             A = byte.MaxValue;
         }
 
         /// <inheritdoc/>
         public void FromRgba64(Rgba64 source)
         {
-            R = VectorMaths.DownScale16To8Bit(source.R);
-            G = VectorMaths.DownScale16To8Bit(source.G);
-            B = VectorMaths.DownScale16To8Bit(source.B);
-            A = VectorMaths.DownScale16To8Bit(source.A);
+            R = PackedVectorHelper.DownScale16To8Bit(source.R);
+            G = PackedVectorHelper.DownScale16To8Bit(source.G);
+            B = PackedVectorHelper.DownScale16To8Bit(source.B);
+            A = PackedVectorHelper.DownScale16To8Bit(source.A);
         }
 
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj is Bgra32 other && Equals(other);
 
         /// <inheritdoc/>
-        public bool Equals(Bgra32 other) => Bgra.Equals(other.Bgra);
+        public bool Equals(Bgra32 other) => PackedValue.Equals(other.PackedValue);
 
         /// <inheritdoc/>
-        public override int GetHashCode() => Bgra.GetHashCode();
+        public override int GetHashCode() => PackedValue.GetHashCode();
 
         /// <inheritdoc />
         public override string ToString() => $"Bgra32({B}, {G}, {R}, {A})";
@@ -249,9 +231,9 @@ namespace MonoGame.Utilities.PackedVector
         /// <param name="vector">The vector containing the values to pack.</param>
         private void Pack(ref Vector4 vector)
         {
-            vector *= MaxBytes;
-            vector += Half;
-            vector = Vector4.Clamp(vector, Vector4.Zero, MaxBytes);
+            vector *= PackedVectorHelper.MaxBytes;
+            vector += PackedVectorHelper.Half;
+            vector = Vector4.Clamp(vector, Vector4.Zero, PackedVectorHelper.MaxBytes);
 
             R = (byte)vector.X;
             G = (byte)vector.Y;

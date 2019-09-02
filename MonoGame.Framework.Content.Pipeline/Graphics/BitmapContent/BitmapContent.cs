@@ -3,10 +3,10 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework.Graphics;
-using SixLabors.ImageSharp.PixelFormats;
+using MonoGame.Framework.Graphics;
+using MonoGame.Utilities.PackedVector;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Provides properties and methods for creating and maintaining a bitmap resource.
@@ -65,7 +65,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
         /// <summary>
         /// Copies one bitmap into another.
-        /// The destination bitmap can be in any format and size. If the destination is larger or smaller, the source bitmap is scaled accordingly.
+        /// The destination bitmap can be in any format and size. If the destination is larger or smaller,
+        /// the source bitmap is scaled accordingly.
         /// </summary>
         /// <param name="sourceBitmap">BitmapContent being copied.</param>
         /// <param name="destinationBitmap">BitmapContent being overwritten.</param>

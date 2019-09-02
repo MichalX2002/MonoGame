@@ -66,7 +66,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ReSharper disable TooWideLocalVariableScope
 // ReSharper disable JoinDeclarationAndInitializer
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Utilities.LZ4
+namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 {
 	internal static partial class LZ4Codec
 	{

@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.InteropServices;
 using MonoGame.Utilities;
 
 namespace MonoGame.Framework.Graphics
@@ -57,14 +58,14 @@ namespace MonoGame.Framework.Graphics
                 throw new NotSupportedException(
                     $"Calling {nameof(GetData)} on a resource that was created with {BufferUsage.WriteOnly} is not supported.");
 
-            int bufferBytes = Capacity * _indexElementSize;
+            int bufferSize = Capacity * _indexElementSize;
             int requestedBytes = destination.Length * sizeof(T);
 
-            if (requestedBytes > bufferBytes)
+            if (requestedBytes > bufferSize)
                 throw new ArgumentOutOfRangeException(
-                    nameof(destination), "More bytes than the buffer contains were requested.");
+                    nameof(destination), "The amount of data requested exceeds the buffer capacity.");
 
-            if (offsetInBytes + requestedBytes > bufferBytes)
+            if (offsetInBytes + requestedBytes > bufferSize)
                 throw new ArgumentOutOfRangeException(
                     nameof(offsetInBytes), "The requested range reaches beyond the buffer.");
 
@@ -85,7 +86,7 @@ namespace MonoGame.Framework.Graphics
             where T : unmanaged
         {
             if (data.IsEmpty)
-                throw new ArgumentNullException(nameof(data));
+                throw new ArgumentEmptyException(nameof(data));
 
             int bufferBytes = Capacity * _indexElementSize;
             int requestedBytes = data.Length * sizeof(T);
@@ -133,9 +134,9 @@ namespace MonoGame.Framework.Graphics
         /// <param name="graphicsDevice">The graphics device.</param>
         /// <param name="type">The type to use for the index buffer</param>
         /// <returns>The <see cref="Graphics.IndexElementSize"/> value that matches the type.</returns>
-        private static IndexElementSize SizeForType(GraphicsDevice graphicsDevice, Type type)
+        private static unsafe IndexElementSize SizeForType(GraphicsDevice graphicsDevice, Type type)
         {
-            switch (ReflectionHelpers.ManagedSizeOf(type))
+            switch (Marshal.SizeOf(type))
             {
                 case 2:
                     return IndexElementSize.SixteenBits;

@@ -7,9 +7,9 @@ using Eto.Forms;
 
 namespace MonoGame.Tools.Pipeline
 {
-    [CellAttribute(typeof(Enum))]
-    [CellAttribute(typeof(ImporterTypeDescription))]
-    [CellAttribute(typeof(ProcessorTypeDescription))]
+    [Cell(typeof(Enum))]
+    [Cell(typeof(ImporterTypeDescription))]
+    [Cell(typeof(ProcessorTypeDescription))]
     public class CellCombo : CellBase
     {
         public override void OnCreate()

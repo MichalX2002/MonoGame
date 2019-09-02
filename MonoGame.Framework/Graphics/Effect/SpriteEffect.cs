@@ -68,7 +68,7 @@ namespace MonoGame.Framework.Graphics
                 // Normal 3D cameras look into the -z direction (z = 1 is in front of z = 0). The
                 // sprite batch layer depth is the opposite (z = 0 is in front of z = 1).
                 // --> We get the correct matrix with near plane 0 and far plane -1.
-                Matrix.CreateOrthographicOffCenter(0, vp.Width, vp.Height, 0, 0, -1, out _projection);
+                _projection = Matrix.CreateOrthographicOffCenter(0, vp.Width, vp.Height, 0, 0, -1);
 
                 if (!GraphicsDeviceManager.UseStandardPixelAddressing)
                 {

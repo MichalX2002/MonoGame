@@ -141,7 +141,7 @@ namespace MonoGame.Framework.Graphics
             DepthStencilFormat = DepthFormat.None;
             MultiSampleCount = 0;
             PresentationInterval = PresentInterval.Default;
-            DisplayOrientation = Microsoft.Xna.Framework.DisplayOrientation.Default;
+            DisplayOrientation = DisplayOrientation.Default;
         }
 
         /// <summary>

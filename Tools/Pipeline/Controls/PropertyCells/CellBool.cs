@@ -8,7 +8,7 @@ using Eto.Forms;
 
 namespace MonoGame.Tools.Pipeline
 {
-    [CellAttribute(typeof(bool))]
+    [Cell(typeof(bool))]
     public class CellBool : CellBase
     {
         private bool _draw;

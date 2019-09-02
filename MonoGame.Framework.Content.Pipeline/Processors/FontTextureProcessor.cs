@@ -5,16 +5,15 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
-using SixLabors.ImageSharp.PixelFormats;
+using MonoGame.Framework.Graphics;
+using MonoGame.Framework.Content.Pipeline.Graphics;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     [ContentProcessor(DisplayName = "Font Texture - MonoGame")]
     public class FontTextureProcessor : ContentProcessor<Texture2DContent, SpriteFontContent>
     {
-        private static readonly Rgba32 _transparentPixel = Rgba32.Magenta;
+        private static readonly Color _transparentPixel = Color.Magenta;
 
         [DefaultValue(' ')]
         public virtual char FirstCharacter { get; set; }
@@ -35,7 +34,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             return (char)((FirstCharacter) + index);
         }
 
-        private List<Glyph> ExtractGlyphs(PixelBitmapContent<Rgba32> bitmap)
+        private List<Glyph> ExtractGlyphs(PixelBitmapContent<Color> bitmap)
         {
             var glyphs = new List<Glyph>();
             var regions = new List<Rectangle>();
@@ -84,7 +83,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             for (int i = 0; i < regions.Count; i++)
             {
                 var rect = regions[i];
-                var newBitmap = new PixelBitmapContent<Rgba32>(rect.Width, rect.Height);
+                var newBitmap = new PixelBitmapContent<Color>(rect.Width, rect.Height);
                 BitmapContent.Copy(bitmap, rect, newBitmap, new Rectangle(0, 0, rect.Width, rect.Height));
 
                 var glyph = new Glyph(GetCharacterForIndex(i), newBitmap);
@@ -104,13 +103,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             face.TryGetFormat(out SurfaceFormat faceFormat);
             if (faceFormat != SurfaceFormat.Rgba32)
             {
-                var colorFace = new PixelBitmapContent<Rgba32>(face.Width, face.Height);
+                var colorFace = new PixelBitmapContent<Color>(face.Width, face.Height);
                 BitmapContent.Copy(face, colorFace);
                 face = colorFace;
             }
 
             var output = new SpriteFontContent();
-            var glyphs = ExtractGlyphs((PixelBitmapContent<Rgba32>)face);
+            var glyphs = ExtractGlyphs((PixelBitmapContent<Color>)face);
             // Optimize.
             foreach (var glyph in glyphs)
             {

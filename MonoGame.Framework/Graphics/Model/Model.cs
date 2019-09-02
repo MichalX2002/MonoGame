@@ -12,9 +12,9 @@ namespace MonoGame.Framework.Graphics
     /// </summary>
 	public sealed class Model
 	{
-		private static Matrix[] sharedDrawBoneMatrices;
+		private static Matrix[] _sharedDrawBoneMatrices;
 		
-		private GraphicsDevice graphicsDevice;
+		private GraphicsDevice _graphicsDevice;
 
         /// <summary>
         /// A collection of <see cref="ModelBone"/> objects which describe how each mesh in the
@@ -44,7 +44,6 @@ namespace MonoGame.Framework.Graphics
 
 		internal Model()
 		{
-
 		}
 
         /// <summary>
@@ -62,9 +61,9 @@ namespace MonoGame.Framework.Graphics
         /// <exception cref="ArgumentNullException">
         /// <paramref name="meshes"/> is null.
         /// </exception>
-        public Model(GraphicsDevice graphicsDevice, List<ModelBone> bones, List<ModelMesh> meshes)
+        public Model(GraphicsDevice graphicsDevice, IList<ModelBone> bones, IList<ModelMesh> meshes)
 		{
-            this.graphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
+            this._graphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
                     nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
 
             // TODO: Complete member initialization
@@ -77,19 +76,15 @@ namespace MonoGame.Framework.Graphics
 			var globalScale = Matrix.CreateScale(0.01f);
 			
 			foreach(var node in Root.Children)
-			{
 				BuildHierarchy(node, Root.Transform * globalScale, 0);
-			}
 		}
 		
-		private void BuildHierarchy(ModelBone node, Matrix parentTransform, int level)
+		private void BuildHierarchy(ModelBone node, in Matrix parentTransform, int level)
 		{
 			node.ModelTransform = node.Transform * parentTransform;
 			
-			foreach (var child in node.Children) 
-			{
+			foreach (var child in node.Children)
 				BuildHierarchy(child, node.ModelTransform, level + 1);
-			}
 			
 			//string s = string.Empty;
 			//
@@ -107,18 +102,16 @@ namespace MonoGame.Framework.Graphics
         /// <param name="world">The world transform.</param>
         /// <param name="view">The view transform.</param>
         /// <param name="projection">The projection transform.</param>
-        public void Draw(Matrix world, Matrix view, Matrix projection) 
+        public void Draw(in Matrix world, in Matrix view, in Matrix projection) 
 		{       
             int boneCount = Bones.Count;
 			
-			if (sharedDrawBoneMatrices == null ||
-				sharedDrawBoneMatrices.Length < boneCount)
-			{
-				sharedDrawBoneMatrices = new Matrix[boneCount];    
-			}
+			if (_sharedDrawBoneMatrices == null ||
+				_sharedDrawBoneMatrices.Length < boneCount)
+				_sharedDrawBoneMatrices = new Matrix[boneCount];
 			
 			// Look up combined bone matrices for the entire model.            
-			CopyAbsoluteBoneTransformsTo(sharedDrawBoneMatrices);
+			CopyAbsoluteBoneTransformsTo(_sharedDrawBoneMatrices);
 
             // Draw the model.
             foreach (ModelMesh mesh in Meshes)
@@ -126,10 +119,9 @@ namespace MonoGame.Framework.Graphics
                 foreach (Effect effect in mesh.Effects)
                 {
                     if (!(effect is IEffectMatrices effectMatricies))
-                    {
                         throw new InvalidOperationException();
-                    }
-                    effectMatricies.World = sharedDrawBoneMatrices[mesh.ParentBone.Index] * world;
+
+                    effectMatricies.World = _sharedDrawBoneMatrices[mesh.ParentBone.Index] * world;
                     effectMatricies.View = view;
                     effectMatricies.Projection = projection;
                 }
@@ -139,15 +131,16 @@ namespace MonoGame.Framework.Graphics
 		}
 
         /// <summary>
-        /// Copies bone transforms relative to all parent bones of the each bone from this model to a given array.
+        /// Copies bone transforms relative to all parent bones of the each bone from this model to a given span.
         /// </summary>
-        /// <param name="destinationBoneTransforms">The array receiving the transformed bones.</param>
-        public void CopyAbsoluteBoneTransformsTo(Matrix[] destinationBoneTransforms)
+        /// <param name="destinationBoneTransforms">The span receiving the transformed bones.</param>
+        public void CopyAbsoluteBoneTransformsTo(Span<Matrix> destinationBoneTransforms)
 		{
-			if (destinationBoneTransforms == null)
+			if (destinationBoneTransforms.IsEmpty)
 				throw new ArgumentNullException(nameof(destinationBoneTransforms));
             if (destinationBoneTransforms.Length < Bones.Count)
 				throw new ArgumentOutOfRangeException(nameof(destinationBoneTransforms));
+
             int count = Bones.Count;
 			for (int index1 = 0; index1 < count; ++index1)
 			{
@@ -159,57 +152,53 @@ namespace MonoGame.Framework.Graphics
 				else
 				{
 					int index2 = modelBone.Parent.Index;
-					Matrix.Multiply(ref modelBone.transform, ref destinationBoneTransforms[index2], out destinationBoneTransforms[index1]);
+                    destinationBoneTransforms[index1] = Matrix.Multiply(modelBone.transform, destinationBoneTransforms[index2]);
 				}
 			}
 		}
 
         /// <summary>
-        /// Copies bone transforms relative to <see cref="Root"/> bone from a given array to this model.
+        /// Copies bone transforms relative to <see cref="Root"/> bone from a given span to this model.
         /// </summary>
-        /// <param name="sourceBoneTransforms">The array of prepared bone transform data.</param>
+        /// <param name="sourceBoneTransforms">The span of prepared bone transform data.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="sourceBoneTransforms"/> is null.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="sourceBoneTransforms"/> is invalid.
         /// </exception>
-        public void CopyBoneTransformsFrom(Matrix[] sourceBoneTransforms)
+        public void CopyBoneTransformsFrom(ReadOnlySpan<Matrix> sourceBoneTransforms)
         {
-            if (sourceBoneTransforms == null)
-                throw new ArgumentNullException(nameof(sourceBoneTransforms));
+            if (sourceBoneTransforms.IsEmpty)
+                throw new ArgumentEmptyException(nameof(sourceBoneTransforms));
             if (sourceBoneTransforms.Length < Bones.Count)
                 throw new ArgumentOutOfRangeException(nameof(sourceBoneTransforms));
 
             int count = Bones.Count;
             for (int i = 0; i < count; i++)
-            {
                 Bones[i].Transform = sourceBoneTransforms[i];
-            }
         }
 
         /// <summary>
-        /// Copies bone transforms relative to <see cref="Root"/> bone from this model to a given array.
+        /// Copies bone transforms relative to <see cref="Root"/> bone from this model to a given span.
         /// </summary>
-        /// <param name="destinationBoneTransforms">The array receiving the transformed bones.</param>
+        /// <param name="destinationBoneTransforms">The span receiving the transformed bones.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="destinationBoneTransforms"/> is null.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="destinationBoneTransforms"/> is invalid.
         /// </exception>
-        public void CopyBoneTransformsTo(Matrix[] destinationBoneTransforms)
+        public void CopyBoneTransformsTo(Span<Matrix> destinationBoneTransforms)
         {
-            if (destinationBoneTransforms == null)
-                throw new ArgumentNullException(nameof(destinationBoneTransforms));
+            if (destinationBoneTransforms.IsEmpty)
+                throw new ArgumentEmptyException(nameof(destinationBoneTransforms));
             if (destinationBoneTransforms.Length < Bones.Count)
                 throw new ArgumentOutOfRangeException(nameof(destinationBoneTransforms));
 
             int count = Bones.Count;
             for (int i = 0; i < count; i++)
-            {
                 destinationBoneTransforms[i] = Bones[i].Transform;
-            }
         }
     }
 }

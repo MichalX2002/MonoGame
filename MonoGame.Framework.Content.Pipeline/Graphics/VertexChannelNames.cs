@@ -5,9 +5,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Provides properties for managing a collection of vertex channel names.

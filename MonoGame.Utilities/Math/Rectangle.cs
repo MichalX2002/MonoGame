@@ -64,14 +64,14 @@ namespace MonoGame.Framework
 
         /// <summary>
         /// Whether or not this <see cref="Rectangle"/> has a <see cref="Width"/> and
-        /// <see cref="Height"/> of 0, and a <see cref="Location"/> of (0, 0).
+        /// <see cref="Height"/> of 0, and a <see cref="Position"/> of (0, 0).
         /// </summary>
         public bool IsEmpty => ((((Width == 0) && (Height == 0)) && (X == 0)) && (Y == 0));
 
         /// <summary>
         /// The top-left coordinates of this <see cref="Rectangle"/>.
         /// </summary>
-        public Point Location
+        public Point Position
         {
             get => new Point(X, Y);
             set
@@ -155,7 +155,7 @@ namespace MonoGame.Framework
 
         #region Operators
 
-        public static Rectangle operator +(Rectangle a, Rectangle b)
+        public static Rectangle operator +(in Rectangle a, in Rectangle b)
         {
             return new Rectangle(
                 a.X + b.X,
@@ -164,7 +164,7 @@ namespace MonoGame.Framework
                 a.Height + b.Height);
         }
 
-        public static Rectangle operator -(Rectangle a, Rectangle b)
+        public static Rectangle operator -(in Rectangle a, in Rectangle b)
         {
             return new Rectangle(
                 a.X - b.X,
@@ -179,7 +179,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Rectangle"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="Rectangle"/> instance on the right of the equal sign.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public static bool operator ==(Rectangle a, Rectangle b)
+        public static bool operator ==(in Rectangle a, in Rectangle b)
         {
             return ((a.X == b.X) && (a.Y == b.Y) && (a.Width == b.Width) && (a.Height == b.Height));
         }
@@ -190,7 +190,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Rectangle"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="Rectangle"/> instance on the right of the not equal sign.</param>
         /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>
-        public static bool operator !=(Rectangle a, Rectangle b)
+        public static bool operator !=(in Rectangle a, in Rectangle b)
         {
             return !(a == b);
         }
@@ -232,16 +232,6 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Gets whether or not the provided <see cref="Point"/> lies within the bounds of this <see cref="Rectangle"/>.
-        /// </summary>
-        /// <param name="value">The coordinates to check for inclusion in this <see cref="Rectangle"/>.</param>
-        /// <param name="result"><c>true</c> if the provided <see cref="Point"/> lies inside this <see cref="Rectangle"/>; <c>false</c> otherwise. As an output parameter.</param>
-        public void Contains(ref Point value, out bool result)
-        {
-            result = ((((X <= value.X) && (value.X < (X + Width))) && (Y <= value.Y)) && (value.Y < (Y + Height)));
-        }
-
-        /// <summary>
         /// Gets whether or not the provided <see cref="Vector2"/> lies within the bounds of this <see cref="Rectangle"/>.
         /// </summary>
         /// <param name="value">The coordinates to check for inclusion in this <see cref="Rectangle"/>.</param>
@@ -252,63 +242,23 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Gets whether or not the provided <see cref="Vector2"/> lies within the bounds of this <see cref="Rectangle"/>.
-        /// </summary>
-        /// <param name="value">The coordinates to check for inclusion in this <see cref="Rectangle"/>.</param>
-        /// <returns><c>true</c> if the provided <see cref="Vector2"/> lies inside this <see cref="Rectangle"/>; <c>false</c> otherwise. As an output parameter.</returns>
-        public bool ContainsRef(ref Vector2 value)
-        {
-            return ((((X <= value.X) && (value.X < (X + Width))) && (Y <= value.Y)) && (value.Y < (Y + Height)));
-        }
-
-        /// <summary>
-        /// Gets whether or not the provided <see cref="Vector2"/> lies within the bounds of this <see cref="Rectangle"/>.
-        /// </summary>
-        /// <param name="value">The coordinates to check for inclusion in this <see cref="Rectangle"/>.</param>
-        /// <param name="result"><c>true</c> if the provided <see cref="Vector2"/> lies inside this <see cref="Rectangle"/>; <c>false</c> otherwise. As an output parameter.</param>
-        public void Contains(ref Vector2 value, out bool result)
-        {
-            result = ((((X <= value.X) && (value.X < (X + Width))) && (Y <= value.Y)) && (value.Y < (Y + Height)));
-        }
-
-        /// <summary>
         /// Gets whether or not the provided <see cref="Rectangle"/> lies within the bounds of this <see cref="Rectangle"/>.
         /// </summary>
         /// <param name="value">The <see cref="Rectangle"/> to check for inclusion in this <see cref="Rectangle"/>.</param>
         /// <returns><c>true</c> if the provided <see cref="Rectangle"/>'s bounds lie entirely inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
-        public bool Contains(Rectangle value)
+        public bool Contains(in Rectangle value)
         {
             return ((((X <= value.X) && ((value.X + value.Width) <= (X + Width))) && (Y <= value.Y)) && ((value.Y + value.Height) <= (Y + Height)));
         }
 
         /// <summary>
-        /// Gets whether or not the provided <see cref="Rectangle"/> lies within the bounds of this <see cref="Rectangle"/>.
+        /// Compares whether current instance is equal to specified <see cref="object"/>.
         /// </summary>
-        /// <param name="value">The <see cref="Rectangle"/> to check for inclusion in this <see cref="Rectangle"/>.</param>
-        /// <param name="result"><c>true</c> if the provided <see cref="Rectangle"/>'s bounds lie entirely inside this <see cref="Rectangle"/>; <c>false</c> otherwise. As an output parameter.</param>
-        public void Contains(ref Rectangle value, out bool result)
-        {
-            result = ((((X <= value.X) && ((value.X + value.Width) <= (X + Width))) && (Y <= value.Y)) && ((value.Y + value.Height) <= (Y + Height)));
-        }
-
-        /// <summary>
-        /// Gets whether or not the provided <see cref="Rectangle"/> lies within the bounds of this <see cref="Rectangle"/>.
-        /// </summary>
-        /// <param name="value">The <see cref="Rectangle"/> to check for inclusion in this <see cref="Rectangle"/>.</param>
-        /// <returns><c>true</c> if the provided <see cref="Rectangle"/>'s bounds lie entirely inside this <see cref="Rectangle"/>; <c>false</c> otherwise. As an output parameter.</returns>
-        public bool ContainsRef(ref Rectangle value)
-        {
-            return ((((X <= value.X) && ((value.X + value.Width) <= (X + Width))) && (Y <= value.Y)) && ((value.Y + value.Height) <= (Y + Height)));
-        }
-
-        /// <summary>
-        /// Compares whether current instance is equal to specified <see cref="Object"/>.
-        /// </summary>
-        /// <param name="obj">The <see cref="Object"/> to compare.</param>
+        /// <param name="obj">The <see cref="object"/> to compare.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
         public override bool Equals(object obj)
         {
-            return (obj is Rectangle) && this == ((Rectangle)obj);
+            return (obj is Rectangle other) && this == other;
         }
 
         /// <summary>
@@ -377,56 +327,30 @@ namespace MonoGame.Framework
                    Top < value.Bottom;
         }
 
-
-        /// <summary>
-        /// Gets whether or not the other <see cref="Rectangle"/> intersects with this rectangle.
-        /// </summary>
-        /// <param name="value">The other rectangle for testing.</param>
-        /// <param name="result"><c>true</c> if other <see cref="Rectangle"/> intersects with this rectangle; <c>false</c> otherwise. As an output parameter.</param>
-        public void Intersects(ref Rectangle value, out bool result)
-        {
-            result = value.Left < Right &&
-                     Left < value.Right &&
-                     value.Top < Bottom &&
-                     Top < value.Bottom;
-        }
-
         /// <summary>
         /// Creates a new <see cref="Rectangle"/> that contains overlapping region of two other rectangles.
         /// </summary>
-        /// <param name="value1">The first <see cref="Rectangle"/>.</param>
-        /// <param name="value2">The second <see cref="Rectangle"/>.</param>
+        /// <param name="first">The first <see cref="Rectangle"/>.</param>
+        /// <param name="second">The second <see cref="Rectangle"/>.</param>
         /// <returns>Overlapping region of the two rectangles.</returns>
-        public static Rectangle Intersect(Rectangle value1, Rectangle value2)
+        public static Rectangle Intersect(in Rectangle first, in Rectangle second)
         {
-            Intersect(ref value1, ref value2, out Rectangle rectangle);
-            return rectangle;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Rectangle"/> that contains overlapping region of two other rectangles.
-        /// </summary>
-        /// <param name="value1">The first <see cref="Rectangle"/>.</param>
-        /// <param name="value2">The second <see cref="Rectangle"/>.</param>
-        /// <param name="result">Overlapping region of the two rectangles as an output parameter.</param>
-        public static void Intersect(ref Rectangle value1, ref Rectangle value2, out Rectangle result)
-        {
-            if (value1.Intersects(value2))
+            if (first.Intersects(second))
             {
-                int right_side = Math.Min(value1.X + value1.Width, value2.X + value2.Width);
-                int left_side = Math.Max(value1.X, value2.X);
-                int top_side = Math.Max(value1.Y, value2.Y);
-                int bottom_side = Math.Min(value1.Y + value1.Height, value2.Y + value2.Height);
-                result = new Rectangle(left_side, top_side, right_side - left_side, bottom_side - top_side);
+                int right_side = Math.Min(first.X + first.Width, second.X + second.Width);
+                int left_side = Math.Max(first.X, second.X);
+                int top_side = Math.Max(first.Y, second.Y);
+                int bottom_side = Math.Min(first.Y + first.Height, second.Y + second.Height);
+                return new Rectangle(left_side, top_side, right_side - left_side, bottom_side - top_side);
             }
             else
             {
-                result = new Rectangle(0, 0, 0, 0);
+                return Empty;
             }
         }
 
         /// <summary>
-        /// Changes the <see cref="Location"/> of this <see cref="Rectangle"/>.
+        /// Changes the <see cref="Position"/> of this <see cref="Rectangle"/>.
         /// </summary>
         /// <param name="offsetX">The x coordinate to add to this <see cref="Rectangle"/>.</param>
         /// <param name="offsetY">The y coordinate to add to this <see cref="Rectangle"/>.</param>
@@ -437,7 +361,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Changes the <see cref="Location"/> of this <see cref="Rectangle"/>.
+        /// Changes the <see cref="Position"/> of this <see cref="Rectangle"/>.
         /// </summary>
         /// <param name="offsetX">The x coordinate to add to this <see cref="Rectangle"/>.</param>
         /// <param name="offsetY">The y coordinate to add to this <see cref="Rectangle"/>.</param>
@@ -448,7 +372,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Changes the <see cref="Location"/> of this <see cref="Rectangle"/>.
+        /// Changes the <see cref="Position"/> of this <see cref="Rectangle"/>.
         /// </summary>
         /// <param name="amount">The x and y components to add to this <see cref="Rectangle"/>.</param>
         public void Offset(Point amount)
@@ -458,7 +382,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Changes the <see cref="Location"/> of this <see cref="Rectangle"/>.
+        /// Changes the <see cref="Position"/> of this <see cref="Rectangle"/>.
         /// </summary>
         /// <param name="amount">The x and y components to add to this <see cref="Rectangle"/>.</param>
         public void Offset(Vector2 amount)
@@ -468,10 +392,10 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Returns a <see cref="String"/> representation of this <see cref="Rectangle"/> in the format:
+        /// Returns a <see cref="string"/> representation of this <see cref="Rectangle"/> in the format:
         /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>] Width:[<see cref="Width"/>] Height:[<see cref="Height"/>]}
         /// </summary>
-        /// <returns><see cref="String"/> representation of this <see cref="Rectangle"/>.</returns>
+        /// <returns><see cref="string"/> representation of this <see cref="Rectangle"/>.</returns>
         public override string ToString()
         {
             return "{X:" + X + " Y:" + Y + " Width:" + Width + " Height:" + Height + "}";
@@ -480,30 +404,16 @@ namespace MonoGame.Framework
         /// <summary>
         /// Creates a new <see cref="Rectangle"/> that completely contains two other rectangles.
         /// </summary>
-        /// <param name="value1">The first <see cref="Rectangle"/>.</param>
-        /// <param name="value2">The second <see cref="Rectangle"/>.</param>
+        /// <param name="a">The first <see cref="Rectangle"/>.</param>
+        /// <param name="b">The second <see cref="Rectangle"/>.</param>
         /// <returns>The union of the two rectangles.</returns>
-        public static Rectangle Union(Rectangle value1, Rectangle value2)
+        public static Rectangle Union(Rectangle a, Rectangle b)
         {
-            int x = Math.Min(value1.X, value2.X);
-            int y = Math.Min(value1.Y, value2.Y);
+            int x = Math.Min(a.X, b.X);
+            int y = Math.Min(a.Y, b.Y);
             return new Rectangle(x, y,
-                                 Math.Max(value1.Right, value2.Right) - x,
-                                     Math.Max(value1.Bottom, value2.Bottom) - y);
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Rectangle"/> that completely contains two other rectangles.
-        /// </summary>
-        /// <param name="value1">The first <see cref="Rectangle"/>.</param>
-        /// <param name="value2">The second <see cref="Rectangle"/>.</param>
-        /// <param name="result">The union of the two rectangles as an output parameter.</param>
-        public static void Union(ref Rectangle value1, ref Rectangle value2, out Rectangle result)
-        {
-            result.X = Math.Min(value1.X, value2.X);
-            result.Y = Math.Min(value1.Y, value2.Y);
-            result.Width = Math.Max(value1.Right, value2.Right) - result.X;
-            result.Height = Math.Max(value1.Bottom, value2.Bottom) - result.Y;
+                Math.Max(a.Right, b.Right) - x,
+                Math.Max(a.Bottom, b.Bottom) - y);
         }
 
         /// <summary>

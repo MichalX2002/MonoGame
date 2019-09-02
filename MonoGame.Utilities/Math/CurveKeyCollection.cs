@@ -78,12 +78,6 @@ namespace MonoGame.Framework
 
         #endregion
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _keys.GetEnumerator();
-        }
-
-
         /// <summary>
         /// Adds a key to this collection.
         /// </summary>
@@ -157,10 +151,10 @@ namespace MonoGame.Framework
         /// Returns an enumerator that iterates through the collection.
         /// </summary>
         /// <returns>An enumerator for the <see cref="CurveKeyCollection"/>.</returns>
-        public IEnumerator<CurveKey> GetEnumerator()
-        {
-            return _keys.GetEnumerator();
-        }
+        public List<CurveKey>.Enumerator GetEnumerator() => _keys.GetEnumerator();
+
+        IEnumerator<CurveKey> IEnumerable<CurveKey>.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         /// Finds element in the collection and returns its index.

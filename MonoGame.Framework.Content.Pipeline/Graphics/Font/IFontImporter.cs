@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
 	// Importer interface allows the conversion tool to support multiple source font formats.
 	internal interface IFontImporter

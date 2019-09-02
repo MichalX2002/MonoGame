@@ -22,10 +22,9 @@ namespace MonoGame.Framework.Graphics
         {
             unchecked
             {
-                var hashCode = Position.GetHashCode();
-                hashCode = (hashCode * 397) ^ Normal.GetHashCode();
-                hashCode = (hashCode * 397) ^ TextureCoordinate.GetHashCode();
-                return hashCode;
+                int code = Position.GetHashCode();
+                code = code * 23 + Normal.GetHashCode();
+                return code * 23 + TextureCoordinate.GetHashCode();
             }
         }
 

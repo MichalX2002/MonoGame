@@ -36,7 +36,7 @@ NOTE:
 */
 
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Utilities.LZ4
+namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 {
 	internal static partial class LZ4Codec
 	{

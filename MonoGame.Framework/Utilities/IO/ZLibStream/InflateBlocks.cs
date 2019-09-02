@@ -48,12 +48,12 @@ namespace MonoGame.Utilities
         internal int end;                                 // one byte after sliding window
         internal int readAt;                              // window read pointer
         internal int writeAt;                             // window write pointer
-        internal System.Object checkfn;                   // check function
+        internal object checkfn;                   // check function
         internal uint check;                              // check on output
 
         internal InfTree inftree = new InfTree();
 
-        internal InflateBlocks(ZlibCodec codec, System.Object checkfn, int w)
+        internal InflateBlocks(ZlibCodec codec, object checkfn, int w)
         {
             _codec = codec;
             hufts = new int[MANY * 3];

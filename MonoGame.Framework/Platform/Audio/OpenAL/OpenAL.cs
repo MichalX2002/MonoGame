@@ -189,12 +189,15 @@ namespace MonoGame.OpenAL
         internal static d_alissource IsSource = FuncLoader.LoadFunction<d_alissource>(NativeLibrary, "alIsSource");
         
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void d_aldeletesources(int n, ref int sources);
+        private unsafe delegate void d_aldeletesources(int n, int* sources);
         private static d_aldeletesources alDeleteSources = FuncLoader.LoadFunction<d_aldeletesources>(NativeLibrary, "alDeleteSources");
 
-        internal static void DeleteSource(int source)
+        internal static unsafe void DeleteSources(ReadOnlySpan<int> span)
         {
-            alDeleteSources(1, ref source);
+            fixed (int* ptr = &MemoryMarshal.GetReference(span))
+            {
+                alDeleteSources(span.Length, ptr);
+            }
         }
         
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

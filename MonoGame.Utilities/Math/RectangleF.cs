@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
@@ -159,42 +158,13 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="minimum">The minimum point.</param>
         /// <param name="maximum">The maximum point.</param>
-        /// <param name="result">The resulting rectangle.</param>
-        public static void CreateFrom(PointF minimum, PointF maximum, out RectangleF result)
-        {
-            result.X = minimum.X;
-            result.Y = minimum.Y;
-            result.Width = maximum.X - minimum.X;
-            result.Height = maximum.Y - minimum.Y;
-        }
-
-        /// <summary>
-        ///     Computes the <see cref="RectangleF" /> from a minimum <see cref="PointF" /> and maximum
-        ///     <see cref="PointF" />.
-        /// </summary>
-        /// <param name="minimum">The minimum point.</param>
-        /// <param name="maximum">The maximum point.</param>
         /// <returns>The resulting <see cref="RectangleF" />.</returns>
         public static RectangleF CreateFrom(PointF minimum, PointF maximum)
         {
-            CreateFrom(minimum, maximum, out RectangleF result);
-            return result;
-        }
-
-        /// <summary>
-        ///     Computes the <see cref="RectangleF" /> that contains the two specified
-        ///     <see cref="RectangleF" /> structures.
-        /// </summary>
-        /// <param name="first">The first rectangle.</param>
-        /// <param name="second">The second rectangle.</param>
-        /// <param name="result">The resulting rectangle that contains both the <paramref name="first" /> and the
-        ///     <paramref name="second" />.</param>
-        public static void Union(RectangleF first, RectangleF second, out RectangleF result)
-        {
-            result.X = Math.Min(first.X, second.X);
-            result.Y = Math.Min(first.Y, second.Y);
-            result.Width = Math.Max(first.Right, second.Right) - result.X;
-            result.Height = Math.Max(first.Bottom, second.Bottom) - result.Y;
+            return new RectangleF(
+                minimum.X, minimum.Y,
+                maximum.X - minimum.X,
+                maximum.Y - minimum.Y);
         }
 
         /// <summary>
@@ -207,10 +177,14 @@ namespace MonoGame.Framework
         ///     An <see cref="RectangleF" /> that contains both the <paramref name="first" /> and the
         ///     <paramref name="second" />.
         /// </returns>
-        public static RectangleF Union(RectangleF first, RectangleF second)
+        public static RectangleF Union(in RectangleF first, in RectangleF second)
         {
-            Union(first, second, out RectangleF result);
-            return result;
+            float x = Math.Min(first.X, second.X);
+            float y = Math.Min(first.Y, second.Y);
+            return new RectangleF(
+                x, y,
+                Math.Max(first.Right, second.Right) - x,
+                Math.Max(first.Bottom, second.Bottom) - y);
         }
 
         /// <summary>
@@ -221,50 +195,35 @@ namespace MonoGame.Framework
         ///     An <see cref="RectangleF" /> that contains both the <paramref name="rectangle" /> and
         ///     this <see cref="RectangleF" />.
         /// </returns>
-        public RectangleF Union(RectangleF rectangle)
+        public RectangleF Union(in RectangleF rectangle)
         {
-            Union(this, rectangle, out RectangleF result);
-            return result;
+            return Union(this, rectangle);
         }
 
         /// <summary>
         ///     Computes the <see cref="RectangleF" /> that is in common between the two specified
         ///     <see cref="RectangleF" /> structures.
         /// </summary>
-        /// <param name="first">The first rectangle.</param>
-        /// <param name="second">The second rectangle.</param>
-        /// <param name="result">The resulting rectangle that is in common between both the <paramref name="first" /> and
-        ///     the <paramref name="second" />, if they intersect; otherwise, <see cref="Empty"/>.</param>
-        public static void Intersection(RectangleF first, RectangleF second, out RectangleF result)
+        /// <param name="a">The first rectangle.</param>
+        /// <param name="b">The second rectangle.</param>
+        /// <returns>
+        ///     A <see cref="RectangleF" /> that is in common between both the <paramref name="rectangle" /> and
+        ///     this <see cref="RectangleF"/>, if they intersect; otherwise, <see cref="Empty"/>.
+        /// </returns>
+        public static RectangleF Intersection(RectangleF a, RectangleF b)
         {
-            var firstMinimum = first.TopLeft;
-            var firstMaximum = first.BottomRight;
-            var secondMinimum = second.TopLeft;
-            var secondMaximum = second.BottomRight;
+            var firstMinimum = a.TopLeft;
+            var firstMaximum = a.BottomRight;
+            var secondMinimum = b.TopLeft;
+            var secondMaximum = b.BottomRight;
             
             var minimum = PointF.Maximum(firstMinimum, secondMinimum);
             var maximum = PointF.Minimum(firstMaximum, secondMaximum);
 
             if ((maximum.X < minimum.X) || (maximum.Y < minimum.Y))
-                result = RectangleF.Empty;
+                return Empty;
             else
-                result = CreateFrom(minimum, maximum);
-        }
-
-        /// <summary>
-        ///     Computes the <see cref="RectangleF" /> that is in common between the two specified
-        ///     <see cref="RectangleF" /> structures.
-        /// </summary>
-        /// <param name="first">The first rectangle.</param>
-        /// <param name="second">The second rectangle.</param>
-        /// <returns>
-        ///     A <see cref="RectangleF" /> that is in common between both the <paramref name="first" /> and
-        ///     the <paramref name="second" />, if they intersect; otherwise, <see cref="Empty"/>.
-        /// </returns>
-        public static RectangleF Intersection(RectangleF first, RectangleF second)
-        {
-            Intersection(first, second, out RectangleF result);
-            return result;
+                return CreateFrom(minimum, maximum);
         }
 
         /// <summary>
@@ -272,28 +231,23 @@ namespace MonoGame.Framework
         ///     <see cref="RectangleF" /> and this <see cref="RectangleF" />.
         /// </summary>
         /// <param name="rectangle">The rectangle.</param>
-        /// <returns>
-        ///     A <see cref="RectangleF" /> that is in common between both the <paramref name="rectangle" /> and
-        ///     this <see cref="RectangleF"/>, if they intersect; otherwise, <see cref="Empty"/>.
-        /// </returns>
-        public RectangleF Intersection(RectangleF rectangle)
+        public RectangleF Intersection(in RectangleF rectangle)
         {
-            Intersection(this, rectangle, out RectangleF result);
-            return result;
+            return Intersection(this, rectangle);
         }
 
         /// <summary>
         ///     Determines whether the two specified <see cref="RectangleF" /> structures intersect.
         /// </summary>
-        /// <param name="first">The first rectangle.</param>
-        /// <param name="second">The second rectangle.</param>
+        /// <param name="a">The first rectangle.</param>
+        /// <param name="b">The second rectangle.</param>
         /// <returns>
-        ///     <c>true</c> if the <paramref name="first" /> intersects with the <paramref name="second" />; otherwise, <c>false</c>.
+        ///     <c>true</c> if the <paramref name="a" /> intersects with the <paramref name="b" />; otherwise, <c>false</c>.
         /// </returns>
-        public static bool Intersects(RectangleF first, RectangleF second)
+        public static bool Intersects(in RectangleF a, in RectangleF b)
         {
-            return first.X < second.X + second.Width && first.X + first.Width > second.X &&
-                   first.Y < second.Y + second.Height && first.Y + first.Height > second.Y;
+            return a.X < b.X + b.Width && a.X + a.Width > b.X &&
+                   a.Y < b.Y + b.Height && a.Y + a.Height > b.Y;
         }
         
         /// <summary>
@@ -306,7 +260,7 @@ namespace MonoGame.Framework
         ///     <see cref="RectangleF" />; otherwise,
         ///     <c>false</c>.
         /// </returns>
-        public bool Intersects(RectangleF rectangle)
+        public bool Intersects(in RectangleF rectangle)
         {
             return Intersects(this, rectangle);
         }
@@ -321,7 +275,7 @@ namespace MonoGame.Framework
         ///     <c>true</c> if the <paramref name="rectangle" /> contains the <paramref name="point" />; otherwise,
         ///     <c>false</c>.
         /// </returns>
-        public static bool Contains(RectangleF rectangle, PointF point)
+        public static bool Contains(in RectangleF rectangle, PointF point)
         {
             return 
                 rectangle.X <= point.X &&
@@ -348,7 +302,7 @@ namespace MonoGame.Framework
         ///     Determines whether this <see cref="RectangleF" /> contains the specified
         ///     <see cref="RectangleF" />.
         /// </summary>
-        public bool Contains(RectangleF value)
+        public bool Contains(in RectangleF value)
         {
             return
                 X < value.X &&
@@ -430,7 +384,7 @@ namespace MonoGame.Framework
             Y += amount.Y;
         }
 
-        public static RectangleF operator +(RectangleF a, RectangleF b)
+        public static RectangleF operator +(in RectangleF a, in RectangleF b)
         {
             return new RectangleF(
                 a.X + b.X,
@@ -439,7 +393,7 @@ namespace MonoGame.Framework
                 a.Height + b.Height);
         }
 
-        public static RectangleF operator -(RectangleF a, RectangleF b)
+        public static RectangleF operator -(in RectangleF a, in RectangleF b)
         {
             return new RectangleF(
                 a.X - b.X,
@@ -453,16 +407,18 @@ namespace MonoGame.Framework
         ///     <see cref="X" />, <see cref="Y"/>, <see cref="Width"/> and <see cref="Height" /> fields of the two <see cref="RectangleF" /> structures
         ///     are equal.
         /// </summary>
-        /// <param name="first">The first rectangle.</param>
-        /// <param name="second">The second rectangle.</param>
+        /// <param name="a">The first rectangle.</param>
+        /// <param name="b">The second rectangle.</param>
         /// <returns>
         ///     <c>true</c> if the values of the
         ///     <see cref="X" />, <see cref="Y"/>, <see cref="Width"/> and <see cref="Height" /> fields of the two <see cref="RectangleF" /> structures
         ///     are equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator ==(RectangleF first, RectangleF second)
+        public static bool operator ==(in RectangleF a, in RectangleF b)
         {
-            return first.Equals(second);
+            // ReSharper disable CompareOfFloatsByEqualityOperator
+            return a.X == b.X && a.Y == b.Y && a.Width == b.Width && a.Height == b.Height;
+            // ReSharper restore CompareOfFloatsByEqualityOperator
         }
 
         /// <summary>
@@ -477,7 +433,7 @@ namespace MonoGame.Framework
         ///     <see cref="X" />, <see cref="Y"/>, <see cref="Width"/> and <see cref="Height" /> fields of the two <see cref="RectangleF" /> structures
         ///     are unequal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator !=(RectangleF first, RectangleF second)
+        public static bool operator !=(in RectangleF first, in RectangleF second)
         {
             return !(first == second);
         }
@@ -491,9 +447,7 @@ namespace MonoGame.Framework
         /// </returns>
         public bool Equals(RectangleF rectangle)
         {
-            // ReSharper disable CompareOfFloatsByEqualityOperator
-            return X == rectangle.X && Y == rectangle.Y && Width == rectangle.Width && Height == rectangle.Height;
-            // ReSharper restore CompareOfFloatsByEqualityOperator
+            return rectangle == this;
         }
 
         /// <summary>
@@ -505,9 +459,7 @@ namespace MonoGame.Framework
         /// </returns>
         public override bool Equals(object obj)
         {
-            if(obj is RectangleF rect)
-                return Equals(rect);
-            return false;
+            return obj is RectangleF rect && rect == this;
         }
 
         /// <summary>
@@ -536,15 +488,11 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The resulting <see cref="RectangleF" />.
         /// </returns>
-        public static implicit operator RectangleF(Rectangle rectangle)
+        public static implicit operator RectangleF(in Rectangle rectangle)
         {
-            return new RectangleF
-            {
-                X = rectangle.X,
-                Y = rectangle.Y,
-                Width = rectangle.Width,
-                Height = rectangle.Height
-            };
+            return new RectangleF(
+                rectangle.X, rectangle.Y,
+                rectangle.Width, rectangle.Height);
         }
 
         /// <summary>
@@ -557,7 +505,7 @@ namespace MonoGame.Framework
         /// <remarks>
         ///     <para>A loss of precision may occur due to the truncation from <see cref="float" /> to <see cref="int" />.</para>
         /// </remarks>
-        public static explicit operator Rectangle(RectangleF rectangle)
+        public static explicit operator Rectangle(in RectangleF rectangle)
         {
             return new Rectangle((int)rectangle.X, (int)rectangle.Y, (int)rectangle.Width, (int)rectangle.Height);
         }

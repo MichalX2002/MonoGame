@@ -2,16 +2,13 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using Microsoft.Xna.Framework.Graphics;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     public partial class MouseCursor
     {
@@ -41,24 +38,22 @@ namespace Microsoft.Xna.Framework.Input
             Hand = new MouseCursor(Cursors.Hand);
         }
 
-        private static unsafe MouseCursor PlatformFromImage(
-            ReadOnlySpan<Rgba32> data, int width, int height, int stride, Point origin)
+        private static unsafe MouseCursor PlatformFromPixels(
+            ReadOnlySpan<Color> data, int width, int height, int stride, Point origin)
         {
             // the bitmap can not be constructed from Rgba data directly
             using (var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb))
             {
                 var rect = new System.Drawing.Rectangle(0, 0, width, height);
                 var bmpData = bitmap.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                fixed(Color* srcPtr = &MemoryMarshal.GetReference(data))
                 try
                 {
-                    var dst = new Span<Bgra32>((void*)bmpData.Scan0, bmpData.Stride * bmpData.Height / 4);
-                    for (int row = 0; row < bmpData.Height; row++)
+                    for (int y = 0; y < bmpData.Height; y++)
                     {
-                        int dstRowOffset = row * bmpData.Stride / 4;
-                        int srcRowOffset = row * stride / 4;
-
-                        for (int x = 0; x < bmpData.Width; x++)
-                            dst[x + dstRowOffset].FromRgba32(data[x + srcRowOffset]);
+                        Color* srcRow = srcPtr + y * stride / sizeof(Color);
+                        byte* dstRow = (byte*)bmpData.Scan0 + y * bmpData.Stride;
+                        Buffer.MemoryCopy(srcRow, dstRow, bmpData.Stride, stride);
                     }
                 }
                 finally

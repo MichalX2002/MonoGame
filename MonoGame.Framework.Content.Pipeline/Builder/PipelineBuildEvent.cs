@@ -9,7 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Xml.Serialization;
-using Microsoft.Xna.Framework.Content.Pipeline;
+using MonoGame.Framework.Content.Pipeline;
 
 namespace MonoGame.Framework.Content.Pipeline.Builder
 {

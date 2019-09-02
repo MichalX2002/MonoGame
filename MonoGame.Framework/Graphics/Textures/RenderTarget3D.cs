@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
 	public partial class RenderTarget3D : Texture3D, IRenderTarget
 	{
@@ -13,10 +13,10 @@ namespace Microsoft.Xna.Framework.Graphics
 		public int MultiSampleCount { get; private set; }
 		
 		public RenderTargetUsage RenderTargetUsage { get; private set; }
-		
-		public bool IsContentLost { get { return false; } }
-		
-		public event EventHandler<EventArgs> ContentLost;
+
+        public bool IsContentLost => false;
+
+        public event EventHandler<EventArgs> ContentLost;
 
         private bool SuppressEventHandlerWarningsUntilEventsAreProperlyImplemented()
         {
@@ -43,8 +43,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
             if (graphicsDevice != null)
             {
-                graphicsDevice.Adapter.QueryRenderTargetFormat(graphicsDevice.GraphicsProfile, preferredFormat, DepthFormat.None, 0,
-                   out selectedFormat, out DepthFormat selectedDepthFormat, out int selectedMultiSampleCount);
+                graphicsDevice.Adapter.QueryRenderTargetFormat(
+                    graphicsDevice.GraphicsProfile, preferredFormat, DepthFormat.None, 0, out selectedFormat, out _, out _);
             }
 
             return selectedFormat;

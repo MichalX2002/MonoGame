@@ -252,7 +252,7 @@ namespace MonoGame.Framework
 
         #endregion Properties
 
-        // FIXME: Internal members should be eliminated.
+        // TODO: Internal members should be eliminated.
         // Currently Game.Initialized is used by the Mac game window class to
         // determine whether to raise DeviceResetting and DeviceReset on
         // GraphicsDeviceManager.
@@ -565,13 +565,13 @@ namespace MonoGame.Framework
             // Since we only subscribe to ComponentAdded after the graphics
             // devices are set up, it is safe to just blindly call Initialize.
             e.GameComponent.Initialize();
-            CategorizeComponent(e.GameComponent);
+            AddComponent(e.GameComponent);
         }
 
         private void Components_ComponentRemoved(
             object sender, GameComponentCollectionEvent e)
         {
-            DecategorizeComponent(e.GameComponent);
+            RemoveComponent(e.GameComponent);
         }
 
         private void Platform_AsyncRunLoopEnded(GamePlatform sender)
@@ -585,11 +585,11 @@ namespace MonoGame.Framework
 
         #endregion Event Handlers
 
-        #region Internal Methods
+        // TODO: We should work toward eliminating internal methods.  They
+        //       break entirely the possibility that additional platforms could
+        //       be added by third parties without changing MonoGame itself.
 
-        // FIXME: We should work toward eliminating internal methods.  They
-        //        break entirely the possibility that additional platforms could
-        //        be added by third parties without changing MonoGame itself.
+        #region Internal Methods
 
 #if !(WINDOWS && DIRECTX)
         internal void InternalApplyChanges(GraphicsDeviceManager manager)
@@ -668,15 +668,14 @@ namespace MonoGame.Framework
             get
             {
                 if (_graphicsDeviceManager == null)
-                {
                     _graphicsDeviceManager = Services.GetService<IGraphicsDeviceManager>();
-                }
                 return (GraphicsDeviceManager)_graphicsDeviceManager;
             }
             set
             {
                 if (_graphicsDeviceManager != null)
-                    throw new InvalidOperationException("GraphicsDeviceManager already registered for this Game object");
+                    throw new InvalidOperationException(
+                        "GraphicsDeviceManager already registered for this object.");
                 _graphicsDeviceManager = value;
             }
         }
@@ -694,41 +693,38 @@ namespace MonoGame.Framework
 
         private void CategorizeComponents()
         {
-            DecategorizeComponents();
+            ClearComponents();
             for (int i = 0; i < Components.Count; ++i)
-                CategorizeComponent(Components[i]);
+                AddComponent(Components[i]);
         }
 
-        // FIXME: I am open to a better name for this method. It does the
-        //        opposite of CategorizeComponents.
-        private void DecategorizeComponents()
+        private void ClearComponents()
         {
             _updateables.Clear();
             _drawables.Clear();
         }
 
-        private void CategorizeComponent(IGameComponent component)
+        private void AddComponent(IGameComponent component)
         {
-            if (component is IUpdateable)
-                _updateables.Add((IUpdateable)component);
-            if (component is IDrawable)
-                _drawables.Add((IDrawable)component);
+            if (component is IUpdateable updateable)
+                _updateables.Add(updateable);
+
+            if (component is IDrawable drawable)
+                _drawables.Add(drawable);
         }
 
-        // FIXME: I am open to a better name for this method.  It does the
-        //        opposite of CategorizeComponent.
-        private void DecategorizeComponent(IGameComponent component)
+        private void RemoveComponent(IGameComponent component)
         {
-            if (component is IUpdateable)
-                _updateables.Remove((IUpdateable)component);
-            if (component is IDrawable)
-                _drawables.Remove((IDrawable)component);
+            if (component is IUpdateable updateable)
+                _updateables.Remove(updateable);
+
+            if (component is IDrawable drawable)
+                _drawables.Remove(drawable);
         }
 
         /// <summary>
-        /// The SortingFilteringCollection class provides efficient, reusable
-        /// sorting and filtering based on a configurable sort comparer, filter
-        /// predicate, and associate change events.
+        /// Provides efficient, reusable sorting and filtering based on a
+        /// configurable sort comparer, filter predicate, and associate change events.
         /// </summary>
         class SortingFilteringCollection<T> : ICollection<T>
         {
@@ -806,8 +802,7 @@ namespace MonoGame.Framework
 
             public void Add(T item)
             {
-                // NOTE: We subscribe to item events after items in _addJournal
-                //       have been merged.
+                // NOTE: We subscribe to item events after items in _addJournal have been merged.
                 _addJournal.Add(new AddJournalEntry<T>(_addJournal.Count, item));
                 InvalidateCache();
             }
@@ -869,6 +864,7 @@ namespace MonoGame.Framework
 
             private static readonly Comparison<int> RemoveJournalSortComparison =
                 (x, y) => Comparer<int>.Default.Compare(y, x); // Sort high to low
+
             private void ProcessRemoveJournal()
             {
                 if (_removeJournal.Count == 0)
@@ -960,7 +956,7 @@ namespace MonoGame.Framework
             }
         }
 
-        private struct AddJournalEntry<T>
+        private readonly struct AddJournalEntry<T>
         {
             public readonly int Order;
             public readonly T Item;
@@ -976,17 +972,14 @@ namespace MonoGame.Framework
                 return new AddJournalEntry<T>(-1, item);
             }
 
+            public override bool Equals(object obj)
+            {
+                return obj is AddJournalEntry<T> entry && Equals(Item, entry.Item);
+            }
+
             public override int GetHashCode()
             {
                 return Item.GetHashCode();
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (!(obj is AddJournalEntry<T>))
-                    return false;
-
-                return object.Equals(Item, ((AddJournalEntry<T>)obj).Item);
             }
         }
     }

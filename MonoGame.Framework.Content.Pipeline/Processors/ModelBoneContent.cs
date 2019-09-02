@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     public sealed class ModelBoneContent
     {
@@ -28,8 +28,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 
         public Matrix Transform
         {
-            get { return _transform; }
-            set { _transform = value; }
+            get => _transform;
+            set => _transform = value;
         }
     }
 }

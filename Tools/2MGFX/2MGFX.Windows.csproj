@@ -43,6 +43,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Buffers.4.5.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Memory.4.5.3\lib\netstandard2.0\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Numerics.Vectors.4.6.0-preview5.19224.8\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Runtime.CompilerServices.Unsafe.4.6.0-preview8.19405.3\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />
@@ -58,8 +71,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\MonoGame.Framework\Math\Color.cs">
-      <Link>MonoGame.Framework\Math\Color.cs</Link>
+    <Compile Include="..\..\MonoGame.Framework\Delegates.cs">
+      <Link>MonoGame.Framework\Delegates.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\Platform\Utilities\CurrentPlatform.cs">
+      <Link>MonoGame.Framework\CurrentPlatform.cs</Link>
     </Compile>
     <Compile Include="MonoGame.Framework\ExceptionHelper.cs" />
     <Compile Include="MonoGame.Framework\Threading.cs" />
@@ -136,78 +152,14 @@
     <Compile Include="..\..\MonoGame.Framework\Design\VectorConversion.cs">
       <Link>MonoGame.Framework\Design\VectorConversion.cs</Link>
     </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Graphics\PackedVector\IPackedVector.cs">
-      <Link>MonoGame.Framework\Graphics\PackedVector\IPackedVector.cs</Link>
-    </Compile>
     <Compile Include="..\..\MonoGame.Framework\Utilities\Hash.cs">
       <Link>MonoGame.Framework\Utilities\Hash.cs</Link>
     </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Utilities\CurrentPlatform.cs" />
     <Compile Include="..\..\MonoGame.Framework.Content.Pipeline\ExternalTool.cs">
       <Link>MonoGame.Framework.Content.Pipeline\ExternalTool.cs</Link>
     </Compile>
     <Compile Include="..\..\MonoGame.Framework.Content.Pipeline\LoadedTypeCollection.cs">
       <Link>MonoGame.Framework.Content.Pipeline\LoadedTypeCollection.c</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\IShapeF.cs">
-      <Link>MonoGame.Framework\Math\IShapeF.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\Vector2.cs">
-      <Link>MonoGame.Framework\Math\Vector2.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\Size.cs">
-      <Link>MonoGame.Framework\Math\Size.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\SizeF.cs">
-      <Link>MonoGame.Framework\Math\SizeF.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\Vector3.cs">
-      <Link>MonoGame.Framework\Math\Vector3.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\Vector4.cs">
-      <Link>MonoGame.Framework\Math\Vector4.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\Rectangle.cs">
-      <Link>MonoGame.Framework\Math\Rectangle.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\RectangleF.cs">
-      <Link>MonoGame.Framework\Math\RectangleF.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\Point.cs">
-      <Link>MonoGame.Framework\Math\Point.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\PointF.cs">
-      <Link>MonoGame.Framework\Math\PointF.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\Quaternion.cs">
-      <Link>MonoGame.Framework\Math\Quaternion.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\Matrix.cs">
-      <Link>MonoGame.Framework\Math\Matrix.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\Plane.cs">
-      <Link>MonoGame.Framework\Math\Plane.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\PlaneIntersectionType.cs">
-      <Link>MonoGame.Framework\Math\PlaneIntersectionType.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\BoundingBox.cs">
-      <Link>MonoGame.Framework\Math\BoundingBox.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\BoundingFrustum.cs">
-      <Link>MonoGame.Framework\Math\BoundingFrustum.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\BoundingSphere.cs">
-      <Link>MonoGame.Framework\Math\BoundingSphere.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\Ray.cs">
-      <Link>MonoGame.Framework\Math\Ray.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\ContainmentType.cs">
-      <Link>MonoGame.Framework\Math\ContainmentType.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MonoGame.Framework\Math\MathHelper.cs">
-      <Link>MonoGame.Framework\Math\MathHelper.cs</Link>
     </Compile>
     <Compile Include="MonoGame.Framework\GraphicsDevice.cs" />
     <Compile Include="ConstantBufferData.cs" />
@@ -243,10 +195,6 @@
     <Compile Include="Preprocessor.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MonoGame.Framework\MonoGame.Framework.Windows.csproj">
-      <Project>{7de47032-a904-4c29-bd22-2d235e8d91ba}</Project>
-      <Name>MonoGame.Framework.Windows</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\MonoGame.Utilities\MonoGame.Utilities.csproj">
       <Project>{86082a6f-d255-4099-b001-67fe366ab5c2}</Project>
       <Name>MonoGame.Utilities</Name>
@@ -254,6 +202,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="packages.config" />
     <None Include="TPGParser\MGFX.tpg" />
   </ItemGroup>
   <ItemGroup />
@@ -283,8 +232,8 @@
     <_PostBuildHookHostPlatform>$(Platform)</_PostBuildHookHostPlatform>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>mkdir "C:\Program Files (x86)\MSBuild\MonoGame\Tools\"
-copy /Y "$(TargetDir)" "C:\Program Files (x86)\MSBuild\MonoGame\Tools\"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <Target Name="PostBuildHooks" Inputs="@(IntermediateAssembly);@(ReferencePath)" Outputs="@(IntermediateAssembly);$(_PostBuildHookTimestamp)" AfterTargets="CoreCompile" BeforeTargets="AfterCompile">
     <Touch Files="$(_PostBuildHookTimestamp)" AlwaysCreate="True" />

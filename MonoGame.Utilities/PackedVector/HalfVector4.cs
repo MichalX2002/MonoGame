@@ -14,6 +14,8 @@ namespace MonoGame.Utilities.PackedVector
     /// </summary>
     public struct HalfVector4 : IPixel, IPackedVector<ulong>
     {
+        public ulong PackedValue;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="HalfVector4"/> struct.
         /// </summary>
@@ -32,8 +34,11 @@ namespace MonoGame.Utilities.PackedVector
         /// <param name="vector">A vector containing the initial values for the components</param>
         public HalfVector4(Vector4 vector) => PackedValue = Pack(ref vector);
 
-        /// <inheritdoc/>
-        public ulong PackedValue { get; set; }
+        ulong IPackedVector<ulong>.PackedValue
+        {
+            get => PackedValue;
+            set => PackedValue = value;
+        }
 
         /// <summary>
         /// Compares two <see cref="HalfVector4"/> objects for equality.

@@ -43,6 +43,7 @@
       <HintPath>..\packages\System.Buffers.4.5.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Memory.4.5.3\lib\netstandard2.0\System.Memory.dll</HintPath>
@@ -78,7 +79,7 @@
       <Name>MonoGame.Imaging</Name>
     </ProjectReference>
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj">
-      <Project>{D046ADDA-B87B-4AB2-9DAD-FA886D3E2014}</Project>
+      <Project>{e8d7b5c4-c5a1-44e3-a55e-e340bbab391c}</Project>
       <Name>MonoGame.Utilities</Name>
     </ProjectReference>
   </ItemGroup>

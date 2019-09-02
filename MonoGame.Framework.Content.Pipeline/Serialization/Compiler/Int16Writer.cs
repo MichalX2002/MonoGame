@@ -5,7 +5,7 @@
 using System;
 using TOutput = System.Int16;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     /// <summary>
     /// Writes the signed short value to the output.

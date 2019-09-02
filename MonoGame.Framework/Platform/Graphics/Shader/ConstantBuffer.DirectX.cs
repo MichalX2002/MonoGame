@@ -3,7 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     internal partial class ConstantBuffer : GraphicsResource
     {

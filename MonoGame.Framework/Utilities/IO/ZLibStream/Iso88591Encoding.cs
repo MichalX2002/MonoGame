@@ -106,7 +106,7 @@ namespace MonoGame.Utilities
                     //throw exception
                     string msg =
                       "The encoding [{0}] cannot encode the character [{1}] (int value {2}). Set the FallbackCharacter property in order to suppress this exception and encode a default character instead.";
-                    msg = String.Format(msg, WebName, character, (int)character);
+                    msg = string.Format(msg, WebName, character, (int)character);
                     throw new EncoderFallbackException(msg);
                 }
 
@@ -166,7 +166,7 @@ namespace MonoGame.Utilities
                 {
                     //throw exception
                     string msg = "The encoding [{0}] cannot decode byte value [{1}]. Set the FallbackCharacter property in order to suppress this exception and decode the value as a default character instead.";
-                    msg = String.Format(msg, WebName, lookupIndex);
+                    msg = string.Format(msg, WebName, lookupIndex);
                     throw new EncoderFallbackException(msg);
                 }
 

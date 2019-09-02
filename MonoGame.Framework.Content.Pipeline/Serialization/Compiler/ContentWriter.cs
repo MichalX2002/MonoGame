@@ -4,13 +4,13 @@
 
 using System;
 using System.IO;
-using Microsoft.Xna.Framework.Content.Pipeline.Utilities.LZ4;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Content.Pipeline.Utilities.LZ4;
+using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Content.Pipeline.Builder;
 using System.Collections.Generic;
 using MonoGame.Utilities.Memory;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     /// <summary>
     /// Provides an implementation for many of the ContentCompiler methods including compilation, state tracking for shared resources and creation of the header type manifest.
@@ -92,7 +92,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
             this.referenceRelocationPath = PathHelper.NormalizeDirectory(referenceRelocationPath);
 
             outputStream = this.OutStream;
-            bodyStream = RecyclableMemoryManager.Instance.GetMemoryStream();
+            bodyStream = RecyclableMemoryManager.Default.GetMemoryStream();
             this.OutStream = bodyStream;
         }
 
@@ -128,7 +128,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
             // Write shared resources to the end of body stream
             WriteSharedResources();
 
-            using (var contentStream = RecyclableMemoryManager.Instance.GetMemoryStream())
+            using (var contentStream = RecyclableMemoryManager.Default.GetMemoryStream())
             {
                 this.OutStream = contentStream;
                 WriteTypeWriters();
@@ -143,7 +143,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
                 {
                     if (compressContent)
                     {
-                        compressedStream = RecyclableMemoryManager.Instance.GetMemoryStream();
+                        compressedStream = RecyclableMemoryManager.Default.GetMemoryStream();
                         this.OutStream = compressedStream;
                         if (!WriteCompressedStream(contentStream))
                         {
@@ -211,7 +211,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
             for (int i = 0; i < sharedResources.Count; i++)
             {
                 var resource = sharedResources[i];
-                WriteObject<object>(resource);
+                WriteObject(resource);
             }
         }
 
@@ -360,7 +360,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
         /// polymorphic values, and the reader must specify an identical type while loading the compiled data.</remarks>
         public void WriteRawObject<T>(T value)
         {
-            WriteRawObject<T>(value, GetTypeWriter(typeof(T)));
+            WriteRawObject(value, GetTypeWriter(typeof(T)));
         }
 
         /// <summary>

@@ -154,12 +154,12 @@ namespace MonoGame.Framework.Graphics
             get => _vertexShader;
             set
             {
-                if (_vertexShader == value)
-                    return;
-
-                _vertexShader = value;
-                _vertexConstantBuffers.Clear();
-                VertexShaderDirty = true;
+                if (_vertexShader != value)
+                {
+                    _vertexShader = value;
+                    _vertexConstantBuffers.Clear();
+                    VertexShaderDirty = true;
+                }
             }
         }
 
@@ -168,12 +168,12 @@ namespace MonoGame.Framework.Graphics
             get => _pixelShader;
             set
             {
-                if (_pixelShader == value)
-                    return;
-
-                _pixelShader = value;
-                _pixelConstantBuffers.Clear();
-                PixelShaderDirty = true;
+                if (_pixelShader != value)
+                {
+                    _pixelShader = value;
+                    _pixelConstantBuffers.Clear();
+                    PixelShaderDirty = true;
+                }
             }
         }
 
@@ -183,7 +183,7 @@ namespace MonoGame.Framework.Graphics
             set
             {
                 _viewport = value;
-                PlatformSetViewport(ref value);
+                PlatformSetViewport(value);
             }
         }
 
@@ -192,11 +192,11 @@ namespace MonoGame.Framework.Graphics
             get => _scissorRectangle;
             set
             {
-                if (_scissorRectangle == value)
-                    return;
-
-                _scissorRectangle = value;
-                _scissorRectangleDirty = true;
+                if (_scissorRectangle != value)
+                {
+                    _scissorRectangle = value;
+                    _scissorRectangleDirty = true;
+                }
             }
         }
 
@@ -554,10 +554,18 @@ namespace MonoGame.Framework.Graphics
         {
             // We cannot present with a RT set on the device.
             if (RenderTargetCount != 0)
-                throw new InvalidOperationException("Cannot call Present when a render target is active.");
+                throw new InvalidOperationException("Cannot call Present while a render target is active.");
 
             _graphicsMetrics = new GraphicsMetrics();
             PlatformPresent();
+        }
+
+        /// <summary>
+        /// Sends queued commands in the command buffer to the GPU.
+        /// </summary>
+        public void Flush()
+        {
+            PlatformFlush();
         }
 
         #endregion
@@ -878,7 +886,7 @@ namespace MonoGame.Framework.Graphics
             where T : unmanaged
         {
             if (vertexData.IsEmpty)
-                throw new ArgumentNullException(nameof(vertexData), "Span is empty.");
+                throw new ArgumentEmptyException(nameof(vertexData));
 
             int vertexCount = GetElementCountForType(primitiveType, vertexData.Length);
             if (vertexCount > vertexData.Length)
@@ -1011,10 +1019,9 @@ namespace MonoGame.Framework.Graphics
             where TIndex : unmanaged
         {
             if (vertexData.IsEmpty)
-                throw new ArgumentException(nameof(vertexData), "The span was empty.");
-
+                throw new ArgumentEmptyException(nameof(vertexData));
             if (indexData.IsEmpty)
-                throw new ArgumentException(nameof(indexData), "The span was empty.");
+                throw new ArgumentEmptyException(nameof(indexData));
 
             if (primitiveCount <= 0 || GetElementCountForType(primitiveType, primitiveCount) > indexData.Length)
                 throw new ArgumentOutOfRangeException(nameof(primitiveCount));
@@ -1022,7 +1029,7 @@ namespace MonoGame.Framework.Graphics
             if (vertexDeclaration == null)
                 throw new ArgumentNullException(nameof(vertexDeclaration));
 
-            if (vertexDeclaration.VertexStride < ReflectionHelpers.SizeOf<TVertex>.Get())
+            if (vertexDeclaration.VertexStride < sizeof(TVertex))
                 throw new ArgumentOutOfRangeException(nameof(vertexDeclaration),
                     $"Vertex stride of {nameof(vertexDeclaration)} should be at least as big as the stride of the actual vertices.");
 
@@ -1056,7 +1063,7 @@ namespace MonoGame.Framework.Graphics
         /// Gets the pixel data of what is currently drawn on screen.
         /// The format is the backbuffer's current format.
         /// </summary>
-        public void GetBackBufferData<T>(Rectangle? rectangle, Span<T> destination)
+        public unsafe void GetBackBufferData<T>(Rectangle? rectangle, Span<T> destination)
             where T : unmanaged
         {
             Rectangle rect;
@@ -1065,7 +1072,7 @@ namespace MonoGame.Framework.Graphics
                 rect = rectangle.Value;
                 if (rect.X < 0 || rect.Y < 0 || rect.Width <= 0 || rect.Height <= 0 ||
                     rect.Right > PresentationParameters.BackBufferWidth || rect.Top > PresentationParameters.BackBufferHeight)
-                    throw new ArgumentException("Rectangle must fit in the backbuffer dimensions.");
+                    throw new ArgumentException("The rectangle must fit in the backbuffer dimensions.", nameof(rectangle));
             }
             else
             {
@@ -1073,15 +1080,14 @@ namespace MonoGame.Framework.Graphics
                     0, 0, PresentationParameters.BackBufferWidth, PresentationParameters.BackBufferHeight);
             }
 
-            var elementSize = ReflectionHelpers.SizeOf<T>.Get();
-            var formatSize = PresentationParameters.BackBufferFormat.GetSize();
-            if (elementSize > formatSize || formatSize % elementSize != 0)
+            int formatSize = PresentationParameters.BackBufferFormat.GetSize();
+            if (sizeof(T) > formatSize || formatSize % sizeof(T) != 0)
                 throw new ArgumentException($"{nameof(T)} is of an invalid size for the format of the backbuffer.", nameof(T));
 
-            var spanByteSize = destination.Length * elementSize;
-            if (spanByteSize != rect.Width * rect.Height * formatSize)
-                throw new ArgumentException(
-                    $"Data does not fit in the span (minimum needed size is {spanByteSize} bytes).", nameof(destination));
+            int spanBytes = destination.Length * sizeof(T);
+            if (spanBytes > rect.Width * rect.Height * formatSize)
+                throw new ArgumentOutOfRangeException(
+                     nameof(destination), "The amount of data requested exceeds the backbuffer size.");
 
             PlatformGetBackBufferData(rect, destination);
         }

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.IO;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Utilities.IO
 {
     /// <summary>
-    /// A stream that calculates a <see cref="CRC32"/> (a checksum)
-    /// on all bytes read or on all bytes written.
+    /// Calculates a <see cref="CRC32"/> checksum on 
+    /// bytes read/written to the underlying stream. 
     /// </summary>
-    ///
     /// <remarks>
     /// This class can be used to verify the CRC of a ZipEntry when reading
     /// from a stream, or to calculate a CRC when writing to a stream.
@@ -20,6 +19,7 @@ namespace MonoGame.Utilities
         private readonly long _lengthLimit = UnsetLengthLimit;
 
         private Stream _innerStream;
+        private bool _leaveOpen;
         private CRC32 _crc32;
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace MonoGame.Utilities
         /// This is either the total number of bytes read, or the total number of
         /// bytes written, depending on the direction of this stream.
         /// </remarks>
-        public Int64 TotalBytesSlurped => _crc32.TotalBytesRead;
+        public long TotalBytesSlurped => _crc32.TotalBytesRead;
 
         /// <summary>
         /// Provides the current CRC for all blocks slurped in.
@@ -39,16 +39,7 @@ namespace MonoGame.Utilities
         /// through the stream.  read this property after all reads or writes
         /// to get an accurate CRC for the entire stream.
         /// </remarks>
-        public Int32 Crc => _crc32.Crc32Result;
-
-        /// <summary>
-        /// Indicates whether the underlying stream will be left open when
-        /// the <see cref="CrcCalculatorStream"/> is closed.
-        /// </summary>
-        /// <remarks>
-        /// Set this at any point before calling <see cref="Stream.Close"/>.
-        /// </remarks>
-        public bool LeaveOpen { get; set; }
+        public int Crc => _crc32.Crc32Result;
 
         /// <summary>
         /// Indicates whether the stream supports reading.
@@ -88,48 +79,40 @@ namespace MonoGame.Utilities
         }
 
         /// <summary>
-        /// The default constructor.
+        /// Constructs the calculator stream, disposing the underlying stream after disposal.
         /// </summary>
         /// <remarks>
-        /// Instances returned from this constructor will leave the underlying
-        /// stream open upon <see cref="Stream.Close"/>. The stream uses the
-        /// default CRC32 algorithm, which implies a polynomial of 0xEDB88320.
+        /// The stream uses the default CRC32 algorithm, which implies a polynomial of 0xEDB88320.
         /// </remarks>
         /// <param name="stream">The underlying stream</param>
         public CrcCalculatorStream(Stream stream) :
-            this(true, UnsetLengthLimit, stream, null)
+            this(false, UnsetLengthLimit, stream, null)
         {
         }
 
         /// <summary>
-        /// The constructor allows the caller to specify how to handle the
-        /// underlying stream at close.
+        /// Constructs the calculator stream, optionally leaving the underlying stream open after disposal.
         /// </summary>
         /// <remarks>
-        /// The stream uses the default CRC32 algorithm, which implies a
-        /// polynomial of 0xEDB88320.
+        /// The stream uses the default CRC32 algorithm, which implies a  of 0xEDB88320.
         /// </remarks>
-        /// <param name="stream">The underlying stream</param>
-        /// <param name="leaveOpen">true to leave the underlying stream
-        /// open upon close of the <c>CrcCalculatorStream</c>; false otherwise.</param>
+        /// <param name="stream">The underlying stream.</param>
+        /// <param name="leaveOpen">true to leave the underlying stream open upon disposal.</param>
         public CrcCalculatorStream(Stream stream, bool leaveOpen) :
             this(leaveOpen, UnsetLengthLimit, stream, null)
         {
         }
 
         /// <summary>
-        /// A constructor allowing the specification of the length of the
-        /// stream to read.
+        /// Constructs the calculator stream with a limited read range,
+        /// disposing the underlying stream after disposal.
         /// </summary>
         /// <remarks>
-        /// The stream uses the default CRC32 algorithm, which implies a
-        /// polynomial of 0xEDB88320.
-        /// Instances returned from this constructor will leave the underlying
-        /// stream open upon <see cref="Stream.Close"/>.
+        /// The stream uses the default CRC32 algorithm, which implies a polynomial of 0xEDB88320.
         /// </remarks>
         /// <param name="stream">The underlying stream</param>
         /// <param name="length">The length of the stream to slurp</param>
-        public CrcCalculatorStream(Stream stream, Int64 length)
+        public CrcCalculatorStream(Stream stream, long length)
             : this(true, length, stream, null)
         {
             if (length < 0)
@@ -137,19 +120,18 @@ namespace MonoGame.Utilities
         }
 
         /// <summary>
-        /// A constructor allowing the specification of the length of the stream
-        /// to read, as well as whether to keep the underlying stream open upon
+        /// Constructs the calculator stream with a limited read range,
+        /// optionally leaving the underlying stream open after disposal.
         /// <see cref="Stream.Close"/>.
         /// </summary>
         /// <remarks>
         /// The stream uses the default CRC32 algorithm, which implies a
         /// polynomial of 0xEDB88320.
         /// </remarks>
-        /// <param name="stream">The underlying stream</param>
-        /// <param name="length">The length of the stream to slurp</param>
-        /// <param name="leaveOpen">true to leave the underlying stream
-        /// open upon close of the <c>CrcCalculatorStream</c>; false otherwise.</param>
-        public CrcCalculatorStream(Stream stream, Int64 length, bool leaveOpen)
+        /// <param name="stream">The underlying stream.</param>
+        /// <param name="length">The length of the stream to slurp.</param>
+        /// <param name="leaveOpen">true to leave the underlying stream open upon disposal.</param>
+        public CrcCalculatorStream(Stream stream, long length, bool leaveOpen)
             : this(leaveOpen, length, stream, null)
         {
             if (length < 0)
@@ -157,20 +139,19 @@ namespace MonoGame.Utilities
         }
 
         /// <summary>
-        /// A constructor allowing the specification of the length of the stream
-        /// to read, as well as whether to keep the underlying stream open upon
-        /// <see cref="Stream.Close"/>, and the <see cref="CRC32"/> instance to use.
+        /// Constructs the calculator stream with a limited read range,
+        /// using an existing <see cref="CRC32"/> instance, and optionally
+        /// leaving the underlying stream open after disposal.
         /// </summary>
         /// <remarks>
         /// The stream uses the specified <see cref="CRC32"/> instance, which allows the
         /// application to specify how the CRC gets calculated.
         /// </remarks>
-        /// <param name="stream">The underlying stream</param>
-        /// <param name="length">The length of the stream to slurp</param>
-        /// <param name="leaveOpen">true to leave the underlying stream
-        /// open upon close of the <see cref="CrcCalculatorStream"/>; false otherwise.</param>
-        /// <param name="crc32">the CRC32 instance to use to calculate the CRC32</param>
-        public CrcCalculatorStream(Stream stream, Int64 length, bool leaveOpen, CRC32 crc32)
+        /// <param name="stream">The underlying stream.</param>
+        /// <param name="length">The length of the stream to slurp.</param>
+        /// <param name="leaveOpen">true to leave the underlying stream open upon disposal.</param>
+        /// <param name="crc32">The <see cref="CRC32"/> instance used for calculation.</param>
+        public CrcCalculatorStream(Stream stream, long length, bool leaveOpen, CRC32 crc32)
             : this(leaveOpen, length, stream, crc32)
         {
             if (length < 0)
@@ -184,12 +165,12 @@ namespace MonoGame.Utilities
         // explicit param, otherwise we don't validate, because it could be our special
         // value.
         private CrcCalculatorStream
-            (bool leaveOpen, Int64 length, Stream stream, CRC32 crc32) : base()
+            (bool leaveOpen, long length, Stream stream, CRC32 crc32) : base()
         {
             _innerStream = stream;
             _crc32 = crc32 ?? new CRC32();
             _lengthLimit = length;
-            LeaveOpen = leaveOpen;
+            _leaveOpen = leaveOpen;
         }
 
         /// <summary>
@@ -204,10 +185,10 @@ namespace MonoGame.Utilities
             // Need to limit the X of bytes returned, if the stream is intended to have
             // a definite length. This is especially useful when returning a stream for
             // the uncompressed data directly to the application. The app won't
-            // necessarily read only the UncompressedSize number of bytes. For example
-            // wrapping the stream returned from OpenReader() into a StreadReader() and
-            // calling ReadToEnd() on it, We can "over-read" the zip data and get a
-            // corrupt string.  The length limits that, prevents that problem.
+            // necessarily read only the UncompressedSize number of bytes. 
+            // For example wrapping the stream returned from OpenReader() into a StreamReader()
+            // and calling ReadToEnd() on it, We can "over-read" the zip data and get a
+            // corrupt string. The length limits it, preventing that problem.
 
             long bytesToRead = count;
             if (_lengthLimit != UnsetLengthLimit)
@@ -241,30 +222,32 @@ namespace MonoGame.Utilities
         /// <summary>
         /// Flush the stream.
         /// </summary>
-        public override void Flush()
-        {
-            _innerStream.Flush();
-        }
+        public override void Flush() => _innerStream.Flush();
 
         /// <summary>
         /// Seeking is not supported on this stream.
         /// This method always throws <see cref="NotSupportedException"/>
         /// </summary>
-        /// <param name="offset">N/A</param>
-        /// <param name="origin">N/A</param>
-        /// <returns>N/A</returns>
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException();
-        }
+        /// <param name="offset"></param>
+        /// <param name="origin"></param>
+        /// <returns></returns>
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
         /// <summary>
         /// This method always throws <see cref="NotSupportedException"/>
         /// </summary>
-        /// <param name="value">N/A</param>
-        public override void SetLength(long value)
+        /// <param name="value"></param>
+        public override void SetLength(long value) => throw new NotSupportedException();
+
+        protected override void Dispose(bool disposing)
         {
-            throw new NotSupportedException();
+            if (disposing)
+            {
+                if (!_leaveOpen)
+                    _innerStream?.Dispose();
+                _innerStream = null;
+            }
+            base.Dispose(disposing);
         }
     }
 }

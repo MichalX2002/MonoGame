@@ -3,11 +3,11 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework.Content.Pipeline.Processors;
-using Microsoft.Xna.Framework.Graphics;
-using SixLabors.ImageSharp.PixelFormats;
+using MonoGame.Framework.Content.Pipeline.Processors;
+using MonoGame.Framework.Graphics;
+using MonoGame.Utilities.PackedVector;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     internal class DefaultTextureProfile : TextureProfile
     {
@@ -108,7 +108,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             }
         }
 
-        protected override void PlatformCompressTexture(ContentProcessorContext context, TextureContent content, TextureProcessorOutputFormat format, bool isSpriteFont)
+        protected override void PlatformCompressTexture(
+            ContentProcessorContext context, TextureContent content, TextureProcessorOutputFormat format, bool isSpriteFont)
         {
             format = GetTextureFormatForPlatform(format, context.TargetPlatform);
 

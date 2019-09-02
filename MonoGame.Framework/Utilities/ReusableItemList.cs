@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     internal class ReusableItemList<T> : ICollection<T>, IReadOnlyList<T>, IEnumerator<T>
     {
@@ -87,13 +87,7 @@ namespace Microsoft.Xna.Framework
 
         public int Count { get; private set; } = 0;
 
-        public bool IsReadOnly
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool IsReadOnly => false;
 
         public bool Remove(T item)
         {
@@ -124,13 +118,7 @@ namespace Microsoft.Xna.Framework
 
         #region IEnumerator<T> Members
 
-        public T Current
-        {
-            get
-            {
-                return _list[_iteratorIndex];
-            }
-        }
+        public T Current => _list[_iteratorIndex];
 
         #endregion
 
@@ -144,13 +132,7 @@ namespace Microsoft.Xna.Framework
 
         #region IEnumerator Members
 
-        object System.Collections.IEnumerator.Current
-        {
-            get
-            {
-                return _list[_iteratorIndex];
-            }
-        }
+        object System.Collections.IEnumerator.Current => _list[_iteratorIndex];
 
         public bool MoveNext()
         {

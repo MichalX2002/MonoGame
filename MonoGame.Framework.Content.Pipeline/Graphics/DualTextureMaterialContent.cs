@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     public class DualTextureMaterialContent : MaterialContent
     {
@@ -14,32 +14,32 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
         public float? Alpha
         {
-            get { return GetValueTypeProperty<float>(AlphaKey); }
-            set { SetProperty(AlphaKey, value); }
+            get => GetValueTypeProperty<float>(AlphaKey);
+            set => SetProperty(AlphaKey, value);
         }
 
         public Vector3? DiffuseColor
         {
-            get { return GetValueTypeProperty<Vector3>(DiffuseColorKey); }
-            set { SetProperty(DiffuseColorKey, value); }
+            get => GetValueTypeProperty<Vector3>(DiffuseColorKey);
+            set => SetProperty(DiffuseColorKey, value);
         }
 
         public ExternalReference<TextureContent> Texture
         {
-            get { return GetTexture(TextureKey); }
-            set { SetTexture(TextureKey, value); }
+            get => GetTexture(TextureKey);
+            set => SetTexture(TextureKey, value);
         }
 
         public ExternalReference<TextureContent> Texture2
         {
-            get { return GetTexture(Texture2Key); }
-            set { SetTexture(Texture2Key, value); }
+            get => GetTexture(Texture2Key);
+            set => SetTexture(Texture2Key, value);
         }
 
         public bool? VertexColorEnabled
         {
-            get { return GetValueTypeProperty<bool>(VertexColorEnabledKey); }
-            set { SetProperty(VertexColorEnabledKey, value); }
+            get => GetValueTypeProperty<bool>(VertexColorEnabledKey);
+            set => SetProperty(VertexColorEnabledKey, value);
         }
     }
 }

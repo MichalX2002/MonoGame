@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 {
     public abstract class ContentTypeSerializer
     {
@@ -14,10 +14,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             XmlTypeName = xmlTypeName;
         }
 
-        public virtual bool CanDeserializeIntoExistingObject
-        {
-            get { return false; }
-        }
+        public virtual bool CanDeserializeIntoExistingObject => false;
 
         public Type TargetType { get; private set; }
 

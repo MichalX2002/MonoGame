@@ -9,7 +9,7 @@ using System.Text;
 using System.Collections;
 using System.Reflection;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Provides methods and properties for managing a list of vertex data channels.
@@ -22,27 +22,15 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Gets the number of vertex channels in the collection.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return channels.Count;
-            }
-        }
+        public int Count => channels.Count;
 
         /// <summary>
         /// Gets or sets the vertex channel at the specified index position.
         /// </summary>
         public VertexChannel this[int index]
         {
-            get
-            {
-                return channels[index];
-            }
-            set
-            {
-                channels[index] = value;
-            }
+            get => channels[index];
+            set => channels[index] = value;
         }
 
         /// <summary>
@@ -69,13 +57,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Determines whether the collection is read-only.
         /// </summary>
-        bool ICollection<VertexChannel>.IsReadOnly
-        {
-            get
-            {
-                return false;
-            }
-        }
+        bool ICollection<VertexChannel>.IsReadOnly => false;
 
         /// <summary>
         /// Creates an instance of VertexChannelCollection.

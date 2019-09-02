@@ -4,9 +4,9 @@
 
 using System;
 using System.IO;
-using Microsoft.Xna.Framework.Content.Pipeline.Audio;
+using MonoGame.Framework.Content.Pipeline.Audio;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline
+namespace MonoGame.Framework.Content.Pipeline
 {
     /// <summary>
     /// Provides methods for reading MP3 audio files for use in the Content Pipeline.

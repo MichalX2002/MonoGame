@@ -27,7 +27,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Utilities.LZ4
+namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 {
 	/// <summary>Unsafe LZ4 codec.</summary>
 	internal static partial class LZ4Codec

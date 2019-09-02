@@ -2,9 +2,9 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using Microsoft.Xna.Framework.Content.Pipeline.Processors;
+using MonoGame.Framework.Content.Pipeline.Processors;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     [ContentTypeWriter]
     class VertexDeclarationWriter : BuiltInContentWriter<VertexDeclarationContent>

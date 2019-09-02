@@ -199,7 +199,7 @@ namespace MonoGame.Framework
 #if DIRECTX && WINDOWS
 		public static GameWindow Create(Game game, int width, int height)
 		{
-			var window = new MonoGame.Framework.WinFormsGameWindow((MonoGame.Framework.WinFormsGamePlatform)game.Platform);
+			var window = new WinFormsGameWindow((WinFormsGamePlatform)game.Platform);
 			window.Initialize(width, height);
 
 			return window;

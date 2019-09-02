@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System.IO;
+using MonoGame.Framework.Content;
 using MonoGame.Utilities;
 using MonoGame.Utilities.Memory;
 
@@ -20,7 +21,7 @@ namespace MonoGame.Framework.Graphics
         public static readonly EffectResource SkinnedEffect = new EffectResource(SkinnedEffectName);
         public static readonly EffectResource SpriteEffect = new EffectResource(SpriteEffectName);
 
-        private readonly object _locker = new object();
+        private readonly object _readMutex = new object();
         private readonly string _name;
         private volatile byte[] _bytecode;
 
@@ -35,26 +36,23 @@ namespace MonoGame.Framework.Graphics
             {
                 if (_bytecode == null)
                 {
-                    lock (_locker)
+                    lock (_readMutex)
                     {
                         if (_bytecode != null)
                             return _bytecode;
 
                         var assembly = ReflectionHelpers.GetAssembly(typeof(EffectResource));
                         var stream = assembly.GetManifestResourceStream(_name);
-                        using (var ms = RecyclableMemoryManager.Instance.GetMemoryStream())
-                        {
-                            var buffer = RecyclableMemoryManager.Instance.GetBlock();   //
-                            int read;                                                   //
-                            while ((read = stream.Read(buffer, 0, buffer.Length)) != 0) // instead of CopyTo
-                                ms.Write(buffer, 0, read);                              //
-                            RecyclableMemoryManager.Instance.ReturnBlock(buffer);       //
+                        if (stream == null)
+                            throw new ContentLoadException($"Missing effect resource named \"{_name}\".");
 
+                        using (var ms = RecyclableMemoryManager.Default.GetMemoryStream())
+                        {
+                            stream.PooledCopyTo(ms);
                             _bytecode = ms.ToArray();
                         }
                     }
                 }
-
                 return _bytecode;
             }
         }

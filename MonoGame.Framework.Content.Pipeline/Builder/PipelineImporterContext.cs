@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using Microsoft.Xna.Framework.Content.Pipeline;
+using MonoGame.Framework.Content.Pipeline;
 
 namespace MonoGame.Framework.Content.Pipeline.Builder
 {
@@ -15,9 +15,9 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
             _manager = manager;
         }
 
-        public override string IntermediateDirectory { get { return _manager.IntermediateDirectory; } }
-        public override string OutputDirectory { get { return _manager.OutputDirectory; } }
-        public override ContentBuildLogger Logger { get { return _manager.Logger; } }
+        public override string IntermediateDirectory => _manager.IntermediateDirectory;
+        public override string OutputDirectory => _manager.OutputDirectory;
+        public override ContentBuildLogger Logger => _manager.Logger;
 
         public override void AddDependency(string filename)
         {            

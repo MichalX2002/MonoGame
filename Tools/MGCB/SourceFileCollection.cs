@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
-using Microsoft.Xna.Framework.Content.Pipeline;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Content.Pipeline;
+using MonoGame.Framework.Graphics;
 
 namespace MGCB
 {

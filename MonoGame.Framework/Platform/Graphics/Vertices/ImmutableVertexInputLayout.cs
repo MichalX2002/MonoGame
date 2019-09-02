@@ -4,7 +4,7 @@
 
 using System.Diagnostics;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Immutable version of <see cref="VertexInputLayout"/>. Can be used as a key in the

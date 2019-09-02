@@ -28,8 +28,6 @@ SOFTWARE.
 */
 #endregion License
 
-using System;
-using System.Globalization;
 using System.Runtime.Serialization;
 
 namespace MonoGame.Framework.Graphics
@@ -37,36 +35,19 @@ namespace MonoGame.Framework.Graphics
     [DataContract]
     public class DisplayMode
     {
-
-        #region Fields
-        private int width;
-
-        #endregion Fields
-
-        #region Properties
-
-        public float AspectRatio => width / (float)Height;
-
         public SurfaceFormat Format { get; }
-
         public int Height { get; }
+        public int Width { get; }
 
-        public int Width => width;
-
-        public Rectangle TitleSafeArea => GraphicsDevice.GetTitleSafeArea(0, 0, width, Height);
-
-        #endregion Properties
-
-        #region Constructors
+        public float AspectRatio => Width / (float)Height;
+        public Rectangle TitleSafeArea => GraphicsDevice.GetTitleSafeArea(0, 0, Width, Height);
 
         internal DisplayMode(int width, int height, SurfaceFormat format)
         {
-            this.width = width;
+            this.Width = width;
             Height = height;
             Format = format;
         }
-
-        #endregion Constructors
 
         #region Operators
 
@@ -78,16 +59,14 @@ namespace MonoGame.Framework.Graphics
         public static bool operator ==(DisplayMode left, DisplayMode right)
         {
             if (ReferenceEquals(left, right)) //Same object or both are null
-            {
                 return true;
-            }
-            if (ReferenceEquals(left, null) || ReferenceEquals(right, null))
-            {
+
+            if (left is null || right is null)
                 return false;
-            }
-            return (left.Format == right.Format) &&
-                (left.Height == right.Height) &&
-                (left.width == right.width);
+
+            return (left.Format == right.Format) 
+                && (left.Height == right.Height) 
+                && (left.Width == right.Width);
         }
 
         #endregion Operators
@@ -96,17 +75,22 @@ namespace MonoGame.Framework.Graphics
 
         public override bool Equals(object obj)
         {
-            return obj is DisplayMode && this == (DisplayMode)obj;
+            return obj is DisplayMode other && this == other;
         }
 
         public override int GetHashCode()
         {
-            return (width.GetHashCode() ^ Height.GetHashCode() ^ Format.GetHashCode());
+            unchecked
+            {
+                int code = Width.GetHashCode();
+                code = code * 23 + Height.GetHashCode();
+                return code * 23 + Format.GetHashCode();
+            }
         }
 
         public override string ToString()
         {
-            return "{Width:" + width + " Height:" + Height + " Format:" + Format + " AspectRatio:" + AspectRatio + "}";
+            return "{Width:" + Width + " Height:" + Height + " Format:" + Format + " AspectRatio:" + AspectRatio + "}";
         }
 
         #endregion Public Methods

@@ -217,7 +217,7 @@ namespace MonoGame.Framework
             if (_willBeFullScreen != IsFullScreen || _hardwareSwitch != _game.InternalGraphicsDeviceManager.HardwareModeSwitch)
             {
                 var fullscreenFlag = _game.InternalGraphicsDeviceManager.HardwareModeSwitch ? Sdl.Window.State.Fullscreen : Sdl.Window.State.FullscreenDesktop;
-                Sdl.Window.SetFullscreen(Handle, (_willBeFullScreen) ? fullscreenFlag : 0);
+                Sdl.Window.SetFullscreen(Handle, _willBeFullScreen ? fullscreenFlag : 0);
                 _hardwareSwitch = _game.InternalGraphicsDeviceManager.HardwareModeSwitch;
             }
             // If going to exclusive full-screen mode, force the window to minimize on focus loss (Windows only)

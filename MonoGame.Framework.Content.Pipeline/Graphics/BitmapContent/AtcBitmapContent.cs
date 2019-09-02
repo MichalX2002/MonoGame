@@ -3,12 +3,11 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 using ATI.TextureConverter;
-using SixLabors.ImageSharp.PixelFormats;
-using System.Runtime.InteropServices;
+using MonoGame.Utilities.PackedVector;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     public abstract class AtcBitmapContent : BitmapContent
     {

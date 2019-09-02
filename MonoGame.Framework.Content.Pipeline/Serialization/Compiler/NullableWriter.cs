@@ -4,13 +4,13 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     /// <summary>
     /// Writes the nullable value to the output.
     /// </summary>
     [ContentTypeWriter]
-    class NullableWriter<T> : BuiltInContentWriter<Nullable<T>> where T: struct
+    class NullableWriter<T> : BuiltInContentWriter<T?> where T: struct
     {
         ContentTypeWriter _elementWriter;
 
@@ -27,7 +27,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
         /// </summary>
         /// <param name="output">The output writer object.</param>
         /// <param name="value">The value to write to the output.</param>
-        protected internal override void Write(ContentWriter output, Nullable<T> value)
+        protected internal override void Write(ContentWriter output, T? value)
         {
             output.Write(value.HasValue);
             if (value.HasValue)

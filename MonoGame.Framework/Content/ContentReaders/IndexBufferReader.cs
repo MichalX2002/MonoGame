@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.IO;
 using MonoGame.Framework.Graphics;
 
 namespace MonoGame.Framework.Content
@@ -17,17 +18,26 @@ namespace MonoGame.Framework.Content
             int dataSize = input.ReadInt32();
 
             byte[] data = input.ContentManager.GetScratchBuffer(dataSize);
-            input.Read(data, 0, dataSize);
-
-            if (indexBuffer == null)
+            try
             {
-                indexBuffer = new IndexBuffer(
-                    input.GraphicsDevice,
-                    sixteenBits ? IndexElementSize.SixteenBits : IndexElementSize.ThirtyTwoBits, 
-                    dataSize / (sixteenBits ? 2 : 4), BufferUsage.None);
+                if (input.Read(data, 0, dataSize) != dataSize)
+                    throw new InvalidDataException();
+
+                if (indexBuffer == null)
+                {
+                    indexBuffer = new IndexBuffer(
+                        input.GraphicsDevice,
+                        sixteenBits ? IndexElementSize.SixteenBits : IndexElementSize.ThirtyTwoBits,
+                        dataSize / (sixteenBits ? 2 : 4), BufferUsage.None);
+                }
+
+                indexBuffer.SetData(data.AsSpan().Slice(0, dataSize));
+            }
+            finally
+            {
+                input.ContentManager.ReturnScratchBuffer(data);
             }
 
-            indexBuffer.SetData(data.AsSpan().Slice(0, dataSize));
             return indexBuffer;
         }
     }

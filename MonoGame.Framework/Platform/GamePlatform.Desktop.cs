@@ -17,7 +17,7 @@ namespace MonoGame.Framework
 #if DESKTOPGL || ANGLE
             return new SdlGamePlatform(game);
 #elif WINDOWS && DIRECTX
-            return new MonoGame.Framework.WinFormsGamePlatform(game);
+            return new WinFormsGamePlatform(game);
 #elif WINDOWS_UAP
             return new UAPGamePlatform(game);
 #endif

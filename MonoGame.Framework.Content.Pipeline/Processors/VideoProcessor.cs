@@ -5,7 +5,7 @@
 using MonoGame.Framework.Content.Pipeline.Builder;
 using System.IO;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     [ContentProcessor(DisplayName = "Video - MonoGame")]
     public class VideoProcessor : ContentProcessor<VideoContent, VideoContent>

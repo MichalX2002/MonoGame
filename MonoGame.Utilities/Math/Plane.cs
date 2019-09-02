@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace MonoGame.Framework
@@ -16,23 +17,24 @@ namespace MonoGame.Framework
         /// <param name="point">The point to check with</param>
         /// <param name="plane">The plane to check against</param>
         /// <returns>Greater than zero if on the positive side, less than zero if on the negative size, 0 otherwise</returns>
-        public static float ClassifyPoint(ref Vector3 point, ref Plane plane)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float ClassifyPoint(Vector3 point, in Plane plane)
         {
             return point.X * plane.Normal.X + point.Y * plane.Normal.Y + point.Z * plane.Normal.Z + plane.D;
         }
 
-        /// <summary>
-        /// Returns the perpendicular distance from a point to a plane
-        /// </summary>
-        /// <param name="point">The point to check</param>
-        /// <param name="plane">The place to check</param>
-        /// <returns>The perpendicular distance from the point to the plane</returns>
-        public static float PerpendicularDistance(ref Vector3 point, ref Plane plane)
-        {
-            // dist = (ax + by + cz + d) / sqrt(a*a + b*b + c*c)
-            return (float)Math.Abs((plane.Normal.X * point.X + plane.Normal.Y * point.Y + plane.Normal.Z * point.Z)
-                                    / Math.Sqrt(plane.Normal.X * plane.Normal.X + plane.Normal.Y * plane.Normal.Y + plane.Normal.Z * plane.Normal.Z));
-        }
+        ///// <summary>
+        ///// Returns the perpendicular distance from a point to a plane
+        ///// </summary>
+        ///// <param name="point">The point to check</param>
+        ///// <param name="plane">The place to check</param>
+        ///// <returns>The perpendicular distance from the point to the plane</returns>
+        //public static float PerpendicularDistance(ref Vector3 point, ref Plane plane)
+        //{
+        //    // dist = (ax + by + cz + d) / sqrt(a*a + b*b + c*c)
+        //    return (float)Math.Abs((plane.Normal.X * point.X + plane.Normal.Y * point.Y + plane.Normal.Z * point.Z)
+        //                            / Math.Sqrt(plane.Normal.X * plane.Normal.X + plane.Normal.Y * plane.Normal.Y + plane.Normal.Z * plane.Normal.Z));
+        //}
     }
 	
     [DataContract]
@@ -44,17 +46,16 @@ namespace MonoGame.Framework
 
         [DataMember]
         public Vector3 Normal;
-        
-        public Plane(Vector4 value)
-            : this(new Vector3(value.X, value.Y, value.Z), value.W)
-        {
-
-        }
 
         public Plane(Vector3 normal, float d)
         {
             Normal = normal;
             D = d;
+        }
+
+        public Plane(in Vector4 value) : this(new Vector3(value.X, value.Y, value.Z), value.W)
+        {
+
         }
 
         public Plane(Vector3 a, Vector3 b, Vector3 c)
@@ -63,24 +64,17 @@ namespace MonoGame.Framework
             Vector3 ac = c - a;
 
             Vector3 cross = Vector3.Cross(ab, ac);
-            Vector3.Normalize(ref cross, out Normal);
-            D = -(Vector3.Dot(Normal, a));
+            Normal = Vector3.Normalize(cross);
+            D = -Vector3.Dot(Normal, a);
         }
 
-        public Plane(float a, float b, float c, float d)
-            : this(new Vector3(a, b, c), d)
+        public Plane(float a, float b, float c, float d) : this(new Vector3(a, b, c), d)
         {
-
         }
         
-        public float Dot(Vector4 value)
+        public float Dot(in Vector4 value)
         {
             return ((((Normal.X * value.X) + (Normal.Y * value.Y)) + (Normal.Z * value.Z)) + (D * value.W));
-        }
-
-        public void Dot(ref Vector4 value, out float result)
-        {
-            result = (((Normal.X * value.X) + (Normal.Y * value.Y)) + (Normal.Z * value.Z)) + (D * value.W);
         }
 
         public float DotCoordinate(Vector3 value)
@@ -88,52 +82,28 @@ namespace MonoGame.Framework
             return ((((Normal.X * value.X) + (Normal.Y * value.Y)) + (Normal.Z * value.Z)) + D);
         }
 
-        public void DotCoordinate(ref Vector3 value, out float result)
-        {
-            result = (((Normal.X * value.X) + (Normal.Y * value.Y)) + (Normal.Z * value.Z)) + D;
-        }
-
         public float DotNormal(Vector3 value)
         {
             return (((Normal.X * value.X) + (Normal.Y * value.Y)) + (Normal.Z * value.Z));
         }
 
-        public void DotNormal(ref Vector3 value, out float result)
-        {
-            result = ((Normal.X * value.X) + (Normal.Y * value.Y)) + (Normal.Z * value.Z);
-        }
-
         /// <summary>
         /// Transforms a normalized plane by a matrix.
         /// </summary>
         /// <param name="plane">The normalized plane to transform.</param>
         /// <param name="matrix">The transformation matrix.</param>
         /// <returns>The transformed plane.</returns>
-        public static Plane Transform(Plane plane, Matrix matrix)
-        {
-            Transform(ref plane, ref matrix, out Plane result);
-            return result;
-        }
-
-        /// <summary>
-        /// Transforms a normalized plane by a matrix.
-        /// </summary>
-        /// <param name="plane">The normalized plane to transform.</param>
-        /// <param name="matrix">The transformation matrix.</param>
-        /// <param name="result">The transformed plane.</param>
-        public static void Transform(ref Plane plane, ref Matrix matrix, out Plane result)
+        public static Plane Transform(in Plane plane, in Matrix matrix)
         {
             // See "Transforming Normals" in http://www.glprogramming.com/red/appendixf.html
             // for an explanation of how this works.
 
-            Matrix.Invert(ref matrix, out Matrix transformedMatrix);
-            Matrix.Transpose(ref transformedMatrix, out transformedMatrix);
+            Matrix transformedMatrix = Matrix.Invert(matrix);
+            transformedMatrix = Matrix.Transpose(transformedMatrix);
 
             var vector = new Vector4(plane.Normal, plane.D);
-
-            Vector4.Transform(ref vector, ref transformedMatrix, out Vector4 transformedVector);
-
-            result = new Plane(transformedVector);
+            var transformedVector = Vector4.Transform(vector, transformedMatrix);
+            return new Plane(transformedVector);
         }
 
         /// <summary>
@@ -142,64 +112,44 @@ namespace MonoGame.Framework
         /// <param name="plane">The normalized plane to transform.</param>
         /// <param name="rotation">The quaternion rotation.</param>
         /// <returns>The transformed plane.</returns>
-        public static Plane Transform(Plane plane, Quaternion rotation)
+        public static Plane Transform(in Plane plane, in Quaternion rotation)
         {
-            Transform(ref plane, ref rotation, out Plane result);
-            return result;
-        }
-
-        /// <summary>
-        /// Transforms a normalized plane by a quaternion rotation.
-        /// </summary>
-        /// <param name="plane">The normalized plane to transform.</param>
-        /// <param name="rotation">The quaternion rotation.</param>
-        /// <param name="result">The transformed plane.</param>
-        public static void Transform(ref Plane plane, ref Quaternion rotation, out Plane result)
-        {
-            Vector3.Transform(ref plane.Normal, ref rotation, out result.Normal);
-            result.D = plane.D;
+            return new Plane(Vector3.Transform(plane.Normal, rotation), plane.D);
         }
 
         public void Normalize()
         {
             float length = Normal.Length();
-            float factor =  1f / length;            
-            Vector3.Multiply(ref Normal, factor, out Normal);
+            float factor =  1f / length;
+            Normal = Vector3.Multiply(Normal, factor);
             D *= factor;
         }
 
-        public static Plane Normalize(Plane value)
-        {
-            Normalize(ref value, out Plane ret);
-            return ret;
-        }
-
-        public static void Normalize(ref Plane value, out Plane result)
+        public static Plane Normalize(in Plane value)
         {
             float length = value.Normal.Length();
             float factor =  1f / length;            
-            Vector3.Multiply(ref value.Normal, factor, out result.Normal);
-            result.D = value.D * factor;
+            return new Plane(Vector3.Multiply(value.Normal, factor), value.D * factor);
         }
 
-        public static bool operator !=(Plane plane1, Plane plane2)
+        public static bool operator !=(in Plane plane1, in Plane plane2)
         {
             return !plane1.Equals(plane2);
         }
 
-        public static bool operator ==(Plane plane1, Plane plane2)
+        public static bool operator ==(in Plane plane1, in Plane plane2)
         {
-            return plane1.Equals(plane2);
+            return plane1.Normal == plane2.Normal && plane1.D == plane2.D;
         }
 
-        public override bool Equals(object other)
+        public override bool Equals(object obj)
         {
-            return (other is Plane) ? Equals((Plane)other) : false;
+            return (obj is Plane other) ? Equals(other) : false;
         }
 
         public bool Equals(Plane other)
         {
-            return ((Normal == other.Normal) && (D == other.D));
+            return this == other;
         }
 
         public override int GetHashCode()
@@ -207,51 +157,17 @@ namespace MonoGame.Framework
             return Normal.GetHashCode() ^ D.GetHashCode();
         }
 
-        public PlaneIntersectionType Intersects(BoundingBox box)
+        internal PlaneIntersectionType Intersects(Vector3 point)
         {
-            return box.Intersects(this);
-        }
-
-        public void Intersects(ref BoundingBox box, out PlaneIntersectionType result)
-        {
-            box.Intersects (ref this, out result);
-        }
-
-        public PlaneIntersectionType Intersects(BoundingFrustum frustum)
-        {
-            return frustum.Intersects(this);
-        }
-
-        public PlaneIntersectionType Intersects(BoundingSphere sphere)
-        {
-            return sphere.Intersects(this);
-        }
-
-        public void Intersects(ref BoundingSphere sphere, out PlaneIntersectionType result)
-        {
-            sphere.Intersects(ref this, out result);
-        }
-
-        internal PlaneIntersectionType Intersects(ref Vector3 point)
-        {
-            DotCoordinate(ref point, out float distance);
-
+            float distance = DotCoordinate(point);
             if (distance > 0)
                 return PlaneIntersectionType.Front;
-
             if (distance < 0)
                 return PlaneIntersectionType.Back;
-
             return PlaneIntersectionType.Intersecting;
         }
 
-        internal string DebugDisplayString
-        {
-            get => string.Concat(
-                    Normal.DebugDisplayString, "  ",
-                    D.ToString()
-                    );
-        }
+        internal string DebugDisplayString => string.Concat(Normal.DebugDisplayString, "  ", D.ToString());
 
         public override string ToString()
         {
@@ -270,4 +186,3 @@ namespace MonoGame.Framework
         }
     }
 }
-

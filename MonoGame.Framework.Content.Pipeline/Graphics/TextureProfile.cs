@@ -3,12 +3,10 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework.Content.Pipeline.Processors;
-using SixLabors.ImageSharp.PixelFormats;
+using MonoGame.Framework.Content.Pipeline.Processors;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     public abstract class TextureProfile
     {
@@ -60,7 +58,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             // If this is color just make sure the format is right and return it.
             if (format == TextureProcessorOutputFormat.Color)
             {
-                content.ConvertBitmapType(typeof(PixelBitmapContent<Rgba32>));
+                content.ConvertBitmapType(typeof(PixelBitmapContent<Color>));
                 return;
             }
 
@@ -93,6 +91,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             }
         }
 
-        protected abstract void PlatformCompressTexture(ContentProcessorContext context, TextureContent content, TextureProcessorOutputFormat format, bool isSpriteFont);
+        protected abstract void PlatformCompressTexture(
+            ContentProcessorContext context, TextureContent content, TextureProcessorOutputFormat format, bool isSpriteFont);
     }
 }

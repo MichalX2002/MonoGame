@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.IO;
 using MonoGame.Framework.Graphics;
 
 namespace MonoGame.Framework.Content
@@ -11,21 +12,30 @@ namespace MonoGame.Framework.Content
     {
         protected internal override Texture3D Read(ContentReader reader, Texture3D existingInstance)
         {
-            SurfaceFormat format = (SurfaceFormat)reader.ReadInt32();
+            var format = (SurfaceFormat)reader.ReadInt32();
             int width = reader.ReadInt32();
             int height = reader.ReadInt32();
             int depth = reader.ReadInt32();
             int levelCount = reader.ReadInt32();
 
-            Texture3D texture = existingInstance ??
-                new Texture3D(reader.GraphicsDevice, width, height, depth, levelCount > 1, format)
-;
+            var texture = existingInstance ?? new Texture3D(
+                reader.GraphicsDevice, width, height, depth, levelCount > 1, format);
+
             for (int i = 0; i < levelCount; i++)
             {
                 int dataSize = reader.ReadInt32();
                 byte[] data = reader.ContentManager.GetScratchBuffer(dataSize);
-                reader.Read(data, 0, dataSize);
-                texture.SetData(i, 0, 0, width, height, 0, depth, data, 0, dataSize);
+                try
+                {
+                    if(reader.Read(data, 0, dataSize) != dataSize)
+                        throw new InvalidDataException();
+
+                    texture.SetData(i, 0, 0, width, height, 0, depth, data.AsSpan(0, dataSize));
+                }
+                finally
+                {
+                    reader.ContentManager.ReturnScratchBuffer(data);
+                }
 
                 // Calculate dimensions of next mip level.
                 width = Math.Max(width >> 1, 1);

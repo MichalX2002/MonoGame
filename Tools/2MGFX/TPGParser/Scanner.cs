@@ -906,9 +906,7 @@ namespace TwoMGFX.TPGParser
 
         public int StartPos { get; set; }
 
-        public int Length { 
-            get { return EndPos - StartPos;} 
-        }
+        public int Length => EndPos - StartPos;
 
         public int EndPos { get; set; }
 

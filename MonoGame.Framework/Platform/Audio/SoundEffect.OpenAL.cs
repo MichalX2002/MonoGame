@@ -44,17 +44,27 @@ namespace MonoGame.Framework.Audio
             ReadOnlySpan<T> data, int sampleBits, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
             where T : unmanaged
         {
-            if (sampleBits == 24)
+            byte[] largeBuffer = null;
+            string bufferTag = null;
+            try
             {
-                // Convert 24-bit signed PCM to 16-bit signed PCM
-                data = MemoryMarshal.Cast<byte, T>(AudioLoader.Convert24To16(data));
-                sampleBits = 16;
+                if (sampleBits == 24)
+                {
+                    // Convert 24-bit signed PCM to 16-bit signed PCM
+                    largeBuffer = AudioLoader.Convert24To16(data, out bufferTag, out int size);
+                    data = MemoryMarshal.Cast<byte, T>(largeBuffer.AsSpan(0, size));
+                    sampleBits = 16;
+                }
+
+                var format = AudioLoader.GetSoundFormat(AudioLoader.FormatPcm, (int)channels, sampleBits);
+                SoundBuffer = ALBufferPool.Rent();
+                SoundBuffer.BufferData(data, format, sampleRate);
             }
-
-            var format = AudioLoader.GetSoundFormat(AudioLoader.FormatPcm, (int)channels, sampleBits);
-
-            SoundBuffer = ALBufferPool.Rent();
-            SoundBuffer.BufferData(data, format, sampleRate);
+            finally
+            {
+                if (largeBuffer != null)
+                    RecyclableMemoryManager.Default.ReturnLargeBuffer(largeBuffer, bufferTag);
+            }
         }
 
         private void PlatformInitializeIeeeFloat<T>(
@@ -70,7 +80,6 @@ namespace MonoGame.Framework.Audio
             }
 
             var format = AudioLoader.GetSoundFormat(AudioLoader.FormatIeee, (int)channels, 32);
-
             SoundBuffer = ALBufferPool.Rent();
             SoundBuffer.BufferData(data, format, sampleRate);
         }
@@ -113,7 +122,6 @@ namespace MonoGame.Framework.Audio
 
             var format = AudioLoader.GetSoundFormat(AudioLoader.FormatIma4, (int)channels, 0);
             int sampleAlignment = AudioLoader.SampleAlignment(format, blockAlignment);
-
             SoundBuffer = ALBufferPool.Rent();
             SoundBuffer.BufferData(data, format, sampleRate, sampleAlignment);
         }
@@ -178,14 +186,10 @@ namespace MonoGame.Framework.Audio
 
         #endregion
 
-        #region Additional SoundEffect/SoundEffectInstance Creation Methods
-
         private void PlatformSetupInstance(SoundEffectInstance inst)
         {
             inst.InitializeSound();
         }
-
-        #endregion
 
         internal static void PlatformSetReverbSettings(ReverbSettings reverbSettings)
         {
@@ -218,8 +222,8 @@ namespace MonoGame.Framework.Audio
             efx.Effect(ReverbEffect, EfxEffectf.EaxReverbDensity, reverbSettings.DensityPct / 100f);
             efx.AuxiliaryEffectSlot(ReverbSlot, EfxEffectSlotf.EffectSlotGain, reverbSettings.WetDryMixPct / 200f);
 
-            // Dont know what to do with these EFX has no mapping for them. Just ignore for now
-            // we can enable them as we go. 
+            // Dont know what to do with these EFX has no mapping for them. 
+            // Just ignore for now we can enable them as we go. 
             //efx.SetEffectParam (ReverbEffect, EfxEffectf.PositionLeft, reverbSettings.PositionLeft);
             //efx.SetEffectParam (ReverbEffect, EfxEffectf.PositionRight, reverbSettings.PositionRight);
             //efx.SetEffectParam (ReverbEffect, EfxEffectf.PositionLeftMatrix, reverbSettings.PositionLeftMatrix);
@@ -234,8 +238,6 @@ namespace MonoGame.Framework.Audio
             efx.BindEffectToAuxiliarySlot(ReverbSlot, ReverbEffect);
         }
 
-        #region IDisposable Members
-
         private void PlatformDispose(bool disposing)
         {
             if (SoundBuffer != null)
@@ -244,8 +246,6 @@ namespace MonoGame.Framework.Audio
                 SoundBuffer = null;
             }
         }
-
-        #endregion
 
         internal static void PlatformInitialize()
         {

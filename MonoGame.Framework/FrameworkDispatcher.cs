@@ -48,9 +48,9 @@ namespace MonoGame.Framework
             {
                 SoundEffect.PlatformInitialize();
             }
-            catch (DllNotFoundException ex)
+            catch (Exception ex)
             {
-                throw new NoAudioHardwareException("Failed to initialize audio engine.", ex);
+                throw new AudioHardwareException("Failed to initialize audio.", ex);
             }
         }
     }

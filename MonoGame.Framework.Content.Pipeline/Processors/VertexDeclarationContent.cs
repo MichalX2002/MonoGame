@@ -4,9 +4,9 @@
 
 using System;
 using System.Collections.ObjectModel;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     /// <summary>
     /// Provides methods and properties for maintaining the vertex declaration data of a VertexContent.
@@ -27,8 +27,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         /// <value>The stride (in bytes).</value>
         public int? VertexStride
         {
-            get { return vertexStride; }
-            set { vertexStride = value; }
+            get => vertexStride;
+            set => vertexStride = value;
         }
 
         /// <summary>

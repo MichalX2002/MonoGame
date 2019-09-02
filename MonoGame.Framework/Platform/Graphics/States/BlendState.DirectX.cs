@@ -4,7 +4,7 @@
 
 using System.Diagnostics;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
     public partial class BlendState
     {

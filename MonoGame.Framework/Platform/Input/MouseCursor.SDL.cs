@@ -30,7 +30,7 @@ namespace MonoGame.Framework.Input
             Hand = new MouseCursor(Sdl.Mouse.SystemCursor.Hand);
         }
 
-        private static unsafe MouseCursor PlatformFromImage(
+        private static unsafe MouseCursor PlatformFromPixels(
             ReadOnlySpan<Color> data, int width, int height, int stride, Point origin)
         {
             var surface = IntPtr.Zero;

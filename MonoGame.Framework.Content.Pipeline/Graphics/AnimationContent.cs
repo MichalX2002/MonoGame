@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Provides properties for maintaining an animation.
@@ -23,14 +23,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// </summary>
         public TimeSpan Duration
         {
-            get
-            {
-                return duration;
-            }
-            set
-            {
-                duration = value;
-            }
+            get => duration;
+            set => duration = value;
         }
 
         /// <summary>

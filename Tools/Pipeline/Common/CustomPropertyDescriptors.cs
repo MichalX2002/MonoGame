@@ -4,7 +4,7 @@
 
 using System;
 using System.ComponentModel;
-using Microsoft.Xna.Framework.Content.Pipeline;
+using MonoGame.Framework.Content.Pipeline;
 
 namespace MonoGame.Tools.Pipeline
 {
@@ -47,9 +47,9 @@ namespace MonoGame.Tools.Pipeline
         }
 
         public override bool CanResetValue(object component) { return true; }
-        public override Type ComponentType { get { return _componentType; } }
-        public override bool IsReadOnly { get { return false; } }
-        public override Type PropertyType { get { return _propertyType; } }
+        public override Type ComponentType => _componentType;
+        public override bool IsReadOnly => false;
+        public override Type PropertyType => _propertyType;
         public override void ResetValue(object component) { SetValue(component, null); }
         public override bool ShouldSerializeValue(object component) { return true; }            
     }
@@ -89,9 +89,9 @@ namespace MonoGame.Tools.Pipeline
         }
 
         public override bool CanResetValue(object component) { return true; }
-        public override Type ComponentType { get { return _componentType; } }        
-        public override bool IsReadOnly { get { return false; } }
-        public override Type PropertyType { get { return _propertyType; } }
+        public override Type ComponentType => _componentType;
+        public override bool IsReadOnly => false;
+        public override Type PropertyType => _propertyType;
         public override void ResetValue(object component) { SetValue(component, null); }        
         public override bool ShouldSerializeValue(object component) { return true; }
     }
@@ -123,20 +123,11 @@ namespace MonoGame.Tools.Pipeline
             return false;
         }
 
-        public override Type ComponentType
-        {
-            get { return _componentType; }
-        }
+        public override Type ComponentType => _componentType;
 
-        public override bool IsReadOnly
-        {
-            get { return true; }
-        }
+        public override bool IsReadOnly => true;
 
-        public override Type PropertyType
-        {
-            get { return _propertyType; }
-        }
+        public override Type PropertyType => _propertyType;
 
         public override void ResetValue(object component)
         {

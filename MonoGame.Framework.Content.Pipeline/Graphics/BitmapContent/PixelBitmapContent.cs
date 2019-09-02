@@ -2,15 +2,15 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using Microsoft.Xna.Framework.Graphics;
-using SixLabors.ImageSharp.PixelFormats;
+using MonoGame.Framework.Graphics;
+using MonoGame.Utilities.PackedVector;
 using System;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     public class PixelBitmapContent<TPixel> : BitmapContent
-        where TPixel : unmanaged, IPixel<TPixel>
+        where TPixel : unmanaged, IPixel
     {
         private byte[] _pixelData;
         private SurfaceFormat _format;
@@ -42,7 +42,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 var srcRow = data.Slice(y * Width, Width);
                 var dstRow = GetRowSpan(y);
                 for (int x = 0; x < Width; x++)
-                    dstRow[x].FromVector4(srcRow[x].ToVector4());
+                    dstRow[x].FromScaledVector4(srcRow[x].ToScaledVector4());
             }
         }
 
@@ -66,7 +66,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <returns>The GPU texture format of the bitmap type.</returns>
         public override bool TryGetFormat(out SurfaceFormat format)
         {
-            if (typeof(TPixel) == typeof(Rgba32))
+            if (typeof(TPixel) == typeof(Color) || typeof(TPixel) == typeof(Byte4))
                 format = SurfaceFormat.Rgba32;
             else if (typeof(TPixel) == typeof(Bgra4444))
                 format = SurfaceFormat.Bgra4444;
@@ -74,12 +74,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 format = SurfaceFormat.Bgra5551;
             else if (typeof(TPixel) == typeof(Bgr565))
                 format = SurfaceFormat.Bgr565;
-            else if (typeof(TPixel) == typeof(RgbaVector))
+            else if (typeof(TPixel) == typeof(Vector4) || typeof(TPixel) == typeof(RgbaVector))
                 format = SurfaceFormat.Vector4;
-            else if (typeof(TPixel) == typeof(System.Numerics.Vector2))
+            else if (typeof(TPixel) == typeof(Vector2))
                 format = SurfaceFormat.Vector2;
-            //else if (typeof(TPixel) == typeof())
-            //    format = SurfaceFormat.Single;
+            else if (typeof(TPixel) == typeof(PackedSingle))
+                format = SurfaceFormat.Single;
             else if (typeof(TPixel) == typeof(Alpha8))
                 format = SurfaceFormat.Alpha8;
             else if (typeof(TPixel) == typeof(Rgba64))
@@ -88,8 +88,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 format = SurfaceFormat.Rgba1010102;
             else if (typeof(TPixel) == typeof(Rg32))
                 format = SurfaceFormat.Rg32;
-            else if (typeof(TPixel) == typeof(Byte4))
-                format = SurfaceFormat.Rgba32;
             else if (typeof(TPixel) == typeof(NormalizedByte2))
                 format = SurfaceFormat.NormalizedByte2;
             else if (typeof(TPixel) == typeof(NormalizedByte4))

@@ -128,7 +128,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc/>
         public void FromGray16(Gray16 source)
         {
-            byte rgb = VectorMaths.DownScale16To8Bit(source.PackedValue);
+            byte rgb = PackedVectorHelper.DownScale16To8Bit(source.PackedValue);
             R = rgb;
             G = rgb;
             B = rgb;
@@ -155,17 +155,17 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc/>
         public void FromRgb48(Rgb48 source)
         {
-            R = VectorMaths.DownScale16To8Bit(source.R);
-            G = VectorMaths.DownScale16To8Bit(source.G);
-            B = VectorMaths.DownScale16To8Bit(source.B);
+            R = PackedVectorHelper.DownScale16To8Bit(source.R);
+            G = PackedVectorHelper.DownScale16To8Bit(source.G);
+            B = PackedVectorHelper.DownScale16To8Bit(source.B);
         }
 
         /// <inheritdoc/>
         public void FromRgba64(Rgba64 source)
         {
-            R = VectorMaths.DownScale16To8Bit(source.R);
-            G = VectorMaths.DownScale16To8Bit(source.G);
-            B = VectorMaths.DownScale16To8Bit(source.B);
+            R = PackedVectorHelper.DownScale16To8Bit(source.R);
+            G = PackedVectorHelper.DownScale16To8Bit(source.G);
+            B = PackedVectorHelper.DownScale16To8Bit(source.B);
         }
 
         /// <inheritdoc/>
@@ -196,9 +196,9 @@ namespace MonoGame.Utilities.PackedVector
         /// <param name="vector">The vector containing the values to pack.</param>
         private void Pack(ref Vector4 vector)
         {
-            vector *= VectorMaths.MaxBytes;
-            vector += VectorMaths.Half;
-            vector = Vector4.Clamp(vector, Vector4.Zero, VectorMaths.MaxBytes);
+            vector *= PackedVectorHelper.MaxBytes;
+            vector += PackedVectorHelper.Half;
+            vector = Vector4.Clamp(vector, Vector4.Zero, PackedVectorHelper.MaxBytes);
 
             R = (byte)vector.X;
             G = (byte)vector.Y;

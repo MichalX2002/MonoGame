@@ -2,23 +2,20 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
-using TOutput = Microsoft.Xna.Framework.BoundingBox;
-
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     /// <summary>
-    /// Writes the BoundingBox value to the output.
+    /// Writes a <see cref="BoundingBox"/> value to the output.
     /// </summary>
     [ContentTypeWriter]
-    class BoundingBoxWriter : BuiltInContentWriter<TOutput>
+    class BoundingBoxWriter : BuiltInContentWriter<BoundingBox>
     {
         /// <summary>
         /// Writes the value to the output.
         /// </summary>
         /// <param name="output">The output writer object.</param>
         /// <param name="value">The value to write to the output.</param>
-        protected internal override void Write(ContentWriter output, TOutput value)
+        protected internal override void Write(ContentWriter output, BoundingBox value)
         {
             output.Write(value.Min);
             output.Write(value.Max);

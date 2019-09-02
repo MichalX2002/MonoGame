@@ -6,8 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Xna.Framework.Content.Pipeline;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Content.Pipeline;
+using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Content.Pipeline.Builder;
 
 
@@ -36,8 +36,8 @@ namespace MGCB
         // The actual handling of '/@' is done in the preprocess step.
         public List<string> ResponseFiles
         {
-            get { throw new InvalidOperationException(); }
-            set { throw new InvalidOperationException(); }
+            get => throw new InvalidOperationException();
+            set => throw new InvalidOperationException();
         }
 
         [CommandLineParameter(
@@ -256,10 +256,7 @@ namespace MGCB
 
         private PipelineManager _manager;
 
-        public bool HasWork
-        {
-            get { return _content.Count > 0 || _copyItems.Count > 0 || Clean; }    
-        }
+        public bool HasWork => _content.Count > 0 || _copyItems.Count > 0 || Clean;
 
         string ReplaceSymbols(string parameter)
         {
@@ -465,7 +462,7 @@ namespace MGCB
 
                     // Destination file should not be read-only even if original was.
                     var fileAttr = File.GetAttributes(dest);
-                    fileAttr = fileAttr & (~FileAttributes.ReadOnly);
+                    fileAttr &= (~FileAttributes.ReadOnly);
                     File.SetAttributes(dest, fileAttr);
 
                     var buildTime = DateTime.UtcNow - startTime;

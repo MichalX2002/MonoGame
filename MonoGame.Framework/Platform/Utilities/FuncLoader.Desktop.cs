@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Utilities
@@ -17,18 +18,22 @@ namespace MonoGame.Utilities
         private class Linux
         {
             [DllImport("libdl.so.2")]
+            [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Interop")]
             public static extern IntPtr dlopen(string path, int flags);
 
             [DllImport("libdl.so.2")]
+            [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Interop")]
             public static extern IntPtr dlsym(IntPtr handle, string symbol);
         }
 
         private class OSX
         {
             [DllImport("/usr/lib/libSystem.dylib")]
+            [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Interop")]
             public static extern IntPtr dlopen(string path, int flags);
 
             [DllImport("/usr/lib/libSystem.dylib")]
+            [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Interop")]
             public static extern IntPtr dlsym(IntPtr handle, string symbol);
         }
         

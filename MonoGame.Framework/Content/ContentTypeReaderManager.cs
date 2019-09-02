@@ -62,12 +62,12 @@ namespace MonoGame.Framework.Content
                 var hBoundingSphereReader = new BoundingSphereReader();
                 var hBoundingFrustumReader = new BoundingFrustumReader();
                 var hRayReader = new RayReader();
-                var hCharListReader = new ListReader<Char>();
+                var hCharListReader = new ListReader<char>();
                 var hRectangleListReader = new ListReader<Rectangle>();
                 var hRectangleArrayReader = new ArrayReader<Rectangle>();
                 var hVector3ListReader = new ListReader<Vector3>();
                 var hStringListReader = new ListReader<StringReader>();
-				var hIntListReader = new ListReader<Int32>();
+				var hIntListReader = new ListReader<int>();
                 var hSpriteFontReader = new SpriteFontReader();
                 var hTexture2DReader = new Texture2DReader();
                 var hCharReader = new CharReader();
@@ -221,9 +221,9 @@ namespace MonoGame.Framework.Content
 				preparedType = Regex.Replace(preparedType, @"(.+?), Version=.+?$", "$1");
 
 			// TODO: For WinRT this is most likely broken!
-			preparedType = preparedType.Replace(", Microsoft.Xna.Framework.Graphics", string.Format(", {0}", _assemblyName));
-            preparedType = preparedType.Replace(", Microsoft.Xna.Framework.Video", string.Format(", {0}", _assemblyName));
-            preparedType = preparedType.Replace(", Microsoft.Xna.Framework", string.Format(", {0}", _assemblyName));
+			preparedType = preparedType.Replace(", MonoGame.Framework.Graphics", string.Format(", {0}", _assemblyName));
+            preparedType = preparedType.Replace(", MonoGame.Framework.Video", string.Format(", {0}", _assemblyName));
+            preparedType = preparedType.Replace(", MonoGame.Framework", string.Format(", {0}", _assemblyName));
 			
 			return preparedType;
 		}

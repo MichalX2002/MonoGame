@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.Xna.Framework;
+using MonoGame.Framework;
 
 namespace TwoMGFX.TPGParser
 {

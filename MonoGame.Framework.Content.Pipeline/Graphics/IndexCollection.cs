@@ -5,7 +5,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Provides methods for maintaining a list of index values.

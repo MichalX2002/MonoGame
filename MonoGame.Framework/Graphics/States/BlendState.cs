@@ -149,8 +149,8 @@ namespace MonoGame.Framework.Graphics
         /// The color used as blend factor when alpha blending.
         /// </summary>
         /// <remarks>
-        /// <see cref="P:Microsoft.Xna.Framework.Graphics.GraphicsDevice.BlendFactor"/> is set to this value when this <see cref="BlendState"/>
-        /// is bound to a GraphicsDevice.
+        /// <see cref="GraphicsDevice.BlendFactor"/> is set to this value when 
+        /// this <see cref="BlendState"/> is bound to a GraphicsDevice.
         /// </remarks>
 	    public Color BlendFactor
         {
@@ -200,7 +200,7 @@ namespace MonoGame.Framework.Graphics
             _targetBlendState[3] = new TargetBlendState(this);
 
 			_blendFactor = Color.White;
-            _multiSampleMask = Int32.MaxValue;
+            _multiSampleMask = int.MaxValue;
             _independentBlendEnable = false;
         }
 

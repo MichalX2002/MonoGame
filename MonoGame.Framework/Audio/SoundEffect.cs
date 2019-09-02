@@ -37,7 +37,7 @@ namespace MonoGame.Framework.Audio
         {
             Initialize();
             if (_systemState != SoundSystemState.Initialized)
-                throw new NoAudioHardwareException(
+                throw new AudioHardwareException(
                     "The sound system has failed to initialize. " +
                     $"Call {nameof(Initialize)} before any sound operation to get more specific errors.");
             
@@ -59,7 +59,7 @@ namespace MonoGame.Framework.Audio
         {
             Initialize();
             if (_systemState != SoundSystemState.Initialized)
-                throw new NoAudioHardwareException(
+                throw new AudioHardwareException(
                     "Audio has failed to initialize. Call SoundEffect.Initialize() before operation to get more specific errors.");
 
             _duration = TimeSpan.FromMilliseconds(durationMs);
@@ -86,7 +86,7 @@ namespace MonoGame.Framework.Audio
         {
             Initialize();
             if (_systemState != SoundSystemState.Initialized)
-                throw new NoAudioHardwareException(
+                throw new AudioHardwareException(
                     "Audio has failed to initialize. Call SoundEffect.Initialize() before operation to get more specific errors.");
 
             // Handle the common case... the rest is platform specific.
@@ -339,7 +339,6 @@ namespace MonoGame.Framework.Audio
                 return false;
 
             inst.Play();
-
             return true;
         }
 

@@ -55,7 +55,7 @@ namespace MonoGame.Utilities
         /// <summary>
         /// used for diagnostics, when something goes wrong!
         /// </summary>
-        internal System.String Message;
+        internal string Message;
 
         internal DeflateManager dstate;
         internal InflateManager istate;
@@ -592,7 +592,7 @@ namespace MonoGame.Utilities
                 dstate.pending.Length < (dstate.nextPending + len) ||
                 OutputBuffer.Length < (NextOut + len))
             {
-                throw new ZlibException(String.Format("Invalid State. (pending.Length={0}, pendingCount={1})",
+                throw new ZlibException(string.Format("Invalid State. (pending.Length={0}, pendingCount={1})",
                     dstate.pending.Length, dstate.pendingCount));
             }
 

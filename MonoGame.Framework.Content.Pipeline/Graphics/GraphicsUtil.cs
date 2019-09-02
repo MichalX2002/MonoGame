@@ -3,17 +3,18 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework.Graphics;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Advanced;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+using System.Runtime.InteropServices;
+using MonoGame.Framework.Graphics;
+using MonoGame.Imaging;
+using MonoGame.Imaging.Processing;
+using MonoGame.Utilities.PackedVector;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
 	public static class GraphicsUtil
 	{
-		internal static PixelBitmapContent<RgbaVector> Resize(this BitmapContent bitmap, int newWidth, int newHeight)
+		internal static PixelBitmapContent<RgbaVector> Resize(
+			this BitmapContent bitmap, int newWidth, int newHeight)
 		{
 			BitmapContent src = bitmap;
 			src.TryGetFormat(out SurfaceFormat format);
@@ -24,12 +25,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 				src = v4;
 			}
 
-			using (var image = Image.LoadPixelData<RgbaVector>(src.GetPixelData(), src.Width, src.Height))
+			var pixelSpan = MemoryMarshal.Cast<byte, RgbaVector>(src.GetPixelData());
+			using (var image = Image.LoadPixels(pixelSpan, src.Width, src.Height))
+			using (var resized = image.Mutate(x => x.Resize(newWidth, newHeight)))
 			{
-				image.Mutate((x) => x.Resize(newWidth, newHeight, KnownResamplers.Bicubic));
-
 				var result = new PixelBitmapContent<RgbaVector>(newWidth, newHeight);
-				result.SetPixelData(image.GetPixelSpan());
+				result.SetPixelData(resized.GetPixelSpan());
 				return result;
 			}
 		}
@@ -90,12 +91,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 		static AlphaRange CalculateAlphaRange(BitmapContent bitmap)
 		{
 			var result = AlphaRange.Opaque;
-			if (bitmap is PixelBitmapContent<Rgba32> rgbaBmp)
+			if (bitmap is PixelBitmapContent<Color> rgbaBmp)
 			{
 				var pixels = rgbaBmp.GetPixelSpan();
 				for (int i = 0; i < pixels.Length; ++i)
 				{
-					Rgba32 pixel = pixels[i];
+					Color pixel = pixels[i];
 					if (pixel.A == 0)
 						result = AlphaRange.Cutout;
 					else if (pixel.A < byte.MaxValue)

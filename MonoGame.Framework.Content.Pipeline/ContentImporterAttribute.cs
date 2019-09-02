@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline
+namespace MonoGame.Framework.Content.Pipeline
 {
     /// <summary>
     /// Provides properties that identify and provide metadata about the importer, such as supported file extensions and caching information.
@@ -33,7 +33,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         /// <summary>
         /// Gets the supported file name extensions of the importer.
         /// </summary>
-        public IEnumerable<string> FileExtensions { get { return extensions; } }
+        public IEnumerable<string> FileExtensions => extensions;
 
         /// <summary>
         /// Initializes a new instance of ContentImporterAttribute and sets the file name extension supported by the importer.

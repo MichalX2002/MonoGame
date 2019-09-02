@@ -4,14 +4,13 @@
 
 using System;
 using System.Collections.Generic;
-using SixLabors.ImageSharp.PixelFormats;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
 	// Helper for arranging many small bitmaps onto a single larger surface.
 	internal static class GlyphPacker
 	{
-		public static PixelBitmapContent<Rgba32> ArrangeGlyphs(
+		public static PixelBitmapContent<Color> ArrangeGlyphs(
             List<Glyph> sourceGlyphs, bool requirePOT, bool requireSquare)
 		{
 			// Build up a list of all the glyphs needing to be arranged.
@@ -56,10 +55,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 		}
 
 		// Once arranging is complete, copies each glyph to its chosen position in the single larger output bitmap.
-		static PixelBitmapContent<Rgba32> CopyGlyphsToOutput(
+		static PixelBitmapContent<Color> CopyGlyphsToOutput(
             List<ArrangedGlyph> glyphs, int width, int height)
 		{
-            var output = new PixelBitmapContent<Rgba32>(width, height);
+            var output = new PixelBitmapContent<Color>(width, height);
 
 			foreach (var glyph in glyphs)
 			{

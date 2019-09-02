@@ -422,7 +422,7 @@ namespace MonoGame.Utilities
                 if (_baseStream._workingBuffer != null)
                     throw new ZlibException("The working buffer is already set.");
                 if (value < ZlibConstants.WorkingBufferSizeMin)
-                    throw new ZlibException(String.Format("Don't be silly. {0} bytes?? Use a bigger buffer, at least {1}.", value, ZlibConstants.WorkingBufferSizeMin));
+                    throw new ZlibException(string.Format("Don't be silly. {0} bytes?? Use a bigger buffer, at least {1}.", value, ZlibConstants.WorkingBufferSizeMin));
                 _baseStream._bufferSize = value;
             }
         }
@@ -676,9 +676,9 @@ namespace MonoGame.Utilities
         /// </param>
         ///
         /// <returns>The string in compressed form</returns>
-        public static byte[] CompressString(String s)
+        public static byte[] CompressString(string s)
         {
-            using (var ms = RecyclableMemoryManager.Instance.GetMemoryStream())
+            using (var ms = RecyclableMemoryManager.Default.GetMemoryStream())
             {
                 Stream compressor = new ZlibStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
                 ZlibBaseStream.CompressString(s, compressor);
@@ -705,7 +705,7 @@ namespace MonoGame.Utilities
         /// <returns>The data in compressed form</returns>
         public static byte[] CompressBuffer(byte[] b)
         {
-            using (var ms = RecyclableMemoryManager.Instance.GetMemoryStream())
+            using (var ms = RecyclableMemoryManager.Default.GetMemoryStream())
             {
                 Stream compressor = new ZlibStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
                 ZlibBaseStream.CompressBuffer(b, compressor);
@@ -726,7 +726,7 @@ namespace MonoGame.Utilities
         /// </param>
         ///
         /// <returns>The uncompressed string</returns>
-        public static String UncompressString(byte[] compressed)
+        public static string UncompressString(byte[] compressed)
         {
             using (var input = new MemoryStream(compressed))
             {
@@ -1016,7 +1016,7 @@ namespace MonoGame.Utilities
         /// This ctor collects a message attached to the exception.
         /// </summary>
         /// <param name="s">the message for the exception.</param>
-        internal ZlibException(System.String s)
+        internal ZlibException(string s)
             : base(s)
         {
         }
@@ -1064,7 +1064,7 @@ namespace MonoGame.Utilities
         ///   count depending on the data available in the source TextReader. Returns -1
         ///   if the end of the stream is reached.
         /// </returns>
-        internal static System.Int32 ReadInput(TextReader sourceTextReader, byte[] target, int start, int count)
+        internal static int ReadInput(TextReader sourceTextReader, byte[] target, int start, int count)
         {
             // Returns 0 bytes if not enough space in target
             if (target.Length == 0) return 0;
@@ -1082,7 +1082,7 @@ namespace MonoGame.Utilities
         }
 
 
-        internal static byte[] ToByteArray(System.String sourceString)
+        internal static byte[] ToByteArray(string sourceString)
         {
             return System.Text.UTF8Encoding.UTF8.GetBytes(sourceString);
         }

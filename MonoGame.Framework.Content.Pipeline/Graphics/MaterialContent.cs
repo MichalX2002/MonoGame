@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Provides methods and properties for maintaining a collection of named texture references.
@@ -57,7 +57,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <typeparam name="T">Type of the value being retrieved.</typeparam>
         /// <param name="key">Key of the value type being retrieved.</param>
         /// <returns>Index of the value type beng retrieved.</returns>
-        protected Nullable<T> GetValueTypeProperty<T>(string key) where T : struct
+        protected T? GetValueTypeProperty<T>(string key) where T : struct
         {
             if (OpaqueData.TryGetValue(key, out object value))
                 return (T)value;

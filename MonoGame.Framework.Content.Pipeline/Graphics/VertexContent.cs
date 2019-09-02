@@ -4,11 +4,11 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework.Content.Pipeline.Processors;
-using Microsoft.Xna.Framework.Graphics;
-using SixLabors.ImageSharp.PixelFormats;
+using MonoGame.Framework.Content.Pipeline.Processors;
+using MonoGame.Framework.Graphics;
+using MonoGame.Utilities.PackedVector;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Provides methods and properties for maintaining the vertex data of a GeometryContent.
@@ -38,13 +38,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// </summary>
         /// <value>Collection of vertex positions for the mesh.</value>
         /// <remarks>The collection returned from this call provides a virtualized view of the vertex positions for this batch. The collection uses the contents of the PositionIndices property to index into the parent Positions. This collection is read-only. If you need to modify any contained values, edit the PositionIndices or Positions members directly.</remarks>
-        public IndirectPositionCollection Positions { get { return positions; } }
+        public IndirectPositionCollection Positions => positions;
 
         /// <summary>
         /// Number of vertices for the content.
         /// </summary>
         /// <value>Number of vertices.</value>
-        public int VertexCount { get { return PositionIndices.Count; } }
+        public int VertexCount => PositionIndices.Count;
 
         /// <summary>
         /// Constructs a VertexContent instance.
@@ -117,8 +117,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             var offset = 0;
 
             // We always have a position channel
-            result.VertexDeclaration.VertexElements.Add(new VertexElement(offset, VertexElementFormat.Vector3,
-                                                                           VertexElementUsage.Position, 0));
+            result.VertexDeclaration.VertexElements.Add(
+                new VertexElement(offset, VertexElementFormat.Vector3, VertexElementUsage.Position, 0));
             offset += VertexElementFormat.Vector3.GetSize();
 
             // Optional channels
@@ -127,7 +127,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 VertexElementFormat format;
 
                 // Try to determine the vertex format
-                if (channel.ElementType == typeof(Single))
+                if (channel.ElementType == typeof(float))
                     format = VertexElementFormat.Single;
                 else if (channel.ElementType == typeof(Vector2))
                     format = VertexElementFormat.Vector2;

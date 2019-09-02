@@ -3,24 +3,23 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
+using MonoGame.Utilities.PackedVector;
 using PVRTexLibNET;
-using SixLabors.ImageSharp.PixelFormats;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Supports the processing of a texture compressed using ETC1.
     /// </summary>
     public class Etc1BitmapContent : BitmapContent
     {
-        byte[] _data;
+        private byte[] _data;
 
         /// <summary>
         /// Initializes a new instance of Etc1BitmapContent.
         /// </summary>
-        protected Etc1BitmapContent()
-            : base()
+        protected Etc1BitmapContent() : base()
         {
         }
 
@@ -29,8 +28,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// </summary>
         /// <param name="width">Width in pixels of the bitmap resource.</param>
         /// <param name="height">Height in pixels of the bitmap resource.</param>
-        public Etc1BitmapContent(int width, int height)
-            : base(width, height)
+        public Etc1BitmapContent(int width, int height) : base(width, height)
         {
         }
 
@@ -68,7 +66,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 return false;
 
             // If the source is not Vector4 or requires resizing, send it through BitmapContent.Copy
-            if (sourceBitmap is PixelBitmapContent<RgbaVector> && sourceRegion.Width == destinationRegion.Width && sourceRegion.Height == destinationRegion.Height)
+            if (sourceBitmap is PixelBitmapContent<RgbaVector> &&
+                sourceRegion.Width == destinationRegion.Width && 
+                sourceRegion.Height == destinationRegion.Height)
             {
                 // Create the texture object in the PVR library
                 var sourceData = sourceBitmap.GetPixelData();
@@ -105,7 +105,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 return false;
 
             // A shortcut for copying the entire bitmap to another bitmap of the same type and format
-            if (SurfaceFormat.RgbEtc1 == destinationFormat && (sourceRegion == new Rectangle(0, 0, Width, Height)) && sourceRegion == destinationRegion)
+            if (SurfaceFormat.RgbEtc1 == destinationFormat && 
+                sourceRegion == new Rectangle(0, 0, Width, Height) &&
+                sourceRegion == destinationRegion)
             {
                 destinationBitmap.SetPixelData(GetPixelData());
                 return true;

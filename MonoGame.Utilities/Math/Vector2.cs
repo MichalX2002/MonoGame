@@ -4,38 +4,27 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using MonoGame.Utilities;
+using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Framework
 {
     /// <summary>
     /// Describes a 2D-vector.
+    /// <para>
+    /// Ranges from [-1, -1, 0, 1] to [1, 1, 0, 1] in vector form.
+    /// </para>
     /// </summary>
 #if XNADESIGNPROVIDED
     [System.ComponentModel.TypeConverter(typeof(Design.Vector2TypeConverter))]
 #endif
     [DataContract]
     [DebuggerDisplay("{DebugDisplayString,nq}")]
-    public struct Vector2 : IEquatable<Vector2>
+    public struct Vector2 : IEquatable<Vector2>, IPackedVector<ulong>, IPixel
     {
-        #region Public Fields
-
-        /// <summary>
-        /// The x coordinate of this <see cref="Vector2"/>.
-        /// </summary>
-        [DataMember]
-        public float X;
-
-        /// <summary>
-        /// The y coordinate of this <see cref="Vector2"/>.
-        /// </summary>
-        [DataMember]
-        public float Y;
-
-        #endregion
-
-        #region Properties
+        #region Constants
 
         /// <summary>
         /// Returns a <see cref="Vector2"/> with components 0, 0.
@@ -59,17 +48,31 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #region Internal Properties
+        #region Public Fields
 
-        internal string DebugDisplayString
-        {
-            get => string.Concat(
-                    X.ToString(), "  ",
-                    Y.ToString()
-                );
-        }
+        /// <summary>
+        /// The x coordinate of this <see cref="Vector2"/>.
+        /// </summary>
+        [DataMember]
+        public float X;
+
+        /// <summary>
+        /// The y coordinate of this <see cref="Vector2"/>.
+        /// </summary>
+        [DataMember]
+        public float Y;
 
         #endregion
+
+        /// <inheritdoc/>
+        [CLSCompliant(false)]
+        public ulong PackedValue
+        {
+            get => Unsafe.As<Vector2, ulong>(ref this);
+            set => Unsafe.As<Vector2, ulong>(ref this) = value;
+        }
+
+        internal string DebugDisplayString => string.Concat(X.ToString(), "  ", Y.ToString());
 
         #region Constructors
 
@@ -96,138 +99,67 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #region Operators
-
-        /// <summary>
-        /// Inverts values in the specified <see cref="Vector2"/>.
-        /// </summary>
-        /// <param name="value">Source <see cref="Vector2"/> on the right of the sub sign.</param>
-        /// <returns>Result of the inversion.</returns>
-        public static Vector2 operator -(Vector2 value)
-        {
-            value.X = -value.X;
-            value.Y = -value.Y;
-            return value;
-        }
-
-        /// <summary>
-        /// Adds two vectors.
-        /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/> on the left of the add sign.</param>
-        /// <param name="value2">Source <see cref="Vector2"/> on the right of the add sign.</param>
-        /// <returns>Sum of the vectors.</returns>
-        public static Vector2 operator +(Vector2 value1, Vector2 value2)
-        {
-            value1.X += value2.X;
-            value1.Y += value2.Y;
-            return value1;
-        }
-
-        /// <summary>
-        /// Subtracts a <see cref="Vector2"/> from a <see cref="Vector2"/>.
-        /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/> on the left of the sub sign.</param>
-        /// <param name="value2">Source <see cref="Vector2"/> on the right of the sub sign.</param>
-        /// <returns>Result of the vector subtraction.</returns>
-        public static Vector2 operator -(Vector2 value1, Vector2 value2)
-        {
-            value1.X -= value2.X;
-            value1.Y -= value2.Y;
-            return value1;
-        }
-
-        /// <summary>
-        /// Multiplies the components of two vectors by each other.
-        /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/> on the left of the mul sign.</param>
-        /// <param name="value2">Source <see cref="Vector2"/> on the right of the mul sign.</param>
-        /// <returns>Result of the vector multiplication.</returns>
-        public static Vector2 operator *(Vector2 value1, Vector2 value2)
-        {
-            value1.X *= value2.X;
-            value1.Y *= value2.Y;
-            return value1;
-        }
-
-        /// <summary>
-        /// Multiplies the components of vector by a scalar.
-        /// </summary>
-        /// <param name="value">Source <see cref="Vector2"/> on the left of the mul sign.</param>
-        /// <param name="scaleFactor">Scalar value on the right of the mul sign.</param>
-        /// <returns>Result of the vector multiplication with a scalar.</returns>
-        public static Vector2 operator *(Vector2 value, float scaleFactor)
-        {
-            value.X *= scaleFactor;
-            value.Y *= scaleFactor;
-            return value;
-        }
-
-        /// <summary>
-        /// Multiplies the components of vector by a scalar.
-        /// </summary>
-        /// <param name="scaleFactor">Scalar value on the left of the mul sign.</param>
-        /// <param name="value">Source <see cref="Vector2"/> on the right of the mul sign.</param>
-        /// <returns>Result of the vector multiplication with a scalar.</returns>
-        public static Vector2 operator *(float scaleFactor, Vector2 value)
-        {
-            value.X *= scaleFactor;
-            value.Y *= scaleFactor;
-            return value;
-        }
-
-        /// <summary>
-        /// Divides the components of a <see cref="Vector2"/> by the components of another <see cref="Vector2"/>.
-        /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/> on the left of the div sign.</param>
-        /// <param name="value2">Divisor <see cref="Vector2"/> on the right of the div sign.</param>
-        /// <returns>The result of dividing the vectors.</returns>
-        public static Vector2 operator /(Vector2 value1, Vector2 value2)
-        {
-            value1.X /= value2.X;
-            value1.Y /= value2.Y;
-            return value1;
-        }
-
-        /// <summary>
-        /// Divides the components of a <see cref="Vector2"/> by a scalar.
-        /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/> on the left of the div sign.</param>
-        /// <param name="divider">Divisor scalar on the right of the div sign.</param>
-        /// <returns>The result of dividing a vector by a scalar.</returns>
-        public static Vector2 operator /(Vector2 value1, float divider)
-        {
-            float factor = 1 / divider;
-            value1.X *= factor;
-            value1.Y *= factor;
-            return value1;
-        }
-
-        /// <summary>
-        /// Compares whether two <see cref="Vector2"/> instances are equal.
-        /// </summary>
-        /// <param name="value1"><see cref="Vector2"/> instance on the left of the equal sign.</param>
-        /// <param name="value2"><see cref="Vector2"/> instance on the right of the equal sign.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public static bool operator ==(Vector2 value1, Vector2 value2)
-        {
-            return value1.X == value2.X && value1.Y == value2.Y;
-        }
-
-        /// <summary>
-        /// Compares whether two <see cref="Vector2"/> instances are not equal.
-        /// </summary>
-        /// <param name="value1"><see cref="Vector2"/> instance on the left of the not equal sign.</param>
-        /// <param name="value2"><see cref="Vector2"/> instance on the right of the not equal sign.</param>
-        /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>	
-        public static bool operator !=(Vector2 value1, Vector2 value2)
-        {
-            return value1.X != value2.X || value1.Y != value2.Y;
-        }
-
-        #endregion
-
         #region Public Methods
-        
+
+        /// <inheritdoc/>
+        public void FromScaledVector4(Vector4 vector)
+        {
+            X = X * 2F - 1;
+            Y = Y * 2F - 1;
+        }
+
+        /// <inheritdoc/>
+        public Vector4 ToScaledVector4()
+        {
+            Vector2 scaled = this;
+            scaled += One;
+            scaled /= 2F;
+            return new Vector4(scaled, 0F, 1F);
+        }
+
+        /// <inheritdoc />
+        public void FromVector4(Vector4 vector)
+        {
+            X = vector.X;
+            Y = vector.Y;
+        }
+
+        /// <inheritdoc />
+        public Vector4 ToVector4() => new Vector4(X, Y, 0F, 1F);
+
+        /// <inheritdoc />
+        public void FromArgb32(Argb32 source) => FromScaledVector4(source.ToScaledVector4());
+
+        /// <inheritdoc />
+        public void FromBgr24(Bgr24 source) => FromScaledVector4(source.ToScaledVector4());
+
+        /// <inheritdoc />
+        public void FromBgra32(Bgra32 source) => FromScaledVector4(source.ToScaledVector4());
+
+        /// <inheritdoc/>
+        public void FromBgra5551(Bgra5551 source) => FromScaledVector4(source.ToScaledVector4());
+
+        /// <inheritdoc/>
+        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
+
+        /// <inheritdoc/>
+        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
+
+        /// <inheritdoc />
+        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
+
+        /// <inheritdoc />
+        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
+
+        /// <inheritdoc/>
+        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
+
+        /// <inheritdoc/>
+        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
+
+        /// <inheritdoc />
+        public void ToColor(ref Color dest) => dest.FromScaledVector4(ToScaledVector4());
+
         /// <summary>
         /// Gets a <see cref="Vector3"/> representation for this
         /// object with <see cref="Vector3.Z"/> axis set to 0.
@@ -239,128 +171,45 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        ///     Calculates the <see cref="Vector2" /> that contains the minimal coordinate values from two <see cref="Vector2" />
-        ///     structures.
-        ///     structures.
+        /// Performs vector addition on <paramref name="a"/> and <paramref name="b"/>.
         /// </summary>
-        /// <param name="first">The first point.</param>
-        /// <param name="second">The second point.</param>
-        /// <returns>
-        ///     The the <see cref="Vector2" /> that contains the minimal coordinate values from two <see cref="Vector2" />
-        ///     structures.
-        /// </returns>
-        public static Vector2 Minimum(Vector2 first, Vector2 second)
-        {
-            return new Vector2(
-                first.X < second.X ? first.X : second.X,
-                first.Y < second.Y ? first.Y : second.Y);
-        }
-
-        /// <summary>
-        ///     Calculates the <see cref="Vector2" /> that contains the maximal coordinate values from two <see cref="Vector2" />
-        ///     structures.
-        ///     structures.
-        /// </summary>
-        /// <param name="first">The first point.</param>
-        /// <param name="second">The second point.</param>
-        /// <returns>
-        ///     The the <see cref="Vector2" /> that contains the maximal coordinate values from two <see cref="Vector2" />
-        ///     structures.
-        /// </returns>
-        public static Vector2 Maximum(Vector2 first, Vector2 second)
-        {
-            return new Vector2(
-                first.X > second.X ? first.X : second.X,
-                first.Y > second.Y ? first.Y : second.Y);
-        }
-
-        /// <summary>
-        /// Performs vector addition on <paramref name="value1"/> and <paramref name="value2"/>.
-        /// </summary>
-        /// <param name="value1">The first vector to add.</param>
-        /// <param name="value2">The second vector to add.</param>
+        /// <param name="a">The first vector to add.</param>
+        /// <param name="b">The second vector to add.</param>
         /// <returns>The result of the vector addition.</returns>
-        public static Vector2 Add(Vector2 value1, Vector2 value2)
-        {
-            value1.X += value2.X;
-            value1.Y += value2.Y;
-            return value1;
-        }
-
-        /// <summary>
-        /// Performs vector addition on <paramref name="value1"/> and
-        /// <paramref name="value2"/>, storing the result of the
-        /// addition in <paramref name="result"/>.
-        /// </summary>
-        /// <param name="value1">The first vector to add.</param>
-        /// <param name="value2">The second vector to add.</param>
-        /// <param name="result">The result of the vector addition.</param>
-        public static void Add(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
-        {
-            result.X = value1.X + value2.X;
-            result.Y = value1.Y + value2.Y;
-        }
+        public static Vector2 Add(in Vector2 a, in Vector2 b) => a + b;
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains the cartesian coordinates of a vector specified in barycentric coordinates and relative to 2d-triangle.
         /// </summary>
-        /// <param name="value1">The first vector of 2d-triangle.</param>
-        /// <param name="value2">The second vector of 2d-triangle.</param>
-        /// <param name="value3">The third vector of 2d-triangle.</param>
+        /// <param name="a">The first vector of 2d-triangle.</param>
+        /// <param name="b">The second vector of 2d-triangle.</param>
+        /// <param name="c">The third vector of 2d-triangle.</param>
         /// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 2d-triangle.</param>
         /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 2d-triangle.</param>
         /// <returns>The cartesian translation of barycentric coordinates.</returns>
-        public static Vector2 Barycentric(Vector2 value1, Vector2 value2, Vector2 value3, float amount1, float amount2)
+        public static Vector2 Barycentric(
+            in Vector2 a, in Vector2 b, in Vector2 c, float amount1, float amount2)
         {
             return new Vector2(
-                MathHelper.Barycentric(value1.X, value2.X, value3.X, amount1, amount2),
-                MathHelper.Barycentric(value1.Y, value2.Y, value3.Y, amount1, amount2));
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains the cartesian coordinates of a vector specified in barycentric coordinates and relative to 2d-triangle.
-        /// </summary>
-        /// <param name="value1">The first vector of 2d-triangle.</param>
-        /// <param name="value2">The second vector of 2d-triangle.</param>
-        /// <param name="value3">The third vector of 2d-triangle.</param>
-        /// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 2d-triangle.</param>
-        /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 2d-triangle.</param>
-        /// <param name="result">The cartesian translation of barycentric coordinates as an output parameter.</param>
-        public static void Barycentric(ref Vector2 value1, ref Vector2 value2, ref Vector2 value3, float amount1, float amount2, out Vector2 result)
-        {
-            result.X = MathHelper.Barycentric(value1.X, value2.X, value3.X, amount1, amount2);
-            result.Y = MathHelper.Barycentric(value1.Y, value2.Y, value3.Y, amount1, amount2);
+                MathHelper.Barycentric(a.X, b.X, c.X, amount1, amount2),
+                MathHelper.Barycentric(a.Y, b.Y, c.Y, amount1, amount2));
         }
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains CatmullRom interpolation of the specified vectors.
         /// </summary>
-        /// <param name="value1">The first vector in interpolation.</param>
-        /// <param name="value2">The second vector in interpolation.</param>
-        /// <param name="value3">The third vector in interpolation.</param>
-        /// <param name="value4">The fourth vector in interpolation.</param>
+        /// <param name="a">The first vector in interpolation.</param>
+        /// <param name="b">The second vector in interpolation.</param>
+        /// <param name="c">The third vector in interpolation.</param>
+        /// <param name="d">The fourth vector in interpolation.</param>
         /// <param name="amount">Weighting factor.</param>
         /// <returns>The result of CatmullRom interpolation.</returns>
-        public static Vector2 CatmullRom(Vector2 value1, Vector2 value2, Vector2 value3, Vector2 value4, float amount)
+        public static Vector2 CatmullRom(
+            in Vector2 a, in Vector2 b, in Vector2 c, in Vector2 d, float amount)
         {
             return new Vector2(
-                MathHelper.CatmullRom(value1.X, value2.X, value3.X, value4.X, amount),
-                MathHelper.CatmullRom(value1.Y, value2.Y, value3.Y, value4.Y, amount));
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains CatmullRom interpolation of the specified vectors.
-        /// </summary>
-        /// <param name="value1">The first vector in interpolation.</param>
-        /// <param name="value2">The second vector in interpolation.</param>
-        /// <param name="value3">The third vector in interpolation.</param>
-        /// <param name="value4">The fourth vector in interpolation.</param>
-        /// <param name="amount">Weighting factor.</param>
-        /// <param name="result">The result of CatmullRom interpolation as an output parameter.</param>
-        public static void CatmullRom(ref Vector2 value1, ref Vector2 value2, ref Vector2 value3, ref Vector2 value4, float amount, out Vector2 result)
-        {
-            result.X = MathHelper.CatmullRom(value1.X, value2.X, value3.X, value4.X, amount);
-            result.Y = MathHelper.CatmullRom(value1.Y, value2.Y, value3.Y, value4.Y, amount);
+                MathHelper.CatmullRom(a.X, b.X, c.X, d.X, amount),
+                MathHelper.CatmullRom(a.Y, b.Y, c.Y, d.Y, amount));
         }
 
         /// <summary>
@@ -377,186 +226,86 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>The rounded <see cref="Vector2"/>.</returns>
-        public static Vector2 Ceiling(Vector2 value)
+        public static Vector2 Ceiling(in Vector2 value)
         {
-            value.X = (float)Math.Ceiling(value.X);
-            value.Y = (float)Math.Ceiling(value.Y);
-            return value;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains members from another vector rounded towards positive infinity.
-        /// </summary>
-        /// <param name="value">Source <see cref="Vector2"/>.</param>
-        /// <param name="result">The rounded <see cref="Vector2"/>.</param>
-        public static void Ceiling(ref Vector2 value, out Vector2 result)
-        {
-            result.X = (float)Math.Ceiling(value.X);
-            result.Y = (float)Math.Ceiling(value.Y);
+            return new Vector2(
+                (float)Math.Ceiling(value.X),
+                (float)Math.Ceiling(value.Y));
         }
 
         /// <summary>
         /// Clamps the specified value within a range.
         /// </summary>
-        /// <param name="value1">The value to clamp.</param>
+        /// <param name="value">The value to clamp.</param>
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
         /// <returns>The clamped value.</returns>
-        public static Vector2 Clamp(Vector2 value1, Vector2 min, Vector2 max)
+        public static Vector2 Clamp(in Vector2 value, in Vector2 min, in Vector2 max)
         {
             return new Vector2(
-                MathHelper.Clamp(value1.X, min.X, max.X),
-                MathHelper.Clamp(value1.Y, min.Y, max.Y));
-        }
-
-        /// <summary>
-        /// Clamps the specified value within a range.
-        /// </summary>
-        /// <param name="value1">The value to clamp.</param>
-        /// <param name="min">The min value.</param>
-        /// <param name="max">The max value.</param>
-        /// <param name="result">The clamped value as an output parameter.</param>
-        public static void Clamp(ref Vector2 value1, ref Vector2 min, ref Vector2 max, out Vector2 result)
-        {
-            result.X = MathHelper.Clamp(value1.X, min.X, max.X);
-            result.Y = MathHelper.Clamp(value1.Y, min.Y, max.Y);
+                MathHelper.Clamp(value.X, min.X, max.X),
+                MathHelper.Clamp(value.Y, min.Y, max.Y));
         }
 
         /// <summary>
         /// Returns the distance between two vectors.
         /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
+        /// <param name="a">The first vector.</param>
+        /// <param name="b">The second vector.</param>
         /// <returns>The distance between two vectors.</returns>
-        public static float Distance(Vector2 value1, Vector2 value2)
+        public static float Distance(in Vector2 a, in Vector2 b)
         {
-            float v1 = value1.X - value2.X, v2 = value1.Y - value2.Y;
+            float v1 = a.X - b.X, v2 = a.Y - b.Y;
             return (float)Math.Sqrt((v1 * v1) + (v2 * v2));
         }
 
         /// <summary>
-        /// Returns the distance between two vectors.
-        /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <param name="result">The distance between two vectors as an output parameter.</param>
-        public static void Distance(ref Vector2 value1, ref Vector2 value2, out float result)
-        {
-            float v1 = value1.X - value2.X, v2 = value1.Y - value2.Y;
-            result = (float)Math.Sqrt((v1 * v1) + (v2 * v2));
-        }
-
-        /// <summary>
         /// Returns the squared distance between two vectors.
         /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
+        /// <param name="a">The first vector.</param>
+        /// <param name="b">The second vector.</param>
         /// <returns>The squared distance between two vectors.</returns>
-        public static float DistanceSquared(Vector2 value1, Vector2 value2)
+        public static float DistanceSquared(in Vector2 a, in Vector2 b)
         {
-            float v1 = value1.X - value2.X, v2 = value1.Y - value2.Y;
+            float v1 = a.X - b.X, v2 = a.Y - b.Y;
             return (v1 * v1) + (v2 * v2);
         }
 
         /// <summary>
-        /// Returns the squared distance between two vectors.
-        /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <param name="result">The squared distance between two vectors as an output parameter.</param>
-        public static void DistanceSquared(ref Vector2 value1, ref Vector2 value2, out float result)
-        {
-            float v1 = value1.X - value2.X, v2 = value1.Y - value2.Y;
-            result = (v1 * v1) + (v2 * v2);
-        }
-
-        /// <summary>
         /// Divides the components of a <see cref="Vector2"/> by the components of another <see cref="Vector2"/>.
         /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/>.</param>
-        /// <param name="value2">Divisor <see cref="Vector2"/>.</param>
+        /// <param name="left">Source <see cref="Vector2"/>.</param>
+        /// <param name="right">Divisor <see cref="Vector2"/>.</param>
         /// <returns>The result of dividing the vectors.</returns>
-        public static Vector2 Divide(Vector2 value1, Vector2 value2)
-        {
-            value1.X /= value2.X;
-            value1.Y /= value2.Y;
-            return value1;
-        }
-
-        /// <summary>
-        /// Divides the components of a <see cref="Vector2"/> by the components of another <see cref="Vector2"/>.
-        /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/>.</param>
-        /// <param name="value2">Divisor <see cref="Vector2"/>.</param>
-        /// <param name="result">The result of dividing the vectors as an output parameter.</param>
-        public static void Divide(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
-        {
-            result.X = value1.X / value2.X;
-            result.Y = value1.Y / value2.Y;
-        }
+        public static Vector2 Divide(in Vector2 left, in Vector2 right) => left / right;
 
         /// <summary>
         /// Divides the components of a <see cref="Vector2"/> by a scalar.
         /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/>.</param>
+        /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <param name="divider">Divisor scalar.</param>
         /// <returns>The result of dividing a vector by a scalar.</returns>
-        public static Vector2 Divide(Vector2 value1, float divider)
-        {
-            float factor = 1 / divider;
-            value1.X *= factor;
-            value1.Y *= factor;
-            return value1;
-        }
-
-        /// <summary>
-        /// Divides the components of a <see cref="Vector2"/> by a scalar.
-        /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/>.</param>
-        /// <param name="divider">Divisor scalar.</param>
-        /// <param name="result">The result of dividing a vector by a scalar as an output parameter.</param>
-        public static void Divide(ref Vector2 value1, float divider, out Vector2 result)
-        {
-            float factor = 1 / divider;
-            result.X = value1.X * factor;
-            result.Y = value1.Y * factor;
-        }
+        public static Vector2 Divide(in Vector2 value, float divider) => value / divider;
 
         /// <summary>
         /// Returns a dot product of two vectors.
         /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
+        /// <param name="a">The first vector.</param>
+        /// <param name="b">The second vector.</param>
         /// <returns>The dot product of two vectors.</returns>
-        public static float Dot(Vector2 value1, Vector2 value2)
+        public static float Dot(in Vector2 a, in Vector2 b)
         {
-            return (value1.X * value2.X) + (value1.Y * value2.Y);
+            return (a.X * b.X) + (a.Y * b.Y);
         }
 
         /// <summary>
-        /// Returns a dot product of two vectors.
+        /// Compares whether current instance is equal to specified <see cref="object"/>.
         /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <param name="result">The dot product of two vectors as an output parameter.</param>
-        public static void Dot(ref Vector2 value1, ref Vector2 value2, out float result)
-        {
-            result = (value1.X * value2.X) + (value1.Y * value2.Y);
-        }
-
-        /// <summary>
-        /// Compares whether current instance is equal to specified <see cref="Object"/>.
-        /// </summary>
-        /// <param name="obj">The <see cref="Object"/> to compare.</param>
+        /// <param name="obj">The <see cref="object"/> to compare.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
         public override bool Equals(object obj)
         {
-            if (obj is Vector2)
-            {
-                return Equals((Vector2)obj);
-            }
-
-            return false;
+            return obj is Vector2 other ? this == other : false;
         }
 
         /// <summary>
@@ -566,7 +315,7 @@ namespace MonoGame.Framework
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
         public bool Equals(Vector2 other)
         {
-            return (X == other.X) && (Y == other.Y);
+            return this == other;
         }
 
         /// <summary>
@@ -583,22 +332,11 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>The rounded <see cref="Vector2"/>.</returns>
-        public static Vector2 Floor(Vector2 value)
+        public static Vector2 Floor(in Vector2 value)
         {
-            value.X = (float)Math.Floor(value.X);
-            value.Y = (float)Math.Floor(value.Y);
-            return value;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains members from another vector rounded towards negative infinity.
-        /// </summary>
-        /// <param name="value">Source <see cref="Vector2"/>.</param>
-        /// <param name="result">The rounded <see cref="Vector2"/>.</param>
-        public static void Floor(ref Vector2 value, out Vector2 result)
-        {
-            result.X = (float)Math.Floor(value.X);
-            result.Y = (float)Math.Floor(value.Y);
+            return new Vector2(
+                (float)Math.Floor(value.X),
+                (float)Math.Floor(value.Y));
         }
 
         /// <summary>
@@ -609,37 +347,26 @@ namespace MonoGame.Framework
         {
             unchecked
             {
-                return (X.GetHashCode() * 397) ^ Y.GetHashCode();
+                int code = X.GetHashCode();
+                return code * 23 + Y.GetHashCode();
             }
         }
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains hermite spline interpolation.
         /// </summary>
-        /// <param name="value1">The first position vector.</param>
+        /// <param name="position1">The first position vector.</param>
         /// <param name="tangent1">The first tangent vector.</param>
-        /// <param name="value2">The second position vector.</param>
+        /// <param name="position2">The second position vector.</param>
         /// <param name="tangent2">The second tangent vector.</param>
         /// <param name="amount">Weighting factor.</param>
         /// <returns>The hermite spline interpolation vector.</returns>
-        public static Vector2 Hermite(Vector2 value1, Vector2 tangent1, Vector2 value2, Vector2 tangent2, float amount)
+        public static Vector2 Hermite(
+            in Vector2 position1, in Vector2 tangent1, in Vector2 position2, in Vector2 tangent2, float amount)
         {
-            return new Vector2(MathHelper.Hermite(value1.X, tangent1.X, value2.X, tangent2.X, amount), MathHelper.Hermite(value1.Y, tangent1.Y, value2.Y, tangent2.Y, amount));
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains hermite spline interpolation.
-        /// </summary>
-        /// <param name="value1">The first position vector.</param>
-        /// <param name="tangent1">The first tangent vector.</param>
-        /// <param name="value2">The second position vector.</param>
-        /// <param name="tangent2">The second tangent vector.</param>
-        /// <param name="amount">Weighting factor.</param>
-        /// <param name="result">The hermite spline interpolation vector as an output parameter.</param>
-        public static void Hermite(ref Vector2 value1, ref Vector2 tangent1, ref Vector2 value2, ref Vector2 tangent2, float amount, out Vector2 result)
-        {
-            result.X = MathHelper.Hermite(value1.X, tangent1.X, value2.X, tangent2.X, amount);
-            result.Y = MathHelper.Hermite(value1.Y, tangent1.Y, value2.Y, tangent2.Y, amount);
+            return new Vector2(
+                MathHelper.Hermite(position1.X, tangent1.X, position2.X, tangent2.X, amount),
+                MathHelper.Hermite(position1.Y, tangent1.Y, position2.Y, tangent2.Y, amount));
         }
 
         /// <summary>
@@ -667,24 +394,11 @@ namespace MonoGame.Framework
         /// <param name="value2">The second vector.</param>
         /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
         /// <returns>The result of linear interpolation of the specified vectors.</returns>
-        public static Vector2 Lerp(Vector2 value1, Vector2 value2, float amount)
+        public static Vector2 Lerp(in Vector2 value1, in Vector2 value2, float amount)
         {
             return new Vector2(
                 MathHelper.Lerp(value1.X, value2.X, amount),
                 MathHelper.Lerp(value1.Y, value2.Y, amount));
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains linear interpolation of the specified vectors.
-        /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
-        /// <param name="result">The result of linear interpolation of the specified vectors as an output parameter.</param>
-        public static void Lerp(ref Vector2 value1, ref Vector2 value2, float amount, out Vector2 result)
-        {
-            result.X = MathHelper.Lerp(value1.X, value2.X, amount);
-            result.Y = MathHelper.Lerp(value1.Y, value2.Y, amount);
         }
 
         /// <summary>
@@ -697,7 +411,7 @@ namespace MonoGame.Framework
         /// <param name="value2">The second vector.</param>
         /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
         /// <returns>The result of linear interpolation of the specified vectors.</returns>
-        public static Vector2 LerpPrecise(Vector2 value1, Vector2 value2, float amount)
+        public static Vector2 LerpPrecise(in Vector2 value1, in Vector2 value2, float amount)
         {
             return new Vector2(
                 MathHelper.LerpPrecise(value1.X, value2.X, amount),
@@ -705,141 +419,53 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains linear interpolation of the specified vectors.
-        /// Uses <see cref="MathHelper.LerpPrecise"/> on MathHelper for the interpolation.
-        /// Less efficient but more precise compared to <see cref="Lerp(ref Vector2, ref Vector2, float, out Vector2)"/>.
-        /// See remarks section of <see cref="MathHelper.LerpPrecise"/> on MathHelper for more info.
-        /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
-        /// <param name="result">The result of linear interpolation of the specified vectors as an output parameter.</param>
-        public static void LerpPrecise(ref Vector2 value1, ref Vector2 value2, float amount, out Vector2 result)
-        { 
-            result.X = MathHelper.LerpPrecise(value1.X, value2.X, amount);
-            result.Y = MathHelper.LerpPrecise(value1.Y, value2.Y, amount);
-        }
-
-        /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains a maximal values from the two vectors.
         /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
+        /// <param name="a">The first vector.</param>
+        /// <param name="b">The second vector.</param>
         /// <returns>The <see cref="Vector2"/> with maximal values from the two vectors.</returns>
-        public static Vector2 Max(Vector2 value1, Vector2 value2)
+        public static Vector2 Max(in Vector2 a, in Vector2 b)
         {
-            return new Vector2(value1.X > value2.X ? value1.X : value2.X,
-                               value1.Y > value2.Y ? value1.Y : value2.Y);
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains a maximal values from the two vectors.
-        /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <param name="result">The <see cref="Vector2"/> with maximal values from the two vectors as an output parameter.</param>
-        public static void Max(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
-        {
-            result.X = value1.X > value2.X ? value1.X : value2.X;
-            result.Y = value1.Y > value2.Y ? value1.Y : value2.Y;
+            return new Vector2(
+                a.X > b.X ? a.X : b.X,
+                a.Y > b.Y ? a.Y : b.Y);
         }
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains a minimal values from the two vectors.
         /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
+        /// <param name="a">The first vector.</param>
+        /// <param name="b">The second vector.</param>
         /// <returns>The <see cref="Vector2"/> with minimal values from the two vectors.</returns>
-        public static Vector2 Min(Vector2 value1, Vector2 value2)
+        public static Vector2 Min(in Vector2 a, in Vector2 b)
         {
-            return new Vector2(value1.X < value2.X ? value1.X : value2.X,
-                               value1.Y < value2.Y ? value1.Y : value2.Y);
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains a minimal values from the two vectors.
-        /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <param name="result">The <see cref="Vector2"/> with minimal values from the two vectors as an output parameter.</param>
-        public static void Min(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
-        {
-            result.X = value1.X < value2.X ? value1.X : value2.X;
-            result.Y = value1.Y < value2.Y ? value1.Y : value2.Y;
+            return new Vector2(
+                a.X < b.X ? a.X : b.X,
+                a.Y < b.Y ? a.Y : b.Y);
         }
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains a multiplication of two vectors.
         /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/>.</param>
-        /// <param name="value2">Source <see cref="Vector2"/>.</param>
+        /// <param name="a">Source <see cref="Vector2"/>.</param>
+        /// <param name="b">Source <see cref="Vector2"/>.</param>
         /// <returns>The result of the vector multiplication.</returns>
-        public static Vector2 Multiply(Vector2 value1, Vector2 value2)
-        {
-            value1.X *= value2.X;
-            value1.Y *= value2.Y;
-            return value1;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains a multiplication of two vectors.
-        /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/>.</param>
-        /// <param name="value2">Source <see cref="Vector2"/>.</param>
-        /// <param name="result">The result of the vector multiplication as an output parameter.</param>
-        public static void Multiply(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
-        {
-            result.X = value1.X * value2.X;
-            result.Y = value1.Y * value2.Y;
-        }
+        public static Vector2 Multiply(in Vector2 a, in Vector2 b) => a * b;
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains a multiplication of <see cref="Vector2"/> and a scalar.
         /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/>.</param>
+        /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <param name="scaleFactor">Scalar value.</param>
         /// <returns>The result of the vector multiplication with a scalar.</returns>
-        public static Vector2 Multiply(Vector2 value1, float scaleFactor)
-        {
-            value1.X *= scaleFactor;
-            value1.Y *= scaleFactor;
-            return value1;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains a multiplication of <see cref="Vector2"/> and a scalar.
-        /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/>.</param>
-        /// <param name="scaleFactor">Scalar value.</param>
-        /// <param name="result">The result of the multiplication with a scalar as an output parameter.</param>
-        public static void Multiply(ref Vector2 value1, float scaleFactor, out Vector2 result)
-        {
-            result.X = value1.X * scaleFactor;
-            result.Y = value1.Y * scaleFactor;
-        }
+        public static Vector2 Multiply(in Vector2 value, float scaleFactor) => value * scaleFactor;
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains the specified vector inversion.
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>The result of the vector inversion.</returns>
-        public static Vector2 Negate(Vector2 value)
-        {
-            value.X = -value.X;
-            value.Y = -value.Y;
-            return value;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains the specified vector inversion.
-        /// </summary>
-        /// <param name="value">Source <see cref="Vector2"/>.</param>
-        /// <param name="result">The result of the vector inversion as an output parameter.</param>
-        public static void Negate(ref Vector2 value, out Vector2 result)
-        {
-            result.X = -value.X;
-            result.Y = -value.Y;
-        }
+        public static Vector2 Negate(in Vector2 value) => -value;
 
         /// <summary>
         /// Turns this <see cref="Vector2"/> to a unit vector with the same direction.
@@ -856,24 +482,10 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>Unit vector.</returns>
-        public static Vector2 Normalize(Vector2 value)
+        public static Vector2 Normalize(in Vector2 value)
         {
-            float val = 1.0f / (float)Math.Sqrt((value.X * value.X) + (value.Y * value.Y));
-            value.X *= val;
-            value.Y *= val;
-            return value;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains a normalized values from another vector.
-        /// </summary>
-        /// <param name="value">Source <see cref="Vector2"/>.</param>
-        /// <param name="result">Unit vector as an output parameter.</param>
-        public static void Normalize(ref Vector2 value, out Vector2 result)
-        {
-            float val = 1.0f / (float)Math.Sqrt((value.X * value.X) + (value.Y * value.Y));
-            result.X = value.X * val;
-            result.Y = value.Y * val;
+            float factor = 1.0f / (float)Math.Sqrt((value.X * value.X) + (value.Y * value.Y));
+            return new Vector2(value.X * factor, value.Y * factor);
         }
 
         /// <summary>
@@ -882,27 +494,10 @@ namespace MonoGame.Framework
         /// <param name="vector">Source <see cref="Vector2"/>.</param>
         /// <param name="normal">Reflection normal.</param>
         /// <returns>Reflected vector.</returns>
-        public static Vector2 Reflect(Vector2 vector, Vector2 normal)
+        public static Vector2 Reflect(in Vector2 vector, in Vector2 normal)
         {
             float val = 2.0f * ((vector.X * normal.X) + (vector.Y * normal.Y));
-            return new Vector2
-            {
-                X = vector.X - (normal.X * val),
-                Y = vector.Y - (normal.Y * val)
-            };
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains reflect vector of the given vector and normal.
-        /// </summary>
-        /// <param name="vector">Source <see cref="Vector2"/>.</param>
-        /// <param name="normal">Reflection normal.</param>
-        /// <param name="result">Reflected vector as an output parameter.</param>
-        public static void Reflect(ref Vector2 vector, ref Vector2 normal, out Vector2 result)
-        {
-            float val = 2.0f * ((vector.X * normal.X) + (vector.Y * normal.Y));
-            result.X = vector.X - (normal.X * val);
-            result.Y = vector.Y - (normal.Y * val);
+            return new Vector2(vector.X - (normal.X * val), vector.Y - (normal.Y * val));
         }
 
         /// <summary>
@@ -919,81 +514,38 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>The rounded <see cref="Vector2"/>.</returns>
-        public static Vector2 Round(Vector2 value)
+        public static Vector2 Round(in Vector2 value)
         {
-            value.X = (float)Math.Round(value.X);
-            value.Y = (float)Math.Round(value.Y);
-            return value;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains members from another vector rounded to the nearest integer value.
-        /// </summary>
-        /// <param name="value">Source <see cref="Vector2"/>.</param>
-        /// <param name="result">The rounded <see cref="Vector2"/>.</param>
-        public static void Round(ref Vector2 value, out Vector2 result)
-        {
-            result.X = (float)Math.Round(value.X);
-            result.Y = (float)Math.Round(value.Y);
+            return new Vector2((float)Math.Round(value.X), (float)Math.Round(value.Y));
         }
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains cubic interpolation of the specified vectors.
         /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/>.</param>
-        /// <param name="value2">Source <see cref="Vector2"/>.</param>
+        /// <param name="a">Source <see cref="Vector2"/>.</param>
+        /// <param name="b">Source <see cref="Vector2"/>.</param>
         /// <param name="amount">Weighting value.</param>
         /// <returns>Cubic interpolation of the specified vectors.</returns>
-        public static Vector2 SmoothStep(Vector2 value1, Vector2 value2, float amount)
+        public static Vector2 SmoothStep(in Vector2 a, in Vector2 b, float amount)
         {
             return new Vector2(
-                MathHelper.SmoothStep(value1.X, value2.X, amount),
-                MathHelper.SmoothStep(value1.Y, value2.Y, amount));
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains cubic interpolation of the specified vectors.
-        /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/>.</param>
-        /// <param name="value2">Source <see cref="Vector2"/>.</param>
-        /// <param name="amount">Weighting value.</param>
-        /// <param name="result">Cubic interpolation of the specified vectors as an output parameter.</param>
-        public static void SmoothStep(ref Vector2 value1, ref Vector2 value2, float amount, out Vector2 result)
-        {
-            result.X = MathHelper.SmoothStep(value1.X, value2.X, amount);
-            result.Y = MathHelper.SmoothStep(value1.Y, value2.Y, amount);
+                MathHelper.SmoothStep(a.X, b.X, amount),
+                MathHelper.SmoothStep(a.Y, b.Y, amount));
         }
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains subtraction of on <see cref="Vector2"/> from a another.
         /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/>.</param>
-        /// <param name="value2">Source <see cref="Vector2"/>.</param>
+        /// <param name="left">Source <see cref="Vector2"/>.</param>
+        /// <param name="right">Source <see cref="Vector2"/>.</param>
         /// <returns>The result of the vector subtraction.</returns>
-        public static Vector2 Subtract(Vector2 value1, Vector2 value2)
-        {
-            value1.X -= value2.X;
-            value1.Y -= value2.Y;
-            return value1;
-        }
+        public static Vector2 Subtract(in Vector2 left, in Vector2 right) => left - right;
 
         /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains subtraction of on <see cref="Vector2"/> from a another.
-        /// </summary>
-        /// <param name="value1">Source <see cref="Vector2"/>.</param>
-        /// <param name="value2">Source <see cref="Vector2"/>.</param>
-        /// <param name="result">The result of the vector subtraction as an output parameter.</param>
-        public static void Subtract(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
-        {
-            result.X = value1.X - value2.X;
-            result.Y = value1.Y - value2.Y;
-        }
-
-        /// <summary>
-        /// Returns a <see cref="String"/> representation of this <see cref="Vector2"/> in the format:
+        /// Returns a <see cref="string"/> representation of this <see cref="Vector2"/> in the format:
         /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>]}
         /// </summary>
-        /// <returns>A <see cref="String"/> representation of this <see cref="Vector2"/>.</returns>
+        /// <returns>A <see cref="string"/> representation of this <see cref="Vector2"/>.</returns>
         public override string ToString()
         {
             return "{X:" + X + " Y:" + Y + "}";
@@ -1009,203 +561,6 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains a transformation of 2d-vector by the specified <see cref="Matrix"/>.
-        /// </summary>
-        /// <param name="position">Source <see cref="Vector2"/>.</param>
-        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
-        /// <returns>Transformed <see cref="Vector2"/>.</returns>
-        public static Vector2 Transform(Vector2 position, Matrix matrix)
-        {
-            return new Vector2((position.X * matrix.M11) + (position.Y * matrix.M21) + matrix.M41, (position.X * matrix.M12) + (position.Y * matrix.M22) + matrix.M42);
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains a transformation of 2d-vector by the specified <see cref="Matrix"/>.
-        /// </summary>
-        /// <param name="position">Source <see cref="Vector2"/>.</param>
-        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
-        /// <param name="result">Transformed <see cref="Vector2"/> as an output parameter.</param>
-        public static void Transform(ref Vector2 position, ref Matrix matrix, out Vector2 result)
-        {
-            result.X = (position.X * matrix.M11) + (position.Y * matrix.M21) + matrix.M41;
-            result.Y = (position.X * matrix.M12) + (position.Y * matrix.M22) + matrix.M42;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains a transformation of 2d-vector by the specified <see cref="Quaternion"/>, representing the rotation.
-        /// </summary>
-        /// <param name="value">Source <see cref="Vector2"/>.</param>
-        /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
-        /// <returns>Transformed <see cref="Vector2"/>.</returns>
-        public static Vector2 Transform(Vector2 value, Quaternion rotation)
-        {
-            Transform(ref value, ref rotation, out value);
-            return value;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains a transformation of 2d-vector by the specified <see cref="Quaternion"/>, representing the rotation.
-        /// </summary>
-        /// <param name="value">Source <see cref="Vector2"/>.</param>
-        /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
-        /// <param name="result">Transformed <see cref="Vector2"/> as an output parameter.</param>
-        public static void Transform(ref Vector2 value, ref Quaternion rotation, out Vector2 result)
-        {
-            var rot1 = new Vector3(rotation.X + rotation.X, rotation.Y + rotation.Y, rotation.Z + rotation.Z);
-            var rot2 = new Vector3(rotation.X, rotation.X, rotation.W);
-            var rot3 = new Vector3(1, rotation.Y, rotation.Z);
-            var rot4 = rot1 * rot2;
-            var rot5 = rot1 * rot3;
-
-            result.X = (float)(value.X * (1.0 - rot5.Y - rot5.Z) + value.Y * (rot4.Y - (double)rot4.Z));
-            result.Y = (float)(value.X * (rot4.Y + (double)rot4.Z) + value.Y * (1.0 - rot4.X - rot5.Z));
-        }
-
-        /// <summary>
-        /// Apply transformation on vectors within array of <see cref="Vector2"/> by the specified <see cref="Matrix"/> and places the results in an another array.
-        /// </summary>
-        /// <param name="sourceArray">Source array.</param>
-        /// <param name="sourceIndex">The starting index of transformation in the source array.</param>
-        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
-        /// <param name="destinationArray">Destination array.</param>
-        /// <param name="destinationIndex">The starting index in the destination array, where the first <see cref="Vector2"/> should be written.</param>
-        /// <param name="length">The number of vectors to be transformed.</param>
-        public static void Transform(
-            Vector2[] sourceArray, int sourceIndex, ref Matrix matrix,
-            Vector2[] destinationArray, int destinationIndex, int length)
-        {
-            if (ExceptionHelper.CheckIndexedSrcDstArrays(
-                    sourceArray, sourceIndex, length, destinationArray, destinationIndex, out var exc))
-                throw exc;
-
-            for (int i = 0; i < length; i++)
-            {
-                ref Vector2 position = ref sourceArray[sourceIndex + i];
-                ref Vector2 destination = ref destinationArray[destinationIndex + i];
-                destination.X = (position.X * matrix.M11) + (position.Y * matrix.M21) + matrix.M41;
-                destination.Y = (position.X * matrix.M12) + (position.Y * matrix.M22) + matrix.M42;
-            }
-        }
-
-        /// <summary>
-        /// Apply transformation on vectors within array of <see cref="Vector2"/> by the specified <see cref="Quaternion"/> and places the results in an another array.
-        /// </summary>
-        /// <param name="sourceArray">Source array.</param>
-        /// <param name="sourceIndex">The starting index of transformation in the source array.</param>
-        /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
-        /// <param name="destinationArray">Destination array.</param>
-        /// <param name="destinationIndex">The starting index in the destination array, where the first <see cref="Vector2"/> should be written.</param>
-        /// <param name="length">The number of vectors to be transformed.</param>
-        public static void Transform(
-            Vector2[] sourceArray, int sourceIndex, ref Quaternion rotation,
-            Vector2[] destinationArray, int destinationIndex, int length)
-        {
-            if (ExceptionHelper.CheckIndexedSrcDstArrays(
-                    sourceArray, sourceIndex, length, destinationArray, destinationIndex, out var exc))
-                throw exc;
-
-            for (int i = 0; i < length; i++)
-            {
-                Transform(
-                    ref sourceArray[sourceIndex + i], ref rotation,
-                    out destinationArray[destinationIndex + i]);
-            }
-        }
-
-        /// <summary>
-        /// Apply transformation on all vectors within array of <see cref="Vector2"/> by the specified <see cref="Matrix"/> and places the results in an another array.
-        /// </summary>
-        /// <param name="sourceArray">Source array.</param>
-        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
-        /// <param name="destinationArray">Destination array.</param>
-        public static void Transform(Vector2[] sourceArray, ref Matrix matrix, Vector2[] destinationArray)
-        {
-            Transform(sourceArray, 0, ref matrix, destinationArray, 0, sourceArray.Length);
-        }
-
-        /// <summary>
-        /// Apply transformation on all vectors within array of <see cref="Vector2"/> by the specified <see cref="Quaternion"/> and places the results in an another array.
-        /// </summary>
-        /// <param name="sourceArray">Source array.</param>
-        /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
-        /// <param name="destinationArray">Destination array.</param>
-        public static void Transform(Vector2[] sourceArray, ref Quaternion rotation, Vector2[] destinationArray)
-        {
-            Transform(sourceArray, 0, ref rotation, destinationArray, 0, sourceArray.Length);
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains a transformation of the specified normal by the specified <see cref="Matrix"/>.
-        /// </summary>
-        /// <param name="normal">Source <see cref="Vector2"/> which represents a normal vector.</param>
-        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
-        /// <returns>Transformed normal.</returns>
-        public static Vector2 TransformNormal(Vector2 normal, Matrix matrix)
-        {
-            return new Vector2(
-                (normal.X * matrix.M11) + (normal.Y * matrix.M21),
-                (normal.X * matrix.M12) + (normal.Y * matrix.M22));
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains a transformation of the specified normal by the specified <see cref="Matrix"/>.
-        /// </summary>
-        /// <param name="normal">Source <see cref="Vector2"/> which represents a normal vector.</param>
-        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
-        /// <param name="result">Transformed normal as an output parameter.</param>
-        public static void TransformNormal(ref Vector2 normal, ref Matrix matrix, out Vector2 result)
-        {
-            result.X = (normal.X * matrix.M11) + (normal.Y * matrix.M21);
-            result.Y = (normal.X * matrix.M12) + (normal.Y * matrix.M22);
-        }
-
-        /// <summary>
-        /// Apply transformation on normals within array of <see cref="Vector2"/> by the specified <see cref="Matrix"/> and places the results in an another array.
-        /// </summary>
-        /// <param name="sourceArray">Source array.</param>
-        /// <param name="sourceIndex">The starting index of transformation in the source array.</param>
-        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
-        /// <param name="destinationArray">Destination array.</param>
-        /// <param name="destinationIndex">The starting index in the destination array, where the first <see cref="Vector2"/> should be written.</param>
-        /// <param name="length">The number of normals to be transformed.</param>
-        public static void TransformNormal(
-            Vector2[] sourceArray, int sourceIndex, ref Matrix matrix,
-            Vector2[] destinationArray, int destinationIndex, int length)
-        {
-            if (ExceptionHelper.CheckIndexedSrcDstArrays(
-                    sourceArray, sourceIndex, length, destinationArray, destinationIndex, out var exc))
-                throw exc;
-
-            for (int i = 0; i < length; i++)
-            {
-                ref Vector2 normal = ref sourceArray[sourceIndex + i];
-                destinationArray[destinationIndex + i] = new Vector2(
-                    (normal.X * matrix.M11) + (normal.Y * matrix.M21),
-                    (normal.X * matrix.M12) + (normal.Y * matrix.M22));
-            }
-        }
-
-        /// <summary>
-        /// Apply transformation on all normals within array of <see cref="Vector2"/> by the specified <see cref="Matrix"/> and places the results in an another array.
-        /// </summary>
-        /// <param name="sourceArray">Source array.</param>
-        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
-        /// <param name="destinationArray">Destination array.</param>
-        public static void TransformNormal(Vector2[] sourceArray, ref Matrix matrix, Vector2[] destinationArray)
-        {
-            if (ExceptionHelper.CheckSrcDstArrays(sourceArray, destinationArray, out var exc))
-                throw exc;
-
-            for (int i = 0; i < sourceArray.Length; i++)
-            {
-                ref Vector2 normal = ref sourceArray[i];
-                destinationArray[i] = new Vector2(
-                    (normal.X * matrix.M11) + (normal.Y * matrix.M21),
-                    (normal.X * matrix.M12) + (normal.Y * matrix.M22));
-            }
-        }
-
-        /// <summary>
         /// Deconstruction method for <see cref="Vector2"/>.
         /// </summary>
         /// <param name="x"></param>
@@ -1214,6 +569,217 @@ namespace MonoGame.Framework
         {
             x = X;
             y = Y;
+        }
+
+        #endregion
+
+        #region Transform & TransformNormal
+
+        /// <summary>
+        /// Creates a new <see cref="Vector2"/> that contains a transformation of 2d-vector by the specified <see cref="Matrix"/>.
+        /// </summary>
+        /// <param name="position">Source <see cref="Vector2"/>.</param>
+        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
+        /// <returns>Transformed <see cref="Vector2"/>.</returns>
+        public static Vector2 Transform(in Vector2 position, in Matrix matrix)
+        {
+            return new Vector2(
+                (position.X * matrix.M11) + (position.Y * matrix.M21) + matrix.M41,
+                (position.X * matrix.M12) + (position.Y * matrix.M22) + matrix.M42);
+        }
+
+        /// <summary>
+        /// Transforms the <see cref="Vector2"/> by the specified <see cref="Quaternion"/> that represents rotation.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector2"/>.</param>
+        /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
+        /// <returns>Transformed <see cref="Vector2"/>.</returns>
+        public static Vector2 Transform(in Vector2 value, in Quaternion rotation)
+        {
+            var rot1 = new Vector3(rotation.X + rotation.X, rotation.Y + rotation.Y, rotation.Z + rotation.Z);
+            var rot2 = new Vector3(rotation.X, rotation.X, rotation.W);
+            var rot3 = new Vector3(1, rotation.Y, rotation.Z);
+            var rot4 = rot1 * rot2;
+            var rot5 = rot1 * rot3;
+
+            return new Vector2(
+                (float)(value.X * (1.0 - rot5.Y - rot5.Z) + value.Y * (rot4.Y - (double)rot4.Z)),
+                (float)(value.X * (rot4.Y + (double)rot4.Z) + value.Y * (1.0 - rot4.X - rot5.Z)));
+        }
+
+        /// <summary>
+        /// Applies transformation on <see cref="Vector2"/> normals by the 
+        /// specified <see cref="Matrix"/> and places the results in another span.
+        /// </summary>
+        /// <param name="source">Source span.</param>
+        /// <param name="rotation">The transformation <see cref="Matrix"/>.</param>
+        /// <param name="destination">Destination span.</param>
+        public static void Transform(
+            ReadOnlySpan<Vector2> source, in Matrix matrix, Span<Vector2> destination)
+        {
+            CommonArgumentGuard.CheckSrcDstSpans(source, destination);
+
+            for (int i = 0; i < source.Length; i++)
+                destination[i] = Transform(source[i], matrix);
+        }
+
+        /// <summary>
+        /// Applies transformation on <see cref="Vector2"/> normals by the 
+        /// specified <see cref="Quaternion"/> and places the results in another span.
+        /// </summary>
+        /// <param name="source">Source span.</param>
+        /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
+        /// <param name="destination">Destination span.</param>
+        public static void Transform(
+            ReadOnlySpan<Vector2> source, in Quaternion rotation, Span<Vector2> destination)
+        {
+            CommonArgumentGuard.CheckSrcDstSpans(source, destination);
+
+            for (int i = 0; i < source.Length; i++)
+                destination[i] = Transform(source[i], rotation);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector2"/> that contains a transformation of the specified normal by the specified <see cref="Matrix"/>.
+        /// </summary>
+        /// <param name="normal">Source <see cref="Vector2"/> which represents a normal vector.</param>
+        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
+        /// <returns>Transformed normal.</returns>
+        public static Vector2 TransformNormal(in Vector2 normal, in Matrix matrix)
+        {
+            return new Vector2(
+                (normal.X * matrix.M11) + (normal.Y * matrix.M21),
+                (normal.X * matrix.M12) + (normal.Y * matrix.M22));
+        }
+
+        /// <summary>
+        /// Applies transformation on <see cref="Vector2"/> normals by the 
+        /// specified <see cref="Matrix"/> and places the results in another span.
+        /// </summary>
+        /// <param name="source">Source span.</param>
+        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
+        /// <param name="destination">Destination span.</param>
+        public static void TransformNormal(
+            ReadOnlySpan<Vector2> source, in Matrix matrix, Span<Vector2> destination)
+        {
+            CommonArgumentGuard.CheckSrcDstSpans(source, destination);
+
+            for (int i = 0; i < source.Length; i++)
+                destination[i] = TransformNormal(source[i], matrix);
+        }
+
+        #endregion
+
+        #region Operators
+
+        /// <summary>
+        /// Negates values in the specified <see cref="Vector2"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector2"/> on the right of the sub sign.</param>
+        /// <returns>Result of the inversion.</returns>
+        public static Vector2 operator -(in Vector2 value)
+        {
+            return new Vector2(-value.X, -value.Y);
+        }
+
+        /// <summary>
+        /// Adds two vectors.
+        /// </summary>
+        /// <param name="a">Source <see cref="Vector2"/> on the left of the add sign.</param>
+        /// <param name="b">Source <see cref="Vector2"/> on the right of the add sign.</param>
+        /// <returns>Sum of the vectors.</returns>
+        public static Vector2 operator +(in Vector2 a, in Vector2 b)
+        {
+            return new Vector2(a.X + b.X, a.Y + b.Y);
+        }
+
+        /// <summary>
+        /// Subtracts a <see cref="Vector2"/> from a <see cref="Vector2"/>.
+        /// </summary>
+        /// <param name="left">Source <see cref="Vector2"/> on the left of the sub sign.</param>
+        /// <param name="right">Source <see cref="Vector2"/> on the right of the sub sign.</param>
+        /// <returns>Result of the vector subtraction.</returns>
+        public static Vector2 operator -(in Vector2 left, in Vector2 right)
+        {
+            return new Vector2(left.X - right.X, left.Y - right.Y);
+        }
+
+        /// <summary>
+        /// Multiplies the components of two vectors by each other.
+        /// </summary>
+        /// <param name="a">Source <see cref="Vector2"/> on the left of the mul sign.</param>
+        /// <param name="b">Source <see cref="Vector2"/> on the right of the mul sign.</param>
+        /// <returns>Result of the vector multiplication.</returns>
+        public static Vector2 operator *(in Vector2 a, in Vector2 b)
+        {
+            return new Vector2(a.X * b.X, a.Y * b.Y);
+        }
+
+        /// <summary>
+        /// Multiplies the components of vector by a scalar.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector2"/> on the left of the mul sign.</param>
+        /// <param name="scaleFactor">Scalar value on the right of the mul sign.</param>
+        /// <returns>Result of the vector multiplication with a scalar.</returns>
+        public static Vector2 operator *(in Vector2 value, float scaleFactor)
+        {
+            return new Vector2(value.X * scaleFactor, value.Y * scaleFactor);
+        }
+
+        /// <summary>
+        /// Multiplies the components of vector by a scalar.
+        /// </summary>
+        /// <param name="scaleFactor">Scalar value on the left of the mul sign.</param>
+        /// <param name="value">Source <see cref="Vector2"/> on the right of the mul sign.</param>
+        /// <returns>Result of the vector multiplication with a scalar.</returns>
+        public static Vector2 operator *(float scaleFactor, in Vector2 value)
+        {
+            return new Vector2(value.X * scaleFactor, value.Y * scaleFactor);
+        }
+
+        /// <summary>
+        /// Divides the components of a <see cref="Vector2"/> by the components of another <see cref="Vector2"/>.
+        /// </summary>
+        /// <param name="left">Source <see cref="Vector2"/> on the left of the div sign.</param>
+        /// <param name="right">Divisor <see cref="Vector2"/> on the right of the div sign.</param>
+        /// <returns>The result of dividing the vectors.</returns>
+        public static Vector2 operator /(in Vector2 left, in Vector2 right)
+        {
+            return new Vector2(left.X / right.X, left.Y / right.Y);
+        }
+
+        /// <summary>
+        /// Divides the components of a <see cref="Vector2"/> by a scalar.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector2"/> on the left of the div sign.</param>
+        /// <param name="divider">Divisor scalar on the right of the div sign.</param>
+        /// <returns>The result of dividing a vector by a scalar.</returns>
+        public static Vector2 operator /(in Vector2 value, float divider)
+        {
+            float factor = 1 / divider;
+            return new Vector2(value.X * factor, value.Y * factor);
+        }
+
+        /// <summary>
+        /// Compares whether two <see cref="Vector2"/> instances are equal.
+        /// </summary>
+        /// <param name="a"><see cref="Vector2"/> instance on the left of the equal sign.</param>
+        /// <param name="b"><see cref="Vector2"/> instance on the right of the equal sign.</param>
+        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        public static bool operator ==(in Vector2 a, in Vector2 b)
+        {
+            return a.X == b.X && a.Y == b.Y;
+        }
+
+        /// <summary>
+        /// Compares whether two <see cref="Vector2"/> instances are not equal.
+        /// </summary>
+        /// <param name="a"><see cref="Vector2"/> instance on the left of the not equal sign.</param>
+        /// <param name="b"><see cref="Vector2"/> instance on the right of the not equal sign.</param>
+        /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>	
+        public static bool operator !=(in Vector2 a, in Vector2 b)
+        {
+            return !(a == b);
         }
 
         #endregion

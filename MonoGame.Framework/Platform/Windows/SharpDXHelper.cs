@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     using System;
     using Graphics;
@@ -113,7 +113,7 @@ namespace Microsoft.Xna.Framework
                 case SurfaceFormat.Bgra32:
                     return SharpDX.DXGI.Format.B8G8R8A8_UNorm;
 
-                case SurfaceFormat.ColorSRgb:
+                case SurfaceFormat.Rgba32SRgb:
                     return SharpDX.DXGI.Format.R8G8B8A8_UNorm_SRgb;
                 case SurfaceFormat.Bgr32SRgb:
                     return SharpDX.DXGI.Format.B8G8R8X8_UNorm_SRgb;

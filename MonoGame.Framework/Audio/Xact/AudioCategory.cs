@@ -178,13 +178,7 @@ namespace MonoGame.Framework.Audio
         /// <returns>true if the objects are equal or false if they aren't.</returns>
         public override bool Equals(object obj)
         {
-            if (obj is AudioCategory)
-            {
-                var other = (AudioCategory)obj;
-                return _engine == other._engine && Name.Equals(other.Name, StringComparison.Ordinal);
-            }
-
-            return false;
+            return obj is AudioCategory other && Equals(other);
         }
 
         /// <summary>
@@ -193,7 +187,11 @@ namespace MonoGame.Framework.Audio
         /// <returns>Hash code for this object.</returns>
         public override int GetHashCode()
         {
-            return Name.GetHashCode() ^ _engine.GetHashCode();
+            unchecked
+            {
+                int code = Name.GetHashCode();
+                return code * 23 + _engine.GetHashCode();
+            }
         }
 
         /// <summary>

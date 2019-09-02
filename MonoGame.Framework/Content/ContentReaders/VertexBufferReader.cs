@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.IO;
 using MonoGame.Framework.Graphics;
 
 namespace MonoGame.Framework.Content
@@ -16,11 +17,19 @@ namespace MonoGame.Framework.Content
             int dataSize = vertexCount * declaration.VertexStride;
 
             byte[] data = input.ContentManager.GetScratchBuffer(dataSize);
-            input.Read(data, 0, dataSize);
+            try
+            {
+                if (input.Read(data, 0, dataSize) != dataSize)
+                    throw new InvalidDataException();
 
-            var buffer = new VertexBuffer(input.GraphicsDevice, declaration, vertexCount, BufferUsage.None);
-            buffer.SetData(data.AsSpan(0, dataSize));
-            return buffer;
+                var buffer = new VertexBuffer(input.GraphicsDevice, declaration, vertexCount, BufferUsage.None);
+                buffer.SetData(data.AsSpan(0, dataSize));
+                return buffer;
+            }
+            finally
+            {
+                input.ContentManager.ReturnScratchBuffer(data);
+            }
         }
     }
 }

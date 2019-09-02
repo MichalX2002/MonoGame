@@ -2,16 +2,15 @@
 using SharpDX.MediaFoundation;
 using System;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     public sealed partial class Video : IDisposable
     {
         private Topology _topology;
-        internal Topology Topology { get { return _topology; } }
+        private MediaType _mediaType;
 
+        internal Topology Topology => _topology;
         internal VideoSampleGrabber SampleGrabber { get; private set; }
-
-        MediaType _mediaType;
 
         private void PlatformInitialize()
         {
@@ -21,22 +20,22 @@ namespace Microsoft.Xna.Framework.Media
             MediaManagerState.CheckStartup();
 
             MediaFactory.CreateTopology(out _topology);
-
-            SharpDX.MediaFoundation.MediaSource mediaSource;
+            MediaSource mediaSource;
             {
-                SourceResolver resolver = new SourceResolver();
-
-                ComObject source = resolver.CreateObjectFromURL(FileName, SourceResolverFlags.MediaSource, null, out ObjectType otype);
-                mediaSource = source.QueryInterface<SharpDX.MediaFoundation.MediaSource>();
-                resolver.Dispose();
-                source.Dispose();
+                using (var resolver = new SourceResolver())
+                using (ComObject source = resolver.CreateObjectFromURL(
+                        FileName, SourceResolverFlags.MediaSource, null, out _))
+                {
+                    mediaSource = source.QueryInterface<MediaSource>();
+                }
             }
 
             mediaSource.CreatePresentationDescriptor(out PresentationDescriptor presDesc);
 
             for (var i = 0; i < presDesc.StreamDescriptorCount; i++)
             {
-                presDesc.GetStreamDescriptorByIndex(i, out SharpDX.Mathematics.Interop.RawBool selected, out StreamDescriptor desc);
+                presDesc.GetStreamDescriptorByIndex(
+                    i, out SharpDX.Mathematics.Interop.RawBool selected, out StreamDescriptor desc);
 
                 if (selected)
                 {
@@ -91,17 +90,11 @@ namespace Microsoft.Xna.Framework.Media
         {
             if (disposing)
             {
-                if (_topology != null)
-                {
-                    _topology.Dispose();
-                    _topology = null;
-                }
+                _topology?.Dispose();
+                _topology = null;
 
-                if (SampleGrabber != null)
-                {
-                    SampleGrabber.Dispose();
-                    SampleGrabber = null;
-                }
+                SampleGrabber?.Dispose();
+                SampleGrabber = null;
             }
         }
     }

@@ -1,5 +1,3 @@
-#if OPENGL
-
 using System;
 using System.Collections.Generic;
 using MonoGame.OpenGL;
@@ -139,5 +137,3 @@ namespace MonoGame.Framework.Graphics
         }
     }
 }
-
-#endif // OPENGL

@@ -9,10 +9,10 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content.Pipeline;
-using Microsoft.Xna.Framework.Content.Pipeline.Builder.Convertors;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework;
+using MonoGame.Framework.Content.Pipeline;
+using MonoGame.Framework.Content.Pipeline.Builder.Converters;
+using MonoGame.Framework.Graphics;
 using System.Diagnostics;
 using MonoGame.Framework.Content.Pipeline.Builder;
 
@@ -82,14 +82,8 @@ namespace MonoGame.Tools.Pipeline
  
             public Property this[int index]
             {
-                get
-                {
-                    return _properties[index];
-                }
-                set
-                {
-                    _properties[index] = value;
-                }
+                get => _properties[index];
+                set => _properties[index] = value;
             }
 
             public Property this[string name]

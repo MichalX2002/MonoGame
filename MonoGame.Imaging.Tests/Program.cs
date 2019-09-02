@@ -1,4 +1,6 @@
-﻿using MonoGame.Utilities.Memory;
+﻿using MonoGame.Framework;
+using MonoGame.Utilities.Memory;
+using StbSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,9 +8,11 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace MonoGame.Imaging.Tests
 {
@@ -20,51 +24,54 @@ namespace MonoGame.Imaging.Tests
         {
             var archive = new ZipArchive(File.OpenRead(DataZip), ZipArchiveMode.Read, false);
             //var stream = archive.GetEntry("png/32bit.png").Open();
+            //var stream = archive.GetEntry("bmp/32bit.bmp").Open();
 
-            var encoded = new MemoryStream();
+            var encoded = new MemoryStream(1024 * 1024 * 8);
             using(var stream = new FileStream("big img.png", FileMode.Open))
                 stream.CopyTo(encoded);
 
-            var watch = new Stopwatch();
-            int readRepeats = 16;
-            int writeRepeats = 4;
+            int readRepeats = 1;
+            int writeRepeats = 8;
 
-            IntPtr pixels = IntPtr.Zero;
-            int width = 0, height = 0, channels = 0;
+            var watch = new Stopwatch();
+            Image<Color> image = null;
             for (int i = 0; i < readRepeats; i++)
             {
-                encoded.Position = 0;
+                encoded.Seek(0, SeekOrigin.Begin);
                 if (readRepeats == 1 || i != 0)
                     watch.Start();
-                if (pixels != IntPtr.Zero)
-                    System.Runtime.InteropServices.Marshal.FreeHGlobal(pixels);
-                pixels = (IntPtr)ImageReader.Read(false, encoded, out width, out height, out channels, 0);
+                if (image != null)
+                    image.Dispose();
+                image = Image.Load<Color>(encoded);
                 watch.Stop();
             }
-            Console.WriteLine(width + "x" + height + " # " + channels);
+            Console.WriteLine(image.Width + "x" + image.Height + " # " + image.GetBitDepth());
             Console.WriteLine("Buffer Read Average: " +
                 Math.Round(watch.Elapsed.TotalMilliseconds / (readRepeats == 1 ? 1 : readRepeats - 1), 3) + "ms");
 
             Thread.Sleep(500);
 
+            image.Save("XD.png");
+
+            Thread.Sleep(500);
+
             watch.Reset();
 
-            var writer = new ImageWriter();
-            var result = new MemoryStream();
+            var result = new MemoryStream(1024 * 1024 * 85);
+            var writeFormat = ImageFormat.Png;
             for (int i = 0; i < writeRepeats; i++)
             {
-                result.Position = 0;
+                result.Seek(0, SeekOrigin.Begin);
                 if (writeRepeats == 1 || i != 0)
                     watch.Start();
-                writer.Write((byte*)pixels, width, height, channels, ImageWriterFormat.Png, result);
+                //ImageWriter.Write(provider, writeFormat, result);
                 watch.Stop();
             }
-            if (pixels != IntPtr.Zero)
-                System.Runtime.InteropServices.Marshal.FreeHGlobal(pixels);
+            image.Dispose();
 
-            using (var fs = new FileStream("recoded.png", FileMode.Create))
+            using (var fs = new FileStream("recoded" + writeFormat.Extension, FileMode.Create))
             {
-                result.Position = 0;
+                result.Seek(0, SeekOrigin.Begin);
                 result.CopyTo(fs);
             }
             Console.WriteLine("Write Average: " +

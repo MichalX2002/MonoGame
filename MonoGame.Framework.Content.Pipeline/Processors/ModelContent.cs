@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     public sealed class ModelContent
     {
@@ -23,10 +23,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 
         public ModelMeshContentCollection Meshes { get; }
 
-        public ModelBoneContent Root
-        {
-            get { return _root; }
-        }
+        public ModelBoneContent Root => _root;
 
         public object Tag { get; set; }
     }

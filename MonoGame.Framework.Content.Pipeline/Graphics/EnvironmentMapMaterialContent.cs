@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     public class EnvironmentMapMaterialContent : MaterialContent
     {
@@ -17,50 +17,50 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
         public float? Alpha
         {
-            get { return GetValueTypeProperty<float>(AlphaKey); }
-            set { SetProperty(AlphaKey, value); }
+            get => GetValueTypeProperty<float>(AlphaKey);
+            set => SetProperty(AlphaKey, value);
         }
 
         public Vector3? DiffuseColor
         {
-            get { return GetValueTypeProperty<Vector3>(DiffuseColorKey); }
-            set { SetProperty(DiffuseColorKey, value); }
+            get => GetValueTypeProperty<Vector3>(DiffuseColorKey);
+            set => SetProperty(DiffuseColorKey, value);
         }
 
         public Vector3? EmissiveColor
         {
-            get { return GetValueTypeProperty<Vector3>(EmissiveColorKey); }
-            set { SetProperty(EmissiveColorKey, value); }
+            get => GetValueTypeProperty<Vector3>(EmissiveColorKey);
+            set => SetProperty(EmissiveColorKey, value);
         }
 
         public ExternalReference<TextureContent> EnvironmentMap
         {
-            get { return GetTexture(EnvironmentMapKey); }
-            set { SetTexture(EnvironmentMapKey, value); }
+            get => GetTexture(EnvironmentMapKey);
+            set => SetTexture(EnvironmentMapKey, value);
         }
 
         public float? EnvironmentMapAmount
         {
-            get { return GetValueTypeProperty<float>(EnvironmentMapAmountKey); }
-            set { SetProperty(EnvironmentMapAmountKey, value); }
+            get => GetValueTypeProperty<float>(EnvironmentMapAmountKey);
+            set => SetProperty(EnvironmentMapAmountKey, value);
         }
 
         public Vector3? EnvironmentMapSpecular
         {
-            get { return GetValueTypeProperty<Vector3>(EnvironmentMapSpecularKey); }
-            set { SetProperty(EnvironmentMapSpecularKey, value); }
+            get => GetValueTypeProperty<Vector3>(EnvironmentMapSpecularKey);
+            set => SetProperty(EnvironmentMapSpecularKey, value);
         }
 
         public float? FresnelFactor
         {
-            get { return GetValueTypeProperty<float>(FresnelFactorKey); }
-            set { SetProperty(FresnelFactorKey, value); }
+            get => GetValueTypeProperty<float>(FresnelFactorKey);
+            set => SetProperty(FresnelFactorKey, value);
         }
 
         public ExternalReference<TextureContent> Texture
         {
-            get { return GetTexture(TextureKey); }
-            set { SetTexture(TextureKey, value); }
+            get => GetTexture(TextureKey);
+            set => SetTexture(TextureKey, value);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MonoGame.Testings
+namespace MonoGame.Testing
 {
     public static class Program
     {

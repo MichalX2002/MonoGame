@@ -3,7 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System.IO;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 using System;
 using MonoGame.Utilities.Memory;
 
@@ -29,7 +29,7 @@ namespace TwoMGFX
             writer.Write(profile);
 
             // Write the rest to a memory stream.
-            using (var memStream = RecyclableMemoryManager.Instance.GetMemoryStream())
+            using (var memStream = RecyclableMemoryManager.Default.GetMemoryStream())
             using (var memWriter = new BinaryWriter(memStream))
             {
                 // Write all the constant buffers.

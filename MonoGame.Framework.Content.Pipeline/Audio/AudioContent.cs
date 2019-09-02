@@ -5,7 +5,7 @@
 using System;
 using System.IO;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
+namespace MonoGame.Framework.Content.Pipeline.Audio
 {
     /// <summary>
     /// Encapsulates and provides operations, such as format conversions, on the 

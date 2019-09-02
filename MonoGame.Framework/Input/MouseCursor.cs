@@ -3,7 +3,12 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.InteropServices;
 using MonoGame.Framework.Graphics;
+using MonoGame.Imaging;
+using MonoGame.Imaging.Pixels;
+using MonoGame.Imaging.Processing;
+using MonoGame.Utilities.Memory;
 using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Framework.Input
@@ -85,60 +90,68 @@ namespace MonoGame.Framework.Input
         /// Creates a mouse cursor from the specified texture.
         /// </summary>
         /// <param name="texture">Texture to use as the cursor image.</param>
-        /// <param name="origin">The coordinates of the image that will be used for mouse position.</param>
-        /// <param name="sourceRectangle">The part of the texture to use as the cursor.</param>
+        /// <param name="origin">A point in the pixels that is used as the cursor position.</param>
+        /// <param name="sourceRectangle">Optional part of the texture to use as the cursor.</param>
         public static MouseCursor FromTexture2D(
             Texture2D texture, Point origin, Rectangle? sourceRectangle = null)
         {
-            if (texture.Format != SurfaceFormat.Rgba32 && texture.Format != SurfaceFormat.ColorSRgb)
+            if (texture.Format != SurfaceFormat.Rgba32 && texture.Format != SurfaceFormat.Rgba32SRgb)
                 throw new ArgumentException(
-                    $"Only {SurfaceFormat.Rgba32} or {SurfaceFormat.ColorSRgb} textures are accepted for mouse cursors.",
+                    $"Only {SurfaceFormat.Rgba32} and {SurfaceFormat.Rgba32SRgb} textures are accepted for mouse cursors.",
                     nameof(texture));
 
             var rect = sourceRectangle ?? texture.Bounds;
-            var textureData = new Color[rect.Width * rect.Height];
-            texture.GetData(textureData.AsSpan(), sourceRectangle);
 
-            using (var image = Image.WrapMemory(textureData.AsMemory(), rect.Width, rect.Height))
-                return FromImage(image, origin, sourceRectangle);
+            using (var image = Image.Create<Color>(rect.Width, rect.Height))
+            {
+                texture.GetData(image.GetPixelSpan(), rect);
+                return FromPixels(image, origin);
+            }
         }
 
         /// <summary>
-        /// Creates a mouse cursor from the specified image.
+        /// Creates a mouse cursor from the specified pixels.
         /// </summary>
-        /// <typeparam name="TPixel">The pixel type of the image.</typeparam>
-        /// <param name="image">Image to use as the cursor image.</param>
-        /// <param name="origin">The coordinates of the image that will be used for mouse position.</param>
-        /// <param name="sourceRectangle">The part of the image to use as the cursor.</param>
+        /// <typeparam name="TPixel">The pixel type of the buffer.</typeparam>
+        /// <param name="pixels">Pixels to use as the cursor image.</param>
+        /// <param name="origin">A point in the pixels that is used as the cursor position.</param>
+        /// <param name="sourceRectangle">Optional part of the image to use as the cursor.</param>
         [CLSCompliant(false)]
-        public static MouseCursor FromImage<TPixel>(
-            Image<TPixel> image, Point origin, Rectangle? sourceRectangle = null)
-            where TPixel : unmanaged, IPackedVector<TPixel>
+        public static unsafe MouseCursor FromPixels<TPixel>(
+            IReadOnlyPixelView<TPixel> pixels, Point origin, Rectangle? sourceRectangle = null)
+            where TPixel : unmanaged, IPixel
         {
-            var rect = sourceRectangle ?? new Rectangle(0, 0, image.Width, image.Height);
+            Rectangle rect = sourceRectangle ?? pixels.GetBounds();
+            if (!pixels.GetBounds().Contains(rect))
+                throw new ArgumentOutOfRangeException(
+                    "The source rectangle is outside the pixel span.", nameof(sourceRectangle));
 
-            Span<Color> imageData;
-            if (image is Image<Color> rgbaImage)
+            IReadOnlyPixelMemory<Color> buffer = null;
+            try
             {
-                // CreateRGBSurfaceFrom takes pitch which defines bytes per row so we
-                // don't need to worry about indexing if the image is larger than the srcRect
-                imageData = rgbaImage.GetPixelSpan();
-            }
-            else
-            {
-                var buffer = new Color[rect.Width * rect.Height];
-                var pixels = image.GetPixelSpan();
-                for (int y = 0; y < rect.Height; y++)
+                ReadOnlySpan<Color> pixelSpan;
+                int stride;
+
+                if (rect.Position == Point.Zero && pixels is IReadOnlyPixelMemory<Color> rgbaMemory)
                 {
-                    var clippedPixelRow = pixels.Slice(rect.Y + y, rect.Width);
-                    for (int x = 0; x < rect.Width; x++)
-                        clippedPixelRow[rect.X + x].ToRgba32(ref buffer[x + y * rect.Height]);
+                    // PlatformFromPixels takes stride so we don't need to worry
+                    // about a source rect whose width differs from the buffer's stride
+                    pixelSpan = rgbaMemory.GetPixelSpan();
+                    stride = rgbaMemory.GetByteStride();
                 }
-                imageData = buffer;
-            }
+                else
+                {
+                    buffer = Image.LoadPixelViewAs<TPixel, Color>(pixels.Project(x => x.Crop(rect)));
+                    pixelSpan = buffer.GetPixelSpan();
+                    stride = buffer.GetByteStride();
+                }
 
-            int stride = image.Width * image.PixelType.BitsPerPixel / 8; // bytes per row
-            return PlatformFromImage(imageData, rect.Width, rect.Height, stride, origin);
+                return PlatformFromPixels(pixelSpan, rect.Width, rect.Height, stride, origin);
+            }
+            finally
+            {
+                buffer?.Dispose();
+            }
         }
 
         static MouseCursor()
@@ -153,11 +166,11 @@ namespace MonoGame.Framework.Input
 
         public void Dispose()
         {
-            if (_disposed)
-                return;
-
-            PlatformDispose();
-            _disposed = true;
+            if (!_disposed)
+            {
+                PlatformDispose();
+                _disposed = true;
+            }
         }
     }
 }

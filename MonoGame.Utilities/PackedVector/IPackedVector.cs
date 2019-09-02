@@ -1,5 +1,4 @@
-// #region License
-// /*
+#region License
 // Microsoft Public License (Ms-PL)
 // MonoGame - Copyright © 2009 The MonoGame Team
 // 
@@ -35,9 +34,7 @@
 // or conditions. You may have additional consumer rights under your local laws which this license cannot change. To the extent
 // permitted under your local laws, the contributors exclude the implied warranties of merchantability, fitness for a particular
 // purpose and non-infringement.
-// */
-// #endregion License
-//
+#endregion License
 // Author: Kenneth James Pouncey
 
 using MonoGame.Framework;
@@ -48,6 +45,21 @@ namespace MonoGame.Utilities.PackedVector
     public interface IPackedVector
     {
         void FromVector4(Vector4 vector);
+
+        /// <summary>
+        /// Initializes the vector instance from a generic "scaled" <see cref="Vector4"/>.
+        /// </summary>
+        /// <param name="vector">The vector to load the pixel from.</param>
+        void FromScaledVector4(Vector4 vector);
+
+        /// <summary>
+        /// Expands the vector into a generic "scaled" <see cref="Vector4"/> representation
+        /// with values scaled and clamped between <value>0</value> and <value>1</value>.
+        /// The vector components are typically expanded in least to greatest significance order.
+        /// </summary>
+        /// <returns>The <see cref="Vector4"/>.</returns>
+        Vector4 ToScaledVector4();
+
         Vector4 ToVector4();
     }
 

@@ -16,8 +16,6 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebugDisplayString,nq}")]
     public struct BoundingSphere : IEquatable<BoundingSphere>
     {
-        #region Public Fields
-
         /// <summary>
         /// The sphere center.
         /// </summary>
@@ -30,10 +28,6 @@ namespace MonoGame.Framework
         [DataMember]
         public float Radius;
 
-        #endregion
-
-        #region Internal Properties
-
         internal string DebugDisplayString
         {
             get => string.Concat(
@@ -42,22 +36,16 @@ namespace MonoGame.Framework
                     );
         }
 
-        #endregion
-
-        #region Constructors
-
         /// <summary>
         /// Constructs a bounding sphere with the specified center and radius.  
         /// </summary>
         /// <param name="center">The sphere center.</param>
         /// <param name="radius">The sphere radius.</param>
-        public BoundingSphere(Vector3 center, float radius)
+        public BoundingSphere(in Vector3 center, float radius)
         {
             Center = center;
             Radius = radius;
         }
-
-        #endregion
 
         #region Public Methods
 
@@ -68,11 +56,13 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="box">The box for testing.</param>
         /// <returns>The containment type.</returns>
-        public ContainmentType Contains(BoundingBox box)
+        public ContainmentType Contains(in BoundingBox box)
         {
-            //check if all corner is in sphere
+            Span<Vector3> corners = stackalloc Vector3[BoundingBox.CornerCount];
+            box.GetCorners(corners);
+
             bool inside = true;
-            foreach (Vector3 corner in box.GetCorners())
+            foreach (Vector3 corner in corners)
             {
                 if (Contains(corner) == ContainmentType.Disjoint)
                 {
@@ -88,38 +78,28 @@ namespace MonoGame.Framework
             double dmin = 0;
 
             if (Center.X < box.Min.X)
-				dmin += (Center.X - box.Min.X) * (Center.X - box.Min.X);
+                dmin += (Center.X - box.Min.X) * (Center.X - box.Min.X);
 
-			else if (Center.X > box.Max.X)
-					dmin += (Center.X - box.Max.X) * (Center.X - box.Max.X);
+            else if (Center.X > box.Max.X)
+                dmin += (Center.X - box.Max.X) * (Center.X - box.Max.X);
 
-			if (Center.Y < box.Min.Y)
-				dmin += (Center.Y - box.Min.Y) * (Center.Y - box.Min.Y);
+            if (Center.Y < box.Min.Y)
+                dmin += (Center.Y - box.Min.Y) * (Center.Y - box.Min.Y);
 
-			else if (Center.Y > box.Max.Y)
-				dmin += (Center.Y - box.Max.Y) * (Center.Y - box.Max.Y);
+            else if (Center.Y > box.Max.Y)
+                dmin += (Center.Y - box.Max.Y) * (Center.Y - box.Max.Y);
 
-			if (Center.Z < box.Min.Z)
-				dmin += (Center.Z - box.Min.Z) * (Center.Z - box.Min.Z);
+            if (Center.Z < box.Min.Z)
+                dmin += (Center.Z - box.Min.Z) * (Center.Z - box.Min.Z);
 
-			else if (Center.Z > box.Max.Z)
-				dmin += (Center.Z - box.Max.Z) * (Center.Z - box.Max.Z);
+            else if (Center.Z > box.Max.Z)
+                dmin += (Center.Z - box.Max.Z) * (Center.Z - box.Max.Z);
 
-			if (dmin <= Radius * Radius) 
-				return ContainmentType.Intersects;
-            
+            if (dmin <= Radius * Radius)
+                return ContainmentType.Intersects;
+
             //else disjoint
             return ContainmentType.Disjoint;
-        }
-
-        /// <summary>
-        /// Test if a bounding box is fully inside, outside, or just intersecting the sphere.
-        /// </summary>
-        /// <param name="box">The box for testing.</param>
-        /// <param name="result">The containment type as an output parameter.</param>
-        public void Contains(ref BoundingBox box, out ContainmentType result)
-        {
-            result = Contains(box);
         }
 
         /// <summary>
@@ -132,8 +112,7 @@ namespace MonoGame.Framework
             //check if all corner is in sphere
             bool inside = true;
 
-            Vector3[] corners = frustum.GetCorners();
-            foreach (Vector3 corner in corners)
+            foreach (Vector3 corner in frustum.GetCorners())
             {
                 if (Contains(corner) == ContainmentType.Disjoint)
                 {
@@ -156,43 +135,18 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Test if a frustum is fully inside, outside, or just intersecting the sphere.
-        /// </summary>
-        /// <param name="frustum">The frustum for testing.</param>
-        /// <param name="result">The containment type as an output parameter.</param>
-        public void Contains(ref BoundingFrustum frustum,out ContainmentType result)
-        {
-            result = Contains(frustum);
-        }
-
-        /// <summary>
         /// Test if a sphere is fully inside, outside, or just intersecting the sphere.
         /// </summary>
         /// <param name="sphere">The other sphere for testing.</param>
         /// <returns>The containment type.</returns>
-        public ContainmentType Contains(BoundingSphere sphere)
+        public ContainmentType Contains(in BoundingSphere sphere)
         {
-            Contains(ref sphere, out ContainmentType result);
-            return result;
-        }
-
-        /// <summary>
-        /// Test if a sphere is fully inside, outside, or just intersecting the sphere.
-        /// </summary>
-        /// <param name="sphere">The other sphere for testing.</param>
-        /// <param name="result">The containment type as an output parameter.</param>
-        public void Contains(ref BoundingSphere sphere, out ContainmentType result)
-        {
-            Vector3.DistanceSquared(ref sphere.Center, ref Center, out float sqDistance);
-
+            float sqDistance = Vector3.DistanceSquared(sphere.Center, Center);
             if (sqDistance > (sphere.Radius + Radius) * (sphere.Radius + Radius))
-                result = ContainmentType.Disjoint;
-
-            else if (sqDistance <= (Radius - sphere.Radius) * (Radius - sphere.Radius))
-                result = ContainmentType.Contains;
-
-            else
-                result = ContainmentType.Intersects;
+                return ContainmentType.Disjoint;
+            if (sqDistance <= (Radius - sphere.Radius) * (Radius - sphere.Radius))
+                return ContainmentType.Contains;
+            return ContainmentType.Intersects;
         }
 
         /// <summary>
@@ -200,30 +154,16 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="point">The vector in 3D-space for testing.</param>
         /// <returns>The containment type.</returns>
-        public ContainmentType Contains(Vector3 point)
-        {
-            Contains(ref point, out ContainmentType result);
-            return result;
-        }
-
-        /// <summary>
-        /// Test if a point is fully inside, outside, or just intersecting the sphere.
-        /// </summary>
-        /// <param name="point">The vector in 3D-space for testing.</param>
-        /// <param name="result">The containment type as an output parameter.</param>
-        public void Contains(ref Vector3 point, out ContainmentType result)
+        public ContainmentType Contains(in Vector3 point)
         {
             float sqRadius = Radius * Radius;
-            Vector3.DistanceSquared(ref point, ref Center, out float sqDistance);
+            float sqDistance = Vector3.DistanceSquared(point, Center);
 
             if (sqDistance > sqRadius)
-                result = ContainmentType.Disjoint;
-
+                return ContainmentType.Disjoint;
             else if (sqDistance < sqRadius)
-                result = ContainmentType.Contains;
-
-            else 
-                result = ContainmentType.Intersects;
+                return ContainmentType.Contains;
+            return ContainmentType.Intersects;
         }
 
         #endregion
@@ -235,28 +175,17 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="box">The box to create the sphere from.</param>
         /// <returns>The new <see cref="BoundingSphere"/>.</returns>
-        public static BoundingSphere CreateFromBoundingBox(BoundingBox box)
-        {
-            CreateFromBoundingBox(ref box, out BoundingSphere result);
-            return result;
-        }
-
-        /// <summary>
-        /// Creates the smallest <see cref="BoundingSphere"/> that can contain a specified <see cref="BoundingBox"/>.
-        /// </summary>
-        /// <param name="box">The box to create the sphere from.</param>
-        /// <param name="result">The new <see cref="BoundingSphere"/> as an output parameter.</param>
-        public static void CreateFromBoundingBox(ref BoundingBox box, out BoundingSphere result)
+        public static BoundingSphere CreateFromBoundingBox(in BoundingBox box)
         {
             // Find the center of the box.
-            Vector3 center = new Vector3((box.Min.X + box.Max.X) / 2.0f,
-                                         (box.Min.Y + box.Max.Y) / 2.0f,
-                                         (box.Min.Z + box.Max.Z) / 2.0f);
+            var center = new Vector3(
+                (box.Min.X + box.Max.X) / 2.0f,
+                (box.Min.Y + box.Max.Y) / 2.0f,
+                (box.Min.Z + box.Max.Z) / 2.0f);
 
             // Find the distance between the center and one of the corners of the box.
             float radius = Vector3.Distance(center, box.Max);
-
-            result = new BoundingSphere(center, radius);
+            return new BoundingSphere(center, radius);
         }
 
         #endregion
@@ -278,7 +207,7 @@ namespace MonoGame.Framework
         /// <returns>The new <see cref="BoundingSphere"/>.</returns>
         public static BoundingSphere CreateFromPoints(IEnumerable<Vector3> points)
         {
-            if (points == null )
+            if (points == null)
                 throw new ArgumentNullException(nameof(points));
 
             // From "Real-Time Collision Detection" (Page 89)
@@ -291,27 +220,27 @@ namespace MonoGame.Framework
             var maxz = -minx;
 
             // Find the most extreme points along the principle axis.
-            var numPoints = 0;           
+            var numPoints = 0;
             foreach (var pt in points)
             {
                 ++numPoints;
 
-                if (pt.X < minx.X) 
+                if (pt.X < minx.X)
                     minx = pt;
-                if (pt.X > maxx.X) 
+                if (pt.X > maxx.X)
                     maxx = pt;
-                if (pt.Y < miny.Y) 
+                if (pt.Y < miny.Y)
                     miny = pt;
-                if (pt.Y > maxy.Y) 
+                if (pt.Y > maxy.Y)
                     maxy = pt;
-                if (pt.Z < minz.Z) 
+                if (pt.Z < minz.Z)
                     minz = pt;
-                if (pt.Z > maxz.Z) 
+                if (pt.Z > maxz.Z)
                     maxz = pt;
             }
 
             if (numPoints == 0)
-                throw new ArgumentException("You should have at least one point in points.");
+                throw new ArgumentEmptyException(nameof(points));
 
             var sqDistX = Vector3.DistanceSquared(maxx, minx);
             var sqDistY = Vector3.DistanceSquared(maxy, miny);
@@ -320,20 +249,20 @@ namespace MonoGame.Framework
             // Pick the pair of most distant points.
             var min = minx;
             var max = maxx;
-            if (sqDistY > sqDistX && sqDistY > sqDistZ) 
+            if (sqDistY > sqDistX && sqDistY > sqDistZ)
             {
                 max = maxy;
                 min = miny;
             }
-            if (sqDistZ > sqDistX && sqDistZ > sqDistY) 
+            if (sqDistZ > sqDistX && sqDistZ > sqDistY)
             {
                 max = maxz;
                 min = minz;
             }
-            
+
             var center = (min + max) * 0.5f;
             var radius = Vector3.Distance(max, center);
-            
+
             // Test every point and expand the sphere.
             // The current bounding sphere is just a good approximation and may not enclose all points.            
             // From: Mathematics for 3D Game Programming and Computer Graphics, Eric Lengyel, Third Edition.
@@ -341,7 +270,87 @@ namespace MonoGame.Framework
             float sqRadius = radius * radius;
             foreach (var pt in points)
             {
-                Vector3 diff = (pt-center);
+                Vector3 diff = (pt - center);
+                float sqDist = diff.LengthSquared();
+                if (sqDist > sqRadius)
+                {
+                    float distance = (float)Math.Sqrt(sqDist); // equal to diff.Length();
+                    Vector3 direction = diff / distance;
+                    Vector3 G = center - radius * direction;
+                    center = (G + pt) / 2;
+                    radius = Vector3.Distance(pt, center);
+                    sqRadius = radius * radius;
+                }
+            }
+
+            return new BoundingSphere(center, radius);
+        }
+
+        /// <summary>
+        /// Creates the smallest <see cref="BoundingSphere"/> that can contain a specified list of points in 3D-space. 
+        /// </summary>
+        /// <param name="points">Span of points to create the sphere from.</param>
+        /// <returns>The new <see cref="BoundingSphere"/>.</returns>
+        public static BoundingSphere CreateFromPoints(ReadOnlySpan<Vector3> points)
+        {
+            if (points.IsEmpty)
+                throw new ArgumentEmptyException(nameof(points));
+
+            // From "Real-Time Collision Detection" (Page 89)
+
+            var minx = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+            var maxx = -minx;
+            var miny = minx;
+            var maxy = -minx;
+            var minz = minx;
+            var maxz = -minx;
+
+            // Find the most extreme points along the principle axis.
+            foreach (Vector3 pt in points)
+            {
+                if (pt.X < minx.X)
+                    minx = pt;
+                if (pt.X > maxx.X)
+                    maxx = pt;
+                if (pt.Y < miny.Y)
+                    miny = pt;
+                if (pt.Y > maxy.Y)
+                    maxy = pt;
+                if (pt.Z < minz.Z)
+                    minz = pt;
+                if (pt.Z > maxz.Z)
+                    maxz = pt;
+            }
+
+            var sqDistX = Vector3.DistanceSquared(maxx, minx);
+            var sqDistY = Vector3.DistanceSquared(maxy, miny);
+            var sqDistZ = Vector3.DistanceSquared(maxz, minz);
+
+            // Pick the pair of most distant points.
+            var min = minx;
+            var max = maxx;
+            if (sqDistY > sqDistX && sqDistY > sqDistZ)
+            {
+                max = maxy;
+                min = miny;
+            }
+            if (sqDistZ > sqDistX && sqDistZ > sqDistY)
+            {
+                max = maxz;
+                min = minz;
+            }
+
+            var center = (min + max) * 0.5f;
+            var radius = Vector3.Distance(max, center);
+
+            // Test every point and expand the sphere.
+            // The current bounding sphere is just a good approximation and may not enclose all points.            
+            // From: Mathematics for 3D Game Programming and Computer Graphics, Eric Lengyel, Third Edition.
+            // Page 218
+            float sqRadius = radius * radius;
+            foreach (var pt in points)
+            {
+                Vector3 diff = (pt - center);
                 float sqDist = diff.LengthSquared();
                 if (sqDist > sqRadius)
                 {
@@ -363,45 +372,27 @@ namespace MonoGame.Framework
         /// <param name="original">First sphere.</param>
         /// <param name="additional">Second sphere.</param>
         /// <returns>The new <see cref="BoundingSphere"/>.</returns>
-        public static BoundingSphere CreateMerged(BoundingSphere original, BoundingSphere additional)
-        {
-            CreateMerged(ref original, ref additional, out BoundingSphere result);
-            return result;
-        }
-
-        /// <summary>
-        /// Creates the smallest <see cref="BoundingSphere"/> that can contain two spheres.
-        /// </summary>
-        /// <param name="original">First sphere.</param>
-        /// <param name="additional">Second sphere.</param>
-        /// <param name="result">The new <see cref="BoundingSphere"/> as an output parameter.</param>
-        public static void CreateMerged(ref BoundingSphere original, ref BoundingSphere additional, out BoundingSphere result)
+        public static BoundingSphere CreateMerged(
+            in BoundingSphere original, in BoundingSphere additional)
         {
             Vector3 ocenterToaCenter = Vector3.Subtract(additional.Center, original.Center);
             float distance = ocenterToaCenter.Length();
             if (distance <= original.Radius + additional.Radius)//intersect
             {
                 if (distance <= original.Radius - additional.Radius)//original contain additional
-                {
-                    result = original;
-                    return;
-                }
+                    return original;
                 if (distance <= additional.Radius - original.Radius)//additional contain original
-                {
-                    result = additional;
-                    return;
-                }
+                    return original;
             }
+            
             //else find center of new sphere and radius
             float leftRadius = Math.Max(original.Radius - distance, additional.Radius);
             float Rightradius = Math.Max(original.Radius + distance, additional.Radius);
             ocenterToaCenter += (((leftRadius - Rightradius) / (2 * ocenterToaCenter.Length())) * ocenterToaCenter);//oCenterToResultCenter
 
-            result = new BoundingSphere
-            {
-                Center = original.Center + ocenterToaCenter,
-                Radius = (leftRadius + Rightradius) / 2
-            };
+            return new BoundingSphere(
+                original.Center + ocenterToaCenter,
+                (leftRadius + Rightradius) / 2);
         }
 
         /// <summary>
@@ -411,20 +402,17 @@ namespace MonoGame.Framework
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
         public bool Equals(BoundingSphere other)
         {
-            return Center == other.Center && Radius == other.Radius;
+            return this == other;
         }
 
         /// <summary>
-        /// Compares whether current instance is equal to specified <see cref="Object"/>.
+        /// Compares whether current instance is equal to specified <see cref="object"/>.
         /// </summary>
-        /// <param name="obj">The <see cref="Object"/> to compare.</param>
+        /// <param name="obj">The <see cref="object"/> to compare.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
         public override bool Equals(object obj)
         {
-            if (obj is BoundingSphere)
-                return Equals((BoundingSphere)obj);
-
-            return false;
+            return obj is BoundingSphere other ? this == other : false;
         }
 
         /// <summary>
@@ -439,62 +427,31 @@ namespace MonoGame.Framework
         #region Intersects
 
         /// <summary>
-        /// Gets whether or not a specified <see cref="BoundingBox"/> intersects with this sphere.
+        /// Gets whether or not a specified box intersects with this sphere.
         /// </summary>
         /// <param name="box">The box for testing.</param>
         /// <returns><c>true</c> if <see cref="BoundingBox"/> intersects with this sphere; <c>false</c> otherwise.</returns>
-        public bool Intersects(BoundingBox box)
+        public bool Intersects(in BoundingBox box)
         {
-			return box.Intersects(this);
+            return box.Intersects(this);
         }
 
-        /// <summary>
-        /// Gets whether or not a specified <see cref="BoundingBox"/> intersects with this sphere.
-        /// </summary>
-        /// <param name="box">The box for testing.</param>
-        /// <param name="result"><c>true</c> if <see cref="BoundingBox"/> intersects with this sphere; <c>false</c> otherwise. As an output parameter.</param>
-        public void Intersects(ref BoundingBox box, out bool result)
-        {
-            box.Intersects(ref this, out result);
-        }
-
-        /*
-        TODO : Make the public bool Intersects(BoundingFrustum frustum) overload
-
-        public bool Intersects(BoundingFrustum frustum)
-        {
-            if (frustum == null)
-                throw new NullReferenceException();
-
-            throw new NotImplementedException();
-        }
-
-        */
+        //public bool Intersects(BoundingFrustum frustum, out float distance)
+        //{
+        //    if (frustum == null)
+        //        throw new ArgumentNullException(nameof(frustum));
+        //    return frustum.Intersects(this, out distance);
+        //}
 
         /// <summary>
         /// Gets whether or not the other <see cref="BoundingSphere"/> intersects with this sphere.
         /// </summary>
         /// <param name="sphere">The other sphere for testing.</param>
         /// <returns><c>true</c> if other <see cref="BoundingSphere"/> intersects with this sphere; <c>false</c> otherwise.</returns>
-        public bool Intersects(BoundingSphere sphere)
+        public bool Intersects(in BoundingSphere sphere)
         {
-            Intersects(ref sphere, out bool result);
-            return result;
-        }
-
-        /// <summary>
-        /// Gets whether or not the other <see cref="BoundingSphere"/> intersects with this sphere.
-        /// </summary>
-        /// <param name="sphere">The other sphere for testing.</param>
-        /// <param name="result"><c>true</c> if other <see cref="BoundingSphere"/> intersects with this sphere; <c>false</c> otherwise. As an output parameter.</param>
-        public void Intersects(ref BoundingSphere sphere, out bool result)
-        {
-            Vector3.DistanceSquared(ref sphere.Center, ref Center, out float sqDistance);
-
-            if (sqDistance > (sphere.Radius + Radius) * (sphere.Radius + Radius))
-                result = false;
-            else
-                result = true;
+            float sqDistance = Vector3.DistanceSquared(sphere.Center, Center);
+            return !(sqDistance > (sphere.Radius + Radius) * (sphere.Radius + Radius));
         }
 
         /// <summary>
@@ -502,92 +459,55 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="plane">The plane for testing.</param>
         /// <returns>Type of intersection.</returns>
-        public PlaneIntersectionType Intersects(Plane plane)
+        public PlaneIntersectionType Intersects(in Plane plane)
         {
             // TODO: we might want to inline this for performance reasons
-            Intersects(ref plane, out PlaneIntersectionType result);
-            return result;
-        }
-
-        /// <summary>
-        /// Gets whether or not a specified <see cref="Plane"/> intersects with this sphere.
-        /// </summary>
-        /// <param name="plane">The plane for testing.</param>
-        /// <param name="result">Type of intersection as an output parameter.</param>
-        public void Intersects(ref Plane plane, out PlaneIntersectionType result)
-        {
-            // TODO: we might want to inline this for performance reasons
-            Vector3.Dot(ref plane.Normal, ref Center, out float distance);
+            float distance = Vector3.Dot(plane.Normal, Center);
             distance += plane.D;
+
             if (distance > Radius)
-                result = PlaneIntersectionType.Front;
-            else if (distance < -Radius)
-                result = PlaneIntersectionType.Back;
-            else
-                result = PlaneIntersectionType.Intersecting;
+                return PlaneIntersectionType.Front;
+            if (distance < -Radius)
+                return PlaneIntersectionType.Back;
+            return PlaneIntersectionType.Intersecting;
         }
 
         /// <summary>
         /// Gets whether or not a specified <see cref="Ray"/> intersects with this sphere.
         /// </summary>
         /// <param name="ray">The ray for testing.</param>
-        /// <returns>Distance of ray intersection or <c>null</c> if there is no intersection.</returns>
-        public float? Intersects(Ray ray)
+        /// <param name="distance">Distance of ray intersection.</param>
+        /// <returns>Whether the ray intersects this sphere.</returns>
+        public bool Intersects(in Ray ray, out float distance)
         {
-            return ray.Intersects(this);
-        }
-
-        /// <summary>
-        /// Gets whether or not a specified <see cref="Ray"/> intersects with this sphere.
-        /// </summary>
-        /// <param name="ray">The ray for testing.</param>
-        /// <param name="result">Distance of ray intersection or <c>null</c> if there is no intersection as an output parameter.</param>
-        public void Intersects(ref Ray ray, out float? result)
-        {
-            ray.Intersects(ref this, out result);
+            return ray.Intersects(this, out distance);
         }
 
         #endregion
 
         /// <summary>
-        /// Returns a <see cref="String"/> representation of this <see cref="BoundingSphere"/> in the format:
+        /// Returns a <see cref="string"/> representation of this <see cref="BoundingSphere"/> in the format:
         /// {Center:[<see cref="Center"/>] Radius:[<see cref="Radius"/>]}
         /// </summary>
-        /// <returns>A <see cref="String"/> representation of this <see cref="BoundingSphere"/>.</returns>
+        /// <returns>A <see cref="string"/> representation of this <see cref="BoundingSphere"/>.</returns>
         public override string ToString()
         {
             return "{Center:" + Center + " Radius:" + Radius + "}";
         }
-
-        #region Transform
 
         /// <summary>
         /// Creates a new <see cref="BoundingSphere"/> that contains a transformation of translation and scale from this sphere by the specified <see cref="Matrix"/>.
         /// </summary>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
         /// <returns>Transformed <see cref="BoundingSphere"/>.</returns>
-        public BoundingSphere Transform(Matrix matrix)
+        public BoundingSphere Transform(in Matrix matrix)
         {
-            BoundingSphere sphere = new BoundingSphere
-            {
-                Center = Vector3.Transform(Center, matrix),
-                Radius = Radius * ((float)Math.Sqrt(Math.Max(((matrix.M11 * matrix.M11) + (matrix.M12 * matrix.M12)) + (matrix.M13 * matrix.M13), Math.Max(((matrix.M21 * matrix.M21) + (matrix.M22 * matrix.M22)) + (matrix.M23 * matrix.M23), ((matrix.M31 * matrix.M31) + (matrix.M32 * matrix.M32)) + (matrix.M33 * matrix.M33)))))
-            };
-            return sphere;
+            float v1 = (matrix.M11 * matrix.M11) + (matrix.M12 * matrix.M12) + (matrix.M13 * matrix.M13);
+            float v2 = (matrix.M21 * matrix.M21) + (matrix.M22 * matrix.M22) + (matrix.M23 * matrix.M23);
+            float v3 = (matrix.M31 * matrix.M31) + (matrix.M32 * matrix.M32) + (matrix.M33 * matrix.M33);
+            return new BoundingSphere(
+                Vector3.Transform(Center, matrix), Radius * (float)Math.Sqrt(Math.Max(v1, Math.Max(v2, v3))));
         }
-
-        /// <summary>
-        /// Creates a new <see cref="BoundingSphere"/> that contains a transformation of translation and scale from this sphere by the specified <see cref="Matrix"/>.
-        /// </summary>
-        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
-        /// <param name="result">Transformed <see cref="BoundingSphere"/> as an output parameter.</param>
-        public void Transform(ref Matrix matrix, out BoundingSphere result)
-        {
-            result.Center = Vector3.Transform(Center, matrix);
-            result.Radius = Radius * ((float)Math.Sqrt(Math.Max(((matrix.M11 * matrix.M11) + (matrix.M12 * matrix.M12)) + (matrix.M13 * matrix.M13), Math.Max(((matrix.M21 * matrix.M21) + (matrix.M22 * matrix.M22)) + (matrix.M23 * matrix.M23), ((matrix.M31 * matrix.M31) + (matrix.M32 * matrix.M32)) + (matrix.M33 * matrix.M33)))));
-        }
-
-        #endregion
 
         /// <summary>
         /// Deconstruction method for <see cref="BoundingSphere"/>.
@@ -610,9 +530,10 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="BoundingSphere"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="BoundingSphere"/> instance on the right of the equal sign.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public static bool operator == (BoundingSphere a, BoundingSphere b)
+        public static bool operator ==(in BoundingSphere a, in BoundingSphere b)
         {
-            return a.Equals(b);
+            return a.Center == b.Center
+                && a.Radius == b.Radius;
         }
 
         /// <summary>
@@ -621,7 +542,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="BoundingSphere"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="BoundingSphere"/> instance on the right of the not equal sign.</param>
         /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>
-        public static bool operator != (BoundingSphere a, BoundingSphere b)
+        public static bool operator !=(in BoundingSphere a, in BoundingSphere b)
         {
             return !a.Equals(b);
         }

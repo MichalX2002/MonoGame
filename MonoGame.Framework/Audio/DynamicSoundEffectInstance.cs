@@ -87,7 +87,7 @@ namespace MonoGame.Framework.Audio
         {
             SoundEffect.Initialize();
             if (SoundEffect._systemState != SoundEffect.SoundSystemState.Initialized)
-                throw new NoAudioHardwareException("Audio has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
+                throw new AudioHardwareException("Audio has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
 
             if ((sampleRate < 8000) || (sampleRate > 48000))
                 throw new ArgumentOutOfRangeException(nameof(sampleRate));
@@ -246,7 +246,7 @@ namespace MonoGame.Framework.Audio
             AssertNotDisposed();
 
             if (data.IsEmpty)
-                throw new ArgumentException("Span is empty.", nameof(data));
+                throw new ArgumentEmptyException(nameof(data));
 
             PlatformSubmitBuffer(data);
         }

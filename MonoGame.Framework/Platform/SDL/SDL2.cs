@@ -185,9 +185,14 @@ internal static class Sdl
             return string.Empty;
 
         IntPtr data = SDL_GetClipboardText();
-        string value = InteropHelpers.PtrToString(data);
-        SDL_free(data);
-        return value;
+        try
+        {
+            return InteropHelpers.PtrToString(data);
+        }
+        finally
+        {
+            SDL_free(data);
+        }
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -313,23 +318,24 @@ internal static class Sdl
             Close,
         }
 
-        public static class State
+        [Flags]
+        public enum State
         {
-            public const int Fullscreen = 0x00000001;
-            public const int OpenGL = 0x00000002;
-            public const int Shown = 0x00000004;
-            public const int Hidden = 0x00000008;
-            public const int Borderless = 0x00000010;
-            public const int Resizable = 0x00000020;
-            public const int Minimized = 0x00000040;
-            public const int Maximized = 0x00000080;
-            public const int Grabbed = 0x00000100;
-            public const int InputFocus = 0x00000200;
-            public const int MouseFocus = 0x00000400;
-            public const int FullscreenDesktop = 0x00001001;
-            public const int Foreign = 0x00000800;
-            public const int AllowHighDPI = 0x00002000;
-            public const int MouseCapture = 0x00004000;
+            Fullscreen = 0x00000001,
+            OpenGL = 0x00000002,
+            Shown = 0x00000004,
+            Hidden = 0x00000008,
+            Borderless = 0x00000010,
+            Resizable = 0x00000020,
+            Minimized = 0x00000040,
+            Maximized = 0x00000080,
+            Grabbed = 0x00000100,
+            InputFocus = 0x00000200,
+            MouseFocus = 0x00000400,
+            FullscreenDesktop = 0x00001001,
+            Foreign = 0x00000800,
+            AllowHighDPI = 0x00002000,
+            MouseCapture = 0x00004000
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -377,10 +383,10 @@ internal static class Sdl
         //public static readonly d_sdl_restorewindow RestoreWindow = FuncLoader.LoadFunction<d_sdl_restorewindow>(NativeLibrary, "SDL_RestoreWindow");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate IntPtr d_sdl_createwindow(string title, int x, int y, int w, int h, int flags);
+        private delegate IntPtr d_sdl_createwindow(string title, int x, int y, int w, int h, State flags);
         private static readonly d_sdl_createwindow SDL_CreateWindow = FL.LoadFunction<d_sdl_createwindow>(NativeLibrary, "SDL_CreateWindow");
 
-        public static IntPtr Create(string title, int x, int y, int w, int h, int flags)
+        public static IntPtr Create(string title, int x, int y, int w, int h, State flags)
         {
             return GetError(SDL_CreateWindow(title, x, y, w, h, flags));
         }
@@ -403,7 +409,7 @@ internal static class Sdl
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate int d_sdl_getwindowflags(IntPtr window);
+        public delegate Sdl.Window.State d_sdl_getwindowflags(IntPtr window);
         public static d_sdl_getwindowflags GetWindowFlags = FL.LoadFunction<d_sdl_getwindowflags>(NativeLibrary, "SDL_GetWindowFlags");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -423,10 +429,10 @@ internal static class Sdl
         public static d_sdl_setwindowbordered SetBordered = FL.LoadFunction<d_sdl_setwindowbordered>(NativeLibrary, "SDL_SetWindowBordered");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate int d_sdl_setwindowfullscreen(IntPtr window, int flags);
+        private delegate int d_sdl_setwindowfullscreen(IntPtr window, State flags);
         private static readonly d_sdl_setwindowfullscreen SDL_SetWindowFullscreen = FL.LoadFunction<d_sdl_setwindowfullscreen>(NativeLibrary, "SDL_SetWindowFullscreen");
 
-        public static void SetFullscreen(IntPtr window, int flags)
+        public static void SetFullscreen(IntPtr window, State flags)
         {
             GetError(SDL_SetWindowFullscreen(window, flags));
         }
@@ -971,7 +977,15 @@ internal static class Sdl
 
         public static string GetMapping(IntPtr gamecontroller)
         {
-            return InteropHelpers.PtrToString(SDL_GameControllerMapping(gamecontroller));
+            IntPtr data = SDL_GameControllerMapping(gamecontroller);
+            try
+            {
+                return InteropHelpers.PtrToString(data);
+            }
+            finally
+            {
+                SDL_free(data);
+            }
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

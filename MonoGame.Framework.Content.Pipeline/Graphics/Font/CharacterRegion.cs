@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
 	// Describes a range of consecutive characters that should be included in the font.
 	[TypeConverter(typeof(CharacterRegionTypeConverter))]

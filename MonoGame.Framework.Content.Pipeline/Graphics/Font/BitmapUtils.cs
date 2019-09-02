@@ -3,9 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using SixLabors.ImageSharp.PixelFormats;
+using MonoGame.Utilities.PackedVector;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
 	// Assorted helpers for doing useful things with bitmaps.
 	internal static class BitmapUtils
@@ -21,13 +21,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                     var row = alphaBmp.GetRowSpan(bitmapRegion.Y + y);
                     for (int x = 0; x < bitmapRegion.Width; x++)
                     {
-                        if (row[bitmapRegion.X + x].PackedValue != expectedAlpha)
+                        if (row[bitmapRegion.X + x].Value != expectedAlpha)
                             return false;
                     }
                 }
                 return true;
             }
-            else if (bitmap is PixelBitmapContent<Rgba32> rgbaBmp)
+            else if (bitmap is PixelBitmapContent<Color> rgbaBmp)
             {
                 for (int y = 0; y < bitmapRegion.Height; y++)
                 {

@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     public static class MeshHelper
     {
@@ -79,7 +79,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 var len = faceNormal.Length();
                 if (len > 0.0f)
                 {
-                    faceNormal = faceNormal / len;
+                    faceNormal /= len;
 
                     // We are using the "Mean Weighted Equally" method where each
                     // face has an equal weight in the final normal calculation.
@@ -552,7 +552,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
                 // Transform the mesh content.
                 if (node is MeshContent mesh)
-                    mesh.TransformContents(ref transform);
+                    mesh.TransformContents(transform);
 
                 // Transform local coordinate system using "similarity transform".
                 node.Transform = inverseTransform * node.Transform * transform;
@@ -573,7 +573,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <see langword="true"/> if <paramref name="xform"/> is left-handed; otherwise,
         /// <see langword="false"/> if <paramref name="xform"/> is right-handed.
         /// </returns>
-        internal static bool IsLeftHanded(ref Matrix xform)
+        internal static bool IsLeftHanded(in Matrix xform)
         {
             // Check sign of determinant of upper-left 3x3 matrix:
             //   positive determinant ... right-handed

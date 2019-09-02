@@ -3,12 +3,11 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Runtime.InteropServices;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
+using MonoGame.Utilities.PackedVector;
 using PVRTexLibNET;
-using SixLabors.ImageSharp.PixelFormats;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     public abstract class PvrtcBitmapContent : BitmapContent
     {

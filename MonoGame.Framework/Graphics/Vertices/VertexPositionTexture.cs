@@ -18,10 +18,8 @@ namespace MonoGame.Framework.Graphics
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                return (Position.GetHashCode() * 397) ^ TextureCoordinate.GetHashCode();
-            }
+            int code = Position.GetHashCode();
+            return code * 23 + TextureCoordinate.GetHashCode();
         }
 
         public override string ToString()

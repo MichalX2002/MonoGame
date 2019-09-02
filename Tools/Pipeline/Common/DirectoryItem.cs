@@ -27,23 +27,11 @@ namespace MonoGame.Tools.Pipeline
 
         [Category("Common")]
         [Description("The file name of this item.")]
-        public string Name
-        {
-            get
-            {
-                return Path.GetFileName(OriginalPath);
-            }
-        }
+        public string Name => Path.GetFileName(OriginalPath);
 
         [Category("Common")]
         [Description("The folder where this item is located.")]
-        public string Location
-        {
-            get
-            {
-                return Path.GetDirectoryName(OriginalPath);
-            }
-        }
+        public string Location => Path.GetDirectoryName(OriginalPath);
 
         [Browsable(false)]
         public bool Exists { get; set; }
@@ -57,8 +45,8 @@ namespace MonoGame.Tools.Pipeline
         [Browsable(false)]
         public string DestinationPath
         {
-            get { return OriginalPath; }
-            set { OriginalPath = value; }
+            get => OriginalPath;
+            set => OriginalPath = value;
         }
 
         #endregion

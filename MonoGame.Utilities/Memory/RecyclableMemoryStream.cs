@@ -500,24 +500,16 @@ namespace MonoGame.Utilities.Memory
         {
             CheckDisposed();
             if (buffer == null)
-            {
                 throw new ArgumentNullException(nameof(buffer));
-            }
 
             if (offset < 0)
-            {
                 throw new ArgumentOutOfRangeException(nameof(offset), "offset cannot be negative");
-            }
 
             if (count < 0)
-            {
                 throw new ArgumentOutOfRangeException(nameof(count), "count cannot be negative");
-            }
 
             if (offset + count > buffer.Length)
-            {
                 throw new ArgumentException("buffer length must be at least offset + count");
-            }
 
             int amountRead = InternalRead(buffer, offset, count, streamPosition);
             streamPosition += amountRead;

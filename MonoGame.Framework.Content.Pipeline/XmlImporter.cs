@@ -3,9 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System.Xml;
-using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate;
+using MonoGame.Framework.Content.Pipeline.Serialization.Intermediate;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline
+namespace MonoGame.Framework.Content.Pipeline
 {
     /// <summary>
     /// Implements an importer for reading intermediate XML files. This is a wrapper around IntermediateSerializer.

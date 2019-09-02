@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using MonoGame.Utilities;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -22,7 +21,8 @@ namespace MonoGame.Framework.Graphics
 
         internal TextureCube(GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format, bool renderTarget)
         {
-            GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
+            GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
+                nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
 
             if (size <= 0)
                 throw new ArgumentOutOfRangeException(nameof(size), "Cube size must be greater than zero");
@@ -40,44 +40,53 @@ namespace MonoGame.Framework.Graphics
         /// <typeparam name="T"></typeparam>
         /// <param name="cubeMapFace">The cube map face.</param>
         /// <param name="data">The data.</param>
-        public void GetData<T>(CubeMapFace cubeMapFace, T[] data) where T : struct
+        public void GetData<T>(CubeMapFace cubeMapFace, T[] data)
+            where T : unmanaged
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
             GetData(cubeMapFace, 0, null, data, 0, data.Length);
         }
 
-	    public void GetData<T>(CubeMapFace cubeMapFace, T[] data, int startIndex, int elementCount) where T : struct
-	    {
+	    public void GetData<T>(CubeMapFace cubeMapFace, T[] data, int startIndex, int elementCount)
+            where T : unmanaged
+        {
 	        GetData(cubeMapFace, 0, null, data, startIndex, elementCount);
 	    }
 
-	    public void GetData<T>(CubeMapFace cubeMapFace, int level, Rectangle? rect, T[] data, int startIndex, int elementCount) where T : struct
-	    {
+	    public void GetData<T>(
+            CubeMapFace cubeMapFace, int level, Rectangle? rect, T[] data, int startIndex, int elementCount)
+            where T : unmanaged
+        {
             ValidateParams(level, rect, data, startIndex, elementCount, out Rectangle checkedRect);
             PlatformGetData(cubeMapFace, level, checkedRect, data, startIndex, elementCount);
 	    }
 
-		public void SetData<T> (CubeMapFace face, T[] data) where T : struct
-		{
+		public void SetData<T> (CubeMapFace face, T[] data)
+            where T : unmanaged
+        {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
             SetData(face, 0, null, data, 0, data.Length);
 		}
 
-        public void SetData<T>(CubeMapFace face, T[] data, int startIndex, int elementCount) where T : struct
-		{
+        public void SetData<T>(CubeMapFace face, T[] data, int startIndex, int elementCount)
+            where T : unmanaged
+        {
             SetData(face, 0, null, data, startIndex, elementCount);
 		}
 		
-        public void SetData<T>(CubeMapFace face, int level, Rectangle? rect, T[] data, int startIndex, int elementCount) where T : struct
+        public void SetData<T>(CubeMapFace face, int level, Rectangle? rect, T[] data, int startIndex, int elementCount)
+            where T : unmanaged
         {
             ValidateParams(level, rect, data, startIndex, elementCount, out Rectangle checkedRect);
             PlatformSetData(face, level, checkedRect, data, startIndex, elementCount);
 		}
 
-        private void ValidateParams<T>(int level, Rectangle? rect, T[] data, int startIndex,
-            int elementCount, out Rectangle checkedRect) where T : struct
+        private unsafe void ValidateParams<T>(
+            int level, Rectangle? rect, T[] data, int startIndex,
+            int elementCount, out Rectangle checkedRect) 
+            where T : unmanaged
         {
             var textureBounds = new Rectangle(0, 0, Math.Max(Size >> level, 1), Math.Max(Size >> level, 1));
             checkedRect = rect ?? textureBounds;
@@ -92,9 +101,8 @@ namespace MonoGame.Framework.Graphics
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
             
-            var tSize = ReflectionHelpers.SizeOf<T>.Get();
             var fSize = Format.GetSize();
-            if (tSize > fSize || fSize % tSize != 0)
+            if (sizeof(T) > fSize || fSize % sizeof(T) != 0)
                 throw new ArgumentException(
                     $"Type {nameof(T)} is of an invalid size for the format of this texture.", nameof(T));
 
@@ -128,10 +136,11 @@ namespace MonoGame.Framework.Graphics
             {
                 dataByteSize = checkedRect.Width * checkedRect.Height * fSize;
             }
-            if (elementCount * tSize != dataByteSize)
-                throw new ArgumentException($"{nameof(elementCount)} is not the right size, " +
-                                            $"{nameof(elementCount)} * sizeof({nameof(T)}) is {elementCount * tSize}, " +
-                                            $"but data size is {dataByteSize}.", nameof(elementCount));
+            if (elementCount * sizeof(T) != dataByteSize)
+                throw new ArgumentException(
+                    $"{nameof(elementCount)} is not the right size, " +
+                    $"{nameof(elementCount)} * sizeof({nameof(T)}) is {elementCount * sizeof(T)}, " +
+                    $"but data size is {dataByteSize}.", nameof(elementCount));
         }
 	}
 }

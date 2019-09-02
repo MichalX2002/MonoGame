@@ -8,12 +8,11 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Microsoft.Win32;
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
+using MonoGame.Framework.Content.Pipeline.Graphics;
 using MonoGame.Utilities;
-using SixLabors.ImageSharp.PixelFormats;
-using Glyph = Microsoft.Xna.Framework.Content.Pipeline.Graphics.Glyph;
+using Glyph = MonoGame.Framework.Content.Pipeline.Graphics.Glyph;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
 	[ContentProcessor(DisplayName = "Sprite Font Description - MonoGame")]
 	public class FontDescriptionProcessor : ContentProcessor<FontDescription, SpriteFontContent>
@@ -116,7 +115,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 			{
 				for (int i = 0; i < facePixels.Length; i++)
 				{
-					ref Rgba32 pixel = ref facePixels[i];
+					ref Color pixel = ref facePixels[i];
 
 					// A is the value of white alpha we want
 					pixel.R = pixel.A;
@@ -128,7 +127,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 			{
 				for (int i = 0; i < facePixels.Length; i++)
 				{
-					ref Rgba32 pixel = ref facePixels[i];
+					ref Color pixel = ref facePixels[i];
 					pixel.R = 255;
 					pixel.G = 255;
 					pixel.B = 255;
@@ -207,7 +206,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                             if (nulIndex != -1)
                                 fontPath = fontPath.Substring(0, nulIndex);
 
-						return Path.IsPathRooted(fontPath) ? fontPath : Path.Combine(fontDirectory, fontPath);
+                            return Path.IsPathRooted(fontPath) ? fontPath : Path.Combine(fontDirectory, fontPath);
+                        }
 					}
 				}
 			}
@@ -244,7 +244,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 				return split[0];
 			}
 
-			return String.Empty;
+			return string.Empty;
 		}
 	}
 }

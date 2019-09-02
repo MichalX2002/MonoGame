@@ -57,25 +57,31 @@ namespace MonoGame.Framework.Graphics
         /// Note that this pulls data from VRAM into main memory and because of that it's an expensive operation.
         /// It is often a better idea to keep a copy of the data in main memory.
         /// </remarks>
-        public void GetData<T>(
+        public unsafe void GetData<T>(
             int offsetInBytes, Span<T> destination, int destinationStride = 0)
             where T : unmanaged
         {
-            if (destinationStride == 0)
-                destinationStride = ReflectionHelpers.SizeOf<T>.Get();
-
-            var vertexByteSize = Capacity * VertexDeclaration.VertexStride;
-            if (destinationStride > vertexByteSize)
-                throw new ArgumentOutOfRangeException(
-                    nameof(destinationStride), "Vertex stride can not be larger than the vertex buffer size.");
-
             if (BufferUsage == BufferUsage.WriteOnly)
-                throw new NotSupportedException(
+                throw new InvalidOperationException(
                     $"Calling {nameof(GetData)} on a resource that was created with {BufferUsage.WriteOnly} is not supported.");
 
-            if (destination.Length * destinationStride > vertexByteSize)
-                throw new InvalidOperationException(
-                    "The span is not the correct size for the amount of data requested.");
+            if (destinationStride == 0)
+                destinationStride = sizeof(T);
+
+            int bufferSize = Capacity * VertexDeclaration.VertexStride;
+            int requestedBytes = destination.Length * destinationStride;
+
+            if (destinationStride > bufferSize)
+                throw new ArgumentOutOfRangeException(
+                    nameof(destinationStride), "The vertex stride may not be larger than the buffer capacity.");
+
+            if (requestedBytes > bufferSize)
+                throw new ArgumentOutOfRangeException(
+                    nameof(destination), "The amount of data requested exceeds the buffer capacity.");
+
+            if (offsetInBytes + requestedBytes > bufferSize)
+                throw new ArgumentOutOfRangeException(
+                    nameof(offsetInBytes), "The requested range reaches beyond the buffer.");
 
             PlatformGetData(offsetInBytes, destination, destinationStride);
         }
@@ -120,7 +126,7 @@ namespace MonoGame.Framework.Graphics
             where T : unmanaged
         {
             if (data.IsEmpty)
-                throw new ArgumentNullException(nameof(data));
+                throw new ArgumentEmptyException(nameof(data));
 
             if (dataStride == 0)
                 dataStride = sizeof(T);

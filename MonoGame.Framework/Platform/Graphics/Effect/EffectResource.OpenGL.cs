@@ -6,11 +6,14 @@ namespace MonoGame.Framework.Graphics
 {
     internal partial class EffectResource
     {
-        const string AlphaTestEffectName = "Microsoft.Xna.Framework.Platform.Graphics.Effect.Resources.AlphaTestEffect.ogl.mgfxo";
-        const string BasicEffectName = "Microsoft.Xna.Framework.Platform.Graphics.Effect.Resources.BasicEffect.ogl.mgfxo";
-        const string DualTextureEffectName = "Microsoft.Xna.Framework.Platform.Graphics.Effect.Resources.DualTextureEffect.ogl.mgfxo";
-        const string EnvironmentMapEffectName = "Microsoft.Xna.Framework.Platform.Graphics.Effect.Resources.EnvironmentMapEffect.ogl.mgfxo";
-        const string SkinnedEffectName = "Microsoft.Xna.Framework.Platform.Graphics.Effect.Resources.SkinnedEffect.ogl.mgfxo";
-        const string SpriteEffectName = "Microsoft.Xna.Framework.Platform.Graphics.Effect.Resources.SpriteEffect.ogl.mgfxo";
+        private const string PathRoot =
+            nameof(MonoGame) + "." + nameof(Framework) + ".Platform.Graphics.Effect.Resources.";
+
+        const string AlphaTestEffectName = PathRoot + "AlphaTestEffect.ogl.mgfxo";
+        const string BasicEffectName = PathRoot + "BasicEffect.ogl.mgfxo";
+        const string DualTextureEffectName = PathRoot + "DualTextureEffect.ogl.mgfxo";
+        const string EnvironmentMapEffectName = PathRoot + "EnvironmentMapEffect.ogl.mgfxo";
+        const string SkinnedEffectName = PathRoot + "SkinnedEffect.ogl.mgfxo";
+        const string SpriteEffectName = PathRoot + "SpriteEffect.ogl.mgfxo";
     }
 }

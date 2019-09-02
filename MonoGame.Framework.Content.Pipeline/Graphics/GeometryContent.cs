@@ -2,17 +2,18 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Provides properties that define various aspects of a geometry batch.
     /// </summary>
     public class GeometryContent : ContentItem
     {
-        VertexContent vertices;
-
         /// <summary>
-        /// Gets the list of triangle indices for this geometry batch. Geometry is stored as an indexed triangle list, where each group of three indices defines a single triangle.
+        /// Gets the list of triangle indices for this geometry batch. 
+        /// <para>
+        /// Geometry is stored as an indexed triangle list, where each group of three indices defines a single triangle.
+        /// </para>
         /// </summary>
         public IndexCollection Indices { get; }
 
@@ -22,28 +23,22 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         public MaterialContent Material { get; set; }
 
         /// <summary>
-        /// Gets or sets the parent MeshContent for this object.
+        /// Gets or sets the parent mesh for this object.
         /// </summary>
         public MeshContent Parent { get; set; }
 
         /// <summary>
         /// Gets the set of vertex batches for the geometry batch.
         /// </summary>
-        public VertexContent Vertices
-        {
-            get
-            {
-                return vertices;
-            }
-        }
+        public VertexContent Vertices { get; }
 
         /// <summary>
-        /// Creates an instance of GeometryContent.
+        /// Creates an instance of <see cref="GeometryContent"/>.
         /// </summary>
         public GeometryContent()
         {
             Indices = new IndexCollection();
-            vertices = new VertexContent(this);
+            Vertices = new VertexContent(this);
         }
     }
 }

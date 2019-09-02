@@ -4,11 +4,11 @@
 
 using System;
 using System.ComponentModel;
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
-using Microsoft.Xna.Framework.Graphics;
-using SixLabors.ImageSharp.PixelFormats;
+using MonoGame.Framework.Content.Pipeline.Graphics;
+using MonoGame.Framework.Graphics;
+using MonoGame.Utilities.PackedVector;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     [ContentProcessor(DisplayName="Texture - MonoGame")]
     public class TextureProcessor : ContentProcessor<TextureContent, TextureContent>
@@ -20,15 +20,15 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             PremultiplyAlpha = true;
         }
 
-        [DefaultValueAttribute(typeof(Color), "255,0,255,255")]
+        [DefaultValue(typeof(Color), "255,0,255,255")]
         public virtual Color ColorKeyColor { get; set; }
 
-        [DefaultValueAttribute(true)]
+        [DefaultValue(true)]
         public virtual bool ColorKeyEnabled { get; set; }
 
         public virtual bool GenerateMipmaps { get; set; }
 
-        [DefaultValueAttribute(true)]
+        [DefaultValue(true)]
         public virtual bool PremultiplyAlpha { get; set; }
 
         public virtual bool ResizeToPowerOfTwo { get; set; }

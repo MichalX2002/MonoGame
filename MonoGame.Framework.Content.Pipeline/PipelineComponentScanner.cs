@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline
+namespace MonoGame.Framework.Content.Pipeline
 {
     /// <summary>
     /// Implements a scanner object containing the available importers and processors for an application. Designed for internal use only.
@@ -23,47 +23,47 @@ namespace Microsoft.Xna.Framework.Content.Pipeline
         /// <summary>
         /// Gets the list of error messages produced by the last call to Update.
         /// </summary>
-        public IList<string> Errors { get { return errors; } }
+        public IList<string> Errors => errors;
 
         /// <summary>
         /// Gets a dictionary that maps importer names to their associated metadata attributes.
         /// </summary>
-        public IDictionary<string, ContentImporterAttribute> ImporterAttributes { get { return importerAttributes; } }
+        public IDictionary<string, ContentImporterAttribute> ImporterAttributes => importerAttributes;
 
         /// <summary>
         /// Gets the names of all available importers.
         /// </summary>
-        public IEnumerable<string> ImporterNames { get { return importerAttributes.Keys; } }
+        public IEnumerable<string> ImporterNames => importerAttributes.Keys;
 
         /// <summary>
         /// Gets a dictionary that maps importer names to the fully qualified name of their return types.
         /// </summary>
-        public IDictionary<string, string> ImporterOutputTypes { get { return importerOutputTypes; } }
+        public IDictionary<string, string> ImporterOutputTypes => importerOutputTypes;
 
         /// <summary>
         /// Gets a dictionary that maps processor names to their associated metadata attributes.
         /// </summary>
-        public IDictionary<string, ContentProcessorAttribute> ProcessorAttributes { get { return processorAttributes; } }
+        public IDictionary<string, ContentProcessorAttribute> ProcessorAttributes => processorAttributes;
 
         /// <summary>
         /// Gets a dictionary that maps processor names to the fully qualified name of supported input types.
         /// </summary>
-        public IDictionary<string, string> ProcessorInputTypes { get { return processorInputTypes; } }
+        public IDictionary<string, string> ProcessorInputTypes => processorInputTypes;
 
         /// <summary>
         /// Gets the names of all available processors.
         /// </summary>
-        public IEnumerable<string> ProcessorNames { get { return processorAttributes.Keys; } }
+        public IEnumerable<string> ProcessorNames => processorAttributes.Keys;
 
         /// <summary>
         /// Gets a dictionary that maps processor names to the fully qualified name of their output types.
         /// </summary>
-        public IDictionary<string, string> ProcessorOutputTypes { get { return processorOutputTypes; } }
+        public IDictionary<string, string> ProcessorOutputTypes => processorOutputTypes;
 
         /// <summary>
         /// A collection of supported processor parameters.
         /// </summary>
-        public IDictionary<string, ProcessorParameterCollection> ProcessorParameters { get { return processorParameters; } }
+        public IDictionary<string, ProcessorParameterCollection> ProcessorParameters => processorParameters;
 
         /// <summary>
         /// Initializes a new instance of PipelineComponentScanner.

@@ -2,13 +2,12 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using MonoGame.Utilities.PackedVector;
 using SharpFont;
-using SixLabors.ImageSharp.PixelFormats;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
+namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
 	// Uses FreeType to rasterize TrueType fonts into a series of glyph bitmaps.
 	internal class SharpFontImporter : IFontImporter

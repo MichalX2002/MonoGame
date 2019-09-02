@@ -4,11 +4,11 @@
 
 using System;
 using System.IO;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     /// <summary>
     /// Provides methods for writing compiled binary format.

@@ -5,7 +5,7 @@
 using System;
 using TOutput = System.Single;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     /// <summary>
     /// Writes the single precision floating point value to the output.

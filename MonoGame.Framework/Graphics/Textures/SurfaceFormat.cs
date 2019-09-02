@@ -108,7 +108,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Unsigned 32-bit RGBA sRGB pixel format that supports 8 bits per channel.
         /// </summary>
-        ColorSRgb = 30,
+        Rgba32SRgb = 30,
         /// <summary>
         /// Unsigned 32-bit sRGB pixel format that supports 8 bits per channel. 8 bits are unused.
         /// </summary>

@@ -3,15 +3,11 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Buffers;
 using System.IO;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Advanced;
-using SixLabors.ImageSharp.Formats;
-using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.Memory;
+using System.Runtime.InteropServices;
+using MonoGame.Imaging;
+using MonoGame.Utilities.Memory;
+using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -139,7 +135,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="level">Layer of the texture to modify.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
         /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
-        /// <exception cref="ArgumentNullException">Throws if <paramref name="data"/> is empty.</exception>
+        /// <exception cref="ArgumentEmptyException">Throws if <paramref name="data"/> is empty.</exception>
         /// <exception cref="ArgumentException">
         ///  Throws if <paramref name="arraySlice"/> is greater than 0 and
         ///  the graphics device does not support texture arrays.
@@ -189,7 +185,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="level">Layer of the texture to modify.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
         /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
-        /// <exception cref="ArgumentNullException">Throws if <paramref name="data"/> is empty.</exception>
+        /// <exception cref="ArgumentEmptyException">Throws if <paramref name="data"/> is empty.</exception>
         /// <exception cref="ArgumentException">
         ///  Throws if <paramref name="arraySlice"/> is greater than 0 and
         ///  the graphics device does not support texture arrays.
@@ -208,7 +204,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="level">Layer of the texture to modify.</param>
         /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
         public void SetData<T>(Span<T> data, int level, Rectangle? rectangle = null)
-        where T : unmanaged
+            where T : unmanaged
         {
             SetData((ReadOnlySpan<T>)data, level, 0, rectangle);
         }
@@ -238,7 +234,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="level">Layer of the texture.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
         /// <param name="rectangle">Area of the texture; defaults to texture bounds.</param>
-        /// <exception cref="ArgumentNullException">Throws if <paramref name="destination"/> is empty.</exception>
+        /// <exception cref="ArgumentEmptyException">Throws if <paramref name="destination"/> is empty.</exception>
         /// <exception cref="ArgumentException">
         ///  Throws if <paramref name="arraySlice"/> is greater than 0
         ///  and the graphics device does not support texture arrays.
@@ -248,7 +244,7 @@ namespace MonoGame.Framework.Graphics
             where T : unmanaged
         {
             if (destination.IsEmpty)
-                throw new ArgumentNullException(nameof(destination));
+                throw new ArgumentEmptyException(nameof(destination));
 
             ValidateParams<T>(level, arraySlice, rectangle, destination, out Rectangle checkedRect);
             PlatformGetData(level, arraySlice, checkedRect, destination);
@@ -260,7 +256,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="destination">Destination span for the data.</param>
         /// <param name="level">Layer of the texture.</param>
         /// <param name="rectangle">Area of the texture; defaults to texture bounds.</param>
-        /// <exception cref="ArgumentNullException">Throws if <paramref name="destination"/> is empty.</exception>
+        /// <exception cref="ArgumentEmptyException">Throws if <paramref name="destination"/> is empty.</exception>
         public void GetData<T>(
             Span<T> destination, int level, Rectangle? rectangle = null)
             where T : unmanaged
@@ -273,7 +269,7 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="destination">Destination span for the data.</param>
         /// <param name="rectangle">Area of the texture; defaults to texture bounds.</param>
-        /// <exception cref="ArgumentNullException">Throws if <paramref name="destination"/> is empty.</exception>
+        /// <exception cref="ArgumentEmptyException">Throws if <paramref name="destination"/> is empty.</exception>
         public void GetData<T>(Span<T> destination, Rectangle? rectangle = null)
             where T : unmanaged
         {
@@ -293,7 +289,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="stream">The stream from which to read the image data.</param>
         /// <param name="mipmap"><see langword="true"/> to generate mipmaps.</param>
         /// <param name="format">The desired surface format to use for the texture.</param>
-        /// <param name="configuration">The configuration used to load the image.</param>
+        /// <param name="config">The configuration used to load the image.</param>
         /// <returns>The texture created from the image stream.</returns>
         /// <remarks>
         ///  Note that different image decoders may generate slight differences between platforms, but perceptually 
@@ -302,12 +298,12 @@ namespace MonoGame.Framework.Graphics
         /// </remarks>
         [CLSCompliant(false)]
         public static Texture2D FromStream(
-            GraphicsDevice graphicsDevice, Stream stream, bool mipmap, SurfaceFormat format, Configuration configuration = null)
+            GraphicsDevice graphicsDevice, Stream stream, bool mipmap, SurfaceFormat format, ImagingConfig config = null)
         {
             if (graphicsDevice == null)
                 throw new ArgumentNullException(nameof(graphicsDevice));
 
-            using (var image = LoadImage(stream, configuration))
+            using (var image = LoadImage(stream, config))
                 return FromImage(graphicsDevice, image, mipmap, format);
         }
 
@@ -334,13 +330,13 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="graphicsDevice">The graphics device where the texture will be created.</param>
         /// <param name="stream">The stream from which to read the image data.</param>
-        /// <param name="configuration">The configuration used to load the image.</param>
+        /// <param name="config">The configuration used to load the image.</param>
         /// <returns>The <see cref="SurfaceFormat.Rgba32"/> texture created from the image stream.</returns>
         [CLSCompliant(false)]
         public static Texture2D FromStream(
-            GraphicsDevice graphicsDevice, Stream stream, Configuration configuration = null)
+            GraphicsDevice graphicsDevice, Stream stream, ImagingConfig config = null)
         {
-            return FromStream(graphicsDevice, stream, false, SurfaceFormat.Rgba32, configuration);
+            return FromStream(graphicsDevice, stream, false, SurfaceFormat.Rgba32, config);
         }
 
         /// <summary>
@@ -362,7 +358,7 @@ namespace MonoGame.Framework.Graphics
         [CLSCompliant(false)]
         public static Texture2D FromImage<TPixel>(
             GraphicsDevice graphicsDevice, Image<TPixel> image, bool mipmap, SurfaceFormat format)
-            where TPixel : unmanaged, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel
         {
             var texture = new Texture2D(graphicsDevice, image.Width, image.Height, mipmap, format);
             texture.SetData(image.GetPixelSpan());
@@ -371,29 +367,27 @@ namespace MonoGame.Framework.Graphics
 
         [CLSCompliant(false)]
         public static Texture2D FromImage<TPixel>(GraphicsDevice graphicsDevice, Image<TPixel> image)
-           where TPixel : unmanaged, IPixel<TPixel>
+           where TPixel : unmanaged, IPixel
         {
             return FromImage(graphicsDevice, image, false, SurfaceFormat.Rgba32);
         }
 
         [CLSCompliant(false)]
-        public static Image<Rgba32> LoadImage(Stream stream, Configuration configuration = null)
+        public static unsafe Image<Color> LoadImage(Stream stream, ImagingConfig config = null)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
-            if (configuration == null)
-                configuration = Configuration.Default;
-
-            var image = Image.Load<Rgba32>(configuration, stream);
-            var pixelSpan = image.GetPixelSpan();
-
-            int pixels = image.Width * image.Height;
-            for (int i = 0; i < pixels; i++)
+            var image = Image.Load<Color>(stream, config);
+            fixed (Color* pixelPtr = &MemoryMarshal.GetReference(image.GetPixelSpan()))
             {
-                // XNA blacks out any pixel with an alpha of zero
-                if (pixelSpan[i].A == 0)
-                    pixelSpan[i] = default;
+                int pixels = image.Width * image.Height;
+                for (int i = 0; i < pixels; i++)
+                {
+                    // XNA blacks out any pixel with an alpha of zero
+                    if (pixelPtr[i].A == 0)
+                        pixelPtr[i] = default;
+                }
             }
             return image;
         }
@@ -407,19 +401,19 @@ namespace MonoGame.Framework.Graphics
         /// This method cannot change texture dimensions.
         /// </summary>
         /// <param name="stream">The image data in the same dimensions as this texture.</param>
-        /// <param name="configuration">The configuration used to load the image.</param>
+        /// <param name="config">The configuration used to load the image.</param>
         [CLSCompliant(false)]
-        public void Reload(Stream stream, Configuration configuration = null)
+        public void Reload(Stream stream, ImagingConfig config)
         {
-            using (var image = LoadImage(stream, configuration))
+            using (var image = LoadImage(stream, config))
             {
                 if (image.Width != Width)
                     throw new InvalidOperationException(
-                        "The decoded image has a different width. Texture dimensions cannot be changed.");
+                        "The decoded image has a different width, texture dimensions may not be changed after construction.");
 
                 if (image.Height != Height)
                     throw new InvalidOperationException(
-                        "The decoded image has a different height. Texture dimensions cannot be changed.");
+                        "The decoded image has a different height, texture dimensions may not be changed after construction.");
 
                 SetData(image.GetPixelSpan());
             }
@@ -441,119 +435,168 @@ namespace MonoGame.Framework.Graphics
 
         #region Save
 
-        private unsafe Memory<Color> GetDataAsMemory(int width, int height, Configuration configuration)
+        private unsafe UnmanagedPointer<TPixel> GetDataAsPointer<TPixel>(int level, Rectangle rect)
+            where TPixel : unmanaged, IPixel
         {
-            var memory = configuration.MemoryAllocator.Allocate<Rgba32>(
-                width * height, AllocationOptions.None);
-
-            GetData(memory.Memory.Span, new Rectangle(0, 0, width, height));
-            return memory;
+            var ptr = new UnmanagedPointer<TPixel>(rect.Width * rect.Height);
+            GetData(ptr.Span, level, rect);
+            return ptr;
         }
 
-        /// <summary>
-        /// Saves the texture with the specified format.
-        /// </summary>
-        /// <param name="stream">Destination for the image</param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="format">The format used to encode the image.</param>
-        /// <param name="configuration">The configuration used to save the image.</param>
         [CLSCompliant(false)]
-        public void Save(int width, int height, Stream stream, IImageFormat format, Configuration configuration = null)
+        public Image<TPixel> ToImage<TPixel>(int level = 0, Rectangle? rect = null)
+            where TPixel : unmanaged, IPixel
         {
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
+            CheckRect(level, rect, out Rectangle checkedRect);
 
-            if (width <= 0)
-                throw new ArgumentOutOfRangeException(nameof(width), "Texture width must be greater than zero.");
-
-            if (height <= 0)
-                throw new ArgumentOutOfRangeException(nameof(height), "Texture height must be greater than zero.");
-
-            if (configuration == null)
-                configuration = Configuration.Default;
-
-            using (var mem = GetDataAsMemory(width, height, configuration))
-            using (var tmp = Image.WrapMemory(configuration, mem, width, height))
-                tmp.Save(stream, format);
+            using (var data = GetDataAsPointer<TPixel>(level, checkedRect))
+                return Image.WrapMemory(data, checkedRect.Width, checkedRect.Height, false);
         }
 
         /// <summary>
-        /// Saves the texture with the specified format.
+        /// Saves the texture to a stream with the specified format and configurations.
         /// </summary>
-        /// <param name="stream">Destination for the image</param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="encoder">The encoder used to encode the image.</param>
-        /// <param name="configuration">The configuration used to save the image.</param>
+        /// <param name="imagingConfig">The imaging configuration.</param>
+        /// <param name="stream">Destination for the texture.</param>
+        /// <param name="format">The format used to encode the texture.</param>
+        /// <param name="encoderConfig">The encoder configuration.</param>
+        /// <param name="level">The texture level to save.</param>
+        /// <param name="rect">The part of the texture to save.</param>
         [CLSCompliant(false)]
-        public void Save(int width, int height, Stream stream, IImageEncoder encoder, Configuration configuration = null)
+        public void Save(
+            ImagingConfig imagingConfig, Stream stream,
+            ImageFormat format, EncoderConfig encoderConfig,
+            int level = 0, Rectangle? rect = null)
         {
-            if (configuration == null)
-                configuration = Configuration.Default;
+            if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (format == null) throw new ArgumentNullException(nameof(format));
+            if (encoderConfig == null) throw new ArgumentNullException(nameof(encoderConfig));
 
-            using (var mem = GetDataAsMemory(width, height, configuration))
-            using (var tmp = Image.WrapMemory(configuration, Memory<Rgba32>.Empty, width, height))
-                tmp.Save(stream, encoder);
+            if (Format.IsCompressedFormat())
+                throw new NotSupportedException(
+                    "Compressed texture formats are currently not supported.");
+
+            void SaveByType<TPixel>() where TPixel : unmanaged, IPixel
+            {
+                using (var tmp = ToImage<TPixel>(level, rect))
+                    tmp.Save(imagingConfig, stream, format, encoderConfig);
+            }
+
+            switch (Format)
+            {
+                case SurfaceFormat.Alpha8: SaveByType<Alpha8>(); break;
+                case SurfaceFormat.Single: SaveByType<PackedSingle>(); break;
+                case SurfaceFormat.Rgba32SRgb:
+                case SurfaceFormat.Rgba32: SaveByType<Color>(); break;
+                case SurfaceFormat.Rg32: SaveByType<Rg32>(); break;
+                case SurfaceFormat.Rgba64: SaveByType<Rgba64>(); break;
+                case SurfaceFormat.Rgba1010102: SaveByType<Rgba1010102>(); break;
+                case SurfaceFormat.Bgr565:SaveByType<Bgr565>(); break;
+                case SurfaceFormat.Bgra5551: SaveByType<Bgra5551>(); break;
+                case SurfaceFormat.Bgra4444: SaveByType<Bgra4444>(); break;
+
+                case SurfaceFormat.Bgr32SRgb:
+                case SurfaceFormat.Bgr32:
+                case SurfaceFormat.Bgra32SRgb:
+                case SurfaceFormat.Bgra32: SaveByType<Bgra32>(); break;
+
+                case SurfaceFormat.HalfSingle: SaveByType<HalfSingle>(); break;
+                case SurfaceFormat.HalfVector2: SaveByType<HalfVector2>(); break;
+                case SurfaceFormat.HalfVector4: SaveByType<HalfVector4>(); break;
+                case SurfaceFormat.Vector2: SaveByType<Vector2>(); break;
+                case SurfaceFormat.Vector4: SaveByType<Vector4>(); break;
+                case SurfaceFormat.HdrBlendable: SaveByType<RgbaVector>(); break;
+
+                case SurfaceFormat.NormalizedByte2: SaveByType<NormalizedByte2>(); break;
+                case SurfaceFormat.NormalizedByte4: SaveByType<NormalizedByte4>(); break;
+
+                default:
+                    throw new Exception("Texture surface format is not supported.");
+            }
         }
 
         /// <summary>
-        /// Saves the texture as a JPEG image.
+        /// Saves the texture to a stream with the specified format and configurations.
         /// </summary>
-        /// <param name="stream">Destination for the image</param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="configuration">The configuration used to save the image.</param>
+        /// <param name="stream">Destination for the texture.</param>
+        /// <param name="format">The format used to encode the texture.</param>
+        /// <param name="encoderConfig">The encoder configuration.</param>
+        /// <param name="level">The texture level to save.</param>
+        /// <param name="rect">The part of the texture to save.</param>
         [CLSCompliant(false)]
-        public void SaveAsJpeg(int width, int height, Stream stream, Configuration configuration)
+        public void Save(
+            Stream stream, ImageFormat format, EncoderConfig encoderConfig,
+            int level = 0, Rectangle? rect = null)
         {
-            Save(width, height, stream, JpegFormat.Instance, configuration);
+            Save(ImagingConfig.Default, stream, format, encoderConfig, level, rect);
         }
 
         /// <summary>
-        /// Saves the texture as a JPEG image.
+        /// Saves the texture to a stream with the specified format.
         /// </summary>
-        /// <param name="stream">Destination for the image</param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        public void SaveAsJpeg(int width, int height, Stream stream)
-        {
-            SaveAsJpeg(width, height, stream, null);
-        }
-
-        /// <summary>
-        /// Saves the texture as a PNG image.
-        /// </summary>
-        /// <param name="stream">Destination for the image</param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="configuration">The configuration used to save the image.</param>
+        /// <param name="stream">Destination for the texture.</param>
+        /// <param name="format">The format used to encode the texture.</param>
+        /// <param name="level">The texture level to save.</param>
+        /// <param name="rect">The part of the texture to save.</param>
         [CLSCompliant(false)]
-        public void SaveAsPng(int width, int height, Stream stream, Configuration configuration)
+        public void Save(
+            Stream stream, ImageFormat format,
+            int level = 0, Rectangle? rect = null)
         {
-            Save(width, height, stream, PngFormat.Instance, configuration);
+            Save(ImagingConfig.Default, stream, format, Image.GetDefaultEncoderConfig(format), level, rect);
+        }
+
+        public void SaveAsPng(Stream stream, int level = 0, Rectangle? rect = null)
+        {
+            Save(stream, ImageFormat.Png, level, rect);
+        }
+
+        public void SaveAsJpeg(Stream stream, int level = 0, Rectangle? rect = null)
+        {
+            Save(stream, ImageFormat.Jpeg, level, rect);
         }
 
         /// <summary>
-        /// Saves the texture as a PNG image.
+        /// Saves the texture to a file,
+        /// picking a format based on the path extension unless a format is specified.
         /// </summary>
-        /// <param name="stream">Destination for the image</param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        public void SaveAsPng(int width, int height, Stream stream)
+        /// <param name="filePath">Destination file for the texture.</param>
+        /// <param name="format">The format used to encode the texture.</param>
+        /// <param name="level">The texture level to save.</param>
+        /// <param name="rect">The part of the texture to save.</param>
+        [CLSCompliant(false)]
+        public void Save(string filePath, ImageFormat format = null, int level = 0, Rectangle? rect = null)
         {
-            Save(width, height, stream, PngFormat.Instance, null);
+            SaveExtensions.AssertValidPath(filePath);
+
+            if (format == null)
+                format = ImageFormat.GetByPath(filePath);
+
+            using (var fs = SaveExtensions.OpenWrite(filePath))
+                Save(fs, format, level, rect);
         }
+
+        /// <summary>
+        /// Saves the texture to a file with a format based on the path extension.
+        /// </summary>
+        /// <param name="filePath">The file path for the texture.</param>
+        /// <param name="level">The texture level to save.</param>
+        /// <param name="rect">The part of the texture to save.</param>
+        public void Save(string filePath, int level = 0, Rectangle? rect = null)
+        {
+            Save(filePath, null, level, rect);
+        }
+
         #endregion
 
-        #region ValidateParams
+        #region Parameter Checks
 
         private unsafe void ValidateParams<T>(
             int level, int arraySlice, Rectangle? rect, ReadOnlySpan<T> data, out Rectangle checkedRect)
             where T : unmanaged
         {
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
+            if (data.IsEmpty) throw new ArgumentEmptyException(nameof(data));
 
             if (level < 0 || level >= LevelCount)
                 throw new ArgumentException(
@@ -567,10 +610,7 @@ namespace MonoGame.Framework.Graphics
                     $"{nameof(arraySlice)} must be smaller than the {nameof(ArraySize)} of this texture and larger than 0.",
                     nameof(arraySlice));
 
-            var texBounds = new Rectangle(0, 0, Math.Max(Bounds.Width >> level, 1), Math.Max(Bounds.Height >> level, 1));
-            checkedRect = rect ?? texBounds;
-            if (rect.HasValue && !texBounds.Contains(checkedRect) || checkedRect.Width <= 0 || checkedRect.Height <= 0)
-                throw new ArgumentException("Rectangle must be inside the texture bounds.", nameof(rect));
+            Rectangle texBounds = CheckRect(level, rect, out checkedRect);
 
             var fSize = Format.GetSize();
             if (sizeof(T) > fSize || fSize % sizeof(T) != 0)
@@ -622,6 +662,15 @@ namespace MonoGame.Framework.Graphics
             if (data.Length * sizeof(T) != dataByteSize)
                 throw new ArgumentException(
                     "The span doesn't hold right amount of bytes for the specified format.", nameof(data));
+        }
+
+        private Rectangle CheckRect(int level, Rectangle? rect, out Rectangle checkedRect)
+        {
+            var texBounds = new Rectangle(0, 0, Math.Max(Bounds.Width >> level, 1), Math.Max(Bounds.Height >> level, 1));
+            checkedRect = rect ?? texBounds;
+            if (rect.HasValue && !texBounds.Contains(checkedRect) || checkedRect.Width <= 0 || checkedRect.Height <= 0)
+                throw new ArgumentException("Rectangle must be inside the texture bounds.", nameof(rect));
+            return texBounds;
         }
 
         #endregion

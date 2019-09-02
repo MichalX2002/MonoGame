@@ -10,7 +10,7 @@ namespace MonoGame.Utilities
     internal static class InteropHelpers
     {
         /// <summary>
-        /// Convert a <see cref="IntPtr"/> pointing to a UTF8 null-terminated string to a <see cref="String"/>.
+        /// Convert a <see cref="IntPtr"/> pointing to a UTF-8 null-terminated string to a <see cref="string"/>.
         /// </summary>
         public static unsafe string PtrToString(IntPtr handle)
         {
@@ -24,7 +24,7 @@ namespace MonoGame.Utilities
             int len = (int)(ptr - (byte*)handle);
             if (len == 0)
                 return string.Empty;
-            
+
             return Encoding.UTF8.GetString((byte*)handle, len);
         }
     }

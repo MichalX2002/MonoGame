@@ -105,7 +105,7 @@ namespace MonoGame.Utilities
         ///   (<c>Nothing</c> in VB).
         /// </para>
         /// </remarks>
-        internal String Comment
+        internal string Comment
         {
             get => _Comment;
             set
@@ -139,7 +139,7 @@ namespace MonoGame.Utilities
         ///   in VB).
         /// </para>
         /// </remarks>
-        internal String FileName
+        internal string FileName
         {
             get => _FileName;
             set
@@ -542,7 +542,7 @@ namespace MonoGame.Utilities
                 if (_baseStream._workingBuffer != null)
                     throw new ZlibException("The working buffer is already set.");
                 if (value < ZlibConstants.WorkingBufferSizeMin)
-                    throw new ZlibException(String.Format("Don't be silly. {0} bytes?? Use a bigger buffer, at least {1}.", value, ZlibConstants.WorkingBufferSizeMin));
+                    throw new ZlibException(string.Format("Don't be silly. {0} bytes?? Use a bigger buffer, at least {1}.", value, ZlibConstants.WorkingBufferSizeMin));
                 _baseStream._bufferSize = value;
             }
         }
@@ -826,7 +826,7 @@ namespace MonoGame.Utilities
             // mtime
             if (!LastModified.HasValue) LastModified = DateTime.Now;
             TimeSpan delta = LastModified.Value - _unixEpoch;
-            Int32 timet = (Int32)delta.TotalSeconds;
+            int timet = (int)delta.TotalSeconds;
             Array.Copy(BitConverter.GetBytes(timet), 0, header, i, 4);
             i += 4;
 
@@ -881,7 +881,7 @@ namespace MonoGame.Utilities
         /// <returns>The string in compressed form</returns>
         internal static byte[] CompressString(string s)
         {
-            using (var ms = RecyclableMemoryManager.Instance.GetMemoryStream())
+            using (var ms = RecyclableMemoryManager.Default.GetMemoryStream())
             {
                 Stream compressor = new GZipStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
                 ZlibBaseStream.CompressString(s, compressor);
@@ -908,7 +908,7 @@ namespace MonoGame.Utilities
         /// <returns>The data in compressed form</returns>
         internal static byte[] CompressBuffer(byte[] b)
         {
-            using (var ms = RecyclableMemoryManager.Instance.GetMemoryStream())
+            using (var ms = RecyclableMemoryManager.Default.GetMemoryStream())
             {
                 Stream compressor = new GZipStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
                 ZlibBaseStream.CompressBuffer(b, compressor);
@@ -929,7 +929,7 @@ namespace MonoGame.Utilities
         /// </param>
         ///
         /// <returns>The uncompressed string</returns>
-        internal static String UncompressString(byte[] compressed)
+        internal static string UncompressString(byte[] compressed)
         {
             using (var input = new MemoryStream(compressed))
             {

@@ -5,7 +5,7 @@
 using System;
 using TOutput = System.TimeSpan;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     /// <summary>
     /// Writes the TimeSpan value to the output.

@@ -7,9 +7,7 @@
 //-----------------------------------------------------------------------------
 //#endregion
 
-//#region Using Statements
 using System;
-//#endregion
 
 namespace MonoGame.Framework.Graphics
 {
@@ -29,7 +27,6 @@ namespace MonoGame.Framework.Graphics
         ShaderIndex     = 128,
         All             = -1
     }
-
 
     /// <summary>
     /// Helper code shared between the various built-in effects.
@@ -68,18 +65,17 @@ namespace MonoGame.Framework.Graphics
         /// Lazily recomputes the world+view+projection matrix and
         /// fog vector based on the current effect parameter settings.
         /// </summary>
-        internal static EffectDirtyFlags SetWorldViewProjAndFog(EffectDirtyFlags dirtyFlags,
-                                                                ref Matrix world, ref Matrix view, ref Matrix projection, ref Matrix worldView,
-                                                                bool fogEnabled, float fogStart, float fogEnd,
-                                                                EffectParameter worldViewProjParam, EffectParameter fogVectorParam)
+        internal static EffectDirtyFlags SetWorldViewProjAndFog(
+            EffectDirtyFlags dirtyFlags,
+            ref Matrix world, ref Matrix view, ref Matrix projection, ref Matrix worldView,
+            bool fogEnabled, float fogStart, float fogEnd,
+            EffectParameter worldViewProjParam, EffectParameter fogVectorParam)
         {
             // Recompute the world+view+projection matrix?
             if ((dirtyFlags & EffectDirtyFlags.WorldViewProj) != 0)
             {
-
-                Matrix.Multiply(ref world, ref view, out worldView);
-                Matrix.Multiply(ref worldView, ref projection, out Matrix worldViewProj);
-                
+                worldView = Matrix.Multiply(world, view);
+                var worldViewProj = Matrix.Multiply(worldView, projection);
                 worldViewProjParam.SetValue(worldViewProj);
                 
                 dirtyFlags &= ~EffectDirtyFlags.WorldViewProj;
@@ -117,7 +113,7 @@ namespace MonoGame.Framework.Graphics
         {
             if (fogStart == fogEnd)
             {
-                // Degenerate case: force everything to 100% fogged if start and end are the same.
+                // force everything to 100% fogged if start and end are the same
                 fogVectorParam.SetValue(new Vector4(0, 0, 0, 1));
             }
             else
@@ -129,13 +125,11 @@ namespace MonoGame.Framework.Graphics
                 
                 float scale = 1f / (fogStart - fogEnd);
 
-                Vector4 fogVector = new Vector4
-                {
-                    X = worldView.M13 * scale,
-                    Y = worldView.M23 * scale,
-                    Z = worldView.M33 * scale,
-                    W = (worldView.M43 + fogStart) * scale
-                };
+                var fogVector = new Vector4(
+                    worldView.M13 * scale,
+                    worldView.M23 * scale,
+                    worldView.M33 * scale,
+                    (worldView.M43 + fogStart) * scale);
 
                 fogVectorParam.SetValue(fogVector);
             }
@@ -146,15 +140,15 @@ namespace MonoGame.Framework.Graphics
         /// Lazily recomputes the world inverse transpose matrix and
         /// eye position based on the current effect parameter settings.
         /// </summary>
-        internal static EffectDirtyFlags SetLightingMatrices(EffectDirtyFlags dirtyFlags, ref Matrix world, ref Matrix view,
-                                                             EffectParameter worldParam, EffectParameter worldInverseTransposeParam, EffectParameter eyePositionParam)
+        internal static EffectDirtyFlags SetLightingMatrices(
+            EffectDirtyFlags dirtyFlags, ref Matrix world, ref Matrix view,
+            EffectParameter worldParam, EffectParameter worldInverseTransposeParam, EffectParameter eyePositionParam)
         {
             // Set the world and world inverse transpose matrices.
             if ((dirtyFlags & EffectDirtyFlags.World) != 0)
             {
-
-                Matrix.Invert(ref world, out Matrix worldTranspose);
-                Matrix.Transpose(ref worldTranspose, out Matrix worldInverseTranspose);
+                Matrix worldTranspose = Matrix.Invert(world);
+                Matrix worldInverseTranspose = Matrix.Transpose(worldTranspose);
                 
                 worldParam.SetValue(world);
                 worldInverseTransposeParam.SetValue(worldInverseTranspose);
@@ -165,8 +159,7 @@ namespace MonoGame.Framework.Graphics
             // Set the eye position.
             if ((dirtyFlags & EffectDirtyFlags.EyePosition) != 0)
             {
-
-                Matrix.Invert(ref view, out Matrix viewInverse);
+                Matrix viewInverse = Matrix.Invert(view);
 
                 eyePositionParam.SetValue(viewInverse.Translation);
 
@@ -180,16 +173,15 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Sets the diffuse/emissive/alpha material color parameters.
         /// </summary>
-        internal static void SetMaterialColor(bool lightingEnabled, float alpha,
-                                              ref Vector3 diffuseColor, ref Vector3 emissiveColor, ref Vector3 ambientLightColor,
-                                              EffectParameter diffuseColorParam, EffectParameter emissiveColorParam)
+        internal static void SetMaterialColor(
+            bool lightingEnabled, float alpha,
+            ref Vector3 diffuseColor, ref Vector3 emissiveColor, ref Vector3 ambientLightColor,
+            EffectParameter diffuseColorParam, EffectParameter emissiveColorParam)
         {
             // Desired lighting model:
-            //
             //     ((AmbientLightColor + sum(diffuse directional light)) * DiffuseColor) + EmissiveColor
             //
             // When lighting is disabled, ambient and directional lights are ignored, leaving:
-            //
             //     DiffuseColor + EmissiveColor
             //
             // For the lighting disabled case, we can save one shader instruction by precomputing
@@ -199,7 +191,6 @@ namespace MonoGame.Framework.Graphics
             // When lighting is enabled, we can merge the ambient and emissive settings. If we
             // set our emissive parameter to emissive+(ambient*diffuse), the shader no longer
             // needs to bother adding the ambient contribution, simplifying its computation to:
-            //
             //     (sum(diffuse directional light) * DiffuseColor) + EmissiveColor
             //
             // For futher optimization goodness, we merge material alpha with the diffuse
@@ -207,30 +198,27 @@ namespace MonoGame.Framework.Graphics
             
             if (lightingEnabled)
             {
-                Vector4 diffuse = new Vector4();
-                Vector3 emissive = new Vector3();
-                
-                diffuse.X = diffuseColor.X * alpha;
-                diffuse.Y = diffuseColor.Y * alpha;
-                diffuse.Z = diffuseColor.Z * alpha;
-                diffuse.W = alpha;
+                var diffuse = new Vector4(
+                    diffuseColor.X * alpha,
+                    diffuseColor.Y * alpha,
+                    diffuseColor.Z * alpha,
+                    alpha);
 
-                emissive.X = (emissiveColor.X + ambientLightColor.X * diffuseColor.X) * alpha;
-                emissive.Y = (emissiveColor.Y + ambientLightColor.Y * diffuseColor.Y) * alpha;
-                emissive.Z = (emissiveColor.Z + ambientLightColor.Z * diffuseColor.Z) * alpha;
+                var emissive = new Vector3(
+                    (emissiveColor.X + ambientLightColor.X * diffuseColor.X) * alpha,
+                    (emissiveColor.Y + ambientLightColor.Y * diffuseColor.Y) * alpha,
+                    (emissiveColor.Z + ambientLightColor.Z * diffuseColor.Z) * alpha);
 
                 diffuseColorParam.SetValue(diffuse);
                 emissiveColorParam.SetValue(emissive);
             }
             else
             {
-                Vector4 diffuse = new Vector4
-                {
-                    X = (diffuseColor.X + emissiveColor.X) * alpha,
-                    Y = (diffuseColor.Y + emissiveColor.Y) * alpha,
-                    Z = (diffuseColor.Z + emissiveColor.Z) * alpha,
-                    W = alpha
-                };
+                var diffuse = new Vector4(
+                    (diffuseColor.X + emissiveColor.X) * alpha,
+                    (diffuseColor.Y + emissiveColor.Y) * alpha,
+                    (diffuseColor.Z + emissiveColor.Z) * alpha,
+                    alpha);
 
                 diffuseColorParam.SetValue(diffuse);
             }

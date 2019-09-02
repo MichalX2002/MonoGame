@@ -8,20 +8,6 @@ namespace MonoGame.Utilities.PackedVector
     public interface IPixel : IPackedVector
     {
         /// <summary>
-        /// Initializes the pixel instance from a generic ("scaled") <see cref="Vector4"/>.
-        /// </summary>
-        /// <param name="vector">The vector to load the pixel from.</param>
-        void FromScaledVector4(Vector4 vector);
-
-        /// <summary>
-        /// Expands the pixel into a generic ("scaled") <see cref="Vector4"/> representation
-        /// with values scaled and clamped between <value>0</value> and <value>1</value>.
-        /// The vector components are typically expanded in least to greatest significance order.
-        /// </summary>
-        /// <returns>The <see cref="Vector4"/>.</returns>
-        Vector4 ToScaledVector4();
-
-        /// <summary>
         /// Initializes the pixel instance from an <see cref="Argb32"/> value.
         /// </summary>
         /// <param name="source">The <see cref="Argb32"/> value.</param>
@@ -81,8 +67,26 @@ namespace MonoGame.Utilities.PackedVector
         /// <param name="source">The <see cref="Rgba64"/> value.</param>
         void FromRgba64(Rgba64 source);
 
+        // /// <summary>
+        // /// Converts the pixel instance into <see cref="Gray8"/> representation.
+        // /// </summary>
+        // /// <param name="dest">The reference to the destination <see cref="Gray8"/> pixel</param>
+        // void ToGray8(ref Gray8 dest);
+        // 
+        // /// <summary>
+        // /// Converts the pixel instance into <see cref="GrayAlpha16"/> representation.
+        // /// </summary>
+        // /// <param name="dest">The reference to the destination <see cref="GrayAlpha16"/> pixel</param>
+        // void ToGrayAlpha16(ref GrayAlpha16 dest);
+        // 
+        // /// <summary>
+        // /// Converts the pixel instance into <see cref="Rgb24"/> representation.
+        // /// </summary>
+        // /// <param name="dest">The reference to the destination <see cref="Rgb24"/> pixel</param>
+        // void ToRgb24(ref Rgb24 dest);
+
         /// <summary>
-        /// Convert the pixel instance into <see cref="Color"/> representation.
+        /// Converts the pixel instance into <see cref="Color"/> representation.
         /// </summary>
         /// <param name="dest">The reference to the destination <see cref="Color"/> pixel</param>
         void ToColor(ref Color dest);

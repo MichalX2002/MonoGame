@@ -25,11 +25,9 @@ namespace MonoGame.Framework.Graphics
         private readonly CharacterRegion[] _regions;
         private char? _defaultCharacter;
         private int _defaultGlyphIndex = -1;
-		
-		private readonly Texture2D _texture;
 
         /// <summary>
-        /// All the glyphs in this SpriteFont.
+        /// Gets all the glyphs in this font.
         /// </summary>
         public Glyph[] Glyphs { get; }
 
@@ -51,43 +49,41 @@ namespace MonoGame.Framework.Graphics
         {
         }
 
-        internal SpriteFont (
-			Texture2D texture, List<Rectangle> glyphBounds, List<Rectangle> cropping, List<char> characters, bool copyChars,
-			int lineSpacing, float spacing, List<Vector3> kerning, char? defaultCharacter)
-		{
+        internal SpriteFont(
+            Texture2D texture, List<Rectangle> glyphBounds, List<Rectangle> cropping, List<char> characters, bool copyChars,
+            int lineSpacing, float spacing, List<Vector3> kerning, char? defaultCharacter)
+        {
             if (copyChars)
                 Characters = new ReadOnlyCollection<char>(characters.ToArray());
             else
                 Characters = new ReadOnlyCollection<char>(characters);
 
-            _texture = texture;
-			LineSpacing = lineSpacing;
-			Spacing = spacing;
+            Texture = texture;
+            LineSpacing = lineSpacing;
+            Spacing = spacing;
 
             Glyphs = new Glyph[characters.Count];
             var regions = new Stack<CharacterRegion>();
 
-			for (var i = 0; i < characters.Count; i++) 
+            for (var i = 0; i < characters.Count; i++)
             {
-				Glyphs[i] = new Glyph 
-                {
-					BoundsInTexture = glyphBounds[i],
-					Cropping = cropping[i],
-                    Character = characters[i],
+                Glyphs[i] = new Glyph(
+                    boundsInTexture: glyphBounds[i],
+                    cropping: cropping[i],
+                    character: characters[i],
 
-                    LeftSideBearing = kerning[i].X,
-                    Width = kerning[i].Y,
-                    RightSideBearing = kerning[i].Z,
+                    leftSideBearing: kerning[i].X,
+                    width: kerning[i].Y,
+                    rightSideBearing: kerning[i].Z,
 
-                    WidthIncludingBearings = kerning[i].X + kerning[i].Y + kerning[i].Z
-				};
-                
-                if(regions.Count == 0 || characters[i] > (regions.Peek().End+1))
+                    widthIncludingBearings: kerning[i].X + kerning[i].Y + kerning[i].Z);
+
+                if (regions.Count == 0 || characters[i] > (regions.Peek().End + 1))
                 {
                     // Start a new region
                     regions.Push(new CharacterRegion(characters[i], i));
-                } 
-                else if(characters[i] == (regions.Peek().End+1))
+                }
+                else if (characters[i] == (regions.Peek().End + 1))
                 {
                     var currentRegion = regions.Pop();
                     // include character in currentRegion
@@ -98,19 +94,19 @@ namespace MonoGame.Framework.Graphics
                 {
                     throw new InvalidOperationException("Invalid SpriteFont. Character map must be in ascending order.");
                 }
-			}
+            }
 
             _regions = regions.ToArray();
             Array.Reverse(_regions);
 
-			DefaultCharacter = defaultCharacter;
-		}
+            DefaultCharacter = defaultCharacter;
+        }
 
         /// <summary>
         /// Gets the texture that this SpriteFont draws from.
         /// </summary>
         /// <remarks>Can be used to implement custom rendering of a SpriteFont</remarks>
-        public Texture2D Texture => _texture;
+        public Texture2D Texture { get; }
 
         /// <summary>
         /// Returns a copy of the dictionary containing the glyphs in this SpriteFont.
@@ -172,8 +168,7 @@ namespace MonoGame.Framework.Graphics
 		/// this font.</returns>
 		public Vector2 MeasureString(string text)
 		{
-			var source = new CharacterSource(text);
-            MeasureString(ref source, out Vector2 size);
+            MeasureString(new CharacterSource(text), out Vector2 size);
             return size;
 		}
 
@@ -186,12 +181,11 @@ namespace MonoGame.Framework.Graphics
 		/// this font.</returns>
 		public Vector2 MeasureString(StringBuilder text)
 		{
-			var source = new CharacterSource(text);
-            MeasureString(ref source, out Vector2 size);
+            MeasureString(new CharacterSource(text), out Vector2 size);
             return size;
 		}
 
-		internal unsafe void MeasureString(ref CharacterSource text, out Vector2 size)
+		internal unsafe void MeasureString(in CharacterSource text, out Vector2 size)
 		{
 			if (text.Length == 0)
             {
@@ -260,20 +254,17 @@ namespace MonoGame.Framework.Graphics
             {
                 // Get region Index 
                 int regionIdx = -1;
-                var l = 0;
-                var r = _regions.Length - 1;
+                int l = 0;
+                int r = _regions.Length - 1;
                 while (l <= r)
                 {
                     var m = (l + r) >> 1;                    
                     Debug.Assert(m >= 0 && m < _regions.Length, "Index was outside the bounds of the array.");
+
                     if (pRegions[m].End < c)
-                    {
                         l = m + 1;
-                    }
                     else if (pRegions[m].Start > c)
-                    {
                         r = m - 1;
-                    }
                     else
                     {
                         regionIdx = m;
@@ -306,12 +297,14 @@ namespace MonoGame.Framework.Graphics
                 return glyphIdx;
         }
         
-        internal struct CharacterSource 
+        internal readonly struct CharacterSource 
         {
 			private readonly string _string;
 			private readonly StringBuilder _builder;
 
-			public CharacterSource(string s)
+            public readonly int Length;
+
+            public CharacterSource(string s)
 			{
 				_string = s;
 				_builder = null;
@@ -325,7 +318,6 @@ namespace MonoGame.Framework.Graphics
 				Length = _builder.Length;
 			}
 
-			public readonly int Length;
 			public char this [int index] 
             {
 				get 
@@ -341,40 +333,59 @@ namespace MonoGame.Framework.Graphics
         /// Struct that defines the spacing, Kerning, and bounds of a character.
         /// </summary>
         /// <remarks>Provides the data necessary to implement custom SpriteFont rendering.</remarks>
-		public struct Glyph 
+		public readonly struct Glyph 
         {
             /// <summary>
             /// The char associated with this glyph.
             /// </summary>
-			public char Character;
+			public readonly char Character;
+
             /// <summary>
             /// Rectangle in the font texture where this letter exists.
             /// </summary>
-			public Rectangle BoundsInTexture;
+			public readonly Rectangle BoundsInTexture;
+
             /// <summary>
             /// Cropping applied to the BoundsInTexture to calculate the bounds of the actual character.
             /// </summary>
-			public Rectangle Cropping;
+			public readonly Rectangle Cropping;
+
             /// <summary>
             /// The amount of space between the left side ofthe character and its first pixel in the X dimention.
             /// </summary>
-            public float LeftSideBearing;
+            public readonly float LeftSideBearing;
+
             /// <summary>
             /// The amount of space between the right side of the character and its last pixel in the X dimention.
             /// </summary>
-            public float RightSideBearing;
+            public readonly float RightSideBearing;
+
             /// <summary>
             /// Width of the character before kerning is applied. 
             /// </summary>
-            public float Width;
+            public readonly float Width;
+
             /// <summary>
             /// Width of the character before kerning is applied. 
             /// </summary>
-            public float WidthIncludingBearings;
+            public readonly float WidthIncludingBearings;
 
 			public static readonly Glyph Empty = new Glyph();
 
-			public override string ToString ()
+            public Glyph(
+                char character, in Rectangle boundsInTexture, in Rectangle cropping, 
+                float leftSideBearing, float rightSideBearing, float width, float widthIncludingBearings)
+            {
+                Character = character;
+                BoundsInTexture = boundsInTexture;
+                Cropping = cropping;
+                LeftSideBearing = leftSideBearing;
+                RightSideBearing = rightSideBearing;
+                Width = width;
+                WidthIncludingBearings = widthIncludingBearings;
+            }
+
+            public override string ToString ()
 			{
                 return "CharacterIndex=" + Character + ", Glyph=" + BoundsInTexture + ", Cropping=" + Cropping + ", Kerning=" + LeftSideBearing + "," + Width + "," + RightSideBearing;
 			}
@@ -382,9 +393,9 @@ namespace MonoGame.Framework.Graphics
 
         private struct CharacterRegion
         {
-            public char Start;
+            public readonly char Start;
             public char End;
-            public int StartIndex;
+            public readonly int StartIndex;
 
             public CharacterRegion(char start, int startIndex)
             {

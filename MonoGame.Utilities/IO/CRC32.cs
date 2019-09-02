@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
+using MonoGame.Utilities.Memory;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Utilities.IO
 {
     /// <summary>
     ///   Computes a CRC-32. The CRC-32 algorithm is parameterized - you
@@ -14,25 +15,24 @@ namespace MonoGame.Utilities
         private readonly uint _dwPolynomial;
         private readonly bool _reverseBits;
         private uint[] crc32Table;
-        private const int BUFFER_SIZE = 8192;
         private uint _register = 0xFFFFFFFFU;
 
         /// <summary>
         ///   Indicates the total number of bytes applied to the CRC.
         /// </summary>
-        public Int64 TotalBytesRead { get; private set; }
+        public long TotalBytesRead { get; private set; }
 
         /// <summary>
         /// Indicates the current CRC for all blocks slurped in.
         /// </summary>
-        public Int32 Crc32Result => unchecked((Int32)(~_register));
+        public int Crc32Result => unchecked((int)(~_register));
 
         /// <summary>
         /// Returns the CRC32 for the specified stream.
         /// </summary>
         /// <param name="input">The stream over which to calculate the CRC32</param>
         /// <returns>the CRC32 calculation</returns>
-        public Int32 GetCrc32(Stream input)
+        public int GetCrc32(Stream input)
         {
             return GetCrc32AndCopy(input, null);
         }
@@ -44,29 +44,33 @@ namespace MonoGame.Utilities
         /// <param name="input">The stream over which to calculate the CRC32</param>
         /// <param name="output">The stream into which to deflate the input</param>
         /// <returns>the CRC32 calculation</returns>
-        public Int32 GetCrc32AndCopy(Stream input, Stream output)
+        public int GetCrc32AndCopy(Stream input, Stream output)
         {
             if (input == null)
                 throw new Exception("The input stream must not be null.");
 
             unchecked
             {
-                byte[] buffer = new byte[BUFFER_SIZE];
-                int readSize = BUFFER_SIZE;
-
-                TotalBytesRead = 0;
-                int count = input.Read(buffer, 0, readSize);
-                if (output != null) output.Write(buffer, 0, count);
-                TotalBytesRead += count;
-                while (count > 0)
+                byte[] buffer = RecyclableMemoryManager.Default.GetBlock();
+                try
                 {
-                    SlurpBlock(buffer, 0, count);
-                    count = input.Read(buffer, 0, readSize);
+                    TotalBytesRead = 0;
+                    int count = input.Read(buffer, 0, buffer.Length);
                     if (output != null) output.Write(buffer, 0, count);
                     TotalBytesRead += count;
+                    while (count > 0)
+                    {
+                        SlurpBlock(buffer, 0, count);
+                        count = input.Read(buffer, 0, buffer.Length);
+                        if (output != null) output.Write(buffer, 0, count);
+                        TotalBytesRead += count;
+                    }
+                    return (int)(~_register);
                 }
-
-                return (Int32)(~_register);
+                finally
+                {
+                    RecyclableMemoryManager.Default.ReturnBlock(buffer);
+                }
             }
         }
 
@@ -78,14 +82,14 @@ namespace MonoGame.Utilities
         /// <param name="W">The word to start with.</param>
         /// <param name="B">The byte to combine it with.</param>
         /// <returns>The CRC-ized result.</returns>
-        public Int32 ComputeCrc32(Int32 W, byte B)
+        public int ComputeCrc32(int W, byte B)
         {
-            return _InternalComputeCrc32((UInt32)W, B);
+            return InternalComputeCrc32((uint)W, B);
         }
 
-        internal Int32 _InternalComputeCrc32(UInt32 W, byte B)
+        internal int InternalComputeCrc32(uint W, byte B)
         {
-            return (Int32)(crc32Table[(W ^ B) & 0xFF] ^ (W >> 8));
+            return (int)(crc32Table[(W ^ B) & 0xFF] ^ (W >> 8));
         }
 
         /// <summary>
@@ -98,7 +102,7 @@ namespace MonoGame.Utilities
         public void SlurpBlock(byte[] block, int offset, int count)
         {
             if (block == null)
-                throw new Exception("The data buffer must not be null.");
+                throw new ArgumentNullException("The buffer may not be null.", nameof(block));
 
             // bzip algorithm
             for (int i = 0; i < count; i++)
@@ -107,12 +111,12 @@ namespace MonoGame.Utilities
                 byte b = block[x];
                 if (_reverseBits)
                 {
-                    UInt32 temp = (_register >> 24) ^ b;
+                    uint temp = (_register >> 24) ^ b;
                     _register = (_register << 8) ^ crc32Table[temp];
                 }
                 else
                 {
-                    UInt32 temp = (_register & 0x000000FF) ^ b;
+                    uint temp = (_register & 0x000000FF) ^ b;
                     _register = (_register >> 8) ^ crc32Table[temp];
                 }
             }
@@ -123,17 +127,17 @@ namespace MonoGame.Utilities
         /// <summary>
         ///   Process one byte in the CRC.
         /// </summary>
-        /// <param name = "b">the byte to include into the CRC .  </param>
+        /// <param name = "b">The byte to include into the CRC.</param>
         public void UpdateCRC(byte b)
         {
             if (_reverseBits)
             {
-                UInt32 temp = (_register >> 24) ^ b;
+                uint temp = (_register >> 24) ^ b;
                 _register = (_register << 8) ^ crc32Table[temp];
             }
             else
             {
-                UInt32 temp = (_register & 0x000000FF) ^ b;
+                uint temp = (_register & 0x000000FF) ^ b;
                 _register = (_register >> 8) ^ crc32Table[temp];
             }
         }
@@ -165,7 +169,7 @@ namespace MonoGame.Utilities
                 }
                 else
                 {
-                    UInt32 temp = (_register & 0x000000FF) ^ b;
+                    uint temp = (_register & 0x000000FF) ^ b;
                     _register = (_register >> 8) ^ crc32Table[(temp >= 0)
                                                               ? temp
                                                               : (temp + 256)];
@@ -205,10 +209,10 @@ namespace MonoGame.Utilities
 
         private void GenerateLookupTable()
         {
-            crc32Table = new UInt32[256];
+            crc32Table = new uint[256];
             unchecked
             {
-                UInt32 dwCrc;
+                uint dwCrc;
                 byte i = 0;
                 do
                 {
@@ -216,22 +220,16 @@ namespace MonoGame.Utilities
                     for (byte j = 8; j > 0; j--)
                     {
                         if ((dwCrc & 1) == 1)
-                        {
                             dwCrc = (dwCrc >> 1) ^ _dwPolynomial;
-                        }
                         else
-                        {
                             dwCrc >>= 1;
-                        }
                     }
+
                     if (_reverseBits)
-                    {
                         crc32Table[ReverseBits(i)] = ReverseBits(dwCrc);
-                    }
                     else
-                    {
                         crc32Table[i] = dwCrc;
-                    }
+
                     i++;
                 } while (i != 0);
             }
@@ -272,8 +270,6 @@ namespace MonoGame.Utilities
             for (int i = 0; i < 32; i++)
                 square[i] = Gf2_matrix_times(mat, mat[i]);
         }
-
-
 
         /// <summary>
         /// Combines the given CRC32 value with the current running total.

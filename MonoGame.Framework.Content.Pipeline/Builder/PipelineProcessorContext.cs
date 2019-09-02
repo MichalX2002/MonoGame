@@ -4,8 +4,8 @@
 
 using System;
 using System.IO;
-using Microsoft.Xna.Framework.Content.Pipeline;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Content.Pipeline;
+using MonoGame.Framework.Graphics;
 
 namespace MonoGame.Framework.Content.Pipeline.Builder
 {
@@ -21,20 +21,20 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
             _pipelineEvent = pipelineEvent;
         }
 
-        public override TargetPlatform TargetPlatform { get { return _manager.Platform; } }
-        public override GraphicsProfile TargetProfile { get { return _manager.Profile; } }
+        public override TargetPlatform TargetPlatform => _manager.Platform;
+        public override GraphicsProfile TargetProfile => _manager.Profile;
 
-        public override string BuildConfiguration { get { return _manager.Config; } }
+        public override string BuildConfiguration => _manager.Config;
 
-        public override string IntermediateDirectory { get { return _manager.IntermediateDirectory; } }
-        public override string OutputDirectory { get { return _manager.OutputDirectory; } }
-        public override string OutputFilename { get { return _pipelineEvent.DestFile; } }
+        public override string IntermediateDirectory => _manager.IntermediateDirectory;
+        public override string OutputDirectory => _manager.OutputDirectory;
+        public override string OutputFilename => _pipelineEvent.DestFile;
 
-        public override OpaqueDataDictionary Parameters { get { return _pipelineEvent.Parameters; } }
+        public override OpaqueDataDictionary Parameters => _pipelineEvent.Parameters;
 
-        public override ContentBuildLogger Logger { get { return _manager.Logger; } }
+        public override ContentBuildLogger Logger => _manager.Logger;
 
-        public override ContentIdentity SourceIdentity { get { return new ContentIdentity(_pipelineEvent.SourceFile); } }
+        public override ContentIdentity SourceIdentity => new ContentIdentity(_pipelineEvent.SourceFile);
 
         public override void AddDependency(string filename)
         {

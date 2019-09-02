@@ -11,12 +11,12 @@
 using System.ComponentModel;
 using System.IO;
 using System.Xml;
-using Microsoft.Xna.Framework.Content.Pipeline;
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
-using Microsoft.Xna.Framework.Content.Pipeline.Processors;
+using MonoGame.Framework.Content.Pipeline;
+using MonoGame.Framework.Content.Pipeline.Graphics;
+using MonoGame.Framework.Content.Pipeline.Processors;
 #endregion
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     /// <summary>
     /// Custom processor extends the SpriteFont build process to scan over the resource

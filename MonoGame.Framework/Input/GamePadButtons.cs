@@ -5,76 +5,65 @@
 namespace MonoGame.Framework.Input
 {
     /// <summary>
-    /// A struct that represents the current button states for the controller.
+    /// Represents the current button states for the controller.
     /// </summary>
-    public struct GamePadButtons
+    public readonly struct GamePadButtons
     {
         internal readonly Buttons _buttons;
 
         /// <summary>
-        /// Gets a value indicating if the button A is pressed.
+        /// Gets a value indicating whether the button A is pressed.
         /// </summary>
-        /// <value><see cref="ButtonState.Pressed"/> if the button A is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
         public ButtonState A => ((_buttons & Buttons.A) == Buttons.A) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
-        /// Gets a value indicating if the button B is pressed.
+        /// Gets a value indicating whether the button B is pressed.
         /// </summary>
-        /// <value><see cref="ButtonState.Pressed"/> if the button B is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
         public ButtonState B => ((_buttons & Buttons.B) == Buttons.B) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
-        /// Gets a value indicating if the button Back is pressed.
+        /// Gets a value indicating whether the button Back is pressed.
         /// </summary>
-        /// <value><see cref="ButtonState.Pressed"/> if the button Back is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
         public ButtonState Back => ((_buttons & Buttons.Back) == Buttons.Back) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
-        /// Gets a value indicating if the button X is pressed.
+        /// Gets a value indicating whether the button X is pressed.
         /// </summary>
-        /// <value><see cref="ButtonState.Pressed"/> if the button X is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
         public ButtonState X => ((_buttons & Buttons.X) == Buttons.X) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
-        /// Gets a value indicating if the button Y is pressed.
+        /// Gets a value indicating whether the button Y is pressed.
         /// </summary>
-        /// <value><see cref="ButtonState.Pressed"/> if the button Y is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
         public ButtonState Y => ((_buttons & Buttons.Y) == Buttons.Y) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
-        /// Gets a value indicating if the button Start is pressed.
+        /// Gets a value indicating whether the button Start is pressed.
         /// </summary>
-        /// <value><see cref="ButtonState.Pressed"/> if the button Start is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
         public ButtonState Start => ((_buttons & Buttons.Start) == Buttons.Start) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
-        /// Gets a value indicating if the left shoulder button is pressed.
+        /// Gets a value indicating whether the left shoulder button is pressed.
         /// </summary>
-        /// <value><see cref="ButtonState.Pressed"/> if the left shoulder button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
         public ButtonState LeftShoulder => ((_buttons & Buttons.LeftShoulder) == Buttons.LeftShoulder) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
-        /// Gets a value indicating if the left stick button is pressed.
+        /// Gets a value indicating whether the left stick button is pressed.
         /// </summary>
-        /// <value><see cref="ButtonState.Pressed"/> if the left stick button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
         public ButtonState LeftStick => ((_buttons & Buttons.LeftStick) == Buttons.LeftStick) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
-        /// Gets a value indicating if the right shoulder button is pressed.
+        /// Gets a value indicating whether the right shoulder button is pressed.
         /// </summary>
-        /// <value><see cref="ButtonState.Pressed"/> if the right shoulder button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
         public ButtonState RightShoulder => ((_buttons & Buttons.RightShoulder) == Buttons.RightShoulder) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
-        /// Gets a value indicating if the right stick button is pressed.
+        /// Gets a value indicating whether the right stick button is pressed.
         /// </summary>
-        /// <value><see cref="ButtonState.Pressed"/> if the right stick button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
         public ButtonState RightStick => ((_buttons & Buttons.RightStick) == Buttons.RightStick) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
-        /// Gets a value indicating if the guide button is pressed.
+        /// Gets a value indicating whether the guide button is pressed.
         /// </summary>
-        /// <value><see cref="ButtonState.Pressed"/> if the guide button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
         public ButtonState BigButton => ((_buttons & Buttons.BigButton) == Buttons.BigButton) ? ButtonState.Pressed : ButtonState.Released;
 
         public GamePadButtons(Buttons buttons)
@@ -117,23 +106,21 @@ namespace MonoGame.Framework.Input
         /// <returns>true if <paramref name="obj"/> is a <see cref="GamePadButtons"/> and has the same value as this instance; otherwise, false.</returns>
         public override bool Equals(object obj)
         {
-            return (obj is GamePadButtons) && (this == (GamePadButtons)obj);
+            return (obj is GamePadButtons other) && (this == other);
         }
 
         /// <summary>
-        /// Serves as a hash function for a <see cref="T:Microsoft.Xna.Framework.Input.GamePadButtons"/> object.
+        /// Serves as a hash function for a <see cref="GamePadButtons"/> object.
         /// </summary>
-        /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
-        /// hash table.</returns>
-        public override int GetHashCode ()
+        public override int GetHashCode()
         {
-            return (int)_buttons;
+            return _buttons.GetHashCode();
         }
 
         /// <summary>
-        /// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:Microsoft.Xna.Framework.Input.GamePadButtons"/>.
+        /// Returns a string that represents the current <see cref="GamePadButtons"/>.
         /// </summary>
-        /// <returns>A <see cref="T:System.String"/> that represents the current <see cref="T:Microsoft.Xna.Framework.Input.GamePadButtons"/>.</returns>
+        /// <returns>A string that represents the current <see cref="GamePadButtons"/>.</returns>
         public override string ToString()
         {
             return "[GamePadButtons:" +

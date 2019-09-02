@@ -6,89 +6,61 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
-using Microsoft.Xna.Framework.Graphics;
-using SixLabors.ImageSharp.PixelFormats;
+using MonoGame.Framework.Content.Pipeline.Graphics;
+using MonoGame.Framework.Graphics;
+using MonoGame.Utilities.PackedVector;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     [ContentProcessor(DisplayName = "Model - MonoGame")]
     public class ModelProcessor : ContentProcessor<NodeContent, ModelContent>
     {
+        private const bool DefaultColorKeyEnabled = true;
+        private const bool DefaultGenerateMipmaps = true;
+        private const bool DefaultPremultiplyTextureAlpha = true;
+        private const bool DefaultPremultiplyVertexColors = true;
+        private const float DefaultScale = 1.0f;
+        private const TextureProcessorOutputFormat DefaultTextureFormat = TextureProcessorOutputFormat.Compressed;
+
         private ContentIdentity _identity;
 
-        #region Fields for default values
-
-        private bool _colorKeyEnabled = true;
-        private bool _generateMipmaps = true;
-        private bool _premultiplyTextureAlpha = true;
-        private bool _premultiplyVertexColors = true;
-        private float _scale = 1.0f;
-        private TextureProcessorOutputFormat _textureFormat = TextureProcessorOutputFormat.Compressed;
-
-        #endregion
-
-        public ModelProcessor() { }
+        public ModelProcessor()
+        {
+        }
 
         #region Properties
 
         public virtual Color ColorKeyColor { get; set; }
 
-        [DefaultValue(true)]
-        public virtual bool ColorKeyEnabled
-        {
-            get { return _colorKeyEnabled; }
-            set { _colorKeyEnabled = value; }
-        }
+        [DefaultValue(DefaultColorKeyEnabled)]
+        public virtual bool ColorKeyEnabled { get; set; } = DefaultColorKeyEnabled;
 
         public virtual MaterialProcessorDefaultEffect DefaultEffect { get; set; }
 
-        [DefaultValue(true)]
-        public virtual bool GenerateMipmaps
-        {
-            get { return _generateMipmaps; }
-            set { _generateMipmaps = value; }
-        }
+        [DefaultValue(DefaultGenerateMipmaps)]
+        public virtual bool GenerateMipmaps { get; set; } = DefaultGenerateMipmaps;
 
         public virtual bool GenerateTangentFrames { get; set; }
 
-        [DefaultValue(true)]
-        public virtual bool PremultiplyTextureAlpha
-        {
-            get { return _premultiplyTextureAlpha; }
-            set { _premultiplyTextureAlpha = value; }
-        }
+        [DefaultValue(DefaultPremultiplyTextureAlpha)]
+        public virtual bool PremultiplyTextureAlpha { get; set; } = DefaultPremultiplyTextureAlpha;
 
-        [DefaultValue(true)]
-        public virtual bool PremultiplyVertexColors
-        {
-            get { return _premultiplyVertexColors; }
-            set { _premultiplyVertexColors = value; }
-        }
+        [DefaultValue(DefaultPremultiplyVertexColors)]
+        public virtual bool PremultiplyVertexColors { get; set; } = DefaultPremultiplyVertexColors;
 
         public virtual bool ResizeTexturesToPowerOfTwo { get; set; }
 
         public virtual float RotationX { get; set; }
-
         public virtual float RotationY { get; set; }
-
         public virtual float RotationZ { get; set; }
 
-        [DefaultValue(1.0f)]
-        public virtual float Scale
-        {
-            get { return _scale; }
-            set { _scale = value; }
-        }
+        [DefaultValue(DefaultScale)]
+        public virtual float Scale { get; set; } = DefaultScale;
 
         public virtual bool SwapWindingOrder { get; set; }
 
-		[DefaultValue(typeof(TextureProcessorOutputFormat), "Compressed")]
-        public virtual TextureProcessorOutputFormat TextureFormat
-        {
-            get { return _textureFormat; }
-            set { _textureFormat = value; }
-        }
+        [DefaultValue(DefaultTextureFormat)]
+        public virtual TextureProcessorOutputFormat TextureFormat { get; set; } = DefaultTextureFormat;
 
         #endregion
 
@@ -107,17 +79,17 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             }
 
             // Gather all the nodes in tree traversal order.
-            var nodes = input.AsEnumerable().SelectDeep(n => n.Children).ToList();
+            var nodes = input.AsEnumerable().SelectDeep(n => n.Children);
 
-            var meshes = nodes.FindAll(n => n is MeshContent).Cast<MeshContent>().ToList();
-            var geometries = meshes.SelectMany(m => m.Geometry).ToList();
-            var distinctMaterials = geometries.Select(g => g.Material).Distinct().ToList();
+            var meshes = nodes.Where(n => n is MeshContent).Cast<MeshContent>();
+            var geometries = meshes.SelectMany(m => m.Geometry);
+            var distinctMaterials = geometries.Select(g => g.Material).Distinct();
 
             // Loop through all distinct materials, passing them through the conversion method
             // only once, and then processing all geometries using that material.
             foreach (var inputMaterial in distinctMaterials)
             {
-                var geomsWithMaterial = geometries.Where(g => g.Material == inputMaterial).ToList();
+                var geomsWithMaterial = geometries.Where(g => g.Material == inputMaterial);
                 var material = ConvertMaterial(inputMaterial, context);
 
                 ProcessGeometryUsingMaterial(material, geomsWithMaterial, context);
@@ -151,8 +123,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             var parts = new List<ModelMeshPartContent>();
             var vertexBuffer = new VertexBufferContent();
             var indexBuffer = new IndexCollection();
-			
-			if (GenerateTangentFrames)
+
+            if (GenerateTangentFrames)
             {
                 context.Logger.LogMessage("Generating tangent frames.");
                 foreach (GeometryContent geom in mesh.Geometry)
@@ -162,10 +134,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                         MeshHelper.CalculateNormals(geom, true);
                     }
 
-                    if(!geom.Vertices.Channels.Contains(VertexChannelNames.Tangent(0)) ||
+                    if (!geom.Vertices.Channels.Contains(VertexChannelNames.Tangent(0)) ||
                         !geom.Vertices.Channels.Contains(VertexChannelNames.Binormal(0)))
                     {
-                        MeshHelper.CalculateTangentFrames(geom, VertexChannelNames.TextureCoordinate(0), VertexChannelNames.Tangent(0),
+                        MeshHelper.CalculateTangentFrames(
+                            geom,
+                            VertexChannelNames.TextureCoordinate(0),
+                            VertexChannelNames.Tangent(0),
                             VertexChannelNames.Binormal(0));
                     }
                 }
@@ -187,7 +162,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                     var startIndex = indexBuffer.Count;
                     indexBuffer.AddRange(geometry.Indices);
 
-                    partContent = new ModelMeshPartContent(vertexBuffer, indexBuffer, startVertex, vertexCount, startIndex, geometry.Indices.Count / 3);
+                    partContent = new ModelMeshPartContent(
+                        vertexBuffer, indexBuffer, startVertex, vertexCount, startIndex, geometry.Indices.Count / 3);
 
                     // Geoms are supposed to all have the same decl, so just steal one of these
                     vertexBuffer.VertexDeclaration = geomBuffer.VertexDeclaration;
@@ -220,9 +196,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             return context.Convert<MaterialContent, MaterialContent>(material, "MaterialProcessor", parameters);
         }
 
-        protected virtual void ProcessGeometryUsingMaterial(MaterialContent material,
-                                                            IEnumerable<GeometryContent> geometryCollection,
-                                                            ContentProcessorContext context)
+        protected virtual void ProcessGeometryUsingMaterial(
+            MaterialContent material, IEnumerable<GeometryContent> geometryCollection, ContentProcessorContext context)
         {
             // If we don't get a material then assign a default one.
             if (material == null)
@@ -252,17 +227,15 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             {
                 // Just check for a "Texture" which should cover custom Effects
                 // and BasicEffect which can have an optional texture.
-                textureChannels = material.Textures.ContainsKey("Texture") ? 1 : 0;                
+                textureChannels = material.Textures.ContainsKey("Texture") ? 1 : 0;
             }
 
-            // By default we must set the vertex color property
-            // to match XNA behavior.
+            // By default we must set the vertex color property to match XNA behavior.
             material.OpaqueData["VertexColorEnabled"] = false;
 
-            // If we run into a geometry that requires vertex
-            // color we need a seperate material for it.
+            // If we run into a geometry that requires vertex color we need a seperate material for it.
             var colorMaterial = material.Clone();
-            colorMaterial.OpaqueData["VertexColorEnabled"] = true;    
+            colorMaterial.OpaqueData["VertexColorEnabled"] = true;
 
             foreach (var geometry in geometryCollection)
             {
@@ -275,10 +248,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                 {
                     if (!geometry.Vertices.Channels.Contains(VertexChannelNames.TextureCoordinate(i)))
                         throw new InvalidContentException(
-                            string.Format("The mesh \"{0}\", using {1}, contains geometry that is missing texture coordinates for channel {2}.", 
-                            geometry.Parent.Name,
-                            MaterialProcessor.GetDefaultEffect(material),
-                            i),
+                            string.Format(
+                                "The mesh \"{0}\", using {1}, contains geometry that is missing texture coordinates for channel {2}.",
+                                geometry.Parent.Name, MaterialProcessor.GetDefaultEffect(material), i),
                             _identity);
                 }
 
@@ -295,14 +267,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                     if (!geometry.Vertices.Channels.Contains(weightsName))
                         throw new InvalidContentException(
                             string.Format("The skinned mesh \"{0}\" contains geometry without any vertex weights.", geometry.Parent.Name),
-                            _identity);                    
+                            _identity);
                 }
             }
         }
 
-        protected virtual void ProcessVertexChannel(GeometryContent geometry,
-                                                    int vertexChannelIndex,
-                                                    ContentProcessorContext context)
+        protected virtual void ProcessVertexChannel(
+            GeometryContent geometry, int vertexChannelIndex, ContentProcessorContext context)
         {
             var channel = geometry.Vertices.Channels[vertexChannelIndex];
 
@@ -324,7 +295,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             {
                 throw new InvalidContentException(
                     "Skeleton not found. Meshes that contain a Weights vertex channel cannot be processed without access to the skeleton data.",
-                    identity);                     
+                    identity);
             }
 
             var boneIndices = new Dictionary<string, int>();
@@ -338,9 +309,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                 throw new InvalidContentException(
                     string.Format(
                         "Vertex channel \"{0}\" is the wrong type. It has element type {1}. Type {2} is expected.",
-                        vertexChannel.Name,
-                        vertexChannel.ElementType.FullName,
-                        "Microsoft.Xna.Framework.Content.Pipeline.Graphics.BoneWeightCollection"),
+                        vertexChannel.Name, vertexChannel.ElementType.FullName, typeof(BoneWeightCollection).FullName),
                     identity);
             }
             var outputIndices = new Byte4[inputWeights.Count];
@@ -369,9 +338,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             // we only handle 4 weights per bone
             const int maxWeights = 4;
 
-            // create some temp arrays to hold our values
-            var tempIndices = new int[maxWeights];
-            var tempWeights = new float[maxWeights];
+            // create some tmp spans to hold our values
+            Span<int> tmpIndices = stackalloc int[maxWeights];
+            Span<float> tmpWeights = stackalloc float[maxWeights];
 
             // cull out any extra bones
             weights.NormalizeWeights(maxWeights);
@@ -380,27 +349,25 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             for (var i = 0; i < weights.Count; i++)
             {
                 var weight = weights[i];
-
                 if (!boneIndices.ContainsKey(weight.BoneName))
-                {
-                    var errorMessage = string.Format("Bone '{0}' was not found in the skeleton! Skeleton bones are: '{1}'.", weight.BoneName, string.Join("', '", boneIndices.Keys));
-                    throw new Exception(errorMessage);
-                }
+                    throw new Exception(string.Format(
+                        "Bone '{0}' was not found in the skeleton! Skeleton bones are: '{1}'.",
+                        weight.BoneName, string.Join("', '", boneIndices.Keys)));
 
-                tempIndices[i] = boneIndices[weight.BoneName];
-                tempWeights[i] = weight.Weight;
+                tmpIndices[i] = boneIndices[weight.BoneName];
+                tmpWeights[i] = weight.Weight;
             }
 
             // zero out any remaining spaces
-            for (var i = weights.Count; i < maxWeights; i++)
+            for (int i = weights.Count; i < maxWeights; i++)
             {
-                tempIndices[i] = 0;
-                tempWeights[i] = 0;
+                tmpIndices[i] = 0;
+                tmpWeights[i] = 0;
             }
 
             // output the values
-            outIndices[vertexIndex] = new Byte4(tempIndices[0], tempIndices[1], tempIndices[2], tempIndices[3]);
-            outWeights[vertexIndex] = new Vector4(tempWeights[0], tempWeights[1], tempWeights[2], tempWeights[3]);
+            outIndices[vertexIndex] = new Byte4(tmpIndices[0], tmpIndices[1], tmpIndices[2], tmpIndices[3]);
+            outWeights[vertexIndex] = new Vector4(tmpWeights[0], tmpWeights[1], tmpWeights[2], tmpWeights[3]);
         }
     }
 

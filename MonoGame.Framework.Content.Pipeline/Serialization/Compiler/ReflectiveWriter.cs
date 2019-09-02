@@ -9,7 +9,7 @@ using System.Linq;
 using System.Reflection;
 using MonoGame.Utilities;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
+namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     class ReflectiveWriter<T> : ContentTypeWriter
     {
@@ -27,10 +27,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
         {
         }
 
-        public override bool CanDeserializeIntoExistingObject
-        {
-            get { return TargetType.IsClass; }
-        }
+        public override bool CanDeserializeIntoExistingObject => TargetType.IsClass;
 
         protected override void Initialize(ContentCompiler compiler)
         {
@@ -39,10 +36,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
             if (type != null && type != typeof(object) && !TargetType.IsValueType)
                 _baseType = type;
 
-            if (TargetType.GetCustomAttributes(typeof(ContentSerializerRuntimeTypeAttribute), false).FirstOrDefault() is ContentSerializerRuntimeTypeAttribute runtimeType)
+            if (TargetType.GetCustomAttributes(typeof(ContentSerializerRuntimeTypeAttribute), false)
+                .FirstOrDefault() is ContentSerializerRuntimeTypeAttribute runtimeType)
                 _runtimeType = runtimeType.RuntimeType;
 
-            if (TargetType.GetCustomAttributes(typeof(ContentSerializerTypeVersionAttribute), false).FirstOrDefault() is ContentSerializerTypeVersionAttribute typeVersion)
+            if (TargetType.GetCustomAttributes(typeof(ContentSerializerTypeVersionAttribute), false)
+                .FirstOrDefault() is ContentSerializerTypeVersionAttribute typeVersion)
                 _typeVersion = typeVersion.TypeVersion;
 
             _properties = TargetType.GetAllProperties().Where(IsValidProperty).ToArray();
@@ -167,9 +166,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
 
         public override string GetRuntimeReader(TargetPlatform targetPlatform)
         {
-            return "Microsoft.Xna.Framework.Content.ReflectiveReader`1[[" + 
-                        GetRuntimeType(targetPlatform) 
-                    + "]]";
+            return typeof(ReflectiveReader<>).FullName + "[[" + GetRuntimeType(targetPlatform) + "]]";
         }
 
         protected internal override void Write(ContentWriter output, object value)
