@@ -3,8 +3,20 @@ using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging.Encoding
 {
-    public delegate void EncodeProgressDelegate<TPixel>(
-        int frameIndex, ReadOnlyImageFrame<TPixel> frame, double percentage)
+    /// <summary>
+    /// Represents a progress update for image encoding.
+    /// <para>
+    /// If invocation returns <see langword="true"/>, 
+    /// the operation should be interrupted as soon as possible,
+    /// optionally throwing <see cref="CoderInterruptedException"/>.
+    /// </para>
+    /// </summary>
+    /// <typeparam name="TPixel"></typeparam>
+    /// <param name="frameIndex"></param>
+    /// <param name="frames"></param>
+    /// <param name="percentage"></param>
+    public delegate bool EncodeProgressCallback<TPixel>(
+        int frameIndex, ReadOnlyFrameCollection<TPixel> frames, double percentage)
         where TPixel : unmanaged, IPixel;
 
     /// <summary>
@@ -31,7 +43,7 @@ namespace MonoGame.Imaging.Encoding
             Stream stream,
             EncoderConfig encoderConfig,
             ImagingConfig imagingConfig,
-            EncodeProgressDelegate<TPixel> onProgress = null)
+            EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel;
     }
 }

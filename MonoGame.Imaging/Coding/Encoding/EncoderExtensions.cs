@@ -15,7 +15,7 @@ namespace MonoGame.Imaging.Encoding
         /// <param name="onProgress">Optional delegate for reporting encode progress.</param>
         public static void Encode<TPixel>(this IImageEncoder encoder,
             ReadOnlyFrameCollection<TPixel> frames, Stream stream, ImagingConfig imagingConfig,
-            EncodeProgressDelegate<TPixel> onProgress = null)
+            EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             encoder.Encode(frames, stream, encoder.DefaultConfig, imagingConfig, onProgress);

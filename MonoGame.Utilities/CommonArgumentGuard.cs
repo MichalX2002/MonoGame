@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using MonoGame.Framework;
 
 namespace MonoGame.Utilities
@@ -13,6 +15,24 @@ namespace MonoGame.Utilities
             if (destination.Length < source.Length)
                 throw new ArgumentException(
                     $"The destination is smaller than the source.", nameof(destination));
+        }
+
+        /// <summary>
+        /// Throws if the <see cref="collection"/> is empty.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="paramName"></param>
+        /// <param name="inlineParamName"></param>
+        public static void AssertNonEmpty(int? count, string paramName, bool inlineParamName = true)
+        {
+            if (!count.HasValue)
+                throw new ArgumentNullException(nameof(paramName));
+
+            if (count.Value <= 0)
+            {
+                string name = inlineParamName ? paramName : "The collection";
+                throw new ArgumentEmptyException(paramName, $"{name} may not be empty.");
+            }
         }
 
         /// <summary>

@@ -17,9 +17,16 @@ namespace MonoGame.Imaging
         #region Constructors
 
         /// <summary>
+        /// Constructs the collection without any initial frames, defining an inital capacity.
+        /// </summary>
+        public ReadOnlyFrameCollection(int capacity) : base(null, capacity)
+        {
+        }
+
+        /// <summary>
         /// Constructs the collection without any initial frames.
         /// </summary>
-        public ReadOnlyFrameCollection() : base(null, false)
+        public ReadOnlyFrameCollection() : this(0)
         {
         }
 
@@ -40,14 +47,14 @@ namespace MonoGame.Imaging
         /// <param name="views">The enumerable of views that will be added to the collection.</param>
         /// <param name="delay">The delay to use for every image in the enumerable.</param>
         public ReadOnlyFrameCollection(IEnumerable<IReadOnlyPixelRows<TPixel>> views, int delay) :
-            base(null, UseOneAsInitialCapacity(views))
+            base(null, GetInitialCapacity(views))
         {
             if (views != null)
                 foreach (var image in views)
                     Add(new ReadOnlyImageFrame<TPixel>(image, delay));
         }
 
-        public ReadOnlyFrameCollection(IReadOnlyPixelRows<TPixel> view) : base(null, true)
+        public ReadOnlyFrameCollection(IReadOnlyPixelRows<TPixel> view) : this()
         {
             Add(new ReadOnlyImageFrame<TPixel>(view, 0));
         }

@@ -17,13 +17,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Coding\Decoding\Stb\**" />
     <Compile Remove="Coding\Encoding\Png\**" />
+    <Compile Remove="Coding\Encoding\Stb\**" />
     <Compile Remove="Image\Processing\Extensions\**" />
     <Compile Remove="old\**" />
+    <EmbeddedResource Remove="Coding\Decoding\Stb\**" />
     <EmbeddedResource Remove="Coding\Encoding\Png\**" />
+    <EmbeddedResource Remove="Coding\Encoding\Stb\**" />
     <EmbeddedResource Remove="Image\Processing\Extensions\**" />
     <EmbeddedResource Remove="old\**" />
+    <None Remove="Coding\Decoding\Stb\**" />
     <None Remove="Coding\Encoding\Png\**" />
+    <None Remove="Coding\Encoding\Stb\**" />
     <None Remove="Image\Processing\Extensions\**" />
     <None Remove="old\**" />
   </ItemGroup>
@@ -59,6 +65,5 @@
 
   <ItemGroup>
     <Folder Include="StbSharp\Image\" />
-    <Folder Include="StbSharp\Shared\" />
   </ItemGroup>
 </Project>

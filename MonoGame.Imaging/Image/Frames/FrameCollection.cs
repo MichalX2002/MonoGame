@@ -19,9 +19,16 @@ namespace MonoGame.Imaging
         #region Constructors
 
         /// <summary>
+        /// Constructs the collection without any initial frames, defining an inital capacity.
+        /// </summary>
+        public FrameCollection(int capacity) : base(null, capacity)
+        {
+        }
+
+        /// <summary>
         /// Constructs the collection without any initial frames.
         /// </summary>
-        public FrameCollection() : base(null, false)
+        public FrameCollection() : this(0)
         {
         }
 
@@ -42,14 +49,14 @@ namespace MonoGame.Imaging
         /// <param name="images">The enumerable of images that will be added to the collection.</param>
         /// <param name="delay">The delay to use for every image in the enumerable.</param>
         public FrameCollection(IEnumerable<Image<TPixel>> images, int delay) :
-            base(null, UseOneAsInitialCapacity(images))
+            this(GetInitialCapacity(images))
         {
             if (images != null)
                 foreach (var image in images)
                     Add(new ImageFrame<TPixel>(image, delay));
         }
 
-        public FrameCollection(Image<TPixel> image) : base(null, true)
+        public FrameCollection(Image<TPixel> image) : this(1)
         {
             Add(new ImageFrame<TPixel>(image, 0));
         }
@@ -90,6 +97,11 @@ namespace MonoGame.Imaging
 
         #region Mutating methods
 
+        public void Add(Image<TPixel> image, int delay)
+        {
+            Add(new ImageFrame<TPixel>(image, delay));
+        }
+
         public bool Remove(Image<TPixel> image)
         {
             if (image == null)
@@ -109,10 +121,6 @@ namespace MonoGame.Imaging
         #endregion
 
         #region GetEnumerator
-
-        public List<ImageFrame<TPixel>>.Enumerator GetEnumerator() => _frames.GetEnumerator();
-        IEnumerator<ImageFrame<TPixel>> IEnumerable<ImageFrame<TPixel>>.GetEnumerator() => GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         IEnumerator<Image<TPixel>> IEnumerable<Image<TPixel>>.GetEnumerator() => new ImageEnumerator(this);
         IEnumerator<IPixelRows<TPixel>> IEnumerable<IPixelRows<TPixel>>.GetEnumerator() => new PixelRowsEnumerator(this);

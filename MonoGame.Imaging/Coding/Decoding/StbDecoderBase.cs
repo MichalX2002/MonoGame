@@ -1,24 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Imaging.Utilities;
 using MonoGame.Utilities.Memory;
 using MonoGame.Utilities.PackedVector;
 using StbSharp;
+using static StbSharp.StbImage;
 
 namespace MonoGame.Imaging.Decoding
 {
     public abstract class StbDecoderBase : IImageDecoder
     {
         public abstract ImageFormat Format { get; }
-        public virtual bool SupportsAnimation => false;
+        public virtual bool ImplementsAnimation => false;
 
         #region DetectFormat Abstraction
 
-        protected abstract bool TestFormat(StbImage.ReadContext context);
+        protected abstract bool TestFormat(ReadContext context);
 
-        private bool TryDetectFormat(StbImage.ReadContext context, out ImageFormat format)
+        private bool TryDetectFormat(ReadContext context, out ImageFormat format)
         {
             if (TestFormat(context))
             {
@@ -38,7 +38,7 @@ namespace MonoGame.Imaging.Decoding
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(data))
             {
-                var ctx = new StbImage.ReadContext(ptr, data.Length);
+                var ctx = new ReadContext(ptr, data.Length);
                 return TryDetectFormat(ctx, out format);
             }
         }
@@ -47,9 +47,9 @@ namespace MonoGame.Imaging.Decoding
 
         #region Identify Abstraction
 
-        protected abstract bool GetInfo(StbImage.ReadContext context, out int w, out int h, out int n);
+        protected abstract bool GetInfo(ReadContext context, out int w, out int h, out int n);
 
-        private bool Identify(StbImage.ReadContext context, out ImageInfo info)
+        private bool Identify(ReadContext context, out ImageInfo info)
         {
             if (GetInfo(context, out int w, out int h, out int n))
             {
@@ -71,7 +71,7 @@ namespace MonoGame.Imaging.Decoding
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(data))
             {
-                var ctx = new StbImage.ReadContext(ptr, data.Length);
+                var ctx = new ReadContext(ptr, data.Length);
                 return Identify(ctx, out info);
             }
         }
@@ -81,13 +81,14 @@ namespace MonoGame.Imaging.Decoding
         #region Decode Abstraction
 
         protected abstract unsafe bool ReadFirst(
-            StbImage.ReadContext context, out void* data, ref StbImage.LoadState state);
+            ImagingConfig config, ReadContext context, out void* data, ref LoadState state);
 
         protected virtual unsafe bool ReadNext(
-            StbImage.ReadContext context, out void* data, ref StbImage.LoadState state)
+            ImagingConfig config, ReadContext context, out void* data, ref LoadState state)
         {
-            ImagingArgumentGuard.AssertAnimationSupported(this);
-            throw new NotImplementedException();
+            ImagingArgumentGuard.AssertAnimationSupport(this, config);
+            data = null;
+            return false;
         }
 
         /// <summary>
@@ -112,35 +113,56 @@ namespace MonoGame.Imaging.Decoding
                 || type == typeof(RgbaVector);
         }
 
-        private static StbImage.LoadState CreateLoadState(Type pixelType)
+        private static LoadState CreateLoadState(
+            Type pixelType, ReadProgressCallback onProgress)
         {
-            return new StbImage.LoadState
+            return new LoadState(onProgress)
             {
                 BitsPerChannel = CanUtilize16BitData(pixelType) ? 16 : 8
             };
         }
 
         private unsafe FrameCollection<TPixel> Decode<TPixel>(
-            StbImage.ReadContext context, ImagingConfig config, int? frameLimit = null,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            ImagingConfig config, ReadContext context, int? frameLimit = null,
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            StbImage.LoadState state = CreateLoadState(typeof(TPixel));
-            if (ReadFirst(context, out void* result, ref state))
+            var frames = GetSmallInitialCollection<TPixel>();
+
+            int frameIndex = 0;
+            var progressCallback = onProgress == null ? (ReadProgressCallback)null : (p, rect) =>
             {
-                return ParseResult(result, state, config, onProgress);
-            }
-            else
-            {
+                Rectangle? rectangle;
+                if (rect.HasValue)
+                {
+                    var r = rect.Value;
+                    rectangle = new Rectangle(r.X, r.Y, r.W, r.H);
+                }
+                else
+                    rectangle = null;
+
+                if (onProgress.Invoke(frameIndex, frames, p, rectangle))
+                    throw new CoderInterruptedException(Format);
+            };
+
+            // TODO: add reading of multiple frames
+
+            LoadState state = CreateLoadState(typeof(TPixel), progressCallback);
+            if (!ReadFirst(config, context, out void* result, ref state))
                 throw GetFailureException(context);
-            }
+            ParseResult(config, frames, result, state, onProgress);
+
+            return frames;
         }
 
-        protected unsafe FrameCollection<TPixel> ParseResult<TPixel>(
-            void* result, StbImage.LoadState state, ImagingConfig config,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+        protected unsafe void ParseResult<TPixel>(
+            ImagingConfig config, FrameCollection<TPixel> frames,
+            void* result, LoadState state,
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
+            // TODO: use Image.Load functions instead
+
             UnmanagedPointer<TPixel> dst = null;
             try
             {
@@ -219,10 +241,7 @@ namespace MonoGame.Imaging.Decoding
 
                 var buffer = new Image<TPixel>.Buffer(dst, state.Width, false);
                 var image = new Image<TPixel>(buffer, state.Width, state.Height);
-
-                var frames = GetLowInitialCapacityList<TPixel>();
-                frames.Add(new ImageFrame<TPixel>(image, 0));
-                return new FrameCollection<TPixel>(frames);
+                frames.Add(image, state.AnimationDelay);
             }
             catch
             {
@@ -241,15 +260,13 @@ namespace MonoGame.Imaging.Decoding
         /// </summary>
         /// <typeparam name="TPixel"></typeparam>
         /// <returns></returns>
-        private List<ImageFrame<TPixel>> GetLowInitialCapacityList<TPixel>()
+        private FrameCollection<TPixel> GetSmallInitialCollection<TPixel>()
             where TPixel : unmanaged, IPixel
         {
-            return Format.SupportsAnimation
-                ? new List<ImageFrame<TPixel>>()
-                : new List<ImageFrame<TPixel>>(1);
+            return new FrameCollection<TPixel>(ImplementsAnimation ? 0 : 1);
         }
 
-        protected Exception GetFailureException(StbImage.ReadContext context)
+        protected Exception GetFailureException(ReadContext context)
         {
             // TODO get some error message from the context
             return new Exception();
@@ -258,24 +275,24 @@ namespace MonoGame.Imaging.Decoding
         #endregion
 
         public virtual unsafe FrameCollection<TPixel> Decode<TPixel>(
-            ImageReadStream stream, ImagingConfig config, int? frameLimit = null,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            ImagingConfig config, ImageReadStream stream, int? frameLimit = null,
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             ImagingArgumentGuard.AssertValidFrameLimit(frameLimit, nameof(frameLimit));
-            return Decode(stream.Context, config, frameLimit, onProgress);
+            return Decode(config, stream.Context, frameLimit, onProgress);
         }
 
         public virtual unsafe FrameCollection<TPixel> Decode<TPixel>(
-            ReadOnlySpan<byte> data, ImagingConfig config, int? frameLimit = null,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            ImagingConfig config, ReadOnlySpan<byte> data, int? frameLimit = null,
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             ImagingArgumentGuard.AssertValidFrameLimit(frameLimit, nameof(frameLimit));
             fixed (byte* ptr = &MemoryMarshal.GetReference(data))
             {
-                var context = new StbImage.ReadContext(ptr, data.Length);
-                return Decode(context, config, frameLimit, onProgress);
+                var context = new ReadContext(ptr, data.Length);
+                return Decode(config, context, frameLimit, onProgress);
             }
         }
     }

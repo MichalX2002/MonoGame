@@ -3,11 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using MonoGame.Utilities;
 using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging
 {
-    public class FrameCollectionBase<TPixel, TFrame>
+    public class FrameCollectionBase<TPixel, TFrame> : IReadOnlyCollection<TFrame>
         where TPixel : unmanaged, IPixel
         where TFrame : ReadOnlyImageFrame<TPixel>
     {
@@ -26,20 +27,21 @@ namespace MonoGame.Imaging
 
         #region Constructors
 
-        internal FrameCollectionBase(List<TFrame> frames, bool oneAsInitialCapacity)
+        internal FrameCollectionBase(List<TFrame> frames, int capacity)
         {
-            _frames = frames ?? (oneAsInitialCapacity ? new List<TFrame>(1) : new List<TFrame>());
+            CommonArgumentGuard.AssertAtleastZero(capacity, nameof(capacity));
+            _frames = frames ?? (capacity > 0 ? new List<TFrame>(capacity) : new List<TFrame>());
         }
 
-        protected static bool UseOneAsInitialCapacity<T>(IEnumerable<T> enumerable)
+        protected static int GetInitialCapacity<T>(IEnumerable<T> enumerable)
         {
-            if (enumerable is ICollection coll)
-                return coll.Count > 1;
-            else if (enumerable is ICollection<T> gColl)
-                return gColl.Count > 1;
-            else if (enumerable is IReadOnlyCollection<T> readOnlyColl)
-                return readOnlyColl.Count > 1;
-            return true;
+            if (enumerable is ICollection coll && coll.Count > 1)
+                return coll.Count;
+            else if (enumerable is ICollection<T> gColl && gColl.Count > 1)
+                return gColl.Count;
+            else if (enumerable is IReadOnlyCollection<T> roColl && roColl.Count > 1)
+                return roColl.Count;
+            return 0;
         }
 
         #endregion
@@ -175,5 +177,9 @@ namespace MonoGame.Imaging
         }
 
         #endregion
+
+        public List<TFrame>.Enumerator GetEnumerator() => _frames.GetEnumerator();
+        IEnumerator<TFrame> IEnumerable<TFrame>.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

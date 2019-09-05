@@ -12,7 +12,7 @@ namespace MonoGame.Imaging
 
         public static FrameCollection<TPixel> LoadFrames<TPixel>(
             Stream stream, ImagingConfig config, int? frameLimit, out ImageFormat format,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             if (config == null)
@@ -26,13 +26,13 @@ namespace MonoGame.Imaging
                 if (!TryGetDecoder(format, out var decoder))
                     throw new ImageCoderException(format);
 
-                return decoder.Decode(imageStream, config, frameLimit, onProgress);
+                return decoder.Decode(config, imageStream, frameLimit, onProgress);
             }
         }
 
         public static FrameCollection<TPixel> LoadFrames<TPixel>(
             Stream stream, int? frameLimit, out ImageFormat format,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return LoadFrames(stream, ImagingConfig.Default, frameLimit, out format, onProgress);
@@ -44,20 +44,20 @@ namespace MonoGame.Imaging
 
         public static FrameCollection<TPixel> LoadFrames<TPixel>(
             ReadOnlySpan<byte> data, ImagingConfig config, int? frameLimit, out ImageFormat format,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            if (data.IsEmpty) throw new ArgumentEmptyException(nameof(data));
             if (config == null) throw new ArgumentNullException(nameof(config));
+            if (data.IsEmpty) throw new ArgumentEmptyException(nameof(data));
 
             format = DetectFormat(data);
             var decoder = GetDecoder(format);
-            return decoder.Decode(data, config, frameLimit, onProgress);
+            return decoder.Decode(config, data, frameLimit, onProgress);
         }
 
         public static FrameCollection<TPixel> LoadFrames<TPixel>(
             ReadOnlySpan<byte> data, int? frameLimit, out ImageFormat format,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return LoadFrames(data, ImagingConfig.Default, frameLimit, out format, onProgress);
@@ -70,7 +70,7 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> Load<TPixel>(
             Stream stream, ImagingConfig config, out ImageFormat format,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return LoadFrames(stream, config, 1, out format, onProgress)?.First.Pixels;
@@ -78,7 +78,7 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> Load<TPixel>(
             Stream stream, ImagingConfig config,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return Load(stream, config, out _, onProgress);
@@ -87,14 +87,14 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> Load<TPixel>(
             Stream stream, out ImageFormat format,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return LoadFrames(stream, ImagingConfig.Default, 1, out format, onProgress)?.First.Pixels;
         }
 
         public static Image<TPixel> Load<TPixel>(
-            Stream stream, DecodeProgressDelegate<TPixel> onProgress = null)
+            Stream stream, DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return Load(stream, out _, onProgress);
@@ -106,7 +106,7 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> Load<TPixel>(
             ReadOnlySpan<byte> data, ImagingConfig config, out ImageFormat format,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return LoadFrames(data, config, 1, out format, onProgress)?.First.Pixels;
@@ -114,7 +114,7 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> Load<TPixel>(
             ReadOnlySpan<byte> data, ImagingConfig config,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return Load(data, config, out _, onProgress);
@@ -123,14 +123,14 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> Load<TPixel>(
             ReadOnlySpan<byte> data, out ImageFormat format,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return LoadFrames(data, ImagingConfig.Default, 1, out format, onProgress)?.First.Pixels;
         }
 
         public static Image<TPixel> Load<TPixel>(
-            ReadOnlySpan<byte> data, DecodeProgressDelegate<TPixel> onProgress = null)
+            ReadOnlySpan<byte> data, DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return Load(data, out _, onProgress);

@@ -1613,7 +1613,7 @@ namespace StbSharp
             float s0, float t0, float s1, float t1, float* transform, int channels, int alpha_channel, uint flags,
             DataType type, int h_filter, int v_filter, int edge_horizontal, int edge_vertical, int colorspace)
         {
-            ImageResizeInfo info = new ImageResizeInfo();
+            var info = new ImageResizeInfo();
             int result;
             ulong memory_required;
             void* extra_memory;

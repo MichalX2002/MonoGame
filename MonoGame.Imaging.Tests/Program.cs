@@ -31,7 +31,14 @@ namespace MonoGame.Imaging.Tests
                 stream.CopyTo(encoded);
 
             int readRepeats = 1;
-            int writeRepeats = 8;
+            int writeRepeats = 1;
+
+            bool OnReadProgress(
+                int frameIndex, FrameCollection<Color> frames, double progress, Rectangle? rectangle)
+            {
+                Console.WriteLine("Read: " + Math.Round(progress * 100, 2) + "%");
+                return false;
+            }
 
             var watch = new Stopwatch();
             Image<Color> image = null;
@@ -42,7 +49,7 @@ namespace MonoGame.Imaging.Tests
                     watch.Start();
                 if (image != null)
                     image.Dispose();
-                image = Image.Load<Color>(encoded);
+                image = Image.Load<Color>(encoded, OnReadProgress);
                 watch.Stop();
             }
             Console.WriteLine(image.Width + "x" + image.Height + " # " + image.GetBitDepth());
@@ -51,11 +58,16 @@ namespace MonoGame.Imaging.Tests
 
             Thread.Sleep(500);
 
-            image.Save("XD.png");
-
             Thread.Sleep(500);
 
             watch.Reset();
+
+            bool OnWriteProgress(
+                int frameIndex, ReadOnlyFrameCollection<Color> frames, double progress)
+            {
+                Console.WriteLine("Write: " + Math.Round(progress * 100, 2) + "%");
+                return false;
+            }
 
             var result = new MemoryStream(1024 * 1024 * 85);
             var writeFormat = ImageFormat.Png;
@@ -64,7 +76,9 @@ namespace MonoGame.Imaging.Tests
                 result.Seek(0, SeekOrigin.Begin);
                 if (writeRepeats == 1 || i != 0)
                     watch.Start();
-                //ImageWriter.Write(provider, writeFormat, result);
+
+                image.Save(result, ImageFormat.Png, null, OnWriteProgress);
+
                 watch.Stop();
             }
             image.Dispose();

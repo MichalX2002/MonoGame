@@ -50,6 +50,9 @@ namespace MonoGame.Imaging
         {
             AssertExceptionType(type);
 
+            // TODO: FIXME
+            return true;
+
             if (UseExceptions)
                 return _throwingExceptions.Contains(type);
             return false;

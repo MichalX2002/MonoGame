@@ -5,7 +5,7 @@ namespace MonoGame.Imaging
     public class AnimationNotImplementedException : Exception
     {
         /// <summary>
-        /// Gets the image coder that does not support animation.
+        /// Gets the image coder that has not implement animation.
         /// </summary>
         public IImageCoder Coder { get; }
 

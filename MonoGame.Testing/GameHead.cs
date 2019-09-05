@@ -109,7 +109,7 @@ namespace MonoGame.Testing
                 Exit();
 
             f += time.Delta;
-            if (f >= 0.1f)
+            if (f >= 2f)
             {
                 f = 0f;
 
@@ -134,8 +134,15 @@ namespace MonoGame.Testing
 
                 Task.Run(() =>
                 {
+                    bool OnProgress(
+                        int frameIndex, ReadOnlyFrameCollection<Color> frames, double percentage)
+                    {
+                        Console.WriteLine("PNG write progress: " + Math.Round(percentage * 100f, 1) + "%");
+                        return false;
+                    }
+
                     frameIndex++;
-                    image.Save("frames/yo mom " + frameIndex + ".bmp");
+                    image.Save("frames/yo mom " + frameIndex + ".png", null, null, OnProgress);
                     image.Dispose();
                 });
             }

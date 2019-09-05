@@ -11,7 +11,7 @@ namespace MonoGame.Imaging.Encoding
     public abstract partial class StbEncoderBase : IImageEncoder
     {
         private static unsafe IMemoryResult CustomDeflateCompress(
-            ReadOnlySpan<byte> data, CompressionLevel level)
+            ReadOnlySpan<byte> data, CompressionLevel level, Action<double> onProgress = null)
         {
             var output = RecyclableMemoryManager.Default.GetMemoryStream();
 
@@ -22,14 +22,17 @@ namespace MonoGame.Imaging.Encoding
             {
                 using (var deflate = new DeflateStream(output, level, leaveOpen: true))
                 using (var source = new UnmanagedMemoryStream(dataPtr, data.Length))
-                    source.PooledCopyTo(deflate);
+                {
+                    double dlen = data.Length;
+                    source.PooledCopyTo(deflate, (r, copied) => onProgress?.Invoke(copied / dlen));
+                }
             }
 
             StbImageWrite.calc_adler32_checksum(data, out uint adlerA, out uint adlerB);
-
-            byte[] adlerChecksum = BitConverter.GetBytes((adlerB << 16) | adlerA);
-            adlerChecksum.AsSpan().Reverse();
-            output.Write(adlerChecksum, 0, adlerChecksum.Length);
+            uint adlerSum = (adlerB << 16) | adlerA;
+            var adlerChecksum = new Span<byte>(&adlerSum, sizeof(uint));
+            adlerChecksum.Reverse();
+            output.Write(adlerChecksum);
 
             return new RecyclableDeflateResult(output);
         }

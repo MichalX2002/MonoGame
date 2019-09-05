@@ -12,8 +12,11 @@ namespace MonoGame.Imaging
         ImageFormat Format { get; }
 
         /// <summary>
-        /// Gets whether this coder supports processing animated images.
+        /// Gets whether this coder has implemented processing of animated images.
+        /// <para>
+        /// The format also needs to support animation.
+        /// </para>
         /// </summary>
-        bool SupportsAnimation { get; }
+        bool ImplementsAnimation { get; }
     }
 }

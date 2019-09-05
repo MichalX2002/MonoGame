@@ -3,9 +3,10 @@ using System.IO;
 using MonoGame.Framework;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Utilities;
+using MonoGame.Utilities;
 using MonoGame.Utilities.Memory;
 using MonoGame.Utilities.PackedVector;
-using StbSharp;
+using static StbSharp.StbImageWrite;
 
 namespace MonoGame.Imaging.Encoding
 {
@@ -13,24 +14,23 @@ namespace MonoGame.Imaging.Encoding
     {
         public abstract ImageFormat Format { get; }
         public abstract EncoderConfig DefaultConfig { get; }
-        public virtual bool SupportsAnimation => false;
+        public virtual bool ImplementsAnimation => false;
 
         static StbEncoderBase()
         {
-            StbImageWrite.CustomZlibDeflateCompress = CustomDeflateCompress;
+            CustomZlibDeflateCompress = CustomDeflateCompress;
         }
 
         public void Encode<TPixel>(
             ReadOnlyFrameCollection<TPixel> frames, Stream stream,
             EncoderConfig encoderConfig, ImagingConfig imagingConfig,
-            EncodeProgressDelegate<TPixel> onProgress = null)
+            EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            if (frames == null) throw new ArgumentNullException(nameof(frames));
+            CommonArgumentGuard.AssertNonEmpty(frames?.Count, nameof(frames));
             if (stream == null) throw new ArgumentNullException(nameof(stream));
             if (encoderConfig == null) throw new ArgumentNullException(nameof(encoderConfig));
             if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
-            if (frames.Count <= 0) throw new ArgumentEmptyException(nameof(frames));
             EncoderConfig.AssertTypeEqual(DefaultConfig, encoderConfig, nameof(encoderConfig));
 
             byte[] writeBuffer = RecyclableMemoryManager.Default.GetBlock();
@@ -42,16 +42,25 @@ namespace MonoGame.Imaging.Encoding
                     var frame = frames[i];
                     int components = 4;
                     var provider = new ImagePixelProvider<TPixel>(frame.Pixels, components);
+                    var progressCallback = onProgress == null ? (Action<double>)null : (p) =>
+                    {
+                        if (onProgress.Invoke(i, frames, p))
+                            throw new CoderInterruptedException(Format);
+                    };
 
-                    var context = new StbImageWrite.WriteContext(provider.Fill, provider.Fill,
+                    var context = new WriteContext(
+                        provider.Fill, provider.Fill, progressCallback,
                         frame.Width, frame.Height, components, stream, writeBuffer, scratchBuffer);
 
-                    bool successfulWrite = i == 0
-                        ? WriteFirst(context, frame, encoderConfig, imagingConfig, onProgress)
-                        : WriteNext(context, frame, encoderConfig, imagingConfig, onProgress);
+                    if (i == 0)
+                    {
+                        if (!WriteFirst(context, frame, encoderConfig, imagingConfig))
+                            throw new ImageCoderException(Format);
+                        continue;
+                    }
 
-                    if (!successfulWrite)
-                        throw new ImageCoderException(Format);
+                    if (!WriteNext(context, frame, encoderConfig, imagingConfig))
+                        break;
                 }
             }
             finally
@@ -62,19 +71,17 @@ namespace MonoGame.Imaging.Encoding
         }
 
         protected abstract bool WriteFirst<TPixel>(
-            in StbImageWrite.WriteContext context, ReadOnlyImageFrame<TPixel> frame,
-            EncoderConfig encoderConfig, ImagingConfig imagingConfig,
-            EncodeProgressDelegate<TPixel> onProgress = null)
+            in WriteContext context, ReadOnlyImageFrame<TPixel> frame,
+            EncoderConfig encoderConfig, ImagingConfig imagingConfig)
             where TPixel : unmanaged, IPixel;
 
         protected virtual bool WriteNext<TPixel>(
-            in StbImageWrite.WriteContext context, ReadOnlyImageFrame<TPixel> frame,
-            EncoderConfig encoderConfig, ImagingConfig imagingConfig,
-            EncodeProgressDelegate<TPixel> onProgress = null)
+            in WriteContext context, ReadOnlyImageFrame<TPixel> frame,
+            EncoderConfig encoderConfig, ImagingConfig imagingConfig)
             where TPixel : unmanaged, IPixel
         {
-            ImagingArgumentGuard.AssertAnimationSupported(this);
-            throw new NotImplementedException();
+            ImagingArgumentGuard.AssertAnimationSupport(this, imagingConfig);
+            return false;
         }
     }
 }

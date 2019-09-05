@@ -4,8 +4,21 @@ using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging.Decoding
 {
-    public delegate bool DecodeProgressDelegate<TPixel>(
-        int frameIndex, ReadOnlyImageFrame<TPixel> frame, Rectangle rectangle)
+    /// <summary>
+    /// Represents a progress update for image decoding.
+    /// <para>
+    /// If invocation returns <see langword="true"/>, 
+    /// the operation should be interrupted as soon as possible,
+    /// optionally throwing <see cref="CoderInterruptedException"/>.
+    /// </para>
+    /// </summary>
+    /// <typeparam name="TPixel"></typeparam>
+    /// <param name="frameIndex"></param>
+    /// <param name="frames"></param>
+    /// <param name="rectangle"></param>
+    /// <returns></returns>
+    public delegate bool DecodeProgressCallback<TPixel>(
+        int frameIndex, FrameCollection<TPixel> frames, double progress, Rectangle? rectangle)
         where TPixel : unmanaged, IPixel;
 
     /// <summary>
@@ -70,10 +83,10 @@ namespace MonoGame.Imaging.Decoding
         /// <param name="onProgress">Optional delegate for reporting decode progress.</param>
         /// <returns>The collection of decoded images.</returns>
         FrameCollection<TPixel> Decode<TPixel>(
-            ImageReadStream stream,
             ImagingConfig config,
+            ImageReadStream stream,
             int? frameLimit = null,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel;
 
         /// <summary>
@@ -89,10 +102,10 @@ namespace MonoGame.Imaging.Decoding
         /// <param name="onProgress">Optional delegate for reporting decode progress.</param>
         /// <returns>The collection of decoded frames.</returns>
         FrameCollection<TPixel> Decode<TPixel>(
-            ReadOnlySpan<byte> data,
             ImagingConfig config,
+            ReadOnlySpan<byte> data,
             int? frameLimit = null,
-            DecodeProgressDelegate<TPixel> onProgress = null)
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel;
 
         #endregion

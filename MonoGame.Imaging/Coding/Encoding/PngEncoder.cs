@@ -9,11 +9,11 @@ namespace MonoGame.Imaging.Encoding
     {
         public static PngEncoderConfig Default { get; } = new PngEncoderConfig(CompressionLevel.Optimal);
 
-        public CompressionLevel Compression { get; }
+        public CompressionLevel CompressionLevel { get; }
 
         public PngEncoderConfig(CompressionLevel compression)
         {
-            Compression = compression;
+            CompressionLevel = compression;
         }
     }
 
@@ -24,11 +24,10 @@ namespace MonoGame.Imaging.Encoding
 
         protected override bool WriteFirst<TPixel>(
             in StbImageWrite.WriteContext context, ReadOnlyImageFrame<TPixel> frame, 
-            EncoderConfig encoderConfig, ImagingConfig imagingConfig,
-            EncodeProgressDelegate<TPixel> onProgress = null)
+            EncoderConfig encoderConfig, ImagingConfig imagingConfig)
         {
             var config = encoderConfig as PngEncoderConfig;
-            return StbImageWrite.stbi_write_png_core(context, config.Compression);
+            return StbImageWrite.stbi_write_png_core(context, config.CompressionLevel);
         }
     }
 }

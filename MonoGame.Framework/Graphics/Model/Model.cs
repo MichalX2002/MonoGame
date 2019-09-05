@@ -63,7 +63,7 @@ namespace MonoGame.Framework.Graphics
         /// </exception>
         public Model(GraphicsDevice graphicsDevice, IList<ModelBone> bones, IList<ModelMesh> meshes)
 		{
-            this._graphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
+            _graphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
                     nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
 
             // TODO: Complete member initialization

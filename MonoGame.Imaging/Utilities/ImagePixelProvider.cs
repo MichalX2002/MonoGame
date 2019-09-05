@@ -45,7 +45,9 @@ namespace MonoGame.Imaging.Pixels
                 int lastByteOffset = byteOffset;
                 int toRead = Math.Min(pixelsLeft, readBuffer.Length);
                 _pixels.GetPixelRow(startX + byteOffset / Components, startY, readBuffer.Slice(0, toRead));
-
+                
+                // some for-loops in the folling cases use "toRead - 1" so
+                // we can copy leftover bytes if the request length is irregular
                 switch (Components)
                 {
                     case 1:
@@ -57,19 +59,19 @@ namespace MonoGame.Imaging.Pixels
                         goto ReadEnd;
 
                     case 2:
-                        for (int i = 0; i < toRead - 1; i++, byteOffset += Components)
+                        for (int i = 0; i < toRead - 1; i++, byteOffset += 2)
                         {
                             grayAlphaSpan[0].FromScaledVector4(readBuffer[i].ToScaledVector4());
-                            for (int j = 0; j < Components; j++)
+                            for (int j = 0; j < 2; j++)
                                 buffer[j + byteOffset] = castTmp[j];
                         }
                         break;
 
                     case 3:
-                        for (int i = 0; i < toRead - 1; i++, byteOffset += Components)
+                        for (int i = 0; i < toRead - 1; i++, byteOffset += 3)
                         {
                             rgbSpan[0].FromScaledVector4(readBuffer[i].ToScaledVector4());
-                            for (int j = 0; j < Components; j++)
+                            for (int j = 0; j < 3; j++)
                                 buffer[j + byteOffset] = castTmp[j];
                         }
                         break;
@@ -81,30 +83,32 @@ namespace MonoGame.Imaging.Pixels
                             fixed (byte* dstPtr = &MemoryMarshal.GetReference(buffer))
                             {
                                 int bytes = toRead * sizeof(TPixel);
-                                byte* dst = dstPtr + byteOffset;
-                                Buffer.MemoryCopy((byte*)srcPtr, dst, bytes, bytes);
+                                Buffer.MemoryCopy(srcPtr, dstPtr + byteOffset, bytes, bytes);
                                 byteOffset += bytes;
                             }
                             goto ReadEnd;
                         }
                         else
                         {
-                            for (int i = 0; i < toRead - 1; i++, byteOffset += Components)
+                            for (int i = 0; i < toRead - 1; i++, byteOffset += 4)
                             {
                                 readBuffer[i].ToColor(ref rgbaSpan[0]);
-                                for (int j = 0; j < Components; j++)
+                                for (int j = 0; j < 4; j++)
                                     buffer[j + byteOffset] = castTmp[j];
                             }
                         }
                         break;
                 }
 
-                // copy over the remaining bytes
+                // copy over the remaining bytes, as Fill() may
+                // request less bytes than sizeof(TPixel)
                 int bytesRead = byteOffset - lastByteOffset;
-                int leftover = Math.Min(Components, bytesRead - toRead * sizeof(TPixel));
-                for (int j = 0; j < leftover; j++)
+                int leftoverBytes = Math.Min(Components, bytesRead - toRead * sizeof(TPixel));
+                for (int j = 0; j < leftoverBytes; j++)
                     buffer[j + byteOffset] = castTmp[j];
+                byteOffset += leftoverBytes;
 
+                // a case for code that copies bytes directly, not needing to copy leftovers
                 ReadEnd:
                 pixelsLeft -= toRead;
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using MonoGame.Framework;
+using MonoGame.Imaging.Encoding;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Utilities;
 using MonoGame.Utilities.PackedVector;
@@ -41,15 +42,6 @@ namespace MonoGame.Imaging.Utilities
                 CommonArgumentGuard.AssertAboveZero(frameLimit.Value, paramName);
         }
 
-        public static void AssertAnimationSupported(IImageCoder coder)
-        {
-            if (!coder.Format.SupportsAnimation)
-                throw new ImageCoderException(coder.Format, "The image format does not support animation.");
-
-            if (!coder.SupportsAnimation)
-                throw new ImageCoderException(coder.Format, "The coder does not support animation.");
-        }
-
         public static void AssertRectangleInSource<TPixel>(
             IPixelSource<TPixel> source, Rectangle rect, string rectParamName)
             where TPixel : unmanaged, IPixel
@@ -66,6 +58,25 @@ namespace MonoGame.Imaging.Utilities
                 throw new ArgumentOutOfRangeException(rectParamName + ".X");
             if (rect.Y + rect.Height > source.Height)
                 throw new ArgumentOutOfRangeException(rectParamName + ".Y");
+        }
+
+        public static void AssertAnimationSupport(ImageFormat format, ImagingConfig imagingConfig)
+        {
+            if (imagingConfig == null)
+                throw new ArgumentNullException(nameof(imagingConfig));
+
+            if (imagingConfig.ShouldThrowOnException<AnimationNotSupportedException>())
+                if (!format.SupportsAnimation)
+                    throw new AnimationNotSupportedException(format);
+        }
+
+        public static void AssertAnimationSupport(IImageCoder coder, ImagingConfig imagingConfig)
+        {
+            AssertAnimationSupport(coder.Format, imagingConfig);
+
+            if (imagingConfig.ShouldThrowOnException<AnimationNotImplementedException>())
+                if (!coder.ImplementsAnimation)
+                    throw new AnimationNotImplementedException(coder);
         }
     }
 }

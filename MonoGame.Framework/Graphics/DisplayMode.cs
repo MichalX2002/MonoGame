@@ -44,7 +44,7 @@ namespace MonoGame.Framework.Graphics
 
         internal DisplayMode(int width, int height, SurfaceFormat format)
         {
-            this.Width = width;
+            Width = width;
             Height = height;
             Format = format;
         }
