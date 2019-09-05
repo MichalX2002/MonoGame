@@ -81,10 +81,10 @@ namespace MonoGame.Imaging.Decoding
         #region Decode Abstraction
 
         protected abstract unsafe bool ReadFirst(
-            ImagingConfig config, ReadContext context, out void* data, ref LoadState state);
+            ImagingConfig config, ReadContext context, out void* data, ref ReadState state);
 
         protected virtual unsafe bool ReadNext(
-            ImagingConfig config, ReadContext context, out void* data, ref LoadState state)
+            ImagingConfig config, ReadContext context, out void* data, ref ReadState state)
         {
             ImagingArgumentGuard.AssertAnimationSupport(this, config);
             data = null;
@@ -113,10 +113,10 @@ namespace MonoGame.Imaging.Decoding
                 || type == typeof(RgbaVector);
         }
 
-        private static LoadState CreateLoadState(
+        private static ReadState CreateReadState(
             Type pixelType, ReadProgressCallback onProgress)
         {
-            return new LoadState(onProgress)
+            return new ReadState(onProgress)
             {
                 BitsPerChannel = CanUtilize16BitData(pixelType) ? 16 : 8
             };
@@ -147,7 +147,7 @@ namespace MonoGame.Imaging.Decoding
 
             // TODO: add reading of multiple frames
 
-            LoadState state = CreateLoadState(typeof(TPixel), progressCallback);
+            ReadState state = CreateReadState(typeof(TPixel), progressCallback);
             if (!ReadFirst(config, context, out void* result, ref state))
                 throw GetFailureException(context);
             ParseResult(config, frames, result, state, onProgress);
@@ -157,7 +157,7 @@ namespace MonoGame.Imaging.Decoding
 
         protected unsafe void ParseResult<TPixel>(
             ImagingConfig config, FrameCollection<TPixel> frames,
-            void* result, LoadState state,
+            void* result, ReadState state,
             DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {

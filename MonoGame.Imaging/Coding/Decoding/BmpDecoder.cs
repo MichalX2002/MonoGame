@@ -18,7 +18,7 @@ namespace MonoGame.Imaging.Decoding
 
         protected override unsafe bool ReadFirst(
             ImagingConfig config, StbImage.ReadContext context, 
-            out void* result, ref StbImage.LoadState state)
+            out void* result, ref StbImage.ReadState state)
         {
             result = StbImage.stbi__bmp_load(context, ref state);
             return result != null;
