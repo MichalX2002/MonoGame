@@ -3,10 +3,10 @@
 namespace MonoGame.Framework
 {
     /// <summary>
-    /// The exception that is thrown when trying to use an empty object instance.
+    /// The exception that is thrown when trying to use an empty instance.
     /// <para>
     /// Commonly thrown when checking whether a struct
-    /// (e.g <see cref="Span{T}"/> or <see cref="Memory{T}"/>) or array is empty.
+    /// (e.g <see cref="Span{T}"/> or <see cref="Memory{T}"/>) or collection is empty.
     /// </para>
     /// </summary>
     public class ArgumentEmptyException : ArgumentException

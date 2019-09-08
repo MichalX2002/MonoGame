@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using MonoGame.Imaging.Pixels;
 using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging
@@ -11,9 +10,7 @@ namespace MonoGame.Imaging
     /// Represents a collection of image frames that have the same size and pixel type.
     /// </summary>
     public class FrameCollection<TPixel> : FrameCollectionBase<TPixel, ImageFrame<TPixel>>,
-        IList<ImageFrame<TPixel>>,
-        IReadOnlyCollection<Image<TPixel>>,
-        IReadOnlyCollection<IPixelRows<TPixel>>
+        IReadOnlyCollection<Image<TPixel>>
         where TPixel : unmanaged, IPixel
     {
         #region Constructors
@@ -121,9 +118,8 @@ namespace MonoGame.Imaging
         #endregion
 
         #region GetEnumerator
-
+        
         IEnumerator<Image<TPixel>> IEnumerable<Image<TPixel>>.GetEnumerator() => new ImageEnumerator(this);
-        IEnumerator<IPixelRows<TPixel>> IEnumerable<IPixelRows<TPixel>>.GetEnumerator() => new PixelRowsEnumerator(this);
 
         /// <summary>
         /// Enumerates images from the frames of a <see cref="FrameCollection{TPixel}"/>.
@@ -138,62 +134,6 @@ namespace MonoGame.Imaging
             object IEnumerator.Current => Current;
 
             internal ImageEnumerator(FrameCollection<TPixel> collection)
-            {
-                _collection = collection;
-                _index = 0;
-                _version = _collection._version;
-                Current = null;
-            }
-
-            public bool MoveNext()
-            {
-                AssertCollectionVersion();
-
-                if (_index < _collection.Count)
-                {
-                    Current = _collection._frames[_index].Pixels;
-                    _index++;
-                    return true;
-                }
-
-                _index = _collection.Count + 1;
-                Current = null;
-                return false;
-            }
-
-            public void Reset()
-            {
-                AssertCollectionVersion();
-
-                _index = 0;
-                Current = null;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            private void AssertCollectionVersion()
-            {
-                if (_version != _collection._version)
-                    throw new InvalidOperationException("The underlying collection has changed.");
-            }
-
-            public void Dispose()
-            {
-            }
-        }
-
-        /// <summary>
-        /// Enumerates images as views from the frames of a <see cref="FrameCollection{TPixel}"/>.
-        /// </summary>
-        public struct PixelRowsEnumerator : IEnumerator<IPixelRows<TPixel>>
-        {
-            private FrameCollection<TPixel> _collection;
-            private int _index;
-            private int _version;
-
-            public IPixelRows<TPixel> Current { get; private set; }
-            object IEnumerator.Current => Current;
-
-            internal PixelRowsEnumerator(FrameCollection<TPixel> collection)
             {
                 _collection = collection;
                 _index = 0;

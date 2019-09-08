@@ -5,7 +5,7 @@ namespace MonoGame.Utilities
 {
     public static class StreamExtensions
     {
-        public delegate void CopyProgressCallback(int read, int copied);
+        public delegate void CopyProgressCallback(int read, long copied);
 
         /// <summary>
         /// Reads the bytes from the current stream and writes them to another stream,
@@ -42,7 +42,7 @@ namespace MonoGame.Utilities
             byte[] buffer = RecyclableMemoryManager.Default.GetBlock();
             try
             {
-                int copied = 0;
+                long copied = 0;
                 int read;
                 while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
                 {

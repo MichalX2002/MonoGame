@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using MonoGame.Framework;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Utilities;
 using MonoGame.Utilities;
@@ -12,14 +11,15 @@ namespace MonoGame.Imaging.Encoding
 {
     public abstract partial class StbEncoderBase : IImageEncoder
     {
-        public abstract ImageFormat Format { get; }
-        public abstract EncoderConfig DefaultConfig { get; }
-        public virtual bool ImplementsAnimation => false;
-
         static StbEncoderBase()
         {
             CustomZlibDeflateCompress = CustomDeflateCompress;
         }
+
+        public abstract ImageFormat Format { get; }
+        public abstract EncoderConfig DefaultConfig { get; }
+
+        public virtual bool ImplementsAnimation => false;
 
         public void Encode<TPixel>(
             ReadOnlyFrameCollection<TPixel> frames, Stream stream,
@@ -40,11 +40,11 @@ namespace MonoGame.Imaging.Encoding
                 for (int i = 0; i < frames.Count; i++)
                 {
                     var frame = frames[i];
-                    int components = 4;
+                    int components = 4; // TODO: change this so it's dynamic
                     var provider = new ImagePixelProvider<TPixel>(frame.Pixels, components);
-                    var progressCallback = onProgress == null ? (Action<double>)null : (p) =>
+                    var progressCallback = onProgress == null ? (WriteProgressCallback)null : (p) =>
                     {
-                        if (onProgress.Invoke(i, frames, p))
+                        if (!onProgress.Invoke(i, frames, p))
                             throw new CoderInterruptedException(Format);
                     };
 
@@ -56,11 +56,11 @@ namespace MonoGame.Imaging.Encoding
                     {
                         if (!WriteFirst(context, frame, encoderConfig, imagingConfig))
                             throw new ImageCoderException(Format);
-                        continue;
                     }
-
-                    if (!WriteNext(context, frame, encoderConfig, imagingConfig))
+                    else if (!WriteNext(context, frame, encoderConfig, imagingConfig))
+                    {
                         break;
+                    }
                 }
             }
             finally

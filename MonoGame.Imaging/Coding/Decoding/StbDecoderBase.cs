@@ -130,35 +130,48 @@ namespace MonoGame.Imaging.Decoding
             var frames = GetSmallInitialCollection<TPixel>();
 
             int frameIndex = 0;
-            var progressCallback = onProgress == null ? (ReadProgressCallback)null : (p, rect) =>
-            {
-                Rectangle? rectangle;
-                if (rect.HasValue)
-                {
-                    var r = rect.Value;
-                    rectangle = new Rectangle(r.X, r.Y, r.W, r.H);
-                }
-                else
-                    rectangle = null;
-
-                if (onProgress.Invoke(frameIndex, frames, p, rectangle))
-                    throw new CoderInterruptedException(Format);
-            };
 
             // TODO: add reading of multiple frames
 
-            ReadState state = CreateReadState(typeof(TPixel), progressCallback);
-            if (!ReadFirst(config, context, out void* result, ref state))
-                throw GetFailureException(context);
-            ParseResult(config, frames, result, state, onProgress);
+            while (frameIndex == 0)
+            {
+                var progressCallback = onProgress == null ? (ReadProgressCallback)null : (p, rect) =>
+                {
+                    Rectangle? rectangle = null;
+                    if (rect.HasValue)
+                    {
+                        var r = rect.Value;
+                        rectangle = new Rectangle(r.X, r.Y, r.W, r.H);
+                    }
 
+                    if (!onProgress.Invoke(frameIndex, frames, p, rectangle))
+                        throw new CoderInterruptedException(Format);
+                };
+                ReadState state = CreateReadState(typeof(TPixel), progressCallback);
+
+                void* result;
+                if (frameIndex == 0)
+                {
+                    if (!ReadFirst(config, context, out result, ref state))
+                        throw GetFailureException(context);
+                }
+                else if (!ReadNext(config, context, out result, ref state))
+                {
+                    break;
+                }
+
+                ParseResult(config, frames, result, state);
+                frameIndex++;
+
+                if (frameLimit.HasValue && frameIndex >= frameLimit)
+                    break;
+            }
             return frames;
         }
 
         protected unsafe void ParseResult<TPixel>(
             ImagingConfig config, FrameCollection<TPixel> frames,
-            void* result, ReadState state,
-            DecodeProgressCallback<TPixel> onProgress = null)
+            void* result, ReadState state)
             where TPixel : unmanaged, IPixel
         {
             // TODO: use Image.Load functions instead

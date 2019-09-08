@@ -11,7 +11,7 @@ namespace MonoGame.Imaging
     /// Represents a collection of read-only frames that have the same size and pixel type.
     /// </summary>
     public class ReadOnlyFrameCollection<TPixel> : FrameCollectionBase<TPixel, ReadOnlyImageFrame<TPixel>>,
-        IList<ReadOnlyImageFrame<TPixel>>, IReadOnlyCollection<IReadOnlyPixelRows<TPixel>>
+        IReadOnlyCollection<IReadOnlyPixelRows<TPixel>>
         where TPixel : unmanaged, IPixel
     {
         #region Constructors
@@ -115,15 +115,11 @@ namespace MonoGame.Imaging
 
         #region GetEnumerator
 
-        public List<ReadOnlyImageFrame<TPixel>>.Enumerator GetEnumerator() => _frames.GetEnumerator();
-        IEnumerator<ReadOnlyImageFrame<TPixel>> IEnumerable<ReadOnlyImageFrame<TPixel>>.GetEnumerator() => GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        IEnumerator<IReadOnlyPixelRows<TPixel>> IEnumerable<IReadOnlyPixelRows<TPixel>>.GetEnumerator() =>
+        IEnumerator<IReadOnlyPixelRows<TPixel>> IEnumerable<IReadOnlyPixelRows<TPixel>>.GetEnumerator() => 
             new PixelRowsEnumerator(this);
 
         /// <summary>
-        /// Enumerates pixel views from the frames of a <see cref="ReadOnlyFrameCollection{TPixel}"/>.
+        /// Enumerates images from the frames of a <see cref="ReadOnlyFrameCollection{TPixel}"/>.
         /// </summary>
         public struct PixelRowsEnumerator : IEnumerator<IReadOnlyPixelRows<TPixel>>
         {

@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using MonoGame.Utilities;
 
 namespace MonoGame.Imaging.Tests
 {
@@ -66,7 +67,7 @@ namespace MonoGame.Imaging.Tests
                 int frameIndex, ReadOnlyFrameCollection<Color> frames, double progress)
             {
                 Console.WriteLine("Write: " + Math.Round(progress * 100, 2) + "%");
-                return false;
+                return true;
             }
 
             var result = new MemoryStream(1024 * 1024 * 85);

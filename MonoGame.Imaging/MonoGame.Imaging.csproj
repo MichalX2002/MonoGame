@@ -52,6 +52,7 @@
     <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\IMemoryResult.cs" Link="StbSharp\Shared\IMemoryResult.cs" />
     <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\IPixelProvider.cs" Link="StbSharp\Shared\IPixelProvider.cs" />
     <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\MemoryStatistics.cs" Link="StbSharp\Shared\MemoryStatistics.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\ZlibHeader.cs" Link="StbSharp\Shared\ZlibHeader.cs" />
   </ItemGroup>
 
   <ItemGroup>

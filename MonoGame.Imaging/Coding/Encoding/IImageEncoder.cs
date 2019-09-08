@@ -6,7 +6,7 @@ namespace MonoGame.Imaging.Encoding
     /// <summary>
     /// Represents a progress update for image encoding.
     /// <para>
-    /// If invocation returns <see langword="true"/>, 
+    /// If invocation returns <see langword="false"/>, 
     /// the operation should be interrupted as soon as possible,
     /// optionally throwing <see cref="CoderInterruptedException"/>.
     /// </para>
