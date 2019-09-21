@@ -1,6 +1,6 @@
 ﻿
 namespace MonoGame.Framework
 {
-    public delegate void SenderDelegate<TSender>(TSender sender);
-    public delegate void MessageDelegate<TSender, TData>(TSender sender, TData data);
+    public delegate void MessageHandler<TSender>(TSender sender);
+    public delegate void DataMessageHandler<TSender, TData>(TSender sender, TData data);
 }

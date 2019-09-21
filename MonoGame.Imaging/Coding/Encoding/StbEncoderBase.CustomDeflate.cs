@@ -24,8 +24,13 @@ namespace MonoGame.Imaging.Encoding
                 using (var deflate = new DeflateStream(output, level, leaveOpen: true))
                 using (var source = new UnmanagedMemoryStream(dataPtr, data.Length))
                 {
-                    double dlen = data.Length; // cast to double for precise progress percentage
-                    source.PooledCopyTo(deflate, (r, copied) => onProgress?.Invoke(copied / dlen));
+                    long copied = 0;
+                    double dataLength = data.Length;
+                    source.PooledCopyTo(deflate, (read) =>
+                    {
+                        copied += read;
+                        onProgress?.Invoke(copied / dataLength);
+                    });
                 }
             }
 

@@ -118,7 +118,7 @@ namespace MonoGame.Imaging
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                // Console.WriteLine(ex);
                 // TODO manage exception somehow
                 return 0;
             }

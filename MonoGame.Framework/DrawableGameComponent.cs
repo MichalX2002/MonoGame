@@ -2,8 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
-
 namespace MonoGame.Framework
 {
     public class DrawableGameComponent : GameComponent, IDrawable
@@ -40,8 +38,8 @@ namespace MonoGame.Framework
             }
         }
 
-        public event SenderDelegate<object> DrawOrderChanged;
-        public event SenderDelegate<object> VisibleChanged;
+        public event MessageHandler<object> DrawOrderChanged;
+        public event MessageHandler<object> VisibleChanged;
 
         public DrawableGameComponent(Game game) : base(game)
         {
@@ -56,11 +54,17 @@ namespace MonoGame.Framework
             }
         }
 
-        protected virtual void LoadContent() { }
+        protected virtual void LoadContent()
+        {
+        }
 
-        protected virtual void UnloadContent () { }
+        protected virtual void UnloadContent ()
+        {
+        }
 
-        public virtual void Draw(GameTime gameTime) { }
+        public virtual void Draw(GameTime gameTime)
+        {
+        }
 
         protected virtual void OnVisibleChanged()
         {

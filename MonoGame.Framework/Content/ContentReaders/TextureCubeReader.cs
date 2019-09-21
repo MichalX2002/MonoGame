@@ -2,7 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using System.IO;
 using MonoGame.Framework.Graphics;
 
@@ -13,7 +12,7 @@ namespace MonoGame.Framework.Content
 
         protected internal override TextureCube Read(ContentReader reader, TextureCube existingInstance)
         {
-            SurfaceFormat surfaceFormat = (SurfaceFormat)reader.ReadInt32();
+            var surfaceFormat = (SurfaceFormat)reader.ReadInt32();
             int size = reader.ReadInt32();
             int levels = reader.ReadInt32();
 

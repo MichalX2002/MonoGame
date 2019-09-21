@@ -11,10 +11,7 @@ namespace MonoGame.Imaging.Encoding
 
         public CompressionLevel CompressionLevel { get; }
 
-        public PngEncoderConfig(CompressionLevel compression)
-        {
-            CompressionLevel = compression;
-        }
+        public PngEncoderConfig(CompressionLevel compression) => CompressionLevel = compression;
     }
 
     public class PngEncoder : StbEncoderBase

@@ -27,6 +27,14 @@ namespace MonoGame.Framework.Audio
     {
         private readonly TimeSpan _duration;
 
+        private static void AssertInitialized()
+        {
+            if (_systemState != SoundSystemState.Initialized)
+                throw new AudioHardwareException(
+                    "The audio system has failed to initialize. " +
+                    $"Call {nameof(Initialize)} before any audio operation to get more specific errors.");
+        }
+
         #region Internal Constructors
 
         /// <summary>
@@ -36,10 +44,7 @@ namespace MonoGame.Framework.Audio
         private SoundEffect(Stream stream)
         {
             Initialize();
-            if (_systemState != SoundSystemState.Initialized)
-                throw new AudioHardwareException(
-                    "The sound system has failed to initialize. " +
-                    $"Call {nameof(Initialize)} before any sound operation to get more specific errors.");
+            AssertInitialized();
             
             // TODO: add more audio formats
             /*
@@ -58,9 +63,7 @@ namespace MonoGame.Framework.Audio
             int durationMs, int loopStart, int loopLength)
         {
             Initialize();
-            if (_systemState != SoundSystemState.Initialized)
-                throw new AudioHardwareException(
-                    "Audio has failed to initialize. Call SoundEffect.Initialize() before operation to get more specific errors.");
+            AssertInitialized();
 
             _duration = TimeSpan.FromMilliseconds(durationMs);
 
@@ -85,9 +88,7 @@ namespace MonoGame.Framework.Audio
             int blockAlignment, int loopStart, int loopLength)
         {
             Initialize();
-            if (_systemState != SoundSystemState.Initialized)
-                throw new AudioHardwareException(
-                    "Audio has failed to initialize. Call SoundEffect.Initialize() before operation to get more specific errors.");
+            AssertInitialized();
 
             // Handle the common case... the rest is platform specific.
             if (codec == MiniFormatTag.Pcm)

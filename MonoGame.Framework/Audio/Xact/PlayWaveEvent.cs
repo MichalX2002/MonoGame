@@ -2,9 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
-using System.IO;
-
 namespace MonoGame.Framework.Audio
 {
     enum VariationType
@@ -19,11 +16,8 @@ namespace MonoGame.Framework.Audio
     class PlayWaveEvent : ClipEvent
     {
         private readonly SoundBank _soundBank;
-
         private readonly VariationType _variation;
-
         private readonly int _loopCount;
-
         private readonly bool _newWaveOnLoop;
 
         private readonly int[] _tracks;

@@ -13,13 +13,13 @@ namespace MonoGame.Framework
         /// Event that is triggered when a <see cref="GameComponent"/> is added
         /// to this <see cref="GameComponentCollection"/>.
         /// </summary>
-        public event MessageDelegate<GameComponentCollection, GameComponentCollectionEvent> ComponentAdded;
+        public event DataMessageHandler<GameComponentCollection, IGameComponent> ComponentAdded;
 
         /// <summary>
         /// Event that is triggered when a <see cref="GameComponent"/> is removed
         /// from this <see cref="GameComponentCollection"/>.
         /// </summary>
-        public event MessageDelegate<GameComponentCollection, GameComponentCollectionEvent> ComponentRemoved;
+        public event DataMessageHandler<GameComponentCollection, IGameComponent> ComponentRemoved;
 
         /// <summary>
         /// Removes every <see cref="GameComponent"/> from this <see cref="GameComponentCollection"/>.
@@ -27,38 +27,38 @@ namespace MonoGame.Framework
         /// </summary>
         protected override void ClearItems()
         {
-            for (int i = 0; i < base.Count; i++)
-                OnComponentRemoved(new GameComponentCollectionEvent(base[i]));
+            for (int i = 0; i < Count; i++)
+                OnComponentRemoved(base[i]);
 
             base.ClearItems();
         }
 
         protected override void InsertItem(int index, IGameComponent item)
         {
-            if (base.IndexOf(item) != -1)
+            if (IndexOf(item) != -1)
                 throw new ArgumentException("Cannot add same component multiple times.");
 
             base.InsertItem(index, item);
             if (item != null)
-                OnComponentAdded(new GameComponentCollectionEvent(item));
+                OnComponentAdded(item);
         }
 
-        private void OnComponentAdded(GameComponentCollectionEvent data)
+        private void OnComponentAdded(IGameComponent data)
         {
             ComponentAdded?.Invoke(this, data);
         }
 
-        private void OnComponentRemoved(GameComponentCollectionEvent data)
+        private void OnComponentRemoved(IGameComponent data)
         {
             ComponentRemoved?.Invoke(this, data);
         }
 
         protected override void RemoveItem(int index)
         {
-            IGameComponent gameComponent = base[index];
+            IGameComponent item = base[index];
             base.RemoveItem(index);
-            if (gameComponent != null)
-                OnComponentRemoved(new GameComponentCollectionEvent(gameComponent));
+            if (item != null)
+                OnComponentRemoved(item);
         }
 
         protected override void SetItem(int index, IGameComponent item)

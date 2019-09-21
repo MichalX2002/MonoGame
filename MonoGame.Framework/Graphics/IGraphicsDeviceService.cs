@@ -46,10 +46,10 @@ namespace MonoGame.Framework.Graphics
     {
         GraphicsDevice GraphicsDevice { get; }
         
-		event SenderDelegate<GraphicsDeviceManager> DeviceCreated;
-        event SenderDelegate<GraphicsDeviceManager> DeviceDisposing;
-        event SenderDelegate<GraphicsDeviceManager> DeviceReset;
-        event SenderDelegate<GraphicsDeviceManager> DeviceResetting;
+		event MessageHandler<GraphicsDeviceManager> DeviceCreated;
+        event MessageHandler<GraphicsDeviceManager> DeviceDisposing;
+        event MessageHandler<GraphicsDeviceManager> DeviceReset;
+        event MessageHandler<GraphicsDeviceManager> DeviceResetting;
     }
 }
 

@@ -59,7 +59,7 @@ namespace MonoGame.Framework.Audio
         {
             var stream = TitleContainer.OpenStream(filePath);
 #if ANDROID
-            stream = RecyclableMemoryManager.Instance.GetReadBufferedStream(stream, leaveOpen: false);
+            stream = RecyclableMemoryManager.Instance.GetBufferedStream(stream, leaveOpen: false);
 #endif
             return stream;
         }
@@ -351,7 +351,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// This event is triggered when the AudioEngine is disposed.
         /// </summary>
-        public event SenderDelegate<AudioEngine> Disposing;
+        public event MessageHandler<AudioEngine> Disposing;
 
         /// <summary>
         /// Is true if the AudioEngine has been disposed.

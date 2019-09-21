@@ -18,7 +18,7 @@ namespace MonoGame.Imaging
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
 
-            using (var imageStream = new ImageReadStream(stream, true))
+            using (var imageStream = new ImageReadStream(stream, leaveOpen: true))
             {
                 if (!TryDetectFormat(imageStream, out format))
                     throw new UnknownImageFormatException();

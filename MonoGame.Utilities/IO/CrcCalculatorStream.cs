@@ -4,7 +4,7 @@ using System.IO;
 namespace MonoGame.Utilities.IO
 {
     /// <summary>
-    /// Calculates a <see cref="CRC32"/> checksum on 
+    /// Calculates a <see cref="Crc32"/> checksum on 
     /// bytes read/written to the underlying stream. 
     /// </summary>
     /// <remarks>
@@ -20,7 +20,7 @@ namespace MonoGame.Utilities.IO
 
         private Stream _innerStream;
         private bool _leaveOpen;
-        private CRC32 _crc32;
+        private Crc32 _crc32;
 
         /// <summary>
         /// Gets the total number of bytes run through the CRC32 calculator.
@@ -140,18 +140,18 @@ namespace MonoGame.Utilities.IO
 
         /// <summary>
         /// Constructs the calculator stream with a limited read range,
-        /// using an existing <see cref="CRC32"/> instance, and optionally
+        /// using an existing <see cref="Crc32"/> instance, and optionally
         /// leaving the underlying stream open after disposal.
         /// </summary>
         /// <remarks>
-        /// The stream uses the specified <see cref="CRC32"/> instance, which allows the
+        /// The stream uses the specified <see cref="Crc32"/> instance, which allows the
         /// application to specify how the CRC gets calculated.
         /// </remarks>
         /// <param name="stream">The underlying stream.</param>
         /// <param name="length">The length of the stream to slurp.</param>
         /// <param name="leaveOpen">true to leave the underlying stream open upon disposal.</param>
-        /// <param name="crc32">The <see cref="CRC32"/> instance used for calculation.</param>
-        public CrcCalculatorStream(Stream stream, long length, bool leaveOpen, CRC32 crc32)
+        /// <param name="crc32">The <see cref="Crc32"/> instance used for calculation.</param>
+        public CrcCalculatorStream(Stream stream, long length, bool leaveOpen, Crc32 crc32)
             : this(leaveOpen, length, stream, crc32)
         {
             if (length < 0)
@@ -165,10 +165,10 @@ namespace MonoGame.Utilities.IO
         // explicit param, otherwise we don't validate, because it could be our special
         // value.
         private CrcCalculatorStream
-            (bool leaveOpen, long length, Stream stream, CRC32 crc32) : base()
+            (bool leaveOpen, long length, Stream stream, Crc32 crc32) : base()
         {
             _innerStream = stream;
-            _crc32 = crc32 ?? new CRC32();
+            _crc32 = crc32 ?? new Crc32();
             _lengthLimit = length;
             _leaveOpen = leaveOpen;
         }

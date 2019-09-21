@@ -106,7 +106,7 @@ namespace MonoGame.Framework.Audio
                 stream = new PrefixedStream(sigBytes, stream, leaveOpen: false);
             }
 
-            using (var buffered = RecyclableMemoryManager.Default.GetReadBufferedStream(stream, false))
+            using (var buffered = RecyclableMemoryManager.Default.GetBufferedStream(stream, false))
             {
                 switch (signature)
                 {
@@ -314,7 +314,7 @@ namespace MonoGame.Framework.Audio
             // Sample count includes both channels if stereo
             int sampleCount = byteSpan.Length / 3;
             size = sampleCount * sizeof(short);
-            bool isRecyclable = size > RecyclableMemoryManager.Default.MaximumLargeBufferSize;
+            bool isRecyclable = size <= RecyclableMemoryManager.Default.MaximumLargeBufferSize;
 
             bufferTag = isRecyclable ? nameof(Convert24To16) : null;
             byte[] outData = isRecyclable ?
@@ -340,11 +340,11 @@ namespace MonoGame.Framework.Audio
         }
 
         // Convert buffer containing IEEE 32-bit float wav data to a 16-bit signed PCM buffer
-        internal static unsafe byte[] ConvertFloatTo16<T>(ReadOnlySpan<T> span) where T : unmanaged
+        internal static unsafe byte[] ConvertSingleToInt16<T>(ReadOnlySpan<T> span) where T : unmanaged
         {
             ReadOnlySpan<byte> byteSpan = MemoryMarshal.AsBytes(span);
             if (byteSpan.Length % 4 != 0)
-                throw new ArgumentException("Invalid 32-bit float PCM data received");
+                throw new ArgumentException("Invalid 32-bit float PCM data received.");
 
             // Sample count includes both channels if stereo
             int sampleCount = byteSpan.Length / 4;
@@ -367,7 +367,7 @@ namespace MonoGame.Framework.Audio
             return outData;
         }
 
-        public static void ConvertSamplesToInt16(ReadOnlySpan<float> src, Span<short> dst)
+        public static void ConvertSingleToInt16(ReadOnlySpan<float> src, Span<short> dst)
         {
             if (src.Length != dst.Length)
                 throw new ArgumentException("Non-equal span length.");

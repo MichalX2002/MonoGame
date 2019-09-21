@@ -53,12 +53,12 @@ namespace MonoGame.Utilities
                 var prevPosition = stream.Position;
                 stream.Position = 0;
 
-                var data = new byte[1024];
+                var buffer = new byte[1024];
                 int length;
-                while((length = stream.Read(data, 0, data.Length)) != 0)
+                while((length = stream.Read(buffer, 0, buffer.Length)) != 0)
                 {
                     for (var i = 0; i < length; i++)
-                        hash = (hash ^ data[i]) * p;
+                        hash = (hash ^ buffer[i]) * p;
                 }
 
                 // Restore stream position.

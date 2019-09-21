@@ -186,12 +186,12 @@ namespace MonoGame.Framework
 
         #region IGraphicsDeviceService Members
 
-        public event SenderDelegate<GraphicsDeviceManager> DeviceCreated;
-        public event SenderDelegate<GraphicsDeviceManager> DeviceDisposing;
-        public event SenderDelegate<GraphicsDeviceManager> DeviceReset;
-        public event SenderDelegate<GraphicsDeviceManager> DeviceResetting;
-        public event MessageDelegate<GraphicsDeviceManager, PreparingDeviceSettingsEvent> PreparingDeviceSettings;
-        public event SenderDelegate<GraphicsDeviceManager> Disposed;
+        public event MessageHandler<GraphicsDeviceManager> DeviceCreated;
+        public event MessageHandler<GraphicsDeviceManager> DeviceDisposing;
+        public event MessageHandler<GraphicsDeviceManager> DeviceReset;
+        public event MessageHandler<GraphicsDeviceManager> DeviceResetting;
+        public event DataMessageHandler<GraphicsDeviceManager, GraphicsDeviceInformation> PreparingDeviceSettings;
+        public event MessageHandler<GraphicsDeviceManager> Disposed;
 
         protected void OnDeviceDisposing()
         {
@@ -214,10 +214,14 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// This populates a GraphicsDeviceInformation instance and invokes PreparingDeviceSettings to
-        /// allow users to change the settings. Then returns that GraphicsDeviceInformation.
-        /// Throws NullReferenceException if users set GraphicsDeviceInformation.PresentationParameters to null.
+        /// This populates a <see cref="GraphicsDeviceInformation"/> instance and invokes 
+        /// <see cref="PreparingDeviceSettings"/> to allow users to change the settings. 
+        /// Then returns that <see cref="GraphicsDeviceInformation"/>.
         /// </summary>
+        /// <exception cref="NullReferenceException">
+        /// <see cref="GraphicsDeviceInformation.PresentationParameters"/> or
+        /// <see cref="GraphicsDeviceInformation.Adapter"/> was set to null.
+        /// </exception>
         private GraphicsDeviceInformation DoPreparingDeviceSettings()
         {
             var gdi = new GraphicsDeviceInformation();
@@ -227,11 +231,12 @@ namespace MonoGame.Framework
             if (preparingDeviceSettingsHandler != null)
             {
                 // this allows users to overwrite settings through the argument
-                var args = new PreparingDeviceSettingsEvent(gdi);
-                preparingDeviceSettingsHandler(this, args);
+                preparingDeviceSettingsHandler(this, gdi);
 
-                if (gdi.PresentationParameters == null || gdi.Adapter == null)
-                    throw new NullReferenceException("Members should not be set to null in PreparingDeviceSettingsEventArgs");
+                if (gdi.PresentationParameters == null ||
+                    gdi.Adapter == null)
+                    throw new NullReferenceException(
+                        $"Members should not be set to null in the {nameof(GraphicsDeviceInformation)}.");
             }
 
             return gdi;
@@ -383,9 +388,9 @@ namespace MonoGame.Framework
             ApplyChanges();
         }
 
-        private void OnPresentationChanged(object sender, PresentationEventArgs args)
+        private void OnPresentationChanged(object sender, PresentationParameters args)
         {
-            _game.Platform.OnPresentationChanged(args.PresentationParameters);
+            _game.Platform.OnPresentationChanged(args);
         }
 
         /// <summary>

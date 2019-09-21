@@ -1,12 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using MonoGame.Utilities.Memory;
 
 namespace MonoGame.Utilities
 {
     public static class StreamExtensions
     {
-        public delegate void CopyProgressCallback(int read, long copied);
-
         /// <summary>
         /// Reads the bytes from the current stream and writes them to another stream,
         /// using a pooled buffer.
@@ -31,7 +30,7 @@ namespace MonoGame.Utilities
         /// using a pooled buffer and reporting every write.
         /// </summary>
         public static void PooledCopyTo(
-            this Stream source, Stream destination, CopyProgressCallback onWrite)
+            this Stream source, Stream destination, Action<int> onWrite)
         {
             if (onWrite == null)
             {
@@ -42,14 +41,11 @@ namespace MonoGame.Utilities
             byte[] buffer = RecyclableMemoryManager.Default.GetBlock();
             try
             {
-                long copied = 0;
                 int read;
                 while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
                 {
                     destination.Write(buffer, 0, read);
-
-                    copied += read;
-                    onWrite.Invoke(read, copied);
+                    onWrite.Invoke(read);
                 }
             }
             finally

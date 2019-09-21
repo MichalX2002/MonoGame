@@ -23,7 +23,7 @@ namespace MonoGame.Utilities
         protected internal CompressionStrategy Strategy = CompressionStrategy.Default;
 
         // workitem 7159
-        private CRC32 _crc;
+        private Crc32 _crc;
         protected internal string _GzipFileName;
         protected internal string _GzipComment;
         protected internal DateTime _GzipMtime;
@@ -39,11 +39,9 @@ namespace MonoGame.Utilities
             }
         }
 
-        internal ZlibBaseStream(Stream stream,
-                              CompressionMode compressionMode,
-                              CompressionLevel level,
-                              ZlibStreamFlavor flavor,
-                              bool leaveOpen)
+        internal ZlibBaseStream(
+            Stream stream, CompressionMode compressionMode,
+            CompressionLevel level, ZlibStreamFlavor flavor, bool leaveOpen)
             : base()
         {
             _flushMode = FlushType.None;
@@ -55,9 +53,8 @@ namespace MonoGame.Utilities
             _level = level;
             // workitem 7159
             if (flavor == ZlibStreamFlavor.GZIP)
-                _crc = new CRC32();
+                _crc = new Crc32();
         }
-
 
         protected internal bool WantCompress => (_compressionMode == CompressionMode.Compress);
 
@@ -82,8 +79,6 @@ namespace MonoGame.Utilities
                 return _z;
             }
         }
-
-
 
         private byte[] WorkingBuffer
         {
@@ -114,7 +109,7 @@ namespace MonoGame.Utilities
             Z.InputBuffer = buffer;
             _z.NextIn = offset;
             _z.AvailableBytesIn = count;
-            bool done = false;
+            bool done;
             do
             {
                 _z.OutputBuffer = WorkingBuffer;
@@ -145,7 +140,7 @@ namespace MonoGame.Utilities
 
             if (_streamMode == StreamMode.Writer)
             {
-                bool done = false;
+                bool done;
                 do
                 {
                     _z.OutputBuffer = WorkingBuffer;
@@ -407,8 +402,6 @@ namespace MonoGame.Utilities
             if ((offset + count) > buffer.GetLength(0))
                 throw new ArgumentOutOfRangeException(nameof(count));
 
-            int rc = 0;
-
             // set up the output of the deflate/inflate codec:
             _z.OutputBuffer = buffer;
             _z.NextOut = offset;
@@ -419,6 +412,7 @@ namespace MonoGame.Utilities
             // may initialize it.)
             _z.InputBuffer = WorkingBuffer;
 
+            int rc;
             do
             {
                 // need data in _workingBuffer in order to deflate/inflate.  Here, we check if we have any.
@@ -506,23 +500,18 @@ namespace MonoGame.Utilities
             Undefined,
         }
 
-
         internal static void CompressString(string s, Stream compressor)
         {
             byte[] uncompressed = System.Text.Encoding.UTF8.GetBytes(s);
             using (compressor)
-            {
                 compressor.Write(uncompressed, 0, uncompressed.Length);
-            }
         }
 
         internal static void CompressBuffer(byte[] b, Stream compressor)
         {
             // workitem 8460
             using (compressor)
-            {
                 compressor.Write(b, 0, b.Length);
-            }
         }
 
         internal static string UncompressString(byte[] compressed, Stream decompressor)

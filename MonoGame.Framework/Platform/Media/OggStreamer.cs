@@ -129,7 +129,7 @@ namespace MonoGame.Framework.Media
                     else
                     {
                         var castSpan = _castBuffer.Span.Slice(0, readSamples);
-                        AudioLoader.ConvertSamplesToInt16(dataSpan, castSpan);
+                        AudioLoader.ConvertSingleToInt16(dataSpan, castSpan);
                         buffer.BufferData<short>(castSpan, format, reader.SampleRate);
                     }
                     return true;

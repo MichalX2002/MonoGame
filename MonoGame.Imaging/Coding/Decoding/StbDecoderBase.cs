@@ -95,8 +95,8 @@ namespace MonoGame.Imaging.Decoding
         /// Gets whether the given <see cref="IPixel"/> type can utilize 16-bit 
         /// channels when converting from decoded data.
         /// <para>
-        /// This is used to prevent waste of memory as the library can 
-        /// decode channels as 8-bit or 16-bit based on the type's precision.
+        /// This is used to prevent waste of memory as Stb can 
+        /// decode channels as 8-bit or 16-bit based on the <paramref name="type"/>'s precision.
         /// </para>
         /// </summary>
         /// <param name="type"></param>
@@ -128,23 +128,18 @@ namespace MonoGame.Imaging.Decoding
             where TPixel : unmanaged, IPixel
         {
             var frames = GetSmallInitialCollection<TPixel>();
-
+            int actualFrameLimit = frameLimit ?? int.MaxValue;
             int frameIndex = 0;
 
-            // TODO: add reading of multiple frames
-
-            while (frameIndex == 0)
+            while (frameIndex < actualFrameLimit)
             {
-                var progressCallback = onProgress == null ? (ReadProgressCallback)null : (p, rect) =>
+                var progressCallback = onProgress == null ? (ReadProgressCallback)null : (progress, r) =>
                 {
                     Rectangle? rectangle = null;
-                    if (rect.HasValue)
-                    {
-                        var r = rect.Value;
-                        rectangle = new Rectangle(r.X, r.Y, r.W, r.H);
-                    }
-
-                    if (!onProgress.Invoke(frameIndex, frames, p, rectangle))
+                    if (r.HasValue)
+                        rectangle = new Rectangle(r.Value.X, r.Value.Y, r.Value.W, r.Value.H);
+                    
+                    if (!onProgress.Invoke(frameIndex, frames, progress, rectangle))
                         throw new CoderInterruptedException(Format);
                 };
                 ReadState state = CreateReadState(typeof(TPixel), progressCallback);
@@ -162,9 +157,6 @@ namespace MonoGame.Imaging.Decoding
 
                 ParseResult(config, frames, result, state);
                 frameIndex++;
-
-                if (frameLimit.HasValue && frameIndex >= frameLimit)
-                    break;
             }
             return frames;
         }
@@ -252,6 +244,7 @@ namespace MonoGame.Imaging.Decoding
                         break;
                 }
 
+                // TODO: create an object that wraps the result as IMemory and can dispose it
                 var buffer = new Image<TPixel>.Buffer(dst, state.Width, false);
                 var image = new Image<TPixel>(buffer, state.Width, state.Height);
                 frames.Add(image, state.AnimationDelay);
@@ -287,6 +280,8 @@ namespace MonoGame.Imaging.Decoding
 
         #endregion
 
+        #region Public Methods
+
         public virtual unsafe FrameCollection<TPixel> Decode<TPixel>(
             ImagingConfig config, ImageReadStream stream, int? frameLimit = null,
             DecodeProgressCallback<TPixel> onProgress = null)
@@ -308,5 +303,7 @@ namespace MonoGame.Imaging.Decoding
                 return Decode(config, context, frameLimit, onProgress);
             }
         }
+
+        #endregion
     }
 }

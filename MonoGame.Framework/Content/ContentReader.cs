@@ -87,9 +87,7 @@ namespace MonoGame.Framework.Content
             var externalReference = ReadString();
 
             if (!string.IsNullOrEmpty(externalReference))
-            {
                 return ContentManager.Load<T>(FileHelpers.ResolveRelativePath(AssetName, externalReference));
-            }
 
             return default;
         }

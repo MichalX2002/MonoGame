@@ -260,10 +260,10 @@ namespace MonoGame.Framework
 
         #region Events
 
-        public event SenderDelegate<Game> Activated;
-        public event SenderDelegate<Game> Deactivated;
-        public event SenderDelegate<Game> Disposed;
-        public event SenderDelegate<Game> Exiting;
+        public event MessageHandler<Game> Activated;
+        public event MessageHandler<Game> Deactivated;
+        public event MessageHandler<Game> Disposed;
+        public event MessageHandler<Game> Exiting;
 
 #if WINDOWS_UAP
         [CLSCompliant(false)]
@@ -559,19 +559,17 @@ namespace MonoGame.Framework
 
         #region Event Handlers
 
-        private void Components_ComponentAdded(
-            object sender, GameComponentCollectionEvent e)
+        private void Components_ComponentAdded(object sender, IGameComponent gameComponent)
         {
             // Since we only subscribe to ComponentAdded after the graphics
             // devices are set up, it is safe to just blindly call Initialize.
-            e.GameComponent.Initialize();
-            AddComponent(e.GameComponent);
+            gameComponent.Initialize();
+            AddComponent(gameComponent);
         }
 
-        private void Components_ComponentRemoved(
-            object sender, GameComponentCollectionEvent e)
+        private void Components_ComponentRemoved(object sender, IGameComponent gameComponent)
         {
-            RemoveComponent(e.GameComponent);
+            RemoveComponent(gameComponent);
         }
 
         private void Platform_AsyncRunLoopEnded(GamePlatform sender)
@@ -737,18 +735,18 @@ namespace MonoGame.Framework
 
             private readonly Predicate<T> _filter;
             private readonly Comparison<T> _sort;
-            private readonly Action<T, SenderDelegate<object>> _filterChangedSubscriber;
-            private readonly Action<T, SenderDelegate<object>> _filterChangedUnsubscriber;
-            private readonly Action<T, SenderDelegate<object>> _sortChangedSubscriber;
-            private readonly Action<T, SenderDelegate<object>> _sortChangedUnsubscriber;
+            private readonly Action<T, MessageHandler<object>> _filterChangedSubscriber;
+            private readonly Action<T, MessageHandler<object>> _filterChangedUnsubscriber;
+            private readonly Action<T, MessageHandler<object>> _sortChangedSubscriber;
+            private readonly Action<T, MessageHandler<object>> _sortChangedUnsubscriber;
 
             public SortingFilteringCollection(
                 Predicate<T> filter,
-                Action<T, SenderDelegate<object>> filterChangedSubscriber,
-                Action<T, SenderDelegate<object>> filterChangedUnsubscriber,
+                Action<T, MessageHandler<object>> filterChangedSubscriber,
+                Action<T, MessageHandler<object>> filterChangedUnsubscriber,
                 Comparison<T> sort,
-                Action<T, SenderDelegate<object>> sortChangedSubscriber,
-                Action<T, SenderDelegate<object>> sortChangedUnsubscriber)
+                Action<T, MessageHandler<object>> sortChangedSubscriber,
+                Action<T, MessageHandler<object>> sortChangedUnsubscriber)
             {
                 _items = new List<T>();
                 _addJournal = new List<AddJournalEntry<T>>();

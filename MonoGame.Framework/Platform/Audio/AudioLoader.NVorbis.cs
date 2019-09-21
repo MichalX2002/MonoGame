@@ -66,7 +66,7 @@ namespace MonoGame.Framework.Audio
                         // we need to convert float to short
                         var src = sampleBuffer.Slice(0, samplesRead);
                         var dst = pcmBuffer.Slice(0, samplesRead);
-                        ConvertSamplesToInt16(src, dst);
+                        ConvertSingleToInt16(src, dst);
 
                         int bytes = samplesRead * sizeof(short);
                         result.Write(pcmBufferBlock, 0, bytes);

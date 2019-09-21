@@ -14,18 +14,20 @@ namespace MonoGame.Framework.Graphics
     public class SpriteBatch : GraphicsResource
     {
         #region Private Fields
-        SpriteBatcher _batcher;
 
-        SpriteSortMode _sortMode;
-        BlendState _blendState;
-        SamplerState _samplerState;
-        DepthStencilState _depthStencilState;
-        RasterizerState _rasterizerState;
-        Effect _effect;
-        bool _beginCalled;
+        private SpriteBatcher _batcher;
 
-        SpriteEffect _spriteEffect;
-        EffectPass _spritePass;
+        private SpriteSortMode _sortMode;
+        private BlendState _blendState;
+        private SamplerState _samplerState;
+        private DepthStencilState _depthStencilState;
+        private RasterizerState _rasterizerState;
+        private Effect _effect;
+        private bool _beginCalled;
+
+        private SpriteEffect _spriteEffect;
+        private EffectPass _spritePass;
+
         #endregion
 
         /// <summary>
@@ -36,7 +38,8 @@ namespace MonoGame.Framework.Graphics
         public SpriteBatch(GraphicsDevice graphicsDevice)
         {
             GraphicsDevice = graphicsDevice ??
-                throw new ArgumentNullException("graphicsDevice", FrameworkResources.ResourceCreationWhenDeviceIsNull);
+                throw new ArgumentNullException(
+                    nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
 
             _spriteEffect = new SpriteEffect(graphicsDevice);
             _spritePass = _spriteEffect.CurrentTechnique.Passes[0];
@@ -167,35 +170,41 @@ namespace MonoGame.Framework.Graphics
             _spritePass.Apply();
         }
 
-        void CheckArgs(Texture2D texture)
+        void AssertBeginCalled(string callerName)
+        {
+            if (!_beginCalled)
+                throw new InvalidOperationException(
+                    $"{nameof(Begin)} must be called successfully before you can call {callerName}.");
+        }
+
+        void AssertValidArguments(Texture2D texture, string callerName)
         {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
-            if (!_beginCalled)
-                throw new InvalidOperationException(
-                    "Draw was called, but Begin has not yet been called. Begin must be called successfully before you can call Draw.");
+
+            AssertBeginCalled(callerName);
         }
 
-        void CheckArgs(SpriteFont spriteFont, string text)
+        void AssertValidArguments(SpriteFont spriteFont, string text, string callerName)
         {
             if (spriteFont == null)
                 throw new ArgumentNullException(nameof(spriteFont));
+
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
-            if (!_beginCalled)
-                throw new InvalidOperationException(
-                    "DrawString was called, but Begin has not yet been called. Begin must be called successfully before you can call DrawString.");
+
+            AssertBeginCalled(callerName);
         }
 
-        void CheckArgs(SpriteFont spriteFont, StringBuilder text)
+        void AssertValidArguments(SpriteFont spriteFont, StringBuilder text, string callerName)
         {
             if (spriteFont == null)
                 throw new ArgumentNullException(nameof(spriteFont));
+
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
-            if (!_beginCalled)
-                throw new InvalidOperationException(
-                    "DrawString was called, but Begin has not yet been called. Begin must be called successfully before you can call DrawString.");
+
+            AssertBeginCalled(callerName);
         }
 
         public void Draw(
@@ -300,7 +309,7 @@ namespace MonoGame.Framework.Graphics
             Texture2D texture, Vector2 position, in RectangleF? sourceRectangle, Color color,
             float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
         {
-            CheckArgs(texture);
+            AssertValidArguments(texture, nameof(Draw));
 
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, layerDepth);
@@ -392,7 +401,7 @@ namespace MonoGame.Framework.Graphics
             SpriteEffects effects,
             float layerDepth)
         {
-            CheckArgs(texture);
+            AssertValidArguments(texture, nameof(Draw));
 
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, layerDepth);
@@ -446,7 +455,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         /// <summary>
-        /// Call the end of a draw operation for <see cref="SpriteSortMode.Immediate"/>.
+        /// Called at the end of a draw operation for <see cref="SpriteSortMode.Immediate"/>.
         /// </summary>
         public void FlushIfNeeded()
         {
@@ -463,7 +472,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="color">A color mask.</param>
         public void Draw(Texture2D texture, Vector2 position, in RectangleF? sourceRectangle, Color color)
         {
-            CheckArgs(texture);
+            AssertValidArguments(texture, nameof(Draw));
 
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, 0);
@@ -489,10 +498,7 @@ namespace MonoGame.Framework.Graphics
                 texCoord = new Vector4(0, 0, 1, 1);
             }
 
-            item.Set(
-                position.X, position.Y, w, h,
-                color, texCoord, 0);
-
+            item.Set(position.X, position.Y, w, h, color, texCoord, 0);
             FlushIfNeeded();
         }
 
@@ -505,7 +511,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="color">A color mask.</param>
         public void Draw(Texture2D texture, in RectangleF destinationRectangle, in RectangleF? sourceRectangle, Color color)
         {
-            CheckArgs(texture);
+            AssertValidArguments(texture, nameof(Draw));
 
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, 0);
@@ -541,7 +547,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="color">A color mask.</param>
         public void Draw(Texture2D texture, Vector2 position, Color color)
         {
-            CheckArgs(texture);
+            AssertValidArguments(texture, nameof(Draw));
 
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, 0);
@@ -562,7 +568,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="color">A color mask.</param>
         public void Draw(Texture2D texture, in RectangleF destinationRectangle, Color color)
         {
-            CheckArgs(texture);
+            AssertValidArguments(texture, nameof(Draw));
 
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, 0);
@@ -584,7 +590,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="color">A color mask.</param>
         public unsafe void DrawString(SpriteFont spriteFont, string text, Vector2 position, Color color)
         {
-            CheckArgs(spriteFont, text);
+            AssertValidArguments(spriteFont, text, nameof(DrawString));
             float sortKey = GetSortKey(spriteFont.Texture, 0);
 
             var offset = Vector2.Zero;
@@ -612,7 +618,7 @@ namespace MonoGame.Framework.Graphics
 
                     // The first character on a line might have a negative left side bearing.
                     // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
-                    //  so that text does not hang off the left side of its rectangle.
+                    // so that text does not hang off the left side of its rectangle.
                     if (firstGlyphOfLine)
                     {
                         offset.X = Math.Max(pCurrentGlyph->LeftSideBearing, 0);
@@ -684,7 +690,7 @@ namespace MonoGame.Framework.Graphics
             SpriteFont spriteFont, string text, Vector2 position, Color color,
             float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
         {
-            CheckArgs(spriteFont, text);
+            AssertValidArguments(spriteFont, text, nameof(DrawString));
             float sortKey = GetSortKey(spriteFont.Texture, layerDepth);
 
             var flipAdjustment = Vector2.Zero;
@@ -763,17 +769,17 @@ namespace MonoGame.Framework.Graphics
                         offset.X += spriteFont.Spacing + pCurrentGlyph->LeftSideBearing;
                     }
 
-                    Vector2 p = offset;
+                    Vector2 pos = offset;
 
                     if (flippedHorz)
-                        p.X += pCurrentGlyph->BoundsInTexture.Width;
-                    p.X += pCurrentGlyph->Cropping.X;
+                        pos.X += pCurrentGlyph->BoundsInTexture.Width;
+                    pos.X += pCurrentGlyph->Cropping.X;
 
                     if (flippedVert)
-                        p.Y += pCurrentGlyph->BoundsInTexture.Height - spriteFont.LineSpacing;
-                    p.Y += pCurrentGlyph->Cropping.Y;
+                        pos.Y += pCurrentGlyph->BoundsInTexture.Height - spriteFont.LineSpacing;
+                    pos.Y += pCurrentGlyph->Cropping.Y;
 
-                    p = Vector2.Transform(p, transformation);
+                    pos = Vector2.Transform(pos, transformation);
 
                     var item = GetBatchItem(spriteFont.Texture);
                     item.SortKey = sortKey;
@@ -789,7 +795,7 @@ namespace MonoGame.Framework.Graphics
                     if (rotation == 0f)
                     {
                         item.Set(
-                            p.X, p.Y,
+                            pos.X, pos.Y,
                             pCurrentGlyph->BoundsInTexture.Width * scale.X,
                             pCurrentGlyph->BoundsInTexture.Height * scale.Y,
                             color,
@@ -799,7 +805,7 @@ namespace MonoGame.Framework.Graphics
                     else
                     {
                         item.Set(
-                            p.X, p.Y, 0, 0,
+                            pos.X, pos.Y, 0, 0,
                             pCurrentGlyph->BoundsInTexture.Width * scale.X,
                             pCurrentGlyph->BoundsInTexture.Height * scale.Y,
                             sin, cos,
@@ -825,7 +831,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="color">A color mask.</param>
         public unsafe void DrawString(SpriteFont spriteFont, StringBuilder text, Vector2 position, Color color)
         {
-            CheckArgs(spriteFont, text);
+            AssertValidArguments(spriteFont, text, nameof(DrawString));
 
             float sortKey = GetSortKey(spriteFont.Texture, 0);
 
@@ -865,10 +871,10 @@ namespace MonoGame.Framework.Graphics
                         offset.X += spriteFont.Spacing + pCurrentGlyph->LeftSideBearing;
                     }
 
-                    var p = offset;
-                    p.X += pCurrentGlyph->Cropping.X;
-                    p.Y += pCurrentGlyph->Cropping.Y;
-                    p += position;
+                    var pos = offset;
+                    pos.X += pCurrentGlyph->Cropping.X;
+                    pos.Y += pCurrentGlyph->Cropping.Y;
+                    pos += position;
 
                     var item = GetBatchItem(spriteFont.Texture);
                     item.SortKey = sortKey;
@@ -880,7 +886,7 @@ namespace MonoGame.Framework.Graphics
                         (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
 
                     item.Set(
-                        p.X, p.Y, pCurrentGlyph->BoundsInTexture.Width, pCurrentGlyph->BoundsInTexture.Height, 
+                        pos.X, pos.Y, pCurrentGlyph->BoundsInTexture.Width, pCurrentGlyph->BoundsInTexture.Height, 
                         color, texCoord, 0);
 
                     offset.X += pCurrentGlyph->Width + pCurrentGlyph->RightSideBearing;
@@ -926,7 +932,7 @@ namespace MonoGame.Framework.Graphics
             SpriteFont spriteFont, StringBuilder text, Vector2 position, Color color,
             float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
         {
-            CheckArgs(spriteFont, text);
+            AssertValidArguments(spriteFont, text, nameof(DrawString));
             float sortKey = GetSortKey(spriteFont.Texture, 0);
 
             var flipAdjustment = Vector2.Zero;

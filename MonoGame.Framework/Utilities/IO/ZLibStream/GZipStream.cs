@@ -889,7 +889,6 @@ namespace MonoGame.Utilities
             }
         }
 
-
         /// <summary>
         ///   Compress a byte array into a new byte array using GZip.
         /// </summary>

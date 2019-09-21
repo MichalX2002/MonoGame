@@ -333,13 +333,13 @@ namespace MonoGame.Framework.Graphics
         #region Events
 
         // TODO Graphics Device events need implementing
-        internal event MessageDelegate<GraphicsDevice, PresentationEventArgs> PresentationChanged;
-        public event SenderDelegate<GraphicsDevice> DeviceLost;
-        public event SenderDelegate<GraphicsDevice> DeviceReset;
-        public event SenderDelegate<GraphicsDevice> DeviceResetting;
-        public event MessageDelegate<GraphicsDevice, ResourceCreatedEvent> ResourceCreated;
-        public event MessageDelegate<GraphicsDevice, ResourceDestroyedEvent> ResourceDestroyed;
-        public event SenderDelegate<GraphicsDevice> Disposing;
+        internal event DataMessageHandler<GraphicsDevice, PresentationParameters> PresentationChanged;
+        public event MessageHandler<GraphicsDevice> DeviceLost;
+        public event MessageHandler<GraphicsDevice> DeviceReset;
+        public event MessageHandler<GraphicsDevice> DeviceResetting;
+        public event DataMessageHandler<GraphicsDevice, object> ResourceCreated;
+        public event DataMessageHandler<GraphicsDevice, ResourceDestroyedEvent> ResourceDestroyed;
+        public event MessageHandler<GraphicsDevice> Disposing;
 
         #endregion
 
@@ -581,7 +581,7 @@ namespace MonoGame.Framework.Graphics
             // Update the back buffer.
             OnPresentationChanged();
             
-            PresentationChanged?.Invoke(this, new PresentationEventArgs(PresentationParameters));
+            PresentationChanged?.Invoke(this, PresentationParameters);
             DeviceReset?.Invoke(this);
        }
 

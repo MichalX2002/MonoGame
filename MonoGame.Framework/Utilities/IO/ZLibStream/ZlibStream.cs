@@ -828,10 +828,12 @@ namespace MonoGame.Utilities
     /// href="http://www.ietf.org/rfc/rfc1950.txt">RFC 1950 - ZLIB</see> and <see
     /// href="http://www.ietf.org/rfc/rfc1951.txt">RFC 1951 - DEFLATE</see>.
     /// </remarks>
-
-
-    internal enum ZlibStreamFlavor { ZLIB = 1950, DEFLATE = 1951, GZIP = 1952 }
-
+    internal enum ZlibStreamFlavor
+    {
+        ZLIB = 1950,
+        DEFLATE = 1951,
+        GZIP = 1952
+    }
 
     /// <summary>
     /// Describes how to flush the current deflate operation.
@@ -874,7 +876,6 @@ namespace MonoGame.Utilities
         /// <summary>Signals the end of the compression/decompression stream.</summary>
         Finish,
     }
-
 
     /// <summary>
     /// The compression level to be used when using a DeflateStream or ZlibStream with CompressionMode.Compress.
@@ -981,7 +982,6 @@ namespace MonoGame.Utilities
         HuffmanOnly = 2,
     }
 
-
     /// <summary>
     /// An enum to specify the direction of transcoding - whether to compress or decompress.
     /// </summary>
@@ -996,7 +996,6 @@ namespace MonoGame.Utilities
         /// </summary>
         Decompress = 1,
     }
-
 
     /// <summary>
     /// A general purpose exception class for exceptions in the Zlib library.
@@ -1021,7 +1020,6 @@ namespace MonoGame.Utilities
         {
         }
     }
-
 
     internal class SharedUtils
     {
@@ -1158,11 +1156,13 @@ namespace MonoGame.Utilities
              3, 8, 131, 8, 67, 8, 195, 8, 35, 8, 163, 8, 99, 8, 227, 8
         };
 
-        internal static readonly short[] distTreeCodes = new short[] {
+        internal static readonly short[] distTreeCodes = new short[]
+        {
             0, 5, 16, 5, 8, 5, 24, 5, 4, 5, 20, 5, 12, 5, 28, 5,
             2, 5, 18, 5, 10, 5, 26, 5, 6, 5, 22, 5, 14, 5, 30, 5,
             1, 5, 17, 5, 9, 5, 25, 5, 5, 5, 21, 5, 13, 5, 29, 5,
-            3, 5, 19, 5, 11, 5, 27, 5, 7, 5, 23, 5 };
+            3, 5, 19, 5, 11, 5, 27, 5, 7, 5, 23, 5
+        };
 
         internal static readonly StaticTree Literals;
         internal static readonly StaticTree Distances;
@@ -1189,8 +1189,6 @@ namespace MonoGame.Utilities
             BitLengths = new StaticTree(null, Tree.extra_blbits, 0, InternalConstants.BL_CODES, InternalConstants.MAX_BL_BITS);
         }
     }
-
-
 
     /// <summary>
     /// Computes an Adler-32 checksum.
@@ -1237,26 +1235,13 @@ namespace MonoGame.Utilities
             while (len > 0)
             {
                 int k = len < NMAX ? len : NMAX;
-                len -= k;
                 while (k >= 16)
                 {
-                    //s1 += (buf[index++] & 0xff); s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
-                    s1 += buf[index++]; s2 += s1;
+                    for (int i = 0; i < 16; i++)
+                    {
+                        s1 += buf[index++];
+                        s2 += s1;
+                    }
                     k -= 16;
                 }
                 if (k != 0)
@@ -1270,19 +1255,22 @@ namespace MonoGame.Utilities
                 }
                 s1 %= BASE;
                 s2 %= BASE;
+                len -= k;
             }
             return (s2 << 16) | s1;
         }
     }
-    
+
     internal static class InternalInflateConstants
     {
         // And'ing with mask[n] masks the lower n bits
-        internal static readonly int[] InflateMask = new int[] {
+        internal static readonly int[] InflateMask = new int[]
+        {
             0x00000000, 0x00000001, 0x00000003, 0x00000007,
             0x0000000f, 0x0000001f, 0x0000003f, 0x0000007f,
             0x000000ff, 0x000001ff, 0x000003ff, 0x000007ff,
-            0x00000fff, 0x00001fff, 0x00003fff, 0x00007fff, 0x0000ffff };
+            0x00000fff, 0x00001fff, 0x00003fff, 0x00007fff, 0x0000ffff
+        };
     }
 
     internal enum BlockState

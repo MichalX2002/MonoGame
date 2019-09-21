@@ -69,10 +69,11 @@ namespace MonoGame.Framework.Content
             for (int level = 0; level < levelCount; level++)
             {
                 int levelDataSizeInBytes = reader.ReadInt32();
-                byte[] levelData = reader.ContentManager.GetScratchBuffer(levelDataSizeInBytes);
+                byte[] levelDataBuffer = reader.ContentManager.GetScratchBuffer(levelDataSizeInBytes);
                 try
                 {
-                    if(reader.Read(levelData, 0, levelDataSizeInBytes) != levelDataSizeInBytes)
+                    byte[] levelData = levelDataBuffer;
+                    if (reader.Read(levelData, 0, levelDataSizeInBytes) != levelDataSizeInBytes)
                         throw new InvalidDataException();
 
                     int levelWidth = Math.Max(width >> level, 1);
@@ -87,7 +88,8 @@ namespace MonoGame.Framework.Content
                         case SurfaceFormat.Dxt1:
                         case SurfaceFormat.Dxt1SRgb:
                         case SurfaceFormat.Dxt1a:
-                            if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsDxt1 && convertedFormat == SurfaceFormat.Rgba32)
+                            if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsDxt1 &&
+                                convertedFormat == SurfaceFormat.Rgba32)
                             {
                                 levelData = DxtUtil.DecompressDxt1(levelData, levelWidth, levelHeight);
                                 levelDataSizeInBytes = levelData.Length;
@@ -96,24 +98,22 @@ namespace MonoGame.Framework.Content
 
                         case SurfaceFormat.Dxt3:
                         case SurfaceFormat.Dxt3SRgb:
-                            if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc)
-                                if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc &&
+                            if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc &&
                                     convertedFormat == SurfaceFormat.Rgba32)
-                                {
-                                    levelData = DxtUtil.DecompressDxt3(levelData, levelWidth, levelHeight);
-                                    levelDataSizeInBytes = levelData.Length;
-                                }
+                            {
+                                levelData = DxtUtil.DecompressDxt3(levelData, levelWidth, levelHeight);
+                                levelDataSizeInBytes = levelData.Length;
+                            }
                             break;
 
                         case SurfaceFormat.Dxt5:
                         case SurfaceFormat.Dxt5SRgb:
-                            if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc)
-                                if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc &&
-                                    convertedFormat == SurfaceFormat.Rgba32)
-                                {
-                                    levelData = DxtUtil.DecompressDxt5(levelData, levelWidth, levelHeight);
-                                    levelDataSizeInBytes = levelData.Length;
-                                }
+                            if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc &&
+                                convertedFormat == SurfaceFormat.Rgba32)
+                            {
+                                levelData = DxtUtil.DecompressDxt5(levelData, levelWidth, levelHeight);
+                                levelDataSizeInBytes = levelData.Length;
+                            }
                             break;
 
                         case SurfaceFormat.NormalizedByte4:
@@ -176,7 +176,7 @@ namespace MonoGame.Framework.Content
                 }
                 finally
                 {
-                    reader.ContentManager.ReturnScratchBuffer(levelData);
+                    reader.ContentManager.ReturnScratchBuffer(levelDataBuffer);
                 }
             }
 

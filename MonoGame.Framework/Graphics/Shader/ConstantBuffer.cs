@@ -9,11 +9,8 @@ namespace MonoGame.Framework.Graphics
     internal partial class ConstantBuffer : GraphicsResource
     {
         private readonly byte[] _buffer;
-
         private readonly int[] _parameters;
-
         private readonly int[] _offsets;
-
         private readonly string _name;
 
         private ulong _stateKey;
@@ -33,19 +30,14 @@ namespace MonoGame.Framework.Graphics
             PlatformInitialize();
         }
 
-        public ConstantBuffer(GraphicsDevice device,
-                              int sizeInBytes,
-                              int[] parameterIndexes,
-                              int[] parameterOffsets,
-                              string name)
+        public ConstantBuffer(
+            GraphicsDevice device, int sizeInBytes,
+            int[] parameterIndexes, int[] parameterOffsets, string name)
         {
             GraphicsDevice = device;
-
             _buffer = new byte[sizeInBytes];
-
             _parameters = parameterIndexes;
             _offsets = parameterOffsets;
-
             _name = name;
 
             PlatformInitialize();
@@ -79,19 +71,21 @@ namespace MonoGame.Framework.Graphics
 
 
             // Take care of the single copy case!
-            else if (rows == 1 || (rows == 4 && columns == 4)) {
+            else if (rows == 1 || (rows == 4 && columns == 4))
+            {
                 // take care of shader compiler optimization
                 int len = rows * columns * elementSize;
                 if (_buffer.Length - offset > len)
                     _ = _buffer.Length - offset;
-                Buffer.BlockCopy(data as Array, 0, _buffer, offset, rows*columns*elementSize);
-            } else
+                Buffer.BlockCopy(data as Array, 0, _buffer, offset, rows * columns * elementSize);
+            }
+            else
             {
                 var source = data as Array;
 
-                var stride = (columns*elementSize);
+                var stride = (columns * elementSize);
                 for (var y = 0; y < rows; y++)
-                    Buffer.BlockCopy(source, stride*y, _buffer, offset + (rowSize*y), columns*elementSize);
+                    Buffer.BlockCopy(source, stride * y, _buffer, offset + (rowSize * y), columns * elementSize);
             }
         }
 
@@ -105,7 +99,7 @@ namespace MonoGame.Framework.Graphics
             var elements = param.Elements;
             if (elements.Count > 0)
             {
-                for (var i=0; i < elements.Count; i++)
+                for (var i = 0; i < elements.Count; i++)
                 {
                     var rowsUsedSubParam = SetParameter(offset, elements[i]);
                     offset += rowsUsedSubParam * rowSize;
@@ -155,7 +149,7 @@ namespace MonoGame.Framework.Graphics
             // over and we need to reset.
             if (_stateKey > EffectParameter.NextStateKey)
                 _stateKey = 0;
-            
+
             for (var p = 0; p < _parameters.Length; p++)
             {
                 var index = _parameters[p];

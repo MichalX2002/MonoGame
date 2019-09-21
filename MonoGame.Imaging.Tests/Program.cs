@@ -31,6 +31,12 @@ namespace MonoGame.Imaging.Tests
             using(var stream = new FileStream("big img.png", FileMode.Open))
                 stream.CopyTo(encoded);
 
+            //var encoded = new FileStream("big img.png", FileMode.Open);
+
+            //var req = WebRequest.CreateHttp("https://cdn.discordapp.com/attachments/290820360335523840/551171768090492938/unknown.png");
+            //var encoded = req.GetResponse().GetResponseStream();
+            //encoded = RecyclableMemoryManager.Default.GetBufferedStream(encoded, false);
+
             int readRepeats = 1;
             int writeRepeats = 1;
 
@@ -40,7 +46,7 @@ namespace MonoGame.Imaging.Tests
                 Console.WriteLine("Read: " + Math.Round(progress * 100, 2) + "%");
                 return false;
             }
-
+            
             var watch = new Stopwatch();
             Image<Color> image = null;
             for (int i = 0; i < readRepeats; i++)
@@ -48,16 +54,14 @@ namespace MonoGame.Imaging.Tests
                 encoded.Seek(0, SeekOrigin.Begin);
                 if (readRepeats == 1 || i != 0)
                     watch.Start();
-                if (image != null)
-                    image.Dispose();
+
+                image?.Dispose();
                 image = Image.Load<Color>(encoded, OnReadProgress);
                 watch.Stop();
             }
             Console.WriteLine(image.Width + "x" + image.Height + " # " + image.GetBitDepth());
             Console.WriteLine("Buffer Read Average: " +
                 Math.Round(watch.Elapsed.TotalMilliseconds / (readRepeats == 1 ? 1 : readRepeats - 1), 3) + "ms");
-
-            Thread.Sleep(500);
 
             Thread.Sleep(500);
 
@@ -79,7 +83,6 @@ namespace MonoGame.Imaging.Tests
                     watch.Start();
 
                 image.Save(result, ImageFormat.Png, null, OnWriteProgress);
-
                 watch.Stop();
             }
             image.Dispose();

@@ -308,7 +308,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// This event is triggered when the SoundBank is disposed.
         /// </summary>
-        public event SenderDelegate<SoundBank> Disposing;
+        public event MessageHandler<SoundBank> Disposing;
 
         /// <summary>
         /// Is true if the SoundBank has been disposed.

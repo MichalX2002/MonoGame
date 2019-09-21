@@ -33,63 +33,70 @@ namespace MonoGame.Utilities.Memory
     /// buffers.
     /// </summary>
     /// <remarks>
-    /// This class works in tandem with the RecyclableMemoryStreamManager to supply MemoryStream
+    /// This class works in tandem with the RecyclableMemoryManager to supply MemoryStream
     /// objects to callers, while avoiding these specific problems:
     /// 1. LOH allocations - since all large buffers are pooled, they will never incur a Gen2 GC
     /// 2. Memory waste - A standard memory stream doubles its size when it runs out of room. This
-    /// leads to continual memory growth as each stream approaches the maximum allowed size.
+    ///    leads to continual memory growth as each stream approaches the maximum allowed size.
     /// 3. Memory copying - Each time a MemoryStream grows, all the bytes are copied into new buffers.
-    /// This implementation only copies the bytes when GetBuffer is called.
+    ///    This implementation only copies the bytes when GetBuffer is called.
     /// 4. Memory fragmentation - By using homogeneous buffer sizes, it ensures that blocks of memory
-    /// can be easily reused.
+    ///    can be easily reused.
     /// 
     /// The stream is implemented on top of a series of uniformly-sized blocks. As the stream's length grows,
-    /// additional blocks are retrieved from the memory manager. It is these blocks that are pooled, not the stream
-    /// object itself.
+    /// additional blocks are retrieved from the memory manager. It is these blocks that are pooled,
+    /// not the stream object itself.
     /// 
-    /// The biggest wrinkle in this implementation is when GetBuffer() is called. This requires a single 
-    /// contiguous buffer. If only a single block is in use, then that block is returned. If multiple blocks 
-    /// are in use, we retrieve a larger buffer from the memory manager. These large buffers are also pooled, 
+    /// The biggest wrinkle in this implementation is when GetBuffer() is called. 
+    /// This requires a single contiguous buffer. If only a single block is in use, 
+    /// then that block is returned. If multiple blocks are in use,
+    /// we retrieve a larger buffer from the memory manager. These large buffers are also pooled, 
     /// split by size--they are multiples/exponentials of a chunk size (1 MB by default).
     /// 
-    /// Once a large buffer is assigned to the stream the blocks are NEVER again used for this stream. All operations take place on the 
-    /// large buffer. The large buffer can be replaced by a larger buffer from the pool as needed. All blocks and large buffers 
-    /// are maintained in the stream until the stream is disposed (unless AggressiveBufferReturn is enabled in the stream manager).
-    /// 
+    /// Once a large buffer is assigned to the stream the blocks are NEVER again used for this stream. 
+    /// All operations take place on the large buffer. The large buffer can be replaced by a larger buffer
+    /// from the pool as needed. All blocks and large buffers are maintained in the stream until the 
+    /// stream is disposed (unless AggressiveBufferReturn is enabled in the stream manager).
     /// </remarks>
     public sealed class RecyclableMemoryStream : MemoryStream
     {
         private const long MaxStreamLength = int.MaxValue;
 
-        /// <summary>
-        /// All of these blocks must be the same size
-        /// </summary>
-        private readonly List<byte[]> blocks = new List<byte[]>(1);
+        #region Instance Fields
 
-        private readonly Guid id;
+        private readonly Guid _id;
+        private readonly RecyclableMemoryManager _memoryManager;
+        private readonly string _tag;
 
-        private readonly RecyclableMemoryManager memoryManager;
+        /// <summary>All of these blocks must be the same size.</summary>
+        private readonly List<byte[]> _blocks = new List<byte[]>(1);
 
-        private readonly string tag;
+        private int _length;
+        private int _position;
 
         /// <summary>
         /// This list is used to store buffers once they're replaced by something larger.
         /// This is for the cases where you have users of this class that may hold onto the buffers longer
         /// than they should and you want to prevent race conditions which could corrupt the data.
         /// </summary>
-        private List<byte[]> dirtyBuffers;
+        private List<byte[]> _dirtyBuffers;
 
         // long to allow Interlocked.Read (for .NET Standard 1.4 compat)
-        private long disposedState;
+        private long _disposedState;
 
         /// <summary>
         /// This is only set by GetBuffer() if the necessary buffer is larger than a single block size, or on
         /// construction if the caller immediately requests a single large buffer.
         /// </summary>
-        /// <remarks>If this field is non-null, it contains the concatenation of the bytes found in the individual
-        /// blocks. Once it is created, this (or a larger) largeBuffer will be used for the life of the stream.
+        /// <remarks>
+        /// If this field is non-null, it contains the concatenation of the bytes found in the individual blocks.
+        /// Once it is created, this (or a larger) largeBuffer will be used for the life of the stream.
         /// </remarks>
         private byte[] _largeBuffer;
+
+        #endregion
+
+        #region Internal Properties
 
         /// <summary>
         /// Unique identifier for this stream across it's entire lifetime
@@ -100,7 +107,7 @@ namespace MonoGame.Utilities.Memory
             get
             {
                 CheckDisposed();
-                return id;
+                return _id;
             }
         }
 
@@ -113,7 +120,7 @@ namespace MonoGame.Utilities.Memory
             get
             {
                 CheckDisposed();
-                return tag;
+                return _tag;
             }
         }
 
@@ -126,7 +133,7 @@ namespace MonoGame.Utilities.Memory
             get
             {
                 CheckDisposed();
-                return memoryManager;
+                return _memoryManager;
             }
         }
 
@@ -142,45 +149,56 @@ namespace MonoGame.Utilities.Memory
         /// </summary>
         internal string DisposeStack { get; private set; }
 
+        #endregion
+
         #region Constructors
+
         /// <summary>
-        /// Allocate a new RecyclableMemoryStream object.
+        /// Constructs a new <see cref="RecyclableMemoryStream"/> object.
         /// </summary>
         /// <param name="memoryManager">The memory manager</param>
         public RecyclableMemoryStream(RecyclableMemoryManager memoryManager)
-            : this(memoryManager, null, 0, null) { }
+            : this(memoryManager, null, 0, null)
+        {
+        }
 
         /// <summary>
-        /// Allocate a new RecyclableMemoryStream object
+        /// Constructs a new <see cref="RecyclableMemoryStream"/> object.
         /// </summary>
         /// <param name="memoryManager">The memory manager</param>
         /// <param name="tag">A string identifying this stream for logging and debugging purposes</param>
         public RecyclableMemoryStream(RecyclableMemoryManager memoryManager, string tag)
-            : this(memoryManager, tag, 0, null) { }
+            : this(memoryManager, tag, 0, null)
+        {
+        }
 
         /// <summary>
-        /// Allocate a new RecyclableMemoryStream object
+        /// Constructs a new <see cref="RecyclableMemoryStream"/> object.
         /// </summary>
         /// <param name="memoryManager">The memory manager</param>
         /// <param name="tag">A string identifying this stream for logging and debugging purposes</param>
         /// <param name="requestedSize">The initial requested size to prevent future allocations</param>
-        public RecyclableMemoryStream(RecyclableMemoryManager memoryManager, string tag, int requestedSize)
-            : this(memoryManager, tag, requestedSize, null) { }
+        public RecyclableMemoryStream(RecyclableMemoryManager memoryManager, string tag, long requestedSize)
+            : this(memoryManager, tag, requestedSize, null)
+        {
+        }
 
         /// <summary>
-        /// Allocate a new RecyclableMemoryStream object
+        /// Constructs a new <see cref="RecyclableMemoryStream"/> object.
         /// </summary>
         /// <param name="memoryManager">The memory manager</param>
         /// <param name="tag">A string identifying this stream for logging and debugging purposes</param>
         /// <param name="requestedSize">The initial requested size to prevent future allocations</param>
-        /// <param name="initialLargeBuffer">An initial buffer to use. This buffer will be owned by the stream and returned to the memory manager upon Dispose.</param>
+        /// <param name="initialLargeBuffer">
+        /// This buffer will be owned by the stream and returned to the memory manager upon Dispose.
+        /// </param>
         internal RecyclableMemoryStream(
-            RecyclableMemoryManager memoryManager, string tag, int requestedSize, byte[] initialLargeBuffer)
+            RecyclableMemoryManager memoryManager, string tag, long requestedSize, byte[] initialLargeBuffer)
             : base(Array.Empty<byte>())
         {
-            this.memoryManager = memoryManager;
-            id = Guid.NewGuid();
-            this.tag = tag;
+            _memoryManager = memoryManager;
+            _id = Guid.NewGuid();
+            _tag = tag;
 
             if (requestedSize < memoryManager.BlockSize)
                 requestedSize = memoryManager.BlockSize;
@@ -190,19 +208,15 @@ namespace MonoGame.Utilities.Memory
             else
                 _largeBuffer = initialLargeBuffer;
 
-            if (this.memoryManager.GenerateCallStacks)
+            if (_memoryManager.GenerateCallStacks)
                 AllocationStack = Environment.StackTrace;
 
-            RecyclableMemoryManager.Events.Writer.MemoryStreamCreated(id, this.tag, requestedSize);
-            this.memoryManager.ReportStreamCreated();
+            _memoryManager.ReportStreamCreated();
         }
+        
         #endregion
 
         #region Dispose and Finalize
-        ~RecyclableMemoryStream()
-        {
-            Dispose(false);
-        }
 
         /// <summary>
         /// Returns the memory used by this stream back to the pool.
@@ -212,66 +226,55 @@ namespace MonoGame.Utilities.Memory
             Justification = "We have different disposal semantics, so SuppressFinalize is in a different spot.")]
         protected override void Dispose(bool disposing)
         {
-            if (Interlocked.CompareExchange(ref disposedState, 1, 0) != 0)
+            if (Interlocked.CompareExchange(ref _disposedState, 1, 0) != 0)
             {
                 string doubleDisposeStack = null;
-                if (memoryManager.GenerateCallStacks)
+                if (_memoryManager.GenerateCallStacks)
                     doubleDisposeStack = Environment.StackTrace;
-
-                RecyclableMemoryManager.Events.Writer.MemoryStreamDoubleDispose(
-                    id, tag, AllocationStack, DisposeStack, doubleDisposeStack);
                 return;
             }
 
-            RecyclableMemoryManager.Events.Writer.MemoryStreamDisposed(id, tag);
-
-            if (memoryManager.GenerateCallStacks)
+            if (_memoryManager.GenerateCallStacks)
                 DisposeStack = Environment.StackTrace;
 
             if (disposing)
             {
-                memoryManager.ReportStreamDisposed();
+                _memoryManager.ReportStreamDisposed();
                 GC.SuppressFinalize(this);
             }
             else
             {
-                // We're being finalized.
-
-                RecyclableMemoryManager.Events.Writer.MemoryStreamFinalized(id, tag, AllocationStack);
-
 #if !NETSTANDARD1_4
                 if (AppDomain.CurrentDomain.IsFinalizingForUnload())
                 {
                     // If we're being finalized because of a shutdown, don't go any further.
-                    // We have no idea what's already been cleaned up. Triggering events may cause
-                    // a crash.
+                    // We have no idea what's already been cleaned up. Triggering events may cause a crash.
                     base.Dispose(disposing);
                     return;
                 }
 #endif
-
-                memoryManager.ReportStreamFinalized();
+                _memoryManager.ReportStreamFinalized();
             }
 
-            memoryManager.ReportStreamLength(_length);
+            _memoryManager.ReportStreamLength(_length);
 
             if (_largeBuffer != null)
-                memoryManager.ReturnLargeBuffer(_largeBuffer, tag);
+                _memoryManager.ReturnLargeBuffer(_largeBuffer, _tag);
 
-            if (dirtyBuffers != null)
+            if (_dirtyBuffers != null)
             {
-                foreach (var buffer in dirtyBuffers)
-                    memoryManager.ReturnLargeBuffer(buffer, tag);
+                foreach (var buffer in _dirtyBuffers)
+                    _memoryManager.ReturnLargeBuffer(buffer, _tag);
             }
 
-            memoryManager.ReturnBlocks(blocks, tag);
-            blocks.Clear();
+            _memoryManager.ReturnBlocks(_blocks, _tag);
+            _blocks.Clear();
 
             base.Dispose(disposing);
         }
 
         /// <summary>
-        /// Equivalent to Dispose
+        /// Equivalent to <see cref="Stream.Dispose"/>.
         /// </summary>
 #if NETSTANDARD1_4
         public void Close()
@@ -281,14 +284,22 @@ namespace MonoGame.Utilities.Memory
         {
             Dispose(true);
         }
+
+        ~RecyclableMemoryStream()
+        {
+            Dispose(false);
+        }
+
         #endregion
 
-        #region MemoryStream overrides
+        #region MemoryStream property overrides
+
         /// <summary>
-        /// Gets or sets the capacity
+        /// Gets or sets the capacity.
         /// </summary>
-        /// <remarks>Capacity is always in multiples of the memory manager's block size, unless
-        /// the large buffer is in use.  Capacity never decreases during a stream's lifetime. 
+        /// <remarks>
+        /// Capacity is always in multiples of the memory manager's block size, 
+        /// unless the large buffer is in use. Capacity never decreases during a stream's lifetime. 
         /// Explicitly setting the capacity to a lower value than the current value will have no effect. 
         /// This is because the buffers are all pooled by chunks and there's little reason to 
         /// allow stream truncation.
@@ -300,11 +311,9 @@ namespace MonoGame.Utilities.Memory
             {
                 CheckDisposed();
                 if (_largeBuffer != null)
-                {
                     return _largeBuffer.Length;
-                }
 
-                long size = (long)blocks.Count * memoryManager.BlockSize;
+                long size = (long)_blocks.Count * _memoryManager.BlockSize;
                 return (int)Math.Min(int.MaxValue, size);
             }
             set
@@ -313,8 +322,6 @@ namespace MonoGame.Utilities.Memory
                 EnsureCapacity(value);
             }
         }
-
-        private int _length;
 
         /// <summary>
         /// Gets the number of bytes written to this stream.
@@ -328,8 +335,6 @@ namespace MonoGame.Utilities.Memory
                 return _length;
             }
         }
-
-        private int _position;
 
         /// <summary>
         /// Gets the current position in the stream
@@ -346,46 +351,49 @@ namespace MonoGame.Utilities.Memory
             {
                 CheckDisposed();
                 if (value < 0)
-                {
                     throw new ArgumentOutOfRangeException("value", "value must be non-negative");
-                }
 
                 if (value > MaxStreamLength)
-                {
                     throw new ArgumentOutOfRangeException("value", "value cannot be more than " + MaxStreamLength);
-                }
 
                 _position = (int)value;
             }
         }
 
         /// <summary>
-        /// Whether the stream can currently read
+        /// Gets whether the stream can currently read.
         /// </summary>
-        public override bool CanRead => !Disposed;
+        public override bool CanRead => !IsDisposed;
 
         /// <summary>
-        /// Whether the stream can currently seek
+        /// Gets whether the stream can currently seek.
         /// </summary>
-        public override bool CanSeek => !Disposed;
+        public override bool CanSeek => !IsDisposed;
 
         /// <summary>
-        /// Always false
+        /// Gets whether the stream can currently write.
+        /// </summary>
+        public override bool CanWrite => !IsDisposed;
+
+        /// <summary>
+        /// Gets whether the stream can timeout; always <see langword="false"/>.
         /// </summary>
         public override bool CanTimeout => false;
 
-        /// <summary>
-        /// Whether the stream can currently write
-        /// </summary>
-        public override bool CanWrite => !Disposed;
+        #endregion
+
+        #region MemoryStream method overrides
 
         /// <summary>
         /// Returns a single buffer containing the contents of the stream.
         /// The buffer may be longer than the stream length.
         /// </summary>
         /// <returns>A byte[] buffer</returns>
-        /// <remarks>IMPORTANT: Doing a Write() after calling GetBuffer() invalidates the buffer. The old buffer is held onto
-        /// until Dispose is called, but the next time GetBuffer() is called, a new buffer from the pool will be required.</remarks>
+        /// <remarks>
+        /// Doing a Write() after calling GetBuffer() "invalidates" the buffer. 
+        /// The old buffer is held onto until Dispose is called, but the next time GetBuffer() is called,
+        /// a new buffer from the pool will be required.
+        /// </remarks>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
 #if NETSTANDARD1_4
         public byte[] GetBuffer()
@@ -398,31 +406,31 @@ namespace MonoGame.Utilities.Memory
             if (_largeBuffer != null)
                 return _largeBuffer;
 
-            if (blocks.Count == 1)
-                return blocks[0];
+            if (_blocks.Count == 1)
+                return _blocks[0];
 
-            // Buffer needs to reflect the capacity, not the length, because
-            // it's possible that people will manipulate the buffer directly
+            // Buffer needs to reflect the capacity, not the length, 
+            // because it's possible that people will manipulate the buffer directly
             // and set the length afterward. Capacity sets the expectation
             // for the size of the buffer.
-            var newBuffer = memoryManager.GetLargeBuffer(Capacity, tag);
+            byte[] newBuffer = _memoryManager.GetLargeBuffer(Capacity, _tag);
 
             // InternalRead will check for existence of largeBuffer, so make sure we
             // don't set it until after we've copied the data.
-            InternalRead(newBuffer, 0, _length, 0);
+            InternalRead(newBuffer.AsSpan(0, _length), 0);
             _largeBuffer = newBuffer;
 
-            if (blocks.Count > 0 && memoryManager.AggressiveBufferReturn)
+            if (_blocks.Count > 0 && _memoryManager.AggresiveBlockReturn)
             {
-                memoryManager.ReturnBlocks(blocks, tag);
-                blocks.Clear();
+                _memoryManager.ReturnBlocks(_blocks, _tag);
+                _blocks.Clear();
             }
 
             return _largeBuffer;
         }
 
         /// <summary>
-        /// Returns an ArraySegment that wraps a single buffer containing the contents of the stream.
+        /// Returns an <see cref="ArraySegment{byte}"/> that wraps a single buffer containing the contents of the stream.
         /// </summary>
         /// <param name="buffer">An ArraySegment containing a reference to the underlying bytes.</param>
         /// <returns>Always returns true.</returns>
@@ -451,19 +459,17 @@ namespace MonoGame.Utilities.Memory
         public override byte[] ToArray()
         {
             CheckDisposed();
-            var newBuffer = new byte[Length];
 
-            InternalRead(newBuffer, 0, _length, 0);
-            string stack = memoryManager.GenerateCallStacks ? Environment.StackTrace : null;
-            RecyclableMemoryManager.Events.Writer.MemoryStreamToArray(id, tag, stack, 0);
-            memoryManager.ReportStreamToArray();
+            byte[] newBuffer = new byte[_length];
+            InternalRead(newBuffer, 0);
 
+            _memoryManager.ReportStreamToArray(_tag);
             return newBuffer;
         }
 #pragma warning restore CS0809
 
         /// <summary>
-        /// Reads from the current position into the provided buffer
+        /// Reads from the current position into the provided buffer.
         /// </summary>
         /// <param name="buffer">Destination buffer</param>
         /// <param name="offset">Offset into buffer at which to start placing the read bytes.</param>
@@ -473,13 +479,10 @@ namespace MonoGame.Utilities.Memory
         /// <exception cref="ArgumentOutOfRangeException">offset or count is less than 0</exception>
         /// <exception cref="ArgumentException">offset subtracted from the buffer length is less than count</exception>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            return SafeRead(buffer, offset, count, ref _position);
-        }
+        public override int Read(byte[] buffer, int offset, int count) => SafeRead(buffer, offset, count, ref _position);
 
         /// <summary>
-        /// Reads from the specified position into the provided buffer
+        /// Reads from the specified position into the provided buffer.
         /// </summary>
         /// <param name="buffer">Destination buffer</param>
         /// <param name="offset">Offset into buffer at which to start placing the read bytes.</param>
@@ -496,33 +499,21 @@ namespace MonoGame.Utilities.Memory
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
 
-            if (offset < 0)
-                throw new ArgumentOutOfRangeException(nameof(offset), "offset cannot be negative");
-
-            if (count < 0)
-                throw new ArgumentOutOfRangeException(nameof(count), "count cannot be negative");
-
-            if (offset + count > buffer.Length)
-                throw new ArgumentException("buffer length must be at least offset + count");
-
-            int amountRead = InternalRead(buffer, offset, count, streamPosition);
+            int amountRead = InternalRead(buffer.AsSpan(offset, count), streamPosition);
             streamPosition += amountRead;
             return amountRead;
         }
 
         /// <summary>
-        /// Reads from the current position into the provided buffer
+        /// Reads from the current position into the provided buffer.
         /// </summary>
         /// <param name="buffer">Destination buffer</param>
         /// <returns>The number of bytes read</returns>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
-        public int Read(Span<byte> buffer)
-        {
-            return SafeRead(buffer, ref _position);
-        }
+        public int Read(Span<byte> buffer) => SafeRead(buffer, ref _position);
 
         /// <summary>
-        /// Reads from the specified position into the provided buffer
+        /// Reads from the specified position into the provided buffer.
         /// </summary>
         /// <param name="buffer">Destination buffer</param>
         /// <param name="streamPosition">Position in the stream to start reading from</param>
@@ -547,62 +538,10 @@ namespace MonoGame.Utilities.Memory
         /// <exception cref="ArgumentOutOfRangeException">offset or count is negative</exception>
         /// <exception cref="ArgumentException">buffer.Length - offset is not less than count</exception>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            CheckDisposed();
-            if (buffer == null)
-                throw new ArgumentNullException(nameof(buffer));
-
-            if (offset < 0)
-                throw new ArgumentOutOfRangeException(
-                    nameof(offset), offset, "Offset must be in the range of 0 - buffer.Length-1");
-
-            if (count < 0)
-                throw new ArgumentOutOfRangeException(nameof(count), count, "count must be non-negative");
-
-            if (count + offset > buffer.Length)
-                throw new ArgumentException("count must be greater than buffer.Length - offset");
-
-            int blockSize = memoryManager.BlockSize;
-            long end = (long)_position + count;
-            // Check for overflow
-            if (end > MaxStreamLength)
-                throw new IOException("Maximum capacity exceeded");
-
-            EnsureCapacity((int)end);
-
-            if (_largeBuffer == null)
-            {
-                int bytesRemaining = count;
-                int bytesWritten = 0;
-                var item = GetBlockAndRelativeOffset(_position);
-
-                while (bytesRemaining > 0)
-                {
-                    byte[] currentBlock = blocks[item.Block];
-                    int remainingInBlock = blockSize - item.Offset;
-                    int amountToWriteInBlock = Math.Min(remainingInBlock, bytesRemaining);
-
-                    Buffer.BlockCopy(buffer, offset + bytesWritten, currentBlock, item.Offset,
-                                     amountToWriteInBlock);
-
-                    bytesRemaining -= amountToWriteInBlock;
-                    bytesWritten += amountToWriteInBlock;
-
-                    item.Block++;
-                    item.Offset = 0;
-                }
-            }
-            else
-            {
-                Buffer.BlockCopy(buffer, offset, _largeBuffer, _position, count);
-            }
-            _position = (int)end;
-            _length = Math.Max(_position, _length);
-        }
+        public override void Write(byte[] buffer, int offset, int count) => Write(buffer.AsSpan(offset, count));
 
         /// <summary>
-        /// Writes the buffer to the stream
+        /// Writes the buffer to the stream.
         /// </summary>
         /// <param name="source">Source buffer</param>
         /// <exception cref="ArgumentNullException">buffer is null</exception>
@@ -611,25 +550,23 @@ namespace MonoGame.Utilities.Memory
         {
             CheckDisposed();
 
-            int blockSize = memoryManager.BlockSize;
-            long end = (long)_position + source.Length;
             // Check for overflow
+            long end = (long)_position + source.Length;
             if (end > MaxStreamLength)
                 throw new IOException("Maximum capacity exceeded.");
 
-            EnsureCapacity((int)end);
+            EnsureCapacity(end);
 
             if (_largeBuffer == null)
             {
                 var item = GetBlockAndRelativeOffset(_position);
                 while (source.Length > 0)
                 {
-                    byte[] currentBlock = blocks[item.Block];
-                    int remainingInBlock = blockSize - item.Offset;
+                    byte[] currentBlock = _blocks[item.Block];
+                    int remainingInBlock = _memoryManager.BlockSize - item.Offset;
                     int amountToWriteInBlock = Math.Min(remainingInBlock, source.Length);
 
                     source.Slice(0, amountToWriteInBlock).CopyTo(currentBlock.AsSpan(item.Offset));
-
                     source = source.Slice(amountToWriteInBlock);
 
                     item.Block++;
@@ -645,12 +582,10 @@ namespace MonoGame.Utilities.Memory
         }
 
         /// <summary>
-        /// Returns a useful string for debugging. This should not normally be called in actual production code.
+        /// Returns a useful string for debugging. 
+        /// This should not normally be called in actual production code.
         /// </summary>
-        public override string ToString()
-        {
-            return $"Id = {Id}, Tag = {Tag}, Length = {Length:N0} bytes";
-        }
+        public override string ToString() => $"Id = {Id}, Tag = {Tag}, Length = {Length:N0} bytes";
 
         /// <summary>
         /// Writes a single byte to the current position in the stream.
@@ -670,10 +605,7 @@ namespace MonoGame.Utilities.Memory
         /// </summary>
         /// <returns>The byte at the current position, or -1 if the position is at the end of the stream.</returns>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
-        public override int ReadByte()
-        {
-            return SafeReadByte(ref _position);
-        }
+        public override int ReadByte() => SafeReadByte(ref _position);
 
         /// <summary>
         /// Reads a single byte from the specified position in the stream.
@@ -685,25 +617,23 @@ namespace MonoGame.Utilities.Memory
         {
             CheckDisposed();
             if (streamPosition == _length)
-            {
                 return -1;
-            }
+
             byte value;
             if (_largeBuffer == null)
             {
                 var blockAndOffset = GetBlockAndRelativeOffset(streamPosition);
-                value = blocks[blockAndOffset.Block][blockAndOffset.Offset];
+                value = _blocks[blockAndOffset.Block][blockAndOffset.Offset];
             }
             else
-            {
                 value = _largeBuffer[streamPosition];
-            }
+
             streamPosition++;
             return value;
         }
 
         /// <summary>
-        /// Sets the length of the stream
+        /// Sets the length of the stream.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">value is negative or larger than MaxStreamLength</exception>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
@@ -711,8 +641,8 @@ namespace MonoGame.Utilities.Memory
         {
             CheckDisposed();
             if (value < 0 || value > MaxStreamLength)
-                throw new ArgumentOutOfRangeException(nameof(value),
-                                                      "value must be non-negative and at most " + MaxStreamLength);
+                throw new ArgumentOutOfRangeException(
+                    nameof(value), "value must be non-negative and at most " + MaxStreamLength);
 
             EnsureCapacity((int)value);
 
@@ -722,23 +652,24 @@ namespace MonoGame.Utilities.Memory
         }
 
         /// <summary>
-        /// Sets the position to the offset from the seek location
+        /// Sets the position to the offset from the seek location.
         /// </summary>
-        /// <param name="offset">How many bytes to move</param>
-        /// <param name="loc">From where</param>
+        /// <param name="offset">How many bytes to move.</param>
+        /// <param name="origin">Move from where.</param>
         /// <returns>The new position</returns>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
         /// <exception cref="ArgumentOutOfRangeException">offset is larger than MaxStreamLength</exception>
         /// <exception cref="ArgumentException">Invalid seek origin</exception>
         /// <exception cref="IOException">Attempt to set negative position</exception>
-        public override long Seek(long offset, SeekOrigin loc)
+        public override long Seek(long offset, SeekOrigin origin)
         {
             CheckDisposed();
             if (offset > MaxStreamLength)
-                throw new ArgumentOutOfRangeException(nameof(offset), "offset cannot be larger than " + MaxStreamLength);
+                throw new ArgumentOutOfRangeException(
+                    nameof(offset), "offset cannot be larger than " + MaxStreamLength);
 
             int newPosition;
-            switch (loc)
+            switch (origin)
             {
                 case SeekOrigin.Begin:
                     newPosition = (int)offset;
@@ -749,12 +680,13 @@ namespace MonoGame.Utilities.Memory
                 case SeekOrigin.End:
                     newPosition = (int)offset + _length;
                     break;
+
                 default:
-                    throw new ArgumentException("Invalid seek origin", nameof(loc));
+                    throw new ArgumentException("Invalid seek origin", nameof(origin));
             }
 
             if (newPosition < 0)
-                throw new IOException("Seek before beginning");
+                throw new IOException("Seek before beginning.");
 
             _position = newPosition;
             return _position;
@@ -778,12 +710,11 @@ namespace MonoGame.Utilities.Memory
 
                 while (bytesRemaining > 0)
                 {
-                    int amountToCopy = Math.Min(blocks[currentBlock].Length, bytesRemaining);
-                    stream.Write(blocks[currentBlock], 0, amountToCopy);
+                    int amountToCopy = Math.Min(_blocks[currentBlock].Length, bytesRemaining);
+                    stream.Write(_blocks[currentBlock], 0, amountToCopy);
 
                     bytesRemaining -= amountToCopy;
-
-                    ++currentBlock;
+                    currentBlock++;
                 }
             }
             else
@@ -792,47 +723,14 @@ namespace MonoGame.Utilities.Memory
         #endregion
 
         #region Helper Methods
-        private bool Disposed => Interlocked.Read(ref disposedState) != 0;
+
+        private bool IsDisposed => Interlocked.Read(ref _disposedState) != 0;
 
         private void CheckDisposed()
         {
-            if (Disposed)
-            {
-                throw new ObjectDisposedException($"The stream with Id {id} and Tag {tag} is disposed.");
-            }
-        }
-
-        private int InternalRead(byte[] buffer, int offset, int count, int fromPosition)
-        {
-            if (_length - fromPosition <= 0)
-                return 0;
-
-            int amountToCopy;
-
-            if (_largeBuffer == null)
-            {
-                var blockAndOffset = GetBlockAndRelativeOffset(fromPosition);
-                int bytesWritten = 0;
-                int bytesRemaining = Math.Min(count, _length - fromPosition);
-
-                while (bytesRemaining > 0)
-                {
-                    amountToCopy = Math.Min(blocks[blockAndOffset.Block].Length - blockAndOffset.Offset,
-                                                bytesRemaining);
-                    Buffer.BlockCopy(blocks[blockAndOffset.Block], blockAndOffset.Offset, buffer,
-                                     bytesWritten + offset, amountToCopy);
-
-                    bytesWritten += amountToCopy;
-                    bytesRemaining -= amountToCopy;
-
-                    blockAndOffset.Block++;
-                    blockAndOffset.Offset = 0;
-                }
-                return bytesWritten;
-            }
-            amountToCopy = Math.Min(count, _length - fromPosition);
-            Buffer.BlockCopy(_largeBuffer, fromPosition, buffer, offset, amountToCopy);
-            return amountToCopy;
+            if (IsDisposed)
+                throw new ObjectDisposedException(
+                    $"The stream with Id {_id} and Tag {_tag} is disposed.");
         }
 
         private int InternalRead(Span<byte> buffer, int fromPosition)
@@ -841,7 +739,6 @@ namespace MonoGame.Utilities.Memory
                 return 0;
 
             int amountToCopy;
-
             if (_largeBuffer == null)
             {
                 var item = GetBlockAndRelativeOffset(fromPosition);
@@ -850,8 +747,8 @@ namespace MonoGame.Utilities.Memory
 
                 while (bytesRemaining > 0)
                 {
-                    amountToCopy = Math.Min(blocks[item.Block].Length - item.Offset, bytesRemaining);
-                    blocks[item.Block].AsSpan(item.Offset, amountToCopy).CopyTo(buffer.Slice(bytesWritten));
+                    amountToCopy = Math.Min(_blocks[item.Block].Length - item.Offset, bytesRemaining);
+                    _blocks[item.Block].AsSpan(item.Offset, amountToCopy).CopyTo(buffer.Slice(bytesWritten));
 
                     bytesWritten += amountToCopy;
                     bytesRemaining -= amountToCopy;
@@ -861,6 +758,7 @@ namespace MonoGame.Utilities.Memory
                 }
                 return bytesWritten;
             }
+
             amountToCopy = Math.Min(buffer.Length, _length - fromPosition);
             _largeBuffer.AsSpan(fromPosition, amountToCopy).CopyTo(buffer);
             return amountToCopy;
@@ -880,28 +778,27 @@ namespace MonoGame.Utilities.Memory
 
         private BlockAndOffset GetBlockAndRelativeOffset(int offset)
         {
-            var blockSize = memoryManager.BlockSize;
+            int blockSize = _memoryManager.BlockSize;
             return new BlockAndOffset(offset / blockSize, offset % blockSize);
         }
 
-        private void EnsureCapacity(int newCapacity)
+        private void EnsureCapacity(long newCapacity)
         {
-            if (newCapacity > memoryManager.MaximumStreamCapacity && memoryManager.MaximumStreamCapacity > 0)
+            if (newCapacity > _memoryManager.MaximumStreamCapacity &&
+                _memoryManager.MaximumStreamCapacity > 0)
             {
-                RecyclableMemoryManager.Events.Writer.MemoryStreamOverCapacity(
-                    newCapacity, memoryManager.MaximumStreamCapacity, tag, AllocationStack);
-
                 throw new InvalidOperationException(
                     "Requested capacity is too large (" + newCapacity + 
-                    "). Limit is " + memoryManager.MaximumStreamCapacity);
+                    "). Limit is " + _memoryManager.MaximumStreamCapacity);
             }
 
             if (_largeBuffer != null)
             {
                 if (newCapacity > _largeBuffer.Length)
                 {
-                    var newBuffer = memoryManager.GetLargeBuffer(newCapacity, tag);
-                    InternalRead(newBuffer, 0, _length, 0);
+                    var newBuffer = _memoryManager.GetLargeBuffer(newCapacity, _tag);
+                    InternalRead(newBuffer.AsSpan(0, _length), 0);
+
                     ReleaseLargeBuffer();
                     _largeBuffer = newBuffer;
                 }
@@ -909,9 +806,7 @@ namespace MonoGame.Utilities.Memory
             else
             {
                 while (Capacity < newCapacity)
-                {
-                    blocks.Add((memoryManager.GetBlock()));
-                }
+                    _blocks.Add(_memoryManager.GetBlock());
             }
         }
 
@@ -920,18 +815,17 @@ namespace MonoGame.Utilities.Memory
         /// </summary>
         private void ReleaseLargeBuffer()
         {
-            if (memoryManager.AggressiveBufferReturn)
+            if (_memoryManager.AggressiveLargeBufferReturn)
             {
-                memoryManager.ReturnLargeBuffer(_largeBuffer, tag);
+                _memoryManager.ReturnLargeBuffer(_largeBuffer, _tag);
             }
             else
             {
-                if (dirtyBuffers == null)
-                {
+                if (_dirtyBuffers == null)
                     // We most likely will only ever need space for one
-                    dirtyBuffers = new List<byte[]>(1);
-                }
-                dirtyBuffers.Add(_largeBuffer);
+                    _dirtyBuffers = new List<byte[]>(1);
+
+                _dirtyBuffers.Add(_largeBuffer);
             }
 
             _largeBuffer = null;

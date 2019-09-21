@@ -12,7 +12,7 @@ namespace MonoGame.Framework.Graphics
 		public int MultiSampleCount { get; private set; }
 		public RenderTargetUsage RenderTargetUsage { get; private set; }
         public bool IsContentLost => false;
-        public event SenderDelegate<RenderTarget2D> ContentLost;
+        public event MessageHandler<RenderTarget2D> ContentLost;
 		
         private bool SuppressEventHandlerWarningsUntilEventsAreProperlyImplemented()
         {

@@ -62,7 +62,7 @@ namespace MonoGame.Framework.Audio
             }
             finally
             {
-                if (largeBuffer != null)
+                if (largeBuffer != null && bufferTag != null)
                     RecyclableMemoryManager.Default.ReturnLargeBuffer(largeBuffer, bufferTag);
             }
         }
@@ -74,7 +74,7 @@ namespace MonoGame.Framework.Audio
             if (!ALController.Instance.SupportsFloat32)
             {
                 // If 32-bit IEEE float is not supported, convert to 16-bit signed PCM
-                data = MemoryMarshal.Cast<byte, T>(AudioLoader.ConvertFloatTo16(data));
+                data = MemoryMarshal.Cast<byte, T>(AudioLoader.ConvertSingleToInt16(data));
                 PlatformInitializePcm(data, 16, sampleRate, channels, loopStart, loopLength);
                 return;
             }

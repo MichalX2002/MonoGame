@@ -23,7 +23,7 @@ namespace MonoGame.Utilities
         /// <param name="value"></param>
         /// <param name="paramName"></param>
         /// <param name="inlineParamName"></param>
-        public static void AssertNonEmpty(int? count, string paramName, bool inlineParamName = true)
+        public static void AssertNonEmpty(long? count, string paramName, bool inlineParamName = true)
         {
             if (!count.HasValue)
                 throw new ArgumentNullException(nameof(paramName));
@@ -41,7 +41,7 @@ namespace MonoGame.Utilities
         /// <param name="value"></param>
         /// <param name="paramName"></param>
         /// <param name="inlineParamName"></param>
-        public static void AssertAboveZero(int value, string paramName, bool inlineParamName = true)
+        public static void AssertAboveZero(long value, string paramName, bool inlineParamName = true)
         {
             if (value <= 0)
             {
@@ -57,7 +57,7 @@ namespace MonoGame.Utilities
         /// <param name="value"></param>
         /// <param name="paramName"></param>
         /// <param name="inlineParamName"></param>
-        public static void AssertAtleastZero(int value, string paramName, bool inlineParamName = true)
+        public static void AssertAtleastZero(long value, string paramName, bool inlineParamName = true)
         {
             if (value < 0)
             {

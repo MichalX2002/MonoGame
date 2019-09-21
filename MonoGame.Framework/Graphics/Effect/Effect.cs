@@ -35,15 +35,11 @@ namespace MonoGame.Framework.Graphics
         }
 
         public EffectParameterCollection Parameters { get; private set; }
-
         public EffectTechniqueCollection Techniques { get; private set; }
-
         public EffectTechnique CurrentTechnique { get; set; }
-  
         internal ConstantBuffer[] ConstantBuffers { get; private set; }
 
         private Shader[] _shaders;
-
 	    private readonly bool _isClone;
 
         internal Effect(GraphicsDevice graphicsDevice)
@@ -52,8 +48,7 @@ namespace MonoGame.Framework.Graphics
                     nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
 		}
 			
-		protected Effect(Effect cloneSource)
-            : this(cloneSource.GraphicsDevice)
+		protected Effect(Effect cloneSource) : this(cloneSource.GraphicsDevice)
 		{
             _isClone = true;
             Clone(cloneSource);
@@ -122,7 +117,8 @@ namespace MonoGame.Framework.Graphics
             header.HeaderSize = index;
 
             if (header.Signature != MGFXHeader.MGFXSignature)
-                throw new Exception("This does not appear to be a MonoGame MGFX file!");
+                throw new InvalidDataException("This does not appear to be a MonoGame MGFX file!");
+
             if (header.Version < MGFXHeader.MGFXVersion)
                 throw new Exception("This MGFX effect is for an older release of MonoGame and needs to be rebuilt.");
             if (header.Version > MGFXHeader.MGFXVersion)

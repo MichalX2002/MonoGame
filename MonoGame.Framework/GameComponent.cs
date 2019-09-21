@@ -39,8 +39,8 @@ namespace MonoGame.Framework
             }
         }
 
-        public event SenderDelegate<object> EnabledChanged;
-        public event SenderDelegate<object> UpdateOrderChanged;
+        public event MessageHandler<object> EnabledChanged;
+        public event MessageHandler<object> UpdateOrderChanged;
 
         public GameComponent(Game game)
         {
@@ -52,9 +52,13 @@ namespace MonoGame.Framework
             Dispose(false);
         }
 
-        public virtual void Initialize() { }
+        public virtual void Initialize()
+        {
+        }
 
-        public virtual void Update(GameTime gameTime) { }
+        public virtual void Update(GameTime gameTime)
+        {
+        }
 
         protected virtual void OnUpdateOrderChanged()
         {
@@ -69,7 +73,9 @@ namespace MonoGame.Framework
         /// <summary>
         /// Shuts down the component.
         /// </summary>
-        protected virtual void Dispose(bool disposing) { }
+        protected virtual void Dispose(bool disposing)
+        {
+        }
         
         /// <summary>
         /// Shuts down the component.
@@ -81,6 +87,7 @@ namespace MonoGame.Framework
         }
 
         #region IComparable<GameComponent> Members
+
         // TODO: Should be removed, as it is not part of XNA 4.0
         public int CompareTo(GameComponent other)
         {
