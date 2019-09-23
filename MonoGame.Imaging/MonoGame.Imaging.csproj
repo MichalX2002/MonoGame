@@ -48,7 +48,9 @@
     <Compile Include="..\ThirdParty\StbSharp\Image\src\StbImageSharp\StbImage.cs" Link="StbSharp\Image\StbImage.cs" />
     <Compile Include="..\ThirdParty\StbSharp\Image\src\StbImageSharp\StbImage.Generated.cs" Link="StbSharp\Image\StbImage.Generated.cs" />
     <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\CRuntime.cs" Link="StbSharp\Shared\CRuntime.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\GCHandleResult.cs" Link="StbSharp\Shared\GCHandleResult.cs" />
     <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\GlobalSuppressions.cs" Link="StbSharp\Shared\GlobalSuppressions.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\HGlobalMemoryResult.cs" Link="StbSharp\Shared\HGlobalMemoryResult.cs" />
     <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\IMemoryResult.cs" Link="StbSharp\Shared\IMemoryResult.cs" />
     <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\IPixelProvider.cs" Link="StbSharp\Shared\IPixelProvider.cs" />
     <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\MemoryStatistics.cs" Link="StbSharp\Shared\MemoryStatistics.cs" />

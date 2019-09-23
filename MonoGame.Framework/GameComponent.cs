@@ -8,8 +8,8 @@ namespace MonoGame.Framework
 {   
     public class GameComponent : IGameComponent, IUpdateable, IComparable<GameComponent>, IDisposable
     {
-        bool _enabled = true;
-        int _updateOrder;
+        private bool _enabled = true;
+        private int _updateOrder;
 
         public Game Game { get; private set; }
 
@@ -39,8 +39,8 @@ namespace MonoGame.Framework
             }
         }
 
-        public event MessageHandler<object> EnabledChanged;
-        public event MessageHandler<object> UpdateOrderChanged;
+        public event SimpleEventHandler<object> EnabledChanged;
+        public event SimpleEventHandler<object> UpdateOrderChanged;
 
         public GameComponent(Game game)
         {

@@ -333,13 +333,13 @@ namespace MonoGame.Framework.Graphics
         #region Events
 
         // TODO Graphics Device events need implementing
-        internal event DataMessageHandler<GraphicsDevice, PresentationParameters> PresentationChanged;
-        public event MessageHandler<GraphicsDevice> DeviceLost;
-        public event MessageHandler<GraphicsDevice> DeviceReset;
-        public event MessageHandler<GraphicsDevice> DeviceResetting;
-        public event DataMessageHandler<GraphicsDevice, object> ResourceCreated;
-        public event DataMessageHandler<GraphicsDevice, ResourceDestroyedEvent> ResourceDestroyed;
-        public event MessageHandler<GraphicsDevice> Disposing;
+        internal event DataEventHandler<GraphicsDevice, PresentationParameters> PresentationChanged;
+        public event SimpleEventHandler<GraphicsDevice> DeviceLost;
+        public event SimpleEventHandler<GraphicsDevice> DeviceReset;
+        public event SimpleEventHandler<GraphicsDevice> DeviceResetting;
+        public event DataEventHandler<GraphicsDevice, object> ResourceCreated;
+        public event DataEventHandler<GraphicsDevice, ResourceDestroyedEvent> ResourceDestroyed;
+        public event SimpleEventHandler<GraphicsDevice> Disposing;
 
         #endregion
 

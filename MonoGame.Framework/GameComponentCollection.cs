@@ -13,13 +13,13 @@ namespace MonoGame.Framework
         /// Event that is triggered when a <see cref="GameComponent"/> is added
         /// to this <see cref="GameComponentCollection"/>.
         /// </summary>
-        public event DataMessageHandler<GameComponentCollection, IGameComponent> ComponentAdded;
+        public event DataEventHandler<GameComponentCollection, IGameComponent> ComponentAdded;
 
         /// <summary>
         /// Event that is triggered when a <see cref="GameComponent"/> is removed
         /// from this <see cref="GameComponentCollection"/>.
         /// </summary>
-        public event DataMessageHandler<GameComponentCollection, IGameComponent> ComponentRemoved;
+        public event DataEventHandler<GameComponentCollection, IGameComponent> ComponentRemoved;
 
         /// <summary>
         /// Removes every <see cref="GameComponent"/> from this <see cref="GameComponentCollection"/>.

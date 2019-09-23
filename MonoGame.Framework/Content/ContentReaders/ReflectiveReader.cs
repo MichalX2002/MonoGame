@@ -16,14 +16,11 @@ namespace MonoGame.Framework.Content
         delegate void ReadElement(ContentReader input, object parent);
 
         private List<ReadElement> _readers;
-
         private ConstructorInfo _constructor;
-
         private ContentTypeReader _baseTypeReader;
 
 
-        public ReflectiveReader() 
-            : base(typeof(T))
+        public ReflectiveReader()  : base(typeof(T))
         {
         }
 

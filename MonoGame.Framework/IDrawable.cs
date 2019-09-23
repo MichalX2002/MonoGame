@@ -6,8 +6,8 @@ namespace MonoGame.Framework
 {
     public interface IDrawable
     {
-		event MessageHandler<object> DrawOrderChanged;
-        event MessageHandler<object> VisibleChanged;
+		event SimpleEventHandler<object> DrawOrderChanged;
+        event SimpleEventHandler<object> VisibleChanged;
 
         int DrawOrder { get; }
         bool Visible { get; }

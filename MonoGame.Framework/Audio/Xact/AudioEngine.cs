@@ -351,7 +351,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// This event is triggered when the AudioEngine is disposed.
         /// </summary>
-        public event MessageHandler<AudioEngine> Disposing;
+        public event SimpleEventHandler<AudioEngine> Disposing;
 
         /// <summary>
         /// Is true if the AudioEngine has been disposed.

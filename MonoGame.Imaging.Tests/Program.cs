@@ -70,7 +70,7 @@ namespace MonoGame.Imaging.Tests
             bool OnWriteProgress(
                 int frameIndex, ReadOnlyFrameCollection<Color> frames, double progress)
             {
-                Console.WriteLine("Write: " + Math.Round(progress * 100, 2) + "%");
+                //Console.WriteLine("Write: " + Math.Round(progress * 100, 2) + "%");
                 return true;
             }
 

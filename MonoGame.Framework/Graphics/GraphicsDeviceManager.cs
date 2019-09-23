@@ -186,12 +186,12 @@ namespace MonoGame.Framework
 
         #region IGraphicsDeviceService Members
 
-        public event MessageHandler<GraphicsDeviceManager> DeviceCreated;
-        public event MessageHandler<GraphicsDeviceManager> DeviceDisposing;
-        public event MessageHandler<GraphicsDeviceManager> DeviceReset;
-        public event MessageHandler<GraphicsDeviceManager> DeviceResetting;
-        public event DataMessageHandler<GraphicsDeviceManager, GraphicsDeviceInformation> PreparingDeviceSettings;
-        public event MessageHandler<GraphicsDeviceManager> Disposed;
+        public event SimpleEventHandler<GraphicsDeviceManager> DeviceCreated;
+        public event SimpleEventHandler<GraphicsDeviceManager> DeviceDisposing;
+        public event SimpleEventHandler<GraphicsDeviceManager> DeviceReset;
+        public event SimpleEventHandler<GraphicsDeviceManager> DeviceResetting;
+        public event DataEventHandler<GraphicsDeviceManager, GraphicsDeviceInformation> PreparingDeviceSettings;
+        public event SimpleEventHandler<GraphicsDeviceManager> Disposed;
 
         protected void OnDeviceDisposing()
         {
@@ -226,17 +226,15 @@ namespace MonoGame.Framework
         {
             var gdi = new GraphicsDeviceInformation();
             PrepareGraphicsDeviceInformation(gdi);
-            var preparingDeviceSettingsHandler = PreparingDeviceSettings;
 
-            if (preparingDeviceSettingsHandler != null)
+            if (PreparingDeviceSettings != null)
             {
                 // this allows users to overwrite settings through the argument
-                preparingDeviceSettingsHandler(this, gdi);
+                PreparingDeviceSettings(this, gdi);
 
-                if (gdi.PresentationParameters == null ||
-                    gdi.Adapter == null)
+                if (gdi.PresentationParameters == null || gdi.Adapter == null)
                     throw new NullReferenceException(
-                        $"Members should not be set to null in the {nameof(GraphicsDeviceInformation)}.");
+                        $"Members in the {nameof(GraphicsDeviceInformation)} should not be set to null.");
             }
 
             return gdi;
@@ -388,9 +386,9 @@ namespace MonoGame.Framework
             ApplyChanges();
         }
 
-        private void OnPresentationChanged(object sender, PresentationParameters args)
+        private void OnPresentationChanged(object sender, PresentationParameters presentationParams)
         {
-            _game.Platform.OnPresentationChanged(args);
+            _game.Platform.OnPresentationChanged(presentationParams);
         }
 
         /// <summary>

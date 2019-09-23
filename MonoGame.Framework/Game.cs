@@ -260,10 +260,10 @@ namespace MonoGame.Framework
 
         #region Events
 
-        public event MessageHandler<Game> Activated;
-        public event MessageHandler<Game> Deactivated;
-        public event MessageHandler<Game> Disposed;
-        public event MessageHandler<Game> Exiting;
+        public event SimpleEventHandler<Game> Activated;
+        public event SimpleEventHandler<Game> Deactivated;
+        public event SimpleEventHandler<Game> Disposed;
+        public event SimpleEventHandler<Game> Exiting;
 
 #if WINDOWS_UAP
         [CLSCompliant(false)]
@@ -735,18 +735,18 @@ namespace MonoGame.Framework
 
             private readonly Predicate<T> _filter;
             private readonly Comparison<T> _sort;
-            private readonly Action<T, MessageHandler<object>> _filterChangedSubscriber;
-            private readonly Action<T, MessageHandler<object>> _filterChangedUnsubscriber;
-            private readonly Action<T, MessageHandler<object>> _sortChangedSubscriber;
-            private readonly Action<T, MessageHandler<object>> _sortChangedUnsubscriber;
+            private readonly Action<T, SimpleEventHandler<object>> _filterChangedSubscriber;
+            private readonly Action<T, SimpleEventHandler<object>> _filterChangedUnsubscriber;
+            private readonly Action<T, SimpleEventHandler<object>> _sortChangedSubscriber;
+            private readonly Action<T, SimpleEventHandler<object>> _sortChangedUnsubscriber;
 
             public SortingFilteringCollection(
                 Predicate<T> filter,
-                Action<T, MessageHandler<object>> filterChangedSubscriber,
-                Action<T, MessageHandler<object>> filterChangedUnsubscriber,
+                Action<T, SimpleEventHandler<object>> filterChangedSubscriber,
+                Action<T, SimpleEventHandler<object>> filterChangedUnsubscriber,
                 Comparison<T> sort,
-                Action<T, MessageHandler<object>> sortChangedSubscriber,
-                Action<T, MessageHandler<object>> sortChangedUnsubscriber)
+                Action<T, SimpleEventHandler<object>> sortChangedSubscriber,
+                Action<T, SimpleEventHandler<object>> sortChangedUnsubscriber)
             {
                 _items = new List<T>();
                 _addJournal = new List<AddJournalEntry<T>>();

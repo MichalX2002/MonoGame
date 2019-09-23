@@ -104,9 +104,9 @@ namespace MonoGame.Framework
 
         #region Events
 
-        public event MessageHandler<GamePlatform> AsyncRunLoopEnded;
-        public event MessageHandler<Game> Activated;
-        public event MessageHandler<Game> Deactivated;
+        public event SimpleEventHandler<GamePlatform> AsyncRunLoopEnded;
+        public event SimpleEventHandler<Game> Activated;
+        public event SimpleEventHandler<Game> Deactivated;
 
         /// <summary>
         /// Raises the AsyncRunLoopEnded event. This method must be called by

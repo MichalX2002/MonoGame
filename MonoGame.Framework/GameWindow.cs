@@ -126,9 +126,9 @@ namespace MonoGame.Framework
 
 		#region Events
 
-		public event MessageHandler<GameWindow> ClientSizeChanged;
-		public event MessageHandler<GameWindow> OrientationChanged;
-		public event MessageHandler<GameWindow> ScreenDeviceNameChanged;
+		public event SimpleEventHandler<GameWindow> ClientSizeChanged;
+		public event SimpleEventHandler<GameWindow> OrientationChanged;
+		public event SimpleEventHandler<GameWindow> ScreenDeviceNameChanged;
 
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
 
@@ -141,7 +141,7 @@ namespace MonoGame.Framework
 		/// <remarks>
 		/// This event is only supported on the Windows DirectX, Windows OpenGL and Linux platforms.
 		/// </remarks>
-		public event DataMessageHandler<GameWindow, TextInputEvent> TextInput;
+		public event DataEventHandler<GameWindow, TextInputEvent> TextInput;
 
         internal bool IsTextInputHandled => TextInput != null;
 

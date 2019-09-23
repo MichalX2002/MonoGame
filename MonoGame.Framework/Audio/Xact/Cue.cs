@@ -333,7 +333,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// This event is triggered when the Cue is disposed.
         /// </summary>
-        public event MessageHandler<Cue> Disposing;
+        public event SimpleEventHandler<Cue> Disposing;
 
         /// <summary>
         /// Is true if the Cue has been disposed.

@@ -356,7 +356,7 @@ namespace StbSharp
                 coefficient_group[i] = stbir__filter_info_table[filter].Kernel(
                         in_center_of_out - in_pixel_center, 1 / scale);
 
-                if (((i) == (0)) && (coefficient_group[i] == 0))
+                if (((i) == 0) && (coefficient_group[i] == 0))
                 {
                     contributor->n0 = (int)(++in_first_pixel);
                     i--;
@@ -439,7 +439,7 @@ namespace StbSharp
                 int max;
                 int width;
                 skip = 0;
-                while ((*stbir__get_coefficient(coefficients, filter, scale_ratio, j, skip)) == (0))
+                while ((*stbir__get_coefficient(coefficients, filter, scale_ratio, j, skip)) == 0)
                     skip++;
 
                 contributors[j].n0 += (int)(skip);
@@ -1477,11 +1477,11 @@ namespace StbSharp
 
         public static void stbir__choose_filter(ImageResizeInfo info, int h_filter, int v_filter)
         {
-            if ((h_filter) == (0))
+            if ((h_filter) == 0)
                 h_filter = (int)((stbir__use_upsampling((float)(info.horizontal_scale))) != 0
                         ? STBIR_FILTER_CATMULLROM
                         : STBIR_FILTER_MITCHELL);
-            if ((v_filter) == (0))
+            if ((v_filter) == 0)
                 v_filter = (int)((stbir__use_upsampling((float)(info.vertical_scale))) != 0
                         ? STBIR_FILTER_CATMULLROM
                         : STBIR_FILTER_MITCHELL);
@@ -1605,7 +1605,7 @@ namespace StbSharp
                 stbir__buffer_loop_upsample(info);
             else
                 stbir__buffer_loop_downsample(info);
-            return (int)(1);
+            return 1;
         }
 
         public static int stbir__resize_arbitrary(void* alloc_context, void* input_data, int input_w, int input_h,

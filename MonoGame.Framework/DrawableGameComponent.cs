@@ -38,8 +38,8 @@ namespace MonoGame.Framework
             }
         }
 
-        public event MessageHandler<object> DrawOrderChanged;
-        public event MessageHandler<object> VisibleChanged;
+        public event SimpleEventHandler<object> DrawOrderChanged;
+        public event SimpleEventHandler<object> VisibleChanged;
 
         public DrawableGameComponent(Game game) : base(game)
         {

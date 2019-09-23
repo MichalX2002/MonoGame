@@ -56,7 +56,7 @@ namespace MonoGame.Framework.Graphics
         public string Name { get; set; }
         public object Tag { get; set; }
 
-        public event MessageHandler<GraphicsResource> Disposing;
+        public event SimpleEventHandler<GraphicsResource> Disposing;
 
         public GraphicsDevice GraphicsDevice
         {
