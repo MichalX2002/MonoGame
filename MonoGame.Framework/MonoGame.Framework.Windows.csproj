@@ -55,7 +55,7 @@
       <HintPath>..\packages\System.Numerics.Vectors.4.6.0-preview5.19224.8\lib\net46\System.Numerics.Vectors.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.6.0-preview8.19405.3\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.6.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Core" />
@@ -87,10 +87,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\NewStreamEventArgs.cs">
+      <Link>Utilities\NVorbis\NewStreamEventArgs.cs</Link>
+    </Compile>
     <Compile Include="Audio\AudioHardwareException.cs" />
     <Compile Include="Content\ContentReaders\SoundEffectReader.cs" />
     <Compile Include="Delegates.cs" />
-    <Compile Include="GameComponentCollectionEvent.cs" />
     <Compile Include="Graphics\GraphicsExtensions.cs" />
     <Compile Include="Graphics\Model\Model.cs" />
     <Compile Include="Graphics\Model\ModelBone.cs" />
@@ -100,6 +102,7 @@
     <Compile Include="Graphics\Model\ModelMeshCollection.cs" />
     <Compile Include="Graphics\Model\ModelMeshPart.cs" />
     <Compile Include="Graphics\Model\ModelMeshPartCollection.cs" />
+    <Compile Include="Graphics\ResourceDestroyedEvent.cs" />
     <Compile Include="Graphics\SpriteBatch.cs" />
     <Compile Include="Graphics\SpriteBatcher.cs" />
     <Compile Include="Graphics\SpriteBatchItem.cs" />
@@ -194,7 +197,6 @@
     <Compile Include="Platform\Windows\WinFormsGameForm.cs" />
     <Compile Include="Platform\Windows\WinFormsGamePlatform.cs" />
     <Compile Include="Platform\Windows\WinFormsGameWindow.cs" />
-    <Compile Include="PreparingDeviceSettingsEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DisplayOrientation.cs" />
     <Compile Include="DrawableGameComponent.cs" />
@@ -415,11 +417,8 @@
     <Compile Include="Graphics\OcclusionQuery.cs">
       <ExcludePlatforms>iOS,Android</ExcludePlatforms>
     </Compile>
-    <Compile Include="Graphics\PresentationEventArgs.cs" />
     <Compile Include="Graphics\PresentationParameters.cs" />
     <Compile Include="Graphics\PresentInterval.cs" />
-    <Compile Include="Graphics\ResourceCreatedEventArgs.cs" />
-    <Compile Include="Graphics\ResourceDestroyedEventArgs.cs" />
     <Compile Include="Graphics\SamplerStateCollection.cs" />
     <Compile Include="Graphics\SetDataOptions.cs" />
     <Compile Include="Graphics\Shader\ConstantBufferCollection.cs" />
@@ -542,10 +541,6 @@
     </Compile>
     <Compile Include="..\ThirdParty\NVorbis\NVorbis\Mdct.cs">
       <Link>Utilities\NVorbis\Mdct.cs</Link>
-      <Services>NVorbis</Services>
-    </Compile>
-    <Compile Include="..\ThirdParty\NVorbis\NVorbis\NewStreamEvent.cs">
-      <Link>Utilities\NVorbis\NewStreamEvent.cs</Link>
       <Services>NVorbis</Services>
     </Compile>
     <Compile Include="..\ThirdParty\NVorbis\NVorbis\ParameterChangeEvent.cs">

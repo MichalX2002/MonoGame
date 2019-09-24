@@ -52,7 +52,8 @@ namespace MonoGame.Framework.Windows
 
         #region Events
 
-        public event MessageDelegate<WinFormsGameForm, HorizontalMouseWheelEvent> MouseHorizontalWheel;
+        public event DataEventHandler
+            <WinFormsGameForm, HorizontalMouseWheelEvent> MouseHorizontalWheel;
 
         #endregion
 

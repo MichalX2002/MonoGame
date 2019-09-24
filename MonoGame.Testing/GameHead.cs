@@ -68,7 +68,8 @@ namespace MonoGame.Testing
                 using (var croppedImg = Image.LoadPixelView(cropped))
                     croppedImg.Save("crusor.png");
 
-                _customCursor = MouseCursor.FromPixels(cropped, new Point(2, 2)/*(img.GetSize() / 2).ToPoint()*/);
+                _customCursor = MouseCursor.FromPixels(
+                    cropped, new Point(2, 2)/*(img.GetSize() / 2).ToPoint()*/);
             }
 
             Mouse.SetCursor(_customCursor);

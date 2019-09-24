@@ -21,9 +21,10 @@
     <Optimize>false</Optimize>
     <DebugType>full</DebugType>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
-    <OutputPath>bin\Windows\AnyCPU\Debug</OutputPath>
+    <OutputPath>..\..\..\..\..\Program Files %28x86%29\MSBuild\MonoGame\Tools\</OutputPath>
     <IntermediateOutputPath>obj\Windows\AnyCPU\Debug</IntermediateOutputPath>
-    <DocumentationFile>bin\Windows\AnyCPU\Debug\Pipeline.xml</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <DefineConstants>DEBUG;TRACE;WINDOWS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>

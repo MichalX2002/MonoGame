@@ -20,24 +20,6 @@
 /processorParam:TextureFormat=Compressed
 /build:arial.spritefont
 
-#begin Ending.ogg
-/importer:OggImporter
-/processor:SongProcessor
-/processorParam:Quality=Best
-/build:Ending.ogg
-
-#begin Title Screen.ogg
-/importer:OggImporter
-/processor:SongProcessor
-/processorParam:Quality=Best
-/build:Title Screen.ogg
-
-#begin sinus.ogg
-/importer:OggImporter
-/processor:SongProcessor
-/processorParam:Quality=Best
-/build:sinus.ogg
-
 #begin test.png
 /importer:TextureImporter
 /processor:TextureProcessor
