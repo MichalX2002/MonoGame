@@ -70,7 +70,7 @@ namespace MonoGame.Framework.Graphics
                 // --> We get the correct matrix with near plane 0 and far plane -1.
                 _projection = Matrix.CreateOrthographicOffCenter(0, vp.Width, vp.Height, 0, 0, -1);
 
-                if (!GraphicsDeviceManager.UseStandardPixelAddressing)
+                if (GraphicsDevice.UseHalfPixelOffset)
                 {
                     _projection.M41 += -0.5f * _projection.M11;
                     _projection.M42 += -0.5f * _projection.M22;

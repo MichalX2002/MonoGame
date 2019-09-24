@@ -49,24 +49,35 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Xml" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="WindowsBase" />
-    <Reference Include="Eto.Forms">
-      <HintPath>..\..\ThirdParty\Dependencies\Eto\Eto.dll</HintPath>
-    </Reference>
-    <Reference Include="Eto.Wpf">
-      <HintPath>..\..\ThirdParty\Dependencies\Eto\Eto.Wpf.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Common\IncludeItem.cs" />
-    <Compile Include="LogWindow.cs" />
-    <Compile Include="LogWindow.eto.cs" />
+    <Reference Include="MonoGame.Framework" />
+    <Reference Include="MonoGame.Framework.Content.Pipeline" />
+    <Reference Include="MGCB" />
+    <Reference Include="MonoGame.Build.Tasks" />
+    
+    <Reference Include="PipelineReferences" />
+  </References>
+
+  <Properties>
+    <LangVersion>Default</LangVersion>
+    <NoWarn>1591,0436</NoWarn>
+    <MonoDevelopPoliciesFile>Build/MonoDevelopPolicies.xml</MonoDevelopPoliciesFile>
+    <RootNamespace>MonoGame.Tools.Pipeline</RootNamespace>
+    <PlatformSpecificOutputFolder>True</PlatformSpecificOutputFolder>
+    <WindowsApplicationIcon>App.ico</WindowsApplicationIcon>
+	<ApplicationManifest>app.manifest</ApplicationManifest>
+    <CustomDefinitions>
+      <Platform Name="Windows">TRACE;WINDOWS</Platform>
+      <Platform Name="MacOS">TRACE;MONOMAC;GTK2</Platform>
+      <Platform Name="Linux">TRACE;LINUX;GTK3</Platform>
+    </CustomDefinitions>
+    <FrameworkVersions>
+      <Version>v4.7.2</Version>
+    </FrameworkVersions>
+    <IncludeMonoRuntimeOnMac>True</IncludeMonoRuntimeOnMac>
+    <ImportPipelineTargets>True</ImportPipelineTargets>
+  </Properties>
+
+  <Files>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\MGCB\CommandLineParser.cs">
