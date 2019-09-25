@@ -9,13 +9,10 @@ namespace MonoGame.Framework.Graphics
 	public partial class BlendState : GraphicsResource
 	{
         private readonly TargetBlendState[] _targetBlendState;
-
         private readonly bool _defaultStateObject;
 
 	    private Color _blendFactor;
-
 	    private int _multiSampleMask;
-
 	    private bool _independentBlendEnable;
 
         internal void BindToGraphicsDevice(GraphicsDevice device)

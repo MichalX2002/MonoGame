@@ -20,7 +20,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2MGFX.Windows", "Tools\2MGF
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Build.Tasks.Windows", "Tools\MonoGame.Build.Tasks\MonoGame.Build.Tasks.Windows.csproj", "{E2D9E2AE-B875-D3D6-92B1-ECDC6C642E54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MGCB", "Tools\MGCB\MGCB.csproj", "{5AD34414-6AD1-4D89-A4C9-3DDEFDCB46C8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MGCB.Windows", "Tools\MGCB\MGCB.Windows.csproj", "{4243474D-572E-6E69-646F-77734D474342}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,10 +64,10 @@ Global
 		{E2D9E2AE-B875-D3D6-92B1-ECDC6C642E54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2D9E2AE-B875-D3D6-92B1-ECDC6C642E54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2D9E2AE-B875-D3D6-92B1-ECDC6C642E54}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5AD34414-6AD1-4D89-A4C9-3DDEFDCB46C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5AD34414-6AD1-4D89-A4C9-3DDEFDCB46C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5AD34414-6AD1-4D89-A4C9-3DDEFDCB46C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5AD34414-6AD1-4D89-A4C9-3DDEFDCB46C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4243474D-572E-6E69-646F-77734D474342}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4243474D-572E-6E69-646F-77734D474342}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4243474D-572E-6E69-646F-77734D474342}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4243474D-572E-6E69-646F-77734D474342}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -9,25 +9,25 @@ using SharpFont;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
-    // Uses FreeType to rasterize TrueType fonts into a series of glyph bitmaps.
+    /// <summary>
+    /// Uses FreeType to rasterize TrueType fonts into a series of glyph bitmaps.
+    /// </summary>
     internal class SharpFontImporter : IFontImporter
     {
-        // Properties hold the imported font data.
+        private Library _lib = null;
+
+        /// <summary>
+        /// Properties hold the imported font data.
+        /// </summary>
         public IEnumerable<Glyph> Glyphs { get; private set; }
 
         public float LineSpacing { get; private set; }
-
         public int YOffsetMin { get; private set; }
-
-        // Size of the temp surface used for GDI+ rasterization.
-        const int MaxGlyphSize = 1024;
-
-        Library _lib = null;
 
         public void Import(FontDescription options, string fontName)
         {
             _lib = new Library();
-
+            
             // Create a bunch of GDI+ objects.
             var face = CreateFontFace(options, fontName);
             try
@@ -60,7 +60,6 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             }
         }
 
-
         // Attempts to instantiate the requested GDI+ font object.
         private Face CreateFontFace(FontDescription options, string fontName)
         {
@@ -72,7 +71,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 face.SetCharSize(0, fixedSize, dpi, dpi);
 
                 if (face.FamilyName == "Microsoft Sans Serif" && options.FontName != "Microsoft Sans Serif")
-                    throw new PipelineException(string.Format("Font {0} is not installed on this computer.", options.FontName));
+                    throw new PipelineException(
+                        string.Format("Font {0} is not installed on this computer.", options.FontName));
 
                 return face;
 

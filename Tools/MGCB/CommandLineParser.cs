@@ -180,8 +180,7 @@ namespace MGCB
                 foreach (var ifCondition in ifstack)
                 {
                     var expected = ifCondition.Value;
-                    string actual;
-                    if (!_properties.TryGetValue(ifCondition.Key, out actual))
+                    if (!_properties.TryGetValue(ifCondition.Key, out string actual))
                         return;
                     if (expected != string.Empty && !expected.Equals(actual))
                         return;

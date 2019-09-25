@@ -21,7 +21,9 @@ namespace MonoGame.Utilities
                 // Use the Title attribute of the Assembly if possible.
                 try
                 {
-                    var assemblyTitleAtt = ((AssemblyTitleAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyTitleAttribute)));
+                    var assemblyTitleAtt = (AssemblyTitleAttribute)
+                        Attribute.GetCustomAttribute(assembly, typeof(AssemblyTitleAttribute));
+
                     if (assemblyTitleAtt != null)
                         windowTitle = assemblyTitleAtt.Title;
                 }

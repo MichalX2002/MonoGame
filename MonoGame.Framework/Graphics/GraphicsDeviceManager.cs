@@ -13,26 +13,7 @@ namespace MonoGame.Framework
     /// </summary>
     public partial class GraphicsDeviceManager : IGraphicsDeviceService, IDisposable, IGraphicsDeviceManager
     {
-        /// <summary>
-        /// Indicates if DX9 style pixel addressing or current standard
-        /// pixel addressing should be used. This flag is set to
-        /// <c>true</c> by default. It should be set to <c>false</c>
-        /// for XNA compatibility. It is recommended to leave this flag
-        /// set to <c>true</c> for projects that are not ported from
-        /// XNA.
-        /// </summary>
-        /// <remarks>
-        /// XNA uses DirectX9 for its graphics. DirectX9 interprets UV
-        /// coordinates differently from other graphics API's. This is
-        /// typically referred to as the half-pixel offset. MonoGame
-        /// replicates XNA behavior if this flag is set to <c>false</c>.
-        /// </remarks>
-#if DIRECTX
-        // TODO we need to figure out how to inject the half pixel offset into DX shaders
-        public static bool UseStandardPixelAddressing { get => true; set { } }
-#else
-        public static bool UseStandardPixelAddressing { get; set; } = true;
-#endif
+
 
         private readonly Game _game;
         private bool _initialized = false;
@@ -47,6 +28,7 @@ namespace MonoGame.Framework
         private bool _drawBegun;
         private bool _disposed;
         private bool _hardwareModeSwitch = true;
+        private bool _preferHalfPixelOffset = false;
         private bool _wantFullScreen;
         private GraphicsProfile _graphicsProfile;
         // dirty flag for ApplyChanges
@@ -147,7 +129,8 @@ namespace MonoGame.Framework
             if (GraphicsDevice != null)
                 return;
 
-            GraphicsDevice = new GraphicsDevice(gdi);
+            GraphicsDevice = new GraphicsDevice(
+                gdi.Adapter, gdi.GraphicsProfile, this.PreferHalfPixelOffset, gdi.PresentationParameters);
             _shouldApplyChanges = false;
 
             // hook up reset events
@@ -439,6 +422,32 @@ namespace MonoGame.Framework
             {
                 _shouldApplyChanges = true;
                 _hardwareModeSwitch = value;
+            }
+        }
+
+        /// <summary>
+        /// Indicates if DX9 style pixel addressing or current standard
+        /// pixel addressing should be used. This flag is set to
+        /// <c>false</c> by default. It should be set to <c>true</c>
+        /// for XNA compatibility. It is recommended to leave this flag
+        /// set to <c>false</c> for projects that are not ported from
+        /// XNA. This value is passed to <see cref="GraphicsDevice.UseHalfPixelOffset"/>.
+        /// </summary>
+        /// <remarks>
+        /// XNA uses DirectX9 for its graphics. DirectX9 interprets UV
+        /// coordinates differently from other graphics API's. This is
+        /// typically referred to as the half-pixel offset. MonoGame
+        /// replicates XNA behavior if this flag is set to <c>true</c>.
+        /// </remarks>
+        public bool PreferHalfPixelOffset
+        {
+            get => _preferHalfPixelOffset;
+            set
+            {
+                if (GraphicsDevice != null)
+                    throw new InvalidOperationException(
+                        "Setting PreferHalfPixelOffset is not allowed after the creation of GraphicsDevice.");
+                _preferHalfPixelOffset = value;
             }
         }
 

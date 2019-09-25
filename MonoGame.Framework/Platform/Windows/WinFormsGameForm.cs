@@ -177,20 +177,22 @@ namespace MonoGame.Framework.Windows
             bool extended = (m.LParam.ToInt64() & 0x01000000) != 0;
             long scancode = (m.LParam.ToInt64() & 0x00ff0000) >> 16;
             var key = KeyCodeTranslate(
-                (System.Windows.Forms.Keys)virtualKeyCode,
+                (Keys)virtualKeyCode,
                 extended,
                 scancode);
+
             if (Input.KeysHelper.IsKey((int)key))
             {
                 switch (m.Msg)
                 {
                     case WM_KEYDOWN:
                     case WM_SYSKEYDOWN:
-                        _window.OnKeyDown(new InputKeyEventArgs(key));
+                        _window.OnKeyDown(new KeyInputEvent(key));
                         break;
+
                     case WM_KEYUP:
                     case WM_SYSKEYUP:
-                        _window.OnKeyUp(new InputKeyEventArgs(key));
+                        _window.OnKeyUp(new KeyInputEvent(key));
                         break;
                     default:
                         break;
@@ -199,31 +201,33 @@ namespace MonoGame.Framework.Windows
 
         }
 
-        private static Microsoft.Xna.Framework.Input.Keys KeyCodeTranslate(
-            System.Windows.Forms.Keys keyCode, bool extended, long scancode)
+        private static Input.Keys KeyCodeTranslate(
+            Keys keyCode, bool extended, long scancode)
         {
             switch (keyCode)
             {
                 // WinForms does not distinguish between left/right keys
                 // We have to check for special keys such as control/shift/alt/ etc
-                case System.Windows.Forms.Keys.ControlKey:
+                case Keys.ControlKey:
                     return extended
-                        ? Microsoft.Xna.Framework.Input.Keys.RightControl
-                        : Microsoft.Xna.Framework.Input.Keys.LeftControl;
-                case System.Windows.Forms.Keys.ShiftKey:
+                        ? Input.Keys.RightControl
+                        : Input.Keys.LeftControl;
+
+                case Keys.ShiftKey:
                     // left shift is 0x2A, right shift is 0x36. IsExtendedKey is always false.
                     return ((scancode & 0x1FF) == 0x36)
-                               ? Microsoft.Xna.Framework.Input.Keys.RightShift
-                                : Microsoft.Xna.Framework.Input.Keys.LeftShift;
+                               ? Input.Keys.RightShift
+                                : Input.Keys.LeftShift;
+
                 // Note that the Alt key is now refered to as Menu.
-                case System.Windows.Forms.Keys.Menu:
-                case System.Windows.Forms.Keys.Alt:
+                case Keys.Menu:
+                case Keys.Alt:
                     return extended
-                        ? Microsoft.Xna.Framework.Input.Keys.RightAlt
-                        : Microsoft.Xna.Framework.Input.Keys.LeftAlt;
+                        ? Input.Keys.RightAlt
+                        : Input.Keys.LeftAlt;
 
                 default:
-                    return (Microsoft.Xna.Framework.Input.Keys)keyCode;
+                    return (Input.Keys)keyCode;
             }
         }
     }

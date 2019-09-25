@@ -145,6 +145,16 @@ namespace MonoGame.Framework
 
         internal bool IsTextInputHandled => TextInput != null;
 
+        /// <summary>
+        /// Buffered keyboard KeyDown event.
+        /// </summary>
+		public event DataEventHandler<GameWindow, KeyInputEvent> KeyDown;
+
+        /// <summary>
+        /// Buffered keyboard KeyUp event.
+        /// </summary>
+        public event DataEventHandler<GameWindow, KeyInputEvent> KeyUp;
+
 #endif
 
         #endregion Events
@@ -187,13 +197,25 @@ namespace MonoGame.Framework
 		}
 
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
+
 		protected void OnTextInput(GameWindow window, TextInputEvent ev)
 		{
 			TextInput?.Invoke(window, ev);
 		}
+
+        internal void OnKeyDown(KeyInputEvent e)
+        {
+            KeyDown?.Invoke(this, e);
+        }
+
+        internal void OnKeyUp(KeyInputEvent e)
+        {
+            KeyUp?.Invoke(this, e);
+        }
+
 #endif
 
-		protected internal abstract void SetSupportedOrientations(DisplayOrientation orientations);
+        protected internal abstract void SetSupportedOrientations(DisplayOrientation orientations);
 		protected abstract void SetTitle(string title);
 
 #if DIRECTX && WINDOWS

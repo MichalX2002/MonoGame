@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Description>MonoGame is an open source implementation of the Microsoft XNA 4.x Framework. The goal is to make it easy for XNA developers to create cross-platform games with extremely high code reuse.
 
@@ -20,9 +20,6 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\MonoGame.Framework\Utilities\Hash.cs">
-      <Link>Utilities\Hash.cs</Link>
-    </Compile>
     <Compile Include="..\MonoGame.Framework\Platform\Utilities\AssemblyHelper.cs">
       <Link>Utilities\AssemblyHelper.cs</Link>
     </Compile>
@@ -31,6 +28,8 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
     <Compile Include="..\ThirdParty\StbImageWriteSharp\src\StbImageWriteSharp\**\*.cs" LinkBase="Utilities\StbImageWriteSharp" />
   </ItemGroup>
 
+  
+  
   <ItemGroup>
     <Reference Include="SharpDX">
       <HintPath>..\ThirdParty\Dependencies\SharpDX\net40\SharpDX.dll</HintPath>
@@ -56,14 +55,10 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
     <Reference Include="PVRTexLibNET">
       <HintPath>..\ThirdParty\Dependencies\PVRTexLibNET\PVRTexLibNET.dll</HintPath>
     </Reference>
+    
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.Win32.Registry" Version="4.6.0" />
-    <PackageReference Include="System.Buffers" Version="4.5.0" />
-    <PackageReference Include="System.Memory" Version="4.5.3" />
-    <PackageReference Include="System.Numerics.Vectors" Version="4.6.0-preview5.19224.8" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.6.0" />
   </ItemGroup>
 
   <ItemGroup>

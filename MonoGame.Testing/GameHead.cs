@@ -74,25 +74,25 @@ namespace MonoGame.Testing
 
             Mouse.SetCursor(_customCursor);
 
-            string[] songs = new string[]
-            {
-                "Ending",
-                "Title Screen"
-            };
-
-            _songs = new Song[songs.Length];
-            for (int i = 0; i < songs.Length; i++)
-            {
-                _watch.Restart();
-                _songs[i] = Content.Load<Song>(songs[i]);
-                _songs[i].IsLooped = false;
-                _songs[i].Volume = 0.1f;
-                _songs[i].Pitch = 2f;
-                _watch.Stop();
-                Console.WriteLine("Content.Load<Song>('" + songs[i] + "') Time: " + _watch.ElapsedMilliseconds + "ms");
-            }
-
-            _songs[0].Volume *= 1.5f;
+            //string[] songs = new string[]
+            //{
+            //    "Ending",
+            //    "Title Screen"
+            //};
+            //
+            //_songs = new Song[songs.Length];
+            //for (int i = 0; i < songs.Length; i++)
+            //{
+            //    _watch.Restart();
+            //    _songs[i] = Content.Load<Song>(songs[i]);
+            //    _songs[i].IsLooped = false;
+            //    _songs[i].Volume = 0.1f;
+            //    _songs[i].Pitch = 2f;
+            //    _watch.Stop();
+            //    Console.WriteLine("Content.Load<Song>('" + songs[i] + "') Time: " + _watch.ElapsedMilliseconds + "ms");
+            //}
+            //
+            //_songs[0].Volume *= 1.5f;
         }
 
         protected override void UnloadContent()

@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7DE47032-A904-4C29-BD22-2D235E8D91BA}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Microsoft.Xna.Framework</RootNamespace>
+    <RootNamespace>MonoGame.Framework</RootNamespace>
     <AssemblyName>MonoGame.Framework</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>1591,0436</NoWarn>
@@ -170,9 +170,11 @@
     <Compile Include="Platform\Graphics\Vertices\VertexElement.DirectX.cs" />
     <Compile Include="Platform\Graphics\Vertices\VertexInputLayout.DirectX.cs" />
     <Compile Include="Platform\Input\GamePad.XInput.cs" />
+    <Compile Include="Platform\Input\KeyInputEvent.cs" />
     <Compile Include="Platform\Input\Joystick.Default.cs" />
     <Compile Include="Platform\Input\Keyboard.Windows.cs" />
     <Compile Include="Platform\Input\KeyboardInput.Windows.cs" />
+    <Compile Include="Platform\Input\KeysHelper.cs" />
     <Compile Include="Platform\Input\MessageBox.Windows.cs" />
     <Compile Include="Platform\Input\Mouse.Windows.cs" />
     <Compile Include="Platform\Input\MouseCursor.Windows.cs" />

@@ -10,17 +10,17 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
     [ContentTypeSerializer]
     class RectangleSerializer : ElementSerializer<Rectangle>
     {
-        public RectangleSerializer() :
-            base("Rectangle", 4)
+        public RectangleSerializer() : base("Rectangle", 4)
         {
         }
 
         protected internal override Rectangle Deserialize(string[] inputs, ref int index)
         {
-            return new Rectangle(   XmlConvert.ToInt32(inputs[index++]),
-                                    XmlConvert.ToInt32(inputs[index++]),
-                                    XmlConvert.ToInt32(inputs[index++]),
-                                    XmlConvert.ToInt32(inputs[index++]));
+            return new Rectangle(
+                XmlConvert.ToInt32(inputs[index++]),
+                XmlConvert.ToInt32(inputs[index++]),
+                XmlConvert.ToInt32(inputs[index++]),
+                XmlConvert.ToInt32(inputs[index++]));
         }
 
         protected internal override void Serialize(Rectangle value, List<string> results)

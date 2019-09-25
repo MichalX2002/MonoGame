@@ -45,15 +45,5 @@ namespace MonoGame.Framework.Input
         {
             return PlatformGetState(index);
         }
-
-        /// <summary>
-        /// Gets the current state of the joystick by updating an existing <see cref="JoystickState"/>.
-        /// </summary>
-        /// <param name="joystickState">The <see cref="JoystickState"/> to update.</param>
-        /// <param name="index">Index of the joystick you want to access.</param>
-        public static void GetState(ref JoystickState joystickState, int index)
-        {
-            PlatformGetState(ref joystickState, index);
-        }
     }
 }
