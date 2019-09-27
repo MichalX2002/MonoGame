@@ -12,7 +12,6 @@ using System.Reflection;
 using MonoGame.Framework;
 using MonoGame.Framework.Content.Pipeline;
 using MonoGame.Framework.Content.Pipeline.Builder.Converters;
-using MonoGame.Framework.Graphics;
 using System.Diagnostics;
 using MonoGame.Framework.Content.Pipeline.Builder;
 

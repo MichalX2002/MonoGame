@@ -161,12 +161,12 @@ namespace MonoGame.Testing
                 avg += Song.UpdateTime[i].TotalMilliseconds;
             avg /= Song.UpdateTime.Count;
 
-            DrawShadedString(
-                _font, "Timing: " + avg.ToString("0.0000"), new Vector2(10, 5), Color.White, Color.Black);
-
             float xx = ((float)Math.Sin(time.TotalGameTime.TotalSeconds) + 1) / 2 * 50;
             float yy = ((float)Math.Cos(time.TotalGameTime.TotalSeconds) + 1) / 2 * 50;
             _spriteBatch.Draw(_test, new Vector2(0 + xx, 0 + yy), Color.White);
+
+            DrawShadedString(
+                _font, "Timing: " + avg.ToString("0.0000"), new Vector2(10, 5), Color.White, Color.Black);
 
             //using (var tex = new Texture2D(GraphicsDevice, 1, 1))
             //{

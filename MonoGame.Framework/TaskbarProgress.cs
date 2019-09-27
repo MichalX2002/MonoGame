@@ -1,4 +1,5 @@
 ﻿using System;
+using MonoGame.Utilities;
 
 namespace MonoGame.Framework
 {
@@ -9,11 +10,8 @@ namespace MonoGame.Framework
 
         public TaskbarProgressValue(long completed, long total)
         {
-            if (completed < 0)
-                throw new ArgumentOutOfRangeException(nameof(completed));
-
-            if (total < 0)
-                throw new ArgumentOutOfRangeException(nameof(total));
+            CommonArgumentGuard.AssertAtleastZero(completed, nameof(completed), false);
+            CommonArgumentGuard.AssertAtleastZero(total, nameof(total), false);
 
             Completed = completed;
             Total = total;

@@ -27,7 +27,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
 
 			var pixelSpan = MemoryMarshal.Cast<byte, RgbaVector>(src.GetPixelData());
 			using (var image = Image.LoadPixels(pixelSpan, src.Width, src.Height))
-			using (var resized = image.Mutate(x => x.Resize(newWidth, newHeight)))
+			using (var resized = image.Process(x => x.Resize(newWidth, newHeight)))
 			{
 				var result = new PixelBitmapContent<RgbaVector>(newWidth, newHeight);
 				result.SetPixelData(resized.GetPixelSpan());

@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Framework.Input
 {
@@ -46,14 +47,21 @@ namespace MonoGame.Framework.Input
             {
                 var rect = new System.Drawing.Rectangle(0, 0, width, height);
                 var bmpData = bitmap.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-                fixed(Color* srcPtr = &MemoryMarshal.GetReference(data))
+
                 try
                 {
-                    for (int y = 0; y < bmpData.Height; y++)
+                    fixed (Color* srcPtr = &MemoryMarshal.GetReference(data))
                     {
-                        Color* srcRow = srcPtr + y * stride / sizeof(Color);
-                        byte* dstRow = (byte*)bmpData.Scan0 + y * bmpData.Stride;
-                        Buffer.MemoryCopy(srcRow, dstRow, bmpData.Stride, stride);
+                        int columns = stride / sizeof(Color);
+                        for (int y = 0; y < bmpData.Height; y++)
+                        {
+                            Color* srcRow = srcPtr + y * columns;
+                            byte* dstRow = (byte*)bmpData.Scan0 + y * bmpData.Stride;
+                            var dstColorRow = (Bgra32*)dstRow;
+
+                            for (int x = 0; x < columns; x++)
+                                dstColorRow[x] = srcRow[x];
+                        }
                     }
                 }
                 finally

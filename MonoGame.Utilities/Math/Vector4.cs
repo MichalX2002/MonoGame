@@ -298,10 +298,10 @@ namespace MonoGame.Framework
         /// <returns>The squared distance between two vectors.</returns>
         public static float DistanceSquared(in Vector4 a, in Vector4 b)
         {
-              return (a.W - b.W) * (a.W - b.W) +
-                     (a.X - b.X) * (a.X - b.X) +
+              return (a.X - b.X) * (a.X - b.X) +
                      (a.Y - b.Y) * (a.Y - b.Y) +
-                     (a.Z - b.Z) * (a.Z - b.Z);
+                     (a.Z - b.Z) * (a.Z - b.Z) +
+                     (a.W - b.W) * (a.W - b.W);
         }
 
         /// <summary>
@@ -359,10 +359,10 @@ namespace MonoGame.Framework
         {
             unchecked
             {
-                int code = W.GetHashCode();
-                code = code * 23 + X.GetHashCode();
+                int code = X.GetHashCode();
                 code = code * 23 + Y.GetHashCode();
-                return code * 23 + Z.GetHashCode();
+                code = code * 23 + Z.GetHashCode();
+                return code * 23 + W.GetHashCode();
             }
         }
 
@@ -696,10 +696,10 @@ namespace MonoGame.Framework
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
         public static bool operator ==(in Vector4 a, in Vector4 b)
         {
-            return a.W == b.W
-                && a.X == b.X
+            return a.X == b.X
                 && a.Y == b.Y
-                && a.Z == b.Z;
+                && a.Z == b.Z
+                && a.W == b.W;
         }
 
         /// <summary>
@@ -721,7 +721,7 @@ namespace MonoGame.Framework
         /// <returns>Sum of the vectors.</returns>
         public static Vector4 operator +(in Vector4 a, in Vector4 b)
         {
-            return new Vector4(a.W + b.W, a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+            return new Vector4(a.X + b.X, a.Y + b.Y, a.Z + b.Z, a.W + b.W);
         }
 
         /// <summary>
@@ -732,7 +732,7 @@ namespace MonoGame.Framework
         /// <returns>Result of the vector subtraction.</returns>
         public static Vector4 operator -(in Vector4 left, in Vector4 right)
         {
-            return new Vector4(left.W - right.W, left.X - right.X, left.Y - right.Y, left.Z - right.Z);
+            return new Vector4(left.X - right.X, left.Y - right.Y, left.Z - right.Z, left.W - right.W);
         }
 
         /// <summary>
@@ -743,7 +743,7 @@ namespace MonoGame.Framework
         /// <returns>Result of the vector multiplication.</returns>
         public static Vector4 operator *(in Vector4 a, in Vector4 b)
         {
-            return new Vector4(a.W * b.W, a.X * b.X, a.Y * b.Y, a.Z * b.Z);
+            return new Vector4(a.X * b.X, a.Y * b.Y, a.Z * b.Z, a.W * b.W);
         }
 
         /// <summary>
@@ -755,10 +755,10 @@ namespace MonoGame.Framework
         public static Vector4 operator *(in Vector4 value, float scaleFactor)
         {
             return new Vector4(
-                value.W * scaleFactor,
                 value.X * scaleFactor,
                 value.Y * scaleFactor,
-                value.Z * scaleFactor);
+                value.Z * scaleFactor,
+                value.W * scaleFactor);
         }
 
         /// <summary>
@@ -784,7 +784,7 @@ namespace MonoGame.Framework
         /// <returns>The result of dividing the vectors.</returns>
         public static Vector4 operator /(in Vector4 left, in Vector4 right)
         {
-            return new Vector4(left.W / right.W, left.X / right.X, left.Y / right.Y, left.Z / right.Z);
+            return new Vector4(left.X / right.X, left.Y / right.Y, left.Z / right.Z, left.W / right.W);
         }
 
         /// <summary>
@@ -796,7 +796,7 @@ namespace MonoGame.Framework
         public static Vector4 operator /(in Vector4 value, float divider)
         {
             float factor = 1f / divider;
-            return new Vector4(value.W * factor, value.X * factor, value.Y * factor, value.Z * factor);
+            return new Vector4(value.X * factor, value.Y * factor, value.Z * factor, value.W * factor);
         }
     }
 }
