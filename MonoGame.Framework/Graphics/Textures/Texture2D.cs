@@ -11,6 +11,9 @@ using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Framework.Graphics
 {
+	// TODO: https://github.com/MonoGame/MonoGame/commit/f2f50bcd6c88e927ddbbc1fe677acd85b7bc6c0d#diff-b1287b3ea3e4f14da31f425817f5920eR427
+	// re-implement commit based on MonoGame.Imaging instead
+	
     public partial class Texture2D : Texture
     {
         internal int ArraySize;
