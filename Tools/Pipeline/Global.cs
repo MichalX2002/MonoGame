@@ -44,7 +44,7 @@ namespace MonoGame.Tools.Pipeline
 
             // Generate default link file image
             var linkfile = new Bitmap(_files["0."]);
-            var g = new Graphics(linkfile);
+            using var g = new Graphics(linkfile);
             g.DrawImage(_link, Point.Empty);
             g.Flush();
             _files.Add("1.", linkfile);
@@ -77,16 +77,14 @@ namespace MonoGame.Tools.Pipeline
                 if (File.Exists(path))
                 {
                     var platformicon = PlatformGetFileIcon(path);
-
                     if (platformicon != null)
                     {
                         var icon = ToEtoImage(platformicon);
-
                         if (icon != null)
                         {
                             if (link)
                             {
-                                var g = new Graphics(icon);
+                                using var g = new Graphics(icon);
                                 g.DrawImage(_link, Point.Empty);
                                 g.Flush();
                             }
@@ -97,7 +95,9 @@ namespace MonoGame.Tools.Pipeline
                     }
                 }
             }
-            catch { }
+            catch 
+            {
+            }
 
             return _files[(link) ? "1." : "0."];
         }

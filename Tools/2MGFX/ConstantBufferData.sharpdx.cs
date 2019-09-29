@@ -49,14 +49,12 @@ namespace TwoMGFX
 
         private static EffectObject.d3dx_parameter GetParameterFromType(SharpDX.D3DCompiler.ShaderReflectionType type)
         {
-            var param = new EffectObject.d3dx_parameter
-            {
-                rows = (uint)type.Description.RowCount,
-                columns = (uint)type.Description.ColumnCount,
-                name = type.Description.Name ?? string.Empty,
-                semantic = string.Empty,
-                bufferOffset = type.Description.Offset
-            };
+            var param = new EffectObject.d3dx_parameter();
+            param.rows = (uint)type.Description.RowCount;
+            param.columns = (uint)type.Description.ColumnCount;
+            param.name = type.Description.Name ?? string.Empty;
+            param.semantic = string.Empty;
+            param.bufferOffset = type.Description.Offset;
 
             switch (type.Description.Class)
             {
@@ -112,16 +110,15 @@ namespace TwoMGFX
                 param.member_handles = new EffectObject.d3dx_parameter[param.element_count];
                 for (var i = 0; i < param.element_count; i++)
                 {
-                    var mparam = new EffectObject.d3dx_parameter
-                    {
-                        name = string.Empty,
-                        semantic = string.Empty,
-                        type = param.type,
-                        class_ = param.class_,
-                        rows = param.rows,
-                        columns = param.columns,
-                        data = new byte[param.columns * param.rows * 4]
-                    };
+                    var mparam = new EffectObject.d3dx_parameter();
+
+                    mparam.name = string.Empty;
+                    mparam.semantic = string.Empty;
+                    mparam.type = param.type;
+                    mparam.class_ = param.class_;
+                    mparam.rows = param.rows;
+                    mparam.columns = param.columns;
+                    mparam.data = new byte[param.columns * param.rows * 4];
 
                     param.member_handles[i] = mparam;
                 }

@@ -17,7 +17,7 @@ namespace MonoGame.Framework.Content.Pipeline
         Stack<string> filenames = new Stack<string>();
         private int indentCount = 0;
 
-        protected string IndentString => String.Empty.PadLeft(Math.Max(0, indentCount), '\t');
+        protected string IndentString => string.Empty.PadLeft(Math.Max(0, indentCount), '\t');
 
         /// <summary>
         /// Gets or sets the base reference path used when reporting errors during the content build process.
@@ -69,7 +69,7 @@ namespace MonoGame.Framework.Content.Pipeline
         /// <param name="messageArgs">Arguments for the reported message.</param>
         public abstract void LogImportantMessage(
             string message,
-            params Object[] messageArgs
+            params object[] messageArgs
             );
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace MonoGame.Framework.Content.Pipeline
         /// <param name="messageArgs">Arguments for the reported message.</param>
         public abstract void LogMessage(
             string message,
-            params Object[] messageArgs
+            params object[] messageArgs
             );
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace MonoGame.Framework.Content.Pipeline
             string helpLink,
             ContentIdentity contentIdentity,
             string message,
-            params Object[] messageArgs
+            params object[] messageArgs
             );
 
         /// <summary>

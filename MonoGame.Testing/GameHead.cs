@@ -184,7 +184,8 @@ namespace MonoGame.Testing
             base.Draw(time);
         }
 
-        private void DrawShadedString(SpriteFont font, string value, Vector2 position, Color textColor, Color backgroundColor)
+        private void DrawShadedString(
+            SpriteFont font, string value, Vector2 position, Color textColor, Color backgroundColor)
         {
             _spriteBatch.DrawString(font, value, position + new Vector2(1f), backgroundColor);
             _spriteBatch.DrawString(font, value, position, textColor);

@@ -28,6 +28,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -42,9 +43,18 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Win32.Registry, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Win32.Registry.4.6.0\lib\net461\Microsoft.Win32.Registry.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Design" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security.AccessControl, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Security.AccessControl.4.6.0\lib\net461\System.Security.AccessControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Principal.Windows, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Security.Principal.Windows.4.6.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Xml" />
@@ -209,6 +219,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="app.manifest" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="App.ico" />
@@ -344,7 +355,7 @@
   <Import Project="Pipeline.targets" />
   <ItemGroup>
     <ProjectReference Include="..\..\MonoGame.Framework.Content.Pipeline\MonoGame.Framework.Content.Pipeline.csproj">
-      <Project>{6bc703b3-978a-4fee-98b8-3ca2d6a790b1}</Project>
+      <Project>{6BC703B3-978A-4FEE-98B8-3CA2D6A790B1}</Project>
       <Name>MonoGame.Framework.Content.Pipeline</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\MonoGame.Framework\MonoGame.Framework.Windows.csproj">
@@ -354,6 +365,14 @@
     <ProjectReference Include="..\..\MonoGame.Utilities\MonoGame.Utilities.csproj">
       <Project>{86082a6f-d255-4099-b001-67fe366ab5c2}</Project>
       <Name>MonoGame.Utilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MGCB\MGCB.Windows.csproj">
+      <Project>{4243474d-572e-6e69-646f-77734d474342}</Project>
+      <Name>MGCB.Windows</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MonoGame.Build.Tasks\MonoGame.Build.Tasks.Windows.csproj">
+      <Project>{E2D9E2AE-B875-D3D6-92B1-ECDC6C642E54}</Project>
+      <Name>MonoGame.Build.Tasks.Windows</Name>
     </ProjectReference>
   </ItemGroup>
   <ProjectExtensions>

@@ -81,16 +81,14 @@ namespace MonoGame.Tools.Pipeline
                     messageBuilder.AppendLine();
                     messageBuilder.AppendLine();
                     foreach (var innerEx in typeEx.LoaderExceptions)
-                    { 
                         messageBuilder.AppendLine(innerEx.ToString());
-                    }
                 }
                     
                 PipelineSettings.Default.ErrorMessage = messageBuilder.ToString();
                 PipelineSettings.Default.Save();
                 app.Restart();
             }
-# endif
+#endif
         }
     }
 }

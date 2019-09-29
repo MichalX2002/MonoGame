@@ -1,5 +1,4 @@
-﻿using System;
-using MonoGame.Framework;
+﻿using MonoGame.Framework;
 using MonoGame.Framework.Graphics;
 
 namespace TwoMGFX.TPGParser
@@ -7,7 +6,6 @@ namespace TwoMGFX.TPGParser
     public class SamplerStateInfo
     {
         private SamplerState _state;
-        
         private bool _dirty;
 
         private TextureFilterType _minFilter;

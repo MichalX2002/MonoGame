@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using MonoGame.Framework.Graphics;
-using System.Globalization;
+﻿using MonoGame.Framework.Graphics;
 
 namespace TwoMGFX.TPGParser
 {
@@ -43,13 +40,11 @@ namespace TwoMGFX.TPGParser
                 {
                     if (blendState == null)
                     {
-                        blendState = new BlendState
-                        {
-                            ColorSourceBlend = Blend.One,
-                            AlphaSourceBlend = Blend.One,
-                            ColorDestinationBlend = Blend.InverseSourceAlpha,
-                            AlphaDestinationBlend = Blend.InverseSourceAlpha
-                        };
+                        blendState = new BlendState();
+                        blendState.ColorSourceBlend = Blend.One;
+                        blendState.AlphaSourceBlend = Blend.One;
+                        blendState.ColorDestinationBlend = Blend.InverseSourceAlpha;
+                        blendState.AlphaDestinationBlend = Blend.InverseSourceAlpha;
                     }
                 }
                 else if (!value)

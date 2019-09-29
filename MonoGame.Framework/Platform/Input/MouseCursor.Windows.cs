@@ -57,10 +57,10 @@ namespace MonoGame.Framework.Input
                         {
                             Color* srcRow = srcPtr + y * columns;
                             byte* dstRow = (byte*)bmpData.Scan0 + y * bmpData.Stride;
-                            var dstColorRow = (Bgra32*)dstRow;
+                            Bgra32* dstColorRow = (Bgra32*)dstRow;
 
                             for (int x = 0; x < columns; x++)
-                                dstColorRow[x] = srcRow[x];
+                                dstColorRow[x] = srcRow[x]; // implicit cast
                         }
                     }
                 }

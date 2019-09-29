@@ -12,7 +12,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
 	    public char End;
 
 		// Enumerates all characters within the region.        
-	    public IEnumerable<Char> Characters()
+	    public IEnumerable<char> Characters()
 	    {
 	        for (var c = Start; c <= End; c++)
 	        {

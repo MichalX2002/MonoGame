@@ -42,13 +42,11 @@ namespace TwoMGFX
 
         private static EffectObject.d3dx_parameter GetParameterFromSymbol(MojoShader.MOJOSHADER_symbol symbol)
         {
-            var param = new EffectObject.d3dx_parameter
-            {
-                rows = symbol.info.rows,
-                columns = symbol.info.columns,
-                name = symbol.name ?? string.Empty,
-                semantic = string.Empty // TODO: How do i do this with only MojoShader?
-            };
+            var param = new EffectObject.d3dx_parameter();
+            param.rows = symbol.info.rows;
+            param.columns = symbol.info.columns;
+            param.name = symbol.name ?? string.Empty;
+            param.semantic = string.Empty; // TODO: How do i do this with only MojoShader?
 
             var registerSize = (symbol.register_set == MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_BOOL ? 1 : 4) * 4;
             var offset = (int)symbol.register_index * registerSize;
@@ -114,16 +112,15 @@ namespace TwoMGFX
                 param.member_handles = new EffectObject.d3dx_parameter[param.element_count];
                 for (var i = 0; i < param.element_count; i++)
                 {
-                    var mparam = new EffectObject.d3dx_parameter
-                    {
-                        name = string.Empty,
-                        semantic = string.Empty,
-                        type = param.type,
-                        class_ = param.class_,
-                        rows = param.rows,
-                        columns = param.columns,
-                        data = new byte[param.columns * param.rows * 4]
-                    };
+                    var mparam = new EffectObject.d3dx_parameter();
+
+                    mparam.name = string.Empty;
+                    mparam.semantic = string.Empty;
+                    mparam.type = param.type;
+                    mparam.class_ = param.class_;
+                    mparam.rows = param.rows;
+                    mparam.columns = param.columns;
+                    mparam.data = new byte[param.columns * param.rows * 4];
 
                     param.member_handles[i] = mparam;
                 }

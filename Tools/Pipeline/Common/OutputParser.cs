@@ -27,12 +27,11 @@ namespace MonoGame.Tools.Pipeline
     public class OutputParser
     {
         internal OutputState State { get; private set; }
-        internal String Filename { get; private set; }
-        internal String ErrorMessage { get; private set; }
-        internal String BuildBeginTime { get; private set; }
-        internal String BuildInfo { get; private set; }
-        internal String BuildElapsedTime { get; private set; }
-
+        internal string Filename { get; private set; }
+        internal string ErrorMessage { get; private set; }
+        internal string BuildBeginTime { get; private set; }
+        internal string BuildInfo { get; private set; }
+        internal string BuildElapsedTime { get; private set; }
 
         Regex _reBuildBegin = new Regex(@"^(Build started)\W+(?<buildBeginTime>.*?)\r?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         Regex _reCleaning = new Regex(@"^(Cleaning)\W(?<filename>.*?)\r?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -45,7 +44,6 @@ namespace MonoGame.Tools.Pipeline
         Regex _reBuildEnd = new Regex(@"^(Build)\W+(?<buildInfo>.*?)\r?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         Regex _reBuildTime = new Regex(@"^(Time elapsed)\W+(?<buildElapsedTime>.*?)\.\r?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         
-
         public OutputParser()
         {
             Reset();

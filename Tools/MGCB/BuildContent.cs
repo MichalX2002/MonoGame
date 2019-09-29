@@ -10,7 +10,6 @@ using MonoGame.Framework.Content.Pipeline;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Content.Pipeline.Builder;
 
-
 namespace MGCB
 {
     class BuildContent
@@ -50,19 +49,29 @@ namespace MGCB
             Directory.SetCurrentDirectory(path);
         }
 
+        private string _outputDir = string.Empty;
+
         [CommandLineParameter(
             Name = "outputDir",
             Flag = "o",
             ValueName = "path",
             Description = "The directory where all content is written.")]
-        public string OutputDir = string.Empty;
+        public void SetOutputDir(string path)
+        {
+            _outputDir = Path.GetFullPath(path);
+        }
+
+        private string _intermediateDir = string.Empty;
 
         [CommandLineParameter(
             Name = "intermediateDir",
             Flag = "n",
             ValueName = "path",
             Description = "The directory where all intermediate files are written.")]
-        public string IntermediateDir = string.Empty;
+        public void SetIntermediateDir(string path)
+        {
+            _intermediateDir = Path.GetFullPath(path);
+        }
 
         [CommandLineParameter(
             Name = "rebuild",
@@ -182,14 +191,7 @@ namespace MGCB
                 _content.RemoveAt(previous);
 
             // Create the item for processing later.
-            var item = new ContentItem
-            {
-                SourceFile = sourceFile, 
-                OutputFile = link,
-                Importer = Importer, 
-                Processor = _processor,
-                ProcessorParams = new OpaqueDataDictionary()
-            };
+            var item = new ContentItem(sourceFile, link, Importer, _processor);
             _content.Add(item);
 
             // Copy the current processor parameters blind as we
@@ -221,11 +223,13 @@ namespace MGCB
             sourceFile = PathHelper.Normalize(sourceFile);
 
             // Remove duplicates... keep this new one.
-            var previous = _copyItems.FindIndex(e => string.Equals(e.SourceFile, sourceFile, StringComparison.InvariantCultureIgnoreCase));
+            var previous = _copyItems.FindIndex(
+                e => string.Equals(e.SourceFile, sourceFile, StringComparison.InvariantCultureIgnoreCase));
+
             if (previous != -1)
                 _copyItems.RemoveAt(previous);
 
-            _copyItems.Add(new CopyItem { SourceFile = sourceFile, Link = link });
+            _copyItems.Add(new CopyItem(sourceFile, link));
         }
 
         [CommandLineParameter(
@@ -233,27 +237,43 @@ namespace MGCB
             Description = "Compress the XNB files for smaller file sizes.")]
         public bool CompressContent = false;
 
-        public class ContentItem
+        public readonly struct ContentItem
         {
-            public string SourceFile;
+            public readonly string SourceFile;
 
             // This refers to the "Link" which can override the default output location
-            public string OutputFile;
-            public string Importer;
-            public string Processor;
-            public OpaqueDataDictionary ProcessorParams;
+            public readonly string OutputFile;
+            public readonly string Importer;
+            public readonly string Processor;
+
+            public readonly OpaqueDataDictionary ProcessorParams;
+
+            public ContentItem(
+                string sourceFile, string outputFile,
+                string importer, string processor)
+            {
+                SourceFile = sourceFile;
+                OutputFile = outputFile;
+                Importer = importer;
+                Processor = processor;
+                ProcessorParams = new OpaqueDataDictionary();
+            }
         }
 
-        public class CopyItem
+        public readonly struct CopyItem
         {
-            public string SourceFile;
-            public string Link;
+            public readonly string SourceFile;
+            public readonly string Link;
+
+            public CopyItem(string sourceFile, string link)
+            {
+                SourceFile = sourceFile;
+                Link = link;
+            }
         }
 
         private readonly List<ContentItem> _content = new List<ContentItem>();
-
         private readonly List<CopyItem> _copyItems = new List<CopyItem>();
-
         private PipelineManager _manager;
 
         public bool HasWork => _content.Count > 0 || _copyItems.Count > 0 || Clean;
@@ -273,11 +293,11 @@ namespace MGCB
         {
             var projectDirectory = PathHelper.Normalize(Directory.GetCurrentDirectory());
 
-            var outputPath = ReplaceSymbols (OutputDir);
+            var outputPath = ReplaceSymbols(_outputDir);
             if (!Path.IsPathRooted(outputPath))
                 outputPath = PathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, outputPath)));
 
-            var intermediatePath = ReplaceSymbols (IntermediateDir);
+            var intermediatePath = ReplaceSymbols(_intermediateDir);
             if (!Path.IsPathRooted(intermediatePath))
                 intermediatePath = PathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, intermediatePath)));
 

@@ -46,7 +46,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject />
+    <StartupObject>MonoGame.Testing.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="GameHead.cs" />

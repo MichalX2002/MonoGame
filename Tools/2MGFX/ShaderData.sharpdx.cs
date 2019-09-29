@@ -8,10 +8,8 @@ namespace TwoMGFX
     {
         public static ShaderData CreateHLSL(byte[] byteCode, bool isVertexShader, List<ConstantBufferData> cbuffers, int sharedIndex, Dictionary<string, SamplerStateInfo> samplerStates, bool debug)
         {
-            var dxshader = new ShaderData(isVertexShader, sharedIndex, byteCode)
-            {
-                _attributes = new Attribute[0]
-            };
+            var dxshader = new ShaderData(isVertexShader, sharedIndex, byteCode);
+            dxshader._attributes = new Attribute[0];
 
             // Strip the bytecode we're gonna save!
             var stripFlags = SharpDX.D3DCompiler.StripFlags.CompilerStripReflectionData |
@@ -45,108 +43,106 @@ namespace TwoMGFX
                 }
 
                 // Use reflection to get details of the shader.
-                using (var refelect = new SharpDX.D3DCompiler.ShaderReflection(byteCode))
+                using var refelect = new SharpDX.D3DCompiler.ShaderReflection(byteCode);
+                // Get the samplers.
+                var samplers = new List<Sampler>();
+                for (var i = 0; i < refelect.Description.BoundResources; i++)
                 {
-                    // Get the samplers.
-                    var samplers = new List<Sampler>();
-                    for (var i = 0; i < refelect.Description.BoundResources; i++)
+                    var rdesc = refelect.GetResourceBindingDescription(i);
+                    if (rdesc.Type == SharpDX.D3DCompiler.ShaderInputType.Texture)
                     {
-                        var rdesc = refelect.GetResourceBindingDescription(i);
-                        if (rdesc.Type == SharpDX.D3DCompiler.ShaderInputType.Texture)
+                        var samplerName = rdesc.Name;
+
+                        var sampler = new Sampler
                         {
-                            var samplerName = rdesc.Name;
+                            samplerName = string.Empty,
+                            textureSlot = rdesc.BindPoint,
+                            samplerSlot = rdesc.BindPoint,
+                            parameterName = samplerName
+                        };
 
-                            var sampler = new Sampler
-                            {
-                                samplerName = string.Empty,
-                                textureSlot = rdesc.BindPoint,
-                                samplerSlot = rdesc.BindPoint,
-                                parameterName = samplerName
-                            };
-
-                            if (samplerStates.TryGetValue(samplerName, out SamplerStateInfo state))
-                            {
-                                sampler.parameterName = state.TextureName ?? samplerName;
-                                sampler.state = state.State;
-                            }
-                            else
-                            {
-                                foreach (var s in samplerStates.Values)
-                                {
-                                    if (samplerName == s.TextureName)
-                                    {
-                                        sampler.state = s.State;
-                                        samplerName = s.Name;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            // Find sampler slot, which can be different from the texture slot.
-                            for (int j = 0; j < refelect.Description.BoundResources; j++)
-                            {
-                                var samplerrdesc = refelect.GetResourceBindingDescription(j);
-
-                                if (samplerrdesc.Type == SharpDX.D3DCompiler.ShaderInputType.Sampler && 
-                                    samplerrdesc.Name == samplerName)
-                                {
-                                    sampler.samplerSlot = samplerrdesc.BindPoint;
-                                    break;
-                                }
-                            }
-
-                            switch (rdesc.Dimension)
-                            {
-                                case ShaderResourceViewDimension.Texture1D:
-                                case ShaderResourceViewDimension.Texture1DArray:
-                                    sampler.type = MojoShader.MOJOSHADER_samplerType.MOJOSHADER_SAMPLER_1D;
-                                    break;
-
-                                case ShaderResourceViewDimension.Texture2D:
-                                case ShaderResourceViewDimension.Texture2DArray:
-                                case ShaderResourceViewDimension.Texture2DMultisampled:
-                                case ShaderResourceViewDimension.Texture2DMultisampledArray:
-                                    sampler.type = MojoShader.MOJOSHADER_samplerType.MOJOSHADER_SAMPLER_2D;
-                                    break;
-
-                                case ShaderResourceViewDimension.Texture3D:
-                                    sampler.type = MojoShader.MOJOSHADER_samplerType.MOJOSHADER_SAMPLER_VOLUME;
-                                    break;
-
-                                case ShaderResourceViewDimension.TextureCube:
-                                case ShaderResourceViewDimension.TextureCubeArray:
-                                    sampler.type = MojoShader.MOJOSHADER_samplerType.MOJOSHADER_SAMPLER_CUBE;
-                                    break;
-                            }
-
-                            samplers.Add(sampler);
+                        if (samplerStates.TryGetValue(samplerName, out SamplerStateInfo state))
+                        {
+                            sampler.parameterName = state.TextureName ?? samplerName;
+                            sampler.state = state.State;
                         }
-                    }
-                    dxshader._samplers = samplers.ToArray();
-
-                    // Gather all the constant buffers used by this shader.
-                    dxshader._cbuffers = new int[refelect.Description.ConstantBuffers];
-                    for (var i = 0; i < refelect.Description.ConstantBuffers; i++)
-                    {
-                        var cb = new ConstantBufferData(refelect.GetConstantBuffer(i));
-
-                        // Look for a duplicate cbuffer in the list.
-                        for (var c = 0; c < cbuffers.Count; c++)
+                        else
                         {
-                            if (cb.SameAs(cbuffers[c]))
+                            foreach (var s in samplerStates.Values)
                             {
-                                cb = null;
-                                dxshader._cbuffers[i] = c;
+                                if (samplerName == s.TextureName)
+                                {
+                                    sampler.state = s.State;
+                                    samplerName = s.Name;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Find sampler slot, which can be different from the texture slot.
+                        for (int j = 0; j < refelect.Description.BoundResources; j++)
+                        {
+                            var samplerrdesc = refelect.GetResourceBindingDescription(j);
+
+                            if (samplerrdesc.Type == SharpDX.D3DCompiler.ShaderInputType.Sampler &&
+                                samplerrdesc.Name == samplerName)
+                            {
+                                sampler.samplerSlot = samplerrdesc.BindPoint;
                                 break;
                             }
                         }
 
-                        // Add a new cbuffer.
-                        if (cb != null)
+                        switch (rdesc.Dimension)
                         {
-                            dxshader._cbuffers[i] = cbuffers.Count;
-                            cbuffers.Add(cb);
+                            case ShaderResourceViewDimension.Texture1D:
+                            case ShaderResourceViewDimension.Texture1DArray:
+                                sampler.type = MojoShader.MOJOSHADER_samplerType.MOJOSHADER_SAMPLER_1D;
+                                break;
+
+                            case ShaderResourceViewDimension.Texture2D:
+                            case ShaderResourceViewDimension.Texture2DArray:
+                            case ShaderResourceViewDimension.Texture2DMultisampled:
+                            case ShaderResourceViewDimension.Texture2DMultisampledArray:
+                                sampler.type = MojoShader.MOJOSHADER_samplerType.MOJOSHADER_SAMPLER_2D;
+                                break;
+
+                            case ShaderResourceViewDimension.Texture3D:
+                                sampler.type = MojoShader.MOJOSHADER_samplerType.MOJOSHADER_SAMPLER_VOLUME;
+                                break;
+
+                            case ShaderResourceViewDimension.TextureCube:
+                            case ShaderResourceViewDimension.TextureCubeArray:
+                                sampler.type = MojoShader.MOJOSHADER_samplerType.MOJOSHADER_SAMPLER_CUBE;
+                                break;
                         }
+
+                        samplers.Add(sampler);
+                    }
+                }
+                dxshader._samplers = samplers.ToArray();
+
+                // Gather all the constant buffers used by this shader.
+                dxshader._cbuffers = new int[refelect.Description.ConstantBuffers];
+                for (var i = 0; i < refelect.Description.ConstantBuffers; i++)
+                {
+                    var cb = new ConstantBufferData(refelect.GetConstantBuffer(i));
+
+                    // Look for a duplicate cbuffer in the list.
+                    for (var c = 0; c < cbuffers.Count; c++)
+                    {
+                        if (cb.SameAs(cbuffers[c]))
+                        {
+                            cb = null;
+                            dxshader._cbuffers[i] = c;
+                            break;
+                        }
+                    }
+
+                    // Add a new cbuffer.
+                    if (cb != null)
+                    {
+                        dxshader._cbuffers[i] = cbuffers.Count;
+                        cbuffers.Add(cb);
                     }
                 }
             }

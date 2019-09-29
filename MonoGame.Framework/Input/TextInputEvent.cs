@@ -2,6 +2,9 @@
 
 namespace MonoGame.Framework
 {
+    /// <summary>
+    /// This struct is used for <see cref="GameWindow.TextInput"/>.
+    /// </summary>
     public readonly struct TextInputEvent
     {
         public int Character { get; }

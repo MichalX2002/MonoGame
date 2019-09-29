@@ -121,7 +121,22 @@ namespace MonoGame.Framework.Graphics
         public PresentationParameters PresentationParameters { get; private set; }
         public GraphicsProfile GraphicsProfile { get; }
 
-#endregion
+        /// <summary>
+        /// Indicates if DX9 style pixel addressing or current standard
+        /// pixel addressing should be used. This flag is set to
+        /// <c>false</c> by default. If `UseHalfPixelOffset` is
+        /// `true` you have to add half-pixel offset to a Projection matrix.
+        /// See also <see cref="GraphicsDeviceManager.PreferHalfPixelOffset"/>.
+        /// </summary>
+        /// <remarks>
+        /// XNA uses DirectX9 for its graphics. DirectX9 interprets UV
+        /// coordinates differently from other graphics API's. This is
+        /// typically referred to as the half-pixel offset. MonoGame
+        /// replicates XNA behavior if this flag is set to <c>true</c>.
+        /// </remarks>
+        public bool UseHalfPixelOffset { get; private set; }
+
+        #endregion
 
         #region Simple Properties
 
@@ -345,11 +360,6 @@ namespace MonoGame.Framework.Graphics
 
         #region Constructors
 
-        internal GraphicsDevice(GraphicsDeviceInformation gdi)
-            : this(gdi.Adapter, gdi.GraphicsProfile, gdi.PresentationParameters)
-        {
-        }
-
         internal GraphicsDevice()
 		{
             PresentationParameters = new PresentationParameters
@@ -382,6 +392,41 @@ namespace MonoGame.Framework.Graphics
                 throw new ArgumentNullException(nameof(presentationParameters));
 
             GraphicsProfile = graphicsProfile;
+            Setup();
+            GraphicsCapabilities = new GraphicsCapabilities();
+            GraphicsCapabilities.Initialize(this);
+
+            Initialize();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GraphicsDevice" /> class.
+        /// </summary>
+        /// <param name="adapter">The graphics adapter.</param>
+        /// <param name="graphicsProfile">The graphics profile.</param>
+        /// <param name="preferHalfPixelOffset"> Indicates if DX9 style pixel addressing or current standard pixel addressing should be used. This value is passed to <see cref="GraphicsDevice.UseHalfPixelOffset"/></param>
+        /// <param name="presentationParameters">The presentation options.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="presentationParameters"/> is <see langword="null"/>.
+        /// </exception>
+        public GraphicsDevice(GraphicsAdapter adapter, GraphicsProfile graphicsProfile, bool preferHalfPixelOffset, PresentationParameters presentationParameters)
+        {
+            Adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
+            if (!adapter.IsProfileSupported(graphicsProfile))
+                throw new NoSuitableGraphicsDeviceException(
+                    $"Adapter '{ adapter.Description}' does not support the {graphicsProfile} profile.");
+
+            PresentationParameters = presentationParameters ??
+                throw new ArgumentNullException(nameof(presentationParameters));
+
+#if DIRECTX
+            // TODO we need to figure out how to inject the half pixel offset into DX shaders
+            preferHalfPixelOffset = false;
+#endif
+
+            Adapter = adapter;
+            GraphicsProfile = graphicsProfile;
+            UseHalfPixelOffset = preferHalfPixelOffset;
             Setup();
             GraphicsCapabilities = new GraphicsCapabilities();
             GraphicsCapabilities.Initialize(this);

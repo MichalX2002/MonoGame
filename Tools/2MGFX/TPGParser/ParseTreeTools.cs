@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using MonoGame.Framework;
 
 namespace TwoMGFX.TPGParser
 {
-	public static class ParseTreeTools
+    public static class ParseTreeTools
 	{
         public static float ParseFloat(string value)
         {

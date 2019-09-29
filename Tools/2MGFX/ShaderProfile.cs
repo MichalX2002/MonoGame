@@ -2,7 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -31,7 +30,10 @@ namespace TwoMGFX
         /// <summary>
         /// Returns all the loaded shader profiles.
         /// </summary>
-        public static IEnumerable<ShaderProfile> All => _profiles;
+        public static IEnumerable<ShaderProfile> All
+        {
+            get { return _profiles; }
+        }
 
         /// <summary>
         /// Returns the name of the shader profile.

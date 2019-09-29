@@ -10,6 +10,17 @@ namespace MonoGame.Framework.Input
     public static partial class Joystick
     {
         /// <summary>
+        /// A default <see cref="JoystickState"/>.
+        /// </summary>
+        private static JoystickState _defaultJoystickState = new JoystickState
+        {
+            IsConnected = false,
+            Axes = new int[0],
+            Buttons = new ButtonState[0],
+            Hats = new JoystickHat[0]
+        };
+
+        /// <summary>
         /// Gets a value indicating whether the current platform supports reading raw joystick data.
         /// </summary>
         /// <value><c>true</c> if the current platform supports reading raw joystick data; otherwise, <c>false</c>.</value>

@@ -66,7 +66,9 @@ namespace MonoGame.Tools.Pipeline
                 {
                     _eventHandler(_converter.ConvertFrom(editText.Text), EventArgs.Empty);
                 }
-                catch { }
+                catch 
+                {
+                }
             };
 
             editText.KeyDown += (sender, e) =>

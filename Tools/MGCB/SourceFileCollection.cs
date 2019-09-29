@@ -37,8 +37,8 @@ namespace MGCB
             var deserializer = new XmlSerializer(typeof(SourceFileCollection));
             try
             {
-                using (var textReader = new StreamReader(filePath))
-                    return (SourceFileCollection)deserializer.Deserialize(textReader);
+                using var textReader = new StreamReader(filePath);
+                return (SourceFileCollection)deserializer.Deserialize(textReader);
             }
             catch (Exception)
             {
@@ -50,8 +50,8 @@ namespace MGCB
         public void Write(string filePath)
         {
             var serializer = new XmlSerializer(typeof(SourceFileCollection));
-            using (var textWriter = new StreamWriter(filePath, false, new UTF8Encoding(false)))
-                serializer.Serialize(textWriter, this);            
+            using var textWriter = new StreamWriter(filePath, false, new UTF8Encoding(false));
+            serializer.Serialize(textWriter, this);
         }
 
         public void Merge(SourceFileCollection other)

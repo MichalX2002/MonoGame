@@ -20,9 +20,9 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         /// <param name="value">The value to write to the output.</param>
         protected internal override void Write(ContentWriter output, TOutput value)
         {
-            UInt64 ticks = (UInt64)value.Ticks & ~((UInt64)0xC << 62);
-            UInt64 kind = (UInt64)value.Kind << 62;
-            output.Write((UInt64)(ticks | kind));
+            ulong ticks = (ulong)value.Ticks & ~((ulong)0xC << 62);
+            ulong kind = (ulong)value.Kind << 62;
+            output.Write((ulong)(ticks | kind));
         }
     }
 }

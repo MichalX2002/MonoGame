@@ -17,13 +17,21 @@ namespace TwoMGFX.TPGParser
     [Serializable]
     public class ParseError
     {
-        public string File { get; private set; }
-        public int Code { get; private set; }
-        public int Line { get; private set; }
-        public int Column { get; private set; }
-        public int Position { get; private set; }
-        public int Length { get; private set; }
-        public string Message { get; private set; }
+        private string file;
+        private string message;
+        private int code;
+        private int line;
+        private int col;
+        private int pos;
+        private int length;
+
+        public string File { get { return file; } }
+        public int Code { get { return code; } }
+        public int Line { get { return line; } }
+        public int Column { get { return col; } }
+        public int Position { get { return pos; } }
+        public int Length { get { return length; } }
+        public string Message { get { return message; } }
 
         // just for the sake of serialization
         public ParseError()
@@ -44,13 +52,13 @@ namespace TwoMGFX.TPGParser
 
         public ParseError(string message, int code, string file, int line, int col, int pos, int length)
         {
-            this.File = file;
-            this.Message = message;
-            this.Code = code;
-            this.Line = line;
-            this.Column = col;
-            this.Position = pos;
-            this.Length = length;
+            this.file = file;
+            this.message = message;
+            this.code = code;
+            this.line = line;
+            this.col = col;
+            this.pos = pos;
+            this.length = length;
         }
     }
 
@@ -104,7 +112,10 @@ namespace TwoMGFX.TPGParser
     [XmlInclude(typeof(ParseTree))]
     public partial class ParseNode
     {
-        public List<ParseNode> Nodes { get; protected set; }
+        protected string text;
+        protected List<ParseNode> nodes;
+        
+        public List<ParseNode> Nodes { get {return nodes;} }
         
         [XmlIgnore] // avoid circular references when serializing
         public ParseNode Parent;
@@ -112,38 +123,36 @@ namespace TwoMGFX.TPGParser
 
         [XmlIgnore] // skip redundant text (is part of Token)
         public string Text { // text to display in parse tree 
-            get;
-            protected set;
+            get { return text;} 
+            set { text = value; }
         } 
 
         public virtual ParseNode CreateNode(Token token, string text)
         {
-            ParseNode node = new ParseNode(token, text)
-            {
-                Parent = this
-            };
+            ParseNode node = new ParseNode(token, text);
+            node.Parent = this;
             return node;
         }
 
         protected ParseNode(Token token, string text)
         {
             this.Token = token;
-            this.Text = text;
-            this.Nodes = new List<ParseNode>();
+            this.text = text;
+            this.nodes = new List<ParseNode>();
         }
 
         protected object GetValue(ParseTree tree, TokenType type, int index)
         {
-            return GetValueByRef(tree, type, ref index);
+            return GetValue(tree, type, ref index);
         }
 
-        protected object GetValueByRef(ParseTree tree, TokenType type, ref int index)
+        protected object GetValue(ParseTree tree, TokenType type, ref int index)
         {
             object o = null;
             if (index < 0) return o;
 
             // left to right
-            foreach (ParseNode node in Nodes)
+            foreach (ParseNode node in nodes)
             {
                 if (node.Token.Type == type)
                 {
@@ -514,14 +523,12 @@ namespace TwoMGFX.TPGParser
 
         protected virtual object EvalTechnique_Declaration(ParseTree tree, params object[] paramlist)
         {
-            var technique = new TechniqueInfo
-            {
-                name = this.GetValue(tree, TokenType.Identifier, 0) as string ?? string.Empty,
-                startPos = Token.StartPos,
-                length = Token.Length
-            };
-
-            foreach (var node in Nodes)
+            var technique = new TechniqueInfo();
+           technique.name = this.GetValue(tree, TokenType.Identifier, 0) as string ?? string.Empty;
+           technique.startPos = Token.StartPos;
+           technique.length = Token.Length;
+        
+           foreach (var node in Nodes)
               node.Eval(tree, technique);
            
            // Make sure we have at least one pass.
@@ -928,12 +935,10 @@ namespace TwoMGFX.TPGParser
 
         protected virtual object EvalPass_Declaration(ParseTree tree, params object[] paramlist)
         {
-            var pass = new PassInfo
-            {
-                name = this.GetValue(tree, TokenType.Identifier, 0) as string ?? string.Empty
-            };
-
-            foreach (var node in Nodes)
+            var pass = new PassInfo();
+           pass.name = this.GetValue(tree, TokenType.Identifier, 0) as string ?? string.Empty;
+        
+           foreach (var node in Nodes)
               node.Eval(tree, pass);
         
            // We need to have a pixel or vertex shader to keep this pass.
@@ -1095,13 +1100,11 @@ namespace TwoMGFX.TPGParser
         {
             // if there is a comma or closing paren at the end this is a sampler as a parameter of a function
         	if (this.GetValue(tree, TokenType.Semicolon, 0) == null) return null;
-
-            var sampler = new SamplerStateInfo
-            {
-                Name = this.GetValue(tree, TokenType.Identifier, 0) as string
-            };
-
-            foreach (ParseNode node in Nodes)
+        
+        	var sampler = new SamplerStateInfo();
+        	sampler.Name = this.GetValue(tree, TokenType.Identifier, 0) as string;
+        	
+        	foreach (ParseNode node in Nodes)
         		node.Eval(tree, sampler);
         	
         	var shaderInfo = paramlist[0] as ShaderInfo;

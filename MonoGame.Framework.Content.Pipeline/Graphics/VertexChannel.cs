@@ -36,7 +36,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Gets or sets the element at the specified index.
         /// </summary>
-        public Object this[int index]
+        public object this[int index]
         {
             get => Items[index];
             set => Items[index] = value;
@@ -55,7 +55,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Gets an object that can be used to synchronize access to the collection.
         /// </summary>
-        Object ICollection.SyncRoot => this;
+        object ICollection.SyncRoot => this;
 
         /// <summary>
         /// Gets a value indicating whether this list has a fixed size.
@@ -81,7 +81,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// </summary>
         /// <param name="value">Element being searched for.</param>
         /// <returns>true if the element is present; false otherwise.</returns>
-        public bool Contains(Object value)
+        public bool Contains(object value)
         {
             return Items.Contains(value);
         }
@@ -110,7 +110,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// </summary>
         /// <param name="value">Item whose index is to be retrieved.</param>
         /// <returns>Index of specified item.</returns>
-        public int IndexOf(Object value)
+        public int IndexOf(object value)
         {
             return Items.IndexOf(value);
         }
@@ -127,7 +127,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// </summary>
         /// <param name="value">The element to add.</param>
         /// <returns>Index of the element.</returns>
-        int IList.Add(Object value)
+        int IList.Add(object value)
         {
             return Items.Add(value);
         }
@@ -145,7 +145,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// </summary>
         /// <param name="index">Index at which to insert the element.</param>
         /// <param name="value">The element to insert.</param>
-        void IList.Insert(int index, Object value)
+        void IList.Insert(int index, object value)
         {
             Items.Insert(index, value);
         }
@@ -161,7 +161,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// Removes a specified element from the collection.
         /// </summary>
         /// <param name="value">The element to remove.</param>
-        void IList.Remove(Object value)
+        void IList.Remove(object value)
         {
             Items.Remove(value);
         }
