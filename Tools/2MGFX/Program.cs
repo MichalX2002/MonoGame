@@ -88,9 +88,9 @@ namespace TwoMGFX
             // Write out the effect to a runtime format.
             try
             {
-                using (var stream = new FileStream(options.OutputFile, FileMode.Create, FileAccess.Write))
-                using (var writer = new BinaryWriter(stream))
-                    effect.Write(writer, options);
+                using var stream = new FileStream(options.OutputFile, FileMode.Create, FileAccess.Write);
+                using var writer = new BinaryWriter(stream);
+                effect.Write(writer, options);
             }
             catch (Exception ex)
             {

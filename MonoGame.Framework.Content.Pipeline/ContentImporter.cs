@@ -36,7 +36,7 @@ namespace MonoGame.Framework.Content.Pipeline
         /// <param name="filename">Name of a game asset file.</param>
         /// <param name="context">Contains information for importing a game asset, such as a logger interface.</param>
         /// <returns>Resulting game asset.</returns>
-        Object IContentImporter.Import(string filename, ContentImporterContext context)
+        object IContentImporter.Import(string filename, ContentImporterContext context)
         {
             if (filename == null)
                 throw new ArgumentNullException("filename");

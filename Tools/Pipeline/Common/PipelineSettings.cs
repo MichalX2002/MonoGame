@@ -46,7 +46,9 @@ namespace MonoGame.Tools.Pipeline
                 _isoStore = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Assembly, null, null);
                 _isoStoreInit = true;
             }
-            catch { }
+            catch 
+            {
+            }
         }
 
         /// <summary>
@@ -83,15 +85,14 @@ namespace MonoGame.Tools.Pipeline
                 if (_isoStore.FileExists(SettingsPath))
                     mode = FileMode.Truncate;
 
-                using (var isoStream = new IsolatedStorageFileStream(SettingsPath, mode, _isoStore))
-                {
-                    using (var writer = new StreamWriter(isoStream))
-                    {
-                        var serializer = new XmlSerializer(typeof(PipelineSettings));
-                        serializer.Serialize(writer, this);
-                    }
-                }
-            } catch { }
+                using var isoStream = new IsolatedStorageFileStream(SettingsPath, mode, _isoStore);
+                using var writer = new StreamWriter(isoStream);
+                var serializer = new XmlSerializer(typeof(PipelineSettings));
+                serializer.Serialize(writer, this);
+            } 
+            catch 
+            {
+            }
         }
 
         public void Load()
@@ -103,19 +104,15 @@ namespace MonoGame.Tools.Pipeline
             {
                 if (_isoStore.FileExists(SettingsPath))
                 {
-                    using (var isoStream = new IsolatedStorageFileStream(SettingsPath, FileMode.Open, _isoStore))
-                    {
-                        using (var reader = new StreamReader(isoStream))
-                        {
-                            var serializer = new XmlSerializer(typeof(PipelineSettings));
-                            Default = (PipelineSettings)serializer.Deserialize(reader);
+                    using var isoStream = new IsolatedStorageFileStream(SettingsPath, FileMode.Open, _isoStore);
+                    using var reader = new StreamReader(isoStream);
+                    var serializer = new XmlSerializer(typeof(PipelineSettings));
+                    Default = (PipelineSettings)serializer.Deserialize(reader);
 
-                            var history = Default.ProjectHistory.ToArray();
-                            foreach (var h in history)
-                                if (!File.Exists(h))
-                                    Default.ProjectHistory.Remove(h);
-                        }
-                    }
+                    var history = Default.ProjectHistory.ToArray();
+                    foreach (var h in history)
+                        if (!File.Exists(h))
+                            Default.ProjectHistory.Remove(h);
                 }
             }
             catch

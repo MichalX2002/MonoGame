@@ -19,7 +19,7 @@ namespace MonoGame.Framework.Content.Pipeline
         /// <summary>
         /// Default value of the processor parameter.
         /// </summary>
-        public Object DefaultValue { get; set; }
+        public object DefaultValue { get; set; }
 
         /// <summary>
         /// Description of the parameter, as specified by the [Description] attribute.

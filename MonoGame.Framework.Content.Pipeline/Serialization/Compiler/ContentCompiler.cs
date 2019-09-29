@@ -130,7 +130,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                 }
                 catch (Exception)
                 {
-                    throw new InvalidContentException(String.Format("Could not find ContentTypeWriter for type '{0}'", type.Name));
+                    throw new InvalidContentException(string.Format("Could not find ContentTypeWriter for type '{0}'", type.Name));
                 }
             }
             else

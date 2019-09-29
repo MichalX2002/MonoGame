@@ -6,15 +6,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using MonoGame.Framework;
 using MonoGame.Framework.Content.Pipeline;
-using MonoGame.Framework.Content.Pipeline.Builder.Converters;
-using MonoGame.Framework.Graphics;
-using System.Diagnostics;
 using MonoGame.Framework.Content.Pipeline.Builder;
+using MonoGame.Framework.Content.Pipeline.Builder.Converters;
 
 namespace MonoGame.Tools.Pipeline
 {

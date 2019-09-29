@@ -228,7 +228,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             int resultLength = LZ4Codec.Encode32HC(stream.GetBuffer(), 0, (int)stream.Length, outputArray, 0, maxLength);
             if (resultLength < 0)
                 return false;
-            UInt32 totalSize = (UInt32)(HeaderSize + resultLength + sizeof(UInt32) + sizeof(UInt32));
+            uint totalSize = (uint)(HeaderSize + resultLength + sizeof(uint) + sizeof(uint));
             Write(totalSize);
             Write((int)stream.Length);
             OutStream.Write(outputArray, 0, resultLength);
@@ -242,7 +242,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         /// <returns>true if the write succeeds</returns>
         bool WriteUncompressedStream(Stream stream)
         {
-            UInt32 totalSize = (UInt32)(HeaderSize + stream.Length + sizeof(UInt32));
+            uint totalSize = (uint)(HeaderSize + stream.Length + sizeof(uint));
             Write(totalSize);
             stream.CopyTo(OutStream);
             return true;

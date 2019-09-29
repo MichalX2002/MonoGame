@@ -83,20 +83,18 @@ namespace MonoGame.Tools.Pipeline
 
         private void ButtonAdd_Click(object sender, EventArgs e)
         {
-            using (var dialog = new OpenFileDialog
+            using var dialog = new OpenFileDialog
             {
                 Directory = new Uri(_controller.ProjectItem.Location),
                 MultiSelect = true
-            })
-            {
-                dialog.Filters.Add(_dllFileFilter);
-                dialog.Filters.Add(_allFileFilter);
-                dialog.CurrentFilter = _dllFileFilter;
+            };
+            dialog.Filters.Add(_dllFileFilter);
+            dialog.Filters.Add(_allFileFilter);
+            dialog.CurrentFilter = _dllFileFilter;
 
-                if (dialog.ShowDialog(this) == DialogResult.Ok)
-                    foreach (var fileName in dialog.Filenames)
-                        _dataStore.Add(new RefItem(Path.GetFileName(fileName), fileName));
-            }
+            if (dialog.ShowDialog(this) == DialogResult.Ok)
+                foreach (var fileName in dialog.Filenames)
+                    _dataStore.Add(new RefItem(Path.GetFileName(fileName), fileName));
         }
 
         private void ButtonRemove_Click(object sender, EventArgs e)

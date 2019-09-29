@@ -63,9 +63,9 @@ namespace MonoGame.Framework.Content.Pipeline
         /// <param name="messageArgs">Array of strings specifying message-related arguments.</param>
         public PipelineException(
             string message,
-            params Object[] messageArgs
+            params object[] messageArgs
             )
-            : base(String.Format(message, messageArgs))
+            : base(string.Format(message, messageArgs))
         {
         }
     }

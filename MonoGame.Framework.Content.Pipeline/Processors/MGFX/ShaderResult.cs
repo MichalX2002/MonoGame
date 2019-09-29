@@ -78,7 +78,7 @@ namespace TwoMGFX
             var tree = new Parser(new Scanner()).Parse(newFile, fullPath);
             if (tree.Errors.Count > 0)
             {
-                var errors = String.Empty;
+                var errors = string.Empty;
                 foreach (var error in tree.Errors)
                     errors += string.Format("{0}({1},{2}) : {3}\r\n", error.File, error.Line, error.Column, error.Message);
 

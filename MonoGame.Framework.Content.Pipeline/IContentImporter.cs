@@ -17,6 +17,6 @@ namespace MonoGame.Framework.Content.Pipeline
         /// <param name="filename">Name of the game asset file.</param>
         /// <param name="context">A ContentImporterContext class containing information for importing a game asset, such as a logger interface.</param>
         /// <returns>Resulting game asset.</returns>
-        Object Import(string filename, ContentImporterContext context);
+        object Import(string filename, ContentImporterContext context);
     }
 }

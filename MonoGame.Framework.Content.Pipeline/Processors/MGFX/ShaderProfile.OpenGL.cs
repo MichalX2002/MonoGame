@@ -34,14 +34,14 @@ namespace TwoMGFX
             {
                 ParseShaderModel(pass.vsModel, GlslVertexShaderRegex, out major, out minor);
                 if (major > 3)
-                    throw new Exception(String.Format("Invalid profile '{0}'. Vertex shader '{1}' must be SM 3.0 or lower!", pass.vsModel, pass.vsFunction));
+                    throw new Exception(string.Format("Invalid profile '{0}'. Vertex shader '{1}' must be SM 3.0 or lower!", pass.vsModel, pass.vsFunction));
             }
 
             if (!string.IsNullOrEmpty(pass.psFunction))
             {
                 ParseShaderModel(pass.psModel, GlslPixelShaderRegex, out major, out minor);
                 if (major > 3)
-                    throw new Exception(String.Format("Invalid profile '{0}'. Pixel shader '{1}' must be SM 3.0 or lower!", pass.vsModel, pass.psFunction));
+                    throw new Exception(string.Format("Invalid profile '{0}'. Pixel shader '{1}' must be SM 3.0 or lower!", pass.vsModel, pass.psFunction));
             }
         }
 

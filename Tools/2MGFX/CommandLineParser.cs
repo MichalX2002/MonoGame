@@ -190,7 +190,7 @@ namespace TwoMGFX
                 return field.Name;
         }
 
-        static string GetOptionNameAndDescription(FieldInfo field, out String description)
+        static string GetOptionNameAndDescription(FieldInfo field, out string description)
         {
             var nameAttribute = GetAttribute<NameAttribute>(field);
 

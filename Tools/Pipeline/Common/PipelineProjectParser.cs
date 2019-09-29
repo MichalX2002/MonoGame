@@ -296,8 +296,8 @@ namespace MonoGame.Tools.Pipeline
 
         public void SaveProject()
         {
-            using (var io = File.CreateText(_project.OriginalPath))
-                SaveProject(io, null);
+            using var io = File.CreateText(_project.OriginalPath);
+            SaveProject(io, null);
         }
         
         public void SaveProject(TextWriter io, Func<ContentItem, bool> filterItem)
@@ -429,53 +429,51 @@ namespace MonoGame.Tools.Pipeline
         {
             _project.OriginalPath = projectFilePath.Remove(projectFilePath.LastIndexOf('.')) + ".mgcb";
 
-            using (var io = XmlReader.Create(File.OpenText(projectFilePath)))
+            using var io = XmlReader.Create(File.OpenText(projectFilePath));
+            while (io.Read())
             {
-                while (io.Read())
+                if (io.NodeType == XmlNodeType.Element)
                 {
-                    if (io.NodeType == XmlNodeType.Element)
+                    var buildAction = io.LocalName;
+                    if (buildAction.Equals("Reference"))
                     {
-                        var buildAction = io.LocalName;
-                        if (buildAction.Equals("Reference"))
-                        {
-                            ReadIncludeReference(io, out string include, out string hintPath);
+                        ReadIncludeReference(io, out string include, out string hintPath);
 
-                            if (!string.IsNullOrEmpty(hintPath) &&
-                                hintPath.IndexOf("microsoft", StringComparison.CurrentCultureIgnoreCase) == -1 &&
-                                hintPath.IndexOf("monogamecontentprocessors", StringComparison.CurrentCultureIgnoreCase) == -1)
-                            {
-                                _project.References.Add(hintPath);
-                            }
+                        if (!string.IsNullOrEmpty(hintPath) &&
+                            hintPath.IndexOf("microsoft", StringComparison.CurrentCultureIgnoreCase) == -1 &&
+                            hintPath.IndexOf("monogamecontentprocessors", StringComparison.CurrentCultureIgnoreCase) == -1)
+                        {
+                            _project.References.Add(hintPath);
                         }
-                        else if (buildAction.Equals("Content") || buildAction.Equals("None"))
+                    }
+                    else if (buildAction.Equals("Content") || buildAction.Equals("None"))
+                    {
+                        ReadIncludeContent(io, out string include, out string copyToOutputDirectory);
+
+                        if (!string.IsNullOrEmpty(copyToOutputDirectory) && !copyToOutputDirectory.Equals("Never"))
                         {
-                            ReadIncludeContent(io, out string include, out string copyToOutputDirectory);
-
-                            if (!string.IsNullOrEmpty(copyToOutputDirectory) && !copyToOutputDirectory.Equals("Never"))
-                            {
-                                var sourceFilePath = Path.GetDirectoryName(projectFilePath);
-                                sourceFilePath += "\\" + include;
-
-                                OnCopy(sourceFilePath);
-                            }
-                        }
-                        else if (buildAction.Equals("Compile"))
-                        {
-                            ReadIncludeCompile(io, out string include, out string name, out string importer, out string processor, out string[] processorParams);
-
-                            Importer = importer;
-                            Processor = processor;
-                            if (processorParams != null)
-                            {
-                                foreach (var i in processorParams)
-                                    AddProcessorParam(i);
-                            }
-
                             var sourceFilePath = Path.GetDirectoryName(projectFilePath);
                             sourceFilePath += "\\" + include;
 
-                            OnBuild(sourceFilePath);
+                            OnCopy(sourceFilePath);
                         }
+                    }
+                    else if (buildAction.Equals("Compile"))
+                    {
+                        ReadIncludeCompile(io, out string include, out string name, out string importer, out string processor, out string[] processorParams);
+
+                        Importer = importer;
+                        Processor = processor;
+                        if (processorParams != null)
+                        {
+                            foreach (var i in processorParams)
+                                AddProcessorParam(i);
+                        }
+
+                        var sourceFilePath = Path.GetDirectoryName(projectFilePath);
+                        sourceFilePath += "\\" + include;
+
+                        OnBuild(sourceFilePath);
                     }
                 }
             }
