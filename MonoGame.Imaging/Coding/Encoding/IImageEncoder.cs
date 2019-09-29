@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading;
 using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging.Encoding
@@ -15,7 +16,7 @@ namespace MonoGame.Imaging.Encoding
     /// <param name="frameIndex"></param>
     /// <param name="frames"></param>
     /// <param name="percentage"></param>
-    public delegate bool EncodeProgressCallback<TPixel>(
+    public delegate void EncodeProgressCallback<TPixel>(
         int frameIndex, ReadOnlyFrameCollection<TPixel> frames, double percentage)
         where TPixel : unmanaged, IPixel;
 
@@ -43,7 +44,8 @@ namespace MonoGame.Imaging.Encoding
             Stream stream,
             EncoderConfig encoderConfig,
             ImagingConfig imagingConfig,
-            EncodeProgressCallback<TPixel> onProgress = null)
+            EncodeProgressCallback<TPixel> onProgress = null,
+            CancellationToken? cancellationToken = null)
             where TPixel : unmanaged, IPixel;
     }
 }

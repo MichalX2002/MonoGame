@@ -472,7 +472,7 @@ namespace MonoGame.Framework
         /// </summary>
         public void Normalize()
         {
-            float val = 1.0f / (float)Math.Sqrt((X * X) + (Y * Y));
+            float val = 1f / (float)Math.Sqrt((X * X) + (Y * Y));
             X *= val;
             Y *= val;
         }
@@ -484,7 +484,7 @@ namespace MonoGame.Framework
         /// <returns>Unit vector.</returns>
         public static Vector2 Normalize(in Vector2 value)
         {
-            float factor = 1.0f / (float)Math.Sqrt((value.X * value.X) + (value.Y * value.Y));
+            float factor = 1f / (float)Math.Sqrt((value.X * value.X) + (value.Y * value.Y));
             return new Vector2(value.X * factor, value.Y * factor);
         }
 

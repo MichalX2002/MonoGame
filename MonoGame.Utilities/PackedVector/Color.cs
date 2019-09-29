@@ -152,10 +152,10 @@ namespace MonoGame.Framework
         /// <summary>
         /// Constructs an RGBA color from scalars representing red, green, blue and alpha values.
         /// </summary>
-        /// <param name="r">Red component value from 0.0f to 1.0f.</param>
-        /// <param name="g">Green component value from 0.0f to 1.0f.</param>
-        /// <param name="b">Blue component value from 0.0f to 1.0f.</param>
-        /// <param name="alpha">Alpha component value from 0.0f to 1.0f.</param>
+        /// <param name="r">Red component value from 0f to 1f.</param>
+        /// <param name="g">Green component value from 0f to 1f.</param>
+        /// <param name="b">Blue component value from 0f to 1f.</param>
+        /// <param name="alpha">Alpha component value from 0f to 1f.</param>
         public Color(float r, float g, float b, float alpha)
             : this((int)(r * 255), (int)(g * 255), (int)(b * 255), (int)(alpha * 255))
         {
@@ -172,9 +172,9 @@ namespace MonoGame.Framework
         /// <summary>
         /// Constructs an RGBA color from scalars representing red, green and blue values. Alpha value will be opaque.
         /// </summary>
-        /// <param name="r">Red component value from 0.0f to 1.0f.</param>
-        /// <param name="g">Green component value from 0.0f to 1.0f.</param>
-        /// <param name="b">Blue component value from 0.0f to 1.0f.</param>
+        /// <param name="r">Red component value from 0f to 1f.</param>
+        /// <param name="g">Green component value from 0f to 1f.</param>
+        /// <param name="b">Blue component value from 0f to 1f.</param>
         public Color(float r, float g, float b) : this(r, g, b, 1f)
         {
         }
@@ -200,7 +200,7 @@ namespace MonoGame.Framework
         /// Constructs an RGBA color from color and alpha value.
         /// </summary>
         /// <param name="color">A <see cref="Color"/> for RGB values of new <see cref="Color"/> instance.</param>
-        /// <param name="alpha">Alpha component value from 0.0f to 1.0f.</param>
+        /// <param name="alpha">Alpha component value from 0f to 1f.</param>
         public Color(Color color, float alpha) : 
             this(color, MathHelper.Clamp((int)(alpha * 255), byte.MinValue, byte.MaxValue))
         {
@@ -233,9 +233,6 @@ namespace MonoGame.Framework
         public Vector4 ToVector4() => new Vector4(R / 255f, G / 255f, B / 255f, A / 255f);
 
         /// <inheritdoc />
-        public Vector4 ToScaledVector4() => ToVector4();
-
-        /// <inheritdoc />
         public void FromVector4(Vector4 vector)
         {
             vector *= PackedVectorHelper.MaxBytes;
@@ -247,9 +244,6 @@ namespace MonoGame.Framework
             B = (byte)vector.Z;
             A = (byte)vector.W;
         }
-
-        /// <inheritdoc />
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
         /// <inheritdoc />
         public void FromRgba64(Rgba64 color) => FromVector4(color.ToVector4());
@@ -324,8 +318,6 @@ namespace MonoGame.Framework
             A = byte.MaxValue;
         }
 
-        #endregion
-
         /// <inheritdoc />
         public void FromGrayAlpha(GrayAlpha16 source)
         {
@@ -334,6 +326,8 @@ namespace MonoGame.Framework
             B = source.L;
             A = source.A;
         }
+
+        #endregion
 
         /// <summary>
         /// Convert to <see cref="Bgra32"/>.
@@ -383,7 +377,7 @@ namespace MonoGame.Framework
 
         /// <summary>
         /// Returns a <see cref="string"/> representation of this <see cref="Color"/> in the format
-        /// {R:[red] G:[green] B:[blue] A:[alpha]}
+        /// {R:{0} G:{1} B:{2} A:{3}}.
         /// </summary>
         /// <returns><see cref="string"/> representation of this <see cref="Color"/>.</returns>
         public override string ToString()

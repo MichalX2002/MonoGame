@@ -1,5 +1,6 @@
-// Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+﻿// MonoGame - Copyright (C) The MonoGame Team
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 using System;
 using MonoGame.Framework;
@@ -7,134 +8,128 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed pixel type containing unsigned normalized values, ranging from 0 to 1, using 4 bits each for x, y, z, and w.
-    /// <para>
-    /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
-    /// </para>
+    /// Packed vector type containing unsigned normalized values, ranging from 0 to 1, using 4 bits each for x, y, z, and w.
     /// </summary>
-    public struct Bgra4444 : IPixel, IPackedVector<ushort>
+    public struct Bgra4444 : IPackedVector<ushort>, IEquatable<Bgra4444>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Bgra4444"/> struct.
-        /// </summary>
-        /// <param name="x">The x-component</param>
-        /// <param name="y">The y-component</param>
-        /// <param name="z">The z-component</param>
-        /// <param name="w">The w-component</param>
-        public Bgra4444(float x, float y, float z, float w)
-            : this(new Vector4(x, y, z, w))
+        ushort _packedValue;
+
+        private static ushort Pack(float x, float y, float z, float w)
         {
+            return (ushort) ((((int) Math.Round(MathHelper.Clamp(w, 0, 1) * 15.0f) & 0x0F) << 12) |
+                (((int) Math.Round(MathHelper.Clamp(x, 0, 1) * 15.0f) & 0x0F) << 8) |
+                (((int) Math.Round(MathHelper.Clamp(y, 0, 1) * 15.0f) & 0x0F) << 4) |
+                ((int) Math.Round(MathHelper.Clamp(z, 0, 1) * 15.0f) & 0x0F));
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Bgra4444"/> struct.
+        /// Creates a new instance of Bgra4444.
         /// </summary>
-        /// <param name="vector">The vector containing the components for the packed vector.</param>
-        public Bgra4444(Vector4 vector) => PackedValue = Pack(ref vector);
-
-        /// <inheritdoc/>
-        public ushort PackedValue { get; set; }
+        /// <param name="x">The x component</param>
+        /// <param name="y">The y component</param>
+        /// <param name="z">The z component</param>
+        /// <param name="w">The w component</param>
+        public Bgra4444(float x, float y, float z, float w)
+        {
+            _packedValue = Pack(x, y, z, w);
+        }
 
         /// <summary>
-        /// Compares two <see cref="Bgra4444"/> objects for equality.
+        /// Creates a new instance of Bgra4444.
         /// </summary>
-        /// <param name="left">The <see cref="Bgra4444"/> on the left side of the operand.</param>
-        /// <param name="right">The <see cref="Bgra4444"/> on the right side of the operand.</param>
-        /// <returns>
-        /// True if the <paramref name="left"/> parameter is equal to the <paramref name="right"/> parameter; otherwise, false.
-        /// </returns>
-        public static bool operator ==(Bgra4444 left, Bgra4444 right) => left.Equals(right);
+        /// <param name="vector">Vector containing the components for the packed vector.</param>
+        public Bgra4444(Vector4 vector)
+        {
+            _packedValue = Pack(vector.X, vector.Y, vector.Z, vector.W);
+        }
 
         /// <summary>
-        /// Compares two <see cref="Bgra4444"/> objects for equality.
+        /// Gets and sets the packed value.
         /// </summary>
-        /// <param name="left">The <see cref="Bgra4444"/> on the left side of the operand.</param>
-        /// <param name="right">The <see cref="Bgra4444"/> on the right side of the operand.</param>
-        /// <returns>
-        /// True if the <paramref name="left"/> parameter is not equal to the <paramref name="right"/> parameter; otherwise, false.
-        /// </returns>
-        public static bool operator !=(Bgra4444 left, Bgra4444 right) => !left.Equals(right);
+        [CLSCompliant(false)]
+        public ushort PackedValue
+        {
+            get
+            {
+                return _packedValue;
+            }
+            set
+            {
+                _packedValue = value;
+            }
+        }
 
-        /// <inheritdoc/>
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
-
-        /// <inheritdoc/>
-        public Vector4 ToScaledVector4() => ToVector4();
-
-        /// <inheritdoc />
-        public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
-
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the packed vector in Vector4 format.
+        /// </summary>
+        /// <returns>The packed vector in Vector4 format</returns>
         public Vector4 ToVector4()
         {
-            const float Max = 1 / 15F;
+            const float maxVal = 1 / 15.0f;
 
-            return new Vector4(
-                (PackedValue >> 8) & 0x0F,
-                (PackedValue >> 4) & 0x0F,
-                PackedValue & 0x0F,
-                (PackedValue >> 12) & 0x0F) * Max;
+            return new Vector4( ((_packedValue >> 8) & 0x0F) * maxVal,
+                                ((_packedValue >> 4) & 0x0F) * maxVal,
+                                (_packedValue & 0x0F) * maxVal,
+                                ((_packedValue >> 12) & 0x0F) * maxVal);
         }
 
-        /// <inheritdoc />
-        public void FromArgb32(Argb32 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromBgra5551(Bgra5551 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromBgr24(Bgr24 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromBgra32(Bgra32 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void ToColor(ref Color dest)
+        /// <summary>
+        /// Sets the packed vector from a Vector4.
+        /// </summary>
+        /// <param name="vector">Vector containing the components.</param>
+        public void FromVector4(Vector4 vector)
         {
-            dest.FromScaledVector4(ToScaledVector4());
+            _packedValue = Pack(vector.X, vector.Y, vector.Z, vector.W);
         }
 
-        /// <inheritdoc/>
-        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
+        /// <summary>
+        /// Compares an object with the packed vector.
+        /// </summary>
+        /// <param name="obj">The object to compare.</param>
+        /// <returns>true if the object is equal to the packed vector.</returns>
+        public override bool Equals(object obj)
+        {
+            if (obj != null && (obj is Bgra4444))
+                return this == (Bgra4444)obj;
+            return false;
+        }
 
-        /// <inheritdoc/>
-        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
+        /// <summary>
+        /// Compares another Bgra4444 packed vector with the packed vector.
+        /// </summary>
+        /// <param name="other">The Bgra4444 packed vector to compare.</param>
+        /// <returns>true if the packed vectors are equal.</returns>
+        public bool Equals(Bgra4444 other)
+        {
+            return _packedValue == other._packedValue;
+        }
 
-        /// <inheritdoc />
-        public override bool Equals(object obj) => obj is Bgra4444 other && Equals(other);
-
-        /// <inheritdoc />
-        public bool Equals(Bgra4444 other) => PackedValue.Equals(other.PackedValue);
-
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a string representation of the packed vector.
+        /// </summary>
+        /// <returns>A string representation of the packed vector.</returns>
         public override string ToString()
         {
-            var vector = ToVector4();
-            return FormattableString.Invariant($"Bgra4444({vector.Z:#0.##}, {vector.Y:#0.##}, {vector.X:#0.##}, {vector.W:#0.##})");
+            return ToVector4().ToString();
         }
 
-        /// <inheritdoc />
-        public override int GetHashCode() => PackedValue.GetHashCode();
-
-        private static ushort Pack(ref Vector4 vector)
+        /// <summary>
+        /// Gets a hash code of the packed vector.
+        /// </summary>
+        /// <returns>The hash code for the packed vector.</returns>
+        public override int GetHashCode()
         {
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.One);
-            return (ushort)((((int)Math.Round(vector.W * 15F) & 0x0F) << 12)
-                          | (((int)Math.Round(vector.X * 15F) & 0x0F) << 8)
-                          | (((int)Math.Round(vector.Y * 15F) & 0x0F) << 4)
-                          | ((int)Math.Round(vector.Z * 15F) & 0x0F));
+            return _packedValue.GetHashCode();
+        }
+
+        public static bool operator ==(Bgra4444 lhs, Bgra4444 rhs)
+        {
+            return lhs._packedValue == rhs._packedValue;
+        }
+
+        public static bool operator !=(Bgra4444 lhs, Bgra4444 rhs)
+        {
+            return lhs._packedValue != rhs._packedValue;
         }
     }
 }

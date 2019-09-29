@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using MonoGame.Framework;
 using MonoGame.Utilities.PackedVector;
 
@@ -17,7 +18,7 @@ namespace MonoGame.Imaging.Decoding
     /// <param name="frames"></param>
     /// <param name="rectangle"></param>
     /// <returns></returns>
-    public delegate bool DecodeProgressCallback<TPixel>(
+    public delegate void DecodeProgressCallback<TPixel>(
         int frameIndex, FrameCollection<TPixel> frames, double progress, Rectangle? rectangle)
         where TPixel : unmanaged, IPixel;
 
@@ -36,7 +37,9 @@ namespace MonoGame.Imaging.Decoding
         /// <param name="stream">The stream to read from.</param>
         /// <param name="format">The format that was detected.</param>
         /// <returns><see langword="true"/> if the identification succeeded.</returns>
-        bool TryDetectFormat(ImageReadStream stream, out ImageFormat format);
+        bool TryDetectFormat(
+            ImageReadStream stream, ImagingConfig config,
+            CancellationToken? cancellationToken = null, out ImageFormat format);
 
         /// <summary>
         /// Tries to detect the format of an image from memory.
@@ -44,7 +47,9 @@ namespace MonoGame.Imaging.Decoding
         /// <param name="data">The memory to read from.</param>
         /// <param name="format">The format that was detected.</param>
         /// <returns><see langword="true"/> if the identification succeeded.</returns>
-        bool TryDetectFormat(ReadOnlySpan<byte> data, out ImageFormat format);
+        bool TryDetectFormat(
+            ReadOnlySpan<byte> data, ImagingConfig config,
+            CancellationToken? cancellationToken = null, out ImageFormat format);
 
         #endregion
 
@@ -56,7 +61,9 @@ namespace MonoGame.Imaging.Decoding
         /// <param name="stream">The stream to read from.</param>
         /// <param name="info">The information that was identified.</param>
         /// <returns><see langword="true"/> if the identification succeeded.</returns>
-        bool TryIdentify(ImageReadStream stream, out ImageInfo info);
+        bool TryIdentify(
+            ImageReadStream stream, ImagingConfig config,
+            CancellationToken? cancellationToken = null, out ImageInfo info);
 
         /// <summary>
         /// Tries to identify information about an image from memory.
@@ -64,7 +71,9 @@ namespace MonoGame.Imaging.Decoding
         /// <param name="data">The memory to read from.</param>
         /// <param name="info">The information that was identified.</param>
         /// <returns><see langword="true"/> if the identification succeeded.</returns>
-        bool TryIdentify(ReadOnlySpan<byte> data, out ImageInfo info);
+        bool TryIdentify(
+            ReadOnlySpan<byte> data, ImagingConfig config,
+            CancellationToken? cancellationToken = null, out ImageInfo info);
 
         #endregion
 
@@ -86,7 +95,8 @@ namespace MonoGame.Imaging.Decoding
             ImagingConfig config,
             ImageReadStream stream,
             int? frameLimit = null,
-            DecodeProgressCallback<TPixel> onProgress = null)
+            DecodeProgressCallback<TPixel> onProgress = null,
+            CancellationToken? cancellationToken = null)
             where TPixel : unmanaged, IPixel;
 
         /// <summary>
@@ -105,7 +115,8 @@ namespace MonoGame.Imaging.Decoding
             ImagingConfig config,
             ReadOnlySpan<byte> data,
             int? frameLimit = null,
-            DecodeProgressCallback<TPixel> onProgress = null)
+            DecodeProgressCallback<TPixel> onProgress = null,
+            CancellationToken? cancellationToken = null)
             where TPixel : unmanaged, IPixel;
 
         #endregion

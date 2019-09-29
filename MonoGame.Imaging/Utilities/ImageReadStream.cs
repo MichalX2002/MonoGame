@@ -93,6 +93,8 @@ namespace MonoGame.Imaging
             }
         }
 
+        // TODO: add cancellation token to ReadContext
+
         private static unsafe int ReadCallback(ReadContext context, Span<byte> data)
         {
             try

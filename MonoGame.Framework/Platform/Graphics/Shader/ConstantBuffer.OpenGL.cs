@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.InteropServices;
 using MonoGame.OpenGL;
 
 namespace MonoGame.Framework.Graphics
@@ -54,30 +55,30 @@ namespace MonoGame.Framework.Graphics
 
                 _shaderProgram = program;
                 _location = location;
-                Dirty = true;
+                IsDirty = true;
             }
 
-            // If the shader program is the same, the effect may still be different and have different values in the buffer
-            if (!Object.ReferenceEquals(this, _lastConstantBufferApplied))
-                Dirty = true;
+            // If the shader program is the same, 
+            // the effect may still be different and have different values in the buffer
+            if (!ReferenceEquals(this, _lastConstantBufferApplied))
+                IsDirty = true;
 
             // If the buffer content hasn't changed then we're
             // done... use the previously set uniform state.
-            if (!Dirty)
+            if (!IsDirty)
                 return;
 
-            fixed (byte* bytePtr = _buffer)
+            // TODO: We need to know the type of buffer float/int/bool
+            // and cast this correctly... else it doesn't work as i guess
+            // GL is checking the type of the uniform.
+            fixed (byte* ptr = _buffer)
             {
-                // TODO: We need to know the type of buffer float/int/bool
-                // and cast this correctly... else it doesn't work as i guess
-                // GL is checking the type of the uniform.
-
-                GL.Uniform4(_location, _buffer.Length / 16, (float*)bytePtr);
+                GL.Uniform4(_location, _buffer.Length / 16, (float*)ptr);
                 GraphicsExtensions.CheckGLError();
             }
 
             // Clear the dirty flag.
-            Dirty = false;
+            IsDirty = false;
 
             _lastConstantBufferApplied = this;
         }

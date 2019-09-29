@@ -68,7 +68,7 @@ namespace StbSharp
             0.752942f, 0.760525f, 0.768151f, 0.775822f, 0.783538f, 0.791298f, 0.799103f, 0.806952f, 0.814847f,
             0.822786f, 0.830770f, 0.838799f, 0.846873f, 0.854993f, 0.863157f, 0.871367f, 0.879622f, 0.887923f,
             0.896269f, 0.904661f, 0.913099f, 0.921582f, 0.930111f, 0.938686f, 0.947307f, 0.955974f, 0.964686f,
-            0.973445f, 0.982251f, 0.991102f, 1.0f
+            0.973445f, 0.982251f, 0.991102f, 1f
         };
 
         public static uint[] fp32_to_srgb8_tab4 =
@@ -149,7 +149,7 @@ namespace StbSharp
         public static float stbir__filter_triangle(float x, float s)
         {
             x = ((float)(Math.Abs((double)(x))));
-            if (x <= 1.0f)
+            if (x <= 1f)
                 return (float)(1 - x);
             else
                 return 0f;
@@ -158,31 +158,31 @@ namespace StbSharp
         public static float stbir__filter_cubic(float x, float s)
         {
             x = ((float)(Math.Abs((double)(x))));
-            if ((x) < (1.0f))
+            if ((x) < (1f))
                 return (float)((4 + x * x * (3 * x - 6)) / 6);
             else if ((x) < (2.0f))
                 return (float)((8 + x * (-12 + x * (6 - x))) / 6);
-            return (float)(0.0f);
+            return (float)(0f);
         }
 
         public static float stbir__filter_catmullrom(float x, float s)
         {
             x = ((float)(Math.Abs((double)(x))));
-            if ((x) < (1.0f))
+            if ((x) < (1f))
                 return (float)(1 - x * x * (2.5f - 1.5f * x));
             else if ((x) < (2.0f))
                 return (float)(2 - x * (4 + x * (0.5f * x - 2.5f)));
-            return (float)(0.0f);
+            return (float)(0f);
         }
 
         public static float stbir__filter_mitchell(float x, float s)
         {
             x = ((float)(Math.Abs((double)(x))));
-            if ((x) < (1.0f))
+            if ((x) < (1f))
                 return (float)((16 + x * x * (21 * x - 36)) / 18);
             else if ((x) < (2.0f))
                 return (float)((32 + x * (-60 + x * (36 - 7 * x))) / 18);
-            return (float)(0.0f);
+            return (float)(0f);
         }
 
         public static float stbir__support_zero(float s) => 0f;
@@ -956,7 +956,7 @@ namespace StbSharp
                 {
                     int pixel_index = (int)(x * channels);
                     float alpha = encode_buffer[pixel_index + alpha_channel];
-                    float reciprocal_alpha = (float)((alpha) != 0 ? 1.0f / alpha : 0);
+                    float reciprocal_alpha = (float)((alpha) != 0 ? 1f / alpha : 0);
                     for (n = 0; (n) < (channels); n++)
                         if (n != alpha_channel)
                             encode_buffer[pixel_index + n] *= (float)(reciprocal_alpha);

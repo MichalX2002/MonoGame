@@ -174,7 +174,7 @@ namespace MonoGame.Framework.Graphics
 
 #if OPENGL
             // MojoShader encodes even booleans into a float.
-            return ((float[])Data)[0] != 0.0f;
+            return ((float[])Data)[0] != 0f;
 #else
             return ((int[])Data)[0] != 0;
 #endif

@@ -10,7 +10,8 @@ namespace MonoGame.Framework.Audio
     ///  Represents a single instance of a playing, paused, or stopped sound.
     ///  </summary>
     /// <remarks>
-    /// SoundEffectInstances are created through SoundEffect.CreateInstance() and used internally by SoundEffect.Play().
+    /// Instances are created through <see cref="SoundEffect.CreateInstance()"/>
+    /// and used internally by <see cref="SoundEffect.Play()"/>.
     /// </remarks>
     public partial class SoundEffectInstance : IDisposable
     {
@@ -24,10 +25,10 @@ namespace MonoGame.Framework.Audio
 
         public bool IsDisposed { get; private set; } 
 
-        /// <summary>Gets the instance's current playback state.</summary>
+        /// <summary>Gets the current playback state.</summary>
         public virtual SoundState State => PlatformGetState();
 
-        /// <summary>Enables or Disables whether the <see cref="SoundEffectInstance"/> should repeat after playback.</summary>
+        /// <summary>Gets or sets whether the instance should repeat after playback.</summary>
         /// <remarks>This value has no effect on an already playing sound.</remarks>
         public virtual bool IsLooped
         {
@@ -36,13 +37,16 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>Gets or sets the pan, or speaker balance.</summary>
-        /// <value>Pan value ranging from -1.0 (left speaker) to 0.0 (centered), 1.0 (right speaker). Values outside of this range will throw an exception.</value>
+        /// <value>
+        /// Ranges from -1 (left speaker) to 0 (centered) to 1 (right speaker).
+        /// Values outside of this range will throw an exception.
+        /// </value>
         public float Pan
         {
             get => _pan;
             set
             {
-                if (value < -1.0f || value > 1.0f)
+                if (value < -1f || value > 1f)
                     throw new ArgumentOutOfRangeException();
 
                 _pan = value;
@@ -57,7 +61,7 @@ namespace MonoGame.Framework.Audio
             set
             {
                 // XAct sounds effects don't have pitch limits
-                if (!_isXAct && value <= 0.0f)
+                if (!_isXAct && value <= 0f)
                     throw new ArgumentOutOfRangeException();
 
                 _pitch = value;
@@ -65,18 +69,18 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        /// <summary>Gets or sets the volume of the SoundEffectInstance.</summary>
-        /// <value>Volume, ranging from 0.0 (silence) to 1.0 (full volume). Volume during playback is scaled by SoundEffect.MasterVolume.</value>
-        /// <remarks>
-        /// This is the volume relative to SoundEffect.MasterVolume. Before playback, this Volume property is multiplied by SoundEffect.MasterVolume when determining the final mix volume.
-        /// </remarks>
+        /// <summary>Gets or sets the volume.</summary>
+        /// <value>
+        /// Volume, ranging from 0 (silence) to 1 (full volume).
+        /// Volume is scaled by <see cref="SoundEffect.MasterVolume"/>.
+        /// </value>
         public float Volume
         {
             get => _volume;
             set
             {
                 // XAct sound effects don't have volume limits.
-                if (!_isXAct && (value < 0.0f || value > 1.0f))
+                if (!_isXAct && (value < 0f || value > 1f))
                     throw new ArgumentOutOfRangeException();
 
                 _volume = value;
@@ -91,12 +95,12 @@ namespace MonoGame.Framework.Audio
 
         internal SoundEffectInstance()
         {
-            _pan = 0.0f;
-            _volume = 1.0f;
-            _pitch = 0.0f;            
+            _pan = 0f;
+            _volume = 1f;
+            _pitch = 0f;            
         }
 
-        /// <summary>Applies 3D positioning to the SoundEffectInstance using a single listener.</summary>
+        /// <summary>Applies 3D positioning to the instance using a single listener.</summary>
         /// <param name="listener">Data about the listener.</param>
         /// <param name="emitter">Data about the source of emission.</param>
         public void Apply3D(AudioListener listener, AudioEmitter emitter)
@@ -104,24 +108,25 @@ namespace MonoGame.Framework.Audio
             PlatformApply3D(listener, emitter);
         }
 
-        /// <summary>Applies 3D positioning to the SoundEffectInstance using multiple listeners.</summary>
+        /// <summary>Applies 3D positioning to the instance using multiple listeners.</summary>
         /// <param name="listeners">Data about each listener.</param>
         /// <param name="emitter">Data about the source of emission.</param>
         public void Apply3D(ReadOnlySpan<AudioListener> listeners, AudioEmitter emitter)
         {
-            foreach (var l in listeners)
-				PlatformApply3D(l, emitter);
+            foreach (var listener in listeners)
+				PlatformApply3D(listener, emitter);
         }
 
-        /// <summary>Pauses playback of a SoundEffectInstance.</summary>
-        /// <remarks>Paused instances can be resumed with SoundEffectInstance.Play() or SoundEffectInstance.Resume().</remarks>
+        /// <summary>Pauses playback of the instance.</summary>
+        /// <remarks>Paused instances can be resumed with <see cref="Play()"/> or <see cref="Resume()"/>.</remarks>
         public virtual void Pause()
         {
             PlatformPause();
         }
 
-        /// <summary>Plays or resumes a SoundEffectInstance.</summary>
-        /// <remarks>Throws an exception if more sounds are playing than the platform allows.</remarks>
+        /// <summary>Plays or resumes the instance.</summary>
+        /// <exception cref="InstancePlayLimitException">More sounds are playing than the platform allows.</exception>
+        /// <exception cref="ObjectDisposedException"></exception>
         public virtual void Play()
         {
             if (IsDisposed)
@@ -143,36 +148,29 @@ namespace MonoGame.Framework.Audio
             PlatformPlay();
         }
 
-        /// <summary>Resumes playback for a SoundEffectInstance.</summary>
-        /// <remarks>Only has effect on a SoundEffectInstance in a paused state.</remarks>
+        /// <summary>Resumes playback for the instance.</summary>
+        /// <remarks>Only has effect on paused instances.</remarks>
         public virtual void Resume()
         {
             PlatformResume();
         }
 
-        /// <summary>Immediately stops playing a SoundEffectInstance.</summary>
+        /// <summary>Stops the instance playback immediately.</summary>
         public virtual void Stop()
         {
             PlatformStop(true);
         }
 
-        /// <summary>Stops playing a SoundEffectInstance, either immediately or as authored.</summary>
-        /// <param name="immediate">Determined whether the sound stops immediately, or after playing its release phase and/or transitions.</param>
-        /// <remarks>Stopping a sound with the immediate argument set to false will allow it to play any release phases, such as fade, before coming to a stop.</remarks>
+        /// <summary>Stops the instance playback, either immediately or as authored.</summary>
+        /// <param name="immediate">
+        /// Determines whether the instance stops immediately, 
+        /// or after playing its release phase and/or transitions.
+        /// </param>
         public virtual void Stop(bool immediate)
         {
             PlatformStop(immediate);
         }
 
-        /// <summary>
-        /// Releases the resources held by this <see cref="SoundEffectInstance"/>.
-        /// </summary>
-        /// <param name="disposing">If set to <c>true</c>, Dispose was called explicitly.</param>
-        /// <remarks>If the disposing parameter is true, the Dispose method was called explicitly. This
-        /// means that managed objects referenced by this instance should be disposed or released as
-        /// required. If the disposing parameter is false, Dispose was called by the finalizer and
-        /// no managed objects should be touched because we do not know if they are still valid or
-        /// not at that time. Unmanaged resources should always be released.</remarks>
         protected virtual void Dispose(bool disposing)
         {
             if (!IsDisposed)
@@ -184,7 +182,7 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Releases the resources held by this <see cref="SoundEffectInstance"/>.
+        /// Releases the resources held by the <see cref="SoundEffectInstance"/>.
         /// </summary>
         public void Dispose()
         {
@@ -192,10 +190,6 @@ namespace MonoGame.Framework.Audio
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Releases unmanaged resources and performs other cleanup operations before the
-        /// <see cref="SoundEffectInstance"/> is reclaimed by garbage collection.
-        /// </summary>
         ~SoundEffectInstance()
         {
             Dispose(false);

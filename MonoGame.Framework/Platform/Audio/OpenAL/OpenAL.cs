@@ -274,13 +274,13 @@ namespace MonoGame.OpenAL
         {
             fixed (int* ptr = &MemoryMarshal.GetReference(buffers))
             {
-                AL.alSourceQueueBuffers(sourceId, buffers.Length, ptr);
+                alSourceQueueBuffers(sourceId, buffers.Length, ptr);
             }
         }
 
         internal unsafe static void SourceQueueBuffer(int sourceId, int buffer)
         {
-            AL.alSourceQueueBuffers(sourceId, 1, &buffer);
+            alSourceQueueBuffers(sourceId, 1, &buffer);
         }
 
         internal static unsafe void SourceUnqueueBuffers(int sourceID, int numEntries)

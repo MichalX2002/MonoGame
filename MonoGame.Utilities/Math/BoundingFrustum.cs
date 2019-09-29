@@ -336,7 +336,7 @@ namespace MonoGame.Framework
         /// <returns>Whether the <see cref="Ray"/> intersects the <see cref="BoundingFrustum"/>.</returns>
         public bool Intersects(in Ray ray, out float distance)
         {
-            distance = 0.0f;
+            distance = 0f;
             switch (Contains(ray.Position))
             {
                 case ContainmentType.Disjoint: return false;
@@ -406,7 +406,7 @@ namespace MonoGame.Framework
             Vector3 v2 = Vector3.Cross(c.Normal, a.Normal) * b.D;
             Vector3 v3 = Vector3.Cross(a.Normal, b.Normal) * c.D;
             
-            float f = Vector3.Dot(a.Normal, bcCross) * -1.0f;
+            float f = Vector3.Dot(a.Normal, bcCross) * -1f;
             return new Vector3(
                 (v1.X + v2.X + v3.X) / f,
                 (v1.Y + v2.Y + v3.Y) / f,

@@ -121,12 +121,12 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs a 3d vector with X, Y, Z and W from four values.
+        /// Constructs a 3D vector with X, Y, Z and W from four values.
         /// </summary>
-        /// <param name="x">The x coordinate in 4d-space.</param>
-        /// <param name="y">The y coordinate in 4d-space.</param>
-        /// <param name="z">The z coordinate in 4d-space.</param>
-        /// <param name="w">The w coordinate in 4d-space.</param>
+        /// <param name="x">The x coordinate in 4D-space.</param>
+        /// <param name="y">The y coordinate in 4D-space.</param>
+        /// <param name="z">The z coordinate in 4D-space.</param>
+        /// <param name="w">The w coordinate in 4D-space.</param>
         public Vector4(float x, float y, float z, float w)
         {
             X = x;
@@ -136,11 +136,11 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs a 3d vector with X and Z from <see cref="Vector2"/> and Z and W from the scalars.
+        /// Constructs a 3D vector with X and Z from <see cref="Vector2"/> and Z and W from the scalars.
         /// </summary>
-        /// <param name="value">The x and y coordinates in 4d-space.</param>
-        /// <param name="z">The z coordinate in 4d-space.</param>
-        /// <param name="w">The w coordinate in 4d-space.</param>
+        /// <param name="value">The x and y coordinates in 4D-space.</param>
+        /// <param name="z">The z coordinate in 4D-space.</param>
+        /// <param name="w">The w coordinate in 4D-space.</param>
         public Vector4(in Vector2 value, float z, float w)
         {
             X = value.X;
@@ -150,10 +150,10 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs a 3d vector with X, Y, Z from <see cref="Vector3"/> and W from a scalar.
+        /// Constructs a 3D vector with X, Y, Z from <see cref="Vector3"/> and W from a scalar.
         /// </summary>
-        /// <param name="value">The x, y and z coordinates in 4d-space.</param>
-        /// <param name="w">The w coordinate in 4d-space.</param>
+        /// <param name="value">The x, y and z coordinates in 4D-space.</param>
+        /// <param name="w">The w coordinate in 4D-space.</param>
         public Vector4(in Vector3 value, float w)
         {
             X = value.X;
@@ -163,9 +163,9 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs a 4d vector with X, Y, Z and W set to the same value.
+        /// Constructs a 4D vector with X, Y, Z and W set to the same value.
         /// </summary>
-        /// <param name="value">The x, y, z and w coordinates in 4d-space.</param>
+        /// <param name="value">The x, y, z and w coordinates in 4D-space.</param>
         public Vector4(float value)
         {
             X = value;
@@ -174,17 +174,16 @@ namespace MonoGame.Framework
             W = value;
         }
 
-        /// <inheritdoc/>
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
+        /// <summary>
+        /// Gets the <see cref="Vector3"/> representation of this vector.
+        /// </summary>
+        public Vector3 ToVector3() => new Vector3(X, Y, Z);
 
         /// <inheritdoc/>
-        public Vector4 ToScaledVector4() => ToVector4();
+        void IPackedVector.FromVector4(Vector4 vector) => this = Clamp(vector, Zero, One);
 
         /// <inheritdoc/>
-        public void FromVector4(Vector4 vector) => this = Clamp(vector, Zero, One);
-
-        /// <inheritdoc/>
-        public Vector4 ToVector4() => this;
+        Vector4 IPackedVector.ToVector4() => this;
 
         /// <inheritdoc/>
         public void FromArgb32(Argb32 source) => this = source.ToScaledVector4();
@@ -228,13 +227,13 @@ namespace MonoGame.Framework
         public static Vector4 Add(in Vector4 a, in Vector4 b) => a + b;
 
         /// <summary>
-        /// Creates a new <see cref="Vector4"/> that contains the cartesian coordinates of a vector specified in barycentric coordinates and relative to 4d-triangle.
+        /// Creates a new <see cref="Vector4"/> that contains the cartesian coordinates of a vector specified in barycentric coordinates and relative to 4D-triangle.
         /// </summary>
-        /// <param name="a">The first vector of 4d-triangle.</param>
-        /// <param name="b">The second vector of 4d-triangle.</param>
-        /// <param name="c">The third vector of 4d-triangle.</param>
-        /// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 4d-triangle.</param>
-        /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 4d-triangle.</param>
+        /// <param name="a">The first vector of 4D-triangle.</param>
+        /// <param name="b">The second vector of 4D-triangle.</param>
+        /// <param name="c">The third vector of 4D-triangle.</param>
+        /// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 4D-triangle.</param>
+        /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 4D-triangle.</param>
         /// <returns>The cartesian translation of barycentric coordinates.</returns>
         public static Vector4 Barycentric(in Vector4 a, in Vector4 b, in Vector4 c, float amount1, float amount2)
         {
@@ -541,7 +540,7 @@ namespace MonoGame.Framework
         public static Vector4 Subtract(in Vector4 left, in Vector4 right) => left - right;
 
         /// <summary>
-        /// Creates a new <see cref="Vector4"/> that contains a transformation of 2d-vector by the specified <see cref="Matrix"/>.
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 2D-vector by the specified <see cref="Matrix"/>.
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
@@ -556,7 +555,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Creates a new <see cref="Vector4"/> that contains a transformation of 2d-vector by the specified <see cref="Quaternion"/>.
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 2D-vector by the specified <see cref="Quaternion"/>.
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
@@ -569,7 +568,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Creates a new <see cref="Vector4"/> that contains a transformation of 3d-vector by the specified <see cref="Matrix"/>.
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 3D-vector by the specified <see cref="Matrix"/>.
         /// </summary>
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
@@ -584,7 +583,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Creates a new <see cref="Vector4"/> that contains a transformation of 3d-vector by the specified <see cref="Quaternion"/>.
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 3D-vector by the specified <see cref="Quaternion"/>.
         /// </summary>
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
@@ -597,7 +596,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Creates a new <see cref="Vector4"/> that contains a transformation of 4d-vector by the specified <see cref="Matrix"/>.
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 4D-vector by the specified <see cref="Matrix"/>.
         /// </summary>
         /// <param name="value">Source <see cref="Vector4"/>.</param>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
@@ -612,7 +611,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Creates a new <see cref="Vector4"/> that contains a transformation of 4d-vector by the specified <see cref="Quaternion"/>.
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 4D-vector by the specified <see cref="Quaternion"/>.
         /// </summary>
         /// <param name="value">Source <see cref="Vector4"/>.</param>
         /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>

@@ -253,7 +253,7 @@ namespace MonoGame.Framework.Input
             if (gamepad.HapticType == 0)
                 return false;
 
-            if (leftMotor <= 0.0f && rightMotor <= 0.0f)
+            if (leftMotor <= 0f && rightMotor <= 0f)
                 Sdl.Haptic.StopAll(gamepad.HapticDevice);
             else if (gamepad.HapticType == 1)
             {

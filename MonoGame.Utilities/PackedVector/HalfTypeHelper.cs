@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Helper methods for packing and unpacking floating point values
+    /// Helper methods for packing and unpacking floating point values.
     /// </summary>
     internal static class HalfTypeHelper
     {
@@ -19,7 +19,7 @@ namespace MonoGame.Utilities.PackedVector
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static ushort Pack(float value)
         {
-            var uif = new Uif { F = value };
+            var uif = new FloatInt { F = value };
             return Pack(uif.I);
         }
 
@@ -37,9 +37,7 @@ namespace MonoGame.Utilities.PackedVector
             if (e <= 0)
             {
                 if (e < -10)
-                {
                     return (ushort)s;
-                }
 
                 m |= 0x00800000;
 
@@ -55,9 +53,7 @@ namespace MonoGame.Utilities.PackedVector
             if (e == 0xff - (127 - 15))
             {
                 if (m == 0)
-                {
                     return (ushort)(s | 0x7c00);
-                }
 
                 m >>= 13;
                 return (ushort)(s | 0x7c00 | m | ((m == 0) ? 1 : 0));
@@ -72,9 +68,7 @@ namespace MonoGame.Utilities.PackedVector
             }
 
             if (e > 30)
-            {
                 return (ushort)(s | 0x7c00);
-            }
 
             return (ushort)(s | (e << 10) | (m >> 13));
         }
@@ -113,7 +107,7 @@ namespace MonoGame.Utilities.PackedVector
                 result = (((uint)value & 0x8000) << 16) | ((((((uint)value >> 10) & 0x1f) - 15) + 127) << 23) | (mantissa << 13);
             }
 
-            var uif = new Uif { U = result };
+            var uif = new FloatInt { U = result };
             return uif.F;
         }
 
@@ -121,7 +115,7 @@ namespace MonoGame.Utilities.PackedVector
         /// Maps the position of number types in memory
         /// </summary>
         [StructLayout(LayoutKind.Explicit)]
-        private struct Uif
+        private struct FloatInt
         {
             /// <summary>
             /// The float.

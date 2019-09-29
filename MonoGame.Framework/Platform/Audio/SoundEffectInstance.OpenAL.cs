@@ -169,7 +169,7 @@ namespace MonoGame.Framework.Audio
         {
             if (SourceID.HasValue)
             {
-                AL.Source(SourceID.Value, ALSource3f.Position, value, 0.0f, 0.1f);
+                AL.Source(SourceID.Value, ALSource3f.Position, value, 0f, 0.1f);
                 ALHelper.CheckError("Failed to set source pan.");
             }
         }
@@ -247,7 +247,7 @@ namespace MonoGame.Framework.Audio
             if (_needsFilterUpdate && _controller.Filter > 0)
             {
                 float freq = _frequency / 20000f;
-                float lf = 1.0f - freq;
+                float lf = 1f - freq;
                 var efx = ALController.Efx;
 
                 efx.Filter(_controller.Filter, EfxFilteri.FilterType, (int)_filterType);

@@ -7,7 +7,7 @@ namespace MonoGame.Imaging
     public class ImagingConfig
     {
         public static ImagingConfig Default { get; private set; }
-
+        
         private HashSet<Type> _throwingExceptions;
 
         /// <summary>
@@ -18,8 +18,6 @@ namespace MonoGame.Imaging
         /// </para>
         /// </summary>
         public bool UseExceptions { get; set; } = true;
-
-        public bool UseBufferedIO { get; set; } = true;
 
         static ImagingConfig()
         {

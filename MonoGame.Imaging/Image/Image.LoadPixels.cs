@@ -171,30 +171,37 @@ namespace MonoGame.Imaging
 
         #endregion
 
-        #region LoadPixels (Span<byte>)
-
-        public static Image<TPixel> LoadPixels<TPixel>(
-            Span<byte> pixelData, Rectangle sourceRectangle, int stride, ImagingConfig config)
-            where TPixel : unmanaged, IPixel
-        {
-            return LoadPixels<TPixel>((ReadOnlySpan<byte>)pixelData, sourceRectangle, stride, config);
-        }
-
-        public static Image<TPixel> LoadPixels<TPixel>(
-            Span<byte> pixelData, Rectangle sourceRectangle, int stride)
-            where TPixel : unmanaged, IPixel
-        {
-            return LoadPixels<TPixel>((ReadOnlySpan<byte>)pixelData, sourceRectangle, stride, ImagingConfig.Default);
-        }
+        #region LoadPixels(ReadOnlySpan<TPixel>, sourceRectangle)
 
         public static unsafe Image<TPixel> LoadPixels<TPixel>(
-            Span<TPixel> pixelData, int width, int height)
+            ReadOnlySpan<TPixel> pixelData, Rectangle sourceRectangle, int stride, ImagingConfig config)
             where TPixel : unmanaged, IPixel
         {
             var bytes = MemoryMarshal.AsBytes(pixelData);
-            var srcRect = new Rectangle(0, 0, width, height);
-            return LoadPixels<TPixel>(bytes, srcRect, width * sizeof(TPixel), ImagingConfig.Default);
+            return LoadPixels<TPixel>(bytes, sourceRectangle, stride, config);
         }
+
+        public static unsafe Image<TPixel> LoadPixels<TPixel>(
+            ReadOnlySpan<TPixel> pixelData, Rectangle sourceRectangle, int stride)
+            where TPixel : unmanaged, IPixel => 
+            LoadPixels(pixelData, sourceRectangle, stride, ImagingConfig.Default);
+
+        #endregion
+
+        #region LoadPixels(ReadOnlySpan<TPixel>, width, height)
+
+        public static unsafe Image<TPixel> LoadPixels<TPixel>(
+            ReadOnlySpan<TPixel> pixelData, int width, int height, int stride, ImagingConfig config)
+            where TPixel : unmanaged, IPixel
+        {
+            var srcRect = new Rectangle(0, 0, width, height);
+            return LoadPixels(pixelData, srcRect, stride, config);
+        }
+
+        public static unsafe Image<TPixel> LoadPixels<TPixel>(
+            ReadOnlySpan<TPixel> pixelData, int width, int height, int stride)
+            where TPixel : unmanaged, IPixel => 
+            LoadPixels(pixelData, width, height, stride, ImagingConfig.Default);
 
         #endregion
     }

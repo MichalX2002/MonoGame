@@ -1,156 +1,95 @@
-// Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+﻿// MonoGame - Copyright (C) The MonoGame Team
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 using System;
 using MonoGame.Framework;
 
 namespace MonoGame.Utilities.PackedVector
 {
-    /// <summary>
-    /// Packed pixel type containing two 16-bit floating-point values.
-    /// <para>
-    /// Ranges from [-1, -1, 0, 1] to [1, 1, 0, 1] in vector form.
-    /// </para>
-    /// </summary>
-    public struct HalfVector2 : IPixel, IPackedVector<uint>
+    public struct HalfVector2 : IPackedVector<uint>, IPackedVector, IEquatable<HalfVector2>
     {
-        [CLSCompliant(false)]
-        public uint PackedValue;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HalfVector2"/> struct.
-        /// </summary>
-        /// <param name="x">The x-component.</param>
-        /// <param name="y">The y-component.</param>
-        public HalfVector2(float x, float y) => PackedValue = Pack(x, y);
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HalfVector2"/> struct.
-        /// </summary>
-        /// <param name="vector">A vector containing the initial values for the components.</param>
-        public HalfVector2(Vector2 vector) => PackedValue = Pack(vector.X, vector.Y);
-
-        uint IPackedVector<uint>.PackedValue
+        private uint packedValue;
+        public HalfVector2(float x, float y)
         {
-            get => PackedValue;
-            set => PackedValue = value;
+            this.packedValue = PackHelper(x, y);
         }
 
-        /// <summary>
-        /// Compares two <see cref="HalfVector2"/> objects for equality.
-        /// </summary>
-        /// <param name="left">The <see cref="HalfVector2"/> on the left side of the operand.</param>
-        /// <param name="right">The <see cref="HalfVector2"/> on the right side of the operand.</param>
-        /// <returns>
-        /// True if the <paramref name="left"/> parameter is equal to the <paramref name="right"/> parameter; otherwise, false.
-        /// </returns>
-        public static bool operator ==(HalfVector2 left, HalfVector2 right) => left.Equals(right);
-
-        /// <summary>
-        /// Compares two <see cref="HalfVector2"/> objects for equality.
-        /// </summary>
-        /// <param name="left">The <see cref="HalfVector2"/> on the left side of the operand.</param>
-        /// <param name="right">The <see cref="HalfVector2"/> on the right side of the operand.</param>
-        /// <returns>
-        /// True if the <paramref name="left"/> parameter is not equal to the <paramref name="right"/> parameter; otherwise, false.
-        /// </returns>
-        public static bool operator !=(HalfVector2 left, HalfVector2 right) => !left.Equals(right);
-
-        /// <inheritdoc/>
-        public void FromScaledVector4(Vector4 vector)
+        public HalfVector2(Vector2 vector)
         {
-            var scaled = new Vector2(vector.X * 2f - 1, vector.Y * 2f - 1);
-            PackedValue = Pack(scaled.X, scaled.Y);
+            this.packedValue = PackHelper(vector.X, vector.Y);
         }
 
-        /// <inheritdoc/>
-        public Vector4 ToScaledVector4()
+        public void FromVector4(Vector4 vector)
         {
-            var scaled = ToVector2();
-            scaled += Vector2.One;
-            scaled /= 2F;
-            return new Vector4(scaled, 0F, 1F);
+            this.packedValue = PackHelper(vector.X, vector.Y);
         }
 
-        /// <inheritdoc />
-        public void FromVector4(Vector4 vector) => PackedValue = Pack(vector.X, vector.Y);
-
-        /// <inheritdoc />
-        public Vector4 ToVector4()
+        private static uint PackHelper(float vectorX, float vectorY)
         {
-            var vector = ToVector2();
-            return new Vector4(vector.X, vector.Y, 0F, 1F);
+            uint num2 = HalfTypeHelper.Convert(vectorX);
+            uint num = (uint)(HalfTypeHelper.Convert(vectorY) << 0x10);
+            return (num2 | num);
         }
 
-        /// <inheritdoc />
-        public void FromArgb32(Argb32 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromBgr24(Bgr24 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromBgra32(Bgra32 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromBgra5551(Bgra5551 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void ToColor(ref Color dest)
-        {
-            dest.FromScaledVector4(ToScaledVector4());
-        }
-
-        /// <inheritdoc/>
-        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <summary>
-        /// Expands the packed representation into a <see cref="Vector2"/>.
-        /// </summary>
-        /// <returns>The <see cref="Vector2"/>.</returns>
         public Vector2 ToVector2()
         {
             Vector2 vector;
-            vector.X = HalfTypeHelper.Unpack((ushort)PackedValue);
-            vector.Y = HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x10));
+            vector.X = HalfTypeHelper.Convert((ushort)this.packedValue);
+            vector.Y = HalfTypeHelper.Convert((ushort)(this.packedValue >> 0x10));
             return vector;
         }
 
-        /// <inheritdoc />
-        public override bool Equals(object obj) => obj is HalfVector2 other && Equals(other);
-
-        /// <inheritdoc />
-        public bool Equals(HalfVector2 other) => PackedValue.Equals(other.PackedValue);
-
-        /// <inheritdoc />
-        public override string ToString()
+        /// <summary>
+        /// Gets the packed vector in Vector4 format.
+        /// </summary>
+        /// <returns>The packed vector in Vector4 format</returns>
+        public Vector4 ToVector4()
         {
-            var vector = ToVector2();
-            return FormattableString.Invariant($"HalfVector2({vector.X:#0.##}, {vector.Y:#0.##})");
+            Vector2 vector = this.ToVector2();
+            return new Vector4(vector.X, vector.Y, 0f, 1f);
         }
 
-        /// <inheritdoc />
-        public override int GetHashCode() => PackedValue.GetHashCode();
-
-        private static uint Pack(float x, float y)
+        [CLSCompliant(false)]
+        public uint PackedValue
         {
-            uint num2 = HalfTypeHelper.Pack(x);
-            uint num = (uint)(HalfTypeHelper.Pack(y) << 0x10);
-            return num2 | num;
+            get
+            {
+                return this.packedValue;
+            }
+            set
+            {
+                this.packedValue = value;
+            }
+        }
+        public override string ToString()
+        {
+            return this.ToVector2().ToString();
+        }
+
+        public override int GetHashCode()
+        {
+            return this.packedValue.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return ((obj is HalfVector2) && this.Equals((HalfVector2)obj));
+        }
+
+        public bool Equals(HalfVector2 other)
+        {
+            return this.packedValue.Equals(other.packedValue);
+        }
+
+        public static bool operator ==(HalfVector2 a, HalfVector2 b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(HalfVector2 a, HalfVector2 b)
+        {
+            return !a.Equals(b);
         }
     }
 }

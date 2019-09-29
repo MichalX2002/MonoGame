@@ -17,7 +17,7 @@ namespace MonoGame.Framework
     public struct Size : IEquatable<Size>
     {
         /// <summary>
-        ///     Returns a <see cref="Size" /> with <see cref="Width" /> and <see cref="Height" /> equal to <c>0.0f</c>.
+        ///     Returns a <see cref="Size" /> with <see cref="Width" /> and <see cref="Height" /> equal to <c>0f</c>.
         /// </summary>
         public static readonly Size Empty = new Size();
 

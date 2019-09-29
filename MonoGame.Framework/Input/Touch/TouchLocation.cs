@@ -110,11 +110,11 @@ namespace MonoGame.Framework.Input.Touch
             Id = id;
             State = state;
             _position = position;
-            Pressure = 0.0f;
+            Pressure = 0f;
 
             _previousState = previousState;
             _previousPosition = previousPosition;
-            _previousPressure = 0.0f;
+            _previousPressure = 0f;
 
             _timestamp = timestamp;
             Velocity = Vector2.Zero;
@@ -245,7 +245,7 @@ namespace MonoGame.Framework.Input.Touch
                 _previousState = TouchLocationState.Invalid,
                 _previousPosition = Vector2.Zero,
                 Pressure = _previousPressure,
-                _previousPressure = 0.0f,
+                _previousPressure = 0f,
                 _timestamp = _timestamp,
                 PressPosition = PressPosition,
                 PressTimestamp = PressTimestamp,

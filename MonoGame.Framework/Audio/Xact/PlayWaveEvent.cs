@@ -45,10 +45,11 @@ namespace MonoGame.Framework.Audio
         private SoundEffectInstance _wav;
         private bool _streaming;
 
-        public PlayWaveEvent(   XactClip clip, float timeStamp, float randomOffset, SoundBank soundBank,
-                                int[] waveBanks, int[] tracks, byte[] weights, int totalWeights,
-                                VariationType variation, Vector2? volumeVar, Vector2? pitchVar, Vector4? filterVar,
-                                int loopCount, bool newWaveOnLoop)
+        public PlayWaveEvent(   
+            XactClip clip, float timeStamp, float randomOffset, SoundBank soundBank,
+            int[] waveBanks, int[] tracks, byte[] weights, int totalWeights,
+            VariationType variation, Vector2? volumeVar, Vector2? pitchVar, Vector4? filterVar,
+            int loopCount, bool newWaveOnLoop)
             : base(clip, timeStamp, randomOffset)
         {
             _soundBank = soundBank;
@@ -62,12 +63,12 @@ namespace MonoGame.Framework.Audio
             _wavIndex = -1;
             _loopIndex = 0;
 
-            _trackVolume = 1.0f;
+            _trackVolume = 1f;
             _trackPitch = 0;
             _trackFilterFrequency = 0;
             _trackFilterQFactor = 0;
 
-            _clipVolume = 1.0f;
+            _clipVolume = 1f;
             _clipPitch = 0;
             _clipReverbMix = 0;
 
@@ -84,8 +85,8 @@ namespace MonoGame.Framework.Audio
                     _wav.Stop();
                 if (_streaming)
                     _wav.Dispose();
-				else					
-					_wav._isXAct = false;					
+                else					
+                    _wav._isXAct = false;					
                 _wav = null;
             }
 
@@ -200,8 +201,8 @@ namespace MonoGame.Framework.Audio
                 _wav.Stop();
                 if (_streaming)
                     _wav.Dispose();
-				else
-                	_wav._isXAct = false;				
+                else
+                    _wav._isXAct = false;				
                 _wav = null;
             }
             _loopIndex = 0;
@@ -275,8 +276,8 @@ namespace MonoGame.Framework.Audio
                 {
                     if (_streaming)
                         _wav.Dispose();
-					else
-	                    _wav._isXAct = false;						
+                    else
+                        _wav._isXAct = false;						
                     _wav = null;
                     _loopIndex = 0;
                 }

@@ -132,11 +132,11 @@ namespace MonoGame.Framework
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
         public static bool operator ==(CurveKey value1, CurveKey value2)
         {
-            if (object.Equals(value1, null))
-                return object.Equals(value2, null);
+            if (Equals(value1, null))
+                return Equals(value2, null);
 
-            if (object.Equals(value2, null))
-                return object.Equals(value1, null);
+            if (Equals(value2, null))
+                return Equals(value1, null);
 
             return (value1.Position == value2.Position)
                 && (value1._value == value2._value)

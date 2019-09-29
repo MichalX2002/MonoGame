@@ -99,8 +99,8 @@ namespace MonoGame.Framework.Graphics
             Y = y;
             Width = width;
             Height = height;
-            MinDepth = 0.0f;
-            MaxDepth = 1.0f;
+            MinDepth = 0f;
+            MaxDepth = 1f;
         }
 
         /// <summary>
