@@ -43,8 +43,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 var dstRow = GetRowSpan(y);
                 for (int x = 0; x < Width; x++)
                 {
-                    var scaled = srcRow[x].ToScaledVector4();
-                    dstRow[x].FromScaledVector4(scaled);
+                    var scaled = srcRow[x].ToVector4();
+                    dstRow[x].FromVector4(scaled);
                 }
             }
         }

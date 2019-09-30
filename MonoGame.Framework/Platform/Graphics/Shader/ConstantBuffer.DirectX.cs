@@ -26,7 +26,7 @@ namespace MonoGame.Framework.Graphics
         private void PlatformClear()
         {
             SharpDX.Utilities.Dispose(ref _cbuffer);
-            Dirty = true;
+            IsDirty = true;
         }
 
         internal void PlatformApply(GraphicsDevice device, ShaderStage stage, int slot)
@@ -39,10 +39,10 @@ namespace MonoGame.Framework.Graphics
             var d3dContext = GraphicsDevice._d3dContext;
 
             // Update the hardware buffer.
-            if (Dirty)
+            if (IsDirty)
             {
                 d3dContext.UpdateSubresource(_buffer, _cbuffer);
-                Dirty = false;
+                IsDirty = false;
             }
             
             // Set the buffer to the right stage.

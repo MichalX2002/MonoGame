@@ -186,37 +186,37 @@ namespace MonoGame.Framework
         Vector4 IPackedVector.ToVector4() => this;
 
         /// <inheritdoc/>
-        public void FromArgb32(Argb32 source) => this = source.ToScaledVector4();
+        public void FromArgb32(Argb32 source) => this = source.ToVector4();
 
         /// <inheritdoc />
-        public void FromBgr24(Bgr24 source) => this = source.ToScaledVector4();
+        public void FromBgr24(Bgr24 source) => this = source.ToVector4();
 
         /// <inheritdoc/>
-        public void FromBgra32(Bgra32 source) => this = source.ToScaledVector4();
+        public void FromBgra32(Bgra32 source) => this = source.ToVector4();
 
         /// <inheritdoc/>
-        public void FromBgra5551(Bgra5551 source) => this = source.ToScaledVector4();
+        public void FromBgra5551(Bgra5551 source) => this = source.ToVector4();
 
         /// <inheritdoc />
-        public void FromGray8(Gray8 source) => this = source.ToScaledVector4();
+        public void FromGray8(Gray8 source) => this = source.ToVector4();
 
         /// <inheritdoc />
-        public void FromGray16(Gray16 source) => this = source.ToScaledVector4();
+        public void FromGray16(Gray16 source) => this = source.ToVector4();
 
         /// <inheritdoc />
-        public void FromRgb24(Rgb24 source) => this = source.ToScaledVector4();
+        public void FromRgb24(Rgb24 source) => this = source.ToVector4();
 
         /// <inheritdoc/>
-        public void FromColor(Color source) => this = source.ToScaledVector4();
+        public void FromColor(Color source) => this = source.ToVector4();
 
         /// <inheritdoc/>
-        public void FromRgb48(Rgb48 source) => this = source.ToScaledVector4();
+        public void FromRgb48(Rgb48 source) => this = source.ToVector4();
 
         /// <inheritdoc/>
-        public void FromRgba64(Rgba64 source) => this = source.ToScaledVector4();
+        public void FromRgba64(Rgba64 source) => this = source.ToVector4();
 
         /// <inheritdoc />
-        public void ToColor(ref Color dest) => dest.FromScaledVector4(ToScaledVector4());
+        public void ToColor(ref Color dest) => dest.FromVector4(this);
 
         /// <summary>
         /// Performs vector addition on <paramref name="a"/> and <paramref name="b"/>.
@@ -335,20 +335,14 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="obj">The <see cref="object"/> to compare.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public override bool Equals(object obj)
-        {
-            return obj is Vector4 other ? this == other : false;
-        }
+        public override bool Equals(object obj) => obj is Vector4 other ? this == other : false;
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="Vector4"/>.
         /// </summary>
         /// <param name="other">The <see cref="Vector4"/> to compare.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public bool Equals(Vector4 other)
-        {
-            return this == other;
-        }
+        public bool Equals(Vector4 other) => this == other;
 
         /// <summary>
         /// Gets the hash code of this <see cref="Vector4"/>.
@@ -388,19 +382,13 @@ namespace MonoGame.Framework
         /// Returns the length of this <see cref="Vector4"/>.
         /// </summary>
         /// <returns>The length of this <see cref="Vector4"/>.</returns>
-        public float Length()
-        {
-            return (float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
-        }
+        public float Length() => (float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
 
         /// <summary>
         /// Returns the squared length of this <see cref="Vector4"/>.
         /// </summary>
         /// <returns>The squared length of this <see cref="Vector4"/>.</returns>
-        public float LengthSquared()
-        {
-            return (X * X) + (Y * Y) + (Z * Z) + (W * W);
-        }
+        public float LengthSquared() => (X * X) + (Y * Y) + (Z * Z) + (W * W);
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains linear interpolation of the specified vectors.
@@ -707,10 +695,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Vector4"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="Vector4"/> instance on the right of the not equal sign.</param>
         /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>	
-        public static bool operator !=(in Vector4 a, in Vector4 b)
-        {
-            return !(a == b);
-        }
+        public static bool operator !=(in Vector4 a, in Vector4 b) => !(a == b);
 
         /// <summary>
         /// Adds two vectors.
@@ -718,10 +703,8 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Vector4"/> on the left of the add sign.</param>
         /// <param name="b">Source <see cref="Vector4"/> on the right of the add sign.</param>
         /// <returns>Sum of the vectors.</returns>
-        public static Vector4 operator +(in Vector4 a, in Vector4 b)
-        {
-            return new Vector4(a.X + b.X, a.Y + b.Y, a.Z + b.Z, a.W + b.W);
-        }
+        public static Vector4 operator +(in Vector4 a, in Vector4 b) =>
+            new Vector4(a.X + b.X, a.Y + b.Y, a.Z + b.Z, a.W + b.W);
 
         /// <summary>
         /// Subtracts a <see cref="Vector4"/> from a <see cref="Vector4"/>.
@@ -729,10 +712,8 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector4"/> on the left of the sub sign.</param>
         /// <param name="right">Source <see cref="Vector4"/> on the right of the sub sign.</param>
         /// <returns>Result of the vector subtraction.</returns>
-        public static Vector4 operator -(in Vector4 left, in Vector4 right)
-        {
-            return new Vector4(left.X - right.X, left.Y - right.Y, left.Z - right.Z, left.W - right.W);
-        }
+        public static Vector4 operator -(in Vector4 left, in Vector4 right) =>
+            new Vector4(left.X - right.X, left.Y - right.Y, left.Z - right.Z, left.W - right.W);
 
         /// <summary>
         /// Multiplies the components of two vectors by each other.
@@ -740,10 +721,8 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Vector4"/> on the left of the mul sign.</param>
         /// <param name="b">Source <see cref="Vector4"/> on the right of the mul sign.</param>
         /// <returns>Result of the vector multiplication.</returns>
-        public static Vector4 operator *(in Vector4 a, in Vector4 b)
-        {
-            return new Vector4(a.X * b.X, a.Y * b.Y, a.Z * b.Z, a.W * b.W);
-        }
+        public static Vector4 operator *(in Vector4 a, in Vector4 b) =>
+            new Vector4(a.X * b.X, a.Y * b.Y, a.Z * b.Z, a.W * b.W);
 
         /// <summary>
         /// Multiplies the components of vector by a scalar.
@@ -781,10 +760,8 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector4"/> on the left of the div sign.</param>
         /// <param name="right">Divisor <see cref="Vector4"/> on the right of the div sign.</param>
         /// <returns>The result of dividing the vectors.</returns>
-        public static Vector4 operator /(in Vector4 left, in Vector4 right)
-        {
-            return new Vector4(left.X / right.X, left.Y / right.Y, left.Z / right.Z, left.W / right.W);
-        }
+        public static Vector4 operator /(in Vector4 left, in Vector4 right) =>
+            new Vector4(left.X / right.X, left.Y / right.Y, left.Z / right.Z, left.W / right.W);
 
         /// <summary>
         /// Divides the components of a <see cref="Vector4"/> by a scalar.

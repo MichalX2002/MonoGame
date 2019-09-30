@@ -1,5 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Net.Sockets;
+using System.Threading;
+using MonoGame.Utilities;
+using MonoGame.Utilities.IO;
 using MonoGame.Utilities.Memory;
 using static StbSharp.StbImage;
 
@@ -8,13 +12,15 @@ namespace MonoGame.Imaging
     public class ImageReadStream : Stream
     {
         private Stream _stream;
-        private bool _leaveOpen;
+        private StreamDisposalMethod _disposalMethod;
 
-        private byte[] _buffer;
+        private CancellationTokenRegistration? _cancellationRegistration;
+        private byte[] _readBuffer;
 
         public override bool CanSeek => false;
         public override bool CanRead => _stream.CanRead;
         public override bool CanWrite => false;
+
         public override bool CanTimeout => _stream.CanTimeout;
         public override int ReadTimeout { get => _stream.ReadTimeout; set => _stream.ReadTimeout = value; }
         public override int WriteTimeout { get => _stream.WriteTimeout; set => _stream.WriteTimeout = value; }
@@ -27,17 +33,27 @@ namespace MonoGame.Imaging
         }
 
         /// <summary>
-        /// Gets the imaging context that belongs the this stream.
+        /// Gets the imaging context that belongs the stream.
         /// </summary>
         public ReadContext Context { get; }
 
-        public ImageReadStream(Stream stream, bool leaveOpen)
+        public ImageReadStream(
+            Stream stream, CancellationToken cancellation, StreamDisposalMethod disposalType)
         {
-            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
-            _leaveOpen = leaveOpen;
+            if (disposalType != StreamDisposalMethod.Close &&
+                disposalType != StreamDisposalMethod.LeaveOpen &&
+                disposalType != StreamDisposalMethod.CancellableClose)
+                throw new ArgumentOutOfRangeException(nameof(disposalType));
 
-            _buffer = RecyclableMemoryManager.Default.GetBlock();
-            Context = new ReadContext(_stream, _buffer, ReadCallback, SkipCallback);
+            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
+            _disposalMethod = disposalType;
+
+            if (_disposalMethod == StreamDisposalMethod.CancellableClose && cancellation.CanBeCanceled)
+                _cancellationRegistration = cancellation.Register(() => _stream?.Dispose());
+
+            _readBuffer = RecyclableMemoryManager.Default.GetBlock();
+            Context = new ReadContext(
+                _stream, _readBuffer, cancellation, ReadCallback, SkipCallback);
         }
 
         public override int Read(byte[] buffer, int offset, int count) => _stream.Read(buffer, offset, count);
@@ -51,16 +67,11 @@ namespace MonoGame.Imaging
 
         private static int SkipCallback(ReadContext context, int n)
         {
+            CommonArgumentGuard.AssertAtleastZero(n, nameof(n), false);
             try
             {
                 if (n == 0)
                     return 0;
-
-                if (n < 0)
-                {
-                    Console.WriteLine("Tried to seek backwards by " + n);
-                    return 0;
-                }
 
                 if (!context.Stream.CanSeek)
                 {
@@ -92,8 +103,6 @@ namespace MonoGame.Imaging
                 return 0;
             }
         }
-
-        // TODO: add cancellation token to ReadContext
 
         private static unsafe int ReadCallback(ReadContext context, Span<byte> data)
         {
@@ -130,19 +139,22 @@ namespace MonoGame.Imaging
 
         protected override void Dispose(bool disposing)
         {
-            if (_buffer != null)
+            if (_readBuffer != null)
             {
-                RecyclableMemoryManager.Default.ReturnBlock(_buffer);
-                _buffer = null;
+                RecyclableMemoryManager.Default.ReturnBlock(_readBuffer);
+                _readBuffer = null;
             }
 
             if (disposing)
             {
-                if (!_leaveOpen)
+                if (_disposalMethod != StreamDisposalMethod.LeaveOpen)
                     _stream?.Dispose();
+
+                _cancellationRegistration?.Dispose();
             }
 
             _stream = null;
+            _cancellationRegistration = null;
 
             base.Dispose(disposing);
         }

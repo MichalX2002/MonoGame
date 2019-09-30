@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading;
 using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging.Encoding
@@ -12,13 +13,19 @@ namespace MonoGame.Imaging.Encoding
         /// <param name="frames">The collection of frames to encode.</param>
         /// <param name="stream">The stream to output to.</param>
         /// <param name="imagingConfig">The imaging configuration.</param>
+        /// <param name="cancellation">A cancellation token.</param>
         /// <param name="onProgress">Optional delegate for reporting encode progress.</param>
         public static void Encode<TPixel>(this IImageEncoder encoder,
-            ReadOnlyFrameCollection<TPixel> frames, Stream stream, ImagingConfig imagingConfig,
+            ReadOnlyFrameCollection<TPixel> frames, 
+            Stream stream, 
+            ImagingConfig imagingConfig,
+            CancellationToken cancellation, 
             EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            encoder.Encode(frames, stream, encoder.DefaultConfig, imagingConfig, onProgress);
+            encoder.Encode(
+                frames, stream, encoder.DefaultConfig,
+                imagingConfig, cancellation, onProgress);
         }
     }
 }

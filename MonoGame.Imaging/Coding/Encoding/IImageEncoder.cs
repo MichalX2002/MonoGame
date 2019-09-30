@@ -6,11 +6,6 @@ namespace MonoGame.Imaging.Encoding
 {
     /// <summary>
     /// Represents a progress update for image encoding.
-    /// <para>
-    /// If invocation returns <see langword="false"/>, 
-    /// the operation should be interrupted as soon as possible,
-    /// optionally throwing <see cref="CoderInterruptedException"/>.
-    /// </para>
     /// </summary>
     /// <typeparam name="TPixel"></typeparam>
     /// <param name="frameIndex"></param>
@@ -44,8 +39,8 @@ namespace MonoGame.Imaging.Encoding
             Stream stream,
             EncoderConfig encoderConfig,
             ImagingConfig imagingConfig,
-            EncodeProgressCallback<TPixel> onProgress = null,
-            CancellationToken? cancellationToken = null)
+            CancellationToken cancellationToken,
+            EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using MonoGame.Framework;
 using MonoGame.Imaging.Utilities;
 using MonoGame.Utilities.Memory;
@@ -13,14 +14,16 @@ namespace MonoGame.Imaging.Decoding
     {
         public abstract ImageFormat Format { get; }
         public virtual bool ImplementsAnimation => false;
+        public virtual bool SupportsCancellation => true;
 
         #region DetectFormat Abstraction
 
-        protected abstract bool TestFormat(ReadContext context);
+        protected abstract bool TestFormat(ReadContext context, ImagingConfig config);
 
-        private bool TryDetectFormat(ReadContext context, out ImageFormat format)
+        private bool TryDetectFormat(
+            ReadContext context, ImagingConfig config, out ImageFormat format)
         {
-            if (TestFormat(context))
+            if (TestFormat(context, config))
             {
                 format = Format;
                 return true;
@@ -29,17 +32,20 @@ namespace MonoGame.Imaging.Decoding
             return false;
         }
 
-        public bool TryDetectFormat(ImageReadStream stream, out ImageFormat format)
+        public bool TryDetectFormat(
+            ImageReadStream stream, ImagingConfig config, out ImageFormat format)
         {
-            return TryDetectFormat(stream.Context, out format);
+            return TryDetectFormat(stream.Context, config, out format);
         }
 
-        public unsafe bool TryDetectFormat(ReadOnlySpan<byte> data, out ImageFormat format)
+        public unsafe bool TryDetectFormat(
+            ReadOnlySpan<byte> data, ImagingConfig config, 
+            CancellationToken cancellation, out ImageFormat format)
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(data))
             {
-                var ctx = new ReadContext(ptr, data.Length);
-                return TryDetectFormat(ctx, out format);
+                var ctx = new ReadContext(ptr, data.Length, cancellation);
+                return TryDetectFormat(ctx, config, out format);
             }
         }
 
@@ -47,11 +53,13 @@ namespace MonoGame.Imaging.Decoding
 
         #region Identify Abstraction
 
-        protected abstract bool GetInfo(ReadContext context, out int w, out int h, out int n);
+        protected abstract bool GetInfo(
+            ReadContext context, ImagingConfig config, out int w, out int h, out int n);
 
-        private bool Identify(ReadContext context, out ImageInfo info)
+        private bool Identify(
+            ReadContext context, ImagingConfig config, out ImageInfo info)
         {
-            if (GetInfo(context, out int w, out int h, out int n))
+            if (GetInfo(context, config, out int w, out int h, out int n))
             {
                 info = new ImageInfo(w, h, n * 8, Format);
                 return true;
@@ -61,18 +69,19 @@ namespace MonoGame.Imaging.Decoding
         }
 
         public bool TryIdentify(
-            ImageReadStream stream, out ImageInfo info)
+            ImageReadStream stream, ImagingConfig config, out ImageInfo info)
         {
-            return Identify(stream.Context, out info);
+            return Identify(stream.Context, config, out info);
         }
 
         public unsafe bool TryIdentify(
-            ReadOnlySpan<byte> data, out ImageInfo info)
+            ReadOnlySpan<byte> data, ImagingConfig config,
+            CancellationToken cancellation, out ImageInfo info)
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(data))
             {
-                var ctx = new ReadContext(ptr, data.Length);
-                return Identify(ctx, out info);
+                var ctx = new ReadContext(ptr, data.Length, cancellation);
+                return Identify(ctx, config, out info);
             }
         }
 
@@ -81,10 +90,10 @@ namespace MonoGame.Imaging.Decoding
         #region Decode Abstraction
 
         protected abstract unsafe bool ReadFirst(
-            ImagingConfig config, ReadContext context, out void* data, ref ReadState state);
+            ReadContext context, ImagingConfig config, out void* data, ref ReadState state);
 
         protected virtual unsafe bool ReadNext(
-            ImagingConfig config, ReadContext context, out void* data, ref ReadState state)
+            ReadContext context, ImagingConfig config, out void* data, ref ReadState state)
         {
             ImagingArgumentGuard.AssertAnimationSupport(this, config);
             data = null;
@@ -123,7 +132,7 @@ namespace MonoGame.Imaging.Decoding
         }
 
         private unsafe FrameCollection<TPixel> Decode<TPixel>(
-            ImagingConfig config, ReadContext context, int? frameLimit = null,
+            ReadContext context, ImagingConfig config, int? frameLimit = null,
             DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
@@ -148,22 +157,22 @@ namespace MonoGame.Imaging.Decoding
                 void* result;
                 if (frameIndex == 0)
                 {
-                    if (!ReadFirst(config, context, out result, ref state))
+                    if (!ReadFirst(context, config, out result, ref state))
                         throw GetFailureException(context);
                 }
-                else if (!ReadNext(config, context, out result, ref state))
+                else if (!ReadNext(context, config, out result, ref state))
                 {
                     break;
                 }
 
-                ParseResult(config, frames, result, state);
+                ParseResult(frames, config, result, state);
                 frameIndex++;
             }
             return frames;
         }
 
         protected unsafe void ParseResult<TPixel>(
-            ImagingConfig config, FrameCollection<TPixel> frames,
+            FrameCollection<TPixel> frames, ImagingConfig config,
             void* result, ReadState state)
             where TPixel : unmanaged, IPixel
         {
@@ -275,7 +284,7 @@ namespace MonoGame.Imaging.Decoding
 
         protected Exception GetFailureException(ReadContext context)
         {
-            // TODO get some error message from the context
+            // TODO: get some error message from the context
             return new Exception();
         }
 
@@ -284,24 +293,24 @@ namespace MonoGame.Imaging.Decoding
         #region Public Methods
 
         public virtual unsafe FrameCollection<TPixel> Decode<TPixel>(
-            ImagingConfig config, ImageReadStream stream, int? frameLimit = null,
+            ImageReadStream stream, ImagingConfig config, int? frameLimit,
             DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             ImagingArgumentGuard.AssertValidFrameLimit(frameLimit, nameof(frameLimit));
-            return Decode(config, stream.Context, frameLimit, onProgress);
+            return Decode(stream.Context, config, frameLimit, onProgress);
         }
 
         public virtual unsafe FrameCollection<TPixel> Decode<TPixel>(
-            ImagingConfig config, ReadOnlySpan<byte> data, int? frameLimit = null,
-            DecodeProgressCallback<TPixel> onProgress = null)
+            ReadOnlySpan<byte> data, ImagingConfig config, int? frameLimit,
+            CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             ImagingArgumentGuard.AssertValidFrameLimit(frameLimit, nameof(frameLimit));
             fixed (byte* ptr = &MemoryMarshal.GetReference(data))
             {
-                var context = new ReadContext(ptr, data.Length);
-                return Decode(config, context, frameLimit, onProgress);
+                var context = new ReadContext(ptr, data.Length, cancellation);
+                return Decode(context, config, frameLimit, onProgress);
             }
         }
 

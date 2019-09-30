@@ -490,7 +490,7 @@ namespace MonoGame.Framework.Graphics
             {
                 case SurfaceFormat.Alpha8: SaveByType<Alpha8>(); break;
                 case SurfaceFormat.Single: SaveByType<PackedSingle>(); break;
-                case SurfaceFormat.Rgba32SRgb:
+                case SurfaceFormat.Rgba32SRgb: SaveByType<Rgba32SRgb>(); break;
                 case SurfaceFormat.Rgba32: SaveByType<Color>(); break;
                 case SurfaceFormat.Rg32: SaveByType<Rg32>(); break;
                 case SurfaceFormat.Rgba64: SaveByType<Rgba64>(); break;
@@ -499,9 +499,9 @@ namespace MonoGame.Framework.Graphics
                 case SurfaceFormat.Bgra5551: SaveByType<Bgra5551>(); break;
                 case SurfaceFormat.Bgra4444: SaveByType<Bgra4444>(); break;
 
-                case SurfaceFormat.Bgr32SRgb:
-                case SurfaceFormat.Bgr32:
-                case SurfaceFormat.Bgra32SRgb:
+                case SurfaceFormat.Bgr32SRgb: SaveByType<Bgr32SRgb>(); break;
+                case SurfaceFormat.Bgra32SRgb: SaveByType<Bgra32SRgb>(); break;
+                case SurfaceFormat.Bgr32: SaveByType<Bgr32>(); break;
                 case SurfaceFormat.Bgra32: SaveByType<Bgra32>(); break;
 
                 case SurfaceFormat.HalfSingle: SaveByType<HalfSingle>(); break;
@@ -529,11 +529,9 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rect">The part of the texture to save.</param>
         [CLSCompliant(false)]
         public void Save(
-            Stream stream, ImageFormat format, EncoderConfig encoderConfig,
-            int level = 0, Rectangle? rect = null)
-        {
+            Stream stream, ImageFormat format, EncoderConfig encoderConfig, 
+            int level = 0, Rectangle? rect = null) => 
             Save(ImagingConfig.Default, stream, format, encoderConfig, level, rect);
-        }
 
         /// <summary>
         /// Saves the texture to a stream with the specified format.
@@ -544,21 +542,14 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rect">The part of the texture to save.</param>
         [CLSCompliant(false)]
         public void Save(
-            Stream stream, ImageFormat format,
-            int level = 0, Rectangle? rect = null)
-        {
+            Stream stream, ImageFormat format, int level = 0, Rectangle? rect = null) => 
             Save(ImagingConfig.Default, stream, format, Image.GetDefaultEncoderConfig(format), level, rect);
-        }
 
-        public void SaveAsPng(Stream stream, int level = 0, Rectangle? rect = null)
-        {
+        public void SaveAsPng(Stream stream, int level = 0, Rectangle? rect = null) =>
             Save(stream, ImageFormat.Png, level, rect);
-        }
 
-        public void SaveAsJpeg(Stream stream, int level = 0, Rectangle? rect = null)
-        {
+        public void SaveAsJpeg(Stream stream, int level = 0, Rectangle? rect = null) =>
             Save(stream, ImageFormat.Jpeg, level, rect);
-        }
 
         /// <summary>
         /// Saves the texture to a file,
@@ -569,7 +560,8 @@ namespace MonoGame.Framework.Graphics
         /// <param name="level">The texture level to save.</param>
         /// <param name="rect">The part of the texture to save.</param>
         [CLSCompliant(false)]
-        public void Save(string filePath, ImageFormat format = null, int level = 0, Rectangle? rect = null)
+        public void Save(
+            string filePath, ImageFormat format = null, int level = 0, Rectangle? rect = null)
         {
             SaveExtensions.AssertValidPath(filePath);
 
