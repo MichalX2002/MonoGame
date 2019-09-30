@@ -61,38 +61,35 @@ namespace MonoGame.Testing
 
             _font = Content.Load<SpriteFont>("arial");
 
-            using (var file = File.OpenRead("risgrot.png"))
-            using (var img = Image.Load<Color>(file))
-            using (var cropped = img.Project(x => x.Crop(8, 0, 20, 14)))
-            {
-                using (var croppedImg = Image.LoadPixelView(cropped))
-                    croppedImg.Save("crusor.png");
+            //using (var file = File.OpenRead("risgrot.png"))
+            //using (var img = Image.Load<Color>(file))
+            //using (var cropped = img.Mutate(x => x.Crop(8, 0, 20, 14)))
+            //{
+            //    cropped.Save("crusor.png");
+            //
+            //    _customCursor = MouseCursor.FromPixels(cropped, new Point(2, 2)/*(img.GetSize() / 2).ToPoint()*/);
+            //    Mouse.SetCursor(_customCursor);
+            //}
 
-                _customCursor = MouseCursor.FromPixels(
-                    cropped, new Point(2, 2)/*(img.GetSize() / 2).ToPoint()*/);
+            string[] songs = new string[]
+            {
+                "Ending",
+                "Title Screen"
+            };
+
+            _songs = new Song[songs.Length];
+            for (int i = 0; i < songs.Length; i++)
+            {
+                _watch.Restart();
+                _songs[i] = Content.Load<Song>(songs[i]);
+                _songs[i].IsLooped = false;
+                _songs[i].Volume = 0.005f;
+                _songs[i].Pitch = 1.5f;
+                _watch.Stop();
+                Console.WriteLine("Content.Load<Song>('" + songs[i] + "') Time: " + _watch.ElapsedMilliseconds + "ms");
             }
 
-            Mouse.SetCursor(_customCursor);
-
-            //string[] songs = new string[]
-            //{
-            //    "Ending",
-            //    "Title Screen"
-            //};
-            //
-            //_songs = new Song[songs.Length];
-            //for (int i = 0; i < songs.Length; i++)
-            //{
-            //    _watch.Restart();
-            //    _songs[i] = Content.Load<Song>(songs[i]);
-            //    _songs[i].IsLooped = false;
-            //    _songs[i].Volume = 0.1f;
-            //    _songs[i].Pitch = 2f;
-            //    _watch.Stop();
-            //    Console.WriteLine("Content.Load<Song>('" + songs[i] + "') Time: " + _watch.ElapsedMilliseconds + "ms");
-            //}
-            //
-            //_songs[0].Volume *= 1.5f;
+            _songs[0].Volume *= 1.5f;
         }
 
         protected override void UnloadContent()
@@ -114,38 +111,40 @@ namespace MonoGame.Testing
             {
                 f = 0f;
 
-                //_watch.Restart();
-                //
+                _watch.Restart();
+                
                 //_lastSong?.Stop();
-                //_lastSong = _songs[songIndex++];
-                //_lastSong.Play(immediate: false);
-                //if (songIndex >= _songs.Length)
-                //    songIndex = 0;
-                //
-                //_watch.Stop();
-                //Console.WriteLine("Moved next in " + _watch.Elapsed.TotalMilliseconds.ToString("0.00") + "ms");
+                _lastSong = _songs[songIndex++];
+                _lastSong.Play(immediate: false);
+                if (songIndex >= _songs.Length)
+                    songIndex = 0;
+                
+                _watch.Stop();
+                Console.WriteLine("Moved next in " + _watch.Elapsed.TotalMilliseconds.ToString("0.00") + "ms");
 
-                int x = 0;
-                int y = 0;
-                int w = GraphicsDevice.Viewport.Width;
-                int h = GraphicsDevice.Viewport.Height;
-
-                var image = new Image<Color>(w, h);
-                GraphicsDevice.GetBackBufferData(new Rectangle(x, y, w, h), image.GetPixelSpan());
-
-                Task.Run(() =>
+                if (Directory.Exists("frames"))
                 {
-                    bool OnProgress(
-                        int frameIndex, ReadOnlyFrameCollection<Color> frames, double percentage)
-                    {
-                        Console.WriteLine("PNG write progress: " + Math.Round(percentage * 100f, 1) + "%");
-                        return false;
-                    }
+                    int x = 0;
+                    int y = 0;
+                    int w = GraphicsDevice.Viewport.Width;
+                    int h = GraphicsDevice.Viewport.Height;
 
-                    frameIndex++;
-                    image.Save("frames/yo mom " + frameIndex + ".png", null, null, OnProgress);
-                    image.Dispose();
-                });
+                    var image = new Image<Color>(w, h);
+                    GraphicsDevice.GetBackBufferData(new Rectangle(x, y, w, h), image.GetPixelSpan());
+                    
+                    Task.Run(() =>
+                    {
+                        void OnProgress(
+                            int frameIndex, ReadOnlyFrameCollection<Color> frames, double percentage)
+                        {
+                            Console.WriteLine("PNG write progress: " + Math.Round(percentage * 100f, 1) + "%");
+                        }
+
+                        frameIndex++;
+                        image.Save("frames/yo mom " + frameIndex + ".png", null, null, OnProgress);
+                        image.Dispose();
+                    });
+                }
             }
 
             base.Update(time);

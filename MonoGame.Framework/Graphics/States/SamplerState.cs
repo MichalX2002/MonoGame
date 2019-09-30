@@ -167,7 +167,7 @@ namespace MonoGame.Framework.Graphics
             BorderColor = Color.White;
             MaxAnisotropy = 4;
             MaxMipLevel = 0;
-            MipMapLevelOfDetailBias = 0.0f;
+            MipMapLevelOfDetailBias = 0f;
             ComparisonFunction = CompareFunction.Never;
             FilterMode = TextureFilterMode.Default;
         }

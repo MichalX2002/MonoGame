@@ -76,8 +76,8 @@ namespace MonoGame.Framework.Audio
                         int trackIndex = clipReader.ReadUInt16();
                     int waveBankIndex = clipReader.ReadByte();					
                     var loopCount = clipReader.ReadByte();
-                        _ = clipReader.ReadUInt16() / 100.0f;
-                        _ = clipReader.ReadUInt16() / 100.0f;
+                        _ = clipReader.ReadUInt16() / 100f;
+                        _ = clipReader.ReadUInt16() / 100f;
 
                         _events[i] = new PlayWaveEvent(
                         this,
@@ -110,8 +110,8 @@ namespace MonoGame.Framework.Audio
                         _ = (eventFlags & 0x04) == 0x04;
 
                         var loopCount = clipReader.ReadByte();
-                        _ = clipReader.ReadUInt16() / 100.0f;
-                        _ = clipReader.ReadUInt16() / 100.0f;
+                        _ = clipReader.ReadUInt16() / 100f;
+                        _ = clipReader.ReadUInt16() / 100f;
 
                         // The number of tracks for the variations.
                         var numTracks = clipReader.ReadUInt16();
@@ -175,12 +175,12 @@ namespace MonoGame.Framework.Audio
                         int trackIndex = clipReader.ReadUInt16();
                     int waveBankIndex = clipReader.ReadByte();
                     var loopCount = clipReader.ReadByte();
-                        _ = clipReader.ReadUInt16() / 100.0f;
-                        _ = clipReader.ReadUInt16() / 100.0f;
+                        _ = clipReader.ReadUInt16() / 100f;
+                        _ = clipReader.ReadUInt16() / 100f;
 
                         // Pitch variation range
-                        var minPitch = clipReader.ReadInt16() / 1000.0f;
-                    var maxPitch = clipReader.ReadInt16() / 1000.0f;
+                        var minPitch = clipReader.ReadInt16() / 1000f;
+                    var maxPitch = clipReader.ReadInt16() / 1000f;
 
                     // Volume variation range
                     var minVolume = XactHelpers.ParseVolumeFromDecibels(clipReader.ReadByte());
@@ -243,12 +243,12 @@ namespace MonoGame.Framework.Audio
                         _ = (eventFlags & 0x04) == 0x04;
 
                         var loopCount = clipReader.ReadByte();
-                        _ = clipReader.ReadUInt16() / 100.0f;
-                        _ = clipReader.ReadUInt16() / 100.0f;
+                        _ = clipReader.ReadUInt16() / 100f;
+                        _ = clipReader.ReadUInt16() / 100f;
 
                         // Pitch variation range
-                        var minPitch = clipReader.ReadInt16() / 1000.0f;
-                    var maxPitch = clipReader.ReadInt16() / 1000.0f;
+                        var minPitch = clipReader.ReadInt16() / 1000f;
+                    var maxPitch = clipReader.ReadInt16() / 1000f;
 
                     // Volume variation range
                     var minVolume = XactHelpers.ParseVolumeFromDecibels(clipReader.ReadByte());
@@ -343,7 +343,7 @@ namespace MonoGame.Framework.Audio
                     var isAdd = (eventFlags & 0x01) == 0x01;
 
                     // The replacement or additive volume.
-                    var decibles = clipReader.ReadSingle() / 100.0f;
+                    var decibles = clipReader.ReadSingle() / 100f;
                     var volume = XactHelpers.ParseVolumeFromDecibels(decibles + (isAdd ? volumeDb : 0));
 
                     // Unknown!
@@ -423,7 +423,7 @@ namespace MonoGame.Framework.Audio
 
         public void Play()
         {
-            _time = 0.0f;
+            _time = 0f;
             _nextEvent = 0;
             SetVolume(_defaultVolume);
             State = SoundState.Playing; 

@@ -6,11 +6,13 @@ using System;
 
 namespace MonoGame.Framework.Audio
 {
-    /// <summary>Manages the playback of a sound or set of sounds.</summary>
+    /// <summary>
+    /// Manages the playback of a sound or set of sounds.
+    /// </summary>
     /// <remarks>
     /// <para>Cues are comprised of one or more sounds.</para>
     /// <para>Cues also define specific properties such as pitch or volume.</para>
-    /// <para>Cues are referenced through SoundBank objects.</para>
+    /// <para>Cues are referenced through <see cref="SoundBank"/> objects.</para>
     /// </remarks>
     public class Cue : IDisposable
     {
@@ -84,7 +86,7 @@ namespace MonoGame.Framework.Audio
             _sounds = new XactSound[1];
             _sounds[0] = sound;
             _probs = new float[1];
-            _probs[0] = 1.0f;
+            _probs[0] = 1f;
             _variables = engine.CreateCueVariables();
         }
         
@@ -115,8 +117,9 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        /// <summary>Requests playback of a prepared or preparing Cue.</summary>
-        /// <remarks>Calling Play when the Cue already is playing can result in an InvalidOperationException.</remarks>
+        /// <summary>
+        /// Requests playback of a prepared or preparing <see cref="Cue"/>.
+        /// </summary>
         public void Play()
         {
             lock (_engine.UpdateLock)
@@ -137,7 +140,7 @@ namespace MonoGame.Framework.Audio
             IsPrepared = false;
         }
 
-        /// <summary>Resumes playback of a paused Cue.</summary>
+        /// <summary>Resumes playback of a paused <see cref="Cue"/>.</summary>
         public void Resume()
         {
             lock (_engine.UpdateLock)
@@ -147,8 +150,10 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        /// <summary>Stops playback of a Cue.</summary>
-        /// <param name="options">Specifies if the sound should play any pending release phases or transitions before stopping.</param>
+        /// <summary>Stops playback of a <see cref="Cue"/>.</summary>
+        /// <param name="options">
+        /// Specifies if the sound should play any pending release phases or transitions before stopping.
+        /// </param>
         public void Stop(AudioStopOptions options)
         {
             lock (_engine.UpdateLock)
@@ -167,10 +172,8 @@ namespace MonoGame.Framework.Audio
             // Do a simple linear search... which is fast
             // for as little variables as most cues have.
             for (var i = 0; i < _variables.Length; i++)
-            {
                 if (_variables[i].Name == name)
                     return i;
-            }
 
             return -1;
         }
@@ -197,8 +200,15 @@ namespace MonoGame.Framework.Audio
         /// <param name="name">Friendly name of the variable.</param>
         /// <returns>Value of the variable.</returns>
         /// <remarks>
-        /// <para>Cue-instance variables are useful when multiple instantiations of a single cue (and its associated sounds) are required (for example, a "car" cue where there may be more than one car at any given time). While a global variable allows multiple audio elements to be controlled in unison, a cue instance variable grants discrete control of each instance of a cue, even for each copy of the same cue.</para>
-        /// <para>The friendly name is a value set from the designer.</para>
+        ///The friendly name is a value set by the designer.
+        ///<para>
+        /// Cue-instance variables are useful when multiple instantiations of a single cue
+        /// (and its associated sounds) are required 
+        /// (for example, a "car" cue where there may be more than one car at any given time). 
+        /// While a global variable allows multiple audio elements to be controlled in unison,
+        /// a cue instance variable grants discrete control of each instance of a cue, 
+        /// even for each copy of the same cue.
+        /// </para>
         /// </remarks>
         public float GetVariable(string name)
         {
@@ -212,12 +222,19 @@ namespace MonoGame.Framework.Audio
             return _variables[i].Value;
         }
 
-        /// <summary>Updates the simulated 3D Audio settings calculated between an AudioEmitter and AudioListener.</summary>
-        /// <param name="listener">The listener to calculate.</param>
-        /// <param name="emitter">The emitter to calculate.</param>
+        /// <summary>
+        /// Updates the simulated 3D audio settings with
+        /// an <see cref="AudioEmitter"/> and <see cref="AudioListener"/>.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// You must call <see cref="Apply3D(AudioListener, AudioEmitter)"/> 
+        /// at least once before <see cref="Play()"/> to be able to call it in the future.
+        /// </exception>
         /// <remarks>
-        /// <para>This must be called before Play().</para>
-        /// <para>Calling this method automatically converts the sound to monoaural and sets the speaker mix for any sound played by this cue to a value calculated with the listener's and emitter's positions. Any stereo information in the sound will be discarded.</para>
+        /// Calling this method automatically converts the sound to monoaural and
+        /// sets the speaker mix for any sound played by this cue to a value calculated with
+        /// the listener's and emitter's positions.
+        /// Any stereo information in the sound will be discarded.
         /// </remarks>
         public void Apply3D(AudioListener listener, AudioEmitter emitter) 
         {
@@ -240,7 +257,7 @@ namespace MonoGame.Framework.Audio
                 _variables[i].SetValue(distance);
 
                 // Calculate the orientation.
-                if (distance > 0.0f)
+                if (distance > 0f)
                     direction /= distance;
                 var right = Vector3.Cross(listener.Up, listener.Forward);
                 var slope = Vector3.Dot(direction, listener.Forward);
@@ -270,14 +287,14 @@ namespace MonoGame.Framework.Audio
 
         private float UpdateRpcCurves()
         {
-            var volume = 1.0f;
+            var volume = 1f;
 
             // Evaluate the runtime parameter controls.
             var rpcCurves = _curSound.RpcCurves;
             if (rpcCurves.Length > 0)
             {
-                var pitch = 0.0f;
-                var reverbMix = 1.0f;
+                var pitch = 0f;
+                var reverbMix = 1f;
                 float? filterFrequency = null;
                 float? filterQFactor = null;
 
@@ -296,15 +313,15 @@ namespace MonoGame.Framework.Audio
                     switch (rpcCurve.Parameter)
                     {
                         case RpcParameter.Volume:
-                            volume *= XactHelpers.ParseVolumeFromDecibels(value / 100.0f);
+                            volume *= XactHelpers.ParseVolumeFromDecibels(value / 100f);
                             break;
 
                         case RpcParameter.Pitch:
-                            pitch += value / 1000.0f;
+                            pitch += value / 1000f;
                             break;
 
                         case RpcParameter.ReverbSend:
-                            reverbMix *= XactHelpers.ParseVolumeFromDecibels(value / 100.0f);
+                            reverbMix *= XactHelpers.ParseVolumeFromDecibels(value / 100f);
                             break;
 
                         case RpcParameter.FilterFrequency:
@@ -320,28 +337,28 @@ namespace MonoGame.Framework.Audio
                     }
                 }
 
-                pitch = MathHelper.Clamp(pitch, -1.0f, 1.0f);
-                if (volume < 0.0f)
-                    volume = 0.0f;
+                pitch = MathHelper.Clamp(pitch, -1f, 1f);
+                if (volume < 0f)
+                    volume = 0f;
 
                 _curSound.UpdateState(_engine, volume, pitch, reverbMix, filterFrequency, filterQFactor);
             }
 
             return volume;
         }
-        
+
         /// <summary>
-        /// This event is triggered when the Cue is disposed.
+        /// This event is triggered when the <see cref="Cue"/> is disposed.
         /// </summary>
         public event SimpleEventHandler<Cue> Disposing;
 
         /// <summary>
-        /// Is true if the Cue has been disposed.
+        /// Is true if the <see cref="Cue"/> has been disposed.
         /// </summary>
         public bool IsDisposed { get; internal set; }
 
         /// <summary>
-        /// Disposes the Cue.
+        /// Disposes the <see cref="Cue"/>.
         /// </summary>
         public void Dispose()
         {

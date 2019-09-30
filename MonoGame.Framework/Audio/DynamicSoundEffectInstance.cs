@@ -3,11 +3,12 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Diagnostics;
 
 namespace MonoGame.Framework.Audio
 {
     /// <summary>
-    /// A <see cref="SoundEffectInstance"/> for which the audio data is provided dynamically at run time.
+    /// <see cref="SoundEffectInstance"/> where the audio data is provided dynamically at runtime.
     /// </summary>
     public sealed partial class DynamicSoundEffectInstance : SoundEffectInstance
     {
@@ -18,7 +19,7 @@ namespace MonoGame.Framework.Audio
         private AudioChannels _channels;
         private SoundState _state;
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         /// This value has no effect on <see cref="DynamicSoundEffectInstance"/>.
@@ -46,7 +47,7 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Returns the number of audio buffers queued for playback.
+        /// Gets the number of audio buffers queued for playback.
         /// </summary>
         public int PendingBufferCount
         {
@@ -58,7 +59,7 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Returns the number of samples queued for playback.
+        /// Gets the number of samples queued for playback.
         /// </summary>
         public long BufferedSamples
         {
@@ -79,7 +80,7 @@ namespace MonoGame.Framework.Audio
 
         #endregion
 
-        #region Public Constructor
+        #region Constructors
 
         /// <param name="sampleRate">Sample rate, in Hertz (Hz).</param>
         /// <param name="channels">Number of channels (mono or stereo).</param>
@@ -166,7 +167,7 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Pauses playback of the sound instance.
+        /// Pauses playback of the instance.
         /// </summary>
         public override void Pause()
         {
@@ -176,7 +177,7 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Resumes playback of the sound instance.
+        /// Resumes playback of the instance.
         /// </summary>
         public override void Resume()
         {
@@ -197,7 +198,7 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Immediately stops playing the sound instance.
+        /// Stops the instance playback immediately.
         /// </summary>
         /// <remarks>
         /// Calling this also releases all queued buffers.
@@ -208,8 +209,7 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Stops playing the sound instance.
-        /// If the <paramref name="immediate"/> parameter is <see langword="false"/>, this call has no effect.
+        /// Stops the instance playback if the <paramref name="immediate"/> parameter is <see langword="true"/>.
         /// </summary>
         /// <remarks>
         /// Calling this releases all queued buffers.
@@ -232,7 +232,7 @@ namespace MonoGame.Framework.Audio
 
         /// <summary>
         /// Queues audio data for playback.
-        /// The data is treated as 16-bit unless the type is <see cref="float"/>,
+        /// The data is treated as 16-bit unless <typeparamref name="T"/> is of type <see cref="float"/>,
         /// then it will be treated as 32-bit.
         /// </summary>
         /// <remarks>
@@ -251,16 +251,11 @@ namespace MonoGame.Framework.Audio
             PlatformSubmitBuffer(data);
         }
 
-        public void SubmitBuffer<T>(Span<T> data)
-            where T : unmanaged
-        {
-            SubmitBuffer((ReadOnlySpan<T>)data);
-        }
-
         #endregion
 
-        #region Nonpublic Methods
+        #region Non-public Methods
 
+        [DebuggerHidden]
         private void AssertNotDisposed()
         {
             if (IsDisposed)

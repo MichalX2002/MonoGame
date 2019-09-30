@@ -9,6 +9,8 @@ using static StbSharp.StbImageWrite;
 
 namespace MonoGame.Imaging.Encoding
 {
+    // TODO: add cancellation token to Stb's WriteContext
+
     public abstract partial class StbEncoderBase : IImageEncoder
     {
         static StbEncoderBase()

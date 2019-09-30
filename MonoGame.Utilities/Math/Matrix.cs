@@ -664,21 +664,21 @@ namespace MonoGame.Framework
         {
             return new Matrix(
                 m11: (float)(2.0 / (right - (double)left)),
-                m12: 0.0f,
-                m13: 0.0f,
-                m14: 0.0f,
-                m21: 0.0f,
+                m12: 0f,
+                m13: 0f,
+                m14: 0f,
+                m21: 0f,
                 m22: (float)(2.0 / (top - (double)bottom)),
-                m23: 0.0f,
-                m24: 0.0f,
-                m31: 0.0f,
-                m32: 0.0f,
+                m23: 0f,
+                m24: 0f,
+                m31: 0f,
+                m32: 0f,
                 m33: (float)(1.0 / (zNearPlane - (double)zFarPlane)),
-                m34: 0.0f,
+                m34: 0f,
                 m41: (float)((left + (double)right) / (left - (double)right)),
                 m42: (float)((top + (double)bottom) / (bottom - (double)top)),
                 m43: (float)(zNearPlane / (zNearPlane - (double)zFarPlane)),
-                m44: 1.0f);
+                m44: 1f);
         }
 
         /// <summary>

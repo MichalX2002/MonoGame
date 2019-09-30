@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
-using MonoGame.Utilities.Memory;
 
 #if ANGLE
 using OpenTK.Graphics;
@@ -38,70 +37,53 @@ namespace MonoGame.Framework.Graphics
 
         struct ResourceHandle
         {
-            public ResourceType type;
-            public int handle;
+            public ResourceType Type { get; }
+            public int Handle;
 
-            public static ResourceHandle Texture(int handle)
+            public ResourceHandle(ResourceType type, int handle)
             {
-                return new ResourceHandle() { type = ResourceType.Texture, handle = handle };
+                Type = type;
+                Handle = handle;
             }
 
-            public static ResourceHandle Buffer(int handle)
-            {
-                return new ResourceHandle() { type = ResourceType.Buffer, handle = handle };
-            }
-
-            public static ResourceHandle Shader(int handle)
-            {
-                return new ResourceHandle() { type = ResourceType.Shader, handle = handle };
-            }
-
-            public static ResourceHandle Program(int handle)
-            {
-                return new ResourceHandle() { type = ResourceType.Program, handle = handle };
-            }
-
-            public static ResourceHandle Query(int handle)
-            {
-                return new ResourceHandle() { type = ResourceType.Query, handle = handle };
-            }
-
-            public static ResourceHandle Framebuffer(int handle)
-            {
-                return new ResourceHandle() { type = ResourceType.Framebuffer, handle = handle };
-            }
+            public static ResourceHandle Texture(int handle) => new ResourceHandle(ResourceType.Texture, handle);
+            public static ResourceHandle Buffer(int handle) => new ResourceHandle(ResourceType.Buffer, handle);
+            public static ResourceHandle Shader(int handle) => new ResourceHandle(ResourceType.Shader, handle);
+            public static ResourceHandle Program(int handle) => new ResourceHandle(ResourceType.Program, handle);
+            public static ResourceHandle Framebuffer(int handle) => new ResourceHandle(ResourceType.Framebuffer, handle);
+            public static ResourceHandle Query(int handle) => new ResourceHandle(ResourceType.Query, handle);
 
             public void Free()
             {
-                switch (type)
+                switch (Type)
                 {
                     case ResourceType.Texture:
-                        GL.DeleteTextures(1, ref handle);
+                        GL.DeleteTextures(1, ref Handle);
                         break;
 
                     case ResourceType.Buffer:
-                        GL.DeleteBuffers(1, ref handle);
+                        GL.DeleteBuffers(1, ref Handle);
                         break;
 
                     case ResourceType.Shader:
-                        if (GL.IsShader(handle))
-                            GL.DeleteShader(handle);
+                        if (GL.IsShader(Handle))
+                            GL.DeleteShader(Handle);
                         break;
 
                     case ResourceType.Program:
-                        if (GL.IsProgram(handle))
-                            GL.DeleteProgram(handle);
+                        if (GL.IsProgram(Handle))
+                            GL.DeleteProgram(Handle);
+                        break;
+
+                    case ResourceType.Framebuffer:
+                        GL.DeleteFramebuffers(1, ref Handle);
                         break;
 
 #if !GLES
                     case ResourceType.Query:
-                        GL.DeleteQueries(1, ref handle);
+                        GL.DeleteQueries(1, ref Handle);
                         break;
 #endif
-
-                    case ResourceType.Framebuffer:
-                        GL.DeleteFramebuffers(1, ref handle);
-                        break;
                 }
                 GraphicsExtensions.CheckGLError();
             }
@@ -116,8 +98,6 @@ namespace MonoGame.Framework.Graphics
 
         private ShaderProgramCache _programCache;
         private ShaderProgram _shaderProgram = null;
-
-        static readonly float[] _posFixup = new float[4];
 
         private static BufferBindingInfo[] _bufferBindingInfos;
         private static bool[] _newEnabledVertexAttributes;
@@ -136,8 +116,10 @@ namespace MonoGame.Framework.Graphics
         internal BlendState _lastBlendState = new BlendState();
         internal DepthStencilState _lastDepthStencilState = new DepthStencilState();
         internal RasterizerState _lastRasterizerState = new RasterizerState();
+
+        private DepthStencilState _clearDepthStencilState = new DepthStencilState { StencilEnable = true };
         private Vector4 _lastClearColor = Vector4.Zero;
-        private float _lastClearDepth = 1.0f;
+        private float _lastClearDepth = 1f;
         private int _lastClearStencil = 0;
 
         // Get a hashed value based on the currently bound shaders
@@ -190,7 +172,7 @@ namespace MonoGame.Framework.Graphics
                 var attrInfo = vertexDeclaration.GetAttributeInfo(shader, programHash);
 
                 var vertexStride = vertexDeclaration.VertexStride;
-                var offset = new IntPtr(vertexDeclaration.VertexStride * (baseVertex + vertexBufferBinding.VertexOffset));
+                var offset = (IntPtr)(vertexDeclaration.VertexStride * (baseVertex + vertexBufferBinding.VertexOffset));
 
                 if (!_attribsDirty &&
                     _bufferBindingInfos[slot].VertexOffset == offset &&
@@ -204,10 +186,10 @@ namespace MonoGame.Framework.Graphics
                 GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferBinding.VertexBuffer._vbo);
                 GraphicsExtensions.CheckGLError();
 
-                // If instancing is not supported, but InstanceFrequency of the buffer is not zero, throw an exception
-                if (!GraphicsCapabilities.SupportsInstancing && vertexBufferBinding.InstanceFrequency > 0)
-                    throw new PlatformNotSupportedException(
-                        "Instanced geometry drawing requires at least OpenGL 3.2 or GLES 3.2. Try upgrading your graphics drivers.");
+                // If InstanceFrequency of the buffer is not zero
+                // and instancing is not supported, throw an exception.
+                if (vertexBufferBinding.InstanceFrequency > 0)
+                    AssertSupportsInstancing();
 
                 var elements = attrInfo.Elements;
                 for (int i = 0; i < elements.Count; i++)
@@ -254,13 +236,12 @@ namespace MonoGame.Framework.Graphics
         private void PlatformSetup()
         {
             _programCache = new ShaderProgramCache(this);
+
 #if DESKTOPGL || ANGLE
             var windowInfo = new WindowInfo(SdlGameWindow.Instance.Handle);
 
             if (Context == null || Context.IsDisposed)
-            {
                 Context = GL.CreateContext(windowInfo);
-            }
 
             Context.MakeCurrent(windowInfo);
             Context.SwapInterval = PresentationParameters.PresentationInterval.GetSwapInterval();
@@ -292,56 +273,38 @@ namespace MonoGame.Framework.Graphics
 
             // try getting the context version
             // GL_MAJOR_VERSION and GL_MINOR_VERSION are GL 3.0+ only, so we need to rely on the GL_VERSION string
-            // for non GLES this string always starts with the version number in the "major.minor" format, but can be followed by
-            // multiple vendor specific characters
-            // For GLES this string is formatted as: OpenGL<space>ES<space><version number><space><vendor-specific information>
-#if GLES
+            // for non GLES this string always starts with the version number in the "major.minor" format,
+            // but can be followed by multiple vendor specific characters.
+            // For GLES this string is formatted as: OpenGL ES <version number> <vendor-specific information>
+
             try
             {
                 string version = GL.GetString(StringName.Version);
-
                 if (string.IsNullOrEmpty(version))
-                    throw new NoSuitableGraphicsDeviceException("Unable to retrieve OpenGL version");
-
+                    throw new NoSuitableGraphicsDeviceException("Unable to retrieve OpenGL version.");
+#if GLES
                 string[] versionSplit = version.Split(' ');
                 if (versionSplit.Length > 2 && versionSplit[0].Equals("OpenGL") && versionSplit[1].Equals("ES"))
                 {
-                    glMajorVersion = Convert.ToInt32(versionSplit[2].Substring(0, 1));
-                    glMinorVersion = Convert.ToInt32(versionSplit[2].Substring(2, 1));
+                    _glMajorVersion = Convert.ToInt32(versionSplit[2].Substring(0, 1));
+                    _glMinorVersion = Convert.ToInt32(versionSplit[2].Substring(2, 1));
                 }
                 else
                 {
-                    glMajorVersion = 1;
-                    glMinorVersion = 1;
+                    _glMajorVersion = 1;
+                    _glMinorVersion = 1;
                 }
+#else
+                _glMajorVersion = Convert.ToInt32(version.Substring(0, 1));
+                _glMinorVersion = Convert.ToInt32(version.Substring(2, 1));
+#endif
             }
             catch (FormatException)
             {
                 //if it fails we default to 1.1 context
-                glMajorVersion = 1;
-                glMinorVersion = 1;
-            }
-#else
-            try
-            {
-                string version = GL.GetString(StringName.Version);
-
-                if (string.IsNullOrEmpty(version))
-                    throw new NoSuitableGraphicsDeviceException("Unable to retrieve OpenGL version");
-
-                _glMajorVersion = Convert.ToInt32(version.Substring(0, 1));
-                _glMinorVersion = Convert.ToInt32(version.Substring(2, 1));
-            }
-            catch (FormatException)
-            {
-                // if it fails, we assume to be on a 1.1 context
                 _glMajorVersion = 1;
                 _glMinorVersion = 1;
             }
-
-#endif
-#if !GLES
-#endif
 
 #if !GLES
             // Initialize draw buffer attachment array
@@ -355,7 +318,8 @@ namespace MonoGame.Framework.Graphics
 
         private void PlatformInitialize()
         {
-            _viewport = new Viewport(0, 0, PresentationParameters.BackBufferWidth, PresentationParameters.BackBufferHeight);
+            _viewport = new Viewport(
+                0, 0, PresentationParameters.BackBufferWidth, PresentationParameters.BackBufferHeight);
 
             // Ensure the vertex attributes are reset
             _enabledVertexAttributes.Clear();
@@ -375,8 +339,6 @@ namespace MonoGame.Framework.Graphics
             for (int i = 0; i < _bufferBindingInfos.Length; i++)
                 _bufferBindingInfos[i] = new BufferBindingInfo(null, IntPtr.Zero, 0, -1);
         }
-
-        private DepthStencilState clearDepthStencilState = new DepthStencilState { StencilEnable = true };
 
         internal void PlatformClear(ClearOptions options, Vector4 color, float depth, int stencil)
         {
@@ -401,7 +363,7 @@ namespace MonoGame.Framework.Graphics
             // DepthStencilState.Default has the Stencil Test disabled; 
             // make sure stencil test is enabled before we clear since
             // some drivers won't clear with stencil test disabled
-            DepthStencilState = clearDepthStencilState;
+            DepthStencilState = _clearDepthStencilState;
             BlendState = BlendState.Opaque;
             ApplyState(false);
 
@@ -469,9 +431,21 @@ namespace MonoGame.Framework.Graphics
             _programCache.Dispose();
 
 #if DESKTOPGL || ANGLE
-            Context.Dispose();
+            Context?.Dispose();
             Context = null;
 #endif
+
+            _lastBlendState?.Dispose();
+            _lastBlendState = null;
+
+            _lastDepthStencilState?.Dispose();
+            _lastDepthStencilState = null;
+
+            _lastRasterizerState?.Dispose();
+            _lastRasterizerState = null;
+
+            _clearDepthStencilState?.Dispose();
+            _clearDepthStencilState = null;
         }
 
         internal void DisposeTexture(int handle)
@@ -588,7 +562,10 @@ namespace MonoGame.Framework.Graphics
             if (IsRenderTargetBound)
                 GL.Viewport(value.X, value.Y, value.Width, value.Height);
             else
-                GL.Viewport(value.X, PresentationParameters.BackBufferHeight - value.Y - value.Height, value.Width, value.Height);
+            {
+                var pp = PresentationParameters;
+                GL.Viewport(value.X, pp.BackBufferHeight - value.Y - value.Height, value.Width, value.Height);
+            }
             GraphicsExtensions.LogGLError("GraphicsDevice.Viewport_set() GL.Viewport");
 
             GL.DepthRange(value.MinDepth, value.MaxDepth);
@@ -613,9 +590,11 @@ namespace MonoGame.Framework.Graphics
 
         private class RenderTargetBindingArrayComparer : IEqualityComparer<RenderTargetBinding[]>
         {
+            public static readonly RenderTargetBindingArrayComparer Instance = new RenderTargetBindingArrayComparer();
+
             public bool Equals(RenderTargetBinding[] first, RenderTargetBinding[] second)
             {
-                if (object.ReferenceEquals(first, second))
+                if (ReferenceEquals(first, second))
                     return true;
 
                 if (first == null || second == null)
@@ -626,10 +605,9 @@ namespace MonoGame.Framework.Graphics
 
                 for (var i = 0; i < first.Length; ++i)
                 {
-                    if ((first[i].RenderTarget != second[i].RenderTarget) || (first[i].ArraySlice != second[i].ArraySlice))
-                    {
+                    if (first[i].RenderTarget != second[i].RenderTarget || 
+                        first[i].ArraySlice != second[i].ArraySlice)
                         return false;
-                    }
                 }
 
                 return true;
@@ -637,30 +615,40 @@ namespace MonoGame.Framework.Graphics
 
             public int GetHashCode(RenderTargetBinding[] array)
             {
-                if (array != null)
+                if (array == null)
+                    return 0;
+                unchecked
                 {
-                    unchecked
+                    int code = 17;
+                    foreach (var item in array)
                     {
-                        int code = 17;
-                        foreach (var item in array)
-                        {
-                            if (item.RenderTarget != null)
-                                code = code * 23 + item.RenderTarget.GetHashCode();
-                            code = code * 23 + item.ArraySlice.GetHashCode();
-                        }
-                        return code;
+                        if (item.RenderTarget != null)
+                            code = code * 23 + item.RenderTarget.GetHashCode();
+                        code = code * 23 + item.ArraySlice.GetHashCode();
                     }
+                    return code;
                 }
-                return 0;
             }
         }
 
-        // FBO cache, we create 1 FBO per RenderTargetBinding combination
-        private Dictionary<RenderTargetBinding[], int> _glFramebuffers = new Dictionary<RenderTargetBinding[], int>(new RenderTargetBindingArrayComparer());
-        // FBO cache used to resolve MSAA rendertargets, we create 1 FBO per RenderTargetBinding combination
-        private Dictionary<RenderTargetBinding[], int> _glResolveFramebuffers = new Dictionary<RenderTargetBinding[], int>(new RenderTargetBindingArrayComparer());
+        /// <summary>
+        /// FBO cache, we create 1 FBO per RenderTargetBinding combination.
+        /// </summary>
+        private Dictionary<RenderTargetBinding[], int> _glFramebuffers = 
+            new Dictionary<RenderTargetBinding[], int>(RenderTargetBindingArrayComparer.Instance);
 
-        internal void PlatformCreateRenderTarget(IRenderTarget renderTarget, int width, int height, bool mipMap, SurfaceFormat preferredFormat, DepthFormat preferredDepthFormat, int preferredMultiSampleCount, RenderTargetUsage usage)
+        /// <summary>
+        /// FBO cache used to resolve MSAA rendertargets, we create 1 FBO per RenderTargetBinding combination
+        /// </summary>
+        private Dictionary<RenderTargetBinding[], int> _glResolveFramebuffers =
+            new Dictionary<RenderTargetBinding[], int>(RenderTargetBindingArrayComparer.Instance);
+
+        internal void PlatformCreateRenderTarget(
+            IRenderTarget renderTarget, int width, int height, bool mipMap,
+            SurfaceFormat preferredFormat,
+            DepthFormat preferredDepthFormat,
+            int preferredMultiSampleCount,
+            RenderTargetUsage usage)
         {
             void Create()
             {
@@ -672,7 +660,8 @@ namespace MonoGame.Framework.Graphics
                 {
                     _framebufferHelper.GenRenderbuffer(out color);
                     _framebufferHelper.BindRenderbuffer(color);
-                    _framebufferHelper.RenderbufferStorageMultisample(preferredMultiSampleCount, (int)RenderbufferStorage.Rgba8, width, height);
+                    _framebufferHelper.RenderbufferStorageMultisample(
+                        preferredMultiSampleCount, (int)RenderbufferStorage.Rgba8, width, height);
                 }
 
                 if (preferredDepthFormat != DepthFormat.None)
@@ -722,7 +711,9 @@ namespace MonoGame.Framework.Graphics
                     {
                         _framebufferHelper.GenRenderbuffer(out depth);
                         _framebufferHelper.BindRenderbuffer(depth);
-                        _framebufferHelper.RenderbufferStorageMultisample(preferredMultiSampleCount, (int)depthInternalFormat, width, height);
+                        _framebufferHelper.RenderbufferStorageMultisample(
+                            preferredMultiSampleCount, (int)depthInternalFormat, width, height);
+
                         if (preferredDepthFormat == DepthFormat.Depth24Stencil8)
                         {
                             stencil = depth;
@@ -730,7 +721,8 @@ namespace MonoGame.Framework.Graphics
                             {
                                 _framebufferHelper.GenRenderbuffer(out stencil);
                                 _framebufferHelper.BindRenderbuffer(stencil);
-                                _framebufferHelper.RenderbufferStorageMultisample(preferredMultiSampleCount, (int)stencilInternalFormat, width, height);
+                                _framebufferHelper.RenderbufferStorageMultisample(
+                                    preferredMultiSampleCount, (int)stencilInternalFormat, width, height);
                             }
                         }
                     }
@@ -818,20 +810,26 @@ namespace MonoGame.Framework.Graphics
                     for (var i = 0; i < RenderTargetCount; ++i)
                     {
                         var rt = _currentRenderTargetBindings[i].RenderTarget as IRenderTarget;
-                        _framebufferHelper.FramebufferTexture2D((int)(FramebufferAttachment.ColorAttachment0 + i), (int)rt.GetFramebufferTarget(renderTargetBinding), rt.GLTexture);
+                        var texTarget = (int)rt.GetFramebufferTarget(renderTargetBinding);
+                        _framebufferHelper.FramebufferTexture2D((int)(
+                            FramebufferAttachment.ColorAttachment0 + i), texTarget, rt.GLTexture);
                     }
-                    _glResolveFramebuffers.Add((RenderTargetBinding[])_currentRenderTargetBindings.Clone(), glResolveFramebuffer);
+                    _glResolveFramebuffers.Add(
+                        (RenderTargetBinding[])_currentRenderTargetBindings.Clone(), glResolveFramebuffer);
                 }
                 else
                 {
                     _framebufferHelper.BindFramebuffer(glResolveFramebuffer);
                 }
-                // The only fragment operations which affect the resolve are the pixel ownership test, the scissor test, and dithering.
+
+                // The only fragment operations which affect the resolve are 
+                // the pixel ownership test, the scissor test, and dithering.
                 if (_lastRasterizerState.ScissorTestEnable)
                 {
                     GL.Disable(EnableCap.ScissorTest);
                     GraphicsExtensions.CheckGLError();
                 }
+
                 var glFramebuffer = _glFramebuffers[_currentRenderTargetBindings];
                 _framebufferHelper.BindReadFramebuffer(glFramebuffer);
                 for (var i = 0; i < RenderTargetCount; ++i)
@@ -840,8 +838,11 @@ namespace MonoGame.Framework.Graphics
                     renderTarget = renderTargetBinding.RenderTarget as IRenderTarget;
                     _framebufferHelper.BlitFramebuffer(i, renderTarget.Width, renderTarget.Height);
                 }
-                if (renderTarget.RenderTargetUsage == RenderTargetUsage.DiscardContents && _framebufferHelper.SupportsInvalidateFramebuffer)
+
+                if (renderTarget.RenderTargetUsage == RenderTargetUsage.DiscardContents &&
+                    _framebufferHelper.SupportsInvalidateFramebuffer)
                     _framebufferHelper.InvalidateReadFramebuffer();
+
                 if (_lastRasterizerState.ScissorTestEnable)
                 {
                     GL.Enable(EnableCap.ScissorTest);
@@ -870,8 +871,9 @@ namespace MonoGame.Framework.Graphics
 
                 var renderTargetBinding = _currentRenderTargetBindings[0];
                 var renderTarget = renderTargetBinding.RenderTarget as IRenderTarget;
-                _framebufferHelper.FramebufferRenderbuffer((int)FramebufferAttachment.DepthAttachment, renderTarget.GLDepthBuffer, 0);
-                _framebufferHelper.FramebufferRenderbuffer((int)FramebufferAttachment.StencilAttachment, renderTarget.GLStencilBuffer, 0);
+                var depthBuffer = renderTarget.GLDepthBuffer;
+                _framebufferHelper.FramebufferRenderbuffer((int)FramebufferAttachment.DepthAttachment, depthBuffer, 0);
+                _framebufferHelper.FramebufferRenderbuffer((int)FramebufferAttachment.StencilAttachment, depthBuffer, 0);
 
                 for (int i = 0; i < RenderTargetCount; ++i)
                 {
@@ -881,7 +883,9 @@ namespace MonoGame.Framework.Graphics
                     if (renderTarget.GLColorBuffer != renderTarget.GLTexture)
                         _framebufferHelper.FramebufferRenderbuffer(attachement, renderTarget.GLColorBuffer, 0);
                     else
-                        _framebufferHelper.FramebufferTexture2D(attachement, (int)renderTarget.GetFramebufferTarget(renderTargetBinding), renderTarget.GLTexture, 0, renderTarget.MultiSampleCount);
+                        _framebufferHelper.FramebufferTexture2D(
+                            attachement, (int)renderTarget.GetFramebufferTarget(renderTargetBinding),
+                            renderTarget.GLTexture, 0, renderTarget.MultiSampleCount);
                 }
 
 #if DEBUG
@@ -966,31 +970,30 @@ namespace MonoGame.Framework.Graphics
             // 1.0 or -1.0 to turn the rendering upside down for offscreen rendering. PosFixup.x
             // contains 1.0 to allow a mad.
 
-            _posFixup[0] = 1.0f;
-            _posFixup[1] = 1.0f;
-            if (UseHalfPixelOffset)
+            float* posFixup = stackalloc float[4];
+            posFixup[0] = 1f;
+            posFixup[1] = 1f;
+
+            if (!GraphicsDeviceManager.UseStandardPixelAddressing)
             {
-                _posFixup[2] = (63.0f / 64.0f) / Viewport.Width;
-                _posFixup[3] = -(63.0f / 64.0f) / Viewport.Height;
+                posFixup[2] = (63.0f / 64.0f) / Viewport.Width;
+                posFixup[3] = -(63.0f / 64.0f) / Viewport.Height;
             }
             else
             {
-                _posFixup[2] = 0f;
-                _posFixup[3] = 0f;
+                posFixup[2] = 0f;
+                posFixup[3] = 0f;
             }
 
             //If we have a render target bound (rendering offscreen)
             if (IsRenderTargetBound)
             {
                 //flip vertically
-                _posFixup[1] *= -1.0f;
-                _posFixup[3] *= -1.0f;
+                posFixup[1] *= -1f;
+                posFixup[3] *= -1f;
             }
 
-            fixed (float* floatPtr = _posFixup)
-            {
-                GL.Uniform4(posFixupLoc, 1, floatPtr);
-            }
+            GL.Uniform4fv(posFixupLoc, 1, posFixup);
             GraphicsExtensions.CheckGLError();
         }
 
@@ -1010,10 +1013,10 @@ namespace MonoGame.Framework.Graphics
             if (force || BlendFactor != _lastBlendState.BlendFactor)
             {
                 GL.BlendColor(
-                    BlendFactor.R / 255.0f,
-                    BlendFactor.G / 255.0f,
-                    BlendFactor.B / 255.0f,
-                    BlendFactor.A / 255.0f);
+                    BlendFactor.R / 255f,
+                    BlendFactor.G / 255f,
+                    BlendFactor.B / 255f,
+                    BlendFactor.A / 255f);
                 GraphicsExtensions.CheckGLError();
                 _lastBlendState.BlendFactor = BlendFactor;
             }
@@ -1127,7 +1130,8 @@ namespace MonoGame.Framework.Graphics
 
         private unsafe void PlatformDrawUserIndexedPrimitives<TVertex, TIndex>(
             PrimitiveType type, ReadOnlySpan<TVertex> vertices,
-            IndexElementSize indexElementSize, ReadOnlySpan<TIndex> indices, int primitiveCount, VertexDeclaration declaration)
+            IndexElementSize indexElementSize, ReadOnlySpan<TIndex> indices,
+            int primitiveCount, VertexDeclaration declaration)
             where TVertex : unmanaged
             where TIndex : unmanaged
         {
@@ -1163,12 +1167,10 @@ namespace MonoGame.Framework.Graphics
         }
 
         private void PlatformDrawInstancedPrimitives(
-            PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount, int instanceCount)
+            PrimitiveType primitiveType, int baseVertex,
+            int startIndex, int primitiveCount, int instanceCount)
         {
-            if (!GraphicsCapabilities.SupportsInstancing)
-                throw new PlatformNotSupportedException(
-                    "Instanced geometry drawing requires at least OpenGL 3.2 or GLES 3.2. Try upgrading your graphics card drivers.");
-
+            AssertSupportsInstancing();
             ApplyState(true);
 
             var shortIndices = _indexBuffer.IndexElementSize == IndexElementSize.SixteenBits;
@@ -1181,6 +1183,15 @@ namespace MonoGame.Framework.Graphics
 
             GL.DrawElementsInstanced(target, indexElementCount, indexElementType, indexOffsetInBytes, instanceCount);
             GraphicsExtensions.CheckGLError();
+        }
+
+        [DebuggerHidden]
+        private void AssertSupportsInstancing()
+        {
+            if (!GraphicsCapabilities.SupportsInstancing)
+                throw new PlatformNotSupportedException(
+                    "Instanced geometry drawing requires at least OpenGL 3.2 or GLES 3.2. " +
+                    "Try upgrading your graphics card drivers.");
         }
 
         private unsafe void PlatformGetBackBufferData<T>(Rectangle rect, Span<T> destination)

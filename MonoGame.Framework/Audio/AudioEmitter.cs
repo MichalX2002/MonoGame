@@ -16,7 +16,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>Initializes a new AudioEmitter instance.</summary>
 		public AudioEmitter ()
 		{
-            _dopplerScale = 1.0f;
+            _dopplerScale = 1f;
 			Forward = Vector3.Forward;
 			Position = Vector3.Zero;
 			Up = Vector3.Up;
@@ -36,8 +36,8 @@ namespace MonoGame.Framework.Audio
 
             set
             {
-                if (value < 0.0f)
-                    throw new ArgumentOutOfRangeException(nameof(value), "must be greater than or equal to 0.0f");
+                if (value < 0f)
+                    throw new ArgumentOutOfRangeException(nameof(value), "must be greater than or equal to 0f");
 
                 _dopplerScale = value;
             }

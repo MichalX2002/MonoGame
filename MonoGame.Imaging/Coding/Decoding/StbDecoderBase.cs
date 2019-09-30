@@ -137,10 +137,11 @@ namespace MonoGame.Imaging.Decoding
                 {
                     Rectangle? rectangle = null;
                     if (r.HasValue)
-                        rectangle = new Rectangle(r.Value.X, r.Value.Y, r.Value.W, r.Value.H);
-                    
-                    if (!onProgress.Invoke(frameIndex, frames, progress, rectangle))
-                        throw new CoderInterruptedException(Format);
+                    {
+                        var rect = r.Value;
+                        rectangle = new Rectangle(rect.X, rect.Y, rect.W, rect.H);
+                    }
+                    onProgress.Invoke(frameIndex, frames, progress, rectangle);
                 };
                 ReadState state = CreateReadState(typeof(TPixel), progressCallback);
 
@@ -180,19 +181,19 @@ namespace MonoGame.Imaging.Decoding
                     case 1:
                         var gray8Ptr = (Gray8*)result;
                         for (int p = 0; p < pixelCount; p++)
-                            dstPtr[p].FromScaledVector4(gray8Ptr[p].ToScaledVector4());
+                            dstPtr[p].FromVector4(gray8Ptr[p].ToVector4());
                         break;
 
                     case 2:
                         var gray16Ptr = (Gray16*)result;
                         for (int p = 0; p < pixelCount; p++)
-                            dstPtr[p].FromScaledVector4(gray16Ptr[p].ToScaledVector4());
+                            dstPtr[p].FromVector4(gray16Ptr[p].ToVector4());
                         break;
 
                     case 3:
                         var rgbPtr = (Rgb24*)result;
                         for (int p = 0; p < pixelCount; p++)
-                            dstPtr[p].FromScaledVector4(rgbPtr[p].ToScaledVector4());
+                            dstPtr[p].FromVector4(rgbPtr[p].ToVector4());
                         break;
 
                     case 4:
@@ -232,13 +233,13 @@ namespace MonoGame.Imaging.Decoding
                             {
                                 var src16 = (Rgba64*)result;
                                 for (int p = 0; p < pixelCount; p++)
-                                    dstPtr[p].FromScaledVector4(src16[p].ToScaledVector4());
+                                    dstPtr[p].FromVector4(src16[p].ToVector4());
                             }
                             else
                             {
                                 var src8 = (Color*)result;
                                 for (int p = 0; p < pixelCount; p++)
-                                    dstPtr[p].FromScaledVector4(src8[p].ToScaledVector4());
+                                    dstPtr[p].FromVector4(src8[p].ToVector4());
                             }
                         }
                         break;

@@ -182,9 +182,9 @@ namespace MonoGame.Framework
             float half;
 
             float scale = matrix.M11 + matrix.M22 + matrix.M33;
-            if (scale > 0.0f)
+            if (scale > 0f)
             {
-                sqrt = (float)Math.Sqrt(scale + 1.0f);
+                sqrt = (float)Math.Sqrt(scale + 1f);
                 quaternion.W = sqrt * 0.5f;
                 sqrt = 0.5f / sqrt;
 
@@ -196,7 +196,7 @@ namespace MonoGame.Framework
 
             if ((matrix.M11 >= matrix.M22) && (matrix.M11 >= matrix.M33))
             {
-                sqrt = (float)Math.Sqrt(1.0f + matrix.M11 - matrix.M22 - matrix.M33);
+                sqrt = (float)Math.Sqrt(1f + matrix.M11 - matrix.M22 - matrix.M33);
                 half = 0.5f / sqrt;
 
                 quaternion.X = 0.5f * sqrt;
@@ -208,7 +208,7 @@ namespace MonoGame.Framework
 
             if (matrix.M22 > matrix.M33)
             {
-                sqrt = (float)Math.Sqrt(1.0f + matrix.M22 - matrix.M11 - matrix.M33);
+                sqrt = (float)Math.Sqrt(1f + matrix.M22 - matrix.M11 - matrix.M33);
                 half = 0.5f / sqrt;
 
                 quaternion.X = (matrix.M21 + matrix.M12) * half;
@@ -218,7 +218,7 @@ namespace MonoGame.Framework
                 return quaternion;
             }
 
-            sqrt = (float)Math.Sqrt(1.0f + matrix.M33 - matrix.M11 - matrix.M22);
+            sqrt = (float)Math.Sqrt(1f + matrix.M33 - matrix.M11 - matrix.M22);
             half = 0.5f / sqrt;
 
             quaternion.X = (matrix.M31 + matrix.M13) * half;

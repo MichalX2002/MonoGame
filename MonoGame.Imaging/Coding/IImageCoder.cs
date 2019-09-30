@@ -18,5 +18,11 @@ namespace MonoGame.Imaging
         /// </para>
         /// </summary>
         bool ImplementsAnimation { get; }
+
+        /// <summary>
+        /// Gets whether a coding operation can be cancelled at the
+        /// request of the supplied <see cref="System.Threading.CancellationToken"/>.
+        /// </summary>
+        bool SupportsCancellation { get; }
     }
 }

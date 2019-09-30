@@ -193,7 +193,7 @@ namespace MonoGame.Framework.Graphics
 				return;
 			}
 
-			var width = 0.0f;
+			var width = 0f;
 			var finalLineHeight = (float)LineSpacing;
             
 			var offset = Vector2.Zero;

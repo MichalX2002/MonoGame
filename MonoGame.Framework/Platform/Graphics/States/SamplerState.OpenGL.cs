@@ -31,7 +31,7 @@ namespace MonoGame.Framework.Graphics
       case TextureFilter.Point:
 				if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
                 {
-                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1.0f);
+                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
                 }
         GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureMinFilter, (int)(useMipmaps ? TextureMinFilter.NearestMipmapNearest : TextureMinFilter.Nearest));
@@ -42,7 +42,7 @@ namespace MonoGame.Framework.Graphics
       case TextureFilter.Linear:
 				if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
                 {
-                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1.0f);
+                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
                 }
         GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureMinFilter, (int)(useMipmaps ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
@@ -53,7 +53,7 @@ namespace MonoGame.Framework.Graphics
       case TextureFilter.Anisotropic:
 				if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
                 {
-                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, MathHelper.Clamp(MaxAnisotropy, 1.0f, GraphicsDevice.GraphicsCapabilities.MaxTextureAnisotropy));
+                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, MathHelper.Clamp(MaxAnisotropy, 1f, GraphicsDevice.GraphicsCapabilities.MaxTextureAnisotropy));
                     GraphicsExtensions.CheckGLError();
                 }
         GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureMinFilter, (int)(useMipmaps ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
@@ -64,7 +64,7 @@ namespace MonoGame.Framework.Graphics
       case TextureFilter.PointMipLinear:
 				if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
                 {
-                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1.0f);
+                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
                 }
         GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureMinFilter, (int)(useMipmaps ? TextureMinFilter.NearestMipmapLinear : TextureMinFilter.Nearest));
@@ -75,7 +75,7 @@ namespace MonoGame.Framework.Graphics
             case TextureFilter.LinearMipPoint:
 				if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
                 {
-                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1.0f);
+                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
                 }
                 GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureMinFilter, (int)(useMipmaps ? TextureMinFilter.LinearMipmapNearest : TextureMinFilter.Linear));
@@ -86,7 +86,7 @@ namespace MonoGame.Framework.Graphics
             case TextureFilter.MinLinearMagPointMipLinear:
 				if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
                 {
-                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1.0f);
+                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
                 }
                 GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureMinFilter, (int)(useMipmaps ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
@@ -97,7 +97,7 @@ namespace MonoGame.Framework.Graphics
             case TextureFilter.MinLinearMagPointMipPoint:
 				if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
                 {
-                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1.0f);
+                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
                 }
                 GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureMinFilter, (int)(useMipmaps ? TextureMinFilter.LinearMipmapNearest: TextureMinFilter.Linear));
@@ -108,7 +108,7 @@ namespace MonoGame.Framework.Graphics
             case TextureFilter.MinPointMagLinearMipLinear:
 				if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
                 {
-                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1.0f);
+                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
                 }
                 GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureMinFilter, (int)(useMipmaps ? TextureMinFilter.NearestMipmapLinear: TextureMinFilter.Nearest));
@@ -119,7 +119,7 @@ namespace MonoGame.Framework.Graphics
             case TextureFilter.MinPointMagLinearMipPoint:
 				if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
                 {
-                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1.0f);
+                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
                 }
                 GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureMinFilter, (int)(useMipmaps ? TextureMinFilter.NearestMipmapNearest: TextureMinFilter.Nearest));
@@ -138,10 +138,10 @@ namespace MonoGame.Framework.Graphics
             GraphicsExtensions.CheckGLError();
 #if !GLES
             // Border color is not supported by glTexParameter in OpenGL ES 2.0
-            _openGLBorderColor[0] = BorderColor.R / 255.0f;
-            _openGLBorderColor[1] = BorderColor.G / 255.0f;
-            _openGLBorderColor[2] = BorderColor.B / 255.0f;
-            _openGLBorderColor[3] = BorderColor.A / 255.0f;
+            _openGLBorderColor[0] = BorderColor.R / 255f;
+            _openGLBorderColor[1] = BorderColor.G / 255f;
+            _openGLBorderColor[2] = BorderColor.B / 255f;
+            _openGLBorderColor[3] = BorderColor.A / 255f;
             GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureBorderColor, _openGLBorderColor);
             GraphicsExtensions.CheckGLError();
             // LOD bias is not supported by glTexParameter in OpenGL ES 2.0

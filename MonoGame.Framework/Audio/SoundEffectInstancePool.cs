@@ -88,9 +88,9 @@ namespace MonoGame.Framework.Audio
                     // Reset used instance to the "default" state.
                     inst._isPooled = true;
                     inst._isXAct = forXAct;
-                    inst.Volume = 1.0f;
-                    inst.Pan = 0.0f;
-                    inst.Pitch = 0.0f;
+                    inst.Volume = 1f;
+                    inst.Pan = 0f;
+                    inst.Pitch = 0f;
                     inst.IsLooped = false;
                     inst.PlatformSetReverbMix(0);
                     inst.PlatformClearFilter();

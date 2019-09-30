@@ -478,7 +478,7 @@ namespace MonoGame.Framework.Input.Touch
                             // of about 100 to classify this as a flick.
                             var dist = Vector2.Distance(touch.Position, touch.PressPosition);
                             if (dist > TapJitterTolerance &&
-                                    touch.Velocity.Length() > 100.0f &&
+                                    touch.Velocity.Length() > 100f &&
                                     GestureIsEnabled(GestureType.Flick))
                             {
                                 GestureList.Enqueue(new GestureSample(

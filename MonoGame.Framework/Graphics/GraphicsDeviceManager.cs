@@ -120,7 +120,7 @@ namespace MonoGame.Framework
             }
             catch (Exception ex)
             {
-                throw new NoSuitableGraphicsDeviceException("Failed to create graphics device!", ex);
+                throw new NoSuitableGraphicsDeviceException("Failed to create graphics device.", ex);
             }
         }
 

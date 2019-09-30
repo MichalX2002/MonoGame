@@ -27,7 +27,7 @@ namespace MonoGame.Framework
     {
         /// <summary>
         ///     The <see cref="RectangleF" /> with <see cref="X" />, <see cref="Y" />, <see cref="Width" /> and
-        ///     <see cref="Height" /> all set to <code>0.0f</code>.
+        ///     <see cref="Height" /> all set to <code>0f</code>.
         /// </summary>
         public static readonly RectangleF Empty = new RectangleF();
 
@@ -74,7 +74,7 @@ namespace MonoGame.Framework
         /// <summary>
         ///     Gets a value indicating whether this <see cref="RectangleF" /> has a <see cref="X" />, <see cref="Y" />,
         ///     <see cref="Width" />,
-        ///     <see cref="Height" /> all equal to <code>0.0f</code>.
+        ///     <see cref="Height" /> all equal to <code>0f</code>.
         /// </summary>
         /// <value>
         ///     <c>true</c> if this instance is empty; otherwise, <c>false</c>.
@@ -319,7 +319,7 @@ namespace MonoGame.Framework
         public float SquaredDistanceTo(PointF point)
         {
             // Real-Time Collision Detection, Christer Ericson, 2005. Chapter 5.1.3.1; Basic Primitive Tests - Closest-point Computations - Distance of Point to AABB.  pg 130-131
-            var squaredDistance = 0.0f;
+            var squaredDistance = 0f;
             var minimum = TopLeft;
             var maximum = BottomRight;
 

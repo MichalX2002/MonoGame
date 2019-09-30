@@ -19,7 +19,7 @@ namespace MonoGame.Framework.Media
             get => _masterVolume;
             set
             {
-                if (value < 0.0f || value > 1.0f)
+                if (value < 0f || value > 1f)
                     throw new ArgumentOutOfRangeException();
 
                 if (_masterVolume != value)

@@ -1,5 +1,6 @@
-// Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+// MonoGame - Copyright (C) The MonoGame Team
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 using System;
 using MonoGame.Framework;
@@ -7,159 +8,153 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed pixel type containing four 16-bit signed integer values.
-    /// <para>
-    /// Ranges from [-37267, -37267, -37267, -37267] to [37267, 37267, 37267, 37267] in vector form.
-    /// </para>
+    /// Packed vector type containing four 16-bit signed integer values.
     /// </summary>
-    public struct Short4 : IPixel, IPackedVector<ulong>
+    public struct Short4 : IPackedVector<ulong>, IEquatable<Short4>
     {
-        // Largest two byte positive number 0xFFFF >> 1;
-        private const float MaxPos = 0x7FFF;
-
-        // Two's complement
-        private const float MinNeg = ~(int)MaxPos;
-
-        private static readonly Vector4 Max = new Vector4(MaxPos);
-        private static readonly Vector4 Min = new Vector4(MinNeg);
+        ulong packedValue;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Short4"/> struct.
+        /// Initializes a new instance of the Short4 class.
         /// </summary>
-        /// <param name="x">The x-component.</param>
-        /// <param name="y">The y-component.</param>
-        /// <param name="z">The z-component.</param>
-        /// <param name="w">The w-component.</param>
+        /// <param name="vector">A vector containing the initial values for the components of the Short4 structure.</param>
+        public Short4(Vector4 vector)
+        {
+            packedValue = Pack(ref vector);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the Short4 class.
+        /// </summary>
+        /// <param name="x">Initial value for the x component.</param>
+        /// <param name="y">Initial value for the y component.</param>
+        /// <param name="z">Initial value for the z component.</param>
+        /// <param name="w">Initial value for the w component.</param>
         public Short4(float x, float y, float z, float w)
-            : this(new Vector4(x, y, z, w))
         {
+            var vector = new Vector4(x, y, z, w);
+            packedValue = Pack(ref vector);
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Short4"/> struct.
+        /// Compares the current instance of a class to another instance to determine whether they are different.
         /// </summary>
-        /// <param name="vector">A vector containing the initial values for the components.</param>
-        public Short4(Vector4 vector) => PackedValue = Pack(ref vector);
-
-        /// <inheritdoc/>
-        public ulong PackedValue { get; set; }
+        /// <param name="a">The object to the left of the equality operator.</param>
+        /// <param name="b">The object to the right of the equality operator.</param>
+        /// <returns>true if the objects are different; false otherwise.</returns>
+        public static bool operator !=(Short4 a, Short4 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
 
         /// <summary>
-        /// Compares two <see cref="Short4"/> objects for equality.
+        /// Compares the current instance of a class to another instance to determine whether they are the same.
         /// </summary>
-        /// <param name="left">The <see cref="Short4"/> on the left side of the operand.</param>
-        /// <param name="right">The <see cref="Short4"/> on the right side of the operand.</param>
-        /// <returns>
-        /// True if the <paramref name="left"/> parameter is not equal to the <paramref name="right"/> parameter; otherwise, false.
-        /// </returns>
-        public static bool operator ==(Short4 left, Short4 right) => left.Equals(right);
+        /// <param name="a">The object to the left of the equality operator.</param>
+        /// <param name="b">The object to the right of the equality operator.</param>
+        /// <returns>true if the objects are the same; false otherwise.</returns>
+        public static bool operator ==(Short4 a, Short4 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
         /// <summary>
-        /// Compares two <see cref="Short4"/> objects for equality.
+        /// Directly gets or sets the packed representation of the value.
         /// </summary>
-        /// <param name="left">The <see cref="Short4"/> on the left side of the operand.</param>
-        /// <param name="right">The <see cref="Short4"/> on the right side of the operand.</param>
-        /// <returns>
-        /// True if the <paramref name="left"/> parameter is not equal to the <paramref name="right"/> parameter; otherwise, false.
-        /// </returns>
-        public static bool operator !=(Short4 left, Short4 right) => !left.Equals(right);
-
-        /// <inheritdoc/>
-        public void FromScaledVector4(Vector4 vector)
+        /// <value>The packed representation of the value.</value>
+        [CLSCompliant(false)]
+        public ulong PackedValue
         {
-            vector *= 65534F;
-            vector -= new Vector4(32767F);
-            FromVector4(vector);
+            get
+            {
+                return packedValue;
+            }
+            set
+            {
+                packedValue = value;
+            }
         }
 
-        /// <inheritdoc/>
-        public Vector4 ToScaledVector4()
+        /// <summary>
+        /// Returns a value that indicates whether the current instance is equal to a specified object.
+        /// </summary>
+        /// <param name="obj">The object with which to make the comparison.</param>
+        /// <returns>true if the current instance is equal to the specified object; false otherwise.</returns>
+        public override bool Equals(object obj)
         {
-            var scaled = ToVector4();
-            scaled += new Vector4(32767F);
-            scaled /= 65534F;
-            return scaled;
+            if (obj is Short4)
+                return this == (Short4)obj;
+            return false;
         }
 
-        /// <inheritdoc />
-        public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
-
-        /// <inheritdoc />
-        public Vector4 ToVector4()
+        /// <summary>
+        /// Returns a value that indicates whether the current instance is equal to a specified object.
+        /// </summary>
+        /// <param name="other">The object with which to make the comparison.</param>
+        /// <returns>true if the current instance is equal to the specified object; false otherwise.</returns>
+        public bool Equals(Short4 other)
         {
-            return new Vector4(
-                (short)(PackedValue & 0xFFFF),
-                (short)((PackedValue >> 0x10) & 0xFFFF),
-                (short)((PackedValue >> 0x20) & 0xFFFF),
-                (short)((PackedValue >> 0x30) & 0xFFFF));
+            return this == other;
         }
-
-        /// <inheritdoc />
-        public void FromArgb32(Argb32 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromBgr24(Bgr24 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromBgra32(Bgra32 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromBgra5551(Bgra5551 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void ToColor(ref Color dest)
-        {
-            dest.FromScaledVector4(ToScaledVector4());
-        }
-
-        /// <inheritdoc/>
-        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public override bool Equals(object obj) => obj is Short4 other && Equals(other);
-
-        /// <inheritdoc />
-        public bool Equals(Short4 other) => PackedValue.Equals(other);
 
         /// <summary>
         /// Gets the hash code for the current instance.
         /// </summary>
         /// <returns>Hash code for the instance.</returns>
-        public override int GetHashCode() => PackedValue.GetHashCode();
-
-        /// <inheritdoc />
-        public override string ToString()
+        public override int GetHashCode()
         {
-            var vector = ToVector4();
-            return FormattableString.Invariant($"Short4({vector.X:#0.##}, {vector.Y:#0.##}, {vector.Z:#0.##}, {vector.W:#0.##})");
+            return packedValue.GetHashCode();
         }
 
-        private static ulong Pack(ref Vector4 vector)
+        /// <summary>
+        /// Returns a string representation of the current instance.
+        /// </summary>
+        /// <returns>String that represents the object.</returns>
+        public override string ToString()
         {
-            vector = Vector4.Clamp(vector, Min, Max);
+            return packedValue.ToString("x16");
+        }
 
-            // Clamp the value between min and max values
-            ulong word4 = ((ulong)Math.Round(vector.X) & 0xFFFF) << 0x00;
-            ulong word3 = ((ulong)Math.Round(vector.Y) & 0xFFFF) << 0x10;
-            ulong word2 = ((ulong)Math.Round(vector.Z) & 0xFFFF) << 0x20;
-            ulong word1 = ((ulong)Math.Round(vector.W) & 0xFFFF) << 0x30;
+        /// <summary>
+        /// Packs a vector into a ulong.
+        /// </summary>
+        /// <param name="vector">The vector containing the values to pack.</param>
+        /// <returns>The ulong containing the packed values.</returns>
+        static ulong Pack(ref Vector4 vector)
+        {
+            const long mask = 0xFFFF;
+            const long maxPos = 0x7FFF; // Largest two byte positive number 0xFFFF >> 1;
+			const float minNeg = ~(int)maxPos; // two's complement
+
+            // clamp the value between min and max values
+            var word4 = ((ulong)((int) Math.Round(MathHelper.Clamp(vector.X, minNeg, maxPos))) & mask);
+			var word3 = ((ulong)((int) Math.Round(MathHelper.Clamp(vector.Y, minNeg, maxPos)) & mask)) << 0x10;
+			var word2 = ((ulong)((int) Math.Round(MathHelper.Clamp(vector.Z, minNeg, maxPos)) & mask)) << 0x20;
+			var word1 = ((ulong)((int) Math.Round(MathHelper.Clamp(vector.W, minNeg, maxPos)) & mask)) << 0x30;
 
             return word4 | word3 | word2 | word1;
+        }
+
+        /// <summary>
+        /// Sets the packed representation from a Vector4.
+        /// </summary>
+        /// <param name="vector">The vector to create the packed representation from.</param>
+        public void FromVector4(Vector4 vector)
+        {
+            packedValue = Pack(ref vector);
+        }
+
+        /// <summary>
+        /// Expands the packed representation into a Vector4.
+        /// </summary>
+        /// <returns>The expanded vector.</returns>
+        public Vector4 ToVector4()
+        {
+            return new Vector4(
+                (short)(packedValue & 0xFFFF),
+                (short)((packedValue >> 0x10) & 0xFFFF),
+                (short)((packedValue >> 0x20) & 0xFFFF),
+                (short)((packedValue >> 0x30) & 0xFFFF));
         }
     }
 }

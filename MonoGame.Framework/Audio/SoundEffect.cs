@@ -424,7 +424,7 @@ namespace MonoGame.Framework.Audio
 
         #region Static Members
 
-        private static float _masterVolume = 1.0f;
+        private static float _masterVolume = 1f;
         /// <summary>
         /// Gets or sets the master volume scale applied to all SoundEffectInstances.
         /// </summary>
@@ -437,7 +437,7 @@ namespace MonoGame.Framework.Audio
             get => _masterVolume;
             set
             {
-                if (value < 0.0f || value > 1.0f)
+                if (value < 0f || value > 1f)
                     throw new ArgumentOutOfRangeException();
 
                 if (_masterVolume == value)
@@ -448,7 +448,7 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        private static float _distanceScale = 1.0f;
+        private static float _distanceScale = 1f;
         /// <summary>
         /// Gets or sets the scale of distance calculations.
         /// </summary>
@@ -485,7 +485,7 @@ namespace MonoGame.Framework.Audio
                 // As per documenation it does not look like the value can be less than 0
                 //   although the documentation does not say it throws an error we will anyway
                 //   just so it is like the DistanceScale
-                if (value < 0.0f)
+                if (value < 0f)
                     throw new ArgumentOutOfRangeException(
                         value.ToString(), "value of DopplerScale");
 
@@ -504,7 +504,7 @@ namespace MonoGame.Framework.Audio
             get => speedOfSound;
             set
             {
-                if (value <= 0.0f)
+                if (value <= 0f)
                     throw new ArgumentOutOfRangeException();
 
                 speedOfSound = value;

@@ -1,125 +1,86 @@
-// Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+﻿// MonoGame - Copyright (C) The MonoGame Team
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 using System;
 using MonoGame.Framework;
 
 namespace MonoGame.Utilities.PackedVector
 {
-    /// <summary>
-    /// Packed pixel type containing a single 16 bit floating point value.
-    /// <para>
-    /// Ranges from [-1, 0, 0, 1] to [1, 0, 0, 1] in vector form.
-    /// </para>
-    /// </summary>
-    public struct HalfSingle : IPixel, IPackedVector<ushort>
+    public struct HalfSingle : IPackedVector<ushort>, IEquatable<HalfSingle>, IPackedVector
     {
-        public ushort PackedValue;
+        ushort packedValue;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HalfSingle"/> struct.
-        /// </summary>
-        /// <param name="single">The single component.</param>
-        public HalfSingle(float single) => PackedValue = HalfTypeHelper.Pack(single);
-
-        ushort IPackedVector<ushort>.PackedValue
+        public HalfSingle(float single)
         {
-            get => PackedValue;
-            set => PackedValue = value;
+            packedValue = HalfTypeHelper.Convert(single);
+        }
+
+        [CLSCompliant(false)]
+        public ushort PackedValue
+        {
+            get
+            {
+                return this.packedValue;
+            }
+            set
+            {
+                this.packedValue = value;
+            }
+        }
+
+        public float ToSingle()
+        {
+            return HalfTypeHelper.Convert(this.packedValue);
+        }
+
+        public void FromVector4(Vector4 vector)
+        {
+            this.packedValue = HalfTypeHelper.Convert(vector.X);
         }
 
         /// <summary>
-        /// Compares two <see cref="HalfSingle"/> objects for equality.
+        /// Gets the packed vector in Vector4 format.
         /// </summary>
-        /// <param name="left">The <see cref="HalfSingle"/> on the left side of the operand.</param>
-        /// <param name="right">The <see cref="HalfSingle"/> on the right side of the operand.</param>
-        /// <returns>
-        /// True if the <paramref name="left"/> parameter is equal to the <paramref name="right"/> parameter; otherwise, false.
-        /// </returns>
-        public static bool operator ==(HalfSingle left, HalfSingle right) => left.Equals(right);
-
-        /// <summary>
-        /// Compares two <see cref="HalfSingle"/> objects for equality.
-        /// </summary>
-        /// <param name="left">The <see cref="HalfSingle"/> on the left side of the operand.</param>
-        /// <param name="right">The <see cref="HalfSingle"/> on the right side of the operand.</param>
-        /// <returns>
-        /// True if the <paramref name="left"/> parameter is not equal to the <paramref name="right"/> parameter; otherwise, false.
-        /// </returns>
-        public static bool operator !=(HalfSingle left, HalfSingle right) => !left.Equals(right);
-
-        /// <inheritdoc/>
-        public void FromScaledVector4(Vector4 vector)
+        /// <returns>The packed vector in Vector4 format</returns>
+        public Vector4 ToVector4()
         {
-            float scaled = vector.X;
-            scaled *= 2F;
-            scaled--;
-            PackedValue = HalfTypeHelper.Pack(scaled);
+            return new Vector4(this.ToSingle(), 0f, 0f, 1f);
         }
 
-        /// <inheritdoc/>
-        public Vector4 ToScaledVector4()
+        public override bool Equals(object obj)
         {
-            float single = ToSingle() + 1F;
-            single /= 2F;
-            return new Vector4(single, 0, 0, 1F);
+            if (obj != null && obj.GetType() == this.GetType())
+            {
+                return this == (HalfSingle)obj;
+            }
+
+            return false;
         }
 
-        /// <inheritdoc />
-        public void FromVector4(Vector4 vector) => PackedValue = HalfTypeHelper.Pack(vector.X);
+        public bool Equals(HalfSingle other)
+        {
+            return this.packedValue == other.packedValue;
+        }
 
-        /// <inheritdoc />
-        public Vector4 ToVector4() => new Vector4(ToSingle(), 0, 0, 1F);
+        public override string ToString()
+        {
+            return this.ToSingle().ToString();
+        }
 
-        /// <inheritdoc />
-        public void FromArgb32(Argb32 source) => FromScaledVector4(source.ToScaledVector4());
+        public override int GetHashCode()
+        {
+            return this.packedValue.GetHashCode();
+        }
 
-        /// <inheritdoc />
-        public void FromBgr24(Bgr24 source) => FromScaledVector4(source.ToScaledVector4());
+        public static bool operator ==(HalfSingle lhs, HalfSingle rhs)
+        {
+            return lhs.packedValue == rhs.packedValue;
+        }
 
-        /// <inheritdoc />
-        public void FromBgra32(Bgra32 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromBgra5551(Bgra5551 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void ToColor(ref Color dest) => dest.FromScaledVector4(ToScaledVector4());
-
-        /// <summary>
-        /// Expands the packed representation into a <see cref="float"/>.
-        /// </summary>
-        /// <returns>The <see cref="float"/>.</returns>
-        public float ToSingle() => HalfTypeHelper.Unpack(PackedValue);
-
-        /// <inheritdoc />
-        public override bool Equals(object obj) => obj is HalfSingle other && Equals(other);
-
-        /// <inheritdoc />
-        public bool Equals(HalfSingle other) => PackedValue.Equals(other.PackedValue);
-
-        /// <inheritdoc />
-        public override string ToString() => FormattableString.Invariant($"HalfSingle({ToSingle():#0.##})");
-
-        /// <inheritdoc />
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public static bool operator !=(HalfSingle lhs, HalfSingle rhs)
+        {
+            return lhs.packedValue != rhs.packedValue;
+        }
     }
 }

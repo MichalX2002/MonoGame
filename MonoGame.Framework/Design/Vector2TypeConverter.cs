@@ -26,7 +26,7 @@ namespace MonoGame.Framework.Design
 
             if (VectorConversion.CanConvertTo(context, destinationType))
             {
-                var vec4 = new Vector4(vec.X, vec.Y, 0.0f, 0.0f);
+                var vec4 = new Vector4(vec.X, vec.Y, 0f, 0f);
                 return VectorConversion.ConvertToFromVector4(context, culture, vec4, destinationType);
             }
 

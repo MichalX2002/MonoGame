@@ -141,6 +141,7 @@ namespace MonoGame.Framework.Input
                 }
                 else
                 {
+                    // TODO: remove LoadPixelViewAs / IPixelView, keep the pixel casting though
                     buffer = Image.LoadPixelViewAs<TPixel, Color>(pixels.Project(x => x.Crop(rect)));
                     pixelSpan = buffer.GetPixelSpan();
                     stride = buffer.GetByteStride();

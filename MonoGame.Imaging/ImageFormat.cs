@@ -146,8 +146,8 @@ namespace MonoGame.Imaging
             Extension = ExtendExtension(primaryExtension) ?? throw new ArgumentNullException(nameof(primaryExtension));
             SupportsAnimation = supportsAnimation;
 
-            MimeTypes = new ReadOnlySet<string>(mimeTypes, null);
-            Extensions = new ReadOnlySet<string>(extensions, null);
+            MimeTypes = new ReadOnlySet<string>(mimeTypes, StringComparer.OrdinalIgnoreCase);
+            Extensions = new ReadOnlySet<string>(extensions, StringComparer.OrdinalIgnoreCase);
         }
 
         public ImageFormat(string name, string mimeType, string extension, bool supportsAnimation) : this(

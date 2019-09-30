@@ -131,7 +131,7 @@ namespace MonoGame.Framework.Input
             if (index < 0 || index >= PlatformGetMaxNumberOfGamePads())
                 return false;
             
-            return PlatformSetVibration(index, MathHelper.Clamp(leftMotor, 0.0f, 1.0f), MathHelper.Clamp(rightMotor, 0.0f, 1.0f));
+            return PlatformSetVibration(index, MathHelper.Clamp(leftMotor, 0f, 1f), MathHelper.Clamp(rightMotor, 0f, 1f));
         }
 
         /// <summary>

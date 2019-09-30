@@ -14,7 +14,7 @@ namespace MonoGame.Framework.Graphics
         private readonly string _name;
 
         private ulong _stateKey;
-        private bool Dirty { get; set; }
+        private bool IsDirty { get; set; }
 
         public ConstantBuffer(ConstantBuffer cloneSource)
         {
@@ -159,7 +159,7 @@ namespace MonoGame.Framework.Graphics
                     continue;
 
                 var offset = _offsets[p];
-                Dirty = true;
+                IsDirty = true;
 
                 SetParameter(offset, param);
             }

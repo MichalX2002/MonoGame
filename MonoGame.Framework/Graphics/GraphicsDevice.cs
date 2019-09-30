@@ -449,7 +449,7 @@ namespace MonoGame.Framework.Graphics
             // Initialize the main viewport
             _viewport = new Viewport(0, 0, DisplayMode.Width, DisplayMode.Height)
             {
-                MaxDepth = 1.0f
+                MaxDepth = 1f
             };
 
             PlatformSetup();

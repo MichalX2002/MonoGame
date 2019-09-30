@@ -26,7 +26,7 @@ namespace MonoGame.Framework
     public struct PointF : IEquatable<PointF>
     {
         /// <summary>
-        ///     Returns a <see cref="PointF" /> with <see cref="X" /> and <see cref="Y" /> equal to <c>0.0f</c>.
+        ///     Returns a <see cref="PointF" /> with <see cref="X" /> and <see cref="Y" /> equal to <c>0f</c>.
         /// </summary>
         public static readonly PointF Zero = new PointF();
 

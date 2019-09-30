@@ -12,20 +12,20 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Gets the position of the left trigger.
         /// </summary>
-        /// <value>A value from 0.0f to 1.0f representing left trigger.</value>
+        /// <value>A value from 0f to 1f representing left trigger.</value>
         public readonly float Left;
 
         /// <summary>
         /// Gets the position of the right trigger.
         /// </summary>
-        /// <value>A value from 0.0f to 1.0f representing right trigger.</value>
+        /// <value>A value from 0f to 1f representing right trigger.</value>
         public readonly float Right;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GamePadTriggers"/> struct.
         /// </summary>
-        /// <param name="leftTrigger">The position of the left trigger, the value will get clamped between 0.0f and 1.0f.</param>
-        /// <param name="rightTrigger">The position of the right trigger, the value will get clamped between 0.0f and 1.0f.</param>
+        /// <param name="leftTrigger">The position of the left trigger, the value will get clamped between 0f and 1f.</param>
+        /// <param name="rightTrigger">The position of the right trigger, the value will get clamped between 0f and 1f.</param>
         public GamePadTriggers(float leftTrigger, float rightTrigger)
         {
             Left = MathHelper.Clamp(leftTrigger, 0f, 1f);

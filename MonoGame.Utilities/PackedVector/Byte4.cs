@@ -1,5 +1,6 @@
-// Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+﻿// MonoGame - Copyright (C) The MonoGame Team
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 using System;
 using MonoGame.Framework;
@@ -7,146 +8,153 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed pixel type containing four 8-bit unsigned integer values, ranging from 0 to 255.
-    /// <para>
-    /// Ranges from [0, 0, 0, 0] to [255, 255, 255, 255] in vector form.
-    /// </para>
+    /// Packed vector type containing four 8-bit unsigned integer values, ranging from 0 to 255.
     /// </summary>
-    public struct Byte4 : IPixel, IPackedVector<uint>
+    public struct Byte4 : IPackedVector<uint>, IEquatable<Byte4>, IPackedVector
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Byte4"/> struct.
-        /// </summary>
-        /// <param name="vector">
-        /// A vector containing the initial values for the components of the Byte4 structure.
-        /// </param>
-        public Byte4(Vector4 vector) => PackedValue = Pack(ref vector);
+        uint packedValue;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Byte4"/> struct.
+        /// Initializes a new instance of the Byte4 class.
         /// </summary>
-        /// <param name="x">The x-component</param>
-        /// <param name="y">The y-component</param>
-        /// <param name="z">The z-component</param>
-        /// <param name="w">The w-component</param>
+        /// <param name="vector">A vector containing the initial values for the components of the Byte4 structure.</param>
+        public Byte4(Vector4 vector)
+        {
+            packedValue = Pack(ref vector);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the Byte4 class.
+        /// </summary>
+        /// <param name="x">Initial value for the x component.</param>
+        /// <param name="y">Initial value for the y component.</param>
+        /// <param name="z">Initial value for the z component.</param>
+        /// <param name="w">Initial value for the w component.</param>
         public Byte4(float x, float y, float z, float w)
         {
             var vector = new Vector4(x, y, z, w);
-            PackedValue = Pack(ref vector);
+            packedValue = Pack(ref vector);
         }
-
-        /// <inheritdoc/>
-        public uint PackedValue { get; set; }
 
         /// <summary>
-        /// Compares two <see cref="Byte4"/> objects for equality.
+        /// Compares the current instance of a class to another instance to determine whether they are different.
         /// </summary>
-        /// <param name="left">The <see cref="Byte4"/> on the left side of the operand.</param>
-        /// <param name="right">The <see cref="Byte4"/> on the right side of the operand.</param>
-        /// <returns>
-        /// True if the <paramref name="left"/> parameter is equal to the <paramref name="right"/> parameter; otherwise, false.
-        /// </returns>
-        public static bool operator ==(Byte4 left, Byte4 right) => left.Equals(right);
+        /// <param name="a">The object to the left of the equality operator.</param>
+        /// <param name="b">The object to the right of the equality operator.</param>
+        /// <returns>true if the objects are different; false otherwise.</returns>
+        public static bool operator !=(Byte4 a, Byte4 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
 
         /// <summary>
-        /// Compares two <see cref="Byte4"/> objects for equality.
+        /// Compares the current instance of a class to another instance to determine whether they are the same.
         /// </summary>
-        /// <param name="left">The <see cref="Byte4"/> on the left side of the operand.</param>
-        /// <param name="right">The <see cref="Byte4"/> on the right side of the operand.</param>
-        /// <returns>
-        /// True if the <paramref name="left"/> parameter is not equal to the <paramref name="right"/> parameter; otherwise, false.
-        /// </returns>
-        public static bool operator !=(Byte4 left, Byte4 right) => !left.Equals(right);
-
-        /// <inheritdoc/>
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector * 255F);
-
-        /// <inheritdoc/>
-        public Vector4 ToScaledVector4() => ToVector4() / 255F;
-
-        /// <inheritdoc />
-        public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
-
-        /// <inheritdoc />
-        public Vector4 ToVector4()
+        /// <param name="a">The object to the left of the equality operator.</param>
+        /// <param name="b">The object to the right of the equality operator.</param>
+        /// <returns>true if the objects are the same; false otherwise.</returns>
+        public static bool operator ==(Byte4 a, Byte4 b)
         {
-            return new Vector4(
-                PackedValue & 0xFF,
-                (PackedValue >> 0x8) & 0xFF,
-                (PackedValue >> 0x10) & 0xFF,
-                (PackedValue >> 0x18) & 0xFF);
+            return a.PackedValue == b.PackedValue;
         }
 
-        /// <inheritdoc />
-        public void FromArgb32(Argb32 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromBgr24(Bgr24 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromBgra32(Bgra32 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc/>
-        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromBgra5551(Bgra5551 source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
-
-        /// <inheritdoc />
-        public void ToColor(ref Color dest)
+        /// <summary>
+        /// Directly gets or sets the packed representation of the value.
+        /// </summary>
+        /// <value>The packed representation of the value.</value>
+        [CLSCompliant(false)]
+        public uint PackedValue
         {
-            dest.FromScaledVector4(ToScaledVector4());
+            get
+            {
+                return packedValue;
+            }
+            set
+            {
+                packedValue = value;
+            }
         }
 
-        /// <inheritdoc/>
-        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
+        /// <summary>
+        /// Returns a value that indicates whether the current instance is equal to a specified object.
+        /// </summary>
+        /// <param name="obj">The object with which to make the comparison.</param>
+        /// <returns>true if the current instance is equal to the specified object; false otherwise.</returns>
+        public override bool Equals(object obj)
+        {
+            if (obj is Byte4)
+                return this == (Byte4)obj;
+            return false;
+        }
 
-        /// <inheritdoc/>
-        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
+        /// <summary>
+        /// Returns a value that indicates whether the current instance is equal to a specified object.
+        /// </summary>
+        /// <param name="other">The object with which to make the comparison.</param>
+        /// <returns>true if the current instance is equal to the specified object; false otherwise.</returns>
+        public bool Equals(Byte4 other)
+        {
+            return this == other;
+        }
 
-        /// <inheritdoc />
-        public override bool Equals(object obj) => obj is Byte4 byte4 && Equals(byte4);
+        /// <summary>
+        /// Gets the hash code for the current instance.
+        /// </summary>
+        /// <returns>Hash code for the instance.</returns>
+        public override int GetHashCode()
+        {
+            return packedValue.GetHashCode();
+        }
 
-        /// <inheritdoc />
-        public bool Equals(Byte4 other) => PackedValue.Equals(other.PackedValue);
-
-        /// <inheritdoc />
-        public override int GetHashCode() => PackedValue.GetHashCode();
-
-        /// <inheritdoc />
+        /// <summary>
+        /// Returns a string representation of the current instance.
+        /// </summary>
+        /// <returns>String that represents the object.</returns>
         public override string ToString()
         {
-            var vector = ToVector4();
-            return FormattableString.Invariant($"Byte4({vector.X:#0.##}, {vector.Y:#0.##}, {vector.Z:#0.##}, {vector.W:#0.##})");
+            return packedValue.ToString("x8");
         }
 
         /// <summary>
         /// Packs a vector into a uint.
         /// </summary>
         /// <param name="vector">The vector containing the values to pack.</param>
-        /// <returns>The <see cref="uint"/> containing the packed values.</returns>
-        private static uint Pack(ref Vector4 vector)
+        /// <returns>The ulong containing the packed values.</returns>
+        static uint Pack(ref Vector4 vector)
         {
-            const float Max = 255F;
+            const float max = 255f;
+            const float min = 0f;
 
-            // Clamp the value between min and max values
-            vector = Vector4.Clamp(vector, Vector4.Zero, new Vector4(Max));
-
-            uint byte4 = (uint)Math.Round(vector.X) & 0xFF;
-            uint byte3 = ((uint)Math.Round(vector.Y) & 0xFF) << 0x8;
-            uint byte2 = ((uint)Math.Round(vector.Z) & 0xFF) << 0x10;
-            uint byte1 = ((uint)Math.Round(vector.W) & 0xFF) << 0x18;
+            // clamp the value between min and max values
+            var byte4 = (uint) Math.Round(MathHelper.Clamp(vector.X, min, max)) & 0xFF;
+            var byte3 = ((uint) Math.Round(MathHelper.Clamp(vector.Y, min, max)) & 0xFF) << 0x8;
+            var byte2 = ((uint) Math.Round(MathHelper.Clamp(vector.Z, min, max)) & 0xFF) << 0x10;
+            var byte1 = ((uint) Math.Round(MathHelper.Clamp(vector.W, min, max)) & 0xFF) << 0x18;
 
             return byte4 | byte3 | byte2 | byte1;
         }
+
+        /// <summary>
+        /// Sets the packed representation from a Vector4.
+        /// </summary>
+        /// <param name="vector">The vector to create the packed representation from.</param>
+        public void FromVector4(Vector4 vector)
+        {
+            packedValue = Pack(ref vector);
+        }
+
+        /// <summary>
+        /// Expands the packed representation into a Vector4.
+        /// </summary>
+        /// <returns>The expanded vector.</returns>
+        public Vector4 ToVector4()
+        {
+            return new Vector4(
+                (float)(packedValue & 0xFF),
+                (float)((packedValue >> 0x8) & 0xFF),
+                (float)((packedValue >> 0x10) & 0xFF),
+                (float)((packedValue >> 0x18) & 0xFF));
+        }
     }
 }
+

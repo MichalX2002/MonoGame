@@ -6,28 +6,29 @@ using System;
 using System.IO;
 using System.Diagnostics;
 using System.Collections.Generic;
-using MonoGame.Utilities;
 
 namespace MonoGame.Framework.Audio
 {
-    /// <summary>Represents a collection of Cues.</summary>
+    /// <summary>
+    /// Represents a collection of <see cref="Cue"/>s.
+    /// </summary>
     public class SoundBank : IDisposable
     {
-        readonly AudioEngine _audioengine;
-        readonly string[] _waveBankNames;
-        readonly WaveBank[] _waveBanks;
+        private static readonly float[] _defaultProbability = new float[1] { 1f };
 
-        readonly float [] defaultProbability = new float [1] { 1.0f };
-        readonly Dictionary<string, XactSound[]> _sounds = new Dictionary<string, XactSound[]>();
-        readonly Dictionary<string, float []> _probabilities = new Dictionary<string, float []> ();
+        private readonly AudioEngine _audioengine;
+        private readonly string[] _waveBankNames;
+        private readonly WaveBank[] _waveBanks;
+
+        private readonly Dictionary<string, XactCueEntry> _entries = new Dictionary<string, XactCueEntry>();
 
         /// <summary>
-        /// Is true if the SoundBank has any live Cues in use.
+        /// Is true if the <see cref="SoundBank"/> has any live <see cref="Cue"/>s in use.
         /// </summary>
         public bool IsInUse { get; private set; }
 
-        /// <param name="audioEngine">AudioEngine that will be associated with this sound bank.</param>
-        /// <param name="fileName">Path to a .xsb SoundBank file.</param>
+        /// <param name="audioEngine">The engine that will be associated with this sound bank.</param>
+        /// <param name="fileName">Path to a .xsb sound bank file.</param>
         public SoundBank(AudioEngine audioEngine, string fileName)
         {
             _audioengine = audioEngine ?? throw new ArgumentNullException(nameof(audioEngine));
@@ -42,7 +43,7 @@ namespace MonoGame.Framework.Audio
 
                 uint magic = reader.ReadUInt32();
                 if (magic != 0x4B424453) //"SDBK"
-                    throw new Exception ("Bad soundbank format");
+                    throw new Exception("Bad soundbank format");
 
                 reader.ReadUInt16(); // toolVersion
 
@@ -75,19 +76,21 @@ namespace MonoGame.Framework.Audio
                 reader.ReadUInt32(); // cueNameHashTableOffset
                 reader.ReadUInt32(); // cueNameHashValsOffset
                 reader.ReadUInt32(); // soundsOffset
-                    
+
                 //name = System.Text.Encoding.UTF8.GetString(soundbankreader.ReadBytes(64),0,64).Replace("\0","");
 
                 //parse wave bank name table
                 stream.Seek(waveBankNameTableOffset, SeekOrigin.Begin);
                 _waveBanks = new WaveBank[numWaveBanks];
                 _waveBankNames = new string[numWaveBanks];
-                for (int i=0; i<numWaveBanks; i++)
-                    _waveBankNames[i] = System.Text.Encoding.UTF8.GetString(reader.ReadBytes(64), 0, 64).Replace("\0", "");
-                    
+                for (int i = 0; i < numWaveBanks; i++)
+                    _waveBankNames[i] = System.Text.Encoding.UTF8.GetString(
+                        reader.ReadBytes(64), 0, 64).Replace("\0", "");
+
                 //parse cue name table
                 stream.Seek(cueNamesOffset, SeekOrigin.Begin);
-                string[] cueNames = System.Text.Encoding.UTF8.GetString(reader.ReadBytes((int)cueNameTableLen), 0, (int)cueNameTableLen).Split('\0');
+                string[] cueNames = System.Text.Encoding.UTF8.GetString(
+                    reader.ReadBytes((int)cueNameTableLen), 0, (int)cueNameTableLen).Split('\0');
 
                 // Simple cues
                 if (numSimpleCues > 0)
@@ -100,14 +103,13 @@ namespace MonoGame.Framework.Audio
 
                         var oldPosition = stream.Position;
                         stream.Seek(soundOffset, SeekOrigin.Begin);
-                        XactSound sound = new XactSound(audioEngine, this, reader);
+                        var sound = new XactSound(audioEngine, this, reader);
                         stream.Seek(oldPosition, SeekOrigin.Begin);
 
-                        _sounds.Add(cueNames [i], new XactSound [] { sound } );
-                        _probabilities.Add (cueNames [i], defaultProbability);  
+                        _entries.Add(cueNames[i], new XactCueEntry(new XactSound[] { sound }, _defaultProbability));
                     }
                 }
-                    
+
                 // Complex cues
                 if (numComplexCues > 0)
                 {
@@ -122,11 +124,11 @@ namespace MonoGame.Framework.Audio
 
                             var oldPosition = stream.Position;
                             stream.Seek(soundOffset, SeekOrigin.Begin);
-                            XactSound sound = new XactSound(audioEngine, this, reader);
+                            var sound = new XactSound(audioEngine, this, reader);
                             stream.Seek(oldPosition, SeekOrigin.Begin);
 
-                            _sounds.Add (cueNames [numSimpleCues + i], new XactSound [] { sound });
-                            _probabilities.Add (cueNames [numSimpleCues + i], defaultProbability);
+                            _entries.Add(cueNames[numSimpleCues + i], new XactCueEntry(
+                                new XactSound[] { sound }, _defaultProbability));
                         }
                         else
                         {
@@ -143,8 +145,8 @@ namespace MonoGame.Framework.Audio
                             reader.ReadUInt16();
                             reader.ReadByte();
 
-                            XactSound[] cueSounds = new XactSound[numEntries];
-                            float[] probs = new float[numEntries];
+                            var cueSounds = new XactSound[numEntries];
+                            var probs = new float[numEntries];
 
                             uint tableType = (variationflags >> 3) & 0x7;
                             for (int j = 0; j < numEntries; j++)
@@ -152,47 +154,51 @@ namespace MonoGame.Framework.Audio
                                 switch (tableType)
                                 {
                                     case 0: //Wave
-                                        {
-                                            int trackIndex = reader.ReadUInt16();
-                                            int waveBankIndex = reader.ReadByte();
-                                            reader.ReadByte(); // weightMin
-                                            reader.ReadByte(); // weightMax
+                                    {
+                                        int trackIndex = reader.ReadUInt16();
+                                        int waveBankIndex = reader.ReadByte();
+                                        reader.ReadByte(); // weightMin
+                                        reader.ReadByte(); // weightMax
 
-                                            cueSounds[j] = new XactSound(this, waveBankIndex, trackIndex);
-                                            break;
-                                        }
+                                        cueSounds[j] = new XactSound(this, waveBankIndex, trackIndex);
+                                        break;
+                                    }
+
                                     case 1:
-                                        {
-                                            uint soundOffset = reader.ReadUInt32();
-                                            reader.ReadByte(); // weightMin
-                                            reader.ReadByte(); // weightMax
+                                    {
+                                        uint soundOffset = reader.ReadUInt32();
+                                        reader.ReadByte(); // weightMin
+                                        reader.ReadByte(); // weightMax
 
-                                            var oldPosition = stream.Position;
-                                            stream.Seek(soundOffset, SeekOrigin.Begin);
-                                            cueSounds[j] = new XactSound(audioEngine, this, reader);
-                                            stream.Seek(oldPosition, SeekOrigin.Begin);
-                                            break;
-                                        }
+                                        var oldPosition = stream.Position;
+                                        stream.Seek(soundOffset, SeekOrigin.Begin);
+                                        cueSounds[j] = new XactSound(audioEngine, this, reader);
+                                        stream.Seek(oldPosition, SeekOrigin.Begin);
+                                        break;
+                                    }
+
                                     case 3:
-                                        {
-                                            uint soundOffset = reader.ReadUInt32();
-                                            reader.ReadSingle(); // weightMin
-                                            reader.ReadSingle(); // weightMax
-                                            reader.ReadUInt32(); // flags
+                                    {
+                                        uint soundOffset = reader.ReadUInt32();
+                                        reader.ReadSingle(); // weightMin
+                                        reader.ReadSingle(); // weightMax
+                                        reader.ReadUInt32(); // flags
 
-                                            var oldPosition = stream.Position;
-                                            stream.Seek(soundOffset, SeekOrigin.Begin);
-                                            cueSounds[j] = new XactSound(audioEngine, this, reader);
-                                            stream.Seek(oldPosition, SeekOrigin.Begin);
-                                            break;
-                                        }
+                                        var oldPosition = stream.Position;
+                                        stream.Seek(soundOffset, SeekOrigin.Begin);
+                                        cueSounds[j] = new XactSound(audioEngine, this, reader);
+                                        stream.Seek(oldPosition, SeekOrigin.Begin);
+                                        break;
+                                    }
+
                                     case 4: //CompactWave
-                                        {
-                                            int trackIndex = reader.ReadUInt16();
-                                            int waveBankIndex = reader.ReadByte();
-                                            cueSounds[j] = new XactSound(this, waveBankIndex, trackIndex);
-                                            break;
-                                        }
+                                    {
+                                        int trackIndex = reader.ReadUInt16();
+                                        int waveBankIndex = reader.ReadByte();
+                                        cueSounds[j] = new XactSound(this, waveBankIndex, trackIndex);
+                                        break;
+                                    }
+
                                     default:
                                         throw new NotSupportedException();
                                 }
@@ -200,14 +206,13 @@ namespace MonoGame.Framework.Audio
 
                             stream.Seek(savepos, SeekOrigin.Begin);
 
-                            _sounds.Add (cueNames [numSimpleCues + i], cueSounds);
-                            _probabilities.Add (cueNames [numSimpleCues + i], probs);
+                            _entries.Add(cueNames[numSimpleCues + i], new XactCueEntry(cueSounds, probs));
                         }
 
                         // Instance limiting
                         reader.ReadByte(); //instanceLimit
-                        reader.ReadUInt16(); //fadeInSec, divide by 1000.0f
-                        reader.ReadUInt16(); //fadeOutSec, divide by 1000.0f
+                        reader.ReadUInt16(); //fadeInSec, divide by 1000f
+                        reader.ReadUInt16(); //fadeOutSec, divide by 1000f
                         reader.ReadByte(); //instanceFlags
                     }
                 }
@@ -224,99 +229,79 @@ namespace MonoGame.Framework.Audio
                 var name = _waveBankNames[waveBankIndex];
                 if (!_audioengine.Wavebanks.TryGetValue(name, out waveBank))
                     throw new Exception("The wave bank '" + name + "' was not found!");
-                _waveBanks[waveBankIndex] = waveBank;                
+                _waveBanks[waveBankIndex] = waveBank;
             }
 
             return waveBank.GetSoundEffectInstance(trackIndex, out streaming);
         }
-        
+
         /// <summary>
-        /// Returns a pooled Cue object.
+        /// Returns a pooled <see cref="Cue"/> object.
         /// </summary>
         /// <param name="name">Friendly name of the cue to get.</param>
-        /// <returns>a unique Cue object from a pool.</returns>
+        /// <returns>A unique <see cref="Cue"/> object from a pool.</returns>
         /// <remarks>
-        /// <para>Cue instances are unique, even when sharing the same name. This allows multiple instances to simultaneously play.</para>
+        /// <para>
+        /// <see cref="Cue"/> instances are unique, even when sharing the same name. 
+        /// This allows multiple instances to simultaneously play.
+        /// </para>
         /// </remarks>
         public Cue GetCue(string name)
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
 
-            if (!_sounds.TryGetValue(name, out XactSound[] sounds))
-                throw new ArgumentException();
-
-            if (!_probabilities.TryGetValue(name, out float[] probs))
-                throw new ArgumentException();
+            if (!_entries.TryGetValue(name, out var entry))
+                throw new KeyNotFoundException(nameof(name));
 
             IsInUse = true;
 
-            var cue = new Cue (_audioengine, name, sounds, probs);
+            var cue = new Cue(_audioengine, name, entry.Sounds, entry.Probabilities);
             cue.Prepare();
             return cue;
         }
-        
+
         /// <summary>
-        /// Plays a cue.
+        /// Plays a cue and returns the reference to it.
         /// </summary>
         /// <param name="name">Name of the cue to play.</param>
-        public void PlayCue(string name)
+        public Cue PlayCue(string name)
         {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException(nameof(name));
-
-            if (!_sounds.TryGetValue(name, out XactSound[] sounds))
-                throw new ArgumentException();
-
-            if (!_probabilities.TryGetValue(name, out float[] probs))
-                throw new ArgumentException();
-
-            IsInUse = true;
-            var cue = new Cue (_audioengine, name, sounds, probs);
-            cue.Prepare();
+            var cue = GetCue(name);
             cue.Play();
+            return cue;
         }
 
         /// <summary>
-        /// Plays a cue with static 3D positional information.
+        /// Plays a cue with 3D positional information.
         /// </summary>
         /// <remarks>
-        /// Commonly used for short lived effects.  To dynamically change the 3D 
-        /// positional information on a cue over time use <see cref="GetCue"/> and <see cref="Cue.Apply3D"/>.</remarks>
+        /// To dynamically change the 3D positional information on 
+        /// a cue over time use <see cref="Cue.Apply3D"/>.
+        /// </remarks>
         /// <param name="name">The name of the cue to play.</param>
-        /// <param name="listener">The listener state.</param>
-        /// <param name="emitter">The cue emitter state.</param>
-        public void PlayCue(string name, AudioListener listener, AudioEmitter emitter)
+        /// <param name="listener">The cue listener.</param>
+        /// <param name="emitter">The cue emitter.</param>
+        public Cue PlayCue(string name, AudioListener listener, AudioEmitter emitter)
         {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException(nameof(name));
-
-            if (!_sounds.TryGetValue(name, out XactSound[] sounds))
-                throw new InvalidOperationException();
-
-            if (!_probabilities.TryGetValue(name, out float[] probs))
-                throw new ArgumentException();
-
-            IsInUse = true;
-
-            var cue = new Cue (_audioengine, name, sounds, probs);
-            cue.Prepare();
+            var cue = GetCue(name);
             cue.Apply3D(listener, emitter);
             cue.Play();
+            return cue;
         }
 
         /// <summary>
-        /// This event is triggered when the SoundBank is disposed.
+        /// This event is triggered when the <see cref="SoundBank"/> is disposed.
         /// </summary>
         public event SimpleEventHandler<SoundBank> Disposing;
 
         /// <summary>
-        /// Is true if the SoundBank has been disposed.
+        /// Is true if the <see cref="SoundBank"/> has been disposed.
         /// </summary>
         public bool IsDisposed { get; private set; }
 
         /// <summary>
-        /// Disposes the SoundBank.
+        /// Disposes the <see cref="SoundBank"/>.
         /// </summary>
         public void Dispose()
         {
@@ -342,6 +327,17 @@ namespace MonoGame.Framework.Audio
                 Disposing?.Invoke(this);
             }
         }
+
+        private readonly struct XactCueEntry
+        {
+            public XactSound[] Sounds { get; }
+            public float[] Probabilities { get; }
+
+            public XactCueEntry(XactSound[] sounds, float[] probabilities)
+            {
+                Sounds = sounds;
+                Probabilities = probabilities;
+            }
+        }
     }
 }
-
