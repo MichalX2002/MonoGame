@@ -147,17 +147,29 @@ namespace MonoGame.Tools.Pipeline
     internal class PipelineTypes
     {
         [DebuggerDisplay("ImporterInfo: {Type.Name}")]
-        private struct ImporterInfo
+        private readonly struct ImporterInfo
         {
-            public ContentImporterAttribute Attribute;
-            public Type Type;
+            public readonly ContentImporterAttribute Attribute;
+            public readonly Type Type;
+
+            public ImporterInfo(ContentImporterAttribute attribute, Type type)
+            {
+                Attribute = attribute;
+                Type = type;
+            }
         }
 
         [DebuggerDisplay("ProcessorInfo: {Type.Name}")]
-        private struct ProcessorInfo
+        private readonly struct ProcessorInfo
         {
-            public ContentProcessorAttribute Attribute;
-            public Type Type;
+            public readonly ContentProcessorAttribute Attribute;
+            public readonly Type Type;
+
+            public ProcessorInfo(ContentProcessorAttribute attribute, Type type)
+            {
+                Attribute = attribute;
+                Type = type;
+            }
         }
 
         private static List<ImporterInfo> _importers;
@@ -505,18 +517,18 @@ namespace MonoGame.Tools.Pipeline
 
         private static void ProcessTypes(IEnumerable<Type> types)
         {
-            foreach (var t in types)
+            foreach (var type in types)
             {
-                if (t.IsAbstract)
+                if (type.IsAbstract)
                     continue;
 
-                if (t.GetInterface(@"IContentImporter") == typeof(IContentImporter))
+                if (type.GetInterface(@"IContentImporter") == typeof(IContentImporter))
                 {
-                    var attributes = t.GetCustomAttributes(typeof(ContentImporterAttribute), false);
+                    var attributes = type.GetCustomAttributes(typeof(ContentImporterAttribute), false);
                     if (attributes.Length != 0)
                     {
                         var importerAttribute = attributes[0] as ContentImporterAttribute;
-                        _importers.Add(new ImporterInfo { Attribute = importerAttribute, Type = t });
+                        _importers.Add(new ImporterInfo(importerAttribute, type));
                     }
                     else
                     {
@@ -524,18 +536,18 @@ namespace MonoGame.Tools.Pipeline
                         var importerAttribute = new ContentImporterAttribute(".*")
                         {
                             DefaultProcessor = "",
-                            DisplayName = t.Name
+                            DisplayName = type.Name
                         };
-                        _importers.Add(new ImporterInfo { Attribute = importerAttribute, Type = t });
+                        _importers.Add(new ImporterInfo(importerAttribute, type));
                     }
                 }
-                else if (t.GetInterface(@"IContentProcessor") == typeof(IContentProcessor))
+                else if (type.GetInterface(@"IContentProcessor") == typeof(IContentProcessor))
                 {
-                    var attributes = t.GetCustomAttributes(typeof(ContentProcessorAttribute), false);
+                    var attributes = type.GetCustomAttributes(typeof(ContentProcessorAttribute), false);
                     if (attributes.Length != 0)
                     {
                         var processorAttribute = attributes[0] as ContentProcessorAttribute;
-                        _processors.Add(new ProcessorInfo { Attribute = processorAttribute, Type = t });
+                        _processors.Add(new ProcessorInfo(processorAttribute, type));
                     }
                 }
             }
