@@ -101,22 +101,6 @@ namespace MonoGame.Framework
 
         #region Public Methods
 
-        /// <inheritdoc/>
-        public void FromScaledVector4(Vector4 vector)
-        {
-            X = X * 2F - 1;
-            Y = Y * 2F - 1;
-        }
-
-        /// <inheritdoc/>
-        public Vector4 ToScaledVector4()
-        {
-            Vector2 scaled = this;
-            scaled += One;
-            scaled /= 2F;
-            return new Vector4(scaled, 0F, 1F);
-        }
-
         /// <inheritdoc />
         public void FromVector4(Vector4 vector)
         {
@@ -128,47 +112,44 @@ namespace MonoGame.Framework
         public Vector4 ToVector4() => new Vector4(X, Y, 0F, 1F);
 
         /// <inheritdoc />
-        public void FromArgb32(Argb32 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromArgb32(Argb32 source) => FromVector4(source.ToVector4());
 
         /// <inheritdoc />
-        public void FromBgr24(Bgr24 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromBgr24(Bgr24 source) => FromVector4(source.ToVector4());
 
         /// <inheritdoc />
-        public void FromBgra32(Bgra32 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromBgra32(Bgra32 source) => FromVector4(source.ToVector4());
 
         /// <inheritdoc/>
-        public void FromBgra5551(Bgra5551 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromBgra5551(Bgra5551 source) => FromVector4(source.ToVector4());
 
         /// <inheritdoc/>
-        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromGray8(Gray8 source) => FromVector4(source.ToVector4());
 
         /// <inheritdoc/>
-        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromGray16(Gray16 source) => FromVector4(source.ToVector4());
 
         /// <inheritdoc />
-        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromRgb24(Rgb24 source) => FromVector4(source.ToVector4());
 
         /// <inheritdoc />
-        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromColor(Color source) => FromVector4(source.ToVector4());
 
         /// <inheritdoc/>
-        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromRgb48(Rgb48 source) => FromVector4(source.ToVector4());
 
         /// <inheritdoc/>
-        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromRgba64(Rgba64 source) => FromVector4(source.ToVector4());
 
         /// <inheritdoc />
-        public void ToColor(ref Color dest) => dest.FromScaledVector4(ToScaledVector4());
+        public void ToColor(ref Color dest) => dest.FromVector4(ToVector4());
 
         /// <summary>
         /// Gets a <see cref="Vector3"/> representation for this
         /// object with <see cref="Vector3.Z"/> axis set to 0.
         /// </summary>
         /// <returns>A <see cref="Vector3"/> representation for this object.</returns>
-        public Vector3 ToVector3()
-        {
-            return new Vector3(X, Y, 0);
-        }
+        public Vector3 ToVector3() => new Vector3(X, Y, 0);
 
         /// <summary>
         /// Performs vector addition on <paramref name="a"/> and <paramref name="b"/>.

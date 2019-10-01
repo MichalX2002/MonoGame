@@ -6,14 +6,15 @@ namespace MonoGame.Imaging.Decoding
     {
         public override ImageFormat Format => ImageFormat.Bmp;
 
-        protected override bool TestFormat(StbImage.ReadContext context) =>
+        protected override bool TestFormat(StbImage.ReadContext context, ImagingConfig config) =>
             StbImage.stbi__bmp_test(context) != 0;
 
-        protected override bool GetInfo(StbImage.ReadContext context, out int w, out int h, out int comp) =>
+        protected override bool GetInfo(
+            StbImage.ReadContext context, ImagingConfig config, out int w, out int h, out int comp) =>
             StbImage.stbi__bmp_info(context, out w, out h, out comp);
 
         protected override unsafe bool ReadFirst(
-            ImagingConfig config, StbImage.ReadContext context, 
+            StbImage.ReadContext context, ImagingConfig config,
             out void* result, ref StbImage.ReadState state)
         {
             result = StbImage.stbi__bmp_load(context, ref state);

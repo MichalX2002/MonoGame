@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using MonoGame.Framework;
 using MonoGame.Imaging.Encoding;
 using MonoGame.Imaging.Pixels;
@@ -16,8 +15,11 @@ namespace MonoGame.Imaging
     {
         public static void Save<TPixel>(
             this ReadOnlyFrameCollection<TPixel> frames,
-            ImagingConfig imagingConfig, Stream output, ImageFormat format,
-            EncoderConfig encoderConfig = null,
+            Stream output, 
+            ImageFormat format,
+            EncoderConfig encoderConfig,
+            ImagingConfig imagingConfig,
+            CancellationToken cancellation,
             EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
@@ -25,10 +27,10 @@ namespace MonoGame.Imaging
             if (encoderConfig == null)
                 encoderConfig = encoder.DefaultConfig;
 
-            AssertValidSource(encoder, imagingConfig, frames);
             AssertValidOutput(output);
-
-            encoder.Encode(frames, output, encoderConfig, imagingConfig, onProgress);
+            AssertValidSource(encoder, imagingConfig, frames);
+            
+            encoder.Encode(frames, output, encoderConfig, imagingConfig, cancellation, onProgress);
         }
 
         public static FileStream OpenWrite(string filePath)
@@ -51,14 +53,6 @@ namespace MonoGame.Imaging
 
             if (frames.Count > 1)
                 ImagingArgumentGuard.AssertAnimationSupport(encoder, config);
-        }
-
-        [DebuggerHidden]
-        private static void AssertValidSource<TPixel>(IReadOnlyPixelRows<TPixel> image)
-            where TPixel : unmanaged, IPixel
-        {
-            if (image == null)
-                throw new ArgumentNullException(nameof(image));
         }
 
         [DebuggerHidden]
@@ -101,18 +95,24 @@ namespace MonoGame.Imaging
 
         public static void Save<TPixel>(
             this ReadOnlyFrameCollection<TPixel> frames,
-            Stream output, ImageFormat format,
-            EncoderConfig encoderConfig = null,
+            Stream output,
+            ImageFormat format,
+            EncoderConfig encoderConfig,
+            CancellationToken cancellation,
             EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            Save(frames, ImagingConfig.Default, output, format, encoderConfig, onProgress);
+            Save(frames, output, format, encoderConfig,
+                ImagingConfig.Default, cancellation, onProgress);
         }
 
         public static void Save<TPixel>(
             this ReadOnlyFrameCollection<TPixel> frames,
-            ImagingConfig imagingConfig, string filePath,
-            ImageFormat format = null, EncoderConfig encoderConfig = null,
+            string filePath, 
+            ImagingConfig imagingConfig,
+            CancellationToken cancellation,
+            ImageFormat format = null, 
+            EncoderConfig encoderConfig = null,
             EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
@@ -121,20 +121,27 @@ namespace MonoGame.Imaging
             AssertValidSource(encoder, imagingConfig, frames);
 
             using (var fs = OpenWrite(filePath))
-                Save(frames, imagingConfig, fs, format, encoderConfig, onProgress);
+                Save(frames, fs, format, encoderConfig, imagingConfig, cancellation, onProgress);
         }
 
         public static void Save<TPixel>(
             this ReadOnlyFrameCollection<TPixel> frames,
-            string filePath, ImageFormat format = null, EncoderConfig encoderConfig = null,
+            string filePath, 
+            ImageFormat format = null,
+            EncoderConfig encoderConfig = null,
             EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            Save(frames, ImagingConfig.Default, filePath, format, encoderConfig, onProgress);
+            Save(
+                frames, filePath, ImagingConfig.Default, CancellationToken.None,
+                format, encoderConfig, onProgress);
         }
 
         #endregion
 
+        /*
+        
+        // TODO: remove this
         #region Save(IReadOnlyPixelRows) Overloads
 
         public static void Save<TPixel>(
@@ -187,5 +194,7 @@ namespace MonoGame.Imaging
         }
 
         #endregion
+
+        */
     }
 }

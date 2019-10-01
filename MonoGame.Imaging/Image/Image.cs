@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using MonoGame.Imaging.Decoding;
 using MonoGame.Imaging.Encoding;
 using MonoGame.Imaging.Utilities;
@@ -159,46 +160,59 @@ namespace MonoGame.Imaging
 
         #region [Try]DetectFormat
 
-        private static bool TryDetectFormat(ImageReadStream stream, out ImageFormat format)
+        private static bool TryDetectFormat(
+            ImageReadStream stream, ImagingConfig config, out ImageFormat format)
         {
             foreach (var decoder in GetDecoders())
             {
-                if (decoder.TryDetectFormat(stream, out format))
+                if (decoder.TryDetectFormat(stream, config, out format))
                     return true;
             }
             format = default;
             return false;
         }
 
-        public static bool TryDetectFormat(Stream stream, out ImageFormat format)
+        public static bool TryDetectFormat(
+            Stream stream, ImagingConfig config, 
+            CancellationToken cancellation, out ImageFormat format)
         {
-            using (var imageStream = new ImageReadStream(stream, true))
-                return TryDetectFormat(imageStream, out format);
+            using (var imageStream = config.CreateReadStream(stream, cancellation))
+                return TryDetectFormat(imageStream, config, out format);
         }
 
-        public static ImageFormat DetectFormat(Stream stream)
+        private static ImageFormat DetectFormat(
+            ImageReadStream imageStream, ImagingConfig config)
         {
-            using (var imageStream = new ImageReadStream(stream, true))
-                if (TryDetectFormat(imageStream, out var format))
-                    return format;
+            if (TryDetectFormat(imageStream, config, out var format))
+                return format;
             throw new UnknownImageFormatException();
         }
 
-        public static bool TryDetectFormat(ReadOnlySpan<byte> data, out ImageFormat format)
+        public static ImageFormat DetectFormat(
+            Stream stream, ImagingConfig config, CancellationToken cancellation)
+        {
+            using (var imageStream = config.CreateReadStream(stream, cancellation))
+                return DetectFormat(imageStream, config);
+        }
+
+        public static bool TryDetectFormat(
+            ReadOnlySpan<byte> data, ImagingConfig config, 
+            CancellationToken cancellation, out ImageFormat format)
         {
             if (!data.IsEmpty)
             {
                 foreach (var decoder in GetDecoders())
-                    if (decoder.TryDetectFormat(data, out format))
+                    if (decoder.TryDetectFormat(data, config, cancellation, out format))
                         return true;
             }
             format = default;
             return false;
         }
 
-        public static ImageFormat DetectFormat(ReadOnlySpan<byte> data)
+        public static ImageFormat DetectFormat(
+            ReadOnlySpan<byte> data, ImagingConfig config, CancellationToken cancellation)
         {
-            if (TryDetectFormat(data, out var format))
+            if (TryDetectFormat(data, config, cancellation, out var format))
                 return format;
             throw new UnknownImageFormatException();
         }
@@ -207,45 +221,51 @@ namespace MonoGame.Imaging
 
         #region [Try]Identify
 
-        public static bool TryIdentify(Stream stream, out ImageInfo info)
+        public static bool TryIdentify(
+            Stream stream, ImagingConfig config,
+            CancellationToken cancellation, out ImageInfo info)
         {
-            using (var imageStream = new ImageReadStream(stream, true))
+            using (var imageStream = config.CreateReadStream(stream, cancellation))
             {
-                if (TryDetectFormat(imageStream, out var format))
+                if (TryDetectFormat(imageStream, config, out var format))
                     if (TryGetDecoder(format, out var decoder))
-                        return decoder.TryIdentify(imageStream, out info);
+                        return decoder.TryIdentify(imageStream, config, out info);
             }
             info = default;
             return false;
         }
 
-        public static ImageInfo Identify(Stream stream)
+        public static ImageInfo Identify(
+            Stream stream, ImagingConfig config, CancellationToken cancellation)
         {
-            using (var imageStream = new ImageReadStream(stream, true))
+            using (var imageStream = config.CreateReadStream(stream, cancellation))
             {
-                var format = DetectFormat(imageStream);
+                var format = DetectFormat(imageStream, config);
                 var decoder = GetDecoder(format);
-                if (!decoder.TryIdentify(imageStream, out var info))
+                if (!decoder.TryIdentify(imageStream, config, out var info))
                     throw new InvalidDataException();
                 return info;
             }
         }
 
-        public static bool TryIdentify(ReadOnlySpan<byte> data, out ImageInfo info)
+        public static bool TryIdentify(
+            ReadOnlySpan<byte> data, ImagingConfig config,
+            CancellationToken cancellation, out ImageInfo info)
         {
-            if (TryDetectFormat(data, out var format))
+            if (TryDetectFormat(data, config, cancellation, out var format))
                 if (TryGetDecoder(format, out var decoder))
-                    return decoder.TryIdentify(data, out info);
+                    return decoder.TryIdentify(data, config, cancellation, out info);
 
             info = default;
             return false;
         }
-
-        public static ImageInfo Identify(ReadOnlySpan<byte> data)
+        
+        public static ImageInfo Identify(
+            ReadOnlySpan<byte> data, ImagingConfig config, CancellationToken cancellation)
         {
-            var format = DetectFormat(data);
+            var format = DetectFormat(data, config, cancellation);
             var decoder = GetDecoder(format);
-            if (!decoder.TryIdentify(data, out var info))
+            if (!decoder.TryIdentify(data, config, cancellation, out var info))
                 throw new InvalidDataException();
             return info;
         }

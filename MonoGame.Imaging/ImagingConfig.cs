@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Threading;
+using MonoGame.Utilities.IO;
 
 namespace MonoGame.Imaging
 {
@@ -19,10 +22,18 @@ namespace MonoGame.Imaging
         /// </summary>
         public bool UseExceptions { get; set; } = true;
 
+        /// <summary>
+        /// Set to <see cref="StreamDisposalMethod.CancellableLeaveOpen"/> by default.
+        /// </summary>
+        public StreamDisposalMethod StreamDisposal { get; set; } = StreamDisposalMethod.CancellableLeaveOpen;
+
         static ImagingConfig()
         {
             Default = new ImagingConfig();
         }
+
+        public ImageReadStream CreateReadStream(Stream stream, CancellationToken cancellation) => 
+            new ImageReadStream(stream, cancellation, StreamDisposal);
 
         #region Exception Management
 
@@ -32,7 +43,7 @@ namespace MonoGame.Imaging
             return _throwingExceptions.Add(type);
         }
 
-        public bool AddThrowingException<TException>() 
+        public bool AddThrowingException<TException>()
             where TException : Exception => AddThrowingException(typeof(TException));
 
         public bool RemoveThrowingException(Type type)

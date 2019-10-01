@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Utilities;
 using MonoGame.Utilities;
@@ -9,8 +10,6 @@ using static StbSharp.StbImageWrite;
 
 namespace MonoGame.Imaging.Encoding
 {
-    // TODO: add cancellation token to Stb's WriteContext
-
     public abstract partial class StbEncoderBase : IImageEncoder
     {
         static StbEncoderBase()
@@ -22,10 +21,12 @@ namespace MonoGame.Imaging.Encoding
         public abstract EncoderConfig DefaultConfig { get; }
 
         public virtual bool ImplementsAnimation => false;
+        public virtual bool SupportsCancellation => true;
 
         public void Encode<TPixel>(
             ReadOnlyFrameCollection<TPixel> frames, Stream stream,
             EncoderConfig encoderConfig, ImagingConfig imagingConfig,
+            CancellationToken cancellation,
             EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
@@ -35,24 +36,26 @@ namespace MonoGame.Imaging.Encoding
             if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
             EncoderConfig.AssertTypeEqual(DefaultConfig, encoderConfig, nameof(encoderConfig));
 
+            cancellation.ThrowIfCancellationRequested();
+
             byte[] writeBuffer = RecyclableMemoryManager.Default.GetBlock();
             byte[] scratchBuffer = RecyclableMemoryManager.Default.GetBlock();
             try
             {
                 for (int i = 0; i < frames.Count; i++)
                 {
+                    cancellation.ThrowIfCancellationRequested();
+
                     var frame = frames[i];
                     int components = 4; // TODO: change this so it's dynamic
                     var provider = new ImagePixelProvider<TPixel>(frame.Pixels, components);
                     var progressCallback = onProgress == null ? (WriteProgressCallback)null : (p) =>
-                    {
-                        if (!onProgress.Invoke(i, frames, p))
-                            throw new CoderInterruptedException(Format);
-                    };
-
+                        onProgress.Invoke(i, frames, p);
+                    
                     var context = new WriteContext(
                         provider.Fill, provider.Fill, progressCallback,
-                        frame.Width, frame.Height, components, stream, writeBuffer, scratchBuffer);
+                        frame.Width, frame.Height, components, 
+                        stream, cancellation, writeBuffer, scratchBuffer);
 
                     if (i == 0)
                     {
