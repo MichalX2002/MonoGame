@@ -2,28 +2,19 @@
 namespace MonoGame.Utilities.PackedVector
 {
     public static class PixelExtensions
-    {   
+    {
         /// <summary>Sets the pixel value from <see cref="Bgra5551"/>.</summary>
         public static void FromBgra5551<T>(this ref T pixel, Bgra5551 source) where T : struct, IPixel
         {
             pixel.FromVector4(source.ToVector4());
         }
 
-        /// <summary>Sets the pixel value from <see cref="Gray8"/>.</summary>
-        public static void FromGray8<T>(this ref T pixel, Gray8 source) where T : struct, IPixel
-        {
-
-        }
-
-        /// <summary>Sets the pixel value from <see cref="Gray16"/>.</summary>
-        public static void FromGray16<T>(this ref T pixel, Gray16 source) where T : struct, IPixel
-        {
-        }
 
         /// <summary>Sets the pixel value from <see cref="Bgr24"/>.</summary>
         public static void FromBgr24<T>(this ref T pixel, Bgr24 source) where T : struct, IPixel
         {
         }
+
 
         /// <summary>Sets the pixel value from <see cref="Bgra32"/>.</summary>
         public static void FromBgra32<T>(this ref T pixel, Bgra32 source) where T : struct, IPixel
