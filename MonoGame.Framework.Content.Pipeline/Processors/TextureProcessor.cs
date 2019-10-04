@@ -6,7 +6,6 @@ using System;
 using System.ComponentModel;
 using MonoGame.Framework.Content.Pipeline.Graphics;
 using MonoGame.Framework.Graphics;
-using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Framework.Content.Pipeline.Processors
 {

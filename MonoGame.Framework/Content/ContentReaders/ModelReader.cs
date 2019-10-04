@@ -25,7 +25,7 @@ namespace MonoGame.Framework.Content
         {
             uint boneId;
 
-            // Read the bone ID, which may be encoded as either an 8 or 32 bit value.
+            // Read the bone ID, which may be encoded as either an 8 or 32-bit value.
             if (boneCount < 255)
             {
                 boneId = reader.ReadByte();
@@ -55,8 +55,7 @@ namespace MonoGame.Framework.Content
             uint boneCount = reader.ReadUInt32();
             //Debug.WriteLine("Bone count: {0}", boneCount);
 
-            List<ModelBone> bones = new List<ModelBone>((int)boneCount);
-
+            var bones = new List<ModelBone>((int)boneCount);
             for (uint i = 0; i < boneCount; i++)
             {
                 string name = reader.ReadObject<string>();

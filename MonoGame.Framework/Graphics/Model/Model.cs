@@ -142,17 +142,18 @@ namespace MonoGame.Framework.Graphics
 				throw new ArgumentOutOfRangeException(nameof(destinationBoneTransforms));
 
             int count = Bones.Count;
-			for (int index1 = 0; index1 < count; ++index1)
+			for (int i = 0; i < count; ++i)
 			{
-                ModelBone modelBone = (Bones)[index1];
+                ModelBone modelBone = Bones[i];
 				if (modelBone.Parent == null)
 				{
-					destinationBoneTransforms[index1] = modelBone.transform;
+					destinationBoneTransforms[i] = modelBone.Transform;
 				}
 				else
 				{
 					int index2 = modelBone.Parent.Index;
-                    destinationBoneTransforms[index1] = Matrix.Multiply(modelBone.transform, destinationBoneTransforms[index2]);
+                    destinationBoneTransforms[i] = Matrix.Multiply(
+                        modelBone.Transform, destinationBoneTransforms[index2]);
 				}
 			}
 		}

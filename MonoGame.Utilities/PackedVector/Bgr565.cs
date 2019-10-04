@@ -8,8 +8,11 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed vector type containing X, Y and Z values. 
+    /// <para>Packed vector type containing X, Y and Z values.</para>
     /// The X and Z components use 5 bits, and the Y component uses 6 bits.
+    /// <para>
+    /// Ranges from [0, 0, 0, 1] to [1, 1, 1, 1] in vector form.
+    /// </para>
     /// </summary>
     public struct Bgr565 : IPackedVector<ushort>, IEquatable<Bgr565>, IPixel
     {
@@ -35,7 +38,7 @@ namespace MonoGame.Utilities.PackedVector
         /// </summary>
         /// <param name="vector"><see cref="Vector3"/> containing the components.</param>
         public Bgr565(Vector3 vector) => Value = Pack(vector.X, vector.Y, vector.Z);
-
+    
         #endregion
 
         private static ushort Pack(float x, float y, float z)
@@ -90,8 +93,8 @@ namespace MonoGame.Utilities.PackedVector
         public static bool operator ==(Bgr565 a, Bgr565 b) => a.Value == b.Value;
         public static bool operator !=(Bgr565 a, Bgr565 b) => a.Value != b.Value;
 
+        public bool Equals(Bgr565 other) => this == other;
         public override bool Equals(object obj) => obj is Bgr565 value && Equals(value);
-        public bool Equals(Bgr565 other) => Value == other.Value;
 
         #endregion
 
@@ -100,18 +103,12 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString()
-        {
-            return this.ToVector3().ToString();
-        }
+        public override string ToString() => this.ToVector3().ToString();
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode()
-        {
-            return Value.GetHashCode();
-        }
+        public override int GetHashCode() => Value.GetHashCode();
 
         #endregion
     }

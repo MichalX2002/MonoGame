@@ -8,7 +8,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     /// <summary>
     /// Writes the enum value to the output.
-    /// Usually 32 bit, but can be other sizes if <typeparamref name="TEnum"/> is not of type <see cref="int"/>.
+    /// Usually 32-bit, but can be other sizes if <typeparamref name="TEnum"/> is not of type <see cref="int"/>.
     /// </summary>
     /// <typeparam name="TEnum">The enum type to write.</typeparam>
     [ContentTypeWriter]

@@ -60,10 +60,7 @@ namespace MonoGame.Framework.Graphics
         /// Returns a ModelMeshCollection.Enumerator that can iterate through a ModelMeshCollection.
         /// </summary>
         /// <returns></returns>
-        public new Enumerator GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
+        public new Enumerator GetEnumerator() => new Enumerator(this);
 
         /// <summary>
         /// Provides the ability to iterate through the bones in an ModelMeshCollection.

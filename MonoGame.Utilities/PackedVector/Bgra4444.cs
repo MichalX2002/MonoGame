@@ -8,128 +8,98 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed vector type containing unsigned normalized values, ranging from 0 to 1, using 4 bits each for x, y, z, and w.
+    /// <para>Packed vector type containing X, Y, Z and W values.</para>
+    /// Each component uses 4 bits.
+    /// <para>
+    /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
+    /// </para>
     /// </summary>
     public struct Bgra4444 : IPackedVector<ushort>, IEquatable<Bgra4444>
     {
-        ushort _packedValue;
+        [CLSCompliant(false)]
+        public ushort Value;
+
+        #region Constructors
+
+        /// <summary>
+        /// Constructs the packed vector with a packed value.
+        /// </summary>
+        [CLSCompliant(false)]
+        public Bgra4444(ushort value) => Value = value;
+
+        /// <summary>
+        /// Constructs the packed vector with raw values.
+        /// </summary>
+        public Bgra4444(float x, float y, float z, float w) => Value = Pack(x, y, z, w);
+
+        /// <summary>
+        /// Constructs the packed vector with raw values.
+        /// </summary>
+        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
+        public Bgra4444(Vector4 vector) => Value = Pack(vector.X, vector.Y, vector.Z, vector.W);
+    
+        #endregion
 
         private static ushort Pack(float x, float y, float z, float w)
         {
-            return (ushort) ((((int) Math.Round(MathHelper.Clamp(w, 0, 1) * 15.0f) & 0x0F) << 12) |
-                (((int) Math.Round(MathHelper.Clamp(x, 0, 1) * 15.0f) & 0x0F) << 8) |
-                (((int) Math.Round(MathHelper.Clamp(y, 0, 1) * 15.0f) & 0x0F) << 4) |
-                ((int) Math.Round(MathHelper.Clamp(z, 0, 1) * 15.0f) & 0x0F));
+            return (ushort)(
+                (((int)Math.Round(MathHelper.Clamp(w, 0, 1) * 15f) & 0x0F) << 12) |
+                (((int)Math.Round(MathHelper.Clamp(x, 0, 1) * 15f) & 0x0F) << 8) |
+                (((int)Math.Round(MathHelper.Clamp(y, 0, 1) * 15f) & 0x0F) << 4) |
+                ((int)Math.Round(MathHelper.Clamp(z, 0, 1) * 15f) & 0x0F));
         }
 
-        /// <summary>
-        /// Creates a new instance of Bgra4444.
-        /// </summary>
-        /// <param name="x">The x component</param>
-        /// <param name="y">The y component</param>
-        /// <param name="z">The z component</param>
-        /// <param name="w">The w component</param>
-        public Bgra4444(float x, float y, float z, float w)
+        #region IPixel
+
+
+
+        #endregion
+
+        #region IPackedVector
+
+        ushort IPackedVector<ushort>.PackedValue
         {
-            _packedValue = Pack(x, y, z, w);
+            get => Value;
+            set => Value = value;
         }
 
-        /// <summary>
-        /// Creates a new instance of Bgra4444.
-        /// </summary>
-        /// <param name="vector">Vector containing the components for the packed vector.</param>
-        public Bgra4444(Vector4 vector)
-        {
-            _packedValue = Pack(vector.X, vector.Y, vector.Z, vector.W);
-        }
+        public void FromVector4(Vector4 vector) =>
+            Value = Pack(vector.X, vector.Y, vector.Z, vector.W);
 
-        /// <summary>
-        /// Gets and sets the packed value.
-        /// </summary>
-        [CLSCompliant(false)]
-        public ushort PackedValue
-        {
-            get
-            {
-                return _packedValue;
-            }
-            set
-            {
-                _packedValue = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets the packed vector in Vector4 format.
-        /// </summary>
-        /// <returns>The packed vector in Vector4 format</returns>
         public Vector4 ToVector4()
         {
-            const float maxVal = 1 / 15.0f;
-
-            return new Vector4( ((_packedValue >> 8) & 0x0F) * maxVal,
-                                ((_packedValue >> 4) & 0x0F) * maxVal,
-                                (_packedValue & 0x0F) * maxVal,
-                                ((_packedValue >> 12) & 0x0F) * maxVal);
+            const float maxValue = 1 / 15f;
+            return new Vector4( 
+                ((Value >> 8) & 0x0F) * maxValue,
+                ((Value >> 4) & 0x0F) * maxValue,
+                (Value & 0x0F) * maxValue,
+                ((Value >> 12) & 0x0F) * maxValue);
         }
 
-        /// <summary>
-        /// Sets the packed vector from a Vector4.
-        /// </summary>
-        /// <param name="vector">Vector containing the components.</param>
-        public void FromVector4(Vector4 vector)
-        {
-            _packedValue = Pack(vector.X, vector.Y, vector.Z, vector.W);
-        }
+        #endregion
 
-        /// <summary>
-        /// Compares an object with the packed vector.
-        /// </summary>
-        /// <param name="obj">The object to compare.</param>
-        /// <returns>true if the object is equal to the packed vector.</returns>
-        public override bool Equals(object obj)
-        {
-            if (obj != null && (obj is Bgra4444))
-                return this == (Bgra4444)obj;
-            return false;
-        }
+        #region Equals
 
-        /// <summary>
-        /// Compares another Bgra4444 packed vector with the packed vector.
-        /// </summary>
-        /// <param name="other">The Bgra4444 packed vector to compare.</param>
-        /// <returns>true if the packed vectors are equal.</returns>
-        public bool Equals(Bgra4444 other)
-        {
-            return _packedValue == other._packedValue;
-        }
+        public static bool operator ==(Bgra4444 a, Bgra4444 b) => a.Value == b.Value;
+        public static bool operator !=(Bgra4444 a, Bgra4444 b) => a.Value != b.Value;
+
+        public bool Equals(Bgra4444 other) => this == other;
+        public override bool Equals(object obj) => obj is Bgra4444 value && Equals(value);
+
+        #endregion
+
+        #region Object Overrides
 
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        /// <returns>A string representation of the packed vector.</returns>
-        public override string ToString()
-        {
-            return ToVector4().ToString();
-        }
+        public override string ToString() => ToVector4().ToString();
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        /// <returns>The hash code for the packed vector.</returns>
-        public override int GetHashCode()
-        {
-            return _packedValue.GetHashCode();
-        }
+        public override int GetHashCode() => Value.GetHashCode();
 
-        public static bool operator ==(Bgra4444 lhs, Bgra4444 rhs)
-        {
-            return lhs._packedValue == rhs._packedValue;
-        }
-
-        public static bool operator !=(Bgra4444 lhs, Bgra4444 rhs)
-        {
-            return lhs._packedValue != rhs._packedValue;
-        }
+        #endregion
     }
 }

@@ -3,17 +3,14 @@ namespace MonoGame.Utilities.Collections
 {
     public partial class LongEqualityComparer<T>
     {
+        /// <summary>
+        /// Used on 64-bit machines.
+        /// </summary>
         private class LongStringComparer64 : ILongEqualityComparer<string>
         {
-            public bool Equals(string x, string y)
-            {
-                return x.Equals(y);
-            }
+            public bool Equals(string x, string y) => x.Equals(y);
 
-            public int GetHashCode(string str)
-            {
-                return str.GetHashCode();
-            }
+            public int GetHashCode(string str) => str.GetHashCode();
 
             public unsafe long GetLongHashCode(string str)
             {
@@ -39,17 +36,14 @@ namespace MonoGame.Utilities.Collections
             }
         }
 
+        /// <summary>
+        /// Used on 32-bit machines.
+        /// </summary>
         private class LongStringComparer32 : ILongEqualityComparer<string>
         {
-            public bool Equals(string x, string y)
-            {
-                return x.Equals(y);
-            }
+            public bool Equals(string x, string y) => x.Equals(y);
 
-            public int GetHashCode(string str)
-            {
-                return str.GetHashCode();
-            }
+            public int GetHashCode(string str) => str.GetHashCode();
 
             public unsafe long GetLongHashCode(string str)
             {
@@ -58,7 +52,6 @@ namespace MonoGame.Utilities.Collections
                     int hash1 = 5381;
                     int hash2 = hash1;
 
-                    // 32 bit machines.
                     int* pint = (int*)src;
                     int len = str.Length;
                     while (len > 2)

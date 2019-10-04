@@ -35,11 +35,9 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         /// Initializes a new instance of the ContentTypeWriter class.
         /// </summary>
         /// <param name="targetType"></param>
-        protected ContentTypeWriter(Type targetType)
-        {
-            TargetType = targetType ?? throw new ArgumentNullException();
-        }
-        
+        protected ContentTypeWriter(Type targetType) => 
+            TargetType = targetType ?? throw new ArgumentNullException(nameof(targetType));
+
         /// <summary>
         /// Gets the assembly qualified name of the runtime loader for this type.
         /// </summary>
@@ -52,10 +50,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         /// </summary>
         /// <param name="targetPlatform">The target platform.</param>
         /// <returns>The qualified name.</returns>
-        public virtual string GetRuntimeType(TargetPlatform targetPlatform)
-        {
-            return TargetType.FullName + ", " + TargetType.Assembly.FullName;
-        }
+        public virtual string GetRuntimeType(TargetPlatform targetPlatform) =>
+            TargetType.FullName + ", " + TargetType.Assembly.FullName;
 
         /// <summary>
         /// Retrieves and caches nested type writers and allows for reflection over the target data type. Called by the framework at creation time.
@@ -63,7 +59,6 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         /// <param name="compiler">The content compiler.</param>
         protected virtual void Initialize(ContentCompiler compiler)
         {
-
         }
 
         /// <summary>
@@ -72,7 +67,6 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         /// <param name="writer">The content writer.</param>
         internal virtual void OnAddedToContentWriter(ContentWriter writer)
         {
-
         }
 
         /// <summary>

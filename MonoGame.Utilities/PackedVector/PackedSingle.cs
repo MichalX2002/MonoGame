@@ -22,13 +22,11 @@ namespace MonoGame.Utilities.PackedVector
         }
 
         /// <inheritdoc/>
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
-
-        /// <inheritdoc/>
-        public void FromVector4(Vector4 vector) => ConvertFromRgbaScaledVector4(vector);
-
-        /// <inheritdoc/>
-        public Vector4 ToScaledVector4() => ToVector4();
+        public void FromVector4(Vector4 vector)
+        {
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.One);
+            Value = PackedVectorHelper.GetBT709Luminance(vector.X, vector.Y, vector.Z);
+        }
 
         /// <inheritdoc/>
         public Vector4 ToVector4() => new Vector4(Value, Value, Value, 1f);
@@ -72,8 +70,6 @@ namespace MonoGame.Utilities.PackedVector
 
         internal void ConvertFromRgbaScaledVector4(Vector4 vector)
         {
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.One);
-            Value = PackedVectorHelper.GetBT709Luminance(vector.X, vector.Y, vector.Z);
         }
     }
 }

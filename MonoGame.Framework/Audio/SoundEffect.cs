@@ -51,7 +51,7 @@ namespace MonoGame.Framework.Audio
               The audio has the following restrictions:
               Must be a PCM wave or Ogg Vorbis file
               Can only be mono or stereo
-              Must be 8 or 16 bit
+              Must be 8 or 16-bit
               Sample rate must be between 8,000 Hz and 48,000 Hz
             */
 

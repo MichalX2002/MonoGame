@@ -211,7 +211,7 @@ namespace MonoGame.Utilities
 
         // Size of match buffer for literals/lengths.  There are 4 reasons for
         // limiting lit_bufsize to 64K:
-        //   - frequencies can be kept in 16 bit counters
+        //   - frequencies can be kept in 16-bit counters
         //   - if compression is not successful for the first block, all input
         //     data is still in the window so we can still emit a stored block even
         //     when input comes from standard input.  (This can also be done for
@@ -660,7 +660,7 @@ namespace MonoGame.Utilities
             return (last_lit == lit_bufsize - 1) || (last_lit == lit_bufsize);
             // dinoch - wraparound?
             // We avoid equality with lit_bufsize because of wraparound at 64K
-            // on 16 bit machines and because stored blocks are restricted to
+            // on 16-bit machines and because stored blocks are restricted to
             // 64K-1 bytes.
         }
 
@@ -733,7 +733,7 @@ namespace MonoGame.Utilities
         // Set the data type to ASCII or BINARY, using a crude approximation:
         // binary if more than 20% of the bytes are <= 6 or >= 128, ascii otherwise.
         // IN assertion: the fields freq of dyn_ltree are set and the total of all
-        // frequencies does not exceed 64K (to fit in an int on 16 bit machines).
+        // frequencies does not exceed 64K (to fit in an int on 16-bit machines).
         internal void set_data_type()
         {
             int n = 0;
@@ -991,7 +991,7 @@ namespace MonoGame.Utilities
                 }
                 else if (more == -1)
                 {
-                    // Very unlikely, but possible on 16 bit machine if strstart == 0
+                    // Very unlikely, but possible on 16-bit machine if strstart == 0
                     // and lookahead == 1 (input done one byte at time)
                     more--;
 
@@ -1005,7 +1005,7 @@ namespace MonoGame.Utilities
                     strstart -= w_size; // we now have strstart >= MAX_DIST
                     block_start -= w_size;
 
-                    // Slide the hash table (could be avoided with 32 bit values
+                    // Slide the hash table (could be avoided with 32-bit values
                     // at the expense of memory usage). We slide even when level == 0
                     // to keep the hash table consistent if we switch back to level > 0
                     // later. (Using level 0 permanently is not an optimal usage of

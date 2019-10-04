@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace MonoGame.Framework.Graphics
@@ -11,7 +9,6 @@ namespace MonoGame.Framework.Graphics
 		public ModelMeshPartCollection(IList<ModelMeshPart> list)
 			: base(list)
 		{
-
 		}
 	}
 

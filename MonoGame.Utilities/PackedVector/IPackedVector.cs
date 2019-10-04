@@ -13,14 +13,24 @@ namespace MonoGame.Utilities.PackedVector
     /// </summary>
     public interface IPackedVector
     {
+        /// <summary>
+        /// Sets the pixel from a scaled <see cref="Vector4"/>.
+        /// </summary>
         void FromVector4(Vector4 vector);
 
+        /// <summary>
+        /// Converts the pixel to a scaled <see cref="Vector4"/>.
+        /// The XYZW vector components correspond to RGBA. 
+        /// </summary>
         Vector4 ToVector4();
     }
 
     // http://msdn.microsoft.com/en-us/library/bb197661.aspx
     public interface IPackedVector<TPacked> : IPackedVector
     {
+        /// <summary>
+        /// Gets or sets the packed representation of this vector.
+        /// </summary>
         TPacked PackedValue { get; set; }
     }
 }

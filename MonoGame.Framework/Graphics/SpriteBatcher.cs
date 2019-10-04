@@ -114,7 +114,7 @@ namespace MonoGame.Framework.Graphics
 
         /// <summary>
         /// Sorts the batch items and then groups batch drawing into maximal allowed batch sets that do not
-        /// overflow the 16 bit array indices for vertices.
+        /// overflow the 16-bit array indices for vertices.
         /// </summary>
         /// <param name="sortMode">The type of depth sorting desired for the rendering.</param>
         /// <param name="effect">The custom effect to apply to the drawn geometry</param>

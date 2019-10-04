@@ -334,10 +334,10 @@ namespace MonoGame.Framework.Graphics
                 Vector4 alphaTest = new Vector4();
                 bool eqNe = false;
                 
-                // Convert reference alpha from 8 bit integer to 0-1 float format.
+                // Convert reference alpha from 8-bit integer to 0-1 float format.
                 float reference = referenceAlpha / 255f;
                 
-                // Comparison tolerance of half the 8 bit integer precision.
+                // Comparison tolerance of half the 8-bit integer precision.
                 const float threshold = 0.5f / 255f;
                 
                 switch (alphaFunction)

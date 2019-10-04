@@ -1,68 +1,57 @@
-﻿using MonoGame.Framework;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace MonoGame.Framework.Graphics
 {
-	// Summary:
-	//     Represents bone data for a model. Reference page contains links to related
-	//     conceptual articles.
+    /// <summary>
+    /// Represents bone data for a model. 
+    /// </summary>
 	public sealed class ModelBone
 	{
-		private List<ModelBone> children = new List<ModelBone>();
-
-        public List<ModelMesh> Meshes { get; private set; } = new List<ModelMesh>();
-
-        // Summary:
-        //     Gets a collection of bones that are children of this bone.
-        public ModelBoneCollection Children { get; private set; }
-		//
-		// Summary:
-		//     Gets the index of this bone in the Bones collection.
-		public int Index { get; set; }
-		//
-		// Summary:
-		//     Gets the name of this bone.
-		public string Name { get; set; }
-		//
-		// Summary:
-		//     Gets the parent of this bone.
-		public ModelBone Parent { get; set; }
-		//
-		// Summary:
-		//     Gets or sets the matrix used to transform this bone relative to its parent
-		//     bone.
-		internal Matrix transform;
-		public Matrix Transform
-        {
-            get => transform;
-            set => transform = value;
-        }
+		private List<ModelBone> _children;
 
         /// <summary>
-        /// Transform of this node from the root of the model not from the parent
+        /// Gets a collection of bones that are children of this bone.
         /// </summary>
-        public Matrix ModelTransform {
-			get;
-			set;
-		}
-		
-		public ModelBone ()	
-		{
-			Children = new ModelBoneCollection(new List<ModelBone>());
-		}
-		
-		public void AddMesh(ModelMesh mesh)
-		{
-			Meshes.Add(mesh);
-		}
+        public ModelBoneCollection Children { get; }
 
-		public void AddChild(ModelBone modelBone)
-		{
-			children.Add(modelBone);
-			Children = new ModelBoneCollection(children);
-		}
-	}
+        public List<ModelMesh> Meshes { get; }
+
+        /// <summary>
+        /// Gets the index of this bone in <see cref="Model.Bones"/>.
+        /// </summary>
+        public int Index { get; set; }
+
+        /// <summary>
+        /// Gets the name of this bone.
+        /// </summary>
+		public string Name { get; set; }
+
+        /// <summary>
+        /// Gets the parent of this bone.
+        /// </summary>
+        public ModelBone Parent { get; set; }
+		
+        /// <summary>
+        /// Gets or sets the matrix used to transform this bone relative to its parent bone.
+        /// </summary>
+		public Matrix Transform { get; set; }
+
+        /// <summary>
+        /// Transform of this node from the root of the model not from the parent.
+        /// </summary>
+        public Matrix ModelTransform { get; set; }
+
+        public ModelBone()
+        {
+            _children = new List<ModelBone>();
+            Meshes = new List<ModelMesh>();
+            Children = new ModelBoneCollection(_children);
+        }
+
+        public void AddMesh(ModelMesh mesh) => Meshes.Add(mesh);
+
+        public void AddChild(ModelBone modelBone) => _children.Add(modelBone);
+    }
 
 	//// Summary:
 	////     Represents bone data for a model. Reference page contains links to related
