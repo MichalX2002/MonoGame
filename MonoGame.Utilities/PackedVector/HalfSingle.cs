@@ -7,80 +7,70 @@ using MonoGame.Framework;
 
 namespace MonoGame.Utilities.PackedVector
 {
-    public struct HalfSingle : IPackedVector<ushort>, IEquatable<HalfSingle>, IPackedVector
+    public struct HalfSingle : IPackedVector<ushort>, IEquatable<HalfSingle>, IPixel
     {
-        ushort packedValue;
-
-        public HalfSingle(float single)
-        {
-            packedValue = HalfTypeHelper.Convert(single);
-        }
-
+        #region Constructors
+        
+        /// <summary>
+        /// Constructs the packed vector with a packed value.
+        /// </summary>
         [CLSCompliant(false)]
-        public ushort PackedValue
-        {
-            get
-            {
-                return this.packedValue;
-            }
-            set
-            {
-                this.packedValue = value;
-            }
-        }
-
-        public float ToSingle()
-        {
-            return HalfTypeHelper.Convert(this.packedValue);
-        }
-
-        public void FromVector4(Vector4 vector)
-        {
-            this.packedValue = HalfTypeHelper.Convert(vector.X);
-        }
+        public HalfSingle(ushort value) : this() => PackedValue = value;
 
         /// <summary>
-        /// Gets the packed vector in Vector4 format.
+        /// Constructs the packed vector with a raw value.
         /// </summary>
-        /// <returns>The packed vector in Vector4 format</returns>
-        public Vector4 ToVector4()
-        {
-            return new Vector4(this.ToSingle(), 0f, 0f, 1f);
-        }
+        public HalfSingle(float single) => PackedValue = HalfTypeHelper.Pack(single);
 
-        public override bool Equals(object obj)
-        {
-            if (obj != null && obj.GetType() == this.GetType())
-            {
-                return this == (HalfSingle)obj;
-            }
+        #endregion
 
-            return false;
-        }
+        /// <summary>
+        /// Gets the packed vector as a <see cref="float"/>.
+        /// </summary>
+        public float ToFloat() => HalfTypeHelper.Pack(PackedValue);
 
-        public bool Equals(HalfSingle other)
-        {
-            return this.packedValue == other.packedValue;
-        }
+        #region IPixel
 
-        public override string ToString()
-        {
-            return this.ToSingle().ToString();
-        }
 
-        public override int GetHashCode()
-        {
-            return this.packedValue.GetHashCode();
-        }
 
-        public static bool operator ==(HalfSingle lhs, HalfSingle rhs)
-        {
-            return lhs.packedValue == rhs.packedValue;
-        }
+        #endregion
 
-        public static bool operator !=(HalfSingle lhs, HalfSingle rhs)
-        {
-            return lhs.packedValue != rhs.packedValue;
-        }
+        #region IPackedVector
+
+        /// <inheritdoc/>
+        [CLSCompliant(false)]
+        public ushort PackedValue { get; set; }
+
+        /// <inheritdoc/>
+        public void FromVector4(Vector4 vector) => PackedValue = HalfTypeHelper.Pack(vector.X);
+
+        /// <inheritdoc/>
+        public Vector4 ToVector4() => new Vector4(ToFloat(), 0f, 0f, 1f);
+
+        #endregion
+
+        #region Equals
+
+        public static bool operator ==(HalfSingle a, HalfSingle b) => a.PackedValue == b.PackedValue;
+        public static bool operator !=(HalfSingle a, HalfSingle b) => a.PackedValue != b.PackedValue;
+
+        public bool Equals(HalfSingle other) => this == other;
+        public override bool Equals(object obj) => obj is HalfSingle other && Equals(other);
+
+        #endregion
+
+        #region Object Overrides
+
+        /// <summary>
+        /// Gets a string representation of the packed vector.
+        /// </summary>
+        public override string ToString() => ToFloat().ToString();
+
+        /// <summary>
+        /// Gets a hash code of the packed vector.
+        /// </summary>
+        public override int GetHashCode() => PackedValue.GetHashCode();
+
+        #endregion
     }
 }

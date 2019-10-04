@@ -15,12 +15,6 @@ namespace MonoGame.Framework
     [DataContract]
     public class CurveKey : IEquatable<CurveKey>, IComparable<CurveKey>
     {
-
-        #region Private Fields
-        private float _value;
-
-        #endregion
-
         #region Properties
 
         /// <summary>
@@ -51,11 +45,7 @@ namespace MonoGame.Framework
         /// Gets a value of this point.
         /// </summary>
         [DataMember]
-        public float Value
-        {
-            get => _value;
-            set => _value = value;
-        }
+        public float Value { get; set; }
 
         #endregion
 
@@ -104,7 +94,7 @@ namespace MonoGame.Framework
         public CurveKey(float position, float value, float tangentIn, float tangentOut, CurveContinuity continuity)
         {
             Position = position;
-            _value = value;
+            Value = value;
             TangentIn = tangentIn;
             TangentOut = tangentOut;
             Continuity = continuity;
@@ -112,71 +102,49 @@ namespace MonoGame.Framework
 
         #endregion
 
-        /// <summary>
-        /// 
-        /// Compares whether two <see cref="CurveKey"/> instances are not equal.
-        /// </summary>
-        /// <param name="value1"><see cref="CurveKey"/> instance on the left of the not equal sign.</param>
-        /// <param name="value2"><see cref="CurveKey"/> instance on the right of the not equal sign.</param>
-        /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>	
-        public static bool operator !=(CurveKey value1, CurveKey value2)
-        {
-            return !(value1 == value2);
-        }
+        #region Equals
 
-        /// <summary>
-        /// Compares whether two <see cref="CurveKey"/> instances are equal.
-        /// </summary>
-        /// <param name="value1"><see cref="CurveKey"/> instance on the left of the equal sign.</param>
-        /// <param name="value2"><see cref="CurveKey"/> instance on the right of the equal sign.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
         public static bool operator ==(CurveKey value1, CurveKey value2)
         {
-            if (Equals(value1, null))
-                return Equals(value2, null);
-
-            if (Equals(value2, null))
-                return Equals(value1, null);
+            if (Equals(value1, null)) return Equals(value2, null);
+            if (Equals(value2, null)) return Equals(value1, null);
 
             return (value1.Position == value2.Position)
-                && (value1._value == value2._value)
+                && (value1.Value == value2.Value)
                 && (value1.TangentIn == value2.TangentIn)
                 && (value1.TangentOut == value2.TangentOut)
                 && (value1.Continuity == value2.Continuity);
         }
 
+        public static bool operator !=(CurveKey value1, CurveKey value2) => !(value1 == value2);
+
+        public bool Equals(CurveKey other) => this == other;
+        public override bool Equals(object obj) => obj is CurveKey other && Equals(other);
+
+        #endregion
+
         /// <summary>
         /// Creates a copy of this key.
         /// </summary>
-        /// <returns>A copy of this key.</returns>
-        public CurveKey Clone()
-        {
-            return new CurveKey(Position, _value, TangentIn, TangentOut, Continuity);
-        }
-
-        #region Inherited Methods
+        public CurveKey Clone() => new CurveKey(Position, Value, TangentIn, TangentOut, Continuity);
 
         public int CompareTo(CurveKey other)
         {
             return Position.CompareTo(other.Position);
         }
 
-        public bool Equals(CurveKey other)
-        {
-            return (this == other);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return (obj as CurveKey) != null && Equals((CurveKey)obj);
-        }
-
         public override int GetHashCode()
         {
-            return Position.GetHashCode() ^ _value.GetHashCode() ^ TangentIn.GetHashCode() ^
-                TangentOut.GetHashCode() ^ Continuity.GetHashCode();
-        } 
-
-        #endregion
+            unchecked
+            {
+                int code = 17;
+                code = code * 23 + Position.GetHashCode();
+                code = code * 23 + Value.GetHashCode();
+                code = code * 23 + TangentIn.GetHashCode();
+                code = code * 23 + TangentOut.GetHashCode();
+                code = code * 23 + Continuity.GetHashCode();
+                return code;
+            }
+        }
     }
 }

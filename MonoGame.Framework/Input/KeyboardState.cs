@@ -10,7 +10,7 @@ namespace MonoGame.Framework.Input
     /// <summary>
     /// Holds the state of keystrokes by a keyboard.
     /// </summary>
-	public struct KeyboardState
+	public struct KeyboardState : IEquatable<KeyboardState>
     {
         public const int MaxKeysPerState = 8;
 
@@ -295,25 +295,17 @@ namespace MonoGame.Framework.Input
 
         #endregion
 
-
-        #region Object and Equality
-
         /// <summary>
-        /// Gets the hash code for <see cref="KeyboardState"/> instance.
+        /// Returns the hash code of the <see cref="KeyboardState"/>.
         /// </summary>
-        /// <returns>Hash code of the object.</returns>
         public override int GetHashCode()
         {
             return (int)(keys0 ^ keys1 ^ keys2 ^ keys3 ^ keys4 ^ keys5 ^ keys6 ^ keys7);
         }
 
-        /// <summary>
-        /// Compares whether two <see cref="KeyboardState"/> instances are equal.
-        /// </summary>
-        /// <param name="a"><see cref="KeyboardState"/> instance to the left of the equality operator.</param>
-        /// <param name="b"><see cref="KeyboardState"/> instance to the right of the equality operator.</param>
-        /// <returns>true if the instances are equal; false otherwise.</returns>
-        public static bool operator ==(KeyboardState a, KeyboardState b)
+        #region Equals
+
+        public static bool operator ==(in KeyboardState a, in KeyboardState b)
         {
             return a.keys0 == b.keys0
                 && a.keys1 == b.keys1
@@ -325,28 +317,11 @@ namespace MonoGame.Framework.Input
                 && a.keys7 == b.keys7;
         }
 
-        /// <summary>
-        /// Compares whether two <see cref="KeyboardState"/> instances are not equal.
-        /// </summary>
-        /// <param name="a"><see cref="KeyboardState"/> instance to the left of the inequality operator.</param>
-        /// <param name="b"><see cref="KeyboardState"/> instance to the right of the inequality operator.</param>
-        /// <returns>true if the instances are different; false otherwise.</returns>
-        public static bool operator !=(KeyboardState a, KeyboardState b)
-        {
-            return !(a == b);
-        }
+        public static bool operator !=(in KeyboardState a, in KeyboardState b) => !(a == b);
 
-        /// <summary>
-        /// Compares whether current instance is equal to specified object.
-        /// </summary>
-        /// <param name="obj">The <see cref="KeyboardState"/> to compare.</param>
-        /// <returns>true if the provided <see cref="KeyboardState"/> instance is same with current; false otherwise.</returns>
-        public override bool Equals(object obj)
-        {
-            return obj is KeyboardState && this == (KeyboardState)obj;
-        }
+        public bool Equals(KeyboardState other) => this == other;
+        public override bool Equals(object obj) => obj is KeyboardState other && Equals(other);
 
         #endregion
-
     }
 }

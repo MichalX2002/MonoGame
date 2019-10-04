@@ -112,7 +112,7 @@ namespace MonoGame.Utilities.PackedVector
         }
 
         /// <summary>
-        /// Maps the position of number types in memory
+        /// Maps the position of number types in memory.
         /// </summary>
         [StructLayout(LayoutKind.Explicit)]
         private struct FloatInt

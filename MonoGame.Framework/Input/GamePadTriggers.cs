@@ -2,12 +2,14 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
+
 namespace MonoGame.Framework.Input
 {
     /// <summary>
     /// Contains information about the left and the right trigger buttons.
     /// </summary>
-    public readonly struct GamePadTriggers
+    public readonly struct GamePadTriggers : IEquatable<GamePadTriggers>
     {
         /// <summary>
         /// Gets the position of the left trigger.
@@ -32,43 +34,21 @@ namespace MonoGame.Framework.Input
             Right = MathHelper.Clamp(rightTrigger, 0f, 1f);
         }
 
-        /// <summary>
-        /// Determines whether two specified instances of <see cref="GamePadTriggers"/> are equal.
-        /// </summary>
-        /// <param name="left">The first object to compare.</param>
-        /// <param name="right">The second object to compare.</param>
-        /// <returns>true if <paramref name="left"/> and <paramref name="right"/> are equal; otherwise, false.</returns>
-        public static bool operator ==(GamePadTriggers left, GamePadTriggers right)
-        {
-            return (left.Left == right.Left) && (left.Right == right.Right);
-        }
+        #region Equals
 
-        /// <summary>
-        /// Determines whether two specified instances of <see cref="GamePadTriggers"/> are not equal.
-        /// </summary>
-        /// <param name="left">The first object to compare.</param>
-        /// <param name="right">The second object to compare.</param>
-        /// <returns>true if <paramref name="left"/> and <paramref name="right"/> are not equal; otherwise, false.</returns>
-        public static bool operator !=(GamePadTriggers left, GamePadTriggers right)
-        {
-            return !(left == right);
-        }
+        public static bool operator ==(in GamePadTriggers a, in GamePadTriggers b) => 
+            (a.Left == b.Left) && (a.Right == b.Right);
 
-        /// <summary>
-        /// Returns a value indicating whether this instance is equal to a specified object.
-        /// </summary>
-        /// <param name="obj">An object to compare to this instance.</param>
-        /// <returns>true if <paramref name="obj"/> is a <see cref="GamePadTriggers"/> and has the same value as this instance; otherwise, false.</returns>
-        public override bool Equals(object obj)
-        {
-            return (obj is GamePadTriggers other) && (this == other);
-        }
+        public static bool operator !=(in GamePadTriggers a, in GamePadTriggers b) => !(a == b);
+
+        public bool Equals(GamePadTriggers other) => this == other;
+        public override bool Equals(object obj) => obj is GamePadTriggers other && Equals(other);
+
+        #endregion
 
         /// <summary>
         /// Serves as a hash function for a <see cref="GamePadTriggers"/> object.
         /// </summary>
-        /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
-        /// hash table.</returns>
         public override int GetHashCode()
         {
             unchecked
@@ -81,10 +61,6 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Returns a string that represents the current <see cref="GamePadTriggers"/>.
         /// </summary>
-        /// <returns>A string that represents the current <see cref="GamePadTriggers"/>.</returns>
-        public override string ToString()
-        {
-            return "[GamePadTriggers: Left=" + Left + ", Right=" + Right + "]";
-        }
+        public override string ToString() => "[GamePadTriggers: Left=" + Left + ", Right=" + Right + "]";
     }
 }

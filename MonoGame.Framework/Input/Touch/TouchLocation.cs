@@ -68,20 +68,14 @@ namespace MonoGame.Framework.Input.Touch
 
         #region Properties
 
-        internal Vector2 PressPosition { get; private set; }
-
         internal TimeSpan PressTimestamp { get; private set; }
-
+        internal Vector2 PressPosition { get; private set; }
+        internal Vector2 Velocity { get; private set; }
         internal TimeSpan Timestamp => _timestamp;
 
-        internal Vector2 Velocity { get; private set; }
-
         public int Id { get; private set; }
-
         public Vector2 Position => _position;
-
         public float Pressure { get; private set; }
-
         public TouchLocationState State { get; private set; }
 
         #endregion
@@ -204,40 +198,47 @@ namespace MonoGame.Framework.Input.Touch
             return State != _previousState || delta.LengthSquared() > 0.001f;
         }
 
-        public override bool Equals(object obj)
-        {
-			if (obj is TouchLocation)
-				return Equals((TouchLocation)obj);
+        #region Equals
 
-			return false;
-		}
-
-        public bool Equals(TouchLocation other)
+        public static bool operator ==(in TouchLocation a, in TouchLocation b)
         {
-            return  Id.Equals(other.Id) &&
-                    _position.Equals(other._position) &&
-                    _previousPosition.Equals(other._previousPosition);
+            return a.Id == b.Id &&
+                   a.State == b.State &&
+                   a._position == b._position &&
+                   a._previousState == b._previousState &&
+                   a._previousPosition == b._previousPosition;
         }
 
-        public override int GetHashCode()
-        {
-            return Id;
-        }
+        public static bool operator !=(in TouchLocation a, in TouchLocation b) => !(a == b);
+
+        public bool Equals(TouchLocation other) => this == other;
+        public override bool Equals(object obj) => obj is TouchLocation other && Equals(other);
+
+        #endregion
+
+        public override int GetHashCode() => Id;
 
         public override string ToString()
         {
-            return "Touch id:"+Id+" state:"+State + " position:" + _position + " pressure:" + Pressure +" prevState:"+_previousState+" prevPosition:"+ _previousPosition + " previousPressure:" + _previousPressure;
+            return
+                "Touch id:" + Id +
+                " state:" + State +
+                " position:" + _position +
+                " pressure:" + Pressure +
+                " prevState:" + _previousState +
+                " prevPosition:" + _previousPosition +
+                " previousPressure:" + _previousPressure;
         }
 
-        public bool TryGetPreviousLocation(out TouchLocation aPreviousLocation)
+        public bool TryGetPreviousLocation(out TouchLocation previousLocation)
         {
 			if (_previousState == TouchLocationState.Invalid)
 			{
-                aPreviousLocation = new TouchLocation();
+                previousLocation = default;
                 return false;
 			}
 
-            aPreviousLocation = new TouchLocation
+            previousLocation = new TouchLocation
             {
                 Id = Id,
                 State = _previousState,
@@ -254,25 +255,6 @@ namespace MonoGame.Framework.Input.Touch
             };
             return true;
         }
-
-        public static bool operator !=(TouchLocation value1, TouchLocation value2)
-        {
-			return  value1.Id != value2.Id || 
-			        value1.State != value2.State ||
-			        value1._position != value2._position ||
-			        value1._previousState != value2._previousState ||
-			        value1._previousPosition != value2._previousPosition;
-        }
-
-        public static bool operator ==(TouchLocation value1, TouchLocation value2)
-        {
-            return  value1.Id == value2.Id && 
-			        value1.State == value2.State &&
-			        value1._position == value2._position &&
-			        value1._previousState == value2._previousState &&
-			        value1._previousPosition == value2._previousPosition;
-        }
-
 
         internal void AgeState()
         {

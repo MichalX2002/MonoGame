@@ -2,9 +2,11 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
+
 namespace MonoGame.Framework.Input
 {
-    public readonly struct GamePadDPad
+    public readonly struct GamePadDPad : IEquatable<GamePadDPad>
     {
         /// <summary>
         /// Gets a value indicating wethever down is pressed on the directional pad.
@@ -30,14 +32,17 @@ namespace MonoGame.Framework.Input
         /// <value><see cref="ButtonState.Pressed"/> if the up button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
         public readonly ButtonState Up;
 
+        #region Constructors
+
         /// <summary>
         /// Initializes a new instance of the <see cref="GamePadDPad"/> struct.
         /// </summary>
-        /// <param name="upValue">Current state of directional pad up.</param>
-        /// <param name="downValue">Current state of directional pad down.</param>
-        /// <param name="leftValue">Current state of directional pad left.</param>
-        /// <param name="rightValue">Current state of directional pad right.</param>
-        public GamePadDPad(ButtonState upValue, ButtonState downValue, ButtonState leftValue, ButtonState rightValue) : this()
+        /// <param name="upValue">Current state of directional up pad.</param>
+        /// <param name="downValue">Current state of directional down pad.</param>
+        /// <param name="leftValue">Current state of directional left pad.</param>
+        /// <param name="rightValue">Current state of directional right pad.</param>
+        public GamePadDPad(
+            ButtonState upValue, ButtonState downValue, ButtonState leftValue, ButtonState rightValue) : this()
         {
             Up = upValue;
             Down = downValue;
@@ -56,12 +61,10 @@ namespace MonoGame.Framework.Input
             ConvertButtonToDirection(button, ref Down, ref Left, ref Right, ref Up);
         }
 
-        /// <summary>
-        /// Determines whether two specified instances of <see cref="GamePadDPad"/> are equal.
-        /// </summary>
-        /// <param name="left">The first object to compare.</param>
-        /// <param name="right">The second object to compare.</param>
-        /// <returns>true if <paramref name="left"/> and <paramref name="right"/> are equal; otherwise, false.</returns>
+        #endregion
+
+        #region Equals
+
         public static bool operator ==(in GamePadDPad left, in GamePadDPad right)
         {
             return (left.Down == right.Down)
@@ -70,35 +73,18 @@ namespace MonoGame.Framework.Input
                 && (left.Up == right.Up);
         }
 
-        /// <summary>
-        /// Determines whether two specified instances of <see cref="GamePadDPad"/> are not equal.
-        /// </summary>
-        /// <param name="left">The first object to compare.</param>
-        /// <param name="right">The second object to compare.</param>
-        /// <returns>true if <paramref name="left"/> and <paramref name="right"/> are not equal; otherwise, false.</returns>
-        public static bool operator !=(in GamePadDPad left, in GamePadDPad right)
-        {
-            return !(left == right);
-        }
+        public static bool operator !=(in GamePadDPad left, in GamePadDPad right) => !(left == right);
+
+        public bool Equals(GamePadDPad other) => this == other;
+        public override bool Equals(object obj) => obj is GamePadDPad other && Equals(other);
+
+        #endregion
+
+        #region Object Overrides
 
         /// <summary>
-        /// Returns a value indicating whether this instance is equal to a specified object.
+        /// Returns the hash code of the <see cref="GamePadDPad"/>.
         /// </summary>
-        /// <param name="obj">An object to compare to this instance.</param>
-        /// <returns>
-        /// true if <paramref name="obj"/> is a <see cref="GamePadDPad"/> and 
-        /// has the same value as this instance; otherwise, false.
-        /// </returns>
-        public override bool Equals(object obj)
-        {
-            return (obj is GamePadDPad other) && (this == other);
-        }
-
-        /// <summary>
-        /// Serves as a hash function for a <see cref="GamePadDPad"/> object.
-        /// </summary>
-        /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
-        /// hash table.</returns>
         public override int GetHashCode()
         {
             return
@@ -110,13 +96,16 @@ namespace MonoGame.Framework.Input
 
         /// <summary>
         /// Returns a string that represents the current <see cref="GamePadDPad"/>
-        /// in a format of 0000 where each number represents a boolean value of each respecting object property: Left, Up, Right, Down.
+        /// in a format of 0000 where each number represents a boolean value of each 
+        /// respective property: <see cref="Left"/>, <see cref="Up"/>, <see cref="Right"/>, <see cref="Down"/>.
         /// </summary>
-        /// <returns>A string that represents the current <see cref="GamePadDPad"/>.</returns>
-        public override string ToString()
-        {
-            return "" + (int)Left + (int)Up + (int)Right + (int)Down;
-        }
+        public override string ToString() => string.Concat(
+                ((int)Left).ToString(),
+                ((int)Up).ToString(),
+                ((int)Right).ToString(),
+                ((int)Down).ToString());
+
+        #endregion
 
         private void ConvertButtonToDirection(Buttons button,
             ref ButtonState down, ref ButtonState left, 

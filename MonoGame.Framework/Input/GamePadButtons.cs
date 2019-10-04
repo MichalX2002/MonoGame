@@ -2,12 +2,14 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
+
 namespace MonoGame.Framework.Input
 {
     /// <summary>
     /// Represents the current button states for the controller.
     /// </summary>
-    public readonly struct GamePadButtons
+    public readonly struct GamePadButtons : IEquatable<GamePadButtons>
     {
         internal readonly Buttons _buttons;
 
@@ -77,54 +79,30 @@ namespace MonoGame.Framework.Input
                 _buttons |= b;
         }
 
-        /// <summary>
-        /// Determines whether two specified instances of <see cref="GamePadButtons"/> are equal.
-        /// </summary>
-        /// <param name="left">The first object to compare.</param>
-        /// <param name="right">The second object to compare.</param>
-        /// <returns>true if <paramref name="left"/> and <paramref name="right"/> are equal; otherwise, false.</returns>
-        public static bool operator ==(GamePadButtons left, GamePadButtons right)
-        {
-            return left._buttons == right._buttons;
-        }
+        #region Equals
+
+        public static bool operator ==(GamePadButtons a, GamePadButtons b) => a._buttons == b._buttons;
+        public static bool operator !=(GamePadButtons a, GamePadButtons b) => a._buttons != b._buttons;
+
+        public bool Equals(GamePadButtons other) => this == other;
+        public override bool Equals(object obj) => obj is GamePadButtons other && Equals(other);
+
+        #endregion
+
+        #region Object Overrides
 
         /// <summary>
-        /// Determines whether two specified instances of <see cref="GamePadButtons"/> are not equal.
+        /// Returns the hash code of the <see cref="GamePadButtons"/>.
         /// </summary>
-        /// <param name="left">The first object to compare.</param>
-        /// <param name="right">The second object to compare.</param>
-        /// <returns>true if <paramref name="left"/> and <paramref name="right"/> are not equal; otherwise, false.</returns>
-        public static bool operator !=(GamePadButtons left, GamePadButtons right)
-        {
-            return !(left == right);
-        }
+        public override int GetHashCode() => _buttons.GetHashCode();
 
         /// <summary>
-        /// Returns a value indicating whether this instance is equal to a specified object.
+        /// Returns a string that represents the <see cref="GamePadButtons"/>.
         /// </summary>
-        /// <param name="obj">An object to compare to this instance.</param>
-        /// <returns>true if <paramref name="obj"/> is a <see cref="GamePadButtons"/> and has the same value as this instance; otherwise, false.</returns>
-        public override bool Equals(object obj)
-        {
-            return (obj is GamePadButtons other) && (this == other);
-        }
-
-        /// <summary>
-        /// Serves as a hash function for a <see cref="GamePadButtons"/> object.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return _buttons.GetHashCode();
-        }
-
-        /// <summary>
-        /// Returns a string that represents the current <see cref="GamePadButtons"/>.
-        /// </summary>
-        /// <returns>A string that represents the current <see cref="GamePadButtons"/>.</returns>
         public override string ToString()
         {
-            return "[GamePadButtons:" +
-                " A=" + (int)A +
+            return
+                "[GamePadButtons: A=" + (int)A +
                 ", B=" + (int)B +
                 ", Back=" + (int)Back +
                 ", X=" + (int)X +
@@ -137,6 +115,8 @@ namespace MonoGame.Framework.Input
                 ", BigButton=" + (int)BigButton +
                 "]";
         }
+
+        #endregion
     }
 }
 

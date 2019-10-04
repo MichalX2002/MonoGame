@@ -104,21 +104,21 @@ namespace MonoGame.Utilities.PackedVector
         public static bool operator !=(Byte4 a, Byte4 b) => a.PackedValue != b.PackedValue;
 
         public bool Equals(Byte4 other) => this == other;
-        public override bool Equals(object obj) => obj is Byte4 value && Equals(value);
+        public override bool Equals(object obj) => obj is Byte4 other && Equals(other);
 
         #endregion
 
         #region Object Overrides
 
         /// <summary>
-        /// Gets the hash code for the current instance.
-        /// </summary>
-        public override int GetHashCode() => PackedValue.GetHashCode();
-
-        /// <summary>
-        /// Returns a string representation of the current instance.
+        /// Gets a string representation of the packed vector.
         /// </summary>
         public override string ToString() => PackedValue.ToString("x8");
+
+        /// <summary>
+        /// Gets a hash code of the packed vector.
+        /// </summary>
+        public override int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

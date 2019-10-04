@@ -102,38 +102,6 @@ namespace MonoGame.Framework
             CreateCorners();
         }
 
-        #region Operators
-
-        /// <summary>
-        /// Compares whether two <see cref="BoundingFrustum"/> instances are equal.
-        /// </summary>
-        /// <param name="a"><see cref="BoundingFrustum"/> instance on the left of the equal sign.</param>
-        /// <param name="b"><see cref="BoundingFrustum"/> instance on the right of the equal sign.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public static bool operator ==(BoundingFrustum a, BoundingFrustum b)
-        {
-            if (Equals(a, null))
-                return (Equals(b, null));
-
-            if (Equals(b, null))
-                return (Equals(a, null));
-
-            return a._matrix == b._matrix;
-        }
-
-        /// <summary>
-        /// Compares whether two <see cref="BoundingFrustum"/> instances are not equal.
-        /// </summary>
-        /// <param name="a"><see cref="BoundingFrustum"/> instance on the left of the not equal sign.</param>
-        /// <param name="b"><see cref="BoundingFrustum"/> instance on the right of the not equal sign.</param>
-        /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>
-        public static bool operator !=(BoundingFrustum a, BoundingFrustum b)
-        {
-            return !(a == b);
-        }
-
-        #endregion
-
         #region Public Methods
 
         #region Contains
@@ -228,25 +196,23 @@ namespace MonoGame.Framework
 
         #endregion
 
-        /// <summary>
-        /// Compares whether current instance is equal to specified <see cref="BoundingFrustum"/>.
-        /// </summary>
-        /// <param name="other">The <see cref="BoundingFrustum"/> to compare.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public bool Equals(BoundingFrustum other)
+        #region Equals
+
+        public static bool operator ==(BoundingFrustum a, BoundingFrustum b)
         {
-            return (this == other);
+            if (Equals(a, null)) return Equals(b, null);
+            if (Equals(b, null)) return Equals(a, null);
+
+            return a._matrix == b._matrix;
         }
 
-        /// <summary>
-        /// Compares whether current instance is equal to specified <see cref="BoundingFrustum"/>.
-        /// </summary>
-        /// <param name="obj">The <see cref="object"/> to compare.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public override bool Equals(object obj)
-        {
-            return obj is BoundingFrustum other && this == other;
-        }
+        public static bool operator !=(BoundingFrustum a, BoundingFrustum b) => !(a == b);
+
+        public bool Equals(BoundingFrustum other) => this == other;
+
+        public override bool Equals(object obj) => obj is BoundingFrustum other && Equals(other);
+
+        #endregion
 
         /// <summary>
         /// Copies the frustum corners into an array.
@@ -255,7 +221,7 @@ namespace MonoGame.Framework
         /// The destination array for this frustum's corners.
         /// It must have size of <see cref="CornerCount"/>.
         /// </param>
-		public void GetCorners(Vector3[] corners)
+        public void GetCorners(Vector3[] corners)
         {
 			if (corners == null)
                 throw new ArgumentNullException(nameof(corners));
@@ -270,49 +236,33 @@ namespace MonoGame.Framework
         /// Returns a span of this frustum's corners.
         /// </summary>
         /// <returns>The span of corners.</returns>
-        public ReadOnlySpan<Vector3> GetCorners()
-        {
-            return _corners.AsSpan();
-        }
+        public ReadOnlySpan<Vector3> GetCorners() => _corners.AsSpan();
 
         /// <summary>
-        /// Gets the hash code of this <see cref="BoundingFrustum"/>.
+        /// Returns the hash code of the <see cref="BoundingFrustum"/>.
         /// </summary>
-        /// <returns>Hash code of this <see cref="BoundingFrustum"/>.</returns>
-        public override int GetHashCode()
-        {
-            return _matrix.GetHashCode();
-        }
+        public override int GetHashCode() => _matrix.GetHashCode();
 
         /// <summary>
         /// Gets whether or not a specified <see cref="BoundingBox"/> intersects with this <see cref="BoundingFrustum"/>.
         /// </summary>
         /// <param name="box">A <see cref="BoundingBox"/> for intersection test.</param>
         /// <returns>Whether the <see cref="BoundingBox"/> intersects with this <see cref="BoundingFrustum"/>.</returns>
-        public bool Intersects(in BoundingBox box)
-        {
-            return Contains(box) != ContainmentType.Disjoint;
-		}
+        public bool Intersects(in BoundingBox box) => Contains(box) != ContainmentType.Disjoint;
 
         /// <summary>
         /// Gets whether or not a specified <see cref="BoundingFrustum"/> intersects with this <see cref="BoundingFrustum"/>.
         /// </summary>
         /// <param name="frustum">An other <see cref="BoundingFrustum"/> for intersection test.</param>
         /// <returns>Whether the <see cref="BoundingFrustum"/> intersects with this <see cref="BoundingFrustum"/>.</returns>
-        public bool Intersects(BoundingFrustum frustum)
-        {
-            return Contains(frustum) != ContainmentType.Disjoint;
-        }
+        public bool Intersects(BoundingFrustum frustum) => Contains(frustum) != ContainmentType.Disjoint;
 
         /// <summary>
         /// Gets whether or not a specified <see cref="BoundingSphere"/> intersects with this <see cref="BoundingFrustum"/>.
         /// </summary>
         /// <param name="sphere">A <see cref="BoundingSphere"/> for intersection test.</param>
         /// <returns>Whether the <see cref="BoundingSphere"/> intersects with this <see cref="BoundingFrustum"/>.</returns>
-        public bool Intersects(in BoundingSphere sphere)
-        {
-            return Contains(sphere) != ContainmentType.Disjoint;
-        }
+        public bool Intersects(in BoundingSphere sphere) => Contains(sphere) != ContainmentType.Disjoint;
 
         /// <summary>
         /// Gets type of intersection between specified <see cref="Plane"/> and this <see cref="BoundingFrustum"/>.

@@ -49,17 +49,6 @@ namespace MonoGame.Framework
         #region Data Properties
 
         /// <summary>
-        /// Gets or sets packed value of this <see cref="Color"/>.
-        /// </summary>
-        [IgnoreDataMember]
-        [CLSCompliant(false)]
-        public uint PackedValue
-        {
-            get => Unsafe.As<Color, uint>(ref this);
-            set => Unsafe.As<Color, uint>(ref this) = value;
-        }
-
-        /// <summary>
         /// Gets or sets the RGB components of this struct as <see cref="Rgb24"/>
         /// </summary>
         public Rgb24 Rgb
@@ -209,18 +198,16 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #region IPixel Implementation
+        #region IPackedVector
 
         /// <inheritdoc />
-        public Rgba64 ToRgba64() => new Rgba64(
-            PackedVectorHelper.UpScale8To16Bit(R),
-            PackedVectorHelper.UpScale8To16Bit(G),
-            PackedVectorHelper.UpScale8To16Bit(B),
-            PackedVectorHelper.UpScale8To16Bit(A));
-
-
-        /// <inheritdoc />
-        public void ToColor(ref Color dest) => dest = this;
+        [IgnoreDataMember]
+        [CLSCompliant(false)]
+        public uint PackedValue
+        {
+            get => Unsafe.As<Color, uint>(ref this);
+            set => Unsafe.As<Color, uint>(ref this) = value;
+        }
 
         /// <inheritdoc />
         public Vector4 ToVector4() => new Vector4(R / 255f, G / 255f, B / 255f, A / 255f);
@@ -237,6 +224,20 @@ namespace MonoGame.Framework
             B = (byte)vector.Z;
             A = (byte)vector.W;
         }
+
+        #endregion
+
+        #region IPixel
+
+        /// <inheritdoc />
+        public Rgba64 ToRgba64() => new Rgba64(
+            PackedVectorHelper.UpScale8To16Bit(R),
+            PackedVectorHelper.UpScale8To16Bit(G),
+            PackedVectorHelper.UpScale8To16Bit(B),
+            PackedVectorHelper.UpScale8To16Bit(A));
+
+        /// <inheritdoc />
+        public void ToColor(ref Color dest) => dest = this;
 
         /// <inheritdoc />
         public void FromRgba64(Rgba64 color) => FromVector4(color.ToVector4());
@@ -403,10 +404,8 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="vector">A <see cref="Vector4"/> representing color.</param>
         /// <returns>A <see cref="Color"/> which contains premultiplied alpha data.</returns>
-        public static Color FromNonPremultiplied(in Vector4 vector)
-        {
-            return new Color(vector.X * vector.W, vector.Y * vector.W, vector.Z * vector.W, vector.W);
-        }
+        public static Color FromNonPremultiplied(in Vector4 vector) => 
+            new Color(vector.X * vector.W, vector.Y * vector.W, vector.Z * vector.W, vector.W);
 
         /// <summary>
         /// Translate a non-premultipled alpha color to a <see cref="Color"/> that contains premultiplied alpha.
@@ -416,10 +415,8 @@ namespace MonoGame.Framework
         /// <param name="b">Blue component value.</param>
         /// <param name="a">Alpha component value.</param>
         /// <returns>A <see cref="Color"/> which contains premultiplied alpha data.</returns>
-        public static Color FromNonPremultiplied(int r, int g, int b, int a)
-        {
-            return new Color(r * a / 255, g * a / 255, b * a / 255, a);
-        }
+        public static Color FromNonPremultiplied(int r, int g, int b, int a) => 
+            new Color(r * a / 255, g * a / 255, b * a / 255, a);
 
         /// <summary>
         /// Performs linear interpolation of <see cref="Color"/>.
@@ -442,7 +439,7 @@ namespace MonoGame.Framework
         /// Multiply <see cref="Color"/> by value.
         /// </summary>
         /// <param name="value">Source <see cref="Color"/>.</param>
-        /// <param name="scale">Multiplicator.</param>
+        /// <param name="scale">Factor.</param>
         /// <returns>Multiplication result.</returns>
         public static Color Multiply(in Color value, float scale)
         {
@@ -457,24 +454,27 @@ namespace MonoGame.Framework
         /// Multiply <see cref="Color"/> by value.
         /// </summary>
         /// <param name="value">Source <see cref="Color"/>.</param>
-        /// <param name="scale">Multiplicator.</param>
+        /// <param name="scale">Factor.</param>
         /// <returns>Multiplication result.</returns>
-        public static Color operator *(in Color value, float scale)
-        {
-            return Multiply(value, scale);
-        }
+        public static Color operator *(in Color value, float scale) => Multiply(value, scale);
 
         #region Equals
 
         /// <summary>
         /// Compares whether two <see cref="Color"/> instances are equal.
         /// </summary>
-        public static bool operator ==(Color a, Color b) => a.PackedValue == b.PackedValue;
+        public static bool operator ==(in Color a, in Color b)
+        {
+            return a.R == b.R
+                && a.G == b.G
+                && a.B == b.B
+                && a.A == b.A;
+        }
 
         /// <summary>
         /// Compares whether two <see cref="Color"/> instances are not equal.
         /// </summary>
-        public static bool operator !=(Color a, Color b) => a.PackedValue != b.PackedValue;
+        public static bool operator !=(in Color a, in Color b) => !(a == b);
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="Color"/>.
@@ -484,7 +484,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Compares whether current instance is equal to specified object.
         /// </summary>
-        public override bool Equals(object obj) => obj is Color color && Equals(color);
+        public override bool Equals(object obj) => obj is Color other && Equals(other);
 
         #endregion
 
@@ -510,7 +510,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Gets the hash code of this <see cref="Color"/>.
+        /// Gets a hash code of the <see cref="Color"/>.
         /// </summary>
         public override int GetHashCode() => PackedValue.GetHashCode();
 

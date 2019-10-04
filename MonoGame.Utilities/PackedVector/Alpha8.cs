@@ -29,7 +29,7 @@ namespace MonoGame.Utilities.PackedVector
         #endregion
 
         /// <summary>
-        /// Gets the packed vector in <see cref="float"/> format.
+        /// Gets the packed vector as a <see cref="float"/>.
         /// </summary>
         public float ToAlpha() => PackedValue / 255f;
 
@@ -61,7 +61,7 @@ namespace MonoGame.Utilities.PackedVector
         public static bool operator !=(Alpha8 a, Alpha8 b) => a.PackedValue != b.PackedValue;
 
         public bool Equals(Alpha8 other) => this == other;
-        public override bool Equals(object obj) => obj is Alpha8 value && Equals(value);
+        public override bool Equals(object obj) => obj is Alpha8 other && Equals(other);
 
         #endregion
 

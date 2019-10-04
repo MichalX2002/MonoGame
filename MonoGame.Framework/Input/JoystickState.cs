@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using System.Linq;
 using System.Text;
 
@@ -10,101 +11,72 @@ namespace MonoGame.Framework.Input
     /// <summary>
     /// Describes current joystick state.
     /// </summary>
-    public struct JoystickState
+    public struct JoystickState : IEquatable<JoystickState>
     {
         /// <summary>
         /// Gets a value indicating whether the joystick is connected.
         /// </summary>
-        /// <value><c>true</c> if the joystick is connected; otherwise, <c>false</c>.</value>
         public bool IsConnected { get; internal set; }
 
         /// <summary>
         /// Gets the joystick axis values.
         /// </summary>
-        /// <value>An array list of ints that indicate axis values.</value>
         public int[] Axes { get; internal set; }
 
         /// <summary>
         /// Gets the joystick button values.
         /// </summary>
-        /// <value>An array list of ButtonState that indicate button values.</value>
         public ButtonState[] Buttons { get; internal set; }
 
         /// <summary>
         /// Gets the joystick hat values.
         /// </summary>
-        /// <value>An array list of <see cref="JoystickHat"/> that indicate hat values.</value>
         public JoystickHat[] Hats{ get; internal set; }
 
-        /// <summary>
-        /// Determines whether a specified instance of <see cref="JoystickState"/> is
-        /// equal to another specified <see cref="JoystickState"/>.
-        /// </summary>
-        /// <param name="left">The first <see cref="JoystickState"/> to compare.</param>
-        /// <param name="right">The second <see cref="JoystickState"/> to compare.</param>
-        /// <returns><c>true</c> if <c>left</c> and <c>right</c> are equal; otherwise, <c>false</c>.</returns>
-        public static bool operator ==(JoystickState left, JoystickState right)
+        #region Equals
+
+        public static bool operator ==(in JoystickState a, in JoystickState b)
         {
-            return left.IsConnected == right.IsConnected &&
-               left.Axes.SequenceEqual(right.Axes) &&
-               left.Buttons.SequenceEqual(right.Buttons) &&
-               left.Hats.SequenceEqual(right.Hats);
+            return a.IsConnected == b.IsConnected
+                && a.Axes.SequenceEqual(b.Axes)
+                && a.Buttons.SequenceEqual(b.Buttons)
+                && a.Hats.SequenceEqual(b.Hats);
         }
 
-        /// <summary>
-        /// Determines whether a specified instance of <see cref="JoystickState"/> is not
-        /// equal to another specified <see cref="JoystickState"/>.
-        /// </summary>
-        /// <param name="left">The first <see cref="JoystickState"/> to compare.</param>
-        /// <param name="right">The second <see cref="JoystickState"/> to compare.</param>
-        /// <returns><c>true</c> if <c>left</c> and <c>right</c> are not equal; otherwise, <c>false</c>.</returns>
-        public static bool operator !=(JoystickState left, JoystickState right)
-        {
-            return !(left == right);
-        }
+        public static bool operator !=(in JoystickState a, in JoystickState b) => !(a == b);
+
+        public bool Equals(JoystickState other) => this == other;
+        public override bool Equals(object obj) => obj is JoystickState other && Equals(other);
+
+        #endregion
+
+        #region Object Overrides
 
         /// <summary>
-        /// Determines whether the specified <see cref="object"/> is equal to the current <see cref="JoystickState"/>.
+        /// Returns the hash code of the <see cref="JoystickState"/>.
         /// </summary>
-        /// <param name="obj">The <see cref="object"/> to compare with the current <see cref="JoystickState"/>.</param>
-        /// <returns><c>true</c> if the specified <see cref="object"/> is equal to the current
-        /// <see cref="JoystickState"/>; otherwise, <c>false</c>.</returns>
-        public override bool Equals(object obj)
-        {
-            return (obj is JoystickState) && (this == (JoystickState)obj);
-        }
-
-        /// <summary>
-        /// Serves as a hash function for a <see cref="JoystickState"/> object.
-        /// </summary>
-        /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
-        /// hash table.</returns>
         public override int GetHashCode()
         {
-            var hash = 0;
-
-            if (IsConnected)
+            if (!IsConnected)
+                return 0;
+            unchecked
             {
-                unchecked
-                {
-                    foreach (var axis in Axes)
-                        hash = (hash * 397) ^ axis;
+                int code = 17;
+                foreach (int axis in Axes)
+                    code = code * 23 + axis;
 
-                    for (int i = 0; i < Buttons.Length; i++)
-                        hash ^= ((int)Buttons[i] << (i % 32));
+                foreach (var button in Buttons)
+                    code = code * 23 + button.GetHashCode();
 
-                    foreach (var hat in Hats)
-                        hash = (hash * 397) ^ hat.GetHashCode();
-                }
+                foreach (var hat in Hats)
+                    code = code * 23 + hat.GetHashCode();
+                return code;
             }
-
-            return hash;
         }
 
         /// <summary>
         /// Returns a string that represents the current <see cref="JoystickState"/>.
         /// </summary>
-        /// <returns>A string that represents the current <see cref="JoystickState"/>.</returns>
         public override string ToString()
         {
             var ret = new StringBuilder(54 - 2 + Axes.Length * 7 + Buttons.Length + Hats.Length * 5);
@@ -130,6 +102,8 @@ namespace MonoGame.Framework.Input
             ret.Append("]");
             return ret.ToString();
         }
+
+        #endregion
     }
 }
 

@@ -79,7 +79,7 @@ namespace MonoGame.Utilities.PackedVector
         public static bool operator !=(Bgra5551 a, Bgra5551 b) => a.PackedValue != b.PackedValue;
 
         public bool Equals(Bgra5551 other) => this == other;
-        public override bool Equals(object obj) => obj is Bgra5551 value && Equals(value);
+        public override bool Equals(object obj) => obj is Bgra5551 other && Equals(other);
         
         #endregion
 

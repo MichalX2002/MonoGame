@@ -11,7 +11,7 @@ namespace MonoGame.Framework.Input.Touch
     /// <summary>
     /// Provides state information for a touch screen enabled device.
     /// </summary>
-    public struct TouchCollection : IList<TouchLocation>
+    public readonly struct TouchCollection : IReadOnlyList<TouchLocation>
 	{
         private readonly TouchLocation[] _collection;
 
@@ -45,7 +45,7 @@ namespace MonoGame.Framework.Input.Touch
         /// <returns></returns>
         public bool FindById(int id, out TouchLocation touchLocation)
 		{
-            for (var i = 0; i < Collection.Length; i++)
+            for (int i = 0; i < Collection.Length; i++)
             {
                 var location = Collection[i];
                 if (location.Id == id)
@@ -54,80 +54,25 @@ namespace MonoGame.Framework.Input.Touch
                     return true;
                 }
             }
-
             touchLocation = default;
             return false;
 		}
 
-        #region IList<TouchLocation>
-
-        /// <summary>
-        /// States if touch collection is read only.
-        /// </summary>
-        public bool IsReadOnly => true;
+        #region IReadOnlyList<TouchLocation>
 
         /// <summary>
         /// Returns the index of the first occurrence of specified <see cref="TouchLocation"/> item in the collection.
         /// </summary>
         /// <param name="item"><see cref="TouchLocation"/> to query.</param>
         /// <returns></returns>
-        public int IndexOf(TouchLocation item)
-        {
-            for (var i = 0; i < Collection.Length; i++)
-            {
-                if (item == Collection[i])
-                    return i;
-            }
-
-            return -1;
-        }
-
-        /// <summary>
-        /// Inserts a <see cref="TouchLocation"/> item into the indicated position.
-        /// </summary>
-        /// <param name="index">The position to insert into.</param>
-        /// <param name="item">The <see cref="TouchLocation"/> item to insert.</param>
-        public void Insert(int index, TouchLocation item)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Removes the <see cref="TouchLocation"/> item at specified index.
-        /// </summary>
-        /// <param name="index">Index of the item that will be removed from collection.</param>
-        public void RemoveAt(int index)
-        {
-            throw new NotSupportedException();
-        }
+        public int IndexOf(TouchLocation item) => Array.IndexOf(Collection, item);
 
         /// <summary>
         /// Gets or sets the item at the specified index of the collection.
         /// </summary>
         /// <param name="index">Position of the item.</param>
         /// <returns><see cref="TouchLocation"/></returns>
-        public TouchLocation this[int index]
-        {
-            get => Collection[index];
-            set => throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Adds a <see cref="TouchLocation"/> to the collection.
-        /// </summary>
-        /// <param name="item">The <see cref="TouchLocation"/> item to be added. </param>
-        public void Add(TouchLocation item)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Clears all the items in collection.
-        /// </summary>
-        public void Clear()
-        {
-            throw new NotSupportedException();
-        }
+        public TouchLocation this[int index] => Collection[index];
 
         /// <summary>
         /// Returns true if specified <see cref="TouchLocation"/> item exists in the collection, false otherwise./>
@@ -136,12 +81,9 @@ namespace MonoGame.Framework.Input.Touch
         /// <returns>Returns true if queried item is found, false otherwise.</returns>
         public bool Contains(TouchLocation item)
         {
-            for (var i = 0; i < Collection.Length; i++)
-            {
+            for (int i = 0; i < Collection.Length; i++)
                 if (item == Collection[i])
                     return true;
-            }
-
             return false;
         }
 
@@ -156,51 +98,22 @@ namespace MonoGame.Framework.Input.Touch
         }
 
         /// <summary>
-        /// Returns the number of <see cref="TouchLocation"/> items that exist in the collection.
+        /// Gets the number of <see cref="TouchLocation"/> items that exist in the collection.
         /// </summary>
         public int Count => Collection.Length;
 
         /// <summary>
-        /// Removes the specified <see cref="TouchLocation"/> item from the collection.
-        /// </summary>
-        /// <param name="item">The <see cref="TouchLocation"/> item to remove.</param>
-        /// <returns></returns>
-        public bool Remove(TouchLocation item)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
         /// Returns an enumerator for the <see cref="TouchCollection"/>.
         /// </summary>
-        /// <returns>Enumerable list of <see cref="TouchLocation"/> objects.</returns>
-        public Enumerator GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
+        public Enumerator GetEnumerator() => new Enumerator(this);
+
+        IEnumerator<TouchLocation> IEnumerable<TouchLocation>.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        #endregion
 
         /// <summary>
-        /// Returns an enumerator for the <see cref="TouchCollection"/>.
-        /// </summary>
-        /// <returns>Enumerable list of <see cref="TouchLocation"/> objects.</returns>
-        IEnumerator<TouchLocation> IEnumerable<TouchLocation>.GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
-
-        /// <summary>
-        /// Returns an enumerator for the <see cref="TouchCollection"/>.
-        /// </summary>
-        /// <returns>Enumerable list of objects.</returns>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
-
-        #endregion // IList<TouchLocation>
-
-        /// <summary>
-        /// Provides the ability to iterate through the TouchLocations in an TouchCollection.
+        /// Provides the ability to iterate through the touch locations in an <see cref="TouchCollection"/>.
         /// </summary>
         public struct Enumerator : IEnumerator<TouchLocation>
         {
@@ -213,41 +126,23 @@ namespace MonoGame.Framework.Input.Touch
                 _position = -1;
             }
 
-            /// <summary>
-            /// Gets the current element in the TouchCollection.
-            /// </summary>
             public TouchLocation Current => _collection[_position];
+            object IEnumerator.Current => Current;
 
-            /// <summary>
-            /// Advances the enumerator to the next element of the TouchCollection.
-            /// </summary>
             public bool MoveNext()
             {
                 _position++;
                 return (_position < _collection.Count);
             }
 
-            #region IDisposable
-
-            /// <summary>
-            /// Immediately releases the unmanaged resources used by this object.
-            /// </summary>
-            public void Dispose()
-            {
-            }
-
-            #endregion
-
-            #region IEnumerator Members
-
-            object IEnumerator.Current => _collection[_position];
-
             public void Reset()
             {
                 _position = -1;
             }
 
-            #endregion
+            public void Dispose()
+            {
+            }
         }
     }
 }

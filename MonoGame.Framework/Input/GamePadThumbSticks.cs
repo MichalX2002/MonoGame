@@ -2,12 +2,14 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
+
 namespace MonoGame.Framework.Input
 {
     /// <summary>
     /// Represents the current thumbstick states for the controller.
     /// </summary>
-    public readonly struct GamePadThumbSticks
+    public readonly struct GamePadThumbSticks : IEquatable<GamePadThumbSticks>
     {
 #if DIRECTX && !WINDOWS_UAP
         // XInput Xbox 360 Controller dead zones
@@ -98,10 +100,8 @@ namespace MonoGame.Framework.Input
             return thumbstickPosition;
         }
 
-        private Vector2 ExcludeIndependentAxesDeadZone(Vector2 value, float deadZone)
-        {
-            return new Vector2(ExcludeAxisDeadZone(value.X, deadZone), ExcludeAxisDeadZone(value.Y, deadZone));
-        }
+        private Vector2 ExcludeIndependentAxesDeadZone(Vector2 value, float deadZone) => 
+            new Vector2(ExcludeAxisDeadZone(value.X, deadZone), ExcludeAxisDeadZone(value.Y, deadZone));
 
         private float ExcludeAxisDeadZone(float value, float deadZone)
         {
@@ -123,56 +123,38 @@ namespace MonoGame.Framework.Input
             return value * (newLength / originalLength);
         }
 
-        /// <summary>
-        /// Determines whether two specified instances of <see cref="GamePadThumbSticks"/> are equal.
-        /// </summary>
-        /// <param name="left">The first object to compare.</param>
-        /// <param name="right">The second object to compare.</param>
-        /// <returns>true if <paramref name="left"/> and <paramref name="right"/> are equal; otherwise, false.</returns>
-        public static bool operator ==(in GamePadThumbSticks left, in GamePadThumbSticks right)
-        {
-            return (left.Left == right.Left) && (left.Right == right.Right);
-        }
+        #region Equals
+
+        public static bool operator ==(in GamePadThumbSticks a, in GamePadThumbSticks b) =>
+            a.Left == b.Left && a.Right == b.Right;
+
+        public static bool operator !=(in GamePadThumbSticks a, in GamePadThumbSticks b) => !(a == b);
+
+        public bool Equals(GamePadThumbSticks other) => this == other;
+        public override bool Equals(object obj) => obj is GamePadThumbSticks other && Equals(other);
+
+        #endregion
+
+        #region Object Overrides
 
         /// <summary>
-        /// Determines whether two specified instances of <see cref="GamePadThumbSticks"/> are not equal.
+        /// Returns the hash code of the <see cref="GamePadThumbSticks"/>.
         /// </summary>
-        /// <param name="left">The first object to compare.</param>
-        /// <param name="right">The second object to compare.</param>
-        /// <returns>true if <paramref name="left"/> and <paramref name="right"/> are not equal; otherwise, false.</returns>
-        public static bool operator !=(in GamePadThumbSticks left, in GamePadThumbSticks right)
-        {
-            return !(left == right);
-        }
-
-        /// <summary>
-        /// Returns a value indicating whether this instance is equal to a specified object.
-        /// </summary>
-        /// <param name="obj">An object to compare to this instance.</param>
-        /// <returns>true if <paramref name="obj"/> is a <see cref="GamePadThumbSticks"/> and has the same value as this instance; otherwise, false.</returns>
-        public override bool Equals(object obj)
-        {
-            return (obj is GamePadThumbSticks other) && (this == other);
-        }
-
-        /// <summary>
-        /// Serves as a hash function for a <see cref="GamePadThumbSticks"/> object.
-        /// </summary>
-        /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
-        /// hash table.</returns>
         public override int GetHashCode()
         {
-            int code = Left.GetHashCode();
-            return code * 23 + Right.GetHashCode();
+            unchecked
+            {
+                int code = 17;
+                code = code * 23 + Left.GetHashCode();
+                return code * 23 + Right.GetHashCode();
+            }
         }
 
         /// <summary>
         /// Returns a string that represents the current <see cref="GamePadThumbSticks"/>.
         /// </summary>
-        /// <returns>A string that represents the current <see cref="GamePadThumbSticks"/>.</returns>
-        public override string ToString()
-        {
-            return "[GamePadThumbSticks: Left=" + Left + ", Right=" + Right + "]";
-        }
+        public override string ToString() => "[GamePadThumbSticks: Left=" + Left + ", Right=" + Right + "]";
+
+        #endregion
     }
 }

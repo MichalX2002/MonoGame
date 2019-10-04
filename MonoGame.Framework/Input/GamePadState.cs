@@ -2,6 +2,8 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
+
 namespace MonoGame.Framework.Input
 {
     /// <summary>
@@ -12,7 +14,7 @@ namespace MonoGame.Framework.Input
     /// to offer additional data without separate state queries to <see cref="GamePad"/>.
     /// </para>
     /// </summary>
-    public readonly partial struct GamePadState
+    public readonly partial struct GamePadState : IEquatable<GamePadState>
     {
         /// <summary>
         /// The default initialized gamepad state.
@@ -126,7 +128,6 @@ namespace MonoGame.Framework.Input
         private Buttons GetVirtualButtons ()
         {
             var result = Buttons._buttons;
-
             result |= ThumbSticks._virtualButtons;
 
             if (DPad.Down == ButtonState.Pressed)
@@ -146,28 +147,17 @@ namespace MonoGame.Framework.Input
         /// </summary>
         /// <returns><c>true</c>, if button was pressed, <c>false</c> otherwise.</returns>
         /// <param name="button">Buttons to query. Specify a single button, or combine multiple buttons using a bitwise OR operation.</param>
-        public bool IsButtonDown(Buttons button)
-        {
-            return (GetVirtualButtons() & button) == button;
-        }
+        public bool IsButtonDown(Buttons button) => (GetVirtualButtons() & button) == button;
 
         /// <summary>
         /// Determines whether specified input device buttons are released (not pressed) in this GamePadState.
         /// </summary>
         /// <returns><c>true</c>, if button was released (not pressed), <c>false</c> otherwise.</returns>
         /// <param name="button">Buttons to query. Specify a single button, or combine multiple buttons using a bitwise OR operation.</param>
-        public bool IsButtonUp(Buttons button)
-        {
-            return (GetVirtualButtons() & button) != button;
-        }
+        public bool IsButtonUp(Buttons button) => (GetVirtualButtons() & button) != button;
 
-        /// <summary>
-        /// Determines whether a specified instance of <see cref="GamePadState"/> is equal
-        /// to another specified <see cref="GamePadState"/>.
-        /// </summary>
-        /// <param name="left">The first <see cref="GamePadState"/> to compare.</param>
-        /// <param name="right">The second <see cref="GamePadState"/> to compare.</param>
-        /// <returns><c>true</c> if <c>left</c> and <c>right</c> are equal; otherwise, <c>false</c>.</returns>
+        #region Equals
+
         public static bool operator ==(in GamePadState left, in GamePadState right)
         {
             return (left.IsConnected == right.IsConnected)
@@ -178,34 +168,16 @@ namespace MonoGame.Framework.Input
                 && (left.Triggers == right.Triggers);
         }
 
-        /// <summary>
-        /// Determines whether a specified instance of <see cref="GamePadState"/> is not
-        /// equal to another specified <see cref="GamePadState"/>.
-        /// </summary>
-        /// <param name="left">The first <see cref="GamePadState"/> to compare.</param>
-        /// <param name="right">The second <see cref="GamePadState"/> to compare.</param>
-        /// <returns><c>true</c> if <c>left</c> and <c>right</c> are not equal; otherwise, <c>false</c>.</returns>
-        public static bool operator !=(in GamePadState left, in GamePadState right)
-        {
-            return !(left == right);
-        }
+        public static bool operator !=(in GamePadState left, in GamePadState right) => !(left == right);
+
+        public bool Equals(GamePadState other) => this == other;
+        public override bool Equals(object obj) => obj is GamePadState other && Equals(other);
+
+        #endregion
 
         /// <summary>
-        /// Determines whether the specified <see cref="object"/> is equal to the current <see cref="GamePadState"/>.
+        /// Returns the hash code of the <see cref="GamePadState"/>.
         /// </summary>
-        /// <param name="obj">The <see cref="object"/> to compare with the current <see cref="GamePadState"/>.</param>
-        /// <returns><c>true</c> if the specified <see cref="object"/> is equal to the current
-        /// <see cref="GamePadState"/>; otherwise, <c>false</c>.</returns>
-        public override bool Equals(object obj)
-        {
-            return (obj is GamePadState other) && (this == other);
-        }
-
-        /// <summary>
-        /// Serves as a hash function for a <see cref="GamePadState"/> object.
-        /// </summary>
-        /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
-        /// hash table.</returns>
         public override int GetHashCode()
         {
             unchecked
@@ -221,7 +193,6 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Returns a string that represents the current <see cref="GamePadState"/>.
         /// </summary>
-        /// <returns>A string that represents the current <see cref="GamePadState"/>.</returns>
         public override string ToString()
         {
             if (!IsConnected)
