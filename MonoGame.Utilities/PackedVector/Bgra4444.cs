@@ -8,45 +8,44 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// <para>Packed vector type containing X, Y, Z and W values.</para>
-    /// Each component uses 4 bits.
-    /// <para>
-    /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
-    /// </para>
+    /// Packed vector type containing unsigned 4-bit XYZW components.
+    /// <para>Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.</para>
     /// </summary>
-    public struct Bgra4444 : IPackedVector<ushort>, IEquatable<Bgra4444>
+    public struct Bgra4444 : IPackedVector<ushort>, IEquatable<Bgra4444>, IPixel
     {
-        [CLSCompliant(false)]
-        public ushort Value;
-
         #region Constructors
 
         /// <summary>
         /// Constructs the packed vector with a packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public Bgra4444(ushort value) => Value = value;
-
-        /// <summary>
-        /// Constructs the packed vector with raw values.
-        /// </summary>
-        public Bgra4444(float x, float y, float z, float w) => Value = Pack(x, y, z, w);
+        public Bgra4444(ushort value) => PackedValue = value;
 
         /// <summary>
         /// Constructs the packed vector with raw values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public Bgra4444(Vector4 vector) => Value = Pack(vector.X, vector.Y, vector.Z, vector.W);
-    
+        public Bgra4444(Vector4 vector) => PackedValue = Pack(ref vector);
+
+        /// <summary>
+        /// Constructs the packed vector with raw values.
+        /// </summary>
+        public Bgra4444(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
+        {
+        }
+
         #endregion
 
-        private static ushort Pack(float x, float y, float z, float w)
+        private static ushort Pack(ref Vector4 vector)
         {
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.One);
+            vector *= 15f;
+
             return (ushort)(
-                (((int)Math.Round(MathHelper.Clamp(w, 0, 1) * 15f) & 0x0F) << 12) |
-                (((int)Math.Round(MathHelper.Clamp(x, 0, 1) * 15f) & 0x0F) << 8) |
-                (((int)Math.Round(MathHelper.Clamp(y, 0, 1) * 15f) & 0x0F) << 4) |
-                ((int)Math.Round(MathHelper.Clamp(z, 0, 1) * 15f) & 0x0F));
+                (((int)Math.Round(vector.W) & 0x0F) << 12) |
+                (((int)Math.Round(vector.X) & 0x0F) << 8) |
+                (((int)Math.Round(vector.Y) & 0x0F) << 4) |
+                ((int)Math.Round(vector.Z) & 0x0F));
         }
 
         #region IPixel
@@ -57,31 +56,30 @@ namespace MonoGame.Utilities.PackedVector
 
         #region IPackedVector
 
-        ushort IPackedVector<ushort>.PackedValue
-        {
-            get => Value;
-            set => Value = value;
-        }
+        /// <inheritdoc />
+        [CLSCompliant(false)]
+        public ushort PackedValue { get; set; }
 
-        public void FromVector4(Vector4 vector) =>
-            Value = Pack(vector.X, vector.Y, vector.Z, vector.W);
+        /// <inheritdoc />
+        public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
 
+        /// <inheritdoc />
         public Vector4 ToVector4()
         {
-            const float maxValue = 1 / 15f;
-            return new Vector4( 
-                ((Value >> 8) & 0x0F) * maxValue,
-                ((Value >> 4) & 0x0F) * maxValue,
-                (Value & 0x0F) * maxValue,
-                ((Value >> 12) & 0x0F) * maxValue);
+            return Vector4.Multiply(new Vector4(
+                (PackedValue >> 8) & 0x0F,
+                (PackedValue >> 4) & 0x0F,
+                PackedValue & 0x0F,
+                (PackedValue >> 12) & 0x0F), 
+                scaleFactor: 1 / 15f);
         }
 
         #endregion
 
         #region Equals
 
-        public static bool operator ==(Bgra4444 a, Bgra4444 b) => a.Value == b.Value;
-        public static bool operator !=(Bgra4444 a, Bgra4444 b) => a.Value != b.Value;
+        public static bool operator ==(Bgra4444 a, Bgra4444 b) => a.PackedValue == b.PackedValue;
+        public static bool operator !=(Bgra4444 a, Bgra4444 b) => a.PackedValue != b.PackedValue;
 
         public bool Equals(Bgra4444 other) => this == other;
         public override bool Equals(object obj) => obj is Bgra4444 value && Equals(value);
@@ -98,7 +96,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => Value.GetHashCode();
+        public override int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

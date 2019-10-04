@@ -19,7 +19,7 @@ namespace MonoGame.Utilities.PackedVector
         void FromVector4(Vector4 vector);
 
         /// <summary>
-        /// Converts the pixel to a scaled <see cref="Vector4"/>.
+        /// Gets the pixel as a scaled <see cref="Vector4"/>.
         /// The XYZW vector components correspond to RGBA. 
         /// </summary>
         Vector4 ToVector4();

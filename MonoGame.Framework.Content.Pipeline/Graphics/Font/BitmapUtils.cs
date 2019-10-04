@@ -21,7 +21,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                     var row = alphaBmp.GetRowSpan(bitmapRegion.Y + y);
                     for (int x = 0; x < bitmapRegion.Width; x++)
                     {
-                        if (row[bitmapRegion.X + x].Value != expectedAlpha)
+                        if (row[bitmapRegion.X + x].PackedValue != expectedAlpha)
                             return false;
                     }
                 }

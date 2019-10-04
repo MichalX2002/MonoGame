@@ -52,6 +52,7 @@ namespace MonoGame.Framework
         /// Gets or sets packed value of this <see cref="Color"/>.
         /// </summary>
         [IgnoreDataMember]
+        [CLSCompliant(false)]
         public uint PackedValue
         {
             get => Unsafe.As<Color, uint>(ref this);
@@ -217,14 +218,6 @@ namespace MonoGame.Framework
             PackedVectorHelper.UpScale8To16Bit(B),
             PackedVectorHelper.UpScale8To16Bit(A));
 
-        /// <inheritdoc />
-        public void ToGray8(ref Gray8 dest) => dest.PackedValue = A;
-
-        /// <inheritdoc />
-        public void ToGrayAlpha16(ref GrayAlpha16 dest) => dest = ToGrayAlpha16();
-
-        /// <inheritdoc />
-        public void ToRgb24(ref Rgb24 dest) => dest = ToRgb24();
 
         /// <inheritdoc />
         public void ToColor(ref Color dest) => dest = this;
@@ -282,20 +275,16 @@ namespace MonoGame.Framework
         public void FromBgra5551(Bgra5551 source) => FromVector4(source.ToVector4());
 
         /// <inheritdoc />
-        public void FromRgb24(Rgb24 color)
+        public void FromRgb24(Rgb24 source)
         {
-            R = color.R;
-            G = color.G;
-            B = color.B;
+            Rgb = source;
             A = byte.MaxValue;
         }
 
         /// <inheritdoc />
         public void FromBgr24(Bgr24 source)
         {
-            R = source.R;
-            G = source.G;
-            B = source.B;
+            Bgr = source;
             A = byte.MaxValue;
         }
 
@@ -352,7 +341,12 @@ namespace MonoGame.Framework
         /// </summary>
         /// <returns>The <see cref="Bgr24"/>.</returns>
         public Bgr24 ToBgr24() => new Bgr24(R, G, B);
-    
+
+        /// <summary>
+        /// Convert to <see cref="Gray8"/>.
+        /// </summary>
+        public Gray8 ToGray8() => new Gray8(A);
+
         /// <summary>
         /// Convert to <see cref="GrayAlpha16"/>.
         /// </summary>
@@ -373,26 +367,6 @@ namespace MonoGame.Framework
         {
             uint hexOrder = (uint)(A << 0 | B << 8 | G << 16 | R << 24);
             return hexOrder.ToString("X8");
-        }
-
-        /// <summary>
-        /// Returns a <see cref="string"/> representation of this <see cref="Color"/> in the format
-        /// {R:{0} G:{1} B:{2} A:{3}}.
-        /// </summary>
-        /// <returns><see cref="string"/> representation of this <see cref="Color"/>.</returns>
-        public override string ToString()
-        {
-            var sb = new StringBuilder(29);
-            sb.Append("{R:");
-            sb.Append(R);
-            sb.Append(" G:");
-            sb.Append(G);
-            sb.Append(" B:");
-            sb.Append(B);
-            sb.Append(" A:");
-            sb.Append(A);
-            sb.Append("}");
-            return sb.ToString();
         }
 
         /// <summary>
@@ -429,7 +403,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="vector">A <see cref="Vector4"/> representing color.</param>
         /// <returns>A <see cref="Color"/> which contains premultiplied alpha data.</returns>
-        public static Color FromNonPremultiplied(Vector4 vector)
+        public static Color FromNonPremultiplied(in Vector4 vector)
         {
             return new Color(vector.X * vector.W, vector.Y * vector.W, vector.Z * vector.W, vector.W);
         }
@@ -450,18 +424,18 @@ namespace MonoGame.Framework
         /// <summary>
         /// Performs linear interpolation of <see cref="Color"/>.
         /// </summary>
-        /// <param name="value1">Source <see cref="Color"/>.</param>
-        /// <param name="value2">Destination <see cref="Color"/>.</param>
+        /// <param name="start">Source <see cref="Color"/>.</param>
+        /// <param name="end">Destination <see cref="Color"/>.</param>
         /// <param name="amount">Interpolation factor.</param>
         /// <returns>Interpolated <see cref="Color"/>.</returns>
-        public static Color Lerp(Color value1, Color value2, float amount)
+        public static Color Lerp(in Color start, in Color end, float amount)
         {
             amount = MathHelper.Clamp(amount, 0, 1);
             return new Color(
-                (int)MathHelper.Lerp(value1.R, value2.R, amount),
-                (int)MathHelper.Lerp(value1.G, value2.G, amount),
-                (int)MathHelper.Lerp(value1.B, value2.B, amount),
-                (int)MathHelper.Lerp(value1.A, value2.A, amount));
+                (int)MathHelper.Lerp(start.R, end.R, amount),
+                (int)MathHelper.Lerp(start.G, end.G, amount),
+                (int)MathHelper.Lerp(start.B, end.B, amount),
+                (int)MathHelper.Lerp(start.A, end.A, amount));
         }
 
         /// <summary>
@@ -470,9 +444,13 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Color"/>.</param>
         /// <param name="scale">Multiplicator.</param>
         /// <returns>Multiplication result.</returns>
-        public static Color Multiply(Color value, float scale)
+        public static Color Multiply(in Color value, float scale)
         {
-            return new Color((int)(value.R * scale), (int)(value.G * scale), (int)(value.B * scale), (int)(value.A * scale));
+            return new Color(
+                (int)(value.R * scale),
+                (int)(value.G * scale),
+                (int)(value.B * scale), 
+                (int)(value.A * scale));
         }
 
         /// <summary>
@@ -481,62 +459,61 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Color"/>.</param>
         /// <param name="scale">Multiplicator.</param>
         /// <returns>Multiplication result.</returns>
-        public static Color operator *(Color value, float scale)
+        public static Color operator *(in Color value, float scale)
         {
             return Multiply(value, scale);
         }
 
-        /// <summary>
-        /// Compares whether current instance is equal to specified object.
-        /// </summary>
-        /// <param name="obj">The <see cref="Color"/> to compare.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public override bool Equals(object obj)
-        {
-            if (obj is Color color)
-                return Equals(color);
-            return false;
-        }
-
-        /// <summary>
-        /// Compares whether current instance is equal to specified <see cref="Color"/>.
-        /// </summary>
-        /// <param name="other">The <see cref="Color"/> to compare.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public bool Equals(Color other)
-        {
-            return PackedValue == other.PackedValue;
-        }
+        #region Equals
 
         /// <summary>
         /// Compares whether two <see cref="Color"/> instances are equal.
         /// </summary>
-        /// <param name="a"><see cref="Color"/> instance on the left of the equal sign.</param>
-        /// <param name="b"><see cref="Color"/> instance on the right of the equal sign.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public static bool operator ==(Color a, Color b)
-        {
-            return a.PackedValue == b.PackedValue;
-        }
+        public static bool operator ==(Color a, Color b) => a.PackedValue == b.PackedValue;
 
         /// <summary>
         /// Compares whether two <see cref="Color"/> instances are not equal.
         /// </summary>
-        /// <param name="a"><see cref="Color"/> instance on the left of the not equal sign.</param>
-        /// <param name="b"><see cref="Color"/> instance on the right of the not equal sign.</param>
-        /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>	
-        public static bool operator !=(Color a, Color b)
+        public static bool operator !=(Color a, Color b) => a.PackedValue != b.PackedValue;
+
+        /// <summary>
+        /// Compares whether current instance is equal to specified <see cref="Color"/>.
+        /// </summary>
+        public bool Equals(Color other) => this == other;
+
+        /// <summary>
+        /// Compares whether current instance is equal to specified object.
+        /// </summary>
+        public override bool Equals(object obj) => obj is Color color && Equals(color);
+
+        #endregion
+
+        #region Object Overrides
+
+        /// <summary>
+        /// Returns a <see cref="string"/> representation of this <see cref="Color"/> in the format
+        /// {R:{0} G:{1} B:{2} A:{3}}.
+        /// </summary>
+        public override string ToString()
         {
-            return a.PackedValue != b.PackedValue;
+            var sb = new StringBuilder(29);
+            sb.Append("{R:");
+            sb.Append(R);
+            sb.Append(" G:");
+            sb.Append(G);
+            sb.Append(" B:");
+            sb.Append(B);
+            sb.Append(" A:");
+            sb.Append(A);
+            sb.Append("}");
+            return sb.ToString();
         }
 
         /// <summary>
         /// Gets the hash code of this <see cref="Color"/>.
         /// </summary>
-        /// <returns>Hash code of this <see cref="Color"/>.</returns>
-        public override int GetHashCode()
-        {
-            return PackedValue.GetHashCode();
-        }
+        public override int GetHashCode() => PackedValue.GetHashCode();
+
+        #endregion
     }
 }

@@ -8,133 +8,94 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed vector type containing X, Y, Z and W components.
-    /// <para>
-    /// The X, Y and Z components use 5 bits, and the W component uses 1 bit.
-    /// </para>
+    /// Packed vector type containing unsigned XYZW components.
+    /// The XYZ components use 5 bits each, and the W component uses 1 bit.
+    /// <para>Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.</para>
     /// </summary>
-    public struct Bgra5551 : IPackedVector<ushort>, IEquatable<Bgra5551>, IPackedVector
+    public struct Bgra5551 : IPackedVector<ushort>, IEquatable<Bgra5551>, IPixel
     {
+        #region Constructors
+
         /// <summary>
-        /// Gets and sets the packed value.
+        /// Constructs the packed vector with a packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public ushort PackedValue
-        {
-            get
-            {
-                return packedValue;
-            }
-            set
-            {
-                packedValue = value;
-            }
-        }
-
-        private ushort packedValue;
+        public Bgra5551(ushort value) => PackedValue = value;
 
         /// <summary>
-        /// Creates a new instance of Bgra5551.
+        /// Constructs the packed vector with raw values.
         /// </summary>
-        /// <param name="x">The x component</param>
-        /// <param name="y">The y component</param>
-        /// <param name="z">The z component</param>
-        /// <param name="w">The w component</param>
-        public Bgra5551(float x, float y, float z, float w)
-        {
-            packedValue = Pack(x, y, z, w);
-        }
+        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
+        public Bgra5551(Vector4 vector) => PackedValue = Pack(ref vector);
 
         /// <summary>
-        /// Creates a new instance of Bgra5551.
+        /// Constructs the packed vector with raw values.
         /// </summary>
-        /// <param name="vector">
-        /// Vector containing the components for the packed vector.
-        /// </param>
-        public Bgra5551(Vector4 vector)
+        public Bgra5551(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
         {
-            packedValue = Pack(vector.X, vector.Y, vector.Z, vector.W);
         }
 
-        /// <summary>
-        /// Gets the packed vector in Vector4 format.
-        /// </summary>
-        /// <returns>The packed vector in Vector4 format</returns>
+        #endregion
+
+        private static ushort Pack(ref Vector4 vector)
+        {
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.One);
+
+            return (ushort)(
+                (((int)Math.Round(vector.X * 31f) & 0x1F) << 10) |
+                (((int)Math.Round(vector.Y * 31f) & 0x1F) << 5) |
+                (((int)Math.Round(vector.Z * 31f) & 0x1F) << 0) |
+                (((int)Math.Round(vector.W) & 0x1) << 15));
+        }
+
+        #region IPixel
+
+        #endregion
+
+        #region IPackedVector
+
+        /// <inheritdoc />
+        [CLSCompliant(false)]
+        public ushort PackedValue { get; set; }
+
+        /// <inheritdoc />
         public Vector4 ToVector4()
         {
             return new Vector4(
-                (float) (((packedValue >> 10) & 0x1F) / 31f),
-                (float) (((packedValue >> 5) & 0x1F) / 31f),
-                (float) (((packedValue >> 0) & 0x1F) / 31f),
-                (float) ((packedValue >> 15)& 0x01)
-            );
+                ((PackedValue >> 10) & 0x1F) / 31f,
+                ((PackedValue >> 5) & 0x1F) / 31f,
+                ((PackedValue >> 0) & 0x1F) / 31f,
+                ((PackedValue >> 15) & 0x01));
         }
 
-        /// <summary>
-        /// Sets the packed vector from a Vector4.
-        /// </summary>
-        /// <param name="vector">Vector containing the components.</param>
-        public void FromVector4(Vector4 vector)
-        {
-            packedValue = Pack(vector.X, vector.Y, vector.Z, vector.W);
-        }
+        /// <inheritdoc />
+        public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
 
-        /// <summary>
-        /// Compares an object with the packed vector.
-        /// </summary>
-        /// <param name="obj">The object to compare.</param>
-        /// <returns>True if the object is equal to the packed vector.</returns>
-        public override bool Equals(object obj)
-        {
-            return (obj is Bgra5551) && Equals((Bgra5551) obj);
-        }
+        #endregion
 
-        /// <summary>
-        /// Compares another Bgra5551 packed vector with the packed vector.
-        /// </summary>
-        /// <param name="other">The Bgra5551 packed vector to compare.</param>
-        /// <returns>True if the packed vectors are equal.</returns>
-        public bool Equals(Bgra5551 other)
-        {
-            return packedValue == other.packedValue;
-        }
+        #region Equals
+
+        public static bool operator ==(Bgra5551 a, Bgra5551 b) => a.PackedValue == b.PackedValue;
+        public static bool operator !=(Bgra5551 a, Bgra5551 b) => a.PackedValue != b.PackedValue;
+
+        public bool Equals(Bgra5551 other) => this == other;
+        public override bool Equals(object obj) => obj is Bgra5551 value && Equals(value);
+        
+        #endregion
+
+        #region Object Overrides
 
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        /// <returns>A string representation of the packed vector.</returns>
-        public override string ToString()
-        {
-            return ToVector4().ToString();
-        }
+        public override string ToString() => ToVector4().ToString();
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        /// <returns>The hash code for the packed vector.</returns>
-        public override int GetHashCode()
-        {
-            return packedValue.GetHashCode();
-        }
+        public override int GetHashCode() => PackedValue.GetHashCode();
 
-        public static bool operator ==(Bgra5551 lhs, Bgra5551 rhs)
-        {
-            return lhs.packedValue == rhs.packedValue;
-        }
+        #endregion
 
-        public static bool operator !=(Bgra5551 lhs, Bgra5551 rhs)
-        {
-            return lhs.packedValue != rhs.packedValue;
-        }
-
-        private static ushort Pack(float x, float y, float z, float w)
-        {
-            return (ushort) (
-                (((int) Math.Round(MathHelper.Clamp(x, 0, 1) * 31f) & 0x1F) << 10) |
-                (((int) Math.Round(MathHelper.Clamp(y, 0, 1) * 31f) & 0x1F) << 5) |
-                (((int) Math.Round(MathHelper.Clamp(z, 0, 1) * 31f) & 0x1F) << 0) |
-                ((((int) Math.Round(MathHelper.Clamp(w, 0, 1)) & 0x1) << 15))
-            );
-        }
     }
 }
