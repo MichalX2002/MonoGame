@@ -347,15 +347,14 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the hash code of this <see cref="Vector4"/>.
         /// </summary>
-        /// <returns>Hash code of this <see cref="Vector4"/>.</returns>
         public override int GetHashCode()
         {
             unchecked
             {
-                int code = X.GetHashCode();
-                code = code * 23 + Y.GetHashCode();
-                code = code * 23 + Z.GetHashCode();
-                return code * 23 + W.GetHashCode();
+                int code = 7 + X.GetHashCode();
+                code = code * 31 + Y.GetHashCode();
+                code = code * 31 + Z.GetHashCode();
+                return code * 31 + W.GetHashCode();
             }
         }
 

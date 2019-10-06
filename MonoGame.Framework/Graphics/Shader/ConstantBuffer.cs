@@ -83,7 +83,7 @@ namespace MonoGame.Framework.Graphics
             {
                 var source = data as Array;
 
-                var stride = (columns * elementSize);
+                var stride = columns * elementSize;
                 for (var y = 0; y < rows; y++)
                     Buffer.BlockCopy(source, stride * y, _buffer, offset + (rowSize * y), columns * elementSize);
             }

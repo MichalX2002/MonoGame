@@ -405,7 +405,7 @@ namespace MonoGame.Framework
             if (IsFixedTimeStep && _accumulatedElapsedTime < TargetElapsedTime)
             {
                 // Sleep for as long as possible without overshooting the update time
-                TimeSpan sleepTime = (TargetElapsedTime - _accumulatedElapsedTime);
+                TimeSpan sleepTime = TargetElapsedTime - _accumulatedElapsedTime;
 #if WINDOWS
                 MonoGame.Utilities.TimerHelper.SleepForNoMoreThan(sleepTime.TotalMilliseconds);
 #else
@@ -965,20 +965,20 @@ namespace MonoGame.Framework
                 Item = item;
             }
 
-            public static AddJournalEntry<T> CreateKey(T item)
-            {
-                return new AddJournalEntry<T>(-1, item);
-            }
+            public static AddJournalEntry<T> CreateKey(T item) => new AddJournalEntry<T>(-1, item);
 
             public override bool Equals(object obj)
             {
-                return obj is AddJournalEntry<T> entry && Equals(Item, entry.Item);
+                if (obj is AddJournalEntry<T> entry)
+                {
+                    return Item is IEquatable<T> equatable
+                        ? equatable.Equals(entry.Item)
+                        : Equals(Item, entry.Item);
+                }
+                return false;
             }
 
-            public override int GetHashCode()
-            {
-                return Item.GetHashCode();
-            }
+            public override int GetHashCode() => Item.GetHashCode();
         }
     }
 }

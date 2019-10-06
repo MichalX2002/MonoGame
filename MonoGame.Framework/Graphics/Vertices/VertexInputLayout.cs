@@ -113,23 +113,20 @@ namespace MonoGame.Framework.Graphics
         /// </returns>
         public override int GetHashCode()
         {
-            // ReSharper disable NonReadonlyMemberInGetHashCode
             unchecked
             {
-                int hashCode = 0;
-                if (Count > 0)
+                if (Count <= 0)
+                    return 0;
+
+                int code = 7 + VertexDeclarations[0].GetHashCode();
+                code = code * 31 + InstanceFrequencies[0];
+                for (int i = 1; i < Count; i++)
                 {
-                    hashCode = VertexDeclarations[0].GetHashCode();
-                    hashCode = (hashCode * 397) ^ InstanceFrequencies[0];
-                    for (int i = 1; i < Count; i++)
-                    {
-                        hashCode = (hashCode * 397) ^ VertexDeclarations[i].GetHashCode();
-                        hashCode = (hashCode * 397) ^ InstanceFrequencies[i];
-                    }
+                    code = code * 31 + VertexDeclarations[i].GetHashCode();
+                    code = code * 31 + InstanceFrequencies[i];
                 }
-                return hashCode;
+                return code;
             }
-            // ReSharper restore NonReadonlyMemberInGetHashCode
         }
 
         /// <summary>

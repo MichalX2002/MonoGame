@@ -18,9 +18,9 @@ namespace MonoGame.Framework.Input
         CapsLock = 0x2000,
         AltGr = 0x4000,
         Reserved = 0x8000,
-        Ctrl = (LeftCtrl | RightCtrl),
-        Shift = (LeftShift | RightShift),
-        Alt = (LeftAlt | RightAlt),
-        Gui = (LeftGui | RightGui)
+        Ctrl = LeftCtrl | RightCtrl,
+        Shift = LeftShift | RightShift,
+        Alt = LeftAlt | RightAlt,
+        Gui = LeftGui | RightGui
     }
 }

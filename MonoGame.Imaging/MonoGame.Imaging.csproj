@@ -42,8 +42,17 @@
 
   <ItemGroup>
     <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\GlobalSuppressions.cs" Link="StbSharp\ImageWrite\GlobalSuppressions.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\StbImageWrite.Adler32.cs" Link="StbSharp\ImageWrite\StbImageWrite.Adler32.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\StbImageWrite.Bmp.cs" Link="StbSharp\ImageWrite\StbImageWrite.Bmp.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\StbImageWrite.Crc32.cs" Link="StbSharp\ImageWrite\StbImageWrite.Crc32.cs" />
     <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\StbImageWrite.cs" Link="StbSharp\ImageWrite\StbImageWrite.cs" />
-    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\StbImageWrite.Generated.cs" Link="StbSharp\ImageWrite\StbImageWrite.Generated.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\StbImageWrite.Hdr.cs" Link="StbSharp\ImageWrite\StbImageWrite.Hdr.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\StbImageWrite.Jpg.cs" Link="StbSharp\ImageWrite\StbImageWrite.Jpg.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\StbImageWrite.JpgConstants.cs" Link="StbSharp\ImageWrite\StbImageWrite.JpgConstants.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\StbImageWrite.Png.cs" Link="StbSharp\ImageWrite\StbImageWrite.Png.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\StbImageWrite.Tga.cs" Link="StbSharp\ImageWrite\StbImageWrite.Tga.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\StbImageWrite.WriteHelpers.cs" Link="StbSharp\ImageWrite\StbImageWrite.WriteHelpers.cs" />
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\StbImageWrite.ZlibCompress.cs" Link="StbSharp\ImageWrite\StbImageWrite.ZlibCompress.cs" />
     <Compile Include="..\ThirdParty\StbSharp\Image\src\StbImageSharp\GlobalSuppressions.cs" Link="StbSharp\Image\GlobalSuppressions.cs" />
     <Compile Include="..\ThirdParty\StbSharp\Image\src\StbImageSharp\StbImage.cs" Link="StbSharp\Image\StbImage.cs" />
     <Compile Include="..\ThirdParty\StbSharp\Image\src\StbImageSharp\StbImage.Generated.cs" Link="StbSharp\Image\StbImage.Generated.cs" />
@@ -66,5 +75,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="StbSharp\Image\" />
   </ItemGroup>
 </Project>

@@ -61,15 +61,15 @@ namespace MonoGame.Framework.Input
                 return 0;
             unchecked
             {
-                int code = 17;
+                int code = 7;
                 foreach (int axis in Axes)
-                    code = code * 23 + axis;
+                    code = code * 31 + axis;
 
                 foreach (var button in Buttons)
-                    code = code * 23 + button.GetHashCode();
+                    code = code * 31 + button.GetHashCode();
 
                 foreach (var hat in Hats)
-                    code = code * 23 + hat.GetHashCode();
+                    code = code * 31 + hat.GetHashCode();
                 return code;
             }
         }

@@ -18,8 +18,8 @@ namespace MonoGame.Framework.Graphics
 
         public override int GetHashCode()
         {
-            int code = Position.GetHashCode();
-            return code * 23 + TextureCoordinate.GetHashCode();
+            int code = 7 + Position.GetHashCode();
+            return code * 31 + TextureCoordinate.GetHashCode();
         }
 
         public override string ToString()
@@ -29,7 +29,7 @@ namespace MonoGame.Framework.Graphics
 
         public static bool operator ==(VertexPositionTexture left, VertexPositionTexture right)
         {
-            return ((left.Position == right.Position) && (left.TextureCoordinate == right.TextureCoordinate));
+            return (left.Position == right.Position) && (left.TextureCoordinate == right.TextureCoordinate);
         }
 
         public static bool operator !=(VertexPositionTexture left, VertexPositionTexture right)
@@ -47,7 +47,7 @@ namespace MonoGame.Framework.Graphics
             {
                 return false;
             }
-            return (this == ((VertexPositionTexture)obj));
+            return this == ((VertexPositionTexture)obj);
         }
 
         static VertexPositionTexture()

@@ -1163,10 +1163,10 @@ namespace MonoGame.Framework.Graphics
                 // for very large numbers. That doesn't matter because
                 // the number will get clamped below anyway in this case.
                 var msc = multiSampleCount;
-                msc |= (msc >> 1);
-                msc |= (msc >> 2);
-                msc |= (msc >> 4);
-                msc -= (msc >> 1);
+                msc |= msc >> 1;
+                msc |= msc >> 2;
+                msc |= msc >> 4;
+                msc -= msc >> 1;
                 // and clamp it to what the device can handle
                 if (msc > GraphicsCapabilities.MaxMultiSampleCount)
                     msc = GraphicsCapabilities.MaxMultiSampleCount;

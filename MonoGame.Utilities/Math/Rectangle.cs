@@ -50,7 +50,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns the x coordinate of the right edge of this <see cref="Rectangle"/>.
         /// </summary>
-        public int Right => (X + Width);
+        public int Right => X + Width;
 
         /// <summary>
         /// Returns the y coordinate of the top edge of this <see cref="Rectangle"/>.
@@ -60,13 +60,13 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns the y coordinate of the bottom edge of this <see cref="Rectangle"/>.
         /// </summary>
-        public int Bottom => (Y + Height);
+        public int Bottom => Y + Height;
 
         /// <summary>
         /// Whether or not this <see cref="Rectangle"/> has a <see cref="Width"/> and
         /// <see cref="Height"/> of 0, and a <see cref="Position"/> of (0, 0).
         /// </summary>
-        public bool IsEmpty => ((((Width == 0) && (Height == 0)) && (X == 0)) && (Y == 0));
+        public bool IsEmpty => (Width == 0) && (Height == 0) && (X == 0) && (Y == 0);
 
         /// <summary>
         /// The top-left coordinates of this <see cref="Rectangle"/>.
@@ -181,7 +181,7 @@ namespace MonoGame.Framework
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
         public static bool operator ==(in Rectangle a, in Rectangle b)
         {
-            return ((a.X == b.X) && (a.Y == b.Y) && (a.Width == b.Width) && (a.Height == b.Height));
+            return (a.X == b.X) && (a.Y == b.Y) && (a.Width == b.Width) && (a.Height == b.Height);
         }
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace MonoGame.Framework
         /// <returns><c>true</c> if the provided coordinates lie inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
 		public bool Contains(int x, int y)
         {
-            return ((((X <= x) && (x < (X + Width))) && (Y <= y)) && (y < (Y + Height)));
+            return (X <= x) && (x < (X + Width)) && (Y <= y) && (y < (Y + Height));
         }
 
         /// <summary>
@@ -218,7 +218,7 @@ namespace MonoGame.Framework
         /// <returns><c>true</c> if the provided coordinates lie inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
         public bool Contains(float x, float y)
         {
-            return ((((X <= x) && (x < (X + Width))) && (Y <= y)) && (y < (Y + Height)));
+            return (X <= x) && (x < (X + Width)) && (Y <= y) && (y < (Y + Height));
         }
 		
         /// <summary>
@@ -228,7 +228,7 @@ namespace MonoGame.Framework
         /// <returns><c>true</c> if the provided <see cref="Point"/> lies inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
         public bool Contains(Point value)
         {
-            return ((((X <= value.X) && (value.X < (X + Width))) && (Y <= value.Y)) && (value.Y < (Y + Height)));
+            return (X <= value.X) && (value.X < (X + Width)) && (Y <= value.Y) && (value.Y < (Y + Height));
         }
 
         /// <summary>
@@ -238,7 +238,7 @@ namespace MonoGame.Framework
         /// <returns><c>true</c> if the provided <see cref="Vector2"/> lies inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
         public bool Contains(Vector2 value)
         {
-            return ((((X <= value.X) && (value.X < (X + Width))) && (Y <= value.Y)) && (value.Y < (Y + Height)));
+            return (X <= value.X) && (value.X < (X + Width)) && (Y <= value.Y) && (value.Y < (Y + Height));
         }
 
         /// <summary>
@@ -248,7 +248,7 @@ namespace MonoGame.Framework
         /// <returns><c>true</c> if the provided <see cref="Rectangle"/>'s bounds lie entirely inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
         public bool Contains(in Rectangle value)
         {
-            return ((((X <= value.X) && ((value.X + value.Width) <= (X + Width))) && (Y <= value.Y)) && ((value.Y + value.Height) <= (Y + Height)));
+            return (X <= value.X) && ((value.X + value.Width) <= (X + Width)) && (Y <= value.Y) && ((value.Y + value.Height) <= (Y + Height));
         }
 
         /// <summary>
@@ -279,12 +279,10 @@ namespace MonoGame.Framework
         {
             unchecked
             {
-                var hash = 17;
-                hash = hash * 23 + X.GetHashCode();
-                hash = hash * 23 + Y.GetHashCode();
-                hash = hash * 23 + Width.GetHashCode();
-                hash = hash * 23 + Height.GetHashCode();
-                return hash;
+                int hash 7 + X.GetHashCode();
+                hash = hash * 31 + Y.GetHashCode();
+                hash = hash * 31 + Width.GetHashCode();
+                return hash * 31 + Height.GetHashCode();
             }
         }
 

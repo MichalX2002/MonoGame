@@ -69,51 +69,22 @@ namespace MonoGame.Utilities.IO
             }
         }
 
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            return InnerStream.Seek(offset, origin);
-        }
+        public override long Seek(long offset, SeekOrigin origin) => InnerStream.Seek(offset, origin);
 
-        public override void SetLength(long value)
-        {
-            InnerStream.SetLength(value);
-        }
+        public override void SetLength(long value) => InnerStream.SetLength(value);
 
-        public override void Flush()
-        {
-            InnerStream.Flush();
-        }
+        public override void Flush() => InnerStream.Flush();
 
-        public override void Close()
-        {
-            InnerStream.Close();
-        }
-
-        public override object InitializeLifetimeService()
-        {
-            return InnerStream.InitializeLifetimeService();
-        }
-
-        public override bool Equals(object obj)
-        {
-            return InnerStream.Equals(obj);
-        }
-
-        public override string ToString()
-        {
-            return InnerStream.ToString();
-        }
-
-        public override int GetHashCode()
-        {
-            return InnerStream.GetHashCode();
-        }
+        public override void Close() => InnerStream.Close();
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
+            {
                 if (!_leaveOpen)
-                    InnerStream.Dispose();
+                    InnerStream?.Dispose();
+                InnerStream = null;
+            }
         }
     }
 }

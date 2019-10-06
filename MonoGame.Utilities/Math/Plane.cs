@@ -74,17 +74,17 @@ namespace MonoGame.Framework
         
         public float Dot(in Vector4 value)
         {
-            return ((((Normal.X * value.X) + (Normal.Y * value.Y)) + (Normal.Z * value.Z)) + (D * value.W));
+            return (Normal.X * value.X) + (Normal.Y * value.Y) + (Normal.Z * value.Z) + (D * value.W);
         }
 
         public float DotCoordinate(Vector3 value)
         {
-            return ((((Normal.X * value.X) + (Normal.Y * value.Y)) + (Normal.Z * value.Z)) + D);
+            return (Normal.X * value.X) + (Normal.Y * value.Y) + (Normal.Z * value.Z) + D;
         }
 
         public float DotNormal(Vector3 value)
         {
-            return (((Normal.X * value.X) + (Normal.Y * value.Y)) + (Normal.Z * value.Z));
+            return (Normal.X * value.X) + (Normal.Y * value.Y) + (Normal.Z * value.Z);
         }
 
         /// <summary>
@@ -154,7 +154,11 @@ namespace MonoGame.Framework
 
         public override int GetHashCode()
         {
-            return Normal.GetHashCode() ^ D.GetHashCode();
+            unchecked
+            {
+                int code = 7 + Normal.GetHashCode();
+                return code * 31 + D.GetHashCode();
+            }
         }
 
         internal PlaneIntersectionType Intersects(Vector3 point)

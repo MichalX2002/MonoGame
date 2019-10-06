@@ -109,7 +109,7 @@ namespace MonoGame.Framework
                         //make the curve continue (with no step) so must up the curve each cycle of delta(value)
                         cycle = GetNumberOfCycle(position);
                         virtualPos = position - (cycle * (last.Position - first.Position));
-                        return (GetCurvePosition(virtualPos) + cycle * (last.Value - first.Value));
+                        return GetCurvePosition(virtualPos) + cycle * (last.Value - first.Value);
 
                     case CurveLoopType.Oscillate:
                         //go back on curve from end and target start 
@@ -145,7 +145,7 @@ namespace MonoGame.Framework
                         //make the curve continue (with no step) so must up the curve each cycle of delta(value)
                         cycle = GetNumberOfCycle(position);
                         virtualPos = position - (cycle * (last.Position - first.Position));
-                        return (GetCurvePosition(virtualPos) + cycle * (last.Value - first.Value));
+                        return GetCurvePosition(virtualPos) + cycle * (last.Value - first.Value);
 
                     case CurveLoopType.Oscillate:
                         //go back on curve from end and target start 

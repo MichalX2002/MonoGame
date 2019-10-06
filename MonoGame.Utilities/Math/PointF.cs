@@ -45,6 +45,8 @@ namespace MonoGame.Framework
         /// </summary>
         [DataMember] public float Y;
 
+        internal string DebugDisplayString => ToString();
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="PointF" /> structure from the specified coordinates.
         /// </summary>
@@ -55,80 +57,12 @@ namespace MonoGame.Framework
             X = x;
             Y = y;
         }
-        
+
         /// <summary>
         /// Returns the <see cref="Vector2"/> representation of this instance.
         /// </summary>
         /// <returns><see cref="Vector2"/></returns>
-        public Vector2 ToVector2()
-        {
-            return new Vector2(X, Y);
-        }
-
-        /// <summary>
-        ///     Compares two <see cref="PointF" /> structures. The result specifies
-        ///     whether the values of the <see cref="X" /> and <see cref="Y" />
-        ///     fields of the two <see cref="PointF" />
-        ///     structures are equal.
-        /// </summary>
-        /// <param name="first">The first point.</param>
-        /// <param name="second">The second point.</param>
-        /// <returns>
-        ///     <c>true</c> if the <see cref="X" /> and <see cref="Y" />
-        ///     fields of the two <see cref="PointF" />
-        ///     structures are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(PointF first, PointF second)
-        {
-            return first.Equals(second);
-        }
-
-        /// <summary>
-        ///     Indicates whether this <see cref="PointF" /> is equal to another <see cref="PointF" />.
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <returns>
-        ///     <c>true</c> if this <see cref="PointF" /> is equal to the <paramref name="point" /> parameter; otherwise,
-        ///     <c>false</c>.
-        /// </returns>
-        public bool Equals(PointF point)
-        {
-            // ReSharper disable CompareOfFloatsByEqualityOperator
-            return (point.X == X) && (point.Y == Y);
-            // ReSharper restore CompareOfFloatsByEqualityOperator
-        }
-
-        /// <summary>
-        ///     Returns a value indicating whether this <see cref="PointF" /> is equal to a specified object.
-        /// </summary>
-        /// <param name="obj">The object to make the comparison with.</param>
-        /// <returns>
-        ///     <c>true</c> if this  <see cref="PointF" /> is equal to <paramref name="obj" />; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (obj is PointF point)
-                return Equals(point);
-            return false;
-        }
-
-        /// <summary>
-        ///     Compares two <see cref="PointF" /> structures. The result specifies
-        ///     whether the values of the <see cref="X" /> or <see cref="Y" />
-        ///     fields of the two <see cref="PointF" />
-        ///     structures are unequal.
-        /// </summary>
-        /// <param name="first">The first point.</param>
-        /// <param name="second">The second point.</param>
-        /// <returns>
-        ///     <c>true</c> if the <see cref="X" /> or <see cref="Y" />
-        ///     fields of the two <see cref="PointF" />
-        ///     structures are unequal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(PointF first, PointF second)
-        {
-            return !(first == second);
-        }
+        public Vector2 ToVector2() => new Vector2(X, Y);
 
         /// <summary>
         ///     Calculates the <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a
@@ -139,10 +73,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a <see cref="Vector2" />.
         /// </returns>
-        public static PointF operator +(PointF point, Vector2 vector)
-        {
-            return Add(point, vector);
-        }
+        public static PointF operator +(in PointF point, in Vector2 vector) => Add(point, vector);
 
         /// <summary>
         ///     Calculates the <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a
@@ -153,14 +84,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a <see cref="Vector2" />.
         /// </returns>
-        public static PointF Add(PointF point, Vector2 vector)
-        {
-            return new PointF
-            {
-                X = point.X + vector.X,
-                Y = point.Y + vector.Y
-            };
-        }
+        public static PointF Add(in PointF point, in Vector2 vector) => new PointF(point.X + vector.X, point.Y + vector.Y);
 
         /// <summary>
         ///     Calculates the <see cref="PointF" /> representing the subtraction of a <see cref="PointF" /> and a
@@ -171,10 +95,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The <see cref="PointF" /> representing the substraction of a <see cref="PointF" /> and a <see cref="Vector2" />.
         /// </returns>
-        public static PointF operator -(PointF point, Vector2 vector)
-        {
-            return Subtract(point, vector);
-        }
+        public static PointF operator -(in PointF point, in Vector2 vector) => Subtract(point, vector);
 
         /// <summary>
         ///     Calculates the <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a
@@ -185,14 +106,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The <see cref="PointF" /> representing the substraction of a <see cref="PointF" /> and a <see cref="Vector2" />.
         /// </returns>
-        public static PointF Subtract(PointF point, Vector2 vector)
-        {
-            return new PointF
-            {
-                X = point.X - vector.X,
-                Y = point.Y - vector.Y
-            };
-        }
+        public static PointF Subtract(in PointF point, in Vector2 vector) => new PointF(point.X - vector.X, point.Y - vector.Y);
 
         /// <summary>
         ///     Calculates the <see cref="Vector2" /> representing the displacement of two <see cref="PointF" /> structures.
@@ -202,10 +116,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The <see cref="Vector2" /> representing the displacement of two <see cref="PointF" /> structures.
         /// </returns>
-        public static Vector2 operator -(PointF point1, PointF point2)
-        {
-            return Displacement(point1, point2);
-        }
+        public static Vector2 operator -(in PointF point1, in PointF point2) => Displacement(point1, point2);
 
         /// <summary>
         ///     Calculates the <see cref="Vector2" /> representing the displacement of two <see cref="PointF" /> structures.
@@ -215,14 +126,8 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The <see cref="Vector2" /> representing the displacement of two <see cref="PointF" /> structures.
         /// </returns>
-        public static Vector2 Displacement(PointF point2, PointF point1)
-        {
-            return new Vector2
-            {
-                X = point2.X - point1.X,
-                Y = point2.Y - point1.Y
-            };
-        }
+        public static Vector2 Displacement(in PointF point2, in PointF point1) =>
+            new Vector2(point2.X - point1.X, point2.Y - point1.Y);
 
         /// <summary>
         ///     Translates a <see cref='PointF' /> by a given <see cref='SizeF' />.
@@ -232,10 +137,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The result of the operator.
         /// </returns>
-        public static PointF operator +(PointF point, SizeF size)
-        {
-            return Add(point, size);
-        }
+        public static PointF operator +(in PointF point, in SizeF size) => Add(point, size);
 
         /// <summary>
         ///     Translates a <see cref='PointF' /> by a given <see cref='SizeF' />.
@@ -245,10 +147,8 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The result of the operator.
         /// </returns>
-        public static PointF Add(PointF point, SizeF size)
-        {
-            return new PointF(point.X + size.Width, point.Y + size.Height);
-        }
+        public static PointF Add(in PointF point, in SizeF size) => 
+            new PointF(point.X + size.Width, point.Y + size.Height);
 
         /// <summary>
         ///     Translates a <see cref='PointF' /> by the negative of a given <see cref='SizeF' />.
@@ -258,10 +158,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The result of the operator.
         /// </returns>
-        public static PointF operator -(PointF point, SizeF size)
-        {
-            return Subtract(point, size);
-        }
+        public static PointF operator -(in PointF point, in SizeF size) => Subtract(point, size);
 
         /// <summary>
         ///     Translates a <see cref='PointF' /> by the negative of a given <see cref='SizeF' /> .
@@ -271,26 +168,8 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The result of the operator.
         /// </returns>
-        public static PointF Subtract(PointF point, SizeF size)
-        {
-            return new PointF(point.X - size.Width, point.Y - size.Height);
-        }
-
-        /// <summary>
-        ///     Returns a hash code of this <see cref="PointF" /> suitable for use in hashing algorithms and data
-        ///     structures like a hash table.
-        /// </summary>
-        /// <returns>
-        ///     A hash code of this <see cref="PointF" />.
-        /// </returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 3 + X.GetHashCode();
-                return hash * 7 + Y.GetHashCode();
-            }
-        }
+        public static PointF Subtract(in PointF point, in SizeF size) => 
+            new PointF(point.X - size.Width, point.Y - size.Height);
 
         /// <summary>
         ///     Calculates the <see cref="PointF" /> that contains the minimal coordinate values from two <see cref="PointF" />
@@ -303,12 +182,10 @@ namespace MonoGame.Framework
         ///     The the <see cref="PointF" /> that contains the minimal coordinate values from two <see cref="PointF" />
         ///     structures.
         /// </returns>
-        public static PointF Minimum(PointF first, PointF second)
-        {
-            return new PointF(
+        public static PointF Minimum(in PointF first, in PointF second) =>
+            new PointF(
                 first.X < second.X ? first.X : second.X,
                 first.Y < second.Y ? first.Y : second.Y);
-        }
 
         /// <summary>
         ///     Calculates the <see cref="PointF" /> that contains the maximal coordinate values from two <see cref="PointF" />
@@ -321,12 +198,9 @@ namespace MonoGame.Framework
         ///     The the <see cref="PointF" /> that contains the maximal coordinate values from two <see cref="PointF" />
         ///     structures.
         /// </returns>
-        public static PointF Maximum(PointF first, PointF second)
-        {
-            return new PointF(
-                first.X > second.X ? first.X : second.X, 
+        public static PointF Maximum(in PointF first, in PointF second) => new PointF(
+                first.X > second.X ? first.X : second.X,
                 first.Y > second.Y ? first.Y : second.Y);
-        }
 
         /// <summary>
         ///     Performs an implicit conversion from a <see cref="PointF" /> to a position <see cref="Vector2" />.
@@ -335,10 +209,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The resulting <see cref="Vector2" />.
         /// </returns>
-        public static implicit operator Vector2(PointF point)
-        {
-            return new Vector2(point.X, point.Y);
-        }
+        public static implicit operator Vector2(in PointF point) => new Vector2(point.X, point.Y);
 
         /// <summary>
         ///     Performs an implicit conversion from a <see cref="Vector2" /> to a position <see cref="PointF" />.
@@ -347,10 +218,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The resulting <see cref="PointF" />.
         /// </returns>
-        public static implicit operator PointF(Vector2 vector)
-        {
-            return new PointF(vector.X, vector.Y);
-        }
+        public static implicit operator PointF(in Vector2 vector) => new PointF(vector.X, vector.Y);
 
 
         /// <summary>
@@ -360,23 +228,49 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The resulting <see cref="PointF" />.
         /// </returns>
-        public static implicit operator PointF(Point point)
-        {
-            return new PointF(point.X, point.Y);
-        }
+        public static implicit operator PointF(in Point point) => new PointF(point.X, point.Y);
 
+        /// <summary>
+        ///     Compares two <see cref="PointF" /> structures. The result specifies
+        ///     whether the values of the <see cref="X" /> and <see cref="Y" />
+        ///     fields of the two <see cref="PointF" />
+        ///     structures are equal.
+        /// </summary>
+        public static bool operator ==(in PointF a, in PointF b) => (a.X == b.X) && (a.Y == b.Y);
+
+        /// <summary>
+        ///     Compares two <see cref="PointF" /> structures. The result specifies
+        ///     whether the values of the <see cref="X" /> or <see cref="Y" />
+        ///     fields of the two <see cref="PointF" />
+        ///     structures are unequal.
+        /// </summary>
+        public static bool operator !=(in PointF first, in PointF second) => !(first == second);
+
+        /// <summary>
+        ///     Indicates whether this <see cref="PointF" /> is equal to another <see cref="PointF" />.
+        /// </summary>
+        public bool Equals(PointF other) => this == other;
+
+        /// <summary>
+        ///     Returns a value indicating whether this <see cref="PointF" /> is equal to a specified object.
+        /// </summary>
+        public override bool Equals(object obj) => obj is PointF other && Equals(other);
 
         /// <summary>
         ///     Returns a <see cref="string" /> that represents this <see cref="PointF" />.
         /// </summary>
-        /// <returns>
-        ///     A <see cref="string" /> that represents this <see cref="PointF" />.
-        /// </returns>
-        public override string ToString()
-        {
-            return $"({X}, {Y})";
-        }
+        public override string ToString() => $"({X}, {Y})";
 
-        internal string DebugDisplayString => ToString();
+        /// <summary>
+        ///     Returns a hash code of this <see cref="PointF" />.
+        /// </summary>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 7 + X.GetHashCode();
+                return hash * 31 + Y.GetHashCode();
+            }
+        }
     }
 }

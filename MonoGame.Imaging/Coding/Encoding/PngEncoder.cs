@@ -24,7 +24,7 @@ namespace MonoGame.Imaging.Encoding
             EncoderConfig encoderConfig, ImagingConfig imagingConfig)
         {
             var config = encoderConfig as PngEncoderConfig;
-            return StbImageWrite.stbi_write_png_core(context, config.CompressionLevel);
+            return StbImageWrite.Png.WriteCore(context, config.CompressionLevel);
         }
     }
 }

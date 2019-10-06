@@ -60,10 +60,10 @@ namespace MonoGame.Utilities.PackedVector
 		public Vector4 ToVector4()
 		{
 			return new Vector4(
-                (float) (((packedValue) & 0xFFFF) / 65535.0f),
-                (float) (((packedValue >> 16) & 0xFFFF) / 65535.0f),
-                (float) (((packedValue >> 32) & 0xFFFF) / 65535.0f),
-                (float) (((packedValue >> 48) & 0xFFFF) / 65535.0f)
+                 ((packedValue) & 0xFFFF) / 65535.0f,
+                 ((packedValue >> 16) & 0xFFFF) / 65535.0f,
+                 ((packedValue >> 32) & 0xFFFF) / 65535.0f,
+                 ((packedValue >> 48) & 0xFFFF) / 65535.0f
             );
 		}
 
@@ -126,12 +126,12 @@ namespace MonoGame.Utilities.PackedVector
 
 		private static ulong Pack(float x, float y, float z, float w)
 		{
-			return (ulong) (
-				(((ulong)Math.Round(MathHelper.Clamp(x * 0xFFFF, 0, 65535f)) ) ) |
-				(((ulong)Math.Round(MathHelper.Clamp(y * 0xFFFF, 0, 65535f)) ) << 16) |
-                (((ulong)Math.Round(MathHelper.Clamp(z * 0xFFFF, 0, 65535f)) ) << 32) |
-				(((ulong)Math.Round(MathHelper.Clamp(w * 0xFFFF, 0, 65535f)) ) << 48)
-            );
+			return
+                ((ulong)Math.Round(MathHelper.Clamp(x * 0xFFFF, 0, 65535f))) |
+                (((ulong)Math.Round(MathHelper.Clamp(y * 0xFFFF, 0, 65535f))) << 16) |
+                (((ulong)Math.Round(MathHelper.Clamp(z * 0xFFFF, 0, 65535f))) << 32) |
+                (((ulong)Math.Round(MathHelper.Clamp(w * 0xFFFF, 0, 65535f))) << 48)
+            ;
 		}
 	}
 }

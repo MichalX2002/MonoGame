@@ -68,7 +68,7 @@ namespace MonoGame.Framework.Input
             {
                 IsConnected = true,
                 Identifier = Sdl.Joystick.GetGUID(jdevice).ToString(),
-                IsGamepad = (Sdl.GameController.IsGameController(index) == 1),
+                IsGamepad = Sdl.GameController.IsGameController(index) == 1,
                 AxisCount = Sdl.Joystick.NumAxes(jdevice),
                 ButtonCount = Sdl.Joystick.NumButtons(jdevice),
                 HatCount = Sdl.Joystick.NumHats(jdevice)

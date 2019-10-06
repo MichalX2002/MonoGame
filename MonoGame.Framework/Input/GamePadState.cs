@@ -182,11 +182,11 @@ namespace MonoGame.Framework.Input
         {
             unchecked
             {
-                int code = PacketNumber.GetHashCode();
-                code = code * 23 + Buttons.GetHashCode();
-                code = code * 23 + DPad.GetHashCode();
-                code = code * 23 + ThumbSticks.GetHashCode();
-                return code * 23 + Triggers.GetHashCode();
+                int code = 7 + PacketNumber.GetHashCode();
+                code = code * 31 + Buttons.GetHashCode();
+                code = code * 31 + DPad.GetHashCode();
+                code = code * 31 + ThumbSticks.GetHashCode();
+                return code * 31 + Triggers.GetHashCode();
             }
         }
 

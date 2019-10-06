@@ -331,15 +331,13 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the hash code of this <see cref="Vector3"/>.
         /// </summary>
-        /// <returns>Hash code of this <see cref="Vector3"/>.</returns>
         public override int GetHashCode()
         {
             unchecked
             {
-                int code = X.GetHashCode();
-                code = code * 23 + Y.GetHashCode();
-                code = code * 23 + Z.GetHashCode();
-                return code;
+                int code = 7 + X.GetHashCode();
+                code = code * 31 + Y.GetHashCode();
+                return code * 31 + Z.GetHashCode();
             }
         }
 
@@ -532,11 +530,11 @@ namespace MonoGame.Framework
             // R = I - (2 * N * ( DotProduct[ I,N] ))
 
             // inline the dotProduct here instead of calling method
-            float dotProduct = ((vector.X * normal.X) + (vector.Y * normal.Y)) + (vector.Z * normal.Z);
+            float dotProduct = (vector.X * normal.X) + (vector.Y * normal.Y) + (vector.Z * normal.Z);
             return new Vector3(
-                vector.X - (2.0f * normal.X) * dotProduct,
-                vector.Y - (2.0f * normal.Y) * dotProduct,
-                vector.Z - (2.0f * normal.Z) * dotProduct);
+                vector.X - 2.0f * normal.X * dotProduct,
+                vector.Y - 2.0f * normal.Y * dotProduct,
+                vector.Z - 2.0f * normal.Z * dotProduct);
         }
 
         /// <summary>

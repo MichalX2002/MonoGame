@@ -390,7 +390,7 @@ namespace MonoGame.Framework.Content
                                             /* verbatim and aligned bits */
                                             extra -= 3;
                                             verbatim_bits = (int)bitbuf.ReadBits((byte)extra);
-                                            match_offset += (verbatim_bits << 3);
+                                            match_offset += verbatim_bits << 3;
                                             aligned_bits = (int)ReadHuffSym(
                                                 m_state.ALIGNED_table, m_state.ALIGNED_len,
                                                 LzxConstants.ALIGNED_MAXSYMBOLS, LzxConstants.ALIGNED_TABLEBITS, bitbuf);
@@ -573,9 +573,9 @@ namespace MonoGame.Framework.Content
                                 /* if this path hasn't been taken yet, 'allocate' two entries */
                                 if (table[leaf] == 0)
                                 {
-                                    table[(next_symbol << 1)] = 0;
+                                    table[next_symbol << 1] = 0;
                                     table[(next_symbol << 1) + 1] = 0;
-                                    table[leaf] = (ushort)(next_symbol++);
+                                    table[leaf] = (ushort)next_symbol++;
                                 }
                                 /* follow the path and select either left or right for next bit */
                                 leaf = (uint)(table[leaf] << 1);
@@ -698,7 +698,7 @@ namespace MonoGame.Framework.Content
 
             public uint PeekBits(byte bits)
             {
-                return (buffer >> ((sizeof(uint) * 8) - bits));
+                return buffer >> ((sizeof(uint) * 8) - bits);
             }
 
             public void RemoveBits(byte bits)

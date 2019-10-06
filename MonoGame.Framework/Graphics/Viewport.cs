@@ -2,7 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using System.Runtime.Serialization;
 
 namespace MonoGame.Framework.Graphics
@@ -140,20 +139,19 @@ namespace MonoGame.Framework.Graphics
         /// <param name="projection">The projection <see cref="Matrix"/>.</param>
         /// <param name="view">The view <see cref="Matrix"/>.</param>
         /// <param name="world">The world <see cref="Matrix"/>.</param>
-        /// <returns></returns>
         public Vector3 Project(in Vector3 source, in Matrix projection, in Matrix view, in Matrix world)
         {
-            Matrix matrix = Matrix.Multiply(Matrix.Multiply(world, view), projection);
-            Vector3 vector = Vector3.Transform(source, matrix);
-            float a = (((source.X * matrix.M14) + (source.Y * matrix.M24)) + (source.Z * matrix.M34)) + matrix.M44;
+            var matrix = Matrix.Multiply(Matrix.Multiply(world, view), projection);
+            var vector = Vector3.Transform(source, matrix);
+            float a = (source.X * matrix.M14) + (source.Y * matrix.M24) + (source.Z * matrix.M34) + matrix.M44;
             if (!WithinEpsilon(a, 1f))
             {
                 vector.X /= a;
                 vector.Y /= a;
                 vector.Z /= a;
             }
-            vector.X = (((vector.X + 1f) * 0.5f) * Width) + X;
-            vector.Y = (((-vector.Y + 1f) * 0.5f) * Height) + Y;
+            vector.X = ((vector.X + 1f) * 0.5f * Width) + X;
+            vector.Y = ((-vector.Y + 1f) * 0.5f * Height) + Y;
             vector.Z = (vector.Z * (MaxDepth - MinDepth)) + MinDepth;
             return vector;
         }
@@ -169,17 +167,16 @@ namespace MonoGame.Framework.Graphics
         /// <param name="projection">The projection <see cref="Matrix"/>.</param>
         /// <param name="view">The view <see cref="Matrix"/>.</param>
         /// <param name="world">The world <see cref="Matrix"/>.</param>
-        /// <returns></returns>
         public Vector3 Unproject(in Vector3 source, in Matrix projection, in Matrix view, in Matrix world)
         {
-            Matrix matrix = Matrix.Invert(Matrix.Multiply(Matrix.Multiply(world, view), projection));
-            Vector3 usource = new Vector3(
-                (((source.X - X) / Width) * 2f) - 1f,
-                -((((source.Y - Y) / Height) * 2f) - 1f),
+            var matrix = Matrix.Invert(Matrix.Multiply(Matrix.Multiply(world, view), projection));
+            var usource = new Vector3(
+                ((source.X - X) / Width * 2f) - 1f,
+                -(((source.Y - Y) / Height * 2f) - 1f),
                 (source.Z - MinDepth) / (MaxDepth - MinDepth));
 
-            Vector3 vector = Vector3.Transform(usource, matrix);
-            float a = (((usource.X * matrix.M14) + (usource.Y * matrix.M24)) + (usource.Z * matrix.M34)) + matrix.M44;
+            var vector = Vector3.Transform(usource, matrix);
+            float a = (usource.X * matrix.M14) + (usource.Y * matrix.M24) + (usource.Z * matrix.M34) + matrix.M44;
             if (!WithinEpsilon(a, 1f))
             {
                 vector.X /= a;
@@ -192,7 +189,7 @@ namespace MonoGame.Framework.Graphics
         private static bool WithinEpsilon(float a, float b)
         {
             float num = a - b;
-            return ((-1.401298E-45f <= num) && (num <= float.Epsilon));
+            return (-1.401298E-45f <= num) && (num <= float.Epsilon);
         }
 
         /// <summary>

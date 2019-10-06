@@ -58,8 +58,8 @@ namespace MonoGame.Utilities.PackedVector
         public Vector2 ToVector2()
         {
             return new Vector2(
-                (float) ((packedValue & 0xFFFF) / 65535.0f),
-                (float)(((packedValue >> 16) & 0xFFFF) / 65535.0f)
+                 (packedValue & 0xFFFF) / 65535.0f,
+                ((packedValue >> 16) & 0xFFFF) / 65535.0f
             );
         }
 
@@ -132,7 +132,7 @@ namespace MonoGame.Utilities.PackedVector
         private static uint Pack(float x, float y)
         {
             return (uint) (
-                (((int) Math.Round(MathHelper.Clamp(x, 0, 1) * 65535.0f) & 0xFFFF) ) |
+                ((int) Math.Round(MathHelper.Clamp(x, 0, 1) * 65535.0f) & 0xFFFF ) |
                 (((int) Math.Round(MathHelper.Clamp(y, 0, 1) * 65535.0f) & 0xFFFF) << 16)
             );
         }

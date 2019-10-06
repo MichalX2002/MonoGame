@@ -108,8 +108,6 @@ namespace MonoGame.Imaging.Decoding
         /// decode channels as 8-bit or 16-bit based on the <paramref name="type"/>'s precision.
         /// </para>
         /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
         public static bool CanUtilize16BitData(Type type)
         {
             return type == typeof(Short4) 
@@ -274,8 +272,6 @@ namespace MonoGame.Imaging.Decoding
         /// Most images will only have one frame so
         /// there's no need for the default list capacity of 4.
         /// </summary>
-        /// <typeparam name="TPixel"></typeparam>
-        /// <returns></returns>
         private FrameCollection<TPixel> GetSmallInitialCollection<TPixel>()
             where TPixel : unmanaged, IPixel
         {

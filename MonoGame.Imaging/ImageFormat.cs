@@ -195,8 +195,6 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Returns whether the format already comes with the imaging library.
         /// </summary>
-        /// <param name="format"></param>
-        /// <returns></returns>
         public static bool IsBuiltIn(ImageFormat format)
         {
             if (format == null)

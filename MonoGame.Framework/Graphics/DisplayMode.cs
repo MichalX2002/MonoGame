@@ -82,9 +82,9 @@ namespace MonoGame.Framework.Graphics
         {
             unchecked
             {
-                int code = Width.GetHashCode();
-                code = code * 23 + Height.GetHashCode();
-                return code * 23 + Format.GetHashCode();
+                int code = 7 + Width.GetHashCode();
+                code = code * 31 + Height.GetHashCode();
+                return code * 31 + Format.GetHashCode();
             }
         }
 

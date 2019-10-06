@@ -144,9 +144,8 @@ namespace MonoGame.Framework.Input
         {
             unchecked
             {
-                int code = 17;
-                code = code * 23 + Left.GetHashCode();
-                return code * 23 + Right.GetHashCode();
+                int code = 17 + Left.GetHashCode();
+                return code * 31 + Right.GetHashCode();
             }
         }
 

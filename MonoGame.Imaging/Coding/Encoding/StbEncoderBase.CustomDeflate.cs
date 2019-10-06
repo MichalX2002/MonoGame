@@ -45,7 +45,7 @@ namespace MonoGame.Imaging.Encoding
                     }
                 }
 
-                uint adlerSum = StbImageWrite.calc_adler32_checksum(data, cancellation);
+                uint adlerSum = StbImageWrite.Adler32.Calculate(data, cancellation);
                 var adlerChecksum = new Span<byte>(&adlerSum, sizeof(uint));
                 adlerChecksum.Reverse();
                 output.Write(adlerChecksum);

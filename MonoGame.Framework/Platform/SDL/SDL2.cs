@@ -1028,7 +1028,7 @@ internal static class Sdl
 
         public enum EffectId : ushort
         {
-            LeftRight = (1 << 2),
+            LeftRight = 1 << 2,
         }
 
         [StructLayout(LayoutKind.Sequential)]

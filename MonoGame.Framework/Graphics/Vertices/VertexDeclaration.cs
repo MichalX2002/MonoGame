@@ -45,20 +45,16 @@ namespace MonoGame.Framework.Graphics
                 // Pre-calculate hash code for fast comparisons and lookup in dictionaries.
                 unchecked
                 {
-                    _hashCode = elements[0].GetHashCode();
+                    _hashCode = 7 + elements[0].GetHashCode();
                     for (int i = 1; i < elements.Length; i++)
-                        _hashCode = (_hashCode * 397) ^ elements[i].GetHashCode();
+                        _hashCode = _hashCode * 31 + elements[i].GetHashCode();
 
-                    _hashCode = (_hashCode * 397) ^ elements.Length;
-                    _hashCode = (_hashCode * 397) ^ vertexStride;
+                    _hashCode = _hashCode * 31 + elements.Length;
+                    _hashCode = _hashCode * 31 + vertexStride;
                 }
             }
 
-            public override bool Equals(object obj)
-            {
-                return Equals(obj as Data);
-            }
-
+            
             public bool Equals(Data other)
             {
                 if (other is null)
@@ -70,9 +66,7 @@ namespace MonoGame.Framework.Graphics
                 if (_hashCode != other._hashCode ||
                     VertexStride != other.VertexStride ||
                     Elements.Length != other.Elements.Length)
-                {
                     return false;
-                }
 
                 for (int i = 0; i < Elements.Length; i++)
                     if (!Elements[i].Equals(other.Elements[i]))
@@ -81,10 +75,9 @@ namespace MonoGame.Framework.Graphics
                 return true;
             }
 
-            public override int GetHashCode()
-            {
-                return _hashCode;
-            }
+            public override bool Equals(object obj) => Equals(obj as Data);
+
+            public override int GetHashCode() => _hashCode;
         }
         #endregion
 
@@ -122,6 +115,7 @@ namespace MonoGame.Framework.Graphics
         {
             _data = data;
         }
+
         #endregion
 
         private readonly Data _data;
@@ -138,8 +132,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="elements">The vertex elements.</param>
         /// <exception cref="ArgumentNullException"><paramref name="elements"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentEmptyException"><paramref name="elements"/> is empty.</exception>
-        public VertexDeclaration(params VertexElement[] elements)
-            : this(GetVertexStride(elements), elements)
+        public VertexDeclaration(params VertexElement[] elements) : this(GetVertexStride(elements), elements)
 		{
 		}
 
@@ -189,7 +182,6 @@ namespace MonoGame.Framework.Graphics
         /// Returns the <see cref="VertexDeclaration"/> for Type.
         /// </summary>
         /// <param name="vertexType">A value type which implements the <see cref="IVertexType"/> interface.</param>
-        /// <returns>The <see cref="VertexDeclaration"/>.</returns>
         /// <remarks>
         /// Prefer to use <see cref="VertexDeclarationCache{T}"/> when the declaration lookup
         /// can be performed with a templated type.
@@ -216,87 +208,38 @@ namespace MonoGame.Framework.Graphics
 		}
 
         /// <summary>
-        /// Gets a copy of the vertex elements.
+        /// Creates a copy of the vertex elements.
         /// </summary>
-        /// <returns>A copy of the vertex elements.</returns>
-        public VertexElement[] GetVertexElements()
-		{
-			return (VertexElement[])_data.Elements.Clone();
-		}
+        public VertexElement[] GetVertexElements() => (VertexElement[])_data.Elements.Clone();
 
         /// <summary>
         /// Gets the size of a vertex (including padding) in bytes.
         /// </summary>
-        /// <value>The size of a vertex (including padding) in bytes.</value>
         public int VertexStride => _data.VertexStride;
+
+        /// <summary>
+        /// Determines whether the specified <see cref="VertexDeclaration"/> is equal to this instance.
+        /// </summary>
+        public bool Equals(VertexDeclaration other) => other != null && ReferenceEquals(_data, other._data);
 
         /// <summary>
         /// Determines whether the specified <see cref="object"/> is equal to this instance.
         /// </summary>
-        /// <param name="obj">The object to compare with the current object.</param>
-        /// <returns>
-        /// <see langword="true"/> if the specified <see cref="object"/> is equal to this instance;
-        /// otherwise, <see langword="false"/>.
-        /// </returns>
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as VertexDeclaration);
-        }
-
-        /// <summary>
-        /// Determines whether the specified <see cref="VertexDeclaration"/> is equal to this
-        /// instance.
-        /// </summary>
-        /// <param name="other">The object to compare with the current object.</param>
-        /// <returns>
-        /// <see langword="true"/> if the specified <see cref="VertexDeclaration"/> is equal to this
-        /// instance; otherwise, <see langword="false"/>.
-        /// </returns>
-        public bool Equals(VertexDeclaration other)
-        {
-            return other != null && ReferenceEquals(_data, other._data);
-        }
+        public override bool Equals(object obj) => Equals(obj as VertexDeclaration);
 
         /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data
-        /// structures like a hash table.
-        /// </returns>
-        public override int GetHashCode()
-        {
-            return _data.GetHashCode();
-        }
+        public override int GetHashCode() => _data.GetHashCode();
 
         /// <summary>
-        /// Compares two <see cref="VertexElement"/> instances to determine whether they are the
-        /// same.
+        /// Compares two <see cref="VertexElement"/> instances to determine whether they are the same.
         /// </summary>
-        /// <param name="left">The first instance.</param>
-        /// <param name="right">The second instance.</param>
-        /// <returns>
-        /// <see langword="true"/> if the <paramref name="left"/> and <paramref name="right"/> are
-        /// the same; otherwise, <see langword="false"/>.
-        /// </returns>
-        public static bool operator ==(VertexDeclaration left, VertexDeclaration right)
-        {
-            return Equals(left, right);
-        }
+        public static bool operator ==(VertexDeclaration a, VertexDeclaration b) => Equals(a, b);
 
         /// <summary>
-        /// Compares two <see cref="VertexElement"/> instances to determine whether they are
-        /// different.
+        /// Compares two <see cref="VertexElement"/> instances to determine whether they are different.
         /// </summary>
-        /// <param name="left">The first instance.</param>
-        /// <param name="right">The second instance.</param>
-        /// <returns>
-        /// <see langword="true"/> if the <paramref name="left"/> and <paramref name="right"/> are
-        /// the different; otherwise, <see langword="false"/>.
-        /// </returns>
-        public static bool operator !=(VertexDeclaration left, VertexDeclaration right)
-        {
-            return !Equals(left, right);
-        }
+        public static bool operator !=(VertexDeclaration a, VertexDeclaration b) => !(a == b);
     }
 }

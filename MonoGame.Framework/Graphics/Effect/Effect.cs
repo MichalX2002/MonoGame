@@ -15,7 +15,7 @@ namespace MonoGame.Framework.Graphics
             /// <summary>
             /// The MonoGame Effect file format header identifier ("MGFX"). 
             /// </summary>
-            public static readonly int MGFXSignature = (BitConverter.IsLittleEndian) ? 0x5846474D: 0x4D474658;
+            public static readonly int MGFXSignature = BitConverter.IsLittleEndian ? 0x5846474D: 0x4D474658;
 
             /// <summary>
             /// The current MonoGame Effect file format versions

@@ -25,7 +25,7 @@ namespace MonoGame.Utilities.IO
         /// <summary>
         /// Indicates the current CRC for all blocks slurped in.
         /// </summary>
-        public int Crc32Result => unchecked((int)(~_register));
+        public int Crc32Result => unchecked((int)~_register);
 
         /// <summary>
         /// Returns the CRC32 for the specified stream.
@@ -65,7 +65,7 @@ namespace MonoGame.Utilities.IO
                         if (output != null) output.Write(buffer, 0, count);
                         TotalBytesRead += count;
                     }
-                    return (int)(~_register);
+                    return (int)~_register;
                 }
                 finally
                 {

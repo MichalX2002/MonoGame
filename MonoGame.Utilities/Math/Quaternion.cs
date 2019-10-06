@@ -325,10 +325,10 @@ namespace MonoGame.Framework
         {
             unchecked
             {
-                int code = X.GetHashCode();
-                code = code * 23 + Y.GetHashCode();
-                code = code * 23 + Z.GetHashCode();
-                code = code * 23 + W.GetHashCode();
+                int code = 7 + X.GetHashCode();
+                code = code * 31 + Y.GetHashCode();
+                code = code * 31 + Z.GetHashCode();
+                code = code * 31 + W.GetHashCode();
                 return code;
             }
         }

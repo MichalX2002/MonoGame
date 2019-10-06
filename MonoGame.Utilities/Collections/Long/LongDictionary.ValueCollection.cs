@@ -20,10 +20,7 @@ namespace MonoGame.Utilities.Collections
                 _dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
             }
 
-            public bool Contains(in TValue item)
-            {
-                return _dictionary.ContainsValue(item);
-            }
+            public bool Contains(TValue item) => _dictionary.ContainsValue(item);
 
             public void CopyTo(TValue[] array, int index)
             {

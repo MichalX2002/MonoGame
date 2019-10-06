@@ -138,7 +138,6 @@ namespace MonoGame.Framework
         /// run loop is begun.  Implementations may also return false to prevent
         /// the run loop from starting.
         /// </summary>
-        /// <returns></returns>
         public virtual bool BeforeRun()
         {
             return true;
@@ -166,8 +165,6 @@ namespace MonoGame.Framework
         /// is called for all IUpdatable components.  Returning false from this
         /// method will result in this round of Update calls being skipped.
         /// </summary>
-        /// <param name="gameTime"></param>
-        /// <returns></returns>
         public abstract bool BeforeUpdate(GameTime gameTime);
 
         /// <summary>
@@ -175,8 +172,6 @@ namespace MonoGame.Framework
         /// is called for all IDrawable components.  Returning false from this
         /// method will result in this round of Draw calls being skipped.
         /// </summary>
-        /// <param name="gameTime"></param>
-        /// <returns></returns>
         public abstract bool BeforeDraw(GameTime gameTime);
 
         /// <summary>

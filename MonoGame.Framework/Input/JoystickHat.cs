@@ -58,10 +58,10 @@ namespace MonoGame.Framework.Input
         public override int GetHashCode()
         {
             int hash = 0;
-            if (Left == ButtonState.Pressed) hash |= (1 << 3);
-            if (Up == ButtonState.Pressed) hash |= (1 << 2);
-            if (Right == ButtonState.Pressed) hash |= (1 << 1);
-            if (Down == ButtonState.Pressed) hash |= (1 << 0);
+            if (Left == ButtonState.Pressed) hash |= 1 << 3;
+            if (Up == ButtonState.Pressed) hash |= 1 << 2;
+            if (Right == ButtonState.Pressed) hash |= 1 << 1;
+            if (Down == ButtonState.Pressed) hash |= 1 << 0;
             return hash;
         }
 

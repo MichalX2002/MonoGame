@@ -228,15 +228,11 @@ namespace MonoGame.Utilities.IO
         /// Seeking is not supported on this stream.
         /// This method always throws <see cref="NotSupportedException"/>
         /// </summary>
-        /// <param name="offset"></param>
-        /// <param name="origin"></param>
-        /// <returns></returns>
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
         /// <summary>
         /// This method always throws <see cref="NotSupportedException"/>
         /// </summary>
-        /// <param name="value"></param>
         public override void SetLength(long value) => throw new NotSupportedException();
 
         protected override void Dispose(bool disposing)

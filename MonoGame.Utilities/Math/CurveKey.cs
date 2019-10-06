@@ -137,12 +137,12 @@ namespace MonoGame.Framework
         {
             unchecked
             {
-                int code = 17;
-                code = code * 23 + Position.GetHashCode();
-                code = code * 23 + Value.GetHashCode();
-                code = code * 23 + TangentIn.GetHashCode();
-                code = code * 23 + TangentOut.GetHashCode();
-                code = code * 23 + Continuity.GetHashCode();
+                int code = 7;
+                code = code * 31 + Position.GetHashCode();
+                code = code * 31 + Value.GetHashCode();
+                code = code * 31 + TangentIn.GetHashCode();
+                code = code * 31 + TangentOut.GetHashCode();
+                code = code * 31 + Continuity.GetHashCode();
                 return code;
             }
         }

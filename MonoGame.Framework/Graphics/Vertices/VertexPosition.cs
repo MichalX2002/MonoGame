@@ -23,12 +23,9 @@ namespace MonoGame.Framework.Graphics
 
         VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
 
-        public override int GetHashCode()
-	    {
-	        return Position.GetHashCode();
-	    }
+        public override int GetHashCode() => Position.GetHashCode();
 
-		public override string ToString()
+        public override string ToString()
 		{
             return "{{Position:" + Position + "}}";
 		}

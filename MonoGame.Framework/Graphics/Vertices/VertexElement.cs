@@ -14,33 +14,26 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets or sets the offset in bytes from the beginning of the stream to the vertex element.
         /// </summary>
-        /// <value>The offset in bytes.</value>
         public int Offset { get; set; }
 
         /// <summary>
         /// Gets or sets the data format.
         /// </summary>
-        /// <value>The data format.</value>
         public VertexElementFormat VertexElementFormat { get; set; }
 
         /// <summary>
         /// Gets or sets the HLSL semantic of the element in the vertex shader input.
         /// </summary>
-        /// <value>The HLSL semantic of the element in the vertex shader input.</value>
         public VertexElementUsage VertexElementUsage { get; set; }
 
         /// <summary>
         /// Gets or sets the semantic index.
+        /// <para>Required if the semantic is used for more than one vertex element.</para>
         /// </summary>
-        /// <value>
-        /// The semantic index, which is required if the semantic is used for more than one vertex
-        /// element.
-        /// </value>
         /// <remarks>
         /// Usage indices in a vertex declaration usually start with 0. When multiple vertex buffers
         /// are bound to the input assembler stage (see <see cref="GraphicsDevice.SetVertexBuffers"/>),
-        /// MonoGame internally adjusts the usage indices based on the order in which the vertex
-        /// buffers are bound.
+        /// the usage indices are internally adjusted based on the order in which the vertex buffers are bound.
         /// </remarks>
         public int UsageIndex { get; set; }
 
@@ -60,16 +53,43 @@ namespace MonoGame.Framework.Graphics
         }
 
         /// <summary>
+        /// Compares two <see cref="VertexElement"/> instances to determine whether they are the same.
+        /// </summary>
+        public static bool operator ==(in VertexElement a, in VertexElement b)
+        {
+            return a.Offset == b.Offset
+                && a.VertexElementFormat == b.VertexElementFormat
+                && a.VertexElementUsage == b.VertexElementUsage
+                && a.UsageIndex == b.UsageIndex;
+        }
+
+        /// <summary>
+        /// Compares two <see cref="VertexElement"/> instances to determine whether they are different.
+        /// </summary>
+        public static bool operator !=(in VertexElement a, in VertexElement b) => !(a == b);
+
+        /// <summary>
+        /// Determines whether the specified <see cref="object"/> is equal to this instance.
+        /// </summary>
+        public override bool Equals(object obj) => obj is VertexElement other && Equals(other);
+
+        /// <summary>
+        /// Determines whether the specified <see cref="VertexElement"/> is equal to this instance.
+        /// </summary>
+        public bool Equals(VertexElement other) => this == other;
+
+        /// <summary>
+        /// Returns a <see cref="string"/> that represents this instance.
+        /// </summary>
+        public override string ToString() =>
+            "{Offset:" + Offset + " Format:" + VertexElementFormat +
+            " Usage:" + VertexElementUsage + " UsageIndex: " + UsageIndex + "}";
+
+        /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data
-        /// structures like a hash table.
-        /// </returns>
         public override int GetHashCode()
         {
-            // ReSharper disable NonReadonlyMemberInGetHashCode
-
             // Optimized hash:
             // - DirectX 11 has max 32 registers. A register is max 16 byte. _offset is in the range
             //   0 to 512 (exclusive). --> _offset needs 9 bit.
@@ -83,76 +103,6 @@ namespace MonoGame.Framework.Graphics
             hashCode ^= (int)VertexElementUsage << (9 + 4);
             hashCode ^= UsageIndex << (9 + 4 + 4);
             return hashCode;
-            // ReSharper restore NonReadonlyMemberInGetHashCode
-        }
-
-        /// <summary>
-        /// Returns a <see cref="string" /> that represents this instance.
-        /// </summary>
-        /// <returns>A <see cref="string" /> that represents this instance.</returns>
-        public override string ToString()
-        {
-            return "{Offset:" + Offset + " Format:" + VertexElementFormat + " Usage:" + VertexElementUsage + " UsageIndex: " + UsageIndex + "}";
-        }
-
-        /// <summary>
-        /// Determines whether the specified <see cref="object"/> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The object to compare with the current object.</param>
-        /// <returns>
-        /// <see langword="true"/> if the specified <see cref="object"/> is equal to this instance;
-        /// otherwise, <see langword="false"/>.
-        /// </returns>
-        public override bool Equals(object obj)
-        {
-            return obj is VertexElement && Equals((VertexElement)obj);
-        }
-
-        /// <summary>
-        /// Determines whether the specified <see cref="VertexElement"/> is equal to this
-        /// instance.
-        /// </summary>
-        /// <param name="other">The object to compare with the current object.</param>
-        /// <returns>
-        /// <see langword="true"/> if the specified <see cref="VertexElement"/> is equal to this
-        /// instance; otherwise, <see langword="false"/>.
-        /// </returns>
-        public bool Equals(VertexElement other)
-        {
-            return Offset == other.Offset
-                   && VertexElementFormat == other.VertexElementFormat
-                   && VertexElementUsage == other.VertexElementUsage
-                   && UsageIndex == other.UsageIndex;
-        }
-
-        /// <summary>
-        /// Compares two <see cref="VertexElement"/> instances to determine whether they are the
-        /// same.
-        /// </summary>
-        /// <param name="left">The first instance.</param>
-        /// <param name="right">The second instance.</param>
-        /// <returns>
-        /// <see langword="true"/> if the <paramref name="left"/> and <paramref name="right"/> are
-        /// the same; otherwise, <see langword="false"/>.
-        /// </returns>
-        public static bool operator ==(VertexElement left, VertexElement right)
-        {
-            return left.Equals(right);
-        }
-
-        /// <summary>
-        /// Compares two <see cref="VertexElement"/> instances to determine whether they are
-        /// different.
-        /// </summary>
-        /// <param name="left">The first instance.</param>
-        /// <param name="right">The second instance.</param>
-        /// <returns>
-        /// <see langword="true"/> if the <paramref name="left"/> and <paramref name="right"/> are
-        /// the different; otherwise, <see langword="false"/>.
-        /// </returns>
-        public static bool operator !=(VertexElement left, VertexElement right)
-        {
-            return !left.Equals(right);
         }
     }
 }

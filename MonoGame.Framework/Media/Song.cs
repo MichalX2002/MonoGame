@@ -138,7 +138,6 @@ namespace MonoGame.Framework.Media
         /// <param name="stream">The seekable stream.</param>
         /// <param name="leaveOpen">true to leave the stream open after disposal; false to also dispose it.</param>
         /// <param name="name">The name for the song.</param>
-        /// <returns></returns>
         public static Song FromStream(Stream stream, bool leaveOpen, string name)
         {
             if (!stream.CanSeek)
@@ -151,7 +150,6 @@ namespace MonoGame.Framework.Media
         /// </summary>
         /// <param name="uri">The path to the song file.</param>
         /// <param name="name">The name for the song. See <see cref="Name"/>.</param>
-        /// <returns></returns>
         public static Song FromUri(Uri uri, string name = null)
         {
             string path = Path.GetFullPath(uri.OriginalString);

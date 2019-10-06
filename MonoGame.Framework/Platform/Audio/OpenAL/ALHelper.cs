@@ -21,11 +21,11 @@ namespace MonoGame.Framework.Audio
 
         public static bool IsStereoFormat(ALFormat format)
         {
-            return (format == ALFormat.Stereo8
+            return format == ALFormat.Stereo8
                 || format == ALFormat.Stereo16
                 || format == ALFormat.StereoFloat32
                 || format == ALFormat.StereoIma4
-                || format == ALFormat.StereoMSAdpcm);
+                || format == ALFormat.StereoMSAdpcm;
         }
 
         public static ALFormat GetALFormat(AudioChannels channels, bool isFloat)

@@ -147,7 +147,6 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Create a copy of this <see cref="PresentationParameters"/> instance.
         /// </summary>
-        /// <returns></returns>
         public PresentationParameters Clone()
         {
             return new PresentationParameters

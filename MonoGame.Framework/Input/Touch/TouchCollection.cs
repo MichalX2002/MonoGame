@@ -40,9 +40,6 @@ namespace MonoGame.Framework.Input.Touch
         /// <summary>
         /// Returns <see cref="TouchLocation"/> specified by ID.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="touchLocation"></param>
-        /// <returns></returns>
         public bool FindById(int id, out TouchLocation touchLocation)
 		{
             for (int i = 0; i < Collection.Length; i++)
@@ -64,14 +61,12 @@ namespace MonoGame.Framework.Input.Touch
         /// Returns the index of the first occurrence of specified <see cref="TouchLocation"/> item in the collection.
         /// </summary>
         /// <param name="item"><see cref="TouchLocation"/> to query.</param>
-        /// <returns></returns>
         public int IndexOf(TouchLocation item) => Array.IndexOf(Collection, item);
 
         /// <summary>
         /// Gets or sets the item at the specified index of the collection.
         /// </summary>
         /// <param name="index">Position of the item.</param>
-        /// <returns><see cref="TouchLocation"/></returns>
         public TouchLocation this[int index] => Collection[index];
 
         /// <summary>
@@ -132,7 +127,7 @@ namespace MonoGame.Framework.Input.Touch
             public bool MoveNext()
             {
                 _position++;
-                return (_position < _collection.Count);
+                return _position < _collection.Count;
             }
 
             public void Reset()

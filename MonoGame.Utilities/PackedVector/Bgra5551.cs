@@ -65,7 +65,7 @@ namespace MonoGame.Utilities.PackedVector
                 ((PackedValue >> 10) & 0x1F) / 31f,
                 ((PackedValue >> 5) & 0x1F) / 31f,
                 ((PackedValue >> 0) & 0x1F) / 31f,
-                ((PackedValue >> 15) & 0x01));
+                (PackedValue >> 15) & 0x01);
         }
 
         /// <inheritdoc />

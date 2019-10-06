@@ -49,7 +49,7 @@ namespace MonoGame.Utilities.Collections
             {
                 fixed (char* src = str)
                 {
-                    int hash1 = 5381;
+                    int hash1 = (5381 << 16) + 5381;
                     int hash2 = hash1;
 
                     int* pint = (int*)src;

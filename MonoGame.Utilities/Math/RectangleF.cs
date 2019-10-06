@@ -356,10 +356,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="point">The point.</param>
         /// <returns>The distance from this <see cref="RectangleF"/> to the <paramref name="point"/>.</returns>
-        public float DistanceTo(PointF point)
-        {
-            return (float)Math.Sqrt(SquaredDistanceTo(point));
-        }
+        public float DistanceTo(PointF point) => (float)Math.Sqrt(SquaredDistanceTo(point));
 
         //TODO: Document this.
         public void Inflate(float horizontalAmount, float verticalAmount)
@@ -407,48 +404,20 @@ namespace MonoGame.Framework
         ///     <see cref="X" />, <see cref="Y"/>, <see cref="Width"/> and <see cref="Height" /> fields of the two <see cref="RectangleF" /> structures
         ///     are equal.
         /// </summary>
-        /// <param name="a">The first rectangle.</param>
-        /// <param name="b">The second rectangle.</param>
-        /// <returns>
-        ///     <c>true</c> if the values of the
-        ///     <see cref="X" />, <see cref="Y"/>, <see cref="Width"/> and <see cref="Height" /> fields of the two <see cref="RectangleF" /> structures
-        ///     are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(in RectangleF a, in RectangleF b)
-        {
-            // ReSharper disable CompareOfFloatsByEqualityOperator
-            return a.X == b.X && a.Y == b.Y && a.Width == b.Width && a.Height == b.Height;
-            // ReSharper restore CompareOfFloatsByEqualityOperator
-        }
+        public static bool operator ==(in RectangleF a, in RectangleF b) =>
+            a.X == b.X && a.Y == b.Y && a.Width == b.Width && a.Height == b.Height;
 
         /// <summary>
         ///     Compares two <see cref="RectangleF" /> structures. The result specifies whether the values of the
         ///     <see cref="X" />, <see cref="Y"/>, <see cref="Width"/> and <see cref="Height" /> fields of the two <see cref="RectangleF" /> structures
         ///     are unequal.
         /// </summary>
-        /// <param name="first">The first rectangle.</param>
-        /// <param name="second">The second rectangle.</param>
-        /// <returns>
-        ///     <c>true</c> if the values of the
-        ///     <see cref="X" />, <see cref="Y"/>, <see cref="Width"/> and <see cref="Height" /> fields of the two <see cref="RectangleF" /> structures
-        ///     are unequal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(in RectangleF first, in RectangleF second)
-        {
-            return !(first == second);
-        }
+        public static bool operator !=(in RectangleF first, in RectangleF second) => !(first == second);
 
         /// <summary>
         ///     Indicates whether this <see cref="RectangleF" /> is equal to another <see cref="RectangleF" />.
         /// </summary>
-        /// <param name="rectangle">The rectangle.</param>
-        /// <returns>
-        ///     <c>true</c> if this <see cref="RectangleF" /> is equal to the <paramref name="rectangle" />; otherwise, <c>false</c>.
-        /// </returns>
-        public bool Equals(RectangleF rectangle)
-        {
-            return rectangle == this;
-        }
+        public bool Equals(RectangleF rectangle) => rectangle == this;
 
         /// <summary>
         ///     Returns a value indicating whether this <see cref="RectangleF" /> is equal to a specified object.
@@ -457,37 +426,25 @@ namespace MonoGame.Framework
         /// <returns>
         ///     <c>true</c> if this <see cref="RectangleF" /> is equal to <paramref name="obj" />; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            return obj is RectangleF rect && rect == this;
-        }
+        public override bool Equals(object obj) => obj is RectangleF rect && Equals(rect);
 
         /// <summary>
-        ///     Returns a hash code of this <see cref="RectangleF" /> suitable for use in hashing algorithms and data
-        ///     structures like a hash table.
+        /// Returns a hash code of this <see cref="RectangleF" />.
         /// </summary>
-        /// <returns>
-        ///     A hash code of this <see cref="RectangleF" />.
-        /// </returns>
         public override int GetHashCode()
         {
             unchecked
             {
-                int hashCode = 7 + X.GetHashCode();
-                hashCode = (hashCode * 3) + Y.GetHashCode();
-                hashCode = (hashCode * 3) + Width.GetHashCode();
-                hashCode = (hashCode * 3) + Height.GetHashCode();
-                return hashCode;
+                int code = 7 + X.GetHashCode();
+                code = code * 31 + Y.GetHashCode();
+                code = code * 31 + Width.GetHashCode();
+                return code * 31 + Height.GetHashCode();
             }
         }
 
         /// <summary>
-        ///     Performs an implicit conversion from a <see cref="Rectangle" /> to a <see cref="RectangleF" />.
+        /// Performs an implicit conversion from a <see cref="Rectangle" /> to a <see cref="RectangleF" />.
         /// </summary>
-        /// <param name="rectangle">The rectangle.</param>
-        /// <returns>
-        ///     The resulting <see cref="RectangleF" />.
-        /// </returns>
         public static implicit operator RectangleF(in Rectangle rectangle)
         {
             return new RectangleF(

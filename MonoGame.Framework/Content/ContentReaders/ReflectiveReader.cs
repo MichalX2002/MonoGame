@@ -165,7 +165,7 @@ namespace MonoGame.Framework.Content
             if (existingInstance != null)
                 obj = (T)existingInstance;
             else
-                obj = (_constructor == null ? (T)Activator.CreateInstance(typeof(T)) : (T)_constructor.Invoke(null));
+                obj = _constructor == null ? (T)Activator.CreateInstance(typeof(T)) : (T)_constructor.Invoke(null);
 		
 			if(_baseTypeReader != null)
 				_baseTypeReader.Read(input, obj);

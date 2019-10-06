@@ -106,7 +106,7 @@ namespace MonoGame.Utilities
                 {
                     case InflateBlockMode.TYPE:
 
-                        while (k < (3))
+                        while (k < 3)
                         {
                             if (n != 0)
                             {
@@ -132,7 +132,7 @@ namespace MonoGame.Utilities
                         switch ((uint)t >> 1)
                         {
                             case 0:  // stored
-                                b >>= 3; k -= (3);
+                                b >>= 3; k -= 3;
                                 t = k & 7; // go to byte boundary
                                 b >>= t; k -= t;
                                 mode = InflateBlockMode.LENS; // get length of stored block
@@ -170,7 +170,7 @@ namespace MonoGame.Utilities
 
                     case InflateBlockMode.LENS:
 
-                        while (k < (32))
+                        while (k < 32)
                         {
                             if (n != 0)
                             {
@@ -204,7 +204,7 @@ namespace MonoGame.Utilities
                             writeAt = q;
                             return Flush(r);
                         }
-                        left = (b & 0xffff);
+                        left = b & 0xffff;
                         b = k = 0; // dump bits
                         mode = left != 0 ? InflateBlockMode.STORED : (last != 0 ? InflateBlockMode.DRY : InflateBlockMode.TYPE);
                         break;
@@ -263,7 +263,7 @@ namespace MonoGame.Utilities
 
                     case InflateBlockMode.TABLE:
 
-                        while (k < (14))
+                        while (k < 14)
                         {
                             if (n != 0)
                             {
@@ -284,7 +284,7 @@ namespace MonoGame.Utilities
                             k += 8;
                         }
 
-                        table = t = (b & 0x3fff);
+                        table = t = b & 0x3fff;
                         if ((t & 0x1f) > 29 || ((t >> 5) & 0x1f) > 29)
                         {
                             mode = InflateBlockMode.BAD;
@@ -323,7 +323,7 @@ namespace MonoGame.Utilities
                     case InflateBlockMode.BTREE:
                         while (index < 4 + (table >> 10))
                         {
-                            while (k < (3))
+                            while (k < 3)
                             {
                                 if (n != 0)
                                 {
@@ -448,7 +448,7 @@ namespace MonoGame.Utilities
 
                                 b >>= t; k -= t;
 
-                                j += (b & InternalInflateConstants.InflateMask[i]);
+                                j += b & InternalInflateConstants.InflateMask[i];
 
                                 b >>= i; k -= i;
 

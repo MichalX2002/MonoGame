@@ -76,7 +76,7 @@ namespace MonoGame.Utilities.PackedVector
             var word2 = (ulong)((int)Math.Round(MathHelper.Clamp(vectorZ * maxPos, minNeg, maxPos)) & mask) << 0x20;
             var word1 = (ulong)((int)Math.Round(MathHelper.Clamp(vectorW * maxPos, minNeg, maxPos)) & mask) << 0x30;
 
-			return (word4 | word3 | word2 | word1);
+			return word4 | word3 | word2 | word1;
 		}
 
 		public void FromVector4 (Vector4 vector)

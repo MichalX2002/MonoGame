@@ -53,8 +53,8 @@ namespace MonoGame.Framework.Input
         {
             unchecked
             {
-                int code = Left.GetHashCode();
-                return code * 23 + Right.GetHashCode();
+                int code = 7 + Left.GetHashCode();
+                return code * 31 + Right.GetHashCode();
             }
         }
 

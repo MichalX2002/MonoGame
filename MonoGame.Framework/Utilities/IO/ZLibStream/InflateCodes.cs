@@ -136,8 +136,8 @@ namespace MonoGame.Utilities
 
                         tindex = (tree_index + (b & InternalInflateConstants.InflateMask[j])) * 3;
 
-                        b >>= (tree[tindex + 1]);
-                        k -= (tree[tindex + 1]);
+                        b >>= tree[tindex + 1];
+                        k -= tree[tindex + 1];
 
                         e = tree[tindex];
 
@@ -199,7 +199,7 @@ namespace MonoGame.Utilities
                             k += 8;
                         }
 
-                        len += (b & InternalInflateConstants.InflateMask[j]);
+                        len += b & InternalInflateConstants.InflateMask[j];
 
                         b >>= j;
                         k -= j;
@@ -233,7 +233,7 @@ namespace MonoGame.Utilities
                         b >>= tree[tindex + 1];
                         k -= tree[tindex + 1];
 
-                        e = (tree[tindex]);
+                        e = tree[tindex];
                         if ((e & 0x10) != 0)
                         {
                             // distance
@@ -277,7 +277,7 @@ namespace MonoGame.Utilities
                             k += 8;
                         }
 
-                        dist += (b & InternalInflateConstants.InflateMask[j]);
+                        dist += b & InternalInflateConstants.InflateMask[j];
 
                         b >>= j;
                         k -= j;
@@ -453,7 +453,7 @@ namespace MonoGame.Utilities
             {
                 // assume called with m >= 258 && n >= 10
                 // get literal/length code
-                while (k < (20))
+                while (k < 20)
                 {
                     // max bits for literal/length code
                     n--;
@@ -466,7 +466,7 @@ namespace MonoGame.Utilities
                 tp_index_t_3 = (tp_index + t) * 3;
                 if ((e = tp[tp_index_t_3]) == 0)
                 {
-                    b >>= (tp[tp_index_t_3 + 1]); k -= (tp[tp_index_t_3 + 1]);
+                    b >>= tp[tp_index_t_3 + 1]; k -= tp[tp_index_t_3 + 1];
 
                     s.window[q++] = (byte)tp[tp_index_t_3 + 2];
                     m--;
@@ -475,7 +475,7 @@ namespace MonoGame.Utilities
                 do
                 {
 
-                    b >>= (tp[tp_index_t_3 + 1]); k -= (tp[tp_index_t_3 + 1]);
+                    b >>= tp[tp_index_t_3 + 1]; k -= tp[tp_index_t_3 + 1];
 
                     if ((e & 16) != 0)
                     {
@@ -501,7 +501,7 @@ namespace MonoGame.Utilities
                         do
                         {
 
-                            b >>= (tp[tp_index_t_3 + 1]); k -= (tp[tp_index_t_3 + 1]);
+                            b >>= tp[tp_index_t_3 + 1]; k -= tp[tp_index_t_3 + 1];
 
                             if ((e & 16) != 0)
                             {
@@ -587,7 +587,7 @@ namespace MonoGame.Utilities
                             else if ((e & 64) == 0)
                             {
                                 t += tp[tp_index_t_3 + 2];
-                                t += (b & InternalInflateConstants.InflateMask[e]);
+                                t += b & InternalInflateConstants.InflateMask[e];
                                 tp_index_t_3 = (tp_index + t) * 3;
                                 e = tp[tp_index_t_3];
                             }
@@ -595,7 +595,7 @@ namespace MonoGame.Utilities
                             {
                                 z.Message = "invalid distance code";
 
-                                c = z.AvailableBytesIn - n; c = (k >> 3) < c ? k >> 3 : c; n += c; p -= c; k -= (c << 3);
+                                c = z.AvailableBytesIn - n; c = (k >> 3) < c ? k >> 3 : c; n += c; p -= c; k -= c << 3;
 
                                 s.bitb = b; s.bitk = k;
                                 z.AvailableBytesIn = n; z.TotalBytesIn += p - z.NextIn; z.NextIn = p;
@@ -611,11 +611,11 @@ namespace MonoGame.Utilities
                     if ((e & 64) == 0)
                     {
                         t += tp[tp_index_t_3 + 2];
-                        t += (b & InternalInflateConstants.InflateMask[e]);
+                        t += b & InternalInflateConstants.InflateMask[e];
                         tp_index_t_3 = (tp_index + t) * 3;
                         if ((e = tp[tp_index_t_3]) == 0)
                         {
-                            b >>= (tp[tp_index_t_3 + 1]); k -= (tp[tp_index_t_3 + 1]);
+                            b >>= tp[tp_index_t_3 + 1]; k -= tp[tp_index_t_3 + 1];
                             s.window[q++] = (byte)tp[tp_index_t_3 + 2];
                             m--;
                             break;
@@ -623,7 +623,7 @@ namespace MonoGame.Utilities
                     }
                     else if ((e & 32) != 0)
                     {
-                        c = z.AvailableBytesIn - n; c = (k >> 3) < c ? k >> 3 : c; n += c; p -= c; k -= (c << 3);
+                        c = z.AvailableBytesIn - n; c = (k >> 3) < c ? k >> 3 : c; n += c; p -= c; k -= c << 3;
 
                         s.bitb = b; s.bitk = k;
                         z.AvailableBytesIn = n; z.TotalBytesIn += p - z.NextIn; z.NextIn = p;
@@ -635,7 +635,7 @@ namespace MonoGame.Utilities
                     {
                         z.Message = "invalid literal/length code";
 
-                        c = z.AvailableBytesIn - n; c = (k >> 3) < c ? k >> 3 : c; n += c; p -= c; k -= (c << 3);
+                        c = z.AvailableBytesIn - n; c = (k >> 3) < c ? k >> 3 : c; n += c; p -= c; k -= c << 3;
 
                         s.bitb = b; s.bitk = k;
                         z.AvailableBytesIn = n; z.TotalBytesIn += p - z.NextIn; z.NextIn = p;
@@ -649,7 +649,7 @@ namespace MonoGame.Utilities
             while (m >= 258 && n >= 10);
 
             // not enough input or output--restore pointers and return
-            c = z.AvailableBytesIn - n; c = (k >> 3) < c ? k >> 3 : c; n += c; p -= c; k -= (c << 3);
+            c = z.AvailableBytesIn - n; c = (k >> 3) < c ? k >> 3 : c; n += c; p -= c; k -= c << 3;
 
             s.bitb = b; s.bitk = k;
             z.AvailableBytesIn = n; z.TotalBytesIn += p - z.NextIn; z.NextIn = p;

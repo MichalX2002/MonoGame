@@ -8,11 +8,6 @@ namespace MonoGame.Imaging.Decoding
     /// <summary>
     /// Represents a progress update for image decoding.
     /// </summary>
-    /// <typeparam name="TPixel"></typeparam>
-    /// <param name="frameIndex"></param>
-    /// <param name="frames"></param>
-    /// <param name="rectangle"></param>
-    /// <returns></returns>
     public delegate void DecodeProgressCallback<TPixel>(
         int frameIndex, FrameCollection<TPixel> frames, double progress, Rectangle? rectangle)
         where TPixel : unmanaged, IPixel;

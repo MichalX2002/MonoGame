@@ -26,7 +26,7 @@ namespace MonoGame.Framework.Graphics
 
             BufferUsage = usage;
             IndexElementSize = indexElementSize;
-            _indexElementSize = (IndexElementSize == IndexElementSize.SixteenBits ? 2 : 4);
+            _indexElementSize = IndexElementSize == IndexElementSize.SixteenBits ? 2 : 4;
 
             _isDynamic = dynamic;
             PlatformConstruct();

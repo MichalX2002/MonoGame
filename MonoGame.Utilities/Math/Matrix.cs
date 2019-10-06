@@ -1175,22 +1175,22 @@ namespace MonoGame.Framework
         /// <returns>Hash code of this <see cref="Matrix"/>.</returns>
         public override int GetHashCode()
         {
-            int code = M11.GetHashCode();
-            code = code * 23 + M12.GetHashCode();
-            code = code * 23 + M13.GetHashCode();
-            code = code * 23 + M14.GetHashCode();
-            code = code * 23 + M21.GetHashCode();
-            code = code * 23 + M22.GetHashCode();
-            code = code * 23 + M23.GetHashCode();
-            code = code * 23 + M24.GetHashCode();
-            code = code * 23 + M31.GetHashCode();
-            code = code * 23 + M32.GetHashCode();
-            code = code * 23 + M33.GetHashCode();
-            code = code * 23 + M34.GetHashCode();
-            code = code * 23 + M41.GetHashCode();
-            code = code * 23 + M42.GetHashCode();
-            code = code * 23 + M43.GetHashCode();
-            return code * 23 + M44.GetHashCode();
+            int code = 7 + M11.GetHashCode();
+            code = code * 31 + M12.GetHashCode();
+            code = code * 31 + M13.GetHashCode();
+            code = code * 31 + M14.GetHashCode();
+            code = code * 31 + M21.GetHashCode();
+            code = code * 31 + M22.GetHashCode();
+            code = code * 31 + M23.GetHashCode();
+            code = code * 31 + M24.GetHashCode();
+            code = code * 31 + M31.GetHashCode();
+            code = code * 31 + M32.GetHashCode();
+            code = code * 31 + M33.GetHashCode();
+            code = code * 31 + M34.GetHashCode();
+            code = code * 31 + M41.GetHashCode();
+            code = code * 31 + M42.GetHashCode();
+            code = code * 31 + M43.GetHashCode();
+            return code * 31 + M44.GetHashCode();
         }
 
         /// <summary>

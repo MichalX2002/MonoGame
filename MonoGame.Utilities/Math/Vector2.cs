@@ -328,8 +328,8 @@ namespace MonoGame.Framework
         {
             unchecked
             {
-                int code = X.GetHashCode();
-                return code * 23 + Y.GetHashCode();
+                int code = 7 + X.GetHashCode();
+                return code * 31 + Y.GetHashCode();
             }
         }
 

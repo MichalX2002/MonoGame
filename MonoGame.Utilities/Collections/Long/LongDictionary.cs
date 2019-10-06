@@ -203,7 +203,7 @@ namespace MonoGame.Utilities.Collections
                 }
                 return true;
             }
-            return (candidate == 2);
+            return candidate == 2;
         }
 
         private static int GetPrime(int min)
@@ -220,7 +220,7 @@ namespace MonoGame.Utilities.Collections
 
             //outside of our predefined table. 
             //compute the hard way. 
-            for (int i = (min | 1); i < int.MaxValue; i += 2)
+            for (int i = min | 1; i < int.MaxValue; i += 2)
             {
                 if (IsPrime(i) && ((i - 1) % 101 != 0))
                     return i;

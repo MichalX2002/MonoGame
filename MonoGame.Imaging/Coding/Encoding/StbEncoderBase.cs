@@ -14,7 +14,7 @@ namespace MonoGame.Imaging.Encoding
     {
         static StbEncoderBase()
         {
-            CustomZlibDeflateCompress = CustomDeflateCompress;
+            ZlibCompress.CustomDeflateCompress = CustomDeflateCompress;
         }
 
         public abstract ImageFormat Format { get; }

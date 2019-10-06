@@ -28,8 +28,8 @@ namespace MonoGame.Framework.Graphics
 	    {
             unchecked
             {
-                int code = Position.GetHashCode();
-                return code * 23 + Color.GetHashCode();
+                int code = 7 + Position.GetHashCode();
+                return code * 31 + Color.GetHashCode();
             }
 	    }
 
@@ -40,7 +40,7 @@ namespace MonoGame.Framework.Graphics
 
 		public static bool operator == (VertexPositionColor left, VertexPositionColor right)
 		{
-			return ((left.Color == right.Color) && (left.Position == right.Position));
+			return (left.Color == right.Color) && (left.Position == right.Position);
 		}
 
 		public static bool operator != (VertexPositionColor left, VertexPositionColor right)
@@ -56,7 +56,7 @@ namespace MonoGame.Framework.Graphics
 			if (obj.GetType () != GetType()) {
 				return false;
 			}
-			return (this == ((VertexPositionColor)obj));
+			return this == ((VertexPositionColor)obj);
 		}
 
 		static VertexPositionColor()

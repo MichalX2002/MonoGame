@@ -246,7 +246,6 @@ namespace MonoGame.Framework
         /// <summary>
         /// Creates an array copy of corners from this <see cref="BoundingBox"/>.
         /// </summary>
-        /// <returns></returns>
         public Vector3[] CloneCorners()
         {
             return new Vector3[]

@@ -56,40 +56,22 @@ namespace MonoGame.Utilities.Collections
         {
             private static readonly IEqualityComparer<TLong> _internalComparer = EqualityComparer<TLong>.Default;
 
-            public bool Equals(TLong x, TLong y)
-            {
-                return _internalComparer.Equals(x, y);
-            }
+            public bool Equals(TLong x, TLong y) => _internalComparer.Equals(x, y);
 
-            public int GetHashCode(TLong value)
-            {
-                return _internalComparer.GetHashCode(value);
-            }
+            public int GetHashCode(TLong value) => _internalComparer.GetHashCode(value);
 
-            public long GetLongHashCode(TLong value)
-            {
-                return value.GetLongHashCode();
-            }
+            public long GetLongHashCode(TLong value) => value.GetLongHashCode();
         }
 
         private class LongDefaultComparer : ILongEqualityComparer<T>
         {
             private static readonly IEqualityComparer<T> _internalComparer = EqualityComparer<T>.Default;
 
-            public bool Equals(T x, T y)
-            {
-                return _internalComparer.Equals(x, y);
-            }
+            public bool Equals(T x, T y) => _internalComparer.Equals(x, y);
 
-            public int GetHashCode(T value)
-            {
-                return _internalComparer.GetHashCode(value);
-            }
+            public int GetHashCode(T value) => _internalComparer.GetHashCode(value);
 
-            public long GetLongHashCode(T value)
-            {
-                return _internalComparer.GetHashCode(value);
-            }
+            public long GetLongHashCode(T value) => _internalComparer.GetHashCode(value);
         }
     }
 }

@@ -84,7 +84,7 @@ namespace MonoGame.Utilities.PackedVector
             var word2 = (uint)((int)MathHelper.Clamp((float)Math.Round(vectorX * maxPos), minNeg, maxPos) & 0xFFFF);
             var word1 = (uint)(((int)MathHelper.Clamp((float)Math.Round(vectorY * maxPos), minNeg, maxPos) & 0xFFFF) << 0x10);
 
-			return (word2 | word1);
+			return word2 | word1;
 		}
 
 		public void FromVector4 (Vector4 vector)

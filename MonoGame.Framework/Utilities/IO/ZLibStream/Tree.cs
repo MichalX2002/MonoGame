@@ -2,7 +2,7 @@
 {
     sealed class Tree
     {
-        private static readonly int HEAP_SIZE = (2 * InternalConstants.L_CODES + 1);
+        private static readonly int HEAP_SIZE = 2 * InternalConstants.L_CODES + 1;
 
         // extra bits for each length code
         internal static readonly int[] ExtraLengthBits = new int[]
@@ -250,7 +250,7 @@
             // two codes of non zero frequency.
             while (s.heap_len < 2)
             {
-                node = s.heap[++s.heap_len] = (max_code < 2 ? ++max_code : 0);
+                node = s.heap[++s.heap_len] = max_code < 2 ? ++max_code : 0;
                 tree[node * 2] = 1;
                 s.depth[node] = 0;
                 s.opt_len--;
@@ -336,7 +336,7 @@
                 if (len == 0)
                     continue;
                 // Now reverse the bits
-                tree[n * 2] = unchecked((short)(BiReverse(next_code[len]++, len)));
+                tree[n * 2] = unchecked((short)BiReverse(next_code[len]++, len));
             }
         }
 

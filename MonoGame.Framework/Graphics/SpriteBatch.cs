@@ -53,7 +53,6 @@ namespace MonoGame.Framework.Graphics
         /// Reuse a previously allocated <see cref="SpriteBatchItem"/> from the item pool. 
         /// If there is none available, the pool grows and initializes new items.
         /// </summary>
-        /// <returns></returns>
         public SpriteBatchItem GetBatchItem(Texture2D texture)
         {
             var item = _batcher.GetBatchItem();
@@ -277,7 +276,7 @@ namespace MonoGame.Framework.Graphics
                 scale = Vector2.One;
 
             // If both drawRectangle and position are null, or if both have been assigned a value, raise an error
-            if ((destinationRectangle.HasValue) == (position.HasValue))
+            if (destinationRectangle.HasValue == position.HasValue)
             {
                 throw new ArgumentException("Expected drawRectangle or position, but received neither or both.");
             }
@@ -716,8 +715,8 @@ namespace MonoGame.Framework.Graphics
             float cos = 0, sin = 0;
             if (rotation == 0)
             {
-                transformation.M11 = (flippedHorz ? -scale.X : scale.X);
-                transformation.M22 = (flippedVert ? -scale.Y : scale.Y);
+                transformation.M11 = flippedHorz ? -scale.X : scale.X;
+                transformation.M22 = flippedVert ? -scale.Y : scale.Y;
                 transformation.M41 = ((flipAdjustment.X - origin.X) * transformation.M11) + position.X;
                 transformation.M42 = ((flipAdjustment.Y - origin.Y) * transformation.M22) + position.Y;
             }
@@ -729,8 +728,8 @@ namespace MonoGame.Framework.Graphics
                 transformation.M12 = (flippedHorz ? -scale.X : scale.X) * sin;
                 transformation.M21 = (flippedVert ? -scale.Y : scale.Y) * (-sin);
                 transformation.M22 = (flippedVert ? -scale.Y : scale.Y) * cos;
-                transformation.M41 = (((flipAdjustment.X - origin.X) * transformation.M11) + (flipAdjustment.Y - origin.Y) * transformation.M21) + position.X;
-                transformation.M42 = (((flipAdjustment.X - origin.X) * transformation.M12) + (flipAdjustment.Y - origin.Y) * transformation.M22) + position.Y;
+                transformation.M41 = ((flipAdjustment.X - origin.X) * transformation.M11) + (flipAdjustment.Y - origin.Y) * transformation.M21 + position.X;
+                transformation.M42 = ((flipAdjustment.X - origin.X) * transformation.M12) + (flipAdjustment.Y - origin.Y) * transformation.M22 + position.Y;
             }
 
             var offset = Vector2.Zero;
@@ -958,8 +957,8 @@ namespace MonoGame.Framework.Graphics
             float cos = 0, sin = 0;
             if (rotation == 0)
             {
-                transformation.M11 = (flippedHorz ? -scale.X : scale.X);
-                transformation.M22 = (flippedVert ? -scale.Y : scale.Y);
+                transformation.M11 = flippedHorz ? -scale.X : scale.X;
+                transformation.M22 = flippedVert ? -scale.Y : scale.Y;
                 transformation.M41 = ((flipAdjustment.X - origin.X) * transformation.M11) + position.X;
                 transformation.M42 = ((flipAdjustment.Y - origin.Y) * transformation.M22) + position.Y;
             }
@@ -971,8 +970,8 @@ namespace MonoGame.Framework.Graphics
                 transformation.M12 = (flippedHorz ? -scale.X : scale.X) * sin;
                 transformation.M21 = (flippedVert ? -scale.Y : scale.Y) * (-sin);
                 transformation.M22 = (flippedVert ? -scale.Y : scale.Y) * cos;
-                transformation.M41 = (((flipAdjustment.X - origin.X) * transformation.M11) + (flipAdjustment.Y - origin.Y) * transformation.M21) + position.X;
-                transformation.M42 = (((flipAdjustment.X - origin.X) * transformation.M12) + (flipAdjustment.Y - origin.Y) * transformation.M22) + position.Y;
+                transformation.M41 = ((flipAdjustment.X - origin.X) * transformation.M11) + (flipAdjustment.Y - origin.Y) * transformation.M21 + position.X;
+                transformation.M42 = ((flipAdjustment.X - origin.X) * transformation.M12) + (flipAdjustment.Y - origin.Y) * transformation.M22 + position.Y;
             }
 
             var offset = Vector2.Zero;

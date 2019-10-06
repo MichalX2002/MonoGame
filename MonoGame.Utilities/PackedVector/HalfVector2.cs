@@ -29,7 +29,7 @@ namespace MonoGame.Utilities.PackedVector
         {
             uint num2 = HalfTypeHelper.Convert(vectorX);
             uint num = (uint)(HalfTypeHelper.Convert(vectorY) << 0x10);
-            return (num2 | num);
+            return num2 | num;
         }
 
         public Vector2 ToVector2()
@@ -74,7 +74,7 @@ namespace MonoGame.Utilities.PackedVector
 
         public override bool Equals(object obj)
         {
-            return ((obj is HalfVector2) && this.Equals((HalfVector2)obj));
+            return (obj is HalfVector2) && this.Equals((HalfVector2)obj);
         }
 
         public bool Equals(HalfVector2 other)

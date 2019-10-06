@@ -146,10 +146,6 @@ namespace MonoGame.Imaging
         /// Creates an empty image using the
         /// <see cref="Image{TPixel}.Image(int, int)"/> constructor.
         /// </summary>
-        /// <typeparam name="TPixel"></typeparam>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <returns></returns>
         public static unsafe Image<TPixel> Create<TPixel>(int width, int height)
             where TPixel : unmanaged, IPixel
         {

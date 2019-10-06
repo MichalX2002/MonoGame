@@ -297,7 +297,7 @@ namespace MonoGame.Framework.Graphics
             {
                 environmentMapSpecularParam.SetValue(value);
 
-                bool enabled = (value != Vector3.Zero);
+                bool enabled = value != Vector3.Zero;
 
                 if (specularEnabled != enabled)
                 {
@@ -326,7 +326,7 @@ namespace MonoGame.Framework.Graphics
             {
                 fresnelFactorParam.SetValue(value);
 
-                bool enabled = (value != 0);
+                bool enabled = value != 0;
 
                 if (fresnelEnabled != enabled)
                 {

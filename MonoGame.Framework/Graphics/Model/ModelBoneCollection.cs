@@ -59,7 +59,6 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Returns a ModelMeshCollection.Enumerator that can iterate through a ModelMeshCollection.
         /// </summary>
-        /// <returns></returns>
         public new Enumerator GetEnumerator() => new Enumerator(this);
 
         /// <summary>
@@ -88,7 +87,7 @@ namespace MonoGame.Framework.Graphics
             public bool MoveNext()
             {
                 _position++;
-                return (_position < _collection.Count);
+                return _position < _collection.Count;
             }
 
             #region IDisposable

@@ -508,7 +508,7 @@ namespace MonoGame.Utilities
         /// </summary>
         virtual internal FlushType FlushMode
         {
-            get => (_baseStream._flushMode);
+            get => _baseStream._flushMode;
             set
             {
                 if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));

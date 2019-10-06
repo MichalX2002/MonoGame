@@ -270,7 +270,7 @@ namespace MonoGame.Framework
             float sqRadius = radius * radius;
             foreach (var pt in points)
             {
-                Vector3 diff = (pt - center);
+                Vector3 diff = pt - center;
                 float sqDist = diff.LengthSquared();
                 if (sqDist > sqRadius)
                 {
@@ -350,7 +350,7 @@ namespace MonoGame.Framework
             float sqRadius = radius * radius;
             foreach (var pt in points)
             {
-                Vector3 diff = (pt - center);
+                Vector3 diff = pt - center;
                 float sqDist = diff.LengthSquared();
                 if (sqDist > sqRadius)
                 {
@@ -388,7 +388,7 @@ namespace MonoGame.Framework
             //else find center of new sphere and radius
             float leftRadius = Math.Max(original.Radius - distance, additional.Radius);
             float Rightradius = Math.Max(original.Radius + distance, additional.Radius);
-            ocenterToaCenter += (((leftRadius - Rightradius) / (2 * ocenterToaCenter.Length())) * ocenterToaCenter);//oCenterToResultCenter
+            ocenterToaCenter += (leftRadius - Rightradius) / (2 * ocenterToaCenter.Length()) * ocenterToaCenter;//oCenterToResultCenter
 
             return new BoundingSphere(
                 original.Center + ocenterToaCenter,
@@ -400,20 +400,14 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="other">The <see cref="BoundingSphere"/> to compare.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public bool Equals(BoundingSphere other)
-        {
-            return this == other;
-        }
+        public bool Equals(BoundingSphere other) => this == other;
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="object"/>.
         /// </summary>
         /// <param name="obj">The <see cref="object"/> to compare.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public override bool Equals(object obj)
-        {
-            return obj is BoundingSphere other ? this == other : false;
-        }
+        public override bool Equals(object obj) => obj is BoundingSphere other && Equals(other);
 
         /// <summary>
         /// Gets the hash code of this <see cref="BoundingSphere"/>.
@@ -421,7 +415,11 @@ namespace MonoGame.Framework
         /// <returns>Hash code of this <see cref="BoundingSphere"/>.</returns>
         public override int GetHashCode()
         {
-            return Center.GetHashCode() + Radius.GetHashCode();
+            unchecked
+            {
+                int code = 7 + Center.GetHashCode();
+                return code * 31 + Radius.GetHashCode();
+            }
         }
 
         #region Intersects

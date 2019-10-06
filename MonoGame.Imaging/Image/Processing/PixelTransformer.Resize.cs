@@ -8,11 +8,6 @@ namespace MonoGame.Imaging.Processing
         /// <summary>
         /// Creates a resized version of the source image using the default resampler.
         /// </summary>
-        /// <typeparam name="TPixel"></typeparam>
-        /// <param name="context"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <returns></returns>
         public static Image<TPixel> Resize<TPixel>(
             this ReadOnlyPixelViewContext<TPixel> context, int width, int height)
             where TPixel : unmanaged, IPixel

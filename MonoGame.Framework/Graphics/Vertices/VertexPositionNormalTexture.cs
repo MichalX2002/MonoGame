@@ -22,9 +22,9 @@ namespace MonoGame.Framework.Graphics
         {
             unchecked
             {
-                int code = Position.GetHashCode();
-                code = code * 23 + Normal.GetHashCode();
-                return code * 23 + TextureCoordinate.GetHashCode();
+                int code = 7 + Position.GetHashCode();
+                code = code * 31 + Normal.GetHashCode();
+                return code * 31 + TextureCoordinate.GetHashCode();
             }
         }
 
@@ -35,7 +35,7 @@ namespace MonoGame.Framework.Graphics
 
         public static bool operator ==(VertexPositionNormalTexture left, VertexPositionNormalTexture right)
         {
-            return (((left.Position == right.Position) && (left.Normal == right.Normal)) && (left.TextureCoordinate == right.TextureCoordinate));
+            return (left.Position == right.Position) && (left.Normal == right.Normal) && (left.TextureCoordinate == right.TextureCoordinate);
         }
 
         public static bool operator !=(VertexPositionNormalTexture left, VertexPositionNormalTexture right)
@@ -53,7 +53,7 @@ namespace MonoGame.Framework.Graphics
             {
                 return false;
             }
-            return (this == ((VertexPositionNormalTexture)obj));
+            return this == ((VertexPositionNormalTexture)obj);
         }
 
         static VertexPositionNormalTexture()

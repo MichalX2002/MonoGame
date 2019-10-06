@@ -106,9 +106,9 @@ namespace MonoGame.Utilities
         private static readonly int MIN_MATCH = 3;
         private static readonly int MAX_MATCH = 258;
 
-        private static readonly int MIN_LOOKAHEAD = (MAX_MATCH + MIN_MATCH + 1);
+        private static readonly int MIN_LOOKAHEAD = MAX_MATCH + MIN_MATCH + 1;
 
-        private static readonly int HEAP_SIZE = (2 * InternalConstants.L_CODES + 1);
+        private static readonly int HEAP_SIZE = 2 * InternalConstants.L_CODES + 1;
 
         private static readonly int END_BLOCK = 256;
 
@@ -346,7 +346,7 @@ namespace MonoGame.Utilities
         {
             short tn2 = tree[n * 2];
             short tm2 = tree[m * 2];
-            return (tn2 < tm2 || (tn2 == tm2 && depth[n] <= depth[m]));
+            return tn2 < tm2 || (tn2 == tm2 && depth[n] <= depth[m]);
         }
 
 
@@ -558,7 +558,7 @@ namespace MonoGame.Utilities
         internal void send_code(int c, short[] tree)
         {
             int c2 = c * 2;
-            send_bits((tree[c2] & 0xffff), (tree[c2 + 1] & 0xffff));
+            send_bits(tree[c2] & 0xffff, tree[c2 + 1] & 0xffff);
         }
 
         internal void send_bits(int value, int length)
@@ -982,7 +982,7 @@ namespace MonoGame.Utilities
 
             do
             {
-                more = (window_size - lookahead - strstart);
+                more = window_size - lookahead - strstart;
 
                 // Deal with !@#$% 64K limit:
                 if (more == 0 && strstart == 0 && lookahead == 0)
@@ -1015,7 +1015,7 @@ namespace MonoGame.Utilities
                     p = n;
                     do
                     {
-                        m = (head[--p] & 0xffff);
+                        m = head[--p] & 0xffff;
                         head[p] = (short)((m >= w_size) ? (m - w_size) : 0);
                     }
                     while (--n != 0);
@@ -1024,7 +1024,7 @@ namespace MonoGame.Utilities
                     p = n;
                     do
                     {
-                        m = (prev[--p] & 0xffff);
+                        m = prev[--p] & 0xffff;
                         prev[p] = (short)((m >= w_size) ? (m - w_size) : 0);
                         // If n is not on any hash chain, prev[n] is garbage but
                         // its value will never be used.
@@ -1094,10 +1094,10 @@ namespace MonoGame.Utilities
                 // dictionary, and set hash_head to the head of the hash chain:
                 if (lookahead >= MIN_MATCH)
                 {
-                    ins_h = (((ins_h) << hash_shift) ^ (window[(strstart) + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
+                    ins_h = (((ins_h) << hash_shift) ^ (window[strstart + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
 
                     //  prev[strstart&w_mask]=hash_head=head[ins_h];
-                    hash_head = (head[ins_h] & 0xffff);
+                    hash_head = head[ins_h] & 0xffff;
                     prev[strstart & w_mask] = head[ins_h];
                     head[ins_h] = unchecked((short)strstart);
                 }
@@ -1133,9 +1133,9 @@ namespace MonoGame.Utilities
                         {
                             strstart++;
 
-                            ins_h = ((ins_h << hash_shift) ^ (window[(strstart) + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
+                            ins_h = ((ins_h << hash_shift) ^ (window[strstart + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
                             //      prev[strstart&w_mask]=hash_head=head[ins_h];
-                            hash_head = (head[ins_h] & 0xffff);
+                            hash_head = head[ins_h] & 0xffff;
                             prev[strstart & w_mask] = head[ins_h];
                             head[ins_h] = unchecked((short)strstart);
 
@@ -1215,9 +1215,9 @@ namespace MonoGame.Utilities
 
                 if (lookahead >= MIN_MATCH)
                 {
-                    ins_h = (((ins_h) << hash_shift) ^ (window[(strstart) + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
+                    ins_h = (((ins_h) << hash_shift) ^ (window[strstart + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
                     //  prev[strstart&w_mask]=hash_head=head[ins_h];
-                    hash_head = (head[ins_h] & 0xffff);
+                    hash_head = head[ins_h] & 0xffff;
                     prev[strstart & w_mask] = head[ins_h];
                     head[ins_h] = unchecked((short)strstart);
                 }
@@ -1265,15 +1265,15 @@ namespace MonoGame.Utilities
                     // strstart-1 and strstart are already inserted. If there is not
                     // enough lookahead, the last two strings are not inserted in
                     // the hash table.
-                    lookahead -= (prev_length - 1);
+                    lookahead -= prev_length - 1;
                     prev_length -= 2;
                     do
                     {
                         if (++strstart <= max_insert)
                         {
-                            ins_h = (((ins_h) << hash_shift) ^ (window[(strstart) + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
+                            ins_h = (((ins_h) << hash_shift) ^ (window[strstart + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
                             //prev[strstart&w_mask]=hash_head=head[ins_h];
-                            hash_head = (head[ins_h] & 0xffff);
+                            hash_head = head[ins_h] & 0xffff;
                             prev[strstart & w_mask] = head[ins_h];
                             head[ins_h] = unchecked((short)strstart);
                         }
@@ -1418,7 +1418,7 @@ namespace MonoGame.Utilities
                     scan_end = window[scan + best_len];
                 }
             }
-            while ((cur_match = (prev[cur_match & wmask] & 0xffff)) > limit && --chain_length != 0);
+            while ((cur_match = prev[cur_match & wmask] & 0xffff) > limit && --chain_length != 0);
 
             if (best_len <= lookahead)
                 return best_len;
@@ -1466,7 +1466,7 @@ namespace MonoGame.Utilities
             hash_bits = memLevel + 7;
             hash_size = 1 << hash_bits;
             hash_mask = hash_size - 1;
-            hash_shift = ((hash_bits + MIN_MATCH - 1) / MIN_MATCH);
+            hash_shift = (hash_bits + MIN_MATCH - 1) / MIN_MATCH;
 
             window = new byte[w_size * 2];
             prev = new short[w_size];
@@ -1507,7 +1507,7 @@ namespace MonoGame.Utilities
 
             Rfc1950BytesEmitted = false;
 
-            status = (WantRfc1950HeaderBytes) ? INIT_STATE : BUSY_STATE;
+            status = WantRfc1950HeaderBytes ? INIT_STATE : BUSY_STATE;
             _codec._Adler32 = Adler.Adler32(0, null, 0, 0);
 
             last_flush = (int)FlushType.None;
@@ -1608,7 +1608,7 @@ namespace MonoGame.Utilities
 
             for (int n = 0; n <= length - MIN_MATCH; n++)
             {
-                ins_h = (((ins_h) << hash_shift) ^ (window[(n) + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
+                ins_h = (((ins_h) << hash_shift) ^ (window[n + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
                 prev[n & w_mask] = head[ins_h];
                 head[ins_h] = (short)n;
             }
@@ -1625,12 +1625,12 @@ namespace MonoGame.Utilities
                 (_codec.InputBuffer == null && _codec.AvailableBytesIn != 0) ||
                 (status == FINISH_STATE && flush != FlushType.Finish))
             {
-                _codec.Message = _ErrorMessage[ZlibConstants.Z_NEED_DICT - (ZlibConstants.Z_STREAM_ERROR)];
+                _codec.Message = _ErrorMessage[ZlibConstants.Z_NEED_DICT - ZlibConstants.Z_STREAM_ERROR];
                 throw new ZlibException(string.Format("Something is fishy. [{0}]", _codec.Message));
             }
             if (_codec.AvailableBytesOut == 0)
             {
-                _codec.Message = _ErrorMessage[ZlibConstants.Z_NEED_DICT - (ZlibConstants.Z_BUF_ERROR)];
+                _codec.Message = _ErrorMessage[ZlibConstants.Z_NEED_DICT - ZlibConstants.Z_BUF_ERROR];
                 throw new ZlibException("OutputBuffer is full (AvailableBytesOut == 0)");
             }
 
@@ -1645,7 +1645,7 @@ namespace MonoGame.Utilities
 
                 if (level_flags > 3)
                     level_flags = 3;
-                header |= (level_flags << 6);
+                header |= level_flags << 6;
                 if (strstart != 0)
                     header |= PRESET_DICT;
                 header += 31 - (header % 31);
@@ -1708,7 +1708,7 @@ namespace MonoGame.Utilities
             // User must not provide more input after the first FINISH:
             if (status == FINISH_STATE && _codec.AvailableBytesIn != 0)
             {
-                _codec.Message = _ErrorMessage[ZlibConstants.Z_NEED_DICT - (ZlibConstants.Z_BUF_ERROR)];
+                _codec.Message = _ErrorMessage[ZlibConstants.Z_NEED_DICT - ZlibConstants.Z_BUF_ERROR];
                 throw new ZlibException("status == FINISH_STATE && _codec.AvailableBytesIn != 0");
             }
 

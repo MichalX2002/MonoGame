@@ -5,20 +5,11 @@ namespace MonoGame.Utilities.Collections
     {
         private class LongDoubleComparer : ILongEqualityComparer<double>
         {
-            public bool Equals(double x, double y)
-            {
-                return x == y;
-            }
+            public bool Equals(double x, double y) => x == y;
 
-            public int GetHashCode(double obj)
-            {
-                return obj.GetHashCode();
-            }
+            public int GetHashCode(double obj) => obj.GetHashCode();
 
-            public long GetLongHashCode(double obj)
-            {
-                return GetLongDoubleHashCode(obj);
-            }
+            public long GetLongHashCode(double obj) => GetLongDoubleHashCode(obj);
 
             public static unsafe long GetLongDoubleHashCode(double d)
             {
@@ -27,24 +18,6 @@ namespace MonoGame.Utilities.Collections
                     return 0;
 
                 return *(long*)&d;
-            }
-        }
-
-        private class LongDecimalComparer : ILongEqualityComparer<decimal>
-        {
-            public bool Equals(decimal x, decimal y)
-            {
-                return x == y;
-            }
-
-            public int GetHashCode(decimal obj)
-            {
-                return obj.GetHashCode();
-            }
-
-            public long GetLongHashCode(decimal obj)
-            {
-                return LongDoubleComparer.GetLongDoubleHashCode((double)obj);
             }
         }
     }

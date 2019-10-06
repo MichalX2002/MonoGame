@@ -123,7 +123,7 @@ namespace MonoGame.Framework
 
             // having a positive tMin and a negative tMax means the ray is inside the box
             // we expect the intesection distance to be 0 in that case
-            if ((tMin.HasValue && tMin < 0) && tMax > 0)
+            if (tMin.HasValue && tMin < 0 && tMax > 0)
                 return true;
 
             // a negative tMin means that the intersection point is behind the ray's origin

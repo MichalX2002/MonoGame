@@ -91,10 +91,8 @@ namespace MonoGame.Framework
         /// <param name="value1">Source <see cref="Point"/> on the left of the add sign.</param>
         /// <param name="value2">Source <see cref="Point"/> on the right of the add sign.</param>
         /// <returns>Sum of the points.</returns>
-        public static Point operator +(Point value1, Point value2)
-        {
-            return new Point(value1.X + value2.X, value1.Y + value2.Y);
-        }
+        public static Point operator +(Point value1, Point value2) =>
+            new Point(value1.X + value2.X, value1.Y + value2.Y);
 
         /// <summary>
         /// Subtracts a <see cref="Point"/> from a <see cref="Point"/>.
@@ -102,10 +100,8 @@ namespace MonoGame.Framework
         /// <param name="value1">Source <see cref="Point"/> on the left of the sub sign.</param>
         /// <param name="value2">Source <see cref="Point"/> on the right of the sub sign.</param>
         /// <returns>Result of the subtraction.</returns>
-        public static Point operator -(Point value1, Point value2)
-        {
-            return new Point(value1.X - value2.X, value1.Y - value2.Y);
-        }
+        public static Point operator -(Point value1, Point value2) => 
+            new Point(value1.X - value2.X, value1.Y - value2.Y);
 
         /// <summary>
         /// Multiplies the components of two points by each other.
@@ -113,10 +109,8 @@ namespace MonoGame.Framework
         /// <param name="value1">Source <see cref="Point"/> on the left of the mul sign.</param>
         /// <param name="value2">Source <see cref="Point"/> on the right of the mul sign.</param>
         /// <returns>Result of the multiplication.</returns>
-        public static Point operator *(Point value1, Point value2)
-        {
-            return new Point(value1.X * value2.X, value1.Y * value2.Y);
-        }
+        public static Point operator *(Point value1, Point value2) => 
+            new Point(value1.X * value2.X, value1.Y * value2.Y);
 
         /// <summary>
         /// Divides the components of a <see cref="Point"/> by the components of another <see cref="Point"/>.
@@ -124,10 +118,8 @@ namespace MonoGame.Framework
         /// <param name="source">Source <see cref="Point"/> on the left of the div sign.</param>
         /// <param name="divisor">Divisor <see cref="Point"/> on the right of the div sign.</param>
         /// <returns>The result of dividing the points.</returns>
-        public static Point operator /(Point source, Point divisor)
-        {
-            return new Point(source.X / divisor.X, source.Y / divisor.Y);
-        }
+        public static Point operator /(Point source, Point divisor) =>
+            new Point(source.X / divisor.X, source.Y / divisor.Y);
 
         /// <summary>
         /// Compares whether two <see cref="Point"/> instances are equal.
@@ -135,10 +127,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Point"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="Point"/> instance on the right of the equal sign.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public static bool operator ==(Point a, Point b)
-        {
-            return a.Equals(b);
-        }
+        public static bool operator ==(in Point a, in Point b) => (a.X == b.X) && (a.Y == b.Y);
 
         /// <summary>
         /// Compares whether two <see cref="Point"/> instances are not equal.
@@ -146,10 +135,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Point"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="Point"/> instance on the right of the not equal sign.</param>
         /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>	
-        public static bool operator !=(Point a, Point b)
-        {
-            return !a.Equals(b);
-        }
+        public static bool operator !=(in Point a, in Point b) => !(a == b);
 
         #endregion
 
@@ -159,21 +145,13 @@ namespace MonoGame.Framework
         /// Compares whether current instance is equal to specified <see cref="object"/>.
         /// </summary>
         /// <param name="obj">The <see cref="object"/> to compare.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public override bool Equals(object obj)
-        {
-            return (obj is Point) && Equals((Point)obj);
-        }
+        public override bool Equals(object obj) => obj is Point other && Equals(other);
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="Point"/>.
         /// </summary>
         /// <param name="other">The <see cref="Point"/> to compare.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public bool Equals(Point other)
-        {
-            return ((X == other.X) && (Y == other.Y));
-        }
+        public bool Equals(Point other) => this == other;
 
         /// <summary>
         /// Gets the hash code of this <see cref="Point"/>.
@@ -183,10 +161,8 @@ namespace MonoGame.Framework
         {
             unchecked
             {
-                var hash = 17;
-                hash = hash * 23 + X.GetHashCode();
-                hash = hash * 23 + Y.GetHashCode();
-                return hash;
+                int hash = 7 + X.GetHashCode();
+                return hash * 31 + Y.GetHashCode();
             }
 
         }

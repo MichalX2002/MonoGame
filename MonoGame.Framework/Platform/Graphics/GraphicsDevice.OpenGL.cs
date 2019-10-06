@@ -619,12 +619,12 @@ namespace MonoGame.Framework.Graphics
                     return 0;
                 unchecked
                 {
-                    int code = 17;
+                    int code = 7;
                     foreach (var item in array)
                     {
                         if (item.RenderTarget != null)
-                            code = code * 23 + item.RenderTarget.GetHashCode();
-                        code = code * 23 + item.ArraySlice.GetHashCode();
+                            code = code * 31 + item.RenderTarget.GetHashCode();
+                        code = code * 31 + item.ArraySlice.GetHashCode();
                     }
                     return code;
                 }
@@ -974,9 +974,9 @@ namespace MonoGame.Framework.Graphics
             posFixup[0] = 1f;
             posFixup[1] = 1f;
 
-            if (!GraphicsDeviceManager.UseStandardPixelAddressing)
+            if (!UseHalfPixelOffset)
             {
-                posFixup[2] = (63.0f / 64.0f) / Viewport.Width;
+                posFixup[2] = 63.0f / 64.0f / Viewport.Width;
                 posFixup[3] = -(63.0f / 64.0f) / Viewport.Height;
             }
             else

@@ -364,7 +364,7 @@ namespace MonoGame.Utilities.Memory
             if (_readLength - _readPosition > 0 && origin == SeekOrigin.Current)
             {
                 // adjust position if there are bytes in the read buffer        
-                offset -= (_readLength - _readPosition);
+                offset -= _readLength - _readPosition;
             }
 
             // Only keep the buffered data if the seek is withing the buffer.

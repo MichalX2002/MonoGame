@@ -325,7 +325,7 @@ namespace MonoGame.Framework.Content
             byte platform = xnbReader.ReadByte();
 
             if (x != 'X' || n != 'N' || b != 'B' ||
-                !(targetPlatformIdentifiers.Contains((char)platform)))
+                !targetPlatformIdentifiers.Contains((char)platform))
             {
                 throw new ContentLoadException(
                     "Asset does not appear to be a valid XNB file. Did you process your content for Windows?");

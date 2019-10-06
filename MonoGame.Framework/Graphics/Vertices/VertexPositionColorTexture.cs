@@ -34,9 +34,9 @@ namespace MonoGame.Framework.Graphics
         {
             unchecked
             {
-                int code = Position.GetHashCode();
-                code = code * 23 + Color.GetHashCode();
-                return code * 23 + TextureCoordinate.GetHashCode();
+                int code = 7 + Position.GetHashCode();
+                code = code * 31 + Color.GetHashCode();
+                return code * 31 + TextureCoordinate.GetHashCode();
             }
         }
 

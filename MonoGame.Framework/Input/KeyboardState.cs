@@ -231,12 +231,12 @@ namespace MonoGame.Framework.Input
         private static uint CountBits(uint v)
         {
             // http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
-            v -= ((v >> 1) & 0x55555555);                    // reuse input as temporary
+            v -= (v >> 1) & 0x55555555;                    // reuse input as temporary
             v = (v & 0x33333333) + ((v >> 2) & 0x33333333);     // temp
             return ((v + (v >> 4) & 0xF0F0F0F) * 0x1010101) >> 24; // count
         }
 
-        private static int AddKeysToArray(uint keys, int offset, Keys[] pressedKeys, int index)
+        private static int AddKeysToArray(uint keys, int offset, Span<Keys> pressedKeys, int index)
         {
             for (int i = 0; i < 32; i++)
             {
@@ -247,12 +247,12 @@ namespace MonoGame.Framework.Input
         }
 
         /// <summary>
-        /// Returns an array of values holding keys that are currently being pressed.
+        /// Returns an array of values keys that are currently being pressed.
         /// </summary>
         /// <returns>The keys that are currently being pressed.</returns>
         public Keys[] GetPressedKeys()
         {
-            Keys[] keys = new Keys[GetCount()];
+            var keys = new Keys[GetCount()];
             GetPressedKeys(keys);
             return keys;
         }
@@ -261,11 +261,10 @@ namespace MonoGame.Framework.Input
         /// Fills an array of values holding keys that are currently being pressed.
         /// </summary>
         /// <param name="keys">
-        /// The keys array to fill.
-        /// This array is not cleared, and it must be equal to or larger than the number of keys pressed.
+        /// The keys span to fill.
+        /// This span is not cleared, and it must be equal to or larger than the number of keys pressed.
         /// </param>
-        /// <returns></returns>
-        public int GetPressedKeys(Keys[] keys)
+        public int GetPressedKeys(Span<Keys> keys)
         {
             if (keys == null)
                 throw new ArgumentNullException(nameof(keys));

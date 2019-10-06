@@ -52,10 +52,10 @@ namespace MonoGame.Imaging
         {
             unchecked
             {
-                int code = 17;
+                int code = 7;
                 if (Pixels != null)
-                    code = (code * 23) + Pixels.GetHashCode();
-                code = (code * 23) + Delay.GetHashCode();
+                    code = code * 31 + Pixels.GetHashCode();
+                code = code * 31 + Delay.GetHashCode();
                 return code;
             }
         }
