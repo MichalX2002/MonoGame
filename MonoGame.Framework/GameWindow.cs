@@ -198,20 +198,11 @@ namespace MonoGame.Framework
 
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
 
-		protected void OnTextInput(GameWindow window, TextInputEvent ev)
-		{
-			TextInput?.Invoke(window, ev);
-		}
+        internal void OnTextInput(in TextInputEvent ev) => TextInput?.Invoke(this, ev);
 
-        internal void OnKeyDown(KeyInputEvent e)
-        {
-            KeyDown?.Invoke(this, e);
-        }
+        internal void OnKeyDown(in KeyInputEvent e) => KeyDown?.Invoke(this, e);
 
-        internal void OnKeyUp(KeyInputEvent e)
-        {
-            KeyUp?.Invoke(this, e);
-        }
+        internal void OnKeyUp(in KeyInputEvent e) => KeyUp?.Invoke(this, e);
 
 #endif
 

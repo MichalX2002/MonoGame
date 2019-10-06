@@ -10,7 +10,6 @@ using System.Runtime.InteropServices;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
 using MonoGame.Utilities;
-using System.Text;
 
 namespace MonoGame.Framework
 {
@@ -103,126 +102,91 @@ namespace MonoGame.Framework
             }
         }
 
-            while (Sdl.PollEvent(out ev) == 1)
+        private unsafe void SdlRunLoop() 
+        { 
+            while (Sdl.PollEvent(out Sdl.Event ev) == 1)
             {
                 switch (ev.Type)
                 {
                     case Sdl.EventType.Quit:
                         _isExiting++;
                         break;
+
                     case Sdl.EventType.JoyDeviceAdded:
                         Joystick.AddDevice(ev.JoystickDevice.Which);
                         break;
+
                     case Sdl.EventType.JoyDeviceRemoved:
                         Joystick.RemoveDevice(ev.JoystickDevice.Which);
                         break;
+
                     case Sdl.EventType.ControllerDeviceRemoved:
                         GamePad.RemoveDevice(ev.ControllerDevice.Which);
                         break;
+
                     case Sdl.EventType.ControllerButtonUp:
                     case Sdl.EventType.ControllerButtonDown:
                     case Sdl.EventType.ControllerAxisMotion:
                         GamePad.UpdatePacketInfo(ev.ControllerDevice.Which, ev.ControllerDevice.TimeStamp);
                         break;
+
                     case Sdl.EventType.MouseWheel:
                         const int wheelDelta = 120;
                         Mouse.ScrollY += ev.Wheel.Y * wheelDelta;
                         Mouse.ScrollX += ev.Wheel.X * wheelDelta;
                         break;
+
                     case Sdl.EventType.MouseMotion:
                         Window.MouseState.X = ev.Motion.X;
                         Window.MouseState.Y = ev.Motion.Y;
                         break;
+
                     case Sdl.EventType.KeyDown:
                     {
                         var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
                         if (!_keys.Contains(key))
                             _keys.Add(key);
                         char character = (char)ev.Key.Keysym.Sym;
-                        _view.OnKeyDown(new InputKeyEventArgs(key));
+                        _window.OnKeyDown(new KeyInputEvent(key));
                         if (char.IsControl(character))
-                            _view.OnTextInput(new TextInputEventArgs(character, key));
+                            _window.OnTextInput(new TextInputEvent(character, key));
                         break;
                     }
+
                     case Sdl.EventType.KeyUp:
                     {
                         var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
                         _keys.Remove(key);
-                        _view.OnKeyUp(new InputKeyEventArgs(key));
+                        _window.OnKeyUp(new KeyInputEvent(key));
                         break;
                     }
+
                     case Sdl.EventType.TextInput:
-                        if (_view.IsTextInputHandled)
-                        {
-                            int len = 0;
-                            int utf8character = 0; // using an int to encode multibyte characters longer than 2 bytes
-                            byte currentByte = 0;
-                            int charByteSize = 0; // UTF8 char lenght to decode
-                            int remainingShift = 0;
-                            unsafe
-                            {
-                                while ((currentByte = Marshal.ReadByte((IntPtr)ev.Text.Text, len)) != 0)
-                                {
-                                    // we're reading the first UTF8 byte, we need to check if it's multibyte
-                                    if (charByteSize == 0)
-                                    {
-                                        if (currentByte < 192)
-                                            charByteSize = 1;
-                                        else if (currentByte < 224)
-                                            charByteSize = 2;
-                                        else if (currentByte < 240)
-                                            charByteSize = 3;
-                                        else
-                                            charByteSize = 4;
-
-                                        utf8character = 0;
-                                        remainingShift = 4;
-                                    }
-
-                                    // assembling the character
-                                    utf8character <<= 8;
-                                    utf8character |= currentByte;
-
-                                    charByteSize--;
-                                    remainingShift--;
-
-                                    if (charByteSize == 0) // finished decoding the current character
-                                    {
-                                        utf8character <<= remainingShift * 8; // shifting it to full UTF8 scope
-
-                                        // SDL returns UTF8-encoded characters while C# char type is UTF16-encoded (and limited to the 0-FFFF range / does not support surrogate pairs)
-                                        // so we need to convert it to Unicode codepoint and check if it's within the supported range
-                                        int codepoint = UTF8ToUnicode(utf8character);
-
-                                        if (codepoint >= 0 && codepoint < 0xFFFF)
-                                        {
-                                            _view.OnTextInput(new TextInputEventArgs((char)codepoint, KeyboardUtil.ToXna(codepoint)));
-                                            // UTF16 characters beyond 0xFFFF are not supported (and would require a surrogate encoding that is not supported by the char type)
-                                        }
-                                    }
-
-                                    len++;
-                                }
-                            }
-                        }
+                        if (_window.IsTextInputHandled)
+                            ProcessTextInput(ev.Text.Text);
                         break;
+
                     case Sdl.EventType.WindowEvent:
 
                         switch (ev.Window.EventID)
                         {
                             case Sdl.Window.EventId.Resized:
                             case Sdl.Window.EventId.SizeChanged:
-                                _view.ClientResize(ev.Window.Data1, ev.Window.Data2);
+                                _window.ClientResize(ev.Window.Data1, ev.Window.Data2);
                                 break;
+
                             case Sdl.Window.EventId.FocusGained:
                                 IsActive = true;
                                 break;
+
                             case Sdl.Window.EventId.FocusLost:
                                 IsActive = false;
                                 break;
+
                             case Sdl.Window.EventId.Moved:
-                                _view.Moved();
+                                _window.Moved();
                                 break;
+
                             case Sdl.Window.EventId.Close:
                                 _isExiting++;
                                 break;
@@ -232,10 +196,61 @@ namespace MonoGame.Framework
             }
         }
 
+        private unsafe void ProcessTextInput(byte* text)
+        {
+            int len = 0;
+            int utf8character = 0; // using an int to encode multibyte characters longer than 2 bytes
+            int charByteSize = 0; // UTF8 char lenght to decode
+            int remainingShift = 0;
+
+            byte currentByte;
+            while ((currentByte = Marshal.ReadByte((IntPtr)text, len)) != 0)
+            {
+                // we're reading the first UTF8 byte, we need to check if it's multibyte
+                if (charByteSize == 0)
+                {
+                    if (currentByte < 192)
+                        charByteSize = 1;
+                    else if (currentByte < 224)
+                        charByteSize = 2;
+                    else if (currentByte < 240)
+                        charByteSize = 3;
+                    else
+                        charByteSize = 4;
+
+                    utf8character = 0;
+                    remainingShift = 4;
+                }
+
+                // assembling the character
+                utf8character <<= 8;
+                utf8character |= currentByte;
+
+                charByteSize--;
+                remainingShift--;
+
+                if (charByteSize == 0) // finished decoding the current character
+                {
+                    utf8character <<= remainingShift * 8; // shifting it to full UTF8 scope
+
+                    // SDL returns UTF8-encoded characters while C# char type is UTF16-encoded (and limited to the 0-FFFF range / does not support surrogate pairs)
+                    // so we need to convert it to Unicode codepoint and check if it's within the supported range
+                    int codepoint = UTF8ToUnicode(utf8character);
+
+                    if (codepoint >= 0 && codepoint < 0xFFFF)
+                    {
+                        _window.OnTextInput(new TextInputEvent((char)codepoint, KeyboardUtil.ToXna(codepoint)));
+                        // UTF16 characters beyond 0xFFFF are not supported (and would require a surrogate encoding that is not supported by the char type)
+                    }
+                }
+
+                len++;
+            }
+        }
+
         private int UTF8ToUnicode(int utf8)
         {
-            int
-                byte4 = utf8 & 0xFF,
+            int byte4 = utf8 & 0xFF,
                 byte3 = (utf8 >> 8) & 0xFF,
                 byte2 = (utf8 >> 16) & 0xFF,
                 byte1 = (utf8 >> 24) & 0xFF;

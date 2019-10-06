@@ -12,11 +12,13 @@ namespace MonoGame.Framework.Input
 {
     static partial class GamePad
     {
-        private readonly struct GamePadInfo
+        private class GamePadInfo
         {
-            public readonly IntPtr Device;
-            public readonly IntPtr HapticDevice;
-            public readonly int HapticType;
+            public IntPtr Device { get; }
+            public IntPtr HapticDevice { get; }
+            public int HapticType { get; }
+
+            public int PacketNumber { get; set; }
 
             public GamePadInfo(IntPtr device, IntPtr hapticDevice, int hapticType)
             {
@@ -27,6 +29,7 @@ namespace MonoGame.Framework.Input
         }
 
         private static readonly Dictionary<int, GamePadInfo> GamePads = new Dictionary<int, GamePadInfo>();
+        private static readonly Dictionary<int, int> _translationTable = new Dictionary<int, int>();
 
         private static Sdl.Haptic.Effect _hapticLeftRightEffect = new Sdl.Haptic.Effect
         {
@@ -87,9 +90,7 @@ namespace MonoGame.Framework.Input
                         hapticType = 2;
                     }
                     else
-                    {
                         Sdl.Haptic.Close(hapticDevice);
-                    }
                 }
                 catch
                 {
@@ -100,6 +101,7 @@ namespace MonoGame.Framework.Input
             }
 
             GamePads.Add(id, new GamePadInfo(device, hapticDevice, hapticType));
+            RefreshTranslationTable();
         }
 
         internal static void RemoveDevice(int instanceid)
@@ -113,9 +115,32 @@ namespace MonoGame.Framework.Input
                     break;
                 }
             }
+
+            RefreshTranslationTable();
         }
 
-        private static void DisposeDevice(in GamePadInfo info)
+        internal static void RefreshTranslationTable()
+        {
+            _translationTable.Clear();
+            foreach (var pair in GamePads)
+            {
+                IntPtr joystick = Sdl.GameController.GetJoystick(pair.Value.Device);
+                _translationTable[Sdl.Joystick.InstanceID(joystick)] = pair.Key;
+            }
+        }
+
+        internal static void UpdatePacketInfo(int instanceid, uint packetNumber)
+        {
+            if (_translationTable.TryGetValue(instanceid, out int index))
+            {
+                if (GamePads.TryGetValue(index, out GamePadInfo info))
+                    info.PacketNumber = (int)(packetNumber < int.MaxValue 
+                        ? packetNumber 
+                        : packetNumber - int.MaxValue);
+            }
+        }
+
+        private static void DisposeDevice(GamePadInfo info)
         {
             if (info.HapticType > 0)
                 Sdl.Haptic.Close(info.HapticDevice);
@@ -202,7 +227,8 @@ namespace MonoGame.Framework.Input
             if (!GamePads.ContainsKey(index))
                 return GamePadState.Default;
 
-            var device = GamePads[index].Device;
+            var gamepad = GamePads[index];
+            var device = gamepad.Device;
 
             // Y gamepad axis is inverted between SDL and XNA
             var thumbSticks = new GamePadThumbSticks(
@@ -240,7 +266,7 @@ namespace MonoGame.Framework.Input
                 (Sdl.GameController.GetButton(device, Sdl.GameController.Button.DpadLeft) == 1) ? ButtonState.Pressed : ButtonState.Released,
                 (Sdl.GameController.GetButton(device, Sdl.GameController.Button.DpadRight) == 1) ? ButtonState.Pressed : ButtonState.Released);
 
-            return new GamePadState(thumbSticks, triggers, buttons, dPad);
+            return new GamePadState(thumbSticks, triggers, buttons, dPad, gamepad.PacketNumber);
         }
 
         private static bool PlatformSetVibration(int index, float leftMotor, float rightMotor)
