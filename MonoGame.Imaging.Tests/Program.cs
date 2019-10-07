@@ -1,6 +1,5 @@
 ﻿using MonoGame.Framework;
 using MonoGame.Utilities.Memory;
-using StbSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -40,11 +39,10 @@ namespace MonoGame.Imaging.Tests
             int readRepeats = 1;
             int writeRepeats = 1;
 
-            bool OnReadProgress(
+            void OnReadProgress(
                 int frameIndex, FrameCollection<Color> frames, double progress, Rectangle? rectangle)
             {
                 Console.WriteLine("Read: " + Math.Round(progress * 100, 2) + "%");
-                return false;
             }
             
             var watch = new Stopwatch();
@@ -56,7 +54,7 @@ namespace MonoGame.Imaging.Tests
                     watch.Start();
 
                 image?.Dispose();
-                image = Image.Load<Color>(encoded, OnReadProgress);
+                image = Image.Load<Color>(encoded, CancellationToken.None, OnReadProgress);
                 watch.Stop();
             }
             Console.WriteLine(image.Width + "x" + image.Height + " # " + image.GetBitDepth());

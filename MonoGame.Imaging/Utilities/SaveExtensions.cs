@@ -141,7 +141,7 @@ namespace MonoGame.Imaging
 
         /*
         
-        // TODO: remove this
+        // TODO: remove this and add ones for Image<T> instead
         #region Save(IReadOnlyPixelRows) Overloads
 
         public static void Save<TPixel>(

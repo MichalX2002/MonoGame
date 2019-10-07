@@ -465,7 +465,7 @@ namespace MonoGame.Framework.Graphics
                 case SurfaceFormat.Rgba1010102:
                     return new ColorFormat(10, 10, 10, 2);
                 default:
-                    // Floating point backbuffers formats could be implemented
+                    // Floating-point backbuffers formats could be implemented
                     // but they are not typically used on the backbuffer. In
                     // those cases it is better to create a render target instead.
                     throw new NotSupportedException();

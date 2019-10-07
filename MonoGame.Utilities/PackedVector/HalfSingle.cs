@@ -7,6 +7,10 @@ using MonoGame.Framework;
 
 namespace MonoGame.Utilities.PackedVector
 {
+    /// <summary>
+    /// Packed vector type containing a 16-bit floating-point X component.
+    /// <para>Ranges from [0, 0, 0, 1] to [1, 0, 0, 1] in vector form.</para>
+    /// </summary>
     public struct HalfSingle : IPackedVector<ushort>, IEquatable<HalfSingle>, IPixel
     {
         #region Constructors

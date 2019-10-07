@@ -75,7 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj">
-      <Project>{4344dacf-e2a9-4699-a89e-89dedba6d941}</Project>
+      <Project>{19385604-8c31-421e-bcf0-41039d1f54c1}</Project>
       <Name>MonoGame.Imaging</Name>
     </ProjectReference>
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj">

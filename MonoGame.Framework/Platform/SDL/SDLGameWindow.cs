@@ -299,11 +299,6 @@ namespace MonoGame.Framework
             OnClientSizeChanged();
         }
 
-        public void CallTextInput(int character, Keys key)
-        {
-            OnTextInput(this, new TextInputEvent(character, key));
-        }
-
         protected internal override void SetSupportedOrientations(DisplayOrientation orientations)
         {
             // Nothing to do here

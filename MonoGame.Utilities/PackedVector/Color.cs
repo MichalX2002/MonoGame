@@ -12,11 +12,9 @@ using System.Runtime.CompilerServices;
 namespace MonoGame.Framework
 {
     /// <summary>
-    /// Packed pixel type containing four 8-bit unsigned normalized values, ranging from 0 to 255.
-    /// The color components are stored in red, green, blue, and alpha order (least significant to most significant byte).
-    /// <para>
-    /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
-    /// </para>
+    /// Packed vector type containing unsigned 8-bit XYZW components.
+    /// The color components are stored in RGBA order.
+    /// <para>Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.</para>
     /// </summary>
     [DataContract]
     [DebuggerDisplay("{DebugDisplayString,nq}")]
@@ -87,25 +85,22 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #region Public Constructors
+        #region Constructors
 
         /// <summary>
-        /// Constructs an RGBA color from a packed value.
-        /// The value is a 32-bit unsigned integer, with R in the least significant octet.
+        /// Constructs the <see cref="Color"/> with a packed value.
+        /// R in the least significant byte.
         /// </summary>
-        /// <param name="packedValue">The packed value.</param>
-        public Color(uint packedValue) : this() => PackedValue = packedValue;
+        [CLSCompliant(false)]
+        public Color(uint packed) : this() => PackedValue = packed;
 
         /// <summary>
-        /// Constructs an RGBA color from scalars representing red, green, blue and alpha values.
+        /// Constructs the <see cref="Color"/> from with raw values.
         /// </summary>
         /// <remarks>
-        /// This overload sets the values directly without clamping and may therefore be faster than the other overloads.
+        /// This overload sets the values directly without clamping and 
+        /// may therefore be faster than the other overloads.
         /// </remarks>
-        /// <param name="r"></param>
-        /// <param name="g"></param>
-        /// <param name="b"></param>
-        /// <param name="a"></param>
         public Color(byte r, byte g, byte b, byte a)
         {
             R = r;
@@ -115,7 +110,10 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs an RGBA color from scalars representing red, green, blue and alpha values.
+        /// Constructs the <see cref="Color"/> from raw values. 
+        /// <para>
+        /// The values are clamped between <see cref="byte.MinValue"/> and <see cref="byte.MaxValue"/>.
+        /// </para>
         /// </summary>
         /// <param name="r">Red component value from 0 to 255.</param>
         /// <param name="g">Green component value from 0 to 255.</param>
@@ -130,7 +128,10 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs an RGBA color from scalars representing red, green and blue values. Alpha value will be opaque.
+        /// Constructs the <see cref="Color"/> from raw values. Alpha value will be opaque.
+        /// <para>
+        /// The values are clamped between <see cref="byte.MinValue"/> and <see cref="byte.MaxValue"/>.
+        /// </para>
         /// </summary>
         /// <param name="r">Red component value from 0 to 255.</param>
         /// <param name="g">Green component value from 0 to 255.</param>
@@ -140,58 +141,83 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs an RGBA color from scalars representing red, green, blue and alpha values.
+        /// Constructs the <see cref="Color"/> from scalars representing red, green, blue and alpha values.
+        /// <para>The values are clamped between 0 and 1.</para>
         /// </summary>
-        /// <param name="r">Red component value from 0f to 1f.</param>
-        /// <param name="g">Green component value from 0f to 1f.</param>
-        /// <param name="b">Blue component value from 0f to 1f.</param>
-        /// <param name="alpha">Alpha component value from 0f to 1f.</param>
+        /// <param name="r">Red component value from 0 to 1.</param>
+        /// <param name="g">Green component value from 0 to 1.</param>
+        /// <param name="b">Blue component value from 0 to 1.</param>
+        /// <param name="alpha">Alpha component value from 0 to 1.</param>
         public Color(float r, float g, float b, float alpha)
             : this((int)(r * 255), (int)(g * 255), (int)(b * 255), (int)(alpha * 255))
         {
         }
 
         /// <summary>
-        /// Constructs an RGBA color from the XYZW unit length components of a vector.
+        /// Constructs the <see cref="Color"/> from the XYZW components of a vector.
+        /// <para>The values are clamped between 0 and 1.</para>
         /// </summary>
-        /// <param name="color">A <see cref="Vector4"/> representing color.</param>
+        /// <param name="color"><see cref="Vector4"/> representing RGBA color.</param>
         public Color(Vector4 color) : this(color.X, color.Y, color.Z, color.W)
         {
         }
 
         /// <summary>
-        /// Constructs an RGBA color from scalars representing red, green and blue values. Alpha value will be opaque.
+        /// Constructs the <see cref="Color"/> from scalars representing red, green and blue values. 
+        /// Alpha value will be opaque.
+        /// <para>The values are clamped between 0 and 1.</para>
         /// </summary>
-        /// <param name="r">Red component value from 0f to 1f.</param>
-        /// <param name="g">Green component value from 0f to 1f.</param>
-        /// <param name="b">Blue component value from 0f to 1f.</param>
+        /// <param name="r">Red component value from 0 to 1.</param>
+        /// <param name="g">Green component value from 0 to 1.</param>
+        /// <param name="b">Blue component value from 0 to 1.</param>
         public Color(float r, float g, float b) : this(r, g, b, 1f)
         {
         }
 
         /// <summary>
-        /// Constructs an RGBA color from the XYZ unit length components of a vector. Alpha value will be opaque.
+        /// Constructs the <see cref="Color"/> from the XYZ components of a vector.
+        /// Alpha value will be opaque.
+        /// <para>The values are clamped between 0 and 1.</para>
         /// </summary>
-        /// <param name="color">A <see cref="Vector3"/> representing color.</param>
+        /// <param name="color"><see cref="Vector3"/> representing RGB color.</param>
         public Color(Vector3 color) : this(color.X, color.Y, color.Z)
         {
         }
 
         /// <summary>
-        /// Constructs an RGBA color from a <see cref="Color"/> and an alpha value.
+        /// Constructs <see cref="Color"/> from a <see cref="Color"/> and alpha value.
         /// </summary>
-        /// <param name="color">A <see cref="Color"/> for RGB values of new <see cref="Color"/> instance.</param>
+        /// <param name="color">The RGB values.</param>
         /// <param name="alpha">The alpha component value from 0 to 255.</param>
         public Color(Color color, byte alpha) : this(color.R, color.G, color.B, alpha)
         {
         }
 
         /// <summary>
-        /// Constructs an RGBA color from color and alpha value.
+        /// Constructs the <see cref="Color"/> from a <see cref="Color"/> and alpha value.
         /// </summary>
-        /// <param name="color">A <see cref="Color"/> for RGB values of new <see cref="Color"/> instance.</param>
-        /// <param name="alpha">Alpha component value from 0f to 1f.</param>
+        /// <param name="color">The RGB values.</param>
+        /// <param name="alpha">Alpha component value from 0 to 1.</param>
         public Color(Color color, float alpha) : 
+            this(color, MathHelper.Clamp((int)(alpha * 255), byte.MinValue, byte.MaxValue))
+        {
+        }
+
+        /// <summary>
+        /// Constructs <see cref="Color"/> from an <see cref="Rgb24"/> and alpha value.
+        /// </summary>
+        /// <param name="color">The RGB values.</param>
+        /// <param name="alpha">The alpha component value from 0 to 255.</param>
+        public Color(Rgb24 color, byte alpha) : this(color.R, color.G, color.B, alpha)
+        {
+        }
+
+        /// <summary>
+        /// Constructs <see cref="Rgb24"/> from an <see cref="Rgb24"/> and alpha value.
+        /// </summary>
+        /// <param name="color">The RGB values.</param>
+        /// <param name="alpha">Alpha component value from 0 to 1.</param>
+        public Color(Rgb24 color, float alpha) :
             this(color, MathHelper.Clamp((int)(alpha * 255), byte.MinValue, byte.MaxValue))
         {
         }
@@ -320,62 +346,44 @@ namespace MonoGame.Framework
         #endregion
 
         /// <summary>
-        /// Convert to <see cref="Bgra32"/>.
+        /// Gets the <see cref="Bgra32"/> representation of this <see cref="Color"/>.
         /// </summary>
-        /// <returns>The <see cref="Bgra32"/>.</returns>
         public Bgra32 ToBgra32() => new Bgra32(R, G, B, A);
 
         /// <summary>
-        /// Convert to <see cref="Argb32"/>.
+        /// Gets the <see cref="Argb32"/> representation of this <see cref="Color"/>.
         /// </summary>
-        /// <returns>The <see cref="Argb32"/>.</returns>
         public Argb32 ToArgb32() => new Argb32(R, G, B, A);
 
         /// <summary>
-        /// Convert to <see cref="Rgb24"/>.
+        /// Gets the <see cref="Rgb24"/> representation of this <see cref="Color"/>.
         /// </summary>
-        /// <returns>The <see cref="Rgb24"/>.</returns>
         public Rgb24 ToRgb24() => new Rgb24(R, G, B);
 
         /// <summary>
-        /// Convert to <see cref="Bgr24"/>.
+        /// Gets the <see cref="Bgr24"/> representation of this <see cref="Color"/>.
         /// </summary>
-        /// <returns>The <see cref="Bgr24"/>.</returns>
         public Bgr24 ToBgr24() => new Bgr24(R, G, B);
 
         /// <summary>
-        /// Convert to <see cref="Gray8"/>.
+        /// Gets the <see cref="Gray8"/> representation of this <see cref="Color"/>.
         /// </summary>
         public Gray8 ToGray8() => new Gray8(A);
 
         /// <summary>
-        /// Convert to <see cref="GrayAlpha16"/>.
+        /// Gets the <see cref="GrayAlpha16 "/> representation of this <see cref="Color"/>.
         /// </summary>
-        /// <returns>The <see cref="GrayAlpha16"/>.</returns>
         public GrayAlpha16 ToGrayAlpha16() => new GrayAlpha16(PackedVectorHelper.Get8BitBT709Luminance(R, G, B), A);
         
         /// <summary>
-        /// Gets a <see cref="Vector3"/> representation for this object.
+        /// Gets the <see cref="Vector3"/> representation of this <see cref="Color"/>.
         /// </summary>
         /// <returns>A <see cref="Vector3"/> representation for this object.</returns>
         public Vector3 ToVector3() => new Vector3(R / 255f, G / 255f, B / 255f);
 
         /// <summary>
-        /// Converts the value of this instance to a hexadecimal string.
-        /// </summary>
-        /// <returns>A hexadecimal string representation of the value.</returns>
-        public string ToHex()
-        {
-            uint hexOrder = (uint)(A << 0 | B << 8 | G << 16 | R << 24);
-            return hexOrder.ToString("X8");
-        }
-
-        /// <summary>
         /// Deconstruction method for <see cref="Color"/>.
         /// </summary>
-        /// <param name="r"></param>
-        /// <param name="g"></param>
-        /// <param name="b"></param>
         public void Deconstruct(out float r, out float g, out float b)
         {
             r = R;
@@ -384,12 +392,8 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Deconstruction method for <see cref="Color"/> with Alpha.
+        /// Deconstruction method for <see cref="Color"/> with alpha.
         /// </summary>
-        /// <param name="r"></param>
-        /// <param name="g"></param>
-        /// <param name="b"></param>
-        /// <param name="a"></param>
         public void Deconstruct(out float r, out float g, out float b, out float a)
         {
             r = R;
@@ -441,22 +445,28 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Color"/>.</param>
         /// <param name="scale">Factor.</param>
         /// <returns>Multiplication result.</returns>
-        public static Color Multiply(in Color value, float scale)
-        {
-            return new Color(
-                (int)(value.R * scale),
-                (int)(value.G * scale),
-                (int)(value.B * scale), 
-                (int)(value.A * scale));
-        }
+        public static Color Multiply(in Color value, float scale) => value * scale;
 
         /// <summary>
-        /// Multiply <see cref="Color"/> by value.
+        /// Multiply <see cref="Color"/> by a scalar.
         /// </summary>
         /// <param name="value">Source <see cref="Color"/>.</param>
         /// <param name="scale">Factor.</param>
         /// <returns>Multiplication result.</returns>
-        public static Color operator *(in Color value, float scale) => Multiply(value, scale);
+        public static Color operator *(in Color value, float scale) => new Color(
+                (int)(value.R * scale),
+                (int)(value.G * scale),
+                (int)(value.B * scale),
+                (int)(value.A * scale));
+
+        /// <summary>
+        /// Gets the hexadecimal <see cref="string"/> representation of this <see cref="Color"/>.
+        /// </summary>
+        public string ToHex()
+        {
+            uint hexOrder = (uint)(A << 0 | B << 8 | G << 16 | R << 24);
+            return hexOrder.ToString("X8");
+        }
 
         #region Equals
 

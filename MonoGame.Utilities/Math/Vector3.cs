@@ -117,11 +117,11 @@ namespace MonoGame.Framework
         #region Constructors
 
         /// <summary>
-        /// Constructs a 3d vector with X, Y and Z from three values.
+        /// Constructs a 3D vector with X, Y and Z from three values.
         /// </summary>
-        /// <param name="x">The x coordinate in 3d-space.</param>
-        /// <param name="y">The y coordinate in 3d-space.</param>
-        /// <param name="z">The z coordinate in 3d-space.</param>
+        /// <param name="x">The x coordinate in 3D-space.</param>
+        /// <param name="y">The y coordinate in 3D-space.</param>
+        /// <param name="z">The z coordinate in 3D-space.</param>
         public Vector3(float x, float y, float z)
         {
             X = x;
@@ -130,9 +130,9 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs a 3d vector with X, Y and Z set to the same value.
+        /// Constructs a 3D vector with X, Y and Z set to the same value.
         /// </summary>
-        /// <param name="value">The x, y and z coordinates in 3d-space.</param>
+        /// <param name="value">The x, y and z coordinates in 3D-space.</param>
         public Vector3(float value)
         {
             X = value;
@@ -141,10 +141,10 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs a 3d vector with X, Y from <see cref="Vector2"/> and Z from a scalar.
+        /// Constructs a 3D vector with X, Y from <see cref="Vector2"/> and Z from a scalar.
         /// </summary>
-        /// <param name="value">The x and y coordinates in 3d-space.</param>
-        /// <param name="z">The z coordinate in 3d-space.</param>
+        /// <param name="value">The x and y coordinates in 3D-space.</param>
+        /// <param name="z">The z coordinate in 3D-space.</param>
         public Vector3(in Vector2 value, float z)
         {
             X = value.X;
@@ -155,22 +155,19 @@ namespace MonoGame.Framework
         #endregion
 
         /// <summary>
-        /// Gets a <see cref="Vector2"/> representation for this object.
+        /// Gets the <see cref="Vector2"/> representation of this <see cref="Vector3"/>.
         /// </summary>
-        /// <returns>A <see cref="Vector2"/> representation for this object.</returns>
-        public Vector2 ToVector2()
-        {
-            return new Vector2(X, Y);
-        }
+        public Vector2 ToVector2() => new Vector2(X, Y);
 
         /// <summary>
-        /// Creates a new <see cref="Vector3"/> that contains the cartesian coordinates of a vector specified in barycentric coordinates and relative to 3d-triangle.
+        /// Creates a new <see cref="Vector3"/> that contains the cartesian
+        /// coordinates of a vector specified in barycentric coordinates and relative to 3D-triangle.
         /// </summary>
-        /// <param name="a">The first vector of 3d-triangle.</param>
-        /// <param name="b">The second vector of 3d-triangle.</param>
-        /// <param name="c">The third vector of 3d-triangle.</param>
-        /// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 3d-triangle.</param>
-        /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 3d-triangle.</param>
+        /// <param name="a">The first vector of 3D-triangle.</param>
+        /// <param name="b">The second vector of 3D-triangle.</param>
+        /// <param name="c">The third vector of 3D-triangle.</param>
+        /// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 3D-triangle.</param>
+        /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 3D-triangle.</param>
         /// <returns>The cartesian translation of barycentric coordinates.</returns>
         public static Vector3 Barycentric(in Vector3 a, in Vector3 b, in Vector3 c, float amount1, float amount2)
         {
@@ -588,7 +585,7 @@ namespace MonoGame.Framework
         #region Transform
 
         /// <summary>
-        /// Creates a new <see cref="Vector3"/> that contains a transformation of 3d-vector by the specified <see cref="Matrix"/>.
+        /// Creates a new <see cref="Vector3"/> that contains a transformation of 3D-vector by the specified <see cref="Matrix"/>.
         /// </summary>
         /// <param name="position">Source <see cref="Vector3"/>.</param>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
@@ -602,7 +599,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Creates a new <see cref="Vector3"/> that contains a transformation of 3d-vector by the specified <see cref="Quaternion"/>, representing the rotation.
+        /// Creates a new <see cref="Vector3"/> that contains a transformation of 3D-vector by the specified <see cref="Quaternion"/>, representing the rotation.
         /// </summary>
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>

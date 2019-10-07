@@ -27,7 +27,7 @@ namespace MonoGame.Utilities.PackedVector
         /// Constructs the packed vector with a packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public Byte4(uint value) : this() => PackedValue = value;
+        public Byte4(uint packed) : this() => PackedValue = packed;
 
         /// <summary>
         /// Constructs the packed vector with raw values.
@@ -44,7 +44,7 @@ namespace MonoGame.Utilities.PackedVector
         /// Constructs the packed vector with raw values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public Byte4(Vector4 vector) : this() => PackedValue = Pack(ref vector);
+        public Byte4(Vector4 vector) => this = Pack(ref vector);
 
         /// <summary>
         /// Constructs the packed vector with raw values.
@@ -55,16 +55,16 @@ namespace MonoGame.Utilities.PackedVector
 
         #endregion
 
-        private static uint Pack(ref Vector4 vector)
+        private static Byte4 Pack(ref Vector4 vector)
         {
             vector *= PackedVectorHelper.MaxBytes;
             vector = Vector4.Clamp(vector, Vector4.Zero, PackedVectorHelper.MaxBytes);
-            
-            uint byte4 = (uint)Math.Round(vector.X) & 0xFF;
-            uint byte3 = ((uint)Math.Round(vector.Y) & 0xFF) << 0x8;
-            uint byte2 = ((uint)Math.Round(vector.Z) & 0xFF) << 0x10;
-            uint byte1 = ((uint)Math.Round(vector.W) & 0xFF) << 0x18;
-            return byte4 | byte3 | byte2 | byte1;
+
+            return new Byte4(
+                (byte)Math.Round(vector.X),
+                (byte)Math.Round(vector.Y),
+                (byte)Math.Round(vector.Z),
+                (byte)Math.Round(vector.W));
         }
 
         #region IPixel
@@ -84,7 +84,7 @@ namespace MonoGame.Utilities.PackedVector
         }
 
         /// <inheritdoc />
-        public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
+        public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
         /// <inheritdoc />
         public Vector4 ToVector4()

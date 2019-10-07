@@ -20,7 +20,7 @@ namespace MonoGame.Utilities.PackedVector
         /// Constructs the packed vector with a packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public Bgra5551(ushort value) => PackedValue = value;
+        public Bgra5551(ushort packed) => PackedValue = packed;
 
         /// <summary>
         /// Constructs the packed vector with raw values.

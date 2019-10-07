@@ -222,7 +222,8 @@ namespace MonoGame.Imaging
         {
             if (TryGetByExtension(extension, out var format))
                 return format;
-            throw new KeyNotFoundException($"Extension '{extension}' is not defined.");
+            throw new KeyNotFoundException(
+                $"Image format for extension '{extension}' is not defined.");
         }
 
         public static bool TryGetByPath(string path, out ImageFormat format)

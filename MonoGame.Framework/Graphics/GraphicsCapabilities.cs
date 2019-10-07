@@ -2,9 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
-using System.Collections.Generic;
-
 namespace MonoGame.Framework.Graphics
 {
     /// <summary>
@@ -14,6 +11,9 @@ namespace MonoGame.Framework.Graphics
     /// </summary>
     internal partial class GraphicsCapabilities
     {
+        // The highest possible MSCount
+        private const int MultiSampleCountLimit = 32;
+
         internal void Initialize(GraphicsDevice device)
         {
             PlatformInitialize(device);
@@ -77,7 +77,7 @@ namespace MonoGame.Framework.Graphics
         internal bool SupportsVertexTextures { get; private set; }
 
         /// <summary>
-        /// True, if the underlying platform supports floating point textures. 
+        /// True, if the underlying platform supports floating-point textures. 
         /// For Direct3D platforms this is always <code>true</code>.
         /// For OpenGL Desktop platforms it is always <code>true</code>.
         /// For OpenGL Mobile platforms it requires `GL_EXT_color_buffer_float`.
@@ -87,7 +87,7 @@ namespace MonoGame.Framework.Graphics
         internal bool SupportsFloatTextures { get; private set; }
 
         /// <summary>
-        /// True, if the underlying platform supports half floating point textures. 
+        /// True, if the underlying platform supports half floating-point textures. 
         /// For Direct3D platforms this is always <code>true</code>.
         /// For OpenGL Desktop platforms it is always <code>true</code>.
         /// For OpenGL Mobile platforms it requires `GL_EXT_color_buffer_half_float`.
@@ -104,9 +104,6 @@ namespace MonoGame.Framework.Graphics
         /// supported.
         /// </summary>
         internal int MaxTextureAnisotropy { get; private set; }
-
-        // The highest possible MSCount
-        private const int MultiSampleCountLimit = 32;
 
         internal int MaxMultiSampleCount { get; private set; }
 

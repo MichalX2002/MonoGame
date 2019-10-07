@@ -1,5 +1,3 @@
-// Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
 
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -7,15 +5,10 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Helper methods for packing and unpacking floating point values.
+    /// Helper methods for packing and unpacking floating-point values.
     /// </summary>
     internal static class HalfTypeHelper
     {
-        /// <summary>
-        /// Packs a <see cref="float"/> into an <see cref="ushort"/>
-        /// </summary>
-        /// <param name="value">The float to pack</param>
-        /// <returns>The <see cref="ushort"/></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static ushort Pack(float value)
         {
@@ -23,11 +16,6 @@ namespace MonoGame.Utilities.PackedVector
             return Pack(uif.I);
         }
 
-        /// <summary>
-        /// Packs an <see cref="int"/> into a <see cref="ushort"/>
-        /// </summary>
-        /// <param name="value">The integer to pack.</param>
-        /// <returns>The <see cref="ushort"/></returns>
         internal static ushort Pack(int value)
         {
             int s = (value >> 16) & 0x00008000;
@@ -73,16 +61,11 @@ namespace MonoGame.Utilities.PackedVector
             return (ushort)(s | (e << 10) | (m >> 13));
         }
 
-        /// <summary>
-        /// Unpacks a <see cref="ushort"/> into a <see cref="float"/>.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The <see cref="float"/>.</returns>
         internal static float Unpack(ushort value)
         {
-            uint result;
             uint mantissa = (uint)(value & 1023);
             uint exponent = 0xfffffff2;
+            uint result;
 
             if ((value & -33792) == 0)
             {
@@ -111,27 +94,15 @@ namespace MonoGame.Utilities.PackedVector
             return uif.F;
         }
 
-        /// <summary>
-        /// Maps the position of number types in memory.
-        /// </summary>
         [StructLayout(LayoutKind.Explicit)]
         private struct FloatInt
         {
-            /// <summary>
-            /// The float.
-            /// </summary>
             [FieldOffset(0)]
             public float F;
 
-            /// <summary>
-            /// The integer.
-            /// </summary>
             [FieldOffset(0)]
             public int I;
 
-            /// <summary>
-            /// The unsigned integer.
-            /// </summary>
             [FieldOffset(0)]
             public uint U;
         }

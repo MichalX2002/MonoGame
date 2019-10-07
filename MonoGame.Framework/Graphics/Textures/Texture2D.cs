@@ -5,6 +5,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using MonoGame.Imaging;
 using MonoGame.Utilities.Memory;
 using MonoGame.Utilities.PackedVector;
@@ -376,12 +377,13 @@ namespace MonoGame.Framework.Graphics
         }
 
         [CLSCompliant(false)]
-        public static unsafe Image<Color> LoadImage(Stream stream, ImagingConfig config = null)
+        public static unsafe Image<Color> LoadImage(
+            Stream stream, ImagingConfig config = null)
         {
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (config == null) config = ImagingConfig.Default;
 
-            var image = Image.Load<Color>(stream, config);
+            var image = Image.Load<Color>(stream, config, CancellationToken.None);
             fixed (Color* pixelPtr = &MemoryMarshal.GetReference(image.GetPixelSpan()))
             {
                 int pixels = image.Width * image.Height;
@@ -403,20 +405,22 @@ namespace MonoGame.Framework.Graphics
         /// This allows reloading textures when the graphics context is lost.
         /// This method cannot change texture dimensions.
         /// </summary>
-        /// <param name="stream">The image data in the same dimensions as this texture.</param>
+        /// <param name="stream">The image data with the same dimensions as this texture.</param>
         /// <param name="config">The configuration used to load the image.</param>
         [CLSCompliant(false)]
-        public void Reload(Stream stream, ImagingConfig config)
+        public void Reload(Stream stream, ImagingConfig config = null)
         {
             using (var image = LoadImage(stream, config))
             {
                 if (image.Width != Width)
                     throw new InvalidOperationException(
-                        "The decoded image has a different width, texture dimensions may not be changed after construction.");
+                        "The decoded image has a different width. " +
+                        "Texture dimensions may not be changed after construction.");
 
                 if (image.Height != Height)
                     throw new InvalidOperationException(
-                        "The decoded image has a different height, texture dimensions may not be changed after construction.");
+                        "The decoded image has a different height. " +
+                        "Texture dimensions may not be changed after construction.");
 
                 SetData(image.GetPixelSpan());
             }
@@ -426,11 +430,8 @@ namespace MonoGame.Framework.Graphics
         /// This allows reloading textures when the graphics context is lost.
         /// This method cannot change texture dimensions.
         /// </summary>
-        /// <param name="stream">The image data in the same dimensions as this texture.</param>
-        public void Reload(Stream stream)
-        {
-            Reload(stream, null);
-        }
+        /// <param name="stream">The image data with the same dimensions as this texture.</param>
+        public void Reload(Stream stream) => Reload(stream, null);
 
         #endregion
 
@@ -464,7 +465,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="format">The format used to encode the texture.</param>
         /// <param name="encoderConfig">The encoder configuration.</param>
         /// <param name="level">The texture level to save.</param>
-        /// <param name="rect">The part of the texture to save.</param>
+        /// <param name="rect">The cutout of the texture to save.</param>
         [CLSCompliant(false)]
         public void Save(
             ImagingConfig imagingConfig, Stream stream,
@@ -515,7 +516,7 @@ namespace MonoGame.Framework.Graphics
                 case SurfaceFormat.NormalizedByte4: SaveByType<NormalizedByte4>(); break;
 
                 default:
-                    throw new Exception("Texture surface format is not supported.");
+                    throw new NotSupportedException("Texture format is not supported.");
             }
         }
 
@@ -526,7 +527,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="format">The format used to encode the texture.</param>
         /// <param name="encoderConfig">The encoder configuration.</param>
         /// <param name="level">The texture level to save.</param>
-        /// <param name="rect">The part of the texture to save.</param>
+        /// <param name="rect">The cutout of the texture to save.</param>
         [CLSCompliant(false)]
         public void Save(
             Stream stream, ImageFormat format, EncoderConfig encoderConfig, 
@@ -539,10 +540,9 @@ namespace MonoGame.Framework.Graphics
         /// <param name="stream">Destination for the texture.</param>
         /// <param name="format">The format used to encode the texture.</param>
         /// <param name="level">The texture level to save.</param>
-        /// <param name="rect">The part of the texture to save.</param>
+        /// <param name="rect">The cutout of the texture to save.</param>
         [CLSCompliant(false)]
-        public void Save(
-            Stream stream, ImageFormat format, int level = 0, Rectangle? rect = null) => 
+        public void Save(Stream stream, ImageFormat format, int level = 0, Rectangle? rect = null) => 
             Save(ImagingConfig.Default, stream, format, Image.GetDefaultEncoderConfig(format), level, rect);
 
         public void SaveAsPng(Stream stream, int level = 0, Rectangle? rect = null) =>
@@ -558,14 +558,14 @@ namespace MonoGame.Framework.Graphics
         /// <param name="filePath">Destination file for the texture.</param>
         /// <param name="format">The format used to encode the texture.</param>
         /// <param name="level">The texture level to save.</param>
-        /// <param name="rect">The part of the texture to save.</param>
+        /// <param name="rect">The cutout of the texture to save.</param>
         [CLSCompliant(false)]
         public void Save(
             string filePath, ImageFormat format = null, int level = 0, Rectangle? rect = null)
         {
             SaveExtensions.AssertValidPath(filePath);
 
-            if (format == null)
+            if (format == null) 
                 format = ImageFormat.GetByPath(filePath);
 
             using (var fs = SaveExtensions.OpenWrite(filePath))
@@ -577,11 +577,9 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="filePath">The file path for the texture.</param>
         /// <param name="level">The texture level to save.</param>
-        /// <param name="rect">The part of the texture to save.</param>
-        public void Save(string filePath, int level = 0, Rectangle? rect = null)
-        {
+        /// <param name="rect">The cutout of the texture to save.</param>
+        public void Save(string filePath, int level = 0, Rectangle? rect = null) => 
             Save(filePath, null, level, rect);
-        }
 
         #endregion
 

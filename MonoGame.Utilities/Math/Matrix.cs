@@ -9,7 +9,7 @@ using System.Runtime.Serialization;
 namespace MonoGame.Framework
 {
     /// <summary>
-    /// Represents the right-handed 4x4 floating point matrix, which can store translation, scale and rotation information.
+    /// Represents the right-handed 4x4 floating-point matrix, which can store translation, scale and rotation information.
     /// </summary>
     [DataContract]
     [DebuggerDisplay("{DebugDisplayString,nq}")]
