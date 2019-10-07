@@ -53,14 +53,36 @@ namespace MonoGame.Utilities.PackedVector
         [CLSCompliant(false)]
         public uint PackedValue { get; set; }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public void FromVector4(Vector4 vector) => PackedValue = Pack(vector.X, vector.Y);
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public Vector4 ToVector4()
         {
-            Vector2 vector = ToVector2();
-            return new Vector4(vector.X, vector.Y, 0f, 1f);
+            var vector = ToVector2();
+            return new Vector4(vector.X, vector.Y, 0, 1);
+        }
+
+        #endregion
+
+        #region IPixel
+
+        /// <inheritdoc/>
+        public void FromScaledVector4(Vector4 vector)
+        {
+            var scaled = new Vector2(vector.X, vector.Y);
+            scaled *= 2;
+            scaled -= Vector2.One;
+            PackedValue = Pack(scaled.X, scaled.Y);
+        }
+
+        /// <inheritdoc/>
+        public Vector4 ToScaledVector4()
+        {
+            var scaled = ToVector2();
+            scaled += Vector2.One;
+            scaled /= 2F;
+            return new Vector4(scaled, 0, 1);
         }
 
         #endregion

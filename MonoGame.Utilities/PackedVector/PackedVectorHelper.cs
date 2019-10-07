@@ -19,6 +19,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets the packed vector in <see cref="Vector3"/> format.
         /// </summary>
+        [Obsolete("To be replaced with a per-type implementation.")]
         public static Vector3 ToVector3<TPackedVector>(this TPackedVector vector)
             where TPackedVector : IPackedVector =>
             vector.ToVector4().ToVector3();

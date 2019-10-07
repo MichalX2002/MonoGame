@@ -9,9 +9,9 @@ namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
     /// Packed vector type containing 16-bit floating-point XYZW components.
-    /// <para>Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.</para>
+    /// <para>Ranges from [-1, -1, -1, 0] to [1, 1, 1, 1] in vector form.</para>
     /// </summary>
-    public struct HalfVector4 : IPackedVector<ulong>, IPackedVector, IEquatable<HalfVector4>
+    public struct HalfVector4 : IPackedVector<ulong>, IEquatable<HalfVector4>, IPixel
     {
         #region Constructors
 
@@ -25,7 +25,7 @@ namespace MonoGame.Utilities.PackedVector
         /// Constructs the packed vector with raw values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public HalfVector4(Vector4 vector) => PackedValue = Pack(ref vector);
+        public HalfVector4(Vector4 vector) => PackedValue = Pack(vector);
 
         /// <summary>
         /// Constructs the packed vector with raw values.
@@ -36,7 +36,7 @@ namespace MonoGame.Utilities.PackedVector
 
         #endregion
 
-        private static ulong Pack(ref Vector4 vector)
+        private static ulong Pack(in Vector4 vector)
         {
             ulong num4 = HalfTypeHelper.Pack(vector.X);
             ulong num3 = (ulong)HalfTypeHelper.Pack(vector.Y) << 0x10;
@@ -45,12 +45,6 @@ namespace MonoGame.Utilities.PackedVector
             return num4 | num3 | num2 | num1;
         }
 
-        #region IPixel
-
-
-
-        #endregion
-
         #region IPackedVector
 
         /// <inheritdoc/>
@@ -58,7 +52,7 @@ namespace MonoGame.Utilities.PackedVector
         public ulong PackedValue { get; set; }
 
         /// <inheritdoc/>
-        public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
+        public void FromVector4(Vector4 vector) => PackedValue = Pack(vector);
 
         /// <inheritdoc/>
         public Vector4 ToVector4() => new Vector4(
@@ -66,6 +60,27 @@ namespace MonoGame.Utilities.PackedVector
                 HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x10)),
                 HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x20)),
                 HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x30)));
+
+        #endregion
+
+        #region IPixel
+
+        /// <inheritdoc/>
+        public void FromScaledVector4(Vector4 vector)
+        {
+            vector *= 2;
+            vector -= Vector4.One;
+            FromVector4(vector);
+        }
+
+        /// <inheritdoc/>
+        public Vector4 ToScaledVector4()
+        {
+            var scaled = ToVector4();
+            scaled += Vector4.One;
+            scaled /= 2;
+            return scaled;
+        }
 
         #endregion
 

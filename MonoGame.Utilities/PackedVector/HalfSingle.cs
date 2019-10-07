@@ -9,7 +9,7 @@ namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
     /// Packed vector type containing a 16-bit floating-point X component.
-    /// <para>Ranges from [0, 0, 0, 1] to [1, 0, 0, 1] in vector form.</para>
+    /// <para>Ranges from [-1, 0, 0, 1] to [1, 0, 0, 1] in vector form.</para>
     /// </summary>
     public struct HalfSingle : IPackedVector<ushort>, IEquatable<HalfSingle>, IPixel
     {
@@ -31,11 +31,26 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets the packed vector as a <see cref="float"/>.
         /// </summary>
-        public float ToFloat() => HalfTypeHelper.Pack(PackedValue);
+        public float ToSingle() => HalfTypeHelper.Unpack(PackedValue);
 
         #region IPixel
 
+        /// <inheritdoc/>
+        public void FromScaledVector4(Vector4 vector)
+        {
+            float scaled = vector.X;
+            scaled *= 2;
+            scaled -= 1;
+            PackedValue = HalfTypeHelper.Pack(scaled);
+        }
 
+        /// <inheritdoc/>
+        public Vector4 ToScaledVector4()
+        {
+            float single = ToSingle() + 1;
+            single /= 2;
+            return new Vector4(single, 0, 0, 1);
+        }
 
         #endregion
 
@@ -45,11 +60,11 @@ namespace MonoGame.Utilities.PackedVector
         [CLSCompliant(false)]
         public ushort PackedValue { get; set; }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public void FromVector4(Vector4 vector) => PackedValue = HalfTypeHelper.Pack(vector.X);
 
-        /// <inheritdoc/>
-        public Vector4 ToVector4() => new Vector4(ToFloat(), 0f, 0f, 1f);
+        /// <inheritdoc />
+        public Vector4 ToVector4() => new Vector4(ToSingle(), 0, 0, 1);
 
         #endregion
 
@@ -68,7 +83,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => ToFloat().ToString();
+        public override string ToString() => ToSingle().ToString();
 
         /// <summary>
         /// Gets a hash code of the packed vector.

@@ -7,11 +7,20 @@ namespace MonoGame.Utilities.PackedVector
     /// </summary>
     public interface IPixel : IPackedVector
     {
+        /// <summary></summary>
+        void FromScaledVector4(Vector4 vector);
+
+        /// <summary></summary>
+        Vector4 ToScaledVector4();
+
         /// <summary>Sets the pixel value from <see cref="Gray8"/>.</summary>
         void FromGray8(Gray8 source);
 
         /// <summary>Sets the pixel value from <see cref="Gray16"/>.</summary>
         void FromGray16(Gray16 source);
+
+        /// <summary>Sets the pixel value from <see cref="GrayAlpha16"/>.</summary>
+        void FromGrayAlpha16(GrayAlpha16 source);
 
         /// <summary>Sets the pixel value from <see cref="Rgb24"/>.</summary>
         void FromRgb24(Rgb24 source);

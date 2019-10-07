@@ -7,91 +7,100 @@ using MonoGame.Framework;
 
 namespace MonoGame.Utilities.PackedVector
 {
-    public struct NormalizedByte2 : IPackedVector<ushort>, IEquatable<NormalizedByte2>
+    public struct NormalizedByte2 : IPackedVector<ushort>, IEquatable<NormalizedByte2>, IPixel
     {
-        private ushort _packed;
-
-        public NormalizedByte2(Vector2 vector)
-        {
-            _packed = Pack(vector.X, vector.Y);
-        }
-
-        public NormalizedByte2(float x, float y)
-        {
-            _packed = Pack(x, y);
-        }
-
-        public static bool operator !=(NormalizedByte2 a, NormalizedByte2 b)
-        {
-            return a._packed != b._packed;
-        }
-
-        public static bool operator ==(NormalizedByte2 a, NormalizedByte2 b)
-        {
-            return a._packed == b._packed;
-        }
-
-        [CLSCompliant(false)]
-        public ushort PackedValue
-        {
-            get
-            {
-                return _packed;
-            }
-            set
-            {
-                _packed = value;
-            }
-        }
-
-        public override bool Equals(object obj)
-        {
-            return (obj is NormalizedByte2) &&
-                    ((NormalizedByte2)obj)._packed == _packed;
-        }
-
-        public bool Equals(NormalizedByte2 other)
-        {
-            return _packed == other._packed;
-        }
-
-        public override int GetHashCode()
-        {
-            return _packed.GetHashCode();
-        }
-
-        public override string ToString()
-        {
-            return _packed.ToString("X");
-        }
-
-        private static ushort Pack(float x, float y)
-        {
-            var byte2 = (((ushort) Math.Round(MathHelper.Clamp(x, -1f, 1f) * 127.0f)) & 0xFF) << 0;
-            var byte1 = (((ushort) Math.Round(MathHelper.Clamp(y, -1f, 1f) * 127.0f)) & 0xFF) << 8;
-
-            return (ushort)(byte2 | byte1);
-        }
-
-        public void FromVector4(Vector4 vector)
-        {
-            _packed = Pack(vector.X, vector.Y);
-        }
+        #region Constructors
 
         /// <summary>
-        /// Gets the packed vector in Vector4 format.
+        /// Constructs the packed vector with a packed value.
         /// </summary>
-        /// <returns>The packed vector in Vector4 format</returns>
-        public Vector4 ToVector4()
+        [CLSCompliant(false)]
+        public NormalizedByte2(ushort packed) => PackedValue = packed;
+
+        /// <summary>
+        /// Constructs the packed vector with raw values.
+        /// </summary>
+        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
+        public NormalizedByte2(Vector2 vector) => PackedValue = Pack(vector);
+
+        /// <summary>
+        /// Constructs the packed vector with raw values.
+        /// </summary>
+        public NormalizedByte2(float x, float y) : this(new Vector2(x, y))
+        { 
+        }
+
+        #endregion
+
+        private static ushort Pack(in Vector2 vector)
         {
-            return new Vector4(ToVector2(), 0f, 1f);
+            int byte2 = (((ushort)Math.Round(MathHelper.Clamp(vector.X, 0, 1) * 255f)) & 0xFF) << 0;
+            int byte1 = (((ushort)Math.Round(MathHelper.Clamp(vector.Y, 0, 1) * 255f)) & 0xFF) << 8;
+            return (ushort)(byte2 | byte1);
         }
 
         public Vector2 ToVector2()
         {
             return new Vector2(
-                ((sbyte) ((_packed >> 0) & 0xFF)) / 127.0f,
-                ((sbyte) ((_packed >> 8) & 0xFF)) / 127.0f);
+                ((byte)((PackedValue >> 0) & 0xFF)) / 255f,
+                ((byte)((PackedValue >> 8) & 0xFF)) / 255f);
         }
+
+        #region IPackedVector
+
+        /// <inheritdoc/>
+        [CLSCompliant(false)]
+        public ushort PackedValue { get; set; }
+
+        /// <inheritdoc/>
+        public void FromVector4(Vector4 vector) => 
+            PackedValue = Pack(new Vector2(vector.X, vector.Y));
+
+        /// <inheritdoc/>
+        public Vector4 ToVector4() => new Vector4(ToVector2(), 0, 1);
+
+        #endregion
+
+        #region IPixel
+
+        /// <inheritdoc/>
+        public void FromScaledVector4(Vector4 vector)
+        {
+            var scaled = new Vector2(vector.X, vector.Y);
+            scaled *= 2;
+            scaled -= Vector2.One;
+            PackedValue = Pack(scaled);
+        }
+
+        /// <inheritdoc/>
+        public Vector4 ToScaledVector4()
+        {
+            var scaled = ToVector2();
+            scaled += Vector2.One;
+            scaled /= 2;
+            return new Vector4(scaled, 0, 1);
+        }
+
+        #endregion
+
+        #region Equals
+
+        public static bool operator ==(NormalizedByte2 a, NormalizedByte2 b) => a.PackedValue == b.PackedValue;
+
+        public static bool operator !=(NormalizedByte2 a, NormalizedByte2 b) => !(a == b);
+
+        public override bool Equals(object obj) => obj is NormalizedByte2 other && Equals(other);
+
+        public bool Equals(NormalizedByte2 other) => this == other;
+
+        #endregion
+
+        #region Object Overrides
+
+        public override int GetHashCode() => PackedValue.GetHashCode();
+
+        public override string ToString() => PackedValue.ToString("X");
+
+        #endregion
     }
 }
