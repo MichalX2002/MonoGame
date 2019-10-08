@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
 using MonoGame.Framework;
 
 namespace MonoGame.Utilities.PackedVector
@@ -13,22 +14,38 @@ namespace MonoGame.Utilities.PackedVector
     /// </summary>
     public struct HalfVector4 : IPackedVector<ulong>, IEquatable<HalfVector4>, IPixel
     {
+        public HalfSingle X;
+        public HalfSingle Y;
+        public HalfSingle Z;
+        public HalfSingle W;
+
         #region Constructors
+
+        /// <summary>
+        /// Constructs the packed vector with raw values.
+        /// </summary>
+        public HalfVector4(HalfSingle x, HalfSingle y, HalfSingle z, HalfSingle w)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+            W = w;
+        }
 
         /// <summary>
         /// Constructs the packed vector with a packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public HalfVector4(ulong packed) => PackedValue = packed;
+        public HalfVector4(ulong packed) : this() => PackedValue = packed;
 
         /// <summary>
-        /// Constructs the packed vector with raw values.
+        /// Constructs the packed vector with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public HalfVector4(Vector4 vector) => PackedValue = Pack(vector);
+        public HalfVector4(Vector4 vector) => this = Pack(vector);
 
         /// <summary>
-        /// Constructs the packed vector with raw values.
+        /// Constructs the packed vector with vector form values.
         /// </summary>
         public HalfVector4(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
         {
@@ -36,31 +53,41 @@ namespace MonoGame.Utilities.PackedVector
 
         #endregion
 
-        private static ulong Pack(in Vector4 vector)
+        private static HalfVector4 Pack(in Vector4 vector)
         {
-            ulong num4 = HalfTypeHelper.Pack(vector.X);
-            ulong num3 = (ulong)HalfTypeHelper.Pack(vector.Y) << 0x10;
-            ulong num2 = (ulong)HalfTypeHelper.Pack(vector.Z) << 0x20;
-            ulong num1 = (ulong)HalfTypeHelper.Pack(vector.W) << 0x30;
-            return num4 | num3 | num2 | num1;
+            return new HalfVector4(
+                new HalfSingle(vector.X),
+                new HalfSingle(vector.Y),
+                new HalfSingle(vector.Z),
+                new HalfSingle(vector.W));
+            //ulong num4 = HalfTypeHelper.Pack(vector.X);
+            //ulong num3 = (ulong)HalfTypeHelper.Pack(vector.Y) << 0x10;
+            //ulong num2 = (ulong)HalfTypeHelper.Pack(vector.Z) << 0x20;
+            //ulong num1 = (ulong)HalfTypeHelper.Pack(vector.W) << 0x30;
+            //return num4 | num3 | num2 | num1;
         }
 
         #region IPackedVector
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         [CLSCompliant(false)]
-        public ulong PackedValue { get; set; }
+        public ulong PackedValue
+        {
+            get => Unsafe.As<HalfVector4, ulong>(ref this);
+            set => Unsafe.As<HalfVector4, ulong>(ref this) = value;
+        }
 
         /// <inheritdoc/>
-        public void FromVector4(Vector4 vector) => PackedValue = Pack(vector);
+        public void FromVector4(Vector4 vector) => this = Pack(vector);
 
         /// <inheritdoc/>
         public Vector4 ToVector4() => new Vector4(
-                HalfTypeHelper.Unpack((ushort)PackedValue),
-                HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x10)),
-                HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x20)),
-                HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x30)));
-
+            X.ToSingle(), Y.ToSingle(), Z.ToSingle(), W.ToSingle());
+                //HalfTypeHelper.Unpack((ushort)PackedValue),
+                //HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x10)),
+                //HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x20)),
+                //HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x30)));
+        
         #endregion
 
         #region IPixel

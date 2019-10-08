@@ -7,19 +7,15 @@ using MonoGame.Framework;
 
 namespace MonoGame.Utilities.PackedVector
 {
+    /// <summary>
+    /// Packed vector type containing 16-bit signed XY components.
+    /// <para>Ranges from [-1, -1, 0, 1] to [1, 1, 0, 1] in vector form.</para>
+    /// </summary>
 	public struct NormalizedShort2 : IPackedVector<uint>, IEquatable<NormalizedShort2>
 	{
-		private uint short2Packed;
+        public NormalizedShort2(Vector2 vector) => PackedValue = Pack(vector.X, vector.Y);
 
-        public NormalizedShort2(Vector2 vector)
-		{
-            short2Packed = PackInTwo(vector.X, vector.Y);
-		}
-
-        public NormalizedShort2(float x, float y)
-		{
-            short2Packed = PackInTwo(x, y);
-		}
+        public NormalizedShort2(float x, float y) => PackedValue = Pack(x, y);
 
         public static bool operator !=(NormalizedShort2 a, NormalizedShort2 b)
 		{
@@ -32,36 +28,26 @@ namespace MonoGame.Utilities.PackedVector
 		}
 
         [CLSCompliant(false)]
-        public uint PackedValue
-        {
-            get
-            {
-                return short2Packed;
-            }
-            set
-            {
-                short2Packed = value;
-            }
-		}
+        public uint PackedValue { get; set; }
 
-		public override bool Equals (object obj)
+        public override bool Equals (object obj)
 		{
             return (obj is NormalizedShort2) && Equals((NormalizedShort2)obj);
 		}
 
         public bool Equals(NormalizedShort2 other)
 		{
-            return short2Packed.Equals(other.short2Packed);
+            return PackedValue.Equals(other.PackedValue);
 		}
 
 		public override int GetHashCode ()
 		{
-			return short2Packed.GetHashCode();
+			return PackedValue.GetHashCode();
 		}
 
 		public override string ToString ()
 		{
-            return short2Packed.ToString("X");
+            return PackedValue.ToString("X");
 		}
 
 		public Vector2 ToVector2 ()
@@ -69,12 +55,12 @@ namespace MonoGame.Utilities.PackedVector
             const float maxVal = 0x7FFF;
 
 			var v2 = new Vector2 ();
-            v2.X = ((short)(short2Packed & 0xFFFF)) / maxVal;
-            v2.Y = (short)(short2Packed >> 0x10) / maxVal;
+            v2.X = ((short)(PackedValue & 0xFFFF)) / maxVal;
+            v2.Y = (short)(PackedValue >> 0x10) / maxVal;
 			return v2;
 		}
 
-		private static uint PackInTwo (float vectorX, float vectorY)
+		private static uint Pack (float vectorX, float vectorY)
 		{
 			const float maxPos = 0x7FFF;
             const float minNeg = -maxPos;
@@ -89,7 +75,7 @@ namespace MonoGame.Utilities.PackedVector
 
 		public void FromVector4 (Vector4 vector)
 		{
-            short2Packed = PackInTwo(vector.X, vector.Y);
+            PackedValue = Pack(vector.X, vector.Y);
 		}
 
         /// <summary>
@@ -101,8 +87,8 @@ namespace MonoGame.Utilities.PackedVector
             const float maxVal = 0x7FFF;
 
 			var v4 = new Vector4 (0,0,0,1);
-            v4.X = ((short)((short2Packed >> 0x00) & 0xFFFF)) / maxVal;
-            v4.Y = ((short)((short2Packed >> 0x10) & 0xFFFF)) / maxVal;
+            v4.X = ((short)((PackedValue >> 0x00) & 0xFFFF)) / maxVal;
+            v4.Y = ((short)((PackedValue >> 0x10) & 0xFFFF)) / maxVal;
 			return v4;
 		}
 	}

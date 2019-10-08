@@ -23,13 +23,13 @@ namespace MonoGame.Utilities.PackedVector
         public Bgra5551(ushort packed) => PackedValue = packed;
 
         /// <summary>
-        /// Constructs the packed vector with raw values.
+        /// Constructs the packed vector with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
         public Bgra5551(Vector4 vector) => PackedValue = Pack(ref vector);
 
         /// <summary>
-        /// Constructs the packed vector with raw values.
+        /// Constructs the packed vector with vector form values.
         /// </summary>
         public Bgra5551(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
         {
@@ -47,10 +47,6 @@ namespace MonoGame.Utilities.PackedVector
                 (((int)Math.Round(vector.Z * 31f) & 0x1F) << 0) |
                 (((int)Math.Round(vector.W) & 0x1) << 15));
         }
-
-        #region IPixel
-
-        #endregion
 
         #region IPackedVector
 
@@ -70,6 +66,16 @@ namespace MonoGame.Utilities.PackedVector
 
         /// <inheritdoc />
         public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
+
+        #endregion
+
+        #region IPixel
+
+        /// <inheritdoc />
+        public Vector4 ToScaledVector4() => ToVector4();
+
+        /// <inheritdoc />
+        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
         #endregion
 
@@ -96,6 +102,5 @@ namespace MonoGame.Utilities.PackedVector
         public override int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
-
     }
 }

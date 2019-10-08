@@ -16,12 +16,12 @@ namespace MonoGame.Utilities.PackedVector
         #region Constructors
 
         /// <summary>
-        /// Constructs the packed vector with a packed value.
+        /// Constructs the packed vector with a raw value.
         /// </summary>
         public Alpha8(byte value) => PackedValue = value;
 
         /// <summary>
-        /// Constructs the packed vector with a raw value.
+        /// Constructs the packed vector with a vector form value.
         /// </summary>
         /// <param name="alpha">The W component.</param>
         public Alpha8(float alpha) => PackedValue = Pack(alpha);
@@ -33,14 +33,10 @@ namespace MonoGame.Utilities.PackedVector
         /// </summary>
         public float ToAlpha() => PackedValue / 255f;
 
-        private static byte Pack(float alpha) => 
-            (byte)Math.Round(MathHelper.Clamp(alpha, 0, 1) * 255f);
-
-        #region IPixel
-
-
-
-        #endregion
+        private static byte Pack(float alpha)
+        {
+            return (byte)Math.Round(MathHelper.Clamp(alpha, 0, 1) * 255f);
+        }
 
         #region IPackedVector
 
@@ -51,7 +47,17 @@ namespace MonoGame.Utilities.PackedVector
         public void FromVector4(Vector4 vector) => PackedValue = Pack(vector.W);
 
         /// <inheritdoc />
-        public Vector4 ToVector4() => new Vector4(0f, 0f, 0f, PackedValue / 255f);
+        public Vector4 ToVector4() => new Vector4(0, 0, 0, PackedValue / 255f);
+
+        #endregion
+
+        #region IPixel
+
+        /// <inheritdoc />
+        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
+
+        /// <inheritdoc />
+        public Vector4 ToScaledVector4() => ToVector4();
 
         #endregion
 

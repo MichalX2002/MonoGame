@@ -3,7 +3,7 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Base interface for pixels, defining the operations to be implemented by a pixel type.
+    /// The operations to be implemented by a pixel type.
     /// </summary>
     public interface IPixel : IPackedVector
     {

@@ -12,11 +12,6 @@ namespace MonoGame.Utilities.PackedVector
         public static readonly Vector4 MaxBytes = new Vector4(byte.MaxValue);
 
         /// <summary>
-        /// <see cref="Vector4"/> with all values set to 0.5f.
-        /// </summary>
-        public static readonly Vector4 Half = new Vector4(0.5F);
-
-        /// <summary>
         /// Gets the packed vector in <see cref="Vector3"/> format.
         /// </summary>
         [Obsolete("To be replaced with a per-type implementation.")]
@@ -40,14 +35,14 @@ namespace MonoGame.Utilities.PackedVector
         public static ushort UpScale8To16Bit(byte component) => (ushort)(component * 257);
 
         /// <summary>
-        /// Gets the luminance from the RGB components using the formula as specified by ITU-R Recommendation BT.709.
+        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte Get8BitBT709Luminance(byte r, byte g, byte b) =>
             (byte)((r * .2126F) + (g * .7152F) + (b * .0722F) + 0.5f);
 
         /// <summary>
-        /// Gets the luminance from the RGB components using the formula as specified by ITU-R Recommendation BT.709.
+        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
         /// </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -55,7 +50,7 @@ namespace MonoGame.Utilities.PackedVector
             (ushort)((r * .2126F) + (g * .7152F) + (b * .0722F));
 
         /// <summary>
-        /// Gets the luminance from the RGB components using the formula as specified by ITU-R Recommendation BT.709.
+        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
         /// </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -63,7 +58,7 @@ namespace MonoGame.Utilities.PackedVector
             (r * .2126F) + (g * .7152F) + (b * .0722F);
 
         /// <summary>
-        /// Gets the luminance from the RGB components using the formula as specified by ITU-R Recommendation BT.709.
+        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
         /// </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

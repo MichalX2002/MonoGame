@@ -24,14 +24,19 @@ namespace MonoGame.Framework
         #region Public Constants
 
         /// <summary>
-        /// Returns a <see cref="Vector4"/> with components 0, 0, 0, 0.
+        /// Returns a <see cref="Vector4"/> with all components set to 0.
         /// </summary>
         public static readonly Vector4 Zero = new Vector4(0, 0, 0, 0);
 
         /// <summary>
-        /// Returns a <see cref="Vector4"/> with components 1, 1, 1, 1.
+        /// Returns a <see cref="Vector4"/> with all components set to 0.5.
         /// </summary>
-        public static readonly Vector4 One = new Vector4(1f, 1f, 1f, 1f);
+        public static readonly Vector4 Half = new Vector4(0.5f);
+
+        /// <summary>
+        /// Returns a <see cref="Vector4"/> with all components set to 1.
+        /// </summary>
+        public static readonly Vector4 One = new Vector4(1f);
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 1, 0, 0, 0.

@@ -24,13 +24,13 @@ namespace MonoGame.Utilities.PackedVector
         public Bgr565(ushort packed) => PackedValue = packed;
 
         /// <summary>
-        /// Constructs the packed vector with raw values.
+        /// Constructs the packed vector with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector3"/> containing the components.</param>
         public Bgr565(Vector3 vector) => PackedValue = Pack(ref vector);
 
         /// <summary>
-        /// Constructs the packed vector with raw values.
+        /// Constructs the packed vector with vector form values.
         /// </summary>
         public Bgr565(float x, float y, float z) : this(new Vector3(x, y, z))
         {
@@ -47,12 +47,6 @@ namespace MonoGame.Utilities.PackedVector
                 (((int)Math.Round(Math.Round(vector.Y) * 63.0f) & 0x3F) << 5) |
                 ((int)Math.Round(Math.Round(vector.Z) * 31f) & 0x1F));
         }
-
-        #region IPixel
-
-
-
-        #endregion
 
         #region IPackedVector
 
@@ -78,6 +72,16 @@ namespace MonoGame.Utilities.PackedVector
                 (PackedValue & 0x1F) * (1f / 31f),
                 1f);
         }
+
+        #endregion
+
+        #region IPixel
+
+        /// <inheritdoc />
+        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
+
+        /// <inheritdoc />
+        public Vector4 ToScaledVector4() => ToVector4();
 
         #endregion
 

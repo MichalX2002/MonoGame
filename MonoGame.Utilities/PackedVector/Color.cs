@@ -12,13 +12,12 @@ using System.Runtime.CompilerServices;
 namespace MonoGame.Framework
 {
     /// <summary>
-    /// Packed vector type containing unsigned 8-bit XYZW components.
-    /// The color components are stored in RGBA order.
+    /// Packed vector type containing unsigned 8-bit RGBA components.
     /// <para>Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.</para>
     /// </summary>
     [DataContract]
     [DebuggerDisplay("{DebugDisplayString,nq}")]
-    public partial struct Color : IPixel, IPackedVector<uint>, IEquatable<Color>
+    public partial struct Color : IPackedVector<uint>, IEquatable<Color>, IPixel
     {
         /// <summary>
         /// Gets or sets the red component.
@@ -88,14 +87,7 @@ namespace MonoGame.Framework
         #region Constructors
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> with a packed value.
-        /// R in the least significant byte.
-        /// </summary>
-        [CLSCompliant(false)]
-        public Color(uint packed) : this() => PackedValue = packed;
-
-        /// <summary>
-        /// Constructs the <see cref="Color"/> from with raw values.
+        /// Constructs the <see cref="Color"/> with raw values.
         /// </summary>
         /// <remarks>
         /// This overload sets the values directly without clamping and 
@@ -110,7 +102,15 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> from raw values. 
+        /// Constructs the <see cref="Color"/> with a packed value.
+        /// R in the least significant byte.
+        /// </summary>
+        [CLSCompliant(false)]
+        public Color(uint packed) : this() => PackedValue = packed;
+
+
+        /// <summary>
+        /// Constructs the <see cref="Color"/> with clamped raw values. 
         /// <para>
         /// The values are clamped between <see cref="byte.MinValue"/> and <see cref="byte.MaxValue"/>.
         /// </para>
@@ -128,7 +128,8 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> from raw values. Alpha value will be opaque.
+        /// Constructs the <see cref="Color"/> with clamped raw values. 
+        /// Alpha value will be opaque.
         /// <para>
         /// The values are clamped between <see cref="byte.MinValue"/> and <see cref="byte.MaxValue"/>.
         /// </para>
@@ -141,8 +142,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> from scalars representing red, green, blue and alpha values.
-        /// <para>The values are clamped between 0 and 1.</para>
+        /// Constructs the <see cref="Color"/> from vector form values.
         /// </summary>
         /// <param name="r">Red component value from 0 to 1.</param>
         /// <param name="g">Green component value from 0 to 1.</param>
@@ -154,18 +154,16 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> from the XYZW components of a vector.
-        /// <para>The values are clamped between 0 and 1.</para>
+        /// Constructs the <see cref="Color"/> with vector form values.
         /// </summary>
-        /// <param name="color"><see cref="Vector4"/> representing RGBA color.</param>
+        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
         public Color(Vector4 color) : this(color.X, color.Y, color.Z, color.W)
         {
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> from scalars representing red, green and blue values. 
+        /// Constructs the <see cref="Color"/> with vector form values. 
         /// Alpha value will be opaque.
-        /// <para>The values are clamped between 0 and 1.</para>
         /// </summary>
         /// <param name="r">Red component value from 0 to 1.</param>
         /// <param name="g">Green component value from 0 to 1.</param>
@@ -175,11 +173,11 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> from the XYZ components of a vector.
+        /// Constructs the <see cref="Color"/> with vector form values.
         /// Alpha value will be opaque.
         /// <para>The values are clamped between 0 and 1.</para>
         /// </summary>
-        /// <param name="color"><see cref="Vector3"/> representing RGB color.</param>
+        /// <param name="color"><see cref="Vector3"/> containing the components.</param>
         public Color(Vector3 color) : this(color.X, color.Y, color.Z)
         {
         }
@@ -217,8 +215,17 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="color">The RGB values.</param>
         /// <param name="alpha">Alpha component value from 0 to 1.</param>
-        public Color(Rgb24 color, float alpha) :
-            this(color, MathHelper.Clamp((int)(alpha * 255), byte.MinValue, byte.MaxValue))
+        public Color(Rgb24 color, int alpha) :
+            this(color, MathHelper.Clamp(alpha, byte.MinValue, byte.MaxValue))
+        {
+        }
+
+        /// <summary>
+        /// Constructs <see cref="Rgb24"/> from an <see cref="Rgb24"/> and alpha value.
+        /// </summary>
+        /// <param name="color">The RGB values.</param>
+        /// <param name="alpha">Alpha component value from 0 to 1.</param>
+        public Color(Rgb24 color, float alpha) : this(color, (int)(alpha * 255))
         {
         }
 
@@ -236,13 +243,22 @@ namespace MonoGame.Framework
         }
 
         /// <inheritdoc />
-        public Vector4 ToVector4() => new Vector4(R / 255f, G / 255f, B / 255f, A / 255f);
+        public Vector4 ToVector4() => ToScaledVector4();
 
         /// <inheritdoc />
-        public void FromVector4(Vector4 vector)
+        public void FromVector4(Vector4 vector) => FromScaledVector4(vector);
+
+        #endregion
+
+        #region IPixel
+
+        /// <inheritdoc />
+        public Vector4 ToScaledVector4() => new Vector4(R / 255f, G / 255f, B / 255f, A / 255f);
+
+        /// <inheritdoc />
+        public void FromScaledVector4(Vector4 vector) 
         {
-            vector *= PackedVectorHelper.MaxBytes;
-            vector += PackedVectorHelper.Half;
+            vector *= 255;
             vector = Vector4.Clamp(vector, Vector4.Zero, PackedVectorHelper.MaxBytes);
 
             R = (byte)vector.X;
@@ -251,25 +267,38 @@ namespace MonoGame.Framework
             A = (byte)vector.W;
         }
 
-        #endregion
-
-        #region IPixel
+        /// <inheritdoc />
+        public void FromGray8(Gray8 source)
+        {
+            R = source.PackedValue;
+            G = source.PackedValue;
+            B = source.PackedValue;
+            A = byte.MaxValue;
+        }
 
         /// <inheritdoc />
-        public Rgba64 ToRgba64() => new Rgba64(
-            PackedVectorHelper.UpScale8To16Bit(R),
-            PackedVectorHelper.UpScale8To16Bit(G),
-            PackedVectorHelper.UpScale8To16Bit(B),
-            PackedVectorHelper.UpScale8To16Bit(A));
+        public void FromGray16(Gray16 source)
+        {
+            R = G = B = PackedVectorHelper.DownScale16To8Bit(source.PackedValue);
+            A = byte.MaxValue;
+        }
 
         /// <inheritdoc />
-        public void ToColor(ref Color dest) => dest = this;
-
-        /// <inheritdoc />
-        public void FromRgba64(Rgba64 color) => FromVector4(color.ToVector4());
+        public void FromGrayAlpha16(GrayAlpha16 source)
+        {
+            R = G = B = source.L;
+            A = source.A;
+        }
 
         /// <inheritdoc />
         public void FromColor(Color color) => this = color;
+
+        /// <inheritdoc />
+        public void FromRgb24(Rgb24 source)
+        {
+            Rgb = source;
+            A = byte.MaxValue;
+        }
 
         /// <inheritdoc />
         public void FromRgb48(Rgb48 source)
@@ -281,6 +310,29 @@ namespace MonoGame.Framework
         }
 
         /// <inheritdoc />
+        public void FromRgba64(Rgba64 source)
+        {
+            R = PackedVectorHelper.DownScale16To8Bit(source.R);
+            G = PackedVectorHelper.DownScale16To8Bit(source.G);
+            B = PackedVectorHelper.DownScale16To8Bit(source.B);
+            A = PackedVectorHelper.DownScale16To8Bit(source.A);
+        }
+
+        /// <inheritdoc />
+        public void ToColor(ref Color destination) => destination = this;
+
+        #endregion
+
+        /// <inheritdoc />
+        public void FromBgra5551(Bgra5551 source) => FromVector4(source.ToVector4());
+
+        /// <inheritdoc />
+        public void FromBgr24(Bgr24 source)
+        {
+            Bgr = source;
+            A = byte.MaxValue;
+        }
+
         public void FromArgb32(Argb32 source)
         {
             R = source.R;
@@ -297,53 +349,6 @@ namespace MonoGame.Framework
             B = source.B;
             A = source.A;
         }
-
-        /// <inheritdoc />
-        public void FromBgra5551(Bgra5551 source) => FromVector4(source.ToVector4());
-
-        /// <inheritdoc />
-        public void FromRgb24(Rgb24 source)
-        {
-            Rgb = source;
-            A = byte.MaxValue;
-        }
-
-        /// <inheritdoc />
-        public void FromBgr24(Bgr24 source)
-        {
-            Bgr = source;
-            A = byte.MaxValue;
-        }
-
-        /// <inheritdoc />
-        public void FromGray8(Gray8 source)
-        {
-            R = source.PackedValue;
-            G = source.PackedValue;
-            B = source.PackedValue;
-            A = byte.MaxValue;
-        }
-
-        /// <inheritdoc />
-        public void FromGray16(Gray16 source)
-        {
-            byte lum = PackedVectorHelper.DownScale16To8Bit(source.PackedValue);
-            R = lum;
-            G = lum;
-            B = lum;
-            A = byte.MaxValue;
-        }
-
-        /// <inheritdoc />
-        public void FromGrayAlpha(GrayAlpha16 source)
-        {
-            R = source.L;
-            G = source.L;
-            B = source.L;
-            A = source.A;
-        }
-
-        #endregion
 
         /// <summary>
         /// Gets the <see cref="Bgra32"/> representation of this <see cref="Color"/>.
@@ -380,6 +385,12 @@ namespace MonoGame.Framework
         /// </summary>
         /// <returns>A <see cref="Vector3"/> representation for this object.</returns>
         public Vector3 ToVector3() => new Vector3(R / 255f, G / 255f, B / 255f);
+
+        public Rgba64 ToRgba64() => new Rgba64(
+            PackedVectorHelper.UpScale8To16Bit(R),
+            PackedVectorHelper.UpScale8To16Bit(G),
+            PackedVectorHelper.UpScale8To16Bit(B),
+            PackedVectorHelper.UpScale8To16Bit(A));
 
         /// <summary>
         /// Deconstruction method for <see cref="Color"/>.
@@ -473,18 +484,12 @@ namespace MonoGame.Framework
         /// <summary>
         /// Compares whether two <see cref="Color"/> instances are equal.
         /// </summary>
-        public static bool operator ==(in Color a, in Color b)
-        {
-            return a.R == b.R
-                && a.G == b.G
-                && a.B == b.B
-                && a.A == b.A;
-        }
+        public static bool operator ==(in Color a, in Color b) => a.PackedValue == b.PackedValue;
 
         /// <summary>
         /// Compares whether two <see cref="Color"/> instances are not equal.
         /// </summary>
-        public static bool operator !=(in Color a, in Color b) => !(a == b);
+        public static bool operator !=(in Color a, in Color b) => a.PackedValue != b.PackedValue;
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="Color"/>.

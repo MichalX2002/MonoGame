@@ -10,7 +10,7 @@ namespace MonoGame.Utilities.PackedVector
     /// Ranges from [0, 0, 0, 1] to [1, 1, 1, 1] in vector form.
     /// </para>
     /// </summary>
-    public struct PackedSingle : IPackedVector<uint>, IPixel
+    public struct PackedSingle : IPackedVector<uint>, IEquatable<PackedSingle>, IPixel
     {
         public float Value;
 
@@ -50,7 +50,10 @@ namespace MonoGame.Utilities.PackedVector
         public void FromGray16(Gray16 source) => Value = source.PackedValue / 65535f;
 
         /// <inheritdoc />
-        public void FromRgb24(Rgb24 source) => 
+        public void FromGrayAlpha16(GrayAlpha16 source) => FromGray8(source.Luminance);
+
+        /// <inheritdoc />
+        public void FromRgb24(Rgb24 source) =>
             Value = PackedVectorHelper.GetBT709Luminance(source.R, source.G, source.B) / 255f;
 
         /// <inheritdoc/>
@@ -58,7 +61,7 @@ namespace MonoGame.Utilities.PackedVector
             Value = PackedVectorHelper.GetBT709Luminance(source.R, source.G, source.B) / 255f;
 
         /// <inheritdoc/>
-        public void FromRgb48(Rgb48 source) => 
+        public void FromRgb48(Rgb48 source) =>
             Value = PackedVectorHelper.GetBT709Luminance(source.R, source.G, source.B) / 65535f;
 
         /// <inheritdoc/>
@@ -66,11 +69,29 @@ namespace MonoGame.Utilities.PackedVector
             Value = PackedVectorHelper.GetBT709Luminance(source.R, source.G, source.B) / 65535f;
 
         /// <inheritdoc />
-        public void ToColor(ref Color dest)
+        public void ToColor(ref Color destination)
         {
-            dest.R = dest.G = dest.B = (byte)(Value * 255f);
-            dest.A = byte.MaxValue;
+            destination.R = destination.G = destination.B = (byte)(Value * 255);
+            destination.A = byte.MaxValue;
         }
+
+        #endregion
+
+        #region Equals
+
+
+
+        public bool Equals(PackedSingle other) => this == other;
+
+        public override bool Equals(object obj) => obj is PackedSingle other && Equals(other);
+
+        #endregion
+
+        #region Object Overrides
+
+        public override string ToString() => Value.ToString();
+
+        public override int GetHashCode() => Value.GetHashCode();
 
         #endregion
     }

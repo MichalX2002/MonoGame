@@ -22,7 +22,7 @@ namespace MonoGame.Utilities.PackedVector
         public HalfSingle(ushort value) : this() => PackedValue = value;
 
         /// <summary>
-        /// Constructs the packed vector with a raw value.
+        /// Constructs the packed vector with a vector form value.
         /// </summary>
         public HalfSingle(float single) => PackedValue = HalfTypeHelper.Pack(single);
 
@@ -32,6 +32,20 @@ namespace MonoGame.Utilities.PackedVector
         /// Gets the packed vector as a <see cref="float"/>.
         /// </summary>
         public float ToSingle() => HalfTypeHelper.Unpack(PackedValue);
+
+        #region IPackedVector
+
+        /// <inheritdoc/>
+        [CLSCompliant(false)]
+        public ushort PackedValue { get; set; }
+
+        /// <inheritdoc />
+        public void FromVector4(Vector4 vector) => PackedValue = HalfTypeHelper.Pack(vector.X);
+
+        /// <inheritdoc />
+        public Vector4 ToVector4() => new Vector4(ToSingle(), 0, 0, 1);
+
+        #endregion
 
         #region IPixel
 
@@ -51,20 +65,6 @@ namespace MonoGame.Utilities.PackedVector
             single /= 2;
             return new Vector4(single, 0, 0, 1);
         }
-
-        #endregion
-
-        #region IPackedVector
-
-        /// <inheritdoc/>
-        [CLSCompliant(false)]
-        public ushort PackedValue { get; set; }
-
-        /// <inheritdoc />
-        public void FromVector4(Vector4 vector) => PackedValue = HalfTypeHelper.Pack(vector.X);
-
-        /// <inheritdoc />
-        public Vector4 ToVector4() => new Vector4(ToSingle(), 0, 0, 1);
 
         #endregion
 

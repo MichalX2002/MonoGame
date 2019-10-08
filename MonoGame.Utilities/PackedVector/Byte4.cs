@@ -11,7 +11,7 @@ namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
     /// Packed vector type containing unsigned 8-bit XYZW components.
-    /// <para>Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.</para>
+    /// <para>Ranges from [0, 0, 0, 0] to [255, 255, 255, 255] in vector form.</para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct Byte4 : IPackedVector<uint>, IEquatable<Byte4>, IPixel
@@ -22,13 +22,7 @@ namespace MonoGame.Utilities.PackedVector
         public byte W;
 
         #region Constructors
-
-        /// <summary>
-        /// Constructs the packed vector with a packed value.
-        /// </summary>
-        [CLSCompliant(false)]
-        public Byte4(uint packed) : this() => PackedValue = packed;
-
+        
         /// <summary>
         /// Constructs the packed vector with raw values.
         /// </summary>
@@ -41,13 +35,19 @@ namespace MonoGame.Utilities.PackedVector
         }
 
         /// <summary>
-        /// Constructs the packed vector with raw values.
+        /// Constructs the packed vector with a packed value.
+        /// </summary>
+        [CLSCompliant(false)]
+        public Byte4(uint packed) : this() => PackedValue = packed;
+
+        /// <summary>
+        /// Constructs the packed vector with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
         public Byte4(Vector4 vector) => this = Pack(ref vector);
 
         /// <summary>
-        /// Constructs the packed vector with raw values.
+        /// Constructs the packed vector with vector form values.
         /// </summary>
         public Byte4(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
         {
@@ -57,7 +57,7 @@ namespace MonoGame.Utilities.PackedVector
 
         private static Byte4 Pack(ref Vector4 vector)
         {
-            vector *= PackedVectorHelper.MaxBytes;
+            vector *= 255;
             vector = Vector4.Clamp(vector, Vector4.Zero, PackedVectorHelper.MaxBytes);
 
             return new Byte4(
@@ -66,12 +66,6 @@ namespace MonoGame.Utilities.PackedVector
                 (byte)Math.Round(vector.Z),
                 (byte)Math.Round(vector.W));
         }
-
-        #region IPixel
-
-
-
-        #endregion
 
         #region IPackedVector
 
@@ -96,6 +90,16 @@ namespace MonoGame.Utilities.PackedVector
                 (PackedValue >> 0x18) & 0xFF);
         }
 
+        #endregion
+
+        #region IPixel
+
+        /// <inheritdoc/>
+        public void FromScaledVector4(Vector4 vector) => FromVector4(vector * 255);
+
+        /// <inheritdoc/>
+        public Vector4 ToScaledVector4() => ToVector4() / 255;
+        
         #endregion
 
         #region Equals

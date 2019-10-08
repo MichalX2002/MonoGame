@@ -32,14 +32,19 @@ namespace MonoGame.Framework
         public static readonly Vector3 MinValue = new Vector3(float.MinValue);
 
         /// <summary>
-        /// <see cref="Vector3"/> with components 0, 0, 0.
+        /// <see cref="Vector3"/> with all components set to 0.
         /// </summary>
-        public static readonly Vector3 Zero = new Vector3(0f, 0f, 0f);
+        public static readonly Vector3 Zero = new Vector3(0f);
 
         /// <summary>
-        /// <see cref="Vector3"/> with components 1, 1, 1.
+        /// <see cref="Vector3"/> with all components set to 0.5.
         /// </summary>
-        public static readonly Vector3 One = new Vector3(1f, 1f, 1f);
+        public static readonly Vector3 Half = new Vector3(0.5f);
+
+        /// <summary>
+        /// <see cref="Vector3"/> with all components set to 1.
+        /// </summary>
+        public static readonly Vector3 One = new Vector3(1f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 1, 0, 0.

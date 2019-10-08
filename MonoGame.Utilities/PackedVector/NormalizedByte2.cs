@@ -1,60 +1,82 @@
-// MonoGame - Copyright (C) The MonoGame Team
+﻿// MonoGame - Copyright (C) The MonoGame Team
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
 using MonoGame.Framework;
 
 namespace MonoGame.Utilities.PackedVector
 {
+    /// <summary>
+    /// Packed vector type containing 8-bit signed XY components.
+    /// <para>Ranges from [-1, -1, 0, 1] to [1, 1, 0, 1] in vector form.</para>
+    /// </summary>
     public struct NormalizedByte2 : IPackedVector<ushort>, IEquatable<NormalizedByte2>, IPixel
     {
+        [CLSCompliant(false)]
+        public sbyte X;
+
+        [CLSCompliant(false)]
+        public sbyte Y;
+
         #region Constructors
+
+        /// <summary>
+        /// Constructs the packed vector with raw values.
+        /// </summary>
+        [CLSCompliant(false)]
+        public NormalizedByte2(sbyte x, sbyte y)
+        {
+            X = x;
+            Y = y;
+        }
 
         /// <summary>
         /// Constructs the packed vector with a packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public NormalizedByte2(ushort packed) => PackedValue = packed;
+        public NormalizedByte2(ushort packed) : this() => PackedValue = packed;
 
         /// <summary>
-        /// Constructs the packed vector with raw values.
+        /// Constructs the packed vector with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public NormalizedByte2(Vector2 vector) => PackedValue = Pack(vector);
+        public NormalizedByte2(Vector2 vector) => this = Pack(vector);
 
         /// <summary>
-        /// Constructs the packed vector with raw values.
+        /// Constructs the packed vector with vector form values.
         /// </summary>
         public NormalizedByte2(float x, float y) : this(new Vector2(x, y))
-        { 
+        {
         }
 
         #endregion
 
-        private static ushort Pack(in Vector2 vector)
+        private static NormalizedByte2 Pack(Vector2 vector)
         {
-            int byte2 = (((ushort)Math.Round(MathHelper.Clamp(vector.X, 0, 1) * 255f)) & 0xFF) << 0;
-            int byte1 = (((ushort)Math.Round(MathHelper.Clamp(vector.Y, 0, 1) * 255f)) & 0xFF) << 8;
-            return (ushort)(byte2 | byte1);
+            vector = Vector2.Clamp(vector, -Vector2.One, Vector2.One);
+            vector *= 127;
+            
+            return new NormalizedByte2(
+                (sbyte)Math.Round(vector.X),
+                (sbyte)Math.Round(vector.Y));
         }
 
-        public Vector2 ToVector2()
-        {
-            return new Vector2(
-                ((byte)((PackedValue >> 0) & 0xFF)) / 255f,
-                ((byte)((PackedValue >> 8) & 0xFF)) / 255f);
-        }
+        public Vector2 ToVector2() => new Vector2(X, Y) / 127;
 
         #region IPackedVector
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         [CLSCompliant(false)]
-        public ushort PackedValue { get; set; }
+        public ushort PackedValue
+        {
+            get => Unsafe.As<NormalizedByte2, ushort>(ref this);
+            set => Unsafe.As<NormalizedByte2, ushort>(ref this) = value;
+        }
 
         /// <inheritdoc/>
-        public void FromVector4(Vector4 vector) => 
-            PackedValue = Pack(new Vector2(vector.X, vector.Y));
+        public void FromVector4(Vector4 vector) => this = Pack(new Vector2(vector.X, vector.Y));
 
         /// <inheritdoc/>
         public Vector4 ToVector4() => new Vector4(ToVector2(), 0, 1);
@@ -69,7 +91,7 @@ namespace MonoGame.Utilities.PackedVector
             var scaled = new Vector2(vector.X, vector.Y);
             scaled *= 2;
             scaled -= Vector2.One;
-            PackedValue = Pack(scaled);
+            this = Pack(scaled);
         }
 
         /// <inheritdoc/>

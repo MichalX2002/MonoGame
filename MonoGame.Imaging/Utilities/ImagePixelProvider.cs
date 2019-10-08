@@ -46,7 +46,7 @@ namespace MonoGame.Imaging.Pixels
                 int toRead = Math.Min(pixelsLeft, readBuffer.Length);
                 _pixels.GetPixelRow(startX + byteOffset / Components, startY, readBuffer.Slice(0, toRead));
                 
-                // some for-loops in the folling cases use "toRead - 1" so
+                // some for-loops in the following cases use "toRead - 1" so
                 // we can copy leftover bytes if the request length is irregular
                 switch (Components)
                 {

@@ -27,14 +27,19 @@ namespace MonoGame.Framework
         #region Constants
 
         /// <summary>
-        /// Returns a <see cref="Vector2"/> with components 0, 0.
+        /// Returns a <see cref="Vector2"/> with all components set to 0.
         /// </summary>
-        public static readonly Vector2 Zero = new Vector2(0f, 0f);
+        public static readonly Vector2 Zero = new Vector2(0f);
 
         /// <summary>
-        /// Returns a <see cref="Vector2"/> with components 1, 1.
+        /// Returns a <see cref="Vector2"/> with all components set 0.5.
         /// </summary>
-        public static readonly Vector2 One = new Vector2(1f, 1f);
+        public static readonly Vector2 Half = new Vector2(0.5f);
+
+        /// <summary>
+        /// Returns a <see cref="Vector2"/> with all components set to 1.
+        /// </summary>
+        public static readonly Vector2 One = new Vector2(1f);
 
         /// <summary>
         /// Returns a <see cref="Vector2"/> with components 1, 0.
@@ -77,10 +82,10 @@ namespace MonoGame.Framework
         #region Constructors
 
         /// <summary>
-        /// Constructs a 2d vector with X and Y from two values.
+        /// Constructs a 2D vector with X and Y from two values.
         /// </summary>
-        /// <param name="x">The x coordinate in 2d-space.</param>
-        /// <param name="y">The y coordinate in 2d-space.</param>
+        /// <param name="x">The x coordinate in 2D-space.</param>
+        /// <param name="y">The y coordinate in 2D-space.</param>
         public Vector2(float x, float y)
         {
             X = x;
@@ -88,9 +93,9 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs a 2d vector with X and Y set to the same value.
+        /// Constructs a 2D vector with X and Y set to the same value.
         /// </summary>
-        /// <param name="value">The x and y coordinates in 2d-space.</param>
+        /// <param name="value">The x and y coordinates in 2D-space.</param>
         public Vector2(float value)
         {
             X = value;
@@ -160,13 +165,13 @@ namespace MonoGame.Framework
         public static Vector2 Add(in Vector2 a, in Vector2 b) => a + b;
 
         /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains the cartesian coordinates of a vector specified in barycentric coordinates and relative to 2d-triangle.
+        /// Creates a new <see cref="Vector2"/> that contains the cartesian coordinates of a vector specified in barycentric coordinates and relative to 2D-triangle.
         /// </summary>
-        /// <param name="a">The first vector of 2d-triangle.</param>
-        /// <param name="b">The second vector of 2d-triangle.</param>
-        /// <param name="c">The third vector of 2d-triangle.</param>
-        /// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 2d-triangle.</param>
-        /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 2d-triangle.</param>
+        /// <param name="a">The first vector of 2D-triangle.</param>
+        /// <param name="b">The second vector of 2D-triangle.</param>
+        /// <param name="c">The third vector of 2D-triangle.</param>
+        /// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 2D-triangle.</param>
+        /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 2D-triangle.</param>
         /// <returns>The cartesian translation of barycentric coordinates.</returns>
         public static Vector2 Barycentric(
             in Vector2 a, in Vector2 b, in Vector2 c, float amount1, float amount2)
@@ -557,7 +562,7 @@ namespace MonoGame.Framework
         #region Transform & TransformNormal
 
         /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains a transformation of 2d-vector by the specified <see cref="Matrix"/>.
+        /// Creates a new <see cref="Vector2"/> that contains a transformation of 2D-vector by the specified <see cref="Matrix"/>.
         /// </summary>
         /// <param name="position">Source <see cref="Vector2"/>.</param>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>

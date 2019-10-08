@@ -7,18 +7,20 @@ using MonoGame.Framework;
 
 namespace MonoGame.Utilities.PackedVector
 {
+    /// <summary>
+    /// Packed vector type containing 16-bit signed XYZW components.
+    /// <para>Ranges from [-1, -1, -1, -1] to [1, 1, 1, 1] in vector form.</para>
+    /// </summary>
     public struct NormalizedShort4 : IPackedVector<ulong>, IEquatable<NormalizedShort4>
 	{
-		private ulong short4Packed;
-
         public NormalizedShort4(Vector4 vector)
 		{
-            short4Packed = PackInFour(vector.X, vector.Y, vector.Z, vector.W);
+            PackedValue = Pack(vector);
 		}
 
         public NormalizedShort4(float x, float y, float z, float w)
 		{
-            short4Packed = PackInFour(x, y, z, w);
+            PackedValue = Pack(x, y, z, w);
 		}
 
         public static bool operator !=(NormalizedShort4 a, NormalizedShort4 b)
@@ -32,17 +34,7 @@ namespace MonoGame.Utilities.PackedVector
 		}
 
         [CLSCompliant(false)]
-        public ulong PackedValue
-        {
-            get
-            {
-                return short4Packed;
-            }
-            set
-            {
-                short4Packed = value;
-            }
-		}
+        public ulong PackedValue { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -51,37 +43,36 @@ namespace MonoGame.Utilities.PackedVector
 
         public bool Equals(NormalizedShort4 other)
         {
-            return short4Packed.Equals(other.short4Packed);
+            return PackedValue.Equals(other.PackedValue);
         }
 
 		public override int GetHashCode ()
 		{
-			return short4Packed.GetHashCode();
+			return PackedValue.GetHashCode();
 		}
 
 		public override string ToString ()
 		{
-            return short4Packed.ToString("X");
+            return PackedValue.ToString("X");
 		}
 
-        private static ulong PackInFour(float vectorX, float vectorY, float vectorZ, float vectorW)
+        private static ulong Pack(in Vector4 vector)
 		{
 			const long mask = 0xFFFF;
             const long maxPos = 0x7FFF;
             const long minNeg = -maxPos;
 
 			// clamp the value between min and max values
-            var word4 = (ulong)((int)Math.Round(MathHelper.Clamp(vectorX * maxPos, minNeg, maxPos)) & mask);
-            var word3 = (ulong)((int)Math.Round(MathHelper.Clamp(vectorY * maxPos, minNeg, maxPos)) & mask) << 0x10;
-            var word2 = (ulong)((int)Math.Round(MathHelper.Clamp(vectorZ * maxPos, minNeg, maxPos)) & mask) << 0x20;
-            var word1 = (ulong)((int)Math.Round(MathHelper.Clamp(vectorW * maxPos, minNeg, maxPos)) & mask) << 0x30;
-
+            var word4 = (ulong)((int)Math.Round(MathHelper.Clamp(vector.X * maxPos, minNeg, maxPos)) & mask);
+            var word3 = (ulong)((int)Math.Round(MathHelper.Clamp(vector.Y * maxPos, minNeg, maxPos)) & mask) << 0x10;
+            var word2 = (ulong)((int)Math.Round(MathHelper.Clamp(vector.Z * maxPos, minNeg, maxPos)) & mask) << 0x20;
+            var word1 = (ulong)((int)Math.Round(MathHelper.Clamp(vector.W * maxPos, minNeg, maxPos)) & mask) << 0x30;
 			return word4 | word3 | word2 | word1;
 		}
 
 		public void FromVector4 (Vector4 vector)
 		{
-            short4Packed = PackInFour(vector.X, vector.Y, vector.Z, vector.W);
+            PackedValue = Pack(vector.X, vector.Y, vector.Z, vector.W);
 		}
 
 		public Vector4 ToVector4 ()
@@ -89,10 +80,10 @@ namespace MonoGame.Utilities.PackedVector
             const float maxVal = 0x7FFF;
 
 			var v4 = new Vector4 ();
-            v4.X = ((short)((short4Packed >> 0x00) & 0xFFFF)) / maxVal;
-            v4.Y = ((short)((short4Packed >> 0x10) & 0xFFFF)) / maxVal;
-            v4.Z = ((short)((short4Packed >> 0x20) & 0xFFFF)) / maxVal;
-            v4.W = ((short)((short4Packed >> 0x30) & 0xFFFF)) / maxVal;
+            v4.X = ((short)((PackedValue >> 0x00) & 0xFFFF)) / maxVal;
+            v4.Y = ((short)((PackedValue >> 0x10) & 0xFFFF)) / maxVal;
+            v4.Z = ((short)((PackedValue >> 0x20) & 0xFFFF)) / maxVal;
+            v4.W = ((short)((PackedValue >> 0x30) & 0xFFFF)) / maxVal;
 			return v4;
 		}
 	}
