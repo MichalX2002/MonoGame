@@ -1,9 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Threading;
-using MonoGame.Utilities;
 using MonoGame.Utilities.Memory;
 using StbSharp;
 
@@ -11,7 +9,7 @@ namespace MonoGame.Imaging.Encoding
 {
     public abstract partial class StbEncoderBase : IImageEncoder
     {
-        private static unsafe IMemoryResult CustomDeflateCompress(
+        private static IMemoryResult CustomDeflateCompress(
             ReadOnlySpan<byte> data,
             CompressionLevel level,
             CancellationToken cancellation,
@@ -20,41 +18,41 @@ namespace MonoGame.Imaging.Encoding
             cancellation.ThrowIfCancellationRequested();
 
             var output = RecyclableMemoryManager.Default.GetMemoryStream();
+            var copyBuffer = RecyclableMemoryManager.Default.GetBlock();
             try
             {
                 var header = ZlibHeader.CreateForDeflateStream(level);
                 output.WriteByte(header.GetCMF());
                 output.WriteByte(header.GetFLG());
 
-                fixed (byte* dataPtr = &MemoryMarshal.GetReference(data))
+                cancellation.ThrowIfCancellationRequested();
+
+                using (var deflate = new DeflateStream(output, level, leaveOpen: true))
                 {
-                    cancellation.ThrowIfCancellationRequested();
-
-                    using (var deflate = new DeflateStream(output, level, leaveOpen: true))
-                    using (var source = new UnmanagedMemoryStream(dataPtr, data.Length))
+                    int totalRead = 0;
+                    while (totalRead < data.Length)
                     {
-                        long copied = 0;
-                        double dataLength = data.Length;
-                        source.PooledCopyTo(deflate, (read) =>
-                        {
-                            copied += read;
-                            onProgress?.Invoke(copied / dataLength);
+                        cancellation.ThrowIfCancellationRequested();
 
-                            cancellation.ThrowIfCancellationRequested();
-                        });
+                        int count = Math.Min(data.Length - totalRead, copyBuffer.Length);
+                        data.Slice(totalRead, count).CopyTo(copyBuffer);
+                        deflate.Write(copyBuffer, 0, count);
+
+                        totalRead += count;
+                        onProgress?.Invoke(totalRead / (double)data.Length);
                     }
                 }
 
-                uint adlerSum = StbImageWrite.Adler32.Calculate(data, cancellation);
-                var adlerChecksum = new Span<byte>(&adlerSum, sizeof(uint));
-                adlerChecksum.Reverse();
-                output.Write(adlerChecksum);
+                uint adlerSum = StbImageWrite.Adler32.Calculate(data);
+                byte[] adlerBytes = BitConverter.GetBytes(adlerSum);
+                adlerBytes.AsSpan().Reverse();
+                output.Write(adlerBytes, 0, adlerBytes.Length);
 
-                cancellation.ThrowIfCancellationRequested();
                 return new RecyclableDeflateResult(output);
             }
             catch
             {
+                RecyclableMemoryManager.Default.ReturnBlock(copyBuffer);
                 output.Dispose();
                 throw;
             }

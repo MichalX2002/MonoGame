@@ -716,7 +716,7 @@ namespace StbSharp
             ring_buffer = stbir__get_ring_buffer_entry(stbir_info.ring_buffer, ring_buffer_index,
                 stbir_info.ring_buffer_length_bytes / sizeof(float));
 
-            CRuntime.memset(ring_buffer, 0, (ulong)(stbir_info.ring_buffer_length_bytes));
+            CRuntime.memset(ring_buffer, 0, stbir_info.ring_buffer_length_bytes);
             return ring_buffer;
         }
 
@@ -928,7 +928,7 @@ namespace StbSharp
         {
             stbir__decode_scanline(stbir_info, n);
             CRuntime.memset(stbir_info.horizontal_buffer, 0,
-                (ulong)(stbir_info.output_w * stbir_info.channels * sizeof(float)));
+                stbir_info.output_w * stbir_info.channels * sizeof(float));
             if ((stbir__use_width_upsampling(stbir_info)) != 0)
                 stbir__resample_horizontal_upsample(stbir_info, n, stbir_info.horizontal_buffer);
             else
@@ -1133,7 +1133,7 @@ namespace StbSharp
             int n0 = (int)(vertical_contributors[contributor].n0);
             int n1 = (int)(vertical_contributors[contributor].n1);
             int output_row_start = (int)(n * stbir_info.output_stride_bytes);
-            CRuntime.memset(encode_buffer, 0, (ulong)(output_w * sizeof(float) * channels));
+            CRuntime.memset(encode_buffer, 0, output_w * sizeof(float) * channels);
             switch (channels)
             {
                 case 1:
@@ -1489,7 +1489,7 @@ namespace StbSharp
             info.vertical_filter = (int)(v_filter);
         }
 
-        public static uint stbir__calculate_memory(ImageResizeInfo info)
+        public static int stbir__calculate_memory(ImageResizeInfo info)
         {
             int pixel_margin = stbir__get_filter_pixel_margin(info.horizontal_filter, info.horizontal_scale);
             int filter_height = stbir__get_filter_pixel_width(info.vertical_filter, info.vertical_scale);
@@ -1513,7 +1513,7 @@ namespace StbSharp
             else
                 info.encode_buffer_size = 0;
 
-            return (uint)
+            return 
                 (info.horizontal_contributors_size + info.horizontal_coefficients_size +
                  info.vertical_contributors_size +
                  info.vertical_coefficients_size + info.decode_buffer_size + info.horizontal_buffer_size +
@@ -1523,9 +1523,9 @@ namespace StbSharp
 
         public static int stbir__resize_allocated(ImageResizeInfo info, void* input_data, int input_stride_in_bytes,
             void* output_data, int output_stride_in_bytes, int alpha_channel, uint flags, DataType type, int edge_horizontal,
-            int edge_vertical, int colorspace, void* tempmem, ulong tempmem_size_in_bytes)
+            int edge_vertical, int colorspace, void* tempmem, int tempmem_size_in_bytes)
         {
-            ulong memory_required = (ulong)(stbir__calculate_memory(info));
+            int memory_required = stbir__calculate_memory(info);
             int width_stride_input = (int)((input_stride_in_bytes) != 0
                     ? input_stride_in_bytes
                     : info.channels * info.input_w * stbir__type_size[(int)type]);
@@ -1548,7 +1548,8 @@ namespace StbSharp
                 return 0;
             if ((tempmem_size_in_bytes) < (memory_required))
                 return 0;
-            CRuntime.memset(tempmem, 0, (ulong)(tempmem_size_in_bytes));
+
+            CRuntime.memset(tempmem, 0, tempmem_size_in_bytes);
             info.input_data = input_data;
             info.input_stride_bytes = (int)(width_stride_input);
             info.output_data = output_data;
@@ -1614,20 +1615,18 @@ namespace StbSharp
             DataType type, int h_filter, int v_filter, int edge_horizontal, int edge_vertical, int colorspace)
         {
             var info = new ImageResizeInfo();
-            int result;
-            ulong memory_required;
-            void* extra_memory;
             stbir__setup(info, (int)(input_w), (int)(input_h), (int)(output_w), (int)(output_h), (int)(channels));
             stbir__calculate_transform(info, (float)(s0), (float)(t0), (float)(s1), (float)(t1), transform);
             stbir__choose_filter(info, (int)(h_filter), (int)(v_filter));
-            memory_required = (ulong)(stbir__calculate_memory(info));
-            extra_memory = CRuntime.malloc((ulong)(memory_required));
+            int memory_required = stbir__calculate_memory(info);
+            void* extra_memory = CRuntime.malloc(memory_required);
             if (extra_memory == null)
                 return 0;
-            result = (int)(stbir__resize_allocated(info, input_data, (int)(input_stride_in_bytes), output_data,
-                    (int)(output_stride_in_bytes), (int)(alpha_channel), (uint)(flags), type,
-                    (int)(edge_horizontal),
-                    (int)(edge_vertical), (int)(colorspace), extra_memory, (ulong)(memory_required)));
+            int result = (int)(stbir__resize_allocated(
+                info, input_data, (int)(input_stride_in_bytes), output_data,
+                (int)(output_stride_in_bytes), (int)(alpha_channel), (uint)(flags), type,
+                (int)(edge_horizontal),
+                (int)(edge_vertical), (int)(colorspace), extra_memory, memory_required));
             CRuntime.free(extra_memory);
             return (int)(result);
         }
