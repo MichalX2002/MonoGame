@@ -62,10 +62,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
+    <Folder Include="StbSharp\Image\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="StbSharp\Image\" />
+    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
   </ItemGroup>
 </Project>

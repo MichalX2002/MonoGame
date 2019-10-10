@@ -68,6 +68,8 @@ namespace MonoGame.Utilities.PackedVector
 
         #endregion
 
+        public static implicit operator float(HalfSingle value) => value.ToSingle();
+
         #region Equals
 
         public static bool operator ==(HalfSingle a, HalfSingle b) => a.PackedValue == b.PackedValue;

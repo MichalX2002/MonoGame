@@ -9,8 +9,10 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed vector type containing 8-bit signed XYZW components.
-    /// <para>Ranges from [-1, -1, -1, -1] to [1, 1, 1, 1] in vector form.</para>
+    /// Packed vector type containing signed 8-bit XYZW components.
+    /// <para>
+    /// Ranges from [-1, -1, -1, -1] to [1, 1, 1, 1] in vector form.
+    /// </para>
     /// </summary>
     public struct NormalizedByte4 : IPackedVector<uint>, IEquatable<NormalizedByte4>, IPixel
     {
@@ -64,13 +66,13 @@ namespace MonoGame.Utilities.PackedVector
         private static NormalizedByte4 Pack(ref Vector4 vector)
         {
             vector = Vector4.Clamp(vector, -Vector4.One, Vector4.One);
-            vector *= 127;
+            vector *= 127f;
 
             return new NormalizedByte4(
-                (sbyte)(Math.Round(vector.X)),
-                (sbyte)(Math.Round(vector.Y)),
-                (sbyte)(Math.Round(vector.Z)),
-                (sbyte)(Math.Round(vector.W)));
+                (sbyte)vector.X,
+                (sbyte)vector.Y,
+                (sbyte)vector.Z,
+                (sbyte)vector.W);
         }
 
         #region IPackedVector
@@ -87,7 +89,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
         /// <inheritdoc/>
-        public Vector4 ToVector4() => new Vector4(X, Y, Z, W) / 127;
+        public Vector4 ToVector4() => new Vector4(X, Y, Z, W) / 127f;
 
         #endregion
 
@@ -98,7 +100,7 @@ namespace MonoGame.Utilities.PackedVector
         {
             vector *= 2;
             vector -= Vector4.One;
-            FromVector4(vector);
+            this = Pack(ref vector);
         }
 
         /// <inheritdoc/>

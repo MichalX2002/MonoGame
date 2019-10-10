@@ -4,104 +4,125 @@
 
 
 using System;
+using System.Runtime.CompilerServices;
 using MonoGame.Framework;
 
 namespace MonoGame.Utilities.PackedVector
 {
-	public struct Short2 : IPackedVector<uint>, IEquatable<Short2>
-	{
-		private uint _short2Packed;
+    /// <summary>
+    /// Packed pixel type containing two signed 16-bit integers.
+    /// <para>
+    /// Ranges from [-32768, -32768, 0, 1] to [32767, 32767, 0, 1] in vector form.
+    /// </para>
+    /// </summary>
+    public struct Short2 : IPackedVector<uint>, IEquatable<Short2>
+    {
+        private static Vector2 Offset = new Vector2(32768);
+        private static Vector2 MinNeg = new Vector2(short.MinValue);
+        private static Vector2 MaxPos = new Vector2(short.MaxValue);
 
-		public Short2 (Vector2 vector)
-		{
-			_short2Packed = PackInTwo (vector.X, vector.Y);
-		}
+        public short X;
+        public short Y;
 
-		public Short2 (float x, float y)
-		{
-			_short2Packed = PackInTwo (x, y);
-		}
-
-		public static bool operator !=(Short2 a, Short2 b)
-		{
-			return a.PackedValue != b.PackedValue;
-		}
-
-		public static bool operator ==(Short2 a, Short2 b)
-		{
-			return a.PackedValue == b.PackedValue;
-		}
-
-        [CLSCompliant(false)]
-		public uint PackedValue
-        {
-			get
-            {
-				return _short2Packed;
-			}
-			set
-            {
-				_short2Packed = value;
-			}
-		}
-
-		public override bool Equals (object obj)
-		{
-            if (obj is Short2)
-                return this == (Short2)obj;
-            return false;
-		}
-
-		public bool Equals (Short2 other)
-		{
-            return this == other;
-		}
-
-		public override int GetHashCode ()
-		{
-			return _short2Packed.GetHashCode();
-		}
-
-		public override string ToString ()
-		{
-            return _short2Packed.ToString("x8");
-		}
-
-		public Vector2 ToVector2 ()
-		{
-			var v2 = new Vector2 ();
-			v2.X = (short)(_short2Packed & 0xFFFF);
-			v2.Y = (short)(_short2Packed >> 0x10);
-			return v2;
-		}
-
-		private static uint PackInTwo (float vectorX, float vectorY)
-		{
-			const float maxPos = 0x7FFF; // Largest two byte positive number 0xFFFF >> 1;
-			const float minNeg = ~(int)maxPos; // two's complement
-
-            // clamp the value between min and max values
-            var word2 = (uint) Math.Round(MathHelper.Clamp(vectorX, minNeg, maxPos)) & 0xFFFF;
-            var word1 = ((uint) Math.Round(MathHelper.Clamp(vectorY, minNeg, maxPos)) & 0xFFFF) << 0x10;
-
-            return word2 | word1;
-		}
-
-		public void FromVector4 (Vector4 vector)
-		{
-			_short2Packed = Short2.PackInTwo (vector.X, vector.Y);
-		}
+        #region Constructors
 
         /// <summary>
-        /// Gets the packed vector in Vector4 format.
+        /// Constructs the packed vector with raw values.
         /// </summary>
-        /// <returns>The packed vector in Vector4 format</returns>
-		public Vector4 ToVector4 ()
-		{
-			var v4 = new Vector4 (0,0,0,1);
-			v4.X = (short)(_short2Packed & 0xFFFF);
-			v4.Y = (short)(_short2Packed >> 0x10);
-			return v4;
-		}
-	}
+        [CLSCompliant(false)]
+        public Short2(short x, short y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        /// <summary>
+        /// Constructs the packed vector with a packed value.
+        /// </summary>
+        [CLSCompliant(false)]
+        public Short2(uint packed) : this() => PackedValue = packed;
+
+        /// <summary>
+        /// Constructs the packed vector with vector form values.
+        /// </summary>
+        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
+        public Short2(Vector2 vector) => this = Pack(vector);
+
+        /// <summary>
+        /// Constructs the packed vector with vector form values.
+        /// </summary>
+        public Short2(float x, float y) : this(new Vector2(x, y))
+        {
+        }
+
+        #endregion
+
+        public Vector2 ToVector2() => new Vector2(X, Y);
+
+        private static Short2 Pack(Vector2 vector)
+        {
+            vector = Vector2.Clamp(vector, MinNeg, MaxPos);
+
+            return new Short2(
+                (short)Math.Round(vector.X),
+                (short)Math.Round(vector.Y));
+        }
+
+        #region IPackedVector
+
+        /// <inheritdoc />
+        [CLSCompliant(false)]
+        public uint PackedValue
+        {
+            get => Unsafe.As<Short2, uint>(ref this);
+            set => Unsafe.As<Short2, uint>(ref this) = value;
+        }
+
+        /// <inheritdoc />
+        public void FromVector4(Vector4 vector) => this = Pack(vector.ToVector2());
+
+        /// <inheritdoc />
+        public Vector4 ToVector4() => new Vector4(X, Y, 0, 1);
+
+        #endregion
+
+        #region IPixel
+
+        /// <inheritdoc/>
+        public void FromScaledVector4(Vector4 vector)
+        {
+            var scaled = vector.ToVector2() * 65535f;
+            scaled -= Offset;
+            this = Pack(scaled);
+        }
+        
+        /// <inheritdoc/>
+        public Vector4 ToScaledVector4()
+        {
+            var scaled = ToVector2();
+            scaled += Offset;
+            scaled /= 65535f;
+            return new Vector4(scaled, 0, 1);
+        }
+
+        #endregion
+
+        #region Equals
+
+        public static bool operator ==(Short2 a, Short2 b) => a.PackedValue == b.PackedValue;
+        public static bool operator !=(Short2 a, Short2 b) => a.PackedValue != b.PackedValue;
+
+        public bool Equals(Short2 other) => this == other;
+        public override bool Equals(object obj) => obj is Short2 other && Equals(other);
+
+        #endregion
+
+        #region Object Overrides
+
+        public override string ToString() => PackedValue.ToString("X8");
+
+        public override int GetHashCode() => PackedValue.GetHashCode();
+
+        #endregion
+    }
 }

@@ -7,11 +7,6 @@ namespace MonoGame.Utilities.PackedVector
     public static class PackedVectorHelper
     {
         /// <summary>
-        /// <see cref="Vector4"/> with all values set to <see cref="byte.MaxValue"/>.
-        /// </summary>
-        public static readonly Vector4 MaxBytes = new Vector4(byte.MaxValue);
-
-        /// <summary>
         /// Gets the packed vector in <see cref="Vector3"/> format.
         /// </summary>
         [Obsolete("To be replaced with a per-type implementation.")]

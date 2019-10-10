@@ -10,8 +10,10 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed vector type containing unsigned 8-bit XYZW components.
-    /// <para>Ranges from [0, 0, 0, 0] to [255, 255, 255, 255] in vector form.</para>
+    /// Packed vector type containing unsigned 8-bit XYZW integer components.
+    /// <para>
+    /// Ranges from [0, 0, 0, 0] to [255, 255, 255, 255] in vector form.
+    /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct Byte4 : IPackedVector<uint>, IEquatable<Byte4>, IPixel
@@ -58,7 +60,7 @@ namespace MonoGame.Utilities.PackedVector
         private static Byte4 Pack(ref Vector4 vector)
         {
             vector *= 255;
-            vector = Vector4.Clamp(vector, Vector4.Zero, PackedVectorHelper.MaxBytes);
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxBytes);
 
             return new Byte4(
                 (byte)Math.Round(vector.X),
@@ -81,14 +83,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
         /// <inheritdoc />
-        public Vector4 ToVector4()
-        {
-            return new Vector4(
-                PackedValue & 0xFF,
-                (PackedValue >> 0x8) & 0xFF,
-                (PackedValue >> 0x10) & 0xFF,
-                (PackedValue >> 0x18) & 0xFF);
-        }
+        public Vector4 ToVector4() => new Vector4(X, Y, Z, W);
 
         #endregion
 

@@ -56,7 +56,7 @@ namespace MonoGame.Utilities.PackedVector
             return new HalfVector2(new HalfSingle(x), new HalfSingle(y));
         }
 
-        public Vector2 ToVector2() => new Vector2(X.ToSingle(), Y.ToSingle());
+        public Vector2 ToVector2() => new Vector2(X, Y);
         //    HalfTypeHelper.Unpack((ushort)PackedValue),
         //    HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x10)));
 

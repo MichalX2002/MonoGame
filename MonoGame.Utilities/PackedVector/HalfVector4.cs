@@ -81,8 +81,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromVector4(Vector4 vector) => this = Pack(vector);
 
         /// <inheritdoc/>
-        public Vector4 ToVector4() => new Vector4(
-            X.ToSingle(), Y.ToSingle(), Z.ToSingle(), W.ToSingle());
+        public Vector4 ToVector4() => new Vector4(X, Y, Z, W);
                 //HalfTypeHelper.Unpack((ushort)PackedValue),
                 //HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x10)),
                 //HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x20)),

@@ -9,11 +9,15 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed vector type containing 8-bit signed XY components.
-    /// <para>Ranges from [-1, -1, 0, 1] to [1, 1, 0, 1] in vector form.</para>
+    /// Packed vector type containing signed 8-bit XY components.
+    /// <para>
+    /// Ranges from [-1, -1, 0, 1] to [1, 1, 0, 1] in vector form.
+    /// </para>
     /// </summary>
     public struct NormalizedByte2 : IPackedVector<ushort>, IEquatable<NormalizedByte2>, IPixel
     {
+        private static readonly Vector4 Offset = new Vector4(128);
+
         [CLSCompliant(false)]
         public sbyte X;
 
@@ -56,14 +60,12 @@ namespace MonoGame.Utilities.PackedVector
         private static NormalizedByte2 Pack(Vector2 vector)
         {
             vector = Vector2.Clamp(vector, -Vector2.One, Vector2.One);
-            vector *= 127;
-            
-            return new NormalizedByte2(
-                (sbyte)Math.Round(vector.X),
-                (sbyte)Math.Round(vector.Y));
+            vector *= 127f;
+
+            return new NormalizedByte2((sbyte)vector.X, (sbyte)vector.Y);
         }
 
-        public Vector2 ToVector2() => new Vector2(X, Y) / 127;
+        public readonly Vector2 ToVector2() => new Vector2(X, Y) / 127f;
 
         #region IPackedVector
 
@@ -76,7 +78,7 @@ namespace MonoGame.Utilities.PackedVector
         }
 
         /// <inheritdoc/>
-        public void FromVector4(Vector4 vector) => this = Pack(new Vector2(vector.X, vector.Y));
+        public void FromVector4(Vector4 vector) => this = Pack(vector.ToVector2());
 
         /// <inheritdoc/>
         public Vector4 ToVector4() => new Vector4(ToVector2(), 0, 1);
@@ -88,7 +90,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector)
         {
-            var scaled = new Vector2(vector.X, vector.Y);
+            var scaled = vector.ToVector2();
             scaled *= 2;
             scaled -= Vector2.One;
             this = Pack(scaled);

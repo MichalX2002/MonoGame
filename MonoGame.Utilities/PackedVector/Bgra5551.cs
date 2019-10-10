@@ -10,7 +10,9 @@ namespace MonoGame.Utilities.PackedVector
     /// <summary>
     /// Packed vector type containing unsigned XYZW components.
     /// The XYZ components use 5 bits each, and the W component uses 1 bit.
-    /// <para>Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.</para>
+    /// <para>
+    /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
+    /// </para>
     /// </summary>
     public struct Bgra5551 : IPackedVector<ushort>, IEquatable<Bgra5551>, IPixel
     {

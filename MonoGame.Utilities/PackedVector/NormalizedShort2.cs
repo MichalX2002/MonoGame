@@ -3,93 +3,77 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
 using MonoGame.Framework;
 
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed vector type containing 16-bit signed XY components.
-    /// <para>Ranges from [-1, -1, 0, 1] to [1, 1, 0, 1] in vector form.</para>
+    /// Packed vector type containing signed 16-bit XY components.
+    /// <para>
+    /// Ranges from [-1, -1, 0, 1] to [1, 1, 0, 1] in vector form.
+    /// </para>
     /// </summary>
 	public struct NormalizedShort2 : IPackedVector<uint>, IEquatable<NormalizedShort2>
 	{
-        public NormalizedShort2(Vector2 vector) => PackedValue = Pack(vector.X, vector.Y);
+        public short X;
+        public short Y;
 
-        public NormalizedShort2(float x, float y) => PackedValue = Pack(x, y);
+        #region Constructors
 
-        public static bool operator !=(NormalizedShort2 a, NormalizedShort2 b)
-		{
-			return !a.Equals (b);
-		}
+        public NormalizedShort2(Vector2 vector) => this = Pack(vector);
 
-        public static bool operator ==(NormalizedShort2 a, NormalizedShort2 b)
-		{
-			return a.Equals (b);
-		}
+        public NormalizedShort2(float x, float y) : this(new Vector2(x, y))
+        {
+        }
 
+        #endregion
+
+        private static NormalizedShort2 Pack(Vector2 vector)
+        {
+            vector = Vector2.Clamp(vector, -Vector2.One, Vector2.One);
+            vector *= 32767f;
+
+            return new NormalizedShort2((short)vector.X, (short)vector.Y);
+        }
+
+        /// <inheritdoc />
+        public readonly Vector2 ToVector2() => new Vector2(X, Y) / 32767f;
+
+        #region IPackedVector
+
+        /// <inheritdoc />
         [CLSCompliant(false)]
-        public uint PackedValue { get; set; }
+        public uint PackedValue
+        {
+            get => Unsafe.As<NormalizedShort2, uint>(ref this);
+            set => Unsafe.As<NormalizedShort2, uint>(ref this) = value;
+        }
 
-        public override bool Equals (object obj)
-		{
-            return (obj is NormalizedShort2) && Equals((NormalizedShort2)obj);
-		}
+        /// <inheritdoc />
+        public void FromVector4(Vector4 vector) => this = Pack(vector.ToVector2());
 
-        public bool Equals(NormalizedShort2 other)
-		{
-            return PackedValue.Equals(other.PackedValue);
-		}
+        /// <inheritdoc/>
+        public readonly Vector4 ToVector4() => new Vector4(ToVector2(), 0, 1);
 
-		public override int GetHashCode ()
-		{
-			return PackedValue.GetHashCode();
-		}
+        #endregion
 
-		public override string ToString ()
-		{
-            return PackedValue.ToString("X");
-		}
+        #region Equals
 
-		public Vector2 ToVector2 ()
-		{
-            const float maxVal = 0x7FFF;
+        public static bool operator ==(NormalizedShort2 a, NormalizedShort2 b) => a.PackedValue == b.PackedValue;
+        public static bool operator !=(NormalizedShort2 a, NormalizedShort2 b) => a.PackedValue != b.PackedValue;
 
-			var v2 = new Vector2 ();
-            v2.X = ((short)(PackedValue & 0xFFFF)) / maxVal;
-            v2.Y = (short)(PackedValue >> 0x10) / maxVal;
-			return v2;
-		}
+        public override bool Equals(object obj) => obj is NormalizedShort2 other && Equals(other);
+        public bool Equals(NormalizedShort2 other) => this == other;
 
-		private static uint Pack (float vectorX, float vectorY)
-		{
-			const float maxPos = 0x7FFF;
-            const float minNeg = -maxPos;
+        #endregion
 
-			// clamp the value between min and max values
-            // Round rather than truncate.
-            var word2 = (uint)((int)MathHelper.Clamp((float)Math.Round(vectorX * maxPos), minNeg, maxPos) & 0xFFFF);
-            var word1 = (uint)(((int)MathHelper.Clamp((float)Math.Round(vectorY * maxPos), minNeg, maxPos) & 0xFFFF) << 0x10);
+        #region Object Overrides
 
-			return word2 | word1;
-		}
+        public override string ToString() => PackedValue.ToString("X");
 
-		public void FromVector4 (Vector4 vector)
-		{
-            PackedValue = Pack(vector.X, vector.Y);
-		}
+        public override int GetHashCode() => PackedValue.GetHashCode();
 
-        /// <summary>
-        /// Gets the packed vector in Vector4 format.
-        /// </summary>
-        /// <returns>The packed vector in Vector4 format</returns>
-		public Vector4 ToVector4 ()
-		{
-            const float maxVal = 0x7FFF;
-
-			var v4 = new Vector4 (0,0,0,1);
-            v4.X = ((short)((PackedValue >> 0x00) & 0xFFFF)) / maxVal;
-            v4.Y = ((short)((PackedValue >> 0x10) & 0xFFFF)) / maxVal;
-			return v4;
-		}
+        #endregion
 	}
 }

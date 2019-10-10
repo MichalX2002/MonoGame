@@ -243,7 +243,7 @@ namespace MonoGame.Framework
         }
 
         /// <inheritdoc />
-        public Vector4 ToVector4() => ToScaledVector4();
+        public readonly Vector4 ToVector4() => ToScaledVector4();
 
         /// <inheritdoc />
         public void FromVector4(Vector4 vector) => FromScaledVector4(vector);
@@ -253,13 +253,13 @@ namespace MonoGame.Framework
         #region IPixel
 
         /// <inheritdoc />
-        public Vector4 ToScaledVector4() => new Vector4(R / 255f, G / 255f, B / 255f, A / 255f);
+        public readonly Vector4 ToScaledVector4() => new Vector4(R / 255f, G / 255f, B / 255f, A / 255f);
 
         /// <inheritdoc />
         public void FromScaledVector4(Vector4 vector) 
         {
             vector *= 255;
-            vector = Vector4.Clamp(vector, Vector4.Zero, PackedVectorHelper.MaxBytes);
+            vector = Vector4.Clamp(vector, Vector4.Zero, Byte4.MaxBytes);
 
             R = (byte)vector.X;
             G = (byte)vector.Y;

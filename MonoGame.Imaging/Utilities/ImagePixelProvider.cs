@@ -53,7 +53,7 @@ namespace MonoGame.Imaging.Pixels
                     case 1:
                         for (int i = 0; i < toRead; i++, byteOffset++)
                         {
-                            graySpan[0].FromVector4(readBuffer[i].ToVector4());
+                            graySpan[0].FromScaledVector4(readBuffer[i].ToScaledVector4());
                             buffer[byteOffset] = castTmp[0];
                         }
                         goto ReadEnd;
@@ -61,7 +61,7 @@ namespace MonoGame.Imaging.Pixels
                     case 2:
                         for (int i = 0; i < toRead - 1; i++, byteOffset += 2)
                         {
-                            grayAlphaSpan[0].FromVector4(readBuffer[i].ToVector4());
+                            grayAlphaSpan[0].FromScaledVector4(readBuffer[i].ToScaledVector4());
                             for (int j = 0; j < 2; j++)
                                 buffer[j + byteOffset] = castTmp[j];
                         }
@@ -70,7 +70,7 @@ namespace MonoGame.Imaging.Pixels
                     case 3:
                         for (int i = 0; i < toRead - 1; i++, byteOffset += 3)
                         {
-                            rgbSpan[0].FromVector4(readBuffer[i].ToVector4());
+                            rgbSpan[0].FromScaledVector4(readBuffer[i].ToScaledVector4());
                             for (int j = 0; j < 3; j++)
                                 buffer[j + byteOffset] = castTmp[j];
                         }

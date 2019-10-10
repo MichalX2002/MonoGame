@@ -21,6 +21,11 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebugDisplayString,nq}")]
     public struct Vector4 : IEquatable<Vector4>, IPixel
     {
+        /// <summary>
+        /// <see cref="Vector4"/> with all values set to <see cref="byte.MaxValue"/>.
+        /// </summary>
+        internal static readonly Vector4 MaxBytes = new Vector4(byte.MaxValue);
+
         #region Public Constants
 
         /// <summary>
@@ -94,7 +99,7 @@ namespace MonoGame.Framework
         /// Gets or sets the x and y coordinates as a (x,y) <see cref="Vector2"/>.
         /// </summary>
         [IgnoreDataMember]
-        public Vector2 XY { get => new Vector2(X, Y); set { X = value.X; Y = value.Y; } }
+        public Vector2 XY { get => ToVector2(); set { X = value.X; Y = value.Y; } }
 
         /// <summary>
         /// Gets or sets the z and w coordinates as a (z,w) <see cref="Vector2"/>.
@@ -114,6 +119,12 @@ namespace MonoGame.Framework
         [IgnoreDataMember]
         public Vector2 XW { get => new Vector2(X, W); set { X = value.X; W = value.Y; } }
 
+        /// <summary>
+        /// Gets or sets the x and y coordinates as a (x,y) <see cref="Vector2"/>.
+        /// </summary>
+        [IgnoreDataMember]
+        public Vector3 XYZ { get => ToVector3(); set { X = value.X; Y = value.Y; Z = value.Z; } }
+
         #endregion
 
         internal string DebugDisplayString
@@ -126,7 +137,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs a 3D vector with X, Y, Z and W from four values.
+        /// Constructs a 3D vector with XYZW values.
         /// </summary>
         /// <param name="x">The x coordinate in 4D-space.</param>
         /// <param name="y">The y coordinate in 4D-space.</param>
@@ -141,7 +152,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs a 3D vector with X and Z from <see cref="Vector2"/> and Z and W from the scalars.
+        /// Constructs a 3D vector with XZ from a <see cref="Vector2"/> and ZW from the scalars.
         /// </summary>
         /// <param name="value">The x and y coordinates in 4D-space.</param>
         /// <param name="z">The z coordinate in 4D-space.</param>
@@ -155,7 +166,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs a 3D vector with X, Y, Z from <see cref="Vector3"/> and W from a scalar.
+        /// Constructs a 3D vector with XYZ from a <see cref="Vector3"/> and W from a scalar.
         /// </summary>
         /// <param name="value">The x, y and z coordinates in 4D-space.</param>
         /// <param name="w">The w coordinate in 4D-space.</param>
@@ -168,7 +179,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs a 4D vector with X, Y, Z and W set to the same value.
+        /// Constructs a 4D vector with XYZW set to the same value.
         /// </summary>
         /// <param name="value">The x, y, z and w coordinates in 4D-space.</param>
         public Vector4(float value)
@@ -180,48 +191,58 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
+        /// Gets the <see cref="Vector2"/> representation of this vector.
+        /// </summary>
+        public readonly Vector2 ToVector2() => new Vector2(X, Y);
+
+        /// <summary>
         /// Gets the <see cref="Vector3"/> representation of this vector.
         /// </summary>
-        public Vector3 ToVector3() => new Vector3(X, Y, Z);
+        public readonly Vector3 ToVector3() => new Vector3(X, Y, Z);
+
+        #region IPackedVector 
 
         /// <inheritdoc/>
-        void IPackedVector.FromVector4(Vector4 vector) => this = Clamp(vector, Zero, One);
+        void IPackedVector.FromVector4(Vector4 vector) => this = vector;
 
         /// <inheritdoc/>
         Vector4 IPackedVector.ToVector4() => this;
 
+        #endregion
+
+        #region IPixel
+
         /// <inheritdoc/>
-        public void FromArgb32(Argb32 source) => this = source.ToVector4();
+        void IPixel.FromScaledVector4(Vector4 vector) => this = Clamp(vector, Zero, One);
+
+        /// <inheritdoc/>
+        readonly Vector4 IPixel.ToScaledVector4() => this;
 
         /// <inheritdoc />
-        public void FromBgr24(Bgr24 source) => this = source.ToVector4();
-
-        /// <inheritdoc/>
-        public void FromBgra32(Bgra32 source) => this = source.ToVector4();
-
-        /// <inheritdoc/>
-        public void FromBgra5551(Bgra5551 source) => this = source.ToVector4();
+        void IPixel.FromGray8(Gray8 source) => this = source.ToVector4();
 
         /// <inheritdoc />
-        public void FromGray8(Gray8 source) => this = source.ToVector4();
+        void IPixel.FromGray16(Gray16 source) => this = source.ToVector4();
 
         /// <inheritdoc />
-        public void FromGray16(Gray16 source) => this = source.ToVector4();
+        void IPixel.FromGrayAlpha16(GrayAlpha16 source) => this = source.ToVector4();
 
         /// <inheritdoc />
-        public void FromRgb24(Rgb24 source) => this = source.ToVector4();
+        void IPixel.FromRgb24(Rgb24 source) => this = source.ToVector4();
 
         /// <inheritdoc/>
-        public void FromColor(Color source) => this = source.ToVector4();
+        void IPixel.FromColor(Color source) => this = source.ToVector4();
 
         /// <inheritdoc/>
-        public void FromRgb48(Rgb48 source) => this = source.ToVector4();
+        void IPixel.FromRgb48(Rgb48 source) => this = source.ToVector4();
 
         /// <inheritdoc/>
-        public void FromRgba64(Rgba64 source) => this = source.ToVector4();
+        void IPixel.FromRgba64(Rgba64 source) => this = source.ToVector4();
 
         /// <inheritdoc />
-        public void ToColor(ref Color dest) => dest.FromVector4(this);
+        public readonly void ToColor(ref Color destination) => destination.FromVector4(this);
+
+        #endregion
 
         /// <summary>
         /// Performs vector addition on <paramref name="a"/> and <paramref name="b"/>.
@@ -232,7 +253,8 @@ namespace MonoGame.Framework
         public static Vector4 Add(in Vector4 a, in Vector4 b) => a + b;
 
         /// <summary>
-        /// Creates a new <see cref="Vector4"/> that contains the cartesian coordinates of a vector specified in barycentric coordinates and relative to 4D-triangle.
+        /// Creates a new <see cref="Vector4"/> that contains the cartesian coordinates
+        /// of a vector specified in barycentric coordinates and relative to 4D-triangle.
         /// </summary>
         /// <param name="a">The first vector of 4D-triangle.</param>
         /// <param name="b">The second vector of 4D-triangle.</param>

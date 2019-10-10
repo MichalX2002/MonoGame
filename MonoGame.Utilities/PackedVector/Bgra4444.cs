@@ -9,7 +9,9 @@ namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
     /// Packed vector type containing unsigned 4-bit XYZW components.
-    /// <para>Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.</para>
+    /// <para>
+    /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
+    /// </para>
     /// </summary>
     public struct Bgra4444 : IPackedVector<ushort>, IEquatable<Bgra4444>, IPixel
     {

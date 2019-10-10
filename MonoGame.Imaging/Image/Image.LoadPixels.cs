@@ -68,7 +68,7 @@ namespace MonoGame.Imaging
                     var srcRow = pixelBuffer.GetPixelRowSpan(sourceRectangle.Y + y);
                     var dstRow = image.GetPixelRowSpan(y);
                     for (int x = 0; x < sourceRectangle.Width; x++)
-                        dstRow[x].FromVector4(srcRow[x + sourceRectangle.X].ToVector4());
+                        dstRow[x].FromScaledVector4(srcRow[x + sourceRectangle.X].ToScaledVector4());
                 }
             }
             else
@@ -76,8 +76,8 @@ namespace MonoGame.Imaging
                 Span<TPixelTo> dstSpan = image.GetPixelSpan();
                 for (int y = 0; y < sourceRectangle.Height; y++)
                     for (int x = 0; x < sourceRectangle.Width; x++)
-                        dstSpan[x + y * sourceRectangle.Width].FromVector4(
-                            pixels.GetPixel(sourceRectangle.X + x, y + sourceRectangle.Height).ToVector4());
+                        dstSpan[x + y * sourceRectangle.Width].FromScaledVector4(
+                            pixels.GetPixel(sourceRectangle.X + x, y + sourceRectangle.Height).ToScaledVector4());
             }
             return image;
         }

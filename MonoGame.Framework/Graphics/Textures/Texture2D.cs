@@ -490,7 +490,7 @@ namespace MonoGame.Framework.Graphics
             switch (Format)
             {
                 case SurfaceFormat.Alpha8: SaveByType<Alpha8>(); break;
-                case SurfaceFormat.Single: SaveByType<PackedSingle>(); break;
+                case SurfaceFormat.Single: SaveByType<Gray32>(); break;
                 case SurfaceFormat.Rgba32SRgb: SaveByType<Rgba32SRgb>(); break;
                 case SurfaceFormat.Rgba32: SaveByType<Color>(); break;
                 case SurfaceFormat.Rg32: SaveByType<Rg32>(); break;

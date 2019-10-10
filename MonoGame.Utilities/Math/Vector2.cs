@@ -24,7 +24,12 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebugDisplayString,nq}")]
     public struct Vector2 : IEquatable<Vector2>, IPackedVector<ulong>, IPixel
     {
-        #region Constants
+        /// <summary>
+        /// <see cref="Vector2"/> with all values set to <see cref="byte.MaxValue"/>.
+        /// </summary>
+        internal static readonly Vector2 MaxBytes = new Vector2(byte.MaxValue);
+
+        #region Public Constants
 
         /// <summary>
         /// Returns a <see cref="Vector2"/> with all components set to 0.
@@ -69,14 +74,6 @@ namespace MonoGame.Framework
 
         #endregion
 
-        /// <inheritdoc/>
-        [CLSCompliant(false)]
-        public ulong PackedValue
-        {
-            get => Unsafe.As<Vector2, ulong>(ref this);
-            set => Unsafe.As<Vector2, ulong>(ref this) = value;
-        }
-
         internal string DebugDisplayString => string.Concat(X.ToString(), "  ", Y.ToString());
 
         #region Constructors
@@ -104,7 +101,15 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #region Public Methods
+        #region IPackedVector
+
+        /// <inheritdoc/>
+        [CLSCompliant(false)]
+        public ulong PackedValue
+        {
+            get => Unsafe.As<Vector2, ulong>(ref this);
+            set => Unsafe.As<Vector2, ulong>(ref this) = value;
+        }
 
         /// <inheritdoc />
         public void FromVector4(Vector4 vector)
@@ -114,47 +119,25 @@ namespace MonoGame.Framework
         }
 
         /// <inheritdoc />
-        public Vector4 ToVector4() => new Vector4(X, Y, 0F, 1F);
+        public Vector4 ToVector4() => new Vector4(X, Y, 0, 1);
+
+        #endregion
+
+        #region IPixel
 
         /// <inheritdoc />
-        public void FromArgb32(Argb32 source) => FromVector4(source.ToVector4());
+        public readonly void ToColor(ref Color destination) => destination.FromVector4(ToVector4());
 
-        /// <inheritdoc />
-        public void FromBgr24(Bgr24 source) => FromVector4(source.ToVector4());
+        #endregion
 
-        /// <inheritdoc />
-        public void FromBgra32(Bgra32 source) => FromVector4(source.ToVector4());
-
-        /// <inheritdoc/>
-        public void FromBgra5551(Bgra5551 source) => FromVector4(source.ToVector4());
-
-        /// <inheritdoc/>
-        public void FromGray8(Gray8 source) => FromVector4(source.ToVector4());
-
-        /// <inheritdoc/>
-        public void FromGray16(Gray16 source) => FromVector4(source.ToVector4());
-
-        /// <inheritdoc />
-        public void FromRgb24(Rgb24 source) => FromVector4(source.ToVector4());
-
-        /// <inheritdoc />
-        public void FromColor(Color source) => FromVector4(source.ToVector4());
-
-        /// <inheritdoc/>
-        public void FromRgb48(Rgb48 source) => FromVector4(source.ToVector4());
-
-        /// <inheritdoc/>
-        public void FromRgba64(Rgba64 source) => FromVector4(source.ToVector4());
-
-        /// <inheritdoc />
-        public void ToColor(ref Color dest) => dest.FromVector4(ToVector4());
+        #region Public Methods
 
         /// <summary>
         /// Gets a <see cref="Vector3"/> representation for this
         /// object with <see cref="Vector3.Z"/> axis set to 0.
         /// </summary>
         /// <returns>A <see cref="Vector3"/> representation for this object.</returns>
-        public Vector3 ToVector3() => new Vector3(X, Y, 0);
+        public readonly Vector3 ToVector3() => new Vector3(X, Y, 0);
 
         /// <summary>
         /// Performs vector addition on <paramref name="a"/> and <paramref name="b"/>.
@@ -289,20 +272,14 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="obj">The <see cref="object"/> to compare.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public override bool Equals(object obj)
-        {
-            return obj is Vector2 other ? this == other : false;
-        }
+        public override bool Equals(object obj) => obj is Vector2 other && Equals(other);
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="Vector2"/>.
         /// </summary>
         /// <param name="other">The <see cref="Vector2"/> to compare.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public bool Equals(Vector2 other)
-        {
-            return this == other;
-        }
+        public bool Equals(Vector2 other) => this == other;
 
         /// <summary>
         /// Round the members of this <see cref="Vector2"/> towards negative infinity.
@@ -742,8 +719,7 @@ namespace MonoGame.Framework
         /// <returns>The result of dividing a vector by a scalar.</returns>
         public static Vector2 operator /(in Vector2 value, float divider)
         {
-            float factor = 1 / divider;
-            return new Vector2(value.X * factor, value.Y * factor);
+            return new Vector2(value.X / divider, value.Y / divider);
         }
 
         /// <summary>
@@ -752,10 +728,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Vector2"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="Vector2"/> instance on the right of the equal sign.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public static bool operator ==(in Vector2 a, in Vector2 b)
-        {
-            return a.X == b.X && a.Y == b.Y;
-        }
+        public static bool operator ==(in Vector2 a, in Vector2 b) => a.X == b.X && a.Y == b.Y;
 
         /// <summary>
         /// Compares whether two <see cref="Vector2"/> instances are not equal.
@@ -763,10 +736,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Vector2"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="Vector2"/> instance on the right of the not equal sign.</param>
         /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>	
-        public static bool operator !=(in Vector2 a, in Vector2 b)
-        {
-            return !(a == b);
-        }
+        public static bool operator !=(in Vector2 a, in Vector2 b) => !(a == b);
 
         #endregion
     }

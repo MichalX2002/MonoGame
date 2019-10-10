@@ -8,8 +8,10 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed vector type containing an unsigned 8-bit W component.
-    /// <para>Ranges from [1, 1, 1, 0] to [1, 1, 1, 1] in vector form.</para>
+    /// Packed vector type containing an 8-bit W component.
+    /// <para>
+    /// Ranges from [1, 1, 1, 0] to [1, 1, 1, 1] in vector form.
+    /// </para>
     /// </summary>
     public struct Alpha8 : IPackedVector<byte>, IEquatable<Alpha8>, IPixel
     {
