@@ -47,16 +47,16 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc/>
         public readonly Vector4 ToScaledVector4() => ToVector4();
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromGray8(Gray8 source) => Value = source.PackedValue / 255f;
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromGray16(Gray16 source) => Value = source.PackedValue / 65535f;
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromGrayAlpha16(GrayAlpha16 source) => FromGray8(source.Luminance);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromRgb24(Rgb24 source) =>
             Value = PackedVectorHelper.GetBT709Luminance(source.R, source.G, source.B) / 255f;
 
@@ -72,7 +72,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromRgba64(Rgba64 source) =>
             Value = PackedVectorHelper.GetBT709Luminance(source.R, source.G, source.B) / 65535f;
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public readonly void ToColor(ref Color destination)
         {
             destination.R = destination.G = destination.B = (byte)(Value * 255);

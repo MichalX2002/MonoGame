@@ -41,7 +41,7 @@ namespace MonoGame.Utilities.PackedVector
 
         #region IPackedVector
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         [CLSCompliant(false)]
         public ulong PackedValue
         {
@@ -49,10 +49,10 @@ namespace MonoGame.Utilities.PackedVector
             set => Unsafe.As<NormalizedShort4, ulong>(ref this) = value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Vector4 ToVector4() => new Vector4(X, Y, Z, W) / 32767f;
 
         #endregion

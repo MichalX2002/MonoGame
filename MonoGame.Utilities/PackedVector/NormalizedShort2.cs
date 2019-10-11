@@ -37,12 +37,12 @@ namespace MonoGame.Utilities.PackedVector
             return new NormalizedShort2((short)vector.X, (short)vector.Y);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public readonly Vector2 ToVector2() => new Vector2(X, Y) / 32767f;
 
         #region IPackedVector
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         [CLSCompliant(false)]
         public uint PackedValue
         {
@@ -50,7 +50,7 @@ namespace MonoGame.Utilities.PackedVector
             set => Unsafe.As<NormalizedShort2, uint>(ref this) = value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => this = Pack(vector.ToVector2());
 
         /// <inheritdoc/>

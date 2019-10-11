@@ -233,7 +233,7 @@ namespace MonoGame.Framework
 
         #region IPackedVector
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         [IgnoreDataMember]
         [CLSCompliant(false)]
         public uint PackedValue
@@ -242,20 +242,20 @@ namespace MonoGame.Framework
             set => Unsafe.As<Color, uint>(ref this) = value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public readonly Vector4 ToVector4() => ToScaledVector4();
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => FromScaledVector4(vector);
 
         #endregion
 
         #region IPixel
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public readonly Vector4 ToScaledVector4() => new Vector4(R / 255f, G / 255f, B / 255f, A / 255f);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector) 
         {
             vector *= 255;
@@ -267,7 +267,7 @@ namespace MonoGame.Framework
             A = (byte)vector.W;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromGray8(Gray8 source)
         {
             R = source.PackedValue;
@@ -276,31 +276,31 @@ namespace MonoGame.Framework
             A = byte.MaxValue;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromGray16(Gray16 source)
         {
             R = G = B = PackedVectorHelper.DownScale16To8Bit(source.PackedValue);
             A = byte.MaxValue;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromGrayAlpha16(GrayAlpha16 source)
         {
             R = G = B = source.L;
             A = source.A;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromColor(Color color) => this = color;
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromRgb24(Rgb24 source)
         {
             Rgb = source;
             A = byte.MaxValue;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromRgb48(Rgb48 source)
         {
             R = PackedVectorHelper.DownScale16To8Bit(source.R);
@@ -309,7 +309,7 @@ namespace MonoGame.Framework
             A = byte.MaxValue;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromRgba64(Rgba64 source)
         {
             R = PackedVectorHelper.DownScale16To8Bit(source.R);
@@ -318,15 +318,15 @@ namespace MonoGame.Framework
             A = PackedVectorHelper.DownScale16To8Bit(source.A);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void ToColor(ref Color destination) => destination = this;
 
         #endregion
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromBgra5551(Bgra5551 source) => FromVector4(source.ToVector4());
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromBgr24(Bgr24 source)
         {
             Bgr = source;
@@ -341,7 +341,7 @@ namespace MonoGame.Framework
             A = source.A;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromBgra32(Bgra32 source)
         {
             R = source.R;

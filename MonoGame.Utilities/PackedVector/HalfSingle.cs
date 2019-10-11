@@ -39,10 +39,10 @@ namespace MonoGame.Utilities.PackedVector
         [CLSCompliant(false)]
         public ushort PackedValue { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => PackedValue = HalfTypeHelper.Pack(vector.X);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Vector4 ToVector4() => new Vector4(ToSingle(), 0, 0, 1);
 
         #endregion

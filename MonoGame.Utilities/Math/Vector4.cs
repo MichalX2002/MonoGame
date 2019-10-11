@@ -218,16 +218,16 @@ namespace MonoGame.Framework
         /// <inheritdoc/>
         readonly Vector4 IPixel.ToScaledVector4() => this;
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         void IPixel.FromGray8(Gray8 source) => this = source.ToVector4();
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         void IPixel.FromGray16(Gray16 source) => this = source.ToVector4();
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         void IPixel.FromGrayAlpha16(GrayAlpha16 source) => this = source.ToVector4();
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         void IPixel.FromRgb24(Rgb24 source) => this = source.ToVector4();
 
         /// <inheritdoc/>
@@ -239,7 +239,7 @@ namespace MonoGame.Framework
         /// <inheritdoc/>
         void IPixel.FromRgba64(Rgba64 source) => this = source.ToVector4();
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public readonly void ToColor(ref Color destination) => destination.FromVector4(this);
 
         #endregion

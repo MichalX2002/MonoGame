@@ -42,23 +42,23 @@ namespace MonoGame.Utilities.PackedVector
 
         #region IPackedVector
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public byte PackedValue { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => PackedValue = Pack(vector.W);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Vector4 ToVector4() => new Vector4(0, 0, 0, PackedValue / 255f);
 
         #endregion
 
         #region IPixel
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Vector4 ToScaledVector4() => ToVector4();
 
         #endregion

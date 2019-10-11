@@ -71,7 +71,7 @@ namespace MonoGame.Utilities.PackedVector
 
         #region IPackedVector
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         [CLSCompliant(false)]
         public uint PackedValue 
         {
@@ -79,10 +79,10 @@ namespace MonoGame.Utilities.PackedVector
             set => Unsafe.As<Byte4, uint>(ref this) = value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Vector4 ToVector4() => new Vector4(X, Y, Z, W);
 
         #endregion

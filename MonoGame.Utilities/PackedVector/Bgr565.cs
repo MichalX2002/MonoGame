@@ -34,7 +34,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Constructs the packed vector with vector form values.
         /// </summary>
-        public Bgr565(float x, float y, float z) : this(new Vector3(x, y, z))
+        public Bgr565(float r, float g, float b) : this(new Vector3(r, g, b))
         {
         }
 
@@ -52,11 +52,11 @@ namespace MonoGame.Utilities.PackedVector
 
         #region IPackedVector
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         [CLSCompliant(false)]
         public ushort PackedValue { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromVector4(Vector4 vector)
         {
             PackedValue = (ushort)(
@@ -65,7 +65,7 @@ namespace MonoGame.Utilities.PackedVector
                 ((int)(vector.Z * 31f) & 0x1F));
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Vector4 ToVector4()
         {
             return new Vector4(
@@ -79,10 +79,10 @@ namespace MonoGame.Utilities.PackedVector
 
         #region IPixel
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Vector4 ToScaledVector4() => ToVector4();
 
         #endregion

@@ -111,21 +111,21 @@ namespace MonoGame.Framework
             set => Unsafe.As<Vector2, ulong>(ref this) = value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void FromVector4(Vector4 vector)
         {
             X = vector.X;
             Y = vector.Y;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Vector4 ToVector4() => new Vector4(X, Y, 0, 1);
 
         #endregion
 
         #region IPixel
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public readonly void ToColor(ref Color destination) => destination.FromVector4(ToVector4());
 
         #endregion

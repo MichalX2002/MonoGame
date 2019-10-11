@@ -3,135 +3,122 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
 using MonoGame.Framework;
 
 namespace MonoGame.Utilities.PackedVector
 {
-	/// <summary>
-    /// Packed vector type containing four 16-bit unsigned normalized values ranging from 0 to 1.
-	/// </summary>
-	public struct Rgba64 : IPackedVector<ulong>, IEquatable<Rgba64>, IPackedVector
-	{
-		/// <summary>
-		/// Gets and sets the packed value.
-		/// </summary>
-		[CLSCompliant(false)]
-		public ulong PackedValue
-		{
-			get
-			{
-				return packedValue;
-			}
-			set
-			{
-				packedValue = value;
-			}
-		}
+    /// <summary>
+    /// Packed pixel type containing four unsigned 16-bit XYZW components.
+    /// <para>
+    /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
+    /// </para>
+    /// </summary>
+    public struct Rgba64 : IPackedVector<ulong>, IEquatable<Rgba64>, IPixel
+    {
+        private static readonly Vector4 Max = new Vector4(ushort.MaxValue);
 
-		private ulong packedValue;
+        [CLSCompliant(false)]
+        public ushort R;
 
-		/// <summary>
-		/// Creates a new instance of Rgba64.
-		/// </summary>
-		/// <param name="x">The x component</param>
-		/// <param name="y">The y component</param>
-		/// <param name="z">The z component</param>
-		/// <param name="w">The w component</param>
-		public Rgba64(float x, float y, float z, float w)
-		{
-			packedValue = Pack(x, y, z, w);
-		}
+        [CLSCompliant(false)]
+        public ushort G;
 
-		/// <summary>
-		/// Creates a new instance of Rgba64.
-		/// </summary>
-		/// <param name="vector">
-		/// Vector containing the components for the packed vector.
-		/// </param>
-		public Rgba64(Vector4 vector)
-		{
-			packedValue = Pack(vector.X, vector.Y, vector.Z, vector.W);
-		}
+        [CLSCompliant(false)]
+        public ushort B;
 
-		/// <summary>
-		/// Gets the packed vector in Vector4 format.
-		/// </summary>
-		/// <returns>The packed vector in Vector4 format</returns>
-		public Vector4 ToVector4()
-		{
-			return new Vector4(
-                 ((packedValue) & 0xFFFF) / 65535.0f,
-                 ((packedValue >> 16) & 0xFFFF) / 65535.0f,
-                 ((packedValue >> 32) & 0xFFFF) / 65535.0f,
-                 ((packedValue >> 48) & 0xFFFF) / 65535.0f
-            );
-		}
+        [CLSCompliant(false)]
+        public ushort A;
 
-		/// <summary>
-		/// Sets the packed vector from a Vector4.
-		/// </summary>
-		/// <param name="vector">Vector containing the components.</param>
-		public void FromVector4(Vector4 vector)
-		{
-			packedValue = Pack(vector.X, vector.Y, vector.Z, vector.W);
-		}
+        #region Constructors
 
-		/// <summary>
-		/// Compares an object with the packed vector.
-		/// </summary>
-		/// <param name="obj">The object to compare.</param>
-		/// <returns>True if the object is equal to the packed vector.</returns>
-		public override bool Equals(object obj)
-		{
-			return (obj is Rgba64) && Equals((Rgba64) obj);
-		}
+        [CLSCompliant(false)]
+        public Rgba64(ushort r, ushort g, ushort b, ushort a)
+        {
+            R = r;
+            G = g;
+            B = b;
+            A = a;
+        }
 
-		/// <summary>
-		/// Compares another Rgba64 packed vector with the packed vector.
-		/// </summary>
-		/// <param name="other">The Rgba64 packed vector to compare.</param>
-		/// <returns>True if the packed vectors are equal.</returns>
-		public bool Equals(Rgba64 other)
-		{
-			return packedValue == other.packedValue;
-		}
+        public Rgba64(Vector4 vector) => this = Pack(ref vector);
 
-		/// <summary>
-		/// Gets a string representation of the packed vector.
-		/// </summary>
-		/// <returns>A string representation of the packed vector.</returns>
-		public override string ToString()
-		{
-			return ToVector4().ToString();
-		}
+        public Rgba64(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
+        {
+        }
 
-		/// <summary>
-		/// Gets a hash code of the packed vector.
-		/// </summary>
-		/// <returns>The hash code for the packed vector.</returns>
-		public override int GetHashCode()
-		{
-			return packedValue.GetHashCode();
-		}
+        #endregion
 
-		public static bool operator ==(Rgba64 lhs, Rgba64 rhs)
-		{
-			return lhs.packedValue == rhs.packedValue;
-		}
+        private static Rgba64 Pack(ref Vector4 vector)
+        {
+            vector *= ushort.MaxValue;
+            vector = Vector4.Clamp(vector, Vector4.Zero, Max);
 
-		public static bool operator !=(Rgba64 lhs, Rgba64 rhs)
-		{
-			return lhs.packedValue != rhs.packedValue;
-		}
+            return new Rgba64(
+                (ushort)Math.Round(vector.X),
+                (ushort)Math.Round(vector.Y),
+                (ushort)Math.Round(vector.Z),
+                (ushort)Math.Round(vector.W));
+        }
 
-		private static ulong Pack(float x, float y, float z, float w)
-		{
-			return
-                ((ulong)Math.Round(MathHelper.Clamp(x * 0xFFFF, 0, 65535f))) |
-                (((ulong)Math.Round(MathHelper.Clamp(y * 0xFFFF, 0, 65535f))) << 16) |
-                (((ulong)Math.Round(MathHelper.Clamp(z * 0xFFFF, 0, 65535f))) << 32) |
-                (((ulong)Math.Round(MathHelper.Clamp(w * 0xFFFF, 0, 65535f))) << 48)
-            ;
-		}
-	}
+        #region IPackedVector
+
+        /// <inheritdoc/>
+        [CLSCompliant(false)]
+        public ulong PackedValue
+        {
+            get => Unsafe.As<Rgba64, ulong>(ref this);
+            set => Unsafe.As<Rgba64, ulong>(ref this) = value;
+        }
+
+        /// <inheritdoc/>
+        public void FromVector4(Vector4 vector) => FromScaledVector4(vector);
+
+        /// <inheritdoc/>
+        public Vector4 ToVector4() => ToScaledVector4();
+
+        #endregion
+
+        #region IPixel
+
+        /// <inheritdoc/>
+        public void FromScaledVector4(Vector4 vector) => this = Pack(ref vector);
+
+        /// <inheritdoc/>
+        public Vector4 ToScaledVector4() => new Vector4(R, G, B, A) / ushort.MaxValue;
+
+        public void ToColor(ref Color destination)
+        {
+            destination.R = PackedVectorHelper.DownScale16To8Bit(R);
+            destination.G = PackedVectorHelper.DownScale16To8Bit(G);
+            destination.B = PackedVectorHelper.DownScale16To8Bit(B);
+            destination.A = PackedVectorHelper.DownScale16To8Bit(A);
+        }
+
+        #endregion
+
+        #region Equals
+
+        public override bool Equals(object obj) => obj is Rgba64 other && Equals(other);
+        public bool Equals(Rgba64 other) => this == other;
+
+        public static bool operator ==(in Rgba64 a, in Rgba64 b) => a.PackedValue == b.PackedValue;
+        public static bool operator !=(in Rgba64 a, in Rgba64 b) => a.PackedValue != b.PackedValue;
+
+        #endregion
+
+        #region Object Overrides
+
+        /// <summary>
+        /// Gets a <see cref="string"/> representation of the packed vector.
+        /// </summary>
+        public override string ToString() => ToVector4().ToString();
+
+        /// <summary>
+        /// Gets a hash code of the packed vector.
+        /// </summary>
+        public override int GetHashCode() => PackedValue.GetHashCode();
+
+        #endregion
+    }
 }
