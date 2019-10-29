@@ -32,7 +32,7 @@ namespace MonoGame.Utilities.PackedVector
         /// Constructs the packed vector with a packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public HalfVector2(uint value) : this() => PackedValue = value;
+        public HalfVector2(uint packed) : this() => PackedValue = packed;
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
@@ -106,8 +106,8 @@ namespace MonoGame.Utilities.PackedVector
 
         #region Equals
 
-        public static bool operator ==(in HalfVector2 a, in HalfVector2 b) => a.PackedValue == b.PackedValue;
-        public static bool operator !=(in HalfVector2 a, in HalfVector2 b) => a.PackedValue != b.PackedValue;
+        public static bool operator ==(HalfVector2 a, HalfVector2 b) => a.PackedValue == b.PackedValue;
+        public static bool operator !=(HalfVector2 a, HalfVector2 b) => a.PackedValue != b.PackedValue;
 
         public bool Equals(HalfVector2 other) => this == other;
         public override bool Equals(object obj) => obj is HalfVector2 other && Equals(other);

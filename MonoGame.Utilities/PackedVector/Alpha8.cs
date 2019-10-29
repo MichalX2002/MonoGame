@@ -15,41 +15,46 @@ namespace MonoGame.Utilities.PackedVector
     /// </summary>
     public struct Alpha8 : IPackedVector<byte>, IEquatable<Alpha8>, IPixel
     {
+        public byte A;
+
         #region Constructors
 
         /// <summary>
         /// Constructs the packed vector with a raw value.
         /// </summary>
-        public Alpha8(byte value) => PackedValue = value;
+        public Alpha8(byte value) => A = value;
 
         /// <summary>
         /// Constructs the packed vector with a vector form value.
         /// </summary>
         /// <param name="alpha">The W component.</param>
-        public Alpha8(float alpha) => PackedValue = Pack(alpha);
+        public Alpha8(float alpha) => A = Pack(alpha);
 
         #endregion
 
         /// <summary>
         /// Gets the packed vector as a <see cref="float"/>.
         /// </summary>
-        public float ToAlpha() => PackedValue / 255f;
+        public float ToAlpha() => A / 255f;
 
         private static byte Pack(float alpha)
         {
-            return (byte)Math.Round(MathHelper.Clamp(alpha, 0, 1) * 255f);
+            alpha = MathHelper.Clamp(alpha, 0, 1);
+            alpha *= 255f;
+            alpha += 0.5f;
+            return (byte)alpha;
         }
 
         #region IPackedVector
 
         /// <inheritdoc/>
-        public byte PackedValue { get; set; }
+        public byte PackedValue { get => A; set => A = value; }
 
         /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => PackedValue = Pack(vector.W);
 
         /// <inheritdoc/>
-        public Vector4 ToVector4() => new Vector4(0, 0, 0, PackedValue / 255f);
+        public readonly Vector4 ToVector4() => new Vector4(0, 0, 0, A / 255f);
 
         #endregion
 
@@ -59,14 +64,34 @@ namespace MonoGame.Utilities.PackedVector
         public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
         /// <inheritdoc/>
-        public Vector4 ToScaledVector4() => ToVector4();
+        public readonly Vector4 ToScaledVector4() => ToVector4();
+
+        public void FromGray8(Gray8 source) => A = byte.MaxValue;
+
+        public void FromGray16(Gray16 source) => A = byte.MaxValue;
+
+        public void FromGrayAlpha16(GrayAlpha16 source) => A = source.A;
+
+        public void FromRgb24(Rgb24 source) => A = byte.MaxValue;
+
+        public void FromColor(Color source) => A = source.A;
+
+        public void FromRgb48(Rgb48 source) => A = byte.MaxValue;
+
+        public void FromRgba64(Rgba64 source) => A = PackedVectorHelper.DownScale16To8Bit(source.A);
+
+        public void ToColor(ref Color destination)
+        {
+            destination.R = destination.G = destination.B = byte.MaxValue;
+            destination.A = A;
+        }
 
         #endregion
 
         #region Equals
 
-        public static bool operator ==(Alpha8 a, Alpha8 b) => a.PackedValue == b.PackedValue;
-        public static bool operator !=(Alpha8 a, Alpha8 b) => a.PackedValue != b.PackedValue;
+        public static bool operator ==(Alpha8 a, Alpha8 b) => a.A == b.A;
+        public static bool operator !=(Alpha8 a, Alpha8 b) => a.A != b.A;
 
         public bool Equals(Alpha8 other) => this == other;
         public override bool Equals(object obj) => obj is Alpha8 other && Equals(other);
@@ -78,12 +103,12 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => (PackedValue / 255f).ToString();
+        public override string ToString() => $"Alpha8({A / 255f})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override int GetHashCode() => A.GetHashCode();
 
         #endregion
     }

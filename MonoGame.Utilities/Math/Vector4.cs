@@ -407,13 +407,11 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns the length of this <see cref="Vector4"/>.
         /// </summary>
-        /// <returns>The length of this <see cref="Vector4"/>.</returns>
         public float Length() => (float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
 
         /// <summary>
         /// Returns the squared length of this <see cref="Vector4"/>.
         /// </summary>
-        /// <returns>The squared length of this <see cref="Vector4"/>.</returns>
         public float LengthSquared() => (X * X) + (Y * Y) + (Z * Z) + (W * W);
 
         /// <summary>
@@ -423,14 +421,11 @@ namespace MonoGame.Framework
         /// <param name="b">The second vector.</param>
         /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
         /// <returns>The result of linear interpolation of the specified vectors.</returns>
-        public static Vector4 Lerp(in Vector4 a, in Vector4 b, float amount)
-        {
-            return new Vector4(
-                MathHelper.Lerp(a.X, b.X, amount),
-                MathHelper.Lerp(a.Y, b.Y, amount),
-                MathHelper.Lerp(a.Z, b.Z, amount),
-                MathHelper.Lerp(a.W, b.W, amount));
-        }
+        public static Vector4 Lerp(in Vector4 a, in Vector4 b, float amount) => new Vector4(
+            MathHelper.Lerp(a.X, b.X, amount),
+            MathHelper.Lerp(a.Y, b.Y, amount),
+            MathHelper.Lerp(a.Z, b.Z, amount),
+            MathHelper.Lerp(a.W, b.W, amount));
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains linear interpolation of the specified vectors.
@@ -507,28 +502,37 @@ namespace MonoGame.Framework
         /// <summary>
         /// Turns this <see cref="Vector4"/> to a unit vector with the same direction.
         /// </summary>
-        public void Normalize()
-        {
-            float factor = (float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
-            factor = 1f / factor;
-            X *= factor;
-            Y *= factor;
-            Z *= factor;
-            W *= factor;
-        }
+        public void Normalize() => this /= (float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains a normalized values from another vector.
         /// </summary>
         /// <param name="value">Source <see cref="Vector4"/>.</param>
         /// <returns>Unit vector.</returns>
-        public static Vector4 Normalize(in Vector4 value)
+        public static Vector4 Normalize(in Vector4 value) => value / (float)Math.Sqrt(
+            (value.X * value.X) + (value.Y * value.Y) + (value.Z * value.Z) + (value.W * value.W));
+
+        /// <summary>
+        /// Round the members of this <see cref="Vector4"/> towards the nearest integer value.
+        /// </summary>
+        public void Round()
         {
-            float factor = (float)Math.Sqrt((value.X * value.X) + (value.Y * value.Y) + (value.Z * value.Z) + (value.W * value.W));
-            factor = 1f / factor;
-            return new Vector4(value.X * factor, value.Y * factor, value.Z * factor, value.W * factor);
+            X = (float)Math.Round(X);
+            Y = (float)Math.Round(Y);
+            Z = (float)Math.Round(Z);
+            W = (float)Math.Round(W);
         }
 
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains members from 
+        /// another vector rounded to the nearest integer value.
+        /// </summary>
+        public static Vector4 Round(in Vector4 value) => new Vector4(
+            (float)Math.Round(value.X),
+            (float)Math.Round(value.Y),
+            (float)Math.Round(value.Z),
+            (float)Math.Round(value.W));
+        
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains cubic interpolation of the specified vectors.
         /// </summary>
@@ -536,14 +540,11 @@ namespace MonoGame.Framework
         /// <param name="b">Source <see cref="Vector4"/>.</param>
         /// <param name="amount">Weighting value.</param>
         /// <returns>Cubic interpolation of the specified vectors.</returns>
-        public static Vector4 SmoothStep(in Vector4 a, in Vector4 b, float amount)
-        {
-            return new Vector4(
+        public static Vector4 SmoothStep(in Vector4 a, in Vector4 b, float amount) => new Vector4(
                 MathHelper.SmoothStep(a.X, b.X, amount),
                 MathHelper.SmoothStep(a.Y, b.Y, amount),
                 MathHelper.SmoothStep(a.Z, b.Z, amount),
                 MathHelper.SmoothStep(a.W, b.W, amount));
-        }
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains subtraction of on <see cref="Vector4"/> from a another.
@@ -690,16 +691,14 @@ namespace MonoGame.Framework
             z = Z;
             w = W;
         }
-        
+
         /// <summary>
         /// Inverts values in the specified <see cref="Vector4"/>.
         /// </summary>
         /// <param name="value">Source <see cref="Vector4"/> on the right of the sub sign.</param>
         /// <returns>Result of the inversion.</returns>
-        public static Vector4 operator -(in Vector4 value)
-        {
-            return new Vector4(-value.X, -value.Y, -value.Z, -value.W);
-        }
+        public static Vector4 operator -(in Vector4 value) =>
+            new Vector4(-value.X, -value.Y, -value.Z, -value.W);
 
         /// <summary>
         /// Compares whether two <see cref="Vector4"/> instances are equal.
@@ -707,13 +706,8 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Vector4"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="Vector4"/> instance on the right of the equal sign.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public static bool operator ==(in Vector4 a, in Vector4 b)
-        {
-            return a.X == b.X
-                && a.Y == b.Y
-                && a.Z == b.Z
-                && a.W == b.W;
-        }
+        public static bool operator ==(in Vector4 a, in Vector4 b) => 
+            a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
 
         /// <summary>
         /// Compares whether two <see cref="Vector4"/> instances are not equal.

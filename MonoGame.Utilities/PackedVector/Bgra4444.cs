@@ -42,12 +42,13 @@ namespace MonoGame.Utilities.PackedVector
         {
             vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.One);
             vector *= 15f;
+            vector.Round();
 
             return (ushort)(
-                (((int)Math.Round(vector.W) & 0x0F) << 12) |
-                (((int)Math.Round(vector.X) & 0x0F) << 8) |
-                (((int)Math.Round(vector.Y) & 0x0F) << 4) |
-                ((int)Math.Round(vector.Z) & 0x0F));
+                (((int)vector.W & 0x0F) << 12) |
+                (((int)vector.X & 0x0F) << 8) |
+                (((int)vector.Y & 0x0F) << 4) |
+                ((int)vector.Z & 0x0F));
         }
 
         #region IPackedVector
@@ -97,7 +98,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => ToVector4().ToString();
+        public override string ToString() => $"Bgra4444({ToVector4()})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

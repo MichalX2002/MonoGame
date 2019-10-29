@@ -88,7 +88,7 @@ namespace MonoGame.Utilities.PackedVector
 
         public bool Equals(Bgra5551 other) => this == other;
         public override bool Equals(object obj) => obj is Bgra5551 other && Equals(other);
-        
+
         #endregion
 
         #region Object Overrides
@@ -96,7 +96,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => ToVector4().ToString();
+        public override string ToString() => $"Bgra5551({ToVector4()}";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

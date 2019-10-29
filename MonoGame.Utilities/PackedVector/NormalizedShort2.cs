@@ -21,6 +21,15 @@ namespace MonoGame.Utilities.PackedVector
 
         #region Constructors
 
+        public NormalizedShort2(short x, short y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        [CLSCompliant(false)]
+        public NormalizedShort2(uint packed) : this() => PackedValue = packed;
+
         public NormalizedShort2(Vector2 vector) => this = Pack(vector);
 
         public NormalizedShort2(float x, float y) : this(new Vector2(x, y))
@@ -60,8 +69,8 @@ namespace MonoGame.Utilities.PackedVector
 
         #region Equals
 
-        public static bool operator ==(NormalizedShort2 a, NormalizedShort2 b) => a.PackedValue == b.PackedValue;
-        public static bool operator !=(NormalizedShort2 a, NormalizedShort2 b) => a.PackedValue != b.PackedValue;
+        public static bool operator ==(in NormalizedShort2 a, in NormalizedShort2 b) => a.X == b.X && a.Y == b.Y;
+        public static bool operator !=(in NormalizedShort2 a, in NormalizedShort2 b) => !(a == b);
 
         public override bool Equals(object obj) => obj is NormalizedShort2 other && Equals(other);
         public bool Equals(NormalizedShort2 other) => this == other;

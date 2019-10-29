@@ -253,13 +253,13 @@ namespace MonoGame.Framework
         #region IPixel
 
         /// <inheritdoc/>
-        public readonly Vector4 ToScaledVector4() => new Vector4(R / 255f, G / 255f, B / 255f, A / 255f);
+        public readonly Vector4 ToScaledVector4() => new Vector4(R, G, B, A) / 255f;
 
         /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector) 
         {
             vector *= 255;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Byte4.MaxBytes);
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxBytes);
 
             R = (byte)vector.X;
             G = (byte)vector.Y;
@@ -270,9 +270,7 @@ namespace MonoGame.Framework
         /// <inheritdoc/>
         public void FromGray8(Gray8 source)
         {
-            R = source.PackedValue;
-            G = source.PackedValue;
-            B = source.PackedValue;
+            R = G = B = source.PackedValue;
             A = byte.MaxValue;
         }
 
@@ -384,7 +382,7 @@ namespace MonoGame.Framework
         /// Gets the <see cref="Vector3"/> representation of this <see cref="Color"/>.
         /// </summary>
         /// <returns>A <see cref="Vector3"/> representation for this object.</returns>
-        public Vector3 ToVector3() => new Vector3(R / 255f, G / 255f, B / 255f);
+        public Vector3 ToVector3() => new Vector3(R, G, B) / 255f;
 
         public Rgba64 ToRgba64() => new Rgba64(
             PackedVectorHelper.UpScale8To16Bit(R),
@@ -476,7 +474,7 @@ namespace MonoGame.Framework
         public string ToHex()
         {
             uint hexOrder = (uint)(A << 0 | B << 8 | G << 16 | R << 24);
-            return hexOrder.ToString("X8");
+            return hexOrder.ToString("x8");
         }
 
         #region Equals
@@ -484,12 +482,13 @@ namespace MonoGame.Framework
         /// <summary>
         /// Compares whether two <see cref="Color"/> instances are equal.
         /// </summary>
-        public static bool operator ==(in Color a, in Color b) => a.PackedValue == b.PackedValue;
+        public static bool operator ==(in Color a, in Color b) =>
+            a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A;
 
         /// <summary>
         /// Compares whether two <see cref="Color"/> instances are not equal.
         /// </summary>
-        public static bool operator !=(in Color a, in Color b) => a.PackedValue != b.PackedValue;
+        public static bool operator !=(in Color a, in Color b) => !(a == b);
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="Color"/>.
@@ -506,8 +505,7 @@ namespace MonoGame.Framework
         #region Object Overrides
 
         /// <summary>
-        /// Returns a <see cref="string"/> representation of this <see cref="Color"/> in the format
-        /// {R:{0} G:{1} B:{2} A:{3}}.
+        /// Returns a <see cref="string"/> representation of this <see cref="Color"/>.
         /// </summary>
         public override string ToString()
         {

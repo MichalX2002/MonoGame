@@ -125,6 +125,11 @@ namespace MonoGame.Framework
 
         #region IPixel
 
+        public readonly void FromScaledVector4()
+        {
+
+        } 
+
         /// <inheritdoc/>
         public readonly void ToColor(ref Color destination) => destination.FromVector4(ToVector4());
 
@@ -157,12 +162,9 @@ namespace MonoGame.Framework
         /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 2D-triangle.</param>
         /// <returns>The cartesian translation of barycentric coordinates.</returns>
         public static Vector2 Barycentric(
-            in Vector2 a, in Vector2 b, in Vector2 c, float amount1, float amount2)
-        {
-            return new Vector2(
+            in Vector2 a, in Vector2 b, in Vector2 c, float amount1, float amount2) => new Vector2(
                 MathHelper.Barycentric(a.X, b.X, c.X, amount1, amount2),
                 MathHelper.Barycentric(a.Y, b.Y, c.Y, amount1, amount2));
-        }
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains CatmullRom interpolation of the specified vectors.
@@ -174,12 +176,9 @@ namespace MonoGame.Framework
         /// <param name="amount">Weighting factor.</param>
         /// <returns>The result of CatmullRom interpolation.</returns>
         public static Vector2 CatmullRom(
-            in Vector2 a, in Vector2 b, in Vector2 c, in Vector2 d, float amount)
-        {
-            return new Vector2(
+            in Vector2 a, in Vector2 b, in Vector2 c, in Vector2 d, float amount) => new Vector2(
                 MathHelper.CatmullRom(a.X, b.X, c.X, d.X, amount),
                 MathHelper.CatmullRom(a.Y, b.Y, c.Y, d.Y, amount));
-        }
 
         /// <summary>
         /// Round the members of this <see cref="Vector2"/> towards positive infinity.
@@ -195,12 +194,9 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>The rounded <see cref="Vector2"/>.</returns>
-        public static Vector2 Ceiling(in Vector2 value)
-        {
-            return new Vector2(
-                (float)Math.Ceiling(value.X),
-                (float)Math.Ceiling(value.Y));
-        }
+        public static Vector2 Ceiling(in Vector2 value) => new Vector2(
+            (float)Math.Ceiling(value.X),
+            (float)Math.Ceiling(value.Y));
 
         /// <summary>
         /// Clamps the specified value within a range.
@@ -209,12 +205,9 @@ namespace MonoGame.Framework
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
         /// <returns>The clamped value.</returns>
-        public static Vector2 Clamp(in Vector2 value, in Vector2 min, in Vector2 max)
-        {
-            return new Vector2(
-                MathHelper.Clamp(value.X, min.X, max.X),
-                MathHelper.Clamp(value.Y, min.Y, max.Y));
-        }
+        public static Vector2 Clamp(in Vector2 value, in Vector2 min, in Vector2 max) => new Vector2(
+            MathHelper.Clamp(value.X, min.X, max.X),
+            MathHelper.Clamp(value.Y, min.Y, max.Y));
 
         /// <summary>
         /// Returns the distance between two vectors.
@@ -262,10 +255,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The dot product of two vectors.</returns>
-        public static float Dot(in Vector2 a, in Vector2 b)
-        {
-            return (a.X * b.X) + (a.Y * b.Y);
-        }
+        public static float Dot(in Vector2 a, in Vector2 b) => (a.X * b.X) + (a.Y * b.Y);
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="object"/>.
@@ -295,12 +285,9 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>The rounded <see cref="Vector2"/>.</returns>
-        public static Vector2 Floor(in Vector2 value)
-        {
-            return new Vector2(
+        public static Vector2 Floor(in Vector2 value) => new Vector2(
                 (float)Math.Floor(value.X),
                 (float)Math.Floor(value.Y));
-        }
 
         /// <summary>
         /// Gets the hash code of this <see cref="Vector2"/>.
@@ -325,30 +312,20 @@ namespace MonoGame.Framework
         /// <param name="amount">Weighting factor.</param>
         /// <returns>The hermite spline interpolation vector.</returns>
         public static Vector2 Hermite(
-            in Vector2 position1, in Vector2 tangent1, in Vector2 position2, in Vector2 tangent2, float amount)
-        {
-            return new Vector2(
+            in Vector2 position1, in Vector2 tangent1, in Vector2 position2, in Vector2 tangent2, float amount) =>
+            new Vector2(
                 MathHelper.Hermite(position1.X, tangent1.X, position2.X, tangent2.X, amount),
                 MathHelper.Hermite(position1.Y, tangent1.Y, position2.Y, tangent2.Y, amount));
-        }
 
         /// <summary>
         /// Returns the length of this <see cref="Vector2"/>.
         /// </summary>
-        /// <returns>The length of this <see cref="Vector2"/>.</returns>
-        public float Length()
-        {
-            return (float)Math.Sqrt((X * X) + (Y * Y));
-        }
+        public float Length() => (float)Math.Sqrt(LengthSquared());
 
         /// <summary>
         /// Returns the squared length of this <see cref="Vector2"/>.
         /// </summary>
-        /// <returns>The squared length of this <see cref="Vector2"/>.</returns>
-        public float LengthSquared()
-        {
-            return (X * X) + (Y * Y);
-        }
+        public float LengthSquared() => (X * X) + (Y * Y);
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains linear interpolation of the specified vectors.
@@ -357,12 +334,9 @@ namespace MonoGame.Framework
         /// <param name="value2">The second vector.</param>
         /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
         /// <returns>The result of linear interpolation of the specified vectors.</returns>
-        public static Vector2 Lerp(in Vector2 value1, in Vector2 value2, float amount)
-        {
-            return new Vector2(
+        public static Vector2 Lerp(in Vector2 value1, in Vector2 value2, float amount) => new Vector2(
                 MathHelper.Lerp(value1.X, value2.X, amount),
                 MathHelper.Lerp(value1.Y, value2.Y, amount));
-        }
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains linear interpolation of the specified vectors.
@@ -374,12 +348,9 @@ namespace MonoGame.Framework
         /// <param name="value2">The second vector.</param>
         /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
         /// <returns>The result of linear interpolation of the specified vectors.</returns>
-        public static Vector2 LerpPrecise(in Vector2 value1, in Vector2 value2, float amount)
-        {
-            return new Vector2(
+        public static Vector2 LerpPrecise(in Vector2 value1, in Vector2 value2, float amount) => new Vector2(
                 MathHelper.LerpPrecise(value1.X, value2.X, amount),
                 MathHelper.LerpPrecise(value1.Y, value2.Y, amount));
-        }
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains a maximal values from the two vectors.

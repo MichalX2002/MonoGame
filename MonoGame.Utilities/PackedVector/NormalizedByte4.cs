@@ -116,12 +116,12 @@ namespace MonoGame.Utilities.PackedVector
 
         #region Equals
 
-        public static bool operator ==(in NormalizedByte4 a, in NormalizedByte4 b) => a.PackedValue == b.PackedValue;
+        public static bool operator ==(in NormalizedByte4 a, in NormalizedByte4 b) =>
+            a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
 
         public static bool operator !=(in NormalizedByte4 a, in NormalizedByte4 b) => !(a == b);
 
         public bool Equals(NormalizedByte4 other) => this == other;
-
         public override bool Equals(object obj) => obj is NormalizedByte4 other && Equals(other);
 
         #endregion

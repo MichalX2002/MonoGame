@@ -59,14 +59,13 @@ namespace MonoGame.Utilities.PackedVector
 
         private static Byte4 Pack(ref Vector4 vector)
         {
-            vector *= 255;
             vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxBytes);
-
+            
             return new Byte4(
-                (byte)Math.Round(vector.X),
-                (byte)Math.Round(vector.Y),
-                (byte)Math.Round(vector.Z),
-                (byte)Math.Round(vector.W));
+                (byte)vector.X,
+                (byte)vector.Y,
+                (byte)vector.Z,
+                (byte)vector.W);
         }
 
         #region IPackedVector
@@ -94,25 +93,35 @@ namespace MonoGame.Utilities.PackedVector
 
         /// <inheritdoc/>
         public Vector4 ToScaledVector4() => ToVector4() / 255;
-        
+
         #endregion
 
         #region Equals
 
-        public static bool operator ==(Byte4 a, Byte4 b) => a.PackedValue == b.PackedValue;
-        public static bool operator !=(Byte4 a, Byte4 b) => a.PackedValue != b.PackedValue;
+        public static bool operator !=(in Byte4 a, in Byte4 b) => !(a == b);
+        public static bool operator ==(in Byte4 a, in Byte4 b) =>
+            a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
 
         public bool Equals(Byte4 other) => this == other;
         public override bool Equals(object obj) => obj is Byte4 other && Equals(other);
 
         #endregion
 
+        /// <summary>
+        /// Gets the hexadecimal <see cref="string"/> representation of this <see cref="Color"/>.
+        /// </summary>
+        public string ToHex()
+        {
+            uint hexOrder = (uint)(W << 0 | Z << 8 | Y << 16 | X << 24);
+            return $"Byte4({hexOrder.ToString("x8")})";
+        }
+
         #region Object Overrides
 
         /// <summary>
-        /// Gets a string representation of the packed vector.
+        /// Returns a <see cref="string"/> representation of this packed vector.
         /// </summary>
-        public override string ToString() => PackedValue.ToString("x8");
+        public override string ToString() => $"Byte4({X}, {Y}, {Z}, {W})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

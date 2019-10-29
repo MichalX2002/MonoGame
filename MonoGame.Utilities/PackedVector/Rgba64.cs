@@ -53,12 +53,13 @@ namespace MonoGame.Utilities.PackedVector
         {
             vector *= ushort.MaxValue;
             vector = Vector4.Clamp(vector, Vector4.Zero, Max);
+            vector.Round();
 
             return new Rgba64(
-                (ushort)Math.Round(vector.X),
-                (ushort)Math.Round(vector.Y),
-                (ushort)Math.Round(vector.Z),
-                (ushort)Math.Round(vector.W));
+                (ushort)vector.X,
+                (ushort)vector.Y,
+                (ushort)vector.Z,
+                (ushort)vector.W);
         }
 
         #region IPackedVector
@@ -72,20 +73,20 @@ namespace MonoGame.Utilities.PackedVector
         }
 
         /// <inheritdoc/>
-        public void FromVector4(Vector4 vector) => FromScaledVector4(vector);
+        public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
         /// <inheritdoc/>
-        public Vector4 ToVector4() => ToScaledVector4();
+        public Vector4 ToVector4() => new Vector4(R, G, B, A) / ushort.MaxValue;
 
         #endregion
 
         #region IPixel
 
         /// <inheritdoc/>
-        public void FromScaledVector4(Vector4 vector) => this = Pack(ref vector);
+        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
         /// <inheritdoc/>
-        public Vector4 ToScaledVector4() => new Vector4(R, G, B, A) / ushort.MaxValue;
+        public Vector4 ToScaledVector4() => ToVector4();
 
         public void ToColor(ref Color destination)
         {
@@ -102,8 +103,10 @@ namespace MonoGame.Utilities.PackedVector
         public override bool Equals(object obj) => obj is Rgba64 other && Equals(other);
         public bool Equals(Rgba64 other) => this == other;
 
-        public static bool operator ==(in Rgba64 a, in Rgba64 b) => a.PackedValue == b.PackedValue;
-        public static bool operator !=(in Rgba64 a, in Rgba64 b) => a.PackedValue != b.PackedValue;
+        public static bool operator ==(in Rgba64 a, in Rgba64 b) =>
+            a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A;
+
+        public static bool operator !=(in Rgba64 a, in Rgba64 b) => !(a == b);
 
         #endregion
 

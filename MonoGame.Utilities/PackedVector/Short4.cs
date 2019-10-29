@@ -46,12 +46,13 @@ namespace MonoGame.Utilities.PackedVector
         private static Short4 Pack(ref Vector4 vector)
         {
             vector = Vector4.Clamp(vector, MinNeg, MaxPos);
+            vector.Round();
 
             return new Short4(
-                (short)Math.Round(vector.X),
-                (short)Math.Round(vector.Y),
-                (short)Math.Round(vector.Z),
-                (short)Math.Round(vector.W));
+                (short)vector.X,
+                (short)vector.Y,
+                (short)vector.Z,
+                (short)vector.W);
         }
 
         #region IPackedVector
@@ -68,7 +69,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
         /// <inheritdoc/>
-        public Vector4 ToVector4() => new Vector4(X, Y, Z, W);
+        public readonly Vector4 ToVector4() => new Vector4(X, Y, Z, W);
 
         #endregion
 
@@ -83,7 +84,7 @@ namespace MonoGame.Utilities.PackedVector
         }
 
         /// <inheritdoc/>
-        public Vector4 ToScaledVector4()
+        public readonly Vector4 ToScaledVector4()
         {
             var scaled = ToVector4();
             scaled += MaxPos;
@@ -95,8 +96,10 @@ namespace MonoGame.Utilities.PackedVector
 
         #region Equals
 
-        public static bool operator ==(Short4 a, Short4 b) => a.PackedValue == b.PackedValue;
-        public static bool operator !=(Short4 a, Short4 b) => a.PackedValue != b.PackedValue;
+        public static bool operator ==(in Short4 a, in Short4 b) =>
+            a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
+
+        public static bool operator !=(in Short4 a, in Short4 b) => !(a == b);
 
         public bool Equals(Short4 other) => this == other;
         public override bool Equals(object obj) => obj is Short4 other && Equals(other);

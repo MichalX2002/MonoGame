@@ -62,10 +62,11 @@ namespace MonoGame.Utilities.PackedVector
         private static Short2 Pack(Vector2 vector)
         {
             vector = Vector2.Clamp(vector, MinNeg, MaxPos);
+            vector.Round();
 
             return new Short2(
-                (short)Math.Round(vector.X),
-                (short)Math.Round(vector.Y));
+                (short)vector.X,
+                (short)vector.Y);
         }
 
         #region IPackedVector
@@ -95,7 +96,7 @@ namespace MonoGame.Utilities.PackedVector
             scaled -= Offset;
             this = Pack(scaled);
         }
-        
+
         /// <inheritdoc/>
         public Vector4 ToScaledVector4()
         {
@@ -109,8 +110,8 @@ namespace MonoGame.Utilities.PackedVector
 
         #region Equals
 
-        public static bool operator ==(Short2 a, Short2 b) => a.PackedValue == b.PackedValue;
-        public static bool operator !=(Short2 a, Short2 b) => a.PackedValue != b.PackedValue;
+        public static bool operator ==(in Short2 a, in Short2 b) => a.X == b.X && a.Y == b.Y;
+        public static bool operator !=(in Short2 a, in Short2 b) => !(a == b);
 
         public bool Equals(Short2 other) => this == other;
         public override bool Equals(object obj) => obj is Short2 other && Equals(other);
@@ -119,7 +120,7 @@ namespace MonoGame.Utilities.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => PackedValue.ToString("X8");
+        public override string ToString() => $"Short2({PackedValue.ToString("x8")})";
 
         public override int GetHashCode() => PackedValue.GetHashCode();
 

@@ -8,131 +8,89 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed vector type containing unsigned normalized values ranging from 0 to 1.
-    /// The x, y and z components use 10 bits, and the w component uses 2 bits.
+    /// Packed vector type containing unsigned XYZW components.
+    /// The XYZ components use 10 bits each, and the W component uses 2 bits.
+    /// <para>
+    /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
+    /// </para>
     /// </summary>
-    public struct Rgba1010102 : IPackedVector<uint>, IEquatable<Rgba1010102>, IPackedVector
+    public struct Rgba1010102 : IPackedVector<uint>, IEquatable<Rgba1010102>, IPixel
     {
         /// <summary>
-        /// Gets and sets the packed value.
+        /// Constructs the packed vector with a packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public uint PackedValue
-        {
-            get
-            {
-                return packedValue;
-            }
-            set
-            {
-                packedValue = value;
-            }
-        }
-
-        private uint packedValue;
+        public Rgba1010102(uint packed) => PackedValue = packed;
 
         /// <summary>
-        /// Creates a new instance of Rgba1010102.
+        /// Constructs the packed vector with vector form values.
         /// </summary>
-        /// <param name="x">The x component</param>
-        /// <param name="y">The y component</param>
-        /// <param name="z">The z component</param>
-        /// <param name="w">The w component</param>
-        public Rgba1010102(float x, float y, float z, float w)
+        public Rgba1010102(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
         {
-            packedValue = Pack(x, y, z, w);
         }
 
         /// <summary>
-        /// Creates a new instance of Rgba1010102.
+        /// Constructs the packed vector with vector form values.
         /// </summary>
-        /// <param name="vector">
-        /// Vector containing the components for the packed vector.
-        /// </param>
-        public Rgba1010102(Vector4 vector)
+        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
+        public Rgba1010102(Vector4 vector) => PackedValue = Pack(ref vector);
+
+        private static uint Pack(ref Vector4 vector)
         {
-            packedValue = Pack(vector.X, vector.Y, vector.Z, vector.W);
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.One);
+
+            return (uint)(
+                (((int)Math.Round(vector.X * 1023f) & 0x03FF) << 0) |
+                (((int)Math.Round(vector.Y * 1023f) & 0x03FF) << 10) |
+                (((int)Math.Round(vector.Z * 1023f) & 0x03FF) << 20) |
+                (((int)Math.Round(vector.W * 3f) & 0x03) << 30));
         }
 
-        /// <summary>
-        /// Gets the packed vector in Vector4 format.
-        /// </summary>
-        /// <returns>The packed vector in Vector4 format</returns>
-        public Vector4 ToVector4()
-        {
-            return new Vector4(
-                 ((packedValue >> 0) & 0x03FF) / 1023.0f,
-                 ((packedValue >> 10) & 0x03FF) / 1023.0f,
-                 ((packedValue >> 20) & 0x03FF) / 1023.0f,
-                 ((packedValue >> 30) & 0x03) / 3.0f
-            );
-        }
+        #region IPackedVector
 
-        /// <summary>
-        /// Sets the packed vector from a Vector4.
-        /// </summary>
-        /// <param name="vector">Vector containing the components.</param>
-        public void FromVector4(Vector4 vector)
-        {
-            packedValue = Pack(vector.X, vector.Y, vector.Z, vector.W);
-        }
+        [CLSCompliant(false)]
+        public uint PackedValue { get; set; }
 
-        /// <summary>
-        /// Compares an object with the packed vector.
-        /// </summary>
-        /// <param name="obj">The object to compare.</param>
-        /// <returns>True if the object is equal to the packed vector.</returns>
-        public override bool Equals(object obj)
-        {
-            return (obj is Rgba1010102) && Equals((Rgba1010102) obj);
-        }
+        public Vector4 ToVector4() => new Vector4(
+            ((PackedValue >> 0) & 0x03FF) / 1023f,
+            ((PackedValue >> 10) & 0x03FF) / 1023f,
+            ((PackedValue >> 20) & 0x03FF) / 1023f,
+            ((PackedValue >> 30) & 0x03) / 3f);
 
-        /// <summary>
-        /// Compares another Rgba1010102 packed vector with the packed vector.
-        /// </summary>
-        /// <param name="other">The Rgba1010102 packed vector to compare.</param>
-        /// <returns>True if the packed vectors are equal.</returns>
-        public bool Equals(Rgba1010102 other)
-        {
-            return packedValue == other.packedValue;
-        }
+        public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
+
+        #endregion
+
+        #region IPixel
+
+        public Vector4 ToScaledVector4() => ToVector4();
+
+        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
+
+        #endregion
+
+        #region Equals
+
+        public static bool operator ==(Rgba1010102 a, Rgba1010102 b) => a.PackedValue == b.PackedValue;
+        public static bool operator !=(Rgba1010102 a, Rgba1010102 b) => a.PackedValue != b.PackedValue;
+
+        public bool Equals(Rgba1010102 other) => this == other;
+        public override bool Equals(object obj) => obj is Rgba1010102 other && Equals(other);
+
+        #endregion
+
+        #region Object Overrides
 
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        /// <returns>A string representation of the packed vector.</returns>
-        public override string ToString()
-        {
-            return ToVector4().ToString();
-        }
+        public override string ToString() => $"Alpha8({ToVector4().ToString()})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        /// <returns>The hash code for the packed vector.</returns>
-        public override int GetHashCode()
-        {
-            return packedValue.GetHashCode();
-        }
+        public override int GetHashCode() => PackedValue.GetHashCode();
 
-        public static bool operator ==(Rgba1010102 lhs, Rgba1010102 rhs)
-        {
-            return lhs.packedValue == rhs.packedValue;
-        }
-
-        public static bool operator !=(Rgba1010102 lhs, Rgba1010102 rhs)
-        {
-            return lhs.packedValue != rhs.packedValue;
-        }
-
-        private static uint Pack(float x, float y, float z, float w)
-        {
-            return (uint) (
-                (((int) Math.Round(MathHelper.Clamp(x, 0, 1) * 1023.0f) & 0x03FF) << 0) |
-                (((int) Math.Round(MathHelper.Clamp(y, 0, 1) * 1023.0f) & 0x03FF) << 10) |
-                (((int) Math.Round(MathHelper.Clamp(z, 0, 1) * 1023.0f) & 0x03FF) << 20) |
-                (((int) Math.Round(MathHelper.Clamp(w, 0, 1) * 3.0f) & 0x03) << 30)
-            );
-        }
+        #endregion
     }
 }

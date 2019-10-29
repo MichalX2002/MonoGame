@@ -116,7 +116,7 @@ namespace MonoGame.Utilities.PackedVector
         /// Compares the current instance to another to determine whether they are the same.
         /// </summary>
         public static bool operator ==(in HalfVector4 a, in HalfVector4 b) =>
-            a.PackedValue.Equals(b.PackedValue);
+            a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
 
         /// <summary>
         /// Compares the current instance to another to determine whether they are different.

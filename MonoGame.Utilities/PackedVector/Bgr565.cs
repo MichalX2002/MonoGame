@@ -43,11 +43,11 @@ namespace MonoGame.Utilities.PackedVector
         private static ushort Pack(ref Vector3 vector)
         {
             vector = Vector3.Clamp(vector, Vector3.Zero, Vector3.One);
-
+            
             return (ushort)(
-                (((int)Math.Round(Math.Round(vector.X) * 31f) & 0x1F) << 11) |
-                (((int)Math.Round(Math.Round(vector.Y) * 63.0f) & 0x3F) << 5) |
-                ((int)Math.Round(Math.Round(vector.Z) * 31f) & 0x1F));
+                (((int)Math.Round(vector.X * 31f) & 0x1F) << 11) |
+                (((int)Math.Round(vector.Y * 63f) & 0x3F) << 5) |
+                ((int)Math.Round(vector.Z * 31f) & 0x1F));
         }
 
         #region IPackedVector
@@ -102,7 +102,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => this.ToVector3().ToString();
+        public override string ToString() => $"Bgr565({this.ToVector3()})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

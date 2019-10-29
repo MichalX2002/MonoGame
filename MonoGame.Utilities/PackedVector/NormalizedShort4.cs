@@ -21,11 +21,26 @@ namespace MonoGame.Utilities.PackedVector
         public short Z;
         public short W;
 
+        #region Constructors
+
+        public NormalizedShort4(short x, short y, short z, short w)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+            W = w;
+        }
+
+        [CLSCompliant(false)]
+        public NormalizedShort4(ulong packed) : this() => PackedValue = packed;
+
         public NormalizedShort4(Vector4 vector) => this = Pack(ref vector);
 
         public NormalizedShort4(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
         {
         }
+
+        #endregion
 
         private static NormalizedShort4 Pack(ref Vector4 vector)
         {

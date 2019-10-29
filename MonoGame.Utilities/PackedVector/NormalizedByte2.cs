@@ -16,8 +16,6 @@ namespace MonoGame.Utilities.PackedVector
     /// </summary>
     public struct NormalizedByte2 : IPackedVector<ushort>, IEquatable<NormalizedByte2>, IPixel
     {
-        private static readonly Vector4 Offset = new Vector4(128);
-
         [CLSCompliant(false)]
         public sbyte X;
 
@@ -109,9 +107,8 @@ namespace MonoGame.Utilities.PackedVector
 
         #region Equals
 
-        public static bool operator ==(NormalizedByte2 a, NormalizedByte2 b) => a.PackedValue == b.PackedValue;
-
-        public static bool operator !=(NormalizedByte2 a, NormalizedByte2 b) => !(a == b);
+        public static bool operator ==(in NormalizedByte2 a, in NormalizedByte2 b) => a.X == b.X && a.Y == b.Y;
+        public static bool operator !=(in NormalizedByte2 a, in NormalizedByte2 b) => !(a == b);
 
         public override bool Equals(object obj) => obj is NormalizedByte2 other && Equals(other);
 
