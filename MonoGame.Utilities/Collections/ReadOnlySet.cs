@@ -6,14 +6,14 @@ using System.Diagnostics;
 namespace MonoGame.Utilities.Collections
 {
     [DebuggerDisplay("Count = {Count}")]
-    public class ReadOnlySet<T> : ISet<T>
+    public class ReadOnlySet<T> : IReadOnlySet<T>
     {
         private readonly ISet<T> _set;
+        private readonly IReadOnlySet<T> _roSet;
         private readonly IEqualityComparer<T> _comparer;
 
         /// <summary>
-        /// Gets whether this set always contains the same elements
-        /// (i.e was constructed by copying elements from a enumerable).
+        /// Gets whether this set always contains the same elements.
         /// </summary>
         public bool IsImmutable { get; }
 
@@ -21,9 +21,9 @@ namespace MonoGame.Utilities.Collections
         public int Count => _set.Count;
 
         /// <summary>
-        /// Constructs a <see cref="ReadOnlySet{T}"/> by wrapping around a <see cref="ISet{T}"/>.
+        /// Constructs a <see cref="ReadOnlySet{T}"/> that uses an <see cref="ISet{T}"/> as it's backing store.
         /// </summary>
-        /// <param name="set">The set to wrap around.</param>
+        /// <param name="set">The set to wrap.</param>
         public ReadOnlySet(ISet<T> set)
         {
             if (set == null)
@@ -35,7 +35,8 @@ namespace MonoGame.Utilities.Collections
         }
 
         /// <summary>
-        /// Constructs a <see cref="ReadOnlySet{T}"/> by copying elements from an <see cref="IEnumerable{T}"/>.
+        /// Constructs an immutable <see cref="ReadOnlySet{T}"/>
+        /// by copying elements from an <see cref="IEnumerable{T}"/>.
         /// <para>
         /// If the <paramref name="enumerable"/> is an immutable <see cref="ReadOnlySet{T}"/> and 
         /// has the same <see cref="IEqualityComparer{T}"/>, it's backing store will be reused.
@@ -51,45 +52,40 @@ namespace MonoGame.Utilities.Collections
             if (enumerable == null)
                 throw new ArgumentNullException(nameof(enumerable));
 
-            if (enumerable is ReadOnlySet<T> roSet && roSet.IsImmutable && roSet._comparer == _comparer)
-                _set = roSet._set;
-            else
-                _set = new HashSet<T>(enumerable, comparer);
-
-            _comparer = comparer;
+            _comparer = comparer ?? EqualityComparer<T>.Default;
             IsImmutable = true;
+
+            while (enumerable is ReadOnlySet<T> roSet && roSet.IsImmutable && roSet._comparer == _comparer)
+            {
+                enumerable = roSet._set;
+                _roSet = roSet;
+            }
+
+            if (_roSet == null)
+                _set = new HashSet<T>(enumerable, _comparer);
         }
 
-        public bool Add(T item) => _set.Add(item);
-        void ICollection<T>.Add(T item) => _set.Add(item);
-        public void Clear() => _set.Clear();
-        public bool Contains(T item) => _set.Contains(item);
-        public void CopyTo(T[] array, int arrayIndex) => _set.CopyTo(array, arrayIndex);
-        public void ExceptWith(IEnumerable<T> other) => _set.ExceptWith(other);
-        public void IntersectWith(IEnumerable<T> other) => _set.IntersectWith(other);
-        public bool IsProperSubsetOf(IEnumerable<T> other) => _set.IsProperSubsetOf(other);
-        public bool IsProperSupersetOf(IEnumerable<T> other) => _set.IsProperSupersetOf(other);
-        public bool IsSubsetOf(IEnumerable<T> other) => _set.IsSubsetOf(other);
-        public bool IsSupersetOf(IEnumerable<T> other) => _set.IsSupersetOf(other);
-        public bool Overlaps(IEnumerable<T> other) => _set.Overlaps(other);
-        public bool Remove(T item) => _set.Remove(item);
-        public bool SetEquals(IEnumerable<T> other) => _set.SetEquals(other);
-        public void SymmetricExceptWith(IEnumerable<T> other) => _set.SymmetricExceptWith(other);
-        public void UnionWith(IEnumerable<T> other) => _set.UnionWith(other);
+        public bool Contains(T item) => _set != null ? _set.Contains(item) : _roSet.Contains(item);
+        public bool IsProperSubsetOf(IEnumerable<T> other) => _set != null ? _set.IsProperSubsetOf(other) : _roSet.IsProperSubsetOf(other);
+        public bool IsProperSupersetOf(IEnumerable<T> other) => _set != null ? _set.IsProperSupersetOf(other) : _roSet.IsProperSupersetOf(other);
+        public bool IsSubsetOf(IEnumerable<T> other) => _set != null ? _set.IsSubsetOf(other) : _roSet.IsSubsetOf(other);
+        public bool IsSupersetOf(IEnumerable<T> other) => _set != null ? _set.IsSupersetOf(other) : _roSet.IsSupersetOf(other);
+        public bool Overlaps(IEnumerable<T> other) => _set != null ? _set.Overlaps(other) : _roSet.Overlaps(other);
+        public bool SetEquals(IEnumerable<T> other) => _set != null ? _set.SetEquals(other) : _roSet.SetEquals(other);
 
-        public Enumerator GetEnumerator() => new Enumerator(_set);
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => _set.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => _set.GetEnumerator();
+        public Enumerator GetEnumerator() => _set != null ? new Enumerator(_set) : new Enumerator(_roSet);
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => _set != null ? _set.GetEnumerator() : _roSet.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => _set != null ? _set.GetEnumerator() : _roSet.GetEnumerator();
 
         public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
         {
             private HashSet<T>.Enumerator _hashSetEnumerator;
             private IEnumerator<T> _genericEnumerator;
-            private IEnumerator _hashSetBoxed;
+            private IEnumerator _boxedCache;
 
-            internal Enumerator(ISet<T> set)
+            internal Enumerator(IEnumerable<T> enumerable)
             {
-                if (set is HashSet<T> hashSet)
+                if (enumerable is HashSet<T> hashSet)
                 {
                     _hashSetEnumerator = hashSet.GetEnumerator();
                     _genericEnumerator = null;
@@ -97,9 +93,9 @@ namespace MonoGame.Utilities.Collections
                 else
                 {
                     _hashSetEnumerator = default;
-                    _genericEnumerator = set.GetEnumerator();
+                    _genericEnumerator = enumerable.GetEnumerator();
                 }
-                _hashSetBoxed = null;
+                _boxedCache = null;
             }
 
             public T Current
@@ -118,7 +114,7 @@ namespace MonoGame.Utilities.Collections
                 {
                     if (_genericEnumerator != null)
                         return _genericEnumerator.Current;
-                    return GetBoxed().Current;
+                    return GetBoxedCache().Current;
                 }
             }
 
@@ -134,7 +130,7 @@ namespace MonoGame.Utilities.Collections
                 if (_genericEnumerator != null)
                     _genericEnumerator.Reset();
                 else
-                    GetBoxed().Reset();
+                    GetBoxedCache().Reset();
             }
 
             public void Dispose()
@@ -145,11 +141,11 @@ namespace MonoGame.Utilities.Collections
                     _hashSetEnumerator.Dispose();
             }
 
-            private IEnumerator GetBoxed()
+            private IEnumerator GetBoxedCache()
             {
-                if (_hashSetBoxed == null)
-                    _hashSetBoxed = _hashSetEnumerator as IEnumerator;
-                return _hashSetBoxed;
+                if (_boxedCache == null)
+                    _boxedCache = _hashSetEnumerator as IEnumerator;
+                return _boxedCache;
             }
         }
     }
