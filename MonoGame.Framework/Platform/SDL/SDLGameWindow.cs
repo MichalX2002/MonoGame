@@ -75,7 +75,7 @@ namespace MonoGame.Framework
         public override string ClipboardText { get => Sdl.GetClipboardText(); set => Sdl.SetClipboardText(value); }
 
         public static GameWindow Instance;
-        public uint? ID;
+        public uint? Id;
         public bool IsFullScreen;
 
         internal readonly Game _game;
@@ -159,7 +159,7 @@ namespace MonoGame.Framework
             _handle = Sdl.Window.Create(
                 AssemblyHelper.GetDefaultWindowTitle(), winx, winy, _width, _height, initflags);
 
-            ID = Sdl.Window.GetWindowId(_handle);
+            Id = Sdl.Window.GetWindowId(_handle);
             if (_icon != IntPtr.Zero)
                 Sdl.Window.SetIcon(_handle, _icon);
 

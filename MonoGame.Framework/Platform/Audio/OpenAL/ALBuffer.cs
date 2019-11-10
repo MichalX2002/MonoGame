@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using MonoGame.OpenAL;
 
@@ -11,15 +12,15 @@ namespace MonoGame.Framework.Audio
     internal class ALBuffer : IDisposable
     {
         public bool IsDisposed { get; private set; }
-        public int BufferID { get; private set; }
+        public uint BufferId { get; private set; }
 
         public int Bits
         {
             get
             {
-                if (BufferID == 0)
+                if (BufferId == 0)
                     return 0;
-                AL.GetBuffer(BufferID, ALGetBufferi.Bits, out int bits);
+                AL.GetBuffer(BufferId, ALGetBufferi.Bits, out int bits);
                 ALHelper.CheckError("Failed to get buffer bits.");
                 return bits;
             }
@@ -29,9 +30,9 @@ namespace MonoGame.Framework.Audio
         {
             get
             {
-                if (BufferID == 0)
+                if (BufferId == 0)
                     return 0;
-                AL.GetBuffer(BufferID, ALGetBufferi.Size, out int unpackedSize);
+                AL.GetBuffer(BufferId, ALGetBufferi.Size, out int unpackedSize);
                 ALHelper.CheckError("Failed to get buffer size");
                 return unpackedSize;
             }
@@ -41,9 +42,9 @@ namespace MonoGame.Framework.Audio
         {
             get
             {
-                if (BufferID == 0)
+                if (BufferId == 0)
                     return 0;
-                AL.GetBuffer(BufferID, ALGetBufferi.Channels, out int channels);
+                AL.GetBuffer(BufferId, ALGetBufferi.Channels, out int channels);
                 ALHelper.CheckError("Failed to get buffer channels.");
                 return channels;
             }
@@ -53,9 +54,9 @@ namespace MonoGame.Framework.Audio
         {
             get
             {
-                if (BufferID == 0)
+                if (BufferId == 0)
                     return 0;
-                AL.GetBuffer(BufferID, ALGetBufferi.Frequency, out int sampleRate);
+                AL.GetBuffer(BufferId, ALGetBufferi.Frequency, out int sampleRate);
                 ALHelper.CheckError("Failed to get buffer sample rate.");
                 return sampleRate;
             }
@@ -83,26 +84,30 @@ namespace MonoGame.Framework.Audio
             if ((format == ALFormat.MonoIma4 || format == ALFormat.StereoIma4) && !ALController.Instance.SupportsIma4)
                 throw new InvalidOperationException("IMA/ADPCM is not supported by this OpenAL driver.");
 
-            if (BufferID != 0)
+            if (BufferId != 0)
                 ClearBuffer();
 
-            BufferID = AL.GenBuffer();
+            BufferId = AL.GenBuffer();
             ALHelper.CheckError("Failed to generate OpenAL data buffer.");
 
             if (sampleAlignment > 0)
             {
-                AL.Bufferi(BufferID, ALBufferi.UnpackBlockAlignmentSoft, sampleAlignment);
+                AL.Bufferi(BufferId, ALBufferi.UnpackBlockAlignmentSoft, sampleAlignment);
                 ALHelper.CheckError("Failed to set buffer alignment.");
             }
 
-            fixed (T* ptr = &MemoryMarshal.GetReference(data))
-            {
-                AL.BufferData(BufferID, format, (IntPtr)ptr, sizeof(T) * data.Length, sampleRate);
-                ALHelper.CheckError("Failed to fill buffer.");
-            }
+            AL.BufferData(BufferId, format, data, sampleRate);
+            ALHelper.CheckError("Failed to fill buffer.");
         }
 
-        [System.Diagnostics.DebuggerHidden]
+        public unsafe void BufferData<T>(
+            Span<T> data, ALFormat format, int sampleRate, int sampleAlignment = 0)
+            where T : unmanaged
+        {
+            BufferData((ReadOnlySpan<T>)data, format, sampleRate, sampleAlignment);
+        }
+
+        [DebuggerHidden]
         private void AssertNotDisposed()
         {
             if (IsDisposed)
@@ -111,16 +116,16 @@ namespace MonoGame.Framework.Audio
 
         public void ClearBuffer()
         {
-            if (IsDisposed || BufferID == 0)
+            if (IsDisposed || BufferId == 0)
                 return;
 
-            bool isBuffer = AL.IsBuffer(BufferID);
+            bool isBuffer = AL.IsBuffer(BufferId);
             ALHelper.CheckError("Failed to fetch buffer state.");
 
             if (isBuffer)
             {
-                AL.DeleteBuffer(BufferID);
-                BufferID = 0;
+                AL.DeleteBuffer(BufferId);
+                BufferId = 0;
                 ALHelper.CheckError("Failed to delete buffer.");
             }
         }

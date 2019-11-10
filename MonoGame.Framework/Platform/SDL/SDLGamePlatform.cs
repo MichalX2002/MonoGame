@@ -168,7 +168,7 @@ namespace MonoGame.Framework
 
                     case Sdl.EventType.WindowEvent:
 
-                        switch (ev.Window.EventID)
+                        switch (ev.Window.EventId)
                         {
                             case Sdl.Window.EventId.Resized:
                             case Sdl.Window.EventId.SizeChanged:

@@ -53,7 +53,11 @@ namespace MonoGame.Framework.Audio
     {
         SourceRelative = 0x202,
         Buffer = 0x1009,
-        EfxDirectFilter = 0x20005,
+        EfxDirectFilter = 0x20005
+    }
+
+    internal enum ALSource3i
+    {
         EfxAuxilarySendFilter = 0x20006,
     }
 

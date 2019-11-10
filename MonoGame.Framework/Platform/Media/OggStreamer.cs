@@ -21,8 +21,8 @@ namespace MonoGame.Framework.Media
         internal readonly object _iterationMutex = new object();
         readonly object _readMutex = new object();
 
-        private UnmanagedPointer<float> _readBuffer;
-        private UnmanagedPointer<short> _castBuffer;
+        private float[] _readBuffer;
+        private short[] _castBuffer;
         internal readonly HashSet<OggStream> _streams;
         readonly TimeSpan[] _threadTiming;
         private static OggStreamer _instance;
@@ -67,9 +67,9 @@ namespace MonoGame.Framework.Media
             _streams = new HashSet<OggStream>();
             _threadWatch = new Stopwatch();
 
-            _readBuffer = new UnmanagedPointer<float>(BufferSize);
+            _readBuffer = new float[BufferSize];
             if (!ALController.Instance.SupportsFloat32)
-                _castBuffer = new UnmanagedPointer<short>(BufferSize);
+                _castBuffer = new short[BufferSize];
 
             _thread = new Thread(SongStreamingThread)
             {
@@ -112,7 +112,7 @@ namespace MonoGame.Framework.Media
             lock (_readMutex)
             {
                 var reader = stream.Reader;
-                int readSamples = reader.ReadSamples(_readBuffer.Span);
+                int readSamples = reader.ReadSamples(_readBuffer);
 
                 if (readSamples > 0)
                 {
@@ -121,16 +121,16 @@ namespace MonoGame.Framework.Media
                     ALFormat format = ALHelper.GetALFormat(channels, supportsFloat);
 
                     buffer = ALBufferPool.Rent();
-                    var dataSpan = _readBuffer.Span.Slice(0, readSamples);
+                    Span<float> dataSpan = _readBuffer.AsSpan(0, readSamples);
                     if (supportsFloat)
                     {
-                        buffer.BufferData<float>(dataSpan, format, reader.SampleRate);
+                        buffer.BufferData(dataSpan, format, reader.SampleRate);
                     }
                     else
                     {
-                        var castSpan = _castBuffer.Span.Slice(0, readSamples);
+                        var castSpan = _castBuffer.AsSpan(0, readSamples);
                         AudioLoader.ConvertSingleToInt16(dataSpan, castSpan);
-                        buffer.BufferData<short>(castSpan, format, reader.SampleRate);
+                        buffer.BufferData(castSpan, format, reader.SampleRate);
                     }
                     return true;
                 }
@@ -183,12 +183,12 @@ namespace MonoGame.Framework.Media
                             if (!_streams.Contains(stream))
                                 continue;
 
-                        var state = AL.GetSourceState(stream._alSourceID);
+                        var state = AL.GetSourceState(stream.SourceId);
                         ALHelper.CheckError("Failed to get source state.");
 
                         if (state == ALSourceState.Stopped)
                         {
-                            AL.SourcePlay(stream._alSourceID);
+                            AL.SourcePlay(stream.SourceId);
                             ALHelper.CheckError("Failed to play.");
                         }
                     }
@@ -205,11 +205,11 @@ namespace MonoGame.Framework.Media
 
         private bool FillStream(OggStream stream)
         {
-            AL.GetSource(stream._alSourceID, ALGetSourcei.BuffersProcessed, out int processed);
+            AL.GetSource(stream.SourceId, ALGetSourcei.BuffersProcessed, out int processed);
             ALHelper.CheckError("Failed to fetch processed buffers.");
             if (processed > 0)
             {
-                AL.SourceUnqueueBuffers(stream._alSourceID, processed);
+                AL.SourceUnqueueBuffers(stream.SourceId, processed);
                 ALHelper.CheckError("Failed to unqueue buffers.");
 
                 for (int i = 0; i < processed; i++)
@@ -220,7 +220,7 @@ namespace MonoGame.Framework.Media
             if (requested == 0)
                 return false;
 
-            AL.GetSource(stream._alSourceID, ALGetSourcei.BuffersQueued, out int queued);
+            AL.GetSource(stream.SourceId, ALGetSourcei.BuffersQueued, out int queued);
             ALHelper.CheckError("Failed to fetch queued buffers.");
 
             int buffersFilled = 0;

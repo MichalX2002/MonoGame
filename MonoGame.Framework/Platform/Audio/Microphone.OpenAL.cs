@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 #if OPENAL
@@ -17,9 +16,6 @@ using AVFoundation;
 
 namespace MonoGame.Framework.Audio
 {
-    /// <summary>
-    /// Provides microphones capture features.  
-    /// </summary>
     public sealed partial class Microphone
     {
         private IntPtr _captureDevice = IntPtr.Zero;

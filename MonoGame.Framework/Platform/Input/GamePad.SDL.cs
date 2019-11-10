@@ -108,7 +108,7 @@ namespace MonoGame.Framework.Input
         {
             foreach (KeyValuePair<int, GamePadInfo> entry in GamePads)
             {
-                if (Sdl.Joystick.InstanceID(Sdl.GameController.GetJoystick(entry.Value.Device)) == instanceid)
+                if (Sdl.Joystick.InstanceId(Sdl.GameController.GetJoystick(entry.Value.Device)) == instanceid)
                 {
                     GamePads.Remove(entry.Key);
                     DisposeDevice(entry.Value);
@@ -125,7 +125,7 @@ namespace MonoGame.Framework.Input
             foreach (var pair in GamePads)
             {
                 IntPtr joystick = Sdl.GameController.GetJoystick(pair.Value.Device);
-                _translationTable[Sdl.Joystick.InstanceID(joystick)] = pair.Key;
+                _translationTable[Sdl.Joystick.InstanceId(joystick)] = pair.Key;
             }
         }
 

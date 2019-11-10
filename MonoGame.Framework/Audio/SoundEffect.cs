@@ -3,24 +3,32 @@
 // file 'LICENSE.txt', which is part of this source code package.
 ﻿
 using System;
+using System.Diagnostics;
 using System.IO;
 using MonoGame.Utilities.Memory;
 
 namespace MonoGame.Framework.Audio
 {
-    /// <summary>Represents a loaded sound resource that can be played.</summary>
+    /// <summary>
+    /// Represents a loaded sound effect that can be played.
+    /// </summary>
     /// <remarks>
     /// <para>
-    /// A SoundEffect represents the buffer used to hold audio data and metadata. 
-    /// SoundEffectInstances are used to play from SoundEffects. 
-    /// Multiple SoundEffectInstance objects can be created and played from the same SoundEffect object.
+    /// A sound effect represents the buffer used to hold audio data and metadata. 
+    /// <see cref="SoundEffectInstance"/>s are used to play <see cref="SoundEffect"/>s. 
+    /// Multiple <see cref="SoundEffectInstance"/> objects can be created and played
+    /// from the same <see cref="SoundEffect"/> object.
     /// </para>
+    /// 
     /// <para>
-    /// The only limit on the number of loaded SoundEffects is restricted by available memory. 
-    /// When a SoundEffect is disposed, all SoundEffectInstances created from it will become invalid.</para>
+    /// The only limit on the number of loaded <see cref="SoundEffect"/>s is available memory. 
+    /// When a <see cref="SoundEffect"/> is disposed,
+    /// all <see cref="SoundEffectInstance"/>s created from it will become invalid.
+    /// </para>
+    /// 
     /// <para>
-    /// SoundEffect.Play() can be used for 'fire and forget' sounds. 
-    /// If advanced playback controls like volume or pitch is required, use SoundEffect.CreateInstance().
+    /// <see cref="Play()"/> can be used for 'fire and forget' sounds. 
+    /// If advanced playback controls like volume or pitch is required, use <see cref="CreateInstance()"/>.
     /// </para>
     /// </remarks>
     public sealed partial class SoundEffect : IDisposable
@@ -33,6 +41,13 @@ namespace MonoGame.Framework.Audio
                 throw new AudioHardwareException(
                     "The audio system has failed to initialize. " +
                     $"Call {nameof(Initialize)} before any audio operation to get more specific errors.");
+        }
+
+        [DebuggerHidden]
+        internal static void AssertValidAudioDepth(AudioDepth depth)
+        {
+            if (depth != AudioDepth.Short && depth != AudioDepth.Float)
+                throw new ArgumentOutOfRangeException(nameof(depth), "Invalid audio depth.");
         }
 
         #region Internal Constructors
@@ -150,18 +165,6 @@ namespace MonoGame.Framework.Audio
         /// <param name="data">The buffer with the sound data.</param>
         /// <param name="sampleRate">The sound data sample rate in hertz.</param>
         /// <param name="channels">The number of channels in the sound data.</param>
-        /// <remarks>This only supports uncompressed 16bit PCM wav data.</remarks>
-        public SoundEffect(Span<byte> data, int sampleRate, AudioChannels channels)
-             : this(data, sampleRate, channels, 0, 0)
-        {
-        }
-
-        /// <summary>
-        /// Create a sound effect.
-        /// </summary>
-        /// <param name="data">The buffer with the sound data.</param>
-        /// <param name="sampleRate">The sound data sample rate in hertz.</param>
-        /// <param name="channels">The number of channels in the sound data.</param>
         /// <param name="loopStart">The position where the sound should begin looping in samples.</param>
         /// <param name="loopLength">The duration of the sound data loop in samples.</param>
         /// <remarks>This only supports uncompressed 16bit PCM wav data.</remarks>
@@ -207,6 +210,18 @@ namespace MonoGame.Framework.Audio
             _duration = GetSampleDuration(data.Length, 16, sampleRate, channels);
 
             PlatformInitializePcm(data, 16, sampleRate, channels, loopStart, loopLength);
+        }
+
+        /// <summary>
+        /// Create a sound effect.
+        /// </summary>
+        /// <param name="data">The buffer with the sound data.</param>
+        /// <param name="sampleRate">The sound data sample rate in hertz.</param>
+        /// <param name="channels">The number of channels in the sound data.</param>
+        /// <remarks>This only supports uncompressed 16bit PCM wav data.</remarks>
+        public SoundEffect(Span<byte> data, int sampleRate, AudioChannels channels)
+             : this(data, sampleRate, channels, 0, 0)
+        {
         }
 
         #endregion
@@ -362,36 +377,35 @@ namespace MonoGame.Framework.Audio
         /// </remarks>
         public bool Play()
         {
-            var inst = GetPooledInstance(false);
-            if (inst == null)
+            var instance = GetPooledInstance(false);
+            if (instance == null)
                 return false;
 
-            inst.Play();
+            instance.Play();
             return true;
         }
 
         /// <summary>Gets an sound effect instance and plays it with the specified volume, pitch, and panning.</summary>
         /// <returns>true if a instance was successfully played, false if not.</returns>
-        /// <param name="volume">Volume, ranging from 0.0 (silence) to 1.0 (full volume). Volume during playback is scaled by SoundEffect.MasterVolume.</param>
+        /// <param name="volume">Volume, ranging from 0.0 (silence) to 1.0 (full volume). Volume during playback is scaled by <see cref="MasterVolume"/>.</param>
         /// <param name="pitch">Pitch adjustment, ranging from 0.0 (down an octave) to 1.0 (no change) to 2.0 (up an octave).</param>
         /// <param name="pan">Panning, ranging from -1.0 (left speaker) to 0.0 (centered), 1.0 (right speaker).</param>
         /// <remarks>
         /// <para>Play returns false if more instances are currently playing then the platform allows.</para>
         /// <para>To apply looping or simulate 3D audio, use instances from <see cref="CreateInstance"/> instead.</para>
-        /// <para>Instances used by SoundEffect.Play() are pooled internally.</para>
+        /// <para>Instances used by <see cref="Play()"/> are pooled internally.</para>
         /// </remarks>
         public bool Play(float volume, float pitch, float pan)
         {
-            var inst = GetPooledInstance(false);
-            if (inst == null)
+            var instance = GetPooledInstance(false);
+            if (instance == null)
                 return false;
 
-            inst.Volume = volume;
-            inst.Pitch = pitch;
-            inst.Pan = pan;
+            instance.Volume = volume;
+            instance.Pitch = pitch;
+            instance.Pan = pan;
 
-            inst.Play();
-
+            instance.Play();
             return true;
         }
 

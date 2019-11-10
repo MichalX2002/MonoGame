@@ -6,15 +6,16 @@ namespace MonoGame.Framework.Audio
 {
     internal class EffectsExtension
     {
-        #region Effect API
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void alGenEffectsDelegate(int n, out uint effect);
+        #region Effect Delegates
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void alDeleteEffectsDelegate(int n, ref int effect);
+        private unsafe delegate void alGenEffectsDelegate(int count, uint* effect);
 
-        //[UnmanagedFunctionPointer (CallingConvention.Cdecl)]
-        //private delegate bool alIsEffectDelegate (uint effect);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private unsafe delegate void alDeleteEffectsDelegate(int count, uint* effect);
+
+        [UnmanagedFunctionPointer (CallingConvention.Cdecl)]
+        public delegate bool alIsEffectDelegate (uint effect);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void alEffectfDelegate(uint effect, EfxEffectf param, float value);
@@ -23,10 +24,10 @@ namespace MonoGame.Framework.Audio
         private delegate void alEffectiDelegate(uint effect, EfxEffecti param, int value);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void alGenAuxiliaryEffectSlotsDelegate(int n, out uint effectslots);
+        private unsafe delegate void alGenAuxiliaryEffectSlotsDelegate(int count, uint* effectslots);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void alDeleteAuxiliaryEffectSlotsDelegate(int n, ref int effectslots);
+        private unsafe delegate void alDeleteAuxiliaryEffectSlotsDelegate(int count, uint* effectslots);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void alAuxiliaryEffectSlotiDelegate(uint slot, EfxEffecti type, uint effect);
@@ -36,18 +37,21 @@ namespace MonoGame.Framework.Audio
 
         private alGenEffectsDelegate alGenEffects;
         private alDeleteEffectsDelegate alDeleteEffects;
-        //private alIsEffectDelegate alIsEffect;
         private alEffectfDelegate alEffectf;
         private alEffectiDelegate alEffecti;
         private alGenAuxiliaryEffectSlotsDelegate alGenAuxiliaryEffectSlots;
         private alDeleteAuxiliaryEffectSlotsDelegate alDeleteAuxiliaryEffectSlots;
         private alAuxiliaryEffectSlotiDelegate alAuxiliaryEffectSloti;
         private alAuxiliaryEffectSlotfDelegate alAuxiliaryEffectSlotf;
+
+        public alIsEffectDelegate IsEffect;
+
         #endregion
 
-        #region Filter API
+        #region Filter Delegates
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private unsafe delegate void alGenFiltersDelegate(int n, [Out] uint* filters);
+        private unsafe delegate void alGenFiltersDelegate(int count, uint* filters);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void alFilteriDelegate(uint fid, EfxFilteri param, int value);
@@ -56,80 +60,123 @@ namespace MonoGame.Framework.Audio
         private delegate void alFilterfDelegate(uint fid, EfxFilterf param, float value);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private unsafe delegate void alDeleteFiltersDelegate(int n, [In] uint* filters);
+        private unsafe delegate void alDeleteFiltersDelegate(int n, uint* filters);
 
         private alGenFiltersDelegate alGenFilters;
         private alFilteriDelegate alFilteri;
         private alFilterfDelegate alFilterf;
         private alDeleteFiltersDelegate alDeleteFilters;
+
         #endregion
 
-        internal bool IsInitialized { get; private set; }
-
-        internal static IntPtr _device;
-
         private static EffectsExtension _instance;
-        public static EffectsExtension Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new EffectsExtension();
-                return _instance;
-            }
-        }
 
-        internal EffectsExtension()
+        public bool IsAvailable { get; private set; }
+
+        public EffectsExtension(IntPtr device)
         {
-            IsInitialized = false;
-            if (!ALC.IsExtensionPresent(_device, "ALC_EXT_EFX"))
+            if (!ALC.IsExtensionPresent(device, "ALC_EXT_EFX"))
                 return;
 
-            alGenEffects = Marshal.GetDelegateForFunctionPointer<alGenEffectsDelegate>(AL.alGetProcAddress("alGenEffects"));
-            alDeleteEffects = Marshal.GetDelegateForFunctionPointer<alDeleteEffectsDelegate>(AL.alGetProcAddress("alDeleteEffects"));
-            alEffectf = Marshal.GetDelegateForFunctionPointer<alEffectfDelegate>(AL.alGetProcAddress("alEffectf"));
-            alEffecti = Marshal.GetDelegateForFunctionPointer<alEffectiDelegate>(AL.alGetProcAddress("alEffecti"));
-            alGenAuxiliaryEffectSlots = Marshal.GetDelegateForFunctionPointer<alGenAuxiliaryEffectSlotsDelegate>(AL.alGetProcAddress("alGenAuxiliaryEffectSlots"));
-            alDeleteAuxiliaryEffectSlots = Marshal.GetDelegateForFunctionPointer<alDeleteAuxiliaryEffectSlotsDelegate>(AL.alGetProcAddress("alDeleteAuxiliaryEffectSlots"));
-            alAuxiliaryEffectSloti = Marshal.GetDelegateForFunctionPointer<alAuxiliaryEffectSlotiDelegate>(AL.alGetProcAddress("alAuxiliaryEffectSloti"));
-            alAuxiliaryEffectSlotf = Marshal.GetDelegateForFunctionPointer<alAuxiliaryEffectSlotfDelegate>(AL.alGetProcAddress("alAuxiliaryEffectSlotf"));
+            TDelegate GetDelegate<TDelegate>(string name)
+            {
+                var procAddress = AL.GetProcAddress(name);
+                return Marshal.GetDelegateForFunctionPointer<TDelegate>(procAddress);
+            }
 
-            alGenFilters = Marshal.GetDelegateForFunctionPointer<alGenFiltersDelegate>(AL.alGetProcAddress("alGenFilters"));
-            alFilteri = Marshal.GetDelegateForFunctionPointer<alFilteriDelegate>(AL.alGetProcAddress("alFilteri"));
-            alFilterf = Marshal.GetDelegateForFunctionPointer<alFilterfDelegate>(AL.alGetProcAddress("alFilterf"));
-            alDeleteFilters = Marshal.GetDelegateForFunctionPointer<alDeleteFiltersDelegate>(AL.alGetProcAddress("alDeleteFilters"));
+            alGenEffects = GetDelegate<alGenEffectsDelegate>("alGenEffects");
+            alDeleteEffects = GetDelegate<alDeleteEffectsDelegate>("alDeleteEffects");
+            alEffectf = GetDelegate<alEffectfDelegate>("alEffectf");
+            alEffecti = GetDelegate<alEffectiDelegate>("alEffecti");
+            alGenAuxiliaryEffectSlots = GetDelegate<alGenAuxiliaryEffectSlotsDelegate>("alGenAuxiliaryEffectSlots");
+            alDeleteAuxiliaryEffectSlots = GetDelegate<alDeleteAuxiliaryEffectSlotsDelegate>("alDeleteAuxiliaryEffectSlots");
+            alAuxiliaryEffectSloti = GetDelegate<alAuxiliaryEffectSlotiDelegate>("alAuxiliaryEffectSloti");
+            alAuxiliaryEffectSlotf = GetDelegate<alAuxiliaryEffectSlotfDelegate>("alAuxiliaryEffectSlotf");
 
-            IsInitialized = true;
+            alGenFilters = GetDelegate<alGenFiltersDelegate>("alGenFilters");
+            alFilteri = GetDelegate<alFilteriDelegate>("alFilteri");
+            alFilterf = GetDelegate<alFilterfDelegate>("alFilterf");
+            alDeleteFilters = GetDelegate<alDeleteFiltersDelegate>("alDeleteFilters");
+
+            IsAvailable = true;
         }
-
 
         //alEffecti(effect, EfxEffecti.FilterType, (int) EfxEffectType.Reverb);
         //ALHelper.CheckError("Failed to set Filter Type.");      
 
-
-        internal void GenAuxiliaryEffectSlots(int count, out uint slot)
+        public unsafe void GenAuxiliaryEffectSlots(Span<uint> output)
         {
-            alGenAuxiliaryEffectSlots(count, out slot);
-            ALHelper.CheckError("Failed to Genereate Aux slot");
+            if (output.IsEmpty)
+                return;
+
+            fixed (uint* ptr = &MemoryMarshal.GetReference(output))
+            {
+                alGenAuxiliaryEffectSlots(output.Length, ptr);
+                ALHelper.CheckError("Failed to genereate aux slot.");
+            }
         }
 
-        internal void GenEffect(out uint effect)
+        public uint GenAuxiliaryEffectSlot()
         {
-            alGenEffects(1, out effect);
-            ALHelper.CheckError("Failed to Generate Effect.");
+            Span<uint> output = stackalloc uint[1];
+            GenAuxiliaryEffectSlots(output);
+            return output[0];
         }
 
-        internal void DeleteAuxiliaryEffectSlot(int slot)
+        public unsafe void GenEffects(Span<uint> output)
         {
-            alDeleteAuxiliaryEffectSlots(1, ref slot);
+            if (output.IsEmpty)
+                return;
+
+            fixed (uint* ptr = &MemoryMarshal.GetReference(output))
+            {
+                alGenEffects(output.Length, ptr);
+                ALHelper.CheckError("Failed to generate effects.");
+            }
         }
 
-        internal void DeleteEffect(int effect)
+        public uint GenEffect()
         {
-            alDeleteEffects(1, ref effect);
+            Span<uint> output = stackalloc uint[1];
+            GenEffects(output);
+            return output[0];
         }
 
-        internal void BindEffectToAuxiliarySlot(uint slot, uint effect)
+        public unsafe void DeleteAuxiliaryEffectSlots(ReadOnlySpan<uint> slots)
+        {
+            if (slots.IsEmpty)
+                return;
+
+            fixed (uint* ptr = &MemoryMarshal.GetReference(slots))
+            {
+                alDeleteAuxiliaryEffectSlots(slots.Length, ptr);
+            }
+        }
+
+        public void DeleteAuxiliaryEffectSlot(uint slot)
+        {
+            Span<uint> tmp = stackalloc uint[] { slot };
+            DeleteAuxiliaryEffectSlots(tmp);
+        }
+
+        public unsafe void DeleteEffects(ReadOnlySpan<uint> effects)
+        {
+            if (effects.IsEmpty)
+                return;
+
+            fixed (uint* ptr = &MemoryMarshal.GetReference(effects))
+            {
+                alDeleteEffects(effects.Length, ptr);
+            }
+        }
+
+        public void DeleteEffect(uint effect)
+        {
+            Span<uint> tmp = stackalloc uint[] { effect };
+            DeleteEffects(tmp);
+        }
+
+        public void BindEffectToAuxiliarySlot(uint slot, uint effect)
         {
             alAuxiliaryEffectSloti(slot, EfxEffecti.SlotEffect, effect);
             ALHelper.CheckError("Failed to bind Effect");
@@ -141,9 +188,9 @@ namespace MonoGame.Framework.Audio
             ALHelper.CheckError("Failes to set " + param + " " + value);
         }
 
-        internal void BindSourceToAuxiliarySlot(int SourceId, int slot, int slotnumber, int filter)
+        internal void BindSourceToAuxiliarySlot(uint source, int slot, int slotnumber, int filter)
         {
-            AL.alSource3i(SourceId, ALSourcei.EfxAuxilarySendFilter, slot, slotnumber, filter);
+            AL.Source(source, ALSource3i.EfxAuxilarySendFilter, slot, slotnumber, filter);
         }
 
         internal void Effect(uint effect, EfxEffectf param, float value)
@@ -158,31 +205,54 @@ namespace MonoGame.Framework.Audio
             ALHelper.CheckError("Failed to set " + param + " " + value);
         }
 
-        internal unsafe int GenFilter()
+        public unsafe void GenFilters(Span<uint> output)
         {
-            uint filter = 0;
-            alGenFilters(1, &filter);
-            return (int)filter;
+            if (output.IsEmpty)
+                return;
+
+            fixed (uint* ptr = &MemoryMarshal.GetReference(output))
+            {
+                alGenFilters(output.Length, ptr);
+            }
         }
 
-        internal void Filter(int sourceId, EfxFilteri filter, int EfxFilterType)
+        public uint GenFilter()
         {
-            alFilteri((uint)sourceId, filter, EfxFilterType);
+            Span<uint> output = stackalloc uint[1];
+            GenFilters(output);
+            return output[0];
         }
 
-        internal void Filter(int sourceId, EfxFilterf filter, float EfxFilterType)
+        public void Filter(uint source, EfxFilteri filter, int filterType)
         {
-            alFilterf((uint)sourceId, filter, EfxFilterType);
+            alFilteri(source, filter, filterType);
         }
 
-        internal void BindFilterToSource(int sourceId, int filterId)
+        public void Filter(uint source, EfxFilterf filter, float filterType)
         {
-            AL.Source(sourceId, ALSourcei.EfxDirectFilter, filterId);
+            alFilterf(source, filter, filterType);
         }
 
-        internal unsafe void DeleteFilter(int filterId)
+        public void BindFilterToSource(uint source, uint filter)
         {
-            alDeleteFilters(1, (uint*)&filterId);
+            AL.Source(source, ALSourcei.EfxDirectFilter, filter);
+        }
+
+        public unsafe void DeleteFilters(ReadOnlySpan<uint> filters)
+        {
+            if (filters.IsEmpty)
+                return;
+
+            fixed (uint* ptr = &MemoryMarshal.GetReference(filters))
+            {
+                alDeleteFilters(filters.Length, ptr);
+            }
+        }
+
+        public void DeleteFilter(uint filter)
+        {
+            Span<uint> tmp = stackalloc uint[] { filter };
+            DeleteFilters(tmp);
         }
     }
 }

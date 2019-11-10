@@ -193,7 +193,7 @@ namespace MonoGame.Framework.Audio
 
         internal static void PlatformSetReverbSettings(ReverbSettings reverbSettings)
         {
-            if (!ALController.Efx.IsInitialized)
+            if (!ALController.Efx.IsAvailable)
                 return;
 
             if (ReverbEffect != 0)

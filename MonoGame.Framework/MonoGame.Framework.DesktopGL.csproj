@@ -65,6 +65,8 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audio\AudioDepth.cs" />
+    <Compile Include="Audio\MicrophoneState.cs" />
     <Compile Include="Content\ContentReaders\SoundEffectReader.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="GameUpdateRequiredException.cs" />

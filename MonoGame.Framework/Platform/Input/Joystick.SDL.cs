@@ -29,7 +29,7 @@ namespace MonoGame.Framework.Input
         {
             foreach (KeyValuePair<int, IntPtr> entry in Joysticks)
             {
-                if (Sdl.Joystick.InstanceID(entry.Value) == instanceid)
+                if (Sdl.Joystick.InstanceId(entry.Value) == instanceid)
                 {
                     Sdl.Joystick.Close(Joysticks[entry.Key]);
                     Joysticks.Remove(entry.Key);

@@ -9,46 +9,37 @@ using System.Collections.ObjectModel;
 namespace MonoGame.Framework.Audio
 {
     /// <summary>
-    /// Microphone state. 
-    /// </summary>
-    public enum MicrophoneState
-    {
-        Started,
-        Stopped
-    }
-
-    /// <summary>
-    /// Provides microphones capture features. 
+    /// Provides microphone capture features. 
     /// </summary>
     public sealed partial class Microphone
     {
         public delegate void BufferReadyDelegate(Microphone source, int sampleCount);
 
-        private TimeSpan _bufferDuration = TimeSpan.FromMilliseconds(1000.0);
-
         private static List<Microphone> _allMicrophones = new List<Microphone>();
         private static ReadOnlyCollection<Microphone> _allMicrophonesRead;
+
+        private TimeSpan _bufferDuration;
 
         /// <summary>
         /// Returns the default microphone.
         /// </summary>
-        public static Microphone Default { get; internal set; } = null;
+        public static Microphone Default { get; internal set; }
 
         /// <summary>
-        /// Returns all compatible microphones.
+        /// Returns all available microphones.
         /// </summary>
         public static ReadOnlyCollection<Microphone> All
         {
             get
             {
                 if (_allMicrophonesRead == null)
-                    _allMicrophonesRead = new ReadOnlyCollection<Microphone>(_allMicrophones);
+                    _allMicrophonesRead = _allMicrophones.AsReadOnly();
                 return _allMicrophonesRead;
             }
         }
 
         /// <summary>
-        /// Event fired when the audio data are available.
+        /// Event that fires when there is audio data available.
         /// </summary>
         public event BufferReadyDelegate BufferReady;
 
@@ -58,18 +49,21 @@ namespace MonoGame.Framework.Audio
         public string Name { get; }
 
         /// <summary>
-        /// Returns the sample rate of the captured audio.
-        /// Note: default value is 44100hz
+        /// Returns the sample rate of the captured audio, 44100Hz by default.
         /// </summary>
         public int SampleRate { get; internal set; } = 44100;
 
         /// <summary>
-        /// Returns the state of the Microphone. 
+        /// Returns the state of the microphone. 
         /// </summary>
         public MicrophoneState State { get; internal set; } = MicrophoneState.Stopped;
 
         /// <summary>
-        /// Gets or sets the capture buffer duration. This value must be greater than 100 milliseconds, lower than 1000 milliseconds, and must be 10 milliseconds aligned (BufferDuration % 10 == 10).
+        /// Gets or sets the capture buffer duration. 
+        /// <para>
+        /// This value must be greater than 100 milliseconds, lower than 1000 milliseconds, 
+        /// and must be 10 milliseconds aligned (value % 10 == 0).
+        /// </para>
         /// </summary>
         public TimeSpan BufferDuration
         {
@@ -77,31 +71,40 @@ namespace MonoGame.Framework.Audio
             set
             {
                 if (value.TotalMilliseconds < 100 || value.TotalMilliseconds > 1000)
-                    throw new ArgumentOutOfRangeException(nameof(value), "Buffer duration must be a value between 100 and 1000 milliseconds.");
+                    throw new ArgumentOutOfRangeException(
+                        nameof(value), "Buffer duration must be a value between 100 and 1000 milliseconds.");
+
                 if (value.TotalMilliseconds % 10 != 0)
-                    throw new ArgumentOutOfRangeException(nameof(value), "Buffer duration must be 10ms aligned (BufferDuration % 10 == 0)");
+                    throw new ArgumentOutOfRangeException(
+                        nameof(value), "Buffer duration must be 10ms aligned (value % 10 == 0)");
+
                 _bufferDuration = value;
             }
         }
 
         /// <summary>
         /// Determines if the microphone is a wired headset.
-        /// Note: XNA could know if a headset microphone was plugged in an Xbox 360 controller but MonoGame can't.
-        /// Hence, this is always true on mobile platforms, and always false otherwise.
+        /// <para>
+        /// Always <see langword="true"/> on mobile and <see langword="false"/> otherwise. See remarks.
+        /// </para>
         /// </summary>
+        /// <remarks>
+        /// XNA could know if a headset microphone was plugged in an Xbox 360 controller but MonoGame can't.
+        /// Hence, this is always true on mobile platforms, and always false otherwise.
+        /// </remarks>
         public bool IsHeadset =>
 #if IOS || ANDROID
-                // always true on mobile, this can't be queried on any platform 
-                // (it was most probably only set to true if the headset was plugged in an XInput controller)
-                return true;
+            // always true on mobile, this can't be queried on any platform 
+            // (it was most probably only set to true if the headset was plugged in an XInput controller)
+            true;
 #else
-                false;
+            false;
 #endif
-
 
         internal Microphone(string name)
         {
             Name = name;
+            BufferDuration = TimeSpan.FromMilliseconds(1000);
         }
 
         #region Public Methods
@@ -119,10 +122,10 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Returns the size, in bytes, of the array required to hold the specified duration of 16-bit PCM data. 
+        /// Returns the amount of bytes required to hold the specified duration of 16-bit PCM data. 
         /// </summary>
         /// <param name="duration">TimeSpan of the duration of the sample.</param>
-        /// <returns>Size, in bytes, of the buffer.</returns>
+        /// <returns>The amount of bytes required.</returns>
         public int GetSampleSizeInBytes(TimeSpan duration)
         {
             // this should be 10ms aligned
@@ -133,33 +136,25 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// Starts microphone capture.
         /// </summary>
-        public void Start()
-        {
-            PlatformStart();
-        }
+        public void Start() => PlatformStart();
 
         /// <summary>
         /// Stops microphone capture.
         /// </summary>
-        public void Stop()
-        {
-            PlatformStop();
-        }
+        public void Stop() => PlatformStop();
 
         /// <summary>
         /// Gets the latest available data from the microphone.
         /// </summary>
-        /// <typeparam name="T">
-        /// The type of the buffer elements. 
-        /// Can be <see langword="byte"></see> or any other type with size divisible by 2.
-        /// </typeparam>
+        /// <typeparam name="T">The type of the buffer elements.</typeparam>
         /// <param name="buffer">Buffer for the captured 16-bit PCM data.</param>
         /// <returns>The amount of 16-bit samples captured.</returns>
-        public unsafe int GetData<T>(Span<T> buffer) where T : unmanaged
+        public unsafe int GetData<T>(Span<T> buffer) 
+            where T : unmanaged
         {
-            if (typeof(T) != typeof(byte) && sizeof(T) % 2 != 0)
+            if (sizeof(T) * buffer.Length % 2 != 0)
                 throw new ArgumentException(
-                    "The size of the generic argument is not divisible by 2.", nameof(T));
+                    "The buffer size in bytes is not divisible by 2.", nameof(buffer));
 
             return PlatformGetData(buffer);
         }

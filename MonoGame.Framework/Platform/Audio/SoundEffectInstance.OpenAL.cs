@@ -14,7 +14,7 @@ namespace MonoGame.Framework.Audio
 		private float _alVolume = 1f;
 
         internal ALController _controller;
-        internal int? SourceID;
+        internal uint? SourceId;
 
         private float _reverb = 0f;
         private bool _needsFilterUpdate = false;
@@ -33,7 +33,7 @@ namespace MonoGame.Framework.Audio
 
         private void PlatformApply3D(AudioListener listener, AudioEmitter emitter)
         {
-            if (!SourceID.HasValue)
+            if (!SourceId.HasValue)
                 return;
 
             AL.GetListener(ALListener3f.Position, out float x, out float y, out float z);
@@ -43,20 +43,20 @@ namespace MonoGame.Framework.Audio
             Vector3 posOffset = emitter.Position - listener.Position;
 
             // set up orientation matrix
-            Matrix orientation = Matrix.CreateWorld(Vector3.Zero, listener.Forward, listener.Up);
+            var orientation = Matrix.CreateWorld(Vector3.Zero, listener.Forward, listener.Up);
 
             // set up our final position and velocity according to orientation of listener
-            Vector3 finalPos = Vector3.Transform(new Vector3(x, y, z) + posOffset, orientation);
-            Vector3 finalVel = Vector3.Transform(emitter.Velocity, orientation);
+            var finalPos = Vector3.Transform(new Vector3(x, y, z) + posOffset, orientation);
+            var finalVel = Vector3.Transform(emitter.Velocity, orientation);
 
             // set the position based on relative positon
-            AL.Source(SourceID.Value, ALSource3f.Position, finalPos.X, finalPos.Y, finalPos.Z);
+            AL.Source(SourceId.Value, ALSource3f.Position, finalPos.X, finalPos.Y, finalPos.Z);
             ALHelper.CheckError("Failed to set source position.");
 
-            AL.Source(SourceID.Value, ALSource3f.Velocity, finalVel.X, finalVel.Y, finalVel.Z);
+            AL.Source(SourceId.Value, ALSource3f.Velocity, finalVel.X, finalVel.Y, finalVel.Z);
             ALHelper.CheckError("Failed to set source velocity.");
 
-            AL.Source(SourceID.Value, ALSourcef.ReferenceDistance, SoundEffect.DistanceScale);
+            AL.Source(SourceId.Value, ALSourcef.ReferenceDistance, SoundEffect.DistanceScale);
             ALHelper.CheckError("Failed to set source distance scale.");
 
             AL.DopplerFactor(SoundEffect.DopplerScale);
@@ -65,48 +65,48 @@ namespace MonoGame.Framework.Audio
 
         private void PlatformPause()
         {
-            if (!SourceID.HasValue || SoundState != SoundState.Playing)
+            if (!SourceId.HasValue || SoundState != SoundState.Playing)
                 return;
 
-            AL.SourcePause(SourceID.Value);
+            AL.SourcePause(SourceId.Value);
             ALHelper.CheckError("Failed to pause source.");
             SoundState = SoundState.Paused;
         }
 
         private void PlatformPlay()
         {
-            SourceID = _controller.ReserveSource();
+            SourceId = _controller.ReserveSource();
             
-            AL.Source(SourceID.Value, ALSourcei.Buffer, _effect.SoundBuffer.BufferID);
+            AL.Source(SourceId.Value, ALSourcei.Buffer, _effect.SoundBuffer.BufferId);
             ALHelper.CheckError("Failed to bind buffer to source.");
 
             // update the position, gain, looping, pitch, and distance model
 
-            AL.Source(SourceID.Value, ALSourcei.SourceRelative, 1);
+            AL.Source(SourceId.Value, ALSourcei.SourceRelative, 1);
             ALHelper.CheckError("Failed set source relative.");
             
             AL.DistanceModel(ALDistanceModel.InverseDistanceClamped);
             ALHelper.CheckError("Failed set source distance.");
             
-            AL.Source(SourceID.Value, ALSource3f.Position, _pan, 0f, 0f);
+            AL.Source(SourceId.Value, ALSource3f.Position, _pan, 0f, 0f);
             ALHelper.CheckError("Failed to set source pan.");
             
-            AL.Source(SourceID.Value, ALSource3f.Velocity, 0f, 0f, 0f);
+            AL.Source(SourceId.Value, ALSource3f.Velocity, 0f, 0f, 0f);
             ALHelper.CheckError("Failed to set source pan.");
             
-            AL.Source(SourceID.Value, ALSourcef.Gain, _alVolume);
+            AL.Source(SourceId.Value, ALSourcef.Gain, _alVolume);
             ALHelper.CheckError("Failed to set source volume.");
             
-            AL.Source(SourceID.Value, ALSourceb.Looping, IsLooped);
+            AL.Source(SourceId.Value, ALSourceb.Looping, IsLooped);
             ALHelper.CheckError("Failed to set source loop state.");
             
-            AL.Source(SourceID.Value, ALSourcef.Pitch, _pitch);
+            AL.Source(SourceId.Value, ALSourcef.Pitch, _pitch);
             ALHelper.CheckError("Failed to set source pitch.");
 
             ApplyReverb();
             ApplyFilter();
 
-            AL.SourcePlay(SourceID.Value);
+            AL.SourcePlay(SourceId.Value);
             ALHelper.CheckError("Failed to play source.");
 
             SoundState = SoundState.Playing;
@@ -114,12 +114,12 @@ namespace MonoGame.Framework.Audio
 
         private void PlatformResume()
         {
-            if (!SourceID.HasValue)
+            if (!SourceId.HasValue)
                 return;
 
             if (SoundState == SoundState.Paused)
             {
-                AL.SourcePlay(SourceID.Value);
+                AL.SourcePlay(SourceId.Value);
                 ALHelper.CheckError("Failed to play source.");
                 SoundState = SoundState.Playing;
             }
@@ -127,25 +127,25 @@ namespace MonoGame.Framework.Audio
 
         private void PlatformStop(bool immediate)
         {
-            if (SourceID.HasValue && AL.IsSource(SourceID.Value))
+            if (SourceId.HasValue && AL.IsSource(SourceId.Value))
             {
-                AL.SourceStop(SourceID.Value);
+                AL.SourceStop(SourceId.Value);
                 ALHelper.CheckError("Failed to stop source.");
 
                 // Reset the SendFilter to 0 if we are NOT using reverb since sources are recycled
                 if (_controller.SupportsEfx)
                 {
-                    ALController.Efx.BindSourceToAuxiliarySlot(SourceID.Value, 0, 0, 0);
+                    ALController.Efx.BindSourceToAuxiliarySlot(SourceId.Value, 0, 0, 0);
                     ALHelper.CheckError("Failed to unset reverb.");
 
-                    AL.Source(SourceID.Value, ALSourcei.EfxDirectFilter, 0);
+                    AL.Source(SourceId.Value, ALSourcei.EfxDirectFilter, 0);
                     ALHelper.CheckError("Failed to unset filter.");
                 }
 
-                AL.Source(SourceID.Value, ALSourcei.Buffer, 0);
+                AL.Source(SourceId.Value, ALSourcei.Buffer, 0);
                 ALHelper.CheckError("Failed to free source from buffer.");
 
-                _controller.RecycleSource(SourceID.Value);
+                _controller.RecycleSource(SourceId.Value);
             }
             SoundState = SoundState.Stopped;
         }
@@ -153,9 +153,9 @@ namespace MonoGame.Framework.Audio
         private void PlatformSetIsLooped(bool value)
         {
             _looped = value;
-            if (SourceID.HasValue)
+            if (SourceId.HasValue)
             {
-                AL.Source(SourceID.Value, ALSourceb.Looping, _looped);
+                AL.Source(SourceId.Value, ALSourceb.Looping, _looped);
                 ALHelper.CheckError("Failed to set source loop state.");
             }
         }
@@ -167,28 +167,28 @@ namespace MonoGame.Framework.Audio
 
         private void PlatformSetPan(float value)
         {
-            if (SourceID.HasValue)
+            if (SourceId.HasValue)
             {
-                AL.Source(SourceID.Value, ALSource3f.Position, value, 0f, 0.1f);
+                AL.Source(SourceId.Value, ALSource3f.Position, value, 0f, 0.1f);
                 ALHelper.CheckError("Failed to set source pan.");
             }
         }
 
         private void PlatformSetPitch(float value)
         {
-            if (SourceID.HasValue)
+            if (SourceId.HasValue)
             {
-                AL.Source(SourceID.Value, ALSourcef.Pitch, value);
+                AL.Source(SourceId.Value, ALSourcef.Pitch, value);
                 ALHelper.CheckError("Failed to set source pitch.");
             }
         }
 
         private SoundState PlatformGetState()
         {
-            if (!SourceID.HasValue)
+            if (!SourceId.HasValue)
                 return SoundState.Stopped;
             
-            var alState = AL.GetSourceState(SourceID.Value);
+            var alState = AL.GetSourceState(SourceId.Value);
             ALHelper.CheckError("Failed to get source state.");
 
             switch (alState)
@@ -213,16 +213,16 @@ namespace MonoGame.Framework.Audio
         private void PlatformSetVolume(float value)
         {
             _alVolume = value;
-            if (SourceID.HasValue)
+            if (SourceId.HasValue)
             {
-                AL.Source(SourceID.Value, ALSourcef.Gain, _alVolume);
+                AL.Source(SourceId.Value, ALSourcef.Gain, _alVolume);
                 ALHelper.CheckError("Failed to set source volume.");
             }
         }
 
         internal void PlatformSetReverbMix(float mix)
         {
-            if (!ALController.Efx.IsInitialized)
+            if (!ALController.Efx.IsAvailable)
                 return;
 
             _reverb = mix;
@@ -237,7 +237,7 @@ namespace MonoGame.Framework.Audio
         {
             if (_reverb > 0f && SoundEffect.ReverbSlot != 0)
             {
-                ALController.Efx.BindSourceToAuxiliarySlot(SourceID.Value, (int)SoundEffect.ReverbSlot, 0, 0);
+                ALController.Efx.BindSourceToAuxiliarySlot(SourceId.Value, (int)SoundEffect.ReverbSlot, 0, 0);
                 ALHelper.CheckError("Failed to set reverb.");
             }
         }
@@ -274,7 +274,7 @@ namespace MonoGame.Framework.Audio
                         break;
                 }
 
-                AL.Source(SourceID.Value, ALSourcei.EfxDirectFilter, _controller.Filter);
+                AL.Source(SourceId.Value, ALSourcei.EfxDirectFilter, _controller.Filter);
                 ALHelper.CheckError("Failed to set DirectFilter.");
 
                 _needsFilterUpdate = false;
@@ -283,7 +283,7 @@ namespace MonoGame.Framework.Audio
 
         internal void PlatformSetFilter(FilterMode mode, float filterQ, float frequency)
         {
-            if (!ALController.Efx.IsInitialized)
+            if (!ALController.Efx.IsAvailable)
                 return;
 
             switch (mode)
@@ -313,7 +313,7 @@ namespace MonoGame.Framework.Audio
 
         internal void PlatformClearFilter()
         {
-            if (!ALController.Efx.IsInitialized)
+            if (!ALController.Efx.IsAvailable)
                 return;
             _needsFilterUpdate = false;
         }

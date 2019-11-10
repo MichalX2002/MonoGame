@@ -8,7 +8,8 @@ using System.Runtime.Serialization;
 namespace MonoGame.Framework.Audio
 {
     /// <summary>
-    /// The exception thrown when the system attempts to play more SoundEffectInstances than allowed.
+    /// The exception thrown when attempting to
+    /// play more sound instances than allowed.
     /// </summary>
     /// <remarks>
     /// Most platforms have a hard limit on how many sounds can be played simultaneously. 

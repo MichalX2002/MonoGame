@@ -31,17 +31,17 @@ namespace MonoGame.Framework.Audio
             if (!AL.IsExtensionPresent("EAX-RAM"))
                 return;
 
-            RamSize = AL.alGetEnumValue("AL_EAX_RAM_SIZE");
-            RamFree = AL.alGetEnumValue("AL_EAX_RAM_FREE");
-            StorageAuto = AL.alGetEnumValue("AL_STORAGE_AUTOMATIC");
-            StorageHardware = AL.alGetEnumValue("AL_STORAGE_HARDWARE");
-            StorageAccessible = AL.alGetEnumValue("AL_STORAGE_ACCESSIBLE");
+            RamSize = AL.GetEnumValue("AL_EAX_RAM_SIZE");
+            RamFree = AL.GetEnumValue("AL_EAX_RAM_FREE");
+            StorageAuto = AL.GetEnumValue("AL_STORAGE_AUTOMATIC");
+            StorageHardware = AL.GetEnumValue("AL_STORAGE_HARDWARE");
+            StorageAccessible = AL.GetEnumValue("AL_STORAGE_ACCESSIBLE");
             if (RamSize == 0 || RamFree == 0 || StorageAuto == 0 || StorageHardware == 0 || StorageAccessible == 0)
                 return;
 
             try
             {
-                setBufferMode = Marshal.GetDelegateForFunctionPointer<SetBufferModeDelegate>(AL.alGetProcAddress("EAXSetBufferMode"));
+                setBufferMode = Marshal.GetDelegateForFunctionPointer<SetBufferModeDelegate>(AL.GetProcAddress("EAXSetBufferMode"));
                 IsInitialized = true; // only initialize if setbuffermode doesn't throw
             }
             catch

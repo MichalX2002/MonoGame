@@ -28,19 +28,35 @@ namespace MonoGame.Framework.Audio
                 || format == ALFormat.StereoMSAdpcm;
         }
 
-        public static ALFormat GetALFormat(AudioChannels channels, bool isFloat)
+        public static ALFormat GetALFormat(AudioChannels channels, AudioDepth depth)
         {
             switch (channels)
             {
                 case AudioChannels.Mono:
-                    return isFloat ? ALFormat.MonoFloat32 : ALFormat.Mono16;
+                    switch (depth)
+                    {
+                        case AudioDepth.Short: return ALFormat.Mono16;
+                        case AudioDepth.Float: return ALFormat.MonoFloat32;
+                    }
+                    break;
 
                 case AudioChannels.Stereo:
-                    return isFloat ? ALFormat.StereoFloat32 : ALFormat.Stereo16;
+                    switch (depth)
+                    {
+                        case AudioDepth.Short: return ALFormat.Stereo16;
+                        case AudioDepth.Float: return ALFormat.StereoFloat32;
+                    }
+                    break;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(channels), "Only mono and stereo channels are supported.");
             }
+            throw new ArgumentOutOfRangeException(nameof(depth), "Audio format is not supported.");
+        }
+
+        public static ALFormat GetALFormat(AudioChannels channels, bool isFloat)
+        {
+            return GetALFormat(channels, isFloat ? AudioDepth.Float : AudioDepth.Short);
         }
     }
 

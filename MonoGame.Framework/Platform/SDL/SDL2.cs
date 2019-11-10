@@ -355,8 +355,8 @@ internal static class Sdl
         {
             public EventType Type;
             public uint TimeStamp;
-            public uint WindowID;
-            public EventId EventID;
+            public uint WindowId;
+            public EventId EventId;
             private readonly byte padding1;
             private readonly byte padding2;
             private readonly byte padding3;
@@ -684,7 +684,7 @@ internal static class Sdl
         {
             public EventType Type;
             public uint Timestamp;
-            public uint WindowID;
+            public uint WindowId;
             public uint Which;
             public byte State;
             private readonly byte _padding1;
@@ -825,11 +825,11 @@ internal static class Sdl
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_joystickfrominstanceid(int joyid);
-        private static readonly d_sdl_joystickfrominstanceid SDL_JoystickFromInstanceID = FL.LoadFunction<d_sdl_joystickfrominstanceid>(NativeLibrary, "SDL_JoystickFromInstanceID");
+        private static readonly d_sdl_joystickfrominstanceid SDL_JoystickFromInstanceId = FL.LoadFunction<d_sdl_joystickfrominstanceid>(NativeLibrary, "SDL_JoystickFromInstanceID");
 
-        public static IntPtr FromInstanceID(int joyid)
+        public static IntPtr FromInstanceId(int joyid)
         {
-            return GetError(SDL_JoystickFromInstanceID(joyid));
+            return GetError(SDL_JoystickFromInstanceId(joyid));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -850,7 +850,7 @@ internal static class Sdl
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int d_sdl_joystickinstanceid(IntPtr joystick);
-        public static d_sdl_joystickinstanceid InstanceID = FL.LoadFunction<d_sdl_joystickinstanceid>(NativeLibrary, "SDL_JoystickInstanceID");
+        public static d_sdl_joystickinstanceid InstanceId = FL.LoadFunction<d_sdl_joystickinstanceid>(NativeLibrary, "SDL_JoystickInstanceID");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_joystickopen(int deviceIndex);
@@ -955,11 +955,11 @@ internal static class Sdl
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_joystickfrominstanceid(int joyid);
-        private static readonly d_sdl_joystickfrominstanceid SDL_GameControllerFromInstanceID = FL.LoadFunction<d_sdl_joystickfrominstanceid>(NativeLibrary, "SDL_JoystickFromInstanceID");
+        private static readonly d_sdl_joystickfrominstanceid SDL_GameControllerFromInstanceId = FL.LoadFunction<d_sdl_joystickfrominstanceid>(NativeLibrary, "SDL_JoystickFromInstanceID");
 
-        public static IntPtr FromInstanceID(int joyid)
+        public static IntPtr FromInstanceId(int joyid)
         {
-            return GetError(SDL_GameControllerFromInstanceID(joyid));
+            return GetError(SDL_GameControllerFromInstanceId(joyid));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

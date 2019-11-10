@@ -16,23 +16,20 @@ namespace MonoGame.Framework.Audio
         {
             InitializeSound();
 
-            SourceID = _controller.ReserveSource();
+            SourceId = _controller.ReserveSource();
 
             // Ensure that the source is not looped (due to source recycling)
-            AL.Source(SourceID.Value, ALSourceb.Looping, false);
+            AL.Source(SourceId.Value, ALSourceb.Looping, false);
             ALHelper.CheckError("Failed to set source loop state.");
 
             _queuedBuffers = new Queue<ALBuffer>();
         }
 
-        private int PlatformGetPendingBufferCount()
-        {
-            return _queuedBuffers.Count;
-        }
+        private int PlatformGetPendingBufferCount() => _queuedBuffers.Count;
 
         private int PlatformGetBufferedSamples()
         {
-            if (!SourceID.HasValue)
+            if (!SourceId.HasValue)
                 return 0;
 
             int total = 0;
@@ -45,7 +42,7 @@ namespace MonoGame.Framework.Audio
                     total += buff.SampleCount;
             }
 
-            AL.GetSource(SourceID.Value, ALGetSourcei.SampleOffset, out int offset);
+            AL.GetSource(SourceId.Value, ALGetSourcei.SampleOffset, out int offset);
             ALHelper.CheckError("Failed to get sample offset in source.");
             total -= offset;
 
@@ -54,29 +51,29 @@ namespace MonoGame.Framework.Audio
 
         private void PlatformPlay()
         {
-            AL.SourcePlay(SourceID.Value);
+            AL.SourcePlay(SourceId.Value);
             ALHelper.CheckError("Failed to play the source.");
         }
 
         private void PlatformPause()
         {
-            AL.SourcePause(SourceID.Value);
+            AL.SourcePause(SourceId.Value);
             ALHelper.CheckError("Failed to pause the source.");
         }
 
         private void PlatformResume()
         {
-            AL.SourcePlay(SourceID.Value);
+            AL.SourcePlay(SourceId.Value);
             ALHelper.CheckError("Failed to play the source.");
         }
 
         private void PlatformStop()
         {
-            AL.SourceStop(SourceID.Value);
+            AL.SourceStop(SourceId.Value);
             ALHelper.CheckError("Failed to stop the source.");
 
             // Remove all queued buffers
-            AL.Source(SourceID.Value, ALSourcei.Buffer, 0);
+            AL.Source(SourceId.Value, ALSourcei.Buffer, 0);
             ALHelper.CheckError("Failed to unbind the buffer.");
 
             lock (_queuedBuffers)
@@ -89,28 +86,26 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        private void PlatformSubmitBuffer<T>(ReadOnlySpan<T> data)
+        private void PlatformSubmitBuffer<T>(ReadOnlySpan<T> data, AudioDepth depth)
             where T : unmanaged
         {
-            var buffer = ALBufferPool.Rent();
-
             // Bind the data
-            bool isFloat = typeof(T) == typeof(float);
-            ALFormat format = ALHelper.GetALFormat(_channels, isFloat);
-            buffer.BufferData(data, format, _sampleRate);
-
+            ALFormat alFormat = ALHelper.GetALFormat(_channels, depth);
+            var buffer = ALBufferPool.Rent();
+            buffer.BufferData(data, alFormat, _sampleRate);
+            
             // Queue the buffer
-            AL.SourceQueueBuffer(SourceID.Value, buffer.BufferID);
+            AL.SourceQueueBuffer(SourceId.Value, buffer.BufferId);
             ALHelper.CheckError("Failed to queue buffer.");
 
             lock (_queuedBuffers)
                 _queuedBuffers.Enqueue(buffer);
 
             // If the source has run out of buffers, restart it
-            var sourceState = AL.GetSourceState(SourceID.Value);
+            var sourceState = AL.GetSourceState(SourceId.Value);
             if (_state == SoundState.Playing && sourceState == ALSourceState.Stopped)
             {
-                AL.SourcePlay(SourceID.Value);
+                AL.SourcePlay(SourceId.Value);
                 ALHelper.CheckError("Failed to resume source playback.");
             }
         }
@@ -118,16 +113,16 @@ namespace MonoGame.Framework.Audio
         private void PlatformDispose(bool disposing)
         {
             // Stop the source and bind null buffer so that it can be recycled
-            if (SourceID.HasValue && AL.IsSource(SourceID.Value))
+            if (SourceId.HasValue && AL.IsSource(SourceId.Value))
             {
-                AL.SourceStop(SourceID.Value);
+                AL.SourceStop(SourceId.Value);
                 ALHelper.CheckError("Failed to stop the source.");
 
-                AL.Source(SourceID.Value, ALSourcei.Buffer, 0);
+                AL.Source(SourceId.Value, ALSourcei.Buffer, 0);
                 ALHelper.CheckError("Failed to unbind the buffer.");
 
-                _controller.RecycleSource(SourceID.Value);
-                SourceID = null;
+                _controller.RecycleSource(SourceId.Value);
+                SourceId = null;
             }
 
             if (disposing)
@@ -147,13 +142,13 @@ namespace MonoGame.Framework.Audio
         private void PlatformUpdateQueue()
         {
             // Get the completed buffers
-            AL.GetSource(SourceID.Value, ALGetSourcei.BuffersProcessed, out int numBuffers);
+            AL.GetSource(SourceId.Value, ALGetSourcei.BuffersProcessed, out int numBuffers);
             ALHelper.CheckError("Failed to get processed buffer count.");
 
             // Unqueue them
             if (numBuffers > 0)
             {
-                AL.SourceUnqueueBuffers(SourceID.Value, numBuffers);
+                AL.SourceUnqueueBuffers(SourceId.Value, numBuffers);
                 ALHelper.CheckError("Failed to unqueue buffers.");
 
                 lock (_queuedBuffers)

@@ -20,8 +20,7 @@ namespace MonoGame.Framework.Media
         internal readonly object _stopMutex = new object();
         internal readonly object _prepareMutex = new object();
 
-        internal readonly int _alSourceID;
-        private readonly int _alFilterID;
+        private readonly uint _alFilterId;
         private readonly Queue<ALBuffer> _queuedBuffers;
         private readonly bool _leaveInnerStreamOpen;
         private Stream _stream;
@@ -30,26 +29,27 @@ namespace MonoGame.Framework.Media
         private float _volume;
         private float _pitch;
 
-        internal Song Parent { get; }
-        internal VorbisReader Reader { get; private set; }
-        internal bool IsReady { get; private set; }
-        internal bool IsPreparing { get; private set; }
+        public Song Parent { get; }
+        public VorbisReader Reader { get; private set; }
+        public bool IsReady { get; private set; }
+        public bool IsPreparing { get; private set; }
 
         public bool IsLooped { get; set; }
         public Action OnFinished { get; private set; }
         public int QueuedBufferCount => _queuedBuffers.Count;
+        public uint SourceId { get; private set; }
 
         public float LowPassHFGain
         {
             get => _lowPassHfGain;
             set
             {
-                if (OggStreamer.Instance.Efx.IsInitialized)
+                if (OggStreamer.Instance.Efx.IsAvailable)
                 {
-                    OggStreamer.Instance.Efx.Filter(_alFilterID, EfxFilterf.LowpassGainHF, _lowPassHfGain = value);
+                    OggStreamer.Instance.Efx.Filter(_alFilterId, EfxFilterf.LowpassGainHF, _lowPassHfGain = value);
                     ALHelper.CheckError("Failed to set Efx filter.");
 
-                    OggStreamer.Instance.Efx.BindFilterToSource(_alSourceID, _alFilterID);
+                    OggStreamer.Instance.Efx.BindFilterToSource(SourceId, _alFilterId);
                     ALHelper.CheckError("Failed to bind Efx filter to source.");
                 }
             }
@@ -60,7 +60,7 @@ namespace MonoGame.Framework.Media
             get => _volume;
             set
             {
-                AL.Source(_alSourceID, ALSourcef.Gain, _volume = value);
+                AL.Source(SourceId, ALSourcef.Gain, _volume = value);
                 ALHelper.CheckError("Failed to set volume.");
             }
         }
@@ -70,7 +70,7 @@ namespace MonoGame.Framework.Media
             get => _pitch;
             set
             {
-                AL.Source(_alSourceID, ALSourcef.Pitch, _pitch = value);
+                AL.Source(SourceId, ALSourcef.Pitch, _pitch = value);
                 ALHelper.CheckError("Failed to set pitch.");
             }
         }
@@ -84,17 +84,17 @@ namespace MonoGame.Framework.Media
             _stream = stream;
 
             _queuedBuffers = new Queue<ALBuffer>();
-            _alSourceID = ALController.Instance.ReserveSource();
+            SourceId = ALController.Instance.ReserveSource();
             
-            if (OggStreamer.Instance.Efx.IsInitialized)
+            if (OggStreamer.Instance.Efx.IsAvailable)
             {
-                _alFilterID = OggStreamer.Instance.Efx.GenFilter();
+                _alFilterId = OggStreamer.Instance.Efx.GenFilter();
                 ALHelper.CheckError("Failed to generate Efx filter.");
 
-                OggStreamer.Instance.Efx.Filter(_alFilterID, EfxFilteri.FilterType, (int)EfxFilterType.Lowpass);
+                OggStreamer.Instance.Efx.Filter(_alFilterId, EfxFilteri.FilterType, (int)EfxFilterType.Lowpass);
                 ALHelper.CheckError("Failed to set Efx filter type.");
 
-                OggStreamer.Instance.Efx.Filter(_alFilterID, EfxFilterf.LowpassGain, 1);
+                OggStreamer.Instance.Efx.Filter(_alFilterId, EfxFilterf.LowpassGain, 1);
                 ALHelper.CheckError("Failed to set Efx filter value.");
                 LowPassHFGain = 1;
             }
@@ -156,7 +156,7 @@ namespace MonoGame.Framework.Media
                 default:
                     Prepare(immediate);
 
-                    AL.SourcePlay(_alSourceID);
+                    AL.SourcePlay(SourceId);
                     ALHelper.CheckError("Failed to play source.");
                     break;
             }
@@ -169,7 +169,7 @@ namespace MonoGame.Framework.Media
                 return;
 
             OggStreamer.Instance.RemoveStream(this);
-            AL.SourcePause(_alSourceID);
+            AL.SourcePause(SourceId);
             ALHelper.CheckError("Failed to pause source.");
         }
 
@@ -180,13 +180,13 @@ namespace MonoGame.Framework.Media
                 return;
 
             OggStreamer.Instance.AddStream(this);
-            AL.SourcePlay(_alSourceID);
+            AL.SourcePlay(SourceId);
             ALHelper.CheckError("Failed to play source.");
         }
 
         void StopPlayback()
         {
-            AL.SourceStop(_alSourceID);
+            AL.SourceStop(SourceId);
             ALHelper.CheckError("Failed to stop source.");
         }
 
@@ -203,7 +203,7 @@ namespace MonoGame.Framework.Media
                     Reader.DecodedPosition = 0;
                 }
 
-                AL.Source(_alSourceID, ALSourcei.Buffer, 0);
+                AL.Source(SourceId, ALSourcei.Buffer, 0);
                 ALHelper.CheckError("Failed to free source from buffers.");
 
                 while(_queuedBuffers.Count > 0)
@@ -213,7 +213,7 @@ namespace MonoGame.Framework.Media
 
         void Empty(int attempts = 0)
         {
-            AL.GetSource(_alSourceID, ALGetSourcei.BuffersProcessed, out int processed);
+            AL.GetSource(SourceId, ALGetSourcei.BuffersProcessed, out int processed);
             ALHelper.CheckError("Failed to fetch processed buffers.");
 
             // there are multiple attempts as some OpenAL implementations are faulty
@@ -221,7 +221,7 @@ namespace MonoGame.Framework.Media
             {
                 if (processed > 0)
                 {
-                    AL.SourceUnqueueBuffers(_alSourceID, processed);
+                    AL.SourceUnqueueBuffers(SourceId, processed);
                     ALHelper.CheckError("Failed to unqueue buffers (first attempt).");
 
                     for (int i = 0; i < processed; i++)
@@ -232,12 +232,12 @@ namespace MonoGame.Framework.Media
             {
                 if (processed > 0)
                 {
-                    AL.SourceUnqueueBuffers(_alSourceID, processed);
+                    AL.SourceUnqueueBuffers(SourceId, processed);
                     ALHelper.CheckError("Failed to unqueue buffers (second attempt).");
                 }
 
                 // Try turning it off again?
-                AL.SourceStop(_alSourceID);
+                AL.SourceStop(SourceId);
                 ALHelper.CheckError("Failed to stop source.");
 
                 if(attempts < 5)
@@ -267,7 +267,7 @@ namespace MonoGame.Framework.Media
 
         public ALSourceState GetState()
         {
-            var state = AL.GetSourceState(_alSourceID);
+            var state = AL.GetSourceState(SourceId);
             ALHelper.CheckError("Failed to get source state.");
             return state;
         }
@@ -297,7 +297,7 @@ namespace MonoGame.Framework.Media
 
         public void EnqueueBuffer(ALBuffer buffer)
         {
-            AL.SourceQueueBuffer(_alSourceID, buffer.BufferID);
+            AL.SourceQueueBuffer(SourceId, buffer.BufferId);
             ALHelper.CheckError("Failed to queue buffer.");
 
             _queuedBuffers.Enqueue(buffer);
@@ -309,11 +309,8 @@ namespace MonoGame.Framework.Media
             ALBufferPool.Return(buffer);
         }
 
-        public override int GetHashCode()
-        {
-            return _alSourceID;
-        }
-        
+        public override int GetHashCode() => (int)SourceId;
+
         internal void Close()
         {
             if (Reader != null)
@@ -344,17 +341,18 @@ namespace MonoGame.Framework.Media
                 Close();
             }
 
-            AL.Source(_alSourceID, ALSourcei.Buffer, 0);
+            AL.Source(SourceId, ALSourcei.Buffer, 0);
             ALHelper.CheckError("Failed to free source from buffers.");
 
             while (_queuedBuffers.Count > 0)
                 DequeueAndReturnBuffer();
 
-            ALController.Instance.RecycleSource(_alSourceID);
-            
-            if (OggStreamer.Instance.Efx.IsInitialized)
+            ALController.Instance.RecycleSource(SourceId);
+            SourceId = 0;
+
+            if (OggStreamer.Instance.Efx.IsAvailable)
             {
-                OggStreamer.Instance.Efx.DeleteFilter(_alFilterID);
+                OggStreamer.Instance.Efx.DeleteFilter(_alFilterId);
                 ALHelper.CheckError("Failed to delete EFX filter.");
             }
         }

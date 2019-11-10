@@ -25,9 +25,8 @@ namespace MonoGame.Framework.Audio
         private static ALController _instance;
 
         private static bool _closed;
-        private IntPtr _device;
         private IntPtr _context;
-        private int[] _allSources;
+        private uint[] _allSources;
 
 #if DESKTOPGL || DIRECTX || ANGLE
         // MacOS & Linux share a limit of 256.
@@ -48,17 +47,18 @@ namespace MonoGame.Framework.Audio
         private static OggStreamer _oggstreamer;
 #endif
 
-        private Queue<int> _availableSources;
-        private HashSet<int> _inUseSources;
+        private Queue<uint> _availableSources;
+        private HashSet<uint> _sourcesInUse;
         private bool _isDisposed;
 
         public bool SupportsIma4 { get; private set; }
         public bool SupportsAdpcm { get; private set; }
         public bool SupportsEfx { get; private set; }
         public bool SupportsFloat32 { get; private set; }
-        public int Filter { get; private set; }
+        public uint Filter { get; private set; }
 
-        public static EffectsExtension Efx => EffectsExtension.Instance;
+        public IntPtr Device { get; private set; }
+        public EffectsExtension Efx { get; }
 
         public static ALController Instance
         {
@@ -88,21 +88,22 @@ namespace MonoGame.Framework.Audio
                 throw new AudioHardwareException(
                     "OpenAL device could not be initialized, see console output for details.");
 
-            if (ALC.IsExtensionPresent(_device, "ALC_EXT_CAPTURE"))
+            Efx = new EffectsExtension(Device);
+
+            if (ALC.IsExtensionPresent(Device, "ALC_EXT_CAPTURE"))
                 Microphone.PopulateCaptureDevices();
 
             // We have hardware here and it is ready
 
-            _allSources = new int[MAX_NUMBER_OF_SOURCES];
+            _allSources = new uint[MAX_NUMBER_OF_SOURCES];
             AL.GenSources(_allSources);
             ALHelper.CheckError("Failed to generate sources.");
 
-            Filter = 0;
-            if (Efx.IsInitialized)
+            if (Efx.IsAvailable)
                 Filter = Efx.GenFilter();
 
-            _availableSources = new Queue<int>(_allSources);
-            _inUseSources = new HashSet<int>();
+            _availableSources = new Queue<uint>(_allSources);
+            _sourcesInUse = new HashSet<uint>();
         }
 
         public static void EnsureInitialized()
@@ -145,8 +146,7 @@ namespace MonoGame.Framework.Audio
             {
                 try
                 {
-                    _device = ALC.OpenDevice(string.Empty);
-                    EffectsExtension._device = _device;
+                    Device = ALC.OpenDevice(string.Empty);
                 }
                 catch (DllNotFoundException)
                 {
@@ -159,7 +159,7 @@ namespace MonoGame.Framework.Audio
 
                 ALCHelper.CheckError("Could not open OpenAL device.");
 
-                if (_device == IntPtr.Zero)
+                if (Device == IntPtr.Zero)
                     return false;
 
 #if ANDROID
@@ -266,7 +266,7 @@ namespace MonoGame.Framework.Audio
                 int[] attribute = Array.Empty<int>();
 #endif
 
-                _context = ALC.CreateContext(_device, attribute);
+                _context = ALC.CreateContext(Device, attribute);
                 ALCHelper.CheckError("Could not create OpenAL context.");
 
                 if (_context != IntPtr.Zero)
@@ -300,25 +300,25 @@ namespace MonoGame.Framework.Audio
         /// <see cref="InstancePlayLimitException"/> is thrown.
         /// </summary>
         /// <returns>The ID of the reserved sound source.</returns>
-        public int ReserveSource()
+        public uint ReserveSource()
         {
             lock (_availableSources)
             {
                 if (_availableSources.Count == 0)
                     throw new InstancePlayLimitException();
 
-                int sourceNumber = _availableSources.Dequeue();
-                _inUseSources.Add(sourceNumber);
+                uint sourceNumber = _availableSources.Dequeue();
+                _sourcesInUse.Add(sourceNumber);
 
                 return sourceNumber;
             }
         }
 
-        public void RecycleSource(int sourceId)
+        public void RecycleSource(uint sourceId)
         {
             lock (_availableSources)
             {
-                _inUseSources.Remove(sourceId);
+                _sourcesInUse.Remove(sourceId);
                 _availableSources.Enqueue(sourceId);
             }
         }
@@ -326,15 +326,15 @@ namespace MonoGame.Framework.Audio
 #if !DIRECTX
         public void FreeSource(SoundEffectInstance inst)
         {
-            RecycleSource(inst.SourceID.Value);
-            inst.SourceID = null;
+            RecycleSource(inst.SourceId.Value);
+            inst.SourceId = null;
             inst.SoundState = SoundState.Stopped;
         }
 #endif
 
-        public double GetSourceCurrentPosition(int sourceID)
+        public double GetSourceCurrentPosition(uint sourceId)
         {
-            AL.GetSource(sourceID, ALGetSourcei.SampleOffset, out int pos);
+            AL.GetSource(sourceId, ALGetSourcei.SampleOffset, out int pos);
             ALHelper.CheckError("Failed to set source offset.");
             return pos;
         }
@@ -366,10 +366,10 @@ namespace MonoGame.Framework.Audio
                 _context = IntPtr.Zero;
             }
 
-            if (_device != IntPtr.Zero)
+            if (Device != IntPtr.Zero)
             {
-                ALC.CloseDevice(_device);
-                _device = IntPtr.Zero;
+                ALC.CloseDevice(Device);
+                Device = IntPtr.Zero;
             }
         }
 
@@ -397,7 +397,7 @@ namespace MonoGame.Framework.Audio
                         _oggstreamer.Dispose();
 #endif
 
-                    if (Filter != 0 && Efx.IsInitialized)
+                    if (Filter != 0 && Efx.IsAvailable)
                         Efx.DeleteFilter(Filter);
 
                     SoundEffectInstancePool.DisposeInstances();

@@ -15,7 +15,7 @@ namespace MonoGame.Framework.Audio
         private readonly int _trackIndex;
         private readonly float _volume;
         private readonly float _pitch;
-        private readonly uint _categoryID;
+        private readonly uint _categoryId;
         private readonly SoundBank _soundBank;
         private readonly bool _useReverb;
 
@@ -49,7 +49,7 @@ namespace MonoGame.Framework.Audio
             var hasRPCs = (flags & 0x0E) != 0;
             var hasDSPs = (flags & 0x10) != 0;
 
-            _categoryID = soundReader.ReadUInt16();
+            _categoryId = soundReader.ReadUInt16();
             _volume = XactHelpers.ParseVolumeFromDecibels(soundReader.ReadByte());
             _pitch = soundReader.ReadInt16() / 1000f;
             soundReader.ReadByte(); //priority
@@ -101,7 +101,7 @@ namespace MonoGame.Framework.Audio
                     _soundClips[i] = new XactClip(soundBank, soundReader, _useReverb);
             }
 
-            var category = engine.Categories[_categoryID];
+            var category = engine.Categories[_categoryId];
             category.AddSound(this);
         }
 
@@ -125,7 +125,7 @@ namespace MonoGame.Framework.Audio
         public void Play(float volume, AudioEngine engine)
         {
             _cueVolume = volume;
-            var category = engine.Categories[_categoryID];
+            var category = engine.Categories[_categoryId];
 
             var curInstances = category.GetPlayingInstanceCount();
             if (curInstances >= category.maxInstances)
@@ -294,7 +294,7 @@ namespace MonoGame.Framework.Audio
         internal void UpdateState(AudioEngine engine, float volume, float pitch, float reverbMix, float? filterFrequency, float? filterQFactor)
         {
             _cueVolume = volume;
-            var finalVolume = _volume * _cueVolume * engine.Categories[_categoryID]._volume[0];
+            var finalVolume = _volume * _cueVolume * engine.Categories[_categoryId]._volume[0];
 
             _cueReverbMix = reverbMix;
             _cueFilterFrequency = filterFrequency;

@@ -597,16 +597,6 @@ namespace MonoGame.Utilities
         /// <summary>
         /// Calling this method always throws a <see cref="NotSupportedException"/>.
         /// </summary>
-        /// <param name="offset">
-        ///   The offset to seek to....
-        ///   IF THIS METHOD ACTUALLY DID ANYTHING.
-        /// </param>
-        /// <param name="origin">
-        ///   The reference specifying how to apply the offset....  IF
-        ///   THIS METHOD ACTUALLY DID ANYTHING.
-        /// </param>
-        ///
-        /// <returns>nothing. This method always throws.</returns>
         public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException();
@@ -615,10 +605,6 @@ namespace MonoGame.Utilities
         /// <summary>
         /// Calling this method always throws a <see cref="NotSupportedException"/>.
         /// </summary>
-        /// <param name="value">
-        ///   The new value for the stream length....  IF
-        ///   THIS METHOD ACTUALLY DID ANYTHING.
-        /// </param>
         public override void SetLength(long value)
         {
             throw new NotSupportedException();

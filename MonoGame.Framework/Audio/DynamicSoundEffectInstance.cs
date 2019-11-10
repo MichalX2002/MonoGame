@@ -232,15 +232,14 @@ namespace MonoGame.Framework.Audio
 
         /// <summary>
         /// Queues audio data for playback.
-        /// The data is treated as 16-bit unless <typeparamref name="T"/> is of type <see cref="float"/>,
-        /// then it will be treated as 32-bit.
         /// </summary>
         /// <remarks>
         /// The span length must conform to alignment requirements for the audio format.
         /// </remarks>
         /// <typeparam name="T">The type of audio data. Use <see cref="float"/> for 32-bit PCM.</typeparam>
-        /// <param name="data">The span containing PCM audio data.</param>
-        public void SubmitBuffer<T>(ReadOnlySpan<T> data)
+        /// <param name="data">The span containing audio data.</param>
+        /// <param name="depth">The depth of the audio data.</param>
+        public void SubmitBuffer<T>(ReadOnlySpan<T> data, AudioDepth depth)
             where T : unmanaged
         {
             AssertNotDisposed();
@@ -248,7 +247,15 @@ namespace MonoGame.Framework.Audio
             if (data.IsEmpty)
                 throw new ArgumentEmptyException(nameof(data));
 
-            PlatformSubmitBuffer(data);
+            SoundEffect.AssertValidAudioDepth(depth);
+
+            PlatformSubmitBuffer(data, depth);
+        }
+
+        public void SubmitBuffer<T>(Span<T> data, AudioDepth depth)
+            where T : unmanaged
+        {
+            SubmitBuffer((ReadOnlySpan<T>)data, depth);
         }
 
         #endregion
