@@ -68,8 +68,7 @@ namespace MonoGame.Framework.Audio
                     throw new ObjectDisposedException(nameof(ALController));
 
                 if (_instance == null)
-                    throw new AudioHardwareException(
-                        "OpenAL context has failed to initialize.");
+                    throw new AudioHardwareException("OpenAL context has failed to initialize.");
 
                 return _instance;
             }

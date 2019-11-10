@@ -193,15 +193,15 @@ namespace MonoGame.Framework.Audio
 
         internal static void PlatformSetReverbSettings(ReverbSettings reverbSettings)
         {
-            if (!ALController.Efx.IsAvailable)
+            var efx = ALController.Instance.Efx;
+            if (!efx.IsAvailable)
                 return;
 
             if (ReverbEffect != 0)
                 return;
 
-            var efx = ALController.Efx;
-            efx.GenAuxiliaryEffectSlots(1, out ReverbSlot);
-            efx.GenEffect(out ReverbEffect);
+            ReverbSlot = efx.GenAuxiliaryEffectSlot();
+            ReverbEffect = efx.GenEffect();
             efx.Effect(ReverbEffect, EfxEffecti.EffectType, (int)EfxEffectType.Reverb);
             efx.Effect(ReverbEffect, EfxEffectf.EaxReverbReflectionsDelay, reverbSettings.ReflectionsDelayMs / 1000f);
             efx.Effect(ReverbEffect, EfxEffectf.LateReverbDelay, reverbSettings.ReverbDelayMs / 1000f);
@@ -256,8 +256,9 @@ namespace MonoGame.Framework.Audio
         {
             if (_systemState == SoundSystemState.Initialized && ReverbEffect != 0)
             {
-                ALController.Efx.DeleteAuxiliaryEffectSlot((int)ReverbSlot);
-                ALController.Efx.DeleteEffect((int)ReverbEffect);
+                var efx = ALController.Instance.Efx;
+                efx.DeleteAuxiliaryEffectSlot(ReverbSlot);
+                efx.DeleteEffect(ReverbEffect);
             }
 
             ALBufferPool.Clear();

@@ -133,9 +133,9 @@ namespace MonoGame.Framework.Audio
                 ALHelper.CheckError("Failed to stop source.");
 
                 // Reset the SendFilter to 0 if we are NOT using reverb since sources are recycled
-                if (_controller.SupportsEfx)
+                if (_controller.Efx.IsAvailable)
                 {
-                    ALController.Efx.BindSourceToAuxiliarySlot(SourceId.Value, 0, 0, 0);
+                    _controller.Efx.BindSourceToAuxiliarySlot(SourceId.Value, 0, 0, 0);
                     ALHelper.CheckError("Failed to unset reverb.");
 
                     AL.Source(SourceId.Value, ALSourcei.EfxDirectFilter, 0);
@@ -222,7 +222,7 @@ namespace MonoGame.Framework.Audio
 
         internal void PlatformSetReverbMix(float mix)
         {
-            if (!ALController.Efx.IsAvailable)
+            if (!_controller.Efx.IsAvailable)
                 return;
 
             _reverb = mix;
@@ -237,7 +237,7 @@ namespace MonoGame.Framework.Audio
         {
             if (_reverb > 0f && SoundEffect.ReverbSlot != 0)
             {
-                ALController.Efx.BindSourceToAuxiliarySlot(SourceId.Value, (int)SoundEffect.ReverbSlot, 0, 0);
+                _controller.Efx.BindSourceToAuxiliarySlot(SourceId.Value, (int)SoundEffect.ReverbSlot, 0, 0);
                 ALHelper.CheckError("Failed to set reverb.");
             }
         }
@@ -248,7 +248,7 @@ namespace MonoGame.Framework.Audio
             {
                 float freq = _frequency / 20000f;
                 float lf = 1f - freq;
-                var efx = ALController.Efx;
+                var efx = _controller.Efx;
 
                 efx.Filter(_controller.Filter, EfxFilteri.FilterType, (int)_filterType);
                 ALHelper.CheckError("Failed to set filter.");
@@ -283,7 +283,7 @@ namespace MonoGame.Framework.Audio
 
         internal void PlatformSetFilter(FilterMode mode, float filterQ, float frequency)
         {
-            if (!ALController.Efx.IsAvailable)
+            if (!_controller.Efx.IsAvailable)
                 return;
 
             switch (mode)
@@ -313,7 +313,7 @@ namespace MonoGame.Framework.Audio
 
         internal void PlatformClearFilter()
         {
-            if (!ALController.Efx.IsAvailable)
+            if (!_controller.Efx.IsAvailable)
                 return;
             _needsFilterUpdate = false;
         }
