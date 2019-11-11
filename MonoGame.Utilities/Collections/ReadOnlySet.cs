@@ -17,8 +17,8 @@ namespace MonoGame.Utilities.Collections
         /// </summary>
         public bool IsImmutable { get; }
 
-        public bool IsReadOnly => IsImmutable || _set.IsReadOnly;
-        public int Count => _set.Count;
+        public bool IsReadOnly => IsImmutable || (_set != null ? _set.IsReadOnly : true);
+        public int Count => _set != null ? _set.Count : _roSet.Count;
 
         /// <summary>
         /// Constructs a <see cref="ReadOnlySet{T}"/> that uses an <see cref="ISet{T}"/> as it's backing store.

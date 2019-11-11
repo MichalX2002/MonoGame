@@ -129,7 +129,7 @@ namespace MonoGame.Imaging
 
         public ImageFormat(
             string name, string primaryMimeType, string primaryExtension, bool supportsAnimation,
-            ISet<string> mimeTypes, ISet<string> extensions)
+            IReadOnlySet<string> mimeTypes, IReadOnlySet<string> extensions)
         {
             if (mimeTypes == null) throw new ArgumentNullException(nameof(mimeTypes));
             if (mimeTypes.Count == 0) throw new ArgumentEmptyException(nameof(mimeTypes));
