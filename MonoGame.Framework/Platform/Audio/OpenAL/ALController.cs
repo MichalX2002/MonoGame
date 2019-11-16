@@ -32,17 +32,17 @@ namespace MonoGame.Framework.Audio
         // MacOS & Linux share a limit of 256.
         internal const int MAX_NUMBER_OF_SOURCES = 256;
 #elif IOS
-		// Reference: http://stackoverflow.com/questions/3894044/maximum-number-of-openal-sound-buffers-on-iphone
-		internal const int MAX_NUMBER_OF_SOURCES = 32;
+        // Reference: http://stackoverflow.com/questions/3894044/maximum-number-of-openal-sound-buffers-on-iphone
+        internal const int MAX_NUMBER_OF_SOURCES = 32;
 #elif ANDROID
-		// Set to the same as OpenAL on iOS
-		internal const int MAX_NUMBER_OF_SOURCES = 32;
+        // Set to the same as OpenAL on iOS
+        internal const int MAX_NUMBER_OF_SOURCES = 32;
 #endif
 
 #if ANDROID
-		private const int DEFAULT_FREQUENCY = 48000;
-		private const int DEFAULT_UPDATE_SIZE = 512;
-		private const int DEFAULT_UPDATE_BUFFER_COUNT = 2;
+        private const int DEFAULT_FREQUENCY = 48000;
+        private const int DEFAULT_UPDATE_SIZE = 512;
+        private const int DEFAULT_UPDATE_BUFFER_COUNT = 2;
 #elif DESKTOPGL || DIRECTX
         private static OggStreamer _oggstreamer;
 #endif
@@ -162,40 +162,40 @@ namespace MonoGame.Framework.Audio
                     return false;
 
 #if ANDROID
-				// Attach activity event handlers so we can pause and resume all playing sounds
-				MonoGameAndroidGameView.OnPauseGameThread += Activity_Paused;
-				MonoGameAndroidGameView.OnResumeGameThread += Activity_Resumed;
+                // Attach activity event handlers so we can pause and resume all playing sounds
+                MonoGameAndroidGameView.OnPauseGameThread += Activity_Paused;
+                MonoGameAndroidGameView.OnResumeGameThread += Activity_Resumed;
 
-				// Query the device for the ideal frequency and update buffer size so
-				// we can get the low latency sound path.
+                // Query the device for the ideal frequency and update buffer size so
+                // we can get the low latency sound path.
 
-				/*
-				The recommended sequence is:
+                /*
+                The recommended sequence is:
 
-				Check for feature "android.hardware.audio.low_latency" using code such as this:
-				import android.content.pm.PackageManager;
-				...
-				PackageManager pm = getContext().getPackageManager();
-				boolean claimsFeature = pm.hasSystemFeature(PackageManager.FEATURE_AUDIO_LOW_LATENCY);
-				Check for API level 17 or higher, to confirm use of android.media.AudioManager.getProperty().
-				Get the native or optimal output sample rate and buffer size for this device's primary output stream, using code such as this:
-				import android.media.AudioManager;
-				...
-				AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-				String sampleRate = am.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE));
-				String framesPerBuffer = am.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER));
-				Note that sampleRate and framesPerBuffer are Strings. First check for null and then convert to int using Integer.parseInt().
-				Now use OpenSL ES to create an AudioPlayer with PCM buffer queue data locator.
+                Check for feature "android.hardware.audio.low_latency" using code such as this:
+                import android.content.pm.PackageManager;
+                ...
+                PackageManager pm = getContext().getPackageManager();
+                boolean claimsFeature = pm.hasSystemFeature(PackageManager.FEATURE_AUDIO_LOW_LATENCY);
+                Check for API level 17 or higher, to confirm use of android.media.AudioManager.getProperty().
+                Get the native or optimal output sample rate and buffer size for this device's primary output stream, using code such as this:
+                import android.media.AudioManager;
+                ...
+                AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                String sampleRate = am.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE));
+                String framesPerBuffer = am.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER));
+                Note that sampleRate and framesPerBuffer are Strings. First check for null and then convert to int using Integer.parseInt().
+                Now use OpenSL ES to create an AudioPlayer with PCM buffer queue data locator.
 
-				See http://stackoverflow.com/questions/14842803/low-latency-audio-playback-on-android
-				*/
+                See http://stackoverflow.com/questions/14842803/low-latency-audio-playback-on-android
+                */
 
-				int frequency = DEFAULT_FREQUENCY;
-				int updateSize = DEFAULT_UPDATE_SIZE;
-				int updateBuffers = DEFAULT_UPDATE_BUFFER_COUNT;
-				if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.JellyBeanMr1)
-				{
-					Android.Util.Log.Debug("OAL", Game.Activity.PackageManager.HasSystemFeature(PackageManager.FeatureAudioLowLatency) ? "Supports low latency audio playback." : "Does not support low latency audio playback.");
+                int frequency = DEFAULT_FREQUENCY;
+                int updateSize = DEFAULT_UPDATE_SIZE;
+                int updateBuffers = DEFAULT_UPDATE_BUFFER_COUNT;
+                if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.JellyBeanMr1)
+                {
+                    Android.Util.Log.Debug("OAL", Game.Activity.PackageManager.HasSystemFeature(PackageManager.FeatureAudioLowLatency) ? "Supports low latency audio playback." : "Does not support low latency audio playback.");
 
                     if (Game.Activity.GetSystemService(Context.AudioService) is AudioManager audioManager)
                     {
@@ -211,26 +211,26 @@ namespace MonoGame.Framework.Audio
                     // If 4.4 or higher, then we don't need to double buffer on the application side.
                     // See http://stackoverflow.com/a/15006327
                     if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Kitkat)
-						updateBuffers = 1;
-				}
-				else
-				{
-					Android.Util.Log.Debug("OAL", "Android 4.2 or higher required for low latency audio playback.");
-				}
-				Android.Util.Log.Debug("OAL", "Using sample rate " + frequency + "Hz and " + updateBuffers + " buffers of " + updateSize + " frames.");
+                        updateBuffers = 1;
+                }
+                else
+                {
+                    Android.Util.Log.Debug("OAL", "Android 4.2 or higher required for low latency audio playback.");
+                }
+                Android.Util.Log.Debug("OAL", "Using sample rate " + frequency + "Hz and " + updateBuffers + " buffers of " + updateSize + " frames.");
 
-				// These are missing and non-standard ALC constants
-				const int AlcFrequency = 0x1007;
-				const int AlcUpdateSize = 0x1014;
-				const int AlcUpdateBuffers = 0x1015;
+                // These are missing and non-standard ALC constants
+                const int AlcFrequency = 0x1007;
+                const int AlcUpdateSize = 0x1014;
+                const int AlcUpdateBuffers = 0x1015;
 
-				Span<int> attribute = stackalloc int[]
-				{
-					AlcFrequency, frequency,
-					AlcUpdateSize, updateSize,
-					AlcUpdateBuffers, updateBuffers,
-					0
-				};
+                Span<int> attribute = stackalloc int[]
+                {
+                    AlcFrequency, frequency,
+                    AlcUpdateSize, updateSize,
+                    AlcUpdateBuffers, updateBuffers,
+                    0
+                };
 #elif IOS
                 AVAudioSession.SharedInstance().Init();
 
@@ -322,15 +322,6 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-#if !DIRECTX
-        public void FreeSource(SoundEffectInstance inst)
-        {
-            RecycleSource(inst.SourceId.Value);
-            inst.SourceId = null;
-            inst.SoundState = SoundState.Stopped;
-        }
-#endif
-
         public double GetSourceCurrentPosition(uint sourceId)
         {
             AL.GetSource(sourceId, ALGetSourcei.SampleOffset, out int pos);
@@ -339,17 +330,17 @@ namespace MonoGame.Framework.Audio
         }
 
 #if ANDROID
-		void Activity_Paused(MonoGameAndroidGameView view)
-		{
-			// Pause all currently playing sounds by pausing the mixer
-			ALC.DevicePause(_device);
-		}
-
-		void Activity_Resumed(MonoGameAndroidGameView view)
+        void Activity_Paused(MonoGameAndroidGameView view)
         {
-			// Resume all sounds that were playing when the activity was paused
-			ALC.DeviceResume(_device);
-		}
+            // Pause all currently playing sounds by pausing the mixer
+            ALC.DevicePause(_device);
+        }
+
+        void Activity_Resumed(MonoGameAndroidGameView view)
+        {
+            // Resume all sounds that were playing when the activity was paused
+            ALC.DeviceResume(_device);
+        }
 #endif
 
         /// <summary>
