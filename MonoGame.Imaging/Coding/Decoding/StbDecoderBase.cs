@@ -216,7 +216,7 @@ namespace MonoGame.Imaging.Decoding
                                 var src8 = (Color*)result;
                                 var dst8 = (Rgba64*)dstPtr;
                                 for (int i = 0; i < pixelCount; i++)
-                                    src8[i].FromColor(dst8[i]);
+                                    src8[i].FromRgba64(dst8[i]);
                             }
                         }
                         else if (typeof(TPixel) == typeof(Color))

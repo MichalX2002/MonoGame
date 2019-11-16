@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using MonoGame.Framework.Graphics;
 using MonoGame.Utilities;
 
 namespace MonoGame.Framework.Content
@@ -19,12 +18,13 @@ namespace MonoGame.Framework.Content
 		internal int sharedResourceCount;
 
         internal ContentTypeReader[] TypeReaders { get; private set; }
-        internal GraphicsDevice GraphicsDevice { get; }
-
+        
         public ContentManager ContentManager { get; }
         public string AssetName { get; }
 
-        internal ContentReader(ContentManager manager, Stream stream, GraphicsDevice graphicsDevice, string assetName, int version, Action<IDisposable> recordDisposableObject)
+        internal ContentReader(
+            ContentManager manager, Stream stream,
+            string assetName, int version, Action<IDisposable> recordDisposableObject)
             : base(stream)
         {
             this.recordDisposableObject = recordDisposableObject;

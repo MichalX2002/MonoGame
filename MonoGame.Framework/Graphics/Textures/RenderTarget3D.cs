@@ -9,13 +9,10 @@ namespace MonoGame.Framework.Graphics
 	public partial class RenderTarget3D : Texture3D, IRenderTarget
 	{
 		public DepthFormat DepthStencilFormat { get; private set; }
-		
 		public int MultiSampleCount { get; private set; }
-		
 		public RenderTargetUsage RenderTargetUsage { get; private set; }
 
         public bool IsContentLost => false;
-
         public event EventHandler<EventArgs> ContentLost;
 
         private bool SuppressEventHandlerWarningsUntilEventsAreProperlyImplemented()
@@ -23,7 +20,9 @@ namespace MonoGame.Framework.Graphics
             return ContentLost != null;
         }
 
-		public RenderTarget3D(GraphicsDevice graphicsDevice, int width, int height, int depth, bool mipMap, SurfaceFormat preferredFormat, DepthFormat preferredDepthFormat, int preferredMultiSampleCount, RenderTargetUsage usage)
+		public RenderTarget3D(
+            GraphicsDevice graphicsDevice, int width, int height, int depth, bool mipMap,
+            SurfaceFormat preferredFormat, DepthFormat preferredDepthFormat, int preferredMultiSampleCount, RenderTargetUsage usage)
 			: base (graphicsDevice, width, height, depth, mipMap, QuerySelectedFormat(graphicsDevice, preferredFormat), true)
 		{
 			DepthStencilFormat = preferredDepthFormat;
@@ -52,10 +51,12 @@ namespace MonoGame.Framework.Graphics
 
 		public RenderTarget3D(GraphicsDevice graphicsDevice, int width, int height, int depth, bool mipMap, SurfaceFormat preferredFormat, DepthFormat preferredDepthFormat)
 			:this (graphicsDevice, width, height, depth, mipMap, preferredFormat, preferredDepthFormat, 0, RenderTargetUsage.DiscardContents) 
-		{}
+		{
+        }
 		
 		public RenderTarget3D(GraphicsDevice graphicsDevice, int width, int height, int depth)
 			: this(graphicsDevice, width, height, depth, false, SurfaceFormat.Rgba32, DepthFormat.None, 0, RenderTargetUsage.DiscardContents) 
-		{}
+		{
+        }
 	}
 }

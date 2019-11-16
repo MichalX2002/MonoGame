@@ -3,8 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MonoGame.Framework.Audio
 {
@@ -12,16 +10,17 @@ namespace MonoGame.Framework.Audio
     /// Represents a 3D audio emitter. Used to simulate 3D audio effects.
     /// </summary>
 	public class AudioEmitter
-	{
+    {
         /// <summary>Initializes a new AudioEmitter instance.</summary>
-		public AudioEmitter ()
-		{
+		public AudioEmitter()
+        {
             _dopplerScale = 1f;
-			Forward = Vector3.Forward;
-			Position = Vector3.Zero;
-			Up = Vector3.Up;
-			Velocity = Vector3.Zero;
-		}
+
+            Forward = Vector3.Forward;
+            Position = Vector3.Zero;
+            Up = Vector3.Up;
+            Velocity = Vector3.Zero;
+        }
 
         private float _dopplerScale;
 
@@ -33,7 +32,6 @@ namespace MonoGame.Framework.Audio
 		public float DopplerScale
         {
             get => _dopplerScale;
-
             set
             {
                 if (value < 0f)
@@ -49,36 +47,39 @@ namespace MonoGame.Framework.Audio
         /// <para>Used with AudioListener.Velocity to calculate Doppler values.</para>
         /// <para>The Forward and Up values must be orthonormal.</para>
         /// </remarks>
-		public Vector3 Forward {
-			get;
-			set;
-		}
+		public Vector3 Forward
+        {
+            get;
+            set;
+        }
 
         /// <summary>Gets or sets the position of this emitter.</summary>
-        public Vector3 Position {
-			get;
-			set;
-		}
+        public Vector3 Position
+        {
+            get;
+            set;
+        }
 
         /// <summary>Gets or sets the emitter's Up vector.</summary>
         /// <remarks>
         /// <para>Defaults to Vector3.Up. (new Vector3(0, -1, 1)).</para>
         /// <para>The Up and Forward vectors must be orthonormal.</para>
         /// </remarks>
-		public Vector3 Up {
-			get;
-			set;
-		}
+		public Vector3 Up
+        {
+            get;
+            set;
+        }
 
         /// <summary>Gets or sets the emitter's velocity vector.</summary>
         /// <remarks>
         /// <para>Defaults to Vector3.Zero.</para>
         /// <para>This value is only used when calculating Doppler values.</para>
         /// </remarks>
-		public Vector3 Velocity {
-			get;
-			set;
-		}
-
-	}
+		public Vector3 Velocity
+        {
+            get;
+            set;
+        }
+    }
 }

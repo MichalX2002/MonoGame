@@ -13,7 +13,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary></summary>
         Vector4 ToScaledVector4();
 
-        #region Gray
+        #region FromGray
 
         /// <summary>Sets the pixel value from <see cref="Gray8"/>.</summary>
         void FromGray8(Gray8 source);
@@ -26,7 +26,7 @@ namespace MonoGame.Utilities.PackedVector
 
         #endregion
 
-        #region Color
+        #region FromColor
 
         /// <summary>Sets the pixel value from <see cref="Rgb24"/>.</summary>
         void FromRgb24(Rgb24 source);

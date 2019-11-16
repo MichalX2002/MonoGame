@@ -19,7 +19,7 @@ namespace MonoGame.Framework.Content
             int levelCount = reader.ReadInt32();
 
             var texture = existingInstance ?? new Texture3D(
-                reader.GraphicsDevice, width, height, depth, levelCount > 1, format);
+                reader.GetGraphicsDevice(), width, height, depth, levelCount > 1, format);
 
             for (int i = 0; i < levelCount; i++)
             {

@@ -22,7 +22,7 @@ namespace MonoGame.Framework.Content
                 if (input.Read(data, 0, dataSize) != dataSize)
                     throw new InvalidDataException();
 
-                var effect = new Effect(input.GraphicsDevice, data, 0, dataSize)
+                var effect = new Effect(input.GetGraphicsDevice(), data, 0, dataSize)
                 {
                     Name = input.AssetName
                 };

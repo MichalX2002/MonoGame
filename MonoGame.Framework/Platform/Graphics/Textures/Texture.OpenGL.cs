@@ -8,7 +8,7 @@ namespace MonoGame.Framework.Graphics
 {
     public abstract partial class Texture
     {
-        internal int _glTexture = -1;
+        internal int _glTexture;
         internal TextureTarget _glTarget;
         internal TextureUnit glTextureUnit = TextureUnit.Texture0;
         internal PixelInternalFormat glInternalFormat;
@@ -36,10 +36,8 @@ namespace MonoGame.Framework.Graphics
         private void DeleteGLTexture()
         {
             if (_glTexture > 0)
-            {
                 GraphicsDevice.DisposeTexture(_glTexture);
-            }
-            _glTexture = -1;
+            _glTexture = 0;
         }
     }
 }

@@ -12,7 +12,8 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class TextureCube
     {
-        private void PlatformConstruct(GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format, bool renderTarget)
+        private void PlatformConstruct(
+            GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format, bool renderTarget)
         {
             _glTarget = TextureTarget.TextureCubeMap;
 
@@ -20,21 +21,23 @@ namespace MonoGame.Framework.Graphics
             {
                 GL.GenTextures(1, out _glTexture);
                 GraphicsExtensions.CheckGLError();
+
                 GL.BindTexture(TextureTarget.TextureCubeMap, _glTexture);
                 GraphicsExtensions.CheckGLError();
 
-                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter,
-                                mipMap ? (int)TextureMinFilter.LinearMipmapLinear : (int)TextureMinFilter.Linear);
+                GL.TexParameter(
+                    TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter,
+                    mipMap ? (int)TextureMinFilter.LinearMipmapLinear : (int)TextureMinFilter.Linear);
                 GraphicsExtensions.CheckGLError();
-                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter,
-                                (int)TextureMagFilter.Linear);
+                GL.TexParameter(
+                    TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
                 GraphicsExtensions.CheckGLError();
 
-                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS,
-                                (int)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(
+                    TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
                 GraphicsExtensions.CheckGLError();
-                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT,
-                                (int)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(
+                    TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
                 GraphicsExtensions.CheckGLError();
 
 

@@ -2,8 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
-
 namespace MonoGame.Framework.Graphics
 {
     /// <summary>
@@ -61,7 +59,8 @@ namespace MonoGame.Framework.Graphics
         /// <param name="preferredDepthFormat">The preferred format of the depth-stencil buffer.</param>
         /// <param name="preferredMultiSampleCount">The preferred number of multisample locations.</param>
         /// <param name="usage">The usage mode of the render target.</param>
-        public RenderTargetCube(GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat preferredFormat, DepthFormat preferredDepthFormat, int preferredMultiSampleCount, RenderTargetUsage usage)
+        public RenderTargetCube(
+            GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat preferredFormat, DepthFormat preferredDepthFormat, int preferredMultiSampleCount, RenderTargetUsage usage)
             : base(graphicsDevice, size, mipMap, QuerySelectedFormat(graphicsDevice, preferredFormat), true)
         {
             DepthStencilFormat = preferredDepthFormat;

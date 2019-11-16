@@ -3,9 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 
-namespace Microsoft.Xna.Framework.Content
+namespace MonoGame.Framework.Content
 {
     public static class ContentReaderExtensions
     {
@@ -16,11 +16,10 @@ namespace Microsoft.Xna.Framework.Content
         public static GraphicsDevice GetGraphicsDevice(this ContentReader contentReader)
         {
             var serviceProvider = contentReader.ContentManager.ServiceProvider;
-            var graphicsDeviceService = serviceProvider.GetService(typeof(IGraphicsDeviceService)) as IGraphicsDeviceService;
-            if (graphicsDeviceService == null)
-                throw new InvalidOperationException("No Graphics Device Service");
+            if (!(serviceProvider.GetService<IGraphicsDeviceService>() is IGraphicsDeviceService gds))
+                throw new InvalidOperationException("No Graphics Device Service.");
 
-            return graphicsDeviceService.GraphicsDevice;
+            return gds.GraphicsDevice;
         }
     }
 }

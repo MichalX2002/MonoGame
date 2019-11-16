@@ -2,7 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using MonoGame.Framework.Graphics;
 
 namespace MonoGame.Framework.Content
@@ -11,7 +10,7 @@ namespace MonoGame.Framework.Content
     {
         protected internal override EnvironmentMapEffect Read(ContentReader input, EnvironmentMapEffect existingInstance)
         {
-            var effect = new EnvironmentMapEffect(input.GraphicsDevice)
+            var effect = new EnvironmentMapEffect(input.GetGraphicsDevice())
             {
                 Texture = input.ReadExternalReference<Texture>() as Texture2D,
                 EnvironmentMap = input.ReadExternalReference<TextureCube>() as TextureCube,

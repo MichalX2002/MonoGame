@@ -17,7 +17,7 @@ namespace MonoGame.Framework.Content
             int levels = reader.ReadInt32();
 
             TextureCube textureCube = existingInstance ??
-                new TextureCube(reader.GraphicsDevice, size, levels > 1, surfaceFormat);
+                new TextureCube(reader.GetGraphicsDevice(), size, levels > 1, surfaceFormat);
 
             for (int face = 0; face < 6; face++)
             {

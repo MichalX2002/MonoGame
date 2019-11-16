@@ -68,13 +68,13 @@ namespace MonoGame.Framework.Graphics
 
             if (GL.BoundApi == GL.RenderApi.ES)
             {
-                SupportsEtc2 = device.glMajorVersion >= 3;
+                SupportsEtc2 = device._glMajorVersion >= 3;
             }
 
 
             // Framebuffer objects
 #if GLES
-            SupportsFramebufferObjectARB = GL.BoundApi == GL.RenderApi.ES && (device.glMajorVersion >= 2 || GL.Extensions.Contains("GL_ARB_framebuffer_object")); // always supported on GLES 2.0+
+            SupportsFramebufferObjectARB = GL.BoundApi == GL.RenderApi.ES && (device._glMajorVersion >= 2 || GL.Extensions.Contains("GL_ARB_framebuffer_object")); // always supported on GLES 2.0+
             SupportsFramebufferObjectEXT = GL.Extensions.Contains("GL_EXT_framebuffer_object");;
             SupportsFramebufferObjectIMG = GL.Extensions.Contains("GL_IMG_multisampled_render_to_texture") |
                                                  GL.Extensions.Contains("GL_APPLE_framebuffer_multisample") |
@@ -98,9 +98,9 @@ namespace MonoGame.Framework.Graphics
             // sRGB
 #if GLES
             SupportsSRgb = GL.Extensions.Contains("GL_EXT_sRGB");
-            SupportsFloatTextures = GL.BoundApi == GL.RenderApi.ES && (device.glMajorVersion >= 3 || GL.Extensions.Contains("GL_EXT_color_buffer_float"));
-            SupportsHalfFloatTextures = GL.BoundApi == GL.RenderApi.ES && (device.glMajorVersion >= 3 || GL.Extensions.Contains("GL_EXT_color_buffer_half_float"));
-            SupportsNormalized = GL.BoundApi == GL.RenderApi.ES && (device.glMajorVersion >= 3 && GL.Extensions.Contains("GL_EXT_texture_norm16"));
+            SupportsFloatTextures = GL.BoundApi == GL.RenderApi.ES && (device._glMajorVersion >= 3 || GL.Extensions.Contains("GL_EXT_color_buffer_float"));
+            SupportsHalfFloatTextures = GL.BoundApi == GL.RenderApi.ES && (device._glMajorVersion >= 3 || GL.Extensions.Contains("GL_EXT_color_buffer_half_float"));
+            SupportsNormalized = GL.BoundApi == GL.RenderApi.ES && (device._glMajorVersion >= 3 && GL.Extensions.Contains("GL_EXT_texture_norm16"));
 #else
             SupportsSRgb = GL.Extensions.Contains("GL_EXT_texture_sRGB") && GL.Extensions.Contains("GL_EXT_framebuffer_sRGB");
             SupportsFloatTextures = GL.BoundApi == GL.RenderApi.GL && (device._glMajorVersion >= 3 || GL.Extensions.Contains("GL_ARB_texture_float"));

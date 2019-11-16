@@ -439,7 +439,7 @@ namespace MonoGame.Framework.Graphics
 
         #region Save
 
-        private unsafe UnmanagedPointer<TPixel> GetDataAsPointer<TPixel>(int level, Rectangle rect)
+        private unsafe UnmanagedPointer<TPixel> GetDataUnmanaged<TPixel>(int level, Rectangle rect)
             where TPixel : unmanaged, IPixel
         {
             var ptr = new UnmanagedPointer<TPixel>(rect.Width * rect.Height);
@@ -453,8 +453,8 @@ namespace MonoGame.Framework.Graphics
         {
             CheckRect(level, rect, out Rectangle checkedRect);
 
-            using (var data = GetDataAsPointer<TPixel>(level, checkedRect))
-                return Image.WrapMemory(data, checkedRect.Width, checkedRect.Height, false);
+            using (var data = GetDataUnmanaged<TPixel>(level, checkedRect))
+                return Image.WrapMemory(data, checkedRect.Width, checkedRect.Height, leaveOpen: false);
         }
 
         /// <summary>

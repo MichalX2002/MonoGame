@@ -18,10 +18,12 @@ namespace MonoGame.Framework.Graphics
             /// Hardware device been used for rendering. Maximum speed and performance.
             /// </summary>
             Hardware,
+
             /// <summary>
             /// Emulates the hardware device on CPU. Slowly, only for testing.
             /// </summary>
             Reference,
+
             /// <summary>
             /// Useful when <see cref="Hardware"/> acceleration does not work.
             /// </summary>

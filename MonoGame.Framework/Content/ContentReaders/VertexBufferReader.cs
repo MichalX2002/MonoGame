@@ -22,7 +22,7 @@ namespace MonoGame.Framework.Content
                 if (input.Read(data, 0, dataSize) != dataSize)
                     throw new InvalidDataException();
 
-                var buffer = new VertexBuffer(input.GraphicsDevice, declaration, vertexCount, BufferUsage.None);
+                var buffer = new VertexBuffer(input.GetGraphicsDevice(), declaration, vertexCount, BufferUsage.None);
                 buffer.SetData(data.AsSpan(0, dataSize));
                 return buffer;
             }

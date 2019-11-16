@@ -14,7 +14,7 @@
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <LangVersion>5</LangVersion>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
 </Project>

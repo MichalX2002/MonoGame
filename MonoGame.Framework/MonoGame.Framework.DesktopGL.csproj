@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
     <DefineConstants>OPENGL;OPENAL;XNADESIGNPROVIDED;LINUX;DESKTOPGL;SUPPORTS_EFX;NETSTANDARD;STBSHARP_INTERNAL</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Description>MonoGame is an open source implementation of the Microsoft XNA 4.x Framework. The goal is to make it easy for XNA developers to create cross-platform games with extremely high code reuse.
@@ -9,21 +9,35 @@
 This package provides you with MonoGame Framework that uses OpenGL for rendering and works on Windows, Linux and MacOS.</Description>
     <PackageTags>monogame;.net core;core;.net standard;standard;desktopgl</PackageTags>
     <PackageId>MonoGame.Framework.DesktopGL</PackageId>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="bin\**\*" />
-    <Compile Remove="obj\**\*" />
+    <Compile Remove="Android\**" />
+    <Compile Remove="bin\**" />
+    <Compile Remove="Design\**" />
+    <Compile Remove="obj\**" />
     <Compile Remove="Platform\**\*" />
     <Compile Remove="Properties\**\*" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Platform\**\*" />
+    
+    <EmbeddedResource Remove="bin\**" />
+    
+    <EmbeddedResource Remove="Design\**" />
+    <EmbeddedResource Remove="obj\**" />
+    
+    <None Remove="bin\**" />
+    
+    <None Remove="Design\**" />
+    <None Remove="obj\**" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="Graphics\GraphicsAdapter.cs" />
+    <Compile Remove="Graphics\Textures\RenderTarget3D.cs" />
+    <Compile Remove="Media\Playlist.cs" />
+    <Compile Remove="Media\PlaylistCollection.cs" />
+    <Compile Remove="Media\SongCollection.cs" />
+    <Compile Remove="Media\SongPart.cs" />
     <Compile Remove="Media\Video.cs" />
     <Compile Remove="Media\VideoPlayer.cs" />
     <Compile Remove="Content\ContentReaders\VideoReader.cs" />
@@ -32,10 +46,11 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Platform\Input\KeyInputEvent.cs" />
+    <Compile Include="Platform\Media\OggStream.cs" />
+    <Compile Include="Platform\Media\OggStreamer.cs" />
     <Compile Include="Platform\TitleContainer.Desktop.cs" />
-    <Compile Include="Platform\Audio\OggStream.cs" />
-    <Compile Include="Platform\Graphics\OpenGL.Common.cs" />
-    <Compile Include="Platform\Graphics\Texture2D.StbSharp.cs" />    
+    <Compile Include="Platform\Graphics\OpenGL.Common.cs" />    
     <Compile Include="Platform\SDL\SDL2.cs" />
     <Compile Include="Platform\SDL\SDLGamePlatform.cs" />
     <Compile Include="Platform\SDL\SDLGameWindow.cs" />
@@ -43,12 +58,8 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
     <Compile Include="Platform\Utilities\CurrentPlatform.cs" />
     <Compile Include="Platform\Utilities\FuncLoader.Desktop.cs" />
     <Compile Include="Platform\Utilities\InteropHelpers.cs" />
-    <Compile Include="Platform\Utilities\ReflectionHelpers.Default.cs" />
-    <Compile Include="Platform\Media\MediaLibrary.Default.cs" />
-    <Compile Include="Platform\Media\MediaPlayer.Default.cs" />
     <Compile Include="Platform\Media\Song.NVorbis.cs" />
     <Compile Include="Platform\Input\GamePad.SDL.cs" />
-    <Compile Include="Platform\Input\InputKeyEventArgs.cs" />
     <Compile Include="Platform\Input\Joystick.SDL.cs" />
     <Compile Include="Platform\Input\Keyboard.SDL.cs" />
     <Compile Include="Platform\Input\KeyboardUtil.SDL.cs" />
@@ -61,11 +72,10 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
     <Compile Include="Platform\Graphics\GraphicsAdapter.Legacy.cs" />
     <Compile Include="Platform\GamePlatform.Desktop.cs" />
     <Compile Include="Platform\GraphicsDeviceManager.SDL.cs" />
+    <Compile Include="Platform\Windows\TaskbarList.COM.cs" />
+    <Compile Include="Platform\Windows\TaskbarList.cs" />
     
-    <Compile Include="..\ThirdParty\StbImageSharp\src\StbImageSharp\**\*.cs" LinkBase="Utilities\StbImageSharp"/>
-    <Compile Include="..\ThirdParty\StbImageWriteSharp\src\StbImageWriteSharp\**\*.cs" LinkBase="Utilities\StbImageWriteSharp"/>
-
-    <Compile Include="..\ThirdParty\NVorbis\NVorbis\**\*.cs" LinkBase="ThirdParty\NVorbis"/>
+    <Compile Include="..\ThirdParty\NVorbis\NVorbis\**\*.cs" LinkBase="ThirdParty\NVorbis" />
     <Compile Remove="..\ThirdParty\NVorbis\NVorbis\Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
@@ -124,6 +134,15 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
     </Content>
 
     <Content Include="MonoGame.Framework.DesktopGL.targets" PackagePath="build" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Memory" Version="4.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj" />
+    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
   </ItemGroup>
 
   <Import Project="Platform\OpenGL.targets" />

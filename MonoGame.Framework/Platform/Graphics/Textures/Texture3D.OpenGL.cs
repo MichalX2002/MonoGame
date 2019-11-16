@@ -18,7 +18,7 @@ namespace MonoGame.Framework.Graphics
             _glTarget = TextureTarget.Texture3D;
 
             if (mipMap)
-                throw new NotImplementedException("Texture3D does not yet support mipmaps.");
+                throw new NotImplementedException(nameof(Texture3D) + " does not yet support mipmaps.");
 
             GL.GenTextures(1, out _glTexture);
             GraphicsExtensions.CheckGLError();
