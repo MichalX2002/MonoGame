@@ -27,7 +27,6 @@ namespace MonoGame.Framework.Content
         internal ContentReader(ContentManager manager, Stream stream, GraphicsDevice graphicsDevice, string assetName, int version, Action<IDisposable> recordDisposableObject)
             : base(stream)
         {
-            GraphicsDevice = graphicsDevice;
             this.recordDisposableObject = recordDisposableObject;
             ContentManager = manager;
             AssetName = assetName;

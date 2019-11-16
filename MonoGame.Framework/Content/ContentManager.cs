@@ -365,7 +365,7 @@ namespace MonoGame.Framework.Content
                 decompressedStream = stream;
             }
 
-            var reader = new ContentReader(this, decompressedStream, _graphicsDeviceService.GraphicsDevice,
+            var reader = new ContentReader(this, decompressedStream,
                                                         originalAssetName, version, recordDisposableObject);
             
             return reader;

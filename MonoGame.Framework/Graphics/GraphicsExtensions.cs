@@ -518,6 +518,7 @@ namespace MonoGame.Framework.Graphics
             var supportsS3tc = graphicsDevice.GraphicsCapabilities.SupportsS3tc;
             var supportsPvrtc = graphicsDevice.GraphicsCapabilities.SupportsPvrtc;
             var supportsEtc1 = graphicsDevice.GraphicsCapabilities.SupportsEtc1;
+            var supportsEtc2 = graphicsDevice.GraphicsCapabilities.SupportsEtc2;
             var supportsAtitc = graphicsDevice.GraphicsCapabilities.SupportsAtitc;
             var supportsFloat = graphicsDevice.GraphicsCapabilities.SupportsFloatTextures;
             var supportsHalfFloat = graphicsDevice.GraphicsCapabilities.SupportsHalfFloatTextures;
@@ -738,6 +739,93 @@ namespace MonoGame.Framework.Graphics
                     break;
                 case InvalidFormat:
                 default:
+            case SurfaceFormat.Rgba64:
+                if (!supportsNormalized)
+                    goto case InvalidFormat;
+                glInternalFormat = PixelInternalFormat.Rgba16;
+                glFormat = PixelFormat.Rgba;
+                glType = PixelType.UnsignedShort;
+                break;
+            case SurfaceFormat.RgbaAtcExplicitAlpha:
+                if (!supportsAtitc)
+                    goto case InvalidFormat;
+				glInternalFormat = PixelInternalFormat.AtcRgbaExplicitAlphaAmd;
+				glFormat = PixelFormat.CompressedTextureFormats;
+				break;
+            case SurfaceFormat.RgbaAtcInterpolatedAlpha:
+                if (!supportsAtitc)
+                    goto case InvalidFormat;
+				glInternalFormat = PixelInternalFormat.AtcRgbaInterpolatedAlphaAmd;
+				glFormat = PixelFormat.CompressedTextureFormats;
+				break;
+            case SurfaceFormat.RgbEtc1:
+                if (!supportsEtc1)
+                    goto case InvalidFormat;
+                glInternalFormat = PixelInternalFormat.Etc1; // GL_ETC1_RGB8_OES
+                glFormat = PixelFormat.CompressedTextureFormats;
+                break;
+            case SurfaceFormat.Rgb8Etc2:
+                if (!supportsEtc2)
+                    goto case InvalidFormat;
+                glInternalFormat = PixelInternalFormat.Etc2Rgb8; // GL_COMPRESSED_RGB8_ETC2
+                glFormat = PixelFormat.CompressedTextureFormats;
+                break;
+            case SurfaceFormat.Srgb8Etc2:
+                if (!supportsEtc2)
+                    goto case InvalidFormat;
+                glInternalFormat = PixelInternalFormat.Etc2Srgb8; // GL_COMPRESSED_SRGB8_ETC2
+                glFormat = PixelFormat.CompressedTextureFormats;
+                break;
+            case SurfaceFormat.Rgb8A1Etc2:
+                if (!supportsEtc2)
+                    goto case InvalidFormat;
+                glInternalFormat = PixelInternalFormat.Etc2Rgb8A1; // GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2
+                glFormat = PixelFormat.CompressedTextureFormats;
+                break;
+            case SurfaceFormat.Srgb8A1Etc2:
+                if (!supportsEtc2)
+                    goto case InvalidFormat;
+                glInternalFormat = PixelInternalFormat.Etc2Srgb8A1; // GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2
+                glFormat = PixelFormat.CompressedTextureFormats;
+                break;
+            case SurfaceFormat.Rgba8Etc2:
+                if (!supportsEtc2)
+                    goto case InvalidFormat;
+                glInternalFormat = PixelInternalFormat.Etc2Rgba8Eac; // GL_COMPRESSED_RGBA8_ETC2_EAC
+                glFormat = PixelFormat.CompressedTextureFormats;
+                break;
+            case SurfaceFormat.SRgb8A8Etc2:
+                if (!supportsEtc2)
+                    goto case InvalidFormat;
+                glInternalFormat = PixelInternalFormat.Etc2SRgb8A8Eac; // GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
+                glFormat = PixelFormat.CompressedTextureFormats;
+                break;
+			case SurfaceFormat.RgbPvrtc2Bpp:
+                if (!supportsPvrtc)
+                    goto case InvalidFormat;
+				glInternalFormat = PixelInternalFormat.CompressedRgbPvrtc2Bppv1Img;
+				glFormat = PixelFormat.CompressedTextureFormats;
+				break;
+			case SurfaceFormat.RgbPvrtc4Bpp:
+                if (!supportsPvrtc)
+                    goto case InvalidFormat;
+				glInternalFormat = PixelInternalFormat.CompressedRgbPvrtc4Bppv1Img;
+				glFormat = PixelFormat.CompressedTextureFormats;
+				break;
+			case SurfaceFormat.RgbaPvrtc2Bpp:
+                if (!supportsPvrtc)
+                    goto case InvalidFormat;
+				glInternalFormat = PixelInternalFormat.CompressedRgbaPvrtc2Bppv1Img;
+				glFormat = PixelFormat.CompressedTextureFormats;
+				break;
+			case SurfaceFormat.RgbaPvrtc4Bpp:
+                if (!supportsPvrtc)
+                    goto case InvalidFormat;
+				glInternalFormat = PixelInternalFormat.CompressedRgbaPvrtc4Bppv1Img;
+				glFormat = PixelFormat.CompressedTextureFormats;
+				break;
+            case InvalidFormat: 
+            default:
                     throw new NotSupportedException(string.Format("The requested SurfaceFormat `{0}` is not supported.", format));
             }
         }
@@ -775,6 +863,12 @@ namespace MonoGame.Framework.Graphics
                 case SurfaceFormat.RgbaPvrtc2Bpp:
                 case SurfaceFormat.RgbaPvrtc4Bpp:
                 case SurfaceFormat.RgbEtc1:
+                case SurfaceFormat.Rgb8Etc2:
+                case SurfaceFormat.Srgb8Etc2:
+                case SurfaceFormat.Rgb8A1Etc2:
+                case SurfaceFormat.Srgb8A1Etc2:
+                case SurfaceFormat.Rgba8Etc2:
+                case SurfaceFormat.SRgb8A8Etc2:
                 case SurfaceFormat.RgbPvrtc2Bpp:
                 case SurfaceFormat.RgbPvrtc4Bpp:
                     return true;
@@ -794,6 +888,10 @@ namespace MonoGame.Framework.Graphics
                 case SurfaceFormat.RgbPvrtc4Bpp:
                 case SurfaceFormat.RgbaPvrtc4Bpp:
                 case SurfaceFormat.RgbEtc1:
+                case SurfaceFormat.Rgb8Etc2:
+                case SurfaceFormat.Srgb8Etc2:
+                case SurfaceFormat.Rgb8A1Etc2:
+                case SurfaceFormat.Srgb8A1Etc2:
                     // One texel in DXT1, PVRTC (2bpp and 4bpp) and ETC1 is a minimum 4x4 block (8x4 for PVRTC 2bpp), which is 8 bytes
                     return 8;
                 case SurfaceFormat.Dxt3:
@@ -802,6 +900,8 @@ namespace MonoGame.Framework.Graphics
                 case SurfaceFormat.Dxt5SRgb:
                 case SurfaceFormat.RgbaAtcExplicitAlpha:
                 case SurfaceFormat.RgbaAtcInterpolatedAlpha:
+                case SurfaceFormat.Rgba8Etc2:
+                case SurfaceFormat.SRgb8A8Etc2:
                     // One texel in DXT3 and DXT5 is a minimum 4x4 block, which is 16 bytes
                     return 16;
                 case SurfaceFormat.Alpha8:
@@ -899,6 +999,12 @@ namespace MonoGame.Framework.Graphics
                 case SurfaceFormat.RgbPvrtc4Bpp:
                 case SurfaceFormat.RgbaPvrtc4Bpp:
                 case SurfaceFormat.RgbEtc1:
+                case SurfaceFormat.Rgb8Etc2:
+                case SurfaceFormat.Srgb8Etc2:
+                case SurfaceFormat.Rgb8A1Etc2:
+                case SurfaceFormat.Srgb8A1Etc2:
+                case SurfaceFormat.Rgba8Etc2:
+                case SurfaceFormat.SRgb8A8Etc2:
                 case SurfaceFormat.RgbaAtcExplicitAlpha:
                 case SurfaceFormat.RgbaAtcInterpolatedAlpha:
                     width = 4;
