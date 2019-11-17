@@ -46,6 +46,9 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Platform\Graphics\GraphicsDevice.OpenGL.ResourceHandle.cs" />
+    <Compile Include="Platform\Graphics\OpenGL.Enums.cs" />
+    <Compile Include="Platform\Graphics\Shader\Shader.Structure.cs" />
     <Compile Include="Platform\Input\KeyInputEvent.cs" />
     <Compile Include="Platform\Media\OggStream.cs" />
     <Compile Include="Platform\Media\OggStreamer.cs" />

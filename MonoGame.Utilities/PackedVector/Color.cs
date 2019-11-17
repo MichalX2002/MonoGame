@@ -16,7 +16,7 @@ namespace MonoGame.Framework
     /// <para>Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.</para>
     /// </summary>
     [DataContract]
-    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public partial struct Color : IPackedVector<uint>, IEquatable<Color>, IPixel
     {
         /// <summary>
@@ -73,14 +73,11 @@ namespace MonoGame.Framework
             }
         }
 
-        internal string DebugDisplayString
-        {
-            get => string.Concat(
-                    R.ToString(), "  ",
-                    G.ToString(), "  ",
-                    B.ToString(), "  ",
-                    A.ToString());
-        }
+        private string DebuggerDisplay => string.Concat(
+            R.ToString(), "  ",
+            G.ToString(), "  ",
+            B.ToString(), "  ",
+            A.ToString());
 
         #endregion
 

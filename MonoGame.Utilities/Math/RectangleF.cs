@@ -22,7 +22,7 @@ namespace MonoGame.Framework
     /// </remarks>
     /// <seealso cref="IEquatable{T}" />
     [DataContract]
-    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct RectangleF : IEquatable<RectangleF>, IShapeF
     {
         /// <summary>
@@ -76,10 +76,13 @@ namespace MonoGame.Framework
         ///     <see cref="Width" />,
         ///     <see cref="Height" /> all equal to <code>0f</code>.
         /// </summary>
-        /// <value>
-        ///     <c>true</c> if this instance is empty; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsEmpty => Width.Equals(0) && Height.Equals(0) && X.Equals(0) && Y.Equals(0);
+        public bool IsEmpty => Width == 0 && Height == 0 && X == 0 && Y == 0;
+
+        private string DebuggerDisplay => string.Concat(
+            X.ToString(), "  ",
+            Y.ToString(), "  ",
+            Width.ToString(), "  ",
+            Height.ToString());
 
         /// <summary>
         ///     Gets the <see cref="PointF" /> representing the the top-left of this <see cref="RectangleF" />.
@@ -482,7 +485,5 @@ namespace MonoGame.Framework
         {
             return $"{{X: {X}, Y: {Y}, Width: {Width}, Height: {Height}";
         }
-
-        internal string DebugDisplayString => string.Concat(X, "  ", Y, "  ", Width, "  ", Height);
     }
 }

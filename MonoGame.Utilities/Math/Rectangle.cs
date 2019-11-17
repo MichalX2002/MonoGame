@@ -12,7 +12,7 @@ namespace MonoGame.Framework
     /// Describes a 2D-rectangle. 
     /// </summary>
     [DataContract]
-    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Rectangle : IEquatable<Rectangle>
     {
         /// <summary>
@@ -34,6 +34,12 @@ namespace MonoGame.Framework
         /// The height of this <see cref="Rectangle"/>.
         /// </summary>
         [DataMember] public int Height;
+
+        private string DebuggerDisplay => string.Concat(
+            X.ToString(), "  ",
+            Y.ToString(), "  ",
+            Width.ToString(), "  ",
+            Height.ToString());
 
         #region Public Properties
 
@@ -102,20 +108,6 @@ namespace MonoGame.Framework
         /// the center point will be rounded down.
         /// </remarks>
         public Point Center => new Point(X + (Width / 2), Y + (Height / 2));
-
-        #endregion
-
-        #region Internal Properties
-
-        internal string DebugDisplayString
-        {
-            get => string.Concat(
-                    X, "  ",
-                    Y, "  ",
-                    Width, "  ",
-                    Height
-                    );
-        }
 
         #endregion
 

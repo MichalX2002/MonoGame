@@ -8,14 +8,16 @@ using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging
 {
-    public class FrameCollectionBase<TPixel, TFrame> : IList<TFrame>, IReadOnlyCollection<TFrame>
+    // TODO: add a LayerCollection and change some constraints (like TImage) to be more generous
+
+    public abstract class ImageCollection<TPixel, TImage> : IList<TImage>, IReadOnlyList<TImage>
         where TPixel : unmanaged, IPixel
-        where TFrame : ReadOnlyImageFrame<TPixel>
+        where TImage : ReadOnlyImageFrame<TPixel>
     {
-        protected List<TFrame> _frames;
+        protected List<TImage> _frames;
         protected int _version;
 
-        public TFrame this[int imageIndex]
+        public TImage this[int imageIndex]
         {
             get => _frames[imageIndex];
             set
@@ -27,10 +29,10 @@ namespace MonoGame.Imaging
 
         #region Constructors
 
-        internal FrameCollectionBase(List<TFrame> frames, int capacity)
+        internal ImageCollection(List<TImage> frames, int capacity)
         {
             CommonArgumentGuard.AssertAtleastZero(capacity, nameof(capacity));
-            _frames = frames ?? (capacity > 0 ? new List<TFrame>(capacity) : new List<TFrame>());
+            _frames = frames ?? (capacity > 0 ? new List<TImage>(capacity) : new List<TImage>());
         }
 
         protected static int GetInitialCapacity<T>(IEnumerable<T> enumerable)
@@ -65,7 +67,7 @@ namespace MonoGame.Imaging
         /// Gets the first frame in the collection.
         /// Returns <see langword="default" /> if the collection is empty.
         /// </summary>
-        public TFrame First => _frames.Count > 0 ? _frames[0] : default;
+        public TImage First => _frames.Count > 0 ? _frames[0] : default;
 
         /// <summary>
         /// Gets whether the frames in this collection are a looping sequence.
@@ -79,17 +81,17 @@ namespace MonoGame.Imaging
 
         #region Pure methods
 
-        public bool Contains(TFrame frame) => _frames.Contains(frame);
+        public bool Contains(TImage frame) => _frames.Contains(frame);
 
-        public void CopyTo(TFrame[] array, int arrayIndex) => _frames.CopyTo(array, arrayIndex);
+        public void CopyTo(TImage[] array, int arrayIndex) => _frames.CopyTo(array, arrayIndex);
 
-        public int IndexOf(TFrame frame) => _frames.IndexOf(frame);
+        public int IndexOf(TImage frame) => _frames.IndexOf(frame);
 
         #endregion
 
         #region Mutating methods
 
-        public void Add(TFrame frame)
+        public void Add(TImage frame)
         {
             AssertValidFrame(frame);
 
@@ -97,7 +99,7 @@ namespace MonoGame.Imaging
             IncrementVersion();
         }
 
-        public void Insert(int index, TFrame frame)
+        public void Insert(int index, TImage frame)
         {
             AssertValidFrame(frame);
 
@@ -105,7 +107,7 @@ namespace MonoGame.Imaging
             IncrementVersion();
         }
 
-        public bool Remove(TFrame image)
+        public bool Remove(TImage image)
         {
             if (_frames.Remove(image))
             {
@@ -163,7 +165,7 @@ namespace MonoGame.Imaging
         }
 
         [DebuggerHidden]
-        protected void AssertValidFrame(TFrame frame)
+        protected void AssertValidFrame(TImage frame)
         {
             if (frame == null)
                 throw new ArgumentNullException(nameof(frame));
@@ -178,8 +180,8 @@ namespace MonoGame.Imaging
 
         #endregion
 
-        public List<TFrame>.Enumerator GetEnumerator() => _frames.GetEnumerator();
-        IEnumerator<TFrame> IEnumerable<TFrame>.GetEnumerator() => GetEnumerator();
+        public List<TImage>.Enumerator GetEnumerator() => _frames.GetEnumerator();
+        IEnumerator<TImage> IEnumerable<TImage>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

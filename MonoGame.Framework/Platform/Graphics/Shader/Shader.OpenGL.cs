@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.IO;
 using System.Diagnostics;
 using MonoGame.OpenGL;
 
@@ -11,11 +10,12 @@ namespace MonoGame.Framework.Graphics
 {
     internal partial class Shader
     {
-        // The shader handle.
-        private int _shaderHandle = -1;
+        private int? _shaderId;
 
-        // We keep this around for recompiling on context lost and debugging.
-        private string _glslCode;
+        /// <summary>
+        /// Saved for recompiling on context loss and debugging.
+        /// </summary>
+        private string GlslCode { get; set; }
 
         private static int PlatformProfile()
         {
@@ -24,45 +24,46 @@ namespace MonoGame.Framework.Graphics
 
         private void PlatformConstruct(bool isVertexShader, byte[] shaderBytecode)
         {
-            _glslCode = System.Text.Encoding.ASCII.GetString(shaderBytecode);
-
+            GlslCode = System.Text.Encoding.ASCII.GetString(shaderBytecode);
             HashKey = MonoGame.Utilities.Hash.ComputeHash(shaderBytecode);
         }
 
         internal int GetShaderHandle()
         {
             // If the shader has already been created then return it.
-            if (_shaderHandle != -1)
-                return _shaderHandle;
-            
-            //
-            _shaderHandle = GL.CreateShader(Stage == ShaderStage.Vertex ? ShaderType.VertexShader : ShaderType.FragmentShader);
-            GraphicsExtensions.CheckGLError();
-            GL.ShaderSource(_shaderHandle, _glslCode);
-            GraphicsExtensions.CheckGLError();
-            GL.CompileShader(_shaderHandle);
-            GraphicsExtensions.CheckGLError();
-            GL.GetShader(_shaderHandle, ShaderParameter.CompileStatus, out int compiled);
-            GraphicsExtensions.CheckGLError();
-            if (compiled != (int)Bool.True)
-            {
-                var log = GL.GetShaderInfoLog(_shaderHandle);
-                Debug.WriteLine(log);
+            if (_shaderId.HasValue)
+                return _shaderId.Value;
 
-                GraphicsDevice.DisposeShader(_shaderHandle);
-                _shaderHandle = -1;
+            var shaderType = Stage == ShaderStage.Vertex ? ShaderType.VertexShader : ShaderType.FragmentShader;
+            _shaderId = GL.CreateShader(shaderType);
+            GraphicsExtensions.CheckGLError();
 
-                throw new InvalidOperationException("Shader Compilation Failed");
-            }
+            GL.ShaderSource(_shaderId.Value, GlslCode);
+            GraphicsExtensions.CheckGLError();
 
-            return _shaderHandle;
+            GL.CompileShader(_shaderId.Value);
+            GraphicsExtensions.CheckGLError();
+
+            GL.GetShader(_shaderId.Value, ShaderParameter.CompileStatus, out int compiled);
+            GraphicsExtensions.CheckGLError();
+
+            if (compiled == (int)Bool.True)
+                return _shaderId.Value;
+
+            var log = GL.GetShaderInfoLog(_shaderId.Value);
+            Debug.WriteLine(log);
+
+            GraphicsDevice.DisposeShader(_shaderId.Value);
+            _shaderId = null;
+
+            throw new InvalidOperationException("Shader compilation failed.");
         }
 
         internal void GetVertexAttributeLocations(int program)
         {
             for (int i = 0; i < Attributes.Length; ++i)
             {
-                Attributes[i].location = GL.GetAttribLocation(program, Attributes[i].name);
+                Attributes[i].Location = GL.GetAttribLocation(program, Attributes[i].Name);
                 GraphicsExtensions.CheckGLError();
             }
         }
@@ -71,8 +72,8 @@ namespace MonoGame.Framework.Graphics
         {
             for (int i = 0; i < Attributes.Length; ++i)
             {
-                if ((Attributes[i].usage == usage) && (Attributes[i].index == index))
-                    return Attributes[i].location;
+                if ((Attributes[i].Usage == usage) && (Attributes[i].Index == index))
+                    return Attributes[i].Location;
             }
             return -1;
         }
@@ -82,11 +83,11 @@ namespace MonoGame.Framework.Graphics
             // Assign the texture unit index to the sampler uniforms.
             foreach (var sampler in Samplers)
             {
-                var loc = GL.GetUniformLocation(program, sampler.name);
+                int loc = GL.GetUniformLocation(program, sampler.Name);
                 GraphicsExtensions.CheckGLError();
                 if (loc != -1)
                 {
-                    GL.Uniform1(loc, sampler.textureSlot);
+                    GL.Uniform1(loc, sampler.TextureSlot);
                     GraphicsExtensions.CheckGLError();
                 }
             }
@@ -94,19 +95,19 @@ namespace MonoGame.Framework.Graphics
 
         private void PlatformGraphicsDeviceResetting()
         {
-            if (_shaderHandle != -1)
+            if (_shaderId.HasValue)
             {
-                GraphicsDevice.DisposeShader(_shaderHandle);
-                _shaderHandle = -1;
+                GraphicsDevice.DisposeShader(_shaderId.Value);
+                _shaderId = null;
             }
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (!IsDisposed && _shaderHandle != -1)
+            if (!IsDisposed && _shaderId.HasValue)
             {
-                GraphicsDevice.DisposeShader(_shaderHandle);
-                _shaderHandle = -1;
+                GraphicsDevice.DisposeShader(_shaderId.Value);
+                _shaderId = null;
             }
 
             base.Dispose(disposing);

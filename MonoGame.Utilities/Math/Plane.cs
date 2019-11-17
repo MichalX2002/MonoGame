@@ -38,7 +38,7 @@ namespace MonoGame.Framework
     }
 	
     [DataContract]
-    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Plane : IEquatable<Plane>
     {
         [DataMember]
@@ -171,7 +171,7 @@ namespace MonoGame.Framework
             return PlaneIntersectionType.Intersecting;
         }
 
-        internal string DebugDisplayString => string.Concat(Normal.DebugDisplayString, "  ", D.ToString());
+        internal string DebuggerDisplay => string.Concat(Normal.DebuggerDisplay, "  ", D.ToString());
 
         public override string ToString()
         {

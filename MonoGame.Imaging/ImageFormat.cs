@@ -14,7 +14,7 @@ namespace MonoGame.Imaging
         private static HashSet<ImageFormat> _builtinFormats;
         private static Dictionary<string, ImageFormat> _byMimeType;
         private static Dictionary<string, ImageFormat> _byExtension;
-        
+
         #region Built-in Formats
 
         /// <summary>
@@ -72,15 +72,19 @@ namespace MonoGame.Imaging
             Bmp = AddBuiltIn("Bitmap", new[] { "image/bmp", "image/x-bmp" }, new[] { ".bmp", ".bm" });
             Tga = AddBuiltIn("Truevision Graphics Adapter", new[] { "image/x-tga", "image/x-targa" }, new[] { ".tga" });
             Hdr = AddBuiltIn("Radiance HDR", new[] { "image/vnd.radiance", "image/x-hdr" }, new[] { ".hdr" });
-            Psd = AddBuiltIn("PhotoShop Document", new[] { "image/vnd.adobe.photoshop", "application/x-photoshop" }, new[] { ".psd" });
+            Psd = AddBuiltIn("PhotoShop Document", new[] { "image/vnd.adobe.photoshop", "application/x-photoshop" }, new[] { ".psd" }, supportsLayers: true);
         }
 
         private static ImageFormat AddBuiltIn(
-            string name, string[] mimeTypes, string[] extensions, bool supportsAnimation = false)
+            string name, string[] mimeTypes, string[] extensions,
+            bool supportsAnimation = false,
+            bool supportsLayers = false)
         {
             var mimeSet = new ReadOnlySet<string>(mimeTypes, StringComparer.OrdinalIgnoreCase);
             var extensionSet = new ReadOnlySet<string>(extensions, StringComparer.OrdinalIgnoreCase);
-            var format = new ImageFormat(name, mimeTypes[0], extensions[0], supportsAnimation, mimeSet, extensionSet);
+            var format = new ImageFormat(
+                name, mimeTypes[0], extensions[0], mimeSet, extensionSet,
+                supportsAnimation, supportsLayers);
 
             _builtinFormats.Add(format);
             AddFormat(format);
@@ -97,30 +101,33 @@ namespace MonoGame.Imaging
         public string Name { get; }
 
         /// <summary>
-        /// Gets the primary MIME type for the format.
+        /// Gets the primary MIME type associated with the format.
         /// </summary>
         public string MimeType { get; }
 
         /// <summary>
-        /// Gets the primary file extension for the format.
+        /// Gets the primary file extension associated with the format.
         /// </summary>
         public string Extension { get; }
 
         /// <summary>
-        /// Gets whether this format supports animation.
+        /// Gets whether this format supports animated images.
         /// </summary>
         public bool SupportsAnimation { get; }
 
         /// <summary>
-        /// Gets associated MIME types for the format.
+        /// Gets whether this format supports layered images.
         /// </summary>
-        [DebuggerDisplay("{DebuggerMimeTypesDisplay,nq}")]
+        public bool SupportsLayers { get; }
+
+        /// <summary>
+        /// Gets MIME types associated with the format.
+        /// </summary>
         public ReadOnlySet<string> MimeTypes { get; }
 
         /// <summary>
-        /// Gets associated file extensions for the format.
+        /// Gets file extensions associated with the format.
         /// </summary>
-        [DebuggerDisplay("{DebuggerExtensionsDisplay,nq}")]
         public ReadOnlySet<string> Extensions { get; }
 
         #endregion
@@ -128,39 +135,49 @@ namespace MonoGame.Imaging
         #region Constructor
 
         public ImageFormat(
-            string name, string primaryMimeType, string primaryExtension, bool supportsAnimation,
-            IReadOnlySet<string> mimeTypes, IReadOnlySet<string> extensions)
+            string name, string primaryMimeType, string primaryExtension,
+            IReadOnlySet<string> mimeTypes, IReadOnlySet<string> extensions,
+            bool supportsAnimation, bool supportsLayers)
         {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            MimeType = primaryMimeType ?? throw new ArgumentNullException(nameof(primaryMimeType));
+            Extension = ValidateExtension(primaryExtension) ?? throw new ArgumentNullException(nameof(primaryExtension));
+
+            SupportsAnimation = supportsAnimation;
+            SupportsLayers = supportsLayers;
+
             if (mimeTypes == null) throw new ArgumentNullException(nameof(mimeTypes));
             if (mimeTypes.Count == 0) throw new ArgumentEmptyException(nameof(mimeTypes));
             if (!mimeTypes.Contains(primaryMimeType))
-                throw new ArgumentException("The set doesn't contain the primary value.", nameof(mimeTypes));
+                throw new ArgumentException("The set doesn't contain the primary MIME type.", nameof(mimeTypes));
 
             if (extensions == null) throw new ArgumentNullException(nameof(extensions));
             if (extensions.Count == 0) throw new ArgumentEmptyException(nameof(extensions));
             if (!extensions.Contains(primaryExtension))
-                throw new ArgumentException("The set doesn't contain the primary value.", nameof(mimeTypes));
-
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            MimeType = primaryMimeType ?? throw new ArgumentNullException(nameof(primaryMimeType));
-            Extension = ExtendExtension(primaryExtension) ?? throw new ArgumentNullException(nameof(primaryExtension));
-            SupportsAnimation = supportsAnimation;
+                throw new ArgumentException("The set doesn't contain the primary extension.", nameof(mimeTypes));
 
             MimeTypes = new ReadOnlySet<string>(mimeTypes, StringComparer.OrdinalIgnoreCase);
             Extensions = new ReadOnlySet<string>(extensions, StringComparer.OrdinalIgnoreCase);
         }
 
-        public ImageFormat(string name, string mimeType, string extension, bool supportsAnimation) : this(
-            name, mimeType, extension, supportsAnimation,
-            new ReadOnlySet<string>(new[] { mimeType }, null),
-            new ReadOnlySet<string>(new[] { extension }, null))
+        public ImageFormat(
+            string name, string mimeType, string extension,
+            bool supportsAnimation, bool supportsLayers) :
+            this(
+                name, mimeType, extension,
+                new ReadOnlySet<string>(new[] { mimeType }, null),
+                new ReadOnlySet<string>(new[] { extension }, null),
+                supportsAnimation, supportsLayers)
         {
         }
 
-        private static string ExtendExtension(string extension)
+        private static string ValidateExtension(string extension)
         {
             if (extension == null)
                 return null;
+
+            if (string.IsNullOrWhiteSpace(extension))
+                throw new ArgumentEmptyException(nameof(extension));
 
             if (extension.StartsWith("."))
                 return extension;
@@ -168,11 +185,6 @@ namespace MonoGame.Imaging
         }
 
         #endregion
-
-        public override string ToString()
-        {
-            return $"{nameof(ImageFormat)}: \"{Name} ({Extension})\"";
-        }
 
         #region Custom Format Methods
 
@@ -193,7 +205,7 @@ namespace MonoGame.Imaging
         #region Format Getters
 
         /// <summary>
-        /// Returns whether the format already comes with the imaging library.
+        /// Gets whether the format comes with the imaging library.
         /// </summary>
         public static bool IsBuiltIn(ImageFormat format)
         {
@@ -222,6 +234,7 @@ namespace MonoGame.Imaging
         {
             if (TryGetByExtension(extension, out var format))
                 return format;
+
             throw new KeyNotFoundException(
                 $"Image format for extension '{extension}' is not defined.");
         }
@@ -245,5 +258,10 @@ namespace MonoGame.Imaging
         }
 
         #endregion
+
+        public override string ToString()
+        {
+            return $"{{Name: \"{Name}\", Extension: \"{Extension}\", MIME: \"{MimeType}\"}}";
+        }
     }
 }

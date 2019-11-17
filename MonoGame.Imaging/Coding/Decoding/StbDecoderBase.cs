@@ -129,8 +129,10 @@ namespace MonoGame.Imaging.Decoding
             };
         }
 
-        private unsafe FrameCollection<TPixel> Decode<TPixel>(
-            ReadContext context, ImagingConfig config, int? frameLimit = null,
+        // TODO: FIXME: properly handle ImageCollection type
+
+        private unsafe ImageCollection<TPixel, ImageFrame<TPixel>> Decode<TPixel>(
+            ReadContext context, ImagingConfig config, int? frameLimit,
             DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
@@ -288,7 +290,7 @@ namespace MonoGame.Imaging.Decoding
 
         #region Public Methods
 
-        public virtual unsafe FrameCollection<TPixel> Decode<TPixel>(
+        public virtual unsafe ImageCollection<TPixel, ImageFrame<TPixel>> Decode<TPixel>(
             ImageReadStream stream, ImagingConfig config, int? frameLimit,
             DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
@@ -297,7 +299,7 @@ namespace MonoGame.Imaging.Decoding
             return Decode(stream.Context, config, frameLimit, onProgress);
         }
 
-        public virtual unsafe FrameCollection<TPixel> Decode<TPixel>(
+        public virtual unsafe ImageCollection<TPixel, ImageFrame<TPixel>> Decode<TPixel>(
             ReadOnlySpan<byte> data, ImagingConfig config, int? frameLimit,
             CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel

@@ -10,7 +10,7 @@ using System.Runtime.Serialization;
 namespace MonoGame.Framework
 {
     [DataContract]
-    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct BoundingBox : IEquatable<BoundingBox>
     {
         public const int CornerCount = 8;
@@ -20,6 +20,10 @@ namespace MonoGame.Framework
 
         [DataMember]
         public Vector3 Max;
+
+        private string DebuggerDisplay => string.Concat(
+            "Min(", Min.ToString(), " \n",
+            "Max(", Max.ToString());
 
         public BoundingBox(in Vector3 min, in Vector3 max)
         {
@@ -418,8 +422,8 @@ namespace MonoGame.Framework
         internal string DebugDisplayString
         {
             get => string.Concat(
-                    "Min( ", Min.DebugDisplayString, " )  \r\n",
-                    "Max( ", Max.DebugDisplayString, " )"
+                    "Min( ", Min.DebuggerDisplay, " )  \r\n",
+                    "Max( ", Max.DebuggerDisplay, " )"
                     );
         }
 

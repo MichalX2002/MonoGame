@@ -43,7 +43,7 @@ namespace MonoGame.Imaging
 
         [DebuggerHidden]
         private static void AssertValidSource<TPixel, TFrame>(
-            IImageEncoder encoder, ImagingConfig config, FrameCollectionBase<TPixel, TFrame> frames)
+            IImageEncoder encoder, ImagingConfig config, ImageCollection<TPixel, TFrame> frames)
             where TPixel : unmanaged, IPixel
             where TFrame : ReadOnlyImageFrame<TPixel>
         {

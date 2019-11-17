@@ -1,13 +1,16 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using MonoGame.Framework;
 
 namespace MonoGame.Utilities
 {
     public static class CommonArgumentGuard
     {
-        public static void CheckSrcDstSpans<T>(ReadOnlySpan<T> source, Span<T> destination)
+        /// <summary>
+        /// Throws if the <paramref name="destination"/> span is 
+        /// smaller than the <paramref name="source"/> span.
+        /// </summary>
+        public static void AssertSourceLargerThanDestination<T>(
+            ReadOnlySpan<T> source, Span<T> destination)
         {
             if (source.IsEmpty) throw new ArgumentEmptyException(nameof(source));
             if (destination.IsEmpty) throw new ArgumentEmptyException(nameof(destination));
@@ -18,11 +21,8 @@ namespace MonoGame.Utilities
         }
 
         /// <summary>
-        /// Throws if the <see cref="collection"/> is empty.
+        /// Throws if the <paramref name="count"/> is <see langword="null"/>, less, or equal to zero.
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="paramName"></param>
-        /// <param name="inlineParamName"></param>
         public static void AssertNonEmpty(long? count, string paramName, bool inlineParamName = true)
         {
             if (!count.HasValue)
@@ -36,34 +36,42 @@ namespace MonoGame.Utilities
         }
 
         /// <summary>
-        /// Throws if the <see cref="value"/> is less or equal to zero.
+        /// Throws if the <paramref name="value"/> is less or equal to zero.
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="paramName"></param>
-        /// <param name="inlineParamName"></param>
         public static void AssertAboveZero(long value, string paramName, bool inlineParamName = true)
         {
             if (value <= 0)
             {
                 string name = inlineParamName ? paramName : "value";
-                throw new ArgumentOutOfRangeException(
-                    $"The {name} must be greater than zero.", paramName);
+                string message = $"The {name} must be greater than zero.";
+                throw new ArgumentOutOfRangeException(message, paramName);
             }
         }
 
         /// <summary>
-        /// Throws if the <see cref="value"/> is less than zero.
+        /// Throws if the <paramref name="value"/> is less than zero.
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="paramName"></param>
-        /// <param name="inlineParamName"></param>
         public static void AssertAtleastZero(long value, string paramName, bool inlineParamName = true)
         {
             if (value < 0)
             {
                 string name = inlineParamName ? paramName : "value";
-                throw new ArgumentOutOfRangeException(
-                    $"The {name} must be equal to or greater than zero.", paramName);
+                string message = $"The {name} must be equal to or greater than zero.";
+                throw new ArgumentOutOfRangeException(message, paramName);
+            }
+        }
+
+        /// <summary>
+        /// Throws if the <see cref="string"/> is empty or consists only out of white-space characters.
+        /// </summary>
+        public static void AssertNotNullOrWhiteSpace(
+            string value, string paramName, bool inlineParamName = true)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                string name = inlineParamName ? paramName : "value";
+                string message = $"The {name} may not be empty or consist only out of white-space characters.";
+                throw new ArgumentException(message, paramName);
             }
         }
     }

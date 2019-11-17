@@ -17,13 +17,13 @@ namespace MonoGame.Imaging
         /// </summary>
         public IReadOnlyPixelRows<TPixel> Pixels { get; }
 
+        public int Width => Pixels.Width;
+        public int Height => Pixels.Height;
+
         /// <summary>
         /// Gets the delay in milliseconds between this and the next frame.
         /// </summary>
         public int Delay { get; }
-
-        public int Width => Pixels.Width;
-        public int Height => Pixels.Height;
 
         public ReadOnlyImageFrame(IReadOnlyPixelRows<TPixel> pixels, int delay)
         {

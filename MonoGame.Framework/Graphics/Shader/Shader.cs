@@ -2,43 +2,10 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using System.IO;
 
 namespace MonoGame.Framework.Graphics
 {
-
-    // TODO: We should convert the types below 
-    // into the start of a Shader reflection API.
-
-    internal enum SamplerType
-    {
-        Sampler2D = 0,
-        SamplerCube = 1,
-        SamplerVolume = 2,
-        Sampler1D = 3,
-    }
-
-    internal struct SamplerInfo
-    {
-        public SamplerType type;
-        public int textureSlot;
-        public int samplerSlot;
-        public string name;
-		public SamplerState state;
-
-        // TODO: This should be moved to EffectPass.
-        public int parameter;
-    }
-
-    internal struct VertexAttribute
-    {
-        public VertexElementUsage usage;
-        public int index;
-        public string name;
-        public int location;
-    }
-
     internal partial class Shader : GraphicsResource
 	{
         /// <summary>
@@ -52,34 +19,31 @@ namespace MonoGame.Framework.Graphics
         internal int HashKey { get; private set; }
 
         public SamplerInfo[] Samplers { get; private set; }
-
 	    public int[] CBuffers { get; private set; }
-
         public ShaderStage Stage { get; private set; }
-
         public VertexAttribute[] Attributes { get; private set; }
 
         internal Shader(GraphicsDevice device, BinaryReader reader)
         {
             GraphicsDevice = device;
 
-            var isVertexShader = reader.ReadBoolean();
+            bool isVertexShader = reader.ReadBoolean();
             Stage = isVertexShader ? ShaderStage.Vertex : ShaderStage.Pixel;
 
-            var shaderLength = reader.ReadInt32();
-            var shaderBytecode = reader.ReadBytes(shaderLength);
+            int shaderLength = reader.ReadInt32();
+            byte[] shaderBytecode = reader.ReadBytes(shaderLength);
 
-            var samplerCount = (int)reader.ReadByte();
+            byte samplerCount = reader.ReadByte();
             Samplers = new SamplerInfo[samplerCount];
-            for (var s = 0; s < samplerCount; s++)
+            for (int s = 0; s < samplerCount; s++)
             {
-                Samplers[s].type = (SamplerType)reader.ReadByte();
-                Samplers[s].textureSlot = reader.ReadByte();
-                Samplers[s].samplerSlot = reader.ReadByte();
+                Samplers[s].Type = (SamplerType)reader.ReadByte();
+                Samplers[s].TextureSlot = reader.ReadByte();
+                Samplers[s].SamplerSlot = reader.ReadByte();
 
 				if (reader.ReadBoolean())
 				{
-                    Samplers[s].state = new SamplerState
+                    Samplers[s].State = new SamplerState
                     {
                         AddressU = (TextureAddressMode)reader.ReadByte(),
                         AddressV = (TextureAddressMode)reader.ReadByte(),
@@ -96,23 +60,23 @@ namespace MonoGame.Framework.Graphics
                     };
                 }
 
-                Samplers[s].name = reader.ReadString();
-                Samplers[s].parameter = reader.ReadByte();
+                Samplers[s].Name = reader.ReadString();
+                Samplers[s].Parameter = reader.ReadByte();
             }
 
-            var cbufferCount = (int)reader.ReadByte();
+            byte cbufferCount = reader.ReadByte();
             CBuffers = new int[cbufferCount];
-            for (var c = 0; c < cbufferCount; c++)
+            for (int c = 0; c < cbufferCount; c++)
                 CBuffers[c] = reader.ReadByte();
 
-            var attributeCount = (int)reader.ReadByte();
+            byte attributeCount = reader.ReadByte();
             Attributes = new VertexAttribute[attributeCount];
-            for (var a = 0; a < attributeCount; a++)
+            for (int a = 0; a < attributeCount; a++)
             {
-                Attributes[a].name = reader.ReadString();
-                Attributes[a].usage = (VertexElementUsage)reader.ReadByte();
-                Attributes[a].index = reader.ReadByte();
-                Attributes[a].location = reader.ReadInt16();
+                Attributes[a].Name = reader.ReadString();
+                Attributes[a].Usage = (VertexElementUsage)reader.ReadByte();
+                Attributes[a].Index = reader.ReadByte();
+                Attributes[a].Location = reader.ReadInt16();
             }
 
             PlatformConstruct(isVertexShader, shaderBytecode);

@@ -7,12 +7,15 @@ using MonoGame.Framework.Graphics;
 
 namespace MonoGame.Framework.Content
 {
+    /// <summary>
+    /// Provides helpers for a <see cref="ContentReader"/>,
+    /// like getting specific services.
+    /// </summary>
     public static class ContentReaderExtensions
     {
         /// <summary>
-        /// Gets the GraphicsDevice from the ContentManager.ServiceProvider.
+        /// Gets the <see cref="GraphicsDevice"/> from the <see cref="ContentReader.ContentManager"/>.
         /// </summary>
-        /// <returns>The <see cref="GraphicsDevice"/>.</returns>
         public static GraphicsDevice GetGraphicsDevice(this ContentReader contentReader)
         {
             var serviceProvider = contentReader.ContentManager.ServiceProvider;

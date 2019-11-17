@@ -10,7 +10,7 @@ namespace MonoGame.Framework
     /// <summary>
     /// Defines a viewing frustum for intersection operations.
     /// </summary>
-    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class BoundingFrustum : IEquatable<BoundingFrustum>
     {
         /// <summary>
@@ -77,17 +77,13 @@ namespace MonoGame.Framework
 
         #region Internal Properties
 
-        internal string DebugDisplayString
-        {
-            get => string.Concat(
-                    "Near( ", _planes[0].DebugDisplayString, " )  \r\n",
-                    "Far( ", _planes[1].DebugDisplayString, " )  \r\n",
-                    "Left( ", _planes[2].DebugDisplayString, " )  \r\n",
-                    "Right( ", _planes[3].DebugDisplayString, " )  \r\n",
-                    "Top( ", _planes[4].DebugDisplayString, " )  \r\n",
-                    "Bottom( ", _planes[5].DebugDisplayString, " )  "
-                    );
-        }
+        private string DebuggerDisplay => string.Concat(
+            "Near(", _planes[0].DebuggerDisplay, ") \n",
+            "Far(", _planes[1].DebuggerDisplay, ") \n",
+            "Left(", _planes[2].DebuggerDisplay, ") \n",
+            "Right(", _planes[3].DebuggerDisplay, ") \n",
+            "Top(", _planes[4].DebuggerDisplay, ") \n",
+            "Bottom(", _planes[5].DebuggerDisplay, ")");
 
         #endregion
 

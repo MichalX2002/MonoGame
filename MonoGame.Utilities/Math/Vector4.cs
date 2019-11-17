@@ -18,7 +18,7 @@ namespace MonoGame.Framework
     [System.ComponentModel.TypeConverter(typeof(Design.Vector4TypeConverter))]
 #endif
     [DataContract]
-    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Vector4 : IEquatable<Vector4>, IPixel
     {
         /// <summary>
@@ -127,14 +127,11 @@ namespace MonoGame.Framework
 
         #endregion
 
-        internal string DebugDisplayString
-        {
-            get => string.Concat(
-                    X.ToString(), "  ",
-                    Y.ToString(), "  ",
-                    Z.ToString(), "  ",
-                    W.ToString());
-        }
+        private string DebuggerDisplay => string.Concat(
+            X.ToString(), "  ",
+            Y.ToString(), "  ",
+            Z.ToString(), "  ",
+            W.ToString());
 
         /// <summary>
         /// Constructs a 3D vector with XYZW values.
@@ -647,7 +644,7 @@ namespace MonoGame.Framework
         public static void Transform(
             ReadOnlySpan<Vector4> source, in Matrix matrix, Span<Vector4> destination)
         {
-            CommonArgumentGuard.CheckSrcDstSpans(source, destination);
+            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
 
             for (var i = 0; i < source.Length; i++)
                 destination[i] = Transform(source[i], matrix);
@@ -662,7 +659,7 @@ namespace MonoGame.Framework
         public static void Transform(
             ReadOnlySpan<Vector4> source, in Quaternion rotation, Span<Vector4> destination)
         {
-            CommonArgumentGuard.CheckSrcDstSpans(source, destination);
+            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
             for (var i = 0; i < source.Length; i++)
                 destination[i] = Transform(source[i], rotation);
         }

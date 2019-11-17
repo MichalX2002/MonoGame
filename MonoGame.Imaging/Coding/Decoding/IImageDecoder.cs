@@ -67,41 +67,43 @@ namespace MonoGame.Imaging.Decoding
 
         #region Decode
 
+        // TODO: FIXME: properly handle ImageCollection type
+
         /// <summary>
-        /// Decodes a stream into a collection of image frames.
+        /// Decodes a stream into a collection of images.
         /// </summary>
         /// <typeparam name="TPixel"></typeparam>
         /// <param name="stream">The stream to read from.</param>
         /// <param name="config">The imaging configuration.</param>
-        /// <param name="frameLimit">
-        /// Optional limit for the amount of frames that can be decoded by this call,
+        /// <param name="amountLimit">
+        /// Optional limit for the amount of images that can be decoded,
         /// the default being <see cref="int.MaxValue"/>.
         /// </param>
         /// <param name="onProgress">Optional delegate for reporting decode progress.</param>
         /// <returns>The collection of decoded images.</returns>
-        FrameCollection<TPixel> Decode<TPixel>(
+        ImageCollection<TPixel, ImageFrame<TPixel>> Decode<TPixel>(
             ImageReadStream stream,
             ImagingConfig config,
-            int? frameLimit,
+            int? amountLimit,
             DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel;
 
         /// <summary>
-        /// Decodes memory into a collection of image frames.
+        /// Decodes memory into a collection of images.
         /// </summary>
         /// <typeparam name="TPixel"></typeparam>
         /// <param name="data">The memory to read from.</param>
         /// <param name="config">The imaging configuration.</param>
-        /// <param name="frameLimit">
-        /// Optional limit for the amount of frames that can be decoded by this call,
+        /// <param name="amountLimit">
+        /// Optional limit for the amount of images that can be decoded,
         /// the default being <see cref="int.MaxValue"/>.
         /// </param>
         /// <param name="onProgress">Optional delegate for reporting decode progress.</param>
-        /// <returns>The collection of decoded frames.</returns>
-        FrameCollection<TPixel> Decode<TPixel>(
+        /// <returns>The collection of decoded images.</returns>
+        ImageCollection<TPixel, ImageFrame<TPixel>> Decode<TPixel>(
             ReadOnlySpan<byte> data,
             ImagingConfig config,
-            int? frameLimit,
+            int? amountLimit,
             CancellationToken cancellation,
             DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel;
