@@ -51,7 +51,7 @@ namespace MonoGame.Framework.Input
                 handle = Sdl.Mouse.CreateColorCursor(surface, origin.X, origin.Y);
                 if (handle == IntPtr.Zero)
                     throw new InvalidOperationException(
-                        "Failed to set surface for mouse cursor.", new Exception(Sdl.GetError()));
+                        "Failed to create mouse cursor from surface.", new Exception(Sdl.GetError()));
             }
             finally
             {

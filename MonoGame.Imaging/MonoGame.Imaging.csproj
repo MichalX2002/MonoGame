@@ -43,7 +43,6 @@
   <ItemGroup>
     <Compile Remove="ColorEncoding.cs" />
     <Compile Remove="ImageReader.cs" />
-    <Compile Remove="Image\Image.LoadPixelBuffer.cs" />
     <Compile Remove="Utilities\BufferPixelProvider.Expressions.cs" />
     <Compile Remove="Utilities\ImageWriter.cs" />
   </ItemGroup>
@@ -76,10 +75,6 @@
 
   <ItemGroup>
     <Folder Include="StbSharp\Image\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Image\Image.LoadPixelBuffer.cs" />
   </ItemGroup>
 
   <ItemGroup>

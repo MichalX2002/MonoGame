@@ -118,13 +118,13 @@ namespace MonoGame.Framework.Input
         /// <param name="sourceRectangle">Optional part of the image to use as the cursor.</param>
         [CLSCompliant(false)]
         public static unsafe MouseCursor FromPixels<TPixel>(
-            IReadOnlyPixelView<TPixel> pixels, Point origin, Rectangle? sourceRectangle = null)
+            IReadOnlyPixelBuffer<TPixel> pixels, Point origin, Rectangle? sourceRectangle = null)
             where TPixel : unmanaged, IPixel
         {
             Rectangle rect = sourceRectangle ?? pixels.GetBounds();
             if (!pixels.GetBounds().Contains(rect))
                 throw new ArgumentOutOfRangeException(
-                    "The source rectangle is outside the pixel span.", nameof(sourceRectangle));
+                    "The source rectangle is outside the pixel buffer.", nameof(sourceRectangle));
 
             IReadOnlyPixelMemory<Color> buffer = null;
             try
@@ -141,8 +141,7 @@ namespace MonoGame.Framework.Input
                 }
                 else
                 {
-                    // TODO: remove LoadPixelViewAs / IPixelView, keep the pixel casting though
-                    buffer = Image.LoadPixelViewAs<TPixel, Color>(pixels.Project(x => x.Crop(rect)));
+                    buffer = Image.LoadPixelBuffer<TPixel, Color>(pixels.Process(x => x.Crop(rect)));
                     pixelSpan = buffer.GetPixelSpan();
                     stride = buffer.GetByteStride();
                 }

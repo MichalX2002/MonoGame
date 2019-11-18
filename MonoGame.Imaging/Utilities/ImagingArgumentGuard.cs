@@ -4,7 +4,7 @@ using MonoGame.Imaging.Pixels;
 using MonoGame.Utilities;
 using MonoGame.Utilities.PackedVector;
 
-namespace MonoGame.Imaging.Utilities
+namespace MonoGame.Imaging
 {
     public static class ImagingArgumentGuard
     {

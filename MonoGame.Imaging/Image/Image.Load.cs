@@ -7,11 +7,13 @@ using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging
 {
+    // TODO: FIXME: change return collection type on LoadFrames methods
+
     public static partial class Image
     {
         #region LoadFrames(Stream)
 
-        public static FrameCollection<TPixel> LoadFrames<TPixel>(
+        public static ImageCollection<TPixel, ImageFrame<TPixel>> LoadFrames<TPixel>(
             Stream stream, ImagingConfig config, int? frameLimit, out ImageFormat format,
             CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
@@ -31,7 +33,7 @@ namespace MonoGame.Imaging
             }
         }
 
-        public static FrameCollection<TPixel> LoadFrames<TPixel>(
+        public static ImageCollection<TPixel, ImageFrame<TPixel>> LoadFrames<TPixel>(
             Stream stream, int? frameLimit, out ImageFormat format,
             CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
@@ -44,7 +46,7 @@ namespace MonoGame.Imaging
 
         #region LoadFrames(ReadOnlySpan)
 
-        public static FrameCollection<TPixel> LoadFrames<TPixel>(
+        public static ImageCollection<TPixel, ImageFrame<TPixel>> LoadFrames<TPixel>(
             ReadOnlySpan<byte> data, ImagingConfig config, int? frameLimit, out ImageFormat format,
             CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
@@ -57,7 +59,7 @@ namespace MonoGame.Imaging
             return decoder.Decode(data, config, frameLimit, cancellation, onProgress);
         }
 
-        public static FrameCollection<TPixel> LoadFrames<TPixel>(
+        public static ImageCollection<TPixel, ImageFrame<TPixel>> LoadFrames<TPixel>(
             ReadOnlySpan<byte> data, int? frameLimit, out ImageFormat format,
             CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel

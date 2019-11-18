@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
-using MonoGame.Imaging.Utilities;
 using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging
 {
     public static partial class Image
     {
-        #region LoadPixels (ReadOnlySpan<byte>)
+        #region LoadPixels(ReadOnlySpan<byte>)
 
         public static unsafe Image<TPixel> LoadPixels<TPixel>(
             ReadOnlySpan<byte> pixelData, Rectangle sourceRectangle, int stride, ImagingConfig config)
