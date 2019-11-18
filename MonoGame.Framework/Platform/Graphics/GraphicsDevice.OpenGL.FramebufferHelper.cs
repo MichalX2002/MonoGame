@@ -3,29 +3,51 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using MonoGame.OpenGL;
-
-using System.Security;
 
 namespace MonoGame.Framework.Graphics
 {
     // ARB_framebuffer_object implementation
-    partial class GraphicsDevice
+    public partial class GraphicsDevice
     {
         internal class FramebufferHelper
         {
+            private static readonly FramebufferAttachment[] FramebufferAttachements = {
+                FramebufferAttachment.ColorAttachment0,
+                FramebufferAttachment.DepthAttachment,
+                FramebufferAttachment.StencilAttachment,
+            };
+
             private static FramebufferHelper _instance;
+
+            public static FramebufferHelper Instance
+            {
+                get
+                {
+
+                    if (_instance == null)
+                        throw new InvalidOperationException("The FramebufferHelper has not been created yet!");
+                    return _instance;
+                }
+            }
+
+            public bool SupportsInvalidateFramebuffer { get; private set; }
+            public bool SupportsBlitFramebuffer { get; private set; }
+
+            internal FramebufferHelper(GraphicsDevice graphicsDevice)
+            {
+                SupportsBlitFramebuffer = GL.BlitFramebuffer != null;
+                SupportsInvalidateFramebuffer = GL.InvalidateFramebuffer != null;
+            }
 
             public static FramebufferHelper Create(GraphicsDevice gd)
             {
-                if (gd.GraphicsCapabilities.SupportsFramebufferObjectARB || gd.GraphicsCapabilities.SupportsFramebufferObjectEXT)
+                if (gd.GraphicsCapabilities.SupportsFramebufferObjectARB ||
+                    gd.GraphicsCapabilities.SupportsFramebufferObjectEXT)
                 {
                     _instance = new FramebufferHelper(gd);
+                    return _instance;
                 }
                 else
                 {
@@ -33,25 +55,6 @@ namespace MonoGame.Framework.Graphics
                         "MonoGame requires either ARB_framebuffer_object or EXT_framebuffer_object." +
                         "Try updating your graphics drivers.");
                 }
-
-                return _instance;
-            }
-
-            public static FramebufferHelper Get()
-            {
-                if (_instance == null)
-                    throw new InvalidOperationException("The FramebufferHelper has not been created yet!");
-                return _instance;
-            }
-
-            public bool SupportsInvalidateFramebuffer { get; private set; }
-
-            public bool SupportsBlitFramebuffer { get; private set; }
-
-            internal FramebufferHelper(GraphicsDevice graphicsDevice)
-            {
-                SupportsBlitFramebuffer = GL.BlitFramebuffer != null;
-                SupportsInvalidateFramebuffer = GL.InvalidateFramebuffer != null;
             }
 
             internal virtual void GenRenderbuffer(out int renderbuffer)
@@ -75,7 +78,8 @@ namespace MonoGame.Framework.Graphics
             internal virtual void RenderbufferStorageMultisample(int samples, int internalFormat, int width, int height)
             {
                 if (samples > 0 && GL.RenderbufferStorageMultisample != null)
-                    GL.RenderbufferStorageMultisample(RenderbufferTarget.RenderbufferExt, samples, (RenderbufferStorage)internalFormat, width, height);
+                    GL.RenderbufferStorageMultisample(
+                        RenderbufferTarget.RenderbufferExt, samples, (RenderbufferStorage)internalFormat, width, height);
                 else
                     GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, (RenderbufferStorage)internalFormat, width, height);
                 GraphicsExtensions.CheckGLError();
@@ -98,12 +102,6 @@ namespace MonoGame.Framework.Graphics
                 GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, readFramebuffer);
                 GraphicsExtensions.CheckGLError();
             }
-
-            static readonly FramebufferAttachment [] FramebufferAttachements = {
-                FramebufferAttachment.ColorAttachment0,
-                FramebufferAttachment.DepthAttachment,
-                FramebufferAttachment.StencilAttachment,
-            };
 
             internal virtual void InvalidateDrawFramebuffer()
             {
@@ -139,19 +137,18 @@ namespace MonoGame.Framework.Graphics
             {
                 GL.GenerateMipmap((GenerateMipmapTarget)target);
                 GraphicsExtensions.CheckGLError();
-
             }
 
             internal virtual void BlitFramebuffer(int iColorAttachment, int width, int height)
             {
-
                 GL.ReadBuffer(ReadBufferMode.ColorAttachment0 + iColorAttachment);
                 GraphicsExtensions.CheckGLError();
+
                 GL.DrawBuffer(DrawBufferMode.ColorAttachment0 + iColorAttachment);
                 GraphicsExtensions.CheckGLError();
+
                 GL.BlitFramebuffer(0, 0, width, height, 0, 0, width, height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
                 GraphicsExtensions.CheckGLError();
-
             }
 
             internal virtual void CheckFramebufferStatus()

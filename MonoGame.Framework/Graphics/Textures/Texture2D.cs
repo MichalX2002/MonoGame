@@ -12,9 +12,9 @@ using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Framework.Graphics
 {
-	// TODO: https://github.com/MonoGame/MonoGame/commit/f2f50bcd6c88e927ddbbc1fe677acd85b7bc6c0d#diff-b1287b3ea3e4f14da31f425817f5920eR427
-	// re-implement commit based on MonoGame.Imaging instead
-	
+    // TODO: https://github.com/MonoGame/MonoGame/commit/f2f50bcd6c88e927ddbbc1fe677acd85b7bc6c0d#diff-b1287b3ea3e4f14da31f425817f5920eR427
+    // re-implement commit based on MonoGame.Imaging instead
+    
     public partial class Texture2D : Texture
     {
         internal int ArraySize;
@@ -439,7 +439,7 @@ namespace MonoGame.Framework.Graphics
 
         #region Save
 
-        private unsafe UnmanagedPointer<TPixel> GetDataAsPointer<TPixel>(int level, Rectangle rect)
+        private unsafe UnmanagedPointer<TPixel> GetDataUnmanaged<TPixel>(int level, Rectangle rect)
             where TPixel : unmanaged, IPixel
         {
             var ptr = new UnmanagedPointer<TPixel>(rect.Width * rect.Height);
@@ -453,8 +453,8 @@ namespace MonoGame.Framework.Graphics
         {
             CheckRect(level, rect, out Rectangle checkedRect);
 
-            using (var data = GetDataAsPointer<TPixel>(level, checkedRect))
-                return Image.WrapMemory(data, checkedRect.Width, checkedRect.Height, false);
+            using (var data = GetDataUnmanaged<TPixel>(level, checkedRect))
+                return Image.WrapMemory(data, checkedRect.Width, checkedRect.Height, leaveOpen: false);
         }
 
         /// <summary>
@@ -477,14 +477,10 @@ namespace MonoGame.Framework.Graphics
             if (format == null) throw new ArgumentNullException(nameof(format));
             if (encoderConfig == null) throw new ArgumentNullException(nameof(encoderConfig));
 
-            if (Format.IsCompressedFormat())
-                throw new NotSupportedException(
-                    "Compressed texture formats are currently not supported.");
-
             void SaveByType<TPixel>() where TPixel : unmanaged, IPixel
             {
-                using (var tmp = ToImage<TPixel>(level, rect))
-                    tmp.Save(imagingConfig, stream, format, encoderConfig);
+                using (var textureImage = ToImage<TPixel>(level, rect))
+                    textureImage.Save(imagingConfig, stream, format, encoderConfig);
             }
 
             switch (Format)
@@ -496,7 +492,7 @@ namespace MonoGame.Framework.Graphics
                 case SurfaceFormat.Rg32: SaveByType<Rg32>(); break;
                 case SurfaceFormat.Rgba64: SaveByType<Rgba64>(); break;
                 case SurfaceFormat.Rgba1010102: SaveByType<Rgba1010102>(); break;
-                case SurfaceFormat.Bgr565:SaveByType<Bgr565>(); break;
+                case SurfaceFormat.Bgr565: SaveByType<Bgr565>(); break;
                 case SurfaceFormat.Bgra5551: SaveByType<Bgra5551>(); break;
                 case SurfaceFormat.Bgra4444: SaveByType<Bgra4444>(); break;
 
@@ -516,7 +512,12 @@ namespace MonoGame.Framework.Graphics
                 case SurfaceFormat.NormalizedByte4: SaveByType<NormalizedByte4>(); break;
 
                 default:
-                    throw new NotSupportedException("Texture format is not supported.");
+                    var innerException = Format.IsCompressedFormat()
+                        ? new NotSupportedException("Compressed texture formats are currently not supported.")
+                        : null;
+
+                    throw new NotSupportedException(
+                        $"The format {Format} is not supported.", innerException);
             }
         }
 
@@ -628,7 +629,7 @@ namespace MonoGame.Framework.Graphics
                     checkedRect.Width < blockWidth && texBounds.Width < blockWidth ? texBounds.Width : roundedWidth,
                     checkedRect.Height < blockHeight && texBounds.Height < blockHeight ? texBounds.Height : roundedHeight);
 #else
-					roundedWidth, roundedHeight);
+                    roundedWidth, roundedHeight);
 #endif
                 switch (Format)
                 {

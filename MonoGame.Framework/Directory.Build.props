@@ -13,6 +13,8 @@
     <PackageLicenseExpression>MS-PL</PackageLicenseExpression>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
 </Project>

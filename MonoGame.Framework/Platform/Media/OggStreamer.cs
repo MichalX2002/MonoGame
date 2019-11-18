@@ -1,6 +1,5 @@
 ﻿using MonoGame.Framework.Audio;
 using MonoGame.OpenAL;
-using MonoGame.Utilities.Memory;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,28 +10,37 @@ namespace MonoGame.Framework.Media
 {
     internal class OggStreamer : IDisposable
     {
-        public readonly EffectsExtension Efx = ALController.Efx;
-
         public const float DefaultUpdateRate = 20;
         public const int DefaultBufferSize = 8000;
         public const int MaxQueuedBuffers = 4;
 
-        internal static readonly object _singletonMutex = new object();
-        internal readonly object _iterationMutex = new object();
-        readonly object _readMutex = new object();
+        internal static object SingletonMutex { get; } = new object();
+        internal object IterationMutex { get; } = new object();
+        private object ReadMutex { get; } = new object();
 
+        private static OggStreamer _instance;
         private float[] _readBuffer;
         private short[] _castBuffer;
-        internal readonly HashSet<OggStream> _streams;
-        readonly TimeSpan[] _threadTiming;
-        private static OggStreamer _instance;
+        internal HashSet<OggStream> _streams;
+        private TimeSpan[] _threadTiming;
+        private float _updateRate;
 
         private readonly Thread _thread;
         private Stopwatch _threadWatch;
         private bool _pendingFinish;
         private volatile bool _cancelled;
 
-        public float UpdateRate { get; }
+        public float UpdateRate
+        {
+            get => _updateRate;
+            set
+            {
+                _updateRate = value;
+                UpdateDelay = TimeSpan.FromSeconds(1 / ((value <= 0) ? 1 : value));
+            }
+        }
+        public TimeSpan UpdateDelay { get; private set; }
+
         public int BufferSize { get; }
         public ReadOnlyCollection<TimeSpan> UpdateTime { get; }
 
@@ -40,7 +48,7 @@ namespace MonoGame.Framework.Media
         {
             get
             {
-                lock (_singletonMutex)
+                lock (SingletonMutex)
                 {
                     if (_instance == null)
                         throw new InvalidOperationException("No instance running.");
@@ -51,7 +59,7 @@ namespace MonoGame.Framework.Media
 
         public OggStreamer(int bufferSize = DefaultBufferSize, float updateRate = DefaultUpdateRate)
         {
-            lock (_singletonMutex)
+            lock (SingletonMutex)
             {
                 if (_instance != null)
                     throw new InvalidOperationException("An instance has already been created.");
@@ -81,13 +89,13 @@ namespace MonoGame.Framework.Media
 
         public void Dispose()
         {
-            lock (_singletonMutex)
+            lock (SingletonMutex)
             {
                 Debug.Assert(
-                    _instance == this, "Something assigned a new instance without locking the singleton mutex.");
+                    _instance == this, "A new instance was assigned without locking the singleton mutex.");
 
                 _cancelled = true;
-                lock (_iterationMutex)
+                lock (IterationMutex)
                     _streams.Clear();
 
                 _thread.Join(1000);
@@ -97,23 +105,22 @@ namespace MonoGame.Framework.Media
 
         internal bool AddStream(OggStream stream)
         {
-            lock (_iterationMutex)
+            lock (IterationMutex)
                 return _streams.Add(stream);
         }
 
         internal bool RemoveStream(OggStream stream)
         {
-            lock (_iterationMutex)
+            lock (IterationMutex)
                 return _streams.Remove(stream);
         }
 
         public bool TryFillBuffer(OggStream stream, out ALBuffer buffer)
         {
-            lock (_readMutex)
+            lock (ReadMutex)
             {
                 var reader = stream.Reader;
                 int readSamples = reader.ReadSamples(_readBuffer);
-
                 if (readSamples > 0)
                 {
                     var channels = (AudioChannels)reader.Channels;
@@ -146,8 +153,7 @@ namespace MonoGame.Framework.Media
 
             while (!_cancelled)
             {
-                var updateDelay = TimeSpan.FromSeconds(1 / ((UpdateRate <= 0) ? 1 : UpdateRate));
-                var toSleep = updateDelay - lastTickElapsed;
+                var toSleep = UpdateDelay - lastTickElapsed;
                 if (toSleep.TotalMilliseconds > 0)
                     Thread.Sleep(toSleep);
 
@@ -156,7 +162,7 @@ namespace MonoGame.Framework.Media
 
                 _threadWatch.Restart();
                 localStreams.Clear();
-                lock (_iterationMutex)
+                lock (IterationMutex)
                 {
                     foreach (var stream in _streams)
                         localStreams.Add(stream);
@@ -164,9 +170,9 @@ namespace MonoGame.Framework.Media
 
                 foreach (OggStream stream in localStreams)
                 {
-                    lock (stream._prepareMutex)
+                    lock (stream.PrepareMutex)
                     {
-                        lock (_iterationMutex)
+                        lock (IterationMutex)
                             if (!_streams.Contains(stream))
                                 continue;
 
@@ -174,32 +180,29 @@ namespace MonoGame.Framework.Media
                             continue;
                     }
 
-                    lock (stream._stopMutex)
+                    lock (stream.StopMutex)
                     {
                         if (stream.IsPreparing)
                             continue;
 
-                        lock (_iterationMutex)
+                        lock (IterationMutex)
                             if (!_streams.Contains(stream))
                                 continue;
 
-                        var state = AL.GetSourceState(stream.SourceId);
-                        ALHelper.CheckError("Failed to get source state.");
-
+                        var state = stream.GetState();
                         if (state == ALSourceState.Stopped)
                         {
                             AL.SourcePlay(stream.SourceId);
-                            ALHelper.CheckError("Failed to play.");
+                            ALHelper.CheckError("Failed to play after fill.");
                         }
                     }
                 }
-
                 _threadWatch.Stop();
 
                 // move all elements forward one index and update the first element
                 Array.Copy(_threadTiming, 0, _threadTiming, destinationIndex: 1, _threadTiming.Length - 1);
-                _threadTiming[0] = _threadWatch.Elapsed;
                 lastTickElapsed = _threadWatch.Elapsed;
+                _threadTiming[0] = lastTickElapsed;
             }
         }
 
@@ -253,7 +256,7 @@ namespace MonoGame.Framework.Media
             if (_pendingFinish && queued == 0)
             {
                 _pendingFinish = false;
-                lock (_iterationMutex)
+                lock (IterationMutex)
                     _streams.Remove(stream);
 
                 stream.OnFinished?.Invoke();

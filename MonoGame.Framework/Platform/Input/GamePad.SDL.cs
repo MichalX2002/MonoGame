@@ -269,7 +269,7 @@ namespace MonoGame.Framework.Input
             return new GamePadState(thumbSticks, triggers, buttons, dPad, gamepad.PacketNumber);
         }
 
-        private static bool PlatformSetVibration(int index, float leftMotor, float rightMotor)
+        private static bool PlatformSetVibration(int index, float leftMotor, float rightMotor, float leftTrigger, float rightTrigger)
         {
             if (!GamePads.ContainsKey(index))
                 return false;

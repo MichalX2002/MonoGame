@@ -16,7 +16,7 @@ namespace MonoGame.Framework
     [System.ComponentModel.TypeConverter(typeof(Design.Vector3TypeConverter))]
 #endif
     [DataContract]
-    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Vector3 : IEquatable<Vector3>
     {
         #region Public Constants
@@ -111,13 +111,10 @@ namespace MonoGame.Framework
         [DataMember]
         public float Z;
 
-        internal string DebugDisplayString
-        {
-            get => string.Concat(
-                X.ToString(), "  ",
-                Y.ToString(), "  ",
-                Z.ToString());
-        }
+        internal string DebuggerDisplay => string.Concat(
+            X.ToString(), "  ",
+            Y.ToString(), "  ",
+            Z.ToString());
 
         #region Constructors
 
@@ -585,7 +582,7 @@ namespace MonoGame.Framework
         /// <param name="destination">The destination span.</param>
         public static void Transform(ReadOnlySpan<Vector3> source, in Matrix matrix, Span<Vector3> destination)
         {
-            CommonArgumentGuard.CheckSrcDstSpans(source, destination);
+            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
 
             // TODO: Are there options on some platforms to implement a vectorized version of this?
             for (int i = 0; i < source.Length; i++)
@@ -606,7 +603,7 @@ namespace MonoGame.Framework
         /// <param name="destination">The destination span.</param>
         public static void Transform(ReadOnlySpan<Vector3> source, in Quaternion rotation, Span<Vector3> destination)
         {
-            CommonArgumentGuard.CheckSrcDstSpans(source, destination);
+            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
 
             // TODO: Are there options on some platforms to implement a vectorized version of this?
             for (int i = 0; i < source.Length; i++)
@@ -650,7 +647,7 @@ namespace MonoGame.Framework
         /// <param name="destination">The destination span.</param>
         public static void TransformNormal(ReadOnlySpan<Vector3> source, in Matrix matrix, Span<Vector3> destination)
         {
-            CommonArgumentGuard.CheckSrcDstSpans(source, destination);
+            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
 
             for (int i = 0; i < source.Length; i++)
             {

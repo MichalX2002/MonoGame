@@ -24,7 +24,7 @@ namespace MonoGame.Framework.Content
 
             // If the system does not fully support Power of Two textures,
             // skip any mip maps supplied with any non PoT textures.
-            if (levelCount > 1 && !reader.GraphicsDevice.GraphicsCapabilities.SupportsNonPowerOfTwo &&
+            if (levelCount > 1 && !reader.GetGraphicsDevice().GraphicsCapabilities.SupportsNonPowerOfTwo &&
                 (!MathHelper.IsPowerOfTwo(width) || !MathHelper.IsPowerOfTwo(height)))
             {
                 levelCountOutput = 1;
@@ -37,24 +37,24 @@ namespace MonoGame.Framework.Content
             {
                 case SurfaceFormat.Dxt1:
                 case SurfaceFormat.Dxt1a:
-                    if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsDxt1)
+                    if (!reader.GetGraphicsDevice().GraphicsCapabilities.SupportsDxt1)
                         convertedFormat = SurfaceFormat.Rgba32;
                     break;
 
                 case SurfaceFormat.Dxt1SRgb:
-                    if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsDxt1)
+                    if (!reader.GetGraphicsDevice().GraphicsCapabilities.SupportsDxt1)
                         convertedFormat = SurfaceFormat.Rgba32SRgb;
                     break;
 
                 case SurfaceFormat.Dxt3:
                 case SurfaceFormat.Dxt5:
-                    if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc)
+                    if (!reader.GetGraphicsDevice().GraphicsCapabilities.SupportsS3tc)
                         convertedFormat = SurfaceFormat.Rgba32;
                     break;
 
                 case SurfaceFormat.Dxt3SRgb:
                 case SurfaceFormat.Dxt5SRgb:
-                    if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc)
+                    if (!reader.GetGraphicsDevice().GraphicsCapabilities.SupportsS3tc)
                         convertedFormat = SurfaceFormat.Rgba32SRgb;
                     break;
 
@@ -64,7 +64,7 @@ namespace MonoGame.Framework.Content
             }
 
             var texture = existingInstance ?? new Texture2D(
-                reader.GraphicsDevice, width, height, levelCountOutput > 1, convertedFormat);
+                reader.GetGraphicsDevice(), width, height, levelCountOutput > 1, convertedFormat);
 
             for (int level = 0; level < levelCount; level++)
             {
@@ -88,7 +88,7 @@ namespace MonoGame.Framework.Content
                         case SurfaceFormat.Dxt1:
                         case SurfaceFormat.Dxt1SRgb:
                         case SurfaceFormat.Dxt1a:
-                            if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsDxt1 &&
+                            if (!reader.GetGraphicsDevice().GraphicsCapabilities.SupportsDxt1 &&
                                 convertedFormat == SurfaceFormat.Rgba32)
                             {
                                 levelData = DxtUtil.DecompressDxt1(levelData, levelWidth, levelHeight);
@@ -98,7 +98,7 @@ namespace MonoGame.Framework.Content
 
                         case SurfaceFormat.Dxt3:
                         case SurfaceFormat.Dxt3SRgb:
-                            if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc &&
+                            if (!reader.GetGraphicsDevice().GraphicsCapabilities.SupportsS3tc &&
                                     convertedFormat == SurfaceFormat.Rgba32)
                             {
                                 levelData = DxtUtil.DecompressDxt3(levelData, levelWidth, levelHeight);
@@ -108,7 +108,7 @@ namespace MonoGame.Framework.Content
 
                         case SurfaceFormat.Dxt5:
                         case SurfaceFormat.Dxt5SRgb:
-                            if (!reader.GraphicsDevice.GraphicsCapabilities.SupportsS3tc &&
+                            if (!reader.GetGraphicsDevice().GraphicsCapabilities.SupportsS3tc &&
                                 convertedFormat == SurfaceFormat.Rgba32)
                             {
                                 levelData = DxtUtil.DecompressDxt5(levelData, levelWidth, levelHeight);

@@ -2,7 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using MonoGame.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -122,17 +121,18 @@ namespace MonoGame.Framework.Graphics
         public GraphicsProfile GraphicsProfile { get; }
 
         /// <summary>
-        /// Indicates if DX9 style pixel addressing or current standard
-        /// pixel addressing should be used. This flag is set to
-        /// <c>false</c> by default. If `UseHalfPixelOffset` is
-        /// `true` you have to add half-pixel offset to a Projection matrix.
-        /// See also <see cref="GraphicsDeviceManager.PreferHalfPixelOffset"/>.
+        /// <para>
+        /// Indicates whether DX9 style pixel addressing or standard pixel addressing is used.
+        /// When <see langword="true"/>, a half-pixel offset needs to be added to projection matrices.
+        /// Set to <see langword="false"/> by default.
+        /// </para>
+        /// See also <seealso cref="GraphicsDeviceManager.PreferHalfPixelOffset"/>.
         /// </summary>
         /// <remarks>
         /// XNA uses DirectX9 for its graphics. DirectX9 interprets UV
-        /// coordinates differently from other graphics API's. This is
-        /// typically referred to as the half-pixel offset. MonoGame
-        /// replicates XNA behavior if this flag is set to <c>true</c>.
+        /// coordinates differently from other graphics API's.
+        /// This is typically referred to as the half-pixel offset.
+        /// MonoGame replicates XNA behavior if this flag is set to <c>true</c>.
         /// </remarks>
         public bool UseHalfPixelOffset { get; private set; }
 
@@ -409,7 +409,9 @@ namespace MonoGame.Framework.Graphics
         /// <exception cref="ArgumentNullException">
         /// <paramref name="presentationParameters"/> is <see langword="null"/>.
         /// </exception>
-        public GraphicsDevice(GraphicsAdapter adapter, GraphicsProfile graphicsProfile, bool preferHalfPixelOffset, PresentationParameters presentationParameters)
+        public GraphicsDevice(
+            GraphicsAdapter adapter, GraphicsProfile graphicsProfile,
+            bool preferHalfPixelOffset, PresentationParameters presentationParameters)
         {
             Adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
             if (!adapter.IsProfileSupported(graphicsProfile))
@@ -440,9 +442,9 @@ namespace MonoGame.Framework.Graphics
             if (DisplayMode == null)
             {
                 throw new Exception(
-                    "Unable to determine the current display mode.  This can indicate that the " +
-                    "game is not configured to be HiDPI aware under Windows 10 or later.  See " +
-                    "https://github.com/MonoGame/MonoGame/issues/5040 for more information.");
+                    "Unable to determine the current display mode. This can indicate that the " +
+                    "game is not configured to be HiDPI aware under Windows 10 or later. " +
+                    "See 'https://github.com/MonoGame/MonoGame/issues/5040' for more information.");
             }
 #endif
 

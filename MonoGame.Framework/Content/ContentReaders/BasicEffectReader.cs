@@ -10,7 +10,7 @@ namespace MonoGame.Framework.Content
     {
         protected internal override BasicEffect Read(ContentReader input, BasicEffect existingInstance)
         {
-            var effect = new BasicEffect(input.GraphicsDevice);
+            var effect = new BasicEffect(input.GetGraphicsDevice());
             if (input.ReadExternalReference<Texture>() is Texture2D texture)
             {
                 effect.Texture = texture;

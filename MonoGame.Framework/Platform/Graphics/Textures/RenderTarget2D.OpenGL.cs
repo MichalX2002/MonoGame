@@ -6,7 +6,7 @@ using MonoGame.OpenGL;
 
 namespace MonoGame.Framework.Graphics
 {
-    public partial class RenderTarget2D
+    public partial class RenderTarget2D : Texture2D, IRenderTarget
     {
         int IRenderTarget.GLTexture => _glTexture;
 

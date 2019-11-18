@@ -13,7 +13,7 @@ namespace MonoGame.Framework
     /// Describes a sphere in 3D-space for bounding operations.
     /// </summary>
     [DataContract]
-    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct BoundingSphere : IEquatable<BoundingSphere>
     {
         /// <summary>
@@ -28,13 +28,9 @@ namespace MonoGame.Framework
         [DataMember]
         public float Radius;
 
-        internal string DebugDisplayString
-        {
-            get => string.Concat(
-                    "Center( ", Center.DebugDisplayString, " )  \r\n",
-                    "Radius( ", Radius.ToString(), " )"
-                    );
-        }
+        private string DebuggerDisplay => string.Concat(
+            "Center(", Center.DebuggerDisplay, ") \n",
+            "Radius(", Radius.ToString(), ")");
 
         /// <summary>
         /// Constructs a bounding sphere with the specified center and radius.  

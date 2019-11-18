@@ -4,34 +4,35 @@ using System.Runtime.Serialization;
 
 namespace MonoGame.Framework
 {
-    // Real-Time Collision Detection, Christer Ericson, 2005. Chapter 3.2; A Math and Geometry Primer - Coordinate Systems and Points. pg 35
+    // Real-Time Collision Detection, Christer Ericson, 2005. Chapter 3.2;
+    // A Math and Geometry Primer - Coordinate Systems and Points. pg 35
 
     /// <summary>
     ///     A two-dimensional point defined by a 2-tuple of real numbers, (x, y).
     /// </summary>
     /// <remarks>
-    ///     <para>
-    ///         A point is a position in two-dimensional space, the location of which is described in terms of a
-    ///         two-dimensional coordinate system, given by a reference point, called the origin, and two coordinate axes.
-    ///     </para>
-    ///     <para>
-    ///         A common two-dimensional coordinate system is the Cartesian (or rectangular) coordinate system where the
-    ///         coordinate axes, conventionally denoted the X axis and Y axis, are perpindicular to each other. For the
-    ///         three-dimensional rectangular coordinate system, the third axis is called the Z axis.
-    ///     </para>
+    ///   <para>
+    ///       A point is a position in two-dimensional space, the location of which is described in terms of a
+    ///       two-dimensional coordinate system, given by a reference point, called the origin, and two coordinate axes.
+    ///   </para>
+    ///   <para>
+    ///       A common two-dimensional coordinate system is the Cartesian (or rectangular) coordinate system where the
+    ///       coordinate axes, conventionally denoted the X axis and Y axis, are perpindicular to each other. For the
+    ///       three-dimensional rectangular coordinate system, the third axis is called the Z axis.
+    ///   </para>
     /// </remarks>
     /// <seealso cref="IEquatable{T}" />
-    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     [DataContract]
     public struct PointF : IEquatable<PointF>
     {
         /// <summary>
-        ///     Returns a <see cref="PointF" /> with <see cref="X" /> and <see cref="Y" /> equal to <c>0f</c>.
+        ///     <see cref="PointF" /> with <see cref="X" /> and <see cref="Y" /> equal to <c>0f</c>.
         /// </summary>
         public static readonly PointF Zero = new PointF();
 
         /// <summary>
-        ///     Returns a <see cref="PointF" /> with <see cref="X" /> and <see cref="Y" /> set to not a number.
+        ///     <see cref="PointF" /> with <see cref="X" /> and <see cref="Y" /> set to not a number.
         /// </summary>
         public static readonly PointF NaN = new PointF(float.NaN, float.NaN);
 
@@ -45,7 +46,9 @@ namespace MonoGame.Framework
         /// </summary>
         [DataMember] public float Y;
 
-        internal string DebugDisplayString => ToString();
+        private string DebuggerDisplay => string.Concat(
+            X.ToString(), "  ",
+            Y.ToString(), "  ");
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="PointF" /> structure from the specified coordinates.

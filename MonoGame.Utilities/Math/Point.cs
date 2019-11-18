@@ -13,11 +13,15 @@ namespace MonoGame.Framework
     /// Describes a 2D-point.
     /// </summary>
     [DataContract]
-    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Point : IEquatable<Point>
     {
+        #region Constants
 
-        #region Private Fields
+        /// <summary>
+        /// <see cref="Point"/> with the coordinates (0, 0).
+        /// </summary>
+        public static readonly Point Zero = new Point();
 
         #endregion
 
@@ -39,22 +43,9 @@ namespace MonoGame.Framework
 
         #region Properties
 
-        /// <summary>
-        /// Returns a <see cref="Point"/> with coordinates 0, 0.
-        /// </summary>
-        public static Point Zero { get; } = new Point();
-
-        #endregion
-
-        #region Internal Properties
-
-        internal string DebugDisplayString
-        {
-            get => string.Concat(
-                    X.ToString(), "  ",
-                    Y.ToString()
-                );
-        }
+        private string DebuggerDisplay => string.Concat(
+            X.ToString(), "  ",
+            Y.ToString(), "  ");
 
         #endregion
 

@@ -16,7 +16,7 @@ namespace MonoGame.Framework.Audio
         {
             InitializeSound();
 
-            SourceId = _controller.ReserveSource();
+            SourceId = Controller.ReserveSource();
 
             // Ensure that the source is not looped (due to source recycling)
             AL.Source(SourceId.Value, ALSourceb.Looping, false);
@@ -121,8 +121,7 @@ namespace MonoGame.Framework.Audio
                 AL.Source(SourceId.Value, ALSourcei.Buffer, 0);
                 ALHelper.CheckError("Failed to unbind the buffer.");
 
-                _controller.RecycleSource(SourceId.Value);
-                SourceId = null;
+                FreeSource();
             }
 
             if (disposing)

@@ -12,14 +12,14 @@ namespace MonoGame.Imaging
         where TPixel : unmanaged, IPixel
     {
         /// <summary>
-        /// Gets the pixels assigned to this frame.
-        /// </summary>
-        public IReadOnlyPixelBuffer<TPixel> Pixels { get; }
-
-        /// <summary>
         /// Gets the delay in milliseconds between this and the next frame.
         /// </summary>
         public int Delay { get; }
+
+        /// <summary>
+        /// Gets the pixels assigned to this frame.
+        /// </summary>
+        public IReadOnlyPixelBuffer<TPixel> Pixels { get; }
 
         public int Width => Pixels.Width;
         public int Height => Pixels.Height;

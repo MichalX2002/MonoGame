@@ -12,7 +12,7 @@ namespace MonoGame.Framework.Content
     {
         protected internal override SkinnedEffect Read(ContentReader input, SkinnedEffect existingInstance)
         {
-            var effect = new SkinnedEffect(input.GraphicsDevice)
+            var effect = new SkinnedEffect(input.GetGraphicsDevice())
             {
                 Texture = input.ReadExternalReference<Texture>() as Texture2D,
                 WeightsPerVertex = input.ReadInt32(),

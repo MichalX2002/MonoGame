@@ -6,13 +6,13 @@ using System;
 using System.Runtime.InteropServices;
 using MonoGame.OpenGL;
 using GLPixelFormat = MonoGame.OpenGL.PixelFormat;
-using MonoGame.Utilities;
 
 namespace MonoGame.Framework.Graphics
 {
     public partial class TextureCube
     {
-        private void PlatformConstruct(GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format, bool renderTarget)
+        private void PlatformConstruct(
+            GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format, bool renderTarget)
         {
             _glTarget = TextureTarget.TextureCubeMap;
 
@@ -20,23 +20,24 @@ namespace MonoGame.Framework.Graphics
             {
                 GL.GenTextures(1, out _glTexture);
                 GraphicsExtensions.CheckGLError();
+
                 GL.BindTexture(TextureTarget.TextureCubeMap, _glTexture);
                 GraphicsExtensions.CheckGLError();
 
-                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter,
-                                mipMap ? (int)TextureMinFilter.LinearMipmapLinear : (int)TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.TextureCubeMap,
+                    TextureParameterName.TextureMinFilter,
+                    mipMap ? (int)TextureMinFilter.LinearMipmapLinear : (int)TextureMinFilter.Linear);
                 GraphicsExtensions.CheckGLError();
-                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter,
-                                (int)TextureMagFilter.Linear);
-                GraphicsExtensions.CheckGLError();
-
-                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS,
-                                (int)TextureWrapMode.ClampToEdge);
-                GraphicsExtensions.CheckGLError();
-                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT,
-                                (int)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(TextureTarget.TextureCubeMap, 
+                    TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
                 GraphicsExtensions.CheckGLError();
 
+                GL.TexParameter(TextureTarget.TextureCubeMap,
+                    TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+                GraphicsExtensions.CheckGLError();
+                GL.TexParameter(TextureTarget.TextureCubeMap, 
+                    TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+                GraphicsExtensions.CheckGLError();
 
                 format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
 
@@ -66,6 +67,12 @@ namespace MonoGame.Framework.Graphics
                             case SurfaceFormat.Dxt5:
                             case SurfaceFormat.Dxt5SRgb:
                             case SurfaceFormat.RgbEtc1:
+                            case SurfaceFormat.Rgb8Etc2:
+                            case SurfaceFormat.Srgb8Etc2:
+                            case SurfaceFormat.Rgb8A1Etc2:
+                            case SurfaceFormat.Srgb8A1Etc2:
+                            case SurfaceFormat.Rgba8Etc2:
+                            case SurfaceFormat.SRgb8A8Etc2:
                             case SurfaceFormat.RgbaAtcExplicitAlpha:
                             case SurfaceFormat.RgbaAtcInterpolatedAlpha:
                                 imageSize = (size + 3) / 4 * ((size + 3) / 4) * format.GetSize();
@@ -74,12 +81,15 @@ namespace MonoGame.Framework.Graphics
                             default:
                                 throw new NotSupportedException();
                         }
-                        GL.CompressedTexImage2D(target, 0, glInternalFormat, size, size, 0, imageSize, IntPtr.Zero);
+
+                        GL.CompressedTexImage2D(
+                            target, 0, glInternalFormat, size, size, 0, imageSize, IntPtr.Zero);
                         GraphicsExtensions.CheckGLError();
                     }
                     else
                     {
-                        GL.TexImage2D(target, 0, glInternalFormat, size, size, 0, glFormat, glType, IntPtr.Zero);
+                        GL.TexImage2D(
+                            target, 0, glInternalFormat, size, size, 0, glFormat, glType, IntPtr.Zero);
                         GraphicsExtensions.CheckGLError();
                     }
                 }
@@ -89,11 +99,13 @@ namespace MonoGame.Framework.Graphics
 #if IOS || ANDROID
                     GL.GenerateMipmap(GenerateMipmapTarget.TextureCubeMap);
 #else
-                    GraphicsDevice.FramebufferHelper.Get().GenerateMipmap((int)_glTarget);
+                    GraphicsDevice.FramebufferHelper.Instance.GenerateMipmap((int)_glTarget);
+
                     // This updates the mipmaps after a change in the base texture
-                    GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.GenerateMipmap, (int)Bool.True);
-#endif
+                    GL.TexParameter(
+                        TextureTarget.TextureCubeMap, TextureParameterName.GenerateMipmap, (int)Bool.True);
                     GraphicsExtensions.CheckGLError();
+#endif
                 }
             }
 
@@ -175,7 +187,8 @@ namespace MonoGame.Framework.Graphics
 #endif
         }
 
-        private unsafe void PlatformSetData<T>(CubeMapFace face, int level, Rectangle rect, T[] data, int startIndex, int elementCount)
+        private unsafe void PlatformSetData<T>(
+            CubeMapFace face, int level, Rectangle rect, T[] data, int startIndex, int elementCount)
             where T : unmanaged
         {
             void Set()

@@ -9,7 +9,7 @@ namespace MonoGame.Imaging
     /// <summary>
     /// Represents a collection of image frames that have the same size and pixel type.
     /// </summary>
-    public class FrameCollection<TPixel> : FrameCollectionBase<TPixel, ImageFrame<TPixel>>,
+    public class FrameCollection<TPixel> : ImageCollection<TPixel, ImageFrame<TPixel>>,
         IReadOnlyCollection<Image<TPixel>>
         where TPixel : unmanaged, IPixel
     {

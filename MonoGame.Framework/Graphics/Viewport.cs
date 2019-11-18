@@ -59,7 +59,7 @@ namespace MonoGame.Framework.Graphics
         {
             get
             {
-                if ((Height != 0) && (Width != 0))
+                if (Height != 0 && Width != 0)
                     return Width / (float)Height;
                 return 0f;
             }
@@ -83,7 +83,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Returns the subset of the viewport that is guaranteed to be visible on a lower quality display.
         /// </summary>
-		public Rectangle TitleSafeArea => GraphicsDevice.GetTitleSafeArea(X, Y, Width, Height);
+        public Rectangle TitleSafeArea => GraphicsDevice.GetTitleSafeArea(X, Y, Width, Height);
 
         /// <summary>
         /// Constructs a viewport from the given values. The <see cref="MinDepth"/> will be 0.0 and <see cref="MaxDepth"/> will be 1.0.
@@ -124,8 +124,10 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Creates a new instance of <see cref="Viewport"/> struct.
         /// </summary>
-        /// <param name="bounds">A <see cref="Rectangle"/> that defines the location and size of the <see cref="Viewport"/> in a render target.</param>
-		public Viewport(in Rectangle bounds) : this(bounds.X, bounds.Y, bounds.Width, bounds.Height)
+        /// <param name="bounds">
+        /// A <see cref="Rectangle"/> that defines the location and size of the <see cref="Viewport"/> in a render target.
+        /// </param>
+        public Viewport(in Rectangle bounds) : this(bounds.X, bounds.Y, bounds.Width, bounds.Height)
         {
         }
 
@@ -194,12 +196,16 @@ namespace MonoGame.Framework.Graphics
 
         /// <summary>
         /// Returns a <see cref="string"/> representation of this <see cref="Viewport"/> in the format:
-        /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>] Width:[<see cref="Width"/>] Height:[<see cref="Height"/>] MinDepth:[<see cref="MinDepth"/>] MaxDepth:[<see cref="MaxDepth"/>]}
+        /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>] 
+        /// Width:[<see cref="Width"/>] Height:[<see cref="Height"/>] 
+        /// MinDepth:[<see cref="MinDepth"/>] MaxDepth:[<see cref="MaxDepth"/>]}
         /// </summary>
         /// <returns>A <see cref="string"/> representation of this <see cref="Viewport"/>.</returns>
         public override string ToString()
         {
-            return "{X:" + X + " Y:" + Y + " Width:" + Width + " Height:" + Height + " MinDepth:" + MinDepth + " MaxDepth:" + MaxDepth + "}";
+            return "{X:" + X + " Y:" + Y 
+                + " Width:" + Width + " Height:" + Height
+                + " MinDepth:" + MinDepth + " MaxDepth:" + MaxDepth + "}";
         }
     }
 }

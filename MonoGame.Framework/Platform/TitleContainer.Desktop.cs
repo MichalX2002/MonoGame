@@ -8,7 +8,7 @@ using MonoGame.Utilities;
 
 namespace MonoGame.Framework
 {
-    partial class TitleContainer
+    public static partial class TitleContainer
     {
         static partial void PlatformInit()
         {

@@ -12,9 +12,14 @@ namespace MonoGame.Framework
     /// An efficient mathematical representation for three dimensional rotations.
     /// </summary>
     [DataContract]
-    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Quaternion : IEquatable<Quaternion>
     {
+        /// <summary>
+        /// Returns a quaternion representing no rotation.
+        /// </summary>
+        public static readonly Quaternion Identity = new Quaternion(0, 0, 0, 1);
+
         #region Public Fields
 
         /// <summary>
@@ -42,6 +47,12 @@ namespace MonoGame.Framework
         public float W;
 
         #endregion
+
+        private string DebuggerDisplay => this == Identity ? "Identity" : string.Concat(
+            X.ToString(), " ",
+            Y.ToString(), " ",
+            Z.ToString(), " ",
+            W.ToString());
 
         #region Constructors
 
@@ -83,30 +94,6 @@ namespace MonoGame.Framework
             Y = value.Y;
             Z = value.Z;
             W = value.W;
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Returns a quaternion representing no rotation.
-        /// </summary>
-        public static readonly Quaternion Identity = new Quaternion(0, 0, 0, 1);
-
-        #region Internal Properties
-
-        internal string DebugDisplayString
-        {
-            get
-            {
-                if (this == Identity)
-                    return "Identity";
-
-                return string.Concat(
-                    X.ToString(), " ",
-                    Y.ToString(), " ",
-                    Z.ToString(), " ",
-                    W.ToString());
-            }
         }
 
         #endregion

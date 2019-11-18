@@ -35,29 +35,29 @@ namespace MonoGame.Utilities.PackedVector
         public byte PackedValue { get => L; set => L = value; }
 
         /// <inheritdoc />
-        public void FromVector4(Vector4 vector) => GrayAlpha16.Pack(ref vector, out L, out _);
+        public void FromVector4(Vector4 vector) => Pack(ref vector, out L, out _);
 
         /// <inheritdoc />
-        public Vector4 ToVector4()
+        public readonly Vector4 ToVector4()
         {
             float l = L / 255f;
             return new Vector4(l, l, l, 1);
         }
 
-		#region IPixel
+        #region IPixel
 
         /// <inheritdoc/>
-        public void FromScaledVector4(Vector4 vector) => Pack(ref vector);
+        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
         /// <inheritdoc/>
-        public Vector4 ToScaledVector4() => ToVector4();
+        public readonly Vector4 ToScaledVector4() => ToVector4();
 
         /// <inheritdoc/>
         public void FromGray8(Gray8 source) => L = source.L;
 
         /// <inheritdoc/>
         public void FromGray16(Gray16 source) =>
-            PackedValue = PackedVectorHelper.DownScale16To8Bit(source.L);
+            L = PackedVectorHelper.DownScale16To8Bit(source.L);
 
         /// <inheritdoc/>
         public void FromGrayAlpha16(GrayAlpha16 source) => L = source.L;
@@ -85,22 +85,22 @@ namespace MonoGame.Utilities.PackedVector
                 PackedVectorHelper.DownScale16To8Bit(source.B));
 
         /// <inheritdoc />
-        public void ToColor(ref Color destination)
+        public readonly void ToColor(ref Color destination)
         {
-            destination.R = destination.G = destination.B = PackedValue;
+            destination.R = destination.G = destination.B = L;
             destination.A = byte.MaxValue;
         }
 
         #endregion
 
         public void FromArgb32(Argb32 source) =>
-            PackedValue = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
+            L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
 
         public void FromBgr24(Bgr24 source) =>
-            PackedValue = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
+            L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
 
         public void FromBgra32(Bgra32 source) =>
-            PackedValue = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
+            L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
 
         #region Equals
 
@@ -108,15 +108,15 @@ namespace MonoGame.Utilities.PackedVector
         public override bool Equals(object obj) => obj is Gray8 other && Equals(other);
 
         /// <inheritdoc />
-        public bool Equals(Gray8 other) => PackedValue.Equals(other.PackedValue);
+        public bool Equals(Gray8 other) => L.Equals(other.L);
 
         #endregion
 
         #region Object Overrides
 
-        public override string ToString() => $"Gray8({PackedValue})";
+        public override string ToString() => $"Gray8({L})";
 
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override int GetHashCode() => L.GetHashCode();
 
         #endregion
     }

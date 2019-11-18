@@ -9,7 +9,7 @@ using System.Runtime.Serialization;
 namespace MonoGame.Framework
 {
     [DataContract]
-    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Ray : IEquatable<Ray>
     {
         [DataMember]
@@ -209,16 +209,13 @@ namespace MonoGame.Framework
                 && a.Direction.Equals(b.Direction);
         }
 
-        internal string DebugDisplayString
-        {
-            get => string.Concat(
-                    "Pos( ", Position.DebugDisplayString, " )  \r\n",
-                    "Dir( ", Direction.DebugDisplayString, " )");
-        }
+        private string DebuggerDisplay => string.Concat(
+            "Pos(", Position.DebuggerDisplay, ") \n",
+            "Dir(", Direction.DebuggerDisplay, ")");
 
         public override string ToString()
         {
-            return "{{Position:" + Position.ToString() + " Direction:" + Direction.ToString() + "}}";
+            return "{Position:" + Position.ToString() + " Direction:" + Direction.ToString() + "}";
         }
 
         /// <summary>

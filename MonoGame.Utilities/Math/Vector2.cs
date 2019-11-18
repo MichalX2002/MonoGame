@@ -21,7 +21,7 @@ namespace MonoGame.Framework
     [System.ComponentModel.TypeConverter(typeof(Design.Vector2TypeConverter))]
 #endif
     [DataContract]
-    [DebuggerDisplay("{DebugDisplayString,nq}")]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Vector2 : IEquatable<Vector2>, IPackedVector<ulong>, IPixel
     {
         /// <summary>
@@ -74,7 +74,9 @@ namespace MonoGame.Framework
 
         #endregion
 
-        internal string DebugDisplayString => string.Concat(X.ToString(), "  ", Y.ToString());
+        private string DebuggerDisplay => string.Concat(
+            X.ToString(), "  ",
+            Y.ToString());
 
         #region Constructors
 
@@ -119,16 +121,15 @@ namespace MonoGame.Framework
         }
 
         /// <inheritdoc/>
-        public Vector4 ToVector4() => new Vector4(X, Y, 0, 1);
+        public readonly Vector4 ToVector4() => new Vector4(X, Y, 0, 1);
 
         #endregion
 
         #region IPixel
 
-        public readonly void FromScaledVector4()
-        {
+        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
-        } 
+        public readonly Vector4 ToScaledVector4() => ToVector4();
 
         /// <inheritdoc/>
         public readonly void ToColor(ref Color destination) => destination.FromVector4(ToVector4());
@@ -551,7 +552,7 @@ namespace MonoGame.Framework
         public static void Transform(
             ReadOnlySpan<Vector2> source, in Matrix matrix, Span<Vector2> destination)
         {
-            CommonArgumentGuard.CheckSrcDstSpans(source, destination);
+            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
 
             for (int i = 0; i < source.Length; i++)
                 destination[i] = Transform(source[i], matrix);
@@ -567,7 +568,7 @@ namespace MonoGame.Framework
         public static void Transform(
             ReadOnlySpan<Vector2> source, in Quaternion rotation, Span<Vector2> destination)
         {
-            CommonArgumentGuard.CheckSrcDstSpans(source, destination);
+            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
 
             for (int i = 0; i < source.Length; i++)
                 destination[i] = Transform(source[i], rotation);
@@ -596,7 +597,7 @@ namespace MonoGame.Framework
         public static void TransformNormal(
             ReadOnlySpan<Vector2> source, in Matrix matrix, Span<Vector2> destination)
         {
-            CommonArgumentGuard.CheckSrcDstSpans(source, destination);
+            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
 
             for (int i = 0; i < source.Length; i++)
                 destination[i] = TransformNormal(source[i], matrix);

@@ -1,11 +1,10 @@
 using System;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
+using System.Linq;
 
 namespace MonoGame.Framework.Graphics
 {
-    [DebuggerDisplay("{DebugDisplayString}")]
+    [DebuggerDisplay("{DebuggerDisplay, nq}")]
     public class EffectParameter
     {
         /// <summary>
@@ -14,18 +13,19 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         internal static ulong NextStateKey { get; private set; }
 
-        internal EffectParameter(EffectParameterClass class_,
-                                    EffectParameterType type,
-                                    string name,
-                                    int rowCount,
-                                    int columnCount,
-                                    string semantic,
-                                    EffectAnnotationCollection annotations,
-                                    EffectParameterCollection elements,
-                                    EffectParameterCollection structMembers,
-                                    object data)
+        internal EffectParameter(
+            EffectParameterClass @class,
+            EffectParameterType type,
+            string name,
+            int rowCount,
+            int columnCount,
+            string semantic,
+            EffectAnnotationCollection annotations,
+            EffectParameterCollection elements,
+            EffectParameterCollection structMembers,
+            object data)
         {
-            ParameterClass = class_;
+            ParameterClass = @class;
             ParameterType = type;
 
             Name = name;
@@ -64,21 +64,16 @@ namespace MonoGame.Framework.Graphics
         }
 
         public string Name { get; private set; }
-
         public string Semantic { get; private set; }
 
         public EffectParameterClass ParameterClass { get; private set; }
-
         public EffectParameterType ParameterType { get; private set; }
 
         public int RowCount { get; private set; }
-
         public int ColumnCount { get; private set; }
 
         public EffectParameterCollection Elements { get; private set; }
-
         public EffectParameterCollection StructureMembers { get; private set; }
-
         public EffectAnnotationCollection Annotations { get; private set; }
 
 
@@ -94,18 +89,16 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         internal ulong StateKey { get; private set; }
 
-        /// <summary>
-        /// Property referenced by the DebuggerDisplayAttribute.
-        /// </summary>
-        private string DebugDisplayString
+        private string DebuggerDisplay
         {
             get
             {
-                var semanticStr = string.Empty;
+                string semanticStr = string.Empty;
                 if (!string.IsNullOrEmpty(Semantic))
-                    semanticStr = string.Concat(" <", Semantic, ">");
+                    semanticStr = string.Concat("<", Semantic, "> ");
 
-                return string.Concat("[", ParameterClass, " ", ParameterType, "]", semanticStr, " ", Name, " : ", GetDataValueString());
+                return string.Concat(
+                    "[", ParameterClass, " ", ParameterType, "]", " ", semanticStr, Name, " : ", GetDataValueString());
             }
         }
 
@@ -169,7 +162,8 @@ namespace MonoGame.Framework.Graphics
 
         public bool GetValueBoolean()
         {
-            if (ParameterClass != EffectParameterClass.Scalar || ParameterType != EffectParameterType.Bool)
+            if (ParameterClass != EffectParameterClass.Scalar ||
+                ParameterType != EffectParameterType.Bool)
                 throw new InvalidCastException();
 
 #if OPENGL
@@ -189,7 +183,8 @@ namespace MonoGame.Framework.Graphics
 
         public int GetValueInt32()
         {
-            if (ParameterClass != EffectParameterClass.Scalar || ParameterType != EffectParameterType.Int32)
+            if (ParameterClass != EffectParameterClass.Scalar ||
+                ParameterType != EffectParameterType.Int32)
                 throw new InvalidCastException();
 
 #if OPENGL
@@ -209,7 +204,8 @@ namespace MonoGame.Framework.Graphics
 
         public Matrix GetValueMatrix()
         {
-            if (ParameterClass != EffectParameterClass.Matrix || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Matrix || 
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             if (RowCount != 4 || ColumnCount != 4)
@@ -224,7 +220,8 @@ namespace MonoGame.Framework.Graphics
 
         public Matrix[] GetValueMatrixArray(int count)
         {
-            if (ParameterClass != EffectParameterClass.Matrix || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Matrix ||
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             var ret = new Matrix[count];
@@ -236,7 +233,8 @@ namespace MonoGame.Framework.Graphics
 
         public Quaternion GetValueQuaternion()
         {
-            if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Vector ||
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             float[] vecInfo = (float[])Data;
@@ -253,7 +251,8 @@ namespace MonoGame.Framework.Graphics
         public float GetValueSingle()
         {
             // TODO: Should this fetch int and bool as a float?
-            if (ParameterClass != EffectParameterClass.Scalar || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Scalar ||
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             return ((float[])Data)[0];
@@ -277,12 +276,14 @@ namespace MonoGame.Framework.Graphics
             {
                 case EffectParameterClass.Scalar:
                     return new float[] { GetValueSingle() };
+
                 case EffectParameterClass.Vector:
                 case EffectParameterClass.Matrix:
                     if (Data is Matrix)
                         return Matrix.ToFloatArray((Matrix)Data);
                     else
                         return (float[])Data;
+
                 default:
                     throw new NotImplementedException();
             }
@@ -290,7 +291,8 @@ namespace MonoGame.Framework.Graphics
 
         public string GetValueString()
         {
-            if (ParameterClass != EffectParameterClass.Object || ParameterType != EffectParameterType.String)
+            if (ParameterClass != EffectParameterClass.Object ||
+                ParameterType != EffectParameterType.String)
                 throw new InvalidCastException();
 
             return ((string[])Data)[0];
@@ -298,7 +300,8 @@ namespace MonoGame.Framework.Graphics
 
         public Texture2D GetValueTexture2D()
         {
-            if (ParameterClass != EffectParameterClass.Object || ParameterType != EffectParameterType.Texture2D)
+            if (ParameterClass != EffectParameterClass.Object ||
+                ParameterType != EffectParameterType.Texture2D)
                 throw new InvalidCastException();
 
             return (Texture2D)Data;
@@ -307,7 +310,8 @@ namespace MonoGame.Framework.Graphics
 #if !GLES
         public Texture3D GetValueTexture3D()
         {
-            if (ParameterClass != EffectParameterClass.Object || ParameterType != EffectParameterType.Texture3D)
+            if (ParameterClass != EffectParameterClass.Object || 
+                ParameterType != EffectParameterType.Texture3D)
                 throw new InvalidCastException();
 
             return (Texture3D)Data;
@@ -316,7 +320,8 @@ namespace MonoGame.Framework.Graphics
 
         public TextureCube GetValueTextureCube()
         {
-            if (ParameterClass != EffectParameterClass.Object || ParameterType != EffectParameterType.TextureCube)
+            if (ParameterClass != EffectParameterClass.Object || 
+                ParameterType != EffectParameterType.TextureCube)
                 throw new InvalidCastException();
 
             return (TextureCube)Data;
@@ -324,7 +329,8 @@ namespace MonoGame.Framework.Graphics
 
         public Vector2 GetValueVector2()
         {
-            if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Vector ||
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             float[] vecInfo = (float[])Data;
@@ -333,11 +339,13 @@ namespace MonoGame.Framework.Graphics
 
         public Vector2[] GetValueVector2Array()
         {
-            if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Vector ||
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
+
             if (Elements != null && Elements.Count > 0)
             {
-                Vector2[] result = new Vector2[Elements.Count];
+                var result = new Vector2[Elements.Count];
                 for (int i = 0; i < Elements.Count; i++)
                 {
                     float[] v = Elements[i].GetValueSingleArray();
@@ -351,7 +359,8 @@ namespace MonoGame.Framework.Graphics
 
         public Vector3 GetValueVector3()
         {
-            if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Vector ||
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             float[] vecInfo = (float[])Data;
@@ -360,7 +369,8 @@ namespace MonoGame.Framework.Graphics
 
         public Vector3[] GetValueVector3Array()
         {
-            if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Vector || 
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             if (Elements != null && Elements.Count > 0)
@@ -379,7 +389,8 @@ namespace MonoGame.Framework.Graphics
 
         public Vector4 GetValueVector4()
         {
-            if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Vector || 
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             float[] vecInfo = (float[])Data;
@@ -388,7 +399,8 @@ namespace MonoGame.Framework.Graphics
 
         public Vector4[] GetValueVector4Array()
         {
-            if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Vector ||
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             if (Elements != null && Elements.Count > 0)
@@ -406,7 +418,8 @@ namespace MonoGame.Framework.Graphics
 
         public void SetValue(bool value)
         {
-            if (ParameterClass != EffectParameterClass.Scalar || ParameterType != EffectParameterType.Bool)
+            if (ParameterClass != EffectParameterClass.Scalar ||
+                ParameterType != EffectParameterType.Bool)
                 throw new InvalidCastException();
 
 #if OPENGL
@@ -428,7 +441,8 @@ namespace MonoGame.Framework.Graphics
 
         public void SetValue(int value)
         {
-            if (ParameterClass != EffectParameterClass.Scalar || ParameterType != EffectParameterType.Int32)
+            if (ParameterClass != EffectParameterClass.Scalar ||
+                ParameterType != EffectParameterType.Int32)
                 throw new InvalidCastException();
 
 #if OPENGL
@@ -449,7 +463,8 @@ namespace MonoGame.Framework.Graphics
 
         public void SetValue(Matrix value)
         {
-            if (ParameterClass != EffectParameterClass.Matrix || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Matrix ||
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             // HLSL expects matrices to be transposed by default.
@@ -551,7 +566,8 @@ namespace MonoGame.Framework.Graphics
 
         public void SetValueTranspose(Matrix value)
         {
-            if (ParameterClass != EffectParameterClass.Matrix || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Matrix || 
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             // HLSL expects matrices to be transposed by default, so copying them straight
@@ -653,7 +669,8 @@ namespace MonoGame.Framework.Graphics
 
         public void SetValue(Matrix[] value)
         {
-            if (ParameterClass != EffectParameterClass.Matrix || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Matrix || 
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             if (RowCount == 4 && ColumnCount == 4)
@@ -768,7 +785,8 @@ namespace MonoGame.Framework.Graphics
 
         public void SetValue(Quaternion value)
         {
-            if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Vector ||
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             var fData = (float[])Data;
@@ -826,7 +844,8 @@ namespace MonoGame.Framework.Graphics
 
         public void SetValue(Vector2 value)
         {
-            if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Vector || 
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             var fData = (float[])Data;
@@ -844,7 +863,8 @@ namespace MonoGame.Framework.Graphics
 
         public void SetValue(Vector3 value)
         {
-            if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Vector ||
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             var fData = (float[])Data;
@@ -863,7 +883,8 @@ namespace MonoGame.Framework.Graphics
 
         public void SetValue(Vector4 value)
         {
-            if (ParameterClass != EffectParameterClass.Vector || ParameterType != EffectParameterType.Single)
+            if (ParameterClass != EffectParameterClass.Vector || 
+                ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             float[] fData = (float[])Data;

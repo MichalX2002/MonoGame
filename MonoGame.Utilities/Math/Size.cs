@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace MonoGame.Framework
@@ -14,6 +15,7 @@ namespace MonoGame.Framework
     /// </remarks>
     /// <seealso cref="IEquatable{T}" />
     [DataContract]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Size : IEquatable<Size>
     {
         /// <summary>
@@ -34,9 +36,9 @@ namespace MonoGame.Framework
         /// <summary>
         ///     Gets a value that indicates whether this <see cref="Size" /> is empty.
         /// </summary>
-        public bool IsEmpty => (Width == 0) && (Height == 0);
+        public bool IsEmpty => Width == 0 && Height == 0;
 
-        internal string DebugDisplayString => ToString();
+        private string DebuggerDisplay => $"Width = {Width}, Height = {Height}";
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Size" /> structure from the specified dimensions.

@@ -34,7 +34,7 @@ namespace MonoGame.Framework.Media
         private static void PlatformMasterVolumeChanged()
         {
             var streamer = OggStreamer.Instance;
-            lock (streamer._iterationMutex)
+            lock (streamer.IterationMutex)
             {
                 foreach (var stream in streamer._streams)
                     stream.Volume = stream.Parent._volume * _masterVolume;
@@ -63,26 +63,23 @@ namespace MonoGame.Framework.Media
 
         private void PlatformSetLooped(bool value)
         {
-            if (_stream != null)
+            if(_stream != null)
                 _stream.IsLooped = value;
         }
 
         private void PlatformResume()
         {
-            if (_stream != null)
-                _stream.Resume();
+            _stream?.Resume();
         }
 
         private void PlatformPause()
         {
-            if (_stream != null)
-                _stream.Pause();
+            _stream?.Pause();
         }
 
         private void PlatformStop()
         {
-            if (_stream != null)
-                _stream.Stop();
+            _stream?.Stop();
         }
 
         private TimeSpan PlatformGetPosition()

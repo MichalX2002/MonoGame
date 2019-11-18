@@ -159,7 +159,7 @@ namespace MonoGame.Framework.Content
                 if (existingInstance != null)
                     continue;
 
-                ModelMesh mesh = new ModelMesh(reader.GraphicsDevice, parts)
+                ModelMesh mesh = new ModelMesh(reader.GetGraphicsDevice(), parts)
                 {
 
                     // Tag reassignment
@@ -184,7 +184,7 @@ namespace MonoGame.Framework.Content
             // Read the final pieces of model data.
             var rootBoneIndex = ReadBoneReference(reader, boneCount);
 
-            Model model = new Model(reader.GraphicsDevice, bones, meshes)
+            var model = new Model(reader.GetGraphicsDevice(), bones, meshes)
             {
                 Root = bones[rootBoneIndex]
             };

@@ -17,20 +17,15 @@ namespace MonoGame.Framework.Graphics
 
         public EffectAnnotationCollection Annotations { get; private set; }
 
-        internal EffectPass(    Effect effect, 
-                                string name,
-                                Shader vertexShader, 
-                                Shader pixelShader, 
-                                BlendState blendState, 
-                                DepthStencilState depthStencilState, 
-                                RasterizerState rasterizerState,
-                                EffectAnnotationCollection annotations )
+        internal EffectPass(
+            Effect effect, string name, Shader vertexShader, Shader pixelShader, 
+            BlendState blendState, DepthStencilState depthStencilState, RasterizerState rasterizerState,
+            EffectAnnotationCollection annotations)
         {
             Debug.Assert(effect != null, "Got a null effect!");
             Debug.Assert(annotations != null, "Got a null annotation collection!");
 
             _effect = effect;
-
             Name = name;
 
             _vertexShader = vertexShader;
@@ -119,14 +114,14 @@ namespace MonoGame.Framework.Graphics
         {
             foreach (var sampler in shader.Samplers)
             {
-                var param = _effect.Parameters[sampler.parameter];
+                var param = _effect.Parameters[sampler.Parameter];
                 var texture = param.Data as Texture;
 
-                textures[sampler.textureSlot] = texture;
+                textures[sampler.TextureSlot] = texture;
 
                 // If there is a sampler state set it.
-                if (sampler.state != null)
-                    samplerStates[sampler.samplerSlot] = sampler.state;
+                if (sampler.State != null)
+                    samplerStates[sampler.SamplerSlot] = sampler.State;
             }
         }
     }

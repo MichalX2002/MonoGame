@@ -17,6 +17,7 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class GraphicsDevice
     {
+
 #if DESKTOPGL || ANGLE
         internal IGraphicsContext Context { get; private set; }
 #endif
@@ -25,83 +26,19 @@ namespace MonoGame.Framework.Graphics
         private DrawBuffersEnum[] _drawBuffers;
 #endif
 
-        enum ResourceType
-        {
-            Texture,
-            Buffer,
-            Shader,
-            Program,
-            Query,
-            Framebuffer
-        }
+        private List<ResourceHandle> _disposeThisFrame = new List<ResourceHandle>();
+        private List<ResourceHandle> _disposeNextFrame = new List<ResourceHandle>();
+        private object _disposeActionsLock = new object();
 
-        struct ResourceHandle
-        {
-            public ResourceType Type { get; }
-            public int Handle;
-
-            public ResourceHandle(ResourceType type, int handle)
-            {
-                Type = type;
-                Handle = handle;
-            }
-
-            public static ResourceHandle Texture(int handle) => new ResourceHandle(ResourceType.Texture, handle);
-            public static ResourceHandle Buffer(int handle) => new ResourceHandle(ResourceType.Buffer, handle);
-            public static ResourceHandle Shader(int handle) => new ResourceHandle(ResourceType.Shader, handle);
-            public static ResourceHandle Program(int handle) => new ResourceHandle(ResourceType.Program, handle);
-            public static ResourceHandle Framebuffer(int handle) => new ResourceHandle(ResourceType.Framebuffer, handle);
-            public static ResourceHandle Query(int handle) => new ResourceHandle(ResourceType.Query, handle);
-
-            public void Free()
-            {
-                switch (Type)
-                {
-                    case ResourceType.Texture:
-                        GL.DeleteTextures(1, ref Handle);
-                        break;
-
-                    case ResourceType.Buffer:
-                        GL.DeleteBuffers(1, ref Handle);
-                        break;
-
-                    case ResourceType.Shader:
-                        if (GL.IsShader(Handle))
-                            GL.DeleteShader(Handle);
-                        break;
-
-                    case ResourceType.Program:
-                        if (GL.IsProgram(Handle))
-                            GL.DeleteProgram(Handle);
-                        break;
-
-                    case ResourceType.Framebuffer:
-                        GL.DeleteFramebuffers(1, ref Handle);
-                        break;
-
-#if !GLES
-                    case ResourceType.Query:
-                        GL.DeleteQueries(1, ref Handle);
-                        break;
-#endif
-                }
-                GraphicsExtensions.CheckGLError();
-            }
-        }
-
-        List<ResourceHandle> _disposeThisFrame = new List<ResourceHandle>();
-        List<ResourceHandle> _disposeNextFrame = new List<ResourceHandle>();
-        object _disposeActionsLock = new object();
-
-        static List<IntPtr> _disposeContexts = new List<IntPtr>();
-        static object _disposeContextsLock = new object();
+        private static List<IntPtr> _disposeContexts = new List<IntPtr>();
+        private static object _disposeContextsLock = new object();
 
         private ShaderProgramCache _programCache;
         private ShaderProgram _shaderProgram = null;
 
         private static BufferBindingInfo[] _bufferBindingInfos;
         private static bool[] _newEnabledVertexAttributes;
-        internal static readonly HashSet<int> _enabledVertexAttributes = new HashSet<int>();
+        internal static HashSet<int> _enabledVertexAttributes = new HashSet<int>();
         internal static bool _attribsDirty;
 
         internal FramebufferHelper _framebufferHelper;
@@ -122,20 +59,24 @@ namespace MonoGame.Framework.Graphics
         private float _lastClearDepth = 1f;
         private int _lastClearStencil = 0;
 
-        // Get a hashed value based on the currently bound shaders
-        // throws an exception if no shaders are bound
+        /// <summary>
+        /// Get a hashed value based on the currently bound shaders.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">No shaders are bound.</exception>
         private int ShaderProgramHash
         {
             get
             {
                 if (_vertexShader == null && _pixelShader == null)
-                    throw new InvalidOperationException("There is no shader bound!");
+                    throw new InvalidOperationException("There is no shader bound.");
 
                 if (_vertexShader == null)
                     return _pixelShader.HashKey;
                 if (_pixelShader == null)
                     return _vertexShader.HashKey;
-                return _vertexShader.HashKey ^ _pixelShader.HashKey;
+
+                int hash = 17 * 23 + _vertexShader.HashKey;
+                return hash * 23 +  _pixelShader.HashKey;
             }
         }
 
@@ -557,7 +498,7 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        private void PlatformSetViewport(in Viewport value)
+        private void PlatformSetViewport(Viewport value)
         {
             if (IsRenderTargetBound)
                 GL.Viewport(value.X, value.Y, value.Width, value.Height);
@@ -993,7 +934,7 @@ namespace MonoGame.Framework.Graphics
                 posFixup[3] *= -1f;
             }
 
-            GL.Uniform4fv(posFixupLoc, 1, posFixup);
+            GL.Uniform4(posFixupLoc, 1, posFixup);
             GraphicsExtensions.CheckGLError();
         }
 

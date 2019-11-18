@@ -24,7 +24,7 @@ namespace MonoGame.Utilities.PackedVector
             A = alpha;
         }
 
-        private static GrayAlpha16 Pack(ref Vector4 vector)
+        internal static GrayAlpha16 Pack(ref Vector4 vector)
         {
             vector *= Vector4.MaxBytes;
             vector += Vector4.Half;
