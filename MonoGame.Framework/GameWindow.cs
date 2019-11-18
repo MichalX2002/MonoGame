@@ -32,51 +32,18 @@ namespace MonoGame.Framework
 		public abstract bool HasClipboardText { get; }
 		public abstract string ClipboardText { get; set; }
 
-		#region Windows Taskbar Progress
+        public TaskbarList TaskbarList { get; }
 
-#if DIRECTX || DESKTOPGL
-
-		private TaskbarProgressState _taskbarState;
-		private TaskbarProgressValue _taskbarProgress;
-		internal TaskbarList _taskbarList;
-
-		public bool IsTaskbarProgressSupported => _taskbarList != null;
-
-		public virtual TaskbarProgressState TaskbarState
-		{
-			get => _taskbarState;
-			set
-			{
-				if (_taskbarList != null && _taskbarState != value)
-					_taskbarList.SetProgressState(value);
-				_taskbarState = value;
-			}
-		}
-
-		public virtual TaskbarProgressValue TaskbarProgress
-		{
-			get => _taskbarProgress;
-			set
-			{
-				if (_taskbarList != null && !_taskbarProgress.Equals(value))
-					_taskbarList.SetProgressValue(value);
-				_taskbarProgress = value;
-			}
-		}
-
-		#endif
-
-#endregion
-
-		/// <summary>
-		/// Gets or sets a bool that enables usage of Alt+F4 for window closing on desktop platforms. Value is true by default.
-		/// </summary>
-		public virtual bool AllowAltF4 { get => _allowAltF4; set => _allowAltF4 = value; }
+        /// <summary>
+        /// Gets or sets whether the usage of Alt+F4 closes the window on desktop platforms. 
+        /// Set to <see langword="true"/> by default.
+        /// </summary>
+        public virtual bool AllowAltF4 { get => _allowAltF4; set => _allowAltF4 = value; }
 
 #if (WINDOWS && !WINDOWS_UAP) || DESKTOPGL
 		/// <summary>
-		/// The location of this window on the desktop, eg: global coordinate space
-		/// which stretches across all screens.
+		/// The location of this window on the desktop, 
+        /// i.e. global coordinate space which stretches across all screens.
 		/// </summary>
 		public abstract Point Position { get; set; }
 #endif
@@ -105,24 +72,28 @@ namespace MonoGame.Framework
 			}
 		}
 
-		/// <summary>
-		/// Determines whether the border of the window is visible. Currently only supported on the WinDX and WinGL/Linux platforms.
-		/// </summary>
-		/// <exception cref="NotImplementedException">
-		/// Thrown when trying to use this property on a platform other than the WinDX and WinGL/Linux platforms.
-		/// </exception>
-		public virtual bool IsBorderless
+        /// <summary>
+        /// <para>
+        /// Determines whether the border of the window is visible.
+        /// </para>
+        /// Currently only supported on the WinDX and WinGL/Linux platforms.
+        /// </summary>
+        /// <exception cref="NotImplementedException">
+        /// Set on a platform other than the WinDX and WinGL/Linux platforms.
+        /// </exception>
+        public virtual bool IsBorderless
 		{
 			get => false;
 			set => throw new NotImplementedException();
 		}
 
+		#endregion
+
 		protected GameWindow()
 		{
 			TouchPanelState = new TouchPanelState(this);
-		}
-
-		#endregion Properties
+            TaskbarList = new TaskbarList(this);
+        }
 
 		#region Events
 

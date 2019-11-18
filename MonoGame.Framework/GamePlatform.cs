@@ -86,8 +86,6 @@ namespace MonoGame.Framework
         public GameWindow Window
         {
             get => _window;
-
-
             protected set
             {
                 if (_window == null)
@@ -95,7 +93,6 @@ namespace MonoGame.Framework
                     Mouse.PrimaryWindow = value;
                     TouchPanel.PrimaryWindow = value;
                 }
-
                 _window = value;
             }
         }

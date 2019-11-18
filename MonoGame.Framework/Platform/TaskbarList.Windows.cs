@@ -1,10 +1,50 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using MonoGame.Utilities;
 
 namespace MonoGame.Framework.Utilities
 {
-    internal partial class TaskbarList
+    public partial class TaskbarList
     {
+        private ITaskbarList _comObject;
+        private IntPtr _windowHandle;
+
+        private void PlatformConstruct(GameWindow window)
+        {
+            if (CurrentPlatform.OS != OS.Windows)
+                return;
+
+            _comObject = (ITaskbarList)new COMTaskbarList();
+            _comObject.HrInit();
+        }
+
+        private void PlatformInitialize()
+        {
+            if (_comObject == null)
+                return;
+
+            using (var process = Process.GetCurrentProcess())
+                _windowHandle = process.MainWindowHandle;
+        }
+
+        private bool PlatformGetIsSupported()
+        {
+            return _comObject != null && _windowHandle != IntPtr.Zero;
+        }
+
+        private void PlatformSetProgressState(TaskbarProgressState state)
+        {
+            _comObject.SetProgressState(_windowHandle, state);
+        }
+
+        private void PlatformSetProgressValue(TaskbarProgressValue value)
+        {
+            _comObject.SetProgressValue(_windowHandle, (ulong)value.Completed, (ulong)value.Total);
+        }
+
+        #region COM Interface
+
         [ComImport]
         [Guid("c43dc798-95d1-4bea-9030-bb99e2983a1a")]
         [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -53,5 +93,7 @@ namespace MonoGame.Framework.Utilities
         private class COMTaskbarList
         {
         }
+
+        #endregion
     }
 }

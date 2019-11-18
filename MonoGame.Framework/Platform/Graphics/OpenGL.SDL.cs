@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace MonoGame.OpenGL
 {
-    partial class GL
+    internal partial class GL
     {
         static partial void LoadPlatformEntryPoints()
         {

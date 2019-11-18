@@ -128,13 +128,6 @@ namespace MonoGame.Framework
                 GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight, Sdl.Window.State.Hidden);
         }
 
-        internal void InitTaskbarList(IntPtr windowHandle)
-        {
-            _taskbarList = new Utilities.TaskbarList(windowHandle);
-            _taskbarList.SetProgressValue(TaskbarProgress);
-            _taskbarList.SetProgressState(TaskbarState);
-        }
-
         internal void CreateWindow()
         {
             var initflags =

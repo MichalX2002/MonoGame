@@ -46,14 +46,9 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Platform\Graphics\GraphicsDevice.OpenGL.ResourceHandle.cs" />
-    <Compile Include="Platform\Graphics\OpenGL.Enums.cs" />
     <Compile Include="Platform\Graphics\Shader\Shader.Structure.cs" />
     <Compile Include="Platform\Input\KeyInputEvent.cs" />
-    <Compile Include="Platform\Media\OggStream.cs" />
-    <Compile Include="Platform\Media\OggStreamer.cs" />
     <Compile Include="Platform\TitleContainer.Desktop.cs" />
-    <Compile Include="Platform\Graphics\OpenGL.Common.cs" />    
     <Compile Include="Platform\SDL\SDL2.cs" />
     <Compile Include="Platform\SDL\SDLGamePlatform.cs" />
     <Compile Include="Platform\SDL\SDLGameWindow.cs" />
@@ -70,13 +65,11 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
     <Compile Include="Platform\Input\Mouse.SDL.cs" />
     <Compile Include="Platform\Input\MouseCursor.SDL.cs" />
     <Compile Include="Platform\Graphics\GraphicsContext.SDL.cs" />
-    <Compile Include="Platform\Graphics\OpenGL.SDL.cs" />
     <Compile Include="Platform\Graphics\WindowInfo.SDL.cs" />
     <Compile Include="Platform\Graphics\GraphicsAdapter.Legacy.cs" />
     <Compile Include="Platform\GamePlatform.Desktop.cs" />
     <Compile Include="Platform\GraphicsDeviceManager.SDL.cs" />
-    <Compile Include="Platform\Windows\TaskbarList.COM.cs" />
-    <Compile Include="Platform\Windows\TaskbarList.cs" />
+    <Compile Include="Platform\TaskbarList.Windows.cs" />
     
     <Compile Include="..\ThirdParty\NVorbis\NVorbis\**\*.cs" LinkBase="ThirdParty\NVorbis" />
     <Compile Remove="..\ThirdParty\NVorbis\NVorbis\Properties\AssemblyInfo.cs" />
@@ -147,7 +140,7 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
     <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj" />
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
   </ItemGroup>
-
+  
   <Import Project="Platform\OpenGL.targets" />
   <Import Project="Platform\OpenAL.targets" />
 </Project>

@@ -11,5 +11,7 @@
     <Compile Include="Platform\Audio\SoundEffect.OpenAL.cs" />
     <Compile Include="Platform\Audio\SoundEffectInstance.OpenAL.cs" />
     <Compile Include="Platform\Audio\OpenAL\**" />
+    <Compile Include="Platform\Media\OggStream.cs" />
+    <Compile Include="Platform\Media\OggStreamer.cs" />
   </ItemGroup>
 </Project>

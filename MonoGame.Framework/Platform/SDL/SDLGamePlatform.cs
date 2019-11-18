@@ -77,8 +77,8 @@ namespace MonoGame.Framework
 
         public override void RunLoop()
         {
-            Sdl.Window.Show(Window.Handle);
-            InitTaskbarList();
+            Sdl.Window.Show(Window.Handle); 
+            _window.TaskbarList.Initialize();
 
             while (true)
             {
@@ -90,15 +90,6 @@ namespace MonoGame.Framework
 
                 if (_isExiting > 0)
                     break;
-            }
-        }
-
-        private void InitTaskbarList()
-        {
-            if (CurrentPlatform.OS == OS.Windows)
-            {
-                using (var process = Process.GetCurrentProcess())
-                    _window.InitTaskbarList(process.MainWindowHandle);
             }
         }
 
