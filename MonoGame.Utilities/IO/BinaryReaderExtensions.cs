@@ -56,7 +56,7 @@ namespace MonoGame.Utilities
             return skipped;
         }
 
-        private static int Read7BitEncodedInt(this BinaryReader reader)
+        public static int Read7BitEncodedInt(this BinaryReader reader)
         {
             return _read7BitEncodedInt.Invoke(reader);
         }

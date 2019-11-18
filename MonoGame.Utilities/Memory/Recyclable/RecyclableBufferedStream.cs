@@ -4,8 +4,8 @@ using System.IO;
 namespace MonoGame.Utilities.Memory
 {
     /// <summary>
-    /// The underlying buffer is a block from a <see cref="RecyclableMemoryManager"/> 
-    /// and therefore the buffer size is fixed.
+    /// Adds a buffering layer where the underlying buffer is a block with
+    /// fixed size from a <see cref="RecyclableMemoryManager"/>.
     /// </summary>
     public sealed class RecyclableBufferedStream : Stream
     {

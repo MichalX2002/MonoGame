@@ -35,7 +35,7 @@ namespace MonoGame.Imaging
         /// Gets the size of type <typeparamref name="TPixel"/> in bits.
         /// </summary>
         [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Extension method")]
-        public static unsafe int GetBitDepth<TPixel>(this IReadOnlyPixelView<TPixel> view)
+        public static unsafe int GetBitDepth<TPixel>(this IPixelSource<TPixel> view)
             where TPixel : unmanaged, IPixel
         {
             return sizeof(TPixel) * 8;

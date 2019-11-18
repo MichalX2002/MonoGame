@@ -8,6 +8,7 @@ using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging
 {
+    [DebuggerDisplay("Count = {Count}")]
     public class FrameCollectionBase<TPixel, TFrame> : IList<TFrame>, IReadOnlyCollection<TFrame>
         where TPixel : unmanaged, IPixel
         where TFrame : ReadOnlyImageFrame<TPixel>

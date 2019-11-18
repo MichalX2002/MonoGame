@@ -1,6 +1,5 @@
 ﻿using System;
 using MonoGame.Framework;
-using MonoGame.Imaging.Encoding;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Utilities;
 using MonoGame.Utilities.PackedVector;
@@ -17,7 +16,7 @@ namespace MonoGame.Imaging.Utilities
             
             if (stride < width * sizeof(TPixel))
                 throw new ArgumentException(
-                    "The stride must be equal to or greater than the row size in bytes (without padding).", 
+                    "The stride must be equal to or greater than the row size in bytes (excluding padding).", 
                     paramName);
         }
 

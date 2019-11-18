@@ -5,17 +5,16 @@ using MonoGame.Utilities.PackedVector;
 namespace MonoGame.Imaging
 {
     /// <summary>
-    /// Represents read-only pixel rows with additional information about it.
+    /// Represents read-only pixel rows with additional information.
     /// </summary>
-    /// <typeparam name="TPixel"></typeparam>
     public class ReadOnlyImageFrame<TPixel> :
-        IReadOnlyPixelRows<TPixel>, IEquatable<ReadOnlyImageFrame<TPixel>>
+        IReadOnlyPixelBuffer<TPixel>, IEquatable<ReadOnlyImageFrame<TPixel>>
         where TPixel : unmanaged, IPixel
     {
         /// <summary>
         /// Gets the pixels assigned to this frame.
         /// </summary>
-        public IReadOnlyPixelRows<TPixel> Pixels { get; }
+        public IReadOnlyPixelBuffer<TPixel> Pixels { get; }
 
         /// <summary>
         /// Gets the delay in milliseconds between this and the next frame.
@@ -25,16 +24,15 @@ namespace MonoGame.Imaging
         public int Width => Pixels.Width;
         public int Height => Pixels.Height;
 
-        public ReadOnlyImageFrame(IReadOnlyPixelRows<TPixel> pixels, int delay)
+        public ReadOnlyImageFrame(IReadOnlyPixelBuffer<TPixel> pixels, int delay)
         {
             Pixels = pixels ?? throw new ArgumentNullException(nameof(pixels));
             Delay = delay;
         }
 
-        public TPixel GetPixel(int x, int y) => Pixels.GetPixel(x, y);
-        public void GetPixelRow(int x, int y, Span<TPixel> destination) => Pixels.GetPixelRow(x, y, destination);
+        public ReadOnlySpan<TPixel> GetPixelRowSpan(int row) => Pixels.GetPixelRowSpan(row);
 
-        #region Equals + GetHashCode
+        #region Object Overrides
 
         public bool Equals(ReadOnlyImageFrame<TPixel> other)
         {
@@ -44,9 +42,7 @@ namespace MonoGame.Imaging
 
         public override bool Equals(object obj)
         {
-            if (obj is ReadOnlyImageFrame<TPixel> frame)
-                return Equals(frame);
-            return false;
+            return obj is ReadOnlyImageFrame<TPixel> frame && Equals(frame);
         }
 
         public override int GetHashCode()
@@ -55,8 +51,8 @@ namespace MonoGame.Imaging
             {
                 int code = 7;
                 if (Pixels != null)
-                    code = code * 31 + Pixels.GetHashCode();
-                code = code * 31 + Delay.GetHashCode();
+                    code = code * 21 + Pixels.GetHashCode();
+                code = code * 21 + Delay.GetHashCode();
                 return code;
             }
         }

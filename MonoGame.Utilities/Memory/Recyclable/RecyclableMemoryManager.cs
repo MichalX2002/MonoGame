@@ -541,7 +541,7 @@ namespace MonoGame.Utilities.Memory
                 throw new ArgumentNullException(nameof(block));
 
             if (block.Length != BlockSize)
-                throw new ArgumentException("block is the wrong size for this memory manager");
+                throw new ArgumentException("The block is the wrong size for this memory manager.");
 
             Interlocked.Add(ref _smallPoolInUseSize, -BlockSize);
 
@@ -682,18 +682,6 @@ namespace MonoGame.Utilities.Memory
             new RecyclableMemoryStream(this, tag, requiredSize);
 
         /// <summary>
-        /// Constructs a new <see cref="RecyclableMemoryStream"/> with the given 
-        /// tag and with contents copied from the provided buffer.
-        /// The provided buffer is not wrapped or used after construction.
-        /// </summary>
-        /// <param name="buffer">The byte buffer to copy data from.</param>
-        /// <param name="offset">The offset from the start of the buffer to copy from.</param>
-        /// <param name="count">The number of bytes to copy from the buffer.</param>
-        /// <returns>The <see cref="RecyclableMemoryStream"/>.</returns>
-        public RecyclableMemoryStream GetMemoryStream(string tag, byte[] buffer, int offset, int count) => 
-            GetMemoryStream(tag, buffer.AsSpan(offset, count));
-
-        /// <summary>
         /// Constructs a new <see cref="RecyclableMemoryStream"/> with the given tag 
         /// and at least the given capacity, possibly using a single continugous underlying buffer.
         /// </summary>
@@ -735,6 +723,18 @@ namespace MonoGame.Utilities.Memory
                 throw;
             }
         }
+
+        /// <summary>
+        /// Constructs a new <see cref="RecyclableMemoryStream"/> with the given 
+        /// tag and with contents copied from the provided buffer.
+        /// The provided buffer is not wrapped or used after construction.
+        /// </summary>
+        /// <param name="buffer">The byte buffer to copy data from.</param>
+        /// <param name="offset">The offset from the start of the buffer to copy from.</param>
+        /// <param name="count">The number of bytes to copy from the buffer.</param>
+        /// <returns>The <see cref="RecyclableMemoryStream"/>.</returns>
+        public RecyclableMemoryStream GetMemoryStream(string tag, byte[] buffer, int offset, int count) =>
+            GetMemoryStream(tag, buffer.AsSpan(offset, count));
 
         /// <summary>
         /// Constructs a new <see cref="RecyclableMemoryStream"/> with the given 

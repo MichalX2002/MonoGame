@@ -48,7 +48,7 @@ namespace MonoGame.Imaging.Encoding
 
                     var frame = frames[i];
                     int components = 4; // TODO: change this so it's dynamic
-                    var provider = new ImagePixelProvider<TPixel>(frame.Pixels, components);
+                    var provider = new BufferPixelProvider<TPixel>(frame.Pixels, components);
                     var progressCallback = onProgress == null ? (WriteProgressCallback)null : (p) =>
                         onProgress.Invoke(i, frames, p);
                     

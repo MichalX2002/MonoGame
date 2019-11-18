@@ -4,7 +4,7 @@ using MonoGame.Utilities.PackedVector;
 namespace MonoGame.Imaging.Pixels
 {
     /// <summary>
-    /// Acts as a base interface for all objects that store pixels.
+    /// Acts as a base interface for objects that store pixels.
     /// </summary>
     public interface IPixelSource<TPixel> : IDisposable
         where TPixel : unmanaged, IPixel

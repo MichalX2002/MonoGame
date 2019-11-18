@@ -12,29 +12,29 @@ namespace MonoGame.Utilities.IO
     public enum StreamDisposalMethod
     {
         /// <summary>
-        /// Closes the inner stream after disposal.
+        /// Close the inner stream after disposal.
         /// <para>
-        /// For long-running reads (e.g. network resources), use <see cref="CancellableClose"/>.
+        /// <see cref="CancellableClose"/> is recommended for long-running operations (e.g. network resources).
         /// </para>
         /// </summary>
         Close,
 
         /// <summary>
-        /// Leaves the inner stream open after disposal.
+        /// Leave the inner stream open after disposal.
         /// <para>
-        /// For long-running reads (e.g. network resources), use <see cref="CancellableLeaveOpen"/>.
+        /// <see cref="CancellableLeaveOpen"/> is recommended for long-running operations (e.g. network resources).
         /// </para>
         /// </summary>
         LeaveOpen,
 
         /// <summary>
-        /// Closes the inner stream after disposal or when the
+        /// Close the inner stream after disposal or when the
         /// <see cref="CancellationToken"/> requests cancellation.
         /// </summary>
         CancellableClose,
 
         /// <summary>
-        /// Leaves the inner stream open after disposal but closes it when the
+        /// Leave the inner stream open after disposal but close it when the
         /// <see cref="CancellationToken"/> requests cancellation.
         /// </summary>
         CancellableLeaveOpen,

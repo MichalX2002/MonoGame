@@ -10,8 +10,9 @@ namespace MonoGame.Imaging
     /// <summary>
     /// Represents a collection of read-only frames that have the same size and pixel type.
     /// </summary>
+    [DebuggerDisplay("Count = {Count}")]
     public class ReadOnlyFrameCollection<TPixel> : FrameCollectionBase<TPixel, ReadOnlyImageFrame<TPixel>>,
-        IReadOnlyCollection<IReadOnlyPixelRows<TPixel>>
+        IReadOnlyCollection<IReadOnlyPixelBuffer<TPixel>>
         where TPixel : unmanaged, IPixel
     {
         #region Constructors
@@ -42,19 +43,19 @@ namespace MonoGame.Imaging
         }
 
         /// <summary>
-        /// Constructs the collection and adds pixel views from an enumerable.
+        /// Constructs the collection and adds pixel buffers from an enumerable.
         /// </summary>
-        /// <param name="views">The enumerable of views that will be added to the collection.</param>
+        /// <param name="buffers">The enumerable of buffers that will be added to the collection.</param>
         /// <param name="delay">The delay to use for every image in the enumerable.</param>
-        public ReadOnlyFrameCollection(IEnumerable<IReadOnlyPixelRows<TPixel>> views, int delay) :
-            base(null, GetInitialCapacity(views))
+        public ReadOnlyFrameCollection(IEnumerable<IReadOnlyPixelBuffer<TPixel>> buffers, int delay) :
+            base(null, GetInitialCapacity(buffers))
         {
-            if (views != null)
-                foreach (var image in views)
+            if (buffers != null)
+                foreach (var image in buffers)
                     Add(new ReadOnlyImageFrame<TPixel>(image, delay));
         }
 
-        public ReadOnlyFrameCollection(IReadOnlyPixelRows<TPixel> view) : this()
+        public ReadOnlyFrameCollection(IReadOnlyPixelBuffer<TPixel> view) : this()
         {
             Add(new ReadOnlyImageFrame<TPixel>(view, 0));
         }
@@ -63,9 +64,9 @@ namespace MonoGame.Imaging
 
         #region Pure methods
 
-        public bool Contains(IReadOnlyPixelRows<TPixel> image) => IndexOf(image) != -1;
+        public bool Contains(IReadOnlyPixelBuffer<TPixel> image) => IndexOf(image) != -1;
 
-        public void CopyTo(IReadOnlyPixelRows<TPixel>[] array, int arrayIndex)
+        public void CopyTo(IReadOnlyPixelBuffer<TPixel>[] array, int arrayIndex)
         {
             if (array == null)
                 throw new ArgumentNullException(nameof(array));
@@ -81,7 +82,7 @@ namespace MonoGame.Imaging
                 array[i + arrayIndex] = _frames[i].Pixels;
         }
 
-        public int IndexOf(IReadOnlyPixelRows<TPixel> image)
+        public int IndexOf(IReadOnlyPixelBuffer<TPixel> image)
         {
             for (int i = 0; i < _frames.Count; i++)
             {
@@ -95,7 +96,7 @@ namespace MonoGame.Imaging
 
         #region Mutating methods
 
-        public bool Remove(IReadOnlyPixelRows<TPixel> image)
+        public bool Remove(IReadOnlyPixelBuffer<TPixel> image)
         {
             if (image == null)
                 throw new ArgumentNullException(nameof(image));
@@ -115,19 +116,19 @@ namespace MonoGame.Imaging
 
         #region GetEnumerator
 
-        IEnumerator<IReadOnlyPixelRows<TPixel>> IEnumerable<IReadOnlyPixelRows<TPixel>>.GetEnumerator() => 
+        IEnumerator<IReadOnlyPixelBuffer<TPixel>> IEnumerable<IReadOnlyPixelBuffer<TPixel>>.GetEnumerator() => 
             new PixelRowsEnumerator(this);
 
         /// <summary>
         /// Enumerates images from the frames of a <see cref="ReadOnlyFrameCollection{TPixel}"/>.
         /// </summary>
-        public struct PixelRowsEnumerator : IEnumerator<IReadOnlyPixelRows<TPixel>>
+        public struct PixelRowsEnumerator : IEnumerator<IReadOnlyPixelBuffer<TPixel>>
         {
             private ReadOnlyFrameCollection<TPixel> _collection;
             private int _index;
             private int _version;
 
-            public IReadOnlyPixelRows<TPixel> Current { get; private set; }
+            public IReadOnlyPixelBuffer<TPixel> Current { get; private set; }
             object IEnumerator.Current => Current;
 
             internal PixelRowsEnumerator(ReadOnlyFrameCollection<TPixel> collection)

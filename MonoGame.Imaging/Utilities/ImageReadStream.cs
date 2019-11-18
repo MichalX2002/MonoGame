@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
-using System.Net.Sockets;
 using System.Threading;
 using MonoGame.Utilities;
 using MonoGame.Utilities.IO;
@@ -98,7 +98,7 @@ namespace MonoGame.Imaging
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Debug.WriteLine(ex);
                 // TODO manage exception somehow
                 return 0;
             }
@@ -129,7 +129,7 @@ namespace MonoGame.Imaging
             }
             catch (Exception ex)
             {
-                // Console.WriteLine(ex);
+                Debug.WriteLine(ex);
                 // TODO manage exception somehow
                 return 0;
             }
@@ -147,7 +147,8 @@ namespace MonoGame.Imaging
 
             if (disposing)
             {
-                if (_disposalMethod != StreamDisposalMethod.LeaveOpen)
+                if (_disposalMethod != StreamDisposalMethod.LeaveOpen &&
+                    _disposalMethod != StreamDisposalMethod.CancellableLeaveOpen)
                     _stream?.Dispose();
 
                 _cancellationRegistration?.Dispose();
