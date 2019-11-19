@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.IO;
 using MonoGame.Utilities;
 
 namespace MonoGame.Framework.Content
@@ -21,15 +22,14 @@ namespace MonoGame.Framework.Content
 
         protected internal override Array Read(ContentReader input, Array existingInstance)
         {
-            var rank = input.ReadInt32();
+            int rank = input.ReadInt32();
             if (rank < 1)
-                throw new RankException();
+                throw new InvalidDataException();
 
             var dimensions = new int[rank];
-            var count = 1;
+            int count = 1;
             for (int d = 0; d < dimensions.Length; d++)
                 count *= dimensions[d] = input.ReadInt32();
-
 
             var array = existingInstance;
             if (array == null)
@@ -38,11 +38,10 @@ namespace MonoGame.Framework.Content
                 throw new RankException(nameof(existingInstance));
 
             var indices = new int[rank];
-
             for (int i = 0; i < count; i++)
             {
                 T value;
-                if (ReflectionHelpers.IsValueType(typeof(T)))
+                if (ReflectionHelpers.IsValueType<T>())
                     value = input.ReadObject<T>(elementReader);
                 else
                 {
@@ -63,7 +62,7 @@ namespace MonoGame.Framework.Content
         static void CalcIndices(Array array, int index, int[] indices)
         {
             if (array.Rank != indices.Length)
-                throw new Exception("indices");
+                throw new ArgumentException(nameof(indices));
 
             for (int d = 0; d < indices.Length; d++)
             {

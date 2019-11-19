@@ -8,7 +8,7 @@ namespace MonoGame.Framework
     {
         #region Error strings
 
-        internal const string ResourceCreationWhenDeviceIsNull = "The graphics device may not be null when creating new resources.";
+        internal const string ResourceCreationWithNullDevice = "The graphics device may not be null when creating new resources.";
         internal const string NoGraphicsDeviceService = "The graphics device service is missing.";
 
         #endregion

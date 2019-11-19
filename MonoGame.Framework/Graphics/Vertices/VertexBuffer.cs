@@ -19,7 +19,7 @@ namespace MonoGame.Framework.Graphics
             base(capacity)
         {
             GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
-                nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
+                nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
 
             BufferUsage = bufferUsage;
             VertexDeclaration = vertexDeclaration;

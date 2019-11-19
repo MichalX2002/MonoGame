@@ -45,7 +45,7 @@ namespace MonoGame.Framework.Graphics
         internal Effect(GraphicsDevice graphicsDevice)
 		{
             GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
-                    nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
+                    nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
 		}
 			
 		protected Effect(Effect cloneSource) : this(cloneSource.GraphicsDevice)

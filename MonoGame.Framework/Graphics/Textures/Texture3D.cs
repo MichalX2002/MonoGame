@@ -25,7 +25,7 @@ namespace MonoGame.Framework.Graphics
             bool mipMap, SurfaceFormat format, bool renderTarget)
         {
             GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
-                nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
+                nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
 
             if (width <= 0)
                 throw new ArgumentOutOfRangeException(nameof(width), "Width must be greater than zero.");

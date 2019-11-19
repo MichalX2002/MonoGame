@@ -6,29 +6,22 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using MonoGame.Utilities;
 using MonoGame.Framework.Graphics;
 using System.Globalization;
 using MonoGame.Utilities.Memory;
 
-#if !WINDOWS_UAP
-using MonoGame.Framework.Audio;
-using MonoGame.Framework.Media;
-#endif
-
 namespace MonoGame.Framework.Content
 {
-	public partial class ContentManager : IDisposable
-	{
+    public partial class ContentManager : IDisposable
+    {
         const byte ContentCompressedLzx = 0x80;
         const byte ContentCompressedLz4 = 0x40;
         private IGraphicsDeviceService _graphicsDeviceService;
-        private Dictionary<string, object> loadedAssets = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-		private List<IDisposable> disposableAssets = new List<IDisposable>();
-        private bool disposed;
+        private HashSet<IDisposable> _disposableAssets = new HashSet<IDisposable>();
+        private bool _disposed;
 
-		private static object ContentManagerLock = new object();
+        private static readonly object ContentManagerLock = new object();
         private static List<WeakReference> ContentManagers = new List<WeakReference>();
 
         private static readonly List<char> targetPlatformIdentifiers = new List<char>()
@@ -133,44 +126,44 @@ namespace MonoGame.Framework.Content
             }
         }
         
-		~ContentManager()
-		{
-			Dispose(false);
-		}
+        ~ContentManager()
+        {
+            Dispose(false);
+        }
 
-		public ContentManager(IServiceProvider serviceProvider)
-		{
+        public ContentManager(IServiceProvider serviceProvider)
+        {
             ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             AddContentManager(this);
-		}
+        }
 
-		public ContentManager(IServiceProvider serviceProvider, string rootDirectory)
+        public ContentManager(IServiceProvider serviceProvider, string rootDirectory)
         {
             ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             RootDirectory = rootDirectory ?? throw new ArgumentNullException(nameof(rootDirectory));
             AddContentManager(this);
-		}
+        }
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
             
             // Once disposed, content manager wont be used again
             RemoveContentManager(this);
-		}
+        }
 
-		// If disposing is true, it was called explicitly and we should dispose managed objects.
-		// If disposing is false, it was called by the finalizer and managed objects should not be disposed.
-		protected virtual void Dispose(bool disposing)
-		{
-			if (!disposed)
-			{
+        // If disposing is true, it was called explicitly and we should dispose managed objects.
+        // If disposing is false, it was called by the finalizer and managed objects should not be disposed.
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
                 if (disposing)
                     Unload();
 
-				disposed = true;
-			}
+                _disposed = true;
+            }
         }
 
         public bool AssetFileExists(string assetName)
@@ -212,12 +205,12 @@ namespace MonoGame.Framework.Content
             return Load<T>(assetName);
         }
 
-		public virtual T Load<T>(string assetName)
-		{
+        public virtual T Load<T>(string assetName)
+        {
             if (string.IsNullOrEmpty(assetName))
                 throw new ArgumentNullException(nameof(assetName));
 
-            if (disposed)
+            if (_disposed)
                 throw new ObjectDisposedException(nameof(ContentManager));
             
             // On some platforms, name and slash direction matter.
@@ -229,7 +222,7 @@ namespace MonoGame.Framework.Content
             var key = assetName.Replace('\\', '/');
 
             // Check for a previously loaded asset first
-            if (loadedAssets.TryGetValue(key, out object asset))
+            if (LoadedAssets.TryGetValue(key, out object asset))
             {
                 if (asset is T typedAsset)
                     return typedAsset;
@@ -238,14 +231,14 @@ namespace MonoGame.Framework.Content
             // Load the asset.
             T result = ReadAsset<T>(assetName, null);
 
-            loadedAssets[key] = result;
+            LoadedAssets[key] = result;
             return result;
-		}
-		
-		protected virtual Stream OpenStream(string assetName)
-		{
-			Stream stream;
-			try
+        }
+        
+        protected virtual Stream OpenStream(string assetName)
+        {
+            Stream stream;
+            try
             {
                 var assetPath = Path.Combine(RootDirectory, assetName) + ".xnb";
 
@@ -264,59 +257,34 @@ namespace MonoGame.Framework.Content
 #endif
             }
             catch (FileNotFoundException fileNotFound)
-			{
-				throw new ContentLoadException("The content file was not found.", fileNotFound);
-			}
+            {
+                throw new ContentLoadException("The content file was not found.", fileNotFound);
+            }
 #if !WINDOWS_UAP
-			catch (DirectoryNotFoundException directoryNotFound)
-			{
-				throw new ContentLoadException("The directory was not found.", directoryNotFound);
-			}
+            catch (DirectoryNotFoundException directoryNotFound)
+            {
+                throw new ContentLoadException("The directory was not found.", directoryNotFound);
+            }
 #endif
-			catch (Exception exception)
-			{
-				throw new ContentLoadException("Failed to open stream.", exception);
-			}
-			return stream;
-		}
+            catch (Exception exception)
+            {
+                throw new ContentLoadException("Failed to open stream.", exception);
+            }
+            return stream;
+        }
 
         protected T ReadAsset<T>(string assetName, Action<IDisposable> recordDisposableObject)
         {
-            if (string.IsNullOrEmpty(assetName))
-            {
-                throw new ArgumentNullException(nameof(assetName));
-            }
-            if (disposed)
-            {
-                throw new ObjectDisposedException(nameof(ContentManager));
-            }
+            T asset = ReadAssetCore(assetName, default(T), recordDisposableObject);
 
-            string originalAssetName = assetName;
-            object result = null;
+            if (asset is GraphicsResource graphicsResult)
+                graphicsResult.Name = assetName;
 
-            if (_graphicsDeviceService == null)
-            {
-                _graphicsDeviceService = ServiceProvider.GetService<IGraphicsDeviceService>();
-                if (_graphicsDeviceService == null)
-                    throw new InvalidOperationException(FrameworkResources.NoGraphicsDeviceService);
-            }
-
-            // Try to load as XNB file
-            using (var stream = OpenStream(assetName))
-            using (var xnbReader = new BinaryReader(stream))
-            using (var reader = GetContentReaderFromXnb(assetName, stream, xnbReader, recordDisposableObject))
-                result = reader.ReadAsset<T>();
-            
-            if (result is GraphicsResource graphicsResult)
-                graphicsResult.Name = originalAssetName;
-
-            if (result == null)
-                throw new ContentLoadException("Failed to load asset: " + originalAssetName);
-
-            return (T)result;
+            return asset;
         }
 
-        private ContentReader GetContentReaderFromXnb(string originalAssetName, Stream stream, BinaryReader xnbReader, Action<IDisposable> recordDisposableObject)
+        private ContentReader GetContentReaderFromXnb(
+            string originalAssetName, Stream stream, BinaryReader xnbReader, Action<IDisposable> recordDisposableObject)
         {
             // The first 4 bytes should be the "XNB" header. i use that to detect an invalid file
             byte x = xnbReader.ReadByte();
@@ -324,8 +292,7 @@ namespace MonoGame.Framework.Content
             byte b = xnbReader.ReadByte();
             byte platform = xnbReader.ReadByte();
 
-            if (x != 'X' || n != 'N' || b != 'B' ||
-                !targetPlatformIdentifiers.Contains((char)platform))
+            if (x != 'X' || n != 'N' || b != 'B' || !targetPlatformIdentifiers.Contains((char)platform))
             {
                 throw new ContentLoadException(
                     "Asset does not appear to be a valid XNB file. Did you process your content for Windows?");
@@ -337,10 +304,8 @@ namespace MonoGame.Framework.Content
             bool compressedLzx = (flags & ContentCompressedLzx) != 0;
             bool compressedLz4 = (flags & ContentCompressedLz4) != 0;
             if (version != 5 && version != 4)
-            {
                 throw new ContentLoadException("Invalid XNB version.");
-            }
-
+            
             // The next int32 is the length of the XNB file
             int xnbLength = xnbReader.ReadInt32();
 
@@ -371,25 +336,30 @@ namespace MonoGame.Framework.Content
             return reader;
         }
 
-        internal void RecordDisposable(IDisposable disposable)
+        /// <summary>
+        /// Adds a disposable object to a set that will be disposed on <see cref="Unload"/>.
+        /// Assets loaded through typical means are automatically recorded for disposal.
+        /// </summary>
+        public void RecordDisposable(IDisposable disposable)
         {
             Debug.Assert(disposable != null, "The disposable is null!");
 
             // Avoid recording disposable objects twice. ReloadAsset will try to record the disposables again.
             // We don't know which asset recorded which disposable so just guard against storing multiple of the same instance.
-            if (!disposableAssets.Contains(disposable))
-                disposableAssets.Add(disposable);
+            if(disposable != null)
+                _disposableAssets.Add(disposable);
         }
 
         /// <summary>
-        /// Virtual property to allow a derived ContentManager to have it's assets reloaded
+        /// Allows a derived <see cref="ContentManager"/> to have it's assets reloaded.
         /// </summary>
-        protected virtual Dictionary<string, object> LoadedAssets => loadedAssets;
+        protected Dictionary<string, object> LoadedAssets { get; } =
+            new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
         protected virtual void ReloadGraphicsAssets()
         {
-            var methodInfo = ReflectionHelpers.GetMethodInfo(typeof(ContentManager), "ReloadAsset");
-            object[] paramArray = new object[2];
+            var methodInfo = ReflectionHelpers.GetMethodInfo(typeof(ContentManager), nameof(ReloadAsset));
+            var paramArray = new object[2];
 
             foreach (var asset in LoadedAssets)
             {
@@ -408,11 +378,15 @@ namespace MonoGame.Framework.Content
 
         protected virtual void ReloadAsset<T>(string originalAssetName, T currentAsset)
         {
-            string assetName = originalAssetName;
+            ReadAssetCore(originalAssetName, currentAsset, null);
+        }
+
+        protected virtual T ReadAssetCore<T>(
+            string assetName, T currentAsset, Action<IDisposable> recordDisposableObject)
+        {
             if (string.IsNullOrEmpty(assetName))
                 throw new ArgumentNullException(nameof(assetName));
-
-            if (disposed)
+            if (_disposed)
                 throw new ObjectDisposedException(nameof(ContentManager));
 
             if (_graphicsDeviceService == null)
@@ -424,18 +398,27 @@ namespace MonoGame.Framework.Content
 
             using (var stream = OpenStream(assetName))
             using (var xnbReader = new BinaryReader(stream))
-            using (var reader = GetContentReaderFromXnb(assetName, stream, xnbReader, null))
-                reader.ReadAsset(currentAsset);
+            using (var reader = GetContentReaderFromXnb(assetName, stream, xnbReader, recordDisposableObject))
+            {
+                T asset = reader.ReadAsset(currentAsset);
+                if (asset == null)
+                    throw new ContentLoadException("Failed to load asset: " + assetName);
+                return asset;
+            }
         }
 
-		public virtual void Unload()
-		{
-		    // Look for disposable assets.
-		    foreach (var disposable in disposableAssets)
-                disposable?.Dispose();
-			disposableAssets.Clear();
-		    loadedAssets.Clear();
-		}
+        /// <summary>
+        /// Disposes and clears references to loaded assets.
+        /// </summary>
+        public virtual void Unload()
+        {
+            // Look for disposable assets.
+            foreach (var disposable in _disposableAssets)
+                disposable.Dispose();
+            _disposableAssets.Clear();
+
+            LoadedAssets.Clear();
+        }
 
         internal byte[] GetScratchBuffer(int size)
         {
@@ -446,5 +429,5 @@ namespace MonoGame.Framework.Content
         {
             RecyclableMemoryManager.Default.ReturnLargeBuffer(buffer, nameof(ContentManager));
         }
-	}
+    }
 }

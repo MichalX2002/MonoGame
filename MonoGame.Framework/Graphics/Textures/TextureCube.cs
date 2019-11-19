@@ -22,7 +22,7 @@ namespace MonoGame.Framework.Graphics
         internal TextureCube(GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format, bool renderTarget)
         {
             GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
-                nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
+                nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
 
             if (size <= 0)
                 throw new ArgumentOutOfRangeException(nameof(size), "Cube size must be greater than zero");
