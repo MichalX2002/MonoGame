@@ -203,7 +203,7 @@ namespace MonoGame.Framework
         void IPackedVector.FromVector4(Vector4 vector) => this = vector;
 
         /// <inheritdoc/>
-        Vector4 IPackedVector.ToVector4() => this;
+        readonly Vector4 IPackedVector.ToVector4() => this;
 
         #endregion
 
@@ -259,14 +259,11 @@ namespace MonoGame.Framework
         /// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 4D-triangle.</param>
         /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 4D-triangle.</param>
         /// <returns>The cartesian translation of barycentric coordinates.</returns>
-        public static Vector4 Barycentric(in Vector4 a, in Vector4 b, in Vector4 c, float amount1, float amount2)
-        {
-            return new Vector4(
-                MathHelper.Barycentric(a.X, b.X, c.X, amount1, amount2),
-                MathHelper.Barycentric(a.Y, b.Y, c.Y, amount1, amount2),
-                MathHelper.Barycentric(a.Z, b.Z, c.Z, amount1, amount2),
-                MathHelper.Barycentric(a.W, b.W, c.W, amount1, amount2));
-        }
+        public static Vector4 Barycentric(in Vector4 a, in Vector4 b, in Vector4 c, float amount1, float amount2) => new Vector4(
+            MathHelper.Barycentric(a.X, b.X, c.X, amount1, amount2),
+            MathHelper.Barycentric(a.Y, b.Y, c.Y, amount1, amount2),
+            MathHelper.Barycentric(a.Z, b.Z, c.Z, amount1, amount2),
+            MathHelper.Barycentric(a.W, b.W, c.W, amount1, amount2));
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains CatmullRom interpolation of the specified vectors.
@@ -277,14 +274,11 @@ namespace MonoGame.Framework
         /// <param name="d">The fourth vector in interpolation.</param>
         /// <param name="amount">Weighting factor.</param>
         /// <returns>The result of CatmullRom interpolation.</returns>
-        public static Vector4 CatmullRom(in Vector4 a, in Vector4 b, in Vector4 c, in Vector4 d, float amount)
-        {
-            return new Vector4(
-                MathHelper.CatmullRom(a.X, b.X, c.X, d.X, amount),
-                MathHelper.CatmullRom(a.Y, b.Y, c.Y, d.Y, amount),
-                MathHelper.CatmullRom(a.Z, b.Z, c.Z, d.Z, amount),
-                MathHelper.CatmullRom(a.W, b.W, c.W, d.W, amount));
-        }
+        public static Vector4 CatmullRom(in Vector4 a, in Vector4 b, in Vector4 c, in Vector4 d, float amount) => new Vector4(
+            MathHelper.CatmullRom(a.X, b.X, c.X, d.X, amount),
+            MathHelper.CatmullRom(a.Y, b.Y, c.Y, d.Y, amount),
+            MathHelper.CatmullRom(a.Z, b.Z, c.Z, d.Z, amount),
+            MathHelper.CatmullRom(a.W, b.W, c.W, d.W, amount));
 
         /// <summary>
         /// Clamps the specified value within a range.
@@ -293,14 +287,11 @@ namespace MonoGame.Framework
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
         /// <returns>The clamped value.</returns>
-        public static Vector4 Clamp(in Vector4 value, in Vector4 min, in Vector4 max)
-        {
-            return new Vector4(
-                MathHelper.Clamp(value.X, min.X, max.X),
-                MathHelper.Clamp(value.Y, min.Y, max.Y),
-                MathHelper.Clamp(value.Z, min.Z, max.Z),
-                MathHelper.Clamp(value.W, min.W, max.W));
-        }
+        public static Vector4 Clamp(in Vector4 value, in Vector4 min, in Vector4 max) => new Vector4(
+            MathHelper.Clamp(value.X, min.X, max.X),
+            MathHelper.Clamp(value.Y, min.Y, max.Y),
+            MathHelper.Clamp(value.Z, min.Z, max.Z),
+            MathHelper.Clamp(value.W, min.W, max.W));
 
         /// <summary>
         /// Returns the distance between two vectors.
@@ -308,10 +299,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The distance between two vectors.</returns>
-        public static float Distance(in Vector4 a, in Vector4 b)
-        {
-            return (float)Math.Sqrt(DistanceSquared(a, b));
-        }
+        public static float Distance(in Vector4 a, in Vector4 b) => (float)Math.Sqrt(DistanceSquared(a, b));
 
         /// <summary>
         /// Returns the squared distance between two vectors.
@@ -319,13 +307,11 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The squared distance between two vectors.</returns>
-        public static float DistanceSquared(in Vector4 a, in Vector4 b)
-        {
-              return (a.X - b.X) * (a.X - b.X) +
-                     (a.Y - b.Y) * (a.Y - b.Y) +
-                     (a.Z - b.Z) * (a.Z - b.Z) +
-                     (a.W - b.W) * (a.W - b.W);
-        }
+        public static float DistanceSquared(in Vector4 a, in Vector4 b) => 
+            (a.X - b.X) * (a.X - b.X) +
+            (a.Y - b.Y) * (a.Y - b.Y) +
+            (a.Z - b.Z) * (a.Z - b.Z) +
+            (a.W - b.W) * (a.W - b.W);
 
         /// <summary>
         /// Divides the components of a <see cref="Vector4"/> by the components of another <see cref="Vector4"/>.
@@ -349,10 +335,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The dot product of two vectors.</returns>
-        public static float Dot(in Vector4 a, in Vector4 b)
-        {
-            return a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;
-        }
+        public static float Dot(in Vector4 a, in Vector4 b) => a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="object"/>.
@@ -404,12 +387,12 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns the length of this <see cref="Vector4"/>.
         /// </summary>
-        public float Length() => (float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
+        public readonly float Length() => (float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
 
         /// <summary>
         /// Returns the squared length of this <see cref="Vector4"/>.
         /// </summary>
-        public float LengthSquared() => (X * X) + (Y * Y) + (Z * Z) + (W * W);
+        public readonly float LengthSquared() => (X * X) + (Y * Y) + (Z * Z) + (W * W);
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains linear interpolation of the specified vectors.
@@ -434,14 +417,11 @@ namespace MonoGame.Framework
         /// <param name="b">The second vector.</param>
         /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
         /// <returns>The result of linear interpolation of the specified vectors.</returns>
-        public static Vector4 LerpPrecise(in Vector4 a, in Vector4 b, float amount)
-        {
-            return new Vector4(
-                MathHelper.LerpPrecise(a.X, b.X, amount),
-                MathHelper.LerpPrecise(a.Y, b.Y, amount),
-                MathHelper.LerpPrecise(a.Z, b.Z, amount),
-                MathHelper.LerpPrecise(a.W, b.W, amount));
-        }
+        public static Vector4 LerpPrecise(in Vector4 a, in Vector4 b, float amount) => new Vector4(
+            MathHelper.LerpPrecise(a.X, b.X, amount),
+            MathHelper.LerpPrecise(a.Y, b.Y, amount),
+            MathHelper.LerpPrecise(a.Z, b.Z, amount),
+            MathHelper.LerpPrecise(a.W, b.W, amount));
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains a maximal values from the two vectors.
@@ -449,14 +429,11 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The <see cref="Vector4"/> with maximal values from the two vectors.</returns>
-        public static Vector4 Max(in Vector4 a, in Vector4 b)
-        {
-            return new Vector4(
-               MathHelper.Max(a.X, b.X),
-               MathHelper.Max(a.Y, b.Y),
-               MathHelper.Max(a.Z, b.Z),
-               MathHelper.Max(a.W, b.W));
-        }
+        public static Vector4 Max(in Vector4 a, in Vector4 b) => new Vector4(
+            MathHelper.Max(a.X, b.X),
+            MathHelper.Max(a.Y, b.Y),
+            MathHelper.Max(a.Z, b.Z),
+            MathHelper.Max(a.W, b.W));
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains a minimal values from the two vectors.
@@ -464,14 +441,11 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The <see cref="Vector4"/> with minimal values from the two vectors.</returns>
-        public static Vector4 Min(in Vector4 a, in Vector4 b)
-        {
-            return new Vector4(
-               MathHelper.Min(a.X, b.X),
-               MathHelper.Min(a.Y, b.Y),
-               MathHelper.Min(a.Z, b.Z),
-               MathHelper.Min(a.W, b.W));
-        }
+        public static Vector4 Min(in Vector4 a, in Vector4 b) => new Vector4(
+            MathHelper.Min(a.X, b.X),
+            MathHelper.Min(a.Y, b.Y),
+            MathHelper.Min(a.Z, b.Z),
+            MathHelper.Min(a.W, b.W));
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains a multiplication of two vectors.

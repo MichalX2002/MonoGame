@@ -51,7 +51,7 @@ namespace MonoGame.Utilities.PackedVector
         [CLSCompliant(false)]
         public uint PackedValue { get; set; }
 
-        public Vector4 ToVector4() => new Vector4(
+        public readonly Vector4 ToVector4() => new Vector4(
             ((PackedValue >> 0) & 0x03FF) / 1023f,
             ((PackedValue >> 10) & 0x03FF) / 1023f,
             ((PackedValue >> 20) & 0x03FF) / 1023f,
@@ -63,7 +63,7 @@ namespace MonoGame.Utilities.PackedVector
 
         #region IPixel
 
-        public Vector4 ToScaledVector4() => ToVector4();
+        public readonly Vector4 ToScaledVector4() => ToVector4();
 
         public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 

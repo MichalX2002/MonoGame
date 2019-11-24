@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using MonoGame.Framework;
 using MonoGame.Imaging.Decoding;
+using MonoGame.Utilities.Memory;
 using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging
@@ -44,23 +45,23 @@ namespace MonoGame.Imaging
 
         #endregion
 
-        #region LoadFrames(ReadOnlySpan)
+        #region LoadFrames(IReadOnlyMemory)
 
-        public static ImageCollection<TPixel, ImageFrame<TPixel>> LoadFrames<TPixel>(
-            ReadOnlySpan<byte> data, ImagingConfig config, int? frameLimit, out ImageFormat format,
+        public static ImageDecoderEnumerable<TPixel> LoadFrames<TPixel>(
+            IReadOnlyMemory<byte> data, ImagingConfig config, int? frameLimit, out ImageFormat format,
             CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
-            if (data.IsEmpty) throw new ArgumentEmptyException(nameof(data));
+            if (data.IsEmpty()) throw new ArgumentEmptyException(nameof(data));
 
             format = DetectFormat(data, config, cancellation);
             var decoder = GetDecoder(format);
             return decoder.Decode(data, config, frameLimit, cancellation, onProgress);
         }
 
-        public static ImageCollection<TPixel, ImageFrame<TPixel>> LoadFrames<TPixel>(
-            ReadOnlySpan<byte> data, int? frameLimit, out ImageFormat format,
+        public static ImageDecoderEnumerable<TPixel> LoadFrames<TPixel>(
+            IReadOnlyMemory<byte> data, int? frameLimit, out ImageFormat format,
             CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {

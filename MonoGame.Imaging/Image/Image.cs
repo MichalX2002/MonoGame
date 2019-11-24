@@ -4,13 +4,14 @@ using System.IO;
 using System.Threading;
 using MonoGame.Imaging.Decoding;
 using MonoGame.Imaging.Encoding;
-using MonoGame.Imaging.Utilities;
 using MonoGame.Utilities;
 using MonoGame.Utilities.Memory;
 using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging
 {
+    // TODO: fix IReadOnlyMemory<T> stuff
+
     /// <summary>
     /// Helper for detecting image formats and identifying and creating 
     /// images by decoding a stream or memory, copying memory, or wrapping around memory.
@@ -169,7 +170,7 @@ namespace MonoGame.Imaging
         }
 
         public static bool TryDetectFormat(
-            Stream stream, ImagingConfig config, 
+            Stream stream, ImagingConfig config,
             CancellationToken cancellation, out ImageFormat format)
         {
             using (var imageStream = config.CreateReadStream(stream, cancellation))
@@ -192,10 +193,10 @@ namespace MonoGame.Imaging
         }
 
         public static bool TryDetectFormat(
-            ReadOnlySpan<byte> data, ImagingConfig config, 
+            IReadOnlyMemory<byte> data, ImagingConfig config,
             CancellationToken cancellation, out ImageFormat format)
         {
-            if (!data.IsEmpty)
+            if (!data.IsEmpty())
             {
                 foreach (var decoder in GetDecoders())
                     if (decoder.TryDetectFormat(data, config, cancellation, out format))
@@ -206,7 +207,7 @@ namespace MonoGame.Imaging
         }
 
         public static ImageFormat DetectFormat(
-            ReadOnlySpan<byte> data, ImagingConfig config, CancellationToken cancellation)
+            IReadOnlyMemory<byte> data, ImagingConfig config, CancellationToken cancellation)
         {
             if (TryDetectFormat(data, config, cancellation, out var format))
                 return format;
@@ -245,7 +246,7 @@ namespace MonoGame.Imaging
         }
 
         public static bool TryIdentify(
-            ReadOnlySpan<byte> data, ImagingConfig config,
+            IReadOnlyMemory<byte> data, ImagingConfig config,
             CancellationToken cancellation, out ImageInfo info)
         {
             if (TryDetectFormat(data, config, cancellation, out var format))
@@ -255,9 +256,9 @@ namespace MonoGame.Imaging
             info = default;
             return false;
         }
-        
+
         public static ImageInfo Identify(
-            ReadOnlySpan<byte> data, ImagingConfig config, CancellationToken cancellation)
+            IReadOnlyMemory<byte> data, ImagingConfig config, CancellationToken cancellation)
         {
             var format = DetectFormat(data, config, cancellation);
             var decoder = GetDecoder(format);

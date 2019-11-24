@@ -5,7 +5,6 @@ using System.Threading;
 using MonoGame.Framework;
 using MonoGame.Imaging.Encoding;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Imaging.Utilities;
 using MonoGame.Utilities;
 using MonoGame.Utilities.PackedVector;
 
@@ -139,13 +138,11 @@ namespace MonoGame.Imaging
 
         #endregion
 
-        /*
-        
         // TODO: remove this and add ones for Image<T> instead
         #region Save(IReadOnlyPixelRows) Overloads
 
         public static void Save<TPixel>(
-            this IReadOnlyPixelRows<TPixel> image,
+            this IReadOnlyPixelBuffer<TPixel> image,
             ImagingConfig imagingConfig, Stream output, 
             ImageFormat format, EncoderConfig encoderConfig = null,
             EncodeProgressCallback<TPixel> onProgress = null)
@@ -154,22 +151,22 @@ namespace MonoGame.Imaging
             AssertValidSource(image);
             AssertValidArguments(imagingConfig, format, encoderConfig);
             AssertValidOutput(output);
-
-            var collection = new ReadOnlyFrameCollection<TPixel>(image);
+            
+            var collection = new LayerCollection<TPixel, IReadOnlyPixelBuffer<TPixel>>(image);
             Save(collection, imagingConfig, output, format, encoderConfig, onProgress);
         }
 
         public static void Save<TPixel>(
-            this IReadOnlyPixelRows<TPixel> image,
+            this IReadOnlyPixelBuffer<TPixel> image,
             Stream output, ImageFormat format, EncoderConfig encoderConfig = null,
-            EncodeProgressCallback<TPixel> onProgress = null)
+            EncodeProgressCallback<TPixel, IReadOnlyPixelBuffer<TPixel>> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             Save(image, ImagingConfig.Default, output, format, encoderConfig, onProgress);
         }
 
         public static void Save<TPixel>(
-            this IReadOnlyPixelRows<TPixel> image,
+            this IReadOnlyPixelBuffer<TPixel> image,
             ImagingConfig imagingConfig, string filePath, 
             ImageFormat format = null, EncoderConfig encoderConfig = null,
             EncodeProgressCallback<TPixel> onProgress = null)
@@ -194,7 +191,5 @@ namespace MonoGame.Imaging
         }
 
         #endregion
-
-        */
     }
 }

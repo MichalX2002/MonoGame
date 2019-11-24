@@ -57,6 +57,8 @@ namespace MonoGame.Utilities.Memory
 
         public Span<T> Span => new Span<T>(Ptr, _length);
 
+        ReadOnlySpan<T> IReadOnlyMemory<T>.Span => new ReadOnlySpan<T>(Ptr, _length);
+
         public ref T this[int index]
         {
             get

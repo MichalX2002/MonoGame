@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Imaging", "MonoGam
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Utilities", "MonoGame.Utilities\MonoGame.Utilities.csproj", "{EB1A065A-70EE-445D-BC9B-1FE16EABF088}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Framework.DesktopGL", "MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj", "{DFF7BDEA-710B-4CC2-A615-B1F7058A6B5E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Framework.DesktopGL", "MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj", "{DFF7BDEA-710B-4CC2-A615-B1F7058A6B5E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

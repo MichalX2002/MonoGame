@@ -81,7 +81,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromVector4(Vector4 vector) => this = Pack(vector);
 
         /// <inheritdoc/>
-        public Vector4 ToVector4() => new Vector4(X, Y, Z, W);
+        public readonly Vector4 ToVector4() => new Vector4(X, Y, Z, W);
                 //HalfTypeHelper.Unpack((ushort)PackedValue),
                 //HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x10)),
                 //HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x20)),
@@ -100,7 +100,7 @@ namespace MonoGame.Utilities.PackedVector
         }
 
         /// <inheritdoc/>
-        public Vector4 ToScaledVector4()
+        public readonly Vector4 ToScaledVector4()
         {
             var scaled = ToVector4();
             scaled += Vector4.One;

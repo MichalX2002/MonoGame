@@ -66,7 +66,7 @@ namespace MonoGame.Utilities.PackedVector
         }
 
         /// <inheritdoc/>
-        public Vector4 ToVector4()
+        public readonly Vector4 ToVector4()
         {
             return new Vector4(
                 ((PackedValue >> 11) & 0x1F) * (1f / 31f),
@@ -83,7 +83,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
         /// <inheritdoc/>
-        public Vector4 ToScaledVector4() => ToVector4();
+        public readonly Vector4 ToScaledVector4() => ToVector4();
 
         #endregion
 

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using MonoGame.Imaging.Pixels;
 using MonoGame.Utilities;
 using MonoGame.Utilities.PackedVector;
 
@@ -11,9 +12,9 @@ namespace MonoGame.Imaging
     // TODO: add a LayerCollection and change some constraints (like TImage) to be more generous
 
     [DebuggerDisplay("Count = {Count}")]
-    public abstract class ImageCollection<TPixel, TImage> : IList<TImage>, IReadOnlyList<TImage>
+    public class ImageCollection<TPixel, TImage> : IList<TImage>, IReadOnlyList<TImage>
         where TPixel : unmanaged, IPixel
-        where TImage : ReadOnlyImageFrame<TPixel>
+        where TImage : IPixelSource<TPixel>
     {
         protected List<TImage> _frames;
         protected int _version;

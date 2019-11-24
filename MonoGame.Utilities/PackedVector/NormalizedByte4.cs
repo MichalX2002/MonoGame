@@ -89,7 +89,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
         /// <inheritdoc/>
-        public Vector4 ToVector4() => new Vector4(X, Y, Z, W) / 127f;
+        public readonly Vector4 ToVector4() => new Vector4(X, Y, Z, W) / 127f;
 
         #endregion
 
@@ -104,7 +104,7 @@ namespace MonoGame.Utilities.PackedVector
         }
 
         /// <inheritdoc/>
-        public Vector4 ToScaledVector4()
+        public readonly Vector4 ToScaledVector4()
         {
             var scaled = ToVector4();
             scaled += Vector4.One;

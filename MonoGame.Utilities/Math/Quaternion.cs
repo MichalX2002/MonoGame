@@ -485,10 +485,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="quaternion">Source <see cref="Quaternion"/>.</param>
         /// <returns>The result of the quaternion negation.</returns>
-        public static Quaternion Negate(in Quaternion quaternion)
-        {
-            return -quaternion;
-        }
+        public static Quaternion Negate(in Quaternion quaternion) => -quaternion;
 
         /// <summary>
         /// Scales the quaternion magnitude to unit length.
@@ -522,22 +519,14 @@ namespace MonoGame.Framework
         /// Returns a <see cref="string"/> representation of this <see cref="Quaternion"/> in the format:
         /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>] Z:[<see cref="Z"/>] W:[<see cref="W"/>]}
         /// </summary>
-        /// <returns>A <see cref="string"/> representation of this <see cref="Quaternion"/>.</returns>
-        public override string ToString()
-        {
-            return "{X:" + X + " Y:" + Y + " Z:" + Z + " W:" + W + "}";
-        }
+        public override string ToString() => "{X:" + X + " Y:" + Y + " Z:" + Z + " W:" + W + "}";
 
         /// <summary>
         /// Gets a <see cref="Vector4"/> representation for this object.
         /// </summary>
-        /// <returns>A <see cref="Vector4"/> representation for this object.</returns>
-        public Vector4 ToVector4()
-        {
-            return new Vector4(X, Y, Z, W);
-        }
+        public readonly Vector4 ToVector4 => new Vector4(X, Y, Z, W);
 
-        public void Deconstruct(out float x, out float y, out float z, out float w)
+        public readonly void Deconstruct(out float x, out float y, out float z, out float w)
         {
             x = X;
             y = Y;
@@ -553,15 +542,12 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Quaternion"/> on the left of the add sign.</param>
         /// <param name="b">Source <see cref="Quaternion"/> on the right of the add sign.</param>
         /// <returns>Sum of the vectors.</returns>
-        public static Quaternion operator +(in Quaternion a, in Quaternion b)
-        {
-            return new Quaternion(
-                a.X + b.X,
-                a.Y + b.Y,
-                a.Z + b.Z,
-                a.W + b.W);
-        }
-
+        public static Quaternion operator +(in Quaternion a, in Quaternion b) => new Quaternion(
+            a.X + b.X,
+            a.Y + b.Y,
+            a.Z + b.Z,
+            a.W + b.W);
+    
         /// <summary>
         /// Divides a <see cref="Quaternion"/> by the other <see cref="Quaternion"/>.
         /// </summary>
@@ -598,24 +584,19 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Quaternion"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="Quaternion"/> instance on the right of the equal sign.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public static bool operator ==(in Quaternion a, in Quaternion b)
-        {
-            return (a.X == b.X) 
-                && (a.Y == b.Y) 
-                && (a.Z == b.Z)
-                && (a.W == b.W);
-        }
-
+        public static bool operator ==(in Quaternion a, in Quaternion b) => 
+            (a.X == b.X) &&
+            (a.Y == b.Y) && 
+            (a.Z == b.Z) && 
+            (a.W == b.W);
+    
         /// <summary>
         /// Compares whether two <see cref="Quaternion"/> instances are not equal.
         /// </summary>
         /// <param name="a"><see cref="Quaternion"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="Quaternion"/> instance on the right of the not equal sign.</param>
         /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>
-        public static bool operator !=(in Quaternion a, in Quaternion b)
-        {
-            return !(a == b);
-        }
+        public static bool operator !=(in Quaternion a, in Quaternion b) => !(a == b);
 
         /// <summary>
         /// Multiplies two quaternions.
@@ -643,40 +624,31 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Quaternion"/> on the left of the mul sign.</param>
         /// <param name="scaleFactor">Scalar value on the right of the mul sign.</param>
         /// <returns>Result of the quaternion multiplication with a scalar.</returns>
-        public static Quaternion operator *(in Quaternion value, float scaleFactor)
-        {
-            return new Quaternion(
-                value.X * scaleFactor,
-                value.Y * scaleFactor,
-                value.Z * scaleFactor,
-                value.W * scaleFactor);
-        }
-
+        public static Quaternion operator *(in Quaternion value, float scaleFactor) => new Quaternion(
+            value.X * scaleFactor,
+            value.Y * scaleFactor,
+            value.Z * scaleFactor,
+            value.W * scaleFactor);
+    
         /// <summary>
         /// Subtracts a <see cref="Quaternion"/> from a <see cref="Quaternion"/>.
         /// </summary>
         /// <param name="left">Source <see cref="Quaternion"/> on the left of the sub sign.</param>
         /// <param name="right">Source <see cref="Quaternion"/> on the right of the sub sign.</param>
         /// <returns>Result of the quaternion subtraction.</returns>
-        public static Quaternion operator -(in Quaternion left, in Quaternion right)
-        {
-            return new Quaternion(
-                left.X - right.X,
-                left.Y - right.Y,
-                left.Z - right.Z,
-                left.W - right.W);
-
-        }
+        public static Quaternion operator -(in Quaternion left, in Quaternion right) => new Quaternion(
+            left.X - right.X,
+            left.Y - right.Y,
+            left.Z - right.Z,
+            left.W - right.W);
 
         /// <summary>
         /// Flips the sign of the all the quaternion components.
         /// </summary>
         /// <param name="value">Source <see cref="Quaternion"/> on the right of the sub sign.</param>
         /// <returns>The result of the quaternion negation.</returns>
-        public static Quaternion operator -(in Quaternion value)
-        {
-            return new Quaternion(-value.X, -value.Y, -value.Z, -value.W);
-        }
+        public static Quaternion operator -(in Quaternion value) =>
+            new Quaternion(-value.X, -value.Y, -value.Z, -value.W);
 
         #endregion
     }

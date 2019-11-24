@@ -321,12 +321,12 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns the length of this <see cref="Vector2"/>.
         /// </summary>
-        public float Length() => (float)Math.Sqrt(LengthSquared());
+        public readonly float Length() => (float)Math.Sqrt(LengthSquared());
 
         /// <summary>
         /// Returns the squared length of this <see cref="Vector2"/>.
         /// </summary>
-        public float LengthSquared() => (X * X) + (Y * Y);
+        public readonly float LengthSquared() => (X * X) + (Y * Y);
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains linear interpolation of the specified vectors.
@@ -359,12 +359,9 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The <see cref="Vector2"/> with maximal values from the two vectors.</returns>
-        public static Vector2 Max(in Vector2 a, in Vector2 b)
-        {
-            return new Vector2(
-                a.X > b.X ? a.X : b.X,
-                a.Y > b.Y ? a.Y : b.Y);
-        }
+        public static Vector2 Max(in Vector2 a, in Vector2 b) => new Vector2(
+            a.X > b.X ? a.X : b.X,
+            a.Y > b.Y ? a.Y : b.Y);
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains a minimal values from the two vectors.
@@ -372,12 +369,9 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The <see cref="Vector2"/> with minimal values from the two vectors.</returns>
-        public static Vector2 Min(in Vector2 a, in Vector2 b)
-        {
-            return new Vector2(
-                a.X < b.X ? a.X : b.X,
-                a.Y < b.Y ? a.Y : b.Y);
-        }
+        public static Vector2 Min(in Vector2 a, in Vector2 b) => new Vector2(
+            a.X < b.X ? a.X : b.X,
+            a.Y < b.Y ? a.Y : b.Y);
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains a multiplication of two vectors.
@@ -449,10 +443,8 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>The rounded <see cref="Vector2"/>.</returns>
-        public static Vector2 Round(in Vector2 value)
-        {
-            return new Vector2((float)Math.Round(value.X), (float)Math.Round(value.Y));
-        }
+        public static Vector2 Round(in Vector2 value) => new Vector2(
+            (float)Math.Round(value.X), (float)Math.Round(value.Y));
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains cubic interpolation of the specified vectors.
@@ -461,12 +453,9 @@ namespace MonoGame.Framework
         /// <param name="b">Source <see cref="Vector2"/>.</param>
         /// <param name="amount">Weighting value.</param>
         /// <returns>Cubic interpolation of the specified vectors.</returns>
-        public static Vector2 SmoothStep(in Vector2 a, in Vector2 b, float amount)
-        {
-            return new Vector2(
-                MathHelper.SmoothStep(a.X, b.X, amount),
-                MathHelper.SmoothStep(a.Y, b.Y, amount));
-        }
+        public static Vector2 SmoothStep(in Vector2 a, in Vector2 b, float amount) => new Vector2(
+            MathHelper.SmoothStep(a.X, b.X, amount),
+            MathHelper.SmoothStep(a.Y, b.Y, amount));
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains subtraction of on <see cref="Vector2"/> from a another.
@@ -480,27 +469,17 @@ namespace MonoGame.Framework
         /// Returns a <see cref="string"/> representation of this <see cref="Vector2"/> in the format:
         /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>]}
         /// </summary>
-        /// <returns>A <see cref="string"/> representation of this <see cref="Vector2"/>.</returns>
-        public override string ToString()
-        {
-            return "{X:" + X + " Y:" + Y + "}";
-        }
+        public override string ToString() => "{X:" + X + " Y:" + Y + "}";
 
         /// <summary>
         /// Gets a <see cref="Point"/> representation for this object.
         /// </summary>
-        /// <returns>A <see cref="Point"/> representation for this object.</returns>
-        public Point ToPoint()
-        {
-            return new Point((int)X, (int)Y);
-        }
+        public readonly Point ToPoint => new Point((int)X, (int)Y);
 
         /// <summary>
         /// Deconstruction method for <see cref="Vector2"/>.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        public void Deconstruct(out float x, out float y)
+        public readonly void Deconstruct(out float x, out float y)
         {
             x = X;
             y = Y;
@@ -612,10 +591,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/> on the right of the sub sign.</param>
         /// <returns>Result of the inversion.</returns>
-        public static Vector2 operator -(in Vector2 value)
-        {
-            return new Vector2(-value.X, -value.Y);
-        }
+        public static Vector2 operator -(in Vector2 value) => new Vector2(-value.X, -value.Y);
 
         /// <summary>
         /// Adds two vectors.
@@ -623,10 +599,7 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Vector2"/> on the left of the add sign.</param>
         /// <param name="b">Source <see cref="Vector2"/> on the right of the add sign.</param>
         /// <returns>Sum of the vectors.</returns>
-        public static Vector2 operator +(in Vector2 a, in Vector2 b)
-        {
-            return new Vector2(a.X + b.X, a.Y + b.Y);
-        }
+        public static Vector2 operator +(in Vector2 a, in Vector2 b) => new Vector2(a.X + b.X, a.Y + b.Y);
 
         /// <summary>
         /// Subtracts a <see cref="Vector2"/> from a <see cref="Vector2"/>.
@@ -634,10 +607,8 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector2"/> on the left of the sub sign.</param>
         /// <param name="right">Source <see cref="Vector2"/> on the right of the sub sign.</param>
         /// <returns>Result of the vector subtraction.</returns>
-        public static Vector2 operator -(in Vector2 left, in Vector2 right)
-        {
-            return new Vector2(left.X - right.X, left.Y - right.Y);
-        }
+        public static Vector2 operator -(in Vector2 left, in Vector2 right) => new Vector2(
+            left.X - right.X, left.Y - right.Y);
 
         /// <summary>
         /// Multiplies the components of two vectors by each other.
@@ -645,10 +616,7 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Vector2"/> on the left of the mul sign.</param>
         /// <param name="b">Source <see cref="Vector2"/> on the right of the mul sign.</param>
         /// <returns>Result of the vector multiplication.</returns>
-        public static Vector2 operator *(in Vector2 a, in Vector2 b)
-        {
-            return new Vector2(a.X * b.X, a.Y * b.Y);
-        }
+        public static Vector2 operator *(in Vector2 a, in Vector2 b) => new Vector2(a.X * b.X, a.Y * b.Y);
 
         /// <summary>
         /// Multiplies the components of vector by a scalar.
@@ -656,10 +624,8 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector2"/> on the left of the mul sign.</param>
         /// <param name="scaleFactor">Scalar value on the right of the mul sign.</param>
         /// <returns>Result of the vector multiplication with a scalar.</returns>
-        public static Vector2 operator *(in Vector2 value, float scaleFactor)
-        {
-            return new Vector2(value.X * scaleFactor, value.Y * scaleFactor);
-        }
+        public static Vector2 operator *(in Vector2 value, float scaleFactor) => new Vector2(
+            value.X * scaleFactor, value.Y * scaleFactor);
 
         /// <summary>
         /// Multiplies the components of vector by a scalar.
@@ -667,10 +633,8 @@ namespace MonoGame.Framework
         /// <param name="scaleFactor">Scalar value on the left of the mul sign.</param>
         /// <param name="value">Source <see cref="Vector2"/> on the right of the mul sign.</param>
         /// <returns>Result of the vector multiplication with a scalar.</returns>
-        public static Vector2 operator *(float scaleFactor, in Vector2 value)
-        {
-            return new Vector2(value.X * scaleFactor, value.Y * scaleFactor);
-        }
+        public static Vector2 operator *(float scaleFactor, in Vector2 value) => new Vector2(
+            value.X * scaleFactor, value.Y * scaleFactor);
 
         /// <summary>
         /// Divides the components of a <see cref="Vector2"/> by the components of another <see cref="Vector2"/>.
@@ -678,10 +642,8 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector2"/> on the left of the div sign.</param>
         /// <param name="right">Divisor <see cref="Vector2"/> on the right of the div sign.</param>
         /// <returns>The result of dividing the vectors.</returns>
-        public static Vector2 operator /(in Vector2 left, in Vector2 right)
-        {
-            return new Vector2(left.X / right.X, left.Y / right.Y);
-        }
+        public static Vector2 operator /(in Vector2 left, in Vector2 right) => new Vector2(
+            left.X / right.X, left.Y / right.Y);
 
         /// <summary>
         /// Divides the components of a <see cref="Vector2"/> by a scalar.
@@ -689,10 +651,8 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector2"/> on the left of the div sign.</param>
         /// <param name="divider">Divisor scalar on the right of the div sign.</param>
         /// <returns>The result of dividing a vector by a scalar.</returns>
-        public static Vector2 operator /(in Vector2 value, float divider)
-        {
-            return new Vector2(value.X / divider, value.Y / divider);
-        }
+        public static Vector2 operator /(in Vector2 value, float divider) => new Vector2(
+            value.X / divider, value.Y / divider);
 
         /// <summary>
         /// Compares whether two <see cref="Vector2"/> instances are equal.

@@ -57,7 +57,7 @@ namespace MonoGame.Utilities.PackedVector
 
         #endregion
 
-        public Vector2 ToVector2() => new Vector2(X, Y);
+        public readonly Vector2 ToVector2() => new Vector2(X, Y);
 
         private static Short2 Pack(Vector2 vector)
         {
@@ -83,7 +83,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromVector4(Vector4 vector) => this = Pack(vector.ToVector2());
 
         /// <inheritdoc/>
-        public Vector4 ToVector4() => new Vector4(X, Y, 0, 1);
+        public readonly Vector4 ToVector4() => new Vector4(X, Y, 0, 1);
 
         #endregion
 
@@ -98,7 +98,7 @@ namespace MonoGame.Utilities.PackedVector
         }
 
         /// <inheritdoc/>
-        public Vector4 ToScaledVector4()
+        public readonly Vector4 ToScaledVector4()
         {
             var scaled = ToVector2();
             scaled += Offset;

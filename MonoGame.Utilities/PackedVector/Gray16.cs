@@ -30,7 +30,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
         /// <inheritdoc />
-        public Vector4 ToVector4()
+        public readonly Vector4 ToVector4()
         {
             float scaled = PackedValue / ushort.MaxValue;
             return new Vector4(scaled, scaled, scaled, 1);
@@ -44,7 +44,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromScaledVector4(Vector4 vector) => this = Pack(ref vector);
 
         /// <inheritdoc/>
-        public Vector4 ToScaledVector4() => ToVector4();
+        public readonly Vector4 ToScaledVector4() => ToVector4();
 
         /// <inheritdoc />
         public void FromGray8(Gray8 source) =>

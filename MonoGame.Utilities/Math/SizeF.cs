@@ -54,82 +54,60 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets a <see cref="Vector2"/> representation for this object.
         /// </summary>
-        public Vector2 ToVector2() => new Vector2(Width, Height);
+        public readonly Vector2 ToVector2() => new Vector2(Width, Height);
 
         /// <summary>
         /// Gets a <see cref="Size"/> representation for this object.
         /// </summary>
-        public Size ToSize() => new Size((int)Width, (int)Height);
+        public readonly Size ToSize() => new Size((int)Width, (int)Height);
 
         /// <summary>
         ///     Calculates the <see cref="SizeF" /> representing the vector addition of two <see cref="SizeF" /> structures as if
         ///     they
         ///     were <see cref="Vector2" /> structures.
         /// </summary>
-        /// <param name="first">The first size.</param>
-        /// <param name="second">The second size.</param>
+        /// <param name="a">The first size.</param>
+        /// <param name="b">The second size.</param>
         /// <returns>
         ///     The <see cref="SizeF" /> representing the vector addition of two <see cref="SizeF" /> structures as if they
         ///     were <see cref="Vector2" /> structures.
         /// </returns>
-        public static SizeF operator +(in SizeF first, in SizeF second) => Add(first, second);
+        public static SizeF operator +(in SizeF a, in SizeF b) => new SizeF(a.Width + b.Width, a.Height + b.Height);
 
         /// <summary>
         ///     Calculates the <see cref="SizeF" /> representing the vector addition of two <see cref="SizeF" /> structures.
         /// </summary>
-        /// <param name="first">The first size.</param>
-        /// <param name="second">The second size.</param>
+        /// <param name="a">The first size.</param>
+        /// <param name="b">The second size.</param>
         /// <returns>
         ///     The <see cref="SizeF" /> representing the vector addition of two <see cref="SizeF" /> structures.
         /// </returns>
-        public static SizeF Add(SizeF first, SizeF second)
-        {
-            return new SizeF
-            {
-                Width = first.Width + second.Width,
-                Height = first.Height + second.Height
-            };
-        }
+        public static SizeF Add(SizeF a, SizeF b) => a + b;
 
         /// <summary>
         /// Calculates the <see cref="SizeF" /> representing the vector subtraction of two <see cref="SizeF" /> structures.
         /// </summary>
-        /// <param name="first">The first size.</param>
-        /// <param name="second">The second size.</param>
+        /// <param name="left">The first size.</param>
+        /// <param name="right">The second size.</param>
         /// <returns>
         ///     The <see cref="SizeF" /> representing the vector subtraction of two <see cref="SizeF" /> structures.
         /// </returns>
-        public static SizeF operator -(SizeF first, SizeF second)
-        {
-            return Subtract(first, second);
-        }
+        public static SizeF operator -(SizeF left, SizeF right) => new SizeF(
+            left.Width - right.Width, left.Height - right.Height);
 
-        public static SizeF operator /(SizeF size, float value)
-        {
-            return new SizeF(size.Width / value, size.Height / value);
-        }
+        public static SizeF operator /(SizeF size, float value) => new SizeF(size.Width / value, size.Height / value);
 
-        public static SizeF operator *(SizeF size, float value)
-        {
-            return new SizeF(size.Width * value, size.Height * value);
-        }
+        public static SizeF operator *(SizeF size, float value) => new SizeF(size.Width * value, size.Height * value);
 
         /// <summary>
         ///     Calculates the <see cref="SizeF" /> representing the vector subtraction of two <see cref="SizeF" /> structures.
         /// </summary>
-        /// <param name="first">The first size.</param>
-        /// <param name="second">The second size.</param>
+        /// <param name="left">The first size.</param>
+        /// <param name="right">The second size.</param>
         /// <returns>
         ///     The <see cref="SizeF" /> representing the vector subtraction of two <see cref="SizeF" /> structures.
         /// </returns>
-        public static SizeF Subtract(SizeF first, SizeF second)
-        {
-            return new SizeF
-            {
-                Width = first.Width - second.Width,
-                Height = first.Height - second.Height
-            };
-        }
+        public static SizeF Subtract(SizeF left, SizeF right) => left - right;
 
         /// <summary>
         ///     Performs an implicit conversion from a <see cref="PointF" /> to a <see cref="SizeF" />.
@@ -138,11 +116,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The resulting <see cref="SizeF" />.
         /// </returns>
-        public static implicit operator SizeF(PointF point)
-        {
-            return new SizeF(point.X, point.Y);
-        }
-
+        public static implicit operator SizeF(PointF point) => new SizeF(point.X, point.Y);
 
         /// <summary>
         ///     Performs an implicit conversion from a <see cref="Point" /> to a <see cref="SizeF" />.
@@ -151,10 +125,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The resulting <see cref="SizeF" />.
         /// </returns>
-        public static implicit operator SizeF(Point point)
-        {
-            return new SizeF(point.X, point.Y);
-        }
+        public static implicit operator SizeF(Point point) => new SizeF(point.X, point.Y);
 
         /// <summary>
         ///     Performs an implicit conversion from a <see cref="PointF" /> to a <see cref="SizeF" />.
@@ -163,10 +134,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The resulting <see cref="PointF" />.
         /// </returns>
-        public static implicit operator PointF(SizeF size)
-        {
-            return new PointF(size.Width, size.Height);
-        }
+        public static implicit operator PointF(SizeF size) => new PointF(size.Width, size.Height);
 
         /// <summary>
         ///     Performs an implicit conversion from a <see cref="SizeF" /> to a <see cref="Vector2" />.
@@ -175,10 +143,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The resulting <see cref="Vector2" />.
         /// </returns>
-        public static implicit operator Vector2(SizeF size)
-        {
-            return new Vector2(size.Width, size.Height);
-        }
+        public static implicit operator Vector2(SizeF size) => new Vector2(size.Width, size.Height);
 
         /// <summary>
         ///     Performs an implicit conversion from a <see cref="Vector2" /> to a <see cref="SizeF" />.
@@ -187,10 +152,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The resulting <see cref="SizeF" />.
         /// </returns>
-        public static implicit operator SizeF(Vector2 vector)
-        {
-            return new SizeF(vector.X, vector.Y);
-        }
+        public static implicit operator SizeF(Vector2 vector) => new SizeF(vector.X, vector.Y);
 
         /// <summary>
         ///     Performs an implicit conversion from a <see cref="SizeF" /> to a <see cref="Size" />.
@@ -199,10 +161,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The resulting <see cref="SizeF" />.
         /// </returns>
-        public static explicit operator Size(SizeF size)
-        {
-            return size.ToSize();
-        }
+        public static explicit operator Size(SizeF size) => size.ToSize();
 
         /// <summary>
         ///     Performs an explicit conversion from a <see cref="SizeF" /> to a <see cref="Point" />.

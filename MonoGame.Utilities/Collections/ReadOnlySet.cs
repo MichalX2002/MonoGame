@@ -8,6 +8,17 @@ namespace MonoGame.Utilities.Collections
     [DebuggerDisplay("Count = {Count}")]
     public class ReadOnlySet<T> : IReadOnlySet<T>
     {
+        private static ReadOnlySet<T> _empty;
+        public static ReadOnlySet<T> Empty
+        {
+            get
+            {
+                if (_empty == null)
+                    _empty = new ReadOnlySet<T>(new HashSet<T>(Array.Empty<T>()));
+                return _empty;
+            }
+        }
+
         private readonly ISet<T> _set;
         private readonly IReadOnlySet<T> _roSet;
         private readonly IEqualityComparer<T> _comparer;
@@ -63,6 +74,10 @@ namespace MonoGame.Utilities.Collections
 
             if (_roSet == null)
                 _set = new HashSet<T>(enumerable, _comparer);
+        }
+
+        public ReadOnlySet(IEnumerable<T> enumerable) : this(enumerable, null)
+        {
         }
 
         public bool Contains(T item) => _set != null ? _set.Contains(item) : _roSet.Contains(item);

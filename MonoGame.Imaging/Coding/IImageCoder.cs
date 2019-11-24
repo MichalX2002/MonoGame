@@ -2,7 +2,8 @@
 namespace MonoGame.Imaging
 {
     /// <summary>
-    /// Gives access to the <see cref="ImageFormat"/> used by image encoders and decoders.
+    /// Base interface for image coders.
+    /// Exposes an <see cref="ImageFormat"/> and whether cancellation is supported.
     /// </summary>
     public interface IImageCoder
     {
@@ -10,14 +11,6 @@ namespace MonoGame.Imaging
         /// Gets the format associated with this coder.
         /// </summary>
         ImageFormat Format { get; }
-
-        /// <summary>
-        /// Gets whether this coder has implemented processing of animated images.
-        /// <para>
-        /// The format also needs to support animation.
-        /// </para>
-        /// </summary>
-        bool ImplementsAnimation { get; }
 
         /// <summary>
         /// Gets whether a coding operation can be cancelled at the

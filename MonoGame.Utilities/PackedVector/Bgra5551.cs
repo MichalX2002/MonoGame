@@ -57,7 +57,7 @@ namespace MonoGame.Utilities.PackedVector
         public ushort PackedValue { get; set; }
 
         /// <inheritdoc/>
-        public Vector4 ToVector4()
+        public readonly Vector4 ToVector4()
         {
             return new Vector4(
                 ((PackedValue >> 10) & 0x1F) / 31f,
@@ -74,7 +74,7 @@ namespace MonoGame.Utilities.PackedVector
         #region IPixel
 
         /// <inheritdoc/>
-        public Vector4 ToScaledVector4() => ToVector4();
+        public readonly Vector4 ToScaledVector4() => ToVector4();
 
         /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector) => FromVector4(vector);

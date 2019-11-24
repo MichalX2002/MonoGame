@@ -155,7 +155,6 @@ namespace MonoGame.Framework
                 int hash = 7 + X.GetHashCode();
                 return hash * 31 + Y.GetHashCode();
             }
-
         }
 
         /// <summary>
@@ -171,9 +170,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets a <see cref="Vector2"/> representation for this object.
         /// </summary>
-        /// <returns>A <see cref="Vector2"/> representation for this object.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector2 ToVector2()
+        public readonly Vector2 ToVector2()
         {
             return new Vector2(X, Y);
         }
@@ -181,9 +178,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Deconstruction method for <see cref="Point"/>.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        public void Deconstruct(out int x, out int y)
+        public readonly void Deconstruct(out int x, out int y)
         {
             x = X;
             y = Y;

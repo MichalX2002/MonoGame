@@ -31,7 +31,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets the packed vector as a <see cref="float"/>.
         /// </summary>
-        public float ToSingle() => HalfTypeHelper.Unpack(PackedValue);
+        public readonly float ToSingle() => HalfTypeHelper.Unpack(PackedValue);
 
         #region IPackedVector
 
@@ -43,7 +43,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromVector4(Vector4 vector) => PackedValue = HalfTypeHelper.Pack(vector.X);
 
         /// <inheritdoc/>
-        public Vector4 ToVector4() => new Vector4(ToSingle(), 0, 0, 1);
+        public readonly Vector4 ToVector4() => new Vector4(ToSingle(), 0, 0, 1);
 
         #endregion
 
@@ -59,7 +59,7 @@ namespace MonoGame.Utilities.PackedVector
         }
 
         /// <inheritdoc/>
-        public Vector4 ToScaledVector4()
+        public readonly Vector4 ToScaledVector4()
         {
             float single = ToSingle() + 1;
             single /= 2;

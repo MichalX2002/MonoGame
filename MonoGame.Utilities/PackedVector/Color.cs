@@ -379,7 +379,7 @@ namespace MonoGame.Framework
         /// Gets the <see cref="Vector3"/> representation of this <see cref="Color"/>.
         /// </summary>
         /// <returns>A <see cref="Vector3"/> representation for this object.</returns>
-        public Vector3 ToVector3() => new Vector3(R, G, B) / 255f;
+        public readonly Vector3 ToVector3() => new Vector3(R, G, B) / 255f;
 
         public Rgba64 ToRgba64() => new Rgba64(
             PackedVectorHelper.UpScale8To16Bit(R),

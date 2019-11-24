@@ -64,8 +64,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns the <see cref="Vector2"/> representation of this instance.
         /// </summary>
-        /// <returns><see cref="Vector2"/></returns>
-        public Vector2 ToVector2() => new Vector2(X, Y);
+        public readonly Vector2 ToVector2() => new Vector2(X, Y);
 
         /// <summary>
         ///     Calculates the <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a

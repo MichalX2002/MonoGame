@@ -15,7 +15,8 @@ namespace MonoGame.Imaging
         public static Size GetSize<TPixel>(this IPixelSource<TPixel> source)
             where TPixel : unmanaged, IPixel
         {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source == null) 
+                throw new ArgumentNullException(nameof(source));
             return new Size(source.Width, source.Height);
         }
 
@@ -45,7 +46,8 @@ namespace MonoGame.Imaging
         public static unsafe bool HasPadding<TPixel>(this IReadOnlyPixelMemory<TPixel> memory)
             where TPixel : unmanaged, IPixel
         {
-            if (memory == null) throw new ArgumentNullException(nameof(memory));
+            if (memory == null) 
+                throw new ArgumentNullException(nameof(memory));
             return memory.Stride != memory.Width;
         }
 
@@ -55,7 +57,8 @@ namespace MonoGame.Imaging
         public static unsafe int GetByteStride<TPixel>(this IReadOnlyPixelMemory<TPixel> memory)
             where TPixel : unmanaged, IPixel
         {
-            if (memory == null) throw new ArgumentNullException(nameof(memory));
+            if (memory == null) 
+                throw new ArgumentNullException(nameof(memory));
             return memory.Stride * sizeof(TPixel);
         }
 

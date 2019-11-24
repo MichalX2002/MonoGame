@@ -54,29 +54,29 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets a <see cref="Point"/> representation for this object.
         /// </summary>
-        public Point ToPoint() => new Point(Width, Height);
+        public readonly Point ToPoint() => new Point(Width, Height);
 
         /// <summary>
         /// Gets a <see cref="SizeF"/> representation for this object.
         /// </summary>
-        public SizeF ToSizeF() => new SizeF(Width, Height);
+        public readonly SizeF ToSizeF() => new SizeF(Width, Height);
 
         /// <summary>
         /// Gets a <see cref="Vector2"/> representation for this object.
         /// </summary>
-        public Vector2 ToVector2() => new Vector2(Width, Height);
+        public readonly Vector2 ToVector2() => new Vector2(Width, Height);
 
         /// <summary>
         ///     Calculates the <see cref="Size" /> representing the vector addition of two <see cref="Size" /> structures as if
         ///     they were <see cref="Vector2" /> structures.
         /// </summary>
-        /// <param name="first">The first size.</param>
-        /// <param name="second">The second size.</param>
+        /// <param name="a">The first size.</param>
+        /// <param name="b">The second size.</param>
         /// <returns>
         ///     The <see cref="Size" /> representing the vector addition of two <see cref="Size" /> structures as if they
         ///     were <see cref="Vector2" /> structures.
         /// </returns>
-        public static Size operator +(in Size first, in Size second) => Add(first, second);
+        public static Size operator +(in Size a, in Size b) => new Size(a.Width + b.Width, a.Height + b.Height);
 
         /// <summary>
         ///     Calculates the <see cref="Size" /> representing the vector addition of two <see cref="Size" /> structures.
@@ -86,17 +86,18 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The <see cref="Size" /> representing the vector addition of two <see cref="Size" /> structures.
         /// </returns>
-        public static Size Add(in Size a, in Size b) => new Size(a.Width + b.Width, a.Height + b.Height);
+        public static Size Add(in Size a, in Size b) => a + b;
 
         /// <summary>
         /// Calculates the <see cref="Size" /> representing the vector subtraction of two <see cref="Size" /> structures.
         /// </summary>
-        /// <param name="first">The first size.</param>
-        /// <param name="second">The second size.</param>
+        /// <param name="left">The first size.</param>
+        /// <param name="right">The second size.</param>
         /// <returns>
         ///     The <see cref="Size" /> representing the vector subtraction of two <see cref="Size" /> structures.
         /// </returns>
-        public static Size operator -(in Size first, in Size second) => Subtract(first, second);
+        public static Size operator -(in Size left, in Size right) => new Size(
+            left.Width - right.Width, left.Height - right.Height);
 
         public static Size operator /(in Size size, int value) => new Size(size.Width / value, size.Height / value);
 
@@ -110,8 +111,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The <see cref="Size" /> representing the vector subtraction of two <see cref="Size" /> structures.
         /// </returns>
-        public static Size Subtract(in Size left, in Size right) =>
-            new Size(left.Width - right.Width, left.Height - right.Height);
+        public static Size Subtract(in Size left, in Size right) => Subtract(left, right);
 
         /// <summary>
         ///     Performs an implicit conversion from a <see cref="Point" /> to a <see cref="Size" />.

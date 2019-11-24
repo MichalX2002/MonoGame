@@ -41,8 +41,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Coding\Encoding\EncoderExtensions.cs" />
     <Compile Remove="ColorEncoding.cs" />
     <Compile Remove="ImageReader.cs" />
+    <Compile Remove="Image\Specialized\FrameCollection.cs" />
+    <Compile Remove="Image\Specialized\ImageCollection.cs" />
+    <Compile Remove="Image\Specialized\LayerCollection.cs" />
     <Compile Remove="Utilities\BufferPixelProvider.Expressions.cs" />
     <Compile Remove="Utilities\ImageWriter.cs" />
   </ItemGroup>

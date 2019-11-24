@@ -159,7 +159,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the <see cref="Vector2"/> representation of this <see cref="Vector3"/>.
         /// </summary>
-        public Vector2 ToVector2() => new Vector2(X, Y);
+        public readonly Vector2 ToVector2() => new Vector2(X, Y);
 
         /// <summary>
         /// Creates a new <see cref="Vector3"/> that contains the cartesian
@@ -171,13 +171,10 @@ namespace MonoGame.Framework
         /// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 3D-triangle.</param>
         /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 3D-triangle.</param>
         /// <returns>The cartesian translation of barycentric coordinates.</returns>
-        public static Vector3 Barycentric(in Vector3 a, in Vector3 b, in Vector3 c, float amount1, float amount2)
-        {
-            return new Vector3(
-                MathHelper.Barycentric(a.X, b.X, c.X, amount1, amount2),
-                MathHelper.Barycentric(a.Y, b.Y, c.Y, amount1, amount2),
-                MathHelper.Barycentric(a.Z, b.Z, c.Z, amount1, amount2));
-        }
+        public static Vector3 Barycentric(in Vector3 a, in Vector3 b, in Vector3 c, float amount1, float amount2) => new Vector3(
+            MathHelper.Barycentric(a.X, b.X, c.X, amount1, amount2),
+            MathHelper.Barycentric(a.Y, b.Y, c.Y, amount1, amount2),
+            MathHelper.Barycentric(a.Z, b.Z, c.Z, amount1, amount2));
 
         /// <summary>
         /// Creates a new <see cref="Vector3"/> that contains CatmullRom interpolation of the specified vectors.
@@ -188,13 +185,10 @@ namespace MonoGame.Framework
         /// <param name="d">The fourth vector in interpolation.</param>
         /// <param name="amount">Weighting factor.</param>
         /// <returns>The result of CatmullRom interpolation.</returns>
-        public static Vector3 CatmullRom(in Vector3 a, in Vector3 b, in Vector3 c, in Vector3 d, float amount)
-        {
-            return new Vector3(
-                MathHelper.CatmullRom(a.X, b.X, c.X, d.X, amount),
-                MathHelper.CatmullRom(a.Y, b.Y, c.Y, d.Y, amount),
-                MathHelper.CatmullRom(a.Z, b.Z, c.Z, d.Z, amount));
-        }
+        public static Vector3 CatmullRom(in Vector3 a, in Vector3 b, in Vector3 c, in Vector3 d, float amount) => new Vector3(
+            MathHelper.CatmullRom(a.X, b.X, c.X, d.X, amount),
+            MathHelper.CatmullRom(a.Y, b.Y, c.Y, d.Y, amount),
+            MathHelper.CatmullRom(a.Z, b.Z, c.Z, d.Z, amount));
 
         /// <summary>
         /// Round the members of this <see cref="Vector3"/> towards positive infinity.
@@ -211,13 +205,10 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <returns>The rounded <see cref="Vector3"/>.</returns>
-        public static Vector3 Ceiling(in Vector3 value)
-        {
-            return new Vector3(
-                (float)Math.Ceiling(value.X),
-                (float)Math.Ceiling(value.Y),
-                (float)Math.Ceiling(value.Z));
-        }
+        public static Vector3 Ceiling(in Vector3 value) => new Vector3(
+            (float)Math.Ceiling(value.X),
+            (float)Math.Ceiling(value.Y),
+            (float)Math.Ceiling(value.Z));
 
         /// <summary>
         /// Clamps the specified value within a range.
@@ -226,13 +217,10 @@ namespace MonoGame.Framework
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
         /// <returns>The clamped value.</returns>
-        public static Vector3 Clamp(in Vector3 value, in Vector3 min, in Vector3 max)
-        {
-            return new Vector3(
-                MathHelper.Clamp(value.X, min.X, max.X),
-                MathHelper.Clamp(value.Y, min.Y, max.Y),
-                MathHelper.Clamp(value.Z, min.Z, max.Z));
-        }
+        public static Vector3 Clamp(in Vector3 value, in Vector3 min, in Vector3 max) => new Vector3(
+            MathHelper.Clamp(value.X, min.X, max.X),
+            MathHelper.Clamp(value.Y, min.Y, max.Y),
+            MathHelper.Clamp(value.Z, min.Z, max.Z));
 
         /// <summary>
         /// Computes the cross product of two vectors.
@@ -240,13 +228,10 @@ namespace MonoGame.Framework
         /// <param name="left">The first vector.</param>
         /// <param name="right">The second vector.</param>
         /// <returns>The cross product of two vectors.</returns>
-        public static Vector3 Cross(in Vector3 left, in Vector3 right)
-        {
-            return new Vector3(
-                left.Y * right.Z - right.Y * left.Z,
-                -(left.X * right.Z - right.X * left.Z),
-                left.X * right.Y - right.X * left.Y);
-        }
+        public static Vector3 Cross(in Vector3 left, in Vector3 right) => new Vector3(
+            left.Y * right.Z - right.Y * left.Z,
+            -(left.X * right.Z - right.X * left.Z),
+            left.X * right.Y - right.X * left.Y);
 
         /// <summary>
         /// Returns the distance between two vectors.
@@ -336,21 +321,20 @@ namespace MonoGame.Framework
         /// <param name="amount">Weighting factor.</param>
         /// <returns>The hermite spline interpolation vector.</returns>
         public static Vector3 Hermite(
-            in Vector3 position1, in Vector3 tangent1, in Vector3 position2, in Vector3 tangent2, float amount) =>
-            new Vector3(
-                MathHelper.Hermite(position1.X, tangent1.X, position2.X, tangent2.X, amount),
-                MathHelper.Hermite(position1.Y, tangent1.Y, position2.Y, tangent2.Y, amount),
-                MathHelper.Hermite(position1.Z, tangent1.Z, position2.Z, tangent2.Z, amount));
+            in Vector3 position1, in Vector3 tangent1, in Vector3 position2, in Vector3 tangent2, float amount) => new Vector3(
+            MathHelper.Hermite(position1.X, tangent1.X, position2.X, tangent2.X, amount),
+            MathHelper.Hermite(position1.Y, tangent1.Y, position2.Y, tangent2.Y, amount),
+            MathHelper.Hermite(position1.Z, tangent1.Z, position2.Z, tangent2.Z, amount));
 
         /// <summary>
         /// Returns the length of this <see cref="Vector3"/>.
         /// </summary>
-        public float Length() => (float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z));
+        public readonly float Length() => (float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z));
 
         /// <summary>
         /// Returns the squared length of this <see cref="Vector3"/>.
         /// </summary>
-        public float LengthSquared() => (X * X) + (Y * Y) + (Z * Z);
+        public readonly float LengthSquared() => (X * X) + (Y * Y) + (Z * Z);
 
         /// <summary>
         /// Creates a new <see cref="Vector3"/> that contains linear interpolation of the specified vectors.
@@ -360,9 +344,9 @@ namespace MonoGame.Framework
         /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
         /// <returns>The result of linear interpolation of the specified vectors.</returns>
         public static Vector3 Lerp(in Vector3 a, in Vector3 b, float amount) => new Vector3(
-                MathHelper.Lerp(a.X, b.X, amount),
-                MathHelper.Lerp(a.Y, b.Y, amount),
-                MathHelper.Lerp(a.Z, b.Z, amount));
+            MathHelper.Lerp(a.X, b.X, amount),
+            MathHelper.Lerp(a.Y, b.Y, amount),
+            MathHelper.Lerp(a.Z, b.Z, amount));
 
         /// <summary>
         /// Creates a new <see cref="Vector3"/> that contains linear interpolation of the specified vectors.
@@ -375,9 +359,9 @@ namespace MonoGame.Framework
         /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
         /// <returns>The result of linear interpolation of the specified vectors.</returns>
         public static Vector3 LerpPrecise(in Vector3 a, in Vector3 b, float amount) => new Vector3(
-                MathHelper.LerpPrecise(a.X, b.X, amount),
-                MathHelper.LerpPrecise(a.Y, b.Y, amount),
-                MathHelper.LerpPrecise(a.Z, b.Z, amount));
+            MathHelper.LerpPrecise(a.X, b.X, amount),
+            MathHelper.LerpPrecise(a.Y, b.Y, amount),
+            MathHelper.LerpPrecise(a.Z, b.Z, amount));
 
         /// <summary>
         /// Creates a new <see cref="Vector3"/> that contains a maximal values from the two vectors.
@@ -386,9 +370,9 @@ namespace MonoGame.Framework
         /// <param name="b">The second vector.</param>
         /// <returns>The <see cref="Vector3"/> with maximal values from the two vectors.</returns>
         public static Vector3 Max(in Vector3 a, in Vector3 b) => new Vector3(
-                MathHelper.Max(a.X, b.X),
-                MathHelper.Max(a.Y, b.Y),
-                MathHelper.Max(a.Z, b.Z));
+            MathHelper.Max(a.X, b.X),
+            MathHelper.Max(a.Y, b.Y),
+            MathHelper.Max(a.Z, b.Z));
 
         /// <summary>
         /// Creates a new <see cref="Vector3"/> that contains a minimal values from the two vectors.
@@ -397,9 +381,9 @@ namespace MonoGame.Framework
         /// <param name="b">The second vector.</param>
         /// <returns>The <see cref="Vector3"/> with minimal values from the two vectors.</returns>
         public static Vector3 Min(in Vector3 a, in Vector3 b) => new Vector3(
-                MathHelper.Min(a.X, b.X),
-                MathHelper.Min(a.Y, b.Y),
-                MathHelper.Min(a.Z, b.Z));
+            MathHelper.Min(a.X, b.X),
+            MathHelper.Min(a.Y, b.Y),
+            MathHelper.Min(a.Z, b.Z));
 
         /// <summary>
         /// Performs vector addition on <paramref name="a"/> and <paramref name="b"/>.
@@ -698,8 +682,8 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Vector3"/> on the left of the add sign.</param>
         /// <param name="b">Source <see cref="Vector3"/> on the right of the add sign.</param>
         /// <returns>Sum of the vectors.</returns>
-        public static Vector3 operator +(in Vector3 a, in Vector3 b) =>
-            new Vector3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+        public static Vector3 operator +(in Vector3 a, in Vector3 b) => new Vector3(
+            a.X + b.X, a.Y + b.Y, a.Z + b.Z);
 
         /// <summary>
         /// Negates values in the specified <see cref="Vector3"/>.
@@ -714,8 +698,8 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector3"/> on the left of the sub sign.</param>
         /// <param name="right">Source <see cref="Vector3"/> on the right of the sub sign.</param>
         /// <returns>Result of the vector subtraction.</returns>
-        public static Vector3 operator -(in Vector3 left, in Vector3 right) => 
-            new Vector3(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
+        public static Vector3 operator -(in Vector3 left, in Vector3 right) => new Vector3(
+            left.X - right.X, left.Y - right.Y, left.Z - right.Z);
 
         /// <summary>
         /// Multiplies the components of two vectors by each other.
@@ -723,8 +707,8 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Vector3"/> on the left of the mul sign.</param>
         /// <param name="b">Source <see cref="Vector3"/> on the right of the mul sign.</param>
         /// <returns>Result of the vector multiplication.</returns>
-        public static Vector3 operator *(in Vector3 a, in Vector3 b) => 
-            new Vector3(a.X * b.X, a.Y * b.Y, a.Z * b.Z);
+        public static Vector3 operator *(in Vector3 a, in Vector3 b) => new Vector3(
+            a.X * b.X, a.Y * b.Y, a.Z * b.Z);
 
         /// <summary>
         /// Multiplies the components of vector by a scalar.
@@ -751,8 +735,8 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector3"/> on the left of the div sign.</param>
         /// <param name="right">Divisor <see cref="Vector3"/> on the right of the div sign.</param>
         /// <returns>The result of dividing the vectors.</returns>
-        public static Vector3 operator /(in Vector3 left, in Vector3 right) =>
-            new Vector3(left.X / right.X, left.Y / right.Y, left.Z / right.Z);
+        public static Vector3 operator /(in Vector3 left, in Vector3 right) => new Vector3(
+            left.X / right.X, left.Y / right.Y, left.Z / right.Z);
 
         /// <summary>
         /// Divides the components of a <see cref="Vector3"/> by a scalar.

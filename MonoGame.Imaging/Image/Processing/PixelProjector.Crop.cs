@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using MonoGame.Framework;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Imaging.Utilities;
 using MonoGame.Utilities;
 using MonoGame.Utilities.PackedVector;
 

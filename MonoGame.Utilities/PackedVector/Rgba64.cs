@@ -76,7 +76,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
         /// <inheritdoc/>
-        public Vector4 ToVector4() => new Vector4(R, G, B, A) / ushort.MaxValue;
+        public readonly Vector4 ToVector4() => new Vector4(R, G, B, A) / ushort.MaxValue;
 
         #endregion
 
@@ -86,9 +86,9 @@ namespace MonoGame.Utilities.PackedVector
         public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
         /// <inheritdoc/>
-        public Vector4 ToScaledVector4() => ToVector4();
+        public readonly Vector4 ToScaledVector4() => ToVector4();
 
-        public void ToColor(ref Color destination)
+        public readonly void ToColor(ref Color destination)
         {
             destination.R = PackedVectorHelper.DownScale16To8Bit(R);
             destination.G = PackedVectorHelper.DownScale16To8Bit(G);

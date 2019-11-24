@@ -2,8 +2,8 @@
 
 namespace MonoGame.Utilities.Memory
 {
-    public interface IMemory<T> : IDisposable
+    public interface IMemory<T> : IReadOnlyMemory<T>
     {
-        Span<T> Span { get; }
+        new Span<T> Span { get; }
     }
 }
