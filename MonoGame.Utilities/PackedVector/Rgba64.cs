@@ -30,6 +30,20 @@ namespace MonoGame.Utilities.PackedVector
         [CLSCompliant(false)]
         public ushort A;
 
+        /// <summary>
+        /// Gets or sets the RGB components of this struct as <see cref="Rgb48"/>
+        /// </summary>
+        public Rgb48 Rgb
+        {
+            readonly get => new Rgb48(R, G, B);
+            set
+            {
+                R = value.R;
+                G = value.G;
+                B = value.B;
+            }
+        }
+
         #region Constructors
 
         [CLSCompliant(false)]
@@ -96,6 +110,50 @@ namespace MonoGame.Utilities.PackedVector
             destination.A = PackedVectorHelper.DownScale16To8Bit(A);
         }
 
+        public void FromGray8(Gray8 source)
+        {
+            R = G = B = PackedVectorHelper.UpScale8To16Bit(source.L);
+            A = byte.MaxValue;
+        }
+
+        public void FromGray16(Gray16 source)
+        {
+            R = G = B = source.L;
+            A = byte.MaxValue;
+        }
+
+        public void FromGrayAlpha16(GrayAlpha16 source)
+        {
+            R = G = B = PackedVectorHelper.UpScale8To16Bit(source.L);
+            A = source.A;
+        }
+
+        public void FromRgb24(Rgb24 source)
+        {
+            R = PackedVectorHelper.UpScale8To16Bit(source.R);
+            G = PackedVectorHelper.UpScale8To16Bit(source.G);
+            B = PackedVectorHelper.UpScale8To16Bit(source.B);
+            A = byte.MaxValue;
+        }
+
+        public void FromColor(Color source)
+        {
+            R = PackedVectorHelper.UpScale8To16Bit(source.R);
+            G = PackedVectorHelper.UpScale8To16Bit(source.G);
+            B = PackedVectorHelper.UpScale8To16Bit(source.B);
+            A = PackedVectorHelper.UpScale8To16Bit(source.A);
+        }
+
+        public void FromRgb48(Rgb48 source)
+        {
+            R = source.R;
+            G = source.G;
+            B = source.B;
+            A = byte.MaxValue;
+        }
+
+        public void FromRgba64(Rgba64 source) => this = source;
+
         #endregion
 
         #region Equals
@@ -115,7 +173,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => ToVector4().ToString();
+        public override string ToString() => $"Rgba64(R:{R}, G:{G}, B:{B}, A:{A})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

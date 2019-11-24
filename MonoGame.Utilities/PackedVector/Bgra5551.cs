@@ -96,7 +96,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => $"Bgra5551({ToVector4()}";
+        public override string ToString() => $"Bgra5551({ToVector4().ToString()}";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

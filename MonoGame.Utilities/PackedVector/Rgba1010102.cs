@@ -84,7 +84,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => $"Alpha8({ToVector4().ToString()})";
+        public override string ToString() => $"Rgba1010102({ToVector4().ToString()})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

@@ -23,9 +23,9 @@ namespace MonoGame.Utilities.PackedVector
 
         private static void Pack(ref Vector4 vector, out byte luminance, out byte alpha)
         {
-            vector *= Vector4.MaxBytes;
+            vector *= Vector4.MaxByteValue;
             vector += Vector4.Half;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxBytes);
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxByteValue);
 
             luminance = PackedVectorHelper.Get8BitBT709Luminance(
                 (byte)vector.X, (byte)vector.Y, (byte)vector.Z);
@@ -114,9 +114,9 @@ namespace MonoGame.Utilities.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => $"Gray8({L})";
+        public override string ToString() => $"Gray8({L.ToString()})";
 
-        public override int GetHashCode() => L.GetHashCode();
+        public override int GetHashCode() => L;
 
         #endregion
     }

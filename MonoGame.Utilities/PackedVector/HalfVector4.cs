@@ -53,19 +53,11 @@ namespace MonoGame.Utilities.PackedVector
 
         #endregion
 
-        private static HalfVector4 Pack(in Vector4 vector)
-        {
-            return new HalfVector4(
-                new HalfSingle(vector.X),
-                new HalfSingle(vector.Y),
-                new HalfSingle(vector.Z),
-                new HalfSingle(vector.W));
-            //ulong num4 = HalfTypeHelper.Pack(vector.X);
-            //ulong num3 = (ulong)HalfTypeHelper.Pack(vector.Y) << 0x10;
-            //ulong num2 = (ulong)HalfTypeHelper.Pack(vector.Z) << 0x20;
-            //ulong num1 = (ulong)HalfTypeHelper.Pack(vector.W) << 0x30;
-            //return num4 | num3 | num2 | num1;
-        }
+        private static HalfVector4 Pack(in Vector4 vector) => new HalfVector4(
+            new HalfSingle(vector.X),
+            new HalfSingle(vector.Y),
+            new HalfSingle(vector.Z),
+            new HalfSingle(vector.W));
 
         #region IPackedVector
 
@@ -82,10 +74,6 @@ namespace MonoGame.Utilities.PackedVector
 
         /// <inheritdoc/>
         public readonly Vector4 ToVector4() => new Vector4(X, Y, Z, W);
-                //HalfTypeHelper.Unpack((ushort)PackedValue),
-                //HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x10)),
-                //HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x20)),
-                //HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x30)));
         
         #endregion
 
@@ -140,7 +128,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Returns a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => ToVector4().ToString();
+        public override string ToString() => $"HalfVector4({ToVector4().ToString()})";
 
         /// <summary>
         /// Gets the hash code for the current instance.

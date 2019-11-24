@@ -59,7 +59,7 @@ namespace MonoGame.Utilities.PackedVector
 
         private static Byte4 Pack(ref Vector4 vector)
         {
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxBytes);
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxByteValue);
             
             return new Byte4(
                 (byte)vector.X,

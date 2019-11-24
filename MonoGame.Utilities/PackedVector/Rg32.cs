@@ -14,21 +14,21 @@ namespace MonoGame.Utilities.PackedVector
     /// Ranges from [0, 0, 0, 1] to [1, 1, 0, 1] in vector form.
     /// </para>
     /// </summary>
-    public struct Rg32 : IPackedVector<uint>, IEquatable<Rg32>, IPackedVector
+    public struct Rg32 : IPackedVector<uint>, IEquatable<Rg32>, IPixel
     {
         [CLSCompliant(false)]
-        public ushort X;
+        public ushort R;
 
         [CLSCompliant(false)]
-        public ushort Y;
+        public ushort G;
 
         #region Constructors
 
         [CLSCompliant(false)]
         public Rg32(ushort x, ushort y)
         {
-            X = x;
-            Y = y;
+            R = x;
+            G = y;
         }
 
         [CLSCompliant(false)]
@@ -54,7 +54,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets the packed vector in <see cref="Vector2"/> format.
         /// </summary>
-        public readonly Vector2 ToVector2() => new Vector2(X, Y) / ushort.MaxValue;
+        public readonly Vector2 ToVector2() => new Vector2(R, G) / ushort.MaxValue;
 
         #region IPackedVector
 
@@ -67,7 +67,7 @@ namespace MonoGame.Utilities.PackedVector
         }
 
         /// <inheritdoc/>
-        public void FromVector4(Vector4 vector) => this = Pack(new Vector2(vector.X, vector.Y));
+        public void FromVector4(Vector4 vector) => this = Pack(vector.XY);
 
         /// <inheritdoc/>
         public readonly Vector4 ToVector4() => new Vector4(ToVector2(), 0, 1f);
@@ -82,11 +82,48 @@ namespace MonoGame.Utilities.PackedVector
         /// <inheritdoc/>
         public readonly Vector4 ToScaledVector4() => ToVector4();
 
+        /// <inheritdoc/>
+        public void FromGray8(Gray8 source) => R = G = PackedVectorHelper.UpScale8To16Bit(source.L);
+
+        public void FromGray16(Gray16 source) => R = G = source.L;
+
+        public void FromGrayAlpha16(GrayAlpha16 source) => R = G = source.L;
+
+        public void FromRgb24(Rgb24 source)
+        {
+            R = PackedVectorHelper.UpScale8To16Bit(source.R);
+            G = PackedVectorHelper.UpScale8To16Bit(source.G);
+        }
+
+        public void FromColor(Color source)
+        {
+            R = PackedVectorHelper.UpScale8To16Bit(source.R);
+            G = PackedVectorHelper.UpScale8To16Bit(source.G);
+        }
+
+        public void FromRgb48(Rgb48 source)
+        {
+            R = source.R;
+            G = source.G;
+        }
+
+        public void FromRgba64(Rgba64 source)
+        {
+            R = source.R;
+            G = source.G;
+        }
+
+        public readonly void ToColor(ref Color destination)
+        {
+            destination.R = PackedVectorHelper.DownScale16To8Bit(R);
+            destination.G = PackedVectorHelper.DownScale16To8Bit(G);
+        }
+
         #endregion
 
         #region Equals
 
-        public static bool operator ==(in Rg32 a, in Rg32 b) => a.X == b.X && a.Y == b.Y;
+        public static bool operator ==(in Rg32 a, in Rg32 b) => a.R == b.R && a.G == b.G;
         public static bool operator !=(in Rg32 a, in Rg32 b) => !(a == b);
 
         /// <summary>
@@ -111,7 +148,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => ToVector2().ToString();
+        public override string ToString() => $"Rg32(R:{R}, G:{G})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

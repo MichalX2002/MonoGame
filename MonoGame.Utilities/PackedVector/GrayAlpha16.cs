@@ -8,9 +8,9 @@ using MonoGame.Framework;
 namespace MonoGame.Utilities.PackedVector
 {
     /// <summary>
-    /// Packed vector type containing a 8-bit XYZ luminance.
+    /// Packed vector type containing an 8-bit XYZ luminance an 8-bit W component.
     /// <para>
-    /// Ranges from [0, 0, 0, 1] to [1, 1, 1, 1] in vector form.
+    /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
     /// </para>
     /// </summary>
     public struct GrayAlpha16 : IPackedVector<ushort>, IEquatable<GrayAlpha16>, IPixel
@@ -18,17 +18,23 @@ namespace MonoGame.Utilities.PackedVector
         public byte L;
         public byte A;
 
+        public Gray8 Gray
+        {
+            readonly get => new Gray8(L);
+            set => L = value.L;
+        }
+
         public GrayAlpha16(byte luminance, byte alpha)
         {
             L = luminance;
             A = alpha;
         }
 
-        internal static GrayAlpha16 Pack(ref Vector4 vector)
+        private static GrayAlpha16 Pack(ref Vector4 vector)
         {
-            vector *= Vector4.MaxBytes;
+            vector *= Vector4.MaxByteValue;
             vector += Vector4.Half;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxBytes);
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxByteValue);
 
             return new GrayAlpha16(PackedVectorHelper.Get8BitBT709Luminance(
                 (byte)vector.X, (byte)vector.Y, (byte)vector.Z), (byte)vector.W);
@@ -116,7 +122,7 @@ namespace MonoGame.Utilities.PackedVector
         }
 
         /// <inheritdoc />
-        public void ToColor(ref Color destination)
+        public readonly void ToColor(ref Color destination)
         {
             destination.R = destination.G = destination.B = L;
             destination.A = A;
@@ -154,7 +160,7 @@ namespace MonoGame.Utilities.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => $"GrayAlpha16({PackedValue})";
+        public override string ToString() => $"GrayAlpha16(L:{L.ToString()}, A:{A.ToString()})";
 
         public override int GetHashCode() => PackedValue.GetHashCode();
 

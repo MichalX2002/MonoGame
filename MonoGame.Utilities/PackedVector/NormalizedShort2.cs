@@ -79,7 +79,7 @@ namespace MonoGame.Utilities.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => PackedValue.ToString("X");
+        public override string ToString() => $"NormalizedShort2({X}, {Y}, {Z}, {W})";
 
         public override int GetHashCode() => PackedValue.GetHashCode();
 

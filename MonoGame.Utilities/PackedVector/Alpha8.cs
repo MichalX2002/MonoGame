@@ -80,7 +80,7 @@ namespace MonoGame.Utilities.PackedVector
 
         public void FromRgba64(Rgba64 source) => A = PackedVectorHelper.DownScale16To8Bit(source.A);
 
-        public void ToColor(ref Color destination)
+        public readonly void ToColor(ref Color destination)
         {
             destination.R = destination.G = destination.B = byte.MaxValue;
             destination.A = A;
@@ -103,12 +103,12 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => $"Alpha8({A / 255f})";
+        public override string ToString() => $"Alpha8({A.ToString()})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => A.GetHashCode();
+        public override int GetHashCode() => A;
 
         #endregion
     }

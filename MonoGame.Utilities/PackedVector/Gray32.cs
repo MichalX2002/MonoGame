@@ -63,7 +63,7 @@ namespace MonoGame.Utilities.PackedVector
         public void FromGray16(Gray16 source) => L = (uint)(source.PackedValue * ShortMul);
 
         /// <inheritdoc/>
-        public void FromGrayAlpha16(GrayAlpha16 source) => FromGray8(source.L);
+        public void FromGrayAlpha16(GrayAlpha16 source) => L = (uint)(source.PackedValue * ByteMul);
 
         /// <inheritdoc/>
         public void FromRgb24(Rgb24 source) =>
@@ -102,7 +102,7 @@ namespace MonoGame.Utilities.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => $"Gray32({L})";
+        public override string ToString() => $"Gray32({L.ToString()})";
 
         public override int GetHashCode() => L.GetHashCode();
 

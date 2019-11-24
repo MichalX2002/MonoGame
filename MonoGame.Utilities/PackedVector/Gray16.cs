@@ -80,7 +80,7 @@ namespace MonoGame.Utilities.PackedVector
             PackedValue = PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B);
 
         /// <inheritdoc />
-        public void ToColor(ref Color destination)
+        public readonly void ToColor(ref Color destination)
         {
             destination.R = destination.G = destination.B =
                 PackedVectorHelper.DownScale16To8Bit(PackedValue);

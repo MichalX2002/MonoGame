@@ -24,7 +24,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// <see cref="Vector4"/> with all values set to <see cref="byte.MaxValue"/>.
         /// </summary>
-        internal static readonly Vector4 MaxBytes = new Vector4(byte.MaxValue);
+        internal static readonly Vector4 MaxByteValue = new Vector4(byte.MaxValue);
 
         #region Public Constants
 
@@ -99,31 +99,31 @@ namespace MonoGame.Framework
         /// Gets or sets the x and y coordinates as a (x,y) <see cref="Vector2"/>.
         /// </summary>
         [IgnoreDataMember]
-        public Vector2 XY { get => ToVector2(); set { X = value.X; Y = value.Y; } }
+        public Vector2 XY { readonly get => ToVector2(); set { X = value.X; Y = value.Y; } }
 
         /// <summary>
         /// Gets or sets the z and w coordinates as a (z,w) <see cref="Vector2"/>.
         /// </summary>
         [IgnoreDataMember]
-        public Vector2 ZW { get => new Vector2(Z, W); set { Z = value.X; W = value.Y; } }
+        public Vector2 ZW { readonly get => new Vector2(Z, W); set { Z = value.X; W = value.Y; } }
 
         /// <summary>
         /// Gets or sets the z and y coordinates as a (z,y) <see cref="Vector2"/>.
         /// </summary>
         [IgnoreDataMember]
-        public Vector2 ZY { get => new Vector2(Z, Y); set { Z = value.X; Y = value.Y; } }
+        public Vector2 ZY { readonly get => new Vector2(Z, Y); set { Z = value.X; Y = value.Y; } }
 
         /// <summary>
         /// Gets or sets the x and w coordinates as a (x,w) <see cref="Vector2"/>.
         /// </summary>
         [IgnoreDataMember]
-        public Vector2 XW { get => new Vector2(X, W); set { X = value.X; W = value.Y; } }
+        public Vector2 XW { readonly get => new Vector2(X, W); set { X = value.X; W = value.Y; } }
 
         /// <summary>
         /// Gets or sets the x and y coordinates as a (x,y) <see cref="Vector2"/>.
         /// </summary>
         [IgnoreDataMember]
-        public Vector3 XYZ { get => ToVector3(); set { X = value.X; Y = value.Y; Z = value.Z; } }
+        public Vector3 XYZ { readonly get => ToVector3(); set { X = value.X; Y = value.Y; Z = value.Z; } }
 
         #endregion
 

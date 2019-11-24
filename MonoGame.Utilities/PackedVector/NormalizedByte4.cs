@@ -128,9 +128,9 @@ namespace MonoGame.Utilities.PackedVector
 
         #region Object Overrides
 
+        public override string ToString() => $"NormalizedByte4({X}, {Y}, {Z}, {W})";
+
         public override int GetHashCode() => PackedValue.GetHashCode();
-        
-        public override string ToString() => PackedValue.ToString("X");
 
         #endregion
     }

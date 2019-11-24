@@ -15,6 +15,7 @@ namespace MonoGame.Utilities.PackedVector
     {
         /// <summary>
         /// Sets the pixel from a scaled <see cref="Vector4"/>.
+        /// The XYZW vector components correspond to RGBA. 
         /// </summary>
         void FromVector4(Vector4 vector);
 

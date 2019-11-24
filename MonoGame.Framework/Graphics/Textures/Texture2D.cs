@@ -495,7 +495,7 @@ namespace MonoGame.Framework.Graphics
                 case SurfaceFormat.Bgr565: SaveByType<Bgr565>(); break;
                 case SurfaceFormat.Bgra5551: SaveByType<Bgra5551>(); break;
                 case SurfaceFormat.Bgra4444: SaveByType<Bgra4444>(); break;
-
+                    
                 case SurfaceFormat.Bgr32SRgb: SaveByType<Bgr32SRgb>(); break;
                 case SurfaceFormat.Bgra32SRgb: SaveByType<Bgra32SRgb>(); break;
                 case SurfaceFormat.Bgr32: SaveByType<Bgr32>(); break;

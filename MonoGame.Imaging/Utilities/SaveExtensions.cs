@@ -142,52 +142,52 @@ namespace MonoGame.Imaging
         #region Save(IReadOnlyPixelRows) Overloads
 
         public static void Save<TPixel>(
-            this IReadOnlyPixelBuffer<TPixel> image,
+            this IReadOnlyPixelBuffer<TPixel> pixels,
             ImagingConfig imagingConfig, Stream output, 
             ImageFormat format, EncoderConfig encoderConfig = null,
             EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            AssertValidSource(image);
+            AssertValidSource(pixels);
             AssertValidArguments(imagingConfig, format, encoderConfig);
             AssertValidOutput(output);
             
-            var collection = new LayerCollection<TPixel, IReadOnlyPixelBuffer<TPixel>>(image);
+            var collection = new LayerCollection<TPixel, IReadOnlyPixelBuffer<TPixel>>(pixels);
             Save(collection, imagingConfig, output, format, encoderConfig, onProgress);
         }
 
         public static void Save<TPixel>(
-            this IReadOnlyPixelBuffer<TPixel> image,
+            this IReadOnlyPixelBuffer<TPixel> pixels,
             Stream output, ImageFormat format, EncoderConfig encoderConfig = null,
             EncodeProgressCallback<TPixel, IReadOnlyPixelBuffer<TPixel>> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            Save(image, ImagingConfig.Default, output, format, encoderConfig, onProgress);
+            Save(pixels, ImagingConfig.Default, output, format, encoderConfig, onProgress);
         }
 
         public static void Save<TPixel>(
-            this IReadOnlyPixelBuffer<TPixel> image,
+            this IReadOnlyPixelBuffer<TPixel> pixels,
             ImagingConfig imagingConfig, string filePath, 
             ImageFormat format = null, EncoderConfig encoderConfig = null,
             EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            AssertValidSource(image);
+            AssertValidSource(pixels);
             if (format == null) format = ImageFormat.GetByPath(filePath);
             AssertValidArguments(imagingConfig, format, encoderConfig);
             AssertValidPath(filePath);
 
-            var collection = new ReadOnlyFrameCollection<TPixel>(image);
+            var collection = new ReadOnlyFrameCollection<TPixel>(pixels);
             Save(collection, imagingConfig, filePath, format, encoderConfig, onProgress);
         }
 
         public static void Save<TPixel>(
-            this IReadOnlyPixelRows<TPixel> image,
+            this IReadOnlyPixelBuffer<TPixel> pixels,
             string filePath, ImageFormat format = null, EncoderConfig encoderConfig = null,
             EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            Save(image, ImagingConfig.Default, filePath, format, encoderConfig, onProgress);
+            Save(pixels, ImagingConfig.Default, filePath, format, encoderConfig, onProgress);
         }
 
         #endregion

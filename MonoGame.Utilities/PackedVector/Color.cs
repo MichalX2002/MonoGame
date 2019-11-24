@@ -50,7 +50,7 @@ namespace MonoGame.Framework
         /// </summary>
         public Rgb24 Rgb
         {
-            get => new Rgb24(R, G, B);
+            readonly get => new Rgb24(R, G, B);
             set
             {
                 R = value.R;
@@ -64,7 +64,7 @@ namespace MonoGame.Framework
         /// </summary>
         public Bgr24 Bgr
         {
-            get => new Bgr24(R, G, B);
+            readonly get => new Bgr24(R, G, B);
             set
             {
                 R = value.R;
@@ -256,7 +256,7 @@ namespace MonoGame.Framework
         public void FromScaledVector4(Vector4 vector) 
         {
             vector *= 255;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxBytes);
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxByteValue);
 
             R = (byte)vector.X;
             G = (byte)vector.Y;
@@ -314,7 +314,7 @@ namespace MonoGame.Framework
         }
 
         /// <inheritdoc/>
-        public void ToColor(ref Color destination) => destination = this;
+        public readonly void ToColor(ref Color destination) => destination = this;
 
         #endregion
 
@@ -460,10 +460,10 @@ namespace MonoGame.Framework
         /// <param name="scale">Factor.</param>
         /// <returns>Multiplication result.</returns>
         public static Color operator *(in Color value, float scale) => new Color(
-                (int)(value.R * scale),
-                (int)(value.G * scale),
-                (int)(value.B * scale),
-                (int)(value.A * scale));
+            (int)(value.R * scale),
+            (int)(value.G * scale),
+            (int)(value.B * scale),
+            (int)(value.A * scale));
 
         /// <summary>
         /// Gets the hexadecimal <see cref="string"/> representation of this <see cref="Color"/>.

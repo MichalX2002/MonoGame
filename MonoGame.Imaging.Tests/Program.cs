@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using MonoGame.Utilities;
+using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging.Tests
 {
@@ -40,7 +41,7 @@ namespace MonoGame.Imaging.Tests
             int writeRepeats = 1;
 
             void OnReadProgress(
-                int frameIndex, FrameCollection<Color> frames, double progress, Rectangle? rectangle)
+                int frameIndex, Image<Color> frame, double progress, Rectangle? rectangle)
             {
                 Console.WriteLine("Read: " + Math.Round(progress * 100, 2) + "%");
             }
@@ -66,7 +67,7 @@ namespace MonoGame.Imaging.Tests
             watch.Reset();
 
             bool OnWriteProgress(
-                int frameIndex, ImageCollection<Color, ImageFrame<Color>> frames, double progress)
+                int frameIndex, IReadOnlyPixelBuffer<Color> frame, double progress)
             {
                 //Console.WriteLine("Write: " + Math.Round(progress * 100, 2) + "%");
                 return true;

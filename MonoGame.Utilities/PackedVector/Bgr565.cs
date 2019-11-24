@@ -29,7 +29,7 @@ namespace MonoGame.Utilities.PackedVector
         /// Constructs the packed vector with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector3"/> containing the components.</param>
-        public Bgr565(Vector3 vector) => PackedValue = Pack(ref vector);
+        public Bgr565(Vector3 vector) => PackedValue = Pack(vector);
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
@@ -40,7 +40,7 @@ namespace MonoGame.Utilities.PackedVector
 
         #endregion
 
-        private static ushort Pack(ref Vector3 vector)
+        private static ushort Pack(Vector3 vector)
         {
             vector = Vector3.Clamp(vector, Vector3.Zero, Vector3.One);
             
@@ -57,13 +57,7 @@ namespace MonoGame.Utilities.PackedVector
         public ushort PackedValue { get; set; }
 
         /// <inheritdoc/>
-        public void FromVector4(Vector4 vector)
-        {
-            PackedValue = (ushort)(
-                (((int)(vector.X * 31f) & 0x1F) << 11) |
-                (((int)(vector.Y * 63f) & 0x3F) << 5) |
-                ((int)(vector.Z * 31f) & 0x1F));
-        }
+        public void FromVector4(Vector4 vector) => Pack(vector.XYZ);
 
         /// <inheritdoc/>
         public readonly Vector4 ToVector4()
@@ -102,7 +96,7 @@ namespace MonoGame.Utilities.PackedVector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => $"Bgr565({this.ToVector3()})";
+        public override string ToString() => $"Bgr565({ToVector4().XYZ.ToString()})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
