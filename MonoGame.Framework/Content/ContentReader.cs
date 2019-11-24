@@ -11,11 +11,11 @@ namespace MonoGame.Framework.Content
 {
     public sealed class ContentReader : BinaryReader
     {
-        private Action<IDisposable> recordDisposableObject;
-        private ContentTypeReaderManager typeReaderManager;
-        private List<KeyValuePair<int, Action<object>>> sharedResourceFixups;
-        internal int version;
-		internal int sharedResourceCount;
+        private Action<IDisposable> _recordDisposableObject;
+        private ContentTypeReaderManager _typeReaderManager;
+        private List<KeyValuePair<int, Action<object>>> _sharedResourceFixups;
+        internal int Version { get; private set; }
+		internal int SharedResourceCount { get; private set; }
 
         internal ContentTypeReader[] TypeReaders { get; private set; }
         
@@ -23,22 +23,22 @@ namespace MonoGame.Framework.Content
         public string AssetName { get; }
 
         internal ContentReader(
-            ContentManager manager, Stream stream,
+            ContentManager manager, Stream stream, 
             string assetName, int version, Action<IDisposable> recordDisposableObject)
             : base(stream)
         {
-            this.recordDisposableObject = recordDisposableObject;
             ContentManager = manager;
             AssetName = assetName;
-			this.version = version;
+			Version = version;
+            _recordDisposableObject = recordDisposableObject;
         }
 
-        internal object ReadAsset<T>()
+        internal T ReadAsset<T>()
         {
             InitializeTypeReaders();
 
             // Read primary object
-            object result = ReadObject<T>();
+            T result = ReadObject<T>();
 
             // Read shared resources
             ReadSharedResources();
@@ -46,12 +46,12 @@ namespace MonoGame.Framework.Content
             return result;
         }
 
-        internal object ReadAsset<T>(T existingInstance)
+        internal T ReadAsset<T>(T existingInstance)
         {
             InitializeTypeReaders();
 
             // Read primary object
-            object result = ReadObject(existingInstance);
+            T result = ReadObject(existingInstance);
 
             // Read shared resources
             ReadSharedResources();
@@ -61,58 +61,34 @@ namespace MonoGame.Framework.Content
 
         internal void InitializeTypeReaders()
         {
-            typeReaderManager = new ContentTypeReaderManager();
-            TypeReaders = typeReaderManager.LoadAssetReaders(this);
-            sharedResourceCount = Read7BitEncodedInt();
-            sharedResourceFixups = new List<KeyValuePair<int, Action<object>>>();
+            _typeReaderManager = new ContentTypeReaderManager();
+            TypeReaders = _typeReaderManager.LoadAssetReaders(this);
+            SharedResourceCount = Read7BitEncodedInt();
+            _sharedResourceFixups = new List<KeyValuePair<int, Action<object>>>();
         }
 
         internal void ReadSharedResources()
         {
-            if (sharedResourceCount <= 0)
+            if (SharedResourceCount <= 0)
                 return;
 
-            var sharedResources = new object[sharedResourceCount];
-            for (var i = 0; i < sharedResourceCount; ++i)
+            var sharedResources = new object[SharedResourceCount];
+            for (var i = 0; i < SharedResourceCount; ++i)
                 sharedResources[i] = InnerReadObject<object>(null);
 
             // Fixup shared resources by calling each registered action
-            foreach (var fixup in sharedResourceFixups)
-                fixup.Value(sharedResources[fixup.Key]);
+            foreach (var fixup in _sharedResourceFixups)
+                fixup.Value.Invoke(sharedResources[fixup.Key]);
         }
 
         public T ReadExternalReference<T>()
         {
-            var externalReference = ReadString();
+            string externalReference = ReadString();
 
             if (!string.IsNullOrEmpty(externalReference))
                 return ContentManager.Load<T>(FileHelpers.ResolveRelativePath(AssetName, externalReference));
 
             return default;
-        }
-
-        public Matrix ReadMatrix()
-        {
-            Matrix result = new Matrix
-            {
-                M11 = ReadSingle(),
-                M12 = ReadSingle(),
-                M13 = ReadSingle(),
-                M14 = ReadSingle(),
-                M21 = ReadSingle(),
-                M22 = ReadSingle(),
-                M23 = ReadSingle(),
-                M24 = ReadSingle(),
-                M31 = ReadSingle(),
-                M32 = ReadSingle(),
-                M33 = ReadSingle(),
-                M34 = ReadSingle(),
-                M41 = ReadSingle(),
-                M42 = ReadSingle(),
-                M43 = ReadSingle(),
-                M44 = ReadSingle()
-            };
-            return result;
         }
             
         private void RecordDisposable<T>(T result)
@@ -120,8 +96,8 @@ namespace MonoGame.Framework.Content
             if (!(result is IDisposable disposable))
                 return;
 
-            if (recordDisposableObject != null)
-                recordDisposableObject(disposable);
+            if (_recordDisposableObject != null)
+                _recordDisposableObject.Invoke(disposable);
             else
                 ContentManager.RecordDisposable(disposable);
         }
@@ -131,16 +107,16 @@ namespace MonoGame.Framework.Content
             return InnerReadObject(default(T));
         }
 
+        public T ReadObject<T>(T existingInstance)
+        {
+            return InnerReadObject(existingInstance);
+        }
+
         public T ReadObject<T>(ContentTypeReader typeReader)
         {
             var result = (T)typeReader.Read(this, default(T));            
             RecordDisposable(result);
             return result;
-        }
-
-        public T ReadObject<T>(T existingInstance)
-        {
-            return InnerReadObject(existingInstance);
         }
 
         private T InnerReadObject<T>(T existingInstance)
@@ -164,21 +140,10 @@ namespace MonoGame.Framework.Content
             if (!ReflectionHelpers.IsValueType(typeReader.TargetType))
                 return ReadObject(existingInstance);
 
-            var result = (T)typeReader.Read(this, existingInstance);
+            T result = (T)typeReader.Read(this, existingInstance);
 
             RecordDisposable(result);
             return result;
-        }
-
-        public Quaternion ReadQuaternion()
-        {
-            return new Quaternion
-            {
-                X = ReadSingle(),
-                Y = ReadSingle(),
-                Z = ReadSingle(),
-                W = ReadSingle()
-            };
         }
 
         public T ReadRawObject<T>()
@@ -212,7 +177,7 @@ namespace MonoGame.Framework.Content
             int index = Read7BitEncodedInt();
             if (index > 0)
             {
-                sharedResourceFixups.Add(new KeyValuePair<int, Action<object>>(index - 1, delegate (object v)
+                _sharedResourceFixups.Add(new KeyValuePair<int, Action<object>>(index - 1, delegate (object v)
                 {
                     if (!(v is T))
                         throw new ContentLoadException(
@@ -222,6 +187,41 @@ namespace MonoGame.Framework.Content
                     fixup.Invoke((T)v);
                 }));
             }
+        }
+
+        public Matrix ReadMatrix()
+        {
+            Matrix result = new Matrix
+            {
+                M11 = ReadSingle(),
+                M12 = ReadSingle(),
+                M13 = ReadSingle(),
+                M14 = ReadSingle(),
+                M21 = ReadSingle(),
+                M22 = ReadSingle(),
+                M23 = ReadSingle(),
+                M24 = ReadSingle(),
+                M31 = ReadSingle(),
+                M32 = ReadSingle(),
+                M33 = ReadSingle(),
+                M34 = ReadSingle(),
+                M41 = ReadSingle(),
+                M42 = ReadSingle(),
+                M43 = ReadSingle(),
+                M44 = ReadSingle()
+            };
+            return result;
+        }
+
+        public Quaternion ReadQuaternion()
+        {
+            return new Quaternion
+            {
+                X = ReadSingle(),
+                Y = ReadSingle(),
+                Z = ReadSingle(),
+                W = ReadSingle()
+            };
         }
 
         public Vector2 ReadVector2()

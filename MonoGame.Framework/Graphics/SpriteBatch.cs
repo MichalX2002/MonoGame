@@ -39,7 +39,7 @@ namespace MonoGame.Framework.Graphics
         {
             GraphicsDevice = graphicsDevice ??
                 throw new ArgumentNullException(
-                    nameof(graphicsDevice), FrameworkResources.ResourceCreationWhenDeviceIsNull);
+                    nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
 
             _spriteEffect = new SpriteEffect(graphicsDevice);
             _spritePass = _spriteEffect.CurrentTechnique.Passes[0];

@@ -4,14 +4,15 @@
 
 using System;
 using System.Collections.Generic;
-using MonoGame.Framework.Content;
 using MonoGame.Utilities;
 
 namespace MonoGame.Framework.Content
 {
     internal class ListReader<T> : ContentTypeReader<List<T>>
     {
-        ContentTypeReader elementReader;
+        private ContentTypeReader _elementReader;
+
+        public override bool CanDeserializeIntoExistingObject => true;
 
         public ListReader()
         {
@@ -19,22 +20,19 @@ namespace MonoGame.Framework.Content
 
         protected internal override void Initialize(ContentTypeReaderManager manager)
         {
-			Type readerType = typeof(T);
-			elementReader = manager.GetTypeReader(readerType);
+			_elementReader = manager.GetTypeReader(typeof(T));
         }
-
-        public override bool CanDeserializeIntoExistingObject => true;
 
         protected internal override List<T> Read(ContentReader input, List<T> existingInstance)
         {
             int count = input.ReadInt32();
-            List<T> list = existingInstance;
-            if (list == null) list = new List<T>(count);
+            var list = existingInstance ?? new List<T>(count);
+
             for (int i = 0; i < count; i++)
             {
-                if (ReflectionHelpers.IsValueType(typeof(T)))
+                if (ReflectionHelpers.IsValueType<T>())
 				{
-                	list.Add(input.ReadObject<T>(elementReader));
+                	list.Add(input.ReadObject<T>(_elementReader));
 				}
 				else
 				{
