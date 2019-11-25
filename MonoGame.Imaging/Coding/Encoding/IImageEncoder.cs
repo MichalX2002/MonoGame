@@ -8,10 +8,6 @@ namespace MonoGame.Imaging.Encoding
     /// <summary>
     /// Represents a progress update for image encoding.
     /// </summary>
-    /// <typeparam name="TPixel"></typeparam>
-    /// <param name="frameIndex"></param>
-    /// <param name="frames"></param>
-    /// <param name="percentage"></param>
     public delegate void EncodeProgressCallback<TPixel>(
         int frameIndex, IReadOnlyPixelBuffer<TPixel> frame, double percentage)
         where TPixel : unmanaged, IPixel;
@@ -22,9 +18,9 @@ namespace MonoGame.Imaging.Encoding
     public interface IImageEncoder : IImageCoder
     {
         /// <summary>
-        /// Gets the default configuration for this encoder.
+        /// Gets the default options for this encoder.
         /// </summary>
-        EncoderConfig DefaultConfig { get; }
+        EncoderOptions DefaultOptions { get; }
 
         /// <summary>
         /// Encodes the first image to a stream.
@@ -32,14 +28,14 @@ namespace MonoGame.Imaging.Encoding
         /// <typeparam name="TPixel">The pixel type of the frame collection.</typeparam>
         /// <param name="image">The image to encode.</param>
         /// <param name="stream">The stream to output to.</param>
-        /// <param name="encoderConfig">The encoder configuration.</param>
-        /// <param name="imagingConfig">The imaging configuration.</param>
+        /// <param name="encoderOptions">The encoder options.</param>
+        /// <param name="config">The imaging configuration.</param>
         /// <param name="onProgress">Optional delegate for reporting encode progress.</param>
         void EncodeFirst<TPixel>(
             IReadOnlyPixelBuffer<TPixel> image,
             Stream stream,
-            EncoderConfig encoderConfig,
-            ImagingConfig imagingConfig,
+            EncoderOptions encoderOptions,
+            ImagingConfig config,
             CancellationToken cancellationToken,
             EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel;
@@ -50,14 +46,14 @@ namespace MonoGame.Imaging.Encoding
         /// <typeparam name="TPixel">The pixel type of the frame collection.</typeparam>
         /// <param name="image">The image to encode.</param>
         /// <param name="stream">The stream to output to.</param>
-        /// <param name="encoderConfig">The encoder configuration.</param>
-        /// <param name="imagingConfig">The imaging configuration.</param>
+        /// <param name="encoderOptions">The encoder options.</param>
+        /// <param name="config">The imaging configuration.</param>
         /// <param name="onProgress">Optional delegate for reporting encode progress.</param>
         void EncodeNext<TPixel>(
             IReadOnlyPixelBuffer<TPixel> image,
             Stream stream,
-            EncoderConfig encoderConfig,
-            ImagingConfig imagingConfig,
+            EncoderOptions encoderOptions,
+            ImagingConfig config,
             CancellationToken cancellationToken,
             EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel;

@@ -17,7 +17,7 @@ namespace MonoGame.Imaging.Encoding
         }
 
         public abstract ImageFormat Format { get; }
-        public abstract EncoderConfig DefaultConfig { get; }
+        public abstract EncoderOptions DefaultOptions { get; }
 
         public virtual bool ImplementsAnimation => false;
         public virtual bool SupportsCancellation => true;
@@ -26,16 +26,16 @@ namespace MonoGame.Imaging.Encoding
 
         public void Encode<TPixel>(
             ImageCollection<TPixel, ReadOnlyImageFrame<TPixel>> images, Stream stream,
-            EncoderConfig encoderConfig, ImagingConfig imagingConfig,
+            EncoderOptions encoderOptions, ImagingConfig config,
             CancellationToken cancellation,
             EncodeProgressCallback<TPixel, ReadOnlyImageFrame<TPixel>> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             CommonArgumentGuard.AssertNonEmpty(images?.Count, nameof(images));
             if (stream == null) throw new ArgumentNullException(nameof(stream));
-            if (encoderConfig == null) throw new ArgumentNullException(nameof(encoderConfig));
-            if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
-            EncoderConfig.AssertTypeEqual(DefaultConfig, encoderConfig, nameof(encoderConfig));
+            if (encoderOptions == null) throw new ArgumentNullException(nameof(encoderOptions));
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            EncoderOptions.AssertTypeEqual(DefaultOptions, encoderOptions, nameof(encoderOptions));
 
             cancellation.ThrowIfCancellationRequested();
 
@@ -60,10 +60,10 @@ namespace MonoGame.Imaging.Encoding
 
                     if (i == 0)
                     {
-                        if (!WriteFirst(context, image, encoderConfig, imagingConfig))
+                        if (!WriteFirst(context, image, encoderOptions, config))
                             throw new ImageCoderException(Format);
                     }
-                    else if (!WriteNext(context, image, encoderConfig, imagingConfig))
+                    else if (!WriteNext(context, image, encoderOptions, config))
                     {
                         break;
                     }
@@ -78,15 +78,15 @@ namespace MonoGame.Imaging.Encoding
 
         protected abstract bool WriteFirst<TPixel>(
             in WriteContext context, ReadOnlyImageFrame<TPixel> image,
-            EncoderConfig encoderConfig, ImagingConfig imagingConfig)
+            EncoderOptions encoderOptions, ImagingConfig config)
             where TPixel : unmanaged, IPixel;
 
         protected virtual bool WriteNext<TPixel>(
             in WriteContext context, ReadOnlyImageFrame<TPixel> image,
-            EncoderConfig encoderConfig, ImagingConfig imagingConfig)
+            EncoderOptions encoderOptions, ImagingConfig config)
             where TPixel : unmanaged, IPixel
         {
-            ImagingArgumentGuard.AssertAnimationSupport(this, imagingConfig);
+            ImagingArgumentGuard.AssertAnimationSupport(this, config);
             return false;
         }
     }

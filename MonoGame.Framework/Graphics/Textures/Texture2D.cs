@@ -460,27 +460,26 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Saves the texture to a stream with the specified format and configurations.
         /// </summary>
-        /// <param name="imagingConfig">The imaging configuration.</param>
+        /// <param name="config">The imaging configuration.</param>
         /// <param name="stream">Destination for the texture.</param>
         /// <param name="format">The format used to encode the texture.</param>
-        /// <param name="encoderConfig">The encoder configuration.</param>
+        /// <param name="encoderOptions">The encoder options.</param>
         /// <param name="level">The texture level to save.</param>
         /// <param name="rect">The cutout of the texture to save.</param>
         [CLSCompliant(false)]
         public void Save(
-            ImagingConfig imagingConfig, Stream stream,
-            ImageFormat format, EncoderConfig encoderConfig,
+            ImagingConfig config, Stream stream, ImageFormat format, EncoderOptions encoderOptions,
             int level = 0, Rectangle? rect = null)
         {
-            if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
+            if (config == null) throw new ArgumentNullException(nameof(config));
             if (stream == null) throw new ArgumentNullException(nameof(stream));
             if (format == null) throw new ArgumentNullException(nameof(format));
-            if (encoderConfig == null) throw new ArgumentNullException(nameof(encoderConfig));
+            if (encoderOptions == null) throw new ArgumentNullException(nameof(encoderOptions));
 
             void SaveByType<TPixel>() where TPixel : unmanaged, IPixel
             {
                 using (var textureImage = ToImage<TPixel>(level, rect))
-                    textureImage.Save(imagingConfig, stream, format, encoderConfig);
+                    textureImage.Save(config, stream, format, encoderOptions);
             }
 
             switch (Format)
@@ -526,14 +525,14 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="stream">Destination for the texture.</param>
         /// <param name="format">The format used to encode the texture.</param>
-        /// <param name="encoderConfig">The encoder configuration.</param>
+        /// <param name="encoderOptions">The encoder options.</param>
         /// <param name="level">The texture level to save.</param>
         /// <param name="rect">The cutout of the texture to save.</param>
         [CLSCompliant(false)]
         public void Save(
-            Stream stream, ImageFormat format, EncoderConfig encoderConfig, 
+            Stream stream, ImageFormat format, EncoderOptions encoderOptions, 
             int level = 0, Rectangle? rect = null) => 
-            Save(ImagingConfig.Default, stream, format, encoderConfig, level, rect);
+            Save(ImagingConfig.Default, stream, format, encoderOptions, level, rect);
 
         /// <summary>
         /// Saves the texture to a stream with the specified format.
@@ -544,7 +543,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rect">The cutout of the texture to save.</param>
         [CLSCompliant(false)]
         public void Save(Stream stream, ImageFormat format, int level = 0, Rectangle? rect = null) => 
-            Save(ImagingConfig.Default, stream, format, Image.GetDefaultEncoderConfig(format), level, rect);
+            Save(ImagingConfig.Default, stream, format, Image.GetDefaultEncoderOptions(format), level, rect);
 
         public void SaveAsPng(Stream stream, int level = 0, Rectangle? rect = null) =>
             Save(stream, ImageFormat.Png, level, rect);

@@ -40,7 +40,7 @@ namespace MonoGame.Imaging
             private bool _leaveOpen;
 
             public IImageEncoder Encoder { get; }
-            public EncoderConfig EncoderConfig { get; }
+            public EncoderOptions EncoderOptions { get; }
 
             public IReadOnlyPixelBuffer<TPixel> Current { get; private set; }
             object IEnumerator.Current => Current;
