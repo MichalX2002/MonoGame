@@ -328,6 +328,8 @@ namespace MonoGame.Framework
             A = byte.MaxValue;
         }
 
+        /* TODO: add following pixel types
+
         public void FromArgb32(Argb32 source)
         {
             R = source.R;
@@ -354,6 +356,8 @@ namespace MonoGame.Framework
         /// Gets the <see cref="Argb32"/> representation of this <see cref="Color"/>.
         /// </summary>
         public Argb32 ToArgb32() => new Argb32(R, G, B, A);
+    
+        */
 
         /// <summary>
         /// Gets the <see cref="Rgb24"/> representation of this <see cref="Color"/>.

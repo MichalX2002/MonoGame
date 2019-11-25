@@ -9,15 +9,9 @@ namespace MonoGame.Imaging
     [Serializable]
     public abstract class EncoderOptions
     {
-        public static bool TypeEquals(EncoderOptions a, Type b)
-        {
-            return a.GetType() == b;
-        }
+        public static bool TypeEquals(EncoderOptions a, Type b) => a.GetType() == b;
 
-        public static bool TypeEquals(EncoderOptions a, EncoderOptions b)
-        {
-            return TypeEquals(a, b.GetType());
-        }
+        public static bool TypeEquals(EncoderOptions a, EncoderOptions b) => TypeEquals(a, b.GetType());
 
         [DebuggerHidden]
         public static void AssertTypeEqual(EncoderOptions required, EncoderOptions other, string argName)

@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Threading;
+using MonoGame.Framework;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Utilities.PackedVector;
 
@@ -9,7 +10,7 @@ namespace MonoGame.Imaging.Coding.Encoding
     /// Represents a progress update for image encoding.
     /// </summary>
     public delegate void EncodeProgressCallback<TPixel>(
-        int frameIndex, IReadOnlyPixelBuffer<TPixel> frame, double percentage)
+        ImageEncoderState<TPixel> encoderState, double percentage, Rectangle? rectangle)
         where TPixel : unmanaged, IPixel;
 
     /// <summary>

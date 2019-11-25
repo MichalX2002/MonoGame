@@ -4,11 +4,10 @@ using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
-    public class ImageDecoderState<TPixel> where TPixel : unmanaged, IPixel
+    public class ImageDecoderState<TPixel> : ImageCoderState<TPixel>
+        where TPixel : unmanaged, IPixel
     {
-        public ImageReadStream Stream { get; }
-
-        public CancellationToken CancellationToken => Stream.Context.CancellationToken;
+        #region Auto Properties
 
         /// <summary>
         /// Gets the decoder that the state originates from.
@@ -16,25 +15,24 @@ namespace MonoGame.Imaging.Coding.Decoding
         public IImageDecoder Decoder { get; }
 
         /// <summary>
-        /// Gets the most recently decoded image. 
+        /// Gets or sets the most recently decoded image. 
         /// </summary>
-        public Image<TPixel> Current { get; }
+        public Image<TPixel> Current { get; set; }
 
-        /// <summary>
-        /// Gets whether the decoder expects another frame from the stream.
-        /// </summary>
-        public bool HasNext { get; protected set; }
+        #endregion
+
+        #region Properties
+
+        public new ImageReadStream Stream => (ImageReadStream)base.Stream;
+
+        public CancellationToken CancellationToken => Stream.Context.CancellationToken;
+
+        #endregion
 
         public ImageDecoderState(
-            ImageReadStream stream, 
-            IImageDecoder decoder,
-            Image<TPixel> current,
-            bool hasNext)
+            IImageDecoder decoder, ImageReadStream stream, bool leaveOpen) : base(stream, leaveOpen)
         {
-            Stream = stream ?? throw new ArgumentNullException(nameof(stream));
             Decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
-            Current = current;
-            HasNext = hasNext;
         }
     }
 }

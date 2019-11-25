@@ -9,7 +9,7 @@ using static StbSharp.StbImage;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
-    public abstract class StbDecoderBase : IImageDecoder, IImageIdentifier
+    public abstract class StbDecoderBase : IImageDecoder, IImageInfoDetector
     {
         public abstract ImageFormat Format { get; }
 
