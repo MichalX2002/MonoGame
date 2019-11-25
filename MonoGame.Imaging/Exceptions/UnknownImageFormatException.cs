@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace MonoGame.Imaging
+namespace MonoGame.Imaging.Coding
 {
-    public class UnknownImageFormatException : Exception
+    public class UnknownImageFormatException : ImagingException
     {
         public UnknownImageFormatException()
         {

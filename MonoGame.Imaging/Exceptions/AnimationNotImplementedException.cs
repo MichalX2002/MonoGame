@@ -1,33 +1,32 @@
 ﻿using System;
 
-namespace MonoGame.Imaging
+namespace MonoGame.Imaging.Coding
 {
-    public class AnimationNotImplementedException : Exception
+    /// <summary>
+    /// Thrown when attempting to process multiple frames with an 
+    /// <see cref="IImageCoder"/> that is missing <see cref="IAnimatedFormatAttribute"/>.
+    /// </summary>
+    public class AnimationNotImplementedException : ImagingException
     {
         /// <summary>
-        /// Gets the image coder that has not implement animation.
+        /// Gets the image coder that has not implemented animation.
         /// </summary>
         public IImageCoder Coder { get; }
-
-        /// <summary>
-        /// Gets the format of the <see cref="Coder"/>.
-        /// </summary>
-        public ImageFormat Format => Coder.Format;
-
-        public AnimationNotImplementedException(IImageCoder coder)
+        
+        public AnimationNotImplementedException(IImageCoder coder) : base(coder?.Format)
         {
-            Coder = coder;
+            Coder = coder ?? throw new ArgumentNullException(nameof(coder));
         }
 
-        public AnimationNotImplementedException(IImageCoder coder, string message) : base(message)
+        public AnimationNotImplementedException(string message, IImageCoder coder) : base(message, coder?.Format)
         {
-            Coder = coder;
+            Coder = coder ?? throw new ArgumentNullException(nameof(coder));
         }
 
         public AnimationNotImplementedException(
-            IImageCoder coder, string message, Exception inner) : base(message, inner)
+            string message, Exception inner, IImageCoder coder) : base(message, inner, coder?.Format)
         {
-            Coder = coder;
+            Coder = coder ?? throw new ArgumentNullException(nameof(coder));
         }
     }
 }

@@ -47,7 +47,7 @@ namespace MonoGame.Imaging
 
         #region LoadFrames(IReadOnlyMemory)
 
-        public static ImageDecoderEnumerable<TPixel> LoadFrames<TPixel>(
+        public static ImageDecoderEnumerator<TPixel> LoadFrames<TPixel>(
             IReadOnlyMemory<byte> data, ImagingConfig config, int? frameLimit, out ImageFormat format,
             CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
@@ -60,7 +60,7 @@ namespace MonoGame.Imaging
             return decoder.Decode(data, config, frameLimit, cancellation, onProgress);
         }
 
-        public static ImageDecoderEnumerable<TPixel> LoadFrames<TPixel>(
+        public static ImageDecoderEnumerator<TPixel> LoadFrames<TPixel>(
             IReadOnlyMemory<byte> data, int? frameLimit, out ImageFormat format,
             CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel

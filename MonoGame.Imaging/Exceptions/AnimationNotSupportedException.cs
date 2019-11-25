@@ -1,28 +1,25 @@
 ﻿using System;
+using MonoGame.Imaging.Coding;
 
 namespace MonoGame.Imaging
 {
-    public class AnimationNotSupportedException : Exception
+    /// <summary>
+    /// Thrown when attempting to process multiple frames with an 
+    /// <see cref="ImageFormat"/> that is missing <see cref="IAnimatedFormatAttribute"/>.
+    /// </summary>
+    public class AnimationNotSupportedException : ImagingException
     {
-        /// <summary>
-        /// Gets the format that does not support animation.
-        /// </summary>
-        public ImageFormat Format { get; }
-
-        public AnimationNotSupportedException(ImageFormat format)
+        public AnimationNotSupportedException(ImageFormat format) : base(format)
         {
-            Format = format;
         }
 
-        public AnimationNotSupportedException(ImageFormat format, string message) : base(message)
+        public AnimationNotSupportedException(string message, ImageFormat format) : base(message, format)
         {
-            Format = format;
         }
 
         public AnimationNotSupportedException(
-            ImageFormat format, string message, Exception inner) : base(message, inner)
+            string message, Exception inner, ImageFormat format) : base(message, inner, format)
         {
-            Format = format;
         }
     }
 }

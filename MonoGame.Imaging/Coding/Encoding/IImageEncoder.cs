@@ -3,7 +3,7 @@ using System.Threading;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Utilities.PackedVector;
 
-namespace MonoGame.Imaging.Encoding
+namespace MonoGame.Imaging.Coding.Encoding
 {
     /// <summary>
     /// Represents a progress update for image encoding.

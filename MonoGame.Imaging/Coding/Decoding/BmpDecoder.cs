@@ -1,6 +1,6 @@
 ﻿using StbSharp;
 
-namespace MonoGame.Imaging.Decoding
+namespace MonoGame.Imaging.Coding.Decoding
 {
     public class BmpDecoder : StbDecoderBase
     {

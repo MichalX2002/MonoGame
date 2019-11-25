@@ -1,10 +1,10 @@
 ﻿
-namespace MonoGame.Imaging
+namespace MonoGame.Imaging.Coding
 {
     /// <summary>
-    /// Base interface for different image format attributes.
+    /// Base interface for image format attributes.
     /// </summary>
-    public interface IImageFormatAttribute
+    public interface IImageFormatAttribute : IImageCoderAttribute
     {
     }
 }

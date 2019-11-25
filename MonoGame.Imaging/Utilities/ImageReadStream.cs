@@ -12,9 +12,7 @@ namespace MonoGame.Imaging
     public class ImageReadStream : Stream
     {
         private Stream _stream;
-        private StreamDisposalMethod _disposalMethod;
-
-        private CancellationTokenRegistration? _cancellationRegistration;
+        private CancellationTokenRegistration _cancellationRegistration;
         private byte[] _readBuffer;
 
         public override bool CanSeek => false;
@@ -37,6 +35,8 @@ namespace MonoGame.Imaging
         /// </summary>
         public ReadContext Context { get; }
 
+        public StreamDisposalMethod DisposalMethod { get; }
+
         public ImageReadStream(
             Stream stream, CancellationToken cancellation, StreamDisposalMethod disposalType)
         {
@@ -46,15 +46,19 @@ namespace MonoGame.Imaging
                 throw new ArgumentOutOfRangeException(nameof(disposalType));
 
             _stream = stream ?? throw new ArgumentNullException(nameof(stream));
-            _disposalMethod = disposalType;
+            DisposalMethod = disposalType;
 
-            if (_disposalMethod == StreamDisposalMethod.CancellableClose && cancellation.CanBeCanceled)
+            if (DisposalMethod == StreamDisposalMethod.CancellableClose && cancellation.CanBeCanceled)
                 _cancellationRegistration = cancellation.Register(() => _stream?.Dispose());
 
             _readBuffer = RecyclableMemoryManager.Default.GetBlock();
             Context = new ReadContext(
                 _stream, _readBuffer, cancellation, ReadCallback, SkipCallback);
         }
+
+        public static ImageReadStream Create(
+            Stream stream, CancellationToken cancellation, StreamDisposalMethod disposalMethod) =>
+            new ImageReadStream(stream, cancellation, disposalMethod);
 
         public override int Read(byte[] buffer, int offset, int count) => _stream.Read(buffer, offset, count);
 
@@ -145,18 +149,19 @@ namespace MonoGame.Imaging
                 _readBuffer = null;
             }
 
-            if (disposing)
+            try
             {
-                if (_disposalMethod != StreamDisposalMethod.LeaveOpen &&
-                    _disposalMethod != StreamDisposalMethod.CancellableLeaveOpen)
-                    _stream?.Dispose();
-
-                _cancellationRegistration?.Dispose();
+                if (disposing)
+                {
+                    if (DisposalMethod != StreamDisposalMethod.LeaveOpen &&
+                        DisposalMethod != StreamDisposalMethod.CancellableLeaveOpen)
+                        _stream?.Dispose();
+                }
             }
-
-            _stream = null;
-            _cancellationRegistration = null;
-
+            finally
+            {
+                _cancellationRegistration.Dispose();
+            }
             base.Dispose(disposing);
         }
     }

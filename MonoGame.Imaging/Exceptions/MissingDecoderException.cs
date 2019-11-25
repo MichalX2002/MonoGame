@@ -2,17 +2,18 @@
 
 namespace MonoGame.Imaging
 {
-    public class MissingDecoderException : ImageCoderException
+    public class MissingDecoderException : ImagingException
     {
         public MissingDecoderException(ImageFormat format) : base(format)
         {
         }
 
-        public MissingDecoderException(ImageFormat format, string message) : base(format, message)
+        public MissingDecoderException(string message, ImageFormat format) : base(message, format)
         {
         }
 
-        public MissingDecoderException(ImageFormat format, string message, Exception inner) : base(format, message, inner)
+        public MissingDecoderException(
+            string message, Exception inner, ImageFormat format) : base(message, inner, format)
         {
         }
     }

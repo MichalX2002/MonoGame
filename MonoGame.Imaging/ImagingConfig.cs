@@ -13,9 +13,11 @@ namespace MonoGame.Imaging
         /// Gets the default <see cref="ImagingConfig"/>,
         /// often used for methods that don't take it as an argument.
         /// </summary>
-        public static ImagingConfig Default { get; } = CreateDefault();
+        public static ImagingConfig Default { get; } = new ImagingConfig();
         
         private HashSet<Type> _throwingExceptions;
+
+        #region Properties
 
         /// <summary>
         /// Gets whether operations should throw exceptions or return a default value.
@@ -29,18 +31,12 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Set to <see cref="StreamDisposalMethod.CancellableLeaveOpen"/> by default.
         /// </summary>
-        public StreamDisposalMethod StreamDisposal { get; set; }
+        public StreamDisposalMethod StreamDisposal { get; set; } = StreamDisposalMethod.CancellableLeaveOpen;
+
+        #endregion
 
         public ImageReadStream CreateReadStream(Stream stream, CancellationToken cancellation) => 
-            new ImageReadStream(stream, cancellation, StreamDisposal);
-
-        public static ImagingConfig CreateDefault()
-        {
-            return new ImagingConfig
-            {
-                StreamDisposal = StreamDisposalMethod.CancellableLeaveOpen
-            };
-        }
+            ImageReadStream.Create(stream, cancellation, StreamDisposal);
 
         #region Exception Management
 

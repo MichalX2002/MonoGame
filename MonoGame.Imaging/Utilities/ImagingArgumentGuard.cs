@@ -1,5 +1,6 @@
 ﻿using System;
 using MonoGame.Framework;
+using MonoGame.Imaging.Coding;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Utilities;
 using MonoGame.Utilities.PackedVector;
@@ -59,22 +60,22 @@ namespace MonoGame.Imaging
                 throw new ArgumentOutOfRangeException(rectParamName + ".Y");
         }
 
-        public static void AssertAnimationSupport(ImageFormat format, ImagingConfig imagingConfig)
+        public static void AssertAnimationSupport(ImageFormat format, ImagingConfig config)
         {
-            if (imagingConfig == null)
-                throw new ArgumentNullException(nameof(imagingConfig));
+            if (config == null)
+                throw new ArgumentNullException(nameof(config));
 
-            if (imagingConfig.ShouldThrowOnException<AnimationNotSupportedException>())
-                if (!format.SupportsAnimation)
+            if (config.ShouldThrowOnException<AnimationNotSupportedException>())
+                if (!format.HasAttribute<IAnimatedFormatAttribute>())
                     throw new AnimationNotSupportedException(format);
         }
 
-        public static void AssertAnimationSupport(IImageCoder coder, ImagingConfig imagingConfig)
+        public static void AssertAnimationSupport(IImageCoder coder, ImagingConfig config)
         {
-            AssertAnimationSupport(coder.Format, imagingConfig);
+            AssertAnimationSupport(coder.Format, config);
 
-            if (imagingConfig.ShouldThrowOnException<AnimationNotImplementedException>())
-                if (!coder.ImplementsAnimation)
+            if (config.ShouldThrowOnException<AnimationNotImplementedException>())
+                if (!coder.HasAttribute<IAnimatedFormatAttribute>())
                     throw new AnimationNotImplementedException(coder);
         }
     }
