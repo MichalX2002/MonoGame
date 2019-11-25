@@ -47,9 +47,9 @@ namespace MonoGame.Imaging
             return _encoders;
         }
 
-        public static EncoderConfig GetDefaultEncoderConfig(ImageFormat format)
+        public static EncoderOptions GetDefaultEncoderOptions(ImageFormat format)
         {
-            return GetEncoder(format).DefaultConfig;
+            return GetEncoder(format).DefaultOptions;
         }
 
         #region [Try]GetDecoder

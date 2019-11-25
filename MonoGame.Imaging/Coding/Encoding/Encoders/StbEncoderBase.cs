@@ -16,21 +16,21 @@ namespace MonoGame.Imaging.Coding.Encoding
         }
 
         public abstract ImageFormat Format { get; }
-        public abstract EncoderConfig DefaultConfig { get; }
+        public abstract EncoderOptions DefaultOptions { get; }
 
         // TODO: FIXME: properly handle ImageCollection type
 
         public void Encode<TPixel>(
             ImageEncoderEnumerator<TPixel> images, Stream stream,
-            EncoderConfig encoderConfig, ImagingConfig imagingConfig,
+            EncoderOptions encoderOptions, ImagingConfig config,
             CancellationToken cancellation,
             EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
-            if (encoderConfig == null) throw new ArgumentNullException(nameof(encoderConfig));
-            if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
-            EncoderConfig.AssertTypeEqual(DefaultConfig, encoderConfig, nameof(encoderConfig));
+            if (encoderOptions == null) throw new ArgumentNullException(nameof(encoderOptions));
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            EncoderOptions.AssertTypeEqual(DefaultOptions, encoderOptions, nameof(encoderOptions));
 
             cancellation.ThrowIfCancellationRequested();
 
@@ -61,10 +61,10 @@ namespace MonoGame.Imaging.Coding.Encoding
 
                     if (i == 0)
                     {
-                        if (!WriteFirst(context, image, encoderConfig, imagingConfig))
+                        if (!WriteFirst(context, image, encoderOptions, config))
                             throw new ImageCoderException(Format);
                     }
-                    else if (!WriteNext(context, image, encoderConfig, imagingConfig))
+                    else if (!WriteNext(context, image, encoderOptions, config))
                     {
                         break;
                     }
@@ -98,15 +98,15 @@ namespace MonoGame.Imaging.Coding.Encoding
 
         protected abstract bool WriteFirst<TPixel>(
             in WriteContext context, ReadOnlyImageFrame<TPixel> image,
-            EncoderConfig encoderConfig, ImagingConfig imagingConfig)
+            EncoderOptions encoderOptions, ImagingConfig config)
             where TPixel : unmanaged, IPixel;
 
         protected virtual bool WriteNext<TPixel>(
             in WriteContext context, ReadOnlyImageFrame<TPixel> image,
-            EncoderConfig encoderConfig, ImagingConfig imagingConfig)
+            EncoderOptions encoderOptions, ImagingConfig config)
             where TPixel : unmanaged, IPixel
         {
-            ImagingArgumentGuard.AssertAnimationSupport(this, imagingConfig);
+            ImagingArgumentGuard.AssertAnimationSupport(this, config);
             return false;
         }
     }
