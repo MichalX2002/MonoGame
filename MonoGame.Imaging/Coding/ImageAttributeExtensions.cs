@@ -1,18 +1,23 @@
 ﻿
+using System;
+
 namespace MonoGame.Imaging.Coding
 {
-    public static class AttributeExtensions
+    /// <summary>
+    /// Helper for checking attributes on image coders and formats,
+    /// being an <see langword="is"/> check codewise.
+    /// </summary>
+    public static class ImageAttributeExtensions
     {
         public static bool HasAttribute<TAttribute>(
-            this IImageCoderAttribute item, out TAttribute attribute)
+            this IImageCoderAttribute item, out ImageAttributeQuery attribute)
             where TAttribute : IImageCoderAttribute
         {
-            if (item is TAttribute attrib)
+            if (item is TAttribute coderAttrib)
             {
-                attribute = attrib;
+                attribute = new ImageAttributeQuery(coderAttrib);
                 return true;
             }
-
             attribute = default;
             return false;
         }

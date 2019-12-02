@@ -2,7 +2,7 @@
 using System.IO.Compression;
 using StbSharp;
 
-namespace MonoGame.Imaging.Coding
+namespace MonoGame.Imaging.Coding.Encoding
 {
     [Serializable]
     public class PngEncoderOptions : EncoderOptions
@@ -17,8 +17,6 @@ namespace MonoGame.Imaging.Coding
         }
     }
 
-namespace MonoGame.Imaging.Coding.Encoding
-{
     public class PngEncoder : StbEncoderBase, ICancellableCoderAttribute
     {
         public override ImageFormat Format => ImageFormat.Png;

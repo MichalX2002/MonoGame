@@ -16,7 +16,7 @@ namespace MonoGame.Imaging
     // an alternative coder in place of an existing one
 
     [DebuggerDisplay("{ToString(),nq}")]
-    public partial class ImageFormat
+    public partial class ImageFormat : IImageFormatAttribute
     {
         private static object RegistrationMutex { get; } = new object();
 
@@ -32,9 +32,9 @@ namespace MonoGame.Imaging
         public string FullName { get; }
 
         /// <summary>
-        /// Gets the short name of the format, often used for the extension.
+        /// Gets the short name of the format, often used as the extension.
         /// </summary>
-        public string Name { get; }
+        public string ShortName { get; }
 
         /// <summary>
         /// Gets the primary MIME type associated with the format.
@@ -56,11 +56,6 @@ namespace MonoGame.Imaging
         /// </summary>
         public ReadOnlySet<string> Extensions { get; }
 
-        /// <summary>
-        /// Gets the image format attributes. These derive from <see cref="IImageFormatAttribute"/>.
-        /// </summary>
-        public ReadOnlySet<Type> Attributes { get; }
-
         #endregion
 
         #region Constructor
@@ -68,15 +63,15 @@ namespace MonoGame.Imaging
         /// <summary>
         /// </summary>
         /// <param name="fullName">The full name of the format.</param>
-        /// <param name="name">The short name of the format.</param>
+        /// <param name="shortName">The short name of the format.</param>
         public ImageFormat(
-            string fullName, string name, string primaryMimeType, string primaryExtension,
+            string fullName, string shortName, 
+            string primaryMimeType, string primaryExtension,
             IReadOnlySet<string> mimeTypes,
-            IReadOnlySet<string> extensions,
-            IReadOnlySet<Type> attributes)
+            IReadOnlySet<string> extensions)
         {
             FullName = fullName ?? throw new ArgumentNullException(nameof(fullName));
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            ShortName = shortName ?? throw new ArgumentNullException(nameof(shortName));
             MimeType = primaryMimeType ?? throw new ArgumentNullException(nameof(primaryMimeType));
             Extension = ValidateExtension(primaryExtension) ?? throw new ArgumentNullException(nameof(primaryExtension));
 
@@ -90,25 +85,18 @@ namespace MonoGame.Imaging
             if (!extensions.Contains(primaryExtension))
                 throw new ArgumentException("The set doesn't contain the primary extension.", nameof(mimeTypes));
 
-            if (attributes == null) throw new ArgumentNullException(nameof(attributes));
-            foreach (var type in attributes)
-                if (!typeof(IImageFormatAttribute).IsAssignableFrom(type))
-                    throw new ArgumentException(
-                        "The attribute set contains types that don't derive from " + typeof(IImageFormatAttribute) + ".",
-                        nameof(attributes));
-
             MimeTypes = new ReadOnlySet<string>(mimeTypes, StringComparer.OrdinalIgnoreCase);
             Extensions = new ReadOnlySet<string>(extensions, StringComparer.OrdinalIgnoreCase);
-            Attributes = new ReadOnlySet<Type>(attributes);
         }
 
         public ImageFormat(
-            string fullName, string name, string mimeType, string extension, IReadOnlySet<Type> attributes) :
+            string fullName, string shortNamename,
+            string mimeType, string extension) :
             this(
-                fullName, name, mimeType, extension,
+                fullName, shortNamename, 
+                mimeType, extension,
                 new ReadOnlySet<string>(new[] { mimeType }),
-                new ReadOnlySet<string>(new[] { extension }),
-                attributes)
+                new ReadOnlySet<string>(new[] { extension }))
         {
         }
 
@@ -133,19 +121,20 @@ namespace MonoGame.Imaging
         {
             lock (RegistrationMutex)
             {
-                if (_formats.Contains(format))
-                    throw new ArgumentException("The format has already been added.", nameof(format));
+                if (!_formats.Add(format))
+                    throw new ArgumentException(
+                        "The format has already been added.", nameof(format));
 
-                _formats.Add(format);
-
-                void AddToDictionary(FormatDictionary dictionary, ReadOnlySet<string> items)
+                void AddToDictionary(FormatDictionary dictionary, ReadOnlySet<string> keys)
                 {
-                    foreach (string item in items)
+                    foreach (string key in keys)
                     {
-                        if (!dictionary.TryGetValue(item, out var list))
+                        if (!dictionary.TryGetValue(key, out var list))
                         {
                             list = FormatList.Create();
-                            dictionary.Add(item.ToLower(), list);
+                            // Use ToLower() to "sanitize" keys, shouldn't change functionality 
+                            // as the format dictionaries should be case-insensitive.
+                            dictionary.Add(key.ToLower(), list);
                         }
                         list.List.Add(format);
                     }
