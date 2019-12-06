@@ -57,17 +57,16 @@ namespace MonoGame.Framework.Graphics
         private void EnsureCapacity(int itemCount)
         {
             int oldSize = _batchItems.Length;
-            Array.Resize(ref _batchItems, itemCount);
+            int newSize = Math.Min(itemCount, MaxBatchSize);
+            Array.Resize(ref _batchItems, newSize);
             for (int i = oldSize; i < _batchItems.Length; i++)
                 _batchItems[i] = new SpriteBatchItem();
 
-            int min = Math.Min(itemCount, MaxBatchSize);
-
-            int minVertices = min * 4; // 4 vertices per item
+            int minVertices = newSize * 4; // 4 vertices per item
             if (minVertices > _vertexBuffer.Capacity)
                 _vertexBuffer.Capacity = minVertices;
 
-            int minIndices = min * 6; // 6 indices per item
+            int minIndices = newSize * 6; // 6 indices per item
             if (minIndices > _indexBuffer.Capacity)
             {
                 _indexBuffer.Capacity = minIndices;
