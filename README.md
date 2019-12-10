@@ -16,9 +16,9 @@ There are several options on the [Donation Page](http://www.monogame.net/donate/
 ## Helpful Links
 
  * The official website is [monogame.net](http://www.monogame.net).
- * Our [issue tracker](https://github.com/MonoGame/MonoGame/issues) is on GitHub.
- * Use our [community forums](http://community.monogame.net/) for support questions.
- * You can [chat live](https://gitter.im/mono/MonoGame?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) with the core developers and other users.
+ * The [issue tracker](https://github.com/MonoGame/MonoGame/issues) is on GitHub.
+ * The [community forums](http://community.monogame.net/) for support questions.
+ * The [live chat](https://gitter.im/mono/MonoGame?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) with the core developers and other users.
  * The [official documentation](http://www.monogame.net/documentation/) is on our website.
  * Download release and development [installers and packages](http://www.monogame.net/downloads/).
  * Follow [@MonoGameTeam](https://twitter.com/monogameteam) on Twitter.
