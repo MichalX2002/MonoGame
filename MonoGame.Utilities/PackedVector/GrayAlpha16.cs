@@ -5,7 +5,7 @@ using System;
 using System.Runtime.CompilerServices;
 using MonoGame.Framework;
 
-namespace MonoGame.Utilities.PackedVector
+namespace MonoGame.Framework.PackedVector
 {
     /// <summary>
     /// Packed vector type containing an 8-bit XYZ luminance an 8-bit W component.

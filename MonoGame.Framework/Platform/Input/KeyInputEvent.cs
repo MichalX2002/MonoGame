@@ -6,15 +6,18 @@ using MonoGame.Framework.Input;
 
 namespace MonoGame.Framework
 {
+    /// <summary>
+    /// Represents data for a keystroke event.
+    /// </summary>
     public readonly struct KeyInputEvent
     {
         /// <summary>
-        /// The key that was either pressed or released.
+        /// Gets the key that was either pressed or released.
         /// </summary>
-        public readonly Keys Key;
+        public Keys Key { get; }
 
         /// <summary>
-        /// Create a new keyboard input event.
+        /// Constructs the <see cref="KeyInputEvent"/>.
         /// </summary>
         /// <param name="key">The key involved in this event</param>
         public KeyInputEvent(Keys key = Keys.None)

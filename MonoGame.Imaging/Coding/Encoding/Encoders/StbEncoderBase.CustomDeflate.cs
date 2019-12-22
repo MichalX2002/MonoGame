@@ -2,7 +2,7 @@
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Threading;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 using StbSharp;
 
 namespace MonoGame.Imaging.Coding.Encoding

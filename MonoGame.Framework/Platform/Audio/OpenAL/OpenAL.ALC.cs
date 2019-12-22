@@ -1,9 +1,8 @@
-﻿using MonoGame.OpenAL;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
-using FL = MonoGame.Utilities.FuncLoader;
+using FL = MonoGame.Framework.FuncLoader;
 
-namespace MonoGame.Framework.Audio
+namespace MonoGame.OpenAL
 {
     internal unsafe class ALC
     {

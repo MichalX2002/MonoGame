@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace MonoGame.Utilities.Collections
+namespace MonoGame.Framework.Collections
 {
     /// <summary>
     /// Caches a <see cref="ReadOnlyCollection{T}"/> to mitigate allocation from 

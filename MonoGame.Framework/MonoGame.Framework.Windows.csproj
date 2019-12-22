@@ -27,7 +27,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -39,7 +38,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <LangVersion>7.3</LangVersion>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
@@ -90,9 +88,14 @@
     <Compile Include="..\ThirdParty\NVorbis\NVorbis\NewStreamEventArgs.cs">
       <Link>Utilities\NVorbis\NewStreamEventArgs.cs</Link>
     </Compile>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="AsyncResourceNotSupportedException.cs" />
+    <Compile Include="Audio\AudioDepth.cs" />
     <Compile Include="Audio\AudioHardwareException.cs" />
+    <Compile Include="Audio\MicrophoneState.cs" />
+    <Compile Include="Audio\NoMicrophoneException.cs" />
+    <Compile Include="Content\ContentReaderExtensions.cs" />
     <Compile Include="Content\ContentReaders\SoundEffectReader.cs" />
-    <Compile Include="Delegates.cs" />
     <Compile Include="Graphics\GraphicsExtensions.cs" />
     <Compile Include="Graphics\Model\Model.cs" />
     <Compile Include="Graphics\Model\ModelBone.cs" />
@@ -185,6 +188,7 @@
     <Compile Include="Platform\Media\Video.WMS.cs" />
     <Compile Include="Platform\Media\VideoPlayer.WMS.cs" />
     <Compile Include="Platform\Media\VideoSampleGrabber.cs" />
+    <Compile Include="Platform\TaskbarList.Windows.cs" />
     <Compile Include="Platform\TitleContainer.Desktop.cs" />
     <Compile Include="Platform\Utilities\AssemblyHelper.cs" />
     <Compile Include="Platform\Utilities\CurrentPlatform.cs" />
@@ -194,8 +198,6 @@
     <Compile Include="Platform\Utilities\TimerHelper.cs" />
     <Compile Include="Platform\Windows\HorizontalMouseWheelEvent.cs" />
     <Compile Include="Platform\Windows\SharpDXHelper.cs" />
-    <Compile Include="Platform\Windows\TaskbarList.COM.cs" />
-    <Compile Include="Platform\Windows\TaskbarList.cs" />
     <Compile Include="Platform\Windows\WinFormsGameForm.cs" />
     <Compile Include="Platform\Windows\WinFormsGamePlatform.cs" />
     <Compile Include="Platform\Windows\WinFormsGameWindow.cs" />
@@ -211,7 +213,6 @@
     <Compile Include="GameRunBehavior.cs" />
     <Compile Include="GameServiceContainer.cs" />
     <Compile Include="GameTime.cs" />
-    <Compile Include="GameUpdateRequiredException.cs" />
     <Compile Include="GameWindow.cs" />
     <Compile Include="IDrawable.cs" />
     <Compile Include="IGameComponent.cs" />
@@ -221,10 +222,9 @@
     <Compile Include="NamespaceDocs.cs" />
     <Compile Include="PlayerIndex.cs" />
     <Compile Include="Properties\AssemblyInfo.Windows.cs" />
-    <Compile Include="TaskbarProgress.cs" />
-    <Compile Include="TaskbarProgressState.cs" />
     <Compile Include="TitleContainer.cs" />
     <Compile Include="Utilities\ByteBufferPool.cs" />
+    <Compile Include="Utilities\GraphicsBackend.cs" />
     <Compile Include="Utilities\IO\Lz4DecoderStream.cs" />
     <Compile Include="Utilities\IO\LzxDecoderStream.cs" />
     <Compile Include="Utilities\IO\ZLibStream\DeflateManager.cs" />
@@ -238,6 +238,8 @@
     <Compile Include="Utilities\IO\ZLibStream\ZlibCodec.cs" />
     <Compile Include="Utilities\IO\ZLibStream\ZlibStream.cs" />
     <Compile Include="Utilities\IO\ZLibStream\ZlibStreamBase.cs" />
+    <Compile Include="Utilities\MonoGamePlatform.cs" />
+    <Compile Include="Utilities\PlatformInfo.cs" />
     <Compile Include="Utilities\ReusableItemList.cs" />
     <Compile Include="Utilities\ServiceProviderExtensions.cs" />
     <Compile Include="Audio\AudioChannels.cs" />
@@ -633,6 +635,9 @@
     <Compile Include="Design\Vector4TypeConverter.cs">
       <Services>_XNADesignProvided</Services>
     </Compile>
+    <Compile Include="Utilities\TaskbarList.cs" />
+    <Compile Include="Utilities\TaskbarProgress.cs" />
+    <Compile Include="Utilities\TaskbarProgressState.cs" />
     <None Include="..\ThirdParty\Dependencies\Config\Windows\MonoGame.Framework.dll.config">
       <Platforms>WindowsGL,Linux,MacOS</Platforms>
       <Link>MonoGame.Framework.dll.config</Link>

@@ -6,8 +6,8 @@ namespace MonoGame.Framework
 {
 	public interface IUpdateable
 	{
-		event SimpleEventHandler<object> EnabledChanged;
-		event SimpleEventHandler<object> UpdateOrderChanged;
+		event DataEvent<object> EnabledChanged;
+		event DataEvent<object> UpdateOrderChanged;
 	
 		bool Enabled { get; }
 		int UpdateOrder { get; }

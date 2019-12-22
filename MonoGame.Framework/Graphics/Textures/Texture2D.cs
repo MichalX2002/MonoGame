@@ -7,8 +7,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using MonoGame.Imaging;
-using MonoGame.Utilities.Memory;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.Memory;
+using MonoGame.Framework.PackedVector;
+using System.Linq;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -565,9 +566,9 @@ namespace MonoGame.Framework.Graphics
         {
             SaveExtensions.AssertValidPath(filePath);
 
-            if (format == null) 
-                format = ImageFormat.GetByPath(filePath);
-
+            if (format == null)
+                format = ImageFormat.GetByPath(filePath).First();
+            
             using (var fs = SaveExtensions.OpenWrite(filePath))
                 Save(fs, format, level, rect);
         }
@@ -583,7 +584,7 @@ namespace MonoGame.Framework.Graphics
 
         #endregion
 
-        #region Parameter Checks
+        #region Parameter Validation
 
         private unsafe void ValidateParams<T>(
             int level, int arraySlice, Rectangle? rect, ReadOnlySpan<T> data, out Rectangle checkedRect)

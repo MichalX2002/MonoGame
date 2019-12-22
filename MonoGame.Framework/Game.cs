@@ -260,10 +260,10 @@ namespace MonoGame.Framework
 
         #region Events
 
-        public event SimpleEventHandler<Game> Activated;
-        public event SimpleEventHandler<Game> Deactivated;
-        public event SimpleEventHandler<Game> Disposed;
-        public event SimpleEventHandler<Game> Exiting;
+        public event DataEvent<Game> Activated;
+        public event DataEvent<Game> Deactivated;
+        public event DataEvent<Game> Disposed;
+        public event DataEvent<Game> Exiting;
 
 #if WINDOWS_UAP
         [CLSCompliant(false)]
@@ -409,7 +409,7 @@ namespace MonoGame.Framework
                 
                 // We only have a precision timer on Windows, so other platforms may still overshoot
 #if WINDOWS && !DESKTOPGL
-                MonoGame.Utilities.TimerHelper.SleepForNoMoreThan(sleepTime);
+                MonoGame.Framework.TimerHelper.SleepForNoMoreThan(sleepTime);
 #elif WINDOWS_UAP
                 lock (_locker)
                     Monitor.Wait(_locker, (int)sleepTime);
@@ -491,11 +491,8 @@ namespace MonoGame.Framework
 
         #region Protected Methods
 
-        protected virtual bool BeginDraw() { return true; }
-        protected virtual void EndDraw()
-        {
-            Platform.Present();
-        }
+        protected virtual bool BeginDraw() => true;
+        protected virtual void EndDraw() => Platform.Present();
 
         protected virtual void BeginRun() { }
         protected virtual void EndRun() { }
@@ -739,18 +736,18 @@ namespace MonoGame.Framework
 
             private readonly Predicate<T> _filter;
             private readonly Comparison<T> _sort;
-            private readonly Action<T, SimpleEventHandler<object>> _filterChangedSubscriber;
-            private readonly Action<T, SimpleEventHandler<object>> _filterChangedUnsubscriber;
-            private readonly Action<T, SimpleEventHandler<object>> _sortChangedSubscriber;
-            private readonly Action<T, SimpleEventHandler<object>> _sortChangedUnsubscriber;
+            private readonly Action<T, DataEvent<object>> _filterChangedSubscriber;
+            private readonly Action<T, DataEvent<object>> _filterChangedUnsubscriber;
+            private readonly Action<T, DataEvent<object>> _sortChangedSubscriber;
+            private readonly Action<T, DataEvent<object>> _sortChangedUnsubscriber;
 
             public SortingFilteringCollection(
                 Predicate<T> filter,
-                Action<T, SimpleEventHandler<object>> filterChangedSubscriber,
-                Action<T, SimpleEventHandler<object>> filterChangedUnsubscriber,
+                Action<T, DataEvent<object>> filterChangedSubscriber,
+                Action<T, DataEvent<object>> filterChangedUnsubscriber,
                 Comparison<T> sort,
-                Action<T, SimpleEventHandler<object>> sortChangedSubscriber,
-                Action<T, SimpleEventHandler<object>> sortChangedUnsubscriber)
+                Action<T, DataEvent<object>> sortChangedSubscriber,
+                Action<T, DataEvent<object>> sortChangedUnsubscriber)
             {
                 _items = new List<T>();
                 _addJournal = new List<AddJournalEntry<T>>();

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using MonoGame.OpenAL;
 using MonoGame.Framework.Media;
+using MonoGame.OpenAL;
 
 #if ANDROID
 using System.Globalization;

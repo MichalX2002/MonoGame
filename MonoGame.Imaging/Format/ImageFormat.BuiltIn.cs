@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MonoGame.Imaging.Coding;
-using MonoGame.Utilities.Collections;
+using MonoGame.Framework.Collections;
 
 namespace MonoGame.Imaging
 {

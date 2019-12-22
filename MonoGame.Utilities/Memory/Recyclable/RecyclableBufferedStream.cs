@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace MonoGame.Utilities.Memory
+namespace MonoGame.Framework.Memory
 {
     /// <summary>
     /// Adds a buffering layer where the underlying buffer is a block with

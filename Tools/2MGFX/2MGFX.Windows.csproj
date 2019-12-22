@@ -71,14 +71,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\MonoGame.Framework\Delegates.cs">
-      <Link>MonoGame.Framework\Delegates.cs</Link>
+    <Compile Include="..\..\MonoGame.Utilities\DataEvent.cs">
+      <Link>MonoGame.Framework\DataEvent.cs</Link>
     </Compile>
     <Compile Include="..\..\MonoGame.Framework\Platform\Utilities\CurrentPlatform.cs">
       <Link>MonoGame.Framework\CurrentPlatform.cs</Link>
     </Compile>
+	<Compile Include="..\..\MonoGame.Framework\Platform\Utilities\Threading.cs">
+      <Link>MonoGame.Framework\Threading.cs</Link>
+    </Compile>
+    <Compile Include="..\..\MonoGame.Framework\AsyncResourceNotSupportedException.cs">
+      <Link>MonoGame.Framework\AsyncResourceNotSupportedException.cs</Link>
+    </Compile>
+	<Compile Include="..\..\MonoGame.Framework\FrameworkResources.cs">
+      <Link>MonoGame.Framework\FrameworkResources.cs</Link>
+    </Compile>
     <Compile Include="MonoGame.Framework\ExceptionHelper.cs" />
-    <Compile Include="MonoGame.Framework\Threading.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CommandLineParser.cs" />

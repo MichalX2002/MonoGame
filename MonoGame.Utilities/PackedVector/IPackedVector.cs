@@ -4,7 +4,7 @@
 
 using MonoGame.Framework;
 
-namespace MonoGame.Utilities.PackedVector
+namespace MonoGame.Framework.PackedVector
 {
     // http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.graphics.packedvector.ipackedvector.aspx
     /// <summary>

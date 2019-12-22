@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {

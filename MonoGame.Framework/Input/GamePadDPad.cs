@@ -8,29 +8,34 @@ namespace MonoGame.Framework.Input
 {
     public readonly struct GamePadDPad : IEquatable<GamePadDPad>
     {
+        private readonly ButtonState _down;
+        private readonly ButtonState _left;
+        private readonly ButtonState _right;
+        private readonly ButtonState _up;
+
         /// <summary>
         /// Gets a value indicating wethever down is pressed on the directional pad.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the down button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public readonly ButtonState Down;
+        public ButtonState Down => _down;
 
         /// <summary>
         /// Gets a value indicating wethever left is pressed on the directional pad.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the left button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public readonly ButtonState Left;
+        public ButtonState Left => _left;
 
         /// <summary>
         /// Gets a value indicating wethever right is pressed on the directional pad.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the right button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public readonly ButtonState Right;
+        public ButtonState Right => _right;
 
         /// <summary>
         /// Gets a value indicating wethever up is pressed on the directional pad.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the up button is pressed; otherwise, <see cref="ButtonState.Released"/>.</value>
-        public readonly ButtonState Up;
+        public ButtonState Up => _up;
 
         #region Constructors
 
@@ -44,21 +49,21 @@ namespace MonoGame.Framework.Input
         public GamePadDPad(
             ButtonState upValue, ButtonState downValue, ButtonState leftValue, ButtonState rightValue) : this()
         {
-            Up = upValue;
-            Down = downValue;
-            Left = leftValue;
-            Right = rightValue;
+            _up = upValue;
+            _down = downValue;
+            _left = leftValue;
+            _right = rightValue;
         }
 
         internal GamePadDPad(Buttons[] buttons) : this()
         {
             foreach (var button in buttons)
-                ConvertButtonToDirection(button, ref Down, ref Left, ref Right, ref Up);
+                ConvertButtonToDirection(button, ref _down, ref _left, ref _right, ref _up);
         }
 
         internal GamePadDPad(Buttons button) : this()
         {
-            ConvertButtonToDirection(button, ref Down, ref Left, ref Right, ref Up);
+            ConvertButtonToDirection(button, ref _down, ref _left, ref _right, ref _up);
         }
 
         #endregion

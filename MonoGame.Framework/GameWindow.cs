@@ -97,9 +97,9 @@ namespace MonoGame.Framework
 
 		#region Events
 
-		public event SimpleEventHandler<GameWindow> ClientSizeChanged;
-		public event SimpleEventHandler<GameWindow> OrientationChanged;
-		public event SimpleEventHandler<GameWindow> ScreenDeviceNameChanged;
+		public event DataEvent<GameWindow> ClientSizeChanged;
+		public event DataEvent<GameWindow> OrientationChanged;
+		public event DataEvent<GameWindow> ScreenDeviceNameChanged;
 
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
 
@@ -112,19 +112,19 @@ namespace MonoGame.Framework
 		/// <remarks>
 		/// This event is only supported on the Windows DirectX, Windows OpenGL and Linux platforms.
 		/// </remarks>
-		public event DataEventHandler<GameWindow, TextInputEvent> TextInput;
+		public event DataEvent<GameWindow, TextInputEvent> TextInput;
 
-        internal bool IsTextInputHandled => TextInput != null;
+		internal bool IsTextInputHandled => TextInput != null;
 
         /// <summary>
         /// Buffered keyboard KeyDown event.
         /// </summary>
-		public event DataEventHandler<GameWindow, KeyInputEvent> KeyDown;
+		public event DataEvent<GameWindow, KeyInputEvent> KeyDown;
 
         /// <summary>
         /// Buffered keyboard KeyUp event.
         /// </summary>
-        public event DataEventHandler<GameWindow, KeyInputEvent> KeyUp;
+        public event DataEvent<GameWindow, KeyInputEvent> KeyUp;
 
 #endif
 
@@ -132,8 +132,7 @@ namespace MonoGame.Framework
 
         public abstract void BeginScreenDeviceChange(bool willBeFullScreen);
 
-		public abstract void EndScreenDeviceChange(
-			string screenDeviceName, int clientWidth, int clientHeight);
+		public abstract void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight);
 
 		public void EndScreenDeviceChange(string screenDeviceName)
 		{
@@ -144,40 +143,32 @@ namespace MonoGame.Framework
 		{
 		}
 
-		internal void OnClientSizeChanged()
-		{
-			ClientSizeChanged?.Invoke(this);
-		}
+		internal void OnClientSizeChanged() => ClientSizeChanged?.Invoke(this);
 
 		protected void OnDeactivated()
 		{
 		}
 
-		protected void OnOrientationChanged()
-		{
-			OrientationChanged?.Invoke(this);
-		}
+		protected void OnOrientationChanged() => OrientationChanged?.Invoke(this);
 
 		protected void OnPaint()
 		{
 		}
 
-		protected void OnScreenDeviceNameChanged()
-		{
-			ScreenDeviceNameChanged?.Invoke(this);
-		}
+		protected void OnScreenDeviceNameChanged() => ScreenDeviceNameChanged?.Invoke(this);
 
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
 
-        internal void OnTextInput(in TextInputEvent ev) => TextInput?.Invoke(this, ev);
+		internal void OnTextInput(TextInputEvent ev) => TextInput?.Invoke(this, ev);
 
-        internal void OnKeyDown(in KeyInputEvent e) => KeyDown?.Invoke(this, e);
+        internal void OnKeyDown(KeyInputEvent e) => KeyDown?.Invoke(this, e);
 
-        internal void OnKeyUp(in KeyInputEvent e) => KeyUp?.Invoke(this, e);
+        internal void OnKeyUp(KeyInputEvent e) => KeyUp?.Invoke(this, e);
 
 #endif
 
         protected internal abstract void SetSupportedOrientations(DisplayOrientation orientations);
+
 		protected abstract void SetTitle(string title);
 
 #if DIRECTX && WINDOWS

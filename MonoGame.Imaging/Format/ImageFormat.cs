@@ -5,8 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using MonoGame.Framework;
 using MonoGame.Imaging.Coding;
-using MonoGame.Utilities.Collections;
-using FormatList = MonoGame.Utilities.Collections.CachedReadOnlyList<MonoGame.Imaging.ImageFormat>;
+using MonoGame.Framework.Collections;
+using FormatList = MonoGame.Framework.Collections.CachedReadOnlyList<MonoGame.Imaging.ImageFormat>;
 
 namespace MonoGame.Imaging
 {

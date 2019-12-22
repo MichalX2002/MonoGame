@@ -1,6 +1,6 @@
 using MonoGame.Framework;
 
-namespace MonoGame.Utilities.PackedVector
+namespace MonoGame.Framework.PackedVector
 {
     /// <summary>
     /// The operations to be implemented by a pixel type.

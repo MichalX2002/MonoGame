@@ -5,7 +5,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework.Audio
 {
@@ -46,7 +46,8 @@ namespace MonoGame.Framework.Audio
         [DebuggerHidden]
         internal static void AssertValidAudioDepth(AudioDepth depth)
         {
-            if (depth != AudioDepth.Short && depth != AudioDepth.Float)
+            if (depth != AudioDepth.Short ||
+                depth != AudioDepth.Float)
                 throw new ArgumentOutOfRangeException(nameof(depth), "Invalid audio depth.");
         }
 

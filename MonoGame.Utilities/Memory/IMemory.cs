@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MonoGame.Utilities.Memory
+namespace MonoGame.Framework.Memory
 {
     public interface IMemory<T> : IReadOnlyMemory<T>
     {

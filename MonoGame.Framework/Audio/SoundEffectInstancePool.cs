@@ -27,7 +27,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// Gets a value indicating whether the platform has capacity for more sounds to be played at this time.
         /// </summary>
-        /// <value><c>true</c> if more sounds can be played; otherwise, <c>false</c>.</value>
+        /// <value><see langword="true"/> if more sounds can be played; otherwise, <see langword="false"/>.</value>
         internal static bool SoundsAvailable
         {
             get
@@ -41,7 +41,6 @@ namespace MonoGame.Framework.Audio
         /// Add the specified instance to the pool if it is a pooled instance and removes it from the
         /// list of playing instances.
         /// </summary>
-        /// <param name="inst">The SoundEffectInstance</param>
         internal static void Return(SoundEffectInstance inst)
         {
             lock (_syncRoot)
@@ -57,9 +56,8 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Adds the SoundEffectInstance to the list of playing instances.
+        /// Adds the <see cref="SoundEffectInstance"/> to the list of playing instances.
         /// </summary>
-        /// <param name="inst">The SoundEffectInstance to add to the playing list.</param>
         internal static void AddToPlaying(SoundEffectInstance inst)
         {
             lock (_syncRoot)
@@ -67,10 +65,9 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Returns a pooled SoundEffectInstance if one is available, or allocates a new
-        /// SoundEffectInstance if the pool is empty.
+        /// Returns a pooled <see cref="SoundEffectInstance"/> if one is available, or allocates a new
+        /// <see cref="SoundEffectInstance"/> if the pool is empty.
         /// </summary>
-        /// <returns>The SoundEffectInstance.</returns>
         internal static SoundEffectInstance GetInstance(bool forXAct)
         {
             lock (_syncRoot)
@@ -169,18 +166,15 @@ namespace MonoGame.Framework.Audio
         {
             lock (_syncRoot)
             {
-                SoundEffectInstance inst = null;
-
                 for (var x = 0; x < _playingInstances.Count;)
                 {
-                    inst = _playingInstances[x];
+                    SoundEffectInstance inst = _playingInstances[x];
                     if (inst._effect == effect)
                     {
                         inst.Stop(true); // stop immediatly
                         Return(inst);
                         continue;
                     }
-
                     x++;
                 }
             }

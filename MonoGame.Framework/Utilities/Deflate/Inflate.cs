@@ -63,7 +63,7 @@
 
 
 using System;
-namespace MonoGame.Utilities.Deflate
+namespace MonoGame.Framework.Deflate
 {
     sealed class InflateBlocks
     {

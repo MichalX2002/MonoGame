@@ -1,5 +1,5 @@
 ﻿using System;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 
 namespace MonoGame.Framework
 {

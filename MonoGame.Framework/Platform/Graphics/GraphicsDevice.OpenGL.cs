@@ -677,10 +677,10 @@ namespace MonoGame.Framework.Graphics
                 renderTarget.GLStencilBuffer = stencil;
             }
 
-            if (Threading.IsOnUIThread())
+            if (Threading.IsOnMainThread)
                 Create();
             else
-                Threading.BlockOnUIThread(Create);
+                Threading.BlockOnMainThread(Create);
         }
 
         internal void PlatformDeleteRenderTarget(IRenderTarget renderTarget)
@@ -729,10 +729,10 @@ namespace MonoGame.Framework.Graphics
                     }
                 }
             }
-            if (Threading.IsOnUIThread())
+            if (Threading.IsOnMainThread)
                 Delete();
             else
-                Threading.BlockOnUIThread(Delete);
+                Threading.BlockOnMainThread(Delete);
         }
 
         private void PlatformResolveRenderTargets()
@@ -940,7 +940,7 @@ namespace MonoGame.Framework.Graphics
 
         internal void PlatformBeginApplyState()
         {
-            Threading.EnsureUIThread();
+            Threading.EnsureMainThread();
         }
 
         private void PlatformApplyBlend(bool force = false)

@@ -24,7 +24,7 @@ namespace MonoGame.Framework
         public CurveKeyCollection Keys { get; private set; }
 
         /// <summary>
-        /// Returns <c>true</c> if this curve is constant (has zero or one points); <c>false</c> otherwise.
+        /// Returns <see langword="true"/> if this curve is constant (has zero or one points); <see langword="false"/> otherwise.
         /// </summary>
         [DataMember]
         public bool IsConstant => Keys.Count <= 1;

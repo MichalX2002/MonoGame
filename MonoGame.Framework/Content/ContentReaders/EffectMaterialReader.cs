@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using MonoGame.Framework.Graphics;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 
 namespace MonoGame.Framework.Content
 {

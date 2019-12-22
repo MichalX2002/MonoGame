@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Framework
 {
     /// <summary>
     /// A custom encoding class that provides encoding capabilities for the

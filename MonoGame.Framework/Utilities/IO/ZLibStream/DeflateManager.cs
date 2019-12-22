@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Framework
 {
     internal sealed class DeflateManager
     {

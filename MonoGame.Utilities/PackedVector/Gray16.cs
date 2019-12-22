@@ -4,7 +4,7 @@
 using System;
 using MonoGame.Framework;
 
-namespace MonoGame.Utilities.PackedVector
+namespace MonoGame.Framework.PackedVector
 {
     /// <summary>
     /// Packed pixel type containing a 16-bit XYZ luminance.
@@ -24,7 +24,7 @@ namespace MonoGame.Utilities.PackedVector
 
         /// <inheritdoc />
         [CLSCompliant(false)]
-        public ushort PackedValue { get => L; set => L = value; }
+        public ushort PackedValue { readonly get => L; set => L = value; }
 
         /// <inheritdoc />
         public void FromVector4(Vector4 vector) => this = Pack(ref vector);

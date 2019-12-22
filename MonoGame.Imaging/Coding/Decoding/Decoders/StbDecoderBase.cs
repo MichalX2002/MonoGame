@@ -2,8 +2,8 @@
 using System.Runtime.InteropServices;
 using System.Threading;
 using MonoGame.Framework;
-using MonoGame.Utilities.Memory;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.Memory;
+using MonoGame.Framework.PackedVector;
 using StbSharp;
 using static StbSharp.StbImage;
 

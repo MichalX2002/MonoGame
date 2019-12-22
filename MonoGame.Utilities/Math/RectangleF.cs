@@ -245,7 +245,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first rectangle.</param>
         /// <param name="b">The second rectangle.</param>
         /// <returns>
-        ///     <c>true</c> if the <paramref name="a" /> intersects with the <paramref name="b" />; otherwise, <c>false</c>.
+        ///     <see langword="true"/> if the <paramref name="a" /> intersects with the <paramref name="b" />; otherwise, <see langword="false"/>.
         /// </returns>
         public static bool Intersects(in RectangleF a, in RectangleF b)
         {
@@ -259,9 +259,9 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="rectangle">The bounding rectangle.</param>
         /// <returns>
-        ///     <c>true</c> if the <paramref name="rectangle" /> intersects with this
+        ///     <see langword="true"/> if the <paramref name="rectangle" /> intersects with this
         ///     <see cref="RectangleF" />; otherwise,
-        ///     <c>false</c>.
+        ///     <see langword="false"/>.
         /// </returns>
         public bool Intersects(in RectangleF rectangle)
         {
@@ -275,8 +275,8 @@ namespace MonoGame.Framework
         /// <param name="rectangle">The rectangle.</param>
         /// <param name="point">The point.</param>
         /// <returns>
-        ///     <c>true</c> if the <paramref name="rectangle" /> contains the <paramref name="point" />; otherwise,
-        ///     <c>false</c>.
+        ///     <see langword="true"/> if the <paramref name="rectangle" /> contains the <paramref name="point" />; otherwise,
+        ///     <see langword="false"/>.
         /// </returns>
         public static bool Contains(in RectangleF rectangle, PointF point)
         {
@@ -293,8 +293,8 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="point">The point.</param>
         /// <returns>
-        ///     <c>true</c> if the this <see cref="RectangleF"/> contains the <paramref name="point" />; otherwise,
-        ///     <c>false</c>.
+        ///     <see langword="true"/> if the this <see cref="RectangleF"/> contains the <paramref name="point" />; otherwise,
+        ///     <see langword="false"/>.
         /// </returns>
         public bool Contains(PointF point)
         {
@@ -427,7 +427,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="obj">The object to make the comparison with.</param>
         /// <returns>
-        ///     <c>true</c> if this <see cref="RectangleF" /> is equal to <paramref name="obj" />; otherwise, <c>false</c>.
+        ///     <see langword="true"/> if this <see cref="RectangleF" /> is equal to <paramref name="obj" />; otherwise, <see langword="false"/>.
         /// </returns>
         public override bool Equals(object obj) => obj is RectangleF rect && Equals(rect);
 

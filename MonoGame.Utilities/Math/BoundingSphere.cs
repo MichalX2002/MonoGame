@@ -395,14 +395,14 @@ namespace MonoGame.Framework
         /// Compares whether current instance is equal to specified <see cref="BoundingSphere"/>.
         /// </summary>
         /// <param name="other">The <see cref="BoundingSphere"/> to compare.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public bool Equals(BoundingSphere other) => this == other;
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="object"/>.
         /// </summary>
         /// <param name="obj">The <see cref="object"/> to compare.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public override bool Equals(object obj) => obj is BoundingSphere other && Equals(other);
 
         /// <summary>
@@ -424,7 +424,7 @@ namespace MonoGame.Framework
         /// Gets whether or not a specified box intersects with this sphere.
         /// </summary>
         /// <param name="box">The box for testing.</param>
-        /// <returns><c>true</c> if <see cref="BoundingBox"/> intersects with this sphere; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if <see cref="BoundingBox"/> intersects with this sphere; <see langword="false"/> otherwise.</returns>
         public bool Intersects(in BoundingBox box)
         {
             return box.Intersects(this);
@@ -441,7 +441,7 @@ namespace MonoGame.Framework
         /// Gets whether or not the other <see cref="BoundingSphere"/> intersects with this sphere.
         /// </summary>
         /// <param name="sphere">The other sphere for testing.</param>
-        /// <returns><c>true</c> if other <see cref="BoundingSphere"/> intersects with this sphere; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if other <see cref="BoundingSphere"/> intersects with this sphere; <see langword="false"/> otherwise.</returns>
         public bool Intersects(in BoundingSphere sphere)
         {
             float sqDistance = Vector3.DistanceSquared(sphere.Center, Center);
@@ -523,7 +523,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="a"><see cref="BoundingSphere"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="BoundingSphere"/> instance on the right of the equal sign.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public static bool operator ==(in BoundingSphere a, in BoundingSphere b)
         {
             return a.Center == b.Center
@@ -535,7 +535,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="a"><see cref="BoundingSphere"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="BoundingSphere"/> instance on the right of the not equal sign.</param>
-        /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>
         public static bool operator !=(in BoundingSphere a, in BoundingSphere b)
         {
             return !a.Equals(b);

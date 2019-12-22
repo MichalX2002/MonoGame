@@ -2,9 +2,9 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using MonoGame.Utilities;
-using MonoGame.Utilities.IO;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework;
+using MonoGame.Framework.IO;
+using MonoGame.Framework.Memory;
 using static StbSharp.StbImage;
 
 namespace MonoGame.Imaging

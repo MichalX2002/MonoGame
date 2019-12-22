@@ -49,7 +49,7 @@ namespace MonoGame.Framework.Graphics
             // input layout from the vertex declaration.
             Bytecode = shaderBytecode;
 
-            HashKey = MonoGame.Utilities.Hash.ComputeHash(Bytecode);
+            HashKey = MonoGame.Framework.Hash.ComputeHash(Bytecode);
 
             if (isVertexShader)
                 CreateVertexShader();

@@ -7,10 +7,9 @@ using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
 using MonoGame.Framework.Input.Touch;
 
-
 namespace MonoGame.Framework
 {
-    abstract partial class GamePlatform : IDisposable
+    internal abstract partial class GamePlatform : IDisposable
     {
         #region Fields
 
@@ -39,17 +38,14 @@ namespace MonoGame.Framework
 
         /// <summary>
         /// When implemented in a derived class, reports the default
-        /// GameRunBehavior for this platform.
+        /// <see cref="GameRunBehavior"/> for this platform.
         /// </summary>
         public abstract GameRunBehavior DefaultRunBehavior { get; }
 
         /// <summary>
         /// Gets the Game instance that owns this GamePlatform instance.
         /// </summary>
-        public Game Game
-        {
-            get; private set;
-        }
+        public Game Game { get; private set; }
 
         private bool _isActive;
         public bool IsActive
@@ -101,19 +97,16 @@ namespace MonoGame.Framework
 
         #region Events
 
-        public event SimpleEventHandler<GamePlatform> AsyncRunLoopEnded;
-        public event SimpleEventHandler<Game> Activated;
-        public event SimpleEventHandler<Game> Deactivated;
+        public event DataEvent<GamePlatform> AsyncRunLoopEnded;
+        public event DataEvent<Game> Activated;
+        public event DataEvent<Game> Deactivated;
 
         /// <summary>
-        /// Raises the AsyncRunLoopEnded event. This method must be called by
-        /// derived classes when the asynchronous run loop they start has
-        /// stopped running.
+        /// Raises the <see cref="AsyncRunLoopEnded"/> event. 
+        /// This method must be called by derived classes when 
+        /// the asynchronous run loop they start has stopped running.
         /// </summary>
-        protected void RaiseAsyncRunLoopEnded()
-        {
-            AsyncRunLoopEnded?.Invoke(this);
-        }
+        protected void RaiseAsyncRunLoopEnded() => AsyncRunLoopEnded?.Invoke(this);
 
         #endregion Events
 
@@ -125,20 +118,14 @@ namespace MonoGame.Framework
         /// IsActive to true, so derived classes should either call the base
         /// implementation or set IsActive to true by their own means.
         /// </summary>
-        public virtual void BeforeInitialize()
-        {
-            IsActive = true;
-        }
+        public virtual void BeforeInitialize() => IsActive = true;
 
         /// <summary>
         /// Gives derived classes an opportunity to do work just before the
         /// run loop is begun.  Implementations may also return false to prevent
         /// the run loop from starting.
         /// </summary>
-        public virtual bool BeforeRun()
-        {
-            return true;
-        }
+        public virtual bool BeforeRun() => true;
 
         /// <summary>
         /// When implemented in a derived, ends the active run loop.
@@ -189,19 +176,15 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">The proposed new value of TargetElapsedTime.</param>
         /// <returns>The new value of TargetElapsedTime that will be set.</returns>
-        public virtual TimeSpan TargetElapsedTimeChanging(TimeSpan value)
-        {
-            return value;
-        }
+        public virtual TimeSpan TargetElapsedTimeChanging(TimeSpan value) => value;
+
         /// <summary>
         /// Starts a device transition (windowed to full screen or vice versa).
         /// </summary>
         /// <param name='willBeFullScreen'>
         /// Specifies whether the device will be in full-screen mode upon completion of the change.
         /// </param>
-        public abstract void BeginScreenDeviceChange (
-                 bool willBeFullScreen
-        );
+        public abstract void BeginScreenDeviceChange(bool willBeFullScreen);
 
         /// <summary>
         /// Completes a device transition.
@@ -215,28 +198,35 @@ namespace MonoGame.Framework
         /// <param name='clientHeight'>
         /// The new height of the game's client window.
         /// </param>
-        public abstract void EndScreenDeviceChange (
-                 string screenDeviceName,
-                 int clientWidth,
-                 int clientHeight
-        );
+        public abstract void EndScreenDeviceChange(
+            string screenDeviceName,
+            int clientWidth,
+            int clientHeight);
 
         /// <summary>
         /// Gives derived classes an opportunity to take action after
         /// Game.TargetElapsedTime has been set.
         /// </summary>
-        public virtual void TargetElapsedTimeChanged() {}
+        public virtual void TargetElapsedTimeChanged()
+        {
+        }
 
         /// <summary>
         /// MSDN: Use this method if your game is recovering from a slow-running state, and ElapsedGameTime is too large to be useful.
         /// Frame timing is generally handled by the Game class, but some platforms still handle it elsewhere. Once all platforms
         /// rely on the Game class's functionality, this method and any overrides should be removed.
         /// </summary>
-        public virtual void ResetElapsedTime() {}
+        public virtual void ResetElapsedTime()
+        {
+        }
 
-        public virtual void Present() { }
+        public virtual void Present()
+        {
+        }
 
-        protected virtual void OnIsMouseVisibleChanged() {}
+        protected virtual void OnIsMouseVisibleChanged()
+        {
+        }
 
         /// <summary>
         /// Called by the GraphicsDeviceManager to notify the platform
@@ -271,16 +261,12 @@ namespace MonoGame.Framework
                 IsDisposed = true;
             }
         }
-		
-		/// <summary>
-		/// Log the specified Message.
-		/// </summary>
-		/// <param name='Message'>
-		/// 
-		/// </param>
-		[System.Diagnostics.Conditional("DEBUG")]
-		public virtual void Log(string Message) {}		
-			
+
+        /// <summary>
+        /// Log the specified Message.
+        /// </summary>
+        [System.Diagnostics.Conditional("DEBUG")]
+        public virtual void Log(string Message) { }
 
         #endregion
     }

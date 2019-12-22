@@ -13,7 +13,7 @@ using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
 using MonoGame.Framework.Input.Touch;
 using MonoGame.Framework.Windows;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 using ButtonState = MonoGame.Framework.Input.ButtonState;
 using Keys = MonoGame.Framework.Input.Keys;
 using DrawingPoint = System.Drawing.Point;
@@ -332,7 +332,7 @@ namespace MonoGame.Framework
         private void OnKeyPress(object sender, KeyPressEventArgs e)
         {
             var key = (Keys)(VkKeyScanEx(e.KeyChar, InputLanguage.CurrentInputLanguage.Handle) & 0xff);
-            OnTextInput(this, new TextInputEvent(e.KeyChar, key));
+            OnTextInput(new TextInputEvent(e.KeyChar, key));
         }
 
         internal void Initialize(int width, int height)

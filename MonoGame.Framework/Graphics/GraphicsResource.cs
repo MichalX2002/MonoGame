@@ -9,19 +9,37 @@ namespace MonoGame.Framework.Graphics
 {
     public abstract class GraphicsResource : IDisposable
     {
-        // The GraphicsDevice property should only be accessed in Dispose(bool) if the disposing
-        // parameter is true. If disposing is false, the GraphicsDevice may or may not be
-        // disposed yet.
+        /// <summary>
+        /// This field should only be accessed in <see cref="Dispose(bool)"/> if the disposing
+        /// parameter is true. If disposing is false, this field may or may not be disposed yet.
+        /// </summary>
         private GraphicsDevice _graphicsDevice;
 
         private WeakReference _selfReference;
 
+        /// <summary>
+        /// Gets whether the <see cref="GraphicsResource"/> is disposed.
+        /// </summary>
         public bool IsDisposed { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the name of this <see cref="GraphicsResource"/>.
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the tag of this <see cref="GraphicsResource"/>.
+        /// </summary>
         public object Tag { get; set; }
 
-        public event SimpleEventHandler<GraphicsResource> Disposing;
+        /// <summary>
+        /// Occurs when the <see cref="GraphicsResource"/> is disposed.
+        /// </summary>
+        public event DataEvent<GraphicsResource> Disposing;
 
+        /// <summary>
+        /// Gets the <see cref="Graphics.GraphicsDevice"/> assigned to this <see cref="GraphicsResource"/>.
+        /// </summary>
         public GraphicsDevice GraphicsDevice
         {
             get => _graphicsDevice;
@@ -52,31 +70,43 @@ namespace MonoGame.Framework.Graphics
 
         /// <summary>
         /// Called before the device is reset. Allows graphics resources to 
-        /// invalidate their state so they can be recreated after the device reset.
-        /// Warning: This may be called after a call to Dispose() up until
+        /// invalidate their state so they can be recreated after the device resets.
+        /// <para>
+        /// This may be called after <see cref="Dispose()"/> up until
         /// the resource is garbage collected.
+        /// </para>
         /// </summary>
         internal protected virtual void GraphicsDeviceResetting()
         {
-
         }
 
+        /// <summary>
+        /// Throws an exception if the caller is not running on the main thread.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// The caller is not running on the main thread.
+        /// </exception>
         [DebuggerHidden]
-        protected static void AssertIsOnUIThreadForSpan()
+        protected static void AssertOnMainThreadForSpan()
         {
-            if (!Threading.IsOnUIThread())
-                throw new NotSupportedException(
-                    "This method (which utilizes Span<T>) can only be called on the UI thread.");
+            if (!Threading.IsOnMainThread)
+                throw new AsyncResourceNotSupportedException(
+                    FrameworkResources.AsyncResourceNotSupportedMessage);
         }
 
+        /// <summary>
+        /// Returns the string representation of this <see cref="GraphicsResource"/>.
+        /// </summary>
         public override string ToString()
         {
             return string.IsNullOrEmpty(Name) ? base.ToString() : Name;
         }
 
+        /// <summary>
+        /// Releases resources used by the <see cref="GraphicsResource"/>.
+        /// </summary>
         public void Dispose()
         {
-            // Dispose of managed objects as well
             Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -85,20 +115,13 @@ namespace MonoGame.Framework.Graphics
         /// The method that derived classes should override to implement disposing of managed and native resources.
         /// </summary>
         /// <param name="disposing">True if managed objects should be disposed.</param>
-        /// <remarks>Native resources should always be released regardless of the value of the disposing parameter.</remarks>
+        /// <remarks>
+        /// Unmanaged resources should always be released regardless of the value of the disposing parameter.
+        /// </remarks>
         protected virtual void Dispose(bool disposing)
         {
             if (!IsDisposed)
             {
-                if (disposing)
-                {
-                    // Release managed objects
-                    // ...
-                }
-
-                // Release native objects
-                // ...
-
                 // Do not trigger the event if called from the finalizer
                 if (disposing)
                     Disposing?.Invoke(this);
@@ -113,9 +136,11 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
+        /// <summary>
+        /// Disposes the <see cref="GraphicsResource"/>.
+        /// </summary>
         ~GraphicsResource()
         {
-            // Pass false so the managed objects are not released
             Dispose(false);
         }
     }

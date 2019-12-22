@@ -30,7 +30,7 @@
 using System;
 using System.IO;
 
-namespace MonoGame.Utilities.Deflate
+namespace MonoGame.Framework.Deflate
 {
     /// <summary>
     ///   A class for compressing and decompressing GZIP streams.
@@ -38,8 +38,8 @@ namespace MonoGame.Utilities.Deflate
     /// <remarks>
     ///
     /// <para>
-    ///   The <c>GZipStream</c> is a <see
-    ///   href="http://en.wikipedia.org/wiki/Decorator_pattern">Decorator</see> on a
+    ///   The <c>GZipStream</c> is a <a
+    ///   href="http://en.wikipedia.org/wiki/Decorator_pattern">Decorator</a> on a
     ///   <see cref="Stream"/>. It adds GZIP compression or decompression to any
     ///   stream.
     /// </para>
@@ -48,8 +48,8 @@ namespace MonoGame.Utilities.Deflate
     ///   Like the <c>System.IO.Compression.GZipStream</c> in the .NET Base Class Library, the
     ///   <c>MonoGame.Utilities.Deflate.GZipStream</c> can compress while writing, or decompress while
     ///   reading, but not vice versa.  The compression method used is GZIP, which is
-    ///   documented in <see href="http://www.ietf.org/rfc/rfc1952.txt">IETF RFC
-    ///   1952</see>, "GZIP file format specification version 4.3".</para>
+    ///   documented in <a href="http://www.ietf.org/rfc/rfc1952.txt">IETF RFC
+    ///   1952</a>, "GZIP file format specification version 4.3".</para>
     ///
     /// <para>
     ///   A <c>GZipStream</c> can be used to decompress data (through <c>Read()</c>) or
@@ -728,9 +728,9 @@ namespace MonoGame.Utilities.Deflate
         {
             get
             {
-                if (this._baseStream._streamMode == MonoGame.Utilities.Deflate.ZlibBaseStream.StreamMode.Writer)
+                if (this._baseStream._streamMode == MonoGame.Framework.Deflate.ZlibBaseStream.StreamMode.Writer)
                     return this._baseStream._z.TotalBytesOut + _headerByteCount;
-                if (this._baseStream._streamMode == MonoGame.Utilities.Deflate.ZlibBaseStream.StreamMode.Reader)
+                if (this._baseStream._streamMode == MonoGame.Framework.Deflate.ZlibBaseStream.StreamMode.Reader)
                     return this._baseStream._z.TotalBytesIn + this._baseStream._gzipHeaderByteCount;
                 return 0;
             }
@@ -833,7 +833,7 @@ namespace MonoGame.Utilities.Deflate
         public override void Write(byte[] buffer, int offset, int count)
         {
             if (_disposed) throw new ObjectDisposedException("GZipStream");
-            if (_baseStream._streamMode == MonoGame.Utilities.Deflate.ZlibBaseStream.StreamMode.Undefined)
+            if (_baseStream._streamMode == MonoGame.Framework.Deflate.ZlibBaseStream.StreamMode.Undefined)
             {
                 //Console.WriteLine("GZipStream: First write");
                 if (_baseStream._wantCompress)

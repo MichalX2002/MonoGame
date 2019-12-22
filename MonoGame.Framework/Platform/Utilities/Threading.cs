@@ -4,9 +4,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
-using MonoGame.Framework.Graphics;
+
 #if IOS
 using Foundation;
 using OpenGLES;
@@ -19,52 +18,50 @@ namespace MonoGame.Framework
 {
     internal class Threading
     {
-        public const int MaxWaitForUIThread = 10000; // In milliseconds
+        public const int MaxWaitForMainThread = 10000; // In milliseconds
 
-        private static int mainThreadId;
+        private static int _mainThreadId;
 
 #if ANDROID || WINDOWS || DESKTOPGL || ANGLE
-        static List<Action> actions = new List<Action>();
-        //static Mutex actionsMutex = new Mutex();
+        private static List<Action> actions = new List<Action>();
 #elif IOS
         public static EAGLContext BackgroundContext;
 #endif
 
         static Threading()
         {
-            mainThreadId = Thread.CurrentThread.ManagedThreadId;
+            _mainThreadId = Thread.CurrentThread.ManagedThreadId;
         }
 #if ANDROID
         internal static void ResetThread (int id)
         {
-            mainThreadId = id;
+            _mainThreadId = id;
         }
 #endif
         /// <summary>
-        /// Checks if the code is currently running on the UI thread.
+        /// Gets whether the caller is running on the main thread.
         /// </summary>
-        /// <returns>true if the code is currently running on the UI thread.</returns>
-        public static bool IsOnUIThread()
+        /// <returns><see langword="true"/> if the caller is running on the main thread.</returns>
+        public static bool IsOnMainThread => _mainThreadId == Thread.CurrentThread.ManagedThreadId;
+
+        /// <summary>
+        /// Throws an exception if the caller is not running on the main thread.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// The caller is not running on the main thread.
+        /// </exception>
+        public static void EnsureMainThread()
         {
-            return mainThreadId == Thread.CurrentThread.ManagedThreadId;
+            if (!IsOnMainThread)
+                throw new InvalidOperationException("Method was not called on the main thread.");
         }
 
         /// <summary>
-        /// Throws an exception if the code is not currently running on the UI thread.
+        /// Runs the given action on the main thread and blocks the current thread while the action is running.
+        /// If the current thread is the main thread, the action will run immediately.
         /// </summary>
-        /// <exception cref="InvalidOperationException">Thrown if the code is not currently running on the UI thread.</exception>
-        public static void EnsureUIThread()
-        {
-            if (!IsOnUIThread())
-                throw new InvalidOperationException("Operation not called on UI thread.");
-        }
-
-        /// <summary>
-        /// Runs the given action on the UI thread and blocks the current thread while the action is running.
-        /// If the current thread is the UI thread, the action will run immediately.
-        /// </summary>
-        /// <param name="action">The action to be run on the UI thread</param>
-        internal static void BlockOnUIThread(Action action)
+        /// <param name="action">The action to be run on the main thread</param>
+        internal static void BlockOnMainThread(Action action)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
@@ -72,8 +69,8 @@ namespace MonoGame.Framework
 #if DIRECTX || PSM
             action();
 #else
-            // If we are already on the UI thread, just call the action and be done with it
-            if (IsOnUIThread())
+            // If we are already on the main thread, just call the action and be done with it
+            if (IsOnMainThread)
             {
                 action.Invoke();
                 return;
@@ -102,14 +99,14 @@ namespace MonoGame.Framework
                 action.Invoke();
                 resetEvent.Set();
             });
-            if (!resetEvent.Wait(MaxWaitForUIThread))
+            if (!resetEvent.Wait(MaxWaitForMainThread))
                 throw new TimeoutException();
 #endif // IOS
 #endif // DIRECTX ||PSM
         }
 
 #if ANDROID || WINDOWS || DESKTOPGL || ANGLE
-        static void Add(Action action)
+        private static void Add(Action action)
         {
             lock (actions)
             {
@@ -118,18 +115,16 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Runs all pending actions. Must be called from the UI thread.
+        /// Runs all pending actions. Must be called from the main thread.
         /// </summary>
         internal static void Run()
         {
-            EnsureUIThread();
+            EnsureMainThread();
 
             lock (actions)
             {
                 foreach (Action action in actions)
-                {
-                    action();
-                }
+                    action.Invoke();
                 actions.Clear();
             }
         }

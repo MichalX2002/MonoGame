@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {

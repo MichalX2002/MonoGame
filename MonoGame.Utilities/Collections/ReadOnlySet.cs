@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace MonoGame.Utilities.Collections
+namespace MonoGame.Framework.Collections
 {
     [DebuggerDisplay("Count = {Count}")]
     public class ReadOnlySet<T> : IReadOnlySet<T>

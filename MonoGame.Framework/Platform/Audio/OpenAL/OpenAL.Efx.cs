@@ -1,6 +1,6 @@
-﻿using MonoGame.OpenAL;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
+using MonoGame.OpenAL;
 
 namespace MonoGame.Framework.Audio
 {

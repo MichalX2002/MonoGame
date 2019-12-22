@@ -6,10 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 using MonoGame.Framework.Graphics;
 using System.Globalization;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework.Content
 {

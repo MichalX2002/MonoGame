@@ -27,6 +27,33 @@ namespace MonoGame.Framework.Audio
         private bool _applied3D;
         private bool _played;
 
+        /// <summary>
+        /// This event is triggered when the <see cref="Cue"/> is disposed.
+        /// </summary>
+        public event DataEvent<Cue> Disposing;
+
+        /// <summary>
+        /// Gets the friendly name of the cue.
+        /// </summary>
+        /// <remarks>
+        /// The friendly name is a value set from the designer.
+        /// </remarks>
+        public string Name { get; }
+
+        /// <summary>
+        /// Is true if the <see cref="Cue"/> has been disposed.
+        /// </summary>
+        public bool IsDisposed { get; internal set; }
+
+        public bool IsPrepared { get; internal set; }
+
+        public bool IsCreated { get; internal set; }
+
+        // TODO: Implement me! 
+        public bool IsStopping => false;
+
+        public bool IsPreparing => false;
+
         /// <summary>Indicates whether or not the cue is currently paused.</summary>
         /// <remarks>IsPlaying and IsPaused both return true if a cue is paused while playing.</remarks>
         public bool IsPaused
@@ -35,7 +62,6 @@ namespace MonoGame.Framework.Audio
             {
                 if (_curSound != null)
                     return _curSound.IsPaused;
-
                 return false;
             }
         }
@@ -48,7 +74,6 @@ namespace MonoGame.Framework.Audio
             {
                 if (_curSound != null)
                     return _curSound.Playing;
-
                 return false;
             }
         }
@@ -60,24 +85,9 @@ namespace MonoGame.Framework.Audio
             {
                 if (_curSound != null)
                     return _curSound.Stopped;
-
                 return !IsDisposed && !IsPrepared;
             }
         }
-
-        public bool IsStopping =>
-                // TODO: Implement me!
-                false;
-
-        public bool IsPreparing => false;
-
-        public bool IsPrepared { get; internal set; }
-
-        public bool IsCreated { get; internal set; }
-
-        /// <summary>Gets the friendly name of the cue.</summary>
-        /// <remarks>The friendly name is a value set from the designer.</remarks>
-        public string Name { get; }
 
         internal Cue(AudioEngine engine, string cuename, XactSound sound)
         {
@@ -346,16 +356,6 @@ namespace MonoGame.Framework.Audio
 
             return volume;
         }
-
-        /// <summary>
-        /// This event is triggered when the <see cref="Cue"/> is disposed.
-        /// </summary>
-        public event SimpleEventHandler<Cue> Disposing;
-
-        /// <summary>
-        /// Is true if the <see cref="Cue"/> has been disposed.
-        /// </summary>
-        public bool IsDisposed { get; internal set; }
 
         /// <summary>
         /// Disposes the <see cref="Cue"/>.

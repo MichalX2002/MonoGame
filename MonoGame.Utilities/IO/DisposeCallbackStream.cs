@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MonoGame.Utilities.IO
+namespace MonoGame.Framework.IO
 {
     public class DisposeCallbackStream : Stream
     {

@@ -3,8 +3,8 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using MonoGame.Framework.Content;
-using MonoGame.Utilities;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework;
+using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework.Graphics
 {

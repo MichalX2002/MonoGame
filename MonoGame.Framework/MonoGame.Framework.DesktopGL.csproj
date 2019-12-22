@@ -9,7 +9,7 @@
 This package provides you with MonoGame Framework that uses OpenGL for rendering and works on Windows, Linux and MacOS.</Description>
     <PackageTags>monogame;.net core;core;.net standard;standard;desktopgl</PackageTags>
     <PackageId>MonoGame.Framework.DesktopGL</PackageId>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,6 +32,7 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Audio\AudioUtil.cs" />
     <Compile Remove="Graphics\GraphicsAdapter.cs" />
     <Compile Remove="Graphics\Textures\RenderTarget3D.cs" />
     <Compile Remove="Media\Playlist.cs" />
@@ -47,6 +48,7 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
 
   <ItemGroup>
     <Compile Include="Platform\Graphics\Shader\Shader.Structure.cs" />
+    <Compile Include="Platform\Input\Joystick.Instance.SDL.cs" />
     <Compile Include="Platform\Input\KeyInputEvent.cs" />
     <Compile Include="Platform\TitleContainer.Desktop.cs" />
     <Compile Include="Platform\SDL\SDL2.cs" />

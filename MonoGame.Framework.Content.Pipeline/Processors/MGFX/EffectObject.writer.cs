@@ -5,7 +5,7 @@
 using System.IO;
 using MonoGame.Framework.Graphics;
 using System;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 
 namespace TwoMGFX
 {
@@ -130,7 +130,7 @@ namespace TwoMGFX
 
                 // Calculate a hash code from memory stream
                 // and write it to the header.
-                var effectKey = MonoGame.Utilities.Hash.ComputeHash(memStream);
+                var effectKey = MonoGame.Framework.Hash.ComputeHash(memStream);
                 writer.Write((int)effectKey);
 
                 //write content from memory stream to final stream.

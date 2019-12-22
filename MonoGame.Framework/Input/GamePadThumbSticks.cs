@@ -17,8 +17,7 @@ namespace MonoGame.Framework.Input
         private const float leftThumbDeadZone = SharpDX.XInput.Gamepad.LeftThumbDeadZone / (float)short.MaxValue;
         private const float rightThumbDeadZone = SharpDX.XInput.Gamepad.RightThumbDeadZone / (float)short.MaxValue;
 #else
-        // Default & SDL Xbox 360 Controller dead zones
-        // Based on the XInput constants
+        // Default & SDL Xbox 360 Controller dead zones based on the XInput constants.
         private const float leftThumbDeadZone = 0.24f;
         private const float rightThumbDeadZone = 0.265f;
 #endif
@@ -29,13 +28,13 @@ namespace MonoGame.Framework.Input
         /// Gets a value indicating the position of the left stick (thumbstick). 
         /// </summary>
         /// <value>A <see cref="Vector2"/> indicating the current position of the left stick (thumbstick).</value>
-        public readonly Vector2 Left;
+        public Vector2 Left { get; }
 
         /// <summary>
         /// Gets a value indicating the position of the right stick (thumbstick). 
         /// </summary>
         /// <value>A <see cref="Vector2"/> indicating the current position of the right stick (thumbstick).</value>
-        public readonly Vector2 Right;
+        public Vector2 Right { get; }
 
         public GamePadThumbSticks(Vector2 leftPosition, Vector2 rightPosition)
             : this(leftPosition, rightPosition, GamePadDeadZone.None, GamePadDeadZone.None)
@@ -101,7 +100,9 @@ namespace MonoGame.Framework.Input
         }
 
         private Vector2 ExcludeIndependentAxesDeadZone(Vector2 value, float deadZone) => 
-            new Vector2(ExcludeAxisDeadZone(value.X, deadZone), ExcludeAxisDeadZone(value.Y, deadZone));
+            new Vector2(
+                ExcludeAxisDeadZone(value.X, deadZone),
+                ExcludeAxisDeadZone(value.Y, deadZone));
 
         private float ExcludeAxisDeadZone(float value, float deadZone)
         {

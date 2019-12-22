@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using MonoGame.Framework.Content.Pipeline.Graphics;
 using MonoGame.Framework.Graphics;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 #if WINDOWS
 using TwoMGFX;
 #endif

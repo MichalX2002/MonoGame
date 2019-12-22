@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework.Graphics
 {

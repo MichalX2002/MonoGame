@@ -15,8 +15,14 @@ using MonoGame.Framework.Input.Touch;
 
 namespace MonoGame.Framework.Graphics
 {
+    /// <summary>
+    /// Parameters for display and presentation and settings for the back buffer.
+    /// </summary>
     public class PresentationParameters
     {
+        /// <summary>
+        /// Gets the default rate for presenting the back buffer.
+        /// </summary>
         public const int DefaultPresentRate = 60;
         
         /// <summary>

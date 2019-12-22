@@ -4,7 +4,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using MonoGame.OpenAL;
 
 namespace MonoGame.Framework.Audio

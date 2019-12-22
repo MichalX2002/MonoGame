@@ -8,8 +8,8 @@ using System.Runtime.Serialization;
 namespace MonoGame.Framework.Graphics
 {
     /// <summary>
-    /// A snapshot of rendering statistics from <see cref="GraphicsDevice.Metrics"/> to
-    /// be used for runtime debugging and profiling.
+    /// A snapshot of rendering statistics from <see cref="GraphicsDevice.Metrics"/>
+    /// to be used for runtime debugging and profiling.
     /// </summary>
     [Serializable, DataContract]
     public struct GraphicsMetrics
@@ -24,49 +24,49 @@ namespace MonoGame.Framework.Graphics
         [DataMember(Name = "PixelShaderCount")] internal long _pixelShaderCount;
 
         /// <summary>
-        /// Number of times Clear was called.
+        /// Gets the amount Clear calls.
         /// </summary>
         [IgnoreDataMember]
         public long ClearCount => _clearCount;
 
         /// <summary>
-        /// Number of times Draw was called.
+        /// Gets the amount of various Draw calls.
         /// </summary>
         [IgnoreDataMember]
         public long DrawCount => _drawCount;
 
         /// <summary>
-        /// Number of rendered primitives.
+        /// Gets the amount of rendered primitives.
         /// </summary>
         [IgnoreDataMember]
         public long PrimitiveCount => _primitiveCount;
 
         /// <summary>
-        /// Number of sprites and text characters rendered via <see cref="SpriteBatch"/>.
+        /// Gets the amount of sprites and text characters rendered via <see cref="SpriteBatch"/>.
         /// </summary>
         [IgnoreDataMember]
         public long SpriteCount => _spriteCount;
 
         /// <summary>
-        /// Number of times a target was changed on the GPU.
+        /// Gets the number of times a target was changed on the GPU.
         /// </summary>
         [IgnoreDataMember]
         public long TargetCount => _targetCount;
 
         /// <summary>
-        /// Number of times a texture was changed on the GPU.
+        /// Gets the number of times a texture was changed on the GPU.
         /// </summary>
         [IgnoreDataMember]
         public long TextureCount => _textureCount;
 
         /// <summary>
-        /// Number of times the vertex shader was changed on the GPU.
+        /// Gets the number of times the vertex shader was changed on the GPU.
         /// </summary>
         [IgnoreDataMember]
         public long VertexShaderCount => _vertexShaderCount;
 
         /// <summary>
-        /// Number of times the pixel shader was changed on the GPU.
+        /// Gets the number of times the pixel shader was changed on the GPU.
         /// </summary>
         [IgnoreDataMember]
         public long PixelShaderCount => _pixelShaderCount;

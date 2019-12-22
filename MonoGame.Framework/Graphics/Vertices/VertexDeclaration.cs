@@ -4,7 +4,7 @@
 
 using System;
 using System.Collections.Generic;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 
 namespace MonoGame.Framework.Graphics
 {

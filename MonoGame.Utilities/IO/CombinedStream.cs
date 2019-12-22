@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
-namespace MonoGame.Utilities.IO
+namespace MonoGame.Framework.IO
 {
     /// <summary>
     /// Combines multiple streams into a larger stream that can only be read once.

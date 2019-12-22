@@ -1,5 +1,5 @@
 ﻿
-namespace MonoGame.Utilities.PackedVector
+namespace MonoGame.Framework.PackedVector
 {
     public static class PixelExtensions
     {

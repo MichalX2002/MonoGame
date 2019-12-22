@@ -9,7 +9,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 
 namespace MonoGame.Framework
 {
@@ -27,7 +27,7 @@ namespace MonoGame.Framework
         {
             _game = game;
             _keys = new List<Keys>();
-            Keyboard.SetKeyList(_keys);
+            Keyboard.SetKeysDownList(_keys);
 
             Sdl.GetVersion(out Sdl.Version sdlVersion);
             Sdl.Major = sdlVersion.Major;
@@ -137,8 +137,10 @@ namespace MonoGame.Framework
                         var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
                         if (!_keys.Contains(key))
                             _keys.Add(key);
+
                         char character = (char)ev.Key.Keysym.Sym;
                         _window.OnKeyDown(new KeyInputEvent(key));
+
                         if (char.IsControl(character))
                             _window.OnTextInput(new TextInputEvent(character, key));
                         break;
@@ -191,7 +193,7 @@ namespace MonoGame.Framework
         {
             int len = 0;
             int utf8character = 0; // using an int to encode multibyte characters longer than 2 bytes
-            int charByteSize = 0; // UTF8 char lenght to decode
+            int charByteSize = 0; // UTF8 char length to decode
             int remainingShift = 0;
 
             byte currentByte;
@@ -224,14 +226,13 @@ namespace MonoGame.Framework
                 {
                     utf8character <<= remainingShift * 8; // shifting it to full UTF8 scope
 
-                    // SDL returns UTF8-encoded characters while C# char type is UTF16-encoded (and limited to the 0-FFFF range / does not support surrogate pairs)
+                    // SDL returns UTF8-encoded characters while C# char type is UTF16-encoded 
+                    // (and limited to the 0-FFFF range / does not support surrogate pairs)
                     // so we need to convert it to Unicode codepoint and check if it's within the supported range
                     int codepoint = UTF8ToUnicode(utf8character);
-
-                    if (codepoint >= 0 && codepoint < 0xFFFF)
+                    if (codepoint >= 0)
                     {
-                        _window.OnTextInput(new TextInputEvent((char)codepoint, KeyboardUtil.ToXna(codepoint)));
-                        // UTF16 characters beyond 0xFFFF are not supported (and would require a surrogate encoding that is not supported by the char type)
+                        _window.OnTextInput(new TextInputEvent(codepoint, KeyboardUtil.ToXna(codepoint)));
                     }
                 }
 
@@ -251,11 +252,11 @@ namespace MonoGame.Framework
             else if (byte1 < 0xC0)
                 return -1;
             else if (byte1 < 0xE0 && byte2 >= 0x80 && byte2 < 0xC0)
-                return (byte1 % 0x20) * 0x40 + (byte2 % 0x40);
+                return byte1 % 0x20 * 0x40 + (byte2 % 0x40);
             else if (byte1 < 0xF0 && byte2 >= 0x80 && byte2 < 0xC0 && byte3 >= 0x80 && byte3 < 0xC0)
-                return (byte1 % 0x10) * 0x40 * 0x40 + (byte2 % 0x40) * 0x40 + (byte3 % 0x40);
+                return byte1 % 0x10 * 0x40 * 0x40 + byte2 % 0x40 * 0x40 + (byte3 % 0x40);
             else if (byte1 < 0xF8 && byte2 >= 0x80 && byte2 < 0xC0 && byte3 >= 0x80 && byte3 < 0xC0 && byte4 >= 0x80 && byte4 < 0xC0)
-                return (byte1 % 0x8) * 0x40 * 0x40 * 0x40 + (byte2 % 0x40) * 0x40 * 0x40 + (byte3 % 0x40) * 0x40 + (byte4 % 0x40);
+                return byte1 % 0x8 * 0x40 * 0x40 * 0x40 + byte2 % 0x40 * 0x40 * 0x40 + byte3 % 0x40 * 0x40 + (byte4 % 0x40);
             else
                 return -1;
         }

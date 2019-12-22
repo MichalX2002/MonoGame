@@ -28,7 +28,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 
-namespace MonoGame.Utilities.Memory
+namespace MonoGame.Framework.Memory
 {
     /// <summary>
     /// Manages pools of small and large byte arrays.

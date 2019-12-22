@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace MonoGame.Utilities.Memory
+namespace MonoGame.Framework.Memory
 {
     public unsafe class UnmanagedPointer<T> : IMemory<T>, IDisposable
         where T : unmanaged

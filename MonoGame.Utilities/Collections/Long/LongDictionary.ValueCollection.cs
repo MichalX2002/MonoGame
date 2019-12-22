@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace MonoGame.Utilities.Collections
+namespace MonoGame.Framework.Collections
 {
     public partial class LongDictionary<TKey, TValue>
     {

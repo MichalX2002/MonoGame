@@ -9,38 +9,70 @@ using System.Text;
 namespace MonoGame.Framework.Input
 {
     /// <summary>
-    /// Describes current joystick state.
+    /// Describes a joystick state.
     /// </summary>
-    public struct JoystickState : IEquatable<JoystickState>
+    public readonly struct JoystickState : IEquatable<JoystickState>
     {
+        /// <summary>
+        /// The default <see cref="JoystickState"/>.
+        /// </summary>
+        public static JoystickState Default { get; } = new JoystickState(
+            isConnected: false,
+            axes: Array.Empty<int>(),
+            buttons: Array.Empty<ButtonState>(),
+            hats: Array.Empty<JoystickHat>());
+
         /// <summary>
         /// Gets a value indicating whether the joystick is connected.
         /// </summary>
-        public bool IsConnected { get; internal set; }
+        public bool IsConnected { get; }
 
         /// <summary>
         /// Gets the joystick axis values.
         /// </summary>
-        public int[] Axes { get; internal set; }
+        public ReadOnlyMemory<int> Axes { get; }
 
         /// <summary>
         /// Gets the joystick button values.
         /// </summary>
-        public ButtonState[] Buttons { get; internal set; }
+        public ReadOnlyMemory<ButtonState> Buttons { get; }
 
         /// <summary>
         /// Gets the joystick hat values.
         /// </summary>
-        public JoystickHat[] Hats{ get; internal set; }
+        public ReadOnlyMemory<JoystickHat> Hats { get; }
+
+        /// <summary>
+        /// Constructs the <see cref="JoystickState"/>.
+        /// </summary>
+        public JoystickState(
+            bool isConnected,
+            ReadOnlyMemory<int> axes, 
+            ReadOnlyMemory<ButtonState> buttons, 
+            ReadOnlyMemory<JoystickHat> hats)
+        {
+            IsConnected = isConnected;
+            Axes = !axes.IsEmpty ? axes : throw new ArgumentEmptyException(nameof(axes));
+            Buttons = !buttons.IsEmpty ? buttons : throw new ArgumentEmptyException(nameof(buttons));
+            Hats = !hats.IsEmpty ? hats : throw new ArgumentEmptyException(nameof(hats));
+        }
 
         #region Equals
 
         public static bool operator ==(in JoystickState a, in JoystickState b)
         {
+            var aButtons = a.Buttons.Span;
+            var bButtons = b.Buttons.Span;
+            if (aButtons.Length != bButtons.Length)
+                return false;
+
+            for (int i = 0; i < aButtons.Length; i++)
+                if (aButtons[i] != bButtons[i])
+                    return false;
+
             return a.IsConnected == b.IsConnected
-                && a.Axes.SequenceEqual(b.Axes)
-                && a.Buttons.SequenceEqual(b.Buttons)
-                && a.Hats.SequenceEqual(b.Hats);
+                && a.Axes.Span.SequenceEqual(b.Axes.Span)
+                && a.Hats.Span.SequenceEqual(b.Hats.Span);
         }
 
         public static bool operator !=(in JoystickState a, in JoystickState b) => !(a == b);
@@ -59,16 +91,17 @@ namespace MonoGame.Framework.Input
         {
             if (!IsConnected)
                 return 0;
+
             unchecked
             {
                 int code = 7;
-                foreach (int axis in Axes)
+                foreach (int axis in Axes.Span)
                     code = code * 31 + axis;
 
-                foreach (var button in Buttons)
+                foreach (var button in Buttons.Span)
                     code = code * 31 + button.GetHashCode();
 
-                foreach (var hat in Hats)
+                foreach (var hat in Hats.Span)
                     code = code * 31 + hat.GetHashCode();
                 return code;
             }
@@ -79,24 +112,39 @@ namespace MonoGame.Framework.Input
         /// </summary>
         public override string ToString()
         {
-            var ret = new StringBuilder(54 - 2 + Axes.Length * 7 + Buttons.Length + Hats.Length * 5);
-            ret.Append("[JoystickState: IsConnected=" + (IsConnected ? 1 : 0));
+            var ret = new StringBuilder(
+                58 +
+                Axes.Length * 7 +
+                Buttons.Length +
+                Hats.Length * 5);
+
+            ret.Append("[JoystickState: IsConnected=");
+            ret.Append(IsConnected);
 
             if (IsConnected)
             {
-                ret.Append(", Axes=");
-                foreach (var axis in Axes)
-                    ret.Append((axis > 0 ? "+" : "") + axis.ToString("00000") + " ");
-                ret.Length--;
+                if (Axes.Length > 0)
+                {
+                    ret.Append(", Axes=");
+                    foreach (var axis in Axes.Span)
+                        ret.Append((axis > 0 ? "+" : "") + axis.ToString("00000") + " ");
+                    ret.Length--;
+                }
 
-                ret.Append(", Buttons=");
-                foreach (var button in Buttons)
-                    ret.Append((int)button);
+                if (Buttons.Length > 0)
+                {
+                    ret.Append(", Buttons=");
+                    foreach (var button in Buttons.Span)
+                        ret.Append((int)button);
+                }
 
-                ret.Append(", Hats=");
-                foreach (var hat in Hats)
-                    ret.Append(hat + " ");
-                ret.Length--;
+                if (Hats.Length > 0)
+                {
+                    ret.Append(", Hats=");
+                    foreach (var hat in Hats.Span)
+                        ret.Append(hat + " ");
+                    ret.Length--;
+                }
             }
 
             ret.Append("]");

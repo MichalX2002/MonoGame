@@ -1,9 +1,8 @@
-﻿
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace MonoGame.Utilities.Memory
+namespace MonoGame.Framework.Memory
 {
     public static class BitHelper
     {

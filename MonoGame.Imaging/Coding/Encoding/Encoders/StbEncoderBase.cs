@@ -2,8 +2,8 @@
 using System.IO;
 using System.Threading;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Utilities.Memory;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.Memory;
+using MonoGame.Framework.PackedVector;
 using static StbSharp.StbImageWrite;
 
 namespace MonoGame.Imaging.Coding.Encoding

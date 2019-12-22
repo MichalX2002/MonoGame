@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Framework
 {
     public static class StreamExtensions
     {

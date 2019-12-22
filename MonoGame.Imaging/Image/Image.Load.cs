@@ -3,8 +3,8 @@ using System.IO;
 using System.Threading;
 using MonoGame.Framework;
 using MonoGame.Imaging.Decoding;
-using MonoGame.Utilities.Memory;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.Memory;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging
 {

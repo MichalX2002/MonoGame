@@ -6,7 +6,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
-using MonoGame.Utilities.Memory;
 
 namespace MonoGame.Framework.Audio
 {
@@ -351,7 +350,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// This event is triggered when the AudioEngine is disposed.
         /// </summary>
-        public event SimpleEventHandler<AudioEngine> Disposing;
+        public event DataEvent<AudioEngine> Disposing;
 
         /// <summary>
         /// Is true if the AudioEngine has been disposed.

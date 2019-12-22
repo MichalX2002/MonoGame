@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 
-namespace MonoGame.Utilities.IO
+namespace MonoGame.Framework.IO
 {
     /// <summary>
     ///   Computes a CRC-32. The CRC-32 algorithm is parameterized - you

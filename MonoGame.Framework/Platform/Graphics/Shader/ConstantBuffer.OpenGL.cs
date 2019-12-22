@@ -31,7 +31,7 @@ namespace MonoGame.Framework.Graphics
                 }
             }
 
-            HashKey = MonoGame.Utilities.Hash.ComputeHash(data);
+            HashKey = MonoGame.Framework.Hash.ComputeHash(data);
         }
 
         private void PlatformClear()

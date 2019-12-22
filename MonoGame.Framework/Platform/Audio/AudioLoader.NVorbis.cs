@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
+using MonoGame.OpenAL;
 using NVorbis;
 
 namespace MonoGame.Framework.Audio
@@ -18,14 +19,14 @@ namespace MonoGame.Framework.Audio
             var reader = new VorbisReader(stream, leaveOpen: false);
             try
             {
-                bool floatOutput = ALController.Instance.SupportsFloat32;
-                int sampleSize = floatOutput ? sizeof(float) : sizeof(short);
+                bool useFloat = ALController.Instance.SupportsFloat32;
+                int sampleSize = useFloat ? sizeof(float) : sizeof(short);
 
                 channels = reader.Channels;
                 if (channels == 1)
-                    format = floatOutput ? ALFormat.MonoFloat32 : ALFormat.Mono16;
+                    format = useFloat ? ALFormat.MonoFloat32 : ALFormat.Mono16;
                 else if (channels == 2)
-                    format = floatOutput ? ALFormat.StereoFloat32 : ALFormat.Stereo16;
+                    format = useFloat ? ALFormat.StereoFloat32 : ALFormat.Stereo16;
                 else
                     throw new NotSupportedException("Only mono and stereo is supported.");
 
@@ -53,7 +54,7 @@ namespace MonoGame.Framework.Audio
                 int samplesRead;
                 while ((samplesRead = reader.ReadSamples(sampleBuffer)) > 0)
                 {
-                    if (floatOutput)
+                    if (useFloat)
                     {
                         // we can copy directly to output
                         int bytes = samplesRead * sizeof(float);

@@ -9,11 +9,18 @@ using System.IO;
 
 namespace MonoGame.Framework.Media
 {
+    /// <summary>
+    /// Encapsulates a streamable resource that can be used to play audio.
+    /// </summary>
     public sealed partial class Song : IDisposable
     {
         #region Static Properties
 
         private static float _masterVolume = 1f;
+
+        /// <summary>
+        /// Gets the master volume which acts for every <see cref="Song"/>.
+        /// </summary>
         public static float MasterVolume
         {
             get => _masterVolume;
@@ -21,7 +28,7 @@ namespace MonoGame.Framework.Media
             {
                 if (value < 0f || value > 1f)
                     throw new ArgumentOutOfRangeException();
-
+                
                 if (_masterVolume != value)
                 {
                     _masterVolume = value;
@@ -30,6 +37,9 @@ namespace MonoGame.Framework.Media
             }
         }
 
+        /// <summary>
+        /// Gets 
+        /// </summary>
         public static ReadOnlyCollection<TimeSpan> UpdateTime
         {
             get =>
@@ -43,9 +53,19 @@ namespace MonoGame.Framework.Media
 
         #endregion
 
-        public event SimpleEventHandler<Song> OnFinish;
+        /// <summary>
+        /// Occurs when the <see cref="Song"/> stops though not when the it loops.
+        /// </summary>
+        public event DataEvent<Song> Finished;
 
+        /// <summary>
+        /// Gets whether the <see cref="Song"/> is disposed.
+        /// </summary>
         public bool IsDisposed { get; private set; }
+
+        /// <summary>
+        /// Gets the name of the <see cref="Song"/>.
+        /// </summary>
         public string Name { get; }
 
         #region Method Properties
@@ -201,7 +221,7 @@ namespace MonoGame.Framework.Media
                 throw new ObjectDisposedException(nameof(Song));
         }
 
-        void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!IsDisposed)
             {
@@ -210,12 +230,18 @@ namespace MonoGame.Framework.Media
             }
         }
 
+        /// <summary>
+        /// Releases resources used by the <see cref="Song"/>.
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Disposes the <see cref="Song"/>.
+        /// </summary>
         ~Song()
         {
             Dispose(false);

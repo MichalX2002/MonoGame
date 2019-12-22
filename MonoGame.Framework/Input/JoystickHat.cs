@@ -9,39 +9,50 @@ namespace MonoGame.Framework.Input
     /// <summary>
     /// Describes joystick hat state.
     /// </summary>
-    public struct JoystickHat : IEquatable<JoystickHat>
+    public readonly struct JoystickHat : IEquatable<JoystickHat>
     {
         /// <summary>
         /// Gets if joysticks hat "down" is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the button is pressed otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState Down { get; internal set; }
+        public ButtonState Down { get; }
 
         /// <summary>
         /// Gets if joysticks hat "left" is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the button is pressed otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState Left { get; internal set; }
+        public ButtonState Left { get; }
 
         /// <summary>
         /// Gets if joysticks hat "right" is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the button is pressed otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState Right { get; internal set; }
+        public ButtonState Right { get; }
 
         /// <summary>
         /// Gets if joysticks hat "up" is pressed.
         /// </summary>
         /// <value><see cref="ButtonState.Pressed"/> if the button is pressed otherwise, <see cref="ButtonState.Released"/>.</value>
-        public ButtonState Up { get; internal set; }
+        public ButtonState Up { get; }
+
+        /// <summary>
+        /// Constructs the <see cref="JoystickHat"/> with the given button states.
+        /// </summary>
+        public JoystickHat(ButtonState down, ButtonState left, ButtonState right, ButtonState up)
+        {
+            Down = down;
+            Left = left;
+            Right = right;
+            Up = up;
+        }
 
         #region Equals
 
         public static bool operator ==(JoystickHat a, JoystickHat b)
         {
-            return (a.Down == b.Down) 
+            return (a.Down == b.Down)
                 && (a.Left == b.Left)
-                && (a.Right == b.Right) 
+                && (a.Right == b.Right)
                 && (a.Up == b.Up);
         }
 

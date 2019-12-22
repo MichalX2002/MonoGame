@@ -8,20 +8,20 @@ using System;
 
 namespace MonoGame.Framework.Graphics
 {
-	// http://msdn.microsoft.com/en-us/library/ff434403.aspx
-	public struct RenderTargetBinding
-	{
+    // http://msdn.microsoft.com/en-us/library/ff434403.aspx
+    public struct RenderTargetBinding
+    {
         public Texture RenderTarget { get; }
         public int ArraySlice { get; }
 
         internal DepthFormat DepthFormat { get; }
 
         public RenderTargetBinding(RenderTarget2D renderTarget)
-		{
+        {
             RenderTarget = renderTarget ?? throw new ArgumentNullException(nameof(renderTarget));
             ArraySlice = (int)CubeMapFace.PositiveX;
             DepthFormat = renderTarget.DepthStencilFormat;
-		}
+        }
 
         public RenderTargetBinding(RenderTargetCube renderTarget, CubeMapFace cubeMapFace)
         {
@@ -46,15 +46,15 @@ namespace MonoGame.Framework.Graphics
                 throw new InvalidOperationException("Texture arrays are not supported on this graphics device.");
 
             RenderTarget = renderTarget;
-            _arraySlice = arraySlice;
-            _depthFormat = renderTarget.DepthStencilFormat;
+            ArraySlice = arraySlice;
+            DepthFormat = renderTarget.DepthStencilFormat;
         }
 
         public RenderTargetBinding(RenderTarget3D renderTarget)
         {
             RenderTarget = renderTarget ?? throw new ArgumentNullException(nameof(renderTarget));
-            _arraySlice = 0;
-            _depthFormat = renderTarget.DepthStencilFormat;
+            ArraySlice = 0;
+            DepthFormat = renderTarget.DepthStencilFormat;
         }
 
         public RenderTargetBinding(RenderTarget3D renderTarget, int arraySlice)
@@ -65,8 +65,8 @@ namespace MonoGame.Framework.Graphics
                 throw new ArgumentOutOfRangeException(nameof(arraySlice));
 
             RenderTarget = renderTarget;
-            _arraySlice = arraySlice;
-            _depthFormat = renderTarget.DepthStencilFormat;
+            ArraySlice = arraySlice;
+            DepthFormat = renderTarget.DepthStencilFormat;
         }
 
 #endif 
@@ -84,5 +84,5 @@ namespace MonoGame.Framework.Graphics
         }
 
 #endif
-	}
+    }
 }

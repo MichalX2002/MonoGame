@@ -170,7 +170,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="a"><see cref="Rectangle"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="Rectangle"/> instance on the right of the equal sign.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public static bool operator ==(in Rectangle a, in Rectangle b)
         {
             return (a.X == b.X) && (a.Y == b.Y) && (a.Width == b.Width) && (a.Height == b.Height);
@@ -181,7 +181,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="a"><see cref="Rectangle"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="Rectangle"/> instance on the right of the not equal sign.</param>
-        /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>
         public static bool operator !=(in Rectangle a, in Rectangle b)
         {
             return !(a == b);
@@ -196,7 +196,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="x">The x coordinate of the point to check for containment.</param>
         /// <param name="y">The y coordinate of the point to check for containment.</param>
-        /// <returns><c>true</c> if the provided coordinates lie inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the provided coordinates lie inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
         public bool Contains(int x, int y) =>
             (X <= x) && (x < (X + Width)) && (Y <= y) && (y < (Y + Height));
 
@@ -205,7 +205,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="x">The x coordinate of the point to check for containment.</param>
         /// <param name="y">The y coordinate of the point to check for containment.</param>
-        /// <returns><c>true</c> if the provided coordinates lie inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the provided coordinates lie inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
         public bool Contains(float x, float y) => 
             (X <= x) && (x < (X + Width)) && (Y <= y) && (y < (Y + Height));
 
@@ -213,7 +213,7 @@ namespace MonoGame.Framework
         /// Gets whether or not the provided <see cref="Point"/> lies within the bounds of this <see cref="Rectangle"/>.
         /// </summary>
         /// <param name="value">The coordinates to check for inclusion in this <see cref="Rectangle"/>.</param>
-        /// <returns><c>true</c> if the provided <see cref="Point"/> lies inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the provided <see cref="Point"/> lies inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
         public bool Contains(Point value) =>
             (X <= value.X) && (value.X < (X + Width)) &&
             (Y <= value.Y) && (value.Y < (Y + Height));
@@ -222,7 +222,7 @@ namespace MonoGame.Framework
         /// Gets whether or not the provided <see cref="Vector2"/> lies within the bounds of this <see cref="Rectangle"/>.
         /// </summary>
         /// <param name="value">The coordinates to check for inclusion in this <see cref="Rectangle"/>.</param>
-        /// <returns><c>true</c> if the provided <see cref="Vector2"/> lies inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the provided <see cref="Vector2"/> lies inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
         public bool Contains(Vector2 value) =>
             (X <= value.X) && (value.X < (X + Width)) &&
             (Y <= value.Y) && (value.Y < (Y + Height));
@@ -231,7 +231,7 @@ namespace MonoGame.Framework
         /// Gets whether or not the provided <see cref="Rectangle"/> lies within the bounds of this <see cref="Rectangle"/>.
         /// </summary>
         /// <param name="value">The <see cref="Rectangle"/> to check for inclusion in this <see cref="Rectangle"/>.</param>
-        /// <returns><c>true</c> if the provided <see cref="Rectangle"/>'s bounds lie entirely inside this <see cref="Rectangle"/>; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the provided <see cref="Rectangle"/>'s bounds lie entirely inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
         public bool Contains(in Rectangle value) => 
             (X <= value.X) && ((value.X + value.Width) <= (X + Width)) && 
             (Y <= value.Y) && ((value.Y + value.Height) <= (Y + Height));
@@ -290,7 +290,7 @@ namespace MonoGame.Framework
         /// Gets whether or not the other <see cref="Rectangle"/> intersects with this rectangle.
         /// </summary>
         /// <param name="value">The other rectangle for testing.</param>
-        /// <returns><c>true</c> if other <see cref="Rectangle"/> intersects with this rectangle; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if other <see cref="Rectangle"/> intersects with this rectangle; <see langword="false"/> otherwise.</returns>
         public bool Intersects(in Rectangle value)
         {
             return value.Left < Right &&

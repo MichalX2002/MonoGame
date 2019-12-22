@@ -1,7 +1,6 @@
-﻿using MonoGame.OpenAL;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
-namespace MonoGame.Framework.Audio
+namespace MonoGame.OpenAL
 {
     internal class XRamExtension
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 
 namespace MonoGame.Framework.Utilities
 {

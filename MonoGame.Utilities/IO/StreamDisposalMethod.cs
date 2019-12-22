@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Threading;
 
-namespace MonoGame.Utilities.IO
+namespace MonoGame.Framework.IO
 {
     /// <summary>
     /// Determines how a <see cref="Stream"/> should be disposed during or after an operation.

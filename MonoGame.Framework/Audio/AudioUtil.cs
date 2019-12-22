@@ -6,15 +6,15 @@ namespace Microsoft.Xna.Framework.Audio
     internal static class AudioUtil
     {
         /// <summary>
-        /// Takes WAV data and appends a header to it.
+        /// Appends a WAV header to PCM data.
         /// </summary>
-        internal static byte[] FormatWavData(byte[] buffer, int sampleRate, int channels)
+        internal static MemoryStream FormatWavData(byte[] buffer, int sampleRate, int channels)
         {
             //buffer should contain 16-bit PCM wave data
             short bitsPerSample = 16;
 
-            using (var mStream = new MemoryStream(44+buffer.Length))
-            using (var writer = new BinaryWriter(mStream))
+            using (var output = new MemoryStream(44 + buffer.Length))
+            using (var writer = new BinaryWriter(output))
             {
                 writer.Write("RIFF".ToCharArray()); //chunk id
                 writer.Write((int)(36 + buffer.Length)); //chunk size
@@ -34,8 +34,8 @@ namespace Microsoft.Xna.Framework.Audio
                 writer.Write((int)buffer.Length); //data size
 
                 writer.Write(buffer);
-                
-                return mStream.ToArray();
+
+                return output;
             }
         }
     }

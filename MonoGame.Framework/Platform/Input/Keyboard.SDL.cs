@@ -11,20 +11,28 @@ namespace MonoGame.Framework.Input
     {
         private static List<Keys> _keys;
 
-        public static ReadOnlyCollection<Keys> KeyList { get; private set; }
+        /// <summary>
+        /// Gets all the currently pressed keys.
+        /// </summary>
+        public static ReadOnlyCollection<Keys> KeysDown { get; private set; }
+
+        /// <summary>
+        /// Gets the currently active key modifiers.
+        /// </summary>
         public static KeyModifier Modifiers { get; internal set; }
 
         private static KeyboardState PlatformGetState()
         {
-            return new KeyboardState(_keys,
-                                     (Modifiers & KeyModifier.CapsLock) == KeyModifier.CapsLock,
-                                     (Modifiers & KeyModifier.NumLock) == KeyModifier.NumLock);
+            return new KeyboardState(
+                _keys,
+                (Modifiers & KeyModifier.CapsLock) == KeyModifier.CapsLock,
+                (Modifiers & KeyModifier.NumLock) == KeyModifier.NumLock);
         }
 
-        internal static void SetKeyList(List<Keys> keys)
+        internal static void SetKeysDownList(List<Keys> keys)
         {
             _keys = keys;
-            KeyList = _keys.AsReadOnly();
+            KeysDown = _keys.AsReadOnly();
         }
     }
 }

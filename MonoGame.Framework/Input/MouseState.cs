@@ -26,7 +26,7 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Gets cursor position.
         /// </summary>
-        public Point Position => new Point(X, Y);
+        public readonly Point Position => new Point(X, Y);
 
         /// <summary>
         /// Gets state of the left mouse button.
@@ -44,7 +44,7 @@ namespace MonoGame.Framework.Input
 		public ButtonState RightButton { get; internal set; }
 
         /// <summary>
-        /// Gets the cumulative scroll wheel value since the game start..
+        /// Gets the cumulative scroll wheel value since the game start.
         /// </summary>
 		public int ScrollWheelValue { get; internal set; }
 
@@ -160,7 +160,7 @@ namespace MonoGame.Framework.Input
 
         public static bool operator !=(in MouseState a, in MouseState b) => !(a == b);
 
-        public bool Equals(MouseState other) => this == other;
+        public readonly bool Equals(MouseState other) => this == other;
         public override bool Equals(object obj) => obj is MouseState other && Equals(other);
 
         #endregion
@@ -168,7 +168,7 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Returns the hash code of the <see cref="MouseState"/>.
         /// </summary>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             unchecked
             {

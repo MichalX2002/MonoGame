@@ -1,5 +1,5 @@
 ﻿using MonoGame.Framework;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {

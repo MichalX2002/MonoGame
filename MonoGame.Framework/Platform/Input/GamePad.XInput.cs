@@ -71,7 +71,7 @@ namespace MonoGame.Framework.Input
             // If the device was disconneced then wait for 
             // the timeout to elapsed before we test it again.
             if (!_connected[index] && !HasDisconnectedTimeoutElapsed(index))
-                return GamePadCapabilities.None;
+                return default;
 
             // Check to see if the device is connected.
             var controller = _controllers[index];
@@ -82,7 +82,7 @@ namespace MonoGame.Framework.Input
             if (!_connected[index])
             {
                 SetDisconnectedTimeout(index);
-                return GamePadCapabilities.None;
+                return default;
             }
 
             var capabilities = controller.GetCapabilities(DeviceQueryType.Any);
@@ -241,12 +241,14 @@ namespace MonoGame.Framework.Input
             return new GamePadButtons(ret);
         }
 
-        private static bool PlatformSetVibration(int index, float leftMotor, float rightMotor, float leftTrigger, float rightTrigger)
+        private static bool PlatformSetVibration(
+            int index, float leftMotor, float rightMotor, float leftTrigger, float rightTrigger)
         {
             if (!_connected[index])
             {
                 if (!HasDisconnectedTimeoutElapsed(index))
                     return false;
+
                 if (!_controllers[index].IsConnected)
                 {
                     SetDisconnectedTimeout(index);
@@ -276,7 +278,6 @@ namespace MonoGame.Framework.Input
                 }
                 throw;
             }
-
             return result == SharpDX.Result.Ok;
         }
 

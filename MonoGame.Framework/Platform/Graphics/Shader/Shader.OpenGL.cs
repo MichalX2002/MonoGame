@@ -25,7 +25,7 @@ namespace MonoGame.Framework.Graphics
         private void PlatformConstruct(bool isVertexShader, byte[] shaderBytecode)
         {
             GlslCode = System.Text.Encoding.ASCII.GetString(shaderBytecode);
-            HashKey = MonoGame.Utilities.Hash.ComputeHash(shaderBytecode);
+            HashKey = MonoGame.Framework.Hash.ComputeHash(shaderBytecode);
         }
 
         internal int GetShaderHandle()

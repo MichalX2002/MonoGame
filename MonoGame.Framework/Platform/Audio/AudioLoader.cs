@@ -6,9 +6,9 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using MonoGame.Utilities;
-using MonoGame.Utilities.IO;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.IO;
+using MonoGame.Framework.Memory;
+using MonoGame.OpenAL;
 
 namespace MonoGame.Framework.Audio
 {
@@ -31,6 +31,7 @@ namespace MonoGame.Framework.Audio
                         case 2: return bits == 8 ? ALFormat.Stereo8 : ALFormat.Stereo16;
                         default: throw new NotSupportedException("The specified channel count is not supported.");
                     }
+
                 case FormatMsAdpcm:
                     // Microsoft ADPCM
                     switch (channels)
@@ -39,6 +40,7 @@ namespace MonoGame.Framework.Audio
                         case 2: return ALFormat.StereoMSAdpcm;
                         default: throw new NotSupportedException("The specified channel count is not supported.");
                     }
+
                 case FormatIeee:
                     // IEEE Float
                     switch (channels)
@@ -47,6 +49,7 @@ namespace MonoGame.Framework.Audio
                         case 2: return ALFormat.StereoFloat32;
                         default: throw new NotSupportedException("The specified channel count is not supported.");
                     }
+
                 case FormatIma4:
                     // IMA4 ADPCM
                     switch (channels)
@@ -55,6 +58,7 @@ namespace MonoGame.Framework.Audio
                         case 2: return ALFormat.StereoIma4;
                         default: throw new NotSupportedException("The specified channel count is not supported.");
                     }
+
                 default:
                     throw new NotSupportedException("The specified sound format (" + format.ToString() + ") is not supported.");
             }
@@ -369,8 +373,8 @@ namespace MonoGame.Framework.Audio
 
         public static void ConvertSingleToInt16(ReadOnlySpan<float> src, Span<short> dst)
         {
-            if (src.Length != dst.Length)
-                throw new ArgumentException("Non-equal span length.");
+            if (dst.Length < src.Length)
+                throw new ArgumentException("The destination span is too small.");
 
             for (int i = 0; i < src.Length; i++)
             {

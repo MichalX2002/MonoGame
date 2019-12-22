@@ -9,37 +9,62 @@ namespace MonoGame.Framework.Input
     /// <summary>
     /// Describes joystick capabilities.
     /// </summary>
-    public struct JoystickCapabilities : IEquatable<JoystickCapabilities>
+    public readonly struct JoystickCapabilities : IEquatable<JoystickCapabilities>
     {
+        /// <summary>
+        /// Gets the default <see cref="JoystickCapabilities"/>.
+        /// </summary>
+        public static JoystickCapabilities Default { get; } = new JoystickCapabilities(
+            isConnected: false,
+            identifier: string.Empty,
+            isGamepad: false,
+            axisCount: 0,
+            buttonCount: 0,
+            hatCount: 0);
+
         /// <summary>
         /// Gets a value indicating whether the joystick is connected.
         /// </summary>
-        public bool IsConnected { get; internal set; }
+        public bool IsConnected { get; }
 
         /// <summary>
         /// Gets the unique identifier of the joystick.
         /// </summary>
-        public string Identifier { get; internal set; }
+        public string Identifier { get;  }
 
         /// <summary>
         /// Gets a value indicating if the joystick is a gamepad.
         /// </summary>
-        public bool IsGamepad { get; internal set; }
+        public bool IsGamepad { get; }
 
         /// <summary>
         /// Gets the axis count.
         /// </summary>
-        public int AxisCount { get; internal set; }
+        public int AxisCount { get; }
 
         /// <summary>
         /// Gets the button count.
         /// </summary>
-        public int ButtonCount { get; internal set; }
+        public int ButtonCount { get; }
 
         /// <summary>
         /// Gets the hat count.
         /// </summary>
-        public int HatCount { get; internal set; }
+        public int HatCount { get; }
+
+        /// <summary>
+        /// Constructs the <see cref="JoystickCapabilities"/>.
+        /// </summary>
+        public JoystickCapabilities(
+            bool isConnected, string identifier, bool isGamepad, int axisCount, int buttonCount, int hatCount)
+        {
+            IsConnected = isConnected;
+            Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
+            IsGamepad = isGamepad;
+            AxisCount = axisCount;
+            ButtonCount = buttonCount;
+            HatCount = hatCount;
+        }
 
         #region Equals
 

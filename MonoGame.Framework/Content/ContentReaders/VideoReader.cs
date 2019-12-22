@@ -5,7 +5,7 @@
 using System;
 using System.IO;
 using MonoGame.Framework.Media;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 
 namespace MonoGame.Framework.Content
 {

@@ -5,7 +5,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 
 #if OPENAL
 using MonoGame.OpenAL;
