@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Utilities
@@ -7,9 +6,8 @@ namespace MonoGame.Framework.Utilities
     public partial class TaskbarList
     {
         private ITaskbarList _comObject;
-        private IntPtr _windowHandle;
 
-        private void PlatformConstruct(GameWindow window)
+        private void PlatformConstruct()
         {
             if (CurrentPlatform.OS != OS.Windows)
                 return;
@@ -18,18 +16,9 @@ namespace MonoGame.Framework.Utilities
             _comObject.HrInit();
         }
 
-        private void PlatformInitialize()
-        {
-            if (_comObject == null)
-                return;
-
-            using (var process = Process.GetCurrentProcess())
-                _windowHandle = process.MainWindowHandle;
-        }
-
         private bool PlatformGetIsSupported()
         {
-            return _comObject != null && _windowHandle != IntPtr.Zero;
+            return _comObject != null;
         }
 
         private void PlatformSetProgressState(TaskbarProgressState state)
@@ -43,12 +32,12 @@ namespace MonoGame.Framework.Utilities
                 TaskbarProgressState.Paused => 0x8,
                 _ => throw new ArgumentOutOfRangeException(nameof(state))
             };
-            _comObject.SetProgressState(_windowHandle, flags);
+            _comObject.SetProgressState(WindowHandle, flags);
         }
 
         private void PlatformSetProgressValue(TaskbarProgressValue value)
         {
-            _comObject.SetProgressValue(_windowHandle, (ulong)value.Completed, (ulong)value.Total);
+            _comObject.SetProgressValue(WindowHandle, (ulong)value.Completed, (ulong)value.Total);
         }
 
         #region COM Interface

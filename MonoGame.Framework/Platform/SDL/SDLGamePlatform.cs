@@ -77,8 +77,8 @@ namespace MonoGame.Framework
 
         public override void RunLoop()
         {
-            Sdl.Window.Show(Window.Handle); 
-            _window.TaskbarList.Initialize();
+            Sdl.Window.Show(Window.Handle);
+            _window.TaskbarList.WindowHandle = _window.GetOSWindowHandle();
 
             while (true)
             {

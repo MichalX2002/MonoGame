@@ -13,15 +13,14 @@ using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
 using MonoGame.Framework.Input.Touch;
 using MonoGame.Framework.Windows;
-using MonoGame.Framework;
 using ButtonState = MonoGame.Framework.Input.ButtonState;
-using Keys = MonoGame.Framework.Input.Keys;
 using DrawingPoint = System.Drawing.Point;
 using DrawingSize = System.Drawing.Size;
+using Keys = MonoGame.Framework.Input.Keys;
 
 namespace MonoGame.Framework
 {
-    class WinFormsGameWindow : GameWindow, IDisposable
+    internal class WinFormsGameWindow : GameWindow, IDisposable
     {
         internal WinFormsGameForm Form;
 
@@ -29,7 +28,7 @@ namespace MonoGame.Framework
         static private List<WinFormsGameWindow> _allWindows = new List<WinFormsGameWindow>();
 
         private WinFormsGamePlatform _platform;
-        
+
         private bool _isResizable;
         private bool _isBorderless;
         private bool _isMouseHidden;
@@ -41,7 +40,6 @@ namespace MonoGame.Framework
 
         // true if window position was moved either through code or by dragging/resizing the form
         private bool _wasMoved;
-
 
         private bool _isResizeTickEnabled;
         private System.Timers.Timer _resizeTickTimer;
@@ -127,16 +125,15 @@ namespace MonoGame.Framework
         public override bool HasClipboardText => Clipboard.ContainsText();
         public override string ClipboardText { get => Clipboard.GetText(); set => Clipboard.SetText(value); }
 
-        
-
-        internal WinFormsGameWindow(WinFormsGamePlatform platform)
+        internal WinFormsGameWindow(WinFormsGamePlatform platform) : base()
         {
             _platform = platform;
             Game = platform.Game;
 
             Form = new WinFormsGameForm(this);
             ChangeClientSize(new DrawingSize(
-                GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight));
+                GraphicsDeviceManager.DefaultBackBufferWidth, 
+                GraphicsDeviceManager.DefaultBackBufferHeight));
 
             SetIcon();
             Title = AssemblyHelper.GetDefaultWindowTitle();
@@ -145,12 +142,14 @@ namespace MonoGame.Framework
             Form.FormBorderStyle = FormBorderStyle.FixedSingle;
             Form.StartPosition = FormStartPosition.Manual;
 
+            TaskbarList.WindowHandle = Form.Handle;
+
             // Capture mouse events.
             Mouse.WindowHandle = Form.Handle;
             Form.MouseWheel += OnMouseScroll;
             Form.MouseHorizontalWheel += OnMouseHorizontalScroll;
             Form.MouseEnter += OnMouseEnter;
-            Form.MouseLeave += OnMouseLeave;            
+            Form.MouseLeave += OnMouseLeave;
 
             _resizeTickTimer = new System.Timers.Timer(1) { SynchronizingObject = Form, AutoReset = false };
             _resizeTickTimer.Elapsed += OnResizeTick;
@@ -175,12 +174,12 @@ namespace MonoGame.Framework
 
         [DllImport("shell32.dll", CharSet = CharSet.Auto, BestFitMapping = false)]
         private static extern IntPtr ExtractIcon(IntPtr hInst, string exeFileName, int iconIndex);
-        
-        [DllImport("user32.dll", ExactSpelling=true, CharSet=CharSet.Auto)]
+
+        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
         [return: MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
         internal static extern bool GetCursorPos(out POINTSTRUCT pt);
-        
-        [DllImport("user32.dll", ExactSpelling=true, CharSet=CharSet.Auto)]
+
+        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
         internal static extern int MapWindowPoints(HandleRef hWndFrom, HandleRef hWndTo, out POINTSTRUCT pt, int cPoints);
 
         private void SetIcon()
@@ -236,11 +235,12 @@ namespace MonoGame.Framework
         private void OnDeactivate(object sender, EventArgs eventArgs)
         {
             // If in exclusive mode full-screen, force it out of exclusive mode and minimize the window
-			if( IsFullScreen && _platform.Game.GraphicsDevice.PresentationParameters.HardwareModeSwitch ) {			
-				// This is true when the user presses the Windows key while game window has focus
-				if( Form.WindowState == FormWindowState.Minimized )
-					MinimizeFullScreen();				
-			}
+            if (IsFullScreen && _platform.Game.GraphicsDevice.PresentationParameters.HardwareModeSwitch)
+            {
+                // This is true when the user presses the Windows key while game window has focus
+                if (Form.WindowState == FormWindowState.Minimized)
+                    MinimizeFullScreen();
+            }
             _platform.IsActive = false;
             Keyboard.SetActive(false);
         }
@@ -282,17 +282,17 @@ namespace MonoGame.Framework
             // Don't process touch state if we're not active 
             // and the mouse is within the client area.
             if (!_platform.IsActive || !withinClient)
-            {                
+            {
                 if (MouseState.LeftButton == ButtonState.Pressed)
                 {
                     // Release mouse TouchLocation
-                    var touchX = MathHelper.Clamp(MouseState.X, 0, Form.ClientRectangle.Width-1);
-                    var touchY = MathHelper.Clamp(MouseState.Y, 0, Form.ClientRectangle.Height-1);
+                    var touchX = MathHelper.Clamp(MouseState.X, 0, Form.ClientRectangle.Width - 1);
+                    var touchY = MathHelper.Clamp(MouseState.Y, 0, Form.ClientRectangle.Height - 1);
                     TouchPanelState.AddEvent(0, TouchLocationState.Released, new Vector2(touchX, touchY), true);
                 }
                 return;
             }
-            
+
             TouchLocationState? touchState = null;
             if (MouseState.LeftButton == ButtonState.Pressed)
                 if (previousState == ButtonState.Released)
@@ -304,7 +304,7 @@ namespace MonoGame.Framework
 
             if (touchState.HasValue)
                 TouchPanelState.AddEvent(0, touchState.Value, new Vector2(MouseState.X, MouseState.Y), true);
-        } 
+        }
 
         private void OnMouseEnter(object sender, EventArgs e)
         {
@@ -364,7 +364,8 @@ namespace MonoGame.Framework
             if (_lastFormState == Form.WindowState)
                 _wasMoved = true;
 
-            if (Game.Window == this && Form.WindowState != FormWindowState.Minimized) {
+            if (Game.Window == this && Form.WindowState != FormWindowState.Minimized)
+            {
                 // we may need to restore full screen when coming back from a minimized window
                 if (_lastFormState == FormWindowState.Minimized)
                     _platform.Game.GraphicsDevice.SetHardwareFullscreen();
@@ -385,6 +386,7 @@ namespace MonoGame.Framework
         {
             if (!_isResizeTickEnabled)
                 return;
+
             UpdateWindows();
             Game.Tick();
             _resizeTickTimer.Enabled = true;
@@ -455,7 +457,7 @@ namespace MonoGame.Framework
                     break;
 
                 Thread.Sleep(100);
-            } 
+            }
             while (PeekMessage(out msg, IntPtr.Zero, 0, 1 << 5, 1));
         }
 
@@ -506,7 +508,7 @@ namespace MonoGame.Framework
             // make sure we don't see the events from this as a user resize
             Form.IsResizing = true;
 
-            if(this.Form.ClientSize != clientBounds)
+            if (this.Form.ClientSize != clientBounds)
                 this.Form.ClientSize = clientBounds;
 
             // if the window wasn't moved manually and it's resized, it should be centered
@@ -519,20 +521,20 @@ namespace MonoGame.Framework
         [System.Security.SuppressUnmanagedCodeSecurity] // We won't use this maliciously
         [DllImport("User32.dll", CharSet = CharSet.Auto)]
         private static extern bool PeekMessage(out NativeMessage msg, IntPtr hWnd, uint messageFilterMin, uint messageFilterMax, uint flags);
-        
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (disposing)
             {
                 if (Form != null)
                 {
-                    UnregisterFromAllWindows(); 
+                    UnregisterFromAllWindows();
                     Form.Dispose();
                     Form = null;
                 }
@@ -576,14 +578,17 @@ namespace MonoGame.Framework
             var raiseClientSizeChanged = false;
             if (pp.IsFullScreen && pp.HardwareModeSwitch && IsFullScreen && HardwareModeSwitch)
             {
-                if( _platform.IsActive ) {
-					// stay in hardware full screen, need to call ResizeTargets so the displaymode can be switched
-					_platform.Game.GraphicsDevice.ResizeTargets();
-				} else {
-					// This needs to be called in case the user presses the Windows key while the focus is on the second monitor,
-					//	which (sometimes) causes the window to exit fullscreen mode, but still keeps it visible
-					MinimizeFullScreen();
-				}
+                if (_platform.IsActive)
+                {
+                    // stay in hardware full screen, need to call ResizeTargets so the displaymode can be switched
+                    _platform.Game.GraphicsDevice.ResizeTargets();
+                }
+                else
+                {
+                    // This needs to be called in case the user presses the Windows key while the focus is on the second monitor,
+                    //	which (sometimes) causes the window to exit fullscreen mode, but still keeps it visible
+                    MinimizeFullScreen();
+                }
             }
             else if (pp.IsFullScreen && (!IsFullScreen || pp.HardwareModeSwitch != HardwareModeSwitch))
             {
@@ -631,7 +636,7 @@ namespace MonoGame.Framework
 
 
         [DllImport("user32.dll")]
-        static extern bool RedrawWindow(IntPtr hWnd, IntPtr lprcUpdate, IntPtr hrgnUpdate, uint flags);
+        private static extern bool RedrawWindow(IntPtr hWnd, IntPtr lprcUpdate, IntPtr hrgnUpdate, uint flags);
 
         private void ExitFullScreen()
         {

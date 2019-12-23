@@ -52,7 +52,7 @@ namespace MonoGame.Framework.Graphics
             _screen = screen;
         }
 #elif DESKTOPGL
-        int _displayIndex;
+        private int _displayIndex;
 #else
         internal GraphicsAdapter()
         {
@@ -153,15 +153,15 @@ namespace MonoGame.Framework.Graphics
         /// <param name="selectedMultiSampleCount">Set to the best count supported by the adaptor for the requested multisample count.</param>
         /// <returns>True if the requested format is supported by the adaptor. False if one or more of the values was changed.</returns>
 		public bool QueryRenderTargetFormat(
-			GraphicsProfile graphicsProfile,
-			SurfaceFormat format,
-			DepthFormat depthFormat,
-			int multiSampleCount,
-			out SurfaceFormat selectedFormat,
-			out DepthFormat selectedDepthFormat,
-			out int selectedMultiSampleCount)
-		{
-			selectedFormat = format;
+            GraphicsProfile graphicsProfile,
+            SurfaceFormat format,
+            DepthFormat depthFormat,
+            int multiSampleCount,
+            out SurfaceFormat selectedFormat,
+            out DepthFormat selectedDepthFormat,
+            out int selectedMultiSampleCount)
+        {
+            selectedFormat = format;
             selectedDepthFormat = depthFormat;
             selectedMultiSampleCount = multiSampleCount;
 
@@ -180,7 +180,7 @@ namespace MonoGame.Framework.Graphics
 
 
             return (format == selectedFormat) && (depthFormat == selectedDepthFormat) && (multiSampleCount == selectedMultiSampleCount);
-		}
+        }
 
         /*
         public string Description
@@ -287,7 +287,7 @@ namespace MonoGame.Framework.Graphics
             {
                 bool displayChanged = false;
 #if DESKTOPGL
-                var displayIndex = Sdl.Display.GetWindowDisplayIndex (SdlGameWindow.Instance.Handle);
+                var displayIndex = Sdl.Display.GetWindowDisplayIndex(SdlGameWindow.Instance.Handle);
                 displayChanged = displayIndex != _displayIndex;
 #endif
                 if (_supportedDisplayModes == null || displayChanged)
@@ -297,10 +297,10 @@ namespace MonoGame.Framework.Graphics
 #if DESKTOPGL
                     _displayIndex = displayIndex;
                     modes.Clear();
-                    
+
                     var modeCount = Sdl.Display.GetNumDisplayModes(displayIndex);
 
-                    for (int i = 0;i < modeCount;i++)
+                    for (int i = 0; i < modeCount; i++)
                     {
                         Sdl.Display.GetDisplayMode(displayIndex, i, out Sdl.Display.Mode mode);
 
@@ -331,7 +331,7 @@ namespace MonoGame.Framework.Graphics
                     adapter.Dispose();
                     dxgiFactory.Dispose();
 #endif
-                    modes.Sort(delegate(DisplayMode a, DisplayMode b)
+                    modes.Sort((DisplayMode a, DisplayMode b) =>
                     {
                         if (a == b) return 0;
                         if (a.Format <= b.Format && a.Width <= b.Width && a.Height <= b.Height) return -1;
@@ -375,17 +375,19 @@ namespace MonoGame.Framework.Graphics
 
         public bool IsProfileSupported(GraphicsProfile graphicsProfile)
         {
-            if(UseReferenceDevice)
+            if (UseReferenceDevice)
                 return true;
 
-            switch(graphicsProfile)
+            switch (graphicsProfile)
             {
                 case GraphicsProfile.Reach:
                     return true;
+
                 case GraphicsProfile.HiDef:
                     bool result = true;
                     // TODO: check adapter capabilities...
                     return result;
+
                 default:
                     throw new InvalidOperationException();
             }

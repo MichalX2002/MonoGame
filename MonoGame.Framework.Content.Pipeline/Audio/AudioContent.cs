@@ -37,7 +37,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
         /// The current raw audio data without header information.
         /// </summary>
         public Stream Data { get; private set; }
-        
+
         /// <summary>
         /// The amount of audio data bytes in the <see cref="Data"/> stream.
         /// </summary>
@@ -82,7 +82,8 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                 audioFileName = Path.GetFullPath(audioFileName);
 
                 // Use probe to get the details of the file.
-                DefaultAudioProfile.ProbeFormat(audioFileName, out _fileType, out _format, out _duration, out _loopStart, out _loopLength);
+                DefaultAudioProfile.ProbeFormat(
+                    audioFileName, out _fileType, out _format, out _duration, out _loopStart, out _loopLength);
 
                 // Looks like XNA only cares about type mismatch when
                 // the type is WAV... else it is ok.
@@ -122,7 +123,9 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             }
             catch (Exception ex)
             {
-                var message = string.Format("Failed to open file {0}. Ensure the file is a valid audio file and is not DRM protected.", Path.GetFileNameWithoutExtension(audioFileName));
+                var message = string.Format(
+                    "Failed to open file {0}. Ensure the file is a valid audio file and is not DRM protected.",
+                    Path.GetFileNameWithoutExtension(audioFileName));
                 throw new InvalidContentException(message, ex);
             }
         }

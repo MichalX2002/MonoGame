@@ -15,8 +15,7 @@ namespace MonoGame.Framework
 
         private WinFormsGameWindow _window;
 
-        public WinFormsGamePlatform(Game game)
-            : base(game)
+        public WinFormsGamePlatform(Game game) : base(game)
         {
             _window = new WinFormsGameWindow(this);
 
@@ -60,7 +59,8 @@ namespace MonoGame.Framework
 
         public override void StartRunLoop()
         {
-            throw new NotSupportedException("The Windows platform does not support asynchronous run loops.");
+            throw new NotSupportedException(
+                "The Windows platform does not support asynchronous run loops.");
         }
         
         public override void Exit()

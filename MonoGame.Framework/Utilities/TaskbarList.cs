@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace MonoGame.Framework.Utilities
 {
     /// <summary>
@@ -8,6 +9,7 @@ namespace MonoGame.Framework.Utilities
     {
         private object SyncRoot { get; } = new object();
 
+        private IntPtr _windowHandle;
         private TaskbarProgressState _progressState;
         private TaskbarProgressValue _progressValue;
 
@@ -15,6 +17,22 @@ namespace MonoGame.Framework.Utilities
         /// Gets whether taskbar functionality is available on the current platform.
         /// </summary>
         public bool IsSupported => PlatformGetIsSupported();
+
+        /// <summary>
+        /// Gets or sets the OS window handle assigned to the taskbar.
+        /// </summary>
+        public IntPtr WindowHandle
+        {
+            get => _windowHandle;
+            set
+            {
+                if (_windowHandle != value)
+                {
+                    _windowHandle = value;
+                    Update();
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the type of the progress indicator displayed on the taskbar.
@@ -29,7 +47,6 @@ namespace MonoGame.Framework.Utilities
                     if (_progressState != value)
                     {
                         _progressState = value;
-
                         if (IsSupported)
                             PlatformSetProgressState(value);
                     }
@@ -50,7 +67,6 @@ namespace MonoGame.Framework.Utilities
                     if (!_progressValue.Equals(value))
                     {
                         _progressValue = value;
-
                         if (IsSupported)
                             PlatformSetProgressValue(value);
                     }
@@ -58,9 +74,12 @@ namespace MonoGame.Framework.Utilities
             }
         }
 
-        internal TaskbarList(GameWindow window)
+        /// <summary>
+        /// Constructs the <see cref="TaskbarList"/>.
+        /// </summary>
+        public TaskbarList()
         {
-            PlatformConstruct(window);
+            PlatformConstruct();
         }
 
         /// <summary>
@@ -73,13 +92,11 @@ namespace MonoGame.Framework.Utilities
             ProgressValue = new TaskbarProgressValue(completed, total);
         }
 
-        internal void Initialize()
+        internal void Update()
         {
-            lock (SyncRoot)
+            if (IsSupported)
             {
-                PlatformInitialize();
-                
-                if (IsSupported)
+                lock (SyncRoot)
                 {
                     PlatformSetProgressState(_progressState);
                     PlatformSetProgressValue(_progressValue);

@@ -13,7 +13,7 @@ namespace MonoGame.Framework
             var surfaceFormat = _game.GraphicsDeviceManager.PreferredBackBufferFormat.GetColorFormat();
             var depthStencilFormat = _game.GraphicsDeviceManager.PreferredDepthStencilFormat;
 
-            // TODO Need to get this data from the Presentation Parameters
+            // TODO: Need to get this data from the Presentation Parameters
             Sdl.GL.SetAttribute(Sdl.GL.Attribute.RedSize, surfaceFormat.R);
             Sdl.GL.SetAttribute(Sdl.GL.Attribute.GreenSize, surfaceFormat.G);
             Sdl.GL.SetAttribute(Sdl.GL.Attribute.BlueSize, surfaceFormat.B);
@@ -46,7 +46,7 @@ namespace MonoGame.Framework
             Sdl.GL.SetAttribute(Sdl.GL.Attribute.ContextMajorVersion, 2);
             Sdl.GL.SetAttribute(Sdl.GL.Attribute.ContextMinorVersion, 1);
 
-            ((SdlGameWindow)SdlGameWindow.Instance).CreateWindow();
+            ((SdlGameWindow)_game.Window).CreateWindow();
         }
     }
 }

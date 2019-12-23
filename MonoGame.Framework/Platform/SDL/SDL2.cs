@@ -10,6 +10,7 @@ using System.Diagnostics;
 using MonoGame.Framework;
 using MonoGame.Framework.Input;
 using FL = MonoGame.Framework.FuncLoader;
+using System.Runtime.CompilerServices;
 
 [Guid("DA23ADEA-3FBC-41B8-B748-F378E9C7BB24")]
 internal static class Sdl
@@ -379,13 +380,29 @@ internal static class Sdl
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct SDL_SysWMinfo
+        public struct SysWMinfo
         {
             public Version version;
             public SysWMType subsystem;
-            public IntPtr window;
+            public WindowInfo data;
         }
-        
+
+        public unsafe struct WindowInfo
+        {
+            public const int WindowInfoSizeInBytes = 100;
+
+            public fixed byte raw[WindowInfoSizeInBytes];
+
+            public WindowInfoWindows Windows => Unsafe.As<WindowInfo, WindowInfoWindows>(ref this);
+        }
+
+        public struct WindowInfoWindows
+        {
+            public IntPtr window;
+            public IntPtr hdc;
+            public IntPtr hinstance;
+        }
+
         //[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         //public delegate void d_sdl_maximizewindow(IntPtr window);
         //public static readonly d_sdl_maximizewindow MaximizeWindow = FuncLoader.LoadFunction<d_sdl_maximizewindow>(NativeLibrary, "SDL_MaximizeWindow");
@@ -476,7 +493,7 @@ internal static class Sdl
         public static d_sdl_showwindow Show = FL.LoadFunction<d_sdl_showwindow>(NativeLibrary, "SDL_ShowWindow");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate bool d_sdl_getwindowwminfo(IntPtr window, ref SDL_SysWMinfo sysWMinfo);
+        public delegate bool d_sdl_getwindowwminfo(IntPtr window, ref SysWMinfo sysWMinfo);
         public static d_sdl_getwindowwminfo GetWindowWMInfo = FL.LoadFunction<d_sdl_getwindowwminfo>(NativeLibrary, "SDL_GetWindowWMInfo");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
