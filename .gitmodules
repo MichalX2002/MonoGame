@@ -10,10 +10,6 @@
 	path = ThirdParty/SDL_GameControllerDB
 	url = https://github.com/gabomdq/SDL_GameControllerDB
 	
-[submodule "ThirdParty/Lidgren.Network"]
-	path = ThirdParty/Lidgren.Network
-	url = https://github.com/TechnologicalPizza/lidgren-network-gen3
-
 [submodule "ThirdParty/SixLabors/Core"]
 	path = ThirdParty/SixLabors/Core
 	url = https://github.com/TechnologicalPizza/SixLabors.Core
