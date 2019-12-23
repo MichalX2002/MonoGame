@@ -22,6 +22,7 @@ namespace MonoGame.Framework
     public partial class Game : IDisposable
     {
         private ContentManager _content;
+
         internal GamePlatform Platform { get; }
 
         private SortingFilteringCollection<IDrawable> _drawables =
@@ -47,12 +48,20 @@ namespace MonoGame.Framework
 
         private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(166667); // 60fps
         private TimeSpan _inactiveSleepTime = TimeSpan.FromSeconds(0.02);
-
         private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
+
+        private TimeSpan _accumulatedElapsedTime;
+        private Stopwatch _gameTimer = new Stopwatch();
+        private long _previousTicks;
+        private int _updateFrameLag;
 
         private bool _isDisposed;
         private bool _shouldExit;
         private bool _suppressDraw;
+
+#if WINDOWS_UAP
+        private readonly object _locker = new object();
+#endif
 
         partial void PlatformConstruct();
 
@@ -280,8 +289,7 @@ namespace MonoGame.Framework
         public void ResetElapsedTime()
         {
             Platform.ResetElapsedTime();
-            _gameTimer.Reset();
-            _gameTimer.Start();
+            _gameTimer.Restart();
             _accumulatedElapsedTime = TimeSpan.Zero;
             Time.ElapsedGameTime = TimeSpan.Zero;
             _previousTicks = 0L;
@@ -303,7 +311,7 @@ namespace MonoGame.Framework
             if (!Initialized)
             {
                 DoInitialize();
-                _gameTimer = Stopwatch.StartNew();
+                _gameTimer.Restart();
                 Initialized = true;
             }
 
@@ -327,7 +335,7 @@ namespace MonoGame.Framework
             if (!Platform.BeforeRun())
             {
                 BeginRun();
-                _gameTimer = Stopwatch.StartNew();
+                _gameTimer.Restart();
                 return;
             }
 
@@ -344,7 +352,7 @@ namespace MonoGame.Framework
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
 
             BeginRun();
-            _gameTimer = Stopwatch.StartNew();
+            _gameTimer.Restart();
             switch (runBehavior)
             {
                 case GameRunBehavior.Asynchronous:
@@ -367,15 +375,6 @@ namespace MonoGame.Framework
                     throw new ArgumentException($"Handling for the run behavior {runBehavior} is not implemented.");
             }
         }
-
-        private TimeSpan _accumulatedElapsedTime;
-        private Stopwatch _gameTimer;
-        private long _previousTicks = 0;
-        private int _updateFrameLag;
-
-#if WINDOWS_UAP
-        private readonly object _locker = new object();
-#endif
 
         public void Tick()
         {
@@ -503,6 +502,9 @@ namespace MonoGame.Framework
 
         protected virtual void Initialize()
         {
+            if (_shouldExit)
+                return;
+
             // TODO: This should be removed once all platforms use the new GraphicsDeviceManager
 #if !(WINDOWS && DIRECTX)
             InternalApplyChanges();
