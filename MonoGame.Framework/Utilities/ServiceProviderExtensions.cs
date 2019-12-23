@@ -3,8 +3,7 @@
 namespace MonoGame.Framework
 {
     /// <summary>
-    /// Provides helpers for an <see cref="IServiceProvider"/>,
-    /// like getting specific services.
+    /// Provides helpers for <see cref="IServiceProvider"/>.
     /// </summary>
     public static class ServiceProviderExtensions
     {

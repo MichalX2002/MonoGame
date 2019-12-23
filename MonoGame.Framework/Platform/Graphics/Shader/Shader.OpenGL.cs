@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using MonoGame.Framework.Utilities;
 using MonoGame.OpenGL;
 
 namespace MonoGame.Framework.Graphics
@@ -25,7 +26,7 @@ namespace MonoGame.Framework.Graphics
         private void PlatformConstruct(bool isVertexShader, byte[] shaderBytecode)
         {
             GlslCode = System.Text.Encoding.ASCII.GetString(shaderBytecode);
-            HashKey = MonoGame.Framework.Hash.ComputeHash(shaderBytecode);
+            HashKey = HashHelper.ComputeHash(shaderBytecode);
         }
 
         internal int GetShaderHandle()

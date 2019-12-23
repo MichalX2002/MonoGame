@@ -7,11 +7,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using MonoGame.Framework;
+using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework.Content
 {
-    internal class ReflectiveReader<T> : ContentTypeReader
+    public class ReflectiveReader<T> : ContentTypeReader
     {
         delegate void ReadElement(ContentReader input, object parent);
 

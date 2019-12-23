@@ -6,7 +6,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace MonoGame.Framework
+namespace MonoGame.Framework.Utilities
 {
     internal static class FileHelpers
     {

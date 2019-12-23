@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using MonoGame.Framework;
+using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework.Content
 {
@@ -126,7 +126,7 @@ namespace MonoGame.Framework.Content
                 return existingInstance;
 
             if (typeReaderIndex > TypeReaders.Length)
-                throw new ContentLoadException("Incorrect type reader index found!");
+                throw new ContentLoadException("Incorrect type reader index found.");
 
             var typeReader = TypeReaders[typeReaderIndex - 1];
             var result = (T)typeReader.Read(this, existingInstance);

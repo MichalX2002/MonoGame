@@ -8,9 +8,6 @@
 This package provides you with the content pipeline for Windows, Mac and Linux which is used to compile raw content to xnb files.</Description>
     <PackageTags>monogame;content;content pipeline</PackageTags>
     <PackageId>MonoGame.Framework.Content.Pipeline</PackageId>
-    
-    <AssemblyName>MonoGame.Framework.Content.Pipeline</AssemblyName>
-    <RootNamespace>Microsoft.Xna.Framework.Content.Pipeline</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,16 +17,11 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\MonoGame.Framework\Platform\Utilities\AssemblyHelper.cs">
-      <Link>Utilities\AssemblyHelper.cs</Link>
-    </Compile>
     
     <Compile Include="..\ThirdParty\StbImageSharp\src\StbImageSharp\**\*.cs" LinkBase="Utilities\StbImageSharp" />
     <Compile Include="..\ThirdParty\StbImageWriteSharp\src\StbImageWriteSharp\**\*.cs" LinkBase="Utilities\StbImageWriteSharp" />
   </ItemGroup>
 
-  
-  
   <ItemGroup>
     <Reference Include="SharpDX">
       <HintPath>..\ThirdParty\Dependencies\SharpDX\net40\SharpDX.dll</HintPath>
@@ -55,10 +47,22 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
     <Reference Include="PVRTexLibNET">
       <HintPath>..\ThirdParty\Dependencies\PVRTexLibNET\PVRTexLibNET.dll</HintPath>
     </Reference>
-    
   </ItemGroup>
+
+  <ItemGroup Condition="'$(SolutionName)' != 'MonoGame.Framework.WindowsDX'">
+    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj">
+      <PrivateAssets>All</PrivateAssets>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(SolutionName)' == 'MonoGame.Framework.WindowsDX'">
+    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.WindowsDX.csproj">
+      <PrivateAssets>All</PrivateAssets>
+    </ProjectReference>
+  </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.Win32.Registry" Version="4.6.0" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -233,7 +237,7 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.Windows.csproj" />
+    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
   </ItemGroup>
 
 </Project>

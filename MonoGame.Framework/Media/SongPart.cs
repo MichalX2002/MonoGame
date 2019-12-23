@@ -1,5 +1,5 @@
 ﻿
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     internal class SongPart
     {

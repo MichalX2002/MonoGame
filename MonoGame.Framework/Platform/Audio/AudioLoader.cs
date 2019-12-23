@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -19,49 +20,50 @@ namespace MonoGame.Framework.Audio
         internal const int FormatIeee = 3;
         internal const int FormatIma4 = 17;
 
+        [DebuggerHidden]
+        private static Exception GetChannelCountNotSupportedException()
+        {
+            return new NotSupportedException("The specified channel count is not supported.");
+        }
+
         public static ALFormat GetSoundFormat(int format, int channels, int bits)
         {
-            switch (format)
+            return format switch
             {
-                case FormatPcm:
-                    // PCM
-                    switch (channels)
-                    {
-                        case 1: return bits == 8 ? ALFormat.Mono8 : ALFormat.Mono16;
-                        case 2: return bits == 8 ? ALFormat.Stereo8 : ALFormat.Stereo16;
-                        default: throw new NotSupportedException("The specified channel count is not supported.");
-                    }
+                // PCM
+                FormatPcm => channels switch
+                {
+                    1 => bits == 8 ? ALFormat.Mono8 : ALFormat.Mono16,
+                    2 => bits == 8 ? ALFormat.Stereo8 : ALFormat.Stereo16,
+                    _ => throw GetChannelCountNotSupportedException(),
+                },
 
-                case FormatMsAdpcm:
-                    // Microsoft ADPCM
-                    switch (channels)
-                    {
-                        case 1: return ALFormat.MonoMSAdpcm;
-                        case 2: return ALFormat.StereoMSAdpcm;
-                        default: throw new NotSupportedException("The specified channel count is not supported.");
-                    }
+                // Microsoft ADPCM
+                FormatMsAdpcm => channels switch
+                {
+                    1 => ALFormat.MonoMSAdpcm,
+                    2 => ALFormat.StereoMSAdpcm,
+                    _ => throw GetChannelCountNotSupportedException(),
+                },
 
-                case FormatIeee:
-                    // IEEE Float
-                    switch (channels)
-                    {
-                        case 1: return ALFormat.MonoFloat32;
-                        case 2: return ALFormat.StereoFloat32;
-                        default: throw new NotSupportedException("The specified channel count is not supported.");
-                    }
+                // IEEE Float
+                FormatIeee => channels switch
+                {
+                    1 => ALFormat.MonoFloat32,
+                    2 => ALFormat.StereoFloat32,
+                    _ => throw GetChannelCountNotSupportedException(),
+                },
 
-                case FormatIma4:
-                    // IMA4 ADPCM
-                    switch (channels)
-                    {
-                        case 1: return ALFormat.MonoIma4;
-                        case 2: return ALFormat.StereoIma4;
-                        default: throw new NotSupportedException("The specified channel count is not supported.");
-                    }
+                // IMA4 ADPCM
+                FormatIma4 => channels switch
+                {
+                    1 => ALFormat.MonoIma4,
+                    2 => ALFormat.StereoIma4,
+                    _ => throw GetChannelCountNotSupportedException(),
+                },
 
-                default:
-                    throw new NotSupportedException("The specified sound format (" + format.ToString() + ") is not supported.");
-            }
+                _ => throw new NotSupportedException("The specified sound format (" + format.ToString() + ") is not supported."),
+            };
         }
 
         // Converts block alignment in bytes to sample alignment, primarily for compressed formats
@@ -308,7 +310,7 @@ namespace MonoGame.Framework.Audio
         /// Convert buffer containing 24-bit signed PCM wav data to a 16-bit signed PCM buffer
         /// </summary>
         internal static unsafe byte[] Convert24To16<T>(
-            ReadOnlySpan<T> span, out string bufferTag, out int size) 
+            ReadOnlySpan<T> span, out string bufferTag, out int size)
             where T : unmanaged
         {
             ReadOnlySpan<byte> byteSpan = MemoryMarshal.AsBytes(span);
@@ -391,7 +393,7 @@ namespace MonoGame.Framework.Audio
         #region IMA4 decoding
 
         // Step table
-        static int[] stepTable = new int[]
+        private static int[] stepTable = new int[]
         {
             7, 8, 9, 10, 11, 12, 13, 14,
             16, 17, 19, 21, 23, 25, 28, 31,
@@ -408,20 +410,20 @@ namespace MonoGame.Framework.Audio
         };
 
         // Step index tables
-        static int[] indexTable = new int[]
+        private static int[] indexTable = new int[]
         {
             // ADPCM data size is 4
             -1, -1, -1, -1, 2, 4, 6, 8,
             -1, -1, -1, -1, 2, 4, 6, 8
         };
 
-        struct ImaState
+        private struct ImaState
         {
             public int predictor;
             public int stepIndex;
         }
 
-        static int AdpcmImaWavExpandNibble(ref ImaState channel, int nibble)
+        private static int AdpcmImaWavExpandNibble(ref ImaState channel, int nibble)
         {
             int diff = stepTable[channel.stepIndex] >> 3;
             if ((nibble & 0x04) != 0)
@@ -566,23 +568,21 @@ namespace MonoGame.Framework.Audio
 
         #region MS-ADPCM decoding
 
-        static int[] adaptationTable = new int[]
+        private static int[] adaptationTable = new int[]
         {
             230, 230, 230, 230, 307, 409, 512, 614,
             768, 614, 512, 409, 307, 230, 230, 230
         };
-
-        static int[] adaptationCoeff1 = new int[]
+        private static int[] adaptationCoeff1 = new int[]
         {
             256, 512, 0, 192, 240, 460, 392
         };
-
-        static int[] adaptationCoeff2 = new int[]
+        private static int[] adaptationCoeff2 = new int[]
         {
             0, -256, 0, 64, 0, -208, -232
         };
 
-        struct MsAdpcmState
+        private struct MsAdpcmState
         {
             public int delta;
             public int sample1;
@@ -591,7 +591,7 @@ namespace MonoGame.Framework.Audio
             public int coeff2;
         }
 
-        static int AdpcmMsExpandNibble(ref MsAdpcmState channel, int nibble)
+        private static int AdpcmMsExpandNibble(ref MsAdpcmState channel, int nibble)
         {
             int nibbleSign = nibble - (((nibble & 0x08) != 0) ? 0x10 : 0);
             int predictor = ((channel.sample1 * channel.coeff1) + (channel.sample2 * channel.coeff2)) / 256 + (nibbleSign * channel.delta);

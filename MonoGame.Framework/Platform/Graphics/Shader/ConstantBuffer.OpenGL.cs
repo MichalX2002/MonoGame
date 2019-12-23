@@ -2,8 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
-using System.Runtime.InteropServices;
+using MonoGame.Framework.Utilities;
 using MonoGame.OpenGL;
 
 namespace MonoGame.Framework.Graphics
@@ -31,7 +30,7 @@ namespace MonoGame.Framework.Graphics
                 }
             }
 
-            HashKey = MonoGame.Framework.Hash.ComputeHash(data);
+            HashKey = HashHelper.ComputeHash(data);
         }
 
         private void PlatformClear()

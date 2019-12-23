@@ -40,9 +40,11 @@ namespace MonoGame.Framework
         {
             base.BeforeInitialize();
             
-            if (Game.InternalGraphicsDeviceManager == null)
+            if (Game.GraphicsDeviceManager == null)
             {
-                _window.Initialize(GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight);
+                _window.Initialize(
+                    GraphicsDeviceManager.DefaultBackBufferWidth,
+                    GraphicsDeviceManager.DefaultBackBufferHeight);
             }
             else
             {
@@ -111,7 +113,7 @@ namespace MonoGame.Framework
             if ( device != null )
                 device.Present();
         }
-		
+        
         protected override void Dispose(bool disposing)
         {
             if (disposing)

@@ -57,7 +57,7 @@ namespace MonoGame.Framework
 
         public override void BeforeInitialize()
         {
-            SdlRunLoop();
+            PollSdlEvents();
 
             base.BeforeInitialize();
         }
@@ -82,9 +82,11 @@ namespace MonoGame.Framework
 
             while (true)
             {
-                SdlRunLoop();
+                PollSdlEvents();
                 Keyboard.Modifiers = Sdl.Keyboard.GetModState();
+
                 Game.Tick();
+
                 Threading.Run();
                 GraphicsDevice.DisposeContexts();
 
@@ -93,7 +95,7 @@ namespace MonoGame.Framework
             }
         }
 
-        private unsafe void SdlRunLoop() 
+        private unsafe void PollSdlEvents() 
         { 
             while (Sdl.PollEvent(out Sdl.Event ev) == 1)
             {

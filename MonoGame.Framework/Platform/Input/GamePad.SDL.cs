@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using MonoGame.Framework.Utilities;
 using SdlGamePad = Sdl.GameController;
 
 namespace MonoGame.Framework.Input
@@ -46,25 +47,22 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Loads embedded game controller mappings.
         /// </summary>
-        public static void InitDatabase()
+        internal static void InitDatabase()
         {
-            using (var stream = ReflectionHelpers.GetAssembly(typeof(GamePad)).GetManifestResourceStream("gamecontrollerdb.txt"))
-            {
-                if (stream == null)
-                    return;
+            var assembly = ReflectionHelpers.GetAssembly(typeof(GamePad));
+            using var stream = assembly.GetManifestResourceStream("gamecontrollerdb.txt");
+            if (stream == null)
+                return;
 
-                using (var reader = new BinaryReader(stream))
-                {
-                    try
-                    {
-                        IntPtr src = Sdl.RwFromMem(reader.ReadBytes((int)stream.Length), (int)stream.Length);
-                        SdlGamePad.AddMappingFromRw(src, 1);
-                    }
-                    catch (Exception exc)
-                    {
-                        Debug.WriteLine("Failed to read game controller mappings: " + exc);
-                    }
-                }
+            using var reader = new BinaryReader(stream);
+            try
+            {
+                IntPtr src = Sdl.RwFromMem(reader.ReadBytes((int)stream.Length), (int)stream.Length);
+                SdlGamePad.AddMappingFromRw(src, 1);
+            }
+            catch (Exception exc)
+            {
+                Debug.WriteLine("Failed to read game controller mappings: " + exc);
             }
         }
 

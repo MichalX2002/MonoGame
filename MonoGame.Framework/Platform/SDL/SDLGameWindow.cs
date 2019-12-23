@@ -207,11 +207,11 @@ namespace MonoGame.Framework
 
             Sdl.Display.GetBounds(displayIndex, out Sdl.Rectangle displayRect);
 
-            if (_willBeFullScreen != IsFullScreen || _hardwareSwitch != _game.InternalGraphicsDeviceManager.HardwareModeSwitch)
+            if (_willBeFullScreen != IsFullScreen || _hardwareSwitch != _game.GraphicsDeviceManager.HardwareModeSwitch)
             {
-                var fullscreenFlag = _game.InternalGraphicsDeviceManager.HardwareModeSwitch ? Sdl.Window.State.Fullscreen : Sdl.Window.State.FullscreenDesktop;
+                var fullscreenFlag = _game.GraphicsDeviceManager.HardwareModeSwitch ? Sdl.Window.State.Fullscreen : Sdl.Window.State.FullscreenDesktop;
                 Sdl.Window.SetFullscreen(Handle, _willBeFullScreen ? fullscreenFlag : 0);
-                _hardwareSwitch = _game.InternalGraphicsDeviceManager.HardwareModeSwitch;
+                _hardwareSwitch = _game.GraphicsDeviceManager.HardwareModeSwitch;
             }
             // If going to exclusive full-screen mode, force the window to minimize on focus loss (Windows only)
             if (CurrentPlatform.OS == OS.Windows)
@@ -219,7 +219,7 @@ namespace MonoGame.Framework
                 Sdl.SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", _willBeFullScreen && _hardwareSwitch ? "1" : "0");
             }
 
-            if (!_willBeFullScreen || _game.InternalGraphicsDeviceManager.HardwareModeSwitch)
+            if (!_willBeFullScreen || _game.GraphicsDeviceManager.HardwareModeSwitch)
             {
                 Sdl.Window.SetSize(Handle, clientWidth, clientHeight);
                 _width = clientWidth;

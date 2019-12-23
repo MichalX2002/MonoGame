@@ -123,9 +123,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.Windows.csproj">
-      <Project>{7de47032-a904-4c29-bd22-2d235e8d91ba}</Project>
-      <Name>MonoGame.Framework.Windows</Name>
+    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.WindowsDX.csproj">
+      <Project>{888f236e-6309-4e7a-9045-fc6ab1617565}</Project>
+      <Name>MonoGame.Framework.WindowsDX</Name>
     </ProjectReference>
     <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj">
       <Project>{dddcf6a4-0069-4969-b8d3-fce5e38b11ac}</Project>

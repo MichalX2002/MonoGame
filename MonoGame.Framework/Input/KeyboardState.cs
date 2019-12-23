@@ -17,7 +17,7 @@ namespace MonoGame.Framework.Input
         /// Gets the max amount of keystrokes that can
         /// be tracked by a <see cref="KeyboardState"/>. 
         /// </summary>
-        public const int MaxKeysPerState = 8;
+        public const int MaxKeysPerState = 256;
 
         #region Key Data
 
@@ -45,7 +45,7 @@ namespace MonoGame.Framework.Input
             };
         }
 
-        private readonly bool InternalGetKey(Keys key)
+        private readonly bool GetKey(Keys key)
         {
             int index = ((int)key) >> 5;
             uint field = GetKeyField(index);
@@ -53,7 +53,7 @@ namespace MonoGame.Framework.Input
             return (field & mask) != 0;
         }
 
-        internal void InternalSetKey(Keys key)
+        internal void SetKey(Keys key)
         {
             uint mask = (uint)1 << (((int)key) & 0x1f);
             switch (((int)key) >> 5)
@@ -69,7 +69,7 @@ namespace MonoGame.Framework.Input
             }
         }
 
-        internal void InternalClearKey(Keys key)
+        internal void ClearKey(Keys key)
         {
             uint mask = (uint)1 << (((int)key) & 0x1f);
             switch (((int)key) >> 5)
@@ -85,7 +85,7 @@ namespace MonoGame.Framework.Input
             }
         }
 
-        internal void InternalClearAllKeys()
+        internal void ClearAllKeys()
         {
             keys0 = 0;
             keys1 = 0;
@@ -119,7 +119,7 @@ namespace MonoGame.Framework.Input
             if (keys != null)
             {
                 for (int i = 0; i < keys.Count; i++)
-                    InternalSetKey(keys[i]);
+                    SetKey(keys[i]);
             }
         }
 
@@ -129,14 +129,29 @@ namespace MonoGame.Framework.Input
         /// <param name="keys">List of keys to be flagged as pressed on initialization.</param>
         /// <param name="capsLock">Caps Lock state.</param>
         /// <param name="numLock">Num Lock state.</param>
-        public KeyboardState(Keys[] keys, bool capsLock = false, bool numLock = false) : this()
+        public KeyboardState(ReadOnlySpan<Keys> keys, bool capsLock = false, bool numLock = false) : this()
+        {
+            CapsLock = capsLock;
+            NumLock = numLock;
+
+            for (int i = 0; i < keys.Length; i++)
+                SetKey(keys[i]);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KeyboardState"/> class.
+        /// </summary>
+        /// <param name="keys">List of keys to be flagged as pressed on initialization.</param>
+        /// <param name="capsLock">Caps Lock state.</param>
+        /// <param name="numLock">Num Lock state.</param>
+        public KeyboardState(IEnumerable<Keys> keys, bool capsLock = false, bool numLock = false) : this()
         {
             CapsLock = capsLock;
             NumLock = numLock;
 
             if (keys != null)
-                for (int i = 0; i < keys.Length; i++)
-                    InternalSetKey(keys[i]);
+                foreach (var key in keys)
+                    SetKey(key);
         }
 
         /// <summary>
@@ -151,30 +166,30 @@ namespace MonoGame.Framework.Input
             if (keys != null)
             {
                 for (int i = 0; i < keys.Length; i++)
-                    InternalSetKey(keys[i]);
+                    SetKey(keys[i]);
             }
         }
-
+         
         /// <summary>
         /// Returns the state of a specified key.
         /// </summary>
         /// <param name="key">The key to query.</param>
         /// <returns>The state of the key.</returns>
-        public readonly KeyState this[Keys key] => InternalGetKey(key) ? KeyState.Down : KeyState.Up;
+        public readonly KeyState this[Keys key] => GetKey(key) ? KeyState.Down : KeyState.Up;
 
         /// <summary>
         /// Gets whether given key is currently being pressed.
         /// </summary>
         /// <param name="key">The key to query.</param>
         /// <returns>true if the key is pressed; false otherwise.</returns>
-        public readonly bool IsKeyDown(Keys key) => InternalGetKey(key);
+        public readonly bool IsKeyDown(Keys key) => GetKey(key);
 
         /// <summary>
         /// Gets whether given key is currently being not pressed.
         /// </summary>
         /// <param name="key">The key to query.</param>
         /// <returns>true if the key is not pressed; false otherwise.</returns>
-        public readonly bool IsKeyUp(Keys key) => !InternalGetKey(key);
+        public readonly bool IsKeyUp(Keys key) => !GetKey(key);
 
         #endregion
 

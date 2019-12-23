@@ -1,7 +1,6 @@
-using System;
 using System.IO;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     internal static class AudioUtil
     {

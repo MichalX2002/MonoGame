@@ -4,7 +4,7 @@
 
 using System;
 using System.IO;
-using MonoGame.Framework;
+using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework
 {

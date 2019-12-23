@@ -1,6 +1,4 @@
-﻿using MonoGame.Framework;
-using MonoGame.Utilities.Memory;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -12,7 +10,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
-using MonoGame.Utilities;
+using MonoGame.Framework;
+using MonoGame.Framework.Memory;
 using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging.Tests

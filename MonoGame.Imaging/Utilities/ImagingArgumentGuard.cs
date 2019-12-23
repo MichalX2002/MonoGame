@@ -2,7 +2,6 @@
 using MonoGame.Framework;
 using MonoGame.Imaging.Coding;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Framework;
 using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging

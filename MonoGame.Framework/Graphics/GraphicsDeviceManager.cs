@@ -86,9 +86,10 @@ namespace MonoGame.Framework
 
             if (_game.Services.GetService<IGraphicsDeviceManager>() != null)
                 throw new ArgumentException(
-                    "A graphics device manager is already registered. The graphics device manager cannot be changed once it is set.");
-
-            _game.InternalGraphicsDeviceManager = this;
+                    "A graphics device manager is already registered. " +
+                    "The graphics device manager cannot be changed once it is set.");
+            
+            _game.GraphicsDeviceManager = this;
 
             _game.Services.AddService<IGraphicsDeviceManager>(this);
             _game.Services.AddService<IGraphicsDeviceService>(this);

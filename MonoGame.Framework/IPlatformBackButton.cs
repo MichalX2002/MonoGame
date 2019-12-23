@@ -1,5 +1,5 @@
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Allows for platform specific handling of the Back button. 

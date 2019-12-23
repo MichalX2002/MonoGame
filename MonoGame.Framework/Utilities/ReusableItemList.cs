@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MonoGame.Framework
+namespace MonoGame.Framework.Utilities
 {
     internal class ReusableItemList<T> : ICollection<T>, IReadOnlyList<T>, IEnumerator<T>
     {

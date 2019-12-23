@@ -4,7 +4,6 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using MonoGame.Framework;
 
 namespace MonoGame.Framework.PackedVector
 {
@@ -79,7 +78,7 @@ namespace MonoGame.Framework.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => $"NormalizedShort2({X}, {Y}, {Z}, {W})";
+        public override string ToString() => $"NormalizedShort2({X}, {Y})";
 
         public override int GetHashCode() => PackedValue.GetHashCode();
 

@@ -4,9 +4,9 @@
 
 using System.IO;
 
-namespace MonoGame.Framework
+namespace MonoGame.Framework.Utilities
 {
-    internal static class Hash
+    public static class HashHelper
     {
         /// <summary>
         /// Compute a hash from a byte array.
@@ -15,7 +15,7 @@ namespace MonoGame.Framework
         /// Modified FNV Hash in C#
         /// http://stackoverflow.com/a/468084
         /// </remarks>
-        internal static int ComputeHash(params byte[] data)
+        public static int ComputeHash(params byte[] data)
         {
             unchecked
             {
@@ -33,7 +33,7 @@ namespace MonoGame.Framework
                 return hash;
             }
         }
-        
+
         /// <summary>
         /// Compute a hash from the content of a stream and restore the position.
         /// </summary>
@@ -41,7 +41,7 @@ namespace MonoGame.Framework
         /// Modified FNV Hash in C#
         /// http://stackoverflow.com/a/468084
         /// </remarks>
-        internal static int ComputeHash(Stream stream)
+        public static int ComputeHash(Stream stream)
         {
             System.Diagnostics.Debug.Assert(stream.CanSeek);
 

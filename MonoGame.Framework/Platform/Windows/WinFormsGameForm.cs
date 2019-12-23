@@ -53,12 +53,7 @@ namespace MonoGame.Framework.Windows
 
         internal bool IsResizing { get; set; }
 
-        #region Events
-
-        public event DataEventHandler
-            <WinFormsGameForm, HorizontalMouseWheelEvent> MouseHorizontalWheel;
-
-        #endregion
+        public event DataEvent <WinFormsGameForm, HorizontalMouseWheelEvent> MouseHorizontalWheel;
 
         public WinFormsGameForm(WinFormsGameWindow window)
         {
@@ -95,6 +90,7 @@ namespace MonoGame.Framework.Windows
                         m.Result = new IntPtr(flags);
                         return;
                     }
+
 #if (WINDOWS && DIRECTX)
                 case WM_KEYDOWN:
                     HandleKeyMessage(ref m);
@@ -109,17 +105,18 @@ namespace MonoGame.Framework.Windows
                             break;
                     }
                     break;
+
                 case WM_SYSKEYDOWN:
                     HandleKeyMessage(ref m);
                     break;
+
                 case WM_KEYUP:
                 case WM_SYSKEYUP:
                     HandleKeyMessage(ref m);
                     break;
 #endif
                 case WM_SYSCOMMAND:
-
-                    var wParam = m.WParam.ToInt32();
+                    int wParam = m.WParam.ToInt32();
 
                     if (!AllowAltF4 && wParam == 0xF060 && m.LParam.ToInt32() == 0 && Focused)
                     {
@@ -139,19 +136,24 @@ namespace MonoGame.Framework.Windows
                 case WM_POINTERUP:
                     state = TouchLocationState.Released;
                     break;
+
                 case WM_POINTERDOWN:
                     state = TouchLocationState.Pressed;
                     break;
+
                 case WM_POINTERUPDATE:
                     state = TouchLocationState.Moved;
                     break;
+
                 case WM_MOUSEHWHEEL:
                     var delta = (short)(((ulong)m.WParam >> 16) & 0xffff);
                     MouseHorizontalWheel?.Invoke(this, new HorizontalMouseWheelEvent(delta));
                     break;
+
                 case WM_ENTERSIZEMOVE:
                     IsResizing = true;
                     break;
+
                 case WM_EXITSIZEMOVE:
                     IsResizing = false;
                     break;

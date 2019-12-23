@@ -415,7 +415,7 @@ namespace MonoGame.Framework
 
         private void UpdateBackBufferSize()
         {
-            var manager = Game.InternalGraphicsDeviceManager;
+            var manager = Game.GraphicsDeviceManager;
             if (manager.GraphicsDevice == null)
                 return;
 

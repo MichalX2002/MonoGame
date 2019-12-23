@@ -22,7 +22,7 @@ namespace MonoGame.Framework
     public partial class Game : IDisposable
     {
         private ContentManager _content;
-        internal GamePlatform Platform;
+        internal GamePlatform Platform { get; }
 
         private SortingFilteringCollection<IDrawable> _drawables =
             new SortingFilteringCollection<IDrawable>(
@@ -50,6 +50,7 @@ namespace MonoGame.Framework
 
         private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
 
+        private bool _isDisposed;
         private bool _shouldExit;
         private bool _suppressDraw;
 
@@ -83,18 +84,12 @@ namespace MonoGame.Framework
 
         #region IDisposable Implementation
 
-        [DebuggerNonUserCode]
+        [DebuggerHidden]
         private void AssertNotDisposed()
         {
             if (_isDisposed)
-            {
-                string name = GetType().Name;
-                throw new ObjectDisposedException(
-                    name, string.Format("The {0} object was used after being Disposed.", name));
-            }
+                throw new ObjectDisposedException(GetType().Name);
         }
-
-        private bool _isDisposed;
 
         public void Dispose()
         {
@@ -136,7 +131,6 @@ namespace MonoGame.Framework
                         Services.RemoveService<GamePlatform>();
 
                         Platform.Dispose();
-                        Platform = null;
                     }
 
                     ContentTypeReaderManager.ClearTypeCreators();
@@ -343,6 +337,12 @@ namespace MonoGame.Framework
                 Initialized = true;
             }
 
+            // Initializing involves loading content, which often creates lots of garbage.
+            // Invoking a compacting GC collection before the game continues should help 
+            // memory usage/fragmentation without causing performance penalties/hickups later.
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+
             BeginRun();
             _gameTimer = Stopwatch.StartNew();
             switch (runBehavior)
@@ -356,10 +356,9 @@ namespace MonoGame.Framework
                     // XNA runs one Update even before showing the window
                     DoUpdate(new GameTime());
 
-                    GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
-                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
-                    
-                    Platform.RunLoop();
+                    if (!_shouldExit)
+                        Platform.RunLoop();
+
                     EndRun();
                     DoExiting();
                     break;
@@ -385,7 +384,7 @@ namespace MonoGame.Framework
             // any change fully in both the fixed and variable timestep 
             // modes across multiple devices and platforms.
 
-            RetryTick:
+        RetryTick:
 
             if (!IsActive && (InactiveSleepTime.TotalMilliseconds >= 1.0))
             {
@@ -406,13 +405,13 @@ namespace MonoGame.Framework
             {
                 // Sleep for as long as possible without overshooting the update time
                 TimeSpan sleepTime = TargetElapsedTime - _accumulatedElapsedTime;
-                
+
                 // We only have a precision timer on Windows, so other platforms may still overshoot
 #if WINDOWS && !DESKTOPGL
-                MonoGame.Framework.TimerHelper.SleepForNoMoreThan(sleepTime);
+                TimerHelper.SleepForNoMoreThan(sleepTime.TotalMilliseconds);
 #elif WINDOWS_UAP
                 lock (_locker)
-                    Monitor.Wait(_locker, (int)sleepTime);
+                    Monitor.Wait(_locker, (int)sleepTime.TotalMilliseconds);
 #else
                 Thread.Sleep(sleepTime);
 #endif
@@ -474,7 +473,9 @@ namespace MonoGame.Framework
 
             // Draw unless the update suppressed it.
             if (_suppressDraw)
+            {
                 _suppressDraw = false;
+            }
             else
             {
                 DoDraw(Time);
@@ -504,12 +505,11 @@ namespace MonoGame.Framework
         {
             // TODO: This should be removed once all platforms use the new GraphicsDeviceManager
 #if !(WINDOWS && DIRECTX)
-            InternalApplyChanges(InternalGraphicsDeviceManager);
+            InternalApplyChanges();
 #endif
 
-            // According to the information given on MSDN (see link below), all
-            // GameComponents in Components at the time Initialize() is called
-            // are initialized.
+            // According to the information given on MSDN (see link below),
+            // all GameComponents in Components at the time Initialize() is called are initialized.
             // http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.game.initialize.aspx
             // Initialize all existing components
             InitializeExistingComponents();
@@ -576,7 +576,7 @@ namespace MonoGame.Framework
         private void Platform_AsyncRunLoopEnded(GamePlatform sender)
         {
             AssertNotDisposed();
-            
+
             sender.AsyncRunLoopEnded -= Platform_AsyncRunLoopEnded;
             EndRun();
             DoExiting();
@@ -591,7 +591,7 @@ namespace MonoGame.Framework
         #region Internal Methods
 
 #if !(WINDOWS && DIRECTX)
-        internal void InternalApplyChanges(GraphicsDeviceManager manager)
+        internal void InternalApplyChanges()
         {
             Platform.BeginScreenDeviceChange(GraphicsDevice.PresentationParameters.IsFullScreen);
 
@@ -599,6 +599,7 @@ namespace MonoGame.Framework
                 Platform.EnterFullScreen();
             else
                 Platform.ExitFullScreen();
+
             var viewport = new Viewport(
                 0, 0,
                 GraphicsDevice.PresentationParameters.BackBufferWidth,
@@ -612,6 +613,7 @@ namespace MonoGame.Framework
         internal void DoUpdate(GameTime gameTime)
         {
             AssertNotDisposed();
+
             if (Platform.BeforeUpdate(gameTime))
             {
                 FrameworkDispatcher.Update();
@@ -626,6 +628,7 @@ namespace MonoGame.Framework
         internal void DoDraw(GameTime gameTime)
         {
             AssertNotDisposed();
+
             // Draw and EndDraw should not be called if BeginDraw returns false.
             // http://stackoverflow.com/questions/4054936/manual-control-over-when-to-redraw-the-screen/4057180#4057180
             // http://stackoverflow.com/questions/4235439/xna-3-1-to-4-0-requires-constant-redraw-or-will-display-a-purple-screen
@@ -639,7 +642,7 @@ namespace MonoGame.Framework
         internal void DoInitialize()
         {
             AssertNotDisposed();
-            if (GraphicsDevice == null && InternalGraphicsDeviceManager != null)
+            if (GraphicsDevice == null && GraphicsDeviceManager != null)
                 _graphicsDeviceManager.CreateDevice();
 
             Platform.BeforeInitialize();
@@ -662,7 +665,7 @@ namespace MonoGame.Framework
 
         #endregion Internal Methods
 
-        internal GraphicsDeviceManager InternalGraphicsDeviceManager
+        internal GraphicsDeviceManager GraphicsDeviceManager
         {
             get
             {
@@ -674,7 +677,7 @@ namespace MonoGame.Framework
             {
                 if (_graphicsDeviceManager != null)
                     throw new InvalidOperationException(
-                        "GraphicsDeviceManager already registered for this object.");
+                        "The GraphicsDeviceManager is already set and cannot be changed.");
                 _graphicsDeviceManager = value;
             }
         }
@@ -725,7 +728,7 @@ namespace MonoGame.Framework
         /// Provides efficient, reusable sorting and filtering based on a
         /// configurable sort comparer, filter predicate, and associate change events.
         /// </summary>
-        class SortingFilteringCollection<T> : ICollection<T>
+        private class SortingFilteringCollection<T> : ICollection<T>
         {
             private readonly List<T> _items;
             private readonly List<AddJournalEntry<T>> _addJournal;

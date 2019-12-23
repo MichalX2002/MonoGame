@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using MonoGame.Framework;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
 

@@ -4,13 +4,13 @@
 
 using System.IO;
 using MonoGame.Framework.Graphics;
-using System;
 using MonoGame.Framework.Memory;
+using MonoGame.Framework.Utilities;
 
 namespace TwoMGFX
 {
-	internal partial class EffectObject
-	{
+    internal partial class EffectObject
+    {
         private const string Header = "MGFX";
         private const int Version = 8;
 
@@ -25,7 +25,7 @@ namespace TwoMGFX
 
             // Write an simple identifier for DX11 vs GLSL
             // so we can easily detect the correct shader type.
-            var profile = (byte)options.Profile.FormatId;
+            var profile = options.Profile.FormatId;
             writer.Write(profile);
 
             // Write the rest to a memory stream.
@@ -130,8 +130,8 @@ namespace TwoMGFX
 
                 // Calculate a hash code from memory stream
                 // and write it to the header.
-                var effectKey = MonoGame.Framework.Hash.ComputeHash(memStream);
-                writer.Write((int)effectKey);
+                var effectKey = HashHelper.ComputeHash(memStream);
+                writer.Write(effectKey);
 
                 //write content from memory stream to final stream.
                 memStream.WriteTo(writer.BaseStream);
@@ -183,6 +183,6 @@ namespace TwoMGFX
             for (var i = 0; i < count; i++)
                 WriteParameter(writer, annotations[i]);
         }
-	}
+    }
 }
 

@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using MonoGame.Framework.Utilities;
 using SharpDX.Direct3D11;
 
 namespace MonoGame.Framework.Graphics
@@ -49,7 +50,7 @@ namespace MonoGame.Framework.Graphics
             // input layout from the vertex declaration.
             Bytecode = shaderBytecode;
 
-            HashKey = MonoGame.Framework.Hash.ComputeHash(Bytecode);
+            HashKey = HashHelper.ComputeHash(Bytecode);
 
             if (isVertexShader)
                 CreateVertexShader();

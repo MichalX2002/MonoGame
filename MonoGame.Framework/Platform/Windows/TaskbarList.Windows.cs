@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using MonoGame.Framework;
 
 namespace MonoGame.Framework.Utilities
 {
@@ -35,7 +34,16 @@ namespace MonoGame.Framework.Utilities
 
         private void PlatformSetProgressState(TaskbarProgressState state)
         {
-            _comObject.SetProgressState(_windowHandle, state);
+            int flags = state switch
+            {
+                TaskbarProgressState.None => 0,
+                TaskbarProgressState.Indeterminate => 0x1,
+                TaskbarProgressState.Normal => 0x2,
+                TaskbarProgressState.Error => 0x4,
+                TaskbarProgressState.Paused => 0x8,
+                _ => throw new ArgumentOutOfRangeException(nameof(state))
+            };
+            _comObject.SetProgressState(_windowHandle, flags);
         }
 
         private void PlatformSetProgressValue(TaskbarProgressValue value)
@@ -66,7 +74,7 @@ namespace MonoGame.Framework.Utilities
 
             #region ITaskbarList3
             [PreserveSig] void SetProgressValue(IntPtr hwnd, ulong ullCompleted, ulong ullTotal);
-            [PreserveSig] void SetProgressState(IntPtr hwnd, TaskbarProgressState tbpFlags);
+            [PreserveSig] void SetProgressState(IntPtr hwnd, int tbpFlags);
 
             [PreserveSig] void RegisterTab(IntPtr hwndTab, IntPtr hwndMDI);
             [PreserveSig] void UnregisterTab(IntPtr hwndTab);

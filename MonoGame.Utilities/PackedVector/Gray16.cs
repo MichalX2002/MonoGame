@@ -52,7 +52,7 @@ namespace MonoGame.Framework.PackedVector
 
         /// <inheritdoc />
         public void FromGrayAlpha16(GrayAlpha16 source) => 
-            PackedValue = PackedVectorHelper.UpScale8To16Bit(source.X);
+            PackedValue = PackedVectorHelper.UpScale8To16Bit(source.L);
 
         /// <inheritdoc />
         public void FromGray16(Gray16 source) => PackedValue = source.PackedValue;

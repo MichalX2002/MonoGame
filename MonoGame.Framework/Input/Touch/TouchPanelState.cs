@@ -41,7 +41,7 @@ namespace MonoGame.Framework.Input.Touch
         private int _nextTouchId = 2;
 
         /// <summary>
-        /// The current timestamp that we use for setting the timestamp of new TouchLocations
+        /// The current timestamp that we use for setting the timestamp of new touch locations.
         /// </summary>
         internal static TimeSpan CurrentTimestamp { get; set; }
 

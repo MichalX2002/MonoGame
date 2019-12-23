@@ -84,3 +84,4 @@ This package provides you with MonoGame Framework that works on Windows 10, Wind
   <Import Project="Platform\DirectX.targets" />
   <Import Project="Platform\XAudio.targets" />
 </Project>
+

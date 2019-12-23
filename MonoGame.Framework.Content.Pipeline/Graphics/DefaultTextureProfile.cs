@@ -5,7 +5,6 @@
 using System;
 using MonoGame.Framework.Content.Pipeline.Processors;
 using MonoGame.Framework.Graphics;
-using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
@@ -13,15 +12,15 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
     {
         public override bool Supports(TargetPlatform platform)
         {
-            return  platform == TargetPlatform.Android ||
-                    platform == TargetPlatform.DesktopGL ||
-                    platform == TargetPlatform.MacOSX ||
-                    platform == TargetPlatform.NativeClient ||
-                    platform == TargetPlatform.RaspberryPi ||
-                    platform == TargetPlatform.Windows ||
-                    platform == TargetPlatform.WindowsPhone8 ||
-                    platform == TargetPlatform.WindowsStoreApp ||
-                    platform == TargetPlatform.iOS;
+            return platform == TargetPlatform.Android
+                || platform == TargetPlatform.DesktopGL
+                || platform == TargetPlatform.MacOSX
+                || platform == TargetPlatform.NativeClient
+                || platform == TargetPlatform.RaspberryPi
+                || platform == TargetPlatform.Windows
+                || platform == TargetPlatform.WindowsPhone8
+                || platform == TargetPlatform.WindowsStoreApp
+                || platform == TargetPlatform.iOS;
         }
 
         private static bool IsCompressedTextureFormat(TextureProcessorOutputFormat format)
@@ -37,7 +36,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             return false;
         }
 
-        private static TextureProcessorOutputFormat GetTextureFormatForPlatform(TextureProcessorOutputFormat format, TargetPlatform platform)
+        private static TextureProcessorOutputFormat GetTextureFormatForPlatform(
+            TextureProcessorOutputFormat format, TargetPlatform platform)
         {
             // Select the default texture compression format for the target platform
             if (format == TextureProcessorOutputFormat.Compressed)
@@ -56,7 +56,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 if (platform == TargetPlatform.iOS)
                 {
                     if (format != TextureProcessorOutputFormat.PvrCompressed)
-                        throw new PlatformNotSupportedException("iOS platform only supports PVR texture compression");
+                        throw new PlatformNotSupportedException(
+                            "iOS platform only supports PVR texture compression.");
                 }
                 else if (platform == TargetPlatform.Windows ||
                             platform == TargetPlatform.WindowsPhone8 ||
@@ -66,14 +67,17 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                             platform == TargetPlatform.NativeClient)
                 {
                     if (format != TextureProcessorOutputFormat.DxtCompressed)
-                        throw new PlatformNotSupportedException(format + " platform only supports DXT texture compression");
+                        throw new PlatformNotSupportedException(
+                            format + " platform only supports DXT texture compression.");
                 }
             }
 
             return format;
         }
 
-        public override void Requirements(ContentProcessorContext context, TextureProcessorOutputFormat format, out bool requiresPowerOfTwo, out bool requiresSquare)
+        public override void Requirements(
+            ContentProcessorContext context, TextureProcessorOutputFormat format,
+            out bool requiresPowerOfTwo, out bool requiresSquare)
         {
             if (format == TextureProcessorOutputFormat.Compressed)
                 format = GetTextureFormatForPlatform(format, context.TargetPlatform);
@@ -109,7 +113,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         }
 
         protected override void PlatformCompressTexture(
-            ContentProcessorContext context, TextureContent content, TextureProcessorOutputFormat format, bool isSpriteFont)
+            ContentProcessorContext context, TextureContent content,
+            TextureProcessorOutputFormat format, bool isSpriteFont)
         {
             format = GetTextureFormatForPlatform(format, context.TargetPlatform);
 

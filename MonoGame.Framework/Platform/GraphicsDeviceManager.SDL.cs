@@ -10,8 +10,8 @@ namespace MonoGame.Framework
     {
         partial void PlatformInitialize(PresentationParameters presentationParameters)
         {
-            var surfaceFormat = _game.InternalGraphicsDeviceManager.PreferredBackBufferFormat.GetColorFormat();
-            var depthStencilFormat = _game.InternalGraphicsDeviceManager.PreferredDepthStencilFormat;
+            var surfaceFormat = _game.GraphicsDeviceManager.PreferredBackBufferFormat.GetColorFormat();
+            var depthStencilFormat = _game.GraphicsDeviceManager.PreferredDepthStencilFormat;
 
             // TODO Need to get this data from the Presentation Parameters
             Sdl.GL.SetAttribute(Sdl.GL.Attribute.RedSize, surfaceFormat.R);

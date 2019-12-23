@@ -107,7 +107,7 @@ namespace MonoGame.Testing
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            f += time.Delta;
+            f += time.ElapsedTotalSeconds;
             if (f >= 2f)
             {
                 f = 0f;

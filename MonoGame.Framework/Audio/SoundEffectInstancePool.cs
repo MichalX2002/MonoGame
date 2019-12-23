@@ -128,12 +128,13 @@ namespace MonoGame.Framework.Audio
                         continue;
                     }
 
-                    if (inst.IsDisposed || inst.State == SoundState.Stopped || (inst._effect == null && !inst._isDynamic))
+                    if (inst.IsDisposed ||
+                        inst.State == SoundState.Stopped ||
+                        (inst._effect == null && !inst._isDynamic))
                     {
-#if OPENAL
                         if (!inst.IsDisposed)
-                            inst.Stop(true); // force stopping it to free its AL source
-#endif
+                            inst.Stop(true);
+
                         Return(inst);
                         continue;
                     }
