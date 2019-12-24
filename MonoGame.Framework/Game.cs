@@ -47,7 +47,7 @@ namespace MonoGame.Framework
         private IGraphicsDeviceService _graphicsDeviceService;
 
         private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(166667); // 60fps
-        private TimeSpan _inactiveSleepTime = TimeSpan.FromSeconds(0.02);
+        private TimeSpan _inactiveSleepTime = TimeSpan.FromTicks(333333); // 30fps
         private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
 
         private TimeSpan _accumulatedElapsedTime;
