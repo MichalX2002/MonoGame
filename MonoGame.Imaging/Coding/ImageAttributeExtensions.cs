@@ -1,4 +1,5 @@
-﻿
+﻿using MonoGame.Imaging.Attributes;
+
 namespace MonoGame.Imaging.Coding
 {
     /// <summary>

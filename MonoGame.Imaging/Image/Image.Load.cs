@@ -1,10 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using MonoGame.Framework;
-using MonoGame.Imaging.Decoding;
-using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
+using MonoGame.Imaging.Coding;
+using MonoGame.Imaging.Coding.Decoding;
 
 namespace MonoGame.Imaging
 {
@@ -28,7 +27,7 @@ namespace MonoGame.Imaging
                     throw new UnknownImageFormatException();
 
                 if (!TryGetDecoder(format, out var decoder))
-                    throw new ImageCoderException(format);
+                    throw new MissingDecoderException(format);
 
                 return decoder.Decode(imageStream, config, frameLimit, onProgress);
             }

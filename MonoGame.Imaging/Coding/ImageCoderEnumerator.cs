@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging.Coding
 {

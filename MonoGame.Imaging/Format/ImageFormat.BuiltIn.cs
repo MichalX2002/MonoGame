@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using MonoGame.Imaging.Coding;
 using MonoGame.Framework.Collections;
 
 namespace MonoGame.Imaging
@@ -30,11 +29,11 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Gets the "Graphics Interchange Format".
         /// </summary>
-        public static ImageFormat Gif { get; } = AddBuiltIn(
+        public static ImageFormat Gif { get; } = new AnimatedImageFormat(
             "Graphics Interchange Format", "GIF",
-            new[] { "image/gif" },
-            new[] { ".gif" },
-            new[] { typeof(IAnimatedFormatAttribute) });
+            new HashSet<string> { "image/gif" }.AsReadOnly(),
+            new HashSet<string> { ".gif" }.AsReadOnly(),
+            TimeSpan.FromSeconds(0.01));
 
         /// <summary>
         /// Gets the "Bitmap" format.
@@ -63,13 +62,18 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Gets the "PhotoShop Document" format.
         /// </summary>
-        public static ImageFormat Psd { get; } = AddBuiltIn(
+        public static ImageFormat Psd { get; } = new LayeredImageFormat(
             "PhotoShop Document", "PSD",
-            new[] { "image/vnd.adobe.photoshop", "application/x-photoshop" },
-            new[] { ".psd" },
-            new[] { typeof(ILayeredFormatAttribute) });
+            new HashSet<string> { "image/vnd.adobe.photoshop", "application/x-photoshop" }.AsReadOnly(),
+            new HashSet<string> { ".psd" }.AsReadOnly());
 
         #endregion
+
+        static ImageFormat()
+        {
+            _builtInFormats.Add(Gif);
+            _builtInFormats.Add(Psd);
+        }
 
         /// <summary>
         /// Gets whether the format comes with the imaging library.
@@ -84,14 +88,13 @@ namespace MonoGame.Imaging
         }
 
         private static ImageFormat AddBuiltIn(
-            string fullName, string name, string[] mimeTypes, string[] extensions, Type[] attributes = null)
+            string fullName, string name, string[] mimeTypes, string[] extensions)
         {
             var mimeSet = new ReadOnlySet<string>(mimeTypes, StringComparer.OrdinalIgnoreCase);
             var extensionSet = new ReadOnlySet<string>(extensions, StringComparer.OrdinalIgnoreCase);
-            var attributeSet = new ReadOnlySet<Type>(attributes ?? Array.Empty<Type>());
 
             var format = new ImageFormat(
-                fullName, name, mimeTypes[0], extensions[0], mimeSet, extensionSet, attributeSet);
+                fullName, name, mimeTypes[0], extensions[0], mimeSet, extensionSet);
 
             _builtInFormats.Add(format);
             AddFormat(format);

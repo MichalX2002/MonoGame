@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using MonoGame.Framework;
-using MonoGame.Imaging.Coding;
 using MonoGame.Framework.Collections;
+using MonoGame.Imaging.Attributes;
 using FormatList = MonoGame.Framework.Collections.CachedReadOnlyList<MonoGame.Imaging.ImageFormat>;
 
 namespace MonoGame.Imaging
@@ -90,18 +91,31 @@ namespace MonoGame.Imaging
         }
 
         public ImageFormat(
-            string fullName, string shortNamename,
+            string fullName, string shortName,
             string mimeType, string extension) :
             this(
-                fullName, shortNamename, 
+                fullName, shortName, 
                 mimeType, extension,
                 new ReadOnlySet<string>(new[] { mimeType }),
                 new ReadOnlySet<string>(new[] { extension }))
         {
         }
 
+        public ImageFormat(
+            string fullName, string shortName,
+            IReadOnlySet<string> mimeTypes,
+            IReadOnlySet<string> extensions) :
+            this(
+                fullName, shortName,
+                mimeTypes.First(), 
+                extensions.First(),
+                mimeTypes, 
+                extensions)
+        {
+        }
+
         #endregion
-        
+
         private static string ValidateExtension(string extension)
         {
             if (extension == null)

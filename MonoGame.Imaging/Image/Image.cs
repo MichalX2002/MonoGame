@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using MonoGame.Imaging.Decoding;
-using MonoGame.Imaging.Encoding;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
+using MonoGame.Imaging.Coding.Decoding;
+using MonoGame.Imaging.Coding.Encoding;
 
 namespace MonoGame.Imaging
 {
