@@ -1,6 +1,4 @@
 ﻿
-using System;
-
 namespace MonoGame.Imaging.Coding
 {
     /// <summary>
