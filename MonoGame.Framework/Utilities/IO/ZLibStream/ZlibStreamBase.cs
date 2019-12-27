@@ -1,9 +1,9 @@
-﻿using MonoGame.Utilities.IO;
-using MonoGame.Utilities.Memory;
+﻿using MonoGame.Framework.IO;
+using MonoGame.Framework.Memory;
 using System;
 using System.IO;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Framework
 {
     internal class ZlibBaseStream : Stream
     {

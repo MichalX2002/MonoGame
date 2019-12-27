@@ -73,17 +73,17 @@ namespace MonoGame.Framework.Graphics
                 }
             }
 
-            if (Threading.IsOnUIThread())
+            if (Threading.IsOnMainThread)
                 Construct();
             else
-                Threading.BlockOnUIThread(Construct);
+                Threading.BlockOnMainThread(Construct);
         }
 
         private unsafe void PlatformSetData<T>(
             int level, int arraySlice, Rectangle? rect, ReadOnlySpan<T> data)
             where T : unmanaged
         {
-            AssertIsOnUIThreadForSpan();
+            AssertOnMainThreadForSpan();
 
             // Store the current bound texture.
             var prevTexture = GraphicsExtensions.GetBoundTexture2D();
@@ -145,7 +145,7 @@ namespace MonoGame.Framework.Graphics
             int level, int arraySlice, Rectangle rect, Span<T> destination)
             where T : unmanaged
         {
-            AssertIsOnUIThreadForSpan();
+            AssertOnMainThreadForSpan();
 #if GLES
             // TODO: check for for non renderable formats (formats that can't be attached to FBO)
             GL.GenFramebuffers(1, out int framebufferId);

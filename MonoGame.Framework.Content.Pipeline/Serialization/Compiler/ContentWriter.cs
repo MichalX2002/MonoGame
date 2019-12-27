@@ -8,7 +8,7 @@ using MonoGame.Framework.Content.Pipeline.Utilities.LZ4;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Content.Pipeline.Builder;
 using System.Collections.Generic;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {

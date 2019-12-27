@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Framework
 {
     /// <summary>
     ///   A class for compressing and decompressing GZIP streams.
@@ -10,8 +10,8 @@ namespace MonoGame.Utilities
     /// <remarks>
     ///
     /// <para>
-    ///   The <c>GZipStream</c> is a <see
-    ///   href="http://en.wikipedia.org/wiki/Decorator_pattern">Decorator</see> on a
+    ///   The <c>GZipStream</c> is a <a
+    ///   href="http://en.wikipedia.org/wiki/Decorator_pattern">Decorator</a> on a
     ///   <see cref="Stream"/>. It adds GZIP compression or decompression to any
     ///   stream.
     /// </para>
@@ -20,8 +20,8 @@ namespace MonoGame.Utilities
     ///   Like the <c>System.IO.Compression.GZipStream</c> in the .NET Base Class Library, the
     ///   <c>Ionic.Zlib.GZipStream</c> can compress while writing, or decompress while
     ///   reading, but not vice versa.  The compression method used is GZIP, which is
-    ///   documented in <see href="http://www.ietf.org/rfc/rfc1952.txt">IETF RFC
-    ///   1952</see>, "GZIP file format specification version 4.3".</para>
+    ///   documented in <a href="http://www.ietf.org/rfc/rfc1952.txt">IETF RFC
+    ///   1952</a>, "GZIP file format specification version 4.3".</para>
     ///
     /// <para>
     ///   A <c>GZipStream</c> can be used to decompress data (through <c>Read()</c>) or

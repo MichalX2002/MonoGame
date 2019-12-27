@@ -2,12 +2,11 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using MonoGame.Framework.Graphics;
-using MonoGame.Framework.Input;
-using MonoGame.Utilities;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using MonoGame.Framework.Graphics;
 
 namespace MonoGame.Framework
 {
@@ -19,7 +18,9 @@ namespace MonoGame.Framework
             set
             {
                 if (Sdl.Major >= 2 && Sdl.Minor >= 0 && Sdl.Patch > 4)
+                {
                     Sdl.Window.SetResizable(_handle, value);
+                }
                 else
                 {
                     string version = string.Join(".", Sdl.Major, Sdl.Minor, Sdl.Patch);
@@ -43,12 +44,12 @@ namespace MonoGame.Framework
         {
             get
             {
-                int x = 0, y = 0;
-
                 if (!IsFullScreen)
-                    Sdl.Window.GetPosition(Handle, out x, out y);
-
-                return new Point(x, y);
+                {
+                    Sdl.Window.GetPosition(Handle, out int x, out int y);
+                    return new Point(x, y);
+                }
+                return Point.Zero;
             }
             set
             {
@@ -75,12 +76,12 @@ namespace MonoGame.Framework
         public override string ClipboardText { get => Sdl.GetClipboardText(); set => Sdl.SetClipboardText(value); }
 
         public static GameWindow Instance;
-        public uint? Id;
         public bool IsFullScreen;
 
         internal readonly Game _game;
         private IntPtr _handle;
         private IntPtr _icon;
+        private string _defaultTitle;
         private bool _disposed;
         private bool _resizable, _borderless, _willBeFullScreen, _mouseVisible, _hardwareSwitch;
         private string _screenDeviceName;
@@ -89,58 +90,62 @@ namespace MonoGame.Framework
 
         public SdlGameWindow(Game game)
         {
-            _game = game;
-            _screenDeviceName = "";
-
             Instance = this;
 
+            _game = game;
+            _screenDeviceName = "";
             _width = GraphicsDeviceManager.DefaultBackBufferWidth;
             _height = GraphicsDeviceManager.DefaultBackBufferHeight;
+            _defaultTitle = AssemblyHelper.GetDefaultWindowTitle();
+
+            byte[] iconBytes = ReadEmbeddedIconBytes();
+            if (iconBytes != null)
+            {
+                var dataSrc = Sdl.RwFromMem(iconBytes, iconBytes.Length);
+                _icon = Sdl.LoadBMP_RW(dataSrc, 1);
+            }
 
             Sdl.SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "0");
             Sdl.SetHint("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1");
 
-            // when running NUnit tests entry assembly can be null
-            if (Assembly.GetEntryAssembly() != null)
+            _handle = Sdl.Window.Create(
+                _defaultTitle,
+                x: 0, y: 0,
+                GraphicsDeviceManager.DefaultBackBufferWidth,
+                GraphicsDeviceManager.DefaultBackBufferHeight,
+                Sdl.Window.State.Hidden);
+        }
+
+        public IntPtr GetOSWindowHandle()
+        {
+            if (_handle != IntPtr.Zero)
             {
-                using (var stream =
-                        Assembly.GetEntryAssembly().GetManifestResourceStream(Assembly.GetEntryAssembly().EntryPoint.DeclaringType.Namespace + ".Icon.bmp") ??
-                        Assembly.GetEntryAssembly().GetManifestResourceStream("Icon.bmp") ??
-                        Assembly.GetExecutingAssembly().GetManifestResourceStream("MonoGame.bmp"))
+                Sdl.Window.SysWMinfo wmInfo = default;
+                Sdl.GetVersion(out wmInfo.version);
+                if (Sdl.Window.GetWindowWMInfo(_handle, ref wmInfo))
                 {
-                    if (stream != null)
-                        using (var br = new BinaryReader(stream))
-                        {
-                            try
-                            {
-                                int length = (int)stream.Length;
-                                var src = Sdl.RwFromMem(br.ReadBytes(length), length);
-                                _icon = Sdl.LoadBMP_RW(src, 1);
-                            }
-                            catch
-                            {
-                            }
-                        }
+                    if (wmInfo.subsystem == Sdl.Window.SysWMType.Windows)
+                    {
+                        return wmInfo.data.Windows.window;
+                    }
                 }
             }
-
-            _handle = Sdl.Window.Create("", 0, 0,
-                GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight, Sdl.Window.State.Hidden);
+            return IntPtr.Zero;
         }
 
         internal void CreateWindow()
         {
             var initflags =
-                Sdl.Window.State.OpenGL |
                 Sdl.Window.State.Hidden |
+                Sdl.Window.State.OpenGL |
                 Sdl.Window.State.InputFocus |
                 Sdl.Window.State.MouseFocus;
 
             if (_handle != IntPtr.Zero)
                 Sdl.Window.Destroy(_handle);
 
-            var winx = Sdl.Window.PosCentered;
-            var winy = Sdl.Window.PosCentered;
+            int winx = Sdl.Window.PosCentered;
+            int winy = Sdl.Window.PosCentered;
 
             // if we are on Linux, start on the current screen
             if (CurrentPlatform.OS == OS.Linux)
@@ -150,9 +155,8 @@ namespace MonoGame.Framework
             }
 
             _handle = Sdl.Window.Create(
-                AssemblyHelper.GetDefaultWindowTitle(), winx, winy, _width, _height, initflags);
+                _defaultTitle, winx, winy, _width, _height, initflags);
 
-            Id = Sdl.Window.GetWindowId(_handle);
             if (_icon != IntPtr.Zero)
                 Sdl.Window.SetIcon(_handle, _icon);
 
@@ -162,9 +166,36 @@ namespace MonoGame.Framework
             SetCursorVisible(_mouseVisible);
         }
 
-        ~SdlGameWindow()
+        private static byte[] ReadEmbeddedIconBytes()
         {
-            Dispose(false);
+            // when running NUnit tests entry assembly can be null
+            var entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly != null)
+            {
+                var entryDeclaringType = entryAssembly.EntryPoint.DeclaringType;
+                using (var stream =
+                        entryAssembly.GetManifestResourceStream(entryDeclaringType.Namespace + ".Icon.bmp") ??
+                        entryAssembly.GetManifestResourceStream("Icon.bmp") ??
+                        Assembly.GetExecutingAssembly().GetManifestResourceStream("MonoGame.bmp"))
+                {
+                    if (stream != null)
+                    {
+                        using (var br = new BinaryReader(stream))
+                        {
+                            try
+                            {
+                                int length = (int)stream.Length;
+                                return br.ReadBytes(length);
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine("Failed to load icon from embedded resources: {0}", ex);
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
         private static int GetMouseDisplay()
@@ -173,7 +204,7 @@ namespace MonoGame.Framework
             Sdl.Mouse.GetGlobalState(out int x, out int y);
 
             var displayCount = Sdl.Display.GetNumVideoDisplays();
-            for (var i = 0; i < displayCount; i++)
+            for (int i = 0; i < displayCount; i++)
             {
                 Sdl.Display.GetBounds(i, out rect);
 
@@ -183,7 +214,6 @@ namespace MonoGame.Framework
                     return i;
                 }
             }
-
             return 0;
         }
 
@@ -207,11 +237,15 @@ namespace MonoGame.Framework
 
             Sdl.Display.GetBounds(displayIndex, out Sdl.Rectangle displayRect);
 
-            if (_willBeFullScreen != IsFullScreen || _hardwareSwitch != _game.InternalGraphicsDeviceManager.HardwareModeSwitch)
+            if (_willBeFullScreen != IsFullScreen ||
+                _hardwareSwitch != _game.GraphicsDeviceManager.HardwareModeSwitch)
             {
-                var fullscreenFlag = _game.InternalGraphicsDeviceManager.HardwareModeSwitch ? Sdl.Window.State.Fullscreen : Sdl.Window.State.FullscreenDesktop;
+                var fullscreenFlag = _game.GraphicsDeviceManager.HardwareModeSwitch
+                    ? Sdl.Window.State.Fullscreen
+                    : Sdl.Window.State.FullscreenDesktop;
+
                 Sdl.Window.SetFullscreen(Handle, _willBeFullScreen ? fullscreenFlag : 0);
-                _hardwareSwitch = _game.InternalGraphicsDeviceManager.HardwareModeSwitch;
+                _hardwareSwitch = _game.GraphicsDeviceManager.HardwareModeSwitch;
             }
             // If going to exclusive full-screen mode, force the window to minimize on focus loss (Windows only)
             if (CurrentPlatform.OS == OS.Windows)
@@ -219,7 +253,7 @@ namespace MonoGame.Framework
                 Sdl.SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", _willBeFullScreen && _hardwareSwitch ? "1" : "0");
             }
 
-            if (!_willBeFullScreen || _game.InternalGraphicsDeviceManager.HardwareModeSwitch)
+            if (!_willBeFullScreen || _game.GraphicsDeviceManager.HardwareModeSwitch)
             {
                 Sdl.Window.SetSize(Handle, clientWidth, clientHeight);
                 _width = clientWidth;
@@ -283,12 +317,12 @@ namespace MonoGame.Framework
             {
                 return;
             }
+
             _game.GraphicsDevice.PresentationParameters.BackBufferWidth = width;
             _game.GraphicsDevice.PresentationParameters.BackBufferHeight = height;
             _game.GraphicsDevice.Viewport = new Viewport(0, 0, width, height);
 
             Sdl.Window.GetSize(Handle, out _width, out _height);
-
             OnClientSizeChanged();
         }
 
@@ -320,6 +354,11 @@ namespace MonoGame.Framework
                 Sdl.FreeSurface(_icon);
 
             _disposed = true;
+        }
+
+        ~SdlGameWindow()
+        {
+            Dispose(false);
         }
     }
 }

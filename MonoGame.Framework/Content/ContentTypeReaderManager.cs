@@ -7,24 +7,21 @@ using System.Collections;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using MonoGame.Utilities;
+using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework.Content
 {
     public sealed class ContentTypeReaderManager
     {
-        private static readonly object _locker;
-
+        private static readonly object _syncRoot;
         private static readonly Dictionary<Type, ContentTypeReader> _contentReadersCache;
+        private static readonly string _assemblyName;
 
         private Dictionary<Type, ContentTypeReader> _contentReaders;
-
-		private static readonly string _assemblyName;
 		
-
 		static ContentTypeReaderManager()
 		{
-            _locker = new object();
+            _syncRoot = new object();
             _contentReadersCache = new Dictionary<Type, ContentTypeReader>(255);
             _assemblyName = ReflectionHelpers.GetAssembly(typeof(ContentTypeReaderManager)).FullName;
         }
@@ -115,7 +112,7 @@ namespace MonoGame.Framework.Content
             // Lock until we're done allocating and initializing any new
             // content type readers...  this ensures we can load content
             // from multiple threads and still cache the readers.
-            lock (_locker)
+            lock (_syncRoot)
             {
                 // For each reader in the file, we read out the length of the string which contains the type of the reader,
                 // then we read out the string. Finally we instantiate an instance of that reader using reflection

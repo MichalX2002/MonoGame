@@ -6,7 +6,7 @@ using System;
 
 namespace MonoGame.Framework.Content
 {
-    internal class EnumReader<T> : ContentTypeReader<T>
+    public class EnumReader<T> : ContentTypeReader<T>
     {
         ContentTypeReader elementReader;
 

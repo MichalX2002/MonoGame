@@ -4,8 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using MonoGame.Framework.Audio;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 using System.IO;
 
 namespace MonoGame.OpenAL
@@ -74,7 +73,7 @@ namespace MonoGame.OpenAL
         {
             fixed (T* ptr = &MemoryMarshal.GetReference(data))
             {
-                alBufferData(buffer, (int)format, (IntPtr)ptr, data.Length, freq);
+                alBufferData(buffer, (int)format, (IntPtr)ptr, data.Length * sizeof(T), freq);
             }
         }
 

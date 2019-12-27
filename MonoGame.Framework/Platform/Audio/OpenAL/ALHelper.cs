@@ -1,5 +1,5 @@
-﻿using MonoGame.OpenAL;
-using System;
+﻿using System;
+using MonoGame.OpenAL;
 
 namespace MonoGame.Framework.Audio
 {

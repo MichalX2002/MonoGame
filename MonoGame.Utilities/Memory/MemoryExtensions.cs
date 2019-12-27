@@ -1,5 +1,5 @@
 ﻿
-namespace MonoGame.Utilities.Memory
+namespace MonoGame.Framework.Memory
 {
     public static class MemoryExtensions
     {

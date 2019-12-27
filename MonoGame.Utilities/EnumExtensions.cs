@@ -12,7 +12,7 @@ namespace MonoGame.Framework
         /// <param name="value">The value.</param>
         /// <param name="flags">The flag.</param>
         /// <returns>
-        ///  <c>true</c> if the specified value has flags; otherwise, <c>false</c>.
+        ///  <see langword="true"/> if the specified value has flags; otherwise, <see langword="false"/>.
         /// </returns>
         public static bool HasFlags<TEnum>(this TEnum value, TEnum flags) where TEnum : Enum
         {
@@ -80,7 +80,7 @@ namespace MonoGame.Framework
         /// <typeparam name="TEnum">The type of the enum.</typeparam>
         /// <param name="value"></param>
         /// <param name="flags"></param>
-        /// <returns><c>true</c> if the specified value has any flag; otherwise, <c>false</c>.</returns>
+        /// <returns><see langword="true"/> if the specified value has any flag; otherwise, <see langword="false"/>.</returns>
         public static bool HasFlags<TEnum>(this TEnum value, ReadOnlySpan<TEnum> flags) where TEnum : Enum
         {
             for (int i = 0; i < flags.Length; i++)
@@ -95,7 +95,7 @@ namespace MonoGame.Framework
         /// <typeparam name="TEnum">The type of the enum.</typeparam>
         /// <param name="value"></param>
         /// <param name="flags"></param>
-        /// <returns><c>true</c> if the specified value has any flag; otherwise, <c>false</c>.</returns>
+        /// <returns><see langword="true"/> if the specified value has any flag; otherwise, <see langword="false"/>.</returns>
         public static bool HasFlags<TEnum>(this TEnum value, params TEnum[] flags) where TEnum : Enum
         {
             return HasFlags(value, flags);

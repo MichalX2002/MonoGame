@@ -5,6 +5,7 @@
 using System;
 using System.IO;
 using MonoGame.Framework.Audio;
+using MonoGame.OpenAL;
 
 namespace MonoGame.Framework.Content
 {

@@ -25,8 +25,6 @@ namespace MonoGame.Framework.Audio
             _queuedBuffers = new Queue<ALBuffer>();
         }
 
-        private int PlatformGetPendingBufferCount() => _queuedBuffers.Count;
-
         private int PlatformGetBufferedSamples()
         {
             if (!SourceId.HasValue)
@@ -48,6 +46,8 @@ namespace MonoGame.Framework.Audio
 
             return total;
         }
+
+        private int PlatformGetPendingBufferCount() => _queuedBuffers.Count;
 
         private void PlatformPlay()
         {

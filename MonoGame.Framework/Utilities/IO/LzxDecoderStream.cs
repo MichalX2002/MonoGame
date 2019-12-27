@@ -5,9 +5,9 @@
 using System;
 using System.IO;
 using MonoGame.Framework.Content;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Framework
 {
     internal class LzxDecoderStream : Stream
     {

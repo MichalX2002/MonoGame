@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 
-namespace MonoGame.Utilities.IO
+namespace MonoGame.Framework.IO
 {
     public class PrefixedStream : Stream
     {

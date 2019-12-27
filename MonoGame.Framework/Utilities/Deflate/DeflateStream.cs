@@ -27,7 +27,7 @@
 
 using System;
 
-namespace MonoGame.Utilities.Deflate
+namespace MonoGame.Framework.Deflate
 {
     /// <summary>
     /// A class for compressing and decompressing streams using the Deflate algorithm.
@@ -36,25 +36,24 @@ namespace MonoGame.Utilities.Deflate
     /// <remarks>
     ///
     /// <para>
-    ///   The DeflateStream is a <see
-    ///   href="http://en.wikipedia.org/wiki/Decorator_pattern">Decorator</see> on a <see
-    ///   cref="System.IO.Stream"/>.  It adds DEFLATE compression or decompression to any
-    ///   stream.
+    ///   The <see cref="DeflateStream"/> is a <a href="http://en.wikipedia.org/wiki/Decorator_pattern">Decorator</a> 
+    ///   on a <see cref="System.IO.Stream"/>. 
+    ///   It adds DEFLATE compression or decompression to any stream.
     /// </para>
     ///
     /// <para>
     ///   Using this stream, applications can compress or decompress data via stream
     ///   <c>Read</c> and <c>Write</c> operations.  Either compresssion or decompression
     ///   can occur through either reading or writing. The compression format used is
-    ///   DEFLATE, which is documented in <see
-    ///   href="http://www.ietf.org/rfc/rfc1951.txt">IETF RFC 1951</see>, "DEFLATE
+    ///   DEFLATE, which is documented in <a
+    ///   href="http://www.ietf.org/rfc/rfc1951.txt">IETF RFC 1951</a>, "DEFLATE
     ///   Compressed Data Format Specification version 1.3.".
     /// </para>
     ///
     /// <para>
     ///   This class is similar to <see cref="ZlibStream"/>, except that
-    ///   <c>ZlibStream</c> adds the <see href="http://www.ietf.org/rfc/rfc1950.txt">RFC
-    ///   1950 - ZLIB</see> framing bytes to a compressed stream when compressing, or
+    ///   <c>ZlibStream</c> adds the <a href="http://www.ietf.org/rfc/rfc1950.txt">RFC
+    ///   1950 - ZLIB</a> framing bytes to a compressed stream when compressing, or
     ///   expects the RFC1950 framing bytes when decompressing. The <c>DeflateStream</c>
     ///   does not.
     /// </para>
@@ -520,9 +519,9 @@ namespace MonoGame.Utilities.Deflate
         {
             get
             {
-                if (this._baseStream._streamMode == MonoGame.Utilities.Deflate.ZlibBaseStream.StreamMode.Writer)
+                if (this._baseStream._streamMode == MonoGame.Framework.Deflate.ZlibBaseStream.StreamMode.Writer)
                     return this._baseStream._z.TotalBytesOut;
-                if (this._baseStream._streamMode == MonoGame.Utilities.Deflate.ZlibBaseStream.StreamMode.Reader)
+                if (this._baseStream._streamMode == MonoGame.Framework.Deflate.ZlibBaseStream.StreamMode.Reader)
                     return this._baseStream._z.TotalBytesIn;
                 return 0;
             }

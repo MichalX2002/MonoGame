@@ -66,7 +66,7 @@
 
 using System;
 
-namespace MonoGame.Utilities.Deflate
+namespace MonoGame.Framework.Deflate
 {
     /// <summary>
     /// Encoder and Decoder for ZLIB and DEFLATE (IETF RFC1950 and RFC1951).
@@ -74,9 +74,9 @@ namespace MonoGame.Utilities.Deflate
     ///
     /// <remarks>
     /// This class compresses and decompresses data according to the Deflate algorithm
-    /// and optionally, the ZLIB format, as documented in <see
-    /// href="http://www.ietf.org/rfc/rfc1950.txt">RFC 1950 - ZLIB</see> and <see
-    /// href="http://www.ietf.org/rfc/rfc1951.txt">RFC 1951 - DEFLATE</see>.
+    /// and optionally, the ZLIB format, as documented in <a
+    /// href="http://www.ietf.org/rfc/rfc1950.txt">RFC 1950 - ZLIB</a> and <a
+    /// href="http://www.ietf.org/rfc/rfc1951.txt">RFC 1951 - DEFLATE</a>.
     /// </remarks>
 
     sealed public class ZlibCodec
@@ -227,8 +227,8 @@ namespace MonoGame.Utilities.Deflate
         /// </summary>
         ///
         /// <remarks>
-        /// By default, the ZLIB header defined in <see
-        /// href="http://www.ietf.org/rfc/rfc1950.txt">RFC 1950</see> is expected.  If
+        /// By default, the ZLIB header defined in <a
+        /// href="http://www.ietf.org/rfc/rfc1950.txt">RFC 1950</a> is expected.  If
         /// you want to read a zlib stream you should specify true for
         /// expectRfc1950Header.  If you have a deflate stream, you will want to specify
         /// false. It is only necessary to invoke this initializer explicitly if you
@@ -264,8 +264,8 @@ namespace MonoGame.Utilities.Deflate
         /// <remarks>
         /// If you want to read a zlib stream you should specify true for
         /// expectRfc1950Header. In this case, the library will expect to find a ZLIB
-        /// header, as defined in <see href="http://www.ietf.org/rfc/rfc1950.txt">RFC
-        /// 1950</see>, in the compressed stream.  If you will be reading a DEFLATE or
+        /// header, as defined in <a href="http://www.ietf.org/rfc/rfc1950.txt">RFC
+        /// 1950</a>, in the compressed stream.  If you will be reading a DEFLATE or
         /// GZIP stream, which does not have such a header, you will want to specify
         /// false.
         /// </remarks>
@@ -452,8 +452,8 @@ namespace MonoGame.Utilities.Deflate
         /// The codec will use the maximum window bits (15) and the specified CompressionLevel.
         /// If you want to generate a zlib stream, you should specify true for
         /// wantRfc1950Header. In this case, the library will emit a ZLIB
-        /// header, as defined in <see href="http://www.ietf.org/rfc/rfc1950.txt">RFC
-        /// 1950</see>, in the compressed stream.  
+        /// header, as defined in <a href="http://www.ietf.org/rfc/rfc1950.txt">RFC
+        /// 1950</a>, in the compressed stream.  
         /// </remarks>
         /// <param name="level">The compression level for the codec.</param>
         /// <param name="wantRfc1950Header">whether to emit an initial RFC1950 byte pair in the compressed stream.</param>

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Coding
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Framework
 {
     sealed internal class ZlibCodec
     {
@@ -150,8 +150,8 @@ namespace MonoGame.Utilities
         /// </summary>
         ///
         /// <remarks>
-        /// By default, the ZLIB header defined in <see
-        /// href="http://www.ietf.org/rfc/rfc1950.txt">RFC 1950</see> is expected.  If
+        /// By default, the ZLIB header defined in <a
+        /// href="http://www.ietf.org/rfc/rfc1950.txt">RFC 1950</a> is expected.  If
         /// you want to read a zlib stream you should specify true for
         /// expectRfc1950Header.  If you have a deflate stream, you will want to specify
         /// false. It is only necessary to invoke this initializer explicitly if you
@@ -187,8 +187,8 @@ namespace MonoGame.Utilities
         /// <remarks>
         /// If you want to read a zlib stream you should specify true for
         /// expectRfc1950Header. In this case, the library will expect to find a ZLIB
-        /// header, as defined in <see href="http://www.ietf.org/rfc/rfc1950.txt">RFC
-        /// 1950</see>, in the compressed stream.  If you will be reading a DEFLATE or
+        /// header, as defined in <a href="http://www.ietf.org/rfc/rfc1950.txt">RFC
+        /// 1950</a>, in the compressed stream.  If you will be reading a DEFLATE or
         /// GZIP stream, which does not have such a header, you will want to specify
         /// false.
         /// </remarks>

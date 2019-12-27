@@ -15,8 +15,6 @@ namespace MonoGame.Framework
 {
 	public abstract class GameWindow
 	{
-		public delegate void StateChangedDelegate();
-
 		private string _title;
 		internal bool _allowAltF4 = true;
 
@@ -32,18 +30,18 @@ namespace MonoGame.Framework
 		public abstract bool HasClipboardText { get; }
 		public abstract string ClipboardText { get; set; }
 
-        public TaskbarList TaskbarList { get; }
+		public TaskbarList TaskbarList { get; }
 
-        /// <summary>
-        /// Gets or sets whether the usage of Alt+F4 closes the window on desktop platforms. 
-        /// Set to <see langword="true"/> by default.
-        /// </summary>
-        public virtual bool AllowAltF4 { get => _allowAltF4; set => _allowAltF4 = value; }
+		/// <summary>
+		/// Gets or sets whether the usage of Alt+F4 closes the window on desktop platforms. 
+		/// Set to <see langword="true"/> by default.
+		/// </summary>
+		public virtual bool AllowAltF4 { get => _allowAltF4; set => _allowAltF4 = value; }
 
 #if (WINDOWS && !WINDOWS_UAP) || DESKTOPGL
 		/// <summary>
 		/// The location of this window on the desktop, 
-        /// i.e. global coordinate space which stretches across all screens.
+		/// i.e. global coordinate space which stretches across all screens.
 		/// </summary>
 		public abstract Point Position { get; set; }
 #endif
@@ -66,22 +64,22 @@ namespace MonoGame.Framework
 			{
 				if (_title != value)
 				{
-					SetTitle(value);
 					_title = value;
+					SetTitle(_title);
 				}
 			}
 		}
 
-        /// <summary>
-        /// <para>
-        /// Determines whether the border of the window is visible.
-        /// </para>
-        /// Currently only supported on the WinDX and WinGL/Linux platforms.
-        /// </summary>
-        /// <exception cref="NotImplementedException">
-        /// Set on a platform other than the WinDX and WinGL/Linux platforms.
-        /// </exception>
-        public virtual bool IsBorderless
+		/// <summary>
+		/// <para>
+		/// Determines whether the border of the window is visible.
+		/// </para>
+		/// Currently only supported on the WinDX and WinGL/Linux platforms.
+		/// </summary>
+		/// <exception cref="NotImplementedException">
+		/// Set on a platform other than the WinDX and WinGL/Linux platforms.
+		/// </exception>
+		public virtual bool IsBorderless
 		{
 			get => false;
 			set => throw new NotImplementedException();
@@ -92,16 +90,18 @@ namespace MonoGame.Framework
 		protected GameWindow()
 		{
 			TouchPanelState = new TouchPanelState(this);
-            TaskbarList = new TaskbarList(this);
-        }
+			TaskbarList = new TaskbarList();
+		}
 
 		#region Events
 
-		public event SimpleEventHandler<GameWindow> ClientSizeChanged;
-		public event SimpleEventHandler<GameWindow> OrientationChanged;
-		public event SimpleEventHandler<GameWindow> ScreenDeviceNameChanged;
+		public event DataEvent<GameWindow> ClientSizeChanged;
+		public event DataEvent<GameWindow> OrientationChanged;
+		public event DataEvent<GameWindow> ScreenDeviceNameChanged;
 
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
+
+		internal bool IsTextInputHandled => TextInput != null;
 
 		/// <summary>
 		/// Use this event to retrieve text for objects like textboxes.
@@ -112,28 +112,31 @@ namespace MonoGame.Framework
 		/// <remarks>
 		/// This event is only supported on the Windows DirectX, Windows OpenGL and Linux platforms.
 		/// </remarks>
-		public event DataEventHandler<GameWindow, TextInputEvent> TextInput;
+		public event DataEvent<GameWindow, TextInputEvent> TextInput;
 
-        internal bool IsTextInputHandled => TextInput != null;
+		/// <summary>
+		/// Buffered keyboard KeyDown event.
+		/// </summary>
+		public event DataEvent<GameWindow, KeyInputEvent> KeyDown;
 
-        /// <summary>
-        /// Buffered keyboard KeyDown event.
-        /// </summary>
-		public event DataEventHandler<GameWindow, KeyInputEvent> KeyDown;
+		/// <summary>
+		/// Buffered keyboard KeyUp event.
+		/// </summary>
+		public event DataEvent<GameWindow, KeyInputEvent> KeyUp;
 
-        /// <summary>
-        /// Buffered keyboard KeyUp event.
-        /// </summary>
-        public event DataEventHandler<GameWindow, KeyInputEvent> KeyUp;
+		internal void OnTextInput(TextInputEvent ev) => TextInput?.Invoke(this, ev);
+
+		internal void OnKeyDown(KeyInputEvent e) => KeyDown?.Invoke(this, e);
+
+		internal void OnKeyUp(KeyInputEvent e) => KeyUp?.Invoke(this, e);
 
 #endif
 
-        #endregion Events
+		#endregion
 
-        public abstract void BeginScreenDeviceChange(bool willBeFullScreen);
+		public abstract void BeginScreenDeviceChange(bool willBeFullScreen);
 
-		public abstract void EndScreenDeviceChange(
-			string screenDeviceName, int clientWidth, int clientHeight);
+		public abstract void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight);
 
 		public void EndScreenDeviceChange(string screenDeviceName)
 		{
@@ -144,40 +147,22 @@ namespace MonoGame.Framework
 		{
 		}
 
-		internal void OnClientSizeChanged()
-		{
-			ClientSizeChanged?.Invoke(this);
-		}
+		internal void OnClientSizeChanged() => ClientSizeChanged?.Invoke(this);
 
 		protected void OnDeactivated()
 		{
 		}
 
-		protected void OnOrientationChanged()
-		{
-			OrientationChanged?.Invoke(this);
-		}
+		protected void OnOrientationChanged() => OrientationChanged?.Invoke(this);
 
 		protected void OnPaint()
 		{
 		}
 
-		protected void OnScreenDeviceNameChanged()
-		{
-			ScreenDeviceNameChanged?.Invoke(this);
-		}
+		protected void OnScreenDeviceNameChanged() => ScreenDeviceNameChanged?.Invoke(this);
 
-#if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
+		protected internal abstract void SetSupportedOrientations(DisplayOrientation orientations);
 
-        internal void OnTextInput(in TextInputEvent ev) => TextInput?.Invoke(this, ev);
-
-        internal void OnKeyDown(in KeyInputEvent e) => KeyDown?.Invoke(this, e);
-
-        internal void OnKeyUp(in KeyInputEvent e) => KeyUp?.Invoke(this, e);
-
-#endif
-
-        protected internal abstract void SetSupportedOrientations(DisplayOrientation orientations);
 		protected abstract void SetTitle(string title);
 
 #if DIRECTX && WINDOWS

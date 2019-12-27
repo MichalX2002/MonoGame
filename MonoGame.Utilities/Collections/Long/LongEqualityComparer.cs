@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MonoGame.Utilities.Collections
+namespace MonoGame.Framework.Collections
 {
     public partial class LongEqualityComparer<T>
     {

@@ -13,8 +13,6 @@ namespace MonoGame.Framework
     /// </summary>
     public partial class GraphicsDeviceManager : IGraphicsDeviceService, IDisposable, IGraphicsDeviceManager
     {
-
-
         private readonly Game _game;
         private bool _initialized = false;
 
@@ -88,14 +86,18 @@ namespace MonoGame.Framework
 
             if (_game.Services.GetService<IGraphicsDeviceManager>() != null)
                 throw new ArgumentException(
-                    "A graphics device manager is already registered. The graphics device manager cannot be changed once it is set.");
-
-            _game.InternalGraphicsDeviceManager = this;
+                    "A graphics device manager is already registered. " +
+                    "The graphics device manager cannot be changed once it is set.");
+            
+            _game.GraphicsDeviceManager = this;
 
             _game.Services.AddService<IGraphicsDeviceManager>(this);
             _game.Services.AddService<IGraphicsDeviceService>(this);
         }
 
+        /// <summary>
+        /// Finalizes the <see cref="GraphicsDeviceManager"/> and disposes it.
+        /// </summary>
         ~GraphicsDeviceManager()
         {
             Dispose(false);
@@ -169,32 +171,20 @@ namespace MonoGame.Framework
 
         #region IGraphicsDeviceService Members
 
-        public event SimpleEventHandler<GraphicsDeviceManager> DeviceCreated;
-        public event SimpleEventHandler<GraphicsDeviceManager> DeviceDisposing;
-        public event SimpleEventHandler<GraphicsDeviceManager> DeviceReset;
-        public event SimpleEventHandler<GraphicsDeviceManager> DeviceResetting;
-        public event DataEventHandler<GraphicsDeviceManager, GraphicsDeviceInformation> PreparingDeviceSettings;
-        public event SimpleEventHandler<GraphicsDeviceManager> Disposed;
+        public event DataEvent<IGraphicsDeviceService> DeviceCreated;
+        public event DataEvent<IGraphicsDeviceService> DeviceDisposing;
+        public event DataEvent<IGraphicsDeviceService> DeviceReset;
+        public event DataEvent<IGraphicsDeviceService> DeviceResetting;
+        public event DataEvent<IGraphicsDeviceService, GraphicsDeviceInformation> PreparingDeviceSettings;
+        public event DataEvent<IGraphicsDeviceService> Disposed;
 
-        protected void OnDeviceDisposing()
-        {
-            DeviceDisposing?.Invoke(this);
-        }
+        protected void OnDeviceDisposing() => DeviceDisposing?.Invoke(this);
 
-        protected void OnDeviceResetting()
-        {
-            DeviceResetting?.Invoke(this);
-        }
+        protected void OnDeviceResetting() => DeviceResetting?.Invoke(this);
 
-        internal void OnDeviceReset()
-        {
-            DeviceReset?.Invoke(this);
-        }
+        internal void OnDeviceReset() => DeviceReset?.Invoke(this);
 
-        internal void OnDeviceCreated()
-        {
-            DeviceCreated?.Invoke(this);
-        }
+        internal void OnDeviceCreated() => DeviceCreated?.Invoke(this);
 
         /// <summary>
         /// This populates a <see cref="GraphicsDeviceInformation"/> instance and invokes 
@@ -397,7 +387,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <remarks>
         /// When called at startup this will automatically set fullscreen mode during initialization.  If
-        /// set after startup you must call ApplyChanges() for the fullscreen mode to be changed.
+        /// set after startup you must call <see cref="ApplyChanges"/> for the fullscreen mode to be changed.
         /// Note that for some platforms that do not support windowed modes this property has no affect.
         /// </remarks>
         public bool IsFullScreen
@@ -412,8 +402,8 @@ namespace MonoGame.Framework
 
         /// <summary>
         /// Gets or sets the boolean which defines how window switches from windowed to fullscreen state.
-        /// "Hard" mode(true) is slow to switch, but more effecient for performance, while "soft" mode(false) is vice versa.
-        /// The default value is <c>true</c>.
+        /// "Hard" mode (true) is slow to switch, but more effecient for performance, while "soft" mode (false) is vice versa.
+        /// The default value is <see langword="true"/>.
         /// </summary>
         public bool HardwareModeSwitch
         {
@@ -428,16 +418,16 @@ namespace MonoGame.Framework
         /// <summary>
         /// Indicates if DX9 style pixel addressing or current standard
         /// pixel addressing should be used. This flag is set to
-        /// <c>false</c> by default. It should be set to <c>true</c>
+        /// <see langword="false"/> by default. It should be set to <see langword="true"/>
         /// for XNA compatibility. It is recommended to leave this flag
-        /// set to <c>false</c> for projects that are not ported from
+        /// set to <see langword="false"/> for projects that are not ported from
         /// XNA. This value is passed to <see cref="GraphicsDevice.UseHalfPixelOffset"/>.
         /// </summary>
         /// <remarks>
         /// XNA uses DirectX9 for its graphics. DirectX9 interprets UV
         /// coordinates differently from other graphics API's. This is
         /// typically referred to as the half-pixel offset. MonoGame
-        /// replicates XNA behavior if this flag is set to <c>true</c>.
+        /// replicates XNA behavior if this flag is set to <see langword="true"/>.
         /// </remarks>
         public bool PreferHalfPixelOffset
         {

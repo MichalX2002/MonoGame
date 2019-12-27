@@ -7,8 +7,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using MonoGame.Imaging;
-using MonoGame.Utilities.Memory;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.Memory;
+using MonoGame.Framework.PackedVector;
+using System.Linq;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -22,7 +23,7 @@ namespace MonoGame.Framework.Graphics
         #region Properties
 
         /// <summary>
-        /// Gets the reciprocal (1/x) of the width and height as a <see cref="Vector2"/>.
+        /// Gets the multiplicative inverse (1/x) of the width and height as a <see cref="Vector2"/>.
         /// </summary>
         public Vector2 Texel { get; }
 
@@ -48,9 +49,6 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Creates a new texture of the given size
         /// </summary>
-        /// <param name="graphicsDevice"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
         public Texture2D(GraphicsDevice graphicsDevice, int width, int height)
             : this(graphicsDevice, width, height, false, SurfaceFormat.Rgba32, SurfaceType.Texture, false, 1)
         {
@@ -59,11 +57,6 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Creates a new texture of a given size with a surface format and optional mipmaps 
         /// </summary>
-        /// <param name="graphicsDevice"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="mipmap"></param>
-        /// <param name="format"></param>
         public Texture2D(GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format)
             : this(graphicsDevice, width, height, mipmap, format, SurfaceType.Texture, false, 1)
         {
@@ -73,12 +66,6 @@ namespace MonoGame.Framework.Graphics
         /// Creates a new texture array of a given size with a surface format and optional mipmaps.
         /// Throws ArgumentException if the current GraphicsDevice can't work with texture arrays
         /// </summary>
-        /// <param name="graphicsDevice"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="mipmap"></param>
-        /// <param name="format"></param>
-        /// <param name="arraySize"></param>
         public Texture2D(GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format, int arraySize)
             : this(graphicsDevice, width, height, mipmap, format, SurfaceType.Texture, false, arraySize)
         {
@@ -88,12 +75,6 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         ///  Creates a new texture of a given size with a surface format and optional mipmaps.
         /// </summary>
-        /// <param name="graphicsDevice"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="mipmap"></param>
-        /// <param name="format"></param>
-        /// <param name="type"></param>
         internal Texture2D(GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format, SurfaceType type)
             : this(graphicsDevice, width, height, mipmap, format, type, false, 1)
         {
@@ -565,9 +546,9 @@ namespace MonoGame.Framework.Graphics
         {
             SaveExtensions.AssertValidPath(filePath);
 
-            if (format == null) 
-                format = ImageFormat.GetByPath(filePath);
-
+            if (format == null)
+                format = ImageFormat.GetByPath(filePath).First();
+            
             using (var fs = SaveExtensions.OpenWrite(filePath))
                 Save(fs, format, level, rect);
         }
@@ -583,7 +564,7 @@ namespace MonoGame.Framework.Graphics
 
         #endregion
 
-        #region Parameter Checks
+        #region Parameter Validation
 
         private unsafe void ValidateParams<T>(
             int level, int arraySlice, Rectangle? rect, ReadOnlySpan<T> data, out Rectangle checkedRect)

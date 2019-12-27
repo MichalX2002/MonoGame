@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Framework
 {
     sealed class InflateBlocks
     {

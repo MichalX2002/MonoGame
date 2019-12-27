@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MonoGame.Utilities.Collections
+namespace MonoGame.Framework.Collections
 {
     public partial class LongEqualityComparer<T>
     {

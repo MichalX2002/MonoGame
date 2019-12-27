@@ -3,20 +3,20 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.IO;
 using MonoGame.Framework.Content.Pipeline.Graphics;
 using MonoGame.Framework.Graphics;
-using System.IO;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Framework.Content.Pipeline
 {
     /// <summary>
     /// Loader class for DDS format image files.
     /// </summary>
-    class DdsLoader
+    internal class DdsLoader
     {
         [Flags]
-        enum Ddsd : uint
+        private enum Ddsd : uint
         {
             Caps = 0x1,             // Required in every DDS file
             Height = 0x2,           // Required in every DDS file
@@ -29,7 +29,7 @@ namespace MonoGame.Framework.Content.Pipeline
         }
 
         [Flags]
-        enum DdsCaps : uint
+        private enum DdsCaps : uint
         {
             Complex = 0x8,       // Optional; must be used on any file that contains more than one surface (a mipmap, a cubic environment map, or mipmapped volume texture)
             MipMap = 0x400000,   // Optional; should be used for a mipmap
@@ -37,7 +37,7 @@ namespace MonoGame.Framework.Content.Pipeline
         }
 
         [Flags]
-        enum DdsCaps2 : uint
+        private enum DdsCaps2 : uint
         {
             Cubemap = 0x200,
             CubemapPositiveX = 0x400,
@@ -52,7 +52,7 @@ namespace MonoGame.Framework.Content.Pipeline
         }
 
         [Flags]
-        enum Ddpf : uint
+        private enum Ddpf : uint
         {
             AlphaPixels = 0x1,
             Alpha = 0x2,
@@ -62,17 +62,17 @@ namespace MonoGame.Framework.Content.Pipeline
             Luminance = 0x20000,
         }
 
-        static uint MakeFourCC(char c1, char c2, char c3, char c4)
+        private static uint MakeFourCC(char c1, char c2, char c3, char c4)
         {
-            return ((uint)c1 << 24) | ((uint)c2 << 16) | ((uint)c3 << 8) | (uint)c4;
+            return ((uint)c1 << 24) | ((uint)c2 << 16) | ((uint)c3 << 8) | c4;
         }
 
-        static uint MakeFourCC(string cc)
+        private static uint MakeFourCC(string cc)
         {
-            return ((uint)cc[0] << 24) | ((uint)cc[1] << 16) | ((uint)cc[2] << 8) | (uint)cc[3];
+            return ((uint)cc[0] << 24) | ((uint)cc[1] << 16) | ((uint)cc[2] << 8) | cc[3];
         }
 
-        enum FourCC : uint
+        private enum FourCC : uint
         {
             A32B32G32R32F = 116,
             Dxt1 = 0x31545844,
@@ -83,7 +83,7 @@ namespace MonoGame.Framework.Content.Pipeline
             Dx10 = 0x30315844,
         }
 
-        struct DdsPixelFormat
+        private struct DdsPixelFormat
         {
             public uint dwSize;
             public Ddpf dwFlags;
@@ -95,7 +95,7 @@ namespace MonoGame.Framework.Content.Pipeline
             public uint dwABitMask;
         }
 
-        struct DdsHeader
+        private struct DdsHeader
         {
             public uint dwSize;
             public Ddsd dwFlags;
@@ -109,7 +109,7 @@ namespace MonoGame.Framework.Content.Pipeline
             public DdsCaps2 dwCaps2;
         }
 
-        static SurfaceFormat GetSurfaceFormat(ref DdsPixelFormat pixelFormat, out bool rbSwap)
+        private static SurfaceFormat GetSurfaceFormat(ref DdsPixelFormat pixelFormat, out bool rbSwap)
         {
             rbSwap = false;
             if (pixelFormat.dwFlags.HasFlag(Ddpf.FourCC))
@@ -181,7 +181,7 @@ namespace MonoGame.Framework.Content.Pipeline
             throw new ContentLoadException("Unsupported pixel format");
         }
 
-        static BitmapContent CreateBitmapContent(SurfaceFormat format, int width, int height)
+        private static BitmapContent CreateBitmapContent(SurfaceFormat format, int width, int height)
         {
             switch (format)
             {
@@ -212,7 +212,7 @@ namespace MonoGame.Framework.Content.Pipeline
             throw new ContentLoadException("Unsupported SurfaceFormat " + format);
         }
 
-        static int GetBitmapSize(SurfaceFormat format, int width, int height)
+        private static int GetBitmapSize(SurfaceFormat format, int width, int height)
         {
             // It is recommended that the dwPitchOrLinearSize field is ignored and we calculate it ourselves
             // https://msdn.microsoft.com/en-us/library/bb943991.aspx
@@ -249,24 +249,24 @@ namespace MonoGame.Framework.Content.Pipeline
             var identity = new ContentIdentity(filename);
             TextureContent output = null;
 
-            using (var reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
+            using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
+            using (var reader = new BinaryReader(fileStream))
             {
                 // Read signature ("DDS ")
-                var valid = reader.ReadByte() == 0x44;
-                valid = valid && reader.ReadByte() == 0x44;
-                valid = valid && reader.ReadByte() == 0x53;
-                valid = valid && reader.ReadByte() == 0x20;
-                if (!valid)
+                if (reader.ReadByte() != 0x44 ||
+                    reader.ReadByte() != 0x44 ||
+                    reader.ReadByte() != 0x53 ||
+                    reader.ReadByte() != 0x20)
                     throw new ContentLoadException("Invalid file signature");
 
                 var header = new DdsHeader
                 {
-
                     // Read DDS_HEADER
                     dwSize = reader.ReadUInt32()
                 };
                 if (header.dwSize != 124)
                     throw new ContentLoadException("Invalid DDS_HEADER dwSize value");
+
                 header.dwFlags = (Ddsd)reader.ReadUInt32();
                 header.dwHeight = reader.ReadUInt32();
                 header.dwWidth = reader.ReadUInt32();
@@ -276,10 +276,12 @@ namespace MonoGame.Framework.Content.Pipeline
                 // The next 11 DWORDs are reserved and unused
                 for (int i = 0; i < 11; ++i)
                     reader.ReadUInt32();
+
                 // Read DDS_PIXELFORMAT
                 header.ddspf.dwSize = reader.ReadUInt32();
                 if (header.ddspf.dwSize != 32)
                     throw new ContentLoadException("Invalid DDS_PIXELFORMAT dwSize value");
+
                 header.ddspf.dwFlags = (Ddpf)reader.ReadUInt32();
                 header.ddspf.dwFourCC = (FourCC)reader.ReadUInt32();
                 header.ddspf.dwRgbBitCount = reader.ReadUInt32();
@@ -287,21 +289,18 @@ namespace MonoGame.Framework.Content.Pipeline
                 header.ddspf.dwGBitMask = reader.ReadUInt32();
                 header.ddspf.dwBBitMask = reader.ReadUInt32();
                 header.ddspf.dwABitMask = reader.ReadUInt32();
+
                 // Continue reading DDS_HEADER
                 header.dwCaps = (DdsCaps)reader.ReadUInt32();
                 header.dwCaps2 = (DdsCaps2)reader.ReadUInt32();
-                // dwCaps3 unused
-                reader.ReadUInt32();
-                // dwCaps4 unused
-                reader.ReadUInt32();
-                // dwReserved2 unused
-                reader.ReadUInt32();
+
+                reader.ReadUInt32(); // dwCaps3 unused
+                reader.ReadUInt32(); // dwCaps4 unused
+                reader.ReadUInt32(); // dwReserved2 unused
 
                 // Check for the existence of the DDS_HEADER_DXT10 struct next
                 if (header.ddspf.dwFlags == Ddpf.FourCC && header.ddspf.dwFourCC == FourCC.Dx10)
-                {
                     throw new ContentLoadException("Unsupported DDS_HEADER_DXT10 struct found");
-                }
 
                 int faceCount = 1;
                 int mipMapCount = (int)(header.dwCaps.HasFlag(DdsCaps.MipMap) ? header.dwMipMapCount : 1);
@@ -321,8 +320,8 @@ namespace MonoGame.Framework.Content.Pipeline
 
                 for (int f = 0; f < faceCount; ++f)
                 {
-                    var w = (int)header.dwWidth;
-                    var h = (int)header.dwHeight;
+                    int w = (int)header.dwWidth;
+                    int h = (int)header.dwHeight;
                     var mipMaps = new MipmapChain();
                     for (int m = 0; m < mipMapCount; ++m)
                     {
@@ -339,12 +338,15 @@ namespace MonoGame.Framework.Content.Pipeline
                                 case SurfaceFormat.Bgr565:
                                     ByteSwapBGR565(bytes);
                                     break;
+
                                 case SurfaceFormat.Bgra4444:
                                     ByteSwapBGRA4444(bytes);
                                     break;
+
                                 case SurfaceFormat.Bgra5551:
                                     ByteSwapBGRA5551(bytes);
                                     break;
+
                                 case SurfaceFormat.Rgba32:
                                     if (header.ddspf.dwRgbBitCount == 32)
                                         ByteSwapRGBX(bytes);
@@ -373,30 +375,26 @@ namespace MonoGame.Framework.Content.Pipeline
             return output;
         }
 
-        static void ByteFillAlpha(byte[] bytes)
+        private static void ByteFillAlpha(byte[] bytes)
         {
             for (int i = 0; i < bytes.Length; i += 4)
-            {
                 bytes[i + 3] = 255;
-            }
         }
 
-        static void ByteExpandAlpha(ref byte[] bytes)
+        private static void ByteExpandAlpha(ref byte[] bytes)
         {
             var rgba = new byte[bytes.Length + (bytes.Length / 3)];
-            int j = 0;
-            for (int i = 0; i < bytes.Length; i += 3)
+            for (int i = 0, j = 0; i < bytes.Length; i += 3, j += 4)
             {
                 rgba[j] = bytes[i];
                 rgba[j + 1] = bytes[i + 1];
                 rgba[j + 2] = bytes[i + 2];
                 rgba[j + 3] = 255;
-                j += 4;
             }
             bytes = rgba;
         }
 
-        static void ByteSwapRGB(byte[] bytes)
+        private static void ByteSwapRGB(byte[] bytes)
         {
             for (int i = 0; i < bytes.Length; i += 3)
             {
@@ -406,7 +404,7 @@ namespace MonoGame.Framework.Content.Pipeline
             }
         }
 
-        static void ByteSwapRGBX(byte[] bytes)
+        private static void ByteSwapRGBX(byte[] bytes)
         {
             for (int i = 0; i < bytes.Length; i += 4)
             {
@@ -416,7 +414,7 @@ namespace MonoGame.Framework.Content.Pipeline
             }
         }
 
-        static void ByteSwapBGRA4444(byte[] bytes)
+        private static void ByteSwapBGRA4444(byte[] bytes)
         {
             for (int i = 0; i < bytes.Length; i += 2)
             {
@@ -427,7 +425,7 @@ namespace MonoGame.Framework.Content.Pipeline
             }
         }
 
-        static void ByteSwapBGRA5551(byte[] bytes)
+        private static void ByteSwapBGRA5551(byte[] bytes)
         {
             for (int i = 0; i < bytes.Length; i += 2)
             {
@@ -438,7 +436,7 @@ namespace MonoGame.Framework.Content.Pipeline
             }
         }
 
-        static void ByteSwapBGR565(byte[] bytes)
+        private static void ByteSwapBGR565(byte[] bytes)
         {
             for (int i = 0; i < bytes.Length; i += 2)
             {
@@ -451,7 +449,8 @@ namespace MonoGame.Framework.Content.Pipeline
 
         internal static void WriteUncompressed(string filename, BitmapContent bitmapContent)
         {
-            using (var writer = new BinaryWriter(new FileStream(filename, FileMode.Create, FileAccess.Write)))
+            using (var fileStream = new FileStream(filename, FileMode.Create, FileAccess.Write))
+            using (var writer = new BinaryWriter(fileStream))
             {
                 // Write signature ("DDS ")
                 writer.Write((byte)0x44);
@@ -466,17 +465,17 @@ namespace MonoGame.Framework.Content.Pipeline
                     dwWidth = (uint)bitmapContent.Width,
                     dwHeight = (uint)bitmapContent.Height,
                     dwPitchOrLinearSize = (uint)(bitmapContent.Width * 4),
-                    dwDepth = (uint)0,
-                    dwMipMapCount = (uint)0
+                    dwDepth = 0,
+                    dwMipMapCount = 0
                 };
 
-                writer.Write((uint)header.dwSize);
+                writer.Write(header.dwSize);
                 writer.Write((uint)header.dwFlags);
-                writer.Write((uint)header.dwHeight);
-                writer.Write((uint)header.dwWidth);
-                writer.Write((uint)header.dwPitchOrLinearSize);
-                writer.Write((uint)header.dwDepth);
-                writer.Write((uint)header.dwMipMapCount);
+                writer.Write(header.dwHeight);
+                writer.Write(header.dwWidth);
+                writer.Write(header.dwPitchOrLinearSize);
+                writer.Write(header.dwDepth);
+                writer.Write(header.dwMipMapCount);
 
                 // 11 unsed and reserved DWORDS.
                 writer.Write((uint)0);
@@ -504,14 +503,14 @@ namespace MonoGame.Framework.Content.Pipeline
                 header.ddspf.dwABitMask = 0xff000000;
 
                 // Write the DDS_PIXELFORMAT
-                writer.Write((uint)header.ddspf.dwSize);
+                writer.Write(header.ddspf.dwSize);
                 writer.Write((uint)header.ddspf.dwFlags);
                 writer.Write((uint)header.ddspf.dwFourCC);
-                writer.Write((uint)header.ddspf.dwRgbBitCount);
-                writer.Write((uint)header.ddspf.dwRBitMask);
-                writer.Write((uint)header.ddspf.dwGBitMask);
-                writer.Write((uint)header.ddspf.dwBBitMask);
-                writer.Write((uint)header.ddspf.dwABitMask);
+                writer.Write(header.ddspf.dwRgbBitCount);
+                writer.Write(header.ddspf.dwRBitMask);
+                writer.Write(header.ddspf.dwGBitMask);
+                writer.Write(header.ddspf.dwBBitMask);
+                writer.Write(header.ddspf.dwABitMask);
 
                 header.dwCaps = DdsCaps.Texture;
                 header.dwCaps2 = 0;

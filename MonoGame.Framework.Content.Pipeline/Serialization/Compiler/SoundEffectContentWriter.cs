@@ -3,7 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using MonoGame.Framework.Content.Pipeline.Processors;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 using System;
 
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler

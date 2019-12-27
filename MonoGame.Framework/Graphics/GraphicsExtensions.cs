@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Diagnostics;
 
 #if OPENGL
 #if DESKTOPGL || GLES
@@ -17,7 +16,7 @@ using OpenTK.Graphics;
 
 namespace MonoGame.Framework.Graphics
 {
-    static class GraphicsExtensions
+    public static class GraphicsExtensions
     {
 #if OPENGL
         public static int OpenGLNumberOfElements(this VertexElementFormat elementFormat)

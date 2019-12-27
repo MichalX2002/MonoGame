@@ -9,7 +9,7 @@ using SharpDX;
 using SharpDX.XAudio2;
 using SharpDX.Multimedia;
 using SharpDX.X3DAudio;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework.Audio
 {

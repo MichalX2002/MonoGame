@@ -5,7 +5,7 @@
 using System;
 using System.Text;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Framework
 {
     internal static class InteropHelpers
     {

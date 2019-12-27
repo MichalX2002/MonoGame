@@ -8,8 +8,8 @@ using MonoGame.Framework.Graphics;
 using MonoGame.Imaging;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Processing;
-using MonoGame.Utilities.Memory;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.Memory;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Framework.Input
 {

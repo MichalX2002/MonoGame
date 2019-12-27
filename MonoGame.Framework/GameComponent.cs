@@ -39,8 +39,8 @@ namespace MonoGame.Framework
             }
         }
 
-        public event SimpleEventHandler<object> EnabledChanged;
-        public event SimpleEventHandler<object> UpdateOrderChanged;
+        public event DataEvent<object> EnabledChanged;
+        public event DataEvent<object> UpdateOrderChanged;
 
         public GameComponent(Game game)
         {

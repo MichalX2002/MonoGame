@@ -5,13 +5,11 @@
 using System;
 using System.Runtime.InteropServices;
 
-#if OPENAL
 using MonoGame.OpenAL;
 #if IOS || MONOMAC
 using AudioToolbox;
 using AudioUnit;
 using AVFoundation;
-#endif
 #endif
 
 namespace MonoGame.Framework.Audio
@@ -85,7 +83,7 @@ namespace MonoGame.Framework.Audio
 
                 State = MicrophoneState.Started;
             }
-			else
+            else
             {
                 throw new AudioHardwareException("Failed to open capture device.");
             }

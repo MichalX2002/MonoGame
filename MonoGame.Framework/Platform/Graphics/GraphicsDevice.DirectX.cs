@@ -49,8 +49,8 @@ namespace MonoGame.Framework.Graphics
         private SharpDX.Direct2D1.Bitmap1 _bitmapTarget;
         private SharpDX.DXGI.SwapChain1 _swapChain;
 
-		private SwapChainPanel _swapChainPanel;
-		private float _dpi; 
+        private SwapChainPanel _swapChainPanel;
+        private float _dpi; 
 
 #elif WINDOWS
 
@@ -103,9 +103,9 @@ namespace MonoGame.Framework.Graphics
             MaxTextureCubeSize = DXResource.MaximumTextureCubeSize;
 
 #if WINDOWS_UAP
-			CreateDeviceIndependentResources();
-			CreateDeviceResources();
-			Dpi = DisplayInformation.GetForCurrentView().LogicalDpi;
+            CreateDeviceIndependentResources();
+            CreateDeviceResources();
+            Dpi = DisplayInformation.GetForCurrentView().LogicalDpi;
 #endif
 #if WINDOWS
             CreateDeviceResources();
@@ -271,20 +271,20 @@ namespace MonoGame.Framework.Graphics
                 _bitmapTarget = null;
             }
 
-			// Clear the current render targets.
+            // Clear the current render targets.
             _currentDepthStencilView = null;
             Array.Clear(_currentRenderTargets, 0, _currentRenderTargets.Length);
             Array.Clear(_currentRenderTargetBindings, 0, _currentRenderTargetBindings.Length);
             _currentRenderTargetCount = 0;
 
-			// Make sure all pending rendering commands are flushed.
+            // Make sure all pending rendering commands are flushed.
             _d3dContext.Flush();
 
             // We need presentation parameters to continue here.
             if (PresentationParameters == null ||
-				(PresentationParameters.DeviceWindowHandle == IntPtr.Zero &&
+                (PresentationParameters.DeviceWindowHandle == IntPtr.Zero &&
                  PresentationParameters.SwapChainPanel == null))
-			{
+            {
                 if (_swapChain != null)
                 {
                     _swapChain.Dispose();
@@ -294,12 +294,12 @@ namespace MonoGame.Framework.Graphics
                 return;
             }
 
-			// Did we change swap panels?
-			if (PresentationParameters.SwapChainPanel != _swapChainPanel)
-			{
-				_swapChainPanel = null;
+            // Did we change swap panels?
+            if (PresentationParameters.SwapChainPanel != _swapChainPanel)
+            {
+                _swapChainPanel = null;
 
-				if (_swapChain != null)
+                if (_swapChain != null)
                 {
                     _swapChain.Dispose();
                     _swapChain = null;
@@ -362,13 +362,13 @@ namespace MonoGame.Framework.Graphics
                     }
                     else
                     {
-						_swapChainPanel = PresentationParameters.SwapChainPanel;
-						using (var nativePanel = ComObject.As
+                        _swapChainPanel = PresentationParameters.SwapChainPanel;
+                        using (var nativePanel = ComObject.As
                             <SharpDX.DXGI.ISwapChainPanelNative>(PresentationParameters.SwapChainPanel))
-						{
-							_swapChain = new SwapChain1(dxgiFactory2, dxgiDevice2, ref desc, null);
-							nativePanel.SwapChain = _swapChain;
-						}
+                        {
+                            _swapChain = new SwapChain1(dxgiFactory2, dxgiDevice2, ref desc, null);
+                            nativePanel.SwapChain = _swapChain;
+                        }
                     }
 
                     // Ensure that DXGI does not queue more than one frame at a time. This both reduces 
@@ -934,7 +934,7 @@ namespace MonoGame.Framework.Graphics
                     foreach (var view in _currentRenderTargets)
                     {
                         if (view != null)
-							_d3dContext.ClearRenderTargetView(
+                            _d3dContext.ClearRenderTargetView(
                                 view, new RawColor4(color.X, color.Y, color.Z, color.W));
                     }
                 }
@@ -1050,15 +1050,15 @@ namespace MonoGame.Framework.Graphics
         {
             if (_d3dContext != null)
             {
-				var rawViewport = new RawViewportF
-				{
-					X = value.X,
-					Y = value.Y,
-					Width = value.Width,
-					Height = value.Height,
-					MinDepth = value.MinDepth,
-					MaxDepth = value.MaxDepth
-				};
+                var rawViewport = new RawViewportF
+                {
+                    X = value.X,
+                    Y = value.Y,
+                    Width = value.Width,
+                    Height = value.Height,
+                    MinDepth = value.MinDepth,
+                    MaxDepth = value.MaxDepth
+                };
                 lock (_d3dContext)
                     _d3dContext.Rasterizer.SetViewport(rawViewport);
             }
@@ -1156,15 +1156,15 @@ namespace MonoGame.Framework.Graphics
             {
                 lock (_d3dContext)
                 {
-					var viewport = new RawViewportF
-					{
-						X = _viewport.X,
-						Y = _viewport.Y,
-						Width = _viewport.Width,
-						Height = _viewport.Height,
-						MinDepth = _viewport.MinDepth,
-						MaxDepth = _viewport.MaxDepth
-					};
+                    var viewport = new RawViewportF
+                    {
+                        X = _viewport.X,
+                        Y = _viewport.Y,
+                        Width = _viewport.Width,
+                        Height = _viewport.Height,
+                        MinDepth = _viewport.MinDepth,
+                        MaxDepth = _viewport.MaxDepth
+                    };
                     _d3dContext.Rasterizer.SetViewport(viewport);
                     _d3dContext.OutputMerger.SetTargets(_currentDepthStencilView, _currentRenderTargets);
                 }
@@ -1220,11 +1220,11 @@ namespace MonoGame.Framework.Graphics
 
         private RawColor4 GetBlendFactor()
         {
-			return new RawColor4(
-					BlendFactor.R / 255.0f,
-					BlendFactor.G / 255.0f,
-					BlendFactor.B / 255.0f,
-					BlendFactor.A / 255.0f);
+            return new RawColor4(
+                    BlendFactor.R / 255.0f,
+                    BlendFactor.G / 255.0f,
+                    BlendFactor.B / 255.0f,
+                    BlendFactor.A / 255.0f);
         }
 
         internal void PlatformApplyState(bool applyShaders)

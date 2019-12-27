@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 using SharpDX;
 using SharpDX.Multimedia;
 using SharpDX.XAudio2;
@@ -26,11 +26,6 @@ namespace MonoGame.Framework.Audio
             _queuedItems = new Queue<DataItem>();
         }
 
-        private int PlatformGetPendingBufferCount()
-        {
-            return _queuedItems.Count;
-        }
-
         private long PlatformGetBufferedSamples()
         {
             if (_queuedItems.Count == 0)
@@ -45,20 +40,13 @@ namespace MonoGame.Framework.Audio
             return bufferedSamples - offset;
         }
 
-        private void PlatformPlay()
-        {
-            _voice.Start();
-        }
+        private int PlatformGetPendingBufferCount() => _queuedItems.Count;
 
-        private void PlatformPause()
-        {
-            _voice.Stop();
-        }
+        private void PlatformPlay() => _voice.Start();
 
-        private void PlatformResume()
-        {
-            _voice.Start();
-        }
+        private void PlatformPause() => _voice.Stop();
+
+        private void PlatformResume() => _voice.Start();
 
         private void PlatformStop()
         {
@@ -71,19 +59,35 @@ namespace MonoGame.Framework.Audio
                 DequeueItem();
         }
 
-        private unsafe void PlatformSubmitBuffer<T>(ReadOnlySpan<T> data)
+        private unsafe void PlatformSubmitBuffer<T>(ReadOnlySpan<T> data, AudioDepth depth)
             where T : unmanaged
         {
-            var byteSrc = MemoryMarshal.AsBytes(data);
+            int dataByteCount = data.Length * sizeof(T);
+            int sampleCount = dataByteCount / ((int)depth / 8);
+
+            // The XAudio voice is always 16-bit, but we support 16-bit and 32-bit data.
+            int bufferByteCount = sampleCount * sizeof(short);
+            byte[] pooledBuffer = _bufferPool.Get(bufferByteCount);
 
             // we need to copy so datastream does not pin the buffer that the user might modify later
-            byte[] pooledBuffer = _bufferPool.Get(byteSrc.Length);
-            byteSrc.CopyTo(pooledBuffer);
+            if (depth == AudioDepth.Float)
+            {
+                // we need to convert to 16-bit
+                var srcSpan = MemoryMarshal.Cast<T, float>(data);
+                var dstSpan = MemoryMarshal.Cast<byte, short>(pooledBuffer.AsSpan(0, bufferByteCount));
+                AudioLoader.ConvertSingleToInt16(srcSpan, dstSpan);
+            }
+            else
+            {
+                // the data was 16-bit, so just copy over
+                var srcSpan = MemoryMarshal.AsBytes(data);
+                srcSpan.CopyTo(pooledBuffer);
+            }
 
             var stream = DataStream.Create(pooledBuffer, true, false, 0, true);
             var audioBuffer = new AudioBuffer(stream)
             {
-                AudioBytes = byteSrc.Length
+                AudioBytes = bufferByteCount
             };
 
             _voice.SubmitSourceBuffer(audioBuffer, null);

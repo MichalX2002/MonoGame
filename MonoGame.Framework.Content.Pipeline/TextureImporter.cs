@@ -6,8 +6,7 @@ using System;
 using System.IO;
 using FreeImageAPI;
 using MonoGame.Framework.Content.Pipeline.Graphics;
-using MonoGame.Imaging;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Framework.Content.Pipeline
 {

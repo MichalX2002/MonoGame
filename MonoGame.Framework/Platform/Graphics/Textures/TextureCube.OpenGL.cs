@@ -109,10 +109,10 @@ namespace MonoGame.Framework.Graphics
                 }
             }
 
-            if (Threading.IsOnUIThread())
+            if (Threading.IsOnMainThread)
                 Construct();
             else
-                Threading.BlockOnUIThread(Construct);
+                Threading.BlockOnMainThread(Construct);
         }
 
         private unsafe void PlatformGetData<T>(
@@ -178,10 +178,10 @@ namespace MonoGame.Framework.Graphics
                     dataHandle.Free();
                 }
             }
-            if (Threading.IsOnUIThread())
+            if (Threading.IsOnMainThread)
                 Get();
             else
-                Threading.BlockOnUIThread(Get);
+                Threading.BlockOnMainThread(Get);
 #else
             throw new NotImplementedException();
 #endif
@@ -223,10 +223,10 @@ namespace MonoGame.Framework.Graphics
                 }
             }
 
-            if (Threading.IsOnUIThread())
+            if (Threading.IsOnMainThread)
                 Set();
             else
-                Threading.BlockOnUIThread(Set);
+                Threading.BlockOnMainThread(Set);
         }
 
         private TextureTarget GetGLCubeFace(CubeMapFace face)

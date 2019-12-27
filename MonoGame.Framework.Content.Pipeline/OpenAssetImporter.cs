@@ -11,7 +11,7 @@ using System.Reflection;
 using Assimp;
 using Assimp.Unmanaged;
 using MonoGame.Framework.Content.Pipeline.Graphics;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 
 namespace MonoGame.Framework.Content.Pipeline
 {

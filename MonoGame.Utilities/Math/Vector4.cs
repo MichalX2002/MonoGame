@@ -5,9 +5,9 @@
 using System;
 using System.Runtime.Serialization;
 using System.Diagnostics;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 using System.Diagnostics.CodeAnalysis;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Framework
 {
@@ -341,14 +341,14 @@ namespace MonoGame.Framework
         /// Compares whether current instance is equal to specified <see cref="object"/>.
         /// </summary>
         /// <param name="obj">The <see cref="object"/> to compare.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public override bool Equals(object obj) => obj is Vector4 other ? this == other : false;
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="Vector4"/>.
         /// </summary>
         /// <param name="other">The <see cref="Vector4"/> to compare.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public bool Equals(Vector4 other) => this == other;
 
         /// <summary>
@@ -676,7 +676,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="a"><see cref="Vector4"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="Vector4"/> instance on the right of the equal sign.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public static bool operator ==(in Vector4 a, in Vector4 b) => 
             a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
 
@@ -685,7 +685,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="a"><see cref="Vector4"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="Vector4"/> instance on the right of the not equal sign.</param>
-        /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>	
+        /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>	
         public static bool operator !=(in Vector4 a, in Vector4 b) => !(a == b);
 
         /// <summary>

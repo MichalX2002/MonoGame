@@ -7,7 +7,7 @@ using System;
 using System.Runtime.CompilerServices;
 using MonoGame.Framework;
 
-namespace MonoGame.Utilities.PackedVector
+namespace MonoGame.Framework.PackedVector
 {
     /// <summary>
     /// Packed pixel type containing two signed 16-bit integers.

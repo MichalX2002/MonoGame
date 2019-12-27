@@ -6,7 +6,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using MonoGame.Utilities.IO;
+using MonoGame.Framework.IO;
 
 namespace MonoGame.Framework.Content.Pipeline.Audio
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging
 {

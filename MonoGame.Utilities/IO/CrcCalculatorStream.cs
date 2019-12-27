@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace MonoGame.Utilities.IO
+namespace MonoGame.Framework.IO
 {
     /// <summary>
     /// Calculates a <see cref="Crc32"/> checksum on 

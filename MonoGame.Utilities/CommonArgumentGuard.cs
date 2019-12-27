@@ -1,7 +1,6 @@
 ﻿using System;
-using MonoGame.Framework;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Framework
 {
     public static class CommonArgumentGuard
     {

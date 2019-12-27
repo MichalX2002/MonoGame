@@ -7,12 +7,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MonoGame.Framework.Content.Pipeline;
-using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Content.Pipeline.Builder;
+using MonoGame.Framework.Graphics;
 
 namespace MGCB
 {
-    class BuildContent
+    internal class BuildContent
     {
         [CommandLineParameter(
             Name = "launchdebugger",
@@ -35,8 +35,8 @@ namespace MGCB
         // The actual handling of '/@' is done in the preprocess step.
         public List<string> ResponseFiles
         {
-            get => throw new InvalidOperationException();
-            set => throw new InvalidOperationException();
+            get { throw new InvalidOperationException(); }
+            set { throw new InvalidOperationException(); }
         }
 
         [CommandLineParameter(
@@ -133,7 +133,7 @@ namespace MGCB
         public void SetProcessor(string processor)
         {
             _processor = processor;
-            
+
             // If you are changing the processor then reset all 
             // the processor parameters.
             _processorParams.Clear();
@@ -173,7 +173,7 @@ namespace MGCB
                 var split = sourceFile.Split(';');
                 sourceFile = split[0];
 
-                if(split.Length > 0)
+                if (split.Length > 0)
                     link = split[1];
             }
 
@@ -191,7 +191,14 @@ namespace MGCB
                 _content.RemoveAt(previous);
 
             // Create the item for processing later.
-            var item = new ContentItem(sourceFile, link, Importer, _processor);
+            var item = new ContentItem
+            {
+                SourceFile = sourceFile,
+                OutputFile = link,
+                Importer = Importer,
+                Processor = _processor,
+                ProcessorParams = new OpaqueDataDictionary()
+            };
             _content.Add(item);
 
             // Copy the current processor parameters blind as we
@@ -223,13 +230,11 @@ namespace MGCB
             sourceFile = PathHelper.Normalize(sourceFile);
 
             // Remove duplicates... keep this new one.
-            var previous = _copyItems.FindIndex(
-                e => string.Equals(e.SourceFile, sourceFile, StringComparison.InvariantCultureIgnoreCase));
-
+            var previous = _copyItems.FindIndex(e => string.Equals(e.SourceFile, sourceFile, StringComparison.InvariantCultureIgnoreCase));
             if (previous != -1)
                 _copyItems.RemoveAt(previous);
 
-            _copyItems.Add(new CopyItem(sourceFile, link));
+            _copyItems.Add(new CopyItem { SourceFile = sourceFile, Link = link });
         }
 
         [CommandLineParameter(
@@ -237,48 +242,35 @@ namespace MGCB
             Description = "Compress the XNB files for smaller file sizes.")]
         public bool CompressContent = false;
 
-        public readonly struct ContentItem
+        public class ContentItem
         {
-            public readonly string SourceFile;
+            public string SourceFile;
 
             // This refers to the "Link" which can override the default output location
-            public readonly string OutputFile;
-            public readonly string Importer;
-            public readonly string Processor;
-
-            public readonly OpaqueDataDictionary ProcessorParams;
-
-            public ContentItem(
-                string sourceFile, string outputFile,
-                string importer, string processor)
-            {
-                SourceFile = sourceFile;
-                OutputFile = outputFile;
-                Importer = importer;
-                Processor = processor;
-                ProcessorParams = new OpaqueDataDictionary();
-            }
+            public string OutputFile;
+            public string Importer;
+            public string Processor;
+            public OpaqueDataDictionary ProcessorParams;
         }
 
-        public readonly struct CopyItem
+        public class CopyItem
         {
-            public readonly string SourceFile;
-            public readonly string Link;
-
-            public CopyItem(string sourceFile, string link)
-            {
-                SourceFile = sourceFile;
-                Link = link;
-            }
+            public string SourceFile;
+            public string Link;
         }
 
         private readonly List<ContentItem> _content = new List<ContentItem>();
+
         private readonly List<CopyItem> _copyItems = new List<CopyItem>();
+
         private PipelineManager _manager;
 
-        public bool HasWork => _content.Count > 0 || _copyItems.Count > 0 || Clean;
+        public bool HasWork
+        {
+            get { return _content.Count > 0 || _copyItems.Count > 0 || Clean; }
+        }
 
-        string ReplaceSymbols(string parameter)
+        private string ReplaceSymbols(string parameter)
         {
             if (string.IsNullOrWhiteSpace(parameter))
                 return parameter;
@@ -301,11 +293,9 @@ namespace MGCB
             if (!Path.IsPathRooted(intermediatePath))
                 intermediatePath = PathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, intermediatePath)));
 
-            _manager = new PipelineManager(projectDirectory, outputPath, intermediatePath)
-            {
-                Logger = new ConsoleLogger(),
-                CompressContent = CompressContent
-            };
+            _manager = new PipelineManager(projectDirectory, outputPath, intermediatePath);
+            _manager.Logger = new ConsoleLogger();
+            _manager.CompressContent = CompressContent;
 
             // If the intent is to debug build, break at the original location
             // of any exception, eg, within the actual importer/processor.
@@ -333,13 +323,13 @@ namespace MGCB
                                 previousContent.Profile != Profile;
 
             // First clean previously built content.
-            for(int i = 0; i < previousContent.SourceFiles.Count; i++)
+            for (int i = 0; i < previousContent.SourceFiles.Count; i++)
             {
                 var sourceFile = previousContent.SourceFiles[i];
 
                 // This may be an old file (prior to MG 3.7) which doesn't have destination files:
                 string destFile = null;
-                if(i < previousContent.DestFiles.Count)
+                if (i < previousContent.DestFiles.Count)
                 {
                     destFile = previousContent.DestFiles[i];
                 }
@@ -348,7 +338,7 @@ namespace MGCB
                 var cleanOldContent = !inContent && !Incremental;
                 var cleanRebuiltContent = inContent && (Rebuild || Clean);
                 if (cleanRebuiltContent || cleanOldContent || targetChanged)
-                    _manager.CleanContent(sourceFile, destFile);                
+                    _manager.CleanContent(sourceFile, destFile);
             }
 
             // TODO: Should we be cleaning copy items?  I think maybe we should.
@@ -482,7 +472,7 @@ namespace MGCB
 
                     // Destination file should not be read-only even if original was.
                     var fileAttr = File.GetAttributes(dest);
-                    fileAttr &= (~FileAttributes.ReadOnly);
+                    fileAttr = fileAttr & (~FileAttributes.ReadOnly);
                     File.SetAttributes(dest, fileAttr);
 
                     var buildTime = DateTime.UtcNow - startTime;

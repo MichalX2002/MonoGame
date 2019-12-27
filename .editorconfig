@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# IDE0064: Make readonly fields writable
+dotnet_diagnostic.IDE0064.severity = none

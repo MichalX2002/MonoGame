@@ -16,154 +16,154 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Gets a value indicating whether the controller is connected.
         /// </summary>
-        public readonly bool IsConnected;
+        public bool IsConnected { get; }
 
         /// <summary>
         /// Gets the gamepad display name.
         /// This property is not available in XNA.
         /// </summary>
-        public readonly string DisplayName;
+        public string DisplayName { get; }
 
         /// <summary>
         /// Gets the unique identifier of the gamepad.
         /// This property is not available in XNA.
         /// </summary>
-        public readonly string Identifier;
+        public string Identifier { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the button A.
         /// </summary>
-        public readonly bool HasAButton;
+        public bool HasAButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the button Back.
         /// </summary>
-        public readonly bool HasBackButton;
+        public bool HasBackButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the button B.
         /// </summary>
-        public readonly bool HasBButton;
+        public bool HasBButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the directional pad down button.
         /// </summary>
-        public readonly bool HasDPadDownButton;
+        public bool HasDPadDownButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the directional pad left button.
         /// </summary>
-        public readonly bool HasDPadLeftButton;
+        public bool HasDPadLeftButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the directional pad right button.
         /// </summary>
-        public readonly bool HasDPadRightButton;
+        public bool HasDPadRightButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the directional pad up button.
         /// </summary>
-        public readonly bool HasDPadUpButton;
+        public bool HasDPadUpButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the left shoulder button.
         /// </summary>
-        public readonly bool HasLeftShoulderButton;
+        public bool HasLeftShoulderButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the left stick button.
         /// </summary>
-        public readonly bool HasLeftStickButton;
+        public bool HasLeftStickButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the right shoulder button.
         /// </summary>
-        public readonly bool HasRightShoulderButton;
+        public bool HasRightShoulderButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the right stick button.
         /// </summary>
-        public readonly bool HasRightStickButton;
+        public bool HasRightStickButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the button Start.
         /// </summary>
-        public readonly bool HasStartButton;
+        public bool HasStartButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the button X.
         /// </summary>
-        public readonly bool HasXButton;
+        public bool HasXButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the button Y.
         /// </summary>
-        public readonly bool HasYButton;
+        public bool HasYButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the guide button.
         /// </summary>
-        public readonly bool HasBigButton;
+        public bool HasBigButton { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has X axis for the left stick (thumbstick) button.
         /// </summary>
-        public readonly bool HasLeftXThumbStick;
+        public bool HasLeftXThumbStick { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has Y axis for the left stick (thumbstick) button.
         /// </summary>
-        public readonly bool HasLeftYThumbStick;
+        public bool HasLeftYThumbStick { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has X axis for the right stick (thumbstick) button.
         /// </summary>
-        public readonly bool HasRightXThumbStick;
+        public bool HasRightXThumbStick { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has Y axis for the right stick (thumbstick) button.
         /// </summary>
-        public readonly bool HasRightYThumbStick;
+        public bool HasRightYThumbStick { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the left trigger button.
         /// </summary>
-        public readonly bool HasLeftTrigger;
+        public bool HasLeftTrigger { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the right trigger button.
         /// </summary>
-        public readonly bool HasRightTrigger;
+        public bool HasRightTrigger { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the left vibration motor.
         /// </summary>
-        public readonly bool HasLeftVibrationMotor;
+        public bool HasLeftVibrationMotor { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has the right vibration motor.
         /// </summary>
-        public readonly bool HasRightVibrationMotor;
+        public bool HasRightVibrationMotor { get; }
 
         /// <summary>
         /// Gets a value indicating whether the controller has a microphone.
         /// </summary>
-        public readonly bool HasVoiceSupport;
+        public bool HasVoiceSupport { get; }
 
         /// <summary>
         /// Gets the type of the controller.
         /// </summary>
-        public readonly GamePadType GamePadType;
+        public GamePadType GamePadType { get; }
 
         #endregion
 
         public GamePadCapabilities(
-            bool isConnected, string displayName, string identifier, 
+            bool isConnected, string displayName, string identifier,
             bool hasAButton, bool hasBButton, bool hasBackButton,
             bool hasDPadDownButton, bool hasDPadLeftButton, bool hasDPadRightButton, bool hasDPadUpButton,
-            bool hasLeftShoulderButton, bool hasLeftStickButton, 
-            bool hasRightShoulderButton, bool hasRightStickButton, 
-            bool hasStartButton, bool hasXButton, bool hasYButton, bool hasBigButton, 
+            bool hasLeftShoulderButton, bool hasLeftStickButton,
+            bool hasRightShoulderButton, bool hasRightStickButton,
+            bool hasStartButton, bool hasXButton, bool hasYButton, bool hasBigButton,
             bool hasLeftXThumbStick, bool hasLeftYThumbStick, bool hasRightXThumbStick, bool hasRightYThumbStick,
             bool hasLeftTrigger, bool hasRightTrigger, bool hasLeftVibrationMotor, bool hasRightVibrationMotor,
             bool hasVoiceSupport, GamePadType gamePadType)

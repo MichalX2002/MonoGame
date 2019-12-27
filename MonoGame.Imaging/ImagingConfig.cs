@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using MonoGame.Utilities.IO;
+using MonoGame.Framework.IO;
 
 namespace MonoGame.Imaging
 {

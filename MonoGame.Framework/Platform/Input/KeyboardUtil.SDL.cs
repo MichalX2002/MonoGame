@@ -159,7 +159,6 @@ namespace MonoGame.Framework.Input
         {
             if (_map.TryGetValue(key, out Keys value))
                 return value;
-
             return Keys.None;
         }
     }

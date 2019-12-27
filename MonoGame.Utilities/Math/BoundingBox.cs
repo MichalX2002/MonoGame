@@ -324,7 +324,7 @@ namespace MonoGame.Framework
         /// Gets whether or not a specified sphere intersects with this box.
         /// </summary>
         /// <param name="box">The box for testing.</param>
-        /// <returns><c>true</c> if <see cref="BoundingBox"/> intersects with this sphere; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if <see cref="BoundingBox"/> intersects with this sphere; <see langword="false"/> otherwise.</returns>
         public bool Intersects(in BoundingSphere sphere)
         {
             if (sphere.Center.X - Min.X > sphere.Radius &&

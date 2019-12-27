@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace MonoGame.Framework.Input
@@ -10,122 +11,155 @@ namespace MonoGame.Framework.Input
     /// <summary>
     /// Holds the state of keystrokes by a keyboard.
     /// </summary>
-	public struct KeyboardState : IEquatable<KeyboardState>
+    public struct KeyboardState : IReadOnlyCollection<Keys>, IEquatable<KeyboardState>
     {
-        public const int MaxKeysPerState = 8;
+        /// <summary>
+        /// Gets the max amount of keystrokes that can
+        /// be tracked by a <see cref="KeyboardState"/>. 
+        /// </summary>
+        public const int MaxKeysPerState = 256;
 
         #region Key Data
 
         // Array of 256 bits:
-        uint keys0, keys1, keys2, keys3, keys4, keys5, keys6, keys7;
+        private uint _key0, _key1, _key2, _key3, _key4, _key5, _key6, _key7;
 
-        public int Count => GetCount();
-
-        bool InternalGetKey(Keys key)
+        private readonly uint GetKeyValue(int index)
         {
-            uint mask = (uint)1 << (((int)key) & 0x1f);
-
-            uint element;
-            switch (((int)key) >> 5)
+            return index switch
             {
-                case 0: element = keys0; break;
-                case 1: element = keys1; break;
-                case 2: element = keys2; break;
-                case 3: element = keys3; break;
-                case 4: element = keys4; break;
-                case 5: element = keys5; break;
-                case 6: element = keys6; break;
-                case 7: element = keys7; break;
-                default: element = 0; break;
-            }
-
-            return (element & mask) != 0;
+                0 => _key0,
+                1 => _key1,
+                2 => _key2,
+                3 => _key3,
+                4 => _key4,
+                5 => _key5,
+                6 => _key6,
+                7 => _key7,
+                _ => 0
+            };
         }
 
-        internal void InternalSetKey(Keys key)
+        private readonly bool GetKey(Keys key)
         {
+            int index = ((int)key) >> 5;
+            uint field = GetKeyValue(index);
             uint mask = (uint)1 << (((int)key) & 0x1f);
-            switch (((int)key) >> 5)
-            {
-                case 0: keys0 |= mask; break;
-                case 1: keys1 |= mask; break;
-                case 2: keys2 |= mask; break;
-                case 3: keys3 |= mask; break;
-                case 4: keys4 |= mask; break;
-                case 5: keys5 |= mask; break;
-                case 6: keys6 |= mask; break;
-                case 7: keys7 |= mask; break;
-            }
+            return (field & mask) != 0;
         }
 
-        internal void InternalClearKey(Keys key)
+        internal void SetKey(Keys key)
         {
             uint mask = (uint)1 << (((int)key) & 0x1f);
             switch (((int)key) >> 5)
             {
-                case 0: keys0 &= ~mask; break;
-                case 1: keys1 &= ~mask; break;
-                case 2: keys2 &= ~mask; break;
-                case 3: keys3 &= ~mask; break;
-                case 4: keys4 &= ~mask; break;
-                case 5: keys5 &= ~mask; break;
-                case 6: keys6 &= ~mask; break;
-                case 7: keys7 &= ~mask; break;
+                case 0: _key0 |= mask; break;
+                case 1: _key1 |= mask; break;
+                case 2: _key2 |= mask; break;
+                case 3: _key3 |= mask; break;
+                case 4: _key4 |= mask; break;
+                case 5: _key5 |= mask; break;
+                case 6: _key6 |= mask; break;
+                case 7: _key7 |= mask; break;
             }
         }
 
-        internal void InternalClearAllKeys()
+        internal void ClearKey(Keys key)
         {
-            keys0 = 0;
-            keys1 = 0;
-            keys2 = 0;
-            keys3 = 0;
-            keys4 = 0;
-            keys5 = 0;
-            keys6 = 0;
-            keys7 = 0;
+            uint mask = (uint)1 << (((int)key) & 0x1f);
+            switch (((int)key) >> 5)
+            {
+                case 0: _key0 &= ~mask; break;
+                case 1: _key1 &= ~mask; break;
+                case 2: _key2 &= ~mask; break;
+                case 3: _key3 &= ~mask; break;
+                case 4: _key4 &= ~mask; break;
+                case 5: _key5 &= ~mask; break;
+                case 6: _key6 &= ~mask; break;
+                case 7: _key7 &= ~mask; break;
+            }
+        }
+
+        internal void ClearAllKeys()
+        {
+            _key0 = 0;
+            _key1 = 0;
+            _key2 = 0;
+            _key3 = 0;
+            _key4 = 0;
+            _key5 = 0;
+            _key6 = 0;
+            _key7 = 0;
         }
 
         #endregion
 
-        private int GetCount()
-        {
-            uint count = CountBits(keys0) + CountBits(keys1) + CountBits(keys2) + CountBits(keys3)
-                    + CountBits(keys4) + CountBits(keys5) + CountBits(keys6) + CountBits(keys7);
-            return (int)count;
-        }
-
-        #region XNA Interface
+        #region Properties
 
         /// <summary>
-        /// Gets the current state of the Caps Lock key.
+        /// Returns the state of a specified key.
+        /// </summary>
+        /// <param name="key">The key to query.</param>
+        /// <returns>The state of the key.</returns>
+        public readonly KeyState this[Keys key] => GetKey(key) ? KeyState.Down : KeyState.Up;
+
+        /// <summary>
+        /// Gets the state of the Caps Lock key.
         /// </summary>
         public bool CapsLock { get; private set; }
 
         /// <summary>
-        /// Gets the current state of the Num Lock key.
+        /// Gets the state of the Num Lock key.
         /// </summary>
         public bool NumLock { get; private set; }
 
-        internal KeyboardState(List<Keys> keys, bool capsLock = false, bool numLock = false)
+        /// <summary>
+        /// Gets the amount of pressed keys.
+        /// </summary>
+        public readonly int Count
+        {
+            get
+            {
+                static uint CountBits(uint v)
+                {
+                    // http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
+                    v -= (v >> 1) & 0x55555555;                    // reuse input as temporary
+                    v = (v & 0x33333333) + ((v >> 2) & 0x33333333);     // temp
+                    return ((v + (v >> 4) & 0xF0F0F0F) * 0x1010101) >> 24; // count
+                }
+
+                return (int)(
+                    CountBits(_key0) + CountBits(_key1) + CountBits(_key2) + CountBits(_key3) +
+                    CountBits(_key4) + CountBits(_key5) + CountBits(_key6) + CountBits(_key7));
+            }
+        }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KeyboardState"/> class.
+        /// </summary>
+        /// <param name="keys">List of keys to be flagged as pressed on initialization.</param>
+        /// <param name="capsLock">Caps Lock state.</param>
+        /// <param name="numLock">Num Lock state.</param>
+        public KeyboardState(IEnumerable<Keys> keys, bool capsLock = false, bool numLock = false) : this()
         {
             CapsLock = capsLock;
             NumLock = numLock;
 
-            keys0 = 0;
-            keys1 = 0;
-            keys2 = 0;
-            keys3 = 0;
-            keys4 = 0;
-            keys5 = 0;
-            keys6 = 0;
-            keys7 = 0;
-
             if (keys != null)
             {
-                for (int i = 0; i < keys.Count; i++)
+                if (keys is IList<Keys> list) // prevents alloc of enumerable
                 {
-                    InternalSetKey(keys[i]);
+                    for (int i = 0; i < list.Count; i++)
+                        SetKey(list[i]);
+                }
+                else
+                {
+                    foreach (var key in keys)
+                        SetKey(key);
                 }
             }
         }
@@ -136,190 +170,186 @@ namespace MonoGame.Framework.Input
         /// <param name="keys">List of keys to be flagged as pressed on initialization.</param>
         /// <param name="capsLock">Caps Lock state.</param>
         /// <param name="numLock">Num Lock state.</param>
-        public KeyboardState(Keys[] keys, bool capsLock = false, bool numLock = false)
+        public KeyboardState(ReadOnlySpan<Keys> keys, bool capsLock = false, bool numLock = false) : this()
         {
             CapsLock = capsLock;
             NumLock = numLock;
 
-            keys0 = 0;
-            keys1 = 0;
-            keys2 = 0;
-            keys3 = 0;
-            keys4 = 0;
-            keys5 = 0;
-            keys6 = 0;
-            keys7 = 0;
-
-            if (keys != null)
-                for (int i = 0; i < keys.Length; i++)
-                    InternalSetKey(keys[i]);
+            for (int i = 0; i < keys.Length; i++)
+                SetKey(keys[i]);
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyboardState"/> class.
         /// </summary>
         /// <param name="keys">List of keys to be flagged as pressed on initialization.</param>
-        public KeyboardState(params Keys[] keys)
+        public KeyboardState(params Keys[] keys) : this(keys.AsSpan())
         {
-            CapsLock = false;
-            NumLock = false;
-
-            keys0 = 0;
-            keys1 = 0;
-            keys2 = 0;
-            keys3 = 0;
-            keys4 = 0;
-            keys5 = 0;
-            keys6 = 0;
-            keys7 = 0;
-
-            if (keys != null)
-            {
-                for (int i = 0; i < keys.Length; i++)
-                {
-                    InternalSetKey(keys[i]);
-                }
-            }
         }
 
-        /// <summary>
-        /// Returns the state of a specified key.
-        /// </summary>
-        /// <param name="key">The key to query.</param>
-        /// <returns>The state of the key.</returns>
-        public KeyState this[Keys key]
-        {
-            get { return InternalGetKey(key) ? KeyState.Down : KeyState.Up; }
-        }
+        #endregion
 
         /// <summary>
         /// Gets whether given key is currently being pressed.
         /// </summary>
         /// <param name="key">The key to query.</param>
         /// <returns>true if the key is pressed; false otherwise.</returns>
-        public bool IsKeyDown(Keys key)
-        {
-            return InternalGetKey(key);
-        }
+        public readonly bool IsKeyDown(Keys key) => GetKey(key);
 
         /// <summary>
         /// Gets whether given key is currently being not pressed.
         /// </summary>
         /// <param name="key">The key to query.</param>
         /// <returns>true if the key is not pressed; false otherwise.</returns>
-        public bool IsKeyUp(Keys key)
-        {
-            return !InternalGetKey(key);
-        }
-
-        #endregion
-
-
-        #region GetPressedKeys()
+        public readonly bool IsKeyUp(Keys key) => !GetKey(key);
 
         /// <summary>
-        /// Returns the number of pressed keys in this <see cref="KeyboardState"/>.
-        /// </summary>
-        /// <returns>An integer representing the number of keys currently pressed in this <see cref="KeyboardState"/>.</returns>
-        public int GetPressedKeyCount()
-        {
-            uint count = CountBits(keys0) + CountBits(keys1) + CountBits(keys2) + CountBits(keys3)
-                    + CountBits(keys4) + CountBits(keys5) + CountBits(keys6) + CountBits(keys7);
-            return (int)count;
-        }
-
-        private static uint CountBits(uint v)
-        {
-            // http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
-            v -= (v >> 1) & 0x55555555;                    // reuse input as temporary
-            v = (v & 0x33333333) + ((v >> 2) & 0x33333333);     // temp
-            return ((v + (v >> 4) & 0xF0F0F0F) * 0x1010101) >> 24; // count
-        }
-
-        private static int AddKeysToArray(uint keys, int offset, Span<Keys> pressedKeys, int index)
-        {
-            for (int i = 0; i < 32; i++)
-            {
-                if ((keys & (1 << i)) != 0)
-                    pressedKeys[index++] = (Keys)(offset + i);
-            }
-            return index;
-        }
-
-        /// <summary>
-        /// Returns an array of values keys that are currently being pressed.
+        /// Returns an array with keys that are currently being pressed.
         /// </summary>
         /// <returns>The keys that are currently being pressed.</returns>
-        public Keys[] GetPressedKeys()
+        public readonly Keys[] GetPressedKeys()
         {
-            var keys = new Keys[GetCount()];
+            var keys = new Keys[Count];
             GetPressedKeys(keys);
             return keys;
         }
 
         /// <summary>
-        /// Fills an array of values holding keys that are currently being pressed.
+        /// Fills a span with keys that are currently being pressed.
         /// </summary>
-        /// <param name="keys">
-        /// The keys span to fill.
-        /// This span is not cleared, and it must be equal to or larger than the number of keys pressed.
-        /// </param>
-        public int GetPressedKeys(Span<Keys> keys)
+        /// <param name="keys">The destination span for the keys.</param>
+        /// <returns>The amount of keys that were added to the span.</returns>
+        public readonly int GetPressedKeys(Span<Keys> keys)
         {
-            if (keys == null)
-                throw new ArgumentNullException(nameof(keys));
-
-            uint count = CountBits(keys0) + CountBits(keys1) + CountBits(keys2) + CountBits(keys3)
-                    + CountBits(keys4) + CountBits(keys5) + CountBits(keys6) + CountBits(keys7);
-
-            if (count > keys.Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(keys),
-                    "The supplied array cannot fit the number of pressed keys. " +
-                    "Call GetPressedKeyCount() to get the number of pressed keys.");
-            }
-
             int index = 0;
-            if (keys0 != 0 && index < keys.Length) index = AddKeysToArray(keys0, 0 * 32, keys, index);
-            if (keys1 != 0 && index < keys.Length) index = AddKeysToArray(keys1, 1 * 32, keys, index);
-            if (keys2 != 0 && index < keys.Length) index = AddKeysToArray(keys2, 2 * 32, keys, index);
-            if (keys3 != 0 && index < keys.Length) index = AddKeysToArray(keys3, 3 * 32, keys, index);
-            if (keys4 != 0 && index < keys.Length) index = AddKeysToArray(keys4, 4 * 32, keys, index);
-            if (keys5 != 0 && index < keys.Length) index = AddKeysToArray(keys5, 5 * 32, keys, index);
-            if (keys6 != 0 && index < keys.Length) index = AddKeysToArray(keys6, 6 * 32, keys, index);
-            if (keys7 != 0 && index < keys.Length) index = AddKeysToArray(keys7, 7 * 32, keys, index);
-
-            return (int)count;
+            var enumerator = GetEnumerator();
+            while (index < keys.Length && enumerator.MoveNext())
+            {
+                keys[index] = enumerator.Current;
+                index++;
+            }
+            return index;
         }
-
-        #endregion
 
         /// <summary>
         /// Returns the hash code of the <see cref="KeyboardState"/>.
         /// </summary>
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
-            return (int)(keys0 ^ keys1 ^ keys2 ^ keys3 ^ keys4 ^ keys5 ^ keys6 ^ keys7);
+            return (int)(
+                CapsLock.GetHashCode() ^ NumLock.GetHashCode() ^
+                _key0 ^ _key1 ^ _key2 ^ _key3 ^ _key4 ^ _key5 ^ _key6 ^ _key7);
         }
 
         #region Equals
 
         public static bool operator ==(in KeyboardState a, in KeyboardState b)
         {
-            return a.keys0 == b.keys0
-                && a.keys1 == b.keys1
-                && a.keys2 == b.keys2
-                && a.keys3 == b.keys3
-                && a.keys4 == b.keys4
-                && a.keys5 == b.keys5
-                && a.keys6 == b.keys6
-                && a.keys7 == b.keys7;
+            return a.CapsLock == b.CapsLock
+                && a.NumLock == b.NumLock
+                && a._key0 == b._key0
+                && a._key1 == b._key1
+                && a._key2 == b._key2
+                && a._key3 == b._key3
+                && a._key4 == b._key4
+                && a._key5 == b._key5
+                && a._key6 == b._key6
+                && a._key7 == b._key7;
         }
 
         public static bool operator !=(in KeyboardState a, in KeyboardState b) => !(a == b);
 
-        public bool Equals(KeyboardState other) => this == other;
-        public override bool Equals(object obj) => obj is KeyboardState other && Equals(other);
+        public readonly bool Equals(KeyboardState other) => this == other;
+        public readonly override bool Equals(object obj) => obj is KeyboardState other && Equals(other);
+
+        #endregion
+
+        #region IEnumerable and Enumerator
+
+        /// <summary>
+        /// Returns an <see cref="Enumerator"/> that 
+        /// enumerates the currently pressed keys.
+        /// </summary>
+        public readonly Enumerator GetEnumerator() => new Enumerator(this);
+
+        readonly IEnumerator<Keys> IEnumerable<Keys>.GetEnumerator() => GetEnumerator();
+        readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Enumerates the pressed keys of a <see cref="KeyboardState"/>.
+        /// </summary>
+        public struct Enumerator : IEnumerator<Keys>
+        {
+            private KeyboardState _state;
+            private int _keyIndex;
+            private int _iterIndex;
+
+            /// <summary>
+            /// Gets the pressed key at the current position of the enumerator.
+            /// </summary>
+            public Keys Current { get; private set; }
+
+            object IEnumerator.Current => Current;
+
+            /// <summary>
+            /// Constructs the <see cref="Enumerator"/>.
+            /// </summary>
+            /// <param name="state">The <see cref="KeyboardState"/> to enumerate.</param>
+            public Enumerator(in KeyboardState state)
+            {
+                _state = state;
+                _keyIndex = 0;
+                _iterIndex = 0;
+                Current = default;
+            }
+
+            /// <summary>
+            /// Advances the <see cref="Enumerator"/> to the next pressed key.
+            /// </summary>
+            /// <returns>
+            /// <see langword="true"/> if the enumerator was successfully advanced to the next pressed key;
+            /// <see langword="false"/> if the enumerator has enumerated all the pressed keys.
+            /// </returns>
+            public bool MoveNext()
+            {
+                while (_keyIndex < 8)
+                {
+                    uint keyField = _state.GetKeyValue(_keyIndex);
+                    if (keyField != 0)
+                    {
+                        for (; _iterIndex < 32; _iterIndex++)
+                        {
+                            if ((keyField & (1 << _iterIndex)) != 0)
+                            {
+                                int offset = _keyIndex * 32;
+                                Current = (Keys)(offset + _iterIndex);
+
+                                // the return exits the loop, so increment here too
+                                _iterIndex++;
+                                return true;
+                            }
+                        }
+                    }
+                    _iterIndex = 0;
+                    _keyIndex++;
+                }
+                return false;
+            }
+
+            /// <summary>
+            /// Resets the <see cref="Enumerator"/>.
+            /// </summary>
+            public void Reset()
+            {
+                _keyIndex = 0;
+                _iterIndex = 0;
+                Current = default;
+            }
+
+            void IDisposable.Dispose()
+            {
+            }
+        }
 
         #endregion
     }

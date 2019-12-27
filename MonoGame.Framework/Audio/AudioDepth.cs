@@ -6,19 +6,18 @@ namespace MonoGame.Framework.Audio
 {
     /// <summary>
     /// Represents the depth of audio data. 
-    /// Used to specify if data is 16-bit PCM or 32-bit float.
     /// </summary>
     public enum AudioDepth
     {
         /// <summary>
         /// 16-bit PCM audio.
         /// </summary>
-        Short,
+        Short = 16,
 
         /// <summary>
         /// 32-bit float audio.
         /// </summary>
-        Float
+        Float = 32
     }
 }
 

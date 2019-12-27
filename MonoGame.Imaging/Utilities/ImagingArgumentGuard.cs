@@ -4,8 +4,7 @@ using MonoGame.Imaging.Attributes;
 using MonoGame.Imaging.Attributes.Format;
 using MonoGame.Imaging.Coding;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Utilities;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging
 {

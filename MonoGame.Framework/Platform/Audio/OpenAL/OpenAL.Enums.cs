@@ -1,5 +1,5 @@
 ﻿
-namespace MonoGame.Framework.Audio
+namespace MonoGame.OpenAL
 {
     internal enum ALFormat
     {

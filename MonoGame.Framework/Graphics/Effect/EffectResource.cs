@@ -2,10 +2,9 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System.IO;
 using MonoGame.Framework.Content;
-using MonoGame.Utilities;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
+using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework.Graphics
 {

@@ -1060,12 +1060,12 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Decomposes this matrix to translation, rotation and scale elements. Returns <c>true</c> if matrix can be decomposed; <c>false</c> otherwise.
+        /// Decomposes this matrix to translation, rotation and scale elements. Returns <see langword="true"/> if matrix can be decomposed; <see langword="false"/> otherwise.
         /// </summary>
         /// <param name="scale">Scale vector as an output parameter.</param>
         /// <param name="rotation">Rotation quaternion as an output parameter.</param>
         /// <param name="translation">Translation vector as an output parameter.</param>
-        /// <returns><c>true</c> if matrix can be decomposed; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if matrix can be decomposed; <see langword="false"/> otherwise.</returns>
         public bool Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation)
         {
             translation.X = M41;
@@ -1154,7 +1154,7 @@ namespace MonoGame.Framework
         /// Compares whether current instance is equal to specified <see cref="Matrix"/> without any tolerance.
         /// </summary>
         /// <param name="other">The <see cref="Matrix"/> to compare.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public bool Equals(Matrix other)
         {
             return this == other;
@@ -1164,7 +1164,7 @@ namespace MonoGame.Framework
         /// Compares whether current instance is equal to specified <see cref="object"/> without any tolerance.
         /// </summary>
         /// <param name="obj">The <see cref="object"/> to compare.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public override bool Equals(object obj)
         {
             return obj is Matrix other ? this == other : false;
@@ -1381,7 +1381,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="a">Source <see cref="Matrix"/> on the left of the equal sign.</param>
         /// <param name="b">Source <see cref="Matrix"/> on the right of the equal sign.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public static bool operator ==(in Matrix a, in Matrix b)
         {
             return a.M11 == b.M11 && a.M12 == b.M12 && a.M13 == b.M13 && a.M14 == b.M14
@@ -1395,7 +1395,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="a">Source <see cref="Matrix"/> on the left of the not equal sign.</param>
         /// <param name="b">Source <see cref="Matrix"/> on the right of the not equal sign.</param>
-        /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>
         public static bool operator !=(in Matrix a, in Matrix b)
         {
             return !(a == b);

@@ -3,6 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace MGCB
 {
@@ -30,38 +33,33 @@ namespace MGCB
             };
 
             if (!parser.Parse(args))
-                return -1;
-
+                return -1;           
+            
             // Launch debugger if requested.
             if (content.LaunchDebugger)
             {
-                try
-                {
+                try {
                     System.Diagnostics.Debugger.Launch();
-                }
-                catch (NotImplementedException)
-                {
+                } catch (NotImplementedException) {
                     // not implemented under Mono
-                    Console.Error.WriteLine(
-                        "The debugger is not implemented under Mono and thus is not supported on your platform.");
+                    Console.Error.WriteLine("The debugger is not implemented under Mono and thus is not supported on your platform.");
                 }
             }
 
-            int errorCount = 0;
-            if (content.HasWork)
-            {
-                // Print a startup message.            
-                var buildStarted = DateTime.Now;
-                if (!content.Quiet)
-                    Console.WriteLine("Build started {0}\n", buildStarted);
-                content.Build(out int successCount, out errorCount);
+            // Print a startup message.            
+            var buildStarted = DateTime.Now;
+            if (!content.Quiet)
+                Console.WriteLine("Build started {0}\n", buildStarted);
 
-                // Print the finishing info.
-                if (!content.Quiet)
-                {
-                    Console.WriteLine("\nBuild {0} succeeded, {1} failed.\n", successCount, errorCount);
-                    Console.WriteLine("Time elapsed {0:hh\\:mm\\:ss\\.ff}.", DateTime.Now - buildStarted);
-                }
+            // Let the content build.
+            int successCount, errorCount;
+            content.Build(out successCount, out errorCount);
+
+            // Print the finishing info.
+            if (!content.Quiet)
+            {
+                Console.WriteLine("\nBuild {0} succeeded, {1} failed.\n", successCount, errorCount);
+                Console.WriteLine("Time elapsed {0:hh\\:mm\\:ss\\.ff}.", DateTime.Now - buildStarted);
             }
 
             // Return the error count.

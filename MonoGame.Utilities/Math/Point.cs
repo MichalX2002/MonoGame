@@ -117,7 +117,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="a"><see cref="Point"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="Point"/> instance on the right of the equal sign.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public static bool operator ==(in Point a, in Point b) => (a.X == b.X) && (a.Y == b.Y);
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="a"><see cref="Point"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="Point"/> instance on the right of the not equal sign.</param>
-        /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>	
+        /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>	
         public static bool operator !=(in Point a, in Point b) => !(a == b);
 
         #endregion

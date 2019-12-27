@@ -5,12 +5,13 @@
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Framework
 {
     internal static class TimerHelper
     {
         [DllImport("ntdll.dll", SetLastError = true)]
-        private static extern int NtQueryTimerResolution(out uint MinimumResolution, out uint MaximumResolution, out uint CurrentResolution);
+        private static extern int NtQueryTimerResolution(
+            out uint MinimumResolution, out uint MaximumResolution, out uint CurrentResolution);
 
         private static readonly double LowestSleepThreshold;
 

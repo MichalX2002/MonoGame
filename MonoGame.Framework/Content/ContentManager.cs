@@ -5,18 +5,19 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using MonoGame.Utilities;
-using MonoGame.Framework.Graphics;
 using System.Globalization;
-using MonoGame.Utilities.Memory;
+using System.IO;
+using MonoGame.Framework.Graphics;
+using MonoGame.Framework.Memory;
+using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework.Content
 {
     public partial class ContentManager : IDisposable
     {
-        const byte ContentCompressedLzx = 0x80;
-        const byte ContentCompressedLz4 = 0x40;
+        private const byte ContentCompressedLzx = 0x80;
+        private const byte ContentCompressedLz4 = 0x40;
+
         private IGraphicsDeviceService _graphicsDeviceService;
         private HashSet<IDisposable> _disposableAssets = new HashSet<IDisposable>();
         private bool _disposed;
@@ -125,7 +126,7 @@ namespace MonoGame.Framework.Content
                 }
             }
         }
-        
+
         ~ContentManager()
         {
             Dispose(false);
@@ -148,7 +149,7 @@ namespace MonoGame.Framework.Content
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-            
+
             // Once disposed, content manager wont be used again
             RemoveContentManager(this);
         }
@@ -212,7 +213,7 @@ namespace MonoGame.Framework.Content
 
             if (_disposed)
                 throw new ObjectDisposedException(nameof(ContentManager));
-            
+
             // On some platforms, name and slash direction matter.
             // We store the asset by a /-seperating key rather than how the
             // path to the file was passed to us to avoid
@@ -234,7 +235,7 @@ namespace MonoGame.Framework.Content
             LoadedAssets[key] = result;
             return result;
         }
-        
+
         protected virtual Stream OpenStream(string assetName)
         {
             Stream stream;
@@ -246,11 +247,11 @@ namespace MonoGame.Framework.Content
                 // Setting the RootDirectory to an absolute path is useful in editor
                 // situations, but TitleContainer can ONLY be passed relative paths.                
 #if DESKTOPGL || WINDOWS
-                if (Path.IsPathRooted(assetPath))                
-                    stream = File.OpenRead(assetPath);                
+                if (Path.IsPathRooted(assetPath))
+                    stream = File.OpenRead(assetPath);
                 else
-#endif                
-                stream = TitleContainer.OpenStream(assetPath);
+#endif
+                    stream = TitleContainer.OpenStream(assetPath);
 
 #if ANDROID
                 stream = RecyclableMemoryManager.Instance.GetBufferedStream(stream, leaveOpen: false);
@@ -305,7 +306,7 @@ namespace MonoGame.Framework.Content
             bool compressedLz4 = (flags & ContentCompressedLz4) != 0;
             if (version != 5 && version != 4)
                 throw new ContentLoadException("Invalid XNB version.");
-            
+
             // The next int32 is the length of the XNB file
             int xnbLength = xnbReader.ReadInt32();
 
@@ -332,7 +333,7 @@ namespace MonoGame.Framework.Content
 
             var reader = new ContentReader(
                 this, decompressedStream, originalAssetName, version, recordDisposableObject);
-            
+
             return reader;
         }
 
@@ -346,12 +347,12 @@ namespace MonoGame.Framework.Content
 
             // Avoid recording disposable objects twice. ReloadAsset will try to record the disposables again.
             // We don't know which asset recorded which disposable so just guard against storing multiple of the same instance.
-            if(disposable != null)
+            if (disposable != null)
                 _disposableAssets.Add(disposable);
         }
 
         /// <summary>
-        /// Allows a derived <see cref="ContentManager"/> to have it's assets reloaded.
+        /// Allows a custom <see cref="ContentManager"/> to have it's assets reloaded.
         /// </summary>
         protected Dictionary<string, object> LoadedAssets { get; } =
             new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
@@ -369,7 +370,7 @@ namespace MonoGame.Framework.Content
                 // linker to include the ReloadAsset method when AOT compiled.
                 if (asset.Key == null)
                     ReloadAsset(asset.Key, Convert.ChangeType(asset.Value, typeOfValue));
-                
+
                 paramArray[0] = asset.Key;
                 paramArray[1] = Convert.ChangeType(asset.Value, typeOfValue);
                 methodInfo.MakeGenericMethod(typeOfValue).Invoke(this, paramArray);
@@ -386,6 +387,7 @@ namespace MonoGame.Framework.Content
         {
             if (string.IsNullOrEmpty(assetName))
                 throw new ArgumentNullException(nameof(assetName));
+
             if (_disposed)
                 throw new ObjectDisposedException(nameof(ContentManager));
 

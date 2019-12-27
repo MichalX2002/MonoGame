@@ -4,7 +4,7 @@
 
 using System;
 using System.Collections.Generic;
-using MonoGame.Utilities;
+using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework
 {
@@ -26,7 +26,7 @@ namespace MonoGame.Framework
                 throw new ArgumentNullException(nameof(provider));
 
             if (!ReflectionHelpers.IsAssignableFrom(type, provider))
-                throw new ArgumentException("The provider does not match the specified service type!");
+                throw new ArgumentException("The provider does not match the specified service type.");
 
             _services.Add(type, provider);
         }
@@ -47,17 +47,17 @@ namespace MonoGame.Framework
             return null;
         }
 
-        public void RemoveService(Type type)
+        public bool RemoveService(Type type)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
 
-            _services.Remove(type);
+            return _services.Remove(type);
         }
 
-        public void RemoveService<T>()
+        public bool RemoveService<T>()
         {
-            RemoveService(typeof(T));
+            return RemoveService(typeof(T));
         }
     }
 }

@@ -5,6 +5,7 @@
 using System;
 using System.IO;
 using MonoGame.Framework.Audio;
+using MonoGame.OpenAL;
 
 namespace MonoGame.Framework.Media
 {
@@ -27,7 +28,7 @@ namespace MonoGame.Framework.Media
 
         private void OnFinishedPlaying()
         {
-            OnFinish?.Invoke(this);
+            Finished?.Invoke(this);
             _isAtEnd = true;
         }
 

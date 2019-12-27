@@ -86,11 +86,11 @@
 
 //------------------------------------------------------------------------------
 
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 using System;
 using System.IO;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Represents a Zlib stream for compression or decompression.
@@ -98,8 +98,8 @@ namespace MonoGame.Utilities
     /// <remarks>
     ///
     /// <para>
-    /// The ZlibStream is a <see
-    /// href="http://en.wikipedia.org/wiki/Decorator_pattern">Decorator</see> on a <see
+    /// The ZlibStream is a <a
+    /// href="http://en.wikipedia.org/wiki/Decorator_pattern">Decorator</a> on a <see
     /// cref="Stream"/>.  It adds ZLIB compression or decompression to any
     /// stream.
     /// </para>
@@ -107,11 +107,11 @@ namespace MonoGame.Utilities
     /// <para> Using this stream, applications can compress or decompress data via
     /// stream <c>Read()</c> and <c>Write()</c> operations.  Either compression or
     /// decompression can occur through either reading or writing. The compression
-    /// format used is ZLIB, which is documented in <see
-    /// href="http://www.ietf.org/rfc/rfc1950.txt">IETF RFC 1950</see>, "ZLIB Compressed
+    /// format used is ZLIB, which is documented in <a
+    /// href="http://www.ietf.org/rfc/rfc1950.txt">IETF RFC 1950</a>, "ZLIB Compressed
     /// Data Format Specification version 3.3". This implementation of ZLIB always uses
-    /// DEFLATE as the compression method.  (see <see
-    /// href="http://www.ietf.org/rfc/rfc1951.txt">IETF RFC 1951</see>, "DEFLATE
+    /// DEFLATE as the compression method.  (see <a
+    /// href="http://www.ietf.org/rfc/rfc1951.txt">IETF RFC 1951</a>, "DEFLATE
     /// Compressed Data Format Specification version 1.3.") </para>
     ///
     /// <para>
@@ -810,9 +810,9 @@ namespace MonoGame.Utilities
     ///
     /// <remarks>
     /// This class compresses and decompresses data according to the Deflate algorithm
-    /// and optionally, the ZLIB format, as documented in <see
-    /// href="http://www.ietf.org/rfc/rfc1950.txt">RFC 1950 - ZLIB</see> and <see
-    /// href="http://www.ietf.org/rfc/rfc1951.txt">RFC 1951 - DEFLATE</see>.
+    /// and optionally, the ZLIB format, as documented in <a
+    /// href="http://www.ietf.org/rfc/rfc1950.txt">RFC 1950 - ZLIB</a> and <a
+    /// href="http://www.ietf.org/rfc/rfc1951.txt">RFC 1951 - DEFLATE</a>.
     /// </remarks>
     internal enum ZlibStreamFlavor
     {

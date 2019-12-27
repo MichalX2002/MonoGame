@@ -63,7 +63,7 @@
 
 using System;
 
-namespace MonoGame.Utilities.Deflate
+namespace MonoGame.Framework.Deflate
 {
     /// <summary>
     /// A bunch of constants used in the Zlib interface.

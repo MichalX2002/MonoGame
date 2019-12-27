@@ -4,7 +4,6 @@ using MonoGame.OpenGL;
 
 namespace MonoGame.Framework.Graphics
 {
-
     internal class ShaderProgram
     {
         public readonly int Program;

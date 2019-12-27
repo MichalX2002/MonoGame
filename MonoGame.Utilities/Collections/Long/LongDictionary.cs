@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace MonoGame.Utilities.Collections
+namespace MonoGame.Framework.Collections
 {
     [DebuggerDisplay("Count = {Count}")]
     public partial class LongDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>

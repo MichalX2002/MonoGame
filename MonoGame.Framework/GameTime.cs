@@ -1,28 +1,17 @@
 // MonoGame - Copyright (C) The MonoGame Team
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
-
 using System;
 
 namespace MonoGame.Framework
 {
     public class GameTime
     {
-        private float _delta;
-        private TimeSpan _elapsedGameTime;
-
         public bool IsRunningSlowly { get; set; }
-        public float Delta => _delta;
         public TimeSpan TotalGameTime { get; set; }
-        public TimeSpan ElapsedGameTime
-        {
-            get => _elapsedGameTime;
-            set
-            {
-                _elapsedGameTime = value;
-                _delta = (float)value.TotalSeconds;
-            }
-        }
+        public TimeSpan ElapsedGameTime { get; set; }
+
+        public float ElapsedTotalSeconds => (float)ElapsedGameTime.TotalSeconds;
 
         public GameTime() : this(TimeSpan.Zero, TimeSpan.Zero)
         {

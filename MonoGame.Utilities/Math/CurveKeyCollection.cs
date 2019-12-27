@@ -131,7 +131,7 @@ namespace MonoGame.Framework
         /// Determines whether this collection contains a specific key.
         /// </summary>
         /// <param name="item">The key to locate in this collection.</param>
-        /// <returns><c>true</c> if the key is found; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the key is found; <see langword="false"/> otherwise.</returns>
         public bool Contains(CurveKey item)
         {
             return _keys.Contains(item);
@@ -179,7 +179,7 @@ namespace MonoGame.Framework
         /// Removes specific element.
         /// </summary>
         /// <param name="item">The element</param>
-        /// <returns><c>true</c> if item is successfully removed; <c>false</c> otherwise. This method also returns <c>false</c> if item was not found.</returns>
+        /// <returns><see langword="true"/> if item is successfully removed; <see langword="false"/> otherwise. This method also returns <see langword="false"/> if item was not found.</returns>
         public bool Remove(CurveKey item)
         {
             return _keys.Remove(item);

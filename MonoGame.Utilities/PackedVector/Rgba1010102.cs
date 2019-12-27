@@ -5,7 +5,7 @@
 using System;
 using MonoGame.Framework;
 
-namespace MonoGame.Utilities.PackedVector
+namespace MonoGame.Framework.PackedVector
 {
     /// <summary>
     /// Packed vector type containing unsigned XYZW components.

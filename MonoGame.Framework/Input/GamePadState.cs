@@ -17,39 +17,34 @@ namespace MonoGame.Framework.Input
     public readonly partial struct GamePadState : IEquatable<GamePadState>
     {
         /// <summary>
-        /// The default initialized gamepad state.
-        /// </summary>
-        public static readonly GamePadState Default = new GamePadState();
-
-        /// <summary>
         /// Gets a value indicating whether the controller is connected.
         /// </summary>
-        public readonly bool IsConnected;
+        public bool IsConnected { get; }
 
         /// <summary>
         /// Gets the packet number associated with this state.
         /// </summary>
-        public readonly int PacketNumber;
+        public int PacketNumber { get; }
 
         /// <summary>
         /// Gets a structure that identifies what buttons on the controller are pressed.
         /// </summary>
-        public readonly GamePadButtons Buttons;
+        public GamePadButtons Buttons { get; }
 
         /// <summary>
         /// Gets a structure that identifies what directions of the directional pad on the controller are pressed.
         /// </summary>
-        public readonly GamePadDPad DPad;
+        public GamePadDPad DPad { get; }
 
         /// <summary>
         /// Gets a structure that indicates the position of the controller sticks (thumbsticks).
         /// </summary>
-        public readonly GamePadThumbSticks ThumbSticks;
+        public GamePadThumbSticks ThumbSticks { get; }
 
         /// <summary>
         /// Gets a structure that identifies the position of triggers on the controller.
         /// </summary>
-        public readonly GamePadTriggers Triggers;
+        public GamePadTriggers Triggers { get; }
 
         internal GamePadState(
             in GamePadThumbSticks thumbSticks, in GamePadTriggers triggers,
@@ -107,7 +102,9 @@ namespace MonoGame.Framework.Input
         /// <param name="leftTrigger">Left trigger value. This value is clamped between 0.0 and 1.0.</param>
         /// <param name="rightTrigger">Right trigger value. This value is clamped between 0.0 and 1.0.</param>
         /// <param name="buttons"> Array of Buttons to initialize as pressed.</param>
-        public GamePadState(Vector2 leftThumbStick, Vector2 rightThumbStick, float leftTrigger, float rightTrigger, Buttons[] buttons) 
+        public GamePadState(
+            Vector2 leftThumbStick, Vector2 rightThumbStick,
+            float leftTrigger, float rightTrigger, Buttons[] buttons) 
             : this(
                 new GamePadThumbSticks(leftThumbStick, rightThumbStick), 
                 new GamePadTriggers(leftTrigger, rightTrigger),
@@ -145,14 +142,14 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Determines whether specified input device buttons are pressed in this GamePadState.
         /// </summary>
-        /// <returns><c>true</c>, if button was pressed, <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/>, if button was pressed, <see langword="false"/> otherwise.</returns>
         /// <param name="button">Buttons to query. Specify a single button, or combine multiple buttons using a bitwise OR operation.</param>
         public bool IsButtonDown(Buttons button) => (GetVirtualButtons() & button) == button;
 
         /// <summary>
         /// Determines whether specified input device buttons are released (not pressed) in this GamePadState.
         /// </summary>
-        /// <returns><c>true</c>, if button was released (not pressed), <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/>, if button was released (not pressed), <see langword="false"/> otherwise.</returns>
         /// <param name="button">Buttons to query. Specify a single button, or combine multiple buttons using a bitwise OR operation.</param>
         public bool IsButtonUp(Buttons button) => (GetVirtualButtons() & button) != button;
 
@@ -196,7 +193,7 @@ namespace MonoGame.Framework.Input
         public override string ToString()
         {
             if (!IsConnected)
-                return "[GamePadState: IsConnected = 0]";
+                return "[GamePadState: IsConnected=false]";
 
             return "[GamePadState: IsConnected=" + (IsConnected ? "1" : "0") +
                    ", PacketNumber=" + PacketNumber.ToString("00000") +

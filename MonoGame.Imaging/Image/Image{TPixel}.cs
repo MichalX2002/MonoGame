@@ -2,19 +2,15 @@
 using System.Diagnostics;
 using MonoGame.Framework;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Utilities;
-using MonoGame.Utilities.Memory;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.Memory;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging
 {
     public partial class Image<TPixel> : IPixelMemory<TPixel>, IDisposable
         where TPixel : unmanaged, IPixel
     {
-        public delegate void DisposeDelegate(Image<TPixel> sender, bool disposing);
-
-        public event DisposeDelegate OnDisposing;
-        public event DisposeDelegate OnDisposed;
+        public event DataEvent<Image<TPixel>> Disposing;
 
         private Buffer _pixelBuffer;
 
@@ -85,12 +81,11 @@ namespace MonoGame.Imaging
         {
             if (!IsDisposed)
             {
-                OnDisposing?.Invoke(this, disposing);
-
                 _pixelBuffer.Dispose();
 
+                Disposing?.Invoke(this);
+
                 IsDisposed = true;
-                OnDisposed?.Invoke(this, disposing);
             }
         }
 

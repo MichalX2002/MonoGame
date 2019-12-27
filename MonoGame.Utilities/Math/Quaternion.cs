@@ -288,7 +288,7 @@ namespace MonoGame.Framework
         /// Compares whether current instance is equal to specified <see cref="object"/>.
         /// </summary>
         /// <param name="obj">The <see cref="object"/> to compare.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public override bool Equals(object obj)
         {
             return obj is Quaternion other ? this == other : false;
@@ -298,7 +298,7 @@ namespace MonoGame.Framework
         /// Compares whether current instance is equal to specified <see cref="Quaternion"/>.
         /// </summary>
         /// <param name="other">The <see cref="Quaternion"/> to compare.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public bool Equals(Quaternion other)
         {
             return this == other;
@@ -583,7 +583,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="a"><see cref="Quaternion"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="Quaternion"/> instance on the right of the equal sign.</param>
-        /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public static bool operator ==(in Quaternion a, in Quaternion b) => 
             (a.X == b.X) &&
             (a.Y == b.Y) && 
@@ -595,7 +595,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="a"><see cref="Quaternion"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="Quaternion"/> instance on the right of the not equal sign.</param>
-        /// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>
+        /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>
         public static bool operator !=(in Quaternion a, in Quaternion b) => !(a == b);
 
         /// <summary>

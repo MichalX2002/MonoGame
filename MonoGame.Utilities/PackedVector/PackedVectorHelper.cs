@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using MonoGame.Framework;
 
-namespace MonoGame.Utilities.PackedVector
+namespace MonoGame.Framework.PackedVector
 {
     public static class PackedVectorHelper
     {

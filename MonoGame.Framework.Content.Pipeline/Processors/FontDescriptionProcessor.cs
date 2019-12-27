@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Win32;
 using MonoGame.Framework.Content.Pipeline.Graphics;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 using Glyph = MonoGame.Framework.Content.Pipeline.Graphics.Glyph;
 
 namespace MonoGame.Framework.Content.Pipeline.Processors

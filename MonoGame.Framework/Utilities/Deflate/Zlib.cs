@@ -91,7 +91,7 @@
 using System;
 using Interop=System.Runtime.InteropServices;
 
-namespace MonoGame.Utilities.Deflate
+namespace MonoGame.Framework.Deflate
 {
 
     /// <summary>

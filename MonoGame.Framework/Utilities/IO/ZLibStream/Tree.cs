@@ -1,4 +1,4 @@
-﻿namespace MonoGame.Utilities
+﻿namespace MonoGame.Framework
 {
     sealed class Tree
     {

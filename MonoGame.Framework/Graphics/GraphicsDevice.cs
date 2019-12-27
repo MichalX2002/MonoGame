@@ -56,10 +56,12 @@ namespace MonoGame.Framework.Graphics
         private readonly RenderTargetBinding[] _currentRenderTargetBindings = new RenderTargetBinding[4];
         private readonly RenderTargetBinding[] _tempRenderTargetBinding = new RenderTargetBinding[1];
 
-        // On Intel Integrated graphics, there is a fast hw unit for doing
-        // clears to colors where all components are either 0 or 255.
-        // Despite XNA4 using Purple here, we use black (in Release) to avoid
-        // performance warnings on Intel/Mesa
+        /// <summary>
+        /// On Intel Integrated graphics, there is a fast hardware unit for doing
+        /// clears to colors where all components are either 0 or 255.
+        /// Despite XNA4 using Purple here, we use black (in Release) to avoid
+        /// performance warnings on Intel/Mesa.
+        /// </summary>
 #if DEBUG
         private static readonly Color DiscardColor = new Color(68, 34, 136, 255);
 #else
@@ -77,12 +79,16 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         internal Dictionary<int, Effect> EffectCache;
 
-        // Resources may be added to and removed from the list from many threads.
+        /// <summary>
+        /// Resources may be added to and removed from the list from many threads.
+        /// </summary>
         private readonly object _resourcesLock = new object();
 
-        // Use WeakReference for the global resources list as we do not know when a resource
-        // may be disposed and collected. We do not want to prevent a resource from being
-        // collected by holding a strong reference to it in this list.
+        /// <summary>
+        /// Use <see cref="WeakReference"/> for the global resources list as we do not know when
+        /// a resource may be disposed and collected. We do not want to prevent a resource from
+        /// being collected by holding a strong reference to it in this list.
+        /// </summary>
         private readonly List<WeakReference> _resources = new List<WeakReference>();
 
         internal GraphicsMetrics _graphicsMetrics;
@@ -132,7 +138,7 @@ namespace MonoGame.Framework.Graphics
         /// XNA uses DirectX9 for its graphics. DirectX9 interprets UV
         /// coordinates differently from other graphics API's.
         /// This is typically referred to as the half-pixel offset.
-        /// MonoGame replicates XNA behavior if this flag is set to <c>true</c>.
+        /// MonoGame replicates XNA behavior if this flag is set to <see langword="true"/>.
         /// </remarks>
         public bool UseHalfPixelOffset { get; private set; }
 
@@ -140,24 +146,28 @@ namespace MonoGame.Framework.Graphics
 
         #region Simple Properties
 
-        // We will just return IsDisposed for now
-        // as that is the only case I can see for now
-        public bool IsContentLost => IsDisposed;
+        /// <summary>
+        /// Gets whether the resources created by this <see cref="GraphicsDevice"/> were lost.
+        /// </summary>
+        /// <remarks>
+        /// Returns <see cref="IsDisposed"/> for now.
+        /// </remarks>
+        public bool IsContentLost => IsDisposed; // IsDisposed is the only case we currently now.
 
         internal bool IsRenderTargetBound => RenderTargetCount > 0;
 
         internal DepthFormat ActiveDepthFormat
         {
             get => IsRenderTargetBound
-                    ? _currentRenderTargetBindings[0].DepthFormat
-                    : PresentationParameters.DepthStencilFormat;
+                ? _currentRenderTargetBindings[0].DepthFormat
+                : PresentationParameters.DepthStencilFormat;
         }
 
         /// <summary>
         /// The rendering information for debugging and profiling.
         /// The metrics are reset every frame after draw within <see cref="Present"/>. 
         /// </summary>
-        public GraphicsMetrics Metrics { get => _graphicsMetrics; set => _graphicsMetrics = value; }
+        public GraphicsMetrics Metrics => _graphicsMetrics;
 
         public DisplayMode DisplayMode => Adapter.CurrentDisplayMode;
         public GraphicsDeviceStatus GraphicsDeviceStatus => GraphicsDeviceStatus.Normal;
@@ -347,14 +357,14 @@ namespace MonoGame.Framework.Graphics
 
         #region Events
 
-        // TODO Graphics Device events need implementing
-        internal event DataEventHandler<GraphicsDevice, PresentationParameters> PresentationChanged;
-        public event SimpleEventHandler<GraphicsDevice> DeviceLost;
-        public event SimpleEventHandler<GraphicsDevice> DeviceReset;
-        public event SimpleEventHandler<GraphicsDevice> DeviceResetting;
-        public event DataEventHandler<GraphicsDevice, object> ResourceCreated;
-        public event DataEventHandler<GraphicsDevice, ResourceDestroyedEvent> ResourceDestroyed;
-        public event SimpleEventHandler<GraphicsDevice> Disposing;
+        // TODO: Graphics Device events need implementing
+        internal event DataEvent<GraphicsDevice, PresentationParameters> PresentationChanged;
+        public event DataEvent<GraphicsDevice> DeviceLost;
+        public event DataEvent<GraphicsDevice> DeviceReset;
+        public event DataEvent<GraphicsDevice> DeviceResetting;
+        public event DataEvent<GraphicsDevice, object> ResourceCreated;
+        public event DataEvent<GraphicsDevice, ResourceDestroyedEvent> ResourceDestroyed;
+        public event DataEvent<GraphicsDevice> Disposing;
 
         #endregion
 
@@ -1216,7 +1226,7 @@ namespace MonoGame.Framework.Graphics
                     // Dispose of all remaining graphics resources before disposing of the graphics device
                     lock (_resourcesLock)
                     {
-                        foreach (var resource in _resources.ToArray())
+                        foreach (var resource in _resources)
                         {
                             if (resource.Target is IDisposable target)
                                 target.Dispose();

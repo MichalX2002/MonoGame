@@ -1,5 +1,5 @@
 ﻿
-namespace MonoGame.Utilities.Collections
+namespace MonoGame.Framework.Collections
 {
     public interface ILongHashable
     {

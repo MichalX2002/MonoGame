@@ -1,14 +1,30 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace MonoGame.Framework.Graphics
 {
-    public class EffectParameterCollection : IEnumerable<EffectParameter>
+    public class EffectParameterCollection : IReadOnlyList<EffectParameter>
     {
-        internal static readonly EffectParameterCollection Empty = new EffectParameterCollection(new EffectParameter[0]);
+        internal static readonly EffectParameterCollection Empty =
+            new EffectParameterCollection(Array.Empty<EffectParameter>());
 
         private readonly EffectParameter[] _parameters;
         private readonly Dictionary<string, int> _indexLookup;
+
+        public int Count => _parameters.Length;
+
+        public EffectParameter this[int index] => _parameters[index];
+
+        public EffectParameter this[string name]
+        {
+            get
+            {
+                if (_indexLookup.TryGetValue(name, out int index))
+                    return _parameters[index];
+                return null;
+            }
+        }
 
         internal EffectParameterCollection(EffectParameter[] parameters)
         {
@@ -40,31 +56,7 @@ namespace MonoGame.Framework.Graphics
             return new EffectParameterCollection(parameters, _indexLookup);
         }
 
-        public int Count => _parameters.Length;
-
-        public EffectParameter this[int index]
-		{
-			get { return _parameters[index]; }
-		}
-		
-		public EffectParameter this[string name]
-        {
-            get
-            {
-                if (_indexLookup.TryGetValue(name, out int index))
-                    return _parameters[index];
-                return null;
-			}
-        }
-
-        public IEnumerator<EffectParameter> GetEnumerator()
-        {
-            return ((IEnumerable<EffectParameter>)_parameters).GetEnumerator();
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return _parameters.GetEnumerator();
-        }
+        public IEnumerator<EffectParameter> GetEnumerator() => ((IEnumerable<EffectParameter>)_parameters).GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => _parameters.GetEnumerator();
     }
 }

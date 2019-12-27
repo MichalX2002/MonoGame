@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.PackedVector;
 using StbSharp;
 
 namespace MonoGame.Imaging.Pixels

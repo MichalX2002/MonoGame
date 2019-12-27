@@ -4,9 +4,8 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using MonoGame.Framework;
 
-namespace MonoGame.Utilities.PackedVector
+namespace MonoGame.Framework.PackedVector
 {
     /// <summary>
     /// Packed vector type containing signed 16-bit XY components.
@@ -79,7 +78,7 @@ namespace MonoGame.Utilities.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => $"NormalizedShort2({X}, {Y}, {Z}, {W})";
+        public override string ToString() => $"NormalizedShort2({X}, {Y})";
 
         public override int GetHashCode() => PackedValue.GetHashCode();
 

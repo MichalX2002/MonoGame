@@ -15,13 +15,13 @@ namespace MonoGame.Framework.Input
         /// Gets the position of the left trigger.
         /// </summary>
         /// <value>A value from 0f to 1f representing left trigger.</value>
-        public readonly float Left;
+        public float Left { get; }
 
         /// <summary>
         /// Gets the position of the right trigger.
         /// </summary>
         /// <value>A value from 0f to 1f representing right trigger.</value>
-        public readonly float Right;
+        public float Right { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GamePadTriggers"/> struct.

@@ -1,6 +1,6 @@
 ﻿using System;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Utilities.PackedVector;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging
 {

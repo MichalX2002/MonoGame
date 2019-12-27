@@ -7,23 +7,21 @@ using System.Runtime.Serialization;
 
 namespace MonoGame.Framework.Audio
 {
-
     /// <summary>
     /// The exception thrown when no audio hardware is present, or driver issues are detected.
     /// </summary>
     [DataContract]
     public sealed class NoMicrophoneException : Exception
     {
-        /// <param name="msg">A message describing the error.</param>
-        public NoMicrophoneException(string msg)
-            : base(msg)
+        /// <param name="message">A message describing the error.</param>
+        public NoMicrophoneException(string message) : base(message)
         {
         }
 
-        /// <param name="msg">A message describing the error.</param>
-        /// <param name="innerException">The exception that is the underlying cause of the current exception. If not null, the current exception is raised in a try/catch block that handled the innerException.</param>
-        public NoMicrophoneException(string msg, Exception innerException)
-            : base(msg, innerException)
+        /// <param name="message">A message describing the error.</param>
+        /// <param name="inner">The exception that is the underlying cause of the current exception. If not null, the current exception is raised in a try/catch block that handled the innerException.</param>
+        public NoMicrophoneException(string message, Exception inner)
+            : base(message, inner)
         {
         }
     }

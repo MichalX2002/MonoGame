@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Reflection;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Framework
 {
     public static class BinaryWriterExtensions
     {

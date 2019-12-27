@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace MonoGame.Utilities.Memory
+namespace MonoGame.Framework.Memory
 {
     using System;
     using System.Collections.Generic;

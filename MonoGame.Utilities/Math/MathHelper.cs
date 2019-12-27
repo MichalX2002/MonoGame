@@ -332,7 +332,7 @@ namespace MonoGame.Framework
         /// Determines if value is a power of two.
         /// </summary>
         /// <param name="value">A value.</param>
-        /// <returns><c>true</c> if <c>value</c> is a power of two; otherwise <c>false</c>.</returns>
+        /// <returns><see langword="true"/> if <c>value</c> is a power of two; otherwise <see langword="false"/>.</returns>
         public static bool IsPowerOfTwo(int value)
         {
             return (value > 0) && ((value & (value - 1)) == 0);

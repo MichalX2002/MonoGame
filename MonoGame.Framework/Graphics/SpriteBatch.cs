@@ -16,17 +16,16 @@ namespace MonoGame.Framework.Graphics
         #region Private Fields
 
         private SpriteBatcher _batcher;
+        private SpriteEffect _spriteEffect;
+        private EffectPass _spritePass;
 
+        private bool _beginCalled;
         private SpriteSortMode _sortMode;
         private BlendState _blendState;
         private SamplerState _samplerState;
         private DepthStencilState _depthStencilState;
         private RasterizerState _rasterizerState;
         private Effect _effect;
-        private bool _beginCalled;
-
-        private SpriteEffect _spriteEffect;
-        private EffectPass _spritePass;
 
         #endregion
 
@@ -41,17 +40,16 @@ namespace MonoGame.Framework.Graphics
                 throw new ArgumentNullException(
                     nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
 
+            _batcher = new SpriteBatcher(graphicsDevice);
             _spriteEffect = new SpriteEffect(graphicsDevice);
             _spritePass = _spriteEffect.CurrentTechnique.Passes[0];
-
-            _batcher = new SpriteBatcher(graphicsDevice);
 
             _beginCalled = false;
         }
 
         /// <summary>
         /// Reuse a previously allocated <see cref="SpriteBatchItem"/> from the item pool. 
-        /// If there is none available, the pool grows and initializes new items.
+        /// The pool grows and initializes new items if none are available.
         /// </summary>
         public SpriteBatchItem GetBatchItem(Texture2D texture)
         {
@@ -1058,7 +1056,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Immediately releases the unmanaged resources used by this object.
         /// </summary>
-        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        /// <param name="disposing"><see langword="true"/> to release both managed and unmanaged resources; <see langword="false"/> to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             if (!IsDisposed)

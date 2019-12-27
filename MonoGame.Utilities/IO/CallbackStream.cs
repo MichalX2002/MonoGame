@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace MonoGame.Utilities.IO
+namespace MonoGame.Framework.IO
 {
     public sealed class CallbackStream : Stream
     {

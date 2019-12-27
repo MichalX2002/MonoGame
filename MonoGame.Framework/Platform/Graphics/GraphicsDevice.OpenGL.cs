@@ -17,7 +17,6 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class GraphicsDevice
     {
-
 #if DESKTOPGL || ANGLE
         internal IGraphicsContext Context { get; private set; }
 #endif
@@ -251,6 +250,7 @@ namespace MonoGame.Framework.Graphics
             // Initialize draw buffer attachment array
             GL.GetInteger(GetPName.MaxDrawBuffers, out int maxDrawBuffers);
             GraphicsExtensions.CheckGLError();
+
             _drawBuffers = new DrawBuffersEnum[maxDrawBuffers];
             for (int i = 0; i < maxDrawBuffers; i++)
                 _drawBuffers[i] = (DrawBuffersEnum)(FramebufferAttachment.ColorAttachment0Ext + i);
@@ -677,10 +677,10 @@ namespace MonoGame.Framework.Graphics
                 renderTarget.GLStencilBuffer = stencil;
             }
 
-            if (Threading.IsOnUIThread())
+            if (Threading.IsOnMainThread)
                 Create();
             else
-                Threading.BlockOnUIThread(Create);
+                Threading.BlockOnMainThread(Create);
         }
 
         internal void PlatformDeleteRenderTarget(IRenderTarget renderTarget)
@@ -729,10 +729,10 @@ namespace MonoGame.Framework.Graphics
                     }
                 }
             }
-            if (Threading.IsOnUIThread())
+            if (Threading.IsOnMainThread)
                 Delete();
             else
-                Threading.BlockOnUIThread(Delete);
+                Threading.BlockOnMainThread(Delete);
         }
 
         private void PlatformResolveRenderTargets()
@@ -854,14 +854,14 @@ namespace MonoGame.Framework.Graphics
 
         private static GLPrimitiveType PrimitiveTypeGL(PrimitiveType primitiveType)
         {
-            switch (primitiveType)
+            return primitiveType switch
             {
-                case PrimitiveType.LineList: return GLPrimitiveType.Lines;
-                case PrimitiveType.LineStrip: return GLPrimitiveType.LineStrip;
-                case PrimitiveType.TriangleList: return GLPrimitiveType.Triangles;
-                case PrimitiveType.TriangleStrip: return GLPrimitiveType.TriangleStrip;
-                default: throw new ArgumentOutOfRangeException();
-            }
+                PrimitiveType.LineList => GLPrimitiveType.Lines,
+                PrimitiveType.LineStrip => GLPrimitiveType.LineStrip,
+                PrimitiveType.TriangleList => GLPrimitiveType.Triangles,
+                PrimitiveType.TriangleStrip => GLPrimitiveType.TriangleStrip,
+                _ => throw new ArgumentOutOfRangeException(),
+            };
         }
 
         /// <summary>
@@ -940,7 +940,7 @@ namespace MonoGame.Framework.Graphics
 
         internal void PlatformBeginApplyState()
         {
-            Threading.EnsureUIThread();
+            Threading.EnsureMainThread();
         }
 
         private void PlatformApplyBlend(bool force = false)
@@ -1198,7 +1198,7 @@ namespace MonoGame.Framework.Graphics
         internal void OnPresentationChanged()
         {
 #if DESKTOPGL || ANGLE
-            Context.MakeCurrent(new WindowInfo(SdlGameWindow.Instance.Handle));
+            Context.MakeCurrent(new WindowInfo( SdlGameWindow.Instance.Handle));
             Context.SwapInterval = PresentationParameters.PresentationInterval.GetSwapInterval();
 #endif
 

@@ -76,7 +76,7 @@ namespace MonoGame.Framework.Audio
         /// <remarks>
         /// This event may occur when <see cref="Play()"/> is called or during playback when a buffer is completed.
         /// </remarks>
-        public event SimpleEventHandler<DynamicSoundEffectInstance> BufferNeeded;
+        public event DataEvent<DynamicSoundEffectInstance> BufferNeeded;
 
         #endregion
 
@@ -236,18 +236,20 @@ namespace MonoGame.Framework.Audio
         /// <remarks>
         /// The span length must conform to alignment requirements for the audio format.
         /// </remarks>
-        /// <typeparam name="T">The type of audio data. Use <see cref="float"/> for 32-bit PCM.</typeparam>
+        /// <typeparam name="T">The audio data type which will be converted to bytes.</typeparam>
         /// <param name="data">The span containing audio data.</param>
         /// <param name="depth">The depth of the audio data.</param>
-        public void SubmitBuffer<T>(ReadOnlySpan<T> data, AudioDepth depth)
+        public unsafe void SubmitBuffer<T>(ReadOnlySpan<T> data, AudioDepth depth)
             where T : unmanaged
         {
             AssertNotDisposed();
 
-            if (data.IsEmpty)
-                throw new ArgumentEmptyException(nameof(data));
-
+            if (data.IsEmpty) throw new ArgumentEmptyException(nameof(data));
             SoundEffect.AssertValidAudioDepth(depth);
+
+            if (sizeof(T) % ((int)depth / 8) != 0)
+                throw new ArgumentException(
+                    "The data bytes do not align with the audio depth.", nameof(data));
 
             PlatformSubmitBuffer(data, depth);
         }
