@@ -1,5 +1,7 @@
 ﻿using System;
 using MonoGame.Framework;
+using MonoGame.Imaging.Attributes;
+using MonoGame.Imaging.Attributes.Format;
 using MonoGame.Imaging.Coding;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Utilities;
@@ -36,17 +38,11 @@ namespace MonoGame.Imaging
                     "The contigous memory is not large enough for the given dimensions.", paramName);
         }
 
-        public static void AssertValidFrameLimit(int? frameLimit, string paramName)
-        {
-            if (frameLimit.HasValue)
-                CommonArgumentGuard.AssertAboveZero(frameLimit.Value, paramName);
-        }
-
         public static void AssertRectangleInSource<TPixel>(
             IPixelSource<TPixel> source, Rectangle rect, string rectParamName)
             where TPixel : unmanaged, IPixel
         {
-            // Rectangle.Contains would suffice, but exception readability would suffer
+            // Rectangle.Contains would suffice, but exception details would suffer
             AssertNonEmptyRectangle(rect, rectParamName);
 
             if (rect.Width > source.Width)

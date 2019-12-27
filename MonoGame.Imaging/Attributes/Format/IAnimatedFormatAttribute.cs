@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MonoGame.Imaging.Coding
+namespace MonoGame.Imaging.Attributes.Format
 {
     /// <summary>
     /// Allows processing of images with multiple frames sharing the same dimensions.

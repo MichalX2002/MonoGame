@@ -1,6 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using MonoGame.Utilities.Memory;
+﻿using MonoGame.Utilities.Memory;
+using System;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -19,6 +18,8 @@ namespace MonoGame.Framework.Graphics
 
         private const int InitialBatchSize = 256;
 
+        private const int BufferSizeGrowth = 256;
+
         /// <summary>
         /// The maximum number of batch items that can be 
         /// drawn at once with <see cref="FlushVertexArray"/>.
@@ -30,7 +31,7 @@ namespace MonoGame.Framework.Graphics
         private int _itemCount;
         private SpriteBatchItem[] _batchItems;
         private UnmanagedPointer<VertexPositionColorTexture> _vertexBuffer;
-        
+
         /// <summary>
         /// The index buffer values are constant and more indices are added as needed.
         /// </summary>
@@ -46,35 +47,27 @@ namespace MonoGame.Framework.Graphics
             _indexBuffer = new UnmanagedPointer<ushort>();
             _batchItems = Array.Empty<SpriteBatchItem>();
 
-            EnsureCapacity(InitialBatchSize);
+            SetupBuffers(InitialBatchSize);
         }
 
         /// <summary>
-        /// Ensures that there's enough indices and vertex buffer 
-        /// capacity for the specified <paramref name="itemCount"/>
-        /// (up to <see cref="MaxBatchSize"/>).
+        /// Calculates indices and resizes buffer capacity (up to <see cref="MaxBatchSize"/>).
         /// </summary>
-        private void EnsureCapacity(int itemCount)
+        private void SetupBuffers(int itemCount, int oldItemCount = 0)
         {
-            int oldSize = _batchItems.Length;
-            Array.Resize(ref _batchItems, itemCount);
-            for (int i = oldSize; i < _batchItems.Length; i++)
-                _batchItems[i] = new SpriteBatchItem();
-
-            int min = Math.Min(itemCount, MaxBatchSize);
-
-            int minVertices = min * 4; // 4 vertices per item
+            int minVertices = itemCount * 4; // 4 vertices per item
             if (minVertices > _vertexBuffer.Capacity)
                 _vertexBuffer.Capacity = minVertices;
 
-            int minIndices = min * 6; // 6 indices per item
+            int minIndices = itemCount * 6; // 6 indices per item
             if (minIndices > _indexBuffer.Capacity)
             {
                 _indexBuffer.Capacity = minIndices;
 
-                // 1 batch item needs 6 indices
+                int oldIndices = oldItemCount * 6;
+                int oldVertices = oldItemCount * 4;
                 ushort* indexPtr = _indexBuffer.Ptr;
-                for (int i = 0, v = 0; i < minIndices; i += 6, v += 4)
+                for (int i = oldIndices, v = oldVertices; i < minIndices; i += 6, v += 4)
                 {
                     /*
                      *  TL    TR    0,1,2,3 = index offsets for vertex indices
@@ -106,8 +99,13 @@ namespace MonoGame.Framework.Graphics
             {
                 int oldSize = _batchItems.Length;
                 int newSize = oldSize + oldSize / 2; // grow by x1.5
-                newSize = (newSize + 255) & (~255); // grow in chunks of 256.
-                EnsureCapacity(newSize);
+                newSize = (newSize + BufferSizeGrowth - 1) & ~(BufferSizeGrowth - 1); // grow in chunks
+
+                Array.Resize(ref _batchItems, newSize);
+                for (int i = oldSize; i < newSize; i++)
+                    _batchItems[i] = new SpriteBatchItem();
+
+                SetupBuffers(Math.Min(newSize, MaxBatchSize), _batchItems.Length);
             }
             return _batchItems[_itemCount++];
         }
@@ -177,7 +175,7 @@ namespace MonoGame.Framework.Graphics
                 // flush the remaining data
                 FlushVertexArray(vertexCount, effect, tex);
             }
-            
+
             unchecked
             {
                 _device._graphicsMetrics._spriteCount += _itemCount;

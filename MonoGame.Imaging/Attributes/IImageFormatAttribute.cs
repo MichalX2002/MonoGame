@@ -1,5 +1,5 @@
 ﻿
-namespace MonoGame.Imaging.Coding
+namespace MonoGame.Imaging.Attributes
 {
     /// <summary>
     /// Base interface for image format attributes.

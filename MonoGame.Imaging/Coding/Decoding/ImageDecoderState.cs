@@ -14,10 +14,7 @@ namespace MonoGame.Imaging.Coding.Decoding
         /// </summary>
         public IImageDecoder Decoder { get; }
 
-        /// <summary>
-        /// Gets or sets the most recently decoded image. 
-        /// </summary>
-        public Image<TPixel> Current { get; set; }
+        public Image<TPixel> CurrentImage { get; set; }
 
         #endregion
 

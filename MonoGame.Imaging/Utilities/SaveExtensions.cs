@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using MonoGame.Framework;
-using MonoGame.Imaging.Encoding;
+using MonoGame.Imaging.Coding.Encoding;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Utilities;
 using MonoGame.Utilities.PackedVector;
@@ -13,7 +14,7 @@ namespace MonoGame.Imaging
     public static partial class SaveExtensions
     {
         public static void Save<TPixel>(
-            this ReadOnlyFrameCollection<TPixel> frames,
+            this IEnumerable<IReadOnlyPixelBuffer<TPixel>> images,
             Stream output, 
             ImageFormat format,
             EncoderOptions encoderOptions,
@@ -27,9 +28,9 @@ namespace MonoGame.Imaging
                 encoderOptions = encoder.DefaultOptions;
 
             AssertValidOutput(output);
-            AssertValidSource(encoder, config, frames);
+            AssertValidSource(encoder, config, images);
             
-            encoder.Encode(frames, output, encoderOptions, config, cancellation, onProgress);
+            encoder.Encode(images, output, encoderOptions, config, cancellation, onProgress);
         }
 
         public static FileStream OpenWrite(string filePath)
@@ -41,17 +42,15 @@ namespace MonoGame.Imaging
         #region Argument Validation
 
         [DebuggerHidden]
-        private static void AssertValidSource<TPixel, TFrame>(
-            IImageEncoder encoder, ImagingConfig config, ImageCollection<TPixel, TFrame> frames)
+        private static void AssertValidSource<TPixel>(
+            IImageEncoder encoder, 
+            ImagingConfig config, 
+            IEnumerable<IReadOnlyPixelBuffer<TPixel>> images)
             where TPixel : unmanaged, IPixel
-            where TFrame : ReadOnlyImageFrame<TPixel>
         {
             if (encoder == null) throw new ArgumentNullException(nameof(encoder));
             if (config == null) throw new ArgumentNullException(nameof(config));
-            CommonArgumentGuard.AssertNonEmpty(frames?.Count, nameof(frames));
-
-            if (frames.Count > 1)
-                ImagingArgumentGuard.AssertAnimationSupport(encoder, config);
+            if (images == null) throw new ArgumentNullException(nameof(images));
         }
 
         [DebuggerHidden]
@@ -158,8 +157,10 @@ namespace MonoGame.Imaging
 
         public static void Save<TPixel>(
             this IReadOnlyPixelBuffer<TPixel> pixels,
-            Stream output, ImageFormat format, EncoderOptions encoderOptions = null,
-            EncodeProgressCallback<TPixel, IReadOnlyPixelBuffer<TPixel>> onProgress = null)
+            Stream output, 
+            ImageFormat format,
+            EncoderOptions encoderOptions = null,
+            EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             Save(pixels, ImagingConfig.Default, output, format, encoderOptions, onProgress);
@@ -167,8 +168,10 @@ namespace MonoGame.Imaging
 
         public static void Save<TPixel>(
             this IReadOnlyPixelBuffer<TPixel> pixels,
-            ImagingConfig imagingConfig, string filePath, 
-            ImageFormat format = null, EncoderOptions encoderOptions = null,
+            ImagingConfig imagingConfig,
+            string filePath, 
+            ImageFormat format = null, 
+            EncoderOptions encoderOptions = null,
             EncodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {

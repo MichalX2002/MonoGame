@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO.Compression;
+using MonoGame.Imaging.Attributes.Coder;
+using MonoGame.Imaging.Pixels;
 using StbSharp;
 
 namespace MonoGame.Imaging.Coding
@@ -16,6 +18,7 @@ namespace MonoGame.Imaging.Coding
             CompressionLevel = compression;
         }
     }
+}
 
 namespace MonoGame.Imaging.Coding.Encoding
 {
@@ -25,8 +28,10 @@ namespace MonoGame.Imaging.Coding.Encoding
         public override EncoderOptions DefaultOptions => PngEncoderOptions.Default;
 
         protected override bool WriteFirst<TPixel>(
-            in StbImageWrite.WriteContext context, ReadOnlyImageFrame<TPixel> frame, 
-            EncoderOptions encoderOptions, ImagingConfig config)
+            in StbImageWrite.WriteContext context, 
+            IReadOnlyPixelBuffer<TPixel> image, 
+            EncoderOptions encoderOptions,
+            ImagingConfig config)
         {
             var options = encoderOptions as PngEncoderOptions;
             return StbImageWrite.Png.WriteCore(context, options.CompressionLevel);

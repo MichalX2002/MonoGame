@@ -8,28 +8,21 @@ using MonoGame.Utilities.PackedVector;
 
 namespace MonoGame.Imaging
 {
-    public unsafe partial class Image<TPixel> : IPixelBuffer<TPixel>, IDisposable
+    public unsafe partial class Image<TPixel> : IPixelMemory<TPixel>, IDisposable
         where TPixel : unmanaged, IPixel
     {
-        public TPixel GetPixel(int x, int y)
-        {
-            return GetPixelRowSpan(y)[x];
-        }
+        /* TODO: make these into IPixelBuffer extensions
+ 
+        public TPixel GetPixel(int x, int y) => GetPixelRowSpan(y)[x];
 
-        public void SetPixel(int x, int y, TPixel value)
-        {
-            GetPixelRowSpan(y)[x] = value;
-        }
+        public void SetPixel(int x, int y, TPixel value) => GetPixelRowSpan(y)[x] = value;
 
-        public void GetPixelRow(int x, int y, Span<TPixel> destination)
-        {
+        public void GetPixelRow(int x, int y, Span<TPixel> destination) => 
             GetPixelRowSpan(y).Slice(x, destination.Length).CopyTo(destination);
-        }
 
-        public void SetPixelRow(int x, int y, Span<TPixel> row)
-        {
+        public void SetPixelRow(int x, int y, Span<TPixel> row) => 
             row.CopyTo(GetPixelRowSpan(y).Slice(x));
-        }
+        */
 
         public Span<TPixel> GetPixelSpan()
         {
@@ -65,16 +58,16 @@ namespace MonoGame.Imaging
         }
 
         /// <summary>
-        /// Helper to keep the main class tidy.
+        /// Helper for containing image pixels in memory.
         /// </summary>
-        internal unsafe struct Buffer
+        public unsafe struct Buffer
         {
             private IMemory<TPixel> _imemory;
             private Memory<TPixel> _memory;
             private bool _leaveOpen;
 
             public int Length { get; }
-            public int Stride { get; }
+            public int PixelStride { get; }
             public bool IsEmpty => Length == 0;
 
             public Span<TPixel> Span
@@ -87,22 +80,22 @@ namespace MonoGame.Imaging
                 }
             }
 
-            public Buffer(IMemory<TPixel> memory, int stride, bool leaveOpen) : this()
+            public Buffer(IMemory<TPixel> memory, int pixelStride, bool leaveOpen) : this()
             {
                 _imemory = memory ?? throw new ArgumentNullException(nameof(memory));
                 _leaveOpen = leaveOpen;
                 Length = memory.Span.Length;
-                Stride = stride;
+                PixelStride = pixelStride;
             }
 
-            public Buffer(Memory<TPixel> memory, int stride) : this()
+            public Buffer(Memory<TPixel> memory, int pixelStride) : this()
             {
                 if (memory.IsEmpty)
                     throw new ArgumentEmptyException(nameof(memory));
 
                 _memory = memory;
                 Length = memory.Length;
-                Stride = stride;
+                PixelStride = pixelStride;
             }
 
             public void Dispose()

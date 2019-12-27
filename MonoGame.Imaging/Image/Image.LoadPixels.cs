@@ -28,8 +28,9 @@ namespace MonoGame.Imaging
             fixed (byte* srcPixelPtr = &MemoryMarshal.GetReference(pixelData))
             fixed (TPixel* dstPixelPtr = &MemoryMarshal.GetReference(image.GetPixelSpan()))
             {
-                byte* srcPtr = srcPixelPtr + sourceRectangle.X;
-                byte* dstPtr = (byte*)(dstPixelPtr + sourceRectangle.X);
+                int byteOffsetX = sourceRectangle.X * sizeof(TPixel);
+                byte* srcPtr = srcPixelPtr + byteOffsetX;
+                byte* dstPtr = (byte*)dstPixelPtr + byteOffsetX;
                 for (int y = 0; y < sourceRectangle.Height; y++)
                 {
                     byte* srcRow = srcPtr + (sourceRectangle.Y + y) * srcStride;

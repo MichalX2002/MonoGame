@@ -10,7 +10,9 @@ namespace MonoGame.Imaging.Coding.Encoding
     /// Represents a progress update for image encoding.
     /// </summary>
     public delegate void EncodeProgressCallback<TPixel>(
-        ImageEncoderState<TPixel> encoderState, double percentage, Rectangle? rectangle)
+        ImageEncoderState<TPixel> encoderState, 
+        double percentage, 
+        Rectangle? rectangle)
         where TPixel : unmanaged, IPixel;
 
     /// <summary>
@@ -32,7 +34,8 @@ namespace MonoGame.Imaging.Coding.Encoding
         /// <param name="encoderOptions">The encoder options.</param>
         /// <param name="config">The imaging configuration.</param>
         /// <param name="onProgress">Optional delegate for reporting encode progress.</param>
-        void EncodeFirst<TPixel>(
+        /// <returns>The state used to continue encoding of subsequent images.</returns>
+        ImageEncoderState<TPixel> EncodeFirst<TPixel>(
             IReadOnlyPixelBuffer<TPixel> image,
             Stream stream,
             EncoderOptions encoderOptions,
@@ -46,17 +49,24 @@ namespace MonoGame.Imaging.Coding.Encoding
         /// </summary>
         /// <typeparam name="TPixel">The pixel type of the frame collection.</typeparam>
         /// <param name="image">The image to encode.</param>
-        /// <param name="stream">The stream to output to.</param>
+        /// <param name="encoderState">The state from the first encode call.</param>
         /// <param name="encoderOptions">The encoder options.</param>
         /// <param name="config">The imaging configuration.</param>
         /// <param name="onProgress">Optional delegate for reporting encode progress.</param>
-        void EncodeNext<TPixel>(
+        bool EncodeNext<TPixel>(
             IReadOnlyPixelBuffer<TPixel> image,
-            Stream stream,
+            ImageEncoderState<TPixel> encoderState,
             EncoderOptions encoderOptions,
             ImagingConfig config,
             CancellationToken cancellationToken,
             EncodeProgressCallback<TPixel> onProgress = null)
+            where TPixel : unmanaged, IPixel;
+
+        /// <summary>
+        /// Finishes an encoding operation.
+        /// </summary>
+        /// <param name="encoderState">The state from the first encode call.</param>
+        void FinishState<TPixel>(ImageEncoderState<TPixel> encoderState)
             where TPixel : unmanaged, IPixel;
     }
 }

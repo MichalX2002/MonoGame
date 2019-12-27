@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading;
 using MonoGame.Framework;
-using MonoGame.Imaging.Decoding;
+using MonoGame.Imaging.Coding.Decoding;
 using MonoGame.Utilities.Memory;
 using MonoGame.Utilities.PackedVector;
 
@@ -45,6 +45,8 @@ namespace MonoGame.Imaging
 
         #endregion
 
+        /* TODO: fix this :)
+
         #region LoadFrames(IReadOnlyMemory)
 
         public static ImageDecoderEnumerator<TPixel> LoadFrames<TPixel>(
@@ -72,6 +74,8 @@ namespace MonoGame.Imaging
 
         #endregion
 
+        */
+
 
         #region Load(Stream)
 
@@ -84,8 +88,10 @@ namespace MonoGame.Imaging
         }
 
         public static Image<TPixel> Load<TPixel>(
-            Stream stream, ImagingConfig config,
-            CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
+            Stream stream,
+            ImagingConfig config,
+            CancellationToken cancellation,
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return Load(stream, config, out _, cancellation, onProgress);
@@ -93,8 +99,10 @@ namespace MonoGame.Imaging
 
 
         public static Image<TPixel> Load<TPixel>(
-            Stream stream, out ImageFormat format,
-            CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
+            Stream stream, 
+            out ImageFormat format,
+            CancellationToken cancellation, 
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return LoadFrames(stream, ImagingConfig.Default, 1, out format, cancellation, onProgress)?.First.Pixels;
@@ -102,13 +110,16 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> Load<TPixel>(
             Stream stream, 
-            CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
+            CancellationToken cancellation, 
+            DecodeProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return Load(stream, out _, cancellation, onProgress);
         }
 
         #endregion
+
+        /* TODO: fix this :)
 
         #region Load(ReadOnlySpan)
 
@@ -147,5 +158,7 @@ namespace MonoGame.Imaging
         }
 
         #endregion
+
+        */
     }
 }

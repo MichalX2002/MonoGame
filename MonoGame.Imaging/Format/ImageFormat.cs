@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using MonoGame.Framework;
-using MonoGame.Imaging.Coding;
+using MonoGame.Imaging.Attributes;
+using MonoGame.Imaging.Attributes.Format;
 using MonoGame.Utilities.Collections;
 
 namespace MonoGame.Imaging
 {
     [DebuggerDisplay("{ToString(),nq}")]
-    public class ImageFormat
+    public class ImageFormat : IImageFormatAttribute
     {
         private static HashSet<ImageFormat> _formats;
         private static HashSet<ImageFormat> _builtinFormats;
@@ -71,7 +72,7 @@ namespace MonoGame.Imaging
             Jpeg = AddBuiltIn("Joint Photographic Experts Group", "JPEG", new[] { "image/jpeg" }, new[] { ".jpeg", ".jpg", ".jpe", ".jfif", ".jif" });
             Gif = AddBuiltIn("Graphics Interchange Format", "GIF", new[] { "image/gif" }, new[] { ".gif" }, new[] { typeof(IAnimatedFormatAttribute) });
             Bmp = AddBuiltIn("Bitmap", "BMP", new[] { "image/bmp", "image/x-bmp" }, new[] { ".bmp", ".bm" });
-            Tga = AddBuiltIn("Truevision Graphics Adapter", "TGA", new[] { "image/x-tga", "image/x-targa" }, new[] { ".tga" });
+            Tga = AddBuiltIn("Truevision Graphics Adapter", "TGA", new[] { "image/x-tga", "image/x-targa" }, new[] { ".tga", ".targa" });
             Rgbe = AddBuiltIn("Radiance HDR", "RGBE", new[] { "image/vnd.radiance", "image/x-hdr" }, new[] { ".hdr", ".rgbe" });
             Psd = AddBuiltIn("PhotoShop Document", "PSD", new[] { "image/vnd.adobe.photoshop", "application/x-photoshop" }, new[] { ".psd" }, new[] { typeof(ILayeredFormatAttribute) });
         }

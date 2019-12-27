@@ -716,7 +716,7 @@ namespace StbSharp
             ring_buffer = stbir__get_ring_buffer_entry(stbir_info.ring_buffer, ring_buffer_index,
                 stbir_info.ring_buffer_length_bytes / sizeof(float));
 
-            CRuntime.memset(ring_buffer, 0, stbir_info.ring_buffer_length_bytes);
+            CRuntime.MemSet(ring_buffer, 0, stbir_info.ring_buffer_length_bytes);
             return ring_buffer;
         }
 
@@ -927,7 +927,7 @@ namespace StbSharp
         public static void stbir__decode_and_resample_downsample(ImageResizeInfo stbir_info, int n)
         {
             stbir__decode_scanline(stbir_info, n);
-            CRuntime.memset(stbir_info.horizontal_buffer, 0,
+            CRuntime.MemSet(stbir_info.horizontal_buffer, 0,
                 stbir_info.output_w * stbir_info.channels * sizeof(float));
             if ((stbir__use_width_upsampling(stbir_info)) != 0)
                 stbir__resample_horizontal_upsample(stbir_info, n, stbir_info.horizontal_buffer);
@@ -1133,7 +1133,7 @@ namespace StbSharp
             int n0 = (int)(vertical_contributors[contributor].n0);
             int n1 = (int)(vertical_contributors[contributor].n1);
             int output_row_start = (int)(n * stbir_info.output_stride_bytes);
-            CRuntime.memset(encode_buffer, 0, output_w * sizeof(float) * channels);
+            CRuntime.MemSet(encode_buffer, 0, output_w * sizeof(float) * channels);
             switch (channels)
             {
                 case 1:
@@ -1549,7 +1549,7 @@ namespace StbSharp
             if ((tempmem_size_in_bytes) < (memory_required))
                 return 0;
 
-            CRuntime.memset(tempmem, 0, tempmem_size_in_bytes);
+            CRuntime.MemSet(tempmem, 0, tempmem_size_in_bytes);
             info.input_data = input_data;
             info.input_stride_bytes = (int)(width_stride_input);
             info.output_data = output_data;
@@ -1619,7 +1619,7 @@ namespace StbSharp
             stbir__calculate_transform(info, (float)(s0), (float)(t0), (float)(s1), (float)(t1), transform);
             stbir__choose_filter(info, (int)(h_filter), (int)(v_filter));
             int memory_required = stbir__calculate_memory(info);
-            void* extra_memory = CRuntime.malloc(memory_required);
+            void* extra_memory = CRuntime.MAlloc(memory_required);
             if (extra_memory == null)
                 return 0;
             int result = (int)(stbir__resize_allocated(
@@ -1627,7 +1627,7 @@ namespace StbSharp
                 (int)(output_stride_in_bytes), (int)(alpha_channel), (uint)(flags), type,
                 (int)(edge_horizontal),
                 (int)(edge_vertical), (int)(colorspace), extra_memory, memory_required));
-            CRuntime.free(extra_memory);
+            CRuntime.Free(extra_memory);
             return (int)(result);
         }
 

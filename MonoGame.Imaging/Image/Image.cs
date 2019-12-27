@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using MonoGame.Imaging.Decoding;
-using MonoGame.Imaging.Encoding;
+using MonoGame.Imaging.Coding;
+using MonoGame.Imaging.Coding.Decoding;
+using MonoGame.Imaging.Coding.Encoding;
 using MonoGame.Utilities;
 using MonoGame.Utilities.Memory;
 using MonoGame.Utilities.PackedVector;
@@ -25,6 +26,20 @@ namespace MonoGame.Imaging
 
         private static List<IImageEncoder> _encoders;
         private static Dictionary<ImageFormat, IImageEncoder> _encoderByFormat;
+
+        private static List<IImageInfoDetector> _infoDetectors;
+        private static Dictionary<ImageFormat, IImageInfoDetector> _infoDetectorByFormat;
+
+        private static List<IImageInfoDetector> GetInfoDetectors()
+        {
+            if (_infoDetectors == null)
+            {
+                _infoDetectors = new List<IImageInfoDetector>();
+                _infoDetectors.Add(new PngInfoDetector());
+                _infoDetectors.Add(new BmpInfoDetector());
+            }
+            return _infoDetectors;
+        }
 
         private static List<IImageDecoder> GetDecoders()
         {
@@ -51,6 +66,30 @@ namespace MonoGame.Imaging
         {
             return GetEncoder(format).DefaultOptions;
         }
+
+        #region [Try]GetInfoDetector
+
+        public static bool TryGetInfoDetector(ImageFormat format, out IImageInfoDetector infoDetector)
+        {
+            if (_infoDetectorByFormat == null)
+            {
+                _infoDetectorByFormat = new Dictionary<ImageFormat, IImageInfoDetector>
+                {
+                    { GetInfoDetectors()[0].Format, GetInfoDetectors()[0] },
+                    { GetInfoDetectors()[1].Format, GetInfoDetectors()[1] }
+                };
+            }
+            return _infoDetectorByFormat.TryGetValue(format, out infoDetector);
+        }
+
+        public static IImageInfoDetector GetInfoDetector(ImageFormat format)
+        {
+            if (TryGetInfoDetector(format, out var infoDetector))
+                return infoDetector;
+            throw new MissingInfoDetectorException(format);
+        }
+
+        #endregion
 
         #region [Try]GetDecoder
 
@@ -160,9 +199,10 @@ namespace MonoGame.Imaging
         private static bool TryDetectFormat(
             ImageReadStream stream, ImagingConfig config, out ImageFormat format)
         {
-            foreach (var decoder in GetDecoders())
+            foreach (var infoDetector in GetInfoDetectors())
             {
-                if (decoder.TryDetectFormat(stream, config, out format))
+                format = infoDetector.DetectFormat(stream, config);
+                if (format != null)
                     return true;
             }
             format = default;
@@ -192,15 +232,20 @@ namespace MonoGame.Imaging
                 return DetectFormat(imageStream, config);
         }
 
+        /*
+
         public static bool TryDetectFormat(
             IReadOnlyMemory<byte> data, ImagingConfig config,
             CancellationToken cancellation, out ImageFormat format)
         {
             if (!data.IsEmpty())
             {
-                foreach (var decoder in GetDecoders())
-                    if (decoder.TryDetectFormat(data, config, cancellation, out format))
+                foreach (var infoDetector in GetInfoDetectors())
+                {
+                    format = infoDetector.DetectFormat(data, config, cancellation);
+                    if (format != null)
                         return true;
+                }
             }
             format = default;
             return false;
@@ -214,6 +259,8 @@ namespace MonoGame.Imaging
             throw new UnknownImageFormatException();
         }
 
+        */
+
         #endregion
 
         #region [Try]Identify
@@ -225,8 +272,14 @@ namespace MonoGame.Imaging
             using (var imageStream = config.CreateReadStream(stream, cancellation))
             {
                 if (TryDetectFormat(imageStream, config, out var format))
-                    if (TryGetDecoder(format, out var decoder))
-                        return decoder.TryIdentify(imageStream, config, out info);
+                {
+                    if (TryGetInfoDetector(format, out var detector))
+                    {
+                        info = detector.Identify(imageStream, config);
+                        if (info != null)
+                            return true;
+                    }
+                }
             }
             info = default;
             return false;
@@ -238,13 +291,15 @@ namespace MonoGame.Imaging
             using (var imageStream = config.CreateReadStream(stream, cancellation))
             {
                 var format = DetectFormat(imageStream, config);
-                var decoder = GetDecoder(format);
-                if (!decoder.TryIdentify(imageStream, config, out var info))
-                    throw new InvalidDataException();
-                return info;
+                var infoDetector = GetInfoDetector(format);
+                var info = infoDetector.Identify(imageStream, config);
+                if (info != null)
+                    return info;
+                throw new InvalidDataException();
             }
         }
 
+        /*
         public static bool TryIdentify(
             IReadOnlyMemory<byte> data, ImagingConfig config,
             CancellationToken cancellation, out ImageInfo info)
@@ -256,7 +311,9 @@ namespace MonoGame.Imaging
             info = default;
             return false;
         }
+        */
 
+        /*
         public static ImageInfo Identify(
             IReadOnlyMemory<byte> data, ImagingConfig config, CancellationToken cancellation)
         {
@@ -266,6 +323,7 @@ namespace MonoGame.Imaging
                 throw new InvalidDataException();
             return info;
         }
+        */
 
         #endregion
     }

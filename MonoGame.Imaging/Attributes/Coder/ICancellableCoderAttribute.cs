@@ -1,5 +1,5 @@
 ﻿
-namespace MonoGame.Imaging.Coding
+namespace MonoGame.Imaging.Attributes.Coder
 {
     /// <summary>
     /// Allows cancellation of coding operations by a

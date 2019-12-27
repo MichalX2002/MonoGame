@@ -35,7 +35,7 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Gets the data stride (row width) including padding of the image in pixels.
         /// </summary>
-        public unsafe int Stride => _pixelBuffer.Stride;
+        public unsafe int Stride => _pixelBuffer.PixelStride;
 
         #endregion
 
