@@ -5,16 +5,13 @@ using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
-    public class ImageDecoderEnumerator<TPixel> : IEnumerable<Image<TPixel>>, IEnumerator<Image<TPixel>>
+    public class ImageDecoderEnumerator<TPixel> : ImageCoderEnumerator<TPixel, Image<TPixel>>
         where TPixel : unmanaged, IPixel
     {
         private ImageReadStream _readStream;
         private bool _leaveOpen;
 
         public IImageDecoder Decoder { get; }
-
-        public Image<TPixel> Current { get; private set; }
-        object IEnumerator.Current => Current;
 
         #region Constructors
 
@@ -28,14 +25,14 @@ namespace MonoGame.Imaging.Coding.Decoding
 
         #endregion
 
-        public bool MoveNext()
+        public override bool MoveNext()
         {
         }
 
         // TODO: consider implementation based on seekable streams
-        public void Reset() => throw new NotSupportedException();
+        public override void Reset() => throw new NotSupportedException();
 
-        public void Dispose()
+        public override void Dispose()
         {
             if (!_leaveOpen)
             {
@@ -43,8 +40,5 @@ namespace MonoGame.Imaging.Coding.Decoding
                 _readStream = null;
             }
         }
-
-        IEnumerator<Image<TPixel>> IEnumerable<Image<TPixel>>.GetEnumerator() => this;
-        IEnumerator IEnumerable.GetEnumerator() => this;
     }
 }

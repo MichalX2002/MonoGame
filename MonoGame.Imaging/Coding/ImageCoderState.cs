@@ -16,7 +16,7 @@ namespace MonoGame.Imaging.Coding
         public Stream Stream { get; }
 
         /// <summary>
-        /// Gets or sets the zero-based index of the most recently processed image.
+        /// Gets or sets the zero-based index of the current image.
         /// </summary>
         public int ImageIndex { get; set; }
 
@@ -26,6 +26,8 @@ namespace MonoGame.Imaging.Coding
         {
             Stream = stream ?? throw new ArgumentNullException(nameof(stream));
             _leaveOpen = leaveOpen;
+
+            ImageIndex = -1;
         }
 
         #region IDisposable

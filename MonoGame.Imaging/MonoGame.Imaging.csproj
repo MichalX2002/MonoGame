@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Remove="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\obj\Debug\netstandard2.0\StbImageWriteSharp.AssemblyInfo.cs" />
     <Compile Remove="..\ThirdParty\StbSharp\Image\src\StbImageSharp\obj\Debug\netstandard2.0\StbImageSharp.AssemblyInfo.cs" />
+    <Compile Remove="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\obj\Debug\netstandard2.0\StbSharp.Shared.AssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>

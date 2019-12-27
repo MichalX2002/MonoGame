@@ -11,21 +11,21 @@ namespace MonoGame.Imaging
 
         // TODO: optimize by replacing Span<>.CopyTo with faster memcpy
         public static Image<TPixelTo> LoadPixelBuffer<TPixelFrom, TPixelTo>(
-            IReadOnlyPixelBuffer<TPixelFrom> pixels, Rectangle sourceRectangle, ImagingConfig config)
+            IReadOnlyPixelBuffer<TPixelFrom> buffer, Rectangle sourceRectangle, ImagingConfig config)
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel
         {
-            if (pixels == null) throw new ArgumentEmptyException(nameof(pixels));
+            if (buffer == null) throw new ArgumentEmptyException(nameof(buffer));
             if (config == null) throw new ArgumentNullException(nameof(config));
             ImagingArgumentGuard.AssertNonEmptyRectangle(sourceRectangle, nameof(sourceRectangle));
 
             var image = new Image<TPixelTo>(sourceRectangle.Width, sourceRectangle.Height);
-            if (pixels is IReadOnlyPixelMemory<TPixelTo> typeEqualMemory)
+            if (buffer is IReadOnlyPixelMemory<TPixelTo> typeEqualMemory)
             {
                 if (!typeEqualMemory.HasPadding() &&
                     sourceRectangle.Position == Point.Zero &&
-                    sourceRectangle.Width == pixels.Width &&
-                    sourceRectangle.Height == pixels.Height)
+                    sourceRectangle.Width == buffer.Width &&
+                    sourceRectangle.Height == buffer.Height)
                 {
                     typeEqualMemory.GetPixelSpan().CopyTo(image.GetPixelSpan());
                 }
@@ -38,7 +38,7 @@ namespace MonoGame.Imaging
                     }
                 }
             }
-            else if (pixels is IReadOnlyPixelBuffer<TPixelTo> typeEqualBuffer)
+            else if (buffer is IReadOnlyPixelBuffer<TPixelTo> typeEqualBuffer)
             {
                 for (int y = 0; y < sourceRectangle.Height; y++)
                 {
@@ -50,7 +50,7 @@ namespace MonoGame.Imaging
             {
                 for (int y = 0; y < sourceRectangle.Height; y++)
                 {
-                    var srcRow = pixels.GetPixelRowSpan(sourceRectangle.Y + y);
+                    var srcRow = buffer.GetPixelRowSpan(sourceRectangle.Y + y);
                     var dstRow = image.GetPixelRowSpan(y);
                     for (int x = 0; x < sourceRectangle.Width; x++)
                         dstRow[x].FromScaledVector4(srcRow[x + sourceRectangle.X].ToScaledVector4());
@@ -63,46 +63,46 @@ namespace MonoGame.Imaging
 
         #region LoadPixelBuffer<TPixelFrom, TPixelTo> (Overloads) 
 
-
         public static Image<TPixelTo> LoadPixelBuffer<TPixelFrom, TPixelTo>(
-            IReadOnlyPixelBuffer<TPixelFrom> pixels, Rectangle sourceRectangle)
+            IReadOnlyPixelBuffer<TPixelFrom> buffer, Rectangle sourceRectangle)
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel
         {
-            return LoadPixelBuffer<TPixelFrom, TPixelTo>(pixels, sourceRectangle, ImagingConfig.Default);
+            return LoadPixelBuffer<TPixelFrom, TPixelTo>(
+                buffer, sourceRectangle, ImagingConfig.Default);
         }
 
         public static Image<TPixelTo> LoadPixelBuffer<TPixelFrom, TPixelTo>(
-            IReadOnlyPixelBuffer<TPixelFrom> pixels)
+            IReadOnlyPixelBuffer<TPixelFrom> buffer)
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel
         {
-            return LoadPixelBuffer<TPixelFrom, TPixelTo>(pixels, pixels.GetBounds());
+            return LoadPixelBuffer<TPixelFrom, TPixelTo>(buffer, buffer.GetBounds());
         }
 
         #endregion
 
-       #region LoadPixelBuffer<TPixel> (Overloads)
+        #region LoadPixelBuffer<TPixel> (Overloads)
 
         public static Image<TPixel> LoadPixelBuffer<TPixel>(
-            IReadOnlyPixelBuffer<TPixel> pixels, Rectangle sourceRectangle, ImagingConfig config)
+            IReadOnlyPixelBuffer<TPixel> buffer, Rectangle sourceRectangle, ImagingConfig config)
             where TPixel : unmanaged, IPixel
         {
-            return LoadPixelBuffer<TPixel, TPixel>(pixels, sourceRectangle, config);
+            return LoadPixelBuffer<TPixel, TPixel>(buffer, sourceRectangle, config);
         }
 
         public static Image<TPixel> LoadPixelBuffer<TPixel>(
-            IReadOnlyPixelBuffer<TPixel> pixels, Rectangle sourceRectangle)
+            IReadOnlyPixelBuffer<TPixel> buffer, Rectangle sourceRectangle)
             where TPixel : unmanaged, IPixel
         {
-            return LoadPixelBuffer(pixels, sourceRectangle, ImagingConfig.Default);
+            return LoadPixelBuffer(buffer, sourceRectangle, ImagingConfig.Default);
         }
 
         public static Image<TPixel> LoadPixelBuffer<TPixel>(
-            IReadOnlyPixelBuffer<TPixel> pixels)
+            IReadOnlyPixelBuffer<TPixel> buffer)
             where TPixel : unmanaged, IPixel
         {
-            return LoadPixelBuffer(pixels, pixels.GetBounds());
+            return LoadPixelBuffer(buffer, buffer.GetBounds());
         }
 
         #endregion

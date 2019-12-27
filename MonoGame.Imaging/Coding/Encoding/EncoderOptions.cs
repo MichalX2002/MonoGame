@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace MonoGame.Imaging
 {
@@ -12,6 +13,11 @@ namespace MonoGame.Imaging
         public static bool TypeEquals(EncoderOptions a, Type b) => a.GetType() == b;
 
         public static bool TypeEquals(EncoderOptions a, EncoderOptions b) => TypeEquals(a, b.GetType());
+
+        /// <summary>
+        /// Gets whether coder operations should close the <see cref="Stream"/>.
+        /// </summary>
+        public bool LeaveStreamOpen { get; }
 
         [DebuggerHidden]
         public static void AssertTypeEqual(EncoderOptions required, EncoderOptions other, string argName)

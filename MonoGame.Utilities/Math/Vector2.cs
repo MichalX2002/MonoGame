@@ -474,7 +474,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets a <see cref="Point"/> representation for this object.
         /// </summary>
-        public readonly Point ToPoint => new Point((int)X, (int)Y);
+        public readonly Point ToPoint() => new Point((int)X, (int)Y);
 
         /// <summary>
         /// Deconstruction method for <see cref="Vector2"/>.
