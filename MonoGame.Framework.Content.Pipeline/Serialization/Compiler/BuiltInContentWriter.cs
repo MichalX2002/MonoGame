@@ -14,8 +14,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
     class BuiltInContentWriter<T> : ContentTypeWriter<T>
     {
         private List<ContentTypeWriter> _genericTypes;
-
-        /// <inheritdoc/>
+         
         internal override void OnAddedToContentWriter(ContentWriter output)
         {
             base.OnAddedToContentWriter(output);

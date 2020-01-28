@@ -15,7 +15,7 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Short4 : IPackedVector<ulong>, IEquatable<Short4>
+    public struct Short4 : IPackedVector<ulong>, IEquatable<Short4>, IPixel
     {
         internal static Vector4 MinNeg = new Vector4(short.MinValue);
         internal static Vector4 MaxPos = new Vector4(short.MaxValue);
@@ -58,7 +58,6 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPackedVector
 
-        /// <inheritdoc/>
         [CLSCompliant(false)]
         public ulong PackedValue
         {
@@ -66,17 +65,14 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Short4, ulong>(ref this) = value;
         }
 
-        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
-        /// <inheritdoc/>
         public readonly Vector4 ToVector4() => new Vector4(X, Y, Z, W);
 
         #endregion
 
         #region IPixel
 
-        /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector)
         {
             var scaled = vector * 65534f;
@@ -84,7 +80,6 @@ namespace MonoGame.Framework.PackedVector
             this = Pack(ref scaled);
         }
 
-        /// <inheritdoc/>
         public readonly Vector4 ToScaledVector4()
         {
             var scaled = ToVector4();
@@ -92,6 +87,22 @@ namespace MonoGame.Framework.PackedVector
             scaled /= 65534f;
             return scaled;
         }
+
+        public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(ToScaledVector4());
+
+        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGrayAlpha16(GrayAlpha88 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
 
         #endregion
 
@@ -109,7 +120,7 @@ namespace MonoGame.Framework.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => $"Short4({X}, {Y}, {Z}, {W})";
+        public override string ToString() => nameof(Short4) + $"({X}, {Y}, {Z}, {W})";
 
         public override int GetHashCode() => PackedValue.GetHashCode();
 

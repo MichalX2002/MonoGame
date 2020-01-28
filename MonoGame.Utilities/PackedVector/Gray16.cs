@@ -1,5 +1,6 @@
-// Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+// MonoGame - Copyright (C) The MonoGame Team
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 using System;
 using System.Runtime.InteropServices;
@@ -23,14 +24,11 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPackedVector
 
-        /// <inheritdoc />
         [CLSCompliant(false)]
         public ushort PackedValue { readonly get => L; set => L = value; }
 
-        /// <inheritdoc />
         public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
-        /// <inheritdoc />
         public readonly Vector4 ToVector4()
         {
             float scaled = PackedValue / ushort.MaxValue;
@@ -41,46 +39,36 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPixel
 
-        /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector) => this = Pack(ref vector);
 
-        /// <inheritdoc/>
         public readonly Vector4 ToScaledVector4() => ToVector4();
 
-        /// <inheritdoc />
         public void FromGray8(Gray8 source) =>
             PackedValue = PackedVectorHelper.UpScale8To16Bit(source.PackedValue);
 
-        /// <inheritdoc />
-        public void FromGrayAlpha16(GrayAlpha16 source) => 
+        public void FromGrayAlpha16(GrayAlpha88 source) => 
             PackedValue = PackedVectorHelper.UpScale8To16Bit(source.L);
 
-        /// <inheritdoc />
         public void FromGray16(Gray16 source) => PackedValue = source.PackedValue;
 
-        /// <inheritdoc />
         public void FromRgb24(Rgb24 source) =>
             PackedValue = PackedVectorHelper.Get16BitBT709Luminance(
                 PackedVectorHelper.UpScale8To16Bit(source.R),
                 PackedVectorHelper.UpScale8To16Bit(source.G),
                 PackedVectorHelper.UpScale8To16Bit(source.B));
 
-        /// <inheritdoc />
         public void FromColor(Color source) =>
             PackedValue = PackedVectorHelper.Get16BitBT709Luminance(
                 PackedVectorHelper.UpScale8To16Bit(source.R),
                 PackedVectorHelper.UpScale8To16Bit(source.G),
                 PackedVectorHelper.UpScale8To16Bit(source.B));
 
-        /// <inheritdoc/>
         public void FromRgb48(Rgb48 source) =>
             PackedValue = PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B);
 
-        /// <inheritdoc/>
         public void FromRgba64(Rgba64 source) =>
             PackedValue = PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B);
 
-        /// <inheritdoc />
         public readonly void ToColor(ref Color destination)
         {
             destination.R = destination.G = destination.B =
@@ -129,7 +117,7 @@ namespace MonoGame.Framework.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => $"Gray16({PackedValue})";
+        public override string ToString() => nameof(Gray16) + $"({PackedValue})";
 
         public override int GetHashCode() => PackedValue.GetHashCode();
 

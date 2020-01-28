@@ -35,7 +35,7 @@ namespace MonoGame.Imaging.Pixels
             public Gray8 Gray;
 
             [FieldOffset(0)]
-            public GrayAlpha16 GrayAlpha;
+            public GrayAlpha88 GrayAlpha;
 
             [FieldOffset(0)]
             public Rgb24 Rgb;
@@ -80,10 +80,10 @@ namespace MonoGame.Imaging.Pixels
                     // creating conversion functions, maybe with some heavy LINQ expressions?
 
                     case 2:
-                        for (; i < toRead - 1; i++, bufferOffset += sizeof(GrayAlpha16))
+                        for (; i < toRead - 1; i++, bufferOffset += sizeof(GrayAlpha88))
                         {
                             convertHelper.GrayAlpha.FromScaledVector4(srcRow[i + offsetX].ToScaledVector4());
-                            for (int j = 0; j < sizeof(GrayAlpha16); j++)
+                            for (int j = 0; j < sizeof(GrayAlpha88); j++)
                                 buffer[j + bufferOffset] = convertHelper.Raw[j];
                         }
                         convertHelper.GrayAlpha.FromScaledVector4(srcRow[i + 1 + offsetX].ToScaledVector4());

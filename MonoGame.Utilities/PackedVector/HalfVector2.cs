@@ -52,18 +52,13 @@ namespace MonoGame.Framework.PackedVector
 
         private static HalfVector2 Pack(float x, float y)
         {
-            //uint num2 = HalfTypeHelper.Pack(x);
-            //uint num = (uint)(HalfTypeHelper.Pack(y) << 0x10);
             return new HalfVector2(new HalfSingle(x), new HalfSingle(y));
         }
 
         public readonly Vector2 ToVector2() => new Vector2(X, Y);
-        //    HalfTypeHelper.Unpack((ushort)PackedValue),
-        //    HalfTypeHelper.Unpack((ushort)(PackedValue >> 0x10)));
 
         #region IPackedVector
 
-        /// <inheritdoc/>
         [CLSCompliant(false)]
         public uint PackedValue
         {
@@ -71,21 +66,34 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<HalfVector2, uint>(ref this) = value;
         }
 
-        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => this = Pack(vector.X, vector.Y);
 
-        /// <inheritdoc/>
         public readonly Vector4 ToVector4()
         {
             var vector = ToVector2();
             return new Vector4(vector.X, vector.Y, 0, 1);
         }
 
+        public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(ToScaledVector4());
+
+        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGrayAlpha16(GrayAlpha88 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
+
         #endregion
 
         #region IPixel
 
-        /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector)
         {
             var scaled = new Vector2(vector.X, vector.Y);
@@ -94,7 +102,6 @@ namespace MonoGame.Framework.PackedVector
             this = Pack(scaled.X, scaled.Y);
         }
 
-        /// <inheritdoc/>
         public readonly Vector4 ToScaledVector4()
         {
             var scaled = ToVector2();
@@ -117,7 +124,7 @@ namespace MonoGame.Framework.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => $"HalfVector2({ToVector2().ToString()})";
+        public override string ToString() => nameof(HalfVector2) + $"({ToVector2().ToString()})";
 
         public override int GetHashCode() => PackedValue.GetHashCode();
 

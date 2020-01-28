@@ -37,7 +37,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         {
             if (OpaqueData.TryGetValue(key, out object value))
                 return (T)value;
-            return default(T);
+            return default;
         }
 
         /// <summary>

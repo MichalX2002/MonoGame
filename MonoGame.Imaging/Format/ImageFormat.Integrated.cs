@@ -78,7 +78,7 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Gets whether the format comes with the imaging library.
         /// </summary>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentNullException"><paramref name="format"/> is null.</exception>
         public static bool IsIntegrated(ImageFormat format)
         {
             if (format == null)

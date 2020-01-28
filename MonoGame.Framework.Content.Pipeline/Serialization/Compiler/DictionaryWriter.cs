@@ -16,7 +16,6 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         ContentTypeWriter _keyWriter;
         ContentTypeWriter _valueWriter;
 
-        /// <inheritdoc/>
         internal override void OnAddedToContentWriter(ContentWriter output)
         {
             base.OnAddedToContentWriter(output);

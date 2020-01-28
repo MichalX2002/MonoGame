@@ -22,7 +22,7 @@ namespace MonoGame.Imaging
 
             int srcRowBytes = sizeof(TPixel) * sourceRectangle.Width;
             int srcStride = byteStride ?? srcRowBytes;
-            
+
             // TODO: check if the pixelData isn't padded and copy everything at once
 
             fixed (byte* srcPixelPtr = &MemoryMarshal.GetReference(pixelData))
@@ -50,43 +50,72 @@ namespace MonoGame.Imaging
 
         #endregion
 
-        #region LoadPixels(ReadOnlySpan<TPixel>, sourceRectangle)
+        #region LoadPixels([ReadOnly]ReadOnlySpan<TPixel>, sourceRectangle)
 
         public static Image<TPixel> LoadPixels<TPixel>(
-            ReadOnlySpan<TPixel> pixelData, Rectangle sourceRectangle, int? byteStride, ImagingConfig config)
+            ReadOnlySpan<TPixel> pixels, Rectangle sourceRectangle, int? byteStride, ImagingConfig config)
             where TPixel : unmanaged, IPixel
         {
-            var bytes = MemoryMarshal.AsBytes(pixelData);
+            var bytes = MemoryMarshal.AsBytes(pixels);
             return LoadPixels<TPixel>(bytes, sourceRectangle, byteStride, config);
         }
 
         public static Image<TPixel> LoadPixels<TPixel>(
-            ReadOnlySpan<TPixel> pixelData, Rectangle sourceRectangle, int? byteStride = null)
+            ReadOnlySpan<TPixel> pixels, Rectangle sourceRectangle, int? byteStride = null)
             where TPixel : unmanaged, IPixel
         {
-            return LoadPixels(pixelData, sourceRectangle, byteStride, ImagingConfig.Default);
+            return LoadPixels(pixels, sourceRectangle, byteStride, ImagingConfig.Default);
+        }
+
+        public static Image<TPixel> LoadPixels<TPixel>(
+            Span<TPixel> pixels, Rectangle sourceRectangle, int? byteStride, ImagingConfig config)
+            where TPixel : unmanaged, IPixel
+        {
+            return LoadPixels((ReadOnlySpan<TPixel>)pixels, sourceRectangle, byteStride, config);
+        }
+
+        public static Image<TPixel> LoadPixels<TPixel>(
+            Span<TPixel> pixels, Rectangle sourceRectangle, int? byteStride = null)
+            where TPixel : unmanaged, IPixel
+        {
+            return LoadPixels((ReadOnlySpan<TPixel>)pixels, sourceRectangle, byteStride);
         }
 
         #endregion
 
-        #region LoadPixels(ReadOnlySpan<TPixel>, width, height)
+        #region LoadPixels([ReadOnly]Span<TPixel>, width, height)
 
         public static unsafe Image<TPixel> LoadPixels<TPixel>(
-            ReadOnlySpan<TPixel> pixelData, int width, int height, int? byteStride, ImagingConfig config)
+            ReadOnlySpan<TPixel> pixels, int width, int height, int? byteStride, ImagingConfig config)
             where TPixel : unmanaged, IPixel
         {
             var srcRect = new Rectangle(0, 0, width, height);
-            return LoadPixels(pixelData, srcRect, byteStride, config);
+            return LoadPixels(pixels, srcRect, byteStride, config);
         }
 
         public static Image<TPixel> LoadPixels<TPixel>(
-            ReadOnlySpan<TPixel> pixelData, int width, int height, int? byteStride = null)
+            ReadOnlySpan<TPixel> pixels, int width, int height, int? byteStride = null)
             where TPixel : unmanaged, IPixel
         {
-            var bytes = MemoryMarshal.AsBytes(pixelData);
+            var bytes = MemoryMarshal.AsBytes(pixels);
             var srcRect = new Rectangle(0, 0, width, height);
             return LoadPixels<TPixel>(bytes, srcRect, byteStride, ImagingConfig.Default);
         }
+
+        public static unsafe Image<TPixel> LoadPixels<TPixel>(
+            Span<TPixel> pixels, int width, int height, int? byteStride, ImagingConfig config)
+            where TPixel : unmanaged, IPixel
+        {
+            return LoadPixels((ReadOnlySpan<TPixel>)pixels, width, height, byteStride, config);
+        }
+
+        public static Image<TPixel> LoadPixels<TPixel>(
+            Span<TPixel> pixels, int width, int height, int? byteStride = null)
+            where TPixel : unmanaged, IPixel
+        {
+            return LoadPixels((ReadOnlySpan<TPixel>)pixels, width, height, byteStride);
+        }
+
 
         #endregion
     }

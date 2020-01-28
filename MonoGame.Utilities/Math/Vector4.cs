@@ -24,7 +24,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// <see cref="Vector4"/> with all values set to <see cref="byte.MaxValue"/>.
         /// </summary>
-        internal static readonly Vector4 MaxByteValue = new Vector4(byte.MaxValue);
+        internal static readonly Vector4 ByteMaxValue = new Vector4(byte.MaxValue);
 
         #region Public Constants
 
@@ -134,7 +134,7 @@ namespace MonoGame.Framework
             W.ToString());
 
         /// <summary>
-        /// Constructs a 3D vector with XYZW values.
+        /// Constructs a 4D vector with XYZW values.
         /// </summary>
         /// <param name="x">The x coordinate in 4D-space.</param>
         /// <param name="y">The y coordinate in 4D-space.</param>
@@ -149,7 +149,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs a 3D vector with XZ from a <see cref="Vector2"/> and ZW from the scalars.
+        /// Constructs a 4D vector with XZ from a <see cref="Vector2"/> and ZW from the scalars.
         /// </summary>
         /// <param name="value">The x and y coordinates in 4D-space.</param>
         /// <param name="z">The z coordinate in 4D-space.</param>
@@ -163,7 +163,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs a 3D vector with XYZ from a <see cref="Vector3"/> and W from a scalar.
+        /// Constructs a 4D vector with XYZ from a <see cref="Vector3"/> and W from a scalar.
         /// </summary>
         /// <param name="value">The x, y and z coordinates in 4D-space.</param>
         /// <param name="w">The w coordinate in 4D-space.</param>
@@ -199,44 +199,32 @@ namespace MonoGame.Framework
 
         #region IPackedVector 
 
-        /// <inheritdoc/>
         void IPackedVector.FromVector4(Vector4 vector) => this = vector;
 
-        /// <inheritdoc/>
         readonly Vector4 IPackedVector.ToVector4() => this;
 
         #endregion
 
         #region IPixel
 
-        /// <inheritdoc/>
         void IPixel.FromScaledVector4(Vector4 vector) => this = Clamp(vector, Zero, One);
 
-        /// <inheritdoc/>
         readonly Vector4 IPixel.ToScaledVector4() => this;
 
-        /// <inheritdoc/>
         void IPixel.FromGray8(Gray8 source) => this = source.ToVector4();
 
-        /// <inheritdoc/>
         void IPixel.FromGray16(Gray16 source) => this = source.ToVector4();
 
-        /// <inheritdoc/>
-        void IPixel.FromGrayAlpha16(GrayAlpha16 source) => this = source.ToVector4();
+        void IPixel.FromGrayAlpha16(GrayAlpha88 source) => this = source.ToVector4();
 
-        /// <inheritdoc/>
         void IPixel.FromRgb24(Rgb24 source) => this = source.ToVector4();
 
-        /// <inheritdoc/>
-        void IPixel.FromColor(Color source) => this = source.ToVector4();
-
-        /// <inheritdoc/>
         void IPixel.FromRgb48(Rgb48 source) => this = source.ToVector4();
 
-        /// <inheritdoc/>
         void IPixel.FromRgba64(Rgba64 source) => this = source.ToVector4();
 
-        /// <inheritdoc/>
+        public void FromColor(Color source) => this = source.ToVector4();
+
         public readonly void ToColor(ref Color destination) => destination.FromVector4(this);
 
         #endregion

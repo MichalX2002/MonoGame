@@ -64,10 +64,7 @@ namespace MonoGame.Framework.Graphics
         /// <see langword="true"/> if the specified <see cref="object"/> is equal to this instance;
         /// otherwise, <see langword="false"/>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as VertexInputLayout);
-        }
+        public override bool Equals(object obj) => Equals(obj as VertexInputLayout);
 
         /// <summary>
         /// Determines whether the specified <see cref="VertexInputLayout"/> is equal to this
@@ -80,8 +77,9 @@ namespace MonoGame.Framework.Graphics
         /// </returns>
         public bool Equals(VertexInputLayout other)
         {
-            if (ReferenceEquals(null, other))
+            if (other == null)
                 return false;
+
             if (ReferenceEquals(this, other))
                 return true;
 
@@ -105,12 +103,8 @@ namespace MonoGame.Framework.Graphics
         }
 
         /// <summary>
-        /// Returns a hash code for this instance.
+        /// Returns a hash code for this <see cref="VertexInputLayout"/>.
         /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data
-        /// structures like a hash table.
-        /// </returns>
         public override int GetHashCode()
         {
             unchecked
@@ -130,8 +124,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         /// <summary>
-        /// Compares two <see cref="VertexInputLayout"/> instances to determine whether they are the
-        /// same.
+        /// Compares two <see cref="VertexInputLayout"/> instances to determine whether they are the same.
         /// </summary>
         /// <param name="left">The first instance.</param>
         /// <param name="right">The second instance.</param>
@@ -139,14 +132,10 @@ namespace MonoGame.Framework.Graphics
         /// <see langword="true"/> if the <paramref name="left"/> and <paramref name="right"/> are
         /// the same; otherwise, <see langword="false"/>.
         /// </returns>
-        public static bool operator ==(VertexInputLayout left, VertexInputLayout right)
-        {
-            return Equals(left, right);
-        }
+        public static bool operator ==(VertexInputLayout left, VertexInputLayout right) => Equals(left, right);
 
         /// <summary>
-        /// Compares two <see cref="VertexInputLayout"/> instances to determine whether they are
-        /// different.
+        /// Compares two <see cref="VertexInputLayout"/> instances to determine whether they are different.
         /// </summary>
         /// <param name="left">The first instance.</param>
         /// <param name="right">The second instance.</param>
@@ -154,9 +143,6 @@ namespace MonoGame.Framework.Graphics
         /// <see langword="true"/> if the <paramref name="left"/> and <paramref name="right"/> are
         /// the different; otherwise, <see langword="false"/>.
         /// </returns>
-        public static bool operator !=(VertexInputLayout left, VertexInputLayout right)
-        {
-            return !Equals(left, right);
-        }
+        public static bool operator !=(VertexInputLayout left, VertexInputLayout right) => !Equals(left, right);
     }
 }

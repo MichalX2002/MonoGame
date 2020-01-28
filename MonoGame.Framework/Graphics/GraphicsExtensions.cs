@@ -17,10 +17,10 @@ using OpenTK.Graphics;
 
 namespace MonoGame.Framework.Graphics
 {
-    internal static class GraphicsExtensions
+    public static class GraphicsExtensions
     {
 #if OPENGL
-        public static int OpenGLNumberOfElements(this VertexElementFormat elementFormat)
+        internal static int OpenGLNumberOfElements(this VertexElementFormat elementFormat)
         {
             switch (elementFormat)
             {
@@ -64,7 +64,7 @@ namespace MonoGame.Framework.Graphics
             throw new ArgumentException();
         }
 
-        public static VertexPointerType OpenGLVertexPointerType(this VertexElementFormat elementFormat)
+        internal static VertexPointerType OpenGLVertexPointerType(this VertexElementFormat elementFormat)
         {
             switch (elementFormat)
             {
@@ -108,7 +108,7 @@ namespace MonoGame.Framework.Graphics
             throw new ArgumentException();
         }
 
-        public static VertexAttribPointerType OpenGLVertexAttribPointerType(this VertexElementFormat elementFormat)
+        internal static VertexAttribPointerType OpenGLVertexAttribPointerType(this VertexElementFormat elementFormat)
         {
             switch (elementFormat)
             {
@@ -178,7 +178,7 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        public static ColorPointerType OpenGLColorPointerType(this VertexElementFormat elementFormat)
+        internal static ColorPointerType OpenGLColorPointerType(this VertexElementFormat elementFormat)
         {
             switch (elementFormat)
             {
@@ -224,7 +224,7 @@ namespace MonoGame.Framework.Graphics
             throw new ArgumentException();
         }
 
-        public static NormalPointerType OpenGLNormalPointerType(this VertexElementFormat elementFormat)
+        internal static NormalPointerType OpenGLNormalPointerType(this VertexElementFormat elementFormat)
         {
             switch (elementFormat)
             {
@@ -270,7 +270,7 @@ namespace MonoGame.Framework.Graphics
             throw new ArgumentException();
         }
 
-        public static TexCoordPointerType OpenGLTexCoordPointerType(this VertexElementFormat elementFormat)
+        internal static TexCoordPointerType OpenGLTexCoordPointerType(this VertexElementFormat elementFormat)
         {
             switch (elementFormat)
             {
@@ -317,7 +317,7 @@ namespace MonoGame.Framework.Graphics
         }
 
 
-        public static BlendEquationMode GetBlendEquationMode(this BlendFunction function)
+        internal static BlendEquationMode GetBlendEquationMode(this BlendFunction function)
         {
             switch (function)
             {
@@ -339,7 +339,7 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        public static BlendingFactorSrc GetBlendFactorSrc(this Blend blend)
+        internal static BlendingFactorSrc GetBlendFactorSrc(this Blend blend)
         {
             switch (blend)
             {
@@ -376,7 +376,7 @@ namespace MonoGame.Framework.Graphics
 
         }
 
-        public static BlendingFactorDest GetBlendFactorDest(this Blend blend)
+        internal static BlendingFactorDest GetBlendFactorDest(this Blend blend)
         {
             switch (blend)
             {
@@ -413,7 +413,7 @@ namespace MonoGame.Framework.Graphics
 
         }
 
-        public static DepthFunction GetDepthFunction(this CompareFunction compare)
+        internal static DepthFunction GetDepthFunction(this CompareFunction compare)
         {
             switch (compare)
             {
@@ -1012,7 +1012,7 @@ namespace MonoGame.Framework.Graphics
 
         [Conditional("DEBUG")]
         [DebuggerHidden]
-        public static void CheckGLError()
+        internal static void CheckGLError()
         {
             var error = GL.GetError();
             if (error != ErrorCode.NoError)
@@ -1025,7 +1025,7 @@ namespace MonoGame.Framework.Graphics
 
 #if OPENGL
         [Conditional("DEBUG")]
-        public static void LogGLError(string location)
+        internal static void LogGLError(string location)
         {
             try
             {

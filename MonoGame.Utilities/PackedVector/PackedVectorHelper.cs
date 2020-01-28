@@ -6,7 +6,7 @@ namespace MonoGame.Framework.PackedVector
     public static class PackedVectorHelper
     {
         /// <summary>
-        /// Scales a value from a 16-bit <see cref="ushort"/> to C:\Projects\Repos\MonoGame\MonoGame.Utilities\PackedVector\PackedVectorHelper.csit's 8-bit <see cref="byte"/> equivalent.
+        /// Scales a value from a 16-bit <see cref="ushort"/> to it's 8-bit <see cref="byte"/> equivalent.
         /// </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

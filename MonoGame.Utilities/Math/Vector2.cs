@@ -105,7 +105,6 @@ namespace MonoGame.Framework
 
         #region IPackedVector
 
-        /// <inheritdoc/>
         [CLSCompliant(false)]
         public ulong PackedValue
         {
@@ -113,26 +112,37 @@ namespace MonoGame.Framework
             set => Unsafe.As<Vector2, ulong>(ref this) = value;
         }
 
-        /// <inheritdoc/>
         public void FromVector4(Vector4 vector)
         {
             X = vector.X;
             Y = vector.Y;
         }
 
-        /// <inheritdoc/>
         public readonly Vector4 ToVector4() => new Vector4(X, Y, 0, 1);
 
         #endregion
 
         #region IPixel
 
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
+        void IPixel.FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
-        public readonly Vector4 ToScaledVector4() => ToVector4();
+        readonly Vector4 IPixel.ToScaledVector4() => ToVector4();
 
-        /// <inheritdoc/>
         public readonly void ToColor(ref Color destination) => destination.FromVector4(ToVector4());
+
+        void IPixel.FromGray8(Gray8 source) => FromVector4(source.ToScaledVector4());
+
+        void IPixel.FromGray16(Gray16 source) => FromVector4(source.ToScaledVector4());
+
+        void IPixel.FromGrayAlpha16(GrayAlpha88 source) => FromVector4(source.ToScaledVector4());
+
+        void IPixel.FromRgb24(Rgb24 source) => FromVector4(source.ToScaledVector4());
+
+        public void FromColor(Color source) => FromVector4(source.ToScaledVector4());
+
+        void IPixel.FromRgb48(Rgb48 source) => FromVector4(source.ToScaledVector4());
+
+        void IPixel.FromRgba64(Rgba64 source) => FromVector4(source.ToScaledVector4());
 
         #endregion
 

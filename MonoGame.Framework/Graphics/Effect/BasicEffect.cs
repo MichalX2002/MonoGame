@@ -192,7 +192,6 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-
         /// <summary>
         /// Gets or sets the per-pixel lighting prefer flag.
         /// </summary>
@@ -210,7 +209,6 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-
         /// <inheritdoc/>
         public Vector3 AmbientLightColor
         {
@@ -227,20 +225,16 @@ namespace MonoGame.Framework.Graphics
         /// <inheritdoc/>
         public DirectionalLight DirectionalLight0 { get; private set; }
 
-
         /// <inheritdoc/>
         public DirectionalLight DirectionalLight1 { get; private set; }
 
-
         /// <inheritdoc/>
         public DirectionalLight DirectionalLight2 => light2;
-
 
         /// <inheritdoc/>
         public bool FogEnabled
         {
             get => fogEnabled;
-
             set
             {
                 if (fogEnabled != value)

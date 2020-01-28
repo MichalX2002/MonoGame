@@ -23,7 +23,13 @@ namespace MonoGame.Framework.PackedVector
         public byte W;
 
         #region Constructors
-        
+
+        /// <summary>
+        /// Constructs the packed vector with a packed value.
+        /// </summary>
+        [CLSCompliant(false)]
+        public Byte4(uint packed) : this() => PackedValue = packed;
+
         /// <summary>
         /// Constructs the packed vector with raw values.
         /// </summary>
@@ -34,12 +40,6 @@ namespace MonoGame.Framework.PackedVector
             Z = z;
             W = w;
         }
-
-        /// <summary>
-        /// Constructs the packed vector with a packed value.
-        /// </summary>
-        [CLSCompliant(false)]
-        public Byte4(uint packed) : this() => PackedValue = packed;
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
@@ -58,7 +58,7 @@ namespace MonoGame.Framework.PackedVector
 
         private static Byte4 Pack(ref Vector4 vector)
         {
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxByteValue);
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.ByteMaxValue);
             
             return new Byte4(
                 (byte)vector.X,
@@ -69,7 +69,6 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPackedVector
 
-        /// <inheritdoc/>
         [CLSCompliant(false)]
         public uint PackedValue 
         {
@@ -77,21 +76,33 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Byte4, uint>(ref this) = value;
         }
 
-        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
-        /// <inheritdoc/>
         public readonly Vector4 ToVector4() => new Vector4(X, Y, Z, W);
 
         #endregion
 
         #region IPixel
 
-        /// <inheritdoc/>
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector * 255);
+        public void FromScaledVector4(Vector4 vector) => FromVector4(vector * byte.MaxValue);
 
-        /// <inheritdoc/>
-        public readonly Vector4 ToScaledVector4() => ToVector4() / 255;
+        public readonly Vector4 ToScaledVector4() => ToVector4() / byte.MaxValue;
+
+        public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(ToScaledVector4());
+
+        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGrayAlpha16(GrayAlpha88 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
 
         #endregion
 
@@ -112,7 +123,7 @@ namespace MonoGame.Framework.PackedVector
         public string ToHex()
         {
             uint hexOrder = (uint)(W << 0 | Z << 8 | Y << 16 | X << 24);
-            return $"Byte4({hexOrder.ToString("x8")})";
+            return hexOrder.ToString("x8");
         }
 
         #region Object Overrides
@@ -120,7 +131,7 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Returns a <see cref="string"/> representation of this packed vector.
         /// </summary>
-        public override string ToString() => $"Byte4({X}, {Y}, {Z}, {W})";
+        public override string ToString() => nameof(Byte4) + $"({X}, {Y}, {Z}, {W})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

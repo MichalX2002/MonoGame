@@ -15,7 +15,7 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct NormalizedShort4 : IPackedVector<ulong>, IEquatable<NormalizedShort4>
+    public struct NormalizedShort4 : IPackedVector<ulong>, IEquatable<NormalizedShort4>, IPixel
     {
         public short X;
         public short Y;
@@ -57,7 +57,6 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPackedVector
 
-        /// <inheritdoc/>
         [CLSCompliant(false)]
         public ulong PackedValue
         {
@@ -65,11 +64,33 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<NormalizedShort4, ulong>(ref this) = value;
         }
 
-        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
-        /// <inheritdoc/>
         public readonly Vector4 ToVector4() => new Vector4(X, Y, Z, W) / 32767f;
+
+        #endregion
+
+        #region IPixel
+
+        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
+
+        public readonly Vector4 ToScaledVector4() => ToVector4();
+
+        public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(ToScaledVector4());
+
+        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGrayAlpha16(GrayAlpha88 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
 
         #endregion
 
@@ -85,7 +106,7 @@ namespace MonoGame.Framework.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => $"NormalizedShort4({X}, {Y}, {Z}, {W})";
+        public override string ToString() => nameof(NormalizedShort4) + $"({X}, {Y}, {Z}, {W})";
 
         public override int GetHashCode() => PackedValue.GetHashCode();
 

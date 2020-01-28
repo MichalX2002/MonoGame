@@ -9,61 +9,61 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Framework.PackedVector
 {
     /// <summary>
-    /// Packed pixel type containing signed 16-bit XY components.
+    /// Packed pixel type containing signed 8-bit XY components.
     /// <para>
     /// Ranges from [0, 0, 0, 1] to [1, 1, 0, 1] in vector form.
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Rg32 : IPackedVector<uint>, IEquatable<Rg32>, IPixel
+    public struct Rg16 : IPackedVector<ushort>, IEquatable<Rg16>, IPixel
     {
         [CLSCompliant(false)]
-        public ushort R;
+        public byte R;
 
         [CLSCompliant(false)]
-        public ushort G;
+        public byte G;
 
         #region Constructors
 
         [CLSCompliant(false)]
-        public Rg32(ushort x, ushort y)
+        public Rg16(byte x, byte y)
         {
             R = x;
             G = y;
         }
 
         [CLSCompliant(false)]
-        public Rg32(uint packed) : this() => PackedValue = packed;
+        public Rg16(ushort packed) : this() => PackedValue = packed;
 
-        public Rg32(Vector2 vector) => this = Pack(vector);
+        public Rg16(Vector2 vector) => this = Pack(vector);
 
-        public Rg32(float x, float y) : this(new Vector2(x, y))
+        public Rg16(float x, float y) : this(new Vector2(x, y))
         {
         }
 
         #endregion
 
-        private static Rg32 Pack(Vector2 vector)
+        private static Rg16 Pack(Vector2 vector)
         {
             vector = Vector2.Clamp(vector, Vector2.Zero, Vector2.One);
-            vector *= ushort.MaxValue;
+            vector *= byte.MaxValue;
             vector.Round();
 
-            return new Rg32((ushort)vector.X, (ushort)vector.Y);
+            return new Rg16((byte)vector.X, (byte)vector.Y);
         }
 
         /// <summary>
         /// Gets the packed vector in <see cref="Vector2"/> format.
         /// </summary>
-        public readonly Vector2 ToVector2() => new Vector2(R, G) / ushort.MaxValue;
+        public readonly Vector2 ToVector2() => new Vector2(R, G) / byte.MaxValue;
 
         #region IPackedVector
 
         [CLSCompliant(false)]
-        public uint PackedValue
+        public ushort PackedValue
         {
-            get => Unsafe.As<Rg32, uint>(ref this);
-            set => Unsafe.As<Rg32, uint>(ref this) = value;
+            get => Unsafe.As<Rg16, ushort>(ref this);
+            set => Unsafe.As<Rg16, ushort>(ref this) = value;
         }
 
         public void FromVector4(Vector4 vector) => this = Pack(vector.XY);
@@ -78,34 +78,34 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly Vector4 ToScaledVector4() => ToVector4();
 
-        public void FromGray8(Gray8 source) => R = G = PackedVectorHelper.UpScale8To16Bit(source.L);
+        public void FromGray8(Gray8 source) => R = G = source.L;
 
-        public void FromGray16(Gray16 source) => R = G = source.L;
+        public void FromGray16(Gray16 source) => R = G = PackedVectorHelper.DownScale16To8Bit(source.L);
 
         public void FromGrayAlpha16(GrayAlpha88 source) => R = G = source.L;
 
         public void FromRgb24(Rgb24 source)
         {
-            R = PackedVectorHelper.UpScale8To16Bit(source.R);
-            G = PackedVectorHelper.UpScale8To16Bit(source.G);
+            R = source.R;
+            G = source.G;
         }
 
         public void FromColor(Color source)
         {
-            R = PackedVectorHelper.UpScale8To16Bit(source.R);
-            G = PackedVectorHelper.UpScale8To16Bit(source.G);
+            R = source.R;
+            G = source.G;
         }
 
         public void FromRgb48(Rgb48 source)
         {
-            R = source.R;
-            G = source.G;
+            R = PackedVectorHelper.DownScale16To8Bit(source.R);
+            G = PackedVectorHelper.DownScale16To8Bit(source.G);
         }
 
         public void FromRgba64(Rgba64 source)
         {
-            R = source.R;
-            G = source.G;
+            R = PackedVectorHelper.DownScale16To8Bit(source.R);
+            G = PackedVectorHelper.DownScale16To8Bit(source.G);
         }
 
         public readonly void ToColor(ref Color destination)
@@ -118,15 +118,15 @@ namespace MonoGame.Framework.PackedVector
 
         #region Equals
 
-        public static bool operator ==(in Rg32 a, in Rg32 b) => a.R == b.R && a.G == b.G;
-        public static bool operator !=(in Rg32 a, in Rg32 b) => !(a == b);
+        public static bool operator ==(in Rg16 a, in Rg16 b) => a.R == b.R && a.G == b.G;
+        public static bool operator !=(in Rg16 a, in Rg16 b) => !(a == b);
 
         /// <summary>
-        /// Compares another Rg32 packed vector with the packed vector.
+        /// Compares another <see cref="Rg16"/> packed vector with the packed vector.
         /// </summary>
-        /// <param name="other">The Rg32 packed vector to compare.</param>
+        /// <param name="other">The <see cref="Rg16"/> packed vector to compare.</param>
         /// <returns>True if the packed vectors are equal.</returns>
-        public bool Equals(Rg32 other) => this == other;
+        public bool Equals(Rg16 other) => this == other;
 
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace MonoGame.Framework.PackedVector
         /// </summary>
         /// <param name="obj">The object to compare.</param>
         /// <returns>True if the object is equal to the packed vector.</returns>
-        public override bool Equals(object obj) => obj is Rg32 other && Equals(other);
+        public override bool Equals(object obj) => obj is Rg16 other && Equals(other);
 
         #endregion
 
@@ -143,7 +143,7 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(Rg32) + $"(R:{R}, G:{G})";
+        public override string ToString() => nameof(Rg16) + $"(R:{R}, G:{G})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

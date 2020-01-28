@@ -48,7 +48,6 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             _fields = TargetType.GetAllFields().Where(IsValidField).ToArray();
         }
 
-        /// <inheritdoc/>
         internal override void OnAddedToContentWriter(ContentWriter output)
         {
             base.OnAddedToContentWriter(output);

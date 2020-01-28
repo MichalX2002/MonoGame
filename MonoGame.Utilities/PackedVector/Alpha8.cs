@@ -48,30 +48,25 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPackedVector
 
-        /// <inheritdoc/>
-        public byte PackedValue { get => A; set => A = value; }
+        public byte PackedValue { readonly get => A; set => A = value; }
 
-        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => PackedValue = Pack(vector.W);
 
-        /// <inheritdoc/>
         public readonly Vector4 ToVector4() => new Vector4(0, 0, 0, A / 255f);
 
         #endregion
 
         #region IPixel
 
-        /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
-        /// <inheritdoc/>
         public readonly Vector4 ToScaledVector4() => ToVector4();
 
         public void FromGray8(Gray8 source) => A = byte.MaxValue;
 
         public void FromGray16(Gray16 source) => A = byte.MaxValue;
 
-        public void FromGrayAlpha16(GrayAlpha16 source) => A = source.A;
+        public void FromGrayAlpha16(GrayAlpha88 source) => A = source.A;
 
         public void FromRgb24(Rgb24 source) => A = byte.MaxValue;
 
@@ -104,7 +99,7 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => $"Alpha8({A.ToString()})";
+        public override string ToString() => nameof(Alpha8) + $"({A.ToString()})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

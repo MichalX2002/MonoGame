@@ -15,7 +15,7 @@ namespace MonoGame.Framework.Graphics
 {
     // TODO: https://github.com/MonoGame/MonoGame/commit/f2f50bcd6c88e927ddbbc1fe677acd85b7bc6c0d#diff-b1287b3ea3e4f14da31f425817f5920eR427
     // re-implement commit based on MonoGame.Imaging instead
-    
+
     public partial class Texture2D : Texture
     {
         internal int ArraySize;
@@ -434,8 +434,8 @@ namespace MonoGame.Framework.Graphics
         {
             CheckRect(level, rect, out Rectangle checkedRect);
 
-            using (var data = GetDataUnmanaged<TPixel>(level, checkedRect))
-                return Image.WrapMemory(data, checkedRect.Width, checkedRect.Height, leaveOpen: false);
+            var data = GetDataUnmanaged<TPixel>(level, checkedRect);
+            return Image.WrapMemory(data, checkedRect.Width, checkedRect.Height, leaveOpen: false);
         }
 
         /// <summary>
@@ -463,11 +463,12 @@ namespace MonoGame.Framework.Graphics
                     textureImage.Save(config, stream, format, encoderOptions);
             }
 
+            // TODO: implement SRgb
             switch (Format)
             {
                 case SurfaceFormat.Alpha8: SaveByType<Alpha8>(); break;
                 case SurfaceFormat.Single: SaveByType<Gray32>(); break;
-                case SurfaceFormat.Rgba32SRgb: SaveByType<Rgba32SRgb>(); break;
+                //case SurfaceFormat.Rgba32SRgb: SaveByType<Rgba32SRgb>(); break;
                 case SurfaceFormat.Rgba32: SaveByType<Color>(); break;
                 case SurfaceFormat.Rg32: SaveByType<Rg32>(); break;
                 case SurfaceFormat.Rgba64: SaveByType<Rgba64>(); break;
@@ -475,9 +476,9 @@ namespace MonoGame.Framework.Graphics
                 case SurfaceFormat.Bgr565: SaveByType<Bgr565>(); break;
                 case SurfaceFormat.Bgra5551: SaveByType<Bgra5551>(); break;
                 case SurfaceFormat.Bgra4444: SaveByType<Bgra4444>(); break;
-                    
-                case SurfaceFormat.Bgr32SRgb: SaveByType<Bgr32SRgb>(); break;
-                case SurfaceFormat.Bgra32SRgb: SaveByType<Bgra32SRgb>(); break;
+
+                //case SurfaceFormat.Bgr32SRgb: SaveByType<Bgr32SRgb>(); break;
+                //case SurfaceFormat.Bgra32SRgb: SaveByType<Bgra32SRgb>(); break;
                 case SurfaceFormat.Bgr32: SaveByType<Bgr32>(); break;
                 case SurfaceFormat.Bgra32: SaveByType<Bgra32>(); break;
 
@@ -511,8 +512,8 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rect">The cutout of the texture to save.</param>
         [CLSCompliant(false)]
         public void Save(
-            Stream stream, ImageFormat format, EncoderOptions encoderOptions, 
-            int level = 0, Rectangle? rect = null) => 
+            Stream stream, ImageFormat format, EncoderOptions encoderOptions,
+            int level = 0, Rectangle? rect = null) =>
             Save(ImagingConfig.Default, stream, format, encoderOptions, level, rect);
 
         /// <summary>
@@ -523,7 +524,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="level">The texture level to save.</param>
         /// <param name="rect">The cutout of the texture to save.</param>
         [CLSCompliant(false)]
-        public void Save(Stream stream, ImageFormat format, int level = 0, Rectangle? rect = null) => 
+        public void Save(Stream stream, ImageFormat format, int level = 0, Rectangle? rect = null) =>
             Save(ImagingConfig.Default, stream, format, Image.GetDefaultEncoderOptions(format), level, rect);
 
         public void SaveAsPng(Stream stream, int level = 0, Rectangle? rect = null) =>
@@ -548,7 +549,7 @@ namespace MonoGame.Framework.Graphics
 
             if (format == null)
                 format = ImageFormat.GetByPath(filePath).First();
-            
+
             using (var fs = SaveExtensions.OpenWrite(filePath))
                 Save(fs, format, level, rect);
         }
@@ -559,7 +560,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="filePath">The file path for the texture.</param>
         /// <param name="level">The texture level to save.</param>
         /// <param name="rect">The cutout of the texture to save.</param>
-        public void Save(string filePath, int level = 0, Rectangle? rect = null) => 
+        public void Save(string filePath, int level = 0, Rectangle? rect = null) =>
             Save(filePath, null, level, rect);
 
         #endregion

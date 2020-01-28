@@ -53,11 +53,9 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPackedVector
 
-        /// <inheritdoc/>
         [CLSCompliant(false)]
         public ushort PackedValue { get; set; }
 
-        /// <inheritdoc/>
         public readonly Vector4 ToVector4()
         {
             return new Vector4(
@@ -67,18 +65,31 @@ namespace MonoGame.Framework.PackedVector
                 (PackedValue >> 15) & 0x01);
         }
 
-        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
 
         #endregion
 
         #region IPixel
 
-        /// <inheritdoc/>
+        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
+
         public readonly Vector4 ToScaledVector4() => ToVector4();
 
-        /// <inheritdoc/>
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
+        public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(ToScaledVector4());
+
+        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGrayAlpha16(GrayAlpha88 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
 
         #endregion
 
@@ -97,7 +108,7 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => $"Bgra5551({ToVector4().ToString()}";
+        public override string ToString() => nameof(Bgra5551) + $"({ToVector4().ToString()}";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

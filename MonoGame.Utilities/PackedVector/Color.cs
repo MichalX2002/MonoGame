@@ -232,7 +232,6 @@ namespace MonoGame.Framework
 
         #region IPackedVector
 
-        /// <inheritdoc/>
         [IgnoreDataMember]
         [CLSCompliant(false)]
         public uint PackedValue
@@ -241,24 +240,20 @@ namespace MonoGame.Framework
             set => Unsafe.As<Color, uint>(ref this) = value;
         }
 
-        /// <inheritdoc/>
         public readonly Vector4 ToVector4() => ToScaledVector4();
 
-        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => FromScaledVector4(vector);
 
         #endregion
 
         #region IPixel
 
-        /// <inheritdoc/>
         public readonly Vector4 ToScaledVector4() => new Vector4(R, G, B, A) / 255f;
 
-        /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector) 
         {
             vector *= 255;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxByteValue);
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.ByteMaxValue);
 
             R = (byte)vector.X;
             G = (byte)vector.Y;
@@ -266,38 +261,32 @@ namespace MonoGame.Framework
             A = (byte)vector.W;
         }
 
-        /// <inheritdoc/>
         public void FromGray8(Gray8 source)
         {
             R = G = B = source.PackedValue;
             A = byte.MaxValue;
         }
 
-        /// <inheritdoc/>
         public void FromGray16(Gray16 source)
         {
             R = G = B = PackedVectorHelper.DownScale16To8Bit(source.PackedValue);
             A = byte.MaxValue;
         }
 
-        /// <inheritdoc/>
-        public void FromGrayAlpha16(GrayAlpha16 source)
+        public void FromGrayAlpha16(GrayAlpha88 source)
         {
             R = G = B = source.L;
             A = source.A;
         }
 
-        /// <inheritdoc/>
         public void FromColor(Color color) => this = color;
 
-        /// <inheritdoc/>
         public void FromRgb24(Rgb24 source)
         {
             Rgb = source;
             A = byte.MaxValue;
         }
 
-        /// <inheritdoc/>
         public void FromRgb48(Rgb48 source)
         {
             R = PackedVectorHelper.DownScale16To8Bit(source.R);
@@ -306,7 +295,6 @@ namespace MonoGame.Framework
             A = byte.MaxValue;
         }
 
-        /// <inheritdoc/>
         public void FromRgba64(Rgba64 source)
         {
             R = PackedVectorHelper.DownScale16To8Bit(source.R);
@@ -315,22 +303,17 @@ namespace MonoGame.Framework
             A = PackedVectorHelper.DownScale16To8Bit(source.A);
         }
 
-        /// <inheritdoc/>
         public readonly void ToColor(ref Color destination) => destination = this;
 
         #endregion
 
-        /// <inheritdoc/>
         public void FromBgra5551(Bgra5551 source) => FromVector4(source.ToVector4());
 
-        /// <inheritdoc/>
         public void FromBgr24(Bgr24 source)
         {
             Bgr = source;
             A = byte.MaxValue;
         }
-
-        /* TODO: add following pixel types
 
         public void FromArgb32(Argb32 source)
         {
@@ -340,7 +323,6 @@ namespace MonoGame.Framework
             A = source.A;
         }
 
-        /// <inheritdoc/>
         public void FromBgra32(Bgra32 source)
         {
             R = source.R;
@@ -359,8 +341,6 @@ namespace MonoGame.Framework
         /// </summary>
         public Argb32 ToArgb32() => new Argb32(R, G, B, A);
     
-        */
-
         /// <summary>
         /// Gets the <see cref="Rgb24"/> representation of this <see cref="Color"/>.
         /// </summary>
@@ -377,14 +357,13 @@ namespace MonoGame.Framework
         public Gray8 ToGray8() => new Gray8(A);
 
         /// <summary>
-        /// Gets the <see cref="GrayAlpha16 "/> representation of this <see cref="Color"/>.
+        /// Gets the <see cref="GrayAlpha88 "/> representation of this <see cref="Color"/>.
         /// </summary>
-        public GrayAlpha16 ToGrayAlpha16() => new GrayAlpha16(PackedVectorHelper.Get8BitBT709Luminance(R, G, B), A);
+        public GrayAlpha88 ToGrayAlpha16() => new GrayAlpha88(PackedVectorHelper.Get8BitBT709Luminance(R, G, B), A);
         
         /// <summary>
         /// Gets the <see cref="Vector3"/> representation of this <see cref="Color"/>.
         /// </summary>
-        /// <returns>A <see cref="Vector3"/> representation for this object.</returns>
         public readonly Vector3 ToVector3() => new Vector3(R, G, B) / 255f;
 
         public Rgba64 ToRgba64() => new Rgba64(
@@ -512,16 +491,16 @@ namespace MonoGame.Framework
         /// </summary>
         public override string ToString()
         {
-            var sb = new StringBuilder(29);
-            sb.Append("{R:");
+            var sb = new StringBuilder(28);
+            sb.Append("(R:");
             sb.Append(R);
-            sb.Append(" G:");
+            sb.Append(", G:");
             sb.Append(G);
-            sb.Append(" B:");
+            sb.Append(", B:");
             sb.Append(B);
-            sb.Append(" A:");
+            sb.Append(", A:");
             sb.Append(A);
-            sb.Append("}");
+            sb.Append(")");
             return sb.ToString();
         }
 

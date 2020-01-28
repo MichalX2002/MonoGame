@@ -29,7 +29,6 @@ namespace MonoGame.Framework.PackedVector
         [CLSCompliant(false)]
         public uint PackedValue { get => L; set => L = value; }
 
-        /// <inheritdoc/>
         public void FromVector4(Vector4 vector)
         {
             vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.One);
@@ -39,7 +38,6 @@ namespace MonoGame.Framework.PackedVector
                 (uint)vector.X, (uint)vector.Y, (uint)vector.Z);
         }
 
-        /// <inheritdoc/>
         public readonly Vector4 ToVector4()
         {
             float l = (float)(L / (double)uint.MaxValue);
@@ -50,38 +48,28 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPixel
 
-        /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
-        /// <inheritdoc/>
         public readonly Vector4 ToScaledVector4() => ToVector4();
 
-        /// <inheritdoc/>
         public void FromGray8(Gray8 source) => L = (uint)(source.PackedValue * ByteMul);
 
-        /// <inheritdoc/>
         public void FromGray16(Gray16 source) => L = (uint)(source.PackedValue * ShortMul);
 
-        /// <inheritdoc/>
-        public void FromGrayAlpha16(GrayAlpha16 source) => L = (uint)(source.PackedValue * ByteMul);
+        public void FromGrayAlpha16(GrayAlpha88 source) => L = (uint)(source.PackedValue * ByteMul);
 
-        /// <inheritdoc/>
         public void FromRgb24(Rgb24 source) =>
             L = (uint)(PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B) * ByteMul);
 
-        /// <inheritdoc/>
         public void FromColor(Color source) =>
             L = (uint)(PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B) * ByteMul);
 
-        /// <inheritdoc/>
         public void FromRgb48(Rgb48 source) =>
             L = (uint)(PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B) * ShortMul);
 
-        /// <inheritdoc/>
         public void FromRgba64(Rgba64 source) =>
             L = (uint)(PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B) * ShortMul);
 
-        /// <inheritdoc/>
         public readonly void ToColor(ref Color destination)
         {
             destination.R = destination.G = destination.B = (byte)(L * 255);
@@ -102,7 +90,7 @@ namespace MonoGame.Framework.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => $"Gray32({L.ToString()})";
+        public override string ToString() => nameof(Gray32) + $"({L.ToString()})";
 
         public override int GetHashCode() => L.GetHashCode();
 

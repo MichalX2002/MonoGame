@@ -79,7 +79,6 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPackedVector
 
-        /// <inheritdoc/>
         [CLSCompliant(false)]
         public ulong PackedValue
         {
@@ -87,20 +86,16 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Rgba64, ulong>(ref this) = value;
         }
 
-        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => this = Pack(ref vector);
 
-        /// <inheritdoc/>
         public readonly Vector4 ToVector4() => new Vector4(R, G, B, A) / ushort.MaxValue;
 
         #endregion
 
         #region IPixel
 
-        /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
-        /// <inheritdoc/>
         public readonly Vector4 ToScaledVector4() => ToVector4();
 
         public readonly void ToColor(ref Color destination)
@@ -123,7 +118,7 @@ namespace MonoGame.Framework.PackedVector
             A = byte.MaxValue;
         }
 
-        public void FromGrayAlpha16(GrayAlpha16 source)
+        public void FromGrayAlpha16(GrayAlpha88 source)
         {
             R = G = B = PackedVectorHelper.UpScale8To16Bit(source.L);
             A = source.A;
@@ -174,7 +169,7 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => $"Rgba64(R:{R}, G:{G}, B:{B}, A:{A})";
+        public override string ToString() => nameof(Rgba64) + $"(R:{R}, G:{G}, B:{B}, A:{A})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

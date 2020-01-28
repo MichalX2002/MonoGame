@@ -37,7 +37,7 @@ namespace MonoGame.Framework.Content.Pipeline
         {
             // Remove parent reference from each child before clearing
             foreach (TChild child in this)
-                SetParent(child, default(TParent));
+                SetParent(child, default);
             base.ClearItems();
         }
 
@@ -71,7 +71,7 @@ namespace MonoGame.Framework.Content.Pipeline
         protected override void RemoveItem(int index)
         {
             TChild child = this[index];
-            SetParent(child, default(TParent));
+            SetParent(child, default);
             base.RemoveItem(index);
         }
 
@@ -87,7 +87,7 @@ namespace MonoGame.Framework.Content.Pipeline
             if (GetParent(item) != null)
                 throw new InvalidOperationException("Child already has a parent");
             TChild child = this[index];
-            SetParent(child, default(TParent));
+            SetParent(child, default);
             SetParent(item, parent);
             base.SetItem(index, item);
         }

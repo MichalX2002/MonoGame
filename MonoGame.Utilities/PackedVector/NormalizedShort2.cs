@@ -15,7 +15,7 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct NormalizedShort2 : IPackedVector<uint>, IEquatable<NormalizedShort2>
+    public struct NormalizedShort2 : IPackedVector<uint>, IEquatable<NormalizedShort2>, IPixel
     {
         public short X;
         public short Y;
@@ -47,12 +47,10 @@ namespace MonoGame.Framework.PackedVector
             return new NormalizedShort2((short)vector.X, (short)vector.Y);
         }
 
-        /// <inheritdoc/>
         public readonly Vector2 ToVector2() => new Vector2(X, Y) / 32767f;
 
         #region IPackedVector
 
-        /// <inheritdoc/>
         [CLSCompliant(false)]
         public uint PackedValue
         {
@@ -60,11 +58,33 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<NormalizedShort2, uint>(ref this) = value;
         }
 
-        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => this = Pack(vector.ToVector2());
 
-        /// <inheritdoc/>
         public readonly Vector4 ToVector4() => new Vector4(ToVector2(), 0, 1);
+
+        #endregion
+
+        #region IPixel
+
+        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
+
+        public readonly Vector4 ToScaledVector4() => ToVector4();
+
+        public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(ToScaledVector4());
+
+        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGrayAlpha16(GrayAlpha88 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
 
         #endregion
 
@@ -80,7 +100,7 @@ namespace MonoGame.Framework.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => $"NormalizedShort2({X}, {Y})";
+        public override string ToString() => nameof(NormalizedShort2) + $"({X}, {Y})";
 
         public override int GetHashCode() => PackedValue.GetHashCode();
 

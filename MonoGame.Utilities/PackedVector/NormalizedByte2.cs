@@ -68,7 +68,6 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPackedVector
 
-        /// <inheritdoc/>
         [CLSCompliant(false)]
         public ushort PackedValue
         {
@@ -76,17 +75,14 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<NormalizedByte2, ushort>(ref this) = value;
         }
 
-        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => this = Pack(vector.ToVector2());
 
-        /// <inheritdoc/>
         public readonly Vector4 ToVector4() => new Vector4(ToVector2(), 0, 1);
 
         #endregion
 
         #region IPixel
 
-        /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector)
         {
             var scaled = vector.ToVector2();
@@ -95,7 +91,6 @@ namespace MonoGame.Framework.PackedVector
             this = Pack(scaled);
         }
 
-        /// <inheritdoc/>
         public readonly Vector4 ToScaledVector4()
         {
             var scaled = ToVector2();
@@ -103,6 +98,22 @@ namespace MonoGame.Framework.PackedVector
             scaled /= 2;
             return new Vector4(scaled, 0, 1);
         }
+
+        public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(ToScaledVector4());
+
+        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGrayAlpha16(GrayAlpha88 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
 
         #endregion
 
@@ -119,7 +130,7 @@ namespace MonoGame.Framework.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => $"NormalizedByte2({X}, {Y})";
+        public override string ToString() => nameof(NormalizedByte2) + $"({X}, {Y})";
 
         public override int GetHashCode() => PackedValue.GetHashCode();
 

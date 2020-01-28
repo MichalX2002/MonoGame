@@ -6,6 +6,7 @@ using System;
 using System.ComponentModel;
 using MonoGame.Framework.Content.Pipeline.Graphics;
 using MonoGame.Framework.Graphics;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Framework.Content.Pipeline.Processors
 {
@@ -71,7 +72,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
 
                         if (ColorKeyEnabled)
                         {
-                            var v4 = ColorKeyColor.ToVector4();
+                            var v4 = ColorKeyColor.ToScaledVector4();
                             var original = new RgbaVector(v4.X, v4.Y, v4.Z, v4.W);
                             bmp.ReplaceColor(original, new RgbaVector(0, 0, 0, 0));
                         }

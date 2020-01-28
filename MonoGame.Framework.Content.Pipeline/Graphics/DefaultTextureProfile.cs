@@ -5,6 +5,7 @@
 using System;
 using MonoGame.Framework.Content.Pipeline.Processors;
 using MonoGame.Framework.Graphics;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {

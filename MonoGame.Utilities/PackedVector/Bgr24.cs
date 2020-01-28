@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Framework.PackedVector
 {
     /// <summary>
-    /// Packed pixel type containing four unsigned 8-bit XYZ components.
+    /// Packed pixel type containing three unsigned 8-bit XYZ components.
     /// <para>
     /// Ranges from [0, 0, 0, 1] to [1, 1, 1, 1] in vector form.
     /// </para>
@@ -59,20 +59,16 @@ namespace MonoGame.Framework.PackedVector
     
         #region IPackedVector
 
-        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => this = Pack(vector.XYZ);
 
-        /// <inheritdoc/>
         public readonly Vector4 ToVector4() => new Vector4(ToVector3(), 1);
 
         #endregion
 
         #region IPixel
 
-        /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
-        /// <inheritdoc/>
         public readonly Vector4 ToScaledVector4() => ToVector4();
 
         public readonly void ToColor(ref Color destination)
@@ -87,7 +83,7 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromGray16(Gray16 source) => B = G = R = PackedVectorHelper.DownScale16To8Bit(source.L);
 
-        public void FromGrayAlpha16(GrayAlpha16 source) => B = G = R = source.L;
+        public void FromGrayAlpha16(GrayAlpha88 source) => B = G = R = source.L;
 
         public void FromRgb24(Rgb24 source)
         {
@@ -136,7 +132,7 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => $"Bgr24(R:{R}, G:{G}, B:{B})";
+        public override string ToString() => nameof(Bgr24) + $"(R:{R}, G:{G}, B:{B})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

@@ -62,7 +62,6 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPackedVector
 
-        /// <inheritdoc/>
         [CLSCompliant(false)]
         public ulong PackedValue
         {
@@ -70,17 +69,14 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<HalfVector4, ulong>(ref this) = value;
         }
 
-        /// <inheritdoc/>
         public void FromVector4(Vector4 vector) => this = Pack(vector);
 
-        /// <inheritdoc/>
         public readonly Vector4 ToVector4() => new Vector4(X, Y, Z, W);
         
         #endregion
 
         #region IPixel
 
-        /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector)
         {
             vector *= 2;
@@ -88,7 +84,6 @@ namespace MonoGame.Framework.PackedVector
             FromVector4(vector);
         }
 
-        /// <inheritdoc/>
         public readonly Vector4 ToScaledVector4()
         {
             var scaled = ToVector4();
@@ -96,6 +91,22 @@ namespace MonoGame.Framework.PackedVector
             scaled /= 2;
             return scaled;
         }
+
+        public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(ToScaledVector4());
+
+        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGrayAlpha16(GrayAlpha88 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
 
         #endregion
 
@@ -129,7 +140,7 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Returns a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => $"HalfVector4({ToVector4().ToString()})";
+        public override string ToString() => nameof(HalfVector4) + $"({ToVector4().ToString()})";
 
         /// <summary>
         /// Gets the hash code for the current instance.

@@ -1,5 +1,6 @@
-// Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+// MonoGame - Copyright (C) The MonoGame Team
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 using System;
 using System.Runtime.InteropServices;
@@ -24,9 +25,9 @@ namespace MonoGame.Framework.PackedVector
 
         private static void Pack(ref Vector4 vector, out byte luminance, out byte alpha)
         {
-            vector *= Vector4.MaxByteValue;
+            vector *= Vector4.ByteMaxValue;
             vector += Vector4.Half;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxByteValue);
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.ByteMaxValue);
 
             luminance = PackedVectorHelper.Get8BitBT709Luminance(
                 (byte)vector.X, (byte)vector.Y, (byte)vector.Z);
@@ -35,10 +36,8 @@ namespace MonoGame.Framework.PackedVector
 
         public byte PackedValue { get => L; set => L = value; }
 
-        /// <inheritdoc />
         public void FromVector4(Vector4 vector) => Pack(ref vector, out L, out _);
 
-        /// <inheritdoc />
         public readonly Vector4 ToVector4()
         {
             float l = L / 255f;
@@ -47,45 +46,35 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPixel
 
-        /// <inheritdoc/>
         public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
-        /// <inheritdoc/>
         public readonly Vector4 ToScaledVector4() => ToVector4();
 
-        /// <inheritdoc/>
         public void FromGray8(Gray8 source) => L = source.L;
 
-        /// <inheritdoc/>
         public void FromGray16(Gray16 source) =>
             L = PackedVectorHelper.DownScale16To8Bit(source.L);
 
-        /// <inheritdoc/>
-        public void FromGrayAlpha16(GrayAlpha16 source) => L = source.L;
+        public void FromGrayAlpha16(GrayAlpha88 source) => L = source.L;
 
-        /// <inheritdoc/>
         public void FromRgb24(Rgb24 source) =>
             L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
 
-        /// <inheritdoc />
         public void FromColor(Color source) =>
             L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
 
-        /// <inheritdoc/>
         public void FromRgb48(Rgb48 source) =>
             L = PackedVectorHelper.Get8BitBT709Luminance(
                 PackedVectorHelper.DownScale16To8Bit(source.R),
                 PackedVectorHelper.DownScale16To8Bit(source.G),
                 PackedVectorHelper.DownScale16To8Bit(source.B));
 
-        /// <inheritdoc/>
         public void FromRgba64(Rgba64 source) =>
             L = PackedVectorHelper.Get8BitBT709Luminance(
                 PackedVectorHelper.DownScale16To8Bit(source.R),
                 PackedVectorHelper.DownScale16To8Bit(source.G),
                 PackedVectorHelper.DownScale16To8Bit(source.B));
 
-        /// <inheritdoc />
         public readonly void ToColor(ref Color destination)
         {
             destination.R = destination.G = destination.B = L;
@@ -105,17 +94,15 @@ namespace MonoGame.Framework.PackedVector
 
         #region Equals
 
-        /// <inheritdoc />
         public override bool Equals(object obj) => obj is Gray8 other && Equals(other);
 
-        /// <inheritdoc />
         public bool Equals(Gray8 other) => L.Equals(other.L);
 
         #endregion
 
         #region Object Overrides
 
-        public override string ToString() => $"Gray8({L.ToString()})";
+        public override string ToString() => nameof(Gray8) + $"({L.ToString()})";
 
         public override int GetHashCode() => L;
 

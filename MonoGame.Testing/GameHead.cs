@@ -135,8 +135,7 @@ namespace MonoGame.Testing
                     
                     Task.Run(() =>
                     {
-                        void OnProgress(
-                            int frameIndex, IReadOnlyPixelBuffer<Color> frames, double percentage)
+                        void OnProgress(int frameIndex, IReadOnlyPixelBuffer<Color> frames, double percentage)
                         {
                             Console.WriteLine("PNG write progress: " + Math.Round(percentage * 100f, 1) + "%");
                         }

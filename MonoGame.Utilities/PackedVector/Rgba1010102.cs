@@ -68,6 +68,22 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
 
+        public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(ToScaledVector4());
+
+        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromGrayAlpha16(GrayAlpha88 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
+
+        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
+
         #endregion
 
         #region Equals
@@ -83,9 +99,9 @@ namespace MonoGame.Framework.PackedVector
         #region Object Overrides
 
         /// <summary>
-        /// Gets a string representation of the packed vector.
+        /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => $"Rgba1010102({ToVector4().ToString()})";
+        public override string ToString() => nameof(Rgba1010102) + $"({ToVector4().ToString()})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

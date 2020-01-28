@@ -78,7 +78,7 @@ namespace MonoGame.Framework.Audio
             if (!ALC.IsExtensionPresent(device, "ALC_EXT_EFX"))
                 return;
 
-            TDelegate GetDelegate<TDelegate>(string name)
+            static TDelegate GetDelegate<TDelegate>(string name)
             {
                 var procAddress = AL.GetProcAddress(name);
                 return Marshal.GetDelegateForFunctionPointer<TDelegate>(procAddress);

@@ -27,15 +27,12 @@ namespace MonoGame.Framework.Graphics
         /// <value>The usage mode of the render target.</value>
         public RenderTargetUsage RenderTargetUsage { get; private set; }
 
-        /// <inheritdoc/>
         int IRenderTarget.Width => Size;
-
-        /// <inheritdoc/>
         int IRenderTarget.Height => Size;
 
         public bool IsContentLost => false;
         public event DataEvent<RenderTargetCube> ContentLost;
-		
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="RenderTargetCube"/> class.
         /// </summary>
@@ -72,7 +69,7 @@ namespace MonoGame.Framework.Graphics
         
         protected static SurfaceFormat QuerySelectedFormat(GraphicsDevice graphicsDevice, SurfaceFormat preferredFormat)
         {
-			SurfaceFormat selectedFormat = preferredFormat;
+            SurfaceFormat selectedFormat = preferredFormat;
 
             if (graphicsDevice != null)
             {

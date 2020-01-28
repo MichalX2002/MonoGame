@@ -1,4 +1,3 @@
-using MonoGame.Framework;
 
 namespace MonoGame.Framework.PackedVector
 {
@@ -7,10 +6,16 @@ namespace MonoGame.Framework.PackedVector
     /// </summary>
     public interface IPixel : IPackedVector
     {
-        /// <summary></summary>
+        /// <summary>
+        /// Sets the pixel from a scaled <see cref="Vector4"/>.
+        /// The XYZW vector components correspond to RGBA. 
+        /// </summary>
         void FromScaledVector4(Vector4 vector);
 
-        /// <summary></summary>
+        /// <summary>
+        /// Gets the pixel as a scaled <see cref="Vector4"/>.
+        /// The XYZW vector components correspond to RGBA. 
+        /// </summary>
         Vector4 ToScaledVector4();
 
         #region FromGray
@@ -21,8 +26,8 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>Sets the pixel value from <see cref="Gray16"/>.</summary>
         void FromGray16(Gray16 source);
 
-        /// <summary>Sets the pixel value from <see cref="GrayAlpha16"/>.</summary>
-        void FromGrayAlpha16(GrayAlpha16 source);
+        /// <summary>Sets the pixel value from <see cref="GrayAlpha88"/>.</summary>
+        void FromGrayAlpha16(GrayAlpha88 source);
 
         #endregion
 
@@ -43,7 +48,7 @@ namespace MonoGame.Framework.PackedVector
         #endregion
 
         /// <summary>
-        /// Converts the pixel value into <see cref="Color"/> representation.
+        /// Converts the pixel value into <see cref="Color"/>.
         /// </summary>
         /// <param name="destination">The destination reference for the <see cref="Color"/>.</param>
         void ToColor(ref Color destination);

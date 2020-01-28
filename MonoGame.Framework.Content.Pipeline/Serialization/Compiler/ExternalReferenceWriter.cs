@@ -12,7 +12,6 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
     {
         private ContentTypeWriter _targetWriter;
 
-        /// <inheritdoc/>
         internal override void OnAddedToContentWriter(ContentWriter output)
         {
             base.OnAddedToContentWriter(output);
@@ -29,7 +28,6 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             output.WriteExternalReference(value);
         }
 
-        /// <inheritdoc/>
         public override string GetRuntimeReader(TargetPlatform targetPlatform)
         {
             var type = typeof(ContentReader);
@@ -37,7 +35,6 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             return readerType;
         }
 
-        /// <inheritdoc/>
         public override string GetRuntimeType(TargetPlatform targetPlatform)
         {
             return _targetWriter.GetRuntimeType(targetPlatform);

@@ -62,7 +62,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
                         throw NewInvalidContentException(null, "Element '{0}' cannot be null.", format.ElementName);
 
                     Xml.Skip();
-                    return default(T);
+                    return default;
                 }
 
                 // Is the object overloading the serialized type?

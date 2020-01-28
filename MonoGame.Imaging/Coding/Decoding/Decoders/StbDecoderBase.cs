@@ -226,7 +226,7 @@ namespace MonoGame.Imaging.Coding.Decoding
             }
             finally
             {
-                CRuntime.free(result);
+                CRuntime.Free(result);
             }
         }
 

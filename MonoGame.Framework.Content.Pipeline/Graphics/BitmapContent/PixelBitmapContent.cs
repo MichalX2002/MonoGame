@@ -81,7 +81,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 format = SurfaceFormat.Vector4;
             else if (typeof(TPixel) == typeof(Vector2))
                 format = SurfaceFormat.Vector2;
-            else if (typeof(TPixel) == typeof(PackedSingle))
+            else if (typeof(TPixel) == typeof(Gray32))
                 format = SurfaceFormat.Single;
             else if (typeof(TPixel) == typeof(Alpha8))
                 format = SurfaceFormat.Alpha8;

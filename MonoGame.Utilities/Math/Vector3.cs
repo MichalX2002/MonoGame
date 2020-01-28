@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 using MonoGame.Framework;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Framework
 {
@@ -17,7 +18,7 @@ namespace MonoGame.Framework
 #endif
     [DataContract]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    public struct Vector3 : IEquatable<Vector3>
+    public struct Vector3 : IEquatable<Vector3>, IPixel
     {
         #region Public Constants
 
@@ -165,6 +166,43 @@ namespace MonoGame.Framework
         /// Gets the <see cref="Vector2"/> representation of this <see cref="Vector3"/>.
         /// </summary>
         public readonly Vector2 ToVector2() => new Vector2(X, Y);
+
+        #region IPackedVector
+
+        public void FromVector4(Vector4 vector)
+        {
+            X = vector.X;
+            Y = vector.Y;
+            Z = vector.Z;
+        }
+
+        public readonly Vector4 ToVector4() => new Vector4(X, Y, Z, 1);
+
+        #endregion
+
+        #region IPixel
+
+        void IPixel.FromScaledVector4(Vector4 vector) => FromVector4(vector);
+
+        readonly Vector4 IPixel.ToScaledVector4() => ToVector4();
+
+        public readonly void ToColor(ref Color destination) => destination.FromVector4(ToVector4());
+
+        void IPixel.FromGray8(Gray8 source) => FromVector4(source.ToScaledVector4());
+
+        void IPixel.FromGray16(Gray16 source) => FromVector4(source.ToScaledVector4());
+
+        void IPixel.FromGrayAlpha16(GrayAlpha88 source) => FromVector4(source.ToScaledVector4());
+
+        void IPixel.FromRgb24(Rgb24 source) => FromVector4(source.ToScaledVector4());
+
+        public void FromColor(Color source) => FromVector4(source.ToScaledVector4());
+
+        void IPixel.FromRgb48(Rgb48 source) => FromVector4(source.ToScaledVector4());
+
+        void IPixel.FromRgba64(Rgba64 source) => FromVector4(source.ToScaledVector4());
+
+        #endregion
 
         /// <summary>
         /// Creates a new <see cref="Vector3"/> that contains the cartesian
@@ -751,7 +789,7 @@ namespace MonoGame.Framework
         /// <returns>The result of dividing a vector by a scalar.</returns>
         public static Vector3 operator /(in Vector3 value, float divider)
         {
-            float factor = 1 / divider;
+            float factor = 1f / divider;
             return new Vector3(
                 value.X * factor,
                 value.Y * factor,
