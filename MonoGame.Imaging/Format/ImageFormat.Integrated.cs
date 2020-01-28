@@ -6,14 +6,14 @@ namespace MonoGame.Imaging
 {
     public partial class ImageFormat
     {
-        private static HashSet<ImageFormat> _builtInFormats = new HashSet<ImageFormat>();
+        private static HashSet<ImageFormat> _integratedFormats = new HashSet<ImageFormat>();
 
-        #region Property Getters
+        #region Getters (+ Initializers)
 
         /// <summary>
         /// Gets the "Portable Network Graphics" format.
         /// </summary>
-        public static ImageFormat Png { get; } = AddBuiltIn(
+        public static ImageFormat Png { get; } = AddIntegrated(
             "Portable Network Graphics", "PNG",
             new[] { "image/png" },
             new[] { ".png" });
@@ -21,7 +21,7 @@ namespace MonoGame.Imaging
         /// <summary> 
         /// Gets the "Joint Photographic Experts Group" (i.e JPEG) format. 
         /// </summary>
-        public static ImageFormat Jpeg { get; } = AddBuiltIn(
+        public static ImageFormat Jpeg { get; } = AddIntegrated(
             "Joint Photographic Experts Group", "JPEG",
             new[] { "image/jpeg" },
             new[] { ".jpeg", ".jpg", ".jpe", ".jfif", ".jif" });
@@ -38,7 +38,7 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Gets the "Bitmap" format.
         /// </summary>
-        public static ImageFormat Bmp { get; } = AddBuiltIn(
+        public static ImageFormat Bmp { get; } = AddIntegrated(
             "Bitmap", "BMP",
             new[] { "image/bmp", "image/x-bmp" },
             new[] { ".bmp", ".bm" });
@@ -46,7 +46,7 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Gets the "Truevision Graphics Adapter" format.
         /// </summary>
-        public static ImageFormat Tga { get; } = AddBuiltIn(
+        public static ImageFormat Tga { get; } = AddIntegrated(
             "Truevision Graphics Adapter", "TGA",
             new[] { "image/x-tga", "image/x-targa" },
             new[] { ".tga" });
@@ -54,7 +54,7 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Gets the "RGBE" format (also known as "Radiance HDR").
         /// </summary>
-        public static ImageFormat Rgbe { get; } = AddBuiltIn(
+        public static ImageFormat Rgbe { get; } = AddIntegrated(
             "Radiance HDR", "RGBE",
             new[] { "image/vnd.radiance", "image/x-hdr" },
             new[] { ".hdr", ".rgbe" });
@@ -71,23 +71,23 @@ namespace MonoGame.Imaging
 
         static ImageFormat()
         {
-            _builtInFormats.Add(Gif);
-            _builtInFormats.Add(Psd);
+            _integratedFormats.Add(Gif);
+            _integratedFormats.Add(Psd);
         }
 
         /// <summary>
         /// Gets whether the format comes with the imaging library.
         /// </summary>
         /// <exception cref="ArgumentNullException"></exception>
-        public static bool IsBuiltIn(ImageFormat format)
+        public static bool IsIntegrated(ImageFormat format)
         {
             if (format == null)
                 throw new ArgumentNullException(nameof(format));
 
-            return _builtInFormats.Contains(format);
+            return _integratedFormats.Contains(format);
         }
 
-        private static ImageFormat AddBuiltIn(
+        private static ImageFormat AddIntegrated(
             string fullName, string name, string[] mimeTypes, string[] extensions)
         {
             var mimeSet = new ReadOnlySet<string>(mimeTypes, StringComparer.OrdinalIgnoreCase);
@@ -96,7 +96,7 @@ namespace MonoGame.Imaging
             var format = new ImageFormat(
                 fullName, name, mimeTypes[0], extensions[0], mimeSet, extensionSet);
 
-            _builtInFormats.Add(format);
+            _integratedFormats.Add(format);
             AddFormat(format);
             return format;
         }
