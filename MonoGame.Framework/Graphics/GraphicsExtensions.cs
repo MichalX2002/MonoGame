@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Diagnostics;
 
 #if OPENGL
 #if DESKTOPGL || GLES
@@ -16,7 +17,7 @@ using OpenTK.Graphics;
 
 namespace MonoGame.Framework.Graphics
 {
-    public static class GraphicsExtensions
+    internal static class GraphicsExtensions
     {
 #if OPENGL
         public static int OpenGLNumberOfElements(this VertexElementFormat elementFormat)
@@ -557,7 +558,7 @@ namespace MonoGame.Framework.Graphics
 
                 case SurfaceFormat.Bgra4444:
 #if IOS || ANDROID
-				glInternalFormat = PixelInternalFormat.Rgba;
+                glInternalFormat = PixelInternalFormat.Rgba;
 #else
                     glInternalFormat = PixelInternalFormat.Rgba4;
 #endif

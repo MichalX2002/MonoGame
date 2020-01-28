@@ -7,7 +7,9 @@ using System.IO;
 
 namespace MonoGame.Framework.Audio
 {
-    /// <summary>Represents a collection of wave files.</summary>
+    /// <summary>
+    /// Represents a collection of wave files.
+    /// </summary>
     public partial class WaveBank : IDisposable
     {
         private readonly SoundEffect[] _sounds;
@@ -35,14 +37,14 @@ namespace MonoGame.Framework.Audio
 
         struct WaveBankData
         {
-            public int    Flags;                                // Bank flags
-            public int    EntryCount;                           // Number of entries in the bank
-            public string BankName;                             // Bank friendly name
-            public int    EntryMetaDataElementSize;             // Size of each entry meta-data element, in bytes
-            public int    EntryNameElementSize;                 // Size of each entry name element, in bytes
-            public int    Alignment;                            // Entry alignment, in bytes
-            public int    CompactFormat;                        // Format data for compact bank
-            public int    BuildTime;                            // Build timestamp
+            public int Flags;                     // Bank flags
+            public int EntryCount;                // Number of entries in the bank
+            public string BankName;               // Bank friendly name
+            public int EntryMetaDataElementSize;  // Size of each entry meta-data element, in bytes
+            public int EntryNameElementSize;      // Size of each entry name element, in bytes
+            public int Alignment;                 // Entry alignment, in bytes
+            public int CompactFormat;             // Format data for compact bank
+            public int BuildTime;                 // Build timestamp
         }
 
         struct StreamInfo
@@ -54,12 +56,12 @@ namespace MonoGame.Framework.Audio
             public int LoopLength;
         }
 
-        private const int Flag_EntryNames = 0x00010000; // Bank includes entry names
+        //private const int Flag_EntryNames = 0x00010000; // Bank includes entry names
         private const int Flag_Compact = 0x00020000; // Bank uses compact format
-        private const int Flag_SyncDisabled = 0x00040000; // Bank is disabled for audition sync
-        private const int Flag_SeekTables = 0x00080000; // Bank includes seek tables.
-        private const int Flag_Mask = 0x000F0000;
-        
+        //private const int Flag_SyncDisabled = 0x00040000; // Bank is disabled for audition sync
+        //private const int Flag_SeekTables = 0x00080000; // Bank includes seek tables.
+        //private const int Flag_Mask = 0x000F0000;
+
         /// <summary>
         /// </summary>
         public bool IsInUse { get; private set; }
@@ -76,7 +78,8 @@ namespace MonoGame.Framework.Audio
         {
         }
 
-        private WaveBank(AudioEngine audioEngine, string waveBankFilename, bool streaming, int offset, int packetsize)
+        private WaveBank(
+            AudioEngine audioEngine, string waveBankFilename, bool streaming, int offset, int packetsize)
         {
             if (audioEngine == null)
                 throw new ArgumentNullException(nameof(audioEngine));
@@ -103,7 +106,7 @@ namespace MonoGame.Framework.Audio
             //XWB PARSING
             //Adapted from MonoXNA
             //Originally adaped from Luigi Auriemma's unxwb
-            
+
             WaveBankHeader wavebankheader;
             WaveBankData wavebankdata;
 
@@ -341,7 +344,7 @@ namespace MonoGame.Framework.Audio
                 rate = (format >> (2 + 3)) & ((1 << 18) - 1);
                 alignment = (format >> (2 + 3 + 18)) & ((1 << 8) - 1);
                 //bits = (info.Format >> (2 + 3 + 18 + 8)) & ((1 << 1) - 1);
-            }            
+            }
         }
 
         /// <param name="audioEngine">Instance of the AudioEngine to associate this wave bank with.</param>

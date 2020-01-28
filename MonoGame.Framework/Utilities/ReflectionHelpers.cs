@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace MonoGame.Framework.Utilities
 {
-    internal static partial class ReflectionHelpers
+    public static partial class ReflectionHelpers
     {
         public static bool IsValueType(Type targetType)
         {
@@ -29,7 +29,7 @@ namespace MonoGame.Framework.Utilities
         }
 
         /// <summary>
-        /// Returns the Assembly of a Type
+        /// Returns the Assembly of a Type.
         /// </summary>
         public static Assembly GetAssembly(Type targetType)
         {

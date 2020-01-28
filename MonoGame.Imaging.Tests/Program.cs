@@ -13,6 +13,8 @@ using System.Runtime.CompilerServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Imaging.Pixels;
+using MonoGame.Imaging.Coding.Decoding;
+using MonoGame.Imaging.Coding.Encoding;
 
 namespace MonoGame.Imaging.Tests
 {
@@ -40,9 +42,11 @@ namespace MonoGame.Imaging.Tests
             int writeRepeats = 1;
 
             void OnReadProgress(
-                int frameIndex, Image<Color> frame, double progress, Rectangle? rectangle)
+                ImageDecoderState<Color> decoderState,
+                double percentage, 
+                Rectangle? rectangle)
             {
-                Console.WriteLine("Read: " + Math.Round(progress * 100, 2) + "%");
+                Console.WriteLine("Read: " + Math.Round(percentage * 100, 2) + "%");
             }
             
             var watch = new Stopwatch();
@@ -66,7 +70,9 @@ namespace MonoGame.Imaging.Tests
             watch.Reset();
 
             bool OnWriteProgress(
-                int frameIndex, IReadOnlyPixelBuffer<Color> frame, double progress)
+                ImageEncoderState<Color> encoderState,
+                double percentage,
+                Rectangle? rectangle)
             {
                 //Console.WriteLine("Write: " + Math.Round(progress * 100, 2) + "%");
                 return true;

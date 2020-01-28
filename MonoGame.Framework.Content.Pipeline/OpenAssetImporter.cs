@@ -17,7 +17,7 @@ namespace MonoGame.Framework.Content.Pipeline
 {
     [ContentImporter(
         ".dae", // Collada
-        ".gltf", "glb", // glTF
+        ".gltf", ".glb", // glTF
         ".blend", // Blender 3D
         ".3ds", // 3ds Max 3DS
         ".ase", // 3ds Max ASE

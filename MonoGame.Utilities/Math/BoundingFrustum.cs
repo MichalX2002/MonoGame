@@ -219,10 +219,10 @@ namespace MonoGame.Framework
         /// </param>
         public void GetCorners(Vector3[] corners)
         {
-			if (corners == null)
+            if (corners == null)
                 throw new ArgumentNullException(nameof(corners));
 
-		    if (corners.Length < CornerCount)
+            if (corners.Length < CornerCount)
                 throw new ArgumentOutOfRangeException(nameof(corners), "Not enough corners.");
 
             _corners.CopyTo(corners, 0);
@@ -303,13 +303,14 @@ namespace MonoGame.Framework
         /// <returns><see cref="string"/> representation of this <see cref="BoundingFrustum"/>.</returns>
         public override string ToString()
         {
-            return "{Near: " + _planes[0] +
-                   " Far:" + _planes[1] +
-                   " Left:" + _planes[2] +
-                   " Right:" + _planes[3] +
-                   " Top:" + _planes[4] +
-                   " Bottom:" + _planes[5] +
-                   "}";
+            return
+                "{Near: " + _planes[0] +
+                " Far:" + _planes[1] +
+                " Left:" + _planes[2] +
+                " Right:" + _planes[3] +
+                " Top:" + _planes[4] +
+                " Bottom:" + _planes[5] +
+                "}";
         }
 
         #endregion

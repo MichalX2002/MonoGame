@@ -52,8 +52,7 @@ namespace MGCB
                 Console.WriteLine("Build started {0}\n", buildStarted);
 
             // Let the content build.
-            int successCount, errorCount;
-            content.Build(out successCount, out errorCount);
+            content.Build(out int successCount, out int errorCount);
 
             // Print the finishing info.
             if (!content.Quiet)

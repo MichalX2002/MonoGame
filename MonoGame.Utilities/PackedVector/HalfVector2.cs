@@ -4,7 +4,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using MonoGame.Framework;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
 {
@@ -12,6 +12,7 @@ namespace MonoGame.Framework.PackedVector
     /// Packed vector type containing 16-bit floating-point XY components.
     /// <para>Ranges from [0, 0, 0, 1] to [1, 1, 0, 1] in vector form.</para>
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct HalfVector2 : IPackedVector<uint>, IEquatable<HalfVector2>, IPixel
     {
         public HalfSingle X;

@@ -4,10 +4,11 @@
 
 using System.Runtime.InteropServices;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MonoGame.Framework
 {
-    internal enum OS
+    public enum OS
     {
         Windows,
         Linux,
@@ -15,13 +16,14 @@ namespace MonoGame.Framework
         Unknown
     }
 
-    internal static class CurrentPlatform
+    public static class CurrentPlatform
     {
         private static bool init = false;
         private static OS os;
 
-        [DllImport ("libc")]
-        static extern int uname (IntPtr buf);
+        [DllImport("libc")]
+        [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Interop")]
+        static extern int uname(IntPtr buf);
 
         private static void Init()
         {

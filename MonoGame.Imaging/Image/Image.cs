@@ -5,6 +5,7 @@ using System.Threading;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
+using MonoGame.Imaging.Coding;
 using MonoGame.Imaging.Coding.Decoding;
 using MonoGame.Imaging.Coding.Encoding;
 

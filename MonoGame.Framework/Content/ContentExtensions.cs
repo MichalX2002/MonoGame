@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace MonoGame.Framework.Content
 {
-    internal static class ContentExtensions
+    public static class ContentExtensions
     {
         public static ConstructorInfo GetDefaultConstructor(this Type type)
         {
