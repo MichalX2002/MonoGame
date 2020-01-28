@@ -6,10 +6,11 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace MonoGame.Framework
 {
-	internal class PlaneHelper
+    internal class PlaneHelper
     {
         /// <summary>
         /// Returns a value indicating what side (positive/negative) of a plane a point is
@@ -36,7 +37,7 @@ namespace MonoGame.Framework
         //                            / Math.Sqrt(plane.Normal.X * plane.Normal.X + plane.Normal.Y * plane.Normal.Y + plane.Normal.Z * plane.Normal.Z));
         //}
     }
-	
+    
     [DataContract]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Plane : IEquatable<Plane>

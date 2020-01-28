@@ -178,8 +178,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 
                 if (info.Attribute.SharedResource)
                 {
-                    Action<object> fixup = (o) => info.Setter(result, o);
-                    input.ReadSharedResource(info.Attribute, fixup);
+                    input.ReadSharedResource(info.Attribute, (object o) => info.Setter(result, o));
                 }
                 else if (info.Setter == null)
                 {

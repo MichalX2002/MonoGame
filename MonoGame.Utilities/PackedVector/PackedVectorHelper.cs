@@ -1,21 +1,12 @@
 using System;
 using System.Runtime.CompilerServices;
-using MonoGame.Framework;
 
 namespace MonoGame.Framework.PackedVector
 {
     public static class PackedVectorHelper
     {
         /// <summary>
-        /// Gets the packed vector in <see cref="Vector3"/> format.
-        /// </summary>
-        [Obsolete("To be replaced with a per-type implementation.")]
-        public static Vector3 ToVector3<TPackedVector>(this TPackedVector vector)
-            where TPackedVector : IPackedVector =>
-            vector.ToVector4().ToVector3();
-
-        /// <summary>
-        /// Scales a value from a 16-bit <see cref="ushort"/> to it's 8-bit <see cref="byte"/> equivalent.
+        /// Scales a value from a 16-bit <see cref="ushort"/> to C:\Projects\Repos\MonoGame\MonoGame.Utilities\PackedVector\PackedVectorHelper.csit's 8-bit <see cref="byte"/> equivalent.
         /// </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -180,8 +180,7 @@ namespace MGCB
                 foreach (var ifCondition in ifstack)
                 {
                     var expected = ifCondition.Value;
-                    string actual;
-                    if (!_properties.TryGetValue(ifCondition.Key, out actual))
+                    if (!_properties.TryGetValue(ifCondition.Key, out string actual))
                         return;
                     if (expected != string.Empty && !expected.Equals(actual))
                         return;
@@ -283,8 +282,7 @@ namespace MGCB
                 (arg[0] == '-' || arg[0] == '/') &&
                 (arg[2] == '=' || arg[2] == ':'))
             {
-                string name;
-                if (!_flags.TryGetValue(arg[1].ToString(), out name))
+                if (!_flags.TryGetValue(arg[1].ToString(), out string name))
                 {
                     ShowError("Unknown option '{0}'", arg[1].ToString());
                     return false;
@@ -302,8 +300,7 @@ namespace MGCB
             {
                 for (int i = 1; i < arg.Length; i++)
                 {
-                    string name;
-                    if (!_flags.TryGetValue(arg[i].ToString(), out name))
+                    if (!_flags.TryGetValue(arg[i].ToString(), out string name))
                     {
                         ShowError("Unknown option '{0}'", arg[i].ToString());
                         break;
@@ -336,9 +333,8 @@ namespace MGCB
                 var name = split[0];
                 var value = (split.Length > 1) ? split[1] : "true";
 
-                MemberInfo member;
 
-                if (!_optionalOptions.TryGetValue(name.ToLowerInvariant(), out member))
+                if (!_optionalOptions.TryGetValue(name.ToLowerInvariant(), out MemberInfo member))
                 {
                     ShowError("Unknown option '{0}'", name);
                     return false;

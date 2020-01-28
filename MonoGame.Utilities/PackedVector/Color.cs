@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Diagnostics;
 using MonoGame.Framework.PackedVector;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework
 {
@@ -17,6 +18,7 @@ namespace MonoGame.Framework
     /// </summary>
     [DataContract]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [StructLayout(LayoutKind.Sequential)]
     public partial struct Color : IPackedVector<uint>, IEquatable<Color>, IPixel
     {
         /// <summary>

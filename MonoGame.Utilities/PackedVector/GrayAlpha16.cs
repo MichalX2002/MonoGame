@@ -3,7 +3,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using MonoGame.Framework;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
 {
@@ -13,6 +13,7 @@ namespace MonoGame.Framework.PackedVector
     /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
     /// </para>
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct GrayAlpha16 : IPackedVector<ushort>, IEquatable<GrayAlpha16>, IPixel
     {
         public byte L;

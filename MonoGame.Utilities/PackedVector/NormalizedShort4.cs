@@ -4,7 +4,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using MonoGame.Framework;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
 {
@@ -14,8 +14,9 @@ namespace MonoGame.Framework.PackedVector
     /// Ranges from [-1, -1, -1, -1] to [1, 1, 1, 1] in vector form.
     /// </para>
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct NormalizedShort4 : IPackedVector<ulong>, IEquatable<NormalizedShort4>
-	{
+    {
         public short X;
         public short Y;
         public short Z;

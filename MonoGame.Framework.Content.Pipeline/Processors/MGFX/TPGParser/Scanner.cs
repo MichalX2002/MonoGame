@@ -553,7 +553,7 @@ namespace TwoMGFX.TPGParser
         }
 
         /// <summary>
-        /// returns token with longest best match
+        /// Returns the token with longest best match.
         /// </summary>
         /// <returns></returns>
         public Token LookAhead(params TokenType[] expectedtokens)
@@ -563,19 +563,20 @@ namespace TwoMGFX.TPGParser
             int endpos = EndPos;
             int currentline = CurrentLine;
             string currentFile = CurrentFile;
-            Token tok = null;
+            Token token;
             List<TokenType> scantokens;
 
-
-            // this prevents double scanning and matching
-            // increased performance
-            if (LookAheadToken != null 
-                && LookAheadToken.Type != TokenType.UNDETERMINED 
-                && LookAheadToken.Type != TokenType.NONE0) return LookAheadToken;
+            // this prevents double scanning and matching = increased performance
+            if (LookAheadToken != null &&
+                LookAheadToken.Type != TokenType.UNDETERMINED &&
+                LookAheadToken.Type != TokenType.NONE0) 
+                return LookAheadToken;
 
             // if no scantokens specified, then scan for all of them (= backward compatible)
             if (expectedtokens.Length == 0)
+            {
                 scantokens = Tokens;
+            }
             else
             {
                 scantokens = new List<TokenType>(expectedtokens);
@@ -589,7 +590,7 @@ namespace TwoMGFX.TPGParser
                 TokenType index = (TokenType)int.MaxValue;
                 string input = Input.Substring(startpos);
 
-                tok = new Token(startpos, endpos);
+                token = new Token(startpos, endpos);
 
                 for (i = 0; i < scantokens.Count; i++)
                 {
@@ -604,44 +605,44 @@ namespace TwoMGFX.TPGParser
 
                 if (index >= 0 && len >= 0)
                 {
-                    tok.EndPos = startpos + len;
-                    tok.Text = Input.Substring(tok.StartPos, len);
-                    tok.Type = index;
+                    token.EndPos = startpos + len;
+                    token.Text = Input.Substring(token.StartPos, len);
+                    token.Type = index;
                 }
-                else if (tok.StartPos == tok.EndPos)
+                else if (token.StartPos == token.EndPos)
                 {
-                    if (tok.StartPos < Input.Length)
-                        tok.Text = Input.Substring(tok.StartPos, 1);
+                    if (token.StartPos < Input.Length)
+                        token.Text = Input.Substring(token.StartPos, 1);
                     else
-                        tok.Text = "EOF";
+                        token.Text = "EOF";
                 }
 
                 // Update the line and column count for error reporting.
-                tok.File = currentFile;
-                tok.Line = currentline;
-                if (tok.StartPos < Input.Length)
-                    tok.Column = tok.StartPos - Input.LastIndexOf('\n', tok.StartPos);
+                token.File = currentFile;
+                token.Line = currentline;
+                if (token.StartPos < Input.Length)
+                    token.Column = token.StartPos - Input.LastIndexOf('\n', token.StartPos);
 
-                if (SkipList.Contains(tok.Type))
+                if (SkipList.Contains(token.Type))
                 {
-                    startpos = tok.EndPos;
-                    endpos = tok.EndPos;
-                    currentline = tok.Line + (tok.Text.Length - tok.Text.Replace("\n", "").Length);
-                    currentFile = tok.File;
-                    Skipped.Add(tok);
+                    startpos = token.EndPos;
+                    endpos = token.EndPos;
+                    currentline = token.Line + (token.Text.Length - token.Text.Replace("\n", "").Length);
+                    currentFile = token.File;
+                    Skipped.Add(token);
                 }
                 else
                 {
                     // only assign to non-skipped tokens
-                    tok.Skipped = Skipped; // assign prior skips to this token
+                    token.Skipped = Skipped; // assign prior skips to this token
                     Skipped = new List<Token>(); //reset skips
                 }
 
                 // Check to see if the parsed token wants to 
                 // alter the file and line number.
-                if (tok.Type == FileAndLine)
+                if (token.Type == FileAndLine)
                 {
-                    var match = Patterns[tok.Type].Match(tok.Text);
+                    var match = Patterns[token.Type].Match(token.Text);
                     var fileMatch = match.Groups["File"];
                     if (fileMatch.Success)
                         currentFile = fileMatch.Value.Replace("\\\\", "\\");
@@ -650,10 +651,10 @@ namespace TwoMGFX.TPGParser
                         currentline = int.Parse(lineMatch.Value, NumberStyles.Integer, CultureInfo.InvariantCulture);
                 }
             }
-            while (SkipList.Contains(tok.Type));
+            while (SkipList.Contains(token.Type));
 
-            LookAheadToken = tok;
-            return tok;
+            LookAheadToken = token;
+            return token;
         }
     }
 

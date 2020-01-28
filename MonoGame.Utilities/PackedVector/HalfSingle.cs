@@ -3,7 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using MonoGame.Framework;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
 {
@@ -11,6 +11,7 @@ namespace MonoGame.Framework.PackedVector
     /// Packed vector type containing a 16-bit floating-point X component.
     /// <para>Ranges from [-1, 0, 0, 1] to [1, 0, 0, 1] in vector form.</para>
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct HalfSingle : IPackedVector<ushort>, IEquatable<HalfSingle>, IPixel
     {
         #region Constructors

@@ -72,8 +72,8 @@ namespace MonoGame.Framework.Audio
         {
             lock (_syncRoot)
             {
+                SoundEffectInstance inst;
 
-                SoundEffectInstance inst = null;
                 var count = _pooledInstances.Count;
                 if (count > 0)
                 {
@@ -113,12 +113,10 @@ namespace MonoGame.Framework.Audio
         {
             lock (_syncRoot)
             {
-                SoundEffectInstance inst = null;
-
                 // Cleanup instances which have finished playing.                    
                 for (var x = 0; x < _playingInstances.Count;)
                 {
-                    inst = _playingInstances[x];
+                    SoundEffectInstance inst = _playingInstances[x];
 
                     // Don't consume XACT instances... XACT will
                     // clear this flag when it is done with the wave.

@@ -3,7 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using MonoGame.Framework;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
 {
@@ -13,6 +13,7 @@ namespace MonoGame.Framework.PackedVector
     /// Ranges from [0, 0, 0, 1] to [1, 1, 1, 1] in vector form.
     /// </para>
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct Rgb48 : IEquatable<Rgb48>, IPixel
     {
         private static readonly Vector3 Max = new Vector3(ushort.MaxValue);

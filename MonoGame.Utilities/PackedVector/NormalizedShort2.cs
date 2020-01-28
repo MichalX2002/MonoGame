@@ -4,6 +4,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
 {
@@ -13,8 +14,9 @@ namespace MonoGame.Framework.PackedVector
     /// Ranges from [-1, -1, 0, 1] to [1, 1, 0, 1] in vector form.
     /// </para>
     /// </summary>
-	public struct NormalizedShort2 : IPackedVector<uint>, IEquatable<NormalizedShort2>
-	{
+    [StructLayout(LayoutKind.Sequential)]
+    public struct NormalizedShort2 : IPackedVector<uint>, IEquatable<NormalizedShort2>
+    {
         public short X;
         public short Y;
 
@@ -83,5 +85,5 @@ namespace MonoGame.Framework.PackedVector
         public override int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
-	}
+    }
 }

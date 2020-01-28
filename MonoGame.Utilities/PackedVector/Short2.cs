@@ -5,7 +5,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using MonoGame.Framework;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
 {
@@ -15,6 +15,7 @@ namespace MonoGame.Framework.PackedVector
     /// Ranges from [-32768, -32768, 0, 1] to [32767, 32767, 0, 1] in vector form.
     /// </para>
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct Short2 : IPackedVector<uint>, IEquatable<Short2>
     {
         private static Vector2 Offset = new Vector2(32768);

@@ -3,7 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using MonoGame.Framework;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
 {
@@ -14,6 +14,7 @@ namespace MonoGame.Framework.PackedVector
     /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
     /// </para>
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct Rgba1010102 : IPackedVector<uint>, IEquatable<Rgba1010102>, IPixel
     {
         /// <summary>

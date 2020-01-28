@@ -173,7 +173,7 @@ namespace MonoGame.Framework.Media
         public static Song FromUri(Uri uri, string name = null)
         {
             string path = Path.GetFullPath(uri.OriginalString);
-            name = name ?? Path.GetFileNameWithoutExtension(path);
+            name ??= Path.GetFileNameWithoutExtension(path);
             return FromStream(File.OpenRead(path), leaveOpen: false, name);
         }
 
