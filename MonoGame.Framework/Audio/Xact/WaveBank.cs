@@ -380,7 +380,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// This event is triggered when the WaveBank is disposed.
         /// </summary>
-        public event DataEvent<WaveBank> Disposing;
+        public event DatalessEvent<WaveBank> Disposing;
 
         /// <summary>
         /// Is true if the WaveBank has been disposed.

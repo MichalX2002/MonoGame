@@ -171,12 +171,12 @@ namespace MonoGame.Framework
 
         #region IGraphicsDeviceService Members
 
-        public event DataEvent<IGraphicsDeviceService> DeviceCreated;
-        public event DataEvent<IGraphicsDeviceService> DeviceDisposing;
-        public event DataEvent<IGraphicsDeviceService> DeviceReset;
-        public event DataEvent<IGraphicsDeviceService> DeviceResetting;
-        public event DataEvent<IGraphicsDeviceService, GraphicsDeviceInformation> PreparingDeviceSettings;
-        public event DataEvent<IGraphicsDeviceService> Disposed;
+        public event DatalessEvent<IGraphicsDeviceService> DeviceCreated;
+        public event DatalessEvent<IGraphicsDeviceService> DeviceDisposing;
+        public event DatalessEvent<IGraphicsDeviceService> DeviceReset;
+        public event DatalessEvent<IGraphicsDeviceService> DeviceResetting;
+        public event DatalessEvent<IGraphicsDeviceService, GraphicsDeviceInformation> PreparingDeviceSettings;
+        public event DatalessEvent<IGraphicsDeviceService> Disposed;
 
         protected void OnDeviceDisposing() => DeviceDisposing?.Invoke(this);
 

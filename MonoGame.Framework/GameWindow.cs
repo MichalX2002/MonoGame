@@ -95,9 +95,9 @@ namespace MonoGame.Framework
 
 		#region Events
 
-		public event DataEvent<GameWindow> ClientSizeChanged;
-		public event DataEvent<GameWindow> OrientationChanged;
-		public event DataEvent<GameWindow> ScreenDeviceNameChanged;
+		public event DatalessEvent<GameWindow> ClientSizeChanged;
+		public event DatalessEvent<GameWindow> OrientationChanged;
+		public event DatalessEvent<GameWindow> ScreenDeviceNameChanged;
 
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
 
@@ -112,17 +112,17 @@ namespace MonoGame.Framework
 		/// <remarks>
 		/// This event is only supported on the Windows DirectX, Windows OpenGL and Linux platforms.
 		/// </remarks>
-		public event DataEvent<GameWindow, TextInputEvent> TextInput;
+		public event DatalessEvent<GameWindow, TextInputEvent> TextInput;
 
 		/// <summary>
 		/// Buffered keyboard KeyDown event.
 		/// </summary>
-		public event DataEvent<GameWindow, KeyInputEvent> KeyDown;
+		public event DatalessEvent<GameWindow, KeyInputEvent> KeyDown;
 
 		/// <summary>
 		/// Buffered keyboard KeyUp event.
 		/// </summary>
-		public event DataEvent<GameWindow, KeyInputEvent> KeyUp;
+		public event DatalessEvent<GameWindow, KeyInputEvent> KeyUp;
 
 		internal void OnTextInput(TextInputEvent ev) => TextInput?.Invoke(this, ev);
 

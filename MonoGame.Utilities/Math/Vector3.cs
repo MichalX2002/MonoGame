@@ -165,7 +165,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the <see cref="Vector2"/> representation of this <see cref="Vector3"/>.
         /// </summary>
-        public readonly Vector2 ToVector2() => new Vector2(X, Y);
+        public readonly Vector2 ToVector2() => UnsafeUtils.As<Vector3, Vector2>(this);
 
         #region IPackedVector
 

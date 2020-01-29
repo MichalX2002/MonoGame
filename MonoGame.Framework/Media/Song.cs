@@ -56,7 +56,7 @@ namespace MonoGame.Framework.Media
         /// <summary>
         /// Occurs when the <see cref="Song"/> stops though not when the it loops.
         /// </summary>
-        public event DataEvent<Song> Finished;
+        public event DatalessEvent<Song> Finished;
 
         /// <summary>
         /// Gets whether the <see cref="Song"/> is disposed.

@@ -359,19 +359,19 @@ namespace MonoGame.Framework.Graphics
 
         // TODO: Graphics Device events need implementing
         internal event DataEvent<GraphicsDevice, PresentationParameters> PresentationChanged;
-        public event DataEvent<GraphicsDevice> DeviceLost;
-        public event DataEvent<GraphicsDevice> DeviceReset;
-        public event DataEvent<GraphicsDevice> DeviceResetting;
+        public event DatalessEvent<GraphicsDevice> DeviceLost;
+        public event DatalessEvent<GraphicsDevice> DeviceReset;
+        public event DatalessEvent<GraphicsDevice> DeviceResetting;
         public event DataEvent<GraphicsDevice, object> ResourceCreated;
         public event DataEvent<GraphicsDevice, ResourceDestroyedEvent> ResourceDestroyed;
-        public event DataEvent<GraphicsDevice> Disposing;
+        public event DatalessEvent<GraphicsDevice> Disposing;
 
         #endregion
 
         #region Constructors
 
         internal GraphicsDevice()
-		{
+        {
             PresentationParameters = new PresentationParameters
             {
                 DepthStencilFormat = DepthFormat.Depth24
@@ -557,8 +557,8 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-		public void Clear(ClearOptions options, Vector4 color, float depth, int stencil)
-		{
+        public void Clear(ClearOptions options, Vector4 color, float depth, int stencil)
+        {
             PlatformClear(options, color, depth, stencil);
 
             unchecked
@@ -684,17 +684,17 @@ namespace MonoGame.Framework.Graphics
         #region RenderTargets
 
         public void SetRenderTarget(RenderTarget2D renderTarget)
-		{
-			if (renderTarget == null)
-		    {
+        {
+            if (renderTarget == null)
+            {
                 SetRenderTargets(null);
-		    }
-			else
-			{
-				_tempRenderTargetBinding[0] = new RenderTargetBinding(renderTarget);
-				SetRenderTargets(_tempRenderTargetBinding);
-			}
-		}
+            }
+            else
+            {
+                _tempRenderTargetBinding[0] = new RenderTargetBinding(renderTarget);
+                SetRenderTargets(_tempRenderTargetBinding);
+            }
+        }
 
         public void SetRenderTarget(RenderTargetCube renderTarget, CubeMapFace cubeMapFace)
         {
@@ -709,8 +709,8 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-		public void SetRenderTargets(params RenderTargetBinding[] renderTargets)
-		{
+        public void SetRenderTargets(params RenderTargetBinding[] renderTargets)
+        {
             // Avoid having to check for null and zero length.
             var renderTargetCount = 0;
             if (renderTargets != null)
@@ -806,13 +806,13 @@ namespace MonoGame.Framework.Graphics
                 Clear(DiscardColor);
         }
 
-		public RenderTargetBinding[] GetRenderTargets()
-		{
+        public RenderTargetBinding[] GetRenderTargets()
+        {
             // Return a correctly sized copy our internal array.
             var bindings = new RenderTargetBinding[RenderTargetCount];
             Array.Copy(_currentRenderTargetBindings, bindings, RenderTargetCount);
             return bindings;
-		}
+        }
 
         public void GetRenderTargets(RenderTargetBinding[] outTargets)
         {

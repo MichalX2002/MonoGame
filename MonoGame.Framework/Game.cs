@@ -263,10 +263,10 @@ namespace MonoGame.Framework
 
         #region Events
 
-        public event DataEvent<Game> Activated;
-        public event DataEvent<Game> Deactivated;
-        public event DataEvent<Game> Disposed;
-        public event DataEvent<Game> Exiting;
+        public event DatalessEvent<Game> Activated;
+        public event DatalessEvent<Game> Deactivated;
+        public event DatalessEvent<Game> Disposed;
+        public event DatalessEvent<Game> Exiting;
 
 #if WINDOWS_UAP
         [CLSCompliant(false)]
@@ -741,18 +741,18 @@ namespace MonoGame.Framework
 
             private readonly Predicate<T> _filter;
             private readonly Comparison<T> _sort;
-            private readonly Action<T, DataEvent<object>> _filterChangedSubscriber;
-            private readonly Action<T, DataEvent<object>> _filterChangedUnsubscriber;
-            private readonly Action<T, DataEvent<object>> _sortChangedSubscriber;
-            private readonly Action<T, DataEvent<object>> _sortChangedUnsubscriber;
+            private readonly Action<T, DatalessEvent<object>> _filterChangedSubscriber;
+            private readonly Action<T, DatalessEvent<object>> _filterChangedUnsubscriber;
+            private readonly Action<T, DatalessEvent<object>> _sortChangedSubscriber;
+            private readonly Action<T, DatalessEvent<object>> _sortChangedUnsubscriber;
 
             public SortingFilteringCollection(
                 Predicate<T> filter,
-                Action<T, DataEvent<object>> filterChangedSubscriber,
-                Action<T, DataEvent<object>> filterChangedUnsubscriber,
+                Action<T, DatalessEvent<object>> filterChangedSubscriber,
+                Action<T, DatalessEvent<object>> filterChangedUnsubscriber,
                 Comparison<T> sort,
-                Action<T, DataEvent<object>> sortChangedSubscriber,
-                Action<T, DataEvent<object>> sortChangedUnsubscriber)
+                Action<T, DatalessEvent<object>> sortChangedSubscriber,
+                Action<T, DatalessEvent<object>> sortChangedUnsubscriber)
             {
                 _items = new List<T>();
                 _addJournal = new List<AddJournalEntry<T>>();

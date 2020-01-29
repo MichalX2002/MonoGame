@@ -81,7 +81,7 @@ namespace MonoGame.Framework.PackedVector
         [CLSCompliant(false)]
         public uint PackedValue
         {
-            get => Unsafe.As<NormalizedByte4, uint>(ref this);
+            readonly get => UnsafeUtils.As<NormalizedByte4, uint>(this);
             set => Unsafe.As<NormalizedByte4, uint>(ref this) = value;
         }
 

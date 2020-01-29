@@ -6,7 +6,7 @@ namespace MonoGame.Framework
     /// </summary>
     /// <typeparam name="TSender">The type of the event source.</typeparam>
     /// <param name="sender">The source of the event.</param>
-    public delegate void DataEvent<TSender>(TSender sender);
+    public delegate void DatalessEvent<TSender>(TSender sender);
 
     /// <summary>
     /// Represents the method that will handle an event when the event provides data.

@@ -18,8 +18,8 @@ namespace MonoGame.Framework.PackedVector
     {
         // skip using the PackedVectorHelper class as Gray32 is the
         // only pixel type that needs these kinds of 32-bit conversions
-        private const double ByteMul = uint.MaxValue / 255d;
-        private const double ShortMul = uint.MaxValue / 65536d;
+        private const double ByteMul = uint.MaxValue / (double)byte.MaxValue;
+        private const double ShortMul = uint.MaxValue / (double)short.MaxValue;
 
         [CLSCompliant(false)]
         public uint L;

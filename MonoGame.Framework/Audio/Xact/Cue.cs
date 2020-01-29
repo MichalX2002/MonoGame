@@ -30,7 +30,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// This event is triggered when the <see cref="Cue"/> is disposed.
         /// </summary>
-        public event DataEvent<Cue> Disposing;
+        public event DatalessEvent<Cue> Disposing;
 
         /// <summary>
         /// Gets the friendly name of the cue.

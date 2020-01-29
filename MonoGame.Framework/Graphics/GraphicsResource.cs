@@ -35,7 +35,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Occurs when the <see cref="GraphicsResource"/> is disposed.
         /// </summary>
-        public event DataEvent<GraphicsResource> Disposing;
+        public event DatalessEvent<GraphicsResource> Disposing;
 
         /// <summary>
         /// Gets the <see cref="Graphics.GraphicsDevice"/> assigned to this <see cref="GraphicsResource"/>.

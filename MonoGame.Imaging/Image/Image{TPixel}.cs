@@ -10,7 +10,7 @@ namespace MonoGame.Imaging
     public partial class Image<TPixel> : IPixelMemory<TPixel>, IDisposable
         where TPixel : unmanaged, IPixel
     {
-        public event DataEvent<Image<TPixel>> Disposing;
+        public event DatalessEvent<Image<TPixel>> Disposing;
 
         private Buffer _pixelBuffer;
 

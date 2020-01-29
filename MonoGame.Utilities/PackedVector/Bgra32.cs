@@ -76,7 +76,7 @@ namespace MonoGame.Framework.PackedVector
         [CLSCompliant(false)]
         public uint PackedValue
         {
-            get => Unsafe.As<Bgra32, uint>(ref this);
+            readonly get => UnsafeUtils.As<Bgra32, uint>(this);
             set => Unsafe.As<Bgra32, uint>(ref this) = value;
         }
 

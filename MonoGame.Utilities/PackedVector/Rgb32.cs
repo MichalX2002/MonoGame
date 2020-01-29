@@ -23,6 +23,20 @@ namespace MonoGame.Framework.PackedVector
         public byte B;
         public byte Padding;
 
+        /// <summary>
+        /// Gets or sets the RGB components of this <see cref="Rgb32"/> as <see cref="Rgb24"/>
+        /// </summary>
+        public Rgb24 Rgb
+        {
+            readonly get => UnsafeUtils.As<Rgb32, Rgb24>(this);
+            set
+            {
+                R = value.R;
+                G = value.G;
+                B = value.B;
+            }
+        }
+
         #region Constructors
 
         [CLSCompliant(false)]
@@ -66,7 +80,7 @@ namespace MonoGame.Framework.PackedVector
         [CLSCompliant(false)]
         public uint PackedValue
         {
-            get => Unsafe.As<Rgb32, uint>(ref this);
+            readonly get => UnsafeUtils.As<Rgb32, uint>(this);
             set => Unsafe.As<Rgb32, uint>(ref this) = value;
         }
 

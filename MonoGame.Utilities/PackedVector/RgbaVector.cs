@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Framework.PackedVector
 {
     /// <summary>
-    /// Packed pixel type containing four single-precision floating-point XYZW components.
+    /// Packed pixel type containing four 32-bit floating-point XYZW components.
     /// <para>
     /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
     /// </para>
@@ -45,7 +45,7 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromVector4(Vector4 vector) => this = Unsafe.As<Vector4, RgbaVector>(ref vector);
 
-        public readonly Vector4 ToVector4() => new Vector4(R, G, B, A);
+        public readonly Vector4 ToVector4() => UnsafeUtils.As<RgbaVector, Vector4>(this);
 
         #endregion
 

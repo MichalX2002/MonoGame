@@ -190,12 +190,12 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the <see cref="Vector2"/> representation of this vector.
         /// </summary>
-        public readonly Vector2 ToVector2() => new Vector2(X, Y);
+        public readonly Vector2 ToVector2() => UnsafeUtils.As<Vector4, Vector2>(this);
 
         /// <summary>
         /// Gets the <see cref="Vector3"/> representation of this vector.
         /// </summary>
-        public readonly Vector3 ToVector3() => new Vector3(X, Y, Z);
+        public readonly Vector3 ToVector3() => UnsafeUtils.As<Vector4, Vector3>(this);
 
         #region IPackedVector 
 

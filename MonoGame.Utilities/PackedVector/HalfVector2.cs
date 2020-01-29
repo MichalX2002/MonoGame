@@ -50,10 +50,9 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        private static HalfVector2 Pack(float x, float y)
-        {
-            return new HalfVector2(new HalfSingle(x), new HalfSingle(y));
-        }
+        private static HalfVector2 Pack(float x, float y) => new HalfVector2(
+            new HalfSingle(x),
+            new HalfSingle(y));
 
         public readonly Vector2 ToVector2() => new Vector2(X, Y);
 
@@ -62,7 +61,7 @@ namespace MonoGame.Framework.PackedVector
         [CLSCompliant(false)]
         public uint PackedValue
         {
-            get => Unsafe.As<HalfVector2, uint>(ref this);
+            readonly get => UnsafeUtils.As<HalfVector2, uint>(this);
             set => Unsafe.As<HalfVector2, uint>(ref this) = value;
         }
 

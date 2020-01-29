@@ -61,7 +61,7 @@ namespace MonoGame.Framework.PackedVector
         [CLSCompliant(false)]
         public ulong PackedValue
         {
-            get => Unsafe.As<Short4, ulong>(ref this);
+            readonly get => UnsafeUtils.As<Short4, ulong>(this);
             set => Unsafe.As<Short4, ulong>(ref this) = value;
         }
 

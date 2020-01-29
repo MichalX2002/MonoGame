@@ -20,9 +20,6 @@ namespace MonoGame.Framework.PackedVector
 
         public Gray8(byte luminance) => L = luminance;
 
-        public static bool operator ==(Gray8 left, Gray8 right) => left.Equals(right);
-        public static bool operator !=(Gray8 a, Gray8 b) => !a.Equals(b);
-
         private static void Pack(ref Vector4 vector, out byte luminance, out byte alpha)
         {
             vector *= Vector4.ByteMaxValue;
@@ -94,9 +91,11 @@ namespace MonoGame.Framework.PackedVector
 
         #region Equals
 
-        public override bool Equals(object obj) => obj is Gray8 other && Equals(other);
+        public static bool operator ==(Gray8 left, Gray8 right) => left.Equals(right);
+        public static bool operator !=(Gray8 a, Gray8 b) => !a.Equals(b);
 
-        public bool Equals(Gray8 other) => L.Equals(other.L);
+        public bool Equals(Gray8 other) => this == other;
+        public override bool Equals(object obj) => obj is Gray8 other && Equals(other);
 
         #endregion
 

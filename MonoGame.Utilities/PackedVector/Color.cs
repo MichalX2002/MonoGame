@@ -48,11 +48,11 @@ namespace MonoGame.Framework
         #region Data Properties
 
         /// <summary>
-        /// Gets or sets the RGB components of this struct as <see cref="Rgb24"/>
+        /// Gets or sets the RGB components of this <see cref="Color"/> as <see cref="Rgb24"/>
         /// </summary>
         public Rgb24 Rgb
         {
-            readonly get => new Rgb24(R, G, B);
+            readonly get => UnsafeUtils.As<Color, Rgb24>(this);
             set
             {
                 R = value.R;
@@ -236,7 +236,7 @@ namespace MonoGame.Framework
         [CLSCompliant(false)]
         public uint PackedValue
         {
-            get => Unsafe.As<Color, uint>(ref this);
+            readonly get => UnsafeUtils.As<Color, uint>(this);
             set => Unsafe.As<Color, uint>(ref this) = value;
         }
 

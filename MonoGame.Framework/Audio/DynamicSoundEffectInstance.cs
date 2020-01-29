@@ -76,7 +76,7 @@ namespace MonoGame.Framework.Audio
         /// <remarks>
         /// This event may occur when <see cref="Play()"/> is called or during playback when a buffer is completed.
         /// </remarks>
-        public event DataEvent<DynamicSoundEffectInstance> BufferNeeded;
+        public event DatalessEvent<DynamicSoundEffectInstance> BufferNeeded;
 
         #endregion
 
