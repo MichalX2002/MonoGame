@@ -1,11 +1,9 @@
 ﻿using System;
 using System.IO;
-using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Coding
 {
-    public abstract class ImageCoderState<TPixel> : IDisposable
-        where TPixel : unmanaged, IPixel
+    public abstract class ImageCoderState : IDisposable
     {
         private bool _leaveOpen;
 
@@ -13,6 +11,7 @@ namespace MonoGame.Imaging.Coding
 
         public bool IsDisposed { get; protected set; }
 
+        public ImagingConfig Config { get; }
         public Stream Stream { get; }
 
         /// <summary>
@@ -22,8 +21,9 @@ namespace MonoGame.Imaging.Coding
 
         #endregion
 
-        public ImageCoderState(Stream stream, bool leaveOpen)
+        public ImageCoderState(ImagingConfig config, Stream stream, bool leaveOpen)
         {
+            Config = config ?? throw new ArgumentNullException(nameof(config));
             Stream = stream ?? throw new ArgumentNullException(nameof(stream));
             _leaveOpen = leaveOpen;
 

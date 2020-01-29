@@ -175,7 +175,7 @@ namespace MonoGame.Framework
         public event DatalessEvent<IGraphicsDeviceService> DeviceDisposing;
         public event DatalessEvent<IGraphicsDeviceService> DeviceReset;
         public event DatalessEvent<IGraphicsDeviceService> DeviceResetting;
-        public event DatalessEvent<IGraphicsDeviceService, GraphicsDeviceInformation> PreparingDeviceSettings;
+        public event DataEvent<IGraphicsDeviceService, GraphicsDeviceInformation> PreparingDeviceSettings;
         public event DatalessEvent<IGraphicsDeviceService> Disposed;
 
         protected void OnDeviceDisposing() => DeviceDisposing?.Invoke(this);

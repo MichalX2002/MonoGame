@@ -35,30 +35,26 @@ namespace MonoGame.Imaging
         /// </summary>
         public ReadContext Context { get; }
 
-        public StreamDisposalMethod DisposalMethod { get; }
+        public StreamDisposeMethod DisposalMethod { get; }
 
         public ImageReadStream(
-            Stream stream, CancellationToken cancellation, StreamDisposalMethod disposalType)
+            Stream stream, CancellationToken cancellation, StreamDisposeMethod disposeMethod)
         {
-            if (disposalType != StreamDisposalMethod.Close &&
-                disposalType != StreamDisposalMethod.LeaveOpen &&
-                disposalType != StreamDisposalMethod.CancellableClose)
-                throw new ArgumentOutOfRangeException(nameof(disposalType));
+            if (disposeMethod != StreamDisposeMethod.Close &&
+                disposeMethod != StreamDisposeMethod.LeaveOpen &&
+                disposeMethod != StreamDisposeMethod.CancellableClose)
+                throw new ArgumentOutOfRangeException(nameof(disposeMethod));
 
             _stream = stream ?? throw new ArgumentNullException(nameof(stream));
-            DisposalMethod = disposalType;
+            DisposalMethod = disposeMethod;
 
-            if (DisposalMethod == StreamDisposalMethod.CancellableClose && cancellation.CanBeCanceled)
+            if (DisposalMethod == StreamDisposeMethod.CancellableClose && cancellation.CanBeCanceled)
                 _cancellationRegistration = cancellation.Register(() => _stream?.Dispose());
 
             _readBuffer = RecyclableMemoryManager.Default.GetBlock();
             Context = new ReadContext(
                 _stream, _readBuffer, cancellation, ReadCallback, SkipCallback);
         }
-
-        public static ImageReadStream Create(
-            Stream stream, CancellationToken cancellation, StreamDisposalMethod disposalMethod) =>
-            new ImageReadStream(stream, cancellation, disposalMethod);
 
         public override int Read(byte[] buffer, int offset, int count) => _stream.Read(buffer, offset, count);
 
@@ -153,8 +149,8 @@ namespace MonoGame.Imaging
             {
                 if (disposing)
                 {
-                    if (DisposalMethod != StreamDisposalMethod.LeaveOpen &&
-                        DisposalMethod != StreamDisposalMethod.CancellableLeaveOpen)
+                    if (DisposalMethod != StreamDisposeMethod.LeaveOpen &&
+                        DisposalMethod != StreamDisposeMethod.CancellableLeaveOpen)
                         _stream?.Dispose();
                 }
             }

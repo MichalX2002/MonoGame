@@ -1,24 +1,18 @@
 ﻿using System;
 using System.Threading;
-using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
-    public class ImageDecoderState<TPixel> : ImageCoderState<TPixel>
-        where TPixel : unmanaged, IPixel
+    public class ImageDecoderState : ImageCoderState
     {
-        #region Auto Properties
+        #region Properties
 
         /// <summary>
         /// Gets the decoder that the state originates from.
         /// </summary>
         public IImageDecoder Decoder { get; }
 
-        public Image<TPixel> CurrentImage { get; set; }
-
-        #endregion
-
-        #region Properties
+        public Image CurrentImage { get; set; }
 
         public new ImageReadStream Stream => (ImageReadStream)base.Stream;
 
@@ -27,7 +21,10 @@ namespace MonoGame.Imaging.Coding.Decoding
         #endregion
 
         public ImageDecoderState(
-            IImageDecoder decoder, ImageReadStream stream, bool leaveOpen) : base(stream, leaveOpen)
+            IImageDecoder decoder,
+            ImagingConfig imagingConfig, 
+            ImageReadStream stream,
+            bool leaveOpen) : base(imagingConfig, stream, leaveOpen)
         {
             Decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
         }

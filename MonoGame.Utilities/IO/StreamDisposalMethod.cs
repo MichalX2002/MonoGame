@@ -5,11 +5,9 @@ namespace MonoGame.Framework.IO
 {
     /// <summary>
     /// Determines how a <see cref="Stream"/> should be disposed during or after an operation.
-    /// <para>
-    /// Commonly used to dispose streams with a <see cref="CancellationTokenRegistration"/> callback.
     /// </para>
     /// </summary>
-    public enum StreamDisposalMethod
+    public enum StreamDisposeMethod
     {
         /// <summary>
         /// Close the inner stream after disposal.

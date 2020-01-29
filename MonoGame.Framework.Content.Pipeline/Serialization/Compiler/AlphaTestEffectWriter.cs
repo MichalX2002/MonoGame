@@ -13,8 +13,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         protected internal override void Write(ContentWriter output, AlphaTestMaterialContent value)
         {
             output.WriteExternalReference(value.Textures.ContainsKey(AlphaTestMaterialContent.TextureKey) ? value.Texture : null);
-            output.Write((int)(value.AlphaFunction.HasValue ? value.AlphaFunction.Value : CompareFunction.Greater));
-            output.Write((int)(value.ReferenceAlpha.HasValue ? value.ReferenceAlpha.Value : 0));
+            output.Write((int)(value.AlphaFunction ?? CompareFunction.Greater));
+            output.Write((int)(value.ReferenceAlpha ?? 0));
             output.Write(value.DiffuseColor.GetValueOrDefault());
             output.Write(value.Alpha.GetValueOrDefault());
             output.Write(value.VertexColorEnabled.GetValueOrDefault());

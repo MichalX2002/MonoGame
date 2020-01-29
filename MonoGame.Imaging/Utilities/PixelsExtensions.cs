@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using MonoGame.Framework;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Framework.PackedVector;
+using System.Runtime.CompilerServices;
 
 namespace MonoGame.Imaging
 {
@@ -34,10 +35,10 @@ namespace MonoGame.Imaging
         /// Gets the size of type <typeparamref name="TPixel"/> in bits.
         /// </summary>
         [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Extension method")]
-        public static unsafe int GetBitDepth<TPixel>(this IPixelSource<TPixel> source)
+        public static int BitDepth<TPixel>(this IPixelSource<TPixel> source)
             where TPixel : unmanaged, IPixel
         {
-            return sizeof(TPixel) * 8;
+            return Unsafe.SizeOf<TPixel>() * 8;
         }
 
         /// <summary>
@@ -48,18 +49,7 @@ namespace MonoGame.Imaging
         {
             if (memory == null) 
                 throw new ArgumentNullException(nameof(memory));
-            return memory.Stride != memory.Width;
-        }
-
-        /// <summary>
-        /// Gets the data stride (row width) including padding of the buffer in bytes.
-        /// </summary>
-        public static unsafe int GetByteStride<TPixel>(this IReadOnlyPixelMemory<TPixel> memory)
-            where TPixel : unmanaged, IPixel
-        {
-            if (memory == null) 
-                throw new ArgumentNullException(nameof(memory));
-            return memory.Stride * sizeof(TPixel);
+            return memory.Width * Unsafe.SizeOf<TPixel>() != memory.Stride;
         }
 
         #region GetPixelSpan

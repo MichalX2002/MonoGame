@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework.Graphics
@@ -10,7 +9,7 @@ namespace MonoGame.Framework.Graphics
     /// batched and will process them into short.MaxValue groups (strided by 6 for the number of vertices
     /// sent to the GPU). 
     /// </summary>
-    internal unsafe class SpriteBatcher : IDisposable
+    internal class SpriteBatcher : IDisposable
     {
         /*
          * Note that this class is fundamental to high performance for SpriteBatch games. Please exercise
@@ -31,12 +30,12 @@ namespace MonoGame.Framework.Graphics
 
         private int _itemCount;
         private SpriteBatchItem[] _batchItems;
-        private UnmanagedPointer<VertexPositionColorTexture> _vertexBuffer;
+        private UnmanagedMemory<VertexPositionColorTexture> _vertexBuffer;
 
         /// <summary>
         /// The index buffer values are constant and more indices are added as needed.
         /// </summary>
-        private UnmanagedPointer<ushort> _indexBuffer;
+        private UnmanagedMemory<ushort> _indexBuffer;
 
         public bool IsDisposed { get; private set; }
 
@@ -44,8 +43,8 @@ namespace MonoGame.Framework.Graphics
         {
             _device = device ?? throw new ArgumentNullException(nameof(device));
 
-            _vertexBuffer = new UnmanagedPointer<VertexPositionColorTexture>();
-            _indexBuffer = new UnmanagedPointer<ushort>();
+            _vertexBuffer = new UnmanagedMemory<VertexPositionColorTexture>();
+            _indexBuffer = new UnmanagedMemory<ushort>();
             _batchItems = Array.Empty<SpriteBatchItem>();
 
             SetupBuffers(InitialBatchSize);
@@ -57,17 +56,17 @@ namespace MonoGame.Framework.Graphics
         private void SetupBuffers(int itemCount, int oldItemCount = 0)
         {
             int minVertices = itemCount * 4; // 4 vertices per item
-            if (minVertices > _vertexBuffer.Capacity)
-                _vertexBuffer.Capacity = minVertices;
+            if (minVertices > _vertexBuffer.Length)
+                _vertexBuffer.Length = minVertices;
 
             int minIndices = itemCount * 6; // 6 indices per item
-            if (minIndices > _indexBuffer.Capacity)
+            if (minIndices > _indexBuffer.Length)
             {
-                _indexBuffer.Capacity = minIndices;
+                _indexBuffer.Length = minIndices;
 
                 int oldIndices = oldItemCount * 6;
                 int oldVertices = oldItemCount * 4;
-                ushort* indexPtr = _indexBuffer.Ptr;
+                var indexSpan = _indexBuffer.Span;
                 for (int i = oldIndices, v = oldVertices; i < minIndices; i += 6, v += 4)
                 {
                     /*
@@ -82,14 +81,14 @@ namespace MonoGame.Framework.Graphics
                      */
 
                     // Triangle 1
-                    indexPtr[i + 0] = (ushort)(v + 0);
-                    indexPtr[i + 1] = (ushort)(v + 1);
-                    indexPtr[i + 2] = (ushort)(v + 2);
+                    indexSpan[i + 0] = (ushort)(v + 0);
+                    indexSpan[i + 1] = (ushort)(v + 1);
+                    indexSpan[i + 2] = (ushort)(v + 2);
 
                     // Triangle 2
-                    indexPtr[i + 3] = (ushort)(v + 1);
-                    indexPtr[i + 4] = (ushort)(v + 3);
-                    indexPtr[i + 5] = (ushort)(v + 2);
+                    indexSpan[i + 3] = (ushort)(v + 1);
+                    indexSpan[i + 4] = (ushort)(v + 3);
+                    indexSpan[i + 5] = (ushort)(v + 2);
                 }
             }
         }
@@ -117,7 +116,7 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="sortMode">The type of depth sorting desired for the rendering.</param>
         /// <param name="effect">The custom effect to apply to the drawn geometry</param>
-        public unsafe void DrawBatch(SpriteSortMode sortMode, Effect effect)
+        public void DrawBatch(SpriteSortMode sortMode, Effect effect)
         {
             if (effect != null && effect.IsDisposed)
                 throw new ObjectDisposedException(nameof(effect));
@@ -137,7 +136,7 @@ namespace MonoGame.Framework.Graphics
             }
 
             // iterate through the batches, doing clamped sets of vertices at the time
-            VertexPositionColorTexture* quadBufferPtr = _vertexBuffer.Ptr;
+            var vertexSpan = _vertexBuffer.Span;
             int itemsLeft = _itemCount;
             while (itemsLeft > 0)
             {
@@ -165,10 +164,10 @@ namespace MonoGame.Framework.Graphics
                     }
                     item.Texture = null; // release texture from item
 
-                    quadBufferPtr[vertexCount + 0] = item.VertexTL;
-                    quadBufferPtr[vertexCount + 1] = item.VertexTR;
-                    quadBufferPtr[vertexCount + 2] = item.VertexBL;
-                    quadBufferPtr[vertexCount + 3] = item.VertexBR;
+                    vertexSpan[vertexCount + 0] = item.VertexTL;
+                    vertexSpan[vertexCount + 1] = item.VertexTR;
+                    vertexSpan[vertexCount + 2] = item.VertexBL;
+                    vertexSpan[vertexCount + 3] = item.VertexBR;
 
                     itemsLeft--; // update our count to continue culling down large batches
                 }

@@ -64,7 +64,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
         private IEnumerable<string> GetAllUsedNamespaces<T>(T value)
         {
             var result = new List<string>();
-            ContentTypeSerializer.ChildCallback onScanChild = (contentTypeSerializer, child) =>
+
+            void onScanChild(ContentTypeSerializer contentTypeSerializer, object child)
             {
                 if (child == null)
                     return;
@@ -74,8 +75,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
                 if (contentTypeSerializer.TargetType == childType)
                     return;
 
-                if (contentTypeSerializer.TargetType.IsGenericType 
-                    && contentTypeSerializer.TargetType.GetGenericTypeDefinition() == typeof(Nullable<>) 
+                if (contentTypeSerializer.TargetType.IsGenericType
+                    && contentTypeSerializer.TargetType.GetGenericTypeDefinition() == typeof(Nullable<>)
                     && contentTypeSerializer.TargetType.GetGenericArguments()[0] == childType)
                     return;
 
@@ -88,7 +89,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
                     return;
 
                 result.Add(childNamespace);
-            };
+            }
 
             // Force top-level object type to be included.
             onScanChild(_serializer.GetTypeSerializer(typeof(object)), value);

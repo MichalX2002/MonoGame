@@ -65,11 +65,11 @@ namespace MonoGame.Framework.Graphics
                 var stencilFaceBack = StencilFace.Back;
 
                 if (force ||
-					TwoSidedStencilMode != device._lastDepthStencilState.TwoSidedStencilMode ||
-					StencilFunction != device._lastDepthStencilState.StencilFunction ||
-					ReferenceStencil != device._lastDepthStencilState.ReferenceStencil ||
-					StencilMask != device._lastDepthStencilState.StencilMask)
-				{
+                    TwoSidedStencilMode != device._lastDepthStencilState.TwoSidedStencilMode ||
+                    StencilFunction != device._lastDepthStencilState.StencilFunction ||
+                    ReferenceStencil != device._lastDepthStencilState.ReferenceStencil ||
+                    StencilMask != device._lastDepthStencilState.StencilMask)
+                {
                     GL.StencilFuncSeparate(cullFaceModeFront, GetStencilFunc(StencilFunction),
                                            ReferenceStencil, StencilMask);
                     GraphicsExtensions.CheckGLError();
@@ -83,7 +83,7 @@ namespace MonoGame.Framework.Graphics
                     CounterClockwiseStencilFunction != device._lastDepthStencilState.CounterClockwiseStencilFunction ||
                     ReferenceStencil != device._lastDepthStencilState.ReferenceStencil ||
                     StencilMask != device._lastDepthStencilState.StencilMask)
-			    {
+                {
                     GL.StencilFuncSeparate(cullFaceModeBack, GetStencilFunc(CounterClockwiseStencilFunction),
                                            ReferenceStencil, StencilMask);
                     GraphicsExtensions.CheckGLError();
@@ -94,10 +94,10 @@ namespace MonoGame.Framework.Graphics
 
                 
                 if (force ||
-					TwoSidedStencilMode != device._lastDepthStencilState.TwoSidedStencilMode ||
-					StencilFail != device._lastDepthStencilState.StencilFail ||
-					StencilDepthBufferFail != device._lastDepthStencilState.StencilDepthBufferFail ||
-					StencilPass != device._lastDepthStencilState.StencilPass)
+                    TwoSidedStencilMode != device._lastDepthStencilState.TwoSidedStencilMode ||
+                    StencilFail != device._lastDepthStencilState.StencilFail ||
+                    StencilDepthBufferFail != device._lastDepthStencilState.StencilDepthBufferFail ||
+                    StencilPass != device._lastDepthStencilState.StencilPass)
                 {
                     GL.StencilOpSeparate(stencilFaceFront, GetStencilOp(StencilFail),
                                          GetStencilOp(StencilDepthBufferFail),
@@ -113,7 +113,7 @@ namespace MonoGame.Framework.Graphics
                     CounterClockwiseStencilFail != device._lastDepthStencilState.CounterClockwiseStencilFail ||
                     CounterClockwiseStencilDepthBufferFail != device._lastDepthStencilState.CounterClockwiseStencilDepthBufferFail ||
                     CounterClockwiseStencilPass != device._lastDepthStencilState.CounterClockwiseStencilPass)
-			    {
+                {
                     GL.StencilOpSeparate(stencilFaceBack, GetStencilOp(CounterClockwiseStencilFail),
                                          GetStencilOp(CounterClockwiseStencilDepthBufferFail),
                                          GetStencilOp(CounterClockwiseStencilPass));
@@ -126,11 +126,11 @@ namespace MonoGame.Framework.Graphics
             else
             {
                 if (force ||
-					TwoSidedStencilMode != device._lastDepthStencilState.TwoSidedStencilMode ||
-					StencilFunction != device._lastDepthStencilState.StencilFunction ||
-					ReferenceStencil != device._lastDepthStencilState.ReferenceStencil ||
-					StencilMask != device._lastDepthStencilState.StencilMask)
-				{
+                    TwoSidedStencilMode != device._lastDepthStencilState.TwoSidedStencilMode ||
+                    StencilFunction != device._lastDepthStencilState.StencilFunction ||
+                    ReferenceStencil != device._lastDepthStencilState.ReferenceStencil ||
+                    StencilMask != device._lastDepthStencilState.StencilMask)
+                {
                     GL.StencilFunc(GetStencilFunc(StencilFunction), ReferenceStencil, StencilMask);
                     GraphicsExtensions.CheckGLError();
                     device._lastDepthStencilState.StencilFunction = StencilFunction;

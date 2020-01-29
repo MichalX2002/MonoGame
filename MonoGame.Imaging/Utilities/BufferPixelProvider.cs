@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Framework.PackedVector;
@@ -22,8 +20,6 @@ namespace MonoGame.Imaging.Pixels
             _pixels = pixels;
             Components = components;
         }
-
-        // TODO: add PixelConversionHelper128 for the Fill(Span<float>)
 
         [StructLayout(LayoutKind.Explicit)]
         unsafe ref struct PixelConversionHelper32
@@ -147,6 +143,8 @@ namespace MonoGame.Imaging.Pixels
 
         public void Fill(Span<float> buffer, int dataOffset)
         {
+            // TODO: add PixelConversionHelper128 for this
+
             throw new NotImplementedException();
         }
     }

@@ -4,7 +4,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using MonoGame.Framework;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -82,7 +81,7 @@ namespace MonoGame.Framework.Graphics
         #region SetData
 
         public unsafe void SetData<T>(
-            int offsetInBytes, ReadOnlySpan<T> data, SetDataOptions options = SetDataOptions.None)
+            int byteOffset, ReadOnlySpan<T> data, SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
             if (data.IsEmpty)
@@ -95,15 +94,16 @@ namespace MonoGame.Framework.Graphics
                 throw new ArgumentOutOfRangeException(
                     nameof(data), "The buffer doesn't have enough capacity.");
 
-            if (offsetInBytes + requestedBytes > bufferBytes)
+            if (byteOffset + requestedBytes > bufferBytes)
                 throw new ArgumentOutOfRangeException(
-                    nameof(offsetInBytes), "The range reaches beyond the buffer.");
+                    nameof(byteOffset), "The range reaches beyond the buffer.");
 
-            PlatformSetData(offsetInBytes, data, options);
+            PlatformSetData(byteOffset, data, options);
             Count = data.Length * sizeof(T) / _indexElementSize;
         }
 
-        public void SetData<T>(ReadOnlySpan<T> data, SetDataOptions options = SetDataOptions.None)
+        public void SetData<T>(
+            ReadOnlySpan<T> data, SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
             SetData(0, data, options);
@@ -112,13 +112,14 @@ namespace MonoGame.Framework.Graphics
         #region Span<T> Overloads
 
         public void SetData<T>(
-            int offsetInBytes, Span<T> data, SetDataOptions options = SetDataOptions.None)
+            int byteOffset, Span<T> data, SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
-            SetData(offsetInBytes, (ReadOnlySpan<T>)data, options);
+            SetData(byteOffset, (ReadOnlySpan<T>)data, options);
         }
 
-        public void SetData<T>(Span<T> data, SetDataOptions options = SetDataOptions.None)
+        public void SetData<T>(
+            Span<T> data, SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
             SetData(0, data, options);

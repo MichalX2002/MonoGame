@@ -112,17 +112,17 @@ namespace MonoGame.Framework
 		/// <remarks>
 		/// This event is only supported on the Windows DirectX, Windows OpenGL and Linux platforms.
 		/// </remarks>
-		public event DatalessEvent<GameWindow, TextInputEvent> TextInput;
+		public event DataEvent<GameWindow, TextInputEvent> TextInput;
 
 		/// <summary>
 		/// Buffered keyboard KeyDown event.
 		/// </summary>
-		public event DatalessEvent<GameWindow, KeyInputEvent> KeyDown;
+		public event DataEvent<GameWindow, KeyInputEvent> KeyDown;
 
 		/// <summary>
 		/// Buffered keyboard KeyUp event.
 		/// </summary>
-		public event DatalessEvent<GameWindow, KeyInputEvent> KeyUp;
+		public event DataEvent<GameWindow, KeyInputEvent> KeyUp;
 
 		internal void OnTextInput(TextInputEvent ev) => TextInput?.Invoke(this, ev);
 

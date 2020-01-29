@@ -1,21 +1,24 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using MonoGame.Framework.PackedVector;
-using MonoGame.Imaging.Coding;
 using MonoGame.Imaging.Coding.Decoding;
 
 namespace MonoGame.Imaging
 {
     // TODO: FIXME: change return collection type on LoadFrames methods
 
-    public static partial class Image
+    public partial class Image
     {
         #region LoadFrames(Stream)
 
-        public static ImageCollection<TPixel, ImageFrame<TPixel>> LoadFrames<TPixel>(
-            Stream stream, ImagingConfig config, int? frameLimit, out ImageFormat format,
-            CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
+        public static ImageDecoderEnumerator<TPixel> LoadFrames<TPixel>(
+            ImagingConfig config,
+            Stream stream,
+            out ImageFormat format,
+            CancellationToken cancellation,
+            DecodeProgressCallback onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             if (config == null)
@@ -23,28 +26,31 @@ namespace MonoGame.Imaging
 
             using (var imageStream = config.CreateReadStream(stream, cancellation))
             {
-                if (!TryDetectFormat(imageStream, config, out format))
+                if (!TryDetectFormat(config, imageStream, out format))
                     throw new UnknownImageFormatException();
 
                 if (!TryGetDecoder(format, out var decoder))
                     throw new MissingDecoderException(format);
 
-                return decoder.Decode(imageStream, config, frameLimit, onProgress);
+                return new ImageDecoderEnumerator<TPixel>(
+                    decoder, onProgress, imageStream, leaveOpen: true);
             }
         }
 
-        public static ImageCollection<TPixel, ImageFrame<TPixel>> LoadFrames<TPixel>(
-            Stream stream, int? frameLimit, out ImageFormat format,
-            CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
+        public static ImageDecoderEnumerator<TPixel> LoadFrames<TPixel>(
+            Stream stream,
+            out ImageFormat format,
+            CancellationToken cancellation,
+            DecodeProgressCallback onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            return LoadFrames(
-                stream, ImagingConfig.Default, frameLimit, out format, cancellation, onProgress);
+            return LoadFrames<TPixel>(
+                ImagingConfig.Default, stream, out format, cancellation, onProgress);
         }
 
         #endregion
 
-        /* TODO: fix this :)
+        /* TODO: fix this (UnmanagedMemoryStream?) :)
 
         #region LoadFrames(IReadOnlyMemory)
 
@@ -75,45 +81,52 @@ namespace MonoGame.Imaging
 
         */
 
-
         #region Load(Stream)
 
         public static Image<TPixel> Load<TPixel>(
-            Stream stream, ImagingConfig config, out ImageFormat format,
-            CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
+            ImagingConfig config,
+            Stream stream,
+            out ImageFormat format,
+            CancellationToken cancellation,
+            DecodeProgressCallback onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            return LoadFrames(stream, config, 1, out format, cancellation, onProgress)?.First.Pixels;
+            using (var frames = LoadFrames<TPixel>(
+                config, stream, out format, cancellation, onProgress))
+            {
+                return frames.First();
+            }
+        }
+
+        public static Image<TPixel> Load<TPixel>(
+            ImagingConfig config,
+            Stream stream,
+            CancellationToken cancellation,
+            DecodeProgressCallback onProgress = null)
+            where TPixel : unmanaged, IPixel
+        {
+            return Load<TPixel>(config, stream, out _, cancellation, onProgress);
+        }
+
+
+        public static Image<TPixel> Load<TPixel>(
+            Stream stream,
+            out ImageFormat format,
+            CancellationToken cancellation,
+            DecodeProgressCallback onProgress = null)
+            where TPixel : unmanaged, IPixel
+        {
+            return Load<TPixel>(
+                ImagingConfig.Default, stream, out format, cancellation, onProgress);
         }
 
         public static Image<TPixel> Load<TPixel>(
             Stream stream,
-            ImagingConfig config,
             CancellationToken cancellation,
-            DecodeProgressCallback<TPixel> onProgress = null)
+            DecodeProgressCallback onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            return Load(stream, config, out _, cancellation, onProgress);
-        }
-
-
-        public static Image<TPixel> Load<TPixel>(
-            Stream stream, 
-            out ImageFormat format,
-            CancellationToken cancellation, 
-            DecodeProgressCallback<TPixel> onProgress = null)
-            where TPixel : unmanaged, IPixel
-        {
-            return LoadFrames(stream, ImagingConfig.Default, 1, out format, cancellation, onProgress)?.First.Pixels;
-        }
-
-        public static Image<TPixel> Load<TPixel>(
-            Stream stream, 
-            CancellationToken cancellation, 
-            DecodeProgressCallback<TPixel> onProgress = null)
-            where TPixel : unmanaged, IPixel
-        {
-            return Load(stream, out _, cancellation, onProgress);
+            return Load<TPixel>(stream, out _, cancellation, onProgress);
         }
 
         #endregion

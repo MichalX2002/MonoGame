@@ -10,7 +10,7 @@ namespace MonoGame.Imaging.Pixels
         where TPixel : unmanaged, IPixel
     {
         /// <summary>
-        /// Gets the data stride (row width) including padding of the view in pixels.
+        /// Gets the data stride (row width including padding) of the view in bytes.
         /// </summary>
         int Stride { get; }
 

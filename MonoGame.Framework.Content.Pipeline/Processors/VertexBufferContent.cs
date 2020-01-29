@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Content.Pipeline.Processors
@@ -55,9 +56,11 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns>The size of the specified type, in bytes.</returns>
-        /// <remarks>Call this method to compute offset parameters for the Write method. If the specified 
-        /// data type cannot be packed into a vertex buffer—for example, if type is not a valid value type—a 
-        /// NotSupportedException is thrown.</remarks>
+        /// <remarks>
+        /// Call this method to compute offset parameters for the Write method. If the specified 
+        /// data type cannot be packed into a vertex buffer, for example, 
+        /// if type is not a valid value type an exception is thrown.
+        /// </remarks>
         /// <exception cref="NotSupportedException">type is not a valid value type</exception>
         public static int SizeOf(Type type)
         {

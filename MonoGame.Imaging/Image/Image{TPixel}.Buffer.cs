@@ -4,25 +4,13 @@ using MonoGame.Framework;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
+using System.Runtime.CompilerServices;
 
 namespace MonoGame.Imaging
 {
-    public unsafe partial class Image<TPixel> : IPixelMemory<TPixel>, IDisposable
+    public partial class Image<TPixel> : IPixelMemory<TPixel>, IDisposable
         where TPixel : unmanaged, IPixel
     {
-        /* TODO: make these into IPixelBuffer extensions
- 
-        public TPixel GetPixel(int x, int y) => GetPixelRowSpan(y)[x];
-
-        public void SetPixel(int x, int y, TPixel value) => GetPixelRowSpan(y)[x] = value;
-
-        public void GetPixelRow(int x, int y, Span<TPixel> destination) => 
-            GetPixelRowSpan(y).Slice(x, destination.Length).CopyTo(destination);
-
-        public void SetPixelRow(int x, int y, Span<TPixel> row) => 
-            row.CopyTo(GetPixelRowSpan(y).Slice(x));
-        */
-
         public Span<TPixel> GetPixelSpan()
         {
             AssertNotDisposed();
@@ -35,16 +23,16 @@ namespace MonoGame.Imaging
             return _pixelBuffer.Span;
         }
 
-        public unsafe Span<TPixel> GetPixelRowSpan(int row)
+        public Span<TPixel> GetPixelRowSpan(int row)
         {
             AssertInRange(row, nameof(row));
-            return this.GetPixelSpan(row * Stride, Width);
+            return this.GetPixelSpan(row * _pixelBuffer.PixelStride, Width);
         }
 
-        unsafe ReadOnlySpan<TPixel> IReadOnlyPixelBuffer<TPixel>.GetPixelRowSpan(int row)
+        ReadOnlySpan<TPixel> IReadOnlyPixelBuffer<TPixel>.GetPixelRowSpan(int row)
         {
             AssertInRange(row, nameof(row));
-            return this.GetPixelSpan(row * Stride, Width);
+            return this.GetPixelSpan(row * _pixelBuffer.PixelStride, Width);
         }
 
         [DebuggerHidden]
@@ -59,9 +47,9 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Helper for containing image pixels in memory.
         /// </summary>
-        public unsafe struct Buffer
+        public struct Buffer
         {
-            private IMemory<TPixel> _imemory;
+            private IMemory _imemory;
             private Memory<TPixel> _memory;
             private bool _leaveOpen;
 
@@ -69,21 +57,21 @@ namespace MonoGame.Imaging
             public int PixelStride { get; }
             public bool IsEmpty => Length == 0;
 
-            public Span<TPixel> Span
+            public unsafe Span<TPixel> Span
             {
                 get
                 {
                     if (_imemory != null)
-                        return _imemory.Span;
+                        return new Span<TPixel>(Unsafe.AsPointer(ref _imemory.Data), Length);
                     return _memory.Span;
                 }
             }
 
-            public Buffer(IMemory<TPixel> memory, int pixelStride, bool leaveOpen) : this()
+            public Buffer(IMemory memory, int pixelStride, bool leaveOpen) : this()
             {
                 _imemory = memory ?? throw new ArgumentNullException(nameof(memory));
                 _leaveOpen = leaveOpen;
-                Length = memory.Span.Length;
+                Length = memory.Length;
                 PixelStride = pixelStride;
             }
 

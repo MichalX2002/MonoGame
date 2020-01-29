@@ -26,7 +26,7 @@ namespace MonoGame.Imaging.Coding.Encoding
             EncoderOptions encoderOptions, 
             ImagingConfig config,
             CancellationToken cancellation,
-            EncodeProgressCallback<TPixel> onProgress = null)
+            EncodeProgressCallback onProgress = null)
             where TPixel : unmanaged, IPixel
         {
 
@@ -46,7 +46,7 @@ namespace MonoGame.Imaging.Coding.Encoding
                 {
                     int components = 4; // TODO: change this so it's dynamic/controlled
                     var provider = new BufferPixelProvider<TPixel>(image, components);
-                    var state = new ImageEncoderState<TPixel>(this, stream, encoderOptions.LeaveStreamOpen);
+                    var state = new ImageEncoderState(this, stream, encoderOptions.LeaveStreamOpen);
                     var progressCallback = onProgress == null ? (WriteProgressCallback)null : (p) =>
                         onProgress.Invoke(state, p, null);
 
@@ -82,20 +82,21 @@ namespace MonoGame.Imaging.Coding.Encoding
 
         #region IImageEncoder
 
-        public ImageEncoderState<TPixel> EncodeFirst<TPixel>(
+        public ImageEncoderState EncodeFirst<TPixel>(
+            ImagingConfig config,
             IReadOnlyPixelBuffer<TPixel> image,
             Stream stream, 
             EncoderOptions encoderOptions, 
-            ImagingConfig config, 
             CancellationToken cancellationToken, 
-            EncodeProgressCallback<TPixel> onProgress = null)
+            EncodeProgressCallback onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            if (config == null) throw new ArgumentNullException(nameof(config));
             if (image == null) throw new ArgumentNullException(nameof(image));
             if (stream == null) throw new ArgumentNullException(nameof(stream));
-            ValidateParams(encoderOptions, config);
+            ValidateEncoderOptions(encoderOptions);
 
             GetBuffers(out byte[] writeBuffer, out byte[] scratchBuffer);
             try
@@ -109,19 +110,18 @@ namespace MonoGame.Imaging.Coding.Encoding
         }
 
         public bool EncodeNext<TPixel>(
+            ImageEncoderState encoderState,
             IReadOnlyPixelBuffer<TPixel> image, 
-            ImageEncoderState<TPixel> encoderState,
             EncoderOptions encoderOptions,
-            ImagingConfig config, 
             CancellationToken cancellationToken, 
-            EncodeProgressCallback<TPixel> onProgress = null)
+            EncodeProgressCallback onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (image == null) throw new ArgumentNullException(nameof(image));
             if (encoderState == null) throw new ArgumentNullException(nameof(encoderState));
-            ValidateParams(encoderOptions, config);
+            if (image == null) throw new ArgumentNullException(nameof(image));
+            ValidateEncoderOptions(encoderOptions);
 
             GetBuffers(out byte[] writeBuffer, out byte[] scratchBuffer);
             try
@@ -134,17 +134,16 @@ namespace MonoGame.Imaging.Coding.Encoding
             }
         }
 
-        public virtual void FinishState<TPixel>(ImageEncoderState<TPixel> encoderState)
-            where TPixel : unmanaged, IPixel
+        public virtual void FinishState(ImageEncoderState encoderState)
         {
         }
 
         #endregion
 
-        private void ValidateParams(EncoderOptions encoderOptions, ImagingConfig config)
+        private void ValidateEncoderOptions(EncoderOptions encoderOptions)
         {
-            if (encoderOptions == null) throw new ArgumentNullException(nameof(encoderOptions));
-            if (config == null) throw new ArgumentNullException(nameof(config));
+            if (encoderOptions == null)
+                throw new ArgumentNullException(nameof(encoderOptions));
             EncoderOptions.AssertTypeEqual(DefaultOptions, encoderOptions, nameof(encoderOptions));
         }
 

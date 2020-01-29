@@ -61,9 +61,10 @@ namespace MonoGame.Framework.Content.Pipeline
         public VideoContent(string filename)
         {
             Filename = filename;
-            var result = ExternalTool.Run("ffprobe",
+            
+            ExternalTool.Run("ffprobe",
                 string.Format("-i \"{0}\" -show_format -select_streams v -show_streams -print_format ini", Filename), 
-                out string stdout, out string stderr);
+                out string stdout, out _);
 
             var lines = stdout.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             foreach (var line in lines)

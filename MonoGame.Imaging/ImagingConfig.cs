@@ -29,14 +29,21 @@ namespace MonoGame.Imaging
         public bool UseExceptions { get; set; } = true;
 
         /// <summary>
-        /// Set to <see cref="StreamDisposalMethod.CancellableLeaveOpen"/> by default.
+        /// Set to <see cref="StreamDisposeMethod.CancellableLeaveOpen"/> by default.
         /// </summary>
-        public StreamDisposalMethod StreamDisposal { get; set; } = StreamDisposalMethod.CancellableLeaveOpen;
+        public StreamDisposeMethod StreamDisposal { get; set; } = StreamDisposeMethod.CancellableLeaveOpen;
 
         #endregion
 
-        public ImageReadStream CreateReadStream(Stream stream, CancellationToken cancellation) => 
-            ImageReadStream.Create(stream, cancellation, StreamDisposal);
+        public ImageReadStream CreateReadStream(Stream stream, CancellationToken cancellation)
+        {
+            return new ImageReadStream(stream, cancellation, StreamDisposal);
+        }
+
+        public ImageReadStream CreateReadStream(Stream stream)
+        {
+            return CreateReadStream(stream, CancellationToken.None);
+        }
 
         #region Exception Management
 
@@ -47,7 +54,10 @@ namespace MonoGame.Imaging
         }
 
         public bool AddThrowingException<TException>()
-            where TException : Exception => AddThrowingException(typeof(TException));
+            where TException : Exception
+        {
+            return AddThrowingException(typeof(TException));
+        }
 
         public bool RemoveThrowingException(Type type)
         {
@@ -56,7 +66,10 @@ namespace MonoGame.Imaging
         }
 
         public bool RemoveThrowingException<TException>()
-            where TException : Exception => RemoveThrowingException(typeof(TException));
+            where TException : Exception
+        {
+            return RemoveThrowingException(typeof(TException));
+        }
 
         public bool ShouldThrowOnException(Type type)
         {

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Threading;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
@@ -29,19 +27,6 @@ namespace MonoGame.Imaging.Coding.Decoding
             return DetectFormat(stream.Context, config);
         }
 
-        /*
-        public unsafe bool TryDetectFormat(
-            ReadOnlySpan<byte> data, ImagingConfig config, 
-            CancellationToken cancellation, out ImageFormat format)
-        {
-            fixed (byte* ptr = &MemoryMarshal.GetReference(data))
-            {
-                var ctx = new ReadContext(ptr, data.Length, cancellation);
-                return TryDetectFormat(ctx, config, out format);
-            }
-        }
-        */
-
         #endregion
 
         #region Identify Abstraction
@@ -61,28 +46,15 @@ namespace MonoGame.Imaging.Coding.Decoding
             return Identify(stream.Context, config);
         }
 
-        /*
-        public unsafe bool TryIdentify(
-            ReadOnlySpan<byte> data, ImagingConfig config,
-            CancellationToken cancellation, out ImageInfo info)
-        {
-            fixed (byte* ptr = &MemoryMarshal.GetReference(data))
-            {
-                var ctx = new ReadContext(ptr, data.Length, cancellation);
-                return Identify(ctx, config, out info);
-            }
-        }
-        */
-
         #endregion
 
         #region Decode Abstraction
 
         protected abstract unsafe bool ReadFirst(
-            ReadContext context, ImagingConfig config, out void* data, ref ReadState state);
+            ImagingConfig config, ReadContext context, out void* data, ref ReadState state);
 
         protected virtual unsafe bool ReadNext(
-            ReadContext context, ImagingConfig config, out void* data, ref ReadState state)
+            ImagingConfig config, ReadContext context, out void* data, ref ReadState state)
         {
             ImagingArgumentGuard.AssertAnimationSupport(this, config);
             data = null;
@@ -110,9 +82,9 @@ namespace MonoGame.Imaging.Coding.Decoding
         }
 
         private static ReadState CreateReadState<TPixel>(
-            ImageDecoderState<TPixel> decoderState,
+            ImageDecoderState decoderState,
             BufferReadyCallback onBufferReady,
-            DecodeProgressCallback<TPixel> onProgress)
+            DecodeProgressCallback onProgress)
             where TPixel : unmanaged, IPixel
         {
             var progressCallback = onProgress == null
@@ -140,13 +112,11 @@ namespace MonoGame.Imaging.Coding.Decoding
         {
             // TODO: use some Image.LoadPixels function instead
 
-            UnmanagedPointer<TPixel> dst = null;
+            int pixelCount = state.Width * state.Height;
+            var dstMemory = new UnmanagedMemory<TPixel>(pixelCount);
             try
             {
-                int pixelCount = state.Width * state.Height;
-                dst = new UnmanagedPointer<TPixel>(pixelCount);
-                TPixel* dstPtr = dst.Ptr;
-
+                var dstPtr = (TPixel*)dstMemory.Pointer;
                 switch (state.Components)
                 {
                     case 1:
@@ -216,12 +186,11 @@ namespace MonoGame.Imaging.Coding.Decoding
                         break;
                 }
 
-                // TODO: create an object that wraps the result as IMemory and can dispose it
-                return new Image<TPixel>.Buffer(dst, state.Width, leaveOpen: false);
+                return new Image<TPixel>.Buffer(dstMemory, state.Width, leaveOpen: false);
             }
             catch
             {
-                dst?.Dispose();
+                dstMemory?.Dispose();
                 throw;
             }
             finally
@@ -240,28 +209,16 @@ namespace MonoGame.Imaging.Coding.Decoding
 
         #region IImageDecoder
 
-        /*
-        public virtual unsafe ImageCollection<TPixel, ImageFrame<TPixel>> Decode<TPixel>(
-            ReadOnlySpan<byte> data, ImagingConfig config, int? frameLimit,
-            CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
+        public unsafe ImageDecoderState DecodeFirst<TPixel>(
+            ImagingConfig config, 
+            ImageReadStream stream, 
+            out Image<TPixel> image,
+            DecodeProgressCallback onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            fixed (byte* ptr = &MemoryMarshal.GetReference(data))
-            {
-                var context = new ReadContext(ptr, data.Length, cancellation);
-                return Decode(context, config, frameLimit, onProgress);
-            }
-        }
-        */
-
-        public unsafe ImageDecoderState<TPixel> DecodeFirst<TPixel>(
-            ImageReadStream stream, ImagingConfig config, out Image<TPixel> image,
-            DecodeProgressCallback<TPixel> onProgress = null)
-            where TPixel : unmanaged, IPixel
-        {
-            var decoderState = new ImageDecoderState<TPixel>(this, stream, true);
-            var readState = CreateReadState(decoderState, null, onProgress);
-            if (ReadFirst(stream.Context, config, out void* result, ref readState))
+            var decoderState = new ImageDecoderState(this, stream, true);
+            var readState = CreateReadState<TPixel>(decoderState, null, onProgress);
+            if (ReadFirst(config, stream.Context, out void* result, ref readState))
             {
                 var parsedBuffer = ParseStbResult<TPixel>(config, result, readState);
                 image = new Image<TPixel>(parsedBuffer, readState.Width, readState.Height);
@@ -275,16 +232,18 @@ namespace MonoGame.Imaging.Coding.Decoding
         }
 
         public unsafe bool DecodeNext<TPixel>(
-            ImageDecoderState<TPixel> decoderState, ImagingConfig config, out Image<TPixel> image, 
-            DecodeProgressCallback<TPixel> onProgress = null) 
+            ImagingConfig config, 
+            ImageDecoderState decoderState, 
+            out Image<TPixel> image, 
+            DecodeProgressCallback onProgress = null) 
             where TPixel : unmanaged, IPixel
         {
             if (decoderState.ImageIndex < 0)
                 throw new InvalidOperationException(
                     $"The decoder state has an invalid {nameof(decoderState.ImageIndex)}.");
 
-            var readState = CreateReadState(decoderState, null, onProgress);
-            if (ReadNext(decoderState.Stream.Context, config, out void* result, ref readState))
+            var readState = CreateReadState<TPixel>(decoderState, null, onProgress);
+            if (ReadNext(config, decoderState.Stream.Context, out void* result, ref readState))
             {
                 var parsedBuffer = ParseStbResult<TPixel>(config, result, readState);
                 image = new Image<TPixel>(parsedBuffer, readState.Width, readState.Height);
@@ -297,8 +256,7 @@ namespace MonoGame.Imaging.Coding.Decoding
                 throw GetFailureException(decoderState.Stream.Context);
         }
 
-        public virtual void FinishState<TPixel>(ImageDecoderState<TPixel> decoderState)
-            where TPixel : unmanaged, IPixel
+        public virtual void FinishState(ImageDecoderState decoderState)
         {
         }
 

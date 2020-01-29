@@ -82,7 +82,7 @@ namespace MonoGame.Framework
         /// Adds a key to this collection.
         /// </summary>
         /// <param name="item">New key for the collection.</param>
-        /// <exception cref="ArgumentNullException">Throws if <paramref name="item"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="item"/> is null.</exception>
         /// <remarks>The new key would be added respectively to a position of that key and the position of other keys.</remarks>
         public void Add(CurveKey item)
         {

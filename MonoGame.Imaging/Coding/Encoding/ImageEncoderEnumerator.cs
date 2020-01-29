@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Coding.Encoding
 {
-    public class ImageEncoderEnumerator<TPixel> : 
-        IEnumerable<IReadOnlyPixelBuffer<TPixel>>, IEnumerator<IReadOnlyPixelBuffer<TPixel>>
+    public class ImageEncoderEnumerator<TPixel> : ImageCoderEnumerator<TPixel, IReadOnlyPixelBuffer<TPixel>>
         where TPixel : unmanaged, IPixel
     {
         private Stream _stream;
@@ -17,13 +14,10 @@ namespace MonoGame.Imaging.Coding.Encoding
         public IImageEncoder Encoder { get; }
         public EncoderOptions EncoderOptions { get; }
 
-        public IReadOnlyPixelBuffer<TPixel> Current { get; private set; }
-        object IEnumerator.Current => Current;
-
-        #region Constructors
+        #region Constructor
 
         public ImageEncoderEnumerator(
-            IImageEncoder encoder, ImagingConfig config, Stream stream, bool leaveOpen)
+            IImageEncoder encoder, Stream stream, bool leaveOpen)
         {
             Encoder = encoder ?? throw new ArgumentNullException(nameof(encoder));
             _stream = stream ?? throw new ArgumentNullException(nameof(stream));
@@ -32,15 +26,18 @@ namespace MonoGame.Imaging.Coding.Encoding
 
         #endregion
 
-        public bool MoveNext()
+        public override bool MoveNext()
         {
 
         }
 
-        // TODO: consider implementation based on seekable streams
-        public void Reset() => throw new NotSupportedException();
+        public override void Reset()
+        {
+            // TODO: consider implementation for seekable streams
+            throw new NotSupportedException();
+        }
 
-        public void Dispose()
+        public override void Dispose()
         {
             if (!_leaveOpen)
             {
@@ -48,8 +45,5 @@ namespace MonoGame.Imaging.Coding.Encoding
                 _stream = null;
             }
         }
-
-        IEnumerator<IReadOnlyPixelBuffer<TPixel>> IEnumerable<IReadOnlyPixelBuffer<TPixel>>.GetEnumerator() => this;
-        IEnumerator IEnumerable.GetEnumerator() => this;
     }
 }
