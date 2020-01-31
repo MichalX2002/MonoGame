@@ -116,7 +116,7 @@ namespace MonoGame.Framework.IO
             : this(true, length, stream, null)
         {
             if (length < 0)
-                throw new ArgumentException(nameof(length));
+                throw new ArgumentOutOfRangeException(nameof(length));
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace MonoGame.Framework.IO
             : this(leaveOpen, length, stream, null)
         {
             if (length < 0)
-                throw new ArgumentException(nameof(length));
+                throw new ArgumentOutOfRangeException(nameof(length));
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace MonoGame.Framework.IO
             : this(leaveOpen, length, stream, crc32)
         {
             if (length < 0)
-                throw new ArgumentException(nameof(length));
+                throw new ArgumentOutOfRangeException(nameof(length));
         }
 
 

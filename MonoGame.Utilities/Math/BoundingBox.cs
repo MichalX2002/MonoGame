@@ -248,55 +248,31 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Creates an array copy of corners from this <see cref="BoundingBox"/>.
+        /// Creates an array of corners from this <see cref="BoundingBox"/>.
         /// </summary>
-        public Vector3[] CloneCorners()
+        public Vector3[] GetCorners()
         {
-            return new Vector3[]
-            {
-                new Vector3(Min.X, Max.Y, Max.Z),
-                new Vector3(Max.X, Max.Y, Max.Z),
-                new Vector3(Max.X, Min.Y, Max.Z),
-                new Vector3(Min.X, Min.Y, Max.Z),
-                new Vector3(Min.X, Max.Y, Min.Z),
-                new Vector3(Max.X, Max.Y, Min.Z),
-                new Vector3(Max.X, Min.Y, Min.Z),
-                new Vector3(Min.X, Min.Y, Min.Z)
-            };
+            var array = new Vector3[8];
+            GetCorners(array);
+            return array;
         }
 
         public void GetCorners(Span<Vector3> corners)
         {
             if (corners.IsEmpty)
-                throw new ArgumentException(nameof(corners));
+                throw new ArgumentEmptyException(nameof(corners));
 
             if (corners.Length < 8)
-                throw new ArgumentException(nameof(corners), "Not enough capacity.");
+                throw new ArgumentException("Destination is too small.", nameof(corners));
 
-            corners[0].X = Min.X;
-            corners[0].Y = Max.Y;
-            corners[0].Z = Max.Z;
-            corners[1].X = Max.X;
-            corners[1].Y = Max.Y;
-            corners[1].Z = Max.Z;
-            corners[2].X = Max.X;
-            corners[2].Y = Min.Y;
-            corners[2].Z = Max.Z;
-            corners[3].X = Min.X;
-            corners[3].Y = Min.Y;
-            corners[3].Z = Max.Z;
-            corners[4].X = Min.X;
-            corners[4].Y = Max.Y;
-            corners[4].Z = Min.Z;
-            corners[5].X = Max.X;
-            corners[5].Y = Max.Y;
-            corners[5].Z = Min.Z;
-            corners[6].X = Max.X;
-            corners[6].Y = Min.Y;
-            corners[6].Z = Min.Z;
-            corners[7].X = Min.X;
-            corners[7].Y = Min.Y;
-            corners[7].Z = Min.Z;
+            corners[0] = new Vector3(Min.X, Max.Y, Max.Z);
+            corners[1] = new Vector3(Max.X, Max.Y, Max.Z);
+            corners[2] = new Vector3(Max.X, Min.Y, Max.Z);
+            corners[3] = new Vector3(Min.X, Min.Y, Max.Z);
+            corners[4] = new Vector3(Min.X, Max.Y, Min.Z);
+            corners[5] = new Vector3(Max.X, Max.Y, Min.Z);
+            corners[6] = new Vector3(Max.X, Min.Y, Min.Z);
+            corners[7] = new Vector3(Min.X, Min.Y, Min.Z);
         }
 
         public override int GetHashCode()

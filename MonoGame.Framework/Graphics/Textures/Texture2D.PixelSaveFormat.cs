@@ -59,11 +59,6 @@ namespace MonoGame.Framework.Graphics
             {
                 return _getDataDelegate.Invoke(texture, rect, level, arraySlice);
             }
-
-            public Image ToImage(IMemory memory, int width, int height, bool leaveOpen)
-            {
-                return _toImageDelegate.Invoke(memory, width, height, leaveOpen);
-            }
         }
 
         private static ConcurrentDictionary<SurfaceFormat, PixelSaveFormat> SaveFormatsBySurface { get; }

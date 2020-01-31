@@ -5,18 +5,18 @@ using MonoGame.Imaging.Attributes.Format;
 using MonoGame.Imaging.Coding;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Framework.PackedVector;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Imaging
 {
     public static class ImagingArgumentGuard
     {
-        public static unsafe void AssertValidByteStride<TPixel>(
-            int width, int stride, string paramName)
-            where TPixel : unmanaged, IPixel
+        public static unsafe void AssertValidByteStride(
+            Type elementType, int width, int byteStride, string paramName)
         {
             CommonArgumentGuard.AssertAboveZero(width, nameof(width));
             
-            if (stride < width * sizeof(TPixel))
+            if (byteStride < width * Marshal.SizeOf(elementType))
                 throw new ArgumentException(
                     "The stride must be equal to or greater than the row size in bytes (excluding padding).", 
                     paramName);

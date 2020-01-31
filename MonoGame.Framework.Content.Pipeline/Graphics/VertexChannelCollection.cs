@@ -42,14 +42,14 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             {
                 var index = IndexOf(name);
                 if (index < 0)
-                    throw new ArgumentException("name");
+                    throw new ArgumentOutOfRangeException(nameof(name));
                 return channels[index];
             }
             set
             {
                 var index = IndexOf(name);
                 if (index < 0)
-                    throw new ArgumentException("name");
+                    throw new ArgumentOutOfRangeException(nameof(name));
                 channels[index] = value;
             }
         }
@@ -164,7 +164,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         {
             var index = IndexOf(name);
             if (index < 0)
-                throw new ArgumentException("name");
+                throw new ArgumentOutOfRangeException(nameof(name));
             return ConvertChannelContent<TargetType>(index);
         }
 
@@ -195,7 +195,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         {
             var index = IndexOf(name);
             if (index < 0)
-                throw new ArgumentException("name");
+                throw new ArgumentOutOfRangeException(nameof(name));
             return Get<T>(index);
         }
 

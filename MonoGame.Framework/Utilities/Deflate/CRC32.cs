@@ -553,7 +553,7 @@ namespace MonoGame.Framework.Deflate
             : this(true, length, stream, null)
         {
             if (length < 0)
-                throw new ArgumentException("length");
+                throw new ArgumentOutOfRangeException(nameof(length));
         }
 
         /// <summary>
@@ -575,7 +575,7 @@ namespace MonoGame.Framework.Deflate
             : this(leaveOpen, length, stream, null)
         {
             if (length < 0)
-                throw new ArgumentException("length");
+                throw new ArgumentOutOfRangeException(nameof(length));
         }
 
         /// <summary>
@@ -594,12 +594,11 @@ namespace MonoGame.Framework.Deflate
         /// <param name="leaveOpen">true to leave the underlying stream
         /// open upon close of the <c>CrcCalculatorStream</c>; false otherwise.</param>
         /// <param name="crc32">the CRC32 instance to use to calculate the CRC32</param>
-        public CrcCalculatorStream(System.IO.Stream stream, Int64 length, bool leaveOpen,
-                                   CRC32 crc32)
+        public CrcCalculatorStream(System.IO.Stream stream, Int64 length, bool leaveOpen, CRC32 crc32)
             : this(leaveOpen, length, stream, crc32)
         {
             if (length < 0)
-                throw new ArgumentException("length");
+                throw new ArgumentOutOfRangeException(nameof(length));
         }
 
 

@@ -378,7 +378,7 @@ namespace MonoGame.Framework.Graphics
 
             var pixelFormat = GetPixelSaveFormat(Format);
             var data = pixelFormat.GetData(this, checkedRect, level, arraySlice);
-            var image = pixelFormat.ToImage(data, checkedRect.Width, checkedRect.Height, leaveOpen: false);
+            var image = Image.LoadMemory(data);
             return image;
         }
 

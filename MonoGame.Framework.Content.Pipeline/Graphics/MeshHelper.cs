@@ -532,7 +532,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public static void TransformScene(NodeContent scene, Matrix transform)
         {
             if (scene == null)
-                throw new ArgumentException("scene");
+                throw new ArgumentNullException(nameof(scene));
 
             // If the transformation is an identity matrix, this is a no-op and
             // we can save ourselves a bunch of work in the first place.

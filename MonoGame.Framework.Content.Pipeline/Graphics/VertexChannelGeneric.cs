@@ -117,7 +117,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             if (data == null)
                 throw new ArgumentNullException("data");
             if (!(data is IEnumerable<T>))
-                throw new ArgumentException("data");
+                throw new ArgumentException("Value does not implement generic enumerable.", nameof(data));
             items.InsertRange(index, (IEnumerable<T>)data);
         }
 

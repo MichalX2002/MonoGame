@@ -62,7 +62,7 @@ namespace MonoGame.Framework.Content
         static void CalcIndices(Array array, int index, int[] indices)
         {
             if (array.Rank != indices.Length)
-                throw new ArgumentException(nameof(indices));
+                throw new ArgumentException("Invalid array rank.", nameof(indices));
 
             for (int d = 0; d < indices.Length; d++)
             {

@@ -8,12 +8,12 @@ namespace MonoGame.Framework.IO
     {
         private Memory<byte> _prefix;
         private Stream _stream;
-        private int _aheadLength;
+        private int _readAheadLength;
         private bool _leaveOpen;
 
         private long _position;
-        private int _aheadPosition;
-        private byte[] _aheadBuffer;
+        private int _readAheadPosition;
+        private byte[] _readAheadBuffer;
 
         public override bool CanSeek => _stream.CanSeek;
         public override bool CanRead => _stream.CanRead;
@@ -22,7 +22,7 @@ namespace MonoGame.Framework.IO
         public override int ReadTimeout { get => _stream.ReadTimeout; set => _stream.ReadTimeout = value; }
         public override int WriteTimeout { get => _stream.WriteTimeout; set => _stream.WriteTimeout = value; }
 
-        public override long Length => _stream.Length + _aheadLength;
+        public override long Length => _stream.Length + _readAheadLength;
         public override long Position
         {
             get => _position;
@@ -36,7 +36,7 @@ namespace MonoGame.Framework.IO
 
             _prefix = prefix;
             _stream = stream;
-            _aheadLength = -1;
+            _readAheadLength = -1;
             _leaveOpen = leaveOpen;
         }
 
@@ -49,11 +49,11 @@ namespace MonoGame.Framework.IO
                 throw new ArgumentOutOfRangeException("Value may not be negative.", nameof(readAhead));
 
             _stream = stream;
-            _aheadLength = readAhead;
+            _readAheadLength = readAhead;
             _leaveOpen = leaveOpen;
 
-            if (_aheadLength > 0)
-                _aheadBuffer = new byte[_aheadLength];
+            if (_readAheadLength > 0)
+                _readAheadBuffer = new byte[_readAheadLength];
         }
 
         public PrefixedStream(Memory<byte> prefix, Stream stream) : this(prefix, stream, leaveOpen: false)
@@ -62,13 +62,13 @@ namespace MonoGame.Framework.IO
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (_aheadPosition < _aheadLength && _prefix.IsEmpty)
+            if (_readAheadPosition < _readAheadLength && _prefix.IsEmpty)
             {
                 int read;
-                while ((read = _stream.Read(_aheadBuffer, _aheadPosition, _aheadLength - _aheadPosition)) > 0)
-                    _aheadPosition += read;
+                while ((read = _stream.Read(_readAheadBuffer, _readAheadPosition, _readAheadLength - _readAheadPosition)) > 0)
+                    _readAheadPosition += read;
 
-                _prefix = new Memory<byte>(_aheadBuffer, 0, _aheadPosition);
+                _prefix = new Memory<byte>(_readAheadBuffer, 0, _readAheadPosition);
             }
 
             if (offset + count > buffer.Length)
@@ -133,7 +133,7 @@ namespace MonoGame.Framework.IO
                 }
 
                 default:
-                    throw new ArgumentException(nameof(origin));
+                    throw new ArgumentOutOfRangeException(nameof(origin));
             }
 
             if (_position < _prefix.Length)
@@ -148,9 +148,9 @@ namespace MonoGame.Framework.IO
         private void ValidateSeekPosition(long value)
         {
             if (value < 0)
-                throw new IOException("Can not seek before stream beginning.");
+                throw new ArgumentOutOfRangeException("Can not seek before stream beginning.");
             if (value > Length)
-                throw new IOException("Can not seek past stream end.");
+                throw new ArgumentOutOfRangeException("Can not seek past stream end.");
         }
 
         public override void SetLength(long value) => new NotSupportedException();

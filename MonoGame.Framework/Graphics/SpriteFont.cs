@@ -12,15 +12,16 @@ using System.Text;
 namespace MonoGame.Framework.Graphics 
 {
 
-	public sealed class SpriteFont 
+    public sealed class SpriteFont 
     {
-		internal static class Errors 
+        internal static class Errors 
         {
-			public const string TextContainsUnresolvableCharacters =
-				"Text contains characters that cannot be resolved by this SpriteFont.";
-			public const string UnresolvableCharacter =
-				"Character cannot be resolved by this SpriteFont.";
-		}
+            public const string TextContainsUnresolvableCharacters =
+                "Text contains characters that cannot be resolved by this font.";
+
+            public const string UnresolvableCharacter =
+                "Character cannot be resolved by this font.";
+        }
 
         private readonly CharacterRegion[] _regions;
         private char? _defaultCharacter;
@@ -121,16 +122,16 @@ namespace MonoGame.Framework.Graphics
             return glyphsDictionary;
         }
 
-		/// <summary>
-		/// Gets a collection of the characters in the font.
-		/// </summary>
-		public ReadOnlyCollection<char> Characters { get; private set; }
+        /// <summary>
+        /// Gets a collection of the characters in the font.
+        /// </summary>
+        public ReadOnlyCollection<char> Characters { get; private set; }
 
-		/// <summary>
-		/// Gets or sets the character that will be substituted when a
-		/// given character is not included in the font.
-		/// </summary>
-		public char? DefaultCharacter
+        /// <summary>
+        /// Gets or sets the character that will be substituted when a
+        /// given character is not included in the font.
+        /// </summary>
+        public char? DefaultCharacter
         {
             get => _defaultCharacter;
             set
@@ -154,49 +155,49 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public int LineSpacing { get; set; }
 
-		/// <summary>
-		/// Gets or sets the spacing (tracking) between characters in
-		/// the font.
-		/// </summary>
-		public float Spacing { get; set; }
+        /// <summary>
+        /// Gets or sets the spacing (tracking) between characters in
+        /// the font.
+        /// </summary>
+        public float Spacing { get; set; }
 
-		/// <summary>
-		/// Returns the size of a string when rendered in this font.
-		/// </summary>
-		/// <param name="text">The text to measure.</param>
-		/// <returns>The size, in pixels, of 'text' when rendered in
-		/// this font.</returns>
-		public Vector2 MeasureString(string text)
-		{
+        /// <summary>
+        /// Returns the size of a string when rendered in this font.
+        /// </summary>
+        /// <param name="text">The text to measure.</param>
+        /// <returns>The size, in pixels, of 'text' when rendered in
+        /// this font.</returns>
+        public Vector2 MeasureString(string text)
+        {
             MeasureString(new CharacterSource(text), out Vector2 size);
             return size;
-		}
+        }
 
-		/// <summary>
-		/// Returns the size of the contents of a StringBuilder when
-		/// rendered in this font.
-		/// </summary>
-		/// <param name="text">The text to measure.</param>
-		/// <returns>The size, in pixels, of 'text' when rendered in
-		/// this font.</returns>
-		public Vector2 MeasureString(StringBuilder text)
-		{
+        /// <summary>
+        /// Returns the size of the contents of a StringBuilder when
+        /// rendered in this font.
+        /// </summary>
+        /// <param name="text">The text to measure.</param>
+        /// <returns>The size, in pixels, of 'text' when rendered in
+        /// this font.</returns>
+        public Vector2 MeasureString(StringBuilder text)
+        {
             MeasureString(new CharacterSource(text), out Vector2 size);
             return size;
-		}
+        }
 
-		internal unsafe void MeasureString(in CharacterSource text, out Vector2 size)
-		{
-			if (text.Length == 0)
+        internal unsafe void MeasureString(in CharacterSource text, out Vector2 size)
+        {
+            if (text.Length == 0)
             {
-				size = Vector2.Zero;
-				return;
-			}
+                size = Vector2.Zero;
+                return;
+            }
 
-			var width = 0f;
-			var finalLineHeight = (float)LineSpacing;
+            var width = 0f;
+            var finalLineHeight = (float)LineSpacing;
             
-			var offset = Vector2.Zero;
+            var offset = Vector2.Zero;
             var firstGlyphOfLine = true;
 
             fixed (Glyph* pGlyphs = Glyphs)
@@ -246,7 +247,7 @@ namespace MonoGame.Framework.Graphics
 
             size.X = width;
             size.Y = offset.Y + finalLineHeight;
-		}
+        }
         
         internal unsafe bool TryGetGlyphIndex(char c, out int index)
         {
@@ -299,56 +300,56 @@ namespace MonoGame.Framework.Graphics
         
         internal readonly struct CharacterSource 
         {
-			private readonly string _string;
-			private readonly StringBuilder _builder;
+            private readonly string _string;
+            private readonly StringBuilder _builder;
 
             public readonly int Length;
 
             public CharacterSource(string s)
-			{
-				_string = s;
-				_builder = null;
-				Length = s.Length;
-			}
-
-			public CharacterSource(StringBuilder builder)
-			{
-				_builder = builder;
-				_string = null;
-				Length = _builder.Length;
-			}
-
-			public char this [int index] 
             {
-				get 
+                _string = s;
+                _builder = null;
+                Length = s.Length;
+            }
+
+            public CharacterSource(StringBuilder builder)
+            {
+                _builder = builder;
+                _string = null;
+                Length = _builder.Length;
+            }
+
+            public char this [int index] 
+            {
+                get 
                 {
-					if (_string != null)
-						return _string[index];
-					return _builder[index];
-				}
-			}
-		}
+                    if (_string != null)
+                        return _string[index];
+                    return _builder[index];
+                }
+            }
+        }
 
         /// <summary>
         /// Struct that defines the spacing, Kerning, and bounds of a character.
         /// </summary>
         /// <remarks>Provides the data necessary to implement custom SpriteFont rendering.</remarks>
-		public readonly struct Glyph 
+        public readonly struct Glyph 
         {
             /// <summary>
             /// The char associated with this glyph.
             /// </summary>
-			public readonly char Character;
+            public readonly char Character;
 
             /// <summary>
             /// Rectangle in the font texture where this letter exists.
             /// </summary>
-			public readonly Rectangle BoundsInTexture;
+            public readonly Rectangle BoundsInTexture;
 
             /// <summary>
             /// Cropping applied to the BoundsInTexture to calculate the bounds of the actual character.
             /// </summary>
-			public readonly Rectangle Cropping;
+            public readonly Rectangle Cropping;
 
             /// <summary>
             /// The amount of space between the left side ofthe character and its first pixel in the X dimention.
@@ -370,7 +371,7 @@ namespace MonoGame.Framework.Graphics
             /// </summary>
             public readonly float WidthIncludingBearings;
 
-			public static readonly Glyph Empty = new Glyph();
+            public static readonly Glyph Empty = new Glyph();
 
             public Glyph(
                 char character, in Rectangle boundsInTexture, in Rectangle cropping, 
@@ -386,10 +387,10 @@ namespace MonoGame.Framework.Graphics
             }
 
             public override string ToString ()
-			{
+            {
                 return "CharacterIndex=" + Character + ", Glyph=" + BoundsInTexture + ", Cropping=" + Cropping + ", Kerning=" + LeftSideBearing + "," + Width + "," + RightSideBearing;
-			}
-		}
+            }
+        }
 
         private struct CharacterRegion
         {
@@ -404,5 +405,5 @@ namespace MonoGame.Framework.Graphics
                 StartIndex = startIndex;
             }
         }
-	}
+    }
 }

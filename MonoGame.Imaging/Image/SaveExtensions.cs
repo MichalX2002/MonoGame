@@ -14,22 +14,25 @@ namespace MonoGame.Imaging
     {
         public static void Save<TPixel>(
             this IEnumerable<IReadOnlyPixelBuffer<TPixel>> images,
+            ImagingConfig config,
             Stream output, 
             ImageFormat format,
             EncoderOptions encoderOptions,
-            ImagingConfig config,
             CancellationToken cancellation,
             EncodeProgressCallback onProgress = null)
-            where TPixel : unmanaged, IPixel
         {
             var encoder = AssertValidArguments(config, format, encoderOptions);
             if (encoderOptions == null)
                 encoderOptions = encoder.DefaultOptions;
 
             AssertValidOutput(output);
-            AssertValidSource(encoder, config, images);
-            
-            encoder.Encode(images, output, encoderOptions, config, cancellation, onProgress);
+
+            if (encoder == null) throw new ArgumentNullException(nameof(encoder));
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            if (images == null) throw new ArgumentNullException(nameof(images));
+
+            return new ImageEncoderEnumerator(
+                encoder, output, encoderOptions, config, cancellation, onProgress);
         }
 
         public static FileStream OpenWrite(string filePath)
@@ -39,18 +42,6 @@ namespace MonoGame.Imaging
         }
 
         #region Argument Validation
-
-        [DebuggerHidden]
-        private static void AssertValidSource<TPixel>(
-            IImageEncoder encoder, 
-            ImagingConfig config, 
-            IEnumerable<IReadOnlyPixelBuffer<TPixel>> images)
-            where TPixel : unmanaged, IPixel
-        {
-            if (encoder == null) throw new ArgumentNullException(nameof(encoder));
-            if (config == null) throw new ArgumentNullException(nameof(config));
-            if (images == null) throw new ArgumentNullException(nameof(images));
-        }
 
         [DebuggerHidden]
         private static IImageEncoder AssertValidArguments(
@@ -127,7 +118,7 @@ namespace MonoGame.Imaging
             string filePath, 
             ImageFormat format = null,
             EncoderOptions encoderOptions = null,
-            EncodeProgressCallback<TPixel> onProgress = null)
+            EncodeProgressCallback onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             Save(
