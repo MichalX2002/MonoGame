@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
@@ -20,6 +21,8 @@ namespace MonoGame.Framework.PackedVector
         // only pixel type that needs these kinds of 32-bit conversions
         private const double ByteMul = uint.MaxValue / (double)byte.MaxValue;
         private const double ShortMul = uint.MaxValue / (double)short.MaxValue;
+
+        public int BitDepth => Unsafe.SizeOf<Gray32>() * 8;
 
         [CLSCompliant(false)]
         public uint L;

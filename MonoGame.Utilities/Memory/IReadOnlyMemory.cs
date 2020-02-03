@@ -2,23 +2,13 @@
 
 namespace MonoGame.Framework.Memory
 {
-    public interface IReadOnlyMemory : IDisposable
+    public interface IReadOnlyMemory : IElementContainer
     {
-        /// <summary>
-        /// Gets the amount of elements contained.
-        /// </summary>
-        int Length { get; }
-
-        /// <summary>
-        /// Gets the size of one element.
-        /// </summary>
-        int ElementSize { get; }
-
-        ref readonly byte Data { get; }
+        ReadOnlySpan<byte> Span { get; }
     }
 
     public interface IReadOnlyMemory<T> : IReadOnlyMemory
     {
-        ReadOnlySpan<T> Span { get; }
+        new ReadOnlySpan<T> Span { get; }
     }
 }

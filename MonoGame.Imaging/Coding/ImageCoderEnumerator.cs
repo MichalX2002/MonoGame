@@ -1,13 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging.Coding
 {
-    public abstract class ImageCoderEnumerator<TPixel, TImage> : IEnumerable<TImage>, IEnumerator<TImage>
-        where TPixel : unmanaged, IPixel
-        where TImage : IPixelSource<TPixel>
+    public abstract class ImageCoderEnumerator<TImage> : IEnumerable<TImage>, IEnumerator<TImage>
+        where TImage : IReadOnlyPixelBuffer
     {
         /// <summary>
         /// Gets or sets the zero-based index of the most recently processed image.

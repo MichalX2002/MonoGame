@@ -15,6 +15,8 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct HalfVector4 : IPackedVector<ulong>, IEquatable<HalfVector4>, IPixel
     {
+        public int BitDepth => Unsafe.SizeOf<HalfVector4>() * 8;
+
         public HalfSingle X;
         public HalfSingle Y;
         public HalfSingle Z;

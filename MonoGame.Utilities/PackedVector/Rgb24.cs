@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
@@ -16,6 +17,8 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct Rgb24 : IEquatable<Rgb24>, IPixel
     {
+        public int BitDepth => Unsafe.SizeOf<Rgb24>() * 8;
+
         [CLSCompliant(false)]
         public byte R;
 

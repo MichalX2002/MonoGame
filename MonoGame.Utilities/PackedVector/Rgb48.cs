@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
@@ -17,6 +18,8 @@ namespace MonoGame.Framework.PackedVector
     public struct Rgb48 : IEquatable<Rgb48>, IPixel
     {
         private static readonly Vector3 Max = new Vector3(ushort.MaxValue);
+
+        public int BitDepth => Unsafe.SizeOf<Rgb48>() * 8;
 
         [CLSCompliant(false)]
         public ushort R;

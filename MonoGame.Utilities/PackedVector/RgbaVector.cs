@@ -13,6 +13,8 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct RgbaVector : IPixel, IEquatable<RgbaVector>
     {
+        public int BitDepth => Unsafe.SizeOf<RgbaVector>() * 8;
+
         public float R;
         public float G;
         public float B;

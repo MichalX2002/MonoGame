@@ -17,9 +17,10 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct Short4 : IPackedVector<ulong>, IEquatable<Short4>, IPixel
     {
-        internal static Vector4 MinNeg = new Vector4(short.MinValue);
-        internal static Vector4 MaxPos = new Vector4(short.MaxValue);
-        internal static Vector4 MaxPosHalf = new Vector4(32767.5f);
+        private static readonly Vector4 MinNeg = new Vector4(short.MinValue);
+        private static readonly Vector4 MaxPos = new Vector4(short.MaxValue);
+        
+        public int BitDepth => Unsafe.SizeOf<Short4>() * 8;
 
         public short X;
         public short Y;

@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using MonoGame.Framework;
 using MonoGame.Framework.PackedVector;
@@ -98,6 +99,8 @@ namespace MonoGame.Framework
         public static readonly Vector3 Backward = new Vector3(0f, 0f, 1f);
 
         #endregion
+
+        public int BitDepth => Unsafe.SizeOf<Vector3>() * 8;
 
         /// <summary>
         /// The X coordinate of this <see cref="Vector3"/>.

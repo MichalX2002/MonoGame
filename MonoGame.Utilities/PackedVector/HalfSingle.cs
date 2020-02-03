@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
@@ -14,6 +15,8 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct HalfSingle : IPackedVector<ushort>, IEquatable<HalfSingle>, IPixel
     {
+        public int BitDepth => Unsafe.SizeOf<HalfSingle>() * 8;
+
         [CLSCompliant(false)]
         public ushort X;
 

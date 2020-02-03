@@ -21,6 +21,8 @@ namespace MonoGame.Framework
     [StructLayout(LayoutKind.Sequential)]
     public partial struct Color : IPackedVector<uint>, IEquatable<Color>, IPixel
     {
+        public int BitDepth => Unsafe.SizeOf<Color>() * 8;
+
         /// <summary>
         /// Gets or sets the red component.
         /// </summary>

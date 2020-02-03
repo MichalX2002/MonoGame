@@ -17,6 +17,8 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct Rg32 : IPackedVector<uint>, IEquatable<Rg32>, IPixel
     {
+        public int BitDepth => Unsafe.SizeOf<Rg32>() * 8;
+
         [CLSCompliant(false)]
         public ushort R;
 

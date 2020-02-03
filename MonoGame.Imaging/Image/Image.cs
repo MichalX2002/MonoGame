@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using MonoGame.Framework;
+using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Pixels;
 
@@ -9,9 +10,11 @@ namespace MonoGame.Imaging
     /// <summary>
     /// Base class for objects that store pixels.
     /// </summary>
-    public abstract partial class Image : IPixelSource
+    public abstract partial class Image : IPixelBuffer
     {
         public event DatalessEvent<Image> Disposing;
+
+        #region Properties
 
         /// <summary>
         /// Gets whether the object is disposed.
@@ -28,16 +31,25 @@ namespace MonoGame.Imaging
         /// </summary>
         public int Height { get; }
 
-        protected Image(int width, int height)
+        /// <summary>
+        /// Gets info about the pixel type of the image.
+        /// </summary>
+        public PixelTypeInfo PixelInfo { get; }
+
+        int IElementContainer.ElementSize => PixelInfo.ElementSize;
+        int IElementContainer.Count => Width * Height;
+
+        #endregion
+
+        protected Image(int width, int height, PixelTypeInfo pixelInfo)
         {
             CommonArgumentGuard.AssertAboveZero(width, nameof(width));
             CommonArgumentGuard.AssertAboveZero(height, nameof(height));
+            PixelInfo = pixelInfo ?? throw new ArgumentNullException(nameof(pixelInfo));
 
             Width = width;
             Height = height;
         }
-
-        #region Create
 
         /// <summary>
         /// Creates an empty image using the
@@ -49,8 +61,13 @@ namespace MonoGame.Imaging
             return new Image<TPixel>(width, height);
         }
 
-        #endregion
-        
+        public abstract Span<byte> GetPixelByteRowSpan(int row);
+
+        ReadOnlySpan<byte> IReadOnlyPixelBuffer.GetPixelByteRowSpan(int row)
+        {
+            return GetPixelByteRowSpan(row);
+        }
+
         #region IDisposable
 
         [DebuggerHidden]

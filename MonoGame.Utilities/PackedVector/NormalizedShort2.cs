@@ -17,6 +17,8 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct NormalizedShort2 : IPackedVector<uint>, IEquatable<NormalizedShort2>, IPixel
     {
+        public int BitDepth => Unsafe.SizeOf<NormalizedShort2>() * 8;
+
         public short X;
         public short Y;
 

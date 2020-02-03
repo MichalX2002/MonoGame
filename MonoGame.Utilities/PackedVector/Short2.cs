@@ -17,9 +17,11 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct Short2 : IPackedVector<uint>, IEquatable<Short2>, IPixel
     {
-        private static Vector2 Offset = new Vector2(32768);
-        private static Vector2 MinNeg = new Vector2(short.MinValue);
-        private static Vector2 MaxPos = new Vector2(short.MaxValue);
+        private static readonly Vector2 MinNeg = new Vector2(short.MinValue);
+        private static readonly Vector2 MaxPos = new Vector2(short.MaxValue);
+        private static readonly Vector2 Offset = new Vector2(32768);
+
+        public int BitDepth => Unsafe.SizeOf<Short2>() * 8;
 
         public short X;
         public short Y;

@@ -24,10 +24,7 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Vector2 : IEquatable<Vector2>, IPackedVector<ulong>, IPixel
     {
-        /// <summary>
-        /// <see cref="Vector2"/> with all values set to <see cref="byte.MaxValue"/>.
-        /// </summary>
-        internal static readonly Vector2 MaxBytes = new Vector2(byte.MaxValue);
+        public int BitDepth => Unsafe.SizeOf<Vector2>() * 8;
 
         #region Public Constants
 

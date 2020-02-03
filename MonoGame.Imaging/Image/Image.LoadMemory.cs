@@ -4,26 +4,27 @@ using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
+using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging
 {
     public partial class Image
     {
         public static Image LoadMemory(
-            Type pixelType, IReadOnlyMemory memory, Rectangle rectangle, int? byteStride = null)
+            PixelTypeInfo pixelInfo, IReadOnlyMemory memory, Rectangle rectangle, int? byteStride = null)
         {
-            if (!typeof(IPixel).IsAssignableFrom(pixelType))
-                throw new ArgumentException(
-                    $"The type does not implement {nameof(IPixel)}.", nameof(pixelType));
-
             ImagingArgumentGuard.AssertNonEmptyRectangle(rectangle, nameof(rectangle));
 
-            int pixelSize = Marshal.SizeOf(pixelType);
+            if (pixelInfo.BitDepth % 8 != 0)
+                throw new NotImplementedException(
+                    "Only byte-aligned pixels can currently be read.");
+
+            int pixelSize = pixelInfo.ElementSize;
             int srcByteStride;
             if (byteStride.HasValue)
             {
                 ImagingArgumentGuard.AssertValidByteStride(
-                    pixelType, rectangle.Width, byteStride.Value, nameof(byteStride));
+                    pixelInfo.Type, rectangle.Width, byteStride.Value, nameof(byteStride));
                 srcByteStride = byteStride.Value;
             }
             else
@@ -37,9 +38,9 @@ namespace MonoGame.Imaging
         public static Image<TPixel> LoadMemory<TPixel>(IReadOnlyMemory<TPixel> memory)
             where TPixel : unmanaged, IPixel
         {
-            public Image ToImage(IMemory memory, int width, int height, bool leaveOpen)
+            Image ToImage(IReadOnlyMemory roMemory, int width, int height, bool leaveOpen)
             {
-                return _toImageDelegate.Invoke(memory, width, height, leaveOpen);
+                return _toImageDelegate.Invoke(roMemory, width, height, leaveOpen);
             }
         }
     }

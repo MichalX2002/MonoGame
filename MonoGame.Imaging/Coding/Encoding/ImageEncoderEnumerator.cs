@@ -1,12 +1,10 @@
 ﻿using System;
 using System.IO;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Coding.Encoding
 {
-    public class ImageEncoderEnumerator<TPixel> : ImageCoderEnumerator<TPixel, IReadOnlyPixelBuffer<TPixel>>
-        where TPixel : unmanaged, IPixel
+    public class ImageEncoderEnumerator : ImageCoderEnumerator<IReadOnlyPixelBuffer>
     {
         private Stream _stream;
         private bool _leaveOpen;

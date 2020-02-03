@@ -19,6 +19,8 @@ namespace MonoGame.Framework.PackedVector
     {
         private static readonly Vector4 Max = new Vector4(ushort.MaxValue);
 
+        public int BitDepth => Unsafe.SizeOf<Rgba64>() * 8;
+
         [CLSCompliant(false)]
         public ushort R;
 

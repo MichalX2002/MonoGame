@@ -1,30 +1,24 @@
-﻿using System.Runtime.CompilerServices;
-using MonoGame.Framework;
+﻿using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging
 {
-    public partial class Image<TPixel> : Image, IPixelMemory<TPixel>
+    public partial class Image<TPixel> : Image, IPixelBuffer<TPixel>
         where TPixel : unmanaged, IPixel
     {
-        private Buffer _pixelBuffer;
-
-        #region Public Properties
-
-        public int Stride => _pixelBuffer.PixelStride * Unsafe.SizeOf<TPixel>();
-
-        #endregion
+        protected PixelBuffer Buffer { get; private set; }
 
         #region Constructors
 
-        internal Image(Buffer buffer, int width, int height) : base(width, height)
+        public Image(PixelBuffer buffer, int width, int height) :
+            base(width, height, PixelTypeInfo.Get(typeof(TPixel)))
         {
             if (buffer.IsEmpty)
                 throw new ArgumentEmptyException(nameof(buffer));
 
-            _pixelBuffer = buffer;
+            Buffer = buffer;
         }
 
         /// <summary>
@@ -32,20 +26,23 @@ namespace MonoGame.Imaging
         /// </summary>
         /// <param name="width">The width of the image.</param>
         /// <param name="height">The height of the image.</param>
-        public Image(int width, int height) : base(width, height)
+        public Image(int width, int height) : 
+            base(width, height, PixelTypeInfo.Get(typeof(TPixel)))
         {
             var memory = new UnmanagedMemory<TPixel>(width * height, zeroFill: true);
-            _pixelBuffer = new Buffer(memory, width, leaveOpen: false);
+            Buffer = new PixelBuffer(memory, width, leaveOpen: false);
         }
 
         #endregion
+
+
 
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
 
-            _pixelBuffer.Dispose();
-            _pixelBuffer = default;
+            Buffer.Dispose();
+            Buffer = default;
         }
     }
 }

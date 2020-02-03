@@ -17,6 +17,11 @@ namespace MonoGame.Imaging.Pixels
         /// Gets the height of the source in pixels.
         /// </summary>
         int Height { get; }
+
+        /// <summary>
+        /// Gets info about the pixel type of the source.
+        /// </summary>
+        PixelTypeInfo PixelInfo { get; }
     }
 
     /// <summary>

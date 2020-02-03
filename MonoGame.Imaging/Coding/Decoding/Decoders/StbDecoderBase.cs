@@ -106,7 +106,7 @@ namespace MonoGame.Imaging.Coding.Decoding
             };
         }
 
-        protected virtual unsafe Image<TPixel>.Buffer ParseStbResult<TPixel>(
+        protected virtual unsafe Image<TPixel>.PixelBuffer ParseStbResult<TPixel>(
             ImagingConfig config, void* result, ReadState state)
             where TPixel : unmanaged, IPixel
         {
@@ -186,7 +186,7 @@ namespace MonoGame.Imaging.Coding.Decoding
                         break;
                 }
 
-                return new Image<TPixel>.Buffer(dstMemory, state.Width, leaveOpen: false);
+                return new Image<TPixel>.PixelBuffer(dstMemory, state.Width, leaveOpen: false);
             }
             catch
             {
@@ -210,17 +210,17 @@ namespace MonoGame.Imaging.Coding.Decoding
         #region IImageDecoder
 
         public unsafe ImageDecoderState DecodeFirst<TPixel>(
-            ImagingConfig config, 
+            ImagingConfig imagingConfig, 
             ImageReadStream stream, 
             out Image<TPixel> image,
             DecodeProgressCallback onProgress = null)
             where TPixel : unmanaged, IPixel
         {
-            var decoderState = new ImageDecoderState(this, stream, true);
+            var decoderState = new ImageDecoderState(this, imagingConfig, stream, true);
             var readState = CreateReadState<TPixel>(decoderState, null, onProgress);
-            if (ReadFirst(config, stream.Context, out void* result, ref readState))
+            if (ReadFirst(imagingConfig, stream.Context, out void* result, ref readState))
             {
-                var parsedBuffer = ParseStbResult<TPixel>(config, result, readState);
+                var parsedBuffer = ParseStbResult<TPixel>(imagingConfig, result, readState);
                 image = new Image<TPixel>(parsedBuffer, readState.Width, readState.Height);
 
                 decoderState.CurrentImage = image;

@@ -17,6 +17,8 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct NormalizedByte4 : IPackedVector<uint>, IEquatable<NormalizedByte4>, IPixel
     {
+        public int BitDepth => Unsafe.SizeOf<NormalizedByte4>() * 8;
+
         [CLSCompliant(false)] 
         public sbyte X;
 

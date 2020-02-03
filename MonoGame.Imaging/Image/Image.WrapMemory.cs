@@ -15,7 +15,7 @@ namespace MonoGame.Imaging
             CommonArgumentGuard.AssertAboveZero(height, nameof(height));
             ImagingArgumentGuard.AssertContigousLargeEnough(memory.Length, width * height, nameof(memory));
 
-            var buffer = new Image<TPixel>.Buffer(memory, stride);
+            var buffer = new Image<TPixel>.PixelBuffer(memory, stride);
             return new Image<TPixel>(buffer, width, height);
         }
 
@@ -32,9 +32,9 @@ namespace MonoGame.Imaging
         {
             CommonArgumentGuard.AssertAboveZero(width, nameof(width));
             CommonArgumentGuard.AssertAboveZero(height, nameof(height));
-            ImagingArgumentGuard.AssertContigousLargeEnough(memory.Length, width * height, nameof(memory));
+            ImagingArgumentGuard.AssertContigousLargeEnough(memory.Count, width * height, nameof(memory));
 
-            var buffer = new Image<TPixel>.Buffer(memory, pixelStride, leaveOpen);
+            var buffer = new Image<TPixel>.PixelBuffer(memory, pixelStride, leaveOpen);
             return new Image<TPixel>(buffer, width, height);
         }
 

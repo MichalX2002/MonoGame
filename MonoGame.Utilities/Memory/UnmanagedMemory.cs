@@ -9,14 +9,23 @@ namespace MonoGame.Framework.Memory
         where T : unmanaged
     {
         private int _length;
-        private object _allocMutex = new object();
 
         #region Properties + Indexer
 
         public bool IsDisposed { get; private set; }
 
+        public IntPtr Pointer { get; private set; }
+
+        public int ElementSize => sizeof(T);
+
+        public Span<T> Span => new Span<T>((void*)Pointer, _length);
+        Span<byte> IMemory.Span => new Span<byte>((void*)Pointer, GetByteCount(_length));
+
+        ReadOnlySpan<T> IReadOnlyMemory<T>.Span => new ReadOnlySpan<T>((void*)Pointer, _length);
+        ReadOnlySpan<byte> IReadOnlyMemory.Span => new ReadOnlySpan<byte>((void*)Pointer, GetByteCount(_length));
+
         /// <summary>
-        /// Gets the length of the pointer in bytes.
+        /// Gets the length of the allocated memory in bytes.
         /// </summary>
         public int ByteLength
         {
@@ -28,9 +37,9 @@ namespace MonoGame.Framework.Memory
         }
 
         /// <summary>
-        /// Gets or sets the length of the pointer in elements.
+        /// Gets or sets the length of the allocated memory in elements.
         /// </summary>
-        public int Length
+        public int Count
 
         {
             get
@@ -38,38 +47,17 @@ namespace MonoGame.Framework.Memory
                 AssertNotDisposed();
                 return _length;
             }
-            set => ReAlloc(value);
+            set => Reallocate(value);
         }
-
-        [CLSCompliant(false)]
-        public ref T Data
-        {
-            get
-            {
-                AssertNotDisposed();
-                if (Pointer == null)
-                    throw new InvalidOperationException(
-                        "There is no underlying memory allocated.");
-                return ref Unsafe.AsRef<T>((void*)Pointer);
-            }
-        }
-
-        public IntPtr Pointer { get; private set; }
-
-        public Span<T> Span => new Span<T>((void*)Pointer, _length);
-        ref byte IMemory.Data => ref Unsafe.AsRef<byte>((void*)Pointer);
-
-        ReadOnlySpan<T> IReadOnlyMemory<T>.Span => new ReadOnlySpan<T>((void*)Pointer, _length);
-        int IReadOnlyMemory.ElementSize => sizeof(T);
-        ref readonly byte IReadOnlyMemory.Data => ref Unsafe.AsRef<byte>((void*)Pointer);
 
         public ref T this[int index]
         {
             get
             {
-                T* ptr = (T*)Pointer;
                 if (index < 0 || index >= _length)
                     throw new ArgumentOutOfRangeException(nameof(index));
+
+                var ptr = (T*)Pointer;
                 return ref ptr[index];
             }
         }
@@ -87,7 +75,7 @@ namespace MonoGame.Framework.Memory
         /// <see langword="true"/> to zero-fill the allocated memory.</param>
         public UnmanagedMemory(int length, bool zeroFill = false)
         {
-            ReAlloc(length, zeroFill);
+            Reallocate(length, zeroFill);
         }
 
         /// <summary>
@@ -109,79 +97,63 @@ namespace MonoGame.Framework.Memory
             Span.Fill(value);
         }
 
-        public void Fill(byte value)
-        {
-            MemoryMarshal.AsBytes(Span).Fill(value);
-        }
-
         #region Helpers
 
         /// <summary>
-        /// Resizes the underlying memory block, 
+        /// Resizes the underlying memory, 
         /// optionally zero-filling newly allocated memory.
         /// </summary>
         /// <param name="length">The new size in elements. Can be zero to free memory.</param>
         /// <param name="zeroFill"><see langword="true"/> to zero-fill the allocated memory.</param>
-        public void ReAlloc(int length, bool zeroFill = false)
+        public void Reallocate(int length, bool zeroFill = false)
         {
-            lock (_allocMutex)
+            AssertNotDisposed();
+            CommonArgumentGuard.AssertAtleastZero(length, nameof(length));
+
+            if (_length == length)
+                return;
+
+            int oldLength = _length;
+            _length = length;
+            if (_length == 0)
             {
-                AssertNotDisposed();
-                CommonArgumentGuard.AssertAtleastZero(length, nameof(length));
-                
-                if (_length != length)
+                Free(oldLength);
+            }
+            else
+            {
+                Pointer = Pointer == null
+                    ? Marshal.AllocHGlobal(ByteLength)
+                    : Marshal.ReAllocHGlobal(Pointer, (IntPtr)ByteLength);
+
+                int lengthDiff = _length - oldLength;
+                int lengthByteDiff = GetByteCount(lengthDiff);
+                if (lengthDiff > 0)
                 {
-                    int oldLength = _length;
-                    _length = length;
+                    GC.AddMemoryPressure(lengthByteDiff);
 
-                    if (length == 0)
-                    {
-                        FreePtr(oldLength);
-                    }
-                    else
-                    {
-                        ClearPressure(oldLength);
-                        GC.AddMemoryPressure(ByteLength);
-
-                        if (Pointer != null)
-                            Pointer = Marshal.ReAllocHGlobal(Pointer, (IntPtr)ByteLength);
-                        else
-                            Pointer = Marshal.AllocHGlobal(ByteLength);
-
-                        if (zeroFill && length > oldLength)
-                            Span.Slice(oldLength, length - oldLength).Clear();
-                    }
+                    if (zeroFill)
+                        Span.Slice(oldLength, lengthDiff).Clear();
+                }
+                else
+                {
+                    GC.RemoveMemoryPressure(-lengthByteDiff);
                 }
             }
         }
 
-        /// <summary>
-        /// Informs the runtime that memory has been released.
-        /// </summary>
-        /// <param name="oldLength"></param>
-        private void ClearPressure(int oldLength)
+        private void Free(int length)
         {
-            if(oldLength != 0)
-                GC.RemoveMemoryPressure(GetByteCount(oldLength));
+            if (Pointer == default)
+                return;
+
+            Marshal.FreeHGlobal(Pointer);
+            Pointer = default;
+            _length = 0;
+
+            GC.RemoveMemoryPressure(GetByteCount(length));
         }
 
-        /// <summary>
-        /// Frees pointer, informs the runtime about released memory, and sets length to zero.
-        /// </summary>
-        /// <param name="oldLength"></param>
-        private void FreePtr(int oldLength)
-        {
-            if (Pointer != null)
-            {
-                Marshal.FreeHGlobal(Pointer);
-                Pointer = default;
-
-                ClearPressure(oldLength);
-                _length = 0;
-            }
-        }
-        
-        private int GetByteCount(int elementCount)
+        private static int GetByteCount(int elementCount)
         {
             return elementCount * sizeof(T);
         }
@@ -199,13 +171,10 @@ namespace MonoGame.Framework.Memory
 
         protected virtual void Dispose(bool disposing)
         {
-            lock (_allocMutex)
+            if (!IsDisposed)
             {
-                if (!IsDisposed)
-                {
-                    FreePtr(_length);
-                    IsDisposed = true;
-                }
+                Free(_length);
+                IsDisposed = true;
             }
         }
 

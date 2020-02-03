@@ -6,16 +6,15 @@ using StbSharp;
 
 namespace MonoGame.Imaging.Pixels
 {
-    public readonly struct BufferPixelProvider<TPixel> : IPixelProvider
-        where TPixel : unmanaged, IPixel
+    public readonly struct BufferPixelProvider : IPixelProvider
     {
-        private readonly IReadOnlyPixelBuffer<TPixel> _pixels;
+        private readonly IReadOnlyPixelBuffer _pixels;
 
         public int Width => _pixels.Width;
         public int Height => _pixels.Height;
         public int Components { get; }
 
-        public BufferPixelProvider(IReadOnlyPixelBuffer<TPixel> pixels, int components)
+        public BufferPixelProvider(IReadOnlyPixelBuffer pixels, int components)
         {
             _pixels = pixels;
             Components = components;
@@ -49,7 +48,8 @@ namespace MonoGame.Imaging.Pixels
             int offsetY = startPixelOffset / Width;
 
             var convertHelper = new PixelConversionHelper32();
-            
+            int pixelSize = _pixels.PixelInfo.ElementSize;
+
             // each iteration is supposed to read pixels from a single row at the time
             int bufferOffset = 0;
             int pixelsLeft = requestedPixelCount;
@@ -96,14 +96,14 @@ namespace MonoGame.Imaging.Pixels
                         break;
 
                     case 4:
-                        if (typeof(TPixel) == typeof(Color))
+                        if (_pixels.PixelInfo.Type == typeof(Color))
                         {
-                            fixed (TPixel* srcPtr = &MemoryMarshal.GetReference(srcRow))
+                            fixed (byte* srcPtr = &MemoryMarshal.GetReference(srcRow))
                             fixed (byte* dstPtr = &MemoryMarshal.GetReference(buffer))
                             {
-                                int bytes = toRead * sizeof(TPixel);
-                                Buffer.MemoryCopy(
-                                    srcPtr + offsetX, dstPtr + bufferOffset, bytes, bytes);
+                                int bytes = toRead * pixelSize;
+                                int byteOffsetX = offsetX * pixelSize;
+                                Buffer.MemoryCopy(srcPtr + byteOffsetX, dstPtr + bufferOffset, bytes, bytes);
                                 bufferOffset += bytes;
                             }
                             goto ReadEnd;
@@ -124,8 +124,7 @@ namespace MonoGame.Imaging.Pixels
                 // copy over the remaining bytes,
                 // as the Fill() caller may request less bytes than sizeof(TPixel)
                 int bytesRead = bufferOffset - lastByteOffset;
-                int leftoverBytes = Math.Min(
-                    Components, toRead * sizeof(TPixel) - bytesRead);
+                int leftoverBytes = Math.Min(Components, toRead * pixelSize - bytesRead);
 
                 for (int j = 0; j < leftoverBytes; j++)
                     buffer[j + bufferOffset] = convertHelper.Raw[j];

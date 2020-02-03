@@ -8,6 +8,7 @@ using System.Diagnostics;
 using MonoGame.Framework;
 using System.Diagnostics.CodeAnalysis;
 using MonoGame.Framework.PackedVector;
+using System.Runtime.CompilerServices;
 
 namespace MonoGame.Framework
 {
@@ -25,6 +26,8 @@ namespace MonoGame.Framework
         /// <see cref="Vector4"/> with all values set to <see cref="byte.MaxValue"/>.
         /// </summary>
         internal static readonly Vector4 ByteMaxValue = new Vector4(byte.MaxValue);
+
+        public int BitDepth => Unsafe.SizeOf<Vector4>() * 8;
 
         #region Public Constants
 

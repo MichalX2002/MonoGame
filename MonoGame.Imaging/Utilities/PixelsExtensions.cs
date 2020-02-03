@@ -49,7 +49,7 @@ namespace MonoGame.Imaging
         {
             if (memory == null) 
                 throw new ArgumentNullException(nameof(memory));
-            return memory.Width * Unsafe.SizeOf<TPixel>() != memory.Stride;
+            return memory.Width * Unsafe.SizeOf<TPixel>() != memory.ByteStride;
         }
 
         #region GetPixelSpan

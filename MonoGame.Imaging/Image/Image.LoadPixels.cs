@@ -25,7 +25,7 @@ namespace MonoGame.Imaging
 
             int srcRowBytes = sizeof(TPixelFrom) * sourceRectangle.Width;
             int srcStride = byteStride ?? srcRowBytes;
-            int dstStride = image.Stride;
+            int dstStride = image.ByteStride;
 
             fixed (TPixelFrom* srcPixelPtr = &MemoryMarshal.GetReference(pixels))
             fixed (TPixelTo* dstPixelPtr = &MemoryMarshal.GetReference(image.GetPixelSpan()))

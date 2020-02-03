@@ -4,7 +4,7 @@ namespace MonoGame.Framework.Memory
 {
     public interface IMemory : IReadOnlyMemory
     {
-        new ref byte Data { get; }
+        new Span<byte> Span { get; }
     }
 
     public interface IMemory<T> : IReadOnlyMemory<T>, IMemory

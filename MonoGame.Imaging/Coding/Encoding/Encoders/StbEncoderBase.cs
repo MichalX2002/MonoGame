@@ -20,23 +20,22 @@ namespace MonoGame.Imaging.Coding.Encoding
 
         // TODO: FIXME: make this into an extension method for IImageEncoder
 
-        public void Encode<TPixel>(
-            ImageEncoderEnumerator<TPixel> images,
+        public void Encode(
+            ImagingConfig imagingConfig,
+            ImageEncoderEnumerator images,
             Stream stream,
-            EncoderOptions encoderOptions, 
-            ImagingConfig config,
-            CancellationToken cancellation,
+            EncoderOptions encoderOptions = null,
+            CancellationToken? cancellationToken = null,
             EncodeProgressCallback onProgress = null)
-            where TPixel : unmanaged, IPixel
         {
 
-            IReadOnlyPixelBuffer<TPixel> image = null;
+            IReadOnlyPixelBuffer image = null;
             if (images.MoveNext())
                 image = images.Current;
             else
                 return;
 
-            cancellation.ThrowIfCancellationRequested();
+            cancellationToken?.ThrowIfCancellationRequested();
 
             int index = 0;
             while (image != null)
@@ -45,8 +44,8 @@ namespace MonoGame.Imaging.Coding.Encoding
                 try
                 {
                     int components = 4; // TODO: change this so it's dynamic/controlled
-                    var provider = new BufferPixelProvider<TPixel>(image, components);
-                    var state = new ImageEncoderState(this, stream, encoderOptions.LeaveStreamOpen);
+                    var provider = new BufferPixelProvider(image, components);
+                    var state = new ImageEncoderState(this, imagingConfig, stream, encoderOptions.LeaveStreamOpen);
                     var progressCallback = onProgress == null ? (WriteProgressCallback)null : (p) =>
                         onProgress.Invoke(state, p, null);
 
@@ -56,25 +55,25 @@ namespace MonoGame.Imaging.Coding.Encoding
                     var context = new WriteContext(
                         provider.Fill, provider.Fill, progressCallback,
                         image.Width, image.Height, components,
-                        stream, cancellation, 
+                        stream, cancellationToken, 
                         new ArraySegment<byte>(writeBuffer, 0, bufferOffset), 
                         new ArraySegment<byte>(writeBuffer, bufferOffset, scratchBufferLength));
 
-                    cancellation.ThrowIfCancellationRequested();
+                    cancellationToken?.ThrowIfCancellationRequested();
 
                     if (index == 0)
                     {
-                        if (!WriteFirst(context, image, encoderOptions, config))
+                        if (!WriteFirst(imagingConfig, context, image, encoderOptions))
                             throw new ImagingException(Format);
                     }
-                    else if (!WriteNext(context, image, encoderOptions, config))
+                    else if (!WriteNext(imagingConfig, context, image, encoderOptions))
                     {
                         break;
                     }
                     index++;
                 }
                 finally
-                {
+                    {
                     RecyclableMemoryManager.Default.ReturnBlock(writeBuffer);
                 }
             }
@@ -82,16 +81,15 @@ namespace MonoGame.Imaging.Coding.Encoding
 
         #region IImageEncoder
 
-        public ImageEncoderState EncodeFirst<TPixel>(
+        public ImageEncoderState EncodeFirst(
             ImagingConfig config,
-            IReadOnlyPixelBuffer<TPixel> image,
+            IReadOnlyPixelBuffer image,
             Stream stream, 
-            EncoderOptions encoderOptions, 
-            CancellationToken cancellationToken, 
+            EncoderOptions encoderOptions = null, 
+            CancellationToken? cancellationToken = null, 
             EncodeProgressCallback onProgress = null)
-            where TPixel : unmanaged, IPixel
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            cancellationToken?.ThrowIfCancellationRequested();
 
             if (config == null) throw new ArgumentNullException(nameof(config));
             if (image == null) throw new ArgumentNullException(nameof(image));
@@ -109,15 +107,14 @@ namespace MonoGame.Imaging.Coding.Encoding
             }
         }
 
-        public bool EncodeNext<TPixel>(
+        public bool EncodeNext(
             ImageEncoderState encoderState,
-            IReadOnlyPixelBuffer<TPixel> image, 
-            EncoderOptions encoderOptions,
-            CancellationToken cancellationToken, 
+            IReadOnlyPixelBuffer image, 
+            EncoderOptions encoderOptions = null,
+            CancellationToken? cancellationToken = null, 
             EncodeProgressCallback onProgress = null)
-            where TPixel : unmanaged, IPixel
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            cancellationToken?.ThrowIfCancellationRequested();
 
             if (encoderState == null) throw new ArgumentNullException(nameof(encoderState));
             if (image == null) throw new ArgumentNullException(nameof(image));
@@ -159,21 +156,19 @@ namespace MonoGame.Imaging.Coding.Encoding
             RecyclableMemoryManager.Default.ReturnBlock(writeBuffer);
         }
 
-        protected abstract bool WriteFirst<TPixel>(
+        protected abstract bool WriteFirst(
+            ImagingConfig imagingConfig,
             in WriteContext context,
-            IReadOnlyPixelBuffer<TPixel> image,
-            EncoderOptions encoderOptions, 
-            ImagingConfig config)
-            where TPixel : unmanaged, IPixel;
+            IReadOnlyPixelBuffer image,
+            EncoderOptions encoderOptions);
 
-        protected virtual bool WriteNext<TPixel>(
+        protected virtual bool WriteNext(
+            ImagingConfig imagingConfig,
             in WriteContext context, 
-            IReadOnlyPixelBuffer<TPixel> image,
-            EncoderOptions encoderOptions, 
-            ImagingConfig config)
-            where TPixel : unmanaged, IPixel
+            IReadOnlyPixelBuffer image,
+            EncoderOptions encoderOptions)
         {
-            ImagingArgumentGuard.AssertAnimationSupport(this, config);
+            ImagingArgumentGuard.AssertAnimationSupport(this, imagingConfig);
             return false;
         }
     }

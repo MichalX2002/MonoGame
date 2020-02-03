@@ -16,6 +16,8 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct GrayAlpha88 : IPackedVector<ushort>, IEquatable<GrayAlpha88>, IPixel
     {
+        public int BitDepth => Unsafe.SizeOf<GrayAlpha88>() * 8;
+
         public byte L;
         public byte A;
 
