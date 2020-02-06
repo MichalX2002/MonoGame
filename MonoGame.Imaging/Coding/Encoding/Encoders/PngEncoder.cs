@@ -18,23 +18,23 @@ namespace MonoGame.Imaging.Coding
             CompressionLevel = compression;
         }
     }
-}
 
-namespace MonoGame.Imaging.Coding.Encoding
-{
-    public class PngEncoder : StbEncoderBase, ICancellableCoderAttribute
+    namespace Encoding
     {
-        public override ImageFormat Format => ImageFormat.Png;
-        public override EncoderOptions DefaultOptions => PngEncoderOptions.Default;
-
-        protected override bool WriteFirst<TPixel>(
-            in StbImageWrite.WriteContext context, 
-            IReadOnlyPixelBuffer<TPixel> image, 
-            EncoderOptions encoderOptions,
-            ImagingConfig config)
+        public class PngEncoder : StbEncoderBase, ICancellableCoderAttribute
         {
-            var options = encoderOptions as PngEncoderOptions;
-            return StbImageWrite.Png.WriteCore(context, options.CompressionLevel);
+            public override ImageFormat Format => ImageFormat.Png;
+            public override EncoderOptions DefaultOptions => PngEncoderOptions.Default;
+
+            protected override bool WriteFirst(
+                ImagingConfig imagingConfig,
+                in StbImageWrite.WriteContext context,
+                IReadOnlyPixelBuffer image,
+                EncoderOptions encoderOptions)
+            {
+                var options = encoderOptions as PngEncoderOptions;
+                return StbImageWrite.Png.WriteCore(context, options.CompressionLevel);
+            }
         }
     }
 }

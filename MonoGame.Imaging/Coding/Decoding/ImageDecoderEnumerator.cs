@@ -1,10 +1,8 @@
 ﻿using System;
-using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
-    public class ImageDecoderEnumerator<TPixel> : ImageCoderEnumerator<TPixel, Image<TPixel>>
-        where TPixel : unmanaged, IPixel
+    public class ImageDecoderEnumerator : ImageCoderEnumerator<Image>
     {
         private ImageReadStream _readStream;
         private bool _leaveOpen;

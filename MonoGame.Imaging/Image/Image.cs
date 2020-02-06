@@ -34,18 +34,18 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Gets info about the pixel type of the image.
         /// </summary>
-        public PixelTypeInfo PixelInfo { get; }
+        public PixelTypeInfo PixelType { get; }
 
-        int IElementContainer.ElementSize => PixelInfo.ElementSize;
+        int IElementContainer.ElementSize => PixelType.ElementSize;
         int IElementContainer.Count => Width * Height;
 
         #endregion
 
-        protected Image(int width, int height, PixelTypeInfo pixelInfo)
+        protected Image(int width, int height, PixelTypeInfo pixelType)
         {
             CommonArgumentGuard.AssertAboveZero(width, nameof(width));
             CommonArgumentGuard.AssertAboveZero(height, nameof(height));
-            PixelInfo = pixelInfo ?? throw new ArgumentNullException(nameof(pixelInfo));
+            PixelType = pixelType ?? throw new ArgumentNullException(nameof(pixelType));
 
             Width = width;
             Height = height;

@@ -11,20 +11,22 @@ namespace MonoGame.Imaging
     public partial class Image
     {
         public static Image LoadMemory(
-            PixelTypeInfo pixelInfo, IReadOnlyMemory memory, Rectangle rectangle, int? byteStride = null)
+            IReadOnlyMemory memory, Rectangle rectangle, PixelTypeInfo pixelType, int? byteStride = null)
         {
+            if (memory == null) throw new ArgumentNullException(nameof(memory));
+            if (pixelType == null) throw new ArgumentNullException(nameof(pixelType));
             ImagingArgumentGuard.AssertNonEmptyRectangle(rectangle, nameof(rectangle));
 
-            if (pixelInfo.BitDepth % 8 != 0)
+            if (pixelType.BitDepth % 8 != 0)
                 throw new NotImplementedException(
                     "Only byte-aligned pixels can currently be read.");
 
-            int pixelSize = pixelInfo.ElementSize;
+            int pixelSize = pixelType.ElementSize;
             int srcByteStride;
             if (byteStride.HasValue)
             {
                 ImagingArgumentGuard.AssertValidByteStride(
-                    pixelInfo.Type, rectangle.Width, byteStride.Value, nameof(byteStride));
+                    pixelType.Type, rectangle.Width, byteStride.Value, nameof(byteStride));
                 srcByteStride = byteStride.Value;
             }
             else

@@ -35,8 +35,6 @@ namespace MonoGame.Imaging
 
         #endregion
 
-
-
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
