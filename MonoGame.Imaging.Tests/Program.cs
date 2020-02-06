@@ -61,7 +61,7 @@ namespace MonoGame.Imaging.Tests
                 image = Image.Load<Color>(encoded, CancellationToken.None, OnReadProgress);
                 watch.Stop();
             }
-            Console.WriteLine(image.Width + "x" + image.Height + " # " + image.BitDepth());
+            Console.WriteLine(image.Width + "x" + image.Height + " # " + image.PixelType);
             Console.WriteLine("Buffer Read Average: " +
                 Math.Round(watch.Elapsed.TotalMilliseconds / (readRepeats == 1 ? 1 : readRepeats - 1), 3) + "ms");
 

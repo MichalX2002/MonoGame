@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using MonoGame.Framework;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Framework.Memory;
@@ -12,41 +11,33 @@ namespace MonoGame.Imaging
     public partial class Image<TPixel> : IPixelBuffer<TPixel>, IDisposable
         where TPixel : unmanaged, IPixel
     {
-        //public Span<TPixel> GetPixelSpan()
-        //{
-        //    AssertNotDisposed();
-        //    return _pixelBuffer.Span;
-        //}
-        //
-        //ReadOnlySpan<TPixel> IReadOnlyPixelMemory<TPixel>.GetPixelSpan()
-        //{
-        //    AssertNotDisposed();
-        //    return _pixelBuffer.Span;
-        //}
-
-        public Span<TPixel> GetPixelRowSpan(int row)
+        public override Span<byte> GetPixelByteSpan()
         {
-            AssertInRange(row, nameof(row));
-            return this.GetPixelSpan(row * Buffer.ByteStride, Width);
+            return Buffer.ByteSpan;
         }
 
-        ReadOnlySpan<TPixel> IReadOnlyPixelBuffer<TPixel>.GetPixelRowSpan(int row)
+        public override Span<byte> GetPixelByteRowSpan(int row)
         {
-            AssertInRange(row, nameof(row));
-            return this.GetPixelSpan(row * Buffer.ByteStride, Width);
+            if (row < 0 || row >= Height)
+                throw new ArgumentOutOfRangeException(nameof(row), "The requested row is out of bounds.");
+            return Buffer.ByteSpan.Slice(row * Buffer.ByteStride, PixelType.BitDepth * Width);
         }
 
-        [DebuggerHidden]
-        private void AssertInRange(int row, string paramName)
+        public Span<TPixel> GetPixelSpan()
         {
-            CommonArgumentGuard.AssertAtleastZero(row, paramName);
-            if (row >= Height)
-                throw new ArgumentOutOfRangeException(
-                    paramName, "The requested row is out of bounds.");
+            if (!IsPixelContiguous)
+                throw new InvalidOperationException("The underlying memory is not pixel contiguous.");
+            return Buffer.PixelSpan;
         }
+
+        public Span<TPixel> GetPixelRowSpan(int row) => MemoryMarshal.Cast<byte, TPixel>(GetPixelByteRowSpan(row));
+
+        ReadOnlySpan<TPixel> IReadOnlyPixelMemory<TPixel>.GetPixelSpan() => GetPixelSpan();
+
+        ReadOnlySpan<TPixel> IReadOnlyPixelBuffer<TPixel>.GetPixelRowSpan(int row) => GetPixelRowSpan(row);
 
         /// <summary>
-        /// Helper for containing image pixels in memory.
+        /// Helper for storing and accessing image pixels from memory.
         /// </summary>
         public struct PixelBuffer
         {
@@ -59,7 +50,7 @@ namespace MonoGame.Imaging
             public int ByteStride { get; }
             public bool IsEmpty => ElementCount == 0;
 
-            public Span<TPixel> Span
+            public Span<TPixel> PixelSpan
             {
                 get
                 {
@@ -68,6 +59,18 @@ namespace MonoGame.Imaging
                     if (!_bmemory.IsEmpty)
                         return MemoryMarshal.Cast<byte, TPixel>(_bmemory.Span);
                     return _memory.Span;
+                }
+            }
+
+            public Span<byte> ByteSpan
+            {
+                get
+                {
+                    if (_imemory != null)
+                        return _imemory.Span;
+                    if (!_bmemory.IsEmpty)
+                        return _bmemory.Span;
+                    return MemoryMarshal.Cast<TPixel, byte>(_memory.Span);
                 }
             }
 

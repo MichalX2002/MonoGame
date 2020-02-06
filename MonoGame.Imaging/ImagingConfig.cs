@@ -35,14 +35,9 @@ namespace MonoGame.Imaging
 
         #endregion
 
-        public ImageReadStream CreateReadStream(Stream stream, CancellationToken cancellation)
+        public ImageReadStream CreateReadStream(Stream stream, CancellationToken? cancellationToken = null)
         {
-            return new ImageReadStream(stream, cancellation, StreamDisposal);
-        }
-
-        public ImageReadStream CreateReadStream(Stream stream)
-        {
-            return CreateReadStream(stream, CancellationToken.None);
+            return new ImageReadStream(stream, cancellationToken ?? CancellationToken.None, StreamDisposal);
         }
 
         #region Exception Management

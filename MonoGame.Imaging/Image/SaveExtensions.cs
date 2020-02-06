@@ -111,7 +111,7 @@ namespace MonoGame.Imaging
             EncoderOptions encoderOptions = null,
             EncodeProgressCallback onProgress = null)
         {
-            Save(pixels, ImagingConfig.Default, output, format, encoderOptions, onProgress);
+            Save(pixels, ImagingConfig.Default, output, format, encoderOptions, null, onProgress);
         }
 
         #endregion

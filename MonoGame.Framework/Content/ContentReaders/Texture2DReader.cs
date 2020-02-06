@@ -172,7 +172,7 @@ namespace MonoGame.Framework.Content
                         break;
 #endif
                     }
-                    texture.SetData(levelData.AsSpan(0, levelDataSizeInBytes), level, 0);
+                    texture.SetData(levelData.AsSpan(0, levelDataSizeInBytes), null, level);
                 }
                 finally
                 {

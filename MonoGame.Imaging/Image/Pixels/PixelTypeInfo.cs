@@ -15,26 +15,27 @@ namespace MonoGame.Imaging.Pixels
         public int ElementSize { get; }
         public int BitDepth { get; }
 
-        public PixelTypeInfo(Type type, int bitDepth)
+        public PixelTypeInfo(Type type, int? bitDepth = null)
         {
             if (!typeof(IPixel).IsAssignableFrom(type))
                 throw new ArgumentException(
                     $"The type does not implement {nameof(IPixel)}.", nameof(type));
 
-            CommonArgumentGuard.AssertAboveZero(bitDepth, nameof(bitDepth));
+            if (bitDepth.HasValue)
+                CommonArgumentGuard.AssertAboveZero(bitDepth.Value, nameof(bitDepth));
 
             Type = type;
             ElementSize = Marshal.SizeOf(type);
-            BitDepth = bitDepth;
-        }
 
-        public PixelTypeInfo(Type type) : this(type, Marshal.SizeOf(type) * 8)
-        {
+            BitDepth = bitDepth ?? ((IPixel)Activator.CreateInstance(type)).BitDepth;
+            if (BitDepth <= 0)
+                throw new ArgumentException(
+                    $"{nameof(IPixel)}.{nameof(IPixel.BitDepth)} returned an invalid value.", nameof(type));
         }
 
         public static PixelTypeInfo Get(Type type)
         {
-            if(!InfoCache.TryGetValue(type, out var info))
+            if (!InfoCache.TryGetValue(type, out var info))
             {
                 info = new PixelTypeInfo(type);
                 InfoCache.TryAdd(type, info);

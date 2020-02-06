@@ -3,13 +3,11 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Runtime.InteropServices;
 using MonoGame.Framework.Graphics;
+using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Processing;
-using MonoGame.Framework.Memory;
-using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Framework.Input
 {
@@ -84,6 +82,9 @@ namespace MonoGame.Framework.Input
 
         private bool _disposed;
 
+        /// <summary>
+        /// Gets the platform handle to the cursor.
+        /// </summary>
         public IntPtr Handle { get; private set; }
 
         /// <summary>
@@ -126,7 +127,7 @@ namespace MonoGame.Framework.Input
                 throw new ArgumentOutOfRangeException(
                     "The source rectangle is outside the pixel buffer.", nameof(sourceRectangle));
 
-            IReadOnlyPixelMemory<Color> buffer = null;
+            IReadOnlyPixelMemory<Color> pixelBuffer = null;
             try
             {
                 ReadOnlySpan<Color> pixelSpan;
@@ -137,20 +138,20 @@ namespace MonoGame.Framework.Input
                     // PlatformFromPixels takes stride so we don't need to worry
                     // about a source rect whose width differs from the buffer's stride
                     pixelSpan = rgbaMemory.GetPixelSpan();
-                    stride = rgbaMemory.GetByteStride();
+                    stride = rgbaMemory.ByteStride;
                 }
                 else
                 {
-                    buffer = Image.LoadPixelBuffer<TPixel, Color>(pixels.Process(x => x.Crop(rect)));
-                    pixelSpan = buffer.GetPixelSpan();
-                    stride = buffer.GetByteStride();
+                    pixelBuffer = Image.LoadPixelBuffer<TPixel, Color>(pixels.Process(x => x.Crop(rect)));
+                    pixelSpan = pixelBuffer.GetPixelSpan();
+                    stride = pixelBuffer.ByteStride;
                 }
 
                 return PlatformFromPixels(pixelSpan, rect.Width, rect.Height, stride, origin);
             }
             finally
             {
-                buffer?.Dispose();
+                pixelBuffer?.Dispose();
             }
         }
 
@@ -164,6 +165,9 @@ namespace MonoGame.Framework.Input
             Handle = handle;
         }
 
+        /// <summary>
+        /// Releases the cursor handle.
+        /// </summary>
         public void Dispose()
         {
             if (!_disposed)

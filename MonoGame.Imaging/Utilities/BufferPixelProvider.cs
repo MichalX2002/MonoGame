@@ -48,7 +48,7 @@ namespace MonoGame.Imaging.Pixels
             int offsetY = startPixelOffset / Width;
 
             var convertHelper = new PixelConversionHelper32();
-            int pixelSize = _pixels.PixelInfo.ElementSize;
+            int pixelSize = _pixels.PixelType.ElementSize;
 
             // each iteration is supposed to read pixels from a single row at the time
             int bufferOffset = 0;
@@ -96,7 +96,7 @@ namespace MonoGame.Imaging.Pixels
                         break;
 
                     case 4:
-                        if (_pixels.PixelInfo.Type == typeof(Color))
+                        if (_pixels.PixelType.Type == typeof(Color))
                         {
                             fixed (byte* srcPtr = &MemoryMarshal.GetReference(srcRow))
                             fixed (byte* dstPtr = &MemoryMarshal.GetReference(buffer))

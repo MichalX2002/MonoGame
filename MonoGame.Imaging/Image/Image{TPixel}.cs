@@ -1,14 +1,27 @@
-﻿using MonoGame.Framework;
+﻿using System.Runtime.CompilerServices;
+using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging
 {
-    public partial class Image<TPixel> : Image, IPixelBuffer<TPixel>
+    public partial class Image<TPixel> : Image, IPixelMemory<TPixel>
         where TPixel : unmanaged, IPixel
     {
-        protected PixelBuffer Buffer { get; private set; }
+        private PixelBuffer _buffer;
+
+        protected PixelBuffer Buffer
+        {
+            get
+            {
+                AssertNotDisposed();
+                return _buffer;
+            }
+            private set => _buffer = value;
+        }
+
+        public override int ByteStride => Buffer.ByteStride;
 
         #region Constructors
 
@@ -30,12 +43,10 @@ namespace MonoGame.Imaging
             base(width, height, PixelTypeInfo.Get(typeof(TPixel)))
         {
             var memory = new UnmanagedMemory<TPixel>(width * height, zeroFill: true);
-            Buffer = new PixelBuffer(memory, width, leaveOpen: false);
+            Buffer = new PixelBuffer(memory, width * Unsafe.SizeOf<TPixel>(), leaveOpen: false);
         }
 
         #endregion
-
-
 
         protected override void Dispose(bool disposing)
         {

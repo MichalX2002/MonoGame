@@ -398,8 +398,8 @@ namespace MonoGame.Framework.Graphics
             CheckRect(level, rectangle, out Rectangle checkedRect);
 
             using (var data = pixelSaveFormat.GetData(this, checkedRect, level, arraySlice))
-                return Image.LoadPixelData<TPixel, >(
-                    data.AsBytes(), checkedRect.Width, checkedRect.Height);
+                return Image.LoadPixelData<TPixel, /*create reflection-based call*/>(
+                    data.Span, checkedRect.Width, checkedRect.Height);
         }
 
         #endregion

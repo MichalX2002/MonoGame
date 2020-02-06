@@ -38,7 +38,7 @@ namespace MonoGame.Imaging
         public StreamDisposeMethod DisposalMethod { get; }
 
         public ImageReadStream(
-            Stream stream, CancellationToken cancellation, StreamDisposeMethod disposeMethod)
+            Stream stream, CancellationToken cancellationToken, StreamDisposeMethod disposeMethod)
         {
             if (disposeMethod != StreamDisposeMethod.Close &&
                 disposeMethod != StreamDisposeMethod.LeaveOpen &&
@@ -48,12 +48,12 @@ namespace MonoGame.Imaging
             _stream = stream ?? throw new ArgumentNullException(nameof(stream));
             DisposalMethod = disposeMethod;
 
-            if (DisposalMethod == StreamDisposeMethod.CancellableClose && cancellation.CanBeCanceled)
-                _cancellationRegistration = cancellation.Register(() => _stream?.Dispose());
+            if (DisposalMethod == StreamDisposeMethod.CancellableClose && cancellationToken.CanBeCanceled)
+                _cancellationRegistration = cancellationToken.Register(() => _stream?.Dispose());
 
             _readBuffer = RecyclableMemoryManager.Default.GetBlock();
             Context = new ReadContext(
-                _stream, _readBuffer, cancellation, ReadCallback, SkipCallback);
+                _stream, _readBuffer, cancellationToken, ReadCallback, SkipCallback);
         }
 
         public override int Read(byte[] buffer, int offset, int count) => _stream.Read(buffer, offset, count);

@@ -10,9 +10,13 @@ namespace MonoGame.Imaging
     /// <summary>
     /// Base class for objects that store pixels.
     /// </summary>
-    public abstract partial class Image : IPixelBuffer
+    public abstract partial class Image : IPixelMemory
     {
         public event DatalessEvent<Image> Disposing;
+
+        public abstract int ByteStride { get; }
+
+        public bool IsPixelContiguous => Width * PixelType.ElementSize == ByteStride;
 
         #region Properties
 
@@ -34,9 +38,9 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Gets info about the pixel type of the image.
         /// </summary>
-        public PixelTypeInfo PixelInfo { get; }
+        public PixelTypeInfo PixelType { get; }
 
-        int IElementContainer.ElementSize => PixelInfo.ElementSize;
+        int IElementContainer.ElementSize => PixelType.ElementSize;
         int IElementContainer.Count => Width * Height;
 
         #endregion
@@ -45,7 +49,7 @@ namespace MonoGame.Imaging
         {
             CommonArgumentGuard.AssertAboveZero(width, nameof(width));
             CommonArgumentGuard.AssertAboveZero(height, nameof(height));
-            PixelInfo = pixelInfo ?? throw new ArgumentNullException(nameof(pixelInfo));
+            PixelType = pixelInfo ?? throw new ArgumentNullException(nameof(pixelInfo));
 
             Width = width;
             Height = height;
@@ -63,10 +67,11 @@ namespace MonoGame.Imaging
 
         public abstract Span<byte> GetPixelByteRowSpan(int row);
 
-        ReadOnlySpan<byte> IReadOnlyPixelBuffer.GetPixelByteRowSpan(int row)
-        {
-            return GetPixelByteRowSpan(row);
-        }
+        public abstract Span<byte> GetPixelByteSpan();
+
+        ReadOnlySpan<byte> IReadOnlyPixelBuffer.GetPixelByteRowSpan(int row) => GetPixelByteRowSpan(row);
+
+        ReadOnlySpan<byte> IReadOnlyPixelMemory.GetPixelByteSpan() => GetPixelByteSpan();
 
         #region IDisposable
 

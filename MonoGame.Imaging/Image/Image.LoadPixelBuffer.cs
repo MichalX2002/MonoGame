@@ -22,7 +22,7 @@ namespace MonoGame.Imaging
             var image = new Image<TPixelTo>(sourceRectangle.Width, sourceRectangle.Height);
             if (buffer is IReadOnlyPixelMemory<TPixelTo> typeEqualMemory)
             {
-                if (!typeEqualMemory.HasPadding() &&
+                if (!typeEqualMemory.IsPixelContiguous &&
                     sourceRectangle.Position == Point.Zero &&
                     sourceRectangle.Width == buffer.Width &&
                     sourceRectangle.Height == buffer.Height)
