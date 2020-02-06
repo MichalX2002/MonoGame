@@ -51,35 +51,35 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns the x coordinate of the left edge of this <see cref="Rectangle"/>.
         /// </summary>
-        public int Left => X;
+        public readonly int Left => X;
 
         /// <summary>
         /// Returns the x coordinate of the right edge of this <see cref="Rectangle"/>.
         /// </summary>
-        public int Right => X + Width;
+        public readonly int Right => X + Width;
 
         /// <summary>
         /// Returns the y coordinate of the top edge of this <see cref="Rectangle"/>.
         /// </summary>
-        public int Top => Y;
+        public readonly int Top => Y;
 
         /// <summary>
         /// Returns the y coordinate of the bottom edge of this <see cref="Rectangle"/>.
         /// </summary>
-        public int Bottom => Y + Height;
+        public readonly int Bottom => Y + Height;
 
         /// <summary>
         /// Whether or not this <see cref="Rectangle"/> has a <see cref="Width"/> and
         /// <see cref="Height"/> of 0, and a <see cref="Position"/> of (0, 0).
         /// </summary>
-        public bool IsEmpty => (Width == 0) && (Height == 0) && (X == 0) && (Y == 0);
+        public readonly bool IsEmpty => (Width == 0) && (Height == 0) && (X == 0) && (Y == 0);
 
         /// <summary>
         /// The top-left coordinates of this <see cref="Rectangle"/>.
         /// </summary>
         public Point Position
         {
-            get => new Point(X, Y);
+            readonly get => new Point(X, Y);
             set
             {
                 X = value.X;
@@ -92,7 +92,7 @@ namespace MonoGame.Framework
         /// </summary>
         public Size Size
         {
-            get => new Size(Width, Height);
+            readonly get => new Size(Width, Height);
             set
             {
                 Width = value.Width;
@@ -107,7 +107,7 @@ namespace MonoGame.Framework
         /// If <see cref="Width"/> or <see cref="Height"/> is an odd number,
         /// the center point will be rounded down.
         /// </remarks>
-        public Point Center => new Point(X + (Width / 2), Y + (Height / 2));
+        public readonly Point Center => new Point(X + (Width / 2), Y + (Height / 2));
 
         #endregion
 
@@ -141,6 +141,15 @@ namespace MonoGame.Framework
             Y = location.Y;
             Width = size.Width;
             Height = size.Height;
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="Rectangle"/> struct,
+        /// with the specified size, where x and y are zero.
+        /// </summary>
+        /// <param name="size">The width and height of the created <see cref="Rectangle"/>.</param>
+        public Rectangle(Size size) : this(Point.Zero, size)
+        {
         }
 
         #endregion

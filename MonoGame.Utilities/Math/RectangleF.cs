@@ -54,29 +54,29 @@ namespace MonoGame.Framework
         /// <summary>
         ///     Gets the x-coordinate of the left edge of this <see cref="RectangleF" />.
         /// </summary>
-        public float Left => X;
+        public readonly float Left => X;
 
         /// <summary>
         ///     Gets the x-coordinate of the right edge of this <see cref="RectangleF" />.
         /// </summary>
-        public float Right => X + Width;
+        public readonly float Right => X + Width;
 
         /// <summary>
         ///     Gets the y-coordinate of the top edge of this <see cref="RectangleF" />.
         /// </summary>
-        public float Top => Y;
+        public readonly float Top => Y;
 
         /// <summary>
         ///     Gets the y-coordinate of the bottom edge of this <see cref="RectangleF" />.
         /// </summary>
-        public float Bottom => Y + Height;
+        public readonly float Bottom => Y + Height;
 
         /// <summary>
         ///     Gets a value indicating whether this <see cref="RectangleF" /> has a <see cref="X" />, <see cref="Y" />,
         ///     <see cref="Width" />,
         ///     <see cref="Height" /> all equal to <code>0f</code>.
         /// </summary>
-        public bool IsEmpty => Width == 0 && Height == 0 && X == 0 && Y == 0;
+        public readonly bool IsEmpty => Width == 0 && Height == 0 && X == 0 && Y == 0;
 
         private string DebuggerDisplay => string.Concat(
             X.ToString(), "  ",
@@ -89,7 +89,7 @@ namespace MonoGame.Framework
         /// </summary>
         public PointF Position
         {
-            get => new PointF(X, Y);
+            readonly get => new PointF(X, Y);
             set
             {
                 X = value.X;
@@ -102,7 +102,7 @@ namespace MonoGame.Framework
         /// </summary>
         public SizeF Size
         {
-            get => new SizeF(Width, Height);
+            readonly get => new SizeF(Width, Height);
             set
             {
                 Width = value.Width;
@@ -113,17 +113,17 @@ namespace MonoGame.Framework
         /// <summary>
         ///     Gets the <see cref="PointF" /> representing the center of this <see cref="RectangleF" />.
         /// </summary>
-        public PointF Center => new PointF(X + Width * 0.5f, Y + Height * 0.5f);
+        public readonly PointF Center => new PointF(X + Width * 0.5f, Y + Height * 0.5f);
 
         /// <summary>
         ///     Gets the <see cref="PointF" /> representing the top-left of this <see cref="RectangleF" />.
         /// </summary>
-        public PointF TopLeft => new PointF(X, Y);
+        public readonly PointF TopLeft => new PointF(X, Y);
 
         /// <summary>
         ///     Gets the <see cref="PointF" /> representing the bottom-right of this <see cref="RectangleF" />.
         /// </summary>
-        public PointF BottomRight => new PointF(X + Width, Y + Height);
+        public readonly PointF BottomRight => new PointF(X + Width, Y + Height);
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="RectangleF" /> structure from the specified top-left xy-coordinate

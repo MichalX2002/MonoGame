@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Framework.PackedVector;
@@ -21,7 +22,7 @@ namespace MonoGame.Imaging.Pixels
         }
 
         [StructLayout(LayoutKind.Explicit)]
-        unsafe ref struct PixelConversionHelper32
+        unsafe ref struct PixelConverter32
         {
             [FieldOffset(0)]
             public fixed byte Raw[4];
@@ -39,15 +40,15 @@ namespace MonoGame.Imaging.Pixels
             public Color Rgba;
         }
 
-        public unsafe void Fill(Span<byte> buffer, int dataOffset)
+        public unsafe void Fill(Span<byte> destination, int dataOffset)
         {
             int startPixelOffset = dataOffset / Components;
-            int requestedPixelCount = (int)Math.Ceiling(buffer.Length / (double)Components);
+            int requestedPixelCount = (int)Math.Ceiling(destination.Length / (double)Components);
 
             int offsetX = startPixelOffset % Width;
             int offsetY = startPixelOffset / Width;
 
-            var convertHelper = new PixelConversionHelper32();
+            var convertHelper = new PixelConverter32();
             int pixelSize = _pixels.PixelType.ElementSize;
 
             // each iteration is supposed to read pixels from a single row at the time
@@ -57,69 +58,10 @@ namespace MonoGame.Imaging.Pixels
             {
                 int lastByteOffset = bufferOffset;
                 int toRead = Math.Min(pixelsLeft, _pixels.Width - offsetX);
-                var srcRow = _pixels.GetPixelRowSpan(offsetY);
-                
-                // some for-loops in the following cases use "toRead - 1" so
-                // we can copy leftover bytes if the request length is irregular
-                int i = 0;
-                switch (Components)
-                {
-                    case 1:
-                        for (; i < toRead; i++, bufferOffset++)
-                        {
-                            convertHelper.Gray.FromScaledVector4(srcRow[i + offsetX].ToScaledVector4());
-                            buffer[bufferOffset] = convertHelper.Raw[0];
-                        }
-                        goto ReadEnd;
+                var srcByteRow = _pixels.GetPixelByteRowSpan(offsetY);
 
-                    // TODO: deduplicate conversion code, think about some dynamic way of
-                    // creating conversion functions, maybe with some heavy LINQ expressions?
-
-                    case 2:
-                        for (; i < toRead - 1; i++, bufferOffset += sizeof(GrayAlpha88))
-                        {
-                            convertHelper.GrayAlpha.FromScaledVector4(srcRow[i + offsetX].ToScaledVector4());
-                            for (int j = 0; j < sizeof(GrayAlpha88); j++)
-                                buffer[j + bufferOffset] = convertHelper.Raw[j];
-                        }
-                        convertHelper.GrayAlpha.FromScaledVector4(srcRow[i + 1 + offsetX].ToScaledVector4());
-                        break;
-
-                    case 3:
-                        for (; i < toRead - 1; i++, bufferOffset += sizeof(Rgb24))
-                        {
-                            convertHelper.Rgb.FromScaledVector4(srcRow[i + offsetX].ToScaledVector4());
-                            for (int j = 0; j < sizeof(Rgb24); j++)
-                                buffer[j + bufferOffset] = convertHelper.Raw[j];
-                        }
-                        convertHelper.Rgb.FromScaledVector4(srcRow[i + 1 + offsetX].ToScaledVector4());
-                        break;
-
-                    case 4:
-                        if (_pixels.PixelType.Type == typeof(Color))
-                        {
-                            fixed (byte* srcPtr = &MemoryMarshal.GetReference(srcRow))
-                            fixed (byte* dstPtr = &MemoryMarshal.GetReference(buffer))
-                            {
-                                int bytes = toRead * pixelSize;
-                                int byteOffsetX = offsetX * pixelSize;
-                                Buffer.MemoryCopy(srcPtr + byteOffsetX, dstPtr + bufferOffset, bytes, bytes);
-                                bufferOffset += bytes;
-                            }
-                            goto ReadEnd;
-                        }
-                        else
-                        {
-                            for (; i < toRead - 1; i++, bufferOffset += sizeof(Color))
-                            {
-                                srcRow[i + offsetX].ToColor(ref convertHelper.Rgba);
-                                for (int j = 0; j < sizeof(Color); j++)
-                                    buffer[j + bufferOffset] = convertHelper.Raw[j];
-                            }
-                            srcRow[i + 1 + offsetX].ToColor(ref convertHelper.Rgba);
-                        }
-                        break;
-                }
+                if (Transform32())
+                    goto ReadEnd;
 
                 // copy over the remaining bytes,
                 // as the Fill() caller may request less bytes than sizeof(TPixel)
@@ -127,7 +69,7 @@ namespace MonoGame.Imaging.Pixels
                 int leftoverBytes = Math.Min(Components, toRead * pixelSize - bytesRead);
 
                 for (int j = 0; j < leftoverBytes; j++)
-                    buffer[j + bufferOffset] = convertHelper.Raw[j];
+                    destination[j + bufferOffset] = convertHelper.Raw[j];
                 bufferOffset += leftoverBytes;
 
                 // a case for code that copies bytes directly, 
@@ -138,6 +80,80 @@ namespace MonoGame.Imaging.Pixels
                 offsetX = 0; // read from row beginning on next loop
                 offsetY++; // and jump to the next row
             }
+        }
+
+        private unsafe bool Transform32<TPixel>(
+            ReadOnlySpan<TPixel> srcRow,
+            int toRead,
+            int offsetX,
+            Span<byte> destination,
+            ref int bufferOffset, 
+            ref PixelConverter32 pixelConverter)
+            where TPixel : unmanaged, IPixel
+        {
+            // some for-loops in the following cases use "toRead - 1" so
+            // we can copy leftover bytes if the request length is irregular
+            int i = 0;
+            switch (Components)
+            {
+                case 1:
+                    for (; i < toRead; i++, bufferOffset++)
+                    {
+                        pixelConverter.Gray.FromScaledVector4(srcRow[i + offsetX].ToScaledVector4());
+                        destination[bufferOffset] = pixelConverter.Raw[0];
+                    }
+                    return true;
+
+                // TODO: deduplicate conversion code, think about some dynamic way of
+                // creating conversion functions, maybe with some heavy LINQ expressions?
+
+                case 2:
+                    for (; i < toRead - 1; i++, bufferOffset += sizeof(GrayAlpha88))
+                    {
+                        pixelConverter.GrayAlpha.FromScaledVector4(srcRow[i + offsetX].ToScaledVector4());
+                        for (int j = 0; j < sizeof(GrayAlpha88); j++)
+                            destination[j + bufferOffset] = pixelConverter.Raw[j];
+                    }
+                    pixelConverter.GrayAlpha.FromScaledVector4(srcRow[i + 1 + offsetX].ToScaledVector4());
+                    return false;
+
+                case 3:
+                    for (; i < toRead - 1; i++, bufferOffset += sizeof(Rgb24))
+                    {
+                        pixelConverter.Rgb.FromScaledVector4(srcRow[i + offsetX].ToScaledVector4());
+                        for (int j = 0; j < sizeof(Rgb24); j++)
+                            destination[j + bufferOffset] = pixelConverter.Raw[j];
+                    }
+                    pixelConverter.Rgb.FromScaledVector4(srcRow[i + 1 + offsetX].ToScaledVector4());
+                    return false;
+
+                case 4:
+                    if (typeof(TPixel) == typeof(Color))
+                    {
+                        fixed (TPixel* srcPtr = &MemoryMarshal.GetReference(srcRow))
+                        fixed (byte* dstPtr = &MemoryMarshal.GetReference(destination))
+                        {
+                            int bytes = toRead * sizeof(TPixel);
+                            int byteOffsetX = offsetX * sizeof(TPixel);
+                            Buffer.MemoryCopy(srcPtr + byteOffsetX, dstPtr + bufferOffset, bytes, bytes);
+                            bufferOffset += bytes;
+                        }
+                        return true;
+                    }
+                    else
+                    {
+                        for (; i < toRead - 1; i++, bufferOffset += sizeof(Color))
+                        {
+                            srcRow[i + offsetX].ToColor(ref pixelConverter.Rgba);
+                            for (int j = 0; j < sizeof(Color); j++)
+                                destination[j + bufferOffset] = pixelConverter.Raw[j];
+                        }
+                        srcRow[i + 1 + offsetX].ToColor(ref pixelConverter.Rgba);
+                    }
+                    return false;
+            }
+
+            throw new InvalidOperationException();
         }
 
         public void Fill(Span<float> buffer, int dataOffset)

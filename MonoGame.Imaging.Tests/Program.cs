@@ -50,7 +50,7 @@ namespace MonoGame.Imaging.Tests
             }
             
             var watch = new Stopwatch();
-            Image<Color> image = null;
+            Image image = null;
             for (int i = 0; i < readRepeats; i++)
             {
                 encoded.Seek(0, SeekOrigin.Begin);
@@ -58,7 +58,7 @@ namespace MonoGame.Imaging.Tests
                     watch.Start();
 
                 image?.Dispose();
-                image = Image.Load<Color>(encoded, CancellationToken.None, OnReadProgress);
+                image = Image.Load(encoded, CancellationToken.None, OnReadProgress);
                 watch.Stop();
             }
             Console.WriteLine(image.Width + "x" + image.Height + " # " + image.PixelType);

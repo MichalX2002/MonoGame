@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Threading;
-using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Coding.Decoding;
 
 namespace MonoGame.Imaging
@@ -31,7 +30,8 @@ namespace MonoGame.Imaging
                 if (!TryGetDecoder(format, out var decoder))
                     throw new MissingDecoderException(format);
 
-                return new ImageDecoderEnumerator(decoder, onProgress, imageStream, leaveOpen: true);
+                return new ImageDecoderEnumerator(
+                    decoder, onProgress, imageStream, leaveOpen: true);
             }
         }
 

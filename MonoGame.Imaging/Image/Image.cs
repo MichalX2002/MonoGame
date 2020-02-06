@@ -45,11 +45,11 @@ namespace MonoGame.Imaging
 
         #endregion
 
-        protected Image(int width, int height, PixelTypeInfo pixelInfo)
+        protected Image(int width, int height, PixelTypeInfo pixelType)
         {
             CommonArgumentGuard.AssertAboveZero(width, nameof(width));
             CommonArgumentGuard.AssertAboveZero(height, nameof(height));
-            PixelType = pixelInfo ?? throw new ArgumentNullException(nameof(pixelInfo));
+            PixelType = pixelType ?? throw new ArgumentNullException(nameof(pixelType));
 
             Width = width;
             Height = height;

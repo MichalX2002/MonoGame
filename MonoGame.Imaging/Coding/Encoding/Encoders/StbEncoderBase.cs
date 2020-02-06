@@ -28,14 +28,14 @@ namespace MonoGame.Imaging.Coding.Encoding
             CancellationToken? cancellationToken = null,
             EncodeProgressCallback onProgress = null)
         {
+            var cancelToken = cancellationToken ?? CancellationToken.None;
+            cancelToken.ThrowIfCancellationRequested();
 
             IReadOnlyPixelBuffer image = null;
             if (images.MoveNext())
                 image = images.Current;
             else
                 return;
-
-            cancellationToken?.ThrowIfCancellationRequested();
 
             int index = 0;
             while (image != null)
@@ -55,11 +55,11 @@ namespace MonoGame.Imaging.Coding.Encoding
                     var context = new WriteContext(
                         provider.Fill, provider.Fill, progressCallback,
                         image.Width, image.Height, components,
-                        stream, cancellationToken, 
+                        stream, cancelToken, 
                         new ArraySegment<byte>(writeBuffer, 0, bufferOffset), 
                         new ArraySegment<byte>(writeBuffer, bufferOffset, scratchBufferLength));
 
-                    cancellationToken?.ThrowIfCancellationRequested();
+                    cancelToken.ThrowIfCancellationRequested();
 
                     if (index == 0)
                     {

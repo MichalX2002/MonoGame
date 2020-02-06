@@ -67,7 +67,7 @@ namespace MonoGame.Framework.Graphics
         /// Given <see cref="GraphicsDevice"/> can't work with texture arrays.
         /// </exception>
         public Texture2D(
-            GraphicsDevice graphicsDevice, int width, int height, bool mipmap, 
+            GraphicsDevice graphicsDevice, int width, int height, bool mipmap,
             SurfaceFormat format, int arraySize) : this(
                 graphicsDevice, width, height, mipmap, format, SurfaceType.Texture, false, arraySize)
         {
@@ -78,14 +78,14 @@ namespace MonoGame.Framework.Graphics
         /// Creates a new texture of a given size with a surface format and optional mipmaps.
         /// </summary>
         internal Texture2D(
-            GraphicsDevice graphicsDevice, int width, int height, bool mipmap, 
+            GraphicsDevice graphicsDevice, int width, int height, bool mipmap,
             SurfaceFormat format, SurfaceType type) : this(
                 graphicsDevice, width, height, mipmap, format, type, false, 1)
         {
         }
 
         protected Texture2D(
-            GraphicsDevice graphicsDevice, int width, int height, bool mipmap, 
+            GraphicsDevice graphicsDevice, int width, int height, bool mipmap,
             SurfaceFormat format, SurfaceType type, bool shared, int arraySize)
         {
             if (graphicsDevice == null)
@@ -204,7 +204,7 @@ namespace MonoGame.Framework.Graphics
             where T : unmanaged
         {
             ValidateParams<T>(level, arraySlice, rectangle, out int byteSize, out Rectangle checkedRect);
-            
+
             int elementCount = checkedRect.Width * checkedRect.Height;
             ValidateSizes<T>(elementCount, byteSize);
 
@@ -238,7 +238,7 @@ namespace MonoGame.Framework.Graphics
             ImagingConfig imagingConfig,
             Stream stream,
             GraphicsDevice graphicsDevice,
-            bool mipmap, 
+            bool mipmap,
             SurfaceFormat format)
         {
             if (graphicsDevice == null)
@@ -378,7 +378,7 @@ namespace MonoGame.Framework.Graphics
 
             var pixelFormat = GetPixelSaveFormat(Format);
             var data = pixelFormat.GetData(this, checkedRect, level, arraySlice);
-            var image = Image.LoadMemory(data);
+            var image = Image.LoadMemory(data, checkedRect.Size, pixelFormat.PixelType);
             return image;
         }
 
@@ -392,8 +392,8 @@ namespace MonoGame.Framework.Graphics
             where TPixel : unmanaged, IPixel
         {
             var pixelSaveFormat = GetPixelSaveFormat(Format);
-            if (pixelSaveFormat.PixelType != typeof(TPixel))
-                throw new ArgumentException();
+            if (pixelSaveFormat.PixelType.Type != typeof(TPixel))
+                throw new ArgumentException(nameof(TPixel));
 
             CheckRect(level, rectangle, out Rectangle checkedRect);
 
@@ -420,16 +420,16 @@ namespace MonoGame.Framework.Graphics
         public void Save(
             ImagingConfig imagingConfig,
             Stream stream,
-            ImageFormat format, 
-            EncoderOptions encoderOptions = null, 
+            ImageFormat format,
+            EncoderOptions encoderOptions = null,
             Rectangle? rectangle = null,
-            int level = 0, 
+            int level = 0,
             int arraySlice = 0)
         {
             if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
             if (stream == null) throw new ArgumentNullException(nameof(stream));
             if (format == null) throw new ArgumentNullException(nameof(format));
-            
+
             void SaveByType<TPixel>() where TPixel : unmanaged, IPixel
             {
                 using (var textureImage = ToImage<TPixel>(rectangle, level, arraySlice))
@@ -482,7 +482,7 @@ namespace MonoGame.Framework.Graphics
         [CLSCompliant(false)]
         public void Save(
             ImagingConfig imagingConfig,
-            string filePath, 
+            string filePath,
             ImageFormat format = null,
             EncoderOptions encoderOptions = null,
             Rectangle? rectangle = null,

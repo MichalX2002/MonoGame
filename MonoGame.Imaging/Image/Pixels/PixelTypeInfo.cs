@@ -35,6 +35,9 @@ namespace MonoGame.Imaging.Pixels
 
         public static PixelTypeInfo Get(Type type)
         {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+
             if (!InfoCache.TryGetValue(type, out var info))
             {
                 info = new PixelTypeInfo(type);

@@ -8,6 +8,7 @@ using System.Linq;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging;
+using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -22,12 +23,15 @@ namespace MonoGame.Framework.Graphics
             private ToImageDelegate _toImageDelegate;
 
             public SurfaceFormat Format { get; }
-            public Type PixelType { get; }
+            public PixelTypeInfo PixelType { get; }
 
             public PixelSaveFormat(SurfaceFormat format, Type pixelType)
             {
+                if (pixelType == null)
+                    throw new ArgumentNullException(nameof(pixelType));
+
                 Format = format;
-                PixelType = pixelType ?? throw new ArgumentNullException(nameof(pixelType));
+                PixelType = PixelTypeInfo.Get(pixelType);
 
                 TDelegate GetDelegate<TDelegate>(Type methodHost, string methodName)
                     where TDelegate : Delegate
@@ -37,7 +41,7 @@ namespace MonoGame.Framework.Graphics
                     var method = methodHost.GetMethod(
                         methodName, methodParams.Select(x => x.ParameterType).ToArray());
 
-                    var genericMethod = method.MakeGenericMethod(PixelType);
+                    var genericMethod = method.MakeGenericMethod(PixelType.Type);
                     return (TDelegate)genericMethod.CreateDelegate(typeof(TDelegate));
                 }
 
