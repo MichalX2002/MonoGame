@@ -103,7 +103,7 @@ namespace MonoGame.Framework.Input
 
             var rect = sourceRectangle ?? texture.Bounds;
 
-            using (var image = Image.Create<Color>(rect.Width, rect.Height))
+            using (var image = Image<Color>.Create(rect.Size))
             {
                 texture.GetData(image.GetPixelSpan(), rect);
                 return FromPixels(image, origin);
@@ -119,7 +119,7 @@ namespace MonoGame.Framework.Input
         /// <param name="sourceRectangle">Optional part of the image to use as the cursor.</param>
         [CLSCompliant(false)]
         public static unsafe MouseCursor FromPixels<TPixel>(
-            IReadOnlyPixelBuffer<TPixel> pixels, Point origin, Rectangle? sourceRectangle = null)
+            IReadOnlyPixelRows<TPixel> pixels, Point origin, Rectangle? sourceRectangle = null)
             where TPixel : unmanaged, IPixel
         {
             Rectangle rect = sourceRectangle ?? pixels.GetBounds();
@@ -136,13 +136,13 @@ namespace MonoGame.Framework.Input
                 if (rect.Position == Point.Zero && pixels is IReadOnlyPixelMemory<Color> rgbaMemory)
                 {
                     // PlatformFromPixels takes stride so we don't need to worry
-                    // about a source rect whose width differs from the buffer's stride
+                    // about a source rect whose width differs from the buffer's stride.
                     pixelSpan = rgbaMemory.GetPixelSpan();
                     stride = rgbaMemory.ByteStride;
                 }
                 else
                 {
-                    pixelBuffer = Image.LoadPixelBuffer<TPixel, Color>(pixels.Process(x => x.Crop(rect)));
+                    pixelBuffer = Image.LoadPixels<TPixel, Color>(pixels.Project(x => x.Crop(rect)));
                     pixelSpan = pixelBuffer.GetPixelSpan();
                     stride = pixelBuffer.ByteStride;
                 }

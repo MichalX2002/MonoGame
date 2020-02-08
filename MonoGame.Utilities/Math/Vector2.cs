@@ -538,7 +538,7 @@ namespace MonoGame.Framework
         public static void Transform(
             ReadOnlySpan<Vector2> source, in Matrix matrix, Span<Vector2> destination)
         {
-            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
+            ArgumentGuard.AssertSourceLargerThanDestination(source, destination);
 
             for (int i = 0; i < source.Length; i++)
                 destination[i] = Transform(source[i], matrix);
@@ -554,7 +554,7 @@ namespace MonoGame.Framework
         public static void Transform(
             ReadOnlySpan<Vector2> source, in Quaternion rotation, Span<Vector2> destination)
         {
-            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
+            ArgumentGuard.AssertSourceLargerThanDestination(source, destination);
 
             for (int i = 0; i < source.Length; i++)
                 destination[i] = Transform(source[i], rotation);
@@ -583,7 +583,7 @@ namespace MonoGame.Framework
         public static void TransformNormal(
             ReadOnlySpan<Vector2> source, in Matrix matrix, Span<Vector2> destination)
         {
-            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
+            ArgumentGuard.AssertSourceLargerThanDestination(source, destination);
 
             for (int i = 0; i < source.Length; i++)
                 destination[i] = TransformNormal(source[i], matrix);

@@ -47,27 +47,47 @@ namespace MonoGame.Imaging
 
         protected Image(int width, int height, PixelTypeInfo pixelType)
         {
-            CommonArgumentGuard.AssertAboveZero(width, nameof(width));
-            CommonArgumentGuard.AssertAboveZero(height, nameof(height));
+            ArgumentGuard.AssertAboveZero(width, nameof(width));
+            ArgumentGuard.AssertAboveZero(height, nameof(height));
             PixelType = pixelType ?? throw new ArgumentNullException(nameof(pixelType));
 
             Width = width;
             Height = height;
         }
 
+        #region Create
+
         /// <summary>
-        /// Creates an empty image using the
-        /// <see cref="Image{TPixel}.Image(int, int)"/> constructor.
+        /// Creates an empty image.
         /// </summary>
-        public static Image<TPixel> Create<TPixel>(int width, int height)
-            where TPixel : unmanaged, IPixel
+        public static Image Create(int width, int height, PixelTypeInfo pixelType)
         {
-            return new Image<TPixel>(width, height);
         }
+
+        /// <summary>
+        /// Creates an empty image.
+        /// </summary>
+        public static Image Create(Size size, PixelTypeInfo pixelType)
+        {
+        }
+
+        #endregion
 
         public abstract Span<byte> GetPixelByteRowSpan(int row);
 
         public abstract Span<byte> GetPixelByteSpan();
+
+        public void GetPixelByteRow(int x, int y, Span<byte> destination)
+        {
+            var rowSpan = GetPixelByteRowSpan(y);
+            rowSpan.Slice(x).CopyTo(destination);
+        }
+
+        public void SetPixelByteRow(int x, int y, ReadOnlySpan<byte> data)
+        {
+            var rowSpan = GetPixelByteRowSpan(y);
+            data.CopyTo(rowSpan.Slice(x));
+        }
 
         ReadOnlySpan<byte> IReadOnlyPixelBuffer.GetPixelByteRowSpan(int row) => GetPixelByteRowSpan(row);
 

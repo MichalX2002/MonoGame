@@ -67,7 +67,7 @@ namespace MonoGame.Imaging
 
         private static int SkipCallback(ReadContext context, int n)
         {
-            CommonArgumentGuard.AssertAtleastZero(n, nameof(n), false);
+            ArgumentGuard.AssertAtleastZero(n, nameof(n), false);
             try
             {
                 if (n == 0)

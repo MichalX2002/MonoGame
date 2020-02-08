@@ -3,7 +3,7 @@ using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Pixels
 {
-    public interface IPixelMemory : IReadOnlyPixelMemory
+    public interface IPixelMemory : IReadOnlyPixelMemory, IPixelBuffer
     {
         /// <summary>
         /// Gets the underlying memory as a contigous span of pixel bytes.

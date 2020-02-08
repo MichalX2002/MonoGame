@@ -609,7 +609,7 @@ namespace MonoGame.Framework
         public static void Transform(
             ReadOnlySpan<Vector4> source, in Matrix matrix, Span<Vector4> destination)
         {
-            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
+            ArgumentGuard.AssertSourceLargerThanDestination(source, destination);
 
             for (var i = 0; i < source.Length; i++)
                 destination[i] = Transform(source[i], matrix);
@@ -624,7 +624,7 @@ namespace MonoGame.Framework
         public static void Transform(
             ReadOnlySpan<Vector4> source, in Quaternion rotation, Span<Vector4> destination)
         {
-            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
+            ArgumentGuard.AssertSourceLargerThanDestination(source, destination);
             for (var i = 0; i < source.Length; i++)
                 destination[i] = Transform(source[i], rotation);
         }

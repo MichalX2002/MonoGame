@@ -612,7 +612,7 @@ namespace MonoGame.Framework
         /// <param name="destination">The destination span.</param>
         public static void Transform(ReadOnlySpan<Vector3> source, in Matrix matrix, Span<Vector3> destination)
         {
-            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
+            ArgumentGuard.AssertSourceLargerThanDestination(source, destination);
 
             // TODO: Are there options on some platforms to implement a vectorized version of this?
             for (int i = 0; i < source.Length; i++)
@@ -633,7 +633,7 @@ namespace MonoGame.Framework
         /// <param name="destination">The destination span.</param>
         public static void Transform(ReadOnlySpan<Vector3> source, in Quaternion rotation, Span<Vector3> destination)
         {
-            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
+            ArgumentGuard.AssertSourceLargerThanDestination(source, destination);
 
             // TODO: Are there options on some platforms to implement a vectorized version of this?
             for (int i = 0; i < source.Length; i++)
@@ -677,7 +677,7 @@ namespace MonoGame.Framework
         /// <param name="destination">The destination span.</param>
         public static void TransformNormal(ReadOnlySpan<Vector3> source, in Matrix matrix, Span<Vector3> destination)
         {
-            CommonArgumentGuard.AssertSourceLargerThanDestination(source, destination);
+            ArgumentGuard.AssertSourceLargerThanDestination(source, destination);
 
             for (int i = 0; i < source.Length; i++)
             {

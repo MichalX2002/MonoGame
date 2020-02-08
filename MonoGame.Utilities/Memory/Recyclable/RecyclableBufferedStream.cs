@@ -53,7 +53,7 @@ namespace MonoGame.Framework.Memory
             }
             set
             {
-                CommonArgumentGuard.AssertAtleastZero(value, nameof(value));
+                ArgumentGuard.AssertAtleastZero(value, nameof(value));
                 AssertNotClosed();
                 AssertCanSeek();
 
@@ -209,8 +209,8 @@ namespace MonoGame.Framework.Memory
         public override int Read(byte[] array, int offset, int count)
         {
             if (array == null) throw new ArgumentNullException(nameof(array));
-            CommonArgumentGuard.AssertAtleastZero(offset, nameof(offset));
-            CommonArgumentGuard.AssertAtleastZero(count, nameof(count));
+            ArgumentGuard.AssertAtleastZero(offset, nameof(offset));
+            ArgumentGuard.AssertAtleastZero(count, nameof(count));
             AssertValidOffset(array.Length, offset, count);
 
             AssertNotClosed();
@@ -286,8 +286,8 @@ namespace MonoGame.Framework.Memory
         public override void Write(byte[] array, int offset, int count)
         {
             if (array == null) throw new ArgumentNullException(nameof(array));
-            CommonArgumentGuard.AssertAtleastZero(offset, nameof(offset));
-            CommonArgumentGuard.AssertAtleastZero(count, nameof(count));
+            ArgumentGuard.AssertAtleastZero(offset, nameof(offset));
+            ArgumentGuard.AssertAtleastZero(count, nameof(count));
             AssertValidOffset(array.Length, offset, count);
 
             AssertNotClosed();
@@ -392,7 +392,7 @@ namespace MonoGame.Framework.Memory
 
         public override void SetLength(long value)
         {
-            CommonArgumentGuard.AssertAtleastZero(value, nameof(value));
+            ArgumentGuard.AssertAtleastZero(value, nameof(value));
 
             AssertNotClosed();
             AssertCanSeek();

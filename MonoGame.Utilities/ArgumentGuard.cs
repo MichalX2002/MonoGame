@@ -2,7 +2,7 @@
 
 namespace MonoGame.Framework
 {
-    public static class CommonArgumentGuard
+    public static class ArgumentGuard
     {
         /// <summary>
         /// Throws if the <paramref name="destination"/> span is 
@@ -29,7 +29,7 @@ namespace MonoGame.Framework
 
             if (count.Value <= 0)
             {
-                string name = inlineParamName ? paramName : "The collection";
+                string name = inlineParamName ? paramName : "Collection";
                 throw new ArgumentEmptyException(paramName, $"{name} may not be empty.");
             }
         }
@@ -41,8 +41,8 @@ namespace MonoGame.Framework
         {
             if (value <= 0)
             {
-                string name = inlineParamName ? paramName : "value";
-                string message = $"The {name} must be greater than zero.";
+                string name = inlineParamName ? paramName : "Value";
+                string message = $"{name} must be greater than zero.";
                 throw new ArgumentOutOfRangeException(message, paramName);
             }
         }
@@ -54,8 +54,8 @@ namespace MonoGame.Framework
         {
             if (value < 0)
             {
-                string name = inlineParamName ? paramName : "value";
-                string message = $"The {name} must be equal to or greater than zero.";
+                string name = inlineParamName ? paramName : "Value";
+                string message = $"{name} must be equal to or greater than zero.";
                 throw new ArgumentOutOfRangeException(message, paramName);
             }
         }
@@ -68,8 +68,8 @@ namespace MonoGame.Framework
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                string name = inlineParamName ? paramName : "value";
-                string message = $"The {name} may not be empty or consist only out of white-space characters.";
+                string name = inlineParamName ? paramName : "Value";
+                string message = $"{name} may not be empty or consist only out of white-space characters.";
                 throw new ArgumentException(message, paramName);
             }
         }

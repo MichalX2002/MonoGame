@@ -293,7 +293,7 @@ namespace MonoGame.OpenAL
 
         public static unsafe void SourceUnqueueBuffers(uint source, int count)
         {
-            CommonArgumentGuard.AssertAboveZero(count, nameof(count));
+            ArgumentGuard.AssertAboveZero(count, nameof(count));
 
             Span<uint> salvaged = stackalloc uint[count];
             SourceUnqueueBuffers(source, salvaged);

@@ -1,12 +1,93 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Framework.PackedVector;
+using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging
 {
     public partial class Image
     {
+        private delegate void LoadPixelsDelegate(
+            IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image destination);
+
+        private static ConcurrentDictionary<(Type, Type), LoadPixelsDelegate> _loadPixelRowsCache = 
+            new ConcurrentDictionary<(Type, Type), LoadPixelsDelegate>();
+
+        // TODO: add non-generic LoadPixels(Type pixelFrom, Type pixelTo, ...)
+
+        public static Image LoadPixels(
+            IReadOnlyPixelRows pixels, PixelTypeInfo imageType, Rectangle sourceRectangle)
+        {
+            var image = Image.Create(sourceRectangle.Size);
+        }
+
+        private static void LoadPixels(
+            IReadOnlyPixelRows pixels, PixelTypeInfo imageType, Rectangle sourceRectangle, Image destination)
+        {
+        }
+
+        #region LoadPixels<TPixel>(IReadOnlyPixelRows)
+
+        public static Image<TPixel> LoadPixels<TPixel>(
+            IReadOnlyPixelRows pixels, Rectangle sourceRectangle)
+            where TPixel : unmanaged, IPixel
+        {
+            // TODO: test optimization: replacing Span<>.CopyTo with possibly faster memcpy
+
+            if (pixels == null) throw new ArgumentEmptyException(nameof(pixels));
+            ImagingArgumentGuard.AssertNonEmptyRectangle(sourceRectangle, nameof(sourceRectangle));
+
+            var dstImage = new Image<TPixel>(sourceRectangle.Width, sourceRectangle.Height);
+            if (pixels is IReadOnlyPixelMemory<TPixel> typeEqualMemory)
+            {
+                if (typeEqualMemory.IsPixelContiguous &&
+                    sourceRectangle.Position == Point.Zero &&
+                    sourceRectangle.Width == pixels.Width &&
+                    sourceRectangle.Height == pixels.Height)
+                {
+                    typeEqualMemory.GetPixelSpan().CopyTo(dstImage.GetPixelSpan());
+                }
+                else
+                {
+                    for (int y = 0; y < sourceRectangle.Height; y++)
+                        typeEqualMemory.GetPixelRow(
+                            sourceRectangle.X, sourceRectangle.Y + y, dstImage.GetPixelRowSpan(y));
+                }
+            }
+            else if (pixels is IReadOnlyPixelBuffer<TPixel> typeEqualBuffer)
+            {
+                for (int y = 0; y < sourceRectangle.Height; y++)
+                    typeEqualBuffer.GetPixelRow(
+                        sourceRectangle.X, sourceRectangle.Y + y, dstImage.GetPixelRowSpan(y));
+            }
+            else
+            {
+                _loadPixelRowsCache[]
+
+                // TODO: make stack-allocated buffer
+                var rowBuffer = new TPixelFrom[dstImage.Width];
+
+                for (int y = 0; y < sourceRectangle.Height; y++)
+                {
+                    pixels.GetPixelByteRow(sourceRectangle.X, sourceRectangle.Y + y, rowBuffer);
+                    var dstRow = dstImage.GetPixelRowSpan(y);
+                    for (int x = 0; x < sourceRectangle.Width; x++)
+                        dstRow[x].FromScaledVector4(rowBuffer[x].ToScaledVector4());
+                }
+            }
+            return dstImage;
+        }
+
+        public static Image<TPixel> LoadPixels<TPixel>(IReadOnlyPixelRows buffer)
+            where TPixel : unmanaged, IPixel
+        {
+            return LoadPixels<TPixel>(buffer, buffer.GetBounds());
+        }
+
+        #endregion
+
         #region LoadPixels(ReadOnlySpan)
 
         public static unsafe Image<TPixelTo> LoadPixels<TPixelFrom, TPixelTo>(
@@ -67,7 +148,7 @@ namespace MonoGame.Imaging
         }
 
         public static Image<TPixel> LoadPixels<TPixel>(
-           ReadOnlySpan<TPixel> pixels, Rectangle sourceRectangle, int? byteStride)
+           ReadOnlySpan<TPixel> pixels, Rectangle sourceRectangle, int? byteStride = null)
            where TPixel : unmanaged, IPixel
         {
             return LoadPixels<TPixel, TPixel>(pixels, sourceRectangle, byteStride);

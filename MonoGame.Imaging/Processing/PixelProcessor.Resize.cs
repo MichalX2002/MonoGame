@@ -1,16 +1,14 @@
 ﻿using System;
-using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Processing
 {
-    public static partial class PixelTransformer
+    public static partial class PixelProcessor
     {
         /// <summary>
         /// Creates a resized version of the source image using the default resampler.
         /// </summary>
-        public static Image<TPixel> Resize<TPixel>(
-            this ReadOnlyPixelViewContext<TPixel> context, int width, int height)
-            where TPixel : unmanaged, IPixel
+        public static Image Resize(
+            this ReadOnlyPixelRowsContext context, int width, int height)
         {
             //var inputImg = context.Image;
             //var outputImg = new Image<TPixel>(width, height);

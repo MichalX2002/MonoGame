@@ -14,7 +14,7 @@ namespace MonoGame.Imaging
         public static unsafe void AssertValidByteStride(
             Type elementType, int width, int byteStride, string paramName)
         {
-            CommonArgumentGuard.AssertAboveZero(width, nameof(width));
+            ArgumentGuard.AssertAboveZero(width, nameof(width));
             
             if (byteStride < width * Marshal.SizeOf(elementType))
                 throw new ArgumentException(
@@ -24,10 +24,10 @@ namespace MonoGame.Imaging
 
         public static void AssertNonEmptyRectangle(Rectangle rectangle, string paramName)
         {
-            CommonArgumentGuard.AssertAtleastZero(rectangle.X, paramName + ".X");
-            CommonArgumentGuard.AssertAtleastZero(rectangle.Y, paramName + ".Y");
-            CommonArgumentGuard.AssertAboveZero(rectangle.Width, paramName + ".Width");
-            CommonArgumentGuard.AssertAboveZero(rectangle.Height, paramName + ".Height");
+            ArgumentGuard.AssertAtleastZero(rectangle.X, paramName + ".X");
+            ArgumentGuard.AssertAtleastZero(rectangle.Y, paramName + ".Y");
+            ArgumentGuard.AssertAboveZero(rectangle.Width, paramName + ".Width");
+            ArgumentGuard.AssertAboveZero(rectangle.Height, paramName + ".Height");
         }
 
         public static void AssertContigousLargeEnough(int sourceLength, int pixelCount, string paramName)
@@ -37,21 +37,20 @@ namespace MonoGame.Imaging
                     "The contigous memory is not large enough for the given dimensions.", paramName);
         }
 
-        public static void AssertRectangleInSource<TPixel>(
-            IPixelSource<TPixel> source, Rectangle rect, string rectParamName)
-            where TPixel : unmanaged, IPixel
+        public static void AssertRectangleInSource(
+            IPixelSource source, Rectangle rectangle, string rectParamName)
         {
             // Rectangle.Contains would suffice, but exception details would suffer
-            AssertNonEmptyRectangle(rect, rectParamName);
+            AssertNonEmptyRectangle(rectangle, rectParamName);
 
-            if (rect.Width > source.Width)
+            if (rectangle.Width > source.Width)
                 throw new ArgumentOutOfRangeException(rectParamName + ".Width");
-            if (rect.Height > source.Height)
+            if (rectangle.Height > source.Height)
                 throw new ArgumentOutOfRangeException(rectParamName + ".Height");
 
-            if (rect.X + rect.Width > source.Width)
+            if (rectangle.X + rectangle.Width > source.Width)
                 throw new ArgumentOutOfRangeException(rectParamName + ".X");
-            if (rect.Y + rect.Height > source.Height)
+            if (rectangle.Y + rectangle.Height > source.Height)
                 throw new ArgumentOutOfRangeException(rectParamName + ".Y");
         }
 

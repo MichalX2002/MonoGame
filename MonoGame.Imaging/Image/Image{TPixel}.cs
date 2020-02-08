@@ -48,12 +48,31 @@ namespace MonoGame.Imaging
 
         #endregion
 
+        #region Create
+
+        /// <summary>
+        /// Creates an empty image.
+        /// </summary>
+        public static Image<TPixel> Create(int width, int height)
+        {
+            return new Image<TPixel>(width, height);
+        }
+
+        /// <summary>
+        /// Creates an empty image.
+        /// </summary>
+        public static Image<TPixel> Create(Size size)
+        {
+            return new Image<TPixel>(size.Width, size.Height);
+        }
+
+        #endregion
+
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
 
             Buffer.Dispose();
-            Buffer = default;
         }
     }
 }

@@ -20,23 +20,26 @@
     <Compile Remove="Coding\Decoding\Stb\**" />
     <Compile Remove="Coding\Encoding\Png\**" />
     <Compile Remove="Coding\Encoding\Stb\**" />
-    <Compile Remove="Image\Pixels\Rows\**" />
-    <Compile Remove="Image\Pixels\View\**" />
-    <Compile Remove="Image\Processing\Extensions\**" />
+    <Compile Remove="Image\Specialized\**" />
+    <Compile Remove="Pixels\Rows\**" />
+    <Compile Remove="Pixels\View\**" />
+    <Compile Remove="Processing\Extensions\**" />
     <Compile Remove="old\**" />
     <EmbeddedResource Remove="Coding\Decoding\Stb\**" />
     <EmbeddedResource Remove="Coding\Encoding\Png\**" />
     <EmbeddedResource Remove="Coding\Encoding\Stb\**" />
-    <EmbeddedResource Remove="Image\Pixels\Rows\**" />
-    <EmbeddedResource Remove="Image\Pixels\View\**" />
-    <EmbeddedResource Remove="Image\Processing\Extensions\**" />
+    <EmbeddedResource Remove="Image\Specialized\**" />
+    <EmbeddedResource Remove="Pixels\Rows\**" />
+    <EmbeddedResource Remove="Pixels\View\**" />
+    <EmbeddedResource Remove="Processing\Extensions\**" />
     <EmbeddedResource Remove="old\**" />
     <None Remove="Coding\Decoding\Stb\**" />
     <None Remove="Coding\Encoding\Png\**" />
     <None Remove="Coding\Encoding\Stb\**" />
-    <None Remove="Image\Pixels\Rows\**" />
-    <None Remove="Image\Pixels\View\**" />
-    <None Remove="Image\Processing\Extensions\**" />
+    <None Remove="Image\Specialized\**" />
+    <None Remove="Pixels\Rows\**" />
+    <None Remove="Pixels\View\**" />
+    <None Remove="Processing\Extensions\**" />
     <None Remove="old\**" />
   </ItemGroup>
 
@@ -44,9 +47,6 @@
     <Compile Remove="Coding\Encoding\EncoderExtensions.cs" />
     <Compile Remove="ColorEncoding.cs" />
     <Compile Remove="ImageReader.cs" />
-    <Compile Remove="Image\Specialized\FrameCollection.cs" />
-    <Compile Remove="Image\Specialized\ImageCollection.cs" />
-    <Compile Remove="Image\Specialized\LayerCollection.cs" />
     <Compile Remove="Utilities\BufferPixelProvider.Expressions.cs" />
     <Compile Remove="Utilities\ImageWriter.cs" />
   </ItemGroup>
