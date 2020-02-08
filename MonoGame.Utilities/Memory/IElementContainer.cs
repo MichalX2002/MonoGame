@@ -10,7 +10,7 @@ namespace MonoGame.Framework.Memory
         int Count { get; }
 
         /// <summary>
-        /// Gets the size of one element.
+        /// Gets the size of one element in bytes.
         /// </summary>
         int ElementSize { get; }
     }

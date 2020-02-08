@@ -36,8 +36,7 @@ namespace MonoGame.Framework.Graphics
                 TDelegate GetDelegate<TDelegate>(Type methodHost, string methodName)
                     where TDelegate : Delegate
                 {
-                    // Trick to get the delegate arguments.
-                    var methodParams = typeof(TDelegate).GetMethod("Invoke").GetParameters();
+                    var methodParams = typeof(TDelegate).GetDelegateParameters();
                     var method = methodHost.GetMethod(
                         methodName, methodParams.Select(x => x.ParameterType).ToArray());
 

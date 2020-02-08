@@ -7,17 +7,18 @@ namespace MonoGame.Imaging.Coding.Decoding
         private ImageReadStream _readStream;
         private bool _leaveOpen;
 
-        private DecodeProgressCallback ProgressCallback { get; }
-
         public IImageDecoder Decoder { get; }
+
+        private DecodeProgressCallback ProgressCallback { get; }
 
         #region Constructors
 
         public ImageDecoderEnumerator(
+            ImagingConfig imagingConfig,
             IImageDecoder decoder,
             DecodeProgressCallback progressCallback,
             ImageReadStream readStream,
-            bool leaveOpen)
+            bool leaveOpen) : base(imagingConfig)
         {
             Decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
             ProgressCallback = progressCallback;
@@ -29,6 +30,14 @@ namespace MonoGame.Imaging.Coding.Decoding
 
         public override bool MoveNext()
         {
+            if(ImageIndex == -1)
+            {
+                Decoder.DecodeFirst()
+            }
+            else
+            {
+
+            }
         }
 
         public override void Reset()

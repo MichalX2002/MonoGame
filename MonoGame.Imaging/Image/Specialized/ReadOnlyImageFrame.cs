@@ -11,7 +11,7 @@ namespace MonoGame.Imaging
         where TPixel : unmanaged, IPixel
     {
         /// <summary>
-        /// Gets the pixels assigned to this frame.
+        /// Gets the pixels assigned to C:\Projects\Repos\MonoGame\MonoGame.Imaging\Image\Specialized\ReadOnlyImageFrame.csthis frame.
         /// </summary>
         public IReadOnlyPixelBuffer<TPixel> Pixels { get; }
 

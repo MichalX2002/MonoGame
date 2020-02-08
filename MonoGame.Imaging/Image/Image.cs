@@ -14,10 +14,6 @@ namespace MonoGame.Imaging
     {
         public event DatalessEvent<Image> Disposing;
 
-        public abstract int ByteStride { get; }
-
-        public bool IsPixelContiguous => Width * PixelType.ElementSize == ByteStride;
-
         #region Properties
 
         /// <summary>
@@ -40,6 +36,10 @@ namespace MonoGame.Imaging
         /// </summary>
         public PixelTypeInfo PixelType { get; }
 
+        public abstract int ByteStride { get; }
+
+        public bool IsPixelContiguous => Width * PixelType.ElementSize == ByteStride;
+
         int IElementContainer.ElementSize => PixelType.ElementSize;
         int IElementContainer.Count => Width * Height;
 
@@ -49,8 +49,8 @@ namespace MonoGame.Imaging
         {
             CommonArgumentGuard.AssertAboveZero(width, nameof(width));
             CommonArgumentGuard.AssertAboveZero(height, nameof(height));
-            PixelType = pixelType ?? throw new ArgumentNullException(nameof(pixelType));
 
+            PixelType = pixelType ?? throw new ArgumentNullException(nameof(pixelType));
             Width = width;
             Height = height;
         }
@@ -87,7 +87,6 @@ namespace MonoGame.Imaging
             if (!IsDisposed)
             {
                 Disposing?.Invoke(this);
-
                 IsDisposed = true;
             }
         }

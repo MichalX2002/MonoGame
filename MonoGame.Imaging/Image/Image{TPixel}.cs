@@ -53,7 +53,6 @@ namespace MonoGame.Imaging
             base.Dispose(disposing);
 
             Buffer.Dispose();
-            Buffer = default;
         }
     }
 }

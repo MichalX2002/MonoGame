@@ -144,7 +144,9 @@ namespace MonoGame.Imaging
             return false;
         }
 
-        public static ImageInfo Identify(ImagingConfig config, ImageReadStream stream)
+        public static ImageInfo Identify(
+            ImagingConfig config,
+            ImageReadStream stream)
         {
             var format = DetectFormat(config, stream);
             var infoDetector = GetInfoDetector(format);
@@ -155,12 +157,14 @@ namespace MonoGame.Imaging
         }
 
         public static ImageInfo Identify(
-            ImagingConfig config, Stream stream, CancellationToken cancellation)
+            ImagingConfig config,
+            Stream stream, 
+            CancellationToken? cancellationToken = null)
         {
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
 
-            using (var readStream = config.CreateReadStream(stream, cancellation))
+            using (var readStream = config.CreateReadStream(stream, cancellationToken))
                 return Identify(config, readStream);
         }
 
