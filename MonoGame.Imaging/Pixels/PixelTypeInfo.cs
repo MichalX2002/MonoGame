@@ -6,7 +6,7 @@ using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Pixels
 {
-    public class PixelTypeInfo : IEquatable<PixelTypeInfo>
+    public class PixelTypeInfo
     {
         private static ConcurrentDictionary<Type, PixelTypeInfo> InfoCache { get; } =
             new ConcurrentDictionary<Type, PixelTypeInfo>();
@@ -46,10 +46,10 @@ namespace MonoGame.Imaging.Pixels
             return info;
         }
 
-        public bool Equals(PixelTypeInfo other)
+        public static PixelTypeInfo Get<TPixel>()
+            where TPixel : unmanaged, IPixel
         {
-            return Type == other.Type
-                && BitDepth == other.BitDepth;
+            return Get(typeof(TPixel));
         }
     }
 }

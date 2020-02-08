@@ -7,53 +7,42 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Framework.PackedVector;
+using MonoGame.Imaging.Utilities;
 using StbSharp;
 
 namespace MonoGame.Imaging.Pixels
 {
-    public readonly struct BufferPixelProvider : IPixelProvider
+    public readonly struct RowsPixelProvider : IPixelProvider
     {
-        private static MethodInfo _spanCastMethod;
-        private static ConcurrentDictionary<Type, Transform32Delegate> _transform32Cache;
+        private static ConcurrentDictionary<PixelTypeInfo, Transform32Delegate> _transform32DelegateCache =
+            new ConcurrentDictionary<PixelTypeInfo, Transform32Delegate>(PixelTypeInfoEqualityComparer.Instance);
 
         private delegate bool Transform32Delegate(
             ReadOnlySpan<byte> srcRow,
-            int column,
             int components,
             int toRead,
             Span<byte> destination,
             ref int bufferOffset,
             ref PixelConverter32 pixelConverter);
 
-        private readonly IReadOnlyPixelBuffer _pixels;
+        private readonly IReadOnlyPixelRows _pixels;
         private readonly Transform32Delegate _transform32;
+        private readonly byte[] _rowBuffer; // TODO: replace with smarter buffer
 
         public int Components { get; }
         public int Width => _pixels.Width;
         public int Height => _pixels.Height;
 
-        static BufferPixelProvider()
-        {
-            _spanCastMethod = typeof(MemoryMarshal).GetMember(
-                nameof(MemoryMarshal.Cast),
-                MemberTypes.Method,
-                BindingFlags.Public | BindingFlags.Static)
-                .Cast<MethodInfo>()
-                .First(x => x.ReturnType.GetGenericTypeDefinition() == typeof(ReadOnlySpan<>));
-
-            _transform32Cache = new ConcurrentDictionary<Type, Transform32Delegate>();
-        }
-
-        public BufferPixelProvider(IReadOnlyPixelBuffer pixels, int components)
+        public RowsPixelProvider(IReadOnlyPixelRows pixels, int components)
         {
             _pixels = pixels;
             Components = components;
+            _rowBuffer = new byte[pixels.Width * pixels.ElementSize];
 
-            var pixelType = pixels.PixelType.Type;
-            if (!_transform32Cache.TryGetValue(pixelType, out _transform32))
+            if (!_transform32DelegateCache.TryGetValue(pixels.PixelType, out _transform32))
             {
-                _transform32 = CreateTransform<Transform32Delegate>(nameof(Transform32), pixelType);
-                _transform32Cache.TryAdd(pixelType, _transform32);
+                _transform32 = CreateTransform<Transform32Delegate>(nameof(Transform32), pixels.PixelType);
+                _transform32DelegateCache.TryAdd(pixels.PixelType, _transform32);
             }
         }
 
@@ -75,10 +64,11 @@ namespace MonoGame.Imaging.Pixels
             {
                 int lastByteOffset = bufferOffset;
                 int count = Math.Min(pixelsLeft, _pixels.Width - column);
-                var srcByteRow = _pixels.GetPixelByteRowSpan(row);
+
+                _pixels.GetPixelByteRow(column, row, _rowBuffer);
 
                 if (_transform32.Invoke(
-                    srcByteRow, column, Components, count, destination,
+                    _rowBuffer, Components, count, destination,
                     ref bufferOffset, ref converter32))
                     goto ReadEnd;
 
@@ -103,7 +93,6 @@ namespace MonoGame.Imaging.Pixels
 
         private static unsafe bool Transform32<TPixel>(
             ReadOnlySpan<TPixel> srcRow,
-            int column,
             int components,
             int count,
             Span<byte> destination,
@@ -119,7 +108,7 @@ namespace MonoGame.Imaging.Pixels
                 case 1:
                     for (; i < count; i++, bufferOffset++)
                     {
-                        pixelConverter.Gray.FromScaledVector4(srcRow[i + column].ToScaledVector4());
+                        pixelConverter.Gray.FromScaledVector4(srcRow[i].ToScaledVector4());
                         destination[bufferOffset] = pixelConverter.Raw[0];
                     }
                     return true;
@@ -130,21 +119,21 @@ namespace MonoGame.Imaging.Pixels
                 case 2:
                     for (; i < count - 1; i++, bufferOffset += sizeof(GrayAlpha88))
                     {
-                        pixelConverter.GrayAlpha.FromScaledVector4(srcRow[i + column].ToScaledVector4());
+                        pixelConverter.GrayAlpha.FromScaledVector4(srcRow[i].ToScaledVector4());
                         for (int j = 0; j < sizeof(GrayAlpha88); j++)
                             destination[j + bufferOffset] = pixelConverter.Raw[j];
                     }
-                    pixelConverter.GrayAlpha.FromScaledVector4(srcRow[i + 1 + column].ToScaledVector4());
+                    pixelConverter.GrayAlpha.FromScaledVector4(srcRow[i + 1].ToScaledVector4());
                     return false;
 
                 case 3:
                     for (; i < count - 1; i++, bufferOffset += sizeof(Rgb24))
                     {
-                        pixelConverter.Rgb.FromScaledVector4(srcRow[i + column].ToScaledVector4());
+                        pixelConverter.Rgb.FromScaledVector4(srcRow[i].ToScaledVector4());
                         for (int j = 0; j < sizeof(Rgb24); j++)
                             destination[j + bufferOffset] = pixelConverter.Raw[j];
                     }
-                    pixelConverter.Rgb.FromScaledVector4(srcRow[i + 1 + column].ToScaledVector4());
+                    pixelConverter.Rgb.FromScaledVector4(srcRow[i + 1].ToScaledVector4());
                     return false;
 
                 case 4:
@@ -154,8 +143,7 @@ namespace MonoGame.Imaging.Pixels
                         fixed (byte* dstPtr = &MemoryMarshal.GetReference(destination))
                         {
                             int bytes = count * sizeof(TPixel);
-                            int byteOffsetX = column * sizeof(TPixel);
-                            Buffer.MemoryCopy(srcPtr + byteOffsetX, dstPtr + bufferOffset, bytes, bytes);
+                            Buffer.MemoryCopy(srcPtr, dstPtr + bufferOffset, bytes, bytes);
                             bufferOffset += bytes;
                         }
                         return true;
@@ -164,11 +152,11 @@ namespace MonoGame.Imaging.Pixels
                     {
                         for (; i < count - 1; i++, bufferOffset += sizeof(Color))
                         {
-                            srcRow[i + column].ToColor(ref pixelConverter.Rgba);
+                            srcRow[i].ToColor(ref pixelConverter.Rgba);
                             for (int j = 0; j < sizeof(Color); j++)
                                 destination[j + bufferOffset] = pixelConverter.Raw[j];
                         }
-                        srcRow[i + 1 + column].ToColor(ref pixelConverter.Rgba);
+                        srcRow[i + 1].ToColor(ref pixelConverter.Rgba);
                     }
                     return false;
             }
@@ -205,10 +193,10 @@ namespace MonoGame.Imaging.Pixels
         }
 
         private static TDelegate CreateTransform<TDelegate>(
-            string transformMethodName, Type pixelType)
+            string transformMethodName, PixelTypeInfo pixelType)
             where TDelegate : Delegate
         {
-            var transformMethod = typeof(BufferPixelProvider).GetMethod(
+            var transformMethod = typeof(RowsPixelProvider).GetMethod(
                 transformMethodName, BindingFlags.NonPublic | BindingFlags.Static);
 
             var methodParams = transformMethod.GetParameters();
@@ -217,14 +205,15 @@ namespace MonoGame.Imaging.Pixels
             var lambdaParams = new List<ParameterExpression>(
                 delegateParams.Select(x => Expression.Parameter(x.ParameterType)));
 
-            var genericSpanCastMethod = _spanCastMethod.MakeGenericMethod(typeof(byte), pixelType);
+            var spanCastMethod = ImagingReflectionHelper.SpanCastMethod;
+            var genericSpanCastMethod = spanCastMethod.MakeGenericMethod(typeof(byte), pixelType.Type);
             var pixelSpan = Expression.Call(genericSpanCastMethod, lambdaParams[0]);
 
             var callParams = new List<Expression>();
             callParams.Add(pixelSpan);
             callParams.AddRange(lambdaParams.Skip(1));
 
-            var genericTransformMethod = transformMethod.MakeGenericMethod(pixelType);
+            var genericTransformMethod = transformMethod.MakeGenericMethod(pixelType.Type);
             var call = Expression.Call(genericTransformMethod, callParams);
             var lambda = Expression.Lambda<TDelegate>(call, lambdaParams);
             return lambda.Compile();

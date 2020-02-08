@@ -20,7 +20,7 @@ namespace MonoGame.Imaging
         {
             if (row < 0 || row >= Height)
                 throw new ArgumentOutOfRangeException(nameof(row), "The requested row is out of bounds.");
-            return Buffer.ByteSpan.Slice(row * Buffer.ByteStride, PixelType.BitDepth * Width);
+            return Buffer.ByteSpan.Slice(row * Buffer.ByteStride, Width * PixelType.ElementSize);
         }
 
         public Span<TPixel> GetPixelSpan()

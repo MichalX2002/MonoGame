@@ -4,12 +4,11 @@
 
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
 using MonoGame.Imaging;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
 using System.Linq;
+using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -244,7 +243,7 @@ namespace MonoGame.Framework.Graphics
             if (graphicsDevice == null)
                 throw new ArgumentNullException(nameof(graphicsDevice));
 
-            using (var image = LoadImage(stream, imagingConfig))
+            using (var image = Image.Load(imagingConfig, stream))
                 return FromImage(image, graphicsDevice, mipmap, format);
         }
 
@@ -378,7 +377,7 @@ namespace MonoGame.Framework.Graphics
 
             var pixelFormat = GetPixelSaveFormat(Format);
             var data = pixelFormat.GetData(this, checkedRect, level, arraySlice);
-            var image = Image.LoadMemory(data, checkedRect.Size, pixelFormat.PixelType);
+            var image = Image.LoadPixelData(pixelFormat.PixelType, data.Span, checkedRect.Size);
             return image;
         }
 
@@ -398,8 +397,8 @@ namespace MonoGame.Framework.Graphics
             CheckRect(level, rectangle, out Rectangle checkedRect);
 
             using (var data = pixelSaveFormat.GetData(this, checkedRect, level, arraySlice))
-                return Image.LoadPixelData<x,y/*create reflection-based call*/>(
-                    data.Span, checkedRect.Width, checkedRect.Height);
+                return Image.LoadPixelData<TPixel>(
+                    pixelSaveFormat.PixelType, data.Span, checkedRect.Size);
         }
 
         #endregion

@@ -17,59 +17,30 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Coding\Decoding\Stb\**" />
-    <Compile Remove="Coding\Encoding\Png\**" />
-    <Compile Remove="Coding\Encoding\Stb\**" />
-    <Compile Remove="Image\Specialized\**" />
-    <Compile Remove="Pixels\Rows\**" />
-    <Compile Remove="Pixels\View\**" />
-    <Compile Remove="Processing\Extensions\**" />
-    <Compile Remove="old\**" />
-    <EmbeddedResource Remove="Coding\Decoding\Stb\**" />
-    <EmbeddedResource Remove="Coding\Encoding\Png\**" />
-    <EmbeddedResource Remove="Coding\Encoding\Stb\**" />
-    <EmbeddedResource Remove="Image\Specialized\**" />
-    <EmbeddedResource Remove="Pixels\Rows\**" />
-    <EmbeddedResource Remove="Pixels\View\**" />
-    <EmbeddedResource Remove="Processing\Extensions\**" />
-    <EmbeddedResource Remove="old\**" />
-    <None Remove="Coding\Decoding\Stb\**" />
-    <None Remove="Coding\Encoding\Png\**" />
-    <None Remove="Coding\Encoding\Stb\**" />
-    <None Remove="Image\Specialized\**" />
-    <None Remove="Pixels\Rows\**" />
-    <None Remove="Pixels\View\**" />
-    <None Remove="Processing\Extensions\**" />
-    <None Remove="old\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Remove="Coding\Encoding\EncoderExtensions.cs" />
     <Compile Remove="ColorEncoding.cs" />
-    <Compile Remove="ImageReader.cs" />
     <Compile Remove="Utilities\BufferPixelProvider.Expressions.cs" />
     <Compile Remove="Utilities\ImageWriter.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\**\*.cs">
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\**\*.cs" Exclude="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\obj\**">
       <Link>StbSharp\ImageWrite\%(FileName)%(Extension)</Link>
     </Compile>
 
-    <Compile Include="..\ThirdParty\StbSharp\Image\src\StbImageSharp\**\*.cs">
+    <Compile Include="..\ThirdParty\StbSharp\Image\src\StbImageSharp\**\*.cs" Exclude="..\ThirdParty\StbSharp\Image\src\StbImageSharp\obj\**">
       <Link>StbSharp\Image\%(FileName)%(Extension)</Link>
     </Compile>
 
-    <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\**\*.cs">
+    <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\**\*.cs" Exclude="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\obj\**">
       <Link>StbSharp\Shared\%(FileName)%(Extension)</Link>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\obj\Debug\netstandard2.0\StbImageWriteSharp.AssemblyInfo.cs" />
-    <Compile Remove="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\obj\Release\netstandard2.0\StbImageWriteSharp.AssemblyInfo.cs" />
-    <Compile Remove="..\ThirdParty\StbSharp\Image\src\StbImageSharp\obj\Debug\netstandard2.0\StbImageSharp.AssemblyInfo.cs" />
-    <Compile Remove="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\obj\Debug\netstandard2.0\StbSharp.Shared.AssemblyInfo.cs" />
+    <Compile Remove="Image\Specialized\**" />
+    <EmbeddedResource Remove="Image\Specialized\**" />
+    <None Remove="Image\Specialized\**" />
   </ItemGroup>
 
   <ItemGroup>

@@ -69,13 +69,12 @@ namespace MonoGame.Imaging.Tests
 
             watch.Reset();
 
-            bool OnWriteProgress(
+            void OnWriteProgress(
                 ImageEncoderState encoderState,
                 double percentage,
                 Rectangle? rectangle)
             {
                 //Console.WriteLine("Write: " + Math.Round(progress * 100, 2) + "%");
-                return true;
             }
 
             var result = new MemoryStream(1024 * 1024 * 85);
@@ -86,7 +85,7 @@ namespace MonoGame.Imaging.Tests
                 if (writeRepeats == 1 || i != 0)
                     watch.Start();
 
-                image.Save(result, ImageFormat.Png, null, OnWriteProgress);
+                image.Save(result, ImageFormat.Png, null, null, OnWriteProgress);
                 watch.Stop();
             }
             image.Dispose();

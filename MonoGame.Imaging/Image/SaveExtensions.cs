@@ -12,7 +12,7 @@ namespace MonoGame.Imaging
     public static partial class SaveExtensions
     {
         public static void Save(
-            this IEnumerable<IReadOnlyPixelBuffer> images,
+            this IEnumerable<IReadOnlyPixelRows> images,
             ImagingConfig imagingConfig,
             Stream output, 
             ImageFormat format,
@@ -35,7 +35,7 @@ namespace MonoGame.Imaging
         }
 
         public static void Save(
-            this IEnumerable<IReadOnlyPixelBuffer> images,
+            this IEnumerable<IReadOnlyPixelRows> images,
             Stream output,
             ImageFormat format,
             EncoderOptions encoderOptions = null,
@@ -48,7 +48,7 @@ namespace MonoGame.Imaging
         }
 
         public static void Save(
-            this IEnumerable<IReadOnlyPixelBuffer> images,
+            this IEnumerable<IReadOnlyPixelRows> images,
             ImagingConfig imagingConfig,
             string filePath, 
             ImageFormat format = null, 
@@ -66,7 +66,7 @@ namespace MonoGame.Imaging
         }
 
         public static void Save(
-            this IEnumerable<IReadOnlyPixelBuffer> images,
+            this IEnumerable<IReadOnlyPixelRows> images,
             string filePath, 
             ImageFormat format = null,
             EncoderOptions encoderOptions = null,
@@ -78,10 +78,10 @@ namespace MonoGame.Imaging
                 encoderOptions, cancellationToken, onProgress);
         }
 
-        #region Save(Buffer, Stream)
+        #region Save(Stream)
 
         public static void Save(
-            this IReadOnlyPixelBuffer image,
+            this IReadOnlyPixelRows image,
             ImagingConfig imagingConfig, 
             Stream output, 
             ImageFormat format,
@@ -101,7 +101,7 @@ namespace MonoGame.Imaging
         }
 
         public static void Save(
-            this IReadOnlyPixelBuffer image,
+            this IReadOnlyPixelRows image,
             Stream output,
             ImageFormat format,
             EncoderOptions encoderOptions = null,
@@ -115,10 +115,10 @@ namespace MonoGame.Imaging
 
         #endregion
 
-        #region Save(Buffer, FilePath)
+        #region Save(FilePath)
 
         public static void Save(
-            this IReadOnlyPixelBuffer image,
+            this IReadOnlyPixelRows image,
             ImagingConfig imagingConfig,
             string filePath, 
             ImageFormat format = null, 
@@ -137,7 +137,7 @@ namespace MonoGame.Imaging
         }
 
         public static void Save(
-            this IReadOnlyPixelBuffer image,
+            this IReadOnlyPixelRows image,
             string filePath,
             ImageFormat format = null,
             EncoderOptions encoderOptions = null,
@@ -146,18 +146,6 @@ namespace MonoGame.Imaging
         {
             Save(
                 image, ImagingConfig.Default, filePath, format, 
-                encoderOptions, cancellationToken, onProgress);
-        }
-
-        public static void Save(
-            this IReadOnlyPixelBuffer image,
-            string filePath,
-            EncoderOptions encoderOptions = null,
-            CancellationToken? cancellationToken = null,
-            EncodeProgressCallback onProgress = null)
-        {
-            Save(
-                image, ImagingConfig.Default, filePath, format: null, 
                 encoderOptions, cancellationToken, onProgress);
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
@@ -12,6 +13,11 @@ namespace MonoGame.Imaging
     /// </summary>
     public abstract partial class Image : IPixelMemory
     {
+        private delegate Image CreateDelegate(int width, int height);
+
+        private static ConcurrentDictionary<PixelTypeInfo, CreateDelegate> _createDelegateCache =
+            new ConcurrentDictionary<PixelTypeInfo, CreateDelegate>(PixelTypeInfoEqualityComparer.Instance);
+
         public event DatalessEvent<Image> Disposing;
 
         #region Properties
@@ -61,6 +67,17 @@ namespace MonoGame.Imaging
         /// </summary>
         public static Image Create(int width, int height, PixelTypeInfo pixelType)
         {
+            if (pixelType == null)
+                throw new ArgumentNullException(nameof(PixelTypeInfo));
+
+            if (!_createDelegateCache.TryGetValue(pixelType, out var createDelegate))
+            {
+                var imageType = typeof(Image<>).MakeGenericType(pixelType.Type);
+                var createMethod = imageType.GetMethod(nameof(Image.Create), new[] { typeof(int), typeof(int) });
+                createDelegate = createMethod.CreateDelegate<CreateDelegate>();
+                _createDelegateCache.TryAdd(pixelType, createDelegate);
+            }
+            return createDelegate.Invoke(width, height);
         }
 
         /// <summary>
@@ -68,6 +85,7 @@ namespace MonoGame.Imaging
         /// </summary>
         public static Image Create(Size size, PixelTypeInfo pixelType)
         {
+            return Create(size.Width, size.Height, pixelType);
         }
 
         #endregion

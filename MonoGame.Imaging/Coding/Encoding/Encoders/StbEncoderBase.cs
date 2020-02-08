@@ -44,7 +44,7 @@ namespace MonoGame.Imaging.Coding.Encoding
                 try
                 {
                     int components = 4; // TODO: change this so it's dynamic/controlled
-                    var provider = new BufferPixelProvider(image, components);
+                    var provider = new RowsPixelProvider(image, components);
                     var state = new ImageEncoderState(this, imagingConfig, stream, encoderOptions.LeaveStreamOpen);
                     var progressCallback = onProgress == null ? (WriteProgressCallback)null : (p) =>
                         onProgress.Invoke(state, p, null);

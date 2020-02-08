@@ -17,10 +17,8 @@ namespace MonoGame.Framework.Graphics
         public class PixelSaveFormat
         {
             private delegate IMemory GetDataDelegate(Texture2D texture, Rectangle rect, int level, int arraySlice);
-            private delegate Image ToImageDelegate(IMemory texture, int width, int height, bool leaveOpen);
-
+            
             private GetDataDelegate _getDataDelegate;
-            private ToImageDelegate _toImageDelegate;
 
             public SurfaceFormat Format { get; }
             public PixelTypeInfo PixelType { get; }
@@ -45,17 +43,6 @@ namespace MonoGame.Framework.Graphics
                 }
 
                 _getDataDelegate = GetDelegate<GetDataDelegate>(typeof(Texture2D), nameof(Texture2D.GetData));
-                _toImageDelegate = GetDelegate<ToImageDelegate>(typeof(Image), nameof(Image.WrapMemory));
-
-                //var parameters = new[]
-                //{
-                //    Expression.Parameter(typeof(Texture2D)),
-                //    Expression.Parameter(typeof(int)),
-                //    Expression.Parameter(typeof(Rectangle))
-                //};
-                //var call = Expression.Call(genericMethod, parameters);
-                //var lambda = Expression.Lambda<GetDataDelegate>(call, parameters);
-                //return lambda.Compile();
             }
 
             public IMemory GetData(Texture2D texture, Rectangle rect, int level, int arraySlice)

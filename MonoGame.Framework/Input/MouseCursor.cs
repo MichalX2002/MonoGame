@@ -4,7 +4,6 @@
 
 using System;
 using MonoGame.Framework.Graphics;
-using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Processing;
@@ -96,31 +95,19 @@ namespace MonoGame.Framework.Input
         public static MouseCursor FromTexture2D(
             Texture2D texture, Point origin, Rectangle? sourceRectangle = null)
         {
-            if (texture.Format != SurfaceFormat.Rgba32 && texture.Format != SurfaceFormat.Rgba32SRgb)
-                throw new ArgumentException(
-                    $"Only {SurfaceFormat.Rgba32} and {SurfaceFormat.Rgba32SRgb} textures are accepted for mouse cursors.",
-                    nameof(texture));
-
-            var rect = sourceRectangle ?? texture.Bounds;
-
-            using (var image = Image<Color>.Create(rect.Size))
-            {
-                texture.GetData(image.GetPixelSpan(), rect);
+            using (var image = texture.ToImage<Color>(sourceRectangle))
                 return FromPixels(image, origin);
-            }
         }
 
         /// <summary>
         /// Creates a mouse cursor from the specified pixels.
         /// </summary>
-        /// <typeparam name="TPixel">The pixel type of the buffer.</typeparam>
         /// <param name="pixels">Pixels to use as the cursor image.</param>
         /// <param name="origin">A point in the pixels that is used as the cursor position.</param>
         /// <param name="sourceRectangle">Optional part of the image to use as the cursor.</param>
         [CLSCompliant(false)]
-        public static unsafe MouseCursor FromPixels<TPixel>(
-            IReadOnlyPixelRows<TPixel> pixels, Point origin, Rectangle? sourceRectangle = null)
-            where TPixel : unmanaged, IPixel
+        public static unsafe MouseCursor FromPixels(
+            IReadOnlyPixelRows pixels, Point origin, Rectangle? sourceRectangle = null)
         {
             Rectangle rect = sourceRectangle ?? pixels.GetBounds();
             if (!pixels.GetBounds().Contains(rect))
@@ -142,7 +129,7 @@ namespace MonoGame.Framework.Input
                 }
                 else
                 {
-                    pixelBuffer = Image.LoadPixels<TPixel, Color>(pixels.Project(x => x.Crop(rect)));
+                    pixelBuffer = Image.LoadPixels<Color>(pixels.Project(x => x.Crop(rect)));
                     pixelSpan = pixelBuffer.GetPixelSpan();
                     stride = pixelBuffer.ByteStride;
                 }

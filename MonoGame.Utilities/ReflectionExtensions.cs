@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace MonoGame.Framework
 {
-    public static class ReflectionUtils
+    public static class ReflectionExtensions
     {
         public static ParameterInfo[] GetDelegateParameters(this Type delegateType)
         {
@@ -21,6 +21,18 @@ namespace MonoGame.Framework
         {
             var type = @delegate.GetType();
             return GetDelegateParameters(type);
+        }
+
+        public static TDelegate CreateDelegate<TDelegate>(this MethodInfo method)
+            where TDelegate : Delegate
+        {
+            return (TDelegate)method.CreateDelegate(typeof(TDelegate));
+        }
+
+        public static TDelegate CreateDelegate<TDelegate>(this MethodInfo method, object target)
+            where TDelegate : Delegate
+        {
+            return (TDelegate)method.CreateDelegate(typeof(TDelegate), target);
         }
     }
 }

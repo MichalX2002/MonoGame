@@ -4,6 +4,7 @@ using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
 using MonoGame.Framework.Media;
 using MonoGame.Imaging;
+using MonoGame.Imaging.Coding.Encoding;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Processing;
 using System;
@@ -135,13 +136,16 @@ namespace MonoGame.Testing
                     
                     Task.Run(() =>
                     {
-                        void OnProgress(int frameIndex, IReadOnlyPixelBuffer<Color> frames, double percentage)
+                        void OnProgress(
+                            ImageEncoderState encoderState,
+                            double percentage,
+                            Rectangle? rectangle)
                         {
                             Console.WriteLine("PNG write progress: " + Math.Round(percentage * 100f, 1) + "%");
                         }
 
                         frameIndex++;
-                        image.Save("frames/yo mom " + frameIndex + ".png", null, null, OnProgress);
+                        image.Save("frames/yo mom " + frameIndex + ".png", null, null, null, OnProgress);
                         image.Dispose();
                     });
                 }

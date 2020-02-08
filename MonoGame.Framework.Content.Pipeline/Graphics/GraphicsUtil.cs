@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Runtime.InteropServices;
 using MonoGame.Framework.Graphics;
 using MonoGame.Imaging;
 using MonoGame.Imaging.Processing;
@@ -25,7 +24,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 src = v4;
             }
 
-            using (var image = Image.LoadPixelData<RgbaVector>(src.GetPixelData(), src.Width, src.Height))
+            using (var image = Image.LoadPixelData<RgbaVector>(src.GetPixelData(), new Size(src.Width, src.Height)))
             using (var resized = image.Process(x => x.Resize(newWidth, newHeight)))
             {
                 var result = new PixelBitmapContent<RgbaVector>(newWidth, newHeight);
