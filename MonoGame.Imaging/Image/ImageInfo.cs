@@ -8,6 +8,7 @@ namespace MonoGame.Imaging
         public int BitDepth { get; }
         public ImageFormat Format { get; }
 
+        // TODO: add color bitmasks
         // TODO: add meta data (that can be read AND written)
 
         public ImageInfo(int width, int height, int bitDepth, ImageFormat format)

@@ -1,5 +1,4 @@
 ﻿using MonoGame.Framework;
-using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
@@ -20,34 +19,30 @@ namespace MonoGame.Imaging.Coding.Decoding
         /// Decodes the first image of a stream and returns a
         /// state that can be used to decode following images.
         /// </summary>
-        /// <typeparam name="TPixel">The pixel type that the image will be decoded into.</typeparam>
-        /// <param name="config">The imaging configuration.</param>
+        /// <param name="imagingConfig">The imaging configuration.</param>
         /// <param name="stream">The stream to read from.</param>
         /// <param name="image">The decoded image.</param>
         /// <param name="onProgress">Optional delegate for reporting decode progress.</param>
         /// <returns>The state used to continue decoding of subsequent images.</returns>
-        ImageDecoderState DecodeFirst<TPixel>(
-            ImagingConfig config,
+        ImageDecoderState DecodeFirst(
+            ImagingConfig imagingConfig,
             ImageReadStream stream,
-            out Image<TPixel> image,
-            DecodeProgressCallback onProgress = null)
-            where TPixel : unmanaged, IPixel;
+            out Image image,
+            DecodeProgressCallback onProgress = null);
 
         /// <summary>
         /// Decodes the next image of a stream using the state from the first decode call. 
         /// </summary>
-        /// <typeparam name="TPixel">The pixel type that the image will be decoded into.</typeparam>
-        /// <param name="config">The imaging configuration.</param>
+        /// <param name="imagingConfig">The imaging configuration.</param>
         /// <param name="decoderState">The state from the first decode call.</param>
         /// <param name="image">The decoded image.</param>
         /// <param name="onProgress">Optional delegate for reporting decode progress.</param>
         /// <returns>Whether an image was read.</returns>
-        bool DecodeNext<TPixel>(
-            ImagingConfig config,
+        bool DecodeNext(
+            ImagingConfig imagingConfig,
             ImageDecoderState decoderState,
-            out Image<TPixel> image,
-            DecodeProgressCallback onProgress = null)
-            where TPixel : unmanaged, IPixel;
+            out Image image,
+            DecodeProgressCallback onProgress = null);
 
         /// <summary>
         /// Finishes a decoding operation.
