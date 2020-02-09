@@ -19,7 +19,7 @@ namespace MonoGame.Imaging.Pixels
     /// <summary>
     /// Represents a read-only way to get pixel rows.
     /// </summary>
-    public interface IPixelRows<TPixel> : IReadOnlyPixelRows<TPixel>
+    public interface IPixelRows<TPixel> : IPixelRows, IReadOnlyPixelRows<TPixel>
         where TPixel : unmanaged, IPixel
     {
         /// <summary>

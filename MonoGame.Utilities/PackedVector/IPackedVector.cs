@@ -11,11 +11,19 @@ namespace MonoGame.Framework.PackedVector
     /// </summary>
     public interface IPackedVector
     {
+        VectorChannelInfo ChannelInfo { get; }
+
         /// <summary>
-        /// Gets the size of the vector in bits 
-        /// (independent of the type's size). 
+        /// Sets the vector from a scaled <see cref="Vector4"/>.
+        /// The XYZW vector components correspond to RGBA. 
         /// </summary>
-        int BitDepth { get; }
+        void FromScaledVector4(Vector4 vector);
+
+        /// <summary>
+        /// Gets the vector as a scaled <see cref="Vector4"/>.
+        /// The XYZW vector components correspond to RGBA. 
+        /// </summary>
+        Vector4 ToScaledVector4();
 
         /// <summary>
         /// Sets the vector from a <see cref="Vector4"/>.

@@ -37,7 +37,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Throws if the <paramref name="value"/> is less or equal to zero.
         /// </summary>
-        public static void AssertAboveZero(long value, string paramName, bool inlineParamName = true)
+        public static void AssertGreaterThanZero(long value, string paramName, bool inlineParamName = true)
         {
             if (value <= 0)
             {

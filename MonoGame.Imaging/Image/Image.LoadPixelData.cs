@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using MonoGame.Framework;
 using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Pixels;
@@ -8,12 +7,6 @@ namespace MonoGame.Imaging
 {
     public partial class Image
     {
-        private delegate void LoadPixelDataDelegate(
-            ReadOnlySpan<byte> pixelData, Rectangle sourceRectangle, int? byteStride, Image destination);
-
-        private static ConcurrentDictionary<(PixelTypeInfo, PixelTypeInfo), LoadPixelDataDelegate> _loadPixelSpanDelegateCache =
-            new ConcurrentDictionary<(PixelTypeInfo, PixelTypeInfo), LoadPixelDataDelegate>();
-
         #region LoadPixelData(FromType, ToType, ReadOnlySpan<byte>)
 
         public static Image LoadPixelData(
@@ -23,12 +16,8 @@ namespace MonoGame.Imaging
             Rectangle sourceRectangle,
             int? byteStride = null)
         {
-            if (!_loadPixelSpanDelegateCache.TryGetValue((fromPixelType, toPixelType), out var loadDelegate))
-            {
-
-            }
-
-            var image = Create(sourceRectangle.Size, toPixelType);
+            var loadDelegate = GetLoadPixelsDelegate(fromPixelType, toPixelType);
+            var image = Create(toPixelType, sourceRectangle.Size);
             try
             {
                 loadDelegate.Invoke(pixelData, sourceRectangle, byteStride, image);

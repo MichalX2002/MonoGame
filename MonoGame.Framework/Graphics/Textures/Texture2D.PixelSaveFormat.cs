@@ -42,7 +42,7 @@ namespace MonoGame.Framework.Graphics
                     return (TDelegate)genericMethod.CreateDelegate(typeof(TDelegate));
                 }
 
-                _getDataDelegate = GetDelegate<GetDataDelegate>(typeof(Texture2D), nameof(Texture2D.GetData));
+                _getDataDelegate = GetDelegate<GetDataDelegate>(typeof(Texture2D), "GetData");
             }
 
             public IMemory GetData(Texture2D texture, Rectangle rect, int level, int arraySlice)

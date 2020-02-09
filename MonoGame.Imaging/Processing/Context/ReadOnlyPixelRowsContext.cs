@@ -3,26 +3,12 @@ using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging.Processing
 {
-    /// <summary>
-    /// Context containing an <see cref="ImagingConfig"/> and 
-    /// pixels in the form of <see cref="IReadOnlyPixelRows"/>.
-    /// </summary>
-    public class ReadOnlyPixelRowsContext : IReadOnlyPixelRows
+    public readonly struct ReadOnlyPixelRowsContext : IReadOnlyPixelRows, IImagingConfigProvider
     {
-        private IReadOnlyPixelRows _pixels;
+        public ImagingConfig ImagingConfig { get; }
+        public IReadOnlyPixelRows Pixels { get; }
 
-        public bool IsDisposed { get; private set; }
-        public ImagingConfig Config { get; }
-
-        public IReadOnlyPixelRows Pixels
-        {
-            get
-            {
-                if (IsDisposed)
-                    throw new ObjectDisposedException(GetType().FullName);
-                return _pixels;
-            }
-        }
+        public bool IsEmpty => Pixels == null;
 
         public int Count => Pixels.Count;
         public int ElementSize => Pixels.ElementSize;
@@ -31,10 +17,10 @@ namespace MonoGame.Imaging.Processing
         public int Height => Pixels.Height;
         public PixelTypeInfo PixelType => Pixels.PixelType;
 
-        public ReadOnlyPixelRowsContext(ImagingConfig config, IReadOnlyPixelRows pixels)
+        public ReadOnlyPixelRowsContext(ImagingConfig imagingConfig, IReadOnlyPixelRows pixels)
         {
-            Config = config ?? throw new ArgumentNullException(nameof(config));
-            _pixels = pixels ?? throw new ArgumentNullException(nameof(pixels));
+            ImagingConfig = imagingConfig ?? throw new ArgumentNullException(nameof(imagingConfig));
+            Pixels = pixels ?? throw new ArgumentNullException(nameof(pixels));
         }
 
         public void GetPixelByteRow(int x, int y, Span<byte> destination)
@@ -42,23 +28,8 @@ namespace MonoGame.Imaging.Processing
             Pixels.GetPixelByteRow(x, y, destination);
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!IsDisposed)
-            {
-                IsDisposed = true;
-            }
-        }
-
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~ReadOnlyPixelRowsContext()
-        {
-            Dispose(false);
         }
     }
 }

@@ -2,6 +2,7 @@
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
+using MonoGame.Imaging.Pixels;
 using StbSharp;
 using static StbSharp.StbImage;
 
@@ -61,31 +62,10 @@ namespace MonoGame.Imaging.Coding.Decoding
             return false;
         }
 
-        /// <summary>
-        /// Gets whether the given <see cref="IPixel"/> type can utilize 16-bit 
-        /// channels when converting from decoded data.
-        /// <para>
-        /// This is used to prevent waste of memory as Stb can 
-        /// decode channels as 8-bit or 16-bit based on the <paramref name="type"/>'s precision.
-        /// </para>
-        /// </summary>
-        public static bool CanUtilize16BitData(Type type)
-        {
-            return type == typeof(Short4) 
-                || type == typeof(NormalizedShort4) 
-                || type == typeof(Rgba1010102) 
-                || type == typeof(Rgb48)
-                || type == typeof(Rgba64)
-                || type == typeof(Vector2) 
-                || type == typeof(Vector4)
-                || type == typeof(RgbaVector);
-        }
-
-        private static ReadState CreateReadState<TPixel>(
+        private static ReadState CreateReadState(
             ImageDecoderState decoderState,
             BufferReadyCallback onBufferReady,
             DecodeProgressCallback onProgress)
-            where TPixel : unmanaged, IPixel
         {
             var progressCallback = onProgress == null
                 ? (ReadProgressCallback)null
@@ -100,10 +80,7 @@ namespace MonoGame.Imaging.Coding.Decoding
                     onProgress.Invoke(decoderState, percentage, rectangle);
                 };
 
-            return new ReadState(onBufferReady, progressCallback)
-            {
-                BitsPerChannel = CanUtilize16BitData(typeof(TPixel)) ? 16 : 8
-            };
+            return new ReadState(onBufferReady, progressCallback);
         }
 
         protected virtual unsafe Image<TPixel>.PixelBuffer ParseStbResult<TPixel>(
@@ -209,15 +186,14 @@ namespace MonoGame.Imaging.Coding.Decoding
 
         #region IImageDecoder
 
-        public unsafe ImageDecoderState DecodeFirst<TPixel>(
-            ImagingConfig imagingConfig, 
-            ImageReadStream stream, 
-            out Image<TPixel> image,
+        public unsafe ImageDecoderState DecodeFirst(
+            ImagingConfig imagingConfig,
+            ImageReadStream stream,
+            out Image image,
             DecodeProgressCallback onProgress = null)
-            where TPixel : unmanaged, IPixel
         {
             var decoderState = new ImageDecoderState(this, imagingConfig, stream, true);
-            var readState = CreateReadState<TPixel>(decoderState, null, onProgress);
+            var readState = CreateReadState(decoderState, null, onProgress);
             if (ReadFirst(imagingConfig, stream.Context, out void* result, ref readState))
             {
                 var parsedBuffer = ParseStbResult<TPixel>(imagingConfig, result, readState);
@@ -228,21 +204,22 @@ namespace MonoGame.Imaging.Coding.Decoding
                 return decoderState;
             }
             else
+            {
                 throw GetFailureException(stream.Context);
+            }
         }
 
-        public unsafe bool DecodeNext<TPixel>(
-            ImagingConfig config, 
-            ImageDecoderState decoderState, 
-            out Image<TPixel> image, 
-            DecodeProgressCallback onProgress = null) 
-            where TPixel : unmanaged, IPixel
+        public unsafe bool DecodeNext(
+            ImagingConfig config,
+            ImageDecoderState decoderState,
+            out Image image,
+            DecodeProgressCallback onProgress = null)
         {
             if (decoderState.ImageIndex < 0)
                 throw new InvalidOperationException(
                     $"The decoder state has an invalid {nameof(decoderState.ImageIndex)}.");
 
-            var readState = CreateReadState<TPixel>(decoderState, null, onProgress);
+            var readState = CreateReadState(decoderState, null, onProgress);
             if (ReadNext(config, decoderState.Stream.Context, out void* result, ref readState))
             {
                 var parsedBuffer = ParseStbResult<TPixel>(config, result, readState);
@@ -253,7 +230,9 @@ namespace MonoGame.Imaging.Coding.Decoding
                 return true;
             }
             else
+            {
                 throw GetFailureException(decoderState.Stream.Context);
+            }
         }
 
         public virtual void FinishState(ImageDecoderState decoderState)

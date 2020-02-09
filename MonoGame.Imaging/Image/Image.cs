@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
-using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging
@@ -13,11 +13,6 @@ namespace MonoGame.Imaging
     /// </summary>
     public abstract partial class Image : IPixelMemory
     {
-        private delegate Image CreateDelegate(int width, int height);
-
-        private static ConcurrentDictionary<PixelTypeInfo, CreateDelegate> _createDelegateCache =
-            new ConcurrentDictionary<PixelTypeInfo, CreateDelegate>(PixelTypeInfoEqualityComparer.Instance);
-
         public event DatalessEvent<Image> Disposing;
 
         #region Properties
@@ -51,11 +46,16 @@ namespace MonoGame.Imaging
 
         #endregion
 
-        protected Image(int width, int height, PixelTypeInfo pixelType)
+        static Image()
         {
-            ArgumentGuard.AssertAboveZero(width, nameof(width));
-            ArgumentGuard.AssertAboveZero(height, nameof(height));
+            SetupReflection();
+        }
+
+        protected Image(PixelTypeInfo pixelType, int width, int height)
+        {
             PixelType = pixelType ?? throw new ArgumentNullException(nameof(pixelType));
+            ArgumentGuard.AssertGreaterThanZero(width, nameof(width));
+            ArgumentGuard.AssertGreaterThanZero(height, nameof(height));
             Width = width;
             Height = height;
         }
@@ -65,7 +65,7 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Creates an empty image.
         /// </summary>
-        public static Image Create(int width, int height, PixelTypeInfo pixelType)
+        public static Image Create(PixelTypeInfo pixelType, int width, int height)
         {
             if (pixelType == null)
                 throw new ArgumentNullException(nameof(PixelTypeInfo));
@@ -73,7 +73,7 @@ namespace MonoGame.Imaging
             if (!_createDelegateCache.TryGetValue(pixelType, out var createDelegate))
             {
                 var imageType = typeof(Image<>).MakeGenericType(pixelType.Type);
-                var createMethod = imageType.GetMethod(nameof(Image.Create), new[] { typeof(int), typeof(int) });
+                var createMethod = imageType.GetMethod("Create", _createArgumentTypes);
                 createDelegate = createMethod.CreateDelegate<CreateDelegate>();
                 _createDelegateCache.TryAdd(pixelType, createDelegate);
             }
@@ -83,9 +83,9 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Creates an empty image.
         /// </summary>
-        public static Image Create(Size size, PixelTypeInfo pixelType)
+        public static Image Create(PixelTypeInfo pixelType, Size size)
         {
-            return Create(size.Width, size.Height, pixelType);
+            return Create(pixelType, size.Width, size.Height);
         }
 
         #endregion

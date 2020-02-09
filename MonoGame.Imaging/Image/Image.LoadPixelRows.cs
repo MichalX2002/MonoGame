@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Pixels;
@@ -8,70 +8,84 @@ namespace MonoGame.Imaging
 {
     public partial class Image
     {
-        private delegate void LoadPixelRowsDelegate(
-            IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image destination);
-
-        private static ConcurrentDictionary<(Type, Type), LoadPixelRowsDelegate> _loadPixelRowsDelegateCache =
-            new ConcurrentDictionary<(Type, Type), LoadPixelRowsDelegate>();
-
-        public static Image LoadPixels(
-            PixelTypeInfo imageType, IReadOnlyPixelRows pixels, Rectangle sourceRectangle)
+        public static void LoadPixels<TPixelFrom, TPixelTo>(
+            IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image<TPixelTo> destination)
+            where TPixelFrom : unmanaged, IPixel
+            where TPixelTo : unmanaged, IPixel
         {
-            ImagingArgumentGuard.AssertNonEmptyRectangle(sourceRectangle, nameof(sourceRectangle));
-            var image = Create(sourceRectangle.Size, imageType);
+            // TODO: make stack-allocated buffer
+            var rowBuffer = new TPixelFrom[destination.Width];
+            var rowBufferBytes = MemoryMarshal.AsBytes(rowBuffer.AsSpan());
 
+            for (int y = 0; y < sourceRectangle.Height; y++)
+            {
+                pixels.GetPixelByteRow(sourceRectangle.X, sourceRectangle.Y + y, rowBufferBytes);
+
+                var dstRow = destination.GetPixelRowSpan(y);
+                for (int x = 0; x < sourceRectangle.Width; x++)
+                    dstRow[x].FromScaledVector4(rowBuffer[x].ToScaledVector4());
+            }
         }
 
-        private static void LoadPixels(
-            PixelTypeInfo imageType, IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image destination)
+        public static void LoadPixels(
+            IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image destination)
         {
+            var loadDelegate = GetLoadPixelRowsDelegate(pixels.PixelType, destination.PixelType);
+            loadDelegate.Invoke(pixels, sourceRectangle, destination);
+        }
+
+        public static Image LoadPixels(
+            PixelTypeInfo resultType, IReadOnlyPixelRows pixels, Rectangle? sourceRectangle = null)
+        {
+            if (pixels == null) throw new ArgumentNullException(nameof(pixels));
+            var rect = sourceRectangle ?? pixels.GetBounds();
+            ImagingArgumentGuard.AssertNonEmptyRectangle(rect, nameof(sourceRectangle));
+
+            var image = Create(resultType, rect.Size);
+            try
+            {
+                LoadPixels(pixels, rect, image);
+            }
+            catch
+            {
+                image.Dispose();
+                throw;
+            }
+            return image;
         }
 
         public static Image<TPixel> LoadPixels<TPixel>(
             IReadOnlyPixelRows pixels, Rectangle? sourceRectangle = null)
             where TPixel : unmanaged, IPixel
         {
-            // TODO: test optimization: replacing Span<>.CopyTo with possibly faster memcpy
+            // TODO: benchmark; replace Span<>.CopyTo with possibly faster memcpy
 
             if (pixels == null) throw new ArgumentEmptyException(nameof(pixels));
+            ImagingArgumentGuard.AssertNonEmptyRectangle(sourceRectangle, nameof(sourceRectangle));
             var rect = sourceRectangle ?? pixels.GetBounds();
-            ImagingArgumentGuard.AssertNonEmptyRectangle(rect, nameof(rect));
 
             var dstImage = new Image<TPixel>(rect.Width, rect.Height);
-            if (pixels is IReadOnlyPixelMemory<TPixel> typeEqualMemory)
+
+            if (pixels.PixelType.Type == typeof(TPixel) &&
+                pixels is IReadOnlyPixelMemory typeEqualMemory &&
+                typeEqualMemory.IsPixelContiguous &&
+                rect.Position == Point.Zero &&
+                rect.Width == pixels.Width &&
+                rect.Height == pixels.Height)
             {
-                if (typeEqualMemory.IsPixelContiguous &&
-                    rect.Position == Point.Zero &&
-                    rect.Width == pixels.Width &&
-                    rect.Height == pixels.Height)
-                {
-                    typeEqualMemory.GetPixelSpan().CopyTo(dstImage.GetPixelSpan());
-                }
-                else
-                {
-                    for (int y = 0; y < rect.Height; y++)
-                        typeEqualMemory.GetPixelRow(
-                            rect.X, rect.Y + y, dstImage.GetPixelRowSpan(y));
-                }
+                typeEqualMemory.GetPixelByteSpan().CopyTo(dstImage.GetPixelByteSpan());
             }
-            else if (pixels is IReadOnlyPixelBuffer<TPixel> typeEqualBuffer)
+            else if (
+                pixels.PixelType.Type == typeof(TPixel) &&
+                pixels is IReadOnlyPixelBuffer typeEqualBuffer)
             {
                 for (int y = 0; y < rect.Height; y++)
-                    typeEqualBuffer.GetPixelRow(
-                        rect.X, rect.Y + y, dstImage.GetPixelRowSpan(y));
+                    typeEqualBuffer.GetPixelByteRow(
+                        rect.X, rect.Y + y, dstImage.GetPixelByteRowSpan(y));
             }
             else
             {
-                // TODO: make stack-allocated buffer
-                var rowBuffer = new TPixelFrom[dstImage.Width];
-
-                for (int y = 0; y < rect.Height; y++)
-                {
-                    pixels.GetPixelByteRow(rect.X, rect.Y + y, rowBuffer);
-                    var dstRow = dstImage.GetPixelRowSpan(y);
-                    for (int x = 0; x < rect.Width; x++)
-                        dstRow[x].FromScaledVector4(rowBuffer[x].ToScaledVector4());
-                }
+                LoadPixels(pixels, rect, dstImage);
             }
             return dstImage;
         }

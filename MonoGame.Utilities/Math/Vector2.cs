@@ -6,7 +6,6 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using MonoGame.Framework;
 using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Framework
@@ -117,13 +116,13 @@ namespace MonoGame.Framework
 
         public readonly Vector4 ToVector4() => new Vector4(X, Y, 0, 1);
 
+        void IPackedVector.FromScaledVector4(Vector4 vector) => FromVector4(vector);
+
+        readonly Vector4 IPackedVector.ToScaledVector4() => ToVector4();
+
         #endregion
 
         #region IPixel
-
-        void IPixel.FromScaledVector4(Vector4 vector) => FromVector4(vector);
-
-        readonly Vector4 IPixel.ToScaledVector4() => ToVector4();
 
         public readonly void ToColor(ref Color destination) => destination.FromVector4(ToVector4());
 

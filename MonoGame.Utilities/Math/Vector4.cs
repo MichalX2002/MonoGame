@@ -206,13 +206,13 @@ namespace MonoGame.Framework
 
         readonly Vector4 IPackedVector.ToVector4() => this;
 
+        void IPackedVector.FromScaledVector4(Vector4 vector) => this = Clamp(vector, Zero, One);
+
+        readonly Vector4 IPackedVector.ToScaledVector4() => this;
+
         #endregion
 
         #region IPixel
-
-        void IPixel.FromScaledVector4(Vector4 vector) => this = Clamp(vector, Zero, One);
-
-        readonly Vector4 IPixel.ToScaledVector4() => this;
 
         void IPixel.FromGray8(Gray8 source) => this = source.ToVector4();
 

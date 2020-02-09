@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 
 namespace MonoGame.Framework
@@ -21,6 +22,19 @@ namespace MonoGame.Framework
         {
             var type = @delegate.GetType();
             return GetDelegateParameters(type);
+        }
+
+        public static Type[] GetGenericTypeDefinitions(this ParameterInfo[] parameters)
+        {
+            return parameters
+                .Select(x =>
+                {
+                    var type = x.ParameterType;
+                    if (type.IsGenericType)
+                        return type.GetGenericTypeDefinition();
+                    return type;
+                })
+                .ToArray();
         }
 
         public static TDelegate CreateDelegate<TDelegate>(this MethodInfo method)

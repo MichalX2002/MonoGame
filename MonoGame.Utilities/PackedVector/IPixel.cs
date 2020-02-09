@@ -6,18 +6,6 @@ namespace MonoGame.Framework.PackedVector
     /// </summary>
     public interface IPixel : IPackedVector
     {
-        /// <summary>
-        /// Sets the pixel from a scaled <see cref="Vector4"/>.
-        /// The XYZW vector components correspond to RGBA. 
-        /// </summary>
-        void FromScaledVector4(Vector4 vector);
-
-        /// <summary>
-        /// Gets the pixel as a scaled <see cref="Vector4"/>.
-        /// The XYZW vector components correspond to RGBA. 
-        /// </summary>
-        Vector4 ToScaledVector4();
-
         #region FromGray
 
         /// <summary>Sets the pixel value from <see cref="Gray8"/>.</summary>

@@ -1,11 +1,9 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using MonoGame.Framework;
-using MonoGame.Imaging.Attributes;
 using MonoGame.Imaging.Attributes.Format;
 using MonoGame.Imaging.Coding;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Framework.PackedVector;
-using System.Runtime.InteropServices;
 
 namespace MonoGame.Imaging
 {
@@ -14,7 +12,7 @@ namespace MonoGame.Imaging
         public static unsafe void AssertValidByteStride(
             Type elementType, int width, int byteStride, string paramName)
         {
-            ArgumentGuard.AssertAboveZero(width, nameof(width));
+            ArgumentGuard.AssertGreaterThanZero(width, nameof(width));
             
             if (byteStride < width * Marshal.SizeOf(elementType))
                 throw new ArgumentException(
@@ -26,8 +24,14 @@ namespace MonoGame.Imaging
         {
             ArgumentGuard.AssertAtleastZero(rectangle.X, paramName + ".X");
             ArgumentGuard.AssertAtleastZero(rectangle.Y, paramName + ".Y");
-            ArgumentGuard.AssertAboveZero(rectangle.Width, paramName + ".Width");
-            ArgumentGuard.AssertAboveZero(rectangle.Height, paramName + ".Height");
+            ArgumentGuard.AssertGreaterThanZero(rectangle.Width, paramName + ".Width");
+            ArgumentGuard.AssertGreaterThanZero(rectangle.Height, paramName + ".Height");
+        }
+
+        public static void AssertNonEmptyRectangle(Rectangle? rectangle, string paramName)
+        {
+            if (rectangle.HasValue)
+                AssertNonEmptyRectangle(rectangle.GetValueOrDefault(), paramName);
         }
 
         public static void AssertContigousLargeEnough(int sourceLength, int pixelCount, string paramName)

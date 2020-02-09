@@ -1,12 +1,14 @@
 ﻿using System;
+using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging.Processing
 {
-    public readonly struct PixelRowsContext : IPixelRows, IImagingConfigProvider
+    public readonly struct PixelRowsContext<TPixel> : IPixelRows<TPixel>, IImagingConfigProvider
+        where TPixel : unmanaged, IPixel
     {
         public ImagingConfig ImagingConfig { get; }
-        public IPixelRows Pixels { get; }
+        public IPixelRows<TPixel> Pixels { get; }
 
         public bool IsEmpty => Pixels == null;
 
@@ -17,7 +19,7 @@ namespace MonoGame.Imaging.Processing
         public int Height => Pixels.Height;
         public PixelTypeInfo PixelType => Pixels.PixelType;
 
-        public PixelRowsContext(ImagingConfig imagingConfig, IPixelRows pixels)
+        public PixelRowsContext(ImagingConfig imagingConfig, IPixelRows<TPixel> pixels)
         {
             ImagingConfig = imagingConfig ?? throw new ArgumentNullException(nameof(imagingConfig));
             Pixels = pixels ?? throw new ArgumentNullException(nameof(pixels));
@@ -31,6 +33,16 @@ namespace MonoGame.Imaging.Processing
         public void GetPixelByteRow(int x, int y, Span<byte> destination)
         {
             Pixels.GetPixelByteRow(x, y, destination);
+        }
+
+        public void SetPixelRow(int x, int y, ReadOnlySpan<TPixel> data)
+        {
+            Pixels.SetPixelRow(x, y, data);
+        }
+
+        public void GetPixelRow(int x, int y, Span<TPixel> destination)
+        {
+            Pixels.GetPixelRow(x, y, destination);
         }
 
         public void Dispose()
