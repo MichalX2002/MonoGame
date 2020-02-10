@@ -4,9 +4,7 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using MonoGame.Framework;
 using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Framework
@@ -100,7 +98,10 @@ namespace MonoGame.Framework
 
         #endregion
 
-        public int BitDepth => Unsafe.SizeOf<Vector3>() * 8;
+        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Red, sizeof(float) * 8),
+            new VectorComponent(VectorComponentType.Green, sizeof(float) * 8),
+            new VectorComponent(VectorComponentType.Blue, sizeof(float) * 8));
 
         /// <summary>
         /// The X coordinate of this <see cref="Vector3"/>.
@@ -195,7 +196,7 @@ namespace MonoGame.Framework
 
         void IPixel.FromGray16(Gray16 source) => FromVector4(source.ToScaledVector4());
 
-        void IPixel.FromGrayAlpha16(GrayAlpha88 source) => FromVector4(source.ToScaledVector4());
+        void IPixel.FromGrayAlpha16(GrayAlpha16 source) => FromVector4(source.ToScaledVector4());
 
         void IPixel.FromRgb24(Rgb24 source) => FromVector4(source.ToScaledVector4());
 

@@ -14,8 +14,8 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>Sets the pixel value from <see cref="Gray16"/>.</summary>
         void FromGray16(Gray16 source);
 
-        /// <summary>Sets the pixel value from <see cref="GrayAlpha88"/>.</summary>
-        void FromGrayAlpha16(GrayAlpha88 source);
+        /// <summary>Sets the pixel value from <see cref="GrayAlpha16"/>.</summary>
+        void FromGrayAlpha16(GrayAlpha16 source);
 
         #endregion
 

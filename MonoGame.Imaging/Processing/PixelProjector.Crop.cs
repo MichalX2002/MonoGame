@@ -117,7 +117,7 @@ namespace MonoGame.Imaging.Processing
             public int Count => Width * Height;
 
             public int ElementSize => Pixels.ElementSize;
-            public PixelTypeInfo PixelType => Pixels.PixelType;
+            public VectorTypeInfo PixelType => Pixels.PixelType;
 
             public ReadOnlyCropRows(IReadOnlyPixelRows pixels, Rectangle sourceRectangle)
             {

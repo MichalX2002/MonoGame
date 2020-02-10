@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
+using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging
@@ -35,7 +36,7 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Gets info about the pixel type of the image.
         /// </summary>
-        public PixelTypeInfo PixelType { get; }
+        public VectorTypeInfo PixelType { get; }
 
         public abstract int ByteStride { get; }
 
@@ -51,7 +52,7 @@ namespace MonoGame.Imaging
             SetupReflection();
         }
 
-        protected Image(PixelTypeInfo pixelType, int width, int height)
+        protected Image(VectorTypeInfo pixelType, int width, int height)
         {
             PixelType = pixelType ?? throw new ArgumentNullException(nameof(pixelType));
             ArgumentGuard.AssertGreaterThanZero(width, nameof(width));
@@ -65,10 +66,10 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Creates an empty image.
         /// </summary>
-        public static Image Create(PixelTypeInfo pixelType, int width, int height)
+        public static Image Create(VectorTypeInfo pixelType, int width, int height)
         {
             if (pixelType == null)
-                throw new ArgumentNullException(nameof(PixelTypeInfo));
+                throw new ArgumentNullException(nameof(VectorTypeInfo));
 
             if (!_createDelegateCache.TryGetValue(pixelType, out var createDelegate))
             {
@@ -83,7 +84,7 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Creates an empty image.
         /// </summary>
-        public static Image Create(PixelTypeInfo pixelType, Size size)
+        public static Image Create(VectorTypeInfo pixelType, Size size)
         {
             return Create(pixelType, size.Width, size.Height);
         }

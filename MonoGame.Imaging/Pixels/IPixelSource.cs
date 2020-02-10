@@ -21,7 +21,7 @@ namespace MonoGame.Imaging.Pixels
         /// <summary>
         /// Gets info about the pixel type of the source.
         /// </summary>
-        PixelTypeInfo PixelType { get; }
+        VectorTypeInfo PixelType { get; }
     }
 
     /// <summary>

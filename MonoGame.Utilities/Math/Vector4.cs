@@ -3,12 +3,11 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Runtime.Serialization;
 using System.Diagnostics;
-using MonoGame.Framework;
 using System.Diagnostics.CodeAnalysis;
-using MonoGame.Framework.PackedVector;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Framework
 {
@@ -27,7 +26,11 @@ namespace MonoGame.Framework
         /// </summary>
         internal static readonly Vector4 ByteMaxValue = new Vector4(byte.MaxValue);
 
-        public int BitDepth => Unsafe.SizeOf<Vector4>() * 8;
+        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Red, sizeof(float) * 8),
+            new VectorComponent(VectorComponentType.Green, sizeof(float) * 8),
+            new VectorComponent(VectorComponentType.Blue, sizeof(float) * 8),
+            new VectorComponent(VectorComponentType.Alpha, sizeof(float) * 8));
 
         #region Public Constants
 
@@ -218,7 +221,7 @@ namespace MonoGame.Framework
 
         void IPixel.FromGray16(Gray16 source) => this = source.ToVector4();
 
-        void IPixel.FromGrayAlpha16(GrayAlpha88 source) => this = source.ToVector4();
+        void IPixel.FromGrayAlpha16(GrayAlpha16 source) => this = source.ToVector4();
 
         void IPixel.FromRgb24(Rgb24 source) => this = source.ToVector4();
 

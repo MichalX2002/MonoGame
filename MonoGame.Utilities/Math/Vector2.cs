@@ -23,7 +23,9 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Vector2 : IEquatable<Vector2>, IPackedVector<ulong>, IPixel
     {
-        public int BitDepth => Unsafe.SizeOf<Vector2>() * 8;
+        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Red, sizeof(float) * 8),
+            new VectorComponent(VectorComponentType.Green, sizeof(float) * 8));
 
         #region Public Constants
 
@@ -71,8 +73,7 @@ namespace MonoGame.Framework
         #endregion
 
         private string DebuggerDisplay => string.Concat(
-            X.ToString(), "  ",
-            Y.ToString());
+            X.ToString(), "  ", Y.ToString());
 
         #region Constructors
 
@@ -130,7 +131,7 @@ namespace MonoGame.Framework
 
         void IPixel.FromGray16(Gray16 source) => FromVector4(source.ToScaledVector4());
 
-        void IPixel.FromGrayAlpha16(GrayAlpha88 source) => FromVector4(source.ToScaledVector4());
+        void IPixel.FromGrayAlpha16(GrayAlpha16 source) => FromVector4(source.ToScaledVector4());
 
         void IPixel.FromRgb24(Rgb24 source) => FromVector4(source.ToScaledVector4());
 

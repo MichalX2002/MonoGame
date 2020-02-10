@@ -35,7 +35,7 @@ namespace MonoGame.Imaging
         }
 
         public static Image LoadPixels(
-            PixelTypeInfo resultType, IReadOnlyPixelRows pixels, Rectangle? sourceRectangle = null)
+            VectorTypeInfo resultType, IReadOnlyPixelRows pixels, Rectangle? sourceRectangle = null)
         {
             if (pixels == null) throw new ArgumentNullException(nameof(pixels));
             var rect = sourceRectangle ?? pixels.GetBounds();

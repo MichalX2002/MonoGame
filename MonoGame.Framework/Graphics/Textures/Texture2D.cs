@@ -42,6 +42,11 @@ namespace MonoGame.Framework.Graphics
 
         #region Constructors
 
+        static Texture2D()
+        {
+            InitializeVectorSaveFormat();
+        }
+
         /// <summary>
         /// Creates a new texture of the given size
         /// </summary>
@@ -375,9 +380,9 @@ namespace MonoGame.Framework.Graphics
         {
             CheckRect(level, rectangle, out Rectangle checkedRect);
 
-            var pixelFormat = GetPixelSaveFormat(Format);
+            var pixelFormat = GetVectorSaveFormat(Format);
             var data = pixelFormat.GetData(this, checkedRect, level, arraySlice);
-            var image = Image.LoadPixelData(pixelFormat.PixelType, data.Span, checkedRect.Size);
+            var image = Image.LoadPixelData(pixelFormat.VectorType, data.Span, checkedRect.Size);
             return image;
         }
 
@@ -390,15 +395,15 @@ namespace MonoGame.Framework.Graphics
             Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
             where TPixel : unmanaged, IPixel
         {
-            var pixelSaveFormat = GetPixelSaveFormat(Format);
-            if (pixelSaveFormat.PixelType.Type != typeof(TPixel))
+            var pixelSaveFormat = GetVectorSaveFormat(Format);
+            if (pixelSaveFormat.VectorType.Type != typeof(TPixel))
                 throw new ArgumentException(nameof(TPixel));
 
             CheckRect(level, rectangle, out Rectangle checkedRect);
 
             using (var data = pixelSaveFormat.GetData(this, checkedRect, level, arraySlice))
                 return Image.LoadPixelData<TPixel>(
-                    pixelSaveFormat.PixelType, data.Span, checkedRect.Size);
+                    pixelSaveFormat.VectorType, data.Span, checkedRect.Size);
         }
 
         #endregion

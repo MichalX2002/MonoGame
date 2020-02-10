@@ -17,7 +17,7 @@ namespace MonoGame.Imaging.Processing
 
         public int Width => Pixels.Width;
         public int Height => Pixels.Height;
-        public PixelTypeInfo PixelType => Pixels.PixelType;
+        public VectorTypeInfo PixelType => Pixels.PixelType;
 
         public PixelRowsContext(ImagingConfig imagingConfig, IPixelRows<TPixel> pixels)
         {

@@ -14,8 +14,8 @@ namespace MonoGame.Imaging.Pixels
 {
     public readonly struct RowsPixelProvider : IPixelProvider
     {
-        private static ConcurrentDictionary<PixelTypeInfo, Transform32Delegate> _transform32DelegateCache =
-            new ConcurrentDictionary<PixelTypeInfo, Transform32Delegate>(PixelTypeInfoEqualityComparer.Instance);
+        private static ConcurrentDictionary<VectorTypeInfo, Transform32Delegate> _transform32DelegateCache =
+            new ConcurrentDictionary<VectorTypeInfo, Transform32Delegate>(VectorTypeInfoEqualityComparer.Instance);
 
         private delegate bool Transform32Delegate(
             ReadOnlySpan<byte> srcRow,
@@ -117,10 +117,10 @@ namespace MonoGame.Imaging.Pixels
                 // creating conversion functions, maybe with some heavy LINQ expressions?
 
                 case 2:
-                    for (; i < count - 1; i++, bufferOffset += sizeof(GrayAlpha88))
+                    for (; i < count - 1; i++, bufferOffset += sizeof(GrayAlpha16))
                     {
                         pixelConverter.GrayAlpha.FromScaledVector4(srcRow[i].ToScaledVector4());
-                        for (int j = 0; j < sizeof(GrayAlpha88); j++)
+                        for (int j = 0; j < sizeof(GrayAlpha16); j++)
                             destination[j + bufferOffset] = pixelConverter.Raw[j];
                     }
                     pixelConverter.GrayAlpha.FromScaledVector4(srcRow[i + 1].ToScaledVector4());
@@ -183,7 +183,7 @@ namespace MonoGame.Imaging.Pixels
             public Gray8 Gray;
 
             [FieldOffset(0)]
-            public GrayAlpha88 GrayAlpha;
+            public GrayAlpha16 GrayAlpha;
 
             [FieldOffset(0)]
             public Rgb24 Rgb;
@@ -193,7 +193,7 @@ namespace MonoGame.Imaging.Pixels
         }
 
         private static TDelegate CreateTransform<TDelegate>(
-            string transformMethodName, PixelTypeInfo pixelType)
+            string transformMethodName, VectorTypeInfo pixelType)
             where TDelegate : Delegate
         {
             var transformMethod = typeof(RowsPixelProvider).GetMethod(

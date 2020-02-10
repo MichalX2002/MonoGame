@@ -11,7 +11,7 @@ namespace MonoGame.Framework.PackedVector
     /// </summary>
     public interface IPackedVector
     {
-        VectorChannelInfo ChannelInfo { get; }
+        VectorComponentInfo ComponentInfo { get; }
 
         /// <summary>
         /// Sets the vector from a scaled <see cref="Vector4"/>.

@@ -3,11 +3,12 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using MonoGame.Framework;
+using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging
 {
-    using FromToPixelTypes = ValueTuple<PixelTypeInfo, PixelTypeInfo>;
+    using FromToPixelTypes = ValueTuple<VectorTypeInfo, VectorTypeInfo>;
 
     public partial class Image
     {
@@ -36,7 +37,7 @@ namespace MonoGame.Imaging
         }
 
         private static LoadPixelsDelegate GetLoadPixelsDelegate(
-            PixelTypeInfo fromPixelType, PixelTypeInfo toPixelType)
+            VectorTypeInfo fromPixelType, VectorTypeInfo toPixelType)
         {
             if (fromPixelType == null) throw new ArgumentNullException(nameof(fromPixelType));
             if (toPixelType == null) throw new ArgumentNullException(nameof(toPixelType));
@@ -71,7 +72,7 @@ namespace MonoGame.Imaging
         }
 
         private static LoadPixelRowsDelegate GetLoadPixelRowsDelegate(
-            PixelTypeInfo fromPixelType, PixelTypeInfo toPixelType)
+            VectorTypeInfo fromPixelType, VectorTypeInfo toPixelType)
         {
             if (fromPixelType == null) throw new ArgumentNullException(nameof(fromPixelType));
             if (toPixelType == null) throw new ArgumentNullException(nameof(toPixelType));
@@ -93,7 +94,7 @@ namespace MonoGame.Imaging
         private delegate Image CreateDelegate(int width, int height);
 
         private static Type[] _createArgumentTypes;
-        private static ConcurrentDictionary<PixelTypeInfo, CreateDelegate> _createDelegateCache;
+        private static ConcurrentDictionary<VectorTypeInfo, CreateDelegate> _createDelegateCache;
 
         private static void SetupReflectionCreate()
         {
@@ -101,8 +102,8 @@ namespace MonoGame.Imaging
                 .Select(x => x.ParameterType)
                 .ToArray();
 
-            _createDelegateCache = new ConcurrentDictionary<PixelTypeInfo, CreateDelegate>(
-                PixelTypeInfoEqualityComparer.Instance);
+            _createDelegateCache = new ConcurrentDictionary<VectorTypeInfo, CreateDelegate>(
+                VectorTypeInfoEqualityComparer.Instance);
         }
 
         #endregion

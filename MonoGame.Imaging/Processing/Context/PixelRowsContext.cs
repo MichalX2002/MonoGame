@@ -1,4 +1,5 @@
 ﻿using System;
+using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging.Processing
@@ -15,7 +16,7 @@ namespace MonoGame.Imaging.Processing
 
         public int Width => Pixels.Width;
         public int Height => Pixels.Height;
-        public PixelTypeInfo PixelType => Pixels.PixelType;
+        public VectorTypeInfo PixelType => Pixels.PixelType;
 
         public PixelRowsContext(ImagingConfig imagingConfig, IPixelRows pixels)
         {
