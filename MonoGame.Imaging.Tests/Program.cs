@@ -24,6 +24,8 @@ namespace MonoGame.Imaging.Tests
 
         static void Main(string[] args)
         {
+            Console.WriteLine(args);
+
             var archive = new ZipArchive(File.OpenRead(DataZip), ZipArchiveMode.Read, false);
             //var stream = archive.GetEntry("png/32bit.png").Open();
             //var stream = archive.GetEntry("bmp/32bit.bmp").Open();

@@ -278,7 +278,7 @@ namespace MonoGame.Framework.Deflate
         /// This ctor collects a message attached to the exception.
         /// </summary>
         /// <param name="s">the message for the exception.</param>
-        public ZlibException(System.String s)
+        public ZlibException(string s)
             : base(s)
         {
         }
@@ -326,7 +326,7 @@ namespace MonoGame.Framework.Deflate
         ///   count depending on the data available in the source TextReader. Returns -1
         ///   if the end of the stream is reached.
         /// </returns>
-        public static System.Int32 ReadInput(System.IO.TextReader sourceTextReader, byte[] target, int start, int count)
+        public static int ReadInput(System.IO.TextReader sourceTextReader, byte[] target, int start, int count)
         {
             // Returns 0 bytes if not enough space in target
             if (target.Length == 0) return 0;
@@ -344,7 +344,7 @@ namespace MonoGame.Framework.Deflate
         }
 
 
-        internal static byte[] ToByteArray(System.String sourceString)
+        internal static byte[] ToByteArray(string sourceString)
         {
             return System.Text.UTF8Encoding.UTF8.GetBytes(sourceString);
         }
@@ -496,8 +496,8 @@ namespace MonoGame.Framework.Deflate
             if (buf == null)
                 return 1;
 
-            uint s1 = (uint) (adler & 0xffff);
-            uint s2 = (uint) ((adler >> 16) & 0xffff);
+            uint s1 = adler & 0xffff;
+            uint s2 = (adler >> 16) & 0xffff;
 
             while (len > 0)
             {
@@ -536,7 +536,7 @@ namespace MonoGame.Framework.Deflate
                 s1 %= BASE;
                 s2 %= BASE;
             }
-            return (uint)((s2 << 16) | s1);
+            return (s2 << 16) | s1;
         }
 #pragma warning restore 3001
 #pragma warning restore 3002

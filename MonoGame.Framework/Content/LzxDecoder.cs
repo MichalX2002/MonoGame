@@ -8,7 +8,7 @@
  *
  * This source file is Dual licensed; meaning the end-user of this source file
  * may redistribute/modify it under the LGPL 2.1 or MS-PL licenses.
- */ 
+ */
 #region LGPL License
 /* GNU LESSER GENERAL PUBLIC LICENSE version 2.1
  * LzxDecoder is free software; you can redistribute it and/or modify it under
@@ -168,7 +168,8 @@ namespace MonoGame.Framework.Content
                     // TODO may screw something up here
                     if (m_state.block_type == LzxConstants.BLOCKTYPE.UNCOMPRESSED)
                     {
-                        if ((m_state.block_length & 1) == 1) inData.ReadByte(); /* realign bitstream to word */
+                        if ((m_state.block_length & 1) == 1) 
+                            inData.ReadByte(); /* realign bitstream to word */
                         bitbuf.InitBitStream();
                     }
 
@@ -180,9 +181,13 @@ namespace MonoGame.Framework.Content
                     switch (m_state.block_type)
                     {
                         case LzxConstants.BLOCKTYPE.ALIGNED:
-                            for (i = 0, j = 0; i < 8; i++) { j = bitbuf.ReadBits(3); m_state.ALIGNED_len[i] = (byte)j; }
-                            MakeDecodeTable(LzxConstants.ALIGNED_MAXSYMBOLS, LzxConstants.ALIGNED_TABLEBITS,
+                            for (i = 0; i < 8; i++)
+                                j = bitbuf.ReadBits(3); m_state.ALIGNED_len[i] = (byte)j;
+
+                            MakeDecodeTable(
+                                LzxConstants.ALIGNED_MAXSYMBOLS, LzxConstants.ALIGNED_TABLEBITS,
                                 m_state.ALIGNED_len, m_state.ALIGNED_table);
+
                             /* rest of aligned header is same as verbatim */
                             goto case LzxConstants.BLOCKTYPE.VERBATIM;
 
@@ -233,13 +238,13 @@ namespace MonoGame.Framework.Content
                 if (inData.Position > (startpos + inLen))
                 {
                     /* it's possible to have a file where the next run is less than
-				     * 16 bits in size. In this case, the READ_HUFFSYM() macro used
-				     * in building the tables will exhaust the buffer, so we should
-				     * allow for this, but not allow those accidentally read bits to
-				     * be used (so we check that there are at least 16 bits
-				     * remaining - in this boundary case they aren't really part of
-				     * the compressed data)
-					 */
+                     * 16 bits in size. In this case, the READ_HUFFSYM() macro used
+                     * in building the tables will exhaust the buffer, so we should
+                     * allow for this, but not allow those accidentally read bits to
+                     * be used (so we check that there are at least 16 bits
+                     * remaining - in this boundary case they aren't really part of
+                     * the compressed data)
+                     */
                     //Debug.WriteLine("WTF");
 
                     if (inData.Position > (startpos + inLen + 2) || bitbuf.GetBitsLeft() < 16)
@@ -266,6 +271,7 @@ namespace MonoGame.Framework.Content
                                 main_element = (int)ReadHuffSym(
                                     m_state.MAINTREE_table, m_state.MAINTREE_len,
                                     LzxConstants.MAINTREE_MAXSYMBOLS, LzxConstants.MAINTREE_TABLEBITS, bitbuf);
+
                                 if (main_element < LzxConstants.NUM_CHARS)
                                 {
                                     /* literal: 0 to NUM_CHARS-1 */

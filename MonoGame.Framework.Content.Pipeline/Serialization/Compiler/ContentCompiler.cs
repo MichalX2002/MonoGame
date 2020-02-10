@@ -46,7 +46,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                 var contentTypeWriterType = typeof(ContentTypeWriter<>);
                 foreach (var type in exportedTypes)
                 {
-					if (type.IsAbstract)
+                    if (type.IsAbstract)
                         continue;
                     if (Attribute.IsDefined(type, typeof(ContentTypeWriterAttribute)))
                     {
@@ -69,8 +69,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         /// <remarks>This should be called from the ContentTypeWriter.Initialize method.</remarks>
         public ContentTypeWriter GetTypeWriter(Type type)
         {
-            ContentTypeWriter result = null;
             var contentTypeWriterType = typeof(ContentTypeWriter<>).MakeGenericType(type);
+            ContentTypeWriter result;
 
             if (type == typeof(Array))
                 result = new ArrayWriter<Array>();

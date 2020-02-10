@@ -355,7 +355,7 @@ namespace MonoGame.Framework.Deflate
                 if (this._baseStream._workingBuffer != null)
                     throw new ZlibException("The working buffer is already set.");
                 if (value < ZlibConstants.WorkingBufferSizeMin)
-                    throw new ZlibException(String.Format("Don't be silly. {0} bytes?? Use a bigger buffer, at least {1}.", value, ZlibConstants.WorkingBufferSizeMin));
+                    throw new ZlibException(string.Format("Don't be silly. {0} bytes?? Use a bigger buffer, at least {1}.", value, ZlibConstants.WorkingBufferSizeMin));
                 this._baseStream._bufferSize = value;
             }
         }
@@ -639,7 +639,7 @@ namespace MonoGame.Framework.Deflate
         /// </param>
         ///
         /// <returns>The string in compressed form</returns>
-        public static byte[] CompressString(String s)
+        public static byte[] CompressString(string s)
         {
             using (var ms = new System.IO.MemoryStream())
             {
@@ -686,7 +686,7 @@ namespace MonoGame.Framework.Deflate
         ///   Uncompress a DEFLATE'd byte array into a single string.
         /// </summary>
         ///
-        /// <seealso cref="DeflateStream.CompressString(String)">DeflateStream.CompressString(String)</seealso>
+        /// <seealso cref="DeflateStream.CompressString(string)">DeflateStream.CompressString(String)</seealso>
         /// <seealso cref="DeflateStream.UncompressBuffer(byte[])">DeflateStream.UncompressBuffer(byte[])</seealso>
         /// <seealso cref="GZipStream.UncompressString(byte[])">GZipStream.UncompressString(byte[])</seealso>
         /// <seealso cref="ZlibStream.UncompressString(byte[])">ZlibStream.UncompressString(byte[])</seealso>
@@ -696,7 +696,7 @@ namespace MonoGame.Framework.Deflate
         /// </param>
         ///
         /// <returns>The uncompressed string</returns>
-        public static String UncompressString(byte[] compressed)
+        public static string UncompressString(byte[] compressed)
         {
             using (var input = new System.IO.MemoryStream(compressed))
             {

@@ -111,12 +111,12 @@ namespace MonoGame.Framework.Deflate
         internal int end;                                 // one byte after sliding window
         internal int readAt;                              // window read pointer
         internal int writeAt;                             // window write pointer
-        internal System.Object checkfn;                   // check function
+        internal object checkfn;                   // check function
         internal uint check;                              // check on output
 
         internal InfTree inftree = new InfTree();
 
-        internal InflateBlocks(ZlibCodec codec, System.Object checkfn, int w)
+        internal InflateBlocks(ZlibCodec codec, object checkfn, int w)
         {
             _codec = codec;
             hufts = new int[MANY * 3];
@@ -605,7 +605,8 @@ namespace MonoGame.Framework.Deflate
                     case InflateBlockMode.DRY:
                         writeAt = q;
                         r = Flush(r);
-                        q = writeAt; m = (int)(q < readAt ? readAt - q - 1 : end - q);
+                        q = writeAt; 
+                        m = (q < readAt ? readAt - q - 1 : end - q);
                         if (readAt != writeAt)
                         {
                             bitb = b; bitk = k;
@@ -805,9 +806,9 @@ namespace MonoGame.Framework.Deflate
             int j;      // temporary storage
             int tindex; // temporary pointer
             int e;      // extra bits or operation
-            int b = 0;  // bit buffer
-            int k = 0;  // bits in bit buffer
-            int p = 0;  // input data pointer
+            int b;  // bit buffer
+            int k;  // bits in bit buffer
+            int p;  // input data pointer
             int n;      // bytes available there
             int q;      // output window write pointer
             int m;      // bytes to end of window or read pointer
@@ -1117,7 +1118,8 @@ namespace MonoGame.Framework.Deflate
                         }
 
                         blocks.writeAt = q; r = blocks.Flush(r);
-                        q = blocks.writeAt; m = q < blocks.readAt ? blocks.readAt - q - 1 : blocks.end - q;
+                        q = blocks.writeAt;
+                        m = q < blocks.readAt ? blocks.readAt - q - 1 : blocks.end - q;
 
                         if (blocks.readAt != blocks.writeAt)
                         {
@@ -1304,7 +1306,9 @@ namespace MonoGame.Framework.Deflate
                                         else
                                         {
                                             Array.Copy(s.window, r, s.window, q, e);
-                                            q += e; r += e; e = 0;
+                                            q += e; 
+                                            r += e;
+                                            e = 0;
                                         }
                                         r = 0; // copy rest from start of window
                                     }
@@ -1322,7 +1326,9 @@ namespace MonoGame.Framework.Deflate
                                 else
                                 {
                                     Array.Copy(s.window, r, s.window, q, c);
-                                    q += c; r += c; c = 0;
+                                    q += c; 
+                                    r += c;
+                                    c = 0;
                                 }
                                 break;
                             }
@@ -1500,9 +1506,7 @@ namespace MonoGame.Framework.Deflate
             }
             wbits = w;
 
-            blocks = new InflateBlocks(codec,
-                HandleRfc1950HeaderBytes ? this : null,
-                1 << w);
+            blocks = new InflateBlocks(codec, HandleRfc1950HeaderBytes ? this : null, 1 << w);
 
             // reset state
             Reset();
@@ -1517,9 +1521,9 @@ namespace MonoGame.Framework.Deflate
             if (_codec.InputBuffer == null)
                 throw new ZlibException("InputBuffer is null. ");
 
-//             int f = (flush == FlushType.Finish)
-//                 ? ZlibConstants.Z_BUF_ERROR
-//                 : ZlibConstants.Z_OK;
+            //int f = (flush == FlushType.Finish)
+            //    ? ZlibConstants.Z_BUF_ERROR
+            //    : ZlibConstants.Z_OK;
 
             // workitem 8870
             int f = ZlibConstants.Z_OK;
@@ -1530,21 +1534,22 @@ namespace MonoGame.Framework.Deflate
                 switch (mode)
                 {
                     case InflateManagerMode.METHOD:
-                        if (_codec.AvailableBytesIn == 0) return r;
+                        if (_codec.AvailableBytesIn == 0) 
+                            return r;
                         r = f;
                         _codec.AvailableBytesIn--;
                         _codec.TotalBytesIn++;
                         if (((method = _codec.InputBuffer[_codec.NextIn++]) & 0xf) != Z_DEFLATED)
                         {
                             mode = InflateManagerMode.BAD;
-                            _codec.Message = String.Format("unknown compression method (0x{0:X2})", method);
+                            _codec.Message = string.Format("unknown compression method (0x{0:X2})", method);
                             marker = 5; // can't try inflateSync
                             break;
                         }
                         if ((method >> 4) + 8 > wbits)
                         {
                             mode = InflateManagerMode.BAD;
-                            _codec.Message = String.Format("invalid window size ({0})", (method >> 4) + 8);
+                            _codec.Message = string.Format("invalid window size ({0})", (method >> 4) + 8);
                             marker = 5; // can't try inflateSync
                             break;
                         }
@@ -1582,7 +1587,8 @@ namespace MonoGame.Framework.Deflate
                         break;
 
                     case InflateManagerMode.DICT3:
-                        if (_codec.AvailableBytesIn == 0) return r;
+                        if (_codec.AvailableBytesIn == 0) 
+                            return r;
                         r = f;
                         _codec.AvailableBytesIn--;
                         _codec.TotalBytesIn++;
@@ -1592,7 +1598,8 @@ namespace MonoGame.Framework.Deflate
 
                     case InflateManagerMode.DICT2:
 
-                        if (_codec.AvailableBytesIn == 0) return r;
+                        if (_codec.AvailableBytesIn == 0)
+                            return r;
                         r = f;
                         _codec.AvailableBytesIn--;
                         _codec.TotalBytesIn++;
@@ -1602,7 +1609,8 @@ namespace MonoGame.Framework.Deflate
 
 
                     case InflateManagerMode.DICT1:
-                        if (_codec.AvailableBytesIn == 0) return r;
+                        if (_codec.AvailableBytesIn == 0) 
+                            return r;
                         r = f;
                         _codec.AvailableBytesIn--; _codec.TotalBytesIn++;
                         expectedCheck += (uint)(_codec.InputBuffer[_codec.NextIn++] & 0x000000ff);
@@ -1687,7 +1695,7 @@ namespace MonoGame.Framework.Deflate
                         return ZlibConstants.Z_STREAM_END;
 
                     case InflateManagerMode.BAD:
-                        throw new ZlibException(String.Format("Bad state ({0})", _codec.Message));
+                        throw new ZlibException(string.Format("Bad state ({0})", _codec.Message));
 
                     default:
                         throw new ZlibException("Stream error.");
@@ -1695,7 +1703,6 @@ namespace MonoGame.Framework.Deflate
                 }
             }
         }
-
 
 
         internal int SetDictionary(byte[] dictionary)
@@ -1706,10 +1713,8 @@ namespace MonoGame.Framework.Deflate
                 throw new ZlibException("Stream error.");
 
             if (Adler.Adler32(1, dictionary, 0, dictionary.Length) != _codec._Adler32)
-            {
                 return ZlibConstants.Z_DATA_ERROR;
-            }
-
+            
             _codec._Adler32 = Adler.Adler32(0, null, 0, 0);
 
             if (length >= (1 << wbits))
@@ -1723,7 +1728,7 @@ namespace MonoGame.Framework.Deflate
         }
 
 
-        private static readonly byte[] mark = new byte[] { 0, 0, 0xff, 0xff };
+        private static readonly byte[] _mark = new byte[] { 0, 0, 0xff, 0xff };
 
         internal int Sync()
         {
@@ -1746,7 +1751,7 @@ namespace MonoGame.Framework.Deflate
             // search
             while (n != 0 && m < 4)
             {
-                if (_codec.InputBuffer[p] == mark[m])
+                if (_codec.InputBuffer[p] == _mark[m])
                 {
                     m++;
                 }
@@ -1769,9 +1774,8 @@ namespace MonoGame.Framework.Deflate
 
             // return no joy or set up to restart on a new block
             if (m != 4)
-            {
                 return ZlibConstants.Z_DATA_ERROR;
-            }
+            
             r = _codec.TotalBytesIn;
             w = _codec.TotalBytesOut;
             Reset();
@@ -1781,13 +1785,14 @@ namespace MonoGame.Framework.Deflate
             return ZlibConstants.Z_OK;
         }
 
-
-        // Returns true if inflate is currently at the end of a block generated
-        // by Z_SYNC_FLUSH or Z_FULL_FLUSH. This function is used by one PPP
-        // implementation to provide an additional safety check. PPP uses Z_SYNC_FLUSH
-        // but removes the length bytes of the resulting empty stored block. When
-        // decompressing, PPP checks that at the end of input packet, inflate is
-        // waiting for these length bytes.
+        /// <summary>
+        /// Returns true if inflate is currently at the end of a block generated
+        /// by Z_SYNC_FLUSH or Z_FULL_FLUSH. This function is used by one PPP
+        /// implementation to provide an additional safety check. PPP uses Z_SYNC_FLUSH
+        /// but removes the length bytes of the resulting empty stored block. When
+        /// decompressing, PPP checks that at the end of input packet, inflate is
+        /// waiting for these length bytes.
+        /// </summary>
         internal int SyncPoint(ZlibCodec z)
         {
             return blocks.SyncPoint();

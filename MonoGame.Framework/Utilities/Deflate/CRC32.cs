@@ -46,7 +46,7 @@ namespace MonoGame.Framework.Deflate
         /// <summary>
         ///   Indicates the total number of bytes applied to the CRC.
         /// </summary>
-        public Int64 TotalBytesRead
+        public long TotalBytesRead
         {
             get
             {
@@ -57,11 +57,11 @@ namespace MonoGame.Framework.Deflate
         /// <summary>
         /// Indicates the current CRC for all blocks slurped in.
         /// </summary>
-        public Int32 Crc32Result
+        public int Crc32Result
         {
             get
             {
-                return unchecked((Int32)(~_register));
+                return unchecked((int)(~_register));
             }
         }
 
@@ -70,7 +70,7 @@ namespace MonoGame.Framework.Deflate
         /// </summary>
         /// <param name="input">The stream over which to calculate the CRC32</param>
         /// <returns>the CRC32 calculation</returns>
-        public Int32 GetCrc32(System.IO.Stream input)
+        public int GetCrc32(System.IO.Stream input)
         {
             return GetCrc32AndCopy(input, null);
         }
@@ -82,7 +82,7 @@ namespace MonoGame.Framework.Deflate
         /// <param name="input">The stream over which to calculate the CRC32</param>
         /// <param name="output">The stream into which to deflate the input</param>
         /// <returns>the CRC32 calculation</returns>
-        public Int32 GetCrc32AndCopy(System.IO.Stream input, System.IO.Stream output)
+        public int GetCrc32AndCopy(System.IO.Stream input, System.IO.Stream output)
         {
             if (input == null)
                 throw new Exception("The input stream must not be null.");
@@ -104,7 +104,7 @@ namespace MonoGame.Framework.Deflate
                     _TotalBytesRead += count;
                 }
 
-                return (Int32)(~_register);
+                return (int)(~_register);
             }
         }
 
@@ -116,14 +116,14 @@ namespace MonoGame.Framework.Deflate
         /// <param name="W">The word to start with.</param>
         /// <param name="B">The byte to combine it with.</param>
         /// <returns>The CRC-ized result.</returns>
-        public Int32 ComputeCrc32(Int32 W, byte B)
+        public int ComputeCrc32(int W, byte B)
         {
-            return _InternalComputeCrc32((UInt32)W, B);
+            return _InternalComputeCrc32((uint)W, B);
         }
 
-        internal Int32 _InternalComputeCrc32(UInt32 W, byte B)
+        internal int _InternalComputeCrc32(uint W, byte B)
         {
-            return (Int32)(crc32Table[(W ^ B) & 0xFF] ^ (W >> 8));
+            return (int)(crc32Table[(W ^ B) & 0xFF] ^ (W >> 8));
         }
 
 
@@ -146,12 +146,12 @@ namespace MonoGame.Framework.Deflate
                 byte b = block[x];
                 if (this.reverseBits)
                 {
-                    UInt32 temp = (_register >> 24) ^ b;
+                    uint temp = (_register >> 24) ^ b;
                     _register = (_register << 8) ^ crc32Table[temp];
                 }
                 else
                 {
-                    UInt32 temp = (_register & 0x000000FF) ^ b;
+                    uint temp = (_register & 0x000000FF) ^ b;
                     _register = (_register >> 8) ^ crc32Table[temp];
                 }
             }
@@ -167,12 +167,12 @@ namespace MonoGame.Framework.Deflate
         {
             if (this.reverseBits)
             {
-                UInt32 temp = (_register >> 24) ^ b;
+                uint temp = (_register >> 24) ^ b;
                 _register = (_register << 8) ^ crc32Table[temp];
             }
             else
             {
-                UInt32 temp = (_register & 0x000000FF) ^ b;
+                uint temp = (_register & 0x000000FF) ^ b;
                 _register = (_register >> 8) ^ crc32Table[temp];
             }
         }
@@ -204,7 +204,7 @@ namespace MonoGame.Framework.Deflate
                 }
                 else
                 {
-                    UInt32 temp = (_register & 0x000000FF) ^ b;
+                    uint temp = (_register & 0x000000FF) ^ b;
                     _register = (_register >> 8) ^ crc32Table[(temp >= 0)
                                                               ? temp
                                                               : (temp + 256)];
@@ -244,10 +244,10 @@ namespace MonoGame.Framework.Deflate
 
         private void GenerateLookupTable()
         {
-            crc32Table = new UInt32[256];
+            crc32Table = new uint[256];
             unchecked
             {
-                UInt32 dwCrc;
+                uint dwCrc;
                 byte i = 0;
                 do
                 {
@@ -462,12 +462,12 @@ namespace MonoGame.Framework.Deflate
         }
 
         // private member vars
-        private UInt32 dwPolynomial;
-        private Int64 _TotalBytesRead;
+        private uint dwPolynomial;
+        private long _TotalBytesRead;
         private bool reverseBits;
-        private UInt32[] crc32Table;
+        private uint[] crc32Table;
         private const int BUFFER_SIZE = 8192;
-        private UInt32 _register = 0xFFFFFFFFU;
+        private uint _register = 0xFFFFFFFFU;
     }
 
 
@@ -492,11 +492,11 @@ namespace MonoGame.Framework.Deflate
     /// </remarks>
     public class CrcCalculatorStream : System.IO.Stream
     {
-        private static readonly Int64 UnsetLengthLimit = -99;
+        private static readonly long UnsetLengthLimit = -99;
 
         internal System.IO.Stream _innerStream;
         private CRC32 _Crc32;
-        private Int64 _lengthLimit = -99;
+        private long _lengthLimit = -99;
         private bool _leaveOpen;
 
         /// <summary>
@@ -549,7 +549,7 @@ namespace MonoGame.Framework.Deflate
         /// </remarks>
         /// <param name="stream">The underlying stream</param>
         /// <param name="length">The length of the stream to slurp</param>
-        public CrcCalculatorStream(System.IO.Stream stream, Int64 length)
+        public CrcCalculatorStream(System.IO.Stream stream, long length)
             : this(true, length, stream, null)
         {
             if (length < 0)
@@ -571,7 +571,7 @@ namespace MonoGame.Framework.Deflate
         /// <param name="length">The length of the stream to slurp</param>
         /// <param name="leaveOpen">true to leave the underlying stream
         /// open upon close of the <c>CrcCalculatorStream</c>; false otherwise.</param>
-        public CrcCalculatorStream(System.IO.Stream stream, Int64 length, bool leaveOpen)
+        public CrcCalculatorStream(System.IO.Stream stream, long length, bool leaveOpen)
             : this(leaveOpen, length, stream, null)
         {
             if (length < 0)
@@ -594,7 +594,7 @@ namespace MonoGame.Framework.Deflate
         /// <param name="leaveOpen">true to leave the underlying stream
         /// open upon close of the <c>CrcCalculatorStream</c>; false otherwise.</param>
         /// <param name="crc32">the CRC32 instance to use to calculate the CRC32</param>
-        public CrcCalculatorStream(System.IO.Stream stream, Int64 length, bool leaveOpen, CRC32 crc32)
+        public CrcCalculatorStream(System.IO.Stream stream, long length, bool leaveOpen, CRC32 crc32)
             : this(leaveOpen, length, stream, crc32)
         {
             if (length < 0)
@@ -608,7 +608,7 @@ namespace MonoGame.Framework.Deflate
         // explicit param, otherwise we don't validate, because it could be our special
         // value.
         private CrcCalculatorStream
-            (bool leaveOpen, Int64 length, System.IO.Stream stream, CRC32 crc32)
+            (bool leaveOpen, long length, System.IO.Stream stream, CRC32 crc32)
             : base()
         {
             _innerStream = stream;
@@ -626,7 +626,7 @@ namespace MonoGame.Framework.Deflate
         ///   This is either the total number of bytes read, or the total number of
         ///   bytes written, depending on the direction of this stream.
         /// </remarks>
-        public Int64 TotalBytesSlurped
+        public long TotalBytesSlurped
         {
             get { return _Crc32.TotalBytesRead; }
         }
@@ -641,7 +641,7 @@ namespace MonoGame.Framework.Deflate
         ///     get an accurate CRC for the entire stream.
         ///   </para>
         /// </remarks>
-        public Int32 Crc
+        public int Crc
         {
             get { return _Crc32.Crc32Result; }
         }
@@ -683,7 +683,7 @@ namespace MonoGame.Framework.Deflate
             if (_lengthLimit != CrcCalculatorStream.UnsetLengthLimit)
             {
                 if (_Crc32.TotalBytesRead >= _lengthLimit) return 0; // EOF
-                Int64 bytesRemaining = _lengthLimit - _Crc32.TotalBytesRead;
+                long bytesRemaining = _lengthLimit - _Crc32.TotalBytesRead;
                 if (bytesRemaining < count) bytesToRead = (int)bytesRemaining;
             }
             int n = _innerStream.Read(buffer, offset, bytesToRead);

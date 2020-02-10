@@ -141,7 +141,7 @@ namespace MonoGame.Framework.Deflate
         ///   (<c>Nothing</c> in VB).
         /// </para>
         /// </remarks>
-        public String Comment
+        public string Comment
         {
             get
             {
@@ -177,7 +177,7 @@ namespace MonoGame.Framework.Deflate
         ///   in VB).
         /// </para>
         /// </remarks>
-        public String FileName
+        public string FileName
         {
             get { return _FileName; }
             set
@@ -582,7 +582,7 @@ namespace MonoGame.Framework.Deflate
                 if (this._baseStream._workingBuffer != null)
                     throw new ZlibException("The working buffer is already set.");
                 if (value < ZlibConstants.WorkingBufferSizeMin)
-                    throw new ZlibException(String.Format("Don't be silly. {0} bytes?? Use a bigger buffer, at least {1}.", value, ZlibConstants.WorkingBufferSizeMin));
+                    throw new ZlibException(string.Format("Don't be silly. {0} bytes?? Use a bigger buffer, at least {1}.", value, ZlibConstants.WorkingBufferSizeMin));
                 this._baseStream._bufferSize = value;
             }
         }
@@ -889,7 +889,7 @@ namespace MonoGame.Framework.Deflate
             // mtime
             if (!LastModified.HasValue) LastModified = DateTime.Now;
             System.TimeSpan delta = LastModified.Value - _unixEpoch;
-            Int32 timet = (Int32)delta.TotalSeconds;
+            int timet = (int)delta.TotalSeconds;
             Array.Copy(BitConverter.GetBytes(timet), 0, header, i, 4);
             i += 4;
 
@@ -942,7 +942,7 @@ namespace MonoGame.Framework.Deflate
         /// </param>
         ///
         /// <returns>The string in compressed form</returns>
-        public static byte[] CompressString(String s)
+        public static byte[] CompressString(string s)
         {
             using (var ms = new MemoryStream())
             {
@@ -987,7 +987,7 @@ namespace MonoGame.Framework.Deflate
         ///   Uncompress a GZip'ed byte array into a single string.
         /// </summary>
         ///
-        /// <seealso cref="GZipStream.CompressString(String)"/>
+        /// <seealso cref="GZipStream.CompressString(string)"/>
         /// <seealso cref="GZipStream.UncompressBuffer(byte[])"/>
         ///
         /// <param name="compressed">
@@ -995,7 +995,7 @@ namespace MonoGame.Framework.Deflate
         /// </param>
         ///
         /// <returns>The uncompressed string</returns>
-        public static String UncompressString(byte[] compressed)
+        public static string UncompressString(byte[] compressed)
         {
             using (var input = new MemoryStream(compressed))
             {
