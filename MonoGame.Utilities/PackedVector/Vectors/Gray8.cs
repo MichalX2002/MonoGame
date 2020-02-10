@@ -35,7 +35,7 @@ namespace MonoGame.Framework.PackedVector
             alpha = (byte)vector.W;
         }
 
-        public byte PackedValue { get => L; set => L = value; }
+        public byte PackedValue { readonly get => L; set => L = value; }
 
         public void FromVector4(Vector4 vector) => Pack(ref vector, out L, out _);
 

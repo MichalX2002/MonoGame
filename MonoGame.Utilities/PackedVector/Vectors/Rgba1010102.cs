@@ -58,13 +58,13 @@ namespace MonoGame.Framework.PackedVector
         [CLSCompliant(false)]
         public uint PackedValue { get; set; }
 
+        public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
+
         public readonly Vector4 ToVector4() => new Vector4(
             ((PackedValue >> 0) & 0x03FF) / 1023f,
             ((PackedValue >> 10) & 0x03FF) / 1023f,
             ((PackedValue >> 20) & 0x03FF) / 1023f,
             ((PackedValue >> 30) & 0x03) / 3f);
-
-        public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
 
         #endregion
 

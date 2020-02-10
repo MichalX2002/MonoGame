@@ -62,6 +62,8 @@ namespace MonoGame.Framework.PackedVector
         [CLSCompliant(false)]
         public ushort PackedValue { get; set; }
 
+        public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
+
         public readonly Vector4 ToVector4()
         {
             return new Vector4(
@@ -70,8 +72,6 @@ namespace MonoGame.Framework.PackedVector
                 ((PackedValue >> 0) & 0x1F) / 31f,
                 (PackedValue >> 15) & 0x01);
         }
-
-        public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
 
         #endregion
 

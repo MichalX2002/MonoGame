@@ -31,7 +31,7 @@ namespace MonoGame.Framework.PackedVector
         #region IPackedVector
 
         [CLSCompliant(false)]
-        public uint PackedValue { get => L; set => L = value; }
+        public uint PackedValue { readonly get => L; set => L = value; }
 
         public void FromVector4(Vector4 vector)
         {
