@@ -20,18 +20,18 @@ namespace MonoGame.Imaging
             CancellationToken? cancellationToken = null,
             EncodeProgressCallback onProgress = null)
         {
-            var encoder = AssertValidArguments(imagingConfig, format, encoderOptions);
-            if (encoderOptions == null)
-                encoderOptions = encoder.DefaultOptions;
-
             AssertValidOutput(output);
 
+            var encoder = AssertValidArguments(imagingConfig, format, encoderOptions);
             if (encoder == null) throw new ArgumentNullException(nameof(encoder));
             if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
             if (images == null) throw new ArgumentNullException(nameof(images));
 
-            return new ImageEncoderEnumerator(
-                encoder, output, encoderOptions, imagingConfig, cancellationToken, onProgress);
+            throw new NotImplementedException();
+            foreach(var image in images)
+            {
+
+            }
         }
 
         public static void Save(

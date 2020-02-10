@@ -2,7 +2,6 @@
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
-using MonoGame.Imaging.Pixels;
 using StbSharp;
 using static StbSharp.StbImage;
 
@@ -12,39 +11,69 @@ namespace MonoGame.Imaging.Coding.Decoding
     {
         public abstract ImageFormat Format { get; }
 
+        private static VectorTypeInfo CompToVectorType(int comp, int compDepth)
+        {
+            switch (comp)
+            {
+                case 1:
+                    return compDepth == 16 ? VectorTypeInfo.Get<Gray16>() : VectorTypeInfo.Get<Gray8>();
+
+                case 2:
+                    return VectorTypeInfo.Get<GrayAlpha16>();
+
+                case 3:
+                    return compDepth == 16 ? VectorTypeInfo.Get<Rgb48>() : VectorTypeInfo.Get<Rgb24>();
+
+                case 4:
+                    return compDepth == 16 ? VectorTypeInfo.Get<Rgba64>() : VectorTypeInfo.Get<Color>();
+
+                default:
+                    return default;
+            }
+        }
+
         #region DetectFormat Abstraction
 
-        protected abstract bool TestFormat(ReadContext context, ImagingConfig config);
+        protected abstract bool TestFormat(ImagingConfig config, ReadContext context);
 
-        private ImageFormat DetectFormat(ReadContext context, ImagingConfig config)
+        private ImageFormat DetectFormat(ImagingConfig config, ReadContext context)
         {
-            if (TestFormat(context, config))
+            if (TestFormat(config, context))
                 return Format;
             return default;
         }
 
-        public ImageFormat DetectFormat(ImageReadStream stream, ImagingConfig config)
+        public ImageFormat DetectFormat(ImagingConfig config, ImageReadStream stream)
         {
-            return DetectFormat(stream.Context, config);
+            return DetectFormat(config, stream.Context);
         }
 
         #endregion
 
         #region Identify Abstraction
 
-        protected abstract bool GetInfo(
-            ReadContext context, ImagingConfig config, out int w, out int h, out int n);
+        protected abstract bool GetInfo(ImagingConfig config, ReadContext context, out ReadState readState);
 
-        private ImageInfo Identify(ReadContext context, ImagingConfig config)
+        private ImageInfo Identify(ImagingConfig config, ReadContext context)
         {
-            if (GetInfo(context, config, out int w, out int h, out int n))
-                return new ImageInfo(w, h, n * 8, Format);
+            if (GetInfo(config, context, out var readState))
+            {
+                int comp = readState.Components;
+                int bitsPerComp = readState.BitsPerComponent.Value;
+
+                var vectorType = CompToVectorType(comp, bitsPerComp );
+                var compInfo = vectorType != null
+                    ? vectorType.ComponentInfo :
+                    new VectorComponentInfo(new VectorComponent(VectorComponentType.Raw, comp * bitsPerComp));
+
+                return new ImageInfo(readState.Width, readState.Height, compInfo, Format);
+            }
             return default;
         }
 
-        public ImageInfo Identify(ImageReadStream stream, ImagingConfig config)
+        public ImageInfo Identify(ImagingConfig config, ImageReadStream stream)
         {
-            return Identify(stream.Context, config);
+            return Identify(config, stream.Context);
         }
 
         #endregion
@@ -83,92 +112,17 @@ namespace MonoGame.Imaging.Coding.Decoding
             return new ReadState(onBufferReady, progressCallback);
         }
 
-        protected virtual unsafe Image<TPixel>.PixelBuffer ParseStbResult<TPixel>(
+        protected virtual unsafe Image ParseStbResult(
             ImagingConfig config, void* result, ReadState state)
-            where TPixel : unmanaged, IPixel
         {
-            // TODO: use some Image.LoadPixels function instead
-
-            int pixelCount = state.Width * state.Height;
-            var dstMemory = new UnmanagedMemory<TPixel>(pixelCount);
             try
             {
-                var dstPtr = (TPixel*)dstMemory.Pointer;
-                switch (state.Components)
-                {
-                    case 1:
-                        var gray8Ptr = (Gray8*)result;
-                        for (int p = 0; p < pixelCount; p++)
-                            dstPtr[p].FromScaledVector4(gray8Ptr[p].ToScaledVector4());
-                        break;
+                var vectorType = CompToVectorType(state.Components, state.BitsPerComponent.Value);
 
-                    case 2:
-                        var gray16Ptr = (Gray16*)result;
-                        for (int p = 0; p < pixelCount; p++)
-                            dstPtr[p].FromScaledVector4(gray16Ptr[p].ToScaledVector4());
-                        break;
-
-                    case 3:
-                        var rgbPtr = (Rgb24*)result;
-                        for (int p = 0; p < pixelCount; p++)
-                            dstPtr[p].FromScaledVector4(rgbPtr[p].ToScaledVector4());
-                        break;
-
-                    case 4:
-                        if (typeof(TPixel) == typeof(Rgba64))
-                        {
-                            if (state.BitsPerChannel == 16)
-                            {
-                                int bytes = pixelCount * sizeof(Rgba64);
-                                Buffer.MemoryCopy(result, dstPtr, bytes, bytes);
-                            }
-                            else
-                            {
-                                var src8 = (Color*)result;
-                                var dst8 = (Rgba64*)dstPtr;
-                                for (int i = 0; i < pixelCount; i++)
-                                    src8[i].FromRgba64(dst8[i]);
-                            }
-                        }
-                        else if (typeof(TPixel) == typeof(Color))
-                        {
-                            if (state.BitsPerChannel == 16)
-                            {
-                                var src16 = (Rgba64*)result;
-                                var dst16 = (Color*)dstPtr;
-                                for (int i = 0; i < pixelCount; i++)
-                                    src16[i].ToColor(ref dst16[i]);
-                            }
-                            else
-                            {
-                                int bytes = pixelCount * sizeof(Color);
-                                Buffer.MemoryCopy(result, dstPtr, bytes, bytes);
-                            }
-                        }
-                        else
-                        {
-                            if (state.BitsPerChannel == 16)
-                            {
-                                var src16 = (Rgba64*)result;
-                                for (int p = 0; p < pixelCount; p++)
-                                    dstPtr[p].FromScaledVector4(src16[p].ToScaledVector4());
-                            }
-                            else
-                            {
-                                var src8 = (Color*)result;
-                                for (int p = 0; p < pixelCount; p++)
-                                    dstPtr[p].FromScaledVector4(src8[p].ToScaledVector4());
-                            }
-                        }
-                        break;
-                }
-
-                return new Image<TPixel>.PixelBuffer(dstMemory, state.Width, leaveOpen: false);
-            }
-            catch
-            {
-                dstMemory?.Dispose();
-                throw;
+                int pixelCount = state.Width * state.Height;
+                var span = new ReadOnlySpan<byte>(result, pixelCount * vectorType.ElementSize);
+                var image = Image.LoadPixelData(vectorType, span, new Size(state.Width, state.Height));
+                return image;
             }
             finally
             {
@@ -176,7 +130,7 @@ namespace MonoGame.Imaging.Coding.Decoding
             }
         }
 
-        protected Exception GetFailureException(ReadContext context)
+        protected Exception GetFailureException(ImagingConfig config, ReadContext context)
         {
             // TODO: get some error message from the context
             return new Exception();
@@ -187,51 +141,46 @@ namespace MonoGame.Imaging.Coding.Decoding
         #region IImageDecoder
 
         public unsafe ImageDecoderState DecodeFirst(
-            ImagingConfig imagingConfig,
+            ImagingConfig config,
             ImageReadStream stream,
-            out Image image,
             DecodeProgressCallback onProgress = null)
         {
-            var decoderState = new ImageDecoderState(this, imagingConfig, stream, true);
+            var decoderState = new ImageStbDecoderState(this, config, stream);
             var readState = CreateReadState(decoderState, null, onProgress);
-            if (ReadFirst(imagingConfig, stream.Context, out void* result, ref readState))
+            if (ReadFirst(config, stream.Context, out void* result, ref readState))
             {
-                var parsedBuffer = ParseStbResult<TPixel>(imagingConfig, result, readState);
-                image = new Image<TPixel>(parsedBuffer, readState.Width, readState.Height);
-
+                var image = ParseStbResult(config, result, readState);
                 decoderState.CurrentImage = image;
-                decoderState.ImageIndex = 0;
+                decoderState.ImageIndex++;
                 return decoderState;
             }
             else
             {
-                throw GetFailureException(stream.Context);
+                throw GetFailureException(config, stream.Context);
             }
         }
 
-        public unsafe bool DecodeNext(
+        public unsafe void DecodeNext(
             ImagingConfig config,
             ImageDecoderState decoderState,
-            out Image image,
             DecodeProgressCallback onProgress = null)
         {
-            if (decoderState.ImageIndex < 0)
+            var state = (ImageStbDecoderState)decoderState;
+            if (state.ImageIndex < 0)
                 throw new InvalidOperationException(
-                    $"The decoder state has an invalid {nameof(decoderState.ImageIndex)}.");
+                    $"The decoder state has an invalid {nameof(state.ImageIndex)}.");
 
-            var readState = CreateReadState(decoderState, null, onProgress);
-            if (ReadNext(config, decoderState.Stream.Context, out void* result, ref readState))
+            var readState = CreateReadState(state, null, onProgress);
+            if (ReadNext(config, state.Stream.Context, out void* result, ref readState))
             {
-                var parsedBuffer = ParseStbResult<TPixel>(config, result, readState);
-                image = new Image<TPixel>(parsedBuffer, readState.Width, readState.Height);
-
-                decoderState.CurrentImage = image;
-                decoderState.ImageIndex++;
-                return true;
+                var image = ParseStbResult(config, result, readState);
+                state.CurrentImage = image;
+                state.ImageIndex++;
             }
             else
             {
-                throw GetFailureException(decoderState.Stream.Context);
+                state.CurrentImage = null;
+                throw GetFailureException(config, decoderState.Stream.Context);
             }
         }
 

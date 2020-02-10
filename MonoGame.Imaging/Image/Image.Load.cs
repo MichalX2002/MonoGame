@@ -30,8 +30,7 @@ namespace MonoGame.Imaging
                 if (!TryGetDecoder(format, out var decoder))
                     throw new MissingDecoderException(format);
 
-                return new ImageDecoderEnumerator(
-                    decoder, onProgress, imageStream, leaveOpen: true);
+                return new ImageDecoderEnumerator(config, decoder, imageStream, onProgress);
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using MonoGame.Imaging.Attributes.Coder;
 using StbSharp;
+using static StbSharp.StbImage;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
@@ -8,25 +9,24 @@ namespace MonoGame.Imaging.Coding.Decoding
         public override ImageFormat Format => ImageFormat.Png;
 
         protected override bool TestFormat(
-            StbImage.ReadContext context, ImagingConfig config)
+            ImagingConfig config, ReadContext context)
         {
-            return StbImage.stbi__png_test(context) != 0;
+            return stbi__png_test(context) != 0;
         }
 
         protected override bool GetInfo(
-            StbImage.ReadContext context, ImagingConfig config,
-            out int w, out int h, out int comp)
+            ImagingConfig config, ReadContext context, out ReadState readState)
         {
-            return StbImage.stbi__png_info(context, out w, out h, out comp);
+            return stbi__png_info(context, out readState);
         }
 
         protected override unsafe bool ReadFirst(
             ImagingConfig imagingConfig,
-            StbImage.ReadContext context,
+            ReadContext context,
             out void* result,
-            ref StbImage.ReadState state)
+            ref ReadState state)
         {
-            result = StbImage.stbi__png_load(context, ref state);
+            result = stbi__png_load(context, ref state);
             return result != null;
         }
     }

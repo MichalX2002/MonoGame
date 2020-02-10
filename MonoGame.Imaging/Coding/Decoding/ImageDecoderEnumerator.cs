@@ -1,58 +1,83 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
-    public class ImageDecoderEnumerator : ImageCoderEnumerator<Image>
+    public class ImageDecoderEnumerator : IEnumerable<Image>, IEnumerator<Image>, IImagingConfigProvider
     {
         private ImageReadStream _readStream;
-        private bool _leaveOpen;
+        private DecodeProgressCallback _progressCallback;
 
+        public ImagingConfig ImagingConfig { get; }
         public IImageDecoder Decoder { get; }
 
-        private DecodeProgressCallback ProgressCallback { get; }
+        public ImageDecoderState State { get; private set; }
+        public Image Current => State.CurrentImage;
+        object IEnumerator.Current => Current;
 
         #region Constructors
 
         public ImageDecoderEnumerator(
-            ImagingConfig imagingConfig,
+            ImagingConfig config,
             IImageDecoder decoder,
-            DecodeProgressCallback progressCallback,
             ImageReadStream readStream,
-            bool leaveOpen) : base(imagingConfig)
+            DecodeProgressCallback progressCallback = null)
         {
+            ImagingConfig = config ?? throw new ArgumentNullException(nameof(config));
             Decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
-            ProgressCallback = progressCallback;
             _readStream = readStream ?? throw new ArgumentNullException(nameof(readStream));
-            _leaveOpen = leaveOpen;
+            _progressCallback = progressCallback;
         }
 
         #endregion
 
-        public override bool MoveNext()
+        public bool MoveNext()
         {
-            if(ImageIndex == -1)
-            {
-                Decoder.DecodeFirst()
-            }
+            if (State == null)
+                State = Decoder.DecodeFirst(ImagingConfig, _readStream, _progressCallback);
             else
-            {
+                Decoder.DecodeNext(ImagingConfig, State, _progressCallback);
 
-            }
+            if (State.CurrentImage != null)
+                return true;
+            return false;
         }
 
-        public override void Reset()
+        public void Reset()
         {
             // TODO: consider implementation based on seekable streams
             throw new NotSupportedException();
         }
 
-        public override void Dispose()
+        IEnumerator<Image> IEnumerable<Image>.GetEnumerator() => this;
+        IEnumerator IEnumerable.GetEnumerator() => this;
+
+        #region IDisposable
+
+        protected void Dispose(bool disposing)
         {
-            if (!_leaveOpen)
-            {
-                _readStream?.Dispose();
-                _readStream = null;
-            }
+            if (!disposing)
+                return;
+
+            State?.Dispose();
+            State = null;
+
+            _readStream?.Dispose();
+            _readStream = null;
         }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~ImageDecoderEnumerator()
+        {
+            Dispose(false);
+        }
+
+        #endregion
     }
 }

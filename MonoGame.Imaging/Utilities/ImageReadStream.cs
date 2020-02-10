@@ -37,6 +37,8 @@ namespace MonoGame.Imaging
 
         public StreamDisposeMethod DisposalMethod { get; }
 
+        public CancellationToken CancellationToken => Context.CancellationToken;
+
         public ImageReadStream(
             Stream stream, CancellationToken cancellationToken, StreamDisposeMethod disposeMethod)
         {

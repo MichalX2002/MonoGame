@@ -7,27 +7,21 @@ namespace MonoGame.Imaging.Coding
     {
         private bool _leaveOpen;
 
-        #region Auto Properties
-
         public bool IsDisposed { get; protected set; }
 
         public ImagingConfig Config { get; }
         public Stream Stream { get; }
 
         /// <summary>
-        /// Gets or sets the zero-based index of the current image.
+        /// Gets the zero-based index of the most recently processed image.
         /// </summary>
-        public int ImageIndex { get; set; }
-
-        #endregion
+        public int ImageIndex { get; protected set; } = -1;
 
         public ImageCoderState(ImagingConfig config, Stream stream, bool leaveOpen)
         {
             Config = config ?? throw new ArgumentNullException(nameof(config));
             Stream = stream ?? throw new ArgumentNullException(nameof(stream));
             _leaveOpen = leaveOpen;
-
-            ImageIndex = -1;
         }
 
         #region IDisposable

@@ -12,13 +12,16 @@ namespace MonoGame.Imaging.Processing
         public static Image Resize(
             this ReadOnlyPixelRowsContext context, int width, int height)
         {
+            throw new NotImplementedException();
+
             var outputImage = Image.Create(context.PixelType, width, height);
             
-            StbImageResize.stbir_resize(
-                inputImg, context.Width, context.Height, context.Stride, outputImage, 
-                outputImage.Width, outputImage.Height, outputImage.ByteStride, StbImageResize.DataType)
-
-                return outputImage;
+            // TODO: FIXME:
+            //StbImageResize.stbir_resize(
+            //    inputImg, context.Width, context.Height, context.Stride, outputImage, 
+            //    outputImage.Width, outputImage.Height, outputImage.ByteStride, StbImageResize.DataType)
+            //
+            //    return outputImage;
         }
 
         /// <summary>

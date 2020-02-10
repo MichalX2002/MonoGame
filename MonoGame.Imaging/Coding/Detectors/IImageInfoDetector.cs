@@ -9,17 +9,17 @@ namespace MonoGame.Imaging.Coding.Decoding
         /// <summary>
         /// Tries to detect the format of an image from a stream.
         /// </summary>
-        /// <param name="stream">The stream to read from.</param>
         /// <param name="config">The imaging configuration.</param>
+        /// <param name="stream">The stream to read from.</param>
         /// <returns>The format that was detected.</returns>
-        ImageFormat DetectFormat(ImageReadStream stream, ImagingConfig config);
+        ImageFormat DetectFormat(ImagingConfig config, ImageReadStream stream);
 
         /// <summary>
         /// Tries to identify information about an image from a stream.
         /// </summary>
-        /// <param name="stream">The stream to read from.</param>
         /// <param name="config">The imaging configuration.</param>
+        /// <param name="stream">The stream to read from.</param>
         /// <returns>The information that was identified.</returns>
-        ImageInfo Identify(ImageReadStream stream, ImagingConfig config);
+        ImageInfo Identify(ImagingConfig config, ImageReadStream stream);
     }
 }

@@ -21,13 +21,11 @@ namespace MonoGame.Imaging.Coding.Decoding
         /// </summary>
         /// <param name="imagingConfig">The imaging configuration.</param>
         /// <param name="stream">The stream to read from.</param>
-        /// <param name="image">The decoded image.</param>
         /// <param name="onProgress">Optional delegate for reporting decode progress.</param>
         /// <returns>The state used to continue decoding of subsequent images.</returns>
         ImageDecoderState DecodeFirst(
             ImagingConfig imagingConfig,
             ImageReadStream stream,
-            out Image image,
             DecodeProgressCallback onProgress = null);
 
         /// <summary>
@@ -35,13 +33,10 @@ namespace MonoGame.Imaging.Coding.Decoding
         /// </summary>
         /// <param name="imagingConfig">The imaging configuration.</param>
         /// <param name="decoderState">The state from the first decode call.</param>
-        /// <param name="image">The decoded image.</param>
         /// <param name="onProgress">Optional delegate for reporting decode progress.</param>
-        /// <returns>Whether an image was read.</returns>
-        bool DecodeNext(
+        void DecodeNext(
             ImagingConfig imagingConfig,
             ImageDecoderState decoderState,
-            out Image image,
             DecodeProgressCallback onProgress = null);
 
         /// <summary>

@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Threading;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
-    public class ImageDecoderState : ImageCoderState
+    public abstract class ImageDecoderState : ImageCoderState
     {
         #region Properties
 
@@ -12,19 +11,17 @@ namespace MonoGame.Imaging.Coding.Decoding
         /// </summary>
         public IImageDecoder Decoder { get; }
 
-        public Image CurrentImage { get; set; }
+        public Image CurrentImage { get; protected set; }
 
         public new ImageReadStream Stream => (ImageReadStream)base.Stream;
-
-        public CancellationToken CancellationToken => Stream.Context.CancellationToken;
-
+        
         #endregion
 
         public ImageDecoderState(
             IImageDecoder decoder,
             ImagingConfig imagingConfig, 
-            ImageReadStream stream,
-            bool leaveOpen) : base(imagingConfig, stream, leaveOpen)
+            ImageReadStream stream) : 
+            base(imagingConfig, stream, leaveOpen: false)
         {
             Decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
         }

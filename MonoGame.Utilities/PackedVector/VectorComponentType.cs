@@ -5,11 +5,11 @@ namespace MonoGame.Framework.PackedVector
     [Flags]
     public enum VectorComponentType
     {
-        Red,
-        Green,
-        Blue,
+        Red = 1 << 0,
+        Green = 1 << 1,
+        Blue = 1 << 2,
         Gray = Red | Green | Blue,
-        Alpha,
-        Raw
+        Alpha = 1 << 3,
+        Raw = 1 << 4
     }
 }

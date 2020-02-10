@@ -302,7 +302,8 @@ namespace MonoGame.Framework.Graphics
             Image image, GraphicsDevice graphicsDevice, bool mipmap, SurfaceFormat format)
         {
             var texture = new Texture2D(graphicsDevice, image.Width, image.Height, mipmap, format);
-            texture.SetData(image.GetPixelSpan());
+            throw new NotImplementedException(); // TODO: FIXME:
+            ///texture.SetData(image.GetPixelSpan());
             return texture;
         }
 
@@ -354,7 +355,8 @@ namespace MonoGame.Framework.Graphics
             if (info.Height != Height) throw GetSizeException("height");
 
             using (var image = Image.Load(config, readStream))
-                SetData(image.GetPixelSpan());
+                throw new NotImplementedException(); // TODO: FIXME:
+                //SetData(image.GetPixelSpan());
         }
 
         /// <summary>
