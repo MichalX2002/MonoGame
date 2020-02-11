@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using MonoGame.Framework;
+using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Utilities;
@@ -19,6 +20,7 @@ namespace MonoGame.Imaging
         {
             SetupReflectionLoadPixels();
             SetupReflectionLoadPixelRows();
+            SetupReflectionWrapMemory();
             SetupReflectionCreate();
         }
 
@@ -52,8 +54,8 @@ namespace MonoGame.Imaging
             if (fromPixelType == null) throw new ArgumentNullException(nameof(fromPixelType));
             if (toPixelType == null) throw new ArgumentNullException(nameof(toPixelType));
 
-            var loadPixelsDelegateKey = (fromPixelType, toPixelType);
-            if (!_loadPixelSpanDelegateCache.TryGetValue(loadPixelsDelegateKey, out var loadDelegate))
+            var delegateKey = (fromPixelType, toPixelType);
+            if (!_loadPixelSpanDelegateCache.TryGetValue(delegateKey, out var loadDelegate))
             {
                 var delegateParams = typeof(LoadPixelSpanDelegate).GetDelegateParameters().AsTypes();
                 var lambdaParams = delegateParams.Select(x => Expression.Parameter(x)).ToArray();
@@ -66,13 +68,13 @@ namespace MonoGame.Imaging
 
                 callParams[3] = Expression.Convert(callParams[3], typeof(Image<>).MakeGenericType(toPixelType.Type));
 
-                var genericLoadPixelSpan = _loadPixelSpanMethod.MakeGenericMethod(fromPixelType.Type, toPixelType.Type);
-                body.Add(Expression.Call(genericLoadPixelSpan, callParams));
+                var genericMethod = _loadPixelSpanMethod.MakeGenericMethod(fromPixelType.Type, toPixelType.Type);
+                body.Add(Expression.Call(genericMethod, callParams));
 
                 var block = Expression.Block(body);
                 var lambda = Expression.Lambda<LoadPixelSpanDelegate>(block, lambdaParams);
                 loadDelegate = lambda.Compile();
-                _loadPixelSpanDelegateCache.TryAdd(loadPixelsDelegateKey, loadDelegate);
+                _loadPixelSpanDelegateCache.TryAdd(delegateKey, loadDelegate);
             }
             return loadDelegate;
         }
@@ -99,14 +101,47 @@ namespace MonoGame.Imaging
             if (fromPixelType == null) throw new ArgumentNullException(nameof(fromPixelType));
             if (toPixelType == null) throw new ArgumentNullException(nameof(toPixelType));
 
-            var loadPixelsDelegateKey = (fromPixelType, toPixelType);
-            if (!_loadPixelRowsDelegateCache.TryGetValue(loadPixelsDelegateKey, out var loadDelegate))
+            var delegateKey = (fromPixelType, toPixelType);
+            if (!_loadPixelRowsDelegateCache.TryGetValue(delegateKey, out var loadDelegate))
             {
-                var genericLoadPixels = _loadPixelRowsMethod.MakeGenericMethod(fromPixelType.Type, toPixelType.Type);
-                loadDelegate = CreateDelegateForMethod<LoadPixelRowsDelegate>(genericLoadPixels);
-                _loadPixelRowsDelegateCache.TryAdd(loadPixelsDelegateKey, loadDelegate);
+                var genericMethod = _loadPixelRowsMethod.MakeGenericMethod(fromPixelType.Type, toPixelType.Type);
+                loadDelegate = CreateDelegateForMethod<LoadPixelRowsDelegate>(genericMethod);
+                _loadPixelRowsDelegateCache.TryAdd(delegateKey, loadDelegate);
             }
             return loadDelegate;
+        }
+
+        #endregion
+
+        #region WrapMemory
+
+        private delegate Image WrapMemoryDelegate(
+            VectorTypeInfo pixelType, IMemory memory, int width, int height);
+
+        private static MethodInfo _wrapMemoryMethod;
+        private static ConcurrentDictionary<VectorTypeInfo, WrapMemoryDelegate> _wrapMemoryDelegateCache;
+
+        private static void SetupReflectionWrapMemory()
+        {
+            var arguments = typeof(WrapMemoryDelegate)
+                .GetDelegateParameters().Skip(1).Select(x => x.ParameterType).ToArray();
+
+            // TODO: FIXME: this may not work
+            _wrapMemoryMethod = typeof(Image).GetMethod(nameof(WrapMemory), arguments);
+            _wrapMemoryDelegateCache = new ConcurrentDictionary<VectorTypeInfo, WrapMemoryDelegate>();
+        }
+
+        private static WrapMemoryDelegate GetWrapMemoryDelegate(VectorTypeInfo pixelType)
+        {
+            if (pixelType == null) throw new ArgumentNullException(nameof(pixelType));
+
+            if (!_wrapMemoryDelegateCache.TryGetValue(pixelType, out var wrapMemoryDelegate))
+            {
+                var genericMethod = _wrapMemoryMethod.MakeGenericMethod(pixelType.Type);
+                wrapMemoryDelegate = CreateDelegateForMethod<WrapMemoryDelegate>(genericMethod);
+                _wrapMemoryDelegateCache.TryAdd(pixelType, wrapMemoryDelegate);
+            }
+            return wrapMemoryDelegate;
         }
 
         #endregion

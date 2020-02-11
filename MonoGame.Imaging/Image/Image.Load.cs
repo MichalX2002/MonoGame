@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading;
+using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Coding.Decoding;
 
 namespace MonoGame.Imaging
@@ -16,6 +17,7 @@ namespace MonoGame.Imaging
             ImagingConfig config,
             Stream stream,
             out ImageFormat format,
+            VectorTypeInfo pixelType = null,
             CancellationToken? cancellationToken = null,
             DecodeProgressCallback onProgress = null)
         {
@@ -30,17 +32,20 @@ namespace MonoGame.Imaging
                 if (!TryGetDecoder(format, out var decoder))
                     throw new MissingDecoderException(format);
 
-                return new ImageDecoderEnumerator(config, decoder, imageStream, onProgress);
+                return new ImageDecoderEnumerator(
+                    config, decoder, imageStream, pixelType, onProgress);
             }
         }
 
         public static ImageDecoderEnumerator LoadFrames(
             Stream stream,
             out ImageFormat format,
+            VectorTypeInfo pixelType = null,
             CancellationToken? cancellationToken = null,
             DecodeProgressCallback onProgress = null)
         {
-            return LoadFrames(ImagingConfig.Default, stream, out format, cancellationToken, onProgress);
+            return LoadFrames(
+                ImagingConfig.Default, stream, out format, pixelType, cancellationToken, onProgress);
         }
 
         #endregion
@@ -82,10 +87,12 @@ namespace MonoGame.Imaging
             ImagingConfig config,
             Stream stream,
             out ImageFormat format,
+            VectorTypeInfo pixelType = null,
             CancellationToken? cancellationToken = null,
             DecodeProgressCallback onProgress = null)
         {
-            using (var frames = LoadFrames(config, stream, out format, cancellationToken, onProgress))
+            using (var frames = LoadFrames(
+                config, stream, out format, pixelType, cancellationToken, onProgress))
             {
                 return frames.First();
             }
@@ -94,28 +101,32 @@ namespace MonoGame.Imaging
         public static Image Load(
             ImagingConfig config,
             Stream stream,
+            VectorTypeInfo pixelType = null,
             CancellationToken? cancellationToken = null,
             DecodeProgressCallback onProgress = null)
         {
-            return Load(config, stream, out _, cancellationToken, onProgress);
+            return Load(config, stream, out _, pixelType, cancellationToken, onProgress);
         }
 
 
         public static Image Load(
             Stream stream,
             out ImageFormat format,
+            VectorTypeInfo pixelType = null,
             CancellationToken? cancellationToken = null,
             DecodeProgressCallback onProgress = null)
         {
-            return Load(ImagingConfig.Default, stream, out format, cancellationToken, onProgress);
+            return Load(
+                ImagingConfig.Default, stream, out format, pixelType, cancellationToken, onProgress);
         }
 
         public static Image Load(
             Stream stream,
+            VectorTypeInfo pixelType = null,
             CancellationToken? cancellationToken = null,
             DecodeProgressCallback onProgress = null)
         {
-            return Load(stream, out _, cancellationToken, onProgress);
+            return Load(stream, out _, pixelType, cancellationToken, onProgress);
         }
 
         #endregion

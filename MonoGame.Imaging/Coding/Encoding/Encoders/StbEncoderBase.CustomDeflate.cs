@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -44,9 +45,9 @@ namespace MonoGame.Imaging.Coding.Encoding
                 }
 
                 uint adlerSum = StbImageWrite.Adler32.Calculate(data);
-                byte[] adlerBytes = BitConverter.GetBytes(adlerSum);
-                adlerBytes.AsSpan().Reverse();
-                output.Write(adlerBytes, 0, adlerBytes.Length);
+                Span<byte> adlerSumBytes = stackalloc byte[sizeof(uint)];
+                BinaryPrimitives.WriteUInt32BigEndian(adlerSumBytes, adlerSum);
+                output.Write(adlerSumBytes);
 
                 return new RecyclableDeflateResult(output);
             }
@@ -58,30 +59,25 @@ namespace MonoGame.Imaging.Coding.Encoding
             }
         }
 
-        private class RecyclableDeflateResult : IMemoryResult
+        private class RecyclableDeflateResult : GCHandleResult
         {
             private RecyclableMemoryStream _stream;
-            private GCHandle _handle;
 
-            public bool IsAllocated => _handle.IsAllocated;
-            public int Length => (int)_stream.Length;
-            public IntPtr Pointer => _handle.AddrOfPinnedObject();
-
-            public RecyclableDeflateResult(RecyclableMemoryStream stream)
+            public RecyclableDeflateResult(RecyclableMemoryStream stream) : 
+                base(GCHandle.Alloc(stream.GetBuffer(), GCHandleType.Pinned), (int)stream.Length)
             {
                 _stream = stream;
-
-                byte[] buffer = _stream.GetBuffer();
-                _handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
             }
 
-            public void Dispose()
+            protected override void Dispose(bool disposing)
             {
-                if (_handle.IsAllocated)
-                    _handle.Free();
+                base.Dispose(disposing);
 
-                _stream?.Dispose();
-                _stream = null;
+                if (disposing)
+                {
+                    _stream?.Dispose();
+                    _stream = null;
+                }
             }
         }
     }

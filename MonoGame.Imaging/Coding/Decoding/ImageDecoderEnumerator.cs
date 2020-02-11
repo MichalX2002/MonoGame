@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
     public class ImageDecoderEnumerator : IEnumerable<Image>, IEnumerator<Image>, IImagingConfigProvider
     {
         private ImageReadStream _readStream;
+        private VectorTypeInfo _pixelType;
         private DecodeProgressCallback _progressCallback;
 
         public ImagingConfig ImagingConfig { get; }
@@ -22,11 +24,13 @@ namespace MonoGame.Imaging.Coding.Decoding
             ImagingConfig config,
             IImageDecoder decoder,
             ImageReadStream readStream,
+            VectorTypeInfo pixelType = null,
             DecodeProgressCallback progressCallback = null)
         {
             ImagingConfig = config ?? throw new ArgumentNullException(nameof(config));
             Decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
             _readStream = readStream ?? throw new ArgumentNullException(nameof(readStream));
+            _pixelType = pixelType;
             _progressCallback = progressCallback;
         }
 
@@ -35,9 +39,9 @@ namespace MonoGame.Imaging.Coding.Decoding
         public bool MoveNext()
         {
             if (State == null)
-                State = Decoder.DecodeFirst(ImagingConfig, _readStream, _progressCallback);
+                State = Decoder.DecodeFirst(ImagingConfig, _readStream, _pixelType, _progressCallback);
             else
-                Decoder.DecodeNext(State, _progressCallback);
+                Decoder.DecodeNext(State, _pixelType, _progressCallback);
 
             if (State.CurrentImage != null)
                 return true;
