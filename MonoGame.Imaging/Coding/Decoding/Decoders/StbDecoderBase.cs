@@ -1,82 +1,14 @@
 ﻿using System;
 using MonoGame.Framework;
-using MonoGame.Framework.Memory;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Imaging.Coding.Identification;
 using StbSharp;
 using static StbSharp.StbImage;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
-    public abstract class StbDecoderBase : IImageDecoder, IImageInfoDetector
+    public abstract class StbDecoderBase : IImageDecoder
     {
         public abstract ImageFormat Format { get; }
-
-        private static VectorTypeInfo CompToVectorType(int comp, int compDepth)
-        {
-            switch (comp)
-            {
-                case 1:
-                    return compDepth == 16 ? VectorTypeInfo.Get<Gray16>() : VectorTypeInfo.Get<Gray8>();
-
-                case 2:
-                    return VectorTypeInfo.Get<GrayAlpha16>();
-
-                case 3:
-                    return compDepth == 16 ? VectorTypeInfo.Get<Rgb48>() : VectorTypeInfo.Get<Rgb24>();
-
-                case 4:
-                    return compDepth == 16 ? VectorTypeInfo.Get<Rgba64>() : VectorTypeInfo.Get<Color>();
-
-                default:
-                    return default;
-            }
-        }
-
-        #region DetectFormat Abstraction
-
-        protected abstract bool TestFormat(ImagingConfig config, ReadContext context);
-
-        private ImageFormat DetectFormat(ImagingConfig config, ReadContext context)
-        {
-            if (TestFormat(config, context))
-                return Format;
-            return default;
-        }
-
-        public ImageFormat DetectFormat(ImagingConfig config, ImageReadStream stream)
-        {
-            return DetectFormat(config, stream.Context);
-        }
-
-        #endregion
-
-        #region Identify Abstraction
-
-        protected abstract bool GetInfo(ImagingConfig config, ReadContext context, out ReadState readState);
-
-        private ImageInfo Identify(ImagingConfig config, ReadContext context)
-        {
-            if (GetInfo(config, context, out var readState))
-            {
-                int comp = readState.Components;
-                int bitsPerComp = readState.BitsPerComponent.Value;
-
-                var vectorType = CompToVectorType(comp, bitsPerComp );
-                var compInfo = vectorType != null
-                    ? vectorType.ComponentInfo :
-                    new VectorComponentInfo(new VectorComponent(VectorComponentType.Raw, comp * bitsPerComp));
-
-                return new ImageInfo(readState.Width, readState.Height, compInfo, Format);
-            }
-            return default;
-        }
-
-        public ImageInfo Identify(ImagingConfig config, ImageReadStream stream)
-        {
-            return Identify(config, stream.Context);
-        }
-
-        #endregion
 
         #region Decode Abstraction
 
@@ -117,7 +49,8 @@ namespace MonoGame.Imaging.Coding.Decoding
         {
             try
             {
-                var vectorType = CompToVectorType(state.Components, state.BitsPerComponent.Value);
+                var vectorType = StbIdentifierBase.CompToVectorType(
+                    state.Components, state.BitsPerComponent.Value);
 
                 int pixelCount = state.Width * state.Height;
                 var span = new ReadOnlySpan<byte>(result, pixelCount * vectorType.ElementSize);
@@ -145,7 +78,7 @@ namespace MonoGame.Imaging.Coding.Decoding
             ImageReadStream stream,
             DecodeProgressCallback onProgress = null)
         {
-            var decoderState = new ImageStbDecoderState(this, config, stream);
+            var decoderState = new ImageStbDecoderState(config, this, stream);
             var readState = CreateReadState(decoderState, null, onProgress);
             if (ReadFirst(config, stream.Context, out void* result, ref readState))
             {
@@ -161,7 +94,6 @@ namespace MonoGame.Imaging.Coding.Decoding
         }
 
         public unsafe void DecodeNext(
-            ImagingConfig config,
             ImageDecoderState decoderState,
             DecodeProgressCallback onProgress = null)
         {
@@ -171,16 +103,16 @@ namespace MonoGame.Imaging.Coding.Decoding
                     $"The decoder state has an invalid {nameof(state.ImageIndex)}.");
 
             var readState = CreateReadState(state, null, onProgress);
-            if (ReadNext(config, state.Stream.Context, out void* result, ref readState))
+            if (ReadNext(decoderState.ImagingConfig, state.Stream.Context, out void* result, ref readState))
             {
-                var image = ParseStbResult(config, result, readState);
+                var image = ParseStbResult(state.ImagingConfig, result, readState);
                 state.CurrentImage = image;
                 state.ImageIndex++;
             }
             else
             {
                 state.CurrentImage = null;
-                throw GetFailureException(config, decoderState.Stream.Context);
+                throw GetFailureException(state.ImagingConfig, decoderState.Stream.Context);
             }
         }
 

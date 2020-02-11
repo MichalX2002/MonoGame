@@ -27,11 +27,11 @@ namespace MonoGame.Imaging.Tests
             Console.WriteLine(args);
 
             var archive = new ZipArchive(File.OpenRead(DataZip), ZipArchiveMode.Read, false);
-            //var stream = archive.GetEntry("png/32bit.png").Open();
-            //var stream = archive.GetEntry("bmp/32bit.bmp").Open();
+            var stream = archive.GetEntry("png/24bit.png").Open();
+            //var stream = archive.GetEntry("bmp/24bit.bmp").Open();
 
             var encoded = new MemoryStream(1024 * 1024 * 8);
-            using(var stream = new FileStream("big img.png", FileMode.Open))
+            //using(var stream = new FileStream("big img.png", FileMode.Open))
                 stream.CopyTo(encoded);
 
             //var encoded = new FileStream("big img.png", FileMode.Open);
@@ -63,7 +63,7 @@ namespace MonoGame.Imaging.Tests
                 image = Image.Load(encoded, null, OnReadProgress);
                 watch.Stop();
             }
-            Console.WriteLine(image.Width + "x" + image.Height + " # " + image.PixelType);
+            Console.WriteLine(image.Width + "x" + image.Height + " # " + image.PixelType.Type);
             Console.WriteLine("Buffer Read Average: " +
                 Math.Round(watch.Elapsed.TotalMilliseconds / (readRepeats == 1 ? 1 : readRepeats - 1), 3) + "ms");
 

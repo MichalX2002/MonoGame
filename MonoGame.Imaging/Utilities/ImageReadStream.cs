@@ -44,7 +44,8 @@ namespace MonoGame.Imaging
         {
             if (disposeMethod != StreamDisposeMethod.Close &&
                 disposeMethod != StreamDisposeMethod.LeaveOpen &&
-                disposeMethod != StreamDisposeMethod.CancellableClose)
+                disposeMethod != StreamDisposeMethod.CancellableClose &&
+                disposeMethod != StreamDisposeMethod.CancellableLeaveOpen)
                 throw new ArgumentOutOfRangeException(nameof(disposeMethod));
 
             _stream = stream ?? throw new ArgumentNullException(nameof(stream));

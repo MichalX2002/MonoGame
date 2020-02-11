@@ -71,7 +71,7 @@ namespace MonoGame.Imaging
         {
             base.Dispose(disposing);
 
-            Buffer.Dispose();
+            _buffer.Dispose();
         }
     }
 }

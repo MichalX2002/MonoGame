@@ -18,8 +18,8 @@ namespace MonoGame.Imaging.Coding.Decoding
         #endregion
 
         public ImageDecoderState(
+            ImagingConfig imagingConfig,
             IImageDecoder decoder,
-            ImagingConfig imagingConfig, 
             ImageReadStream stream) : 
             base(imagingConfig, stream, leaveOpen: false)
         {

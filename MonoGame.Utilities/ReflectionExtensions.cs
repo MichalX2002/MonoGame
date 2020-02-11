@@ -24,6 +24,11 @@ namespace MonoGame.Framework
             return GetDelegateParameters(type);
         }
 
+        public static Type[] AsTypes(this ParameterInfo[] parameters)
+        {
+            return parameters.Select(x => x.ParameterType).ToArray();
+        }
+
         public static Type[] GetGenericTypeDefinitions(this ParameterInfo[] parameters)
         {
             return parameters

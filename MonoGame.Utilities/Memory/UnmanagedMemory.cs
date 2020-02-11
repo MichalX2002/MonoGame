@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Memory
@@ -121,7 +120,7 @@ namespace MonoGame.Framework.Memory
             }
             else
             {
-                Pointer = Pointer == null
+                Pointer = Pointer == default
                     ? Marshal.AllocHGlobal(ByteLength)
                     : Marshal.ReAllocHGlobal(Pointer, (IntPtr)ByteLength);
 

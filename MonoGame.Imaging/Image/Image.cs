@@ -68,16 +68,7 @@ namespace MonoGame.Imaging
         /// </summary>
         public static Image Create(VectorTypeInfo pixelType, int width, int height)
         {
-            if (pixelType == null)
-                throw new ArgumentNullException(nameof(VectorTypeInfo));
-
-            if (!_createDelegateCache.TryGetValue(pixelType, out var createDelegate))
-            {
-                var imageType = typeof(Image<>).MakeGenericType(pixelType.Type);
-                var createMethod = imageType.GetMethod("Create", _createArgumentTypes);
-                createDelegate = createMethod.CreateDelegate<CreateDelegate>();
-                _createDelegateCache.TryAdd(pixelType, createDelegate);
-            }
+            var createDelegate = GetCreateDelegate(pixelType);
             return createDelegate.Invoke(width, height);
         }
 

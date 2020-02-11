@@ -35,7 +35,6 @@ namespace MonoGame.Imaging.Coding.Decoding
         /// <param name="decoderState">The state from the first decode call.</param>
         /// <param name="onProgress">Optional delegate for reporting decode progress.</param>
         void DecodeNext(
-            ImagingConfig imagingConfig,
             ImageDecoderState decoderState,
             DecodeProgressCallback onProgress = null);
 

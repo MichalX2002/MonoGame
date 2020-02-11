@@ -3,13 +3,13 @@ using System.IO;
 
 namespace MonoGame.Imaging.Coding
 {
-    public abstract class ImageCoderState : IDisposable
+    public abstract class ImageCoderState : IImagingConfigProvider, IDisposable
     {
         private bool _leaveOpen;
 
         public bool IsDisposed { get; protected set; }
 
-        public ImagingConfig Config { get; }
+        public ImagingConfig ImagingConfig { get; }
         public Stream Stream { get; }
 
         /// <summary>
@@ -19,7 +19,7 @@ namespace MonoGame.Imaging.Coding
 
         public ImageCoderState(ImagingConfig config, Stream stream, bool leaveOpen)
         {
-            Config = config ?? throw new ArgumentNullException(nameof(config));
+            ImagingConfig = config ?? throw new ArgumentNullException(nameof(config));
             Stream = stream ?? throw new ArgumentNullException(nameof(stream));
             _leaveOpen = leaveOpen;
         }

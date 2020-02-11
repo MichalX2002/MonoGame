@@ -8,7 +8,7 @@ namespace MonoGame.Imaging
 {
     public partial class Image
     {
-        public static void LoadPixels<TPixelFrom, TPixelTo>(
+        private static void LoadPixelRows<TPixelFrom, TPixelTo>(
             IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image<TPixelTo> destination)
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel

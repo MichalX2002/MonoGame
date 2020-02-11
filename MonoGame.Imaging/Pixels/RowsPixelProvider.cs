@@ -18,7 +18,7 @@ namespace MonoGame.Imaging.Pixels
             new ConcurrentDictionary<VectorTypeInfo, Transform32Delegate>(VectorTypeInfoEqualityComparer.Instance);
 
         private delegate bool Transform32Delegate(
-            ReadOnlySpan<byte> srcRow,
+            ReadOnlySpan<byte> sourceRow,
             int components,
             int toRead,
             Span<byte> destination,
@@ -92,7 +92,7 @@ namespace MonoGame.Imaging.Pixels
         }
 
         private static unsafe bool Transform32<TPixel>(
-            ReadOnlySpan<TPixel> srcRow,
+            ReadOnlySpan<TPixel> sourceRow,
             int components,
             int count,
             Span<byte> destination,
@@ -100,7 +100,7 @@ namespace MonoGame.Imaging.Pixels
             ref PixelConverter32 pixelConverter)
             where TPixel : unmanaged, IPixel
         {
-            // some for-loops in the following cases use "toRead - 1" so
+            // some for-loops in the following cases use "count - 1" so
             // we can copy leftover bytes if the request length is irregular
             int i = 0;
             switch (components)
@@ -108,7 +108,7 @@ namespace MonoGame.Imaging.Pixels
                 case 1:
                     for (; i < count; i++, bufferOffset++)
                     {
-                        pixelConverter.Gray.FromScaledVector4(srcRow[i].ToScaledVector4());
+                        pixelConverter.Gray.FromScaledVector4(sourceRow[i].ToScaledVector4());
                         destination[bufferOffset] = pixelConverter.Raw[0];
                     }
                     return true;
@@ -119,27 +119,27 @@ namespace MonoGame.Imaging.Pixels
                 case 2:
                     for (; i < count - 1; i++, bufferOffset += sizeof(GrayAlpha16))
                     {
-                        pixelConverter.GrayAlpha.FromScaledVector4(srcRow[i].ToScaledVector4());
+                        pixelConverter.GrayAlpha.FromScaledVector4(sourceRow[i].ToScaledVector4());
                         for (int j = 0; j < sizeof(GrayAlpha16); j++)
                             destination[j + bufferOffset] = pixelConverter.Raw[j];
                     }
-                    pixelConverter.GrayAlpha.FromScaledVector4(srcRow[i + 1].ToScaledVector4());
+                    pixelConverter.GrayAlpha.FromScaledVector4(sourceRow[i].ToScaledVector4());
                     return false;
 
                 case 3:
                     for (; i < count - 1; i++, bufferOffset += sizeof(Rgb24))
                     {
-                        pixelConverter.Rgb.FromScaledVector4(srcRow[i].ToScaledVector4());
+                        pixelConverter.Rgb.FromScaledVector4(sourceRow[i].ToScaledVector4());
                         for (int j = 0; j < sizeof(Rgb24); j++)
                             destination[j + bufferOffset] = pixelConverter.Raw[j];
                     }
-                    pixelConverter.Rgb.FromScaledVector4(srcRow[i + 1].ToScaledVector4());
+                    pixelConverter.Rgb.FromScaledVector4(sourceRow[i].ToScaledVector4());
                     return false;
 
                 case 4:
                     if (typeof(TPixel) == typeof(Color))
                     {
-                        fixed (TPixel* srcPtr = &MemoryMarshal.GetReference(srcRow))
+                        fixed (TPixel* srcPtr = &MemoryMarshal.GetReference(sourceRow))
                         fixed (byte* dstPtr = &MemoryMarshal.GetReference(destination))
                         {
                             int bytes = count * sizeof(TPixel);
@@ -152,16 +152,17 @@ namespace MonoGame.Imaging.Pixels
                     {
                         for (; i < count - 1; i++, bufferOffset += sizeof(Color))
                         {
-                            srcRow[i].ToColor(ref pixelConverter.Rgba);
+                            sourceRow[i].ToColor(ref pixelConverter.Rgba);
                             for (int j = 0; j < sizeof(Color); j++)
                                 destination[j + bufferOffset] = pixelConverter.Raw[j];
                         }
-                        srcRow[i + 1].ToColor(ref pixelConverter.Rgba);
+                        sourceRow[i].ToColor(ref pixelConverter.Rgba);
+                        return false;
                     }
-                    return false;
-            }
 
-            throw new InvalidOperationException();
+                default:
+                    throw new NotSupportedException();
+            }
         }
 
         public void Fill(Span<float> buffer, int dataOffset)

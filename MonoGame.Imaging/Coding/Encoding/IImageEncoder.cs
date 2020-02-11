@@ -35,7 +35,7 @@ namespace MonoGame.Imaging.Coding.Encoding
         /// <returns>The state used to continue encoding of subsequent images.</returns>
         ImageEncoderState EncodeFirst(
             ImagingConfig imagingConfig,
-            IReadOnlyPixelBuffer image,
+            IReadOnlyPixelRows image,
             Stream stream,
             EncoderOptions encoderOptions = null,
             CancellationToken? cancellationToken = null,
@@ -51,15 +51,9 @@ namespace MonoGame.Imaging.Coding.Encoding
         /// <param name="onProgress">Optional delegate for reporting encode progress.</param>
         bool EncodeNext(
             ImageEncoderState encoderState,
-            IReadOnlyPixelBuffer image,
+            IReadOnlyPixelRows image,
             EncoderOptions encoderOptions = null,
             CancellationToken? cancellationToken = null,
             EncodeProgressCallback onProgress = null);
-
-        /// <summary>
-        /// Finishes an encoding operation.
-        /// </summary>
-        /// <param name="encoderState">The state from the first encode call.</param>
-        void FinishState(ImageEncoderState encoderState);
     }
 }

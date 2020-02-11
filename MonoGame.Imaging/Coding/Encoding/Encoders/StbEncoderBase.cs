@@ -2,8 +2,6 @@
 using System.IO;
 using System.Threading;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Framework.Memory;
-using MonoGame.Framework.PackedVector;
 using static StbSharp.StbImageWrite;
 
 namespace MonoGame.Imaging.Coding.Encoding
@@ -20,70 +18,81 @@ namespace MonoGame.Imaging.Coding.Encoding
 
         // TODO: FIXME: make this into an extension method for IImageEncoder
 
-        public void Encode(
-            ImagingConfig imagingConfig,
-            ImageEncoderEnumerator images,
-            Stream stream,
-            EncoderOptions encoderOptions = null,
+        //public void Encode(
+        //    ImagingConfig imagingConfig,
+        //    IEnumerable<IReadOnlyPixelRows> images,
+        //    Stream stream,
+        //    bool leaveOpen,
+        //    EncoderOptions encoderOptions = null,
+        //    CancellationToken? cancellationToken = null,
+        //    EncodeProgressCallback onProgress = null)
+        //{
+        //    var cancelToken = cancellationToken ?? CancellationToken.None;
+        //    cancelToken.ThrowIfCancellationRequested();
+        //
+        //    int index = 0;
+        //    foreach (var image in images)
+        //    {
+        //        byte[] writeBuffer = RecyclableMemoryManager.Default.GetBlock();
+        //        try
+        //        {
+        //            int components = 4; // TODO: change this so it's dynamic/controlled
+        //            var provider = new RowsPixelProvider(image, components);
+        //            var state = new ImageStbEncoderState(imagingConfig, this, stream, leaveOpen);
+        //
+        //            cancelToken.ThrowIfCancellationRequested();
+        //
+        //            if (index == 0)
+        //            {
+        //                if (!WriteFirst(imagingConfig, context, image, encoderOptions))
+        //                    throw new ImagingException(Format);
+        //            }
+        //            else if (!WriteNext(imagingConfig, context, image, encoderOptions))
+        //            {
+        //                break;
+        //            }
+        //            index++;
+        //        }
+        //        finally
+        //        {
+        //            RecyclableMemoryManager.Default.ReturnBlock(writeBuffer);
+        //        }
+        //    }
+        //}
+
+        private static WriteContext CreateWriteContext(
+            IReadOnlyPixelRows image,
+            ImageStbEncoderState encoderState,
             CancellationToken? cancellationToken = null,
             EncodeProgressCallback onProgress = null)
         {
-            var cancelToken = cancellationToken ?? CancellationToken.None;
-            cancelToken.ThrowIfCancellationRequested();
+            var progressCallback = onProgress == null
+                ? (WriteProgressCallback)null
+                : (progress) => onProgress.Invoke(encoderState, progress, null);
 
-            IReadOnlyPixelBuffer image = null;
-            if (images.MoveNext())
-                image = images.Current;
-            else
-                return;
+            int components = 4; // TODO: change this so it's dynamic/controlled
+            var provider = new RowsPixelProvider(image, components);
 
-            int index = 0;
-            while (image != null)
-            {
-                byte[] writeBuffer = RecyclableMemoryManager.Default.GetBlock();
-                try
-                {
-                    int components = 4; // TODO: change this so it's dynamic/controlled
-                    var provider = new RowsPixelProvider(image, components);
-                    var state = new ImageStbEncoderState(imagingConfig, this, stream, encoderOptions.LeaveStreamOpen);
-                    var progressCallback = onProgress == null ? (WriteProgressCallback)null : (p) =>
-                        onProgress.Invoke(state, p, null);
+            var writeContext = new WriteContext(
+                readBytePixels: provider.Fill,
+                readFloatPixels: provider.Fill,
+                progressCallback,
+                image.Width,
+                image.Height,
+                components,
+                encoderState.Stream,
+                cancellationToken ?? CancellationToken.None,
+                encoderState.WriteBuffer,
+                encoderState.ScratchBuffer);
 
-                    int bufferOffset = writeBuffer.Length / 2;
-                    int scratchBufferLength = writeBuffer.Length - bufferOffset;
-
-                    var context = new WriteContext(
-                        provider.Fill, provider.Fill, progressCallback,
-                        image.Width, image.Height, components,
-                        stream, cancelToken, 
-                        new ArraySegment<byte>(writeBuffer, 0, bufferOffset), 
-                        new ArraySegment<byte>(writeBuffer, bufferOffset, scratchBufferLength));
-
-                    cancelToken.ThrowIfCancellationRequested();
-
-                    if (index == 0)
-                    {
-                        if (!WriteFirst(imagingConfig, context, image, encoderOptions))
-                            throw new ImagingException(Format);
-                    }
-                    else if (!WriteNext(imagingConfig, context, image, encoderOptions))
-                    {
-                        break;
-                    }
-                    index++;
-                }
-                finally
-                    {
-                    RecyclableMemoryManager.Default.ReturnBlock(writeBuffer);
-                }
-            }
+            return writeContext;
         }
 
         #region IImageEncoder
 
         public ImageEncoderState EncodeFirst(
-            ImagingConfig config,
-            IReadOnlyPixelBuffer image,
+            ImagingConfig imagingConfig,
+            IReadOnlyPixelRows image,
             Stream stream, 
             EncoderOptions encoderOptions = null, 
             CancellationToken? cancellationToken = null, 
@@ -91,25 +100,22 @@ namespace MonoGame.Imaging.Coding.Encoding
         {
             cancellationToken?.ThrowIfCancellationRequested();
 
-            if (config == null) throw new ArgumentNullException(nameof(config));
+            if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
             if (image == null) throw new ArgumentNullException(nameof(image));
             if (stream == null) throw new ArgumentNullException(nameof(stream));
-            ValidateEncoderOptions(encoderOptions);
+            encoderOptions = ValidateEncoderOptions(encoderOptions);
 
-            GetBuffers(out byte[] writeBuffer, out byte[] scratchBuffer);
-            try
-            {
+            // TODO: do something about leaveOpen
+            var encoderState = new ImageStbEncoderState(imagingConfig, this, stream, leaveOpen: true);
+            var writeContext = CreateWriteContext(image, encoderState, cancellationToken, onProgress);
 
-            }
-            finally
-            {
-                FreeBuffers(writeBuffer, scratchBuffer);
-            }
+            WriteFirst(encoderState.ImagingConfig, writeContext, image, encoderOptions);
+            return encoderState;
         }
 
         public bool EncodeNext(
             ImageEncoderState encoderState,
-            IReadOnlyPixelBuffer image, 
+            IReadOnlyPixelRows image, 
             EncoderOptions encoderOptions = null,
             CancellationToken? cancellationToken = null, 
             EncodeProgressCallback onProgress = null)
@@ -118,54 +124,40 @@ namespace MonoGame.Imaging.Coding.Encoding
 
             if (encoderState == null) throw new ArgumentNullException(nameof(encoderState));
             if (image == null) throw new ArgumentNullException(nameof(image));
-            ValidateEncoderOptions(encoderOptions);
+            encoderOptions = ValidateEncoderOptions(encoderOptions);
 
-            GetBuffers(out byte[] writeBuffer, out byte[] scratchBuffer);
-            try
-            {
+            var state = (ImageStbEncoderState)encoderState;
+            var writeContext = CreateWriteContext(image, state, cancellationToken, onProgress);
 
-            }
-            finally
-            {
-                FreeBuffers(writeBuffer, scratchBuffer);
-            }
+            return WriteNext(encoderState.ImagingConfig, writeContext, image, encoderOptions);
         }
 
         public virtual void FinishState(ImageEncoderState encoderState)
         {
+            encoderState.Dispose();
         }
 
         #endregion
 
-        private void ValidateEncoderOptions(EncoderOptions encoderOptions)
+        private EncoderOptions ValidateEncoderOptions(EncoderOptions encoderOptions)
         {
             if (encoderOptions == null)
-                throw new ArgumentNullException(nameof(encoderOptions));
+                return DefaultOptions;
+
             EncoderOptions.AssertTypeEqual(DefaultOptions, encoderOptions, nameof(encoderOptions));
-        }
-
-        private void GetBuffers(out byte[] writeBuffer, out byte[] scratchBuffer)
-        {
-            writeBuffer = RecyclableMemoryManager.Default.GetBlock();
-            scratchBuffer = RecyclableMemoryManager.Default.GetBlock();
-        }
-
-        private void FreeBuffers(byte[] writeBuffer, byte[] scratchBuffer)
-        {
-            RecyclableMemoryManager.Default.ReturnBlock(scratchBuffer);
-            RecyclableMemoryManager.Default.ReturnBlock(writeBuffer);
+            return encoderOptions;
         }
 
         protected abstract bool WriteFirst(
             ImagingConfig imagingConfig,
             in WriteContext context,
-            IReadOnlyPixelBuffer image,
+            IReadOnlyPixelRows image,
             EncoderOptions encoderOptions);
 
         protected virtual bool WriteNext(
             ImagingConfig imagingConfig,
             in WriteContext context, 
-            IReadOnlyPixelBuffer image,
+            IReadOnlyPixelRows image,
             EncoderOptions encoderOptions)
         {
             ImagingArgumentGuard.AssertAnimationSupport(this, imagingConfig);

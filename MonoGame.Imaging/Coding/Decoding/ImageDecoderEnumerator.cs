@@ -37,7 +37,7 @@ namespace MonoGame.Imaging.Coding.Decoding
             if (State == null)
                 State = Decoder.DecodeFirst(ImagingConfig, _readStream, _progressCallback);
             else
-                Decoder.DecodeNext(ImagingConfig, State, _progressCallback);
+                Decoder.DecodeNext(State, _progressCallback);
 
             if (State.CurrentImage != null)
                 return true;

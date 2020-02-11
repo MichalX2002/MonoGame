@@ -6,10 +6,10 @@
         public new int ImageIndex { get => base.ImageIndex; set => base.ImageIndex = value; }
 
         public ImageStbDecoderState(
+            ImagingConfig imagingConfig,
             IImageDecoder decoder, 
-            ImagingConfig imagingConfig, 
             ImageReadStream stream) : 
-            base(decoder, imagingConfig, stream)
+            base(imagingConfig, decoder, stream)
         {
         }
     }

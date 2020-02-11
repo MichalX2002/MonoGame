@@ -29,7 +29,7 @@ namespace MonoGame.Imaging.Coding
             protected override bool WriteFirst(
                 ImagingConfig imagingConfig,
                 in StbImageWrite.WriteContext context,
-                IReadOnlyPixelBuffer image,
+                IReadOnlyPixelRows image,
                 EncoderOptions encoderOptions)
             {
                 var options = encoderOptions as PngEncoderOptions;

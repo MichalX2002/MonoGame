@@ -1,12 +1,10 @@
 ﻿// MonoGame - Copyright (C) The MonoGame Team
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
-
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using MonoGame.Framework;
 
 namespace MonoGame.Framework.Content.Pipeline
 {
@@ -19,7 +17,7 @@ namespace MonoGame.Framework.Content.Pipeline
     {
         public static int Run(string command, string arguments)
         {
-            var result = Run(command, arguments, out string stdout, out string stderr);
+            int result = Run(command, arguments, out _, out _);
             if (result < 0)
                 throw new Exception(string.Format("{0} returned exit code {1}", command, result));
 
