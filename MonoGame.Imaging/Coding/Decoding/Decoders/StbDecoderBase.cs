@@ -42,7 +42,7 @@ namespace MonoGame.Imaging.Coding.Decoding
                     onProgress.Invoke(decoderState, percentage, rectangle);
                 };
 
-            return new ReadState(onBufferReady, progressCallback);
+            return new ReadState(null, null, onBufferReady, progressCallback);
         }
 
         protected virtual unsafe Image ParseMemoryResult(
@@ -50,11 +50,16 @@ namespace MonoGame.Imaging.Coding.Decoding
         {
             try
             {
-                var fromType = StbIdentifierBase.CompToVectorType(
-                    state.Components, state.BitsPerComponent.Value);
+                var fromType = StbIdentifierBase.CompToVectorType(state.OutComponents, state.OutDepth);
                 var toType = pixelType ?? fromType;
 
-                if(fromType != toType)
+                if(fromType == toType)
+                {
+                    var memory = new ResultWrapper(result);
+                    var image = Image.WrapMemory(fromType, memory, leaveOpen: false, state.Width, state.Height);
+                    return image;
+                }
+                else
                 {
                     using (result)
                     {
@@ -62,13 +67,6 @@ namespace MonoGame.Imaging.Coding.Decoding
                         var image = Image.LoadPixelData(fromType, toType, span, new Size(state.Width, state.Height));
                         return image;
                     }
-                }
-                else
-                {
-                    var memory = new ResultWrapper(result);
-                    //var image = Image.WrapMemory(fromType, state.Width, state.Height, leaveOpen: false);
-                    //return image;
-                    throw new Exception();
                 }
             }
             catch

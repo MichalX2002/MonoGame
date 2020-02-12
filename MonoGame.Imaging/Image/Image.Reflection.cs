@@ -116,15 +116,14 @@ namespace MonoGame.Imaging
         #region WrapMemory
 
         private delegate Image WrapMemoryDelegate(
-            VectorTypeInfo pixelType, IMemory memory, int width, int height);
+            IMemory memory, bool leaveOpen, int width, int height, int? byteStride = null);
 
         private static MethodInfo _wrapMemoryMethod;
         private static ConcurrentDictionary<VectorTypeInfo, WrapMemoryDelegate> _wrapMemoryDelegateCache;
 
         private static void SetupReflectionWrapMemory()
         {
-            var arguments = typeof(WrapMemoryDelegate)
-                .GetDelegateParameters().Skip(1).Select(x => x.ParameterType).ToArray();
+            var arguments = typeof(WrapMemoryDelegate).GetDelegateParameters().AsTypes();
 
             // TODO: FIXME: this may not work
             _wrapMemoryMethod = typeof(Image).GetMethod(nameof(WrapMemory), arguments);

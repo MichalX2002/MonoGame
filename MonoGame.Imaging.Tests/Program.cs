@@ -60,7 +60,7 @@ namespace MonoGame.Imaging.Tests
                     watch.Start();
 
                 image?.Dispose();
-                image = Image.Load(encoded, null, OnReadProgress);
+                image = Image.Load(encoded, null, null, OnReadProgress);
                 watch.Stop();
             }
             Console.WriteLine(image.Width + "x" + image.Height + " # " + image.PixelType.Type);

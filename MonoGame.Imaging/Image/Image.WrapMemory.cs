@@ -7,6 +7,26 @@ namespace MonoGame.Imaging
 {
     public partial class Image
     {
+        public static Image WrapMemory(
+            VectorTypeInfo pixelType, IMemory memory, bool leaveOpen, int width, int height, int? byteStride= null)
+        {
+            var wrapDelegate = GetWrapMemoryDelegate(pixelType);
+            return wrapDelegate.Invoke(memory, leaveOpen, width, height, byteStride);
+        }
+
+        public static Image<TPixel> WrapMemory<TPixel>(
+            IMemory memory, bool leaveOpen, int width, int height, int? byteStride = null)
+            where TPixel : unmanaged, IPixel
+        {
+            ArgumentGuard.AssertGreaterThanZero(width, nameof(width));
+            ArgumentGuard.AssertGreaterThanZero(height, nameof(height));
+            ImagingArgumentGuard.AssertContigousLargeEnough(memory.Count, width * height, nameof(memory));
+
+            int stride = byteStride ?? VectorTypeInfo.Get<TPixel>().ElementSize;
+            var buffer = new Image<TPixel>.PixelBuffer(memory, stride, leaveOpen);
+            return new Image<TPixel>(buffer, width, height);
+        }
+
         public static Image<TPixel> WrapMemory<TPixel>(
             Memory<TPixel> memory, int width, int height, int? byteStride = null)
             where TPixel : unmanaged, IPixel
@@ -30,19 +50,6 @@ namespace MonoGame.Imaging
             
             int stride = byteStride ?? VectorTypeInfo.Get<TPixel>().ElementSize;
             var buffer = new Image<TPixel>.PixelBuffer(memory, stride);
-            return new Image<TPixel>(buffer, width, height);
-        }
-
-        public static unsafe Image<TPixel> WrapMemory<TPixel>(
-            IMemory memory, bool leaveOpen, int width, int height, int? byteStride = null)
-            where TPixel : unmanaged, IPixel
-        {
-            ArgumentGuard.AssertGreaterThanZero(width, nameof(width));
-            ArgumentGuard.AssertGreaterThanZero(height, nameof(height));
-            ImagingArgumentGuard.AssertContigousLargeEnough(memory.Count, width * height, nameof(memory));
-
-            int stride = byteStride ?? VectorTypeInfo.Get<TPixel>().ElementSize;
-            var buffer = new Image<TPixel>.PixelBuffer(memory, stride, leaveOpen);
             return new Image<TPixel>(buffer, width, height);
         }
     }

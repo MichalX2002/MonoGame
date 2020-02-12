@@ -75,7 +75,7 @@ namespace MonoGame.Imaging.Pixels
                 // copy over the remaining bytes,
                 // as the Fill() caller may request less bytes than sizeof(TPixel)
                 int bytesRead = bufferOffset - lastByteOffset;
-                int leftoverBytes = Math.Min(Components, count * pixelSize - bytesRead);
+                int leftoverBytes = Math.Min(Components, count * Components - bytesRead);
 
                 for (int j = 0; j < leftoverBytes; j++)
                     destination[j + bufferOffset] = converter32.Raw[j];
