@@ -125,7 +125,6 @@ namespace MonoGame.Imaging
         {
             var arguments = typeof(WrapMemoryDelegate).GetDelegateParameters().AsTypes();
 
-            // TODO: FIXME: this may not work
             _wrapMemoryMethod = typeof(Image).GetMethod(nameof(WrapMemory), arguments);
             _wrapMemoryDelegateCache = new ConcurrentDictionary<VectorTypeInfo, WrapMemoryDelegate>();
         }
