@@ -24,7 +24,7 @@ namespace MonoGame.Framework.Content
         {
         }
 
-        public override bool CanDeserializeIntoExistingObject => TargetType.IsClass();
+        public override bool CanDeserializeIntoExistingObject => TargetType.IsClass;
 
         protected internal override void Initialize(ContentTypeReaderManager manager)
         {
@@ -32,7 +32,7 @@ namespace MonoGame.Framework.Content
 
             var baseType = ReflectionHelpers.GetBaseType(TargetType);
             if (baseType != null && baseType != typeof(object))
-				_baseTypeReader = manager.GetTypeReader(baseType);
+                _baseTypeReader = manager.GetTypeReader(baseType);
 
             _constructor = TargetType.GetDefaultConstructor();
 
@@ -111,8 +111,8 @@ namespace MonoGame.Framework.Content
                 }
             }
 
-            Action<object, object> setter;
             Type elementType;
+            Action<object, object> setter;
             if (property != null)
             {
                 elementType = property.PropertyType;
@@ -132,18 +132,20 @@ namespace MonoGame.Framework.Content
             {
                 return (input, parent) =>
                 {
-                    void action(object value) => setter(parent, value);
-                    input.ReadSharedResource((Action<object>)action);
+                    input.ReadSharedResource<object>((value) => setter(parent, value));
                 };
             }
 
             // We need to have a reader at this point.
             var reader = manager.GetTypeReader(elementType);
             if (reader == null)
+            {
                 if (elementType == typeof(Array))
                     reader = new ArrayReader<Array>();
                 else
-                    throw new ContentLoadException(string.Format("Content reader could not be found for {0} type.", elementType.FullName));
+                    throw new ContentLoadException(
+                        $"Content reader could not be found for {elementType.FullName} type.");
+            }
 
             // We use the construct delegate to pick the correct existing 
             // object to be the target of deserialization.
@@ -165,19 +167,17 @@ namespace MonoGame.Framework.Content
             if (existingInstance != null)
                 obj = (T)existingInstance;
             else
-                obj = _constructor == null ? (T)Activator.CreateInstance(typeof(T)) : (T)_constructor.Invoke(null);
-		
-			if(_baseTypeReader != null)
-				_baseTypeReader.Read(input, obj);
+                obj = _constructor == null 
+                    ? (T)Activator.CreateInstance(typeof(T)) 
+                    : (T)_constructor.Invoke(null);
+        
+            if(_baseTypeReader != null)
+                _baseTypeReader.Read(input, obj);
 
-            // Box the type.
-            var boxed = (object)obj;
+            var boxed = (object)obj; // Box the type once.
 
             foreach (var reader in _readers)
                 reader(input, boxed);
-
-            // Unbox it... required for value types.
-            obj = (T)boxed;
 
             return obj;
         }
