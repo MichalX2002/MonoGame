@@ -22,7 +22,7 @@ namespace MonoGame.Imaging.Pixels
             int components,
             int toRead,
             Span<byte> destination,
-            ref int bufferOffset,
+            ref int destinationOffset,
             ref PixelConverter32 pixelConverter);
 
         private readonly IReadOnlyPixelRows _pixels;
@@ -58,28 +58,28 @@ namespace MonoGame.Imaging.Pixels
             int pixelSize = _pixels.PixelType.ElementSize;
 
             // each iteration is supposed to read pixels from a single row at the time
-            int bufferOffset = 0;
+            int destinationOffset = 0;
             int pixelsLeft = requestedPixelCount;
             while (pixelsLeft > 0)
             {
-                int lastByteOffset = bufferOffset;
+                int lastByteOffset = destinationOffset;
                 int count = Math.Min(pixelsLeft, _pixels.Width - column);
 
                 _pixels.GetPixelByteRow(column, row, _rowBuffer);
 
                 if (_transform32.Invoke(
                     _rowBuffer, Components, count, destination,
-                    ref bufferOffset, ref converter32))
+                    ref destinationOffset, ref converter32))
                     goto ReadEnd;
 
                 // copy over the remaining bytes,
                 // as the Fill() caller may request less bytes than sizeof(TPixel)
-                int bytesRead = bufferOffset - lastByteOffset;
-                int leftoverBytes = Math.Min(Components, count * pixelSize - bytesRead);
+                int bytesRead = destinationOffset - lastByteOffset;
+                int leftoverBytes = Math.Min(Components, count * Components - bytesRead);
 
                 for (int j = 0; j < leftoverBytes; j++)
-                    destination[j + bufferOffset] = converter32.Raw[j];
-                bufferOffset += leftoverBytes;
+                    destination[j + destinationOffset] = converter32.Raw[j];
+                destinationOffset += leftoverBytes;
 
                 // a case for code that copies bytes directly, 
                 // not needing to copy leftovers
