@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using MonoGame.Framework.Content.Pipeline;
 
 namespace MonoGame.Framework.Content.Pipeline.Builder
 {
@@ -11,7 +10,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
     {
         public override void LogMessage(string message, params object[] messageArgs)
         {
-			Console.WriteLine(IndentString + message, messageArgs);
+            Console.WriteLine(IndentString + message, messageArgs);
         }
 
         public override void LogImportantMessage(string message, params object[] messageArgs)

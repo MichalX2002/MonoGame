@@ -15,6 +15,7 @@ using MonoGame.Framework.Audio;
 using MonoGame.Framework.Content;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input.Touch;
+using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework
 {
@@ -405,7 +406,7 @@ namespace MonoGame.Framework
                 var sleepTime = (TargetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
                 // We only have a precision timer on Windows, so other platforms may still overshoot
 #if WINDOWS && !DESKTOPGL
-                MonoGame.Utilities.TimerHelper.SleepForNoMoreThan(sleepTime);
+                TimerHelper.SleepForNoMoreThan(sleepTime);
 #elif WINDOWS_UAP
                 lock (_locker)
                     if (sleepTime >= 2.0)

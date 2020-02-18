@@ -37,7 +37,7 @@ namespace MonoGame.Framework.Input
         /// Gets the joystick's display name.
         /// </summary>
         /// <value>String representing the display name of the joystick.</value>
-        public string DisplayName { get; internal set; }
+        public string DisplayName { get; }
 
         /// <summary>
         /// Gets a value indicating if the joystick is a gamepad.

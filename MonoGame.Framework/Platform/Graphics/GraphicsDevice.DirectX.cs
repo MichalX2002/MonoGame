@@ -1445,7 +1445,7 @@ namespace MonoGame.Framework.Graphics
                 ApplyState(true);
 
                 _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
-                int indexCount = GetElementCountArray(primitiveType, primitiveCount);
+                int indexCount = GetElementCountForType(primitiveType, primitiveCount);
                 _d3dContext.DrawIndexedInstanced(indexCount, instanceCount, startIndex, baseVertex, baseInstance);
             }
         }

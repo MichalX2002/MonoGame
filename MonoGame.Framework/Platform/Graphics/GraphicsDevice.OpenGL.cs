@@ -1127,22 +1127,27 @@ namespace MonoGame.Framework.Graphics
             if (baseInstance > 0)
             {
                 if (!GraphicsCapabilities.SupportsBaseIndexInstancing)
-                    throw new PlatformNotSupportedException("Instanced geometry drawing with base instance requires at least OpenGL 4.2. Try upgrading your graphics card drivers.");
+                    throw new PlatformNotSupportedException(
+                        "Instanced geometry drawing with base instance requires at least OpenGL 4.2. " +
+                        "Try upgrading your graphics card drivers.");
 
-                GL.DrawElementsInstancedBaseInstance(target,
-                                          indexElementCount,
-                                          indexElementType,
-                                          indexOffsetInBytes,
-                                          instanceCount,
-                                          baseInstance);
+                GL.DrawElementsInstancedBaseInstance(
+                    target,
+                    indexElementCount,
+                    indexElementType,
+                    indexOffsetInBytes,
+                    instanceCount,
+                    baseInstance);
             }
             else
-                GL.DrawElementsInstanced(target,
-                                     indexElementCount,
-                                     indexElementType,
-                                     indexOffsetInBytes,
-                                     instanceCount);
-
+            {
+                GL.DrawElementsInstanced(
+                    target,
+                    indexElementCount,
+                    indexElementType,
+                    indexOffsetInBytes,
+                    instanceCount);
+            }
             GraphicsExtensions.CheckGLError();
         }
 

@@ -389,7 +389,7 @@ namespace TwoMGFX
             public uint operand_count;
 
             /// MOJOSHADER_preshaderOperand[4]
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4, ArraySubType = UnmanagedType.Struct)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
             public MOJOSHADER_preshaderOperand[] operands;
         }
 

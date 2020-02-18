@@ -68,7 +68,7 @@ namespace MonoGame.Framework.Input
 
         internal static void AddDevice(int deviceId)
         {
-            IntPtr device = SdlGamePad.Open(deviceId);
+            IntPtr device = SdlGamePad.OpenGameController(deviceId);
             IntPtr hapticDevice = Sdl.Haptic.OpenFromJoystick(SdlGamePad.GetJoystick(device));
             int hapticType = 0;
 
@@ -109,7 +109,7 @@ namespace MonoGame.Framework.Input
         {
             foreach (KeyValuePair<int, GamePadInfo> entry in GamePads)
             {
-                if (Sdl.Joystick.InstanceId(SdlGamePad.GetJoystick(entry.Value.Device)) == instanceid)
+                if (Sdl.Joystick.InstanceID(SdlGamePad.GetJoystick(entry.Value.Device)) == instanceid)
                 {
                     GamePads.Remove(entry.Key);
                     DisposeDevice(entry.Value);
@@ -126,7 +126,7 @@ namespace MonoGame.Framework.Input
             foreach (var pair in GamePads)
             {
                 IntPtr joystick = SdlGamePad.GetJoystick(pair.Value.Device);
-                _translationTable[Sdl.Joystick.InstanceId(joystick)] = pair.Key;
+                _translationTable[Sdl.Joystick.InstanceID(joystick)] = pair.Key;
             }
         }
 
@@ -167,7 +167,7 @@ namespace MonoGame.Framework.Input
                 return default;
 
             var gamecontroller = gamepad.Device;
-            var mapping = SdlGamePad.GetMapping(gamecontroller).Split(',');
+            var mapping = SdlGamePad.GetGameControllerMapping(gamecontroller).Split(',');
             var set = new HashSet<string>();
             foreach (var map in mapping)
             {
@@ -179,7 +179,7 @@ namespace MonoGame.Framework.Input
             bool hasVibrationMotor = GamePads[index].HapticType != 0;
             return new GamePadCapabilities(
                 isConnected: true,
-                displayName: SdlGamePad.GetName(gamecontroller),
+                displayName: SdlGamePad.GetGameControllerName(gamecontroller),
                 identifier: Sdl.Joystick.GetGUID(SdlGamePad.GetJoystick(gamecontroller)).ToString(),
 
                 hasBackButton: set.Contains("back"),

@@ -23,7 +23,7 @@ internal static class Sdl
 
         // Load bundled library
         var assemblyLocation = Path.GetDirectoryName(typeof(Sdl).Assembly.Location) ?? "./";
-        
+
         if (CurrentPlatform.OS == OS.Windows && Environment.Is64BitProcess)
             ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "x64/SDL2.dll"));
         else if (CurrentPlatform.OS == OS.Windows && !Environment.Is64BitProcess)
@@ -34,11 +34,11 @@ internal static class Sdl
             ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "x86/libSDL2-2.0.so.0"));
         else if (CurrentPlatform.OS == OS.MacOSX)
         {
-            ret = FuncLoader.LoadLibrary(Path.Combine(assemblyLocation, "libSDL2-2.0.0.dylib"));
+            ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "libSDL2-2.0.0.dylib"));
 
             //Look in Frameworks for .app bundles
             if (ret == IntPtr.Zero)
-                ret = FuncLoader.LoadLibrary(Path.Combine(assemblyLocation, "..", "Frameworks", "libSDL2-2.0.0.dylib"));
+                ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "..", "Frameworks", "libSDL2-2.0.0.dylib"));
         }
 
         // Load system library
@@ -58,10 +58,10 @@ internal static class Sdl
             var rid = Environment.Is64BitProcess ? "win-x64" : "win-x86";
 
             if (ret == IntPtr.Zero)
-                ret = FuncLoader.LoadLibrary(Path.Combine(assemblyLocation, "../../runtimes", rid, "native/SDL2.dll"));
+                ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "../../runtimes", rid, "native/SDL2.dll"));
 
             if (ret == IntPtr.Zero)
-                ret = FuncLoader.LoadLibrary(Path.Combine(assemblyLocation, "runtimes", rid, "native/SDL2.dll"));
+                ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "runtimes", rid, "native/SDL2.dll"));
         }
 
         // Welp, all failed, PANIC!!!
@@ -204,20 +204,20 @@ internal static class Sdl
         if (!HasClipboardText())
             return string.Empty;
 
-        IntPtr data = SDL_GetClipboardText();
+        IntPtr nativeStr = SDL_GetClipboardText();
         try
         {
-            return InteropHelpers.PtrToString(data);
+            return InteropHelpers.Utf8ToString(GetError(nativeStr));
         }
         finally
         {
-            SDL_free(data);
+            Free(nativeStr);
         }
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate IntPtr d_sdl_free(IntPtr pointer);
-    private static readonly d_sdl_free SDL_free = FL.LoadFunction<d_sdl_free>(NativeLibrary, "SDL_free");
+    public delegate IntPtr d_sdl_free(IntPtr pointer);
+    public static readonly d_sdl_free Free = FL.LoadFunction<d_sdl_free>(NativeLibrary, "SDL_free");
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void d_sdl_setclipboardtext(string value);
@@ -258,7 +258,7 @@ internal static class Sdl
 
     public static string GetError()
     {
-        return InteropHelpers.PtrToString(SDL_GetError());
+        return InteropHelpers.Utf8ToString(SDL_GetError());
     }
 
     public static int GetError(int value)
@@ -285,7 +285,7 @@ internal static class Sdl
 
     public static string GetHint(string name)
     {
-        return InteropHelpers.PtrToString(SDL_GetHint(name));
+        return InteropHelpers.Utf8ToString(SDL_GetHint(name));
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -445,7 +445,7 @@ internal static class Sdl
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate Sdl.Window.State d_sdl_getwindowflags(IntPtr window);
+        public delegate State d_sdl_getwindowflags(IntPtr window);
         public static d_sdl_getwindowflags GetWindowFlags = FL.LoadFunction<d_sdl_getwindowflags>(NativeLibrary, "SDL_GetWindowFlags");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -561,7 +561,7 @@ internal static class Sdl
 
         public static string GetDisplayName(int index)
         {
-            return InteropHelpers.PtrToString(GetError(SDL_GetDisplayName(index)));
+            return InteropHelpers.Utf8ToString(GetError(SDL_GetDisplayName(index)));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -849,11 +849,11 @@ internal static class Sdl
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_joystickfrominstanceid(int joyid);
-        private static readonly d_sdl_joystickfrominstanceid SDL_JoystickFromInstanceId = FL.LoadFunction<d_sdl_joystickfrominstanceid>(NativeLibrary, "SDL_JoystickFromInstanceID");
+        private static d_sdl_joystickfrominstanceid JoystickFromInstanceId = FL.LoadFunction<d_sdl_joystickfrominstanceid>(NativeLibrary, "SDL_JoystickFromInstanceID");
 
         public static IntPtr FromInstanceId(int joyid)
         {
-            return GetError(SDL_JoystickFromInstanceId(joyid));
+            return GetError(JoystickFromInstanceId(joyid));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -866,11 +866,19 @@ internal static class Sdl
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_joystickname(IntPtr joystick);
-        private static d_sdl_joystickname JoystickName = FuncLoader.LoadFunction<d_sdl_joystickname>(NativeLibrary, "SDL_JoystickName");
+        private static d_sdl_joystickname JoystickName = FL.LoadFunction<d_sdl_joystickname>(NativeLibrary, "SDL_JoystickName");
 
         public static string GetJoystickName(IntPtr joystick)
         {
-            return InteropHelpers.Utf8ToString(JoystickName(joystick));
+            var namePtr = JoystickName(joystick);
+            try
+            {
+                return InteropHelpers.Utf8ToString(namePtr);
+            }
+            finally
+            {
+                Free(namePtr);
+            }
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -883,7 +891,7 @@ internal static class Sdl
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int d_sdl_joystickinstanceid(IntPtr joystick);
-        public static d_sdl_joystickinstanceid InstanceId = FL.LoadFunction<d_sdl_joystickinstanceid>(NativeLibrary, "SDL_JoystickInstanceID");
+        public static d_sdl_joystickinstanceid InstanceID = FL.LoadFunction<d_sdl_joystickinstanceid>(NativeLibrary, "SDL_JoystickInstanceID");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_joystickopen(int deviceIndex);
@@ -976,7 +984,7 @@ internal static class Sdl
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_sdl_free(IntPtr ptr);
-        public static d_sdl_free SDL_Free = FuncLoader.LoadFunction<d_sdl_free>(NativeLibrary, "SDL_free");
+        public static d_sdl_free SDL_Free = FL.LoadFunction<d_sdl_free>(NativeLibrary, "SDL_free");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int d_sdl_gamecontrolleraddmapping(string mappingString);
@@ -992,11 +1000,11 @@ internal static class Sdl
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_joystickfrominstanceid(int joyid);
-        private static readonly d_sdl_joystickfrominstanceid SDL_GameControllerFromInstanceId = FL.LoadFunction<d_sdl_joystickfrominstanceid>(NativeLibrary, "SDL_JoystickFromInstanceID");
+        private static readonly d_sdl_joystickfrominstanceid GameControllerFromInstanceId = FL.LoadFunction<d_sdl_joystickfrominstanceid>(NativeLibrary, "SDL_JoystickFromInstanceID");
 
         public static IntPtr FromInstanceId(int joyid)
         {
-            return GetError(SDL_GameControllerFromInstanceId(joyid));
+            return GetError(GameControllerFromInstanceId(joyid));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -1009,11 +1017,11 @@ internal static class Sdl
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_gamecontrollergetjoystick(IntPtr gamecontroller);
-        private static readonly d_sdl_gamecontrollergetjoystick SDL_GameControllerGetJoystick = FL.LoadFunction<d_sdl_gamecontrollergetjoystick>(NativeLibrary, "SDL_GameControllerGetJoystick");
+        private static readonly d_sdl_gamecontrollergetjoystick GameControllerGetJoystick = FL.LoadFunction<d_sdl_gamecontrollergetjoystick>(NativeLibrary, "SDL_GameControllerGetJoystick");
 
         public static IntPtr GetJoystick(IntPtr gamecontroller)
         {
-            return GetError(SDL_GameControllerGetJoystick(gamecontroller));
+            return GetError(GameControllerGetJoystick(gamecontroller));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -1022,40 +1030,41 @@ internal static class Sdl
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_gamecontrollermapping(IntPtr gamecontroller);
-        private static readonly d_sdl_gamecontrollermapping SDL_GameControllerMapping = FL.LoadFunction<d_sdl_gamecontrollermapping>(NativeLibrary, "SDL_GameControllerMapping");
+        private static readonly d_sdl_gamecontrollermapping GameControllerMapping = FL.LoadFunction<d_sdl_gamecontrollermapping>(NativeLibrary, "SDL_GameControllerMapping");
 
-        public static string GetMapping(IntPtr gamecontroller)
+        public static string GetGameControllerMapping(IntPtr gamecontroller)
         {
-            IntPtr nativeStr = SDL_GameControllerMapping(gamecontroller);
-            if (nativeStr == IntPtr.Zero)
+            IntPtr mappingStr = GameControllerMapping(gamecontroller);
+            if (mappingStr == IntPtr.Zero)
                 return string.Empty;
+
             try
             {
-                return InteropHelpers.Utf8ToString(nativeStr);
+                return InteropHelpers.Utf8ToString(mappingStr);
             }
             finally
             {
                 //The mapping string returned by SDL is owned by us and thus must be freed
-                SDL_Free(nativeStr);
+                SDL_Free(mappingStr);
             }
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_gamecontrolleropen(int joystickIndex);
-        private static readonly d_sdl_gamecontrolleropen SDL_GameControllerOpen = FL.LoadFunction<d_sdl_gamecontrolleropen>(NativeLibrary, "SDL_GameControllerOpen");
+        private static readonly d_sdl_gamecontrolleropen GameControllerOpen = FL.LoadFunction<d_sdl_gamecontrolleropen>(NativeLibrary, "SDL_GameControllerOpen");
 
-        public static IntPtr Open(int joystickIndex)
+        public static IntPtr OpenGameController(int joystickIndex)
         {
-            return GetError(SDL_GameControllerOpen(joystickIndex));
+            return GetError(GameControllerOpen(joystickIndex));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_gamecontrollername(IntPtr gamecontroller);
-        private static readonly d_sdl_gamecontrollername SDL_GameControllerName = FL.LoadFunction<d_sdl_gamecontrollername>(NativeLibrary, "SDL_GameControllerName");
+        private static readonly d_sdl_gamecontrollername GameControllerName = FL.LoadFunction<d_sdl_gamecontrollername>(NativeLibrary, "SDL_GameControllerName");
 
-        public static string GetName(IntPtr gamecontroller)
+        public static string GetGameControllerName(IntPtr gamecontroller)
         {
-            return InteropHelpers.PtrToString(SDL_GameControllerName(gamecontroller));
+            return InteropHelpers.Utf8ToString(GameControllerName(gamecontroller));
         }
     }
 
@@ -1101,11 +1110,11 @@ internal static class Sdl
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int d_sdl_hapticneweffect(IntPtr haptic, ref Effect effect);
-        private static readonly d_sdl_hapticneweffect SDL_HapticNewEffect = FL.LoadFunction<d_sdl_hapticneweffect>(NativeLibrary, "SDL_HapticNewEffect");
+        private static readonly d_sdl_hapticneweffect HapticNewEffect = FL.LoadFunction<d_sdl_hapticneweffect>(NativeLibrary, "SDL_HapticNewEffect");
 
         public static void NewEffect(IntPtr haptic, ref Effect effect)
         {
-            GetError(SDL_HapticNewEffect(haptic, ref effect));
+            GetError(HapticNewEffect(haptic, ref effect));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -1114,65 +1123,65 @@ internal static class Sdl
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_hapticopenfromjoystick(IntPtr joystick);
-        private static readonly d_sdl_hapticopenfromjoystick SDL_HapticOpenFromJoystick = FL.LoadFunction<d_sdl_hapticopenfromjoystick>(NativeLibrary, "SDL_HapticOpenFromJoystick");
+        private static readonly d_sdl_hapticopenfromjoystick HapticOpenFromJoystick = FL.LoadFunction<d_sdl_hapticopenfromjoystick>(NativeLibrary, "SDL_HapticOpenFromJoystick");
 
         public static IntPtr OpenFromJoystick(IntPtr joystick)
         {
-            return GetError(SDL_HapticOpenFromJoystick(joystick));
+            return GetError(HapticOpenFromJoystick(joystick));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int d_sdl_hapticrumbleinit(IntPtr haptic);
-        private static readonly d_sdl_hapticrumbleinit SDL_HapticRumbleInit = FL.LoadFunction<d_sdl_hapticrumbleinit>(NativeLibrary, "SDL_HapticRumbleInit");
+        private static readonly d_sdl_hapticrumbleinit HapticRumbleInit = FL.LoadFunction<d_sdl_hapticrumbleinit>(NativeLibrary, "SDL_HapticRumbleInit");
 
         public static void RumbleInit(IntPtr haptic)
         {
-            GetError(SDL_HapticRumbleInit(haptic));
+            GetError(HapticRumbleInit(haptic));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int d_sdl_hapticrumbleplay(IntPtr haptic, float strength, uint length);
-        private static readonly d_sdl_hapticrumbleplay SDL_HapticRumblePlay = FL.LoadFunction<d_sdl_hapticrumbleplay>(NativeLibrary, "SDL_HapticRumblePlay");
+        private static readonly d_sdl_hapticrumbleplay HapticRumblePlay = FL.LoadFunction<d_sdl_hapticrumbleplay>(NativeLibrary, "SDL_HapticRumblePlay");
 
         public static void RumblePlay(IntPtr haptic, float strength, uint length)
         {
-            GetError(SDL_HapticRumblePlay(haptic, strength, length));
+            GetError(HapticRumblePlay(haptic, strength, length));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int d_sdl_hapticrumblesupported(IntPtr haptic);
-        private static readonly d_sdl_hapticrumblesupported SDL_HapticRumbleSupported = FL.LoadFunction<d_sdl_hapticrumblesupported>(NativeLibrary, "SDL_HapticRumbleSupported");
+        private static readonly d_sdl_hapticrumblesupported HapticRumbleSupported = FL.LoadFunction<d_sdl_hapticrumblesupported>(NativeLibrary, "SDL_HapticRumbleSupported");
 
         public static int RumbleSupported(IntPtr haptic)
         {
-            return GetError(SDL_HapticRumbleSupported(haptic));
+            return GetError(HapticRumbleSupported(haptic));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int d_sdl_hapticruneffect(IntPtr haptic, int effect, uint iterations);
-        private static readonly d_sdl_hapticruneffect SDL_HapticRunEffect = FL.LoadFunction<d_sdl_hapticruneffect>(NativeLibrary, "SDL_HapticRunEffect");
+        private static readonly d_sdl_hapticruneffect HapticRunEffect = FL.LoadFunction<d_sdl_hapticruneffect>(NativeLibrary, "SDL_HapticRunEffect");
 
         public static void RunEffect(IntPtr haptic, int effect, uint iterations)
         {
-            GetError(SDL_HapticRunEffect(haptic, effect, iterations));
+            GetError(HapticRunEffect(haptic, effect, iterations));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int d_sdl_hapticstopall(IntPtr haptic);
-        private static readonly d_sdl_hapticstopall SDL_HapticStopAll = FL.LoadFunction<d_sdl_hapticstopall>(NativeLibrary, "SDL_HapticStopAll");
+        private static readonly d_sdl_hapticstopall HapticStopAll = FL.LoadFunction<d_sdl_hapticstopall>(NativeLibrary, "SDL_HapticStopAll");
 
         public static void StopAll(IntPtr haptic)
         {
-            GetError(SDL_HapticStopAll(haptic));
+            GetError(HapticStopAll(haptic));
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int d_sdl_hapticupdateeffect(IntPtr haptic, int effect, ref Effect data);
-        private static readonly d_sdl_hapticupdateeffect SDL_HapticUpdateEffect = FL.LoadFunction<d_sdl_hapticupdateeffect>(NativeLibrary, "SDL_HapticUpdateEffect");
+        private static readonly d_sdl_hapticupdateeffect HapticUpdateEffect = FL.LoadFunction<d_sdl_hapticupdateeffect>(NativeLibrary, "SDL_HapticUpdateEffect");
 
         public static void UpdateEffect(IntPtr haptic, int effect, ref Effect data)
         {
-            GetError(SDL_HapticUpdateEffect(haptic, effect, ref data));
+            GetError(HapticUpdateEffect(haptic, effect, ref data));
         }
     }
 }

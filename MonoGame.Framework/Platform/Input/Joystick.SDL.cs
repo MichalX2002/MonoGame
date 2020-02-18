@@ -10,7 +10,6 @@ namespace MonoGame.Framework.Input
     public static partial class Joystick
     {
         internal static Dictionary<int, Instance> Joysticks = new Dictionary<int, Instance>();
-        private static int _lastConnectedIndex = -1;
 
         internal static void AddDevice(int deviceId)
         {
@@ -19,8 +18,8 @@ namespace MonoGame.Framework.Input
             while (Joysticks.ContainsKey(id))
                 id++;
 
-            if (id > _lastConnectedIndex)
-                _lastConnectedIndex = id;
+            if (id > PlatformLastConnectedIndex)
+                PlatformLastConnectedIndex = id;
 
             var instance = new Instance(id, jdevice);
             Joysticks.Add(id, instance);
@@ -35,10 +34,10 @@ namespace MonoGame.Framework.Input
             {
                 if (Sdl.Joystick.InstanceID(entry.Value.Device) == instanceid)
                 {
-                    Sdl.Joystick.Close(Joysticks[entry.Key]);
+                    Joysticks[entry.Key].Close();
                     Joysticks.Remove(entry.Key);
 
-                    if (entry.Key == _lastConnectedIndex)
+                    if (entry.Key == PlatformLastConnectedIndex)
                         RecalculateLastConnectedIndex();
 
                     break;
@@ -58,18 +57,15 @@ namespace MonoGame.Framework.Input
 
         private static void RecalculateLastConnectedIndex()
         {
-            _lastConnectedIndex = -1;
+            PlatformLastConnectedIndex = -1;
             foreach (var entry in Joysticks)
             {
-                if (entry.Key > _lastConnectedIndex)
-                    _lastConnectedIndex = entry.Key;
+                if (entry.Key > PlatformLastConnectedIndex)
+                    PlatformLastConnectedIndex = entry.Key;
             }
         }
 
-        private static int PlatformLastConnectedIndex
-        {
-            get { return _lastConnectedIndex; }
-        }
+        private static int PlatformLastConnectedIndex { get; set; } = -1;
 
         private const bool PlatformIsSupported = true;
 

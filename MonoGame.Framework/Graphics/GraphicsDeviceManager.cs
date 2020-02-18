@@ -169,7 +169,7 @@ namespace MonoGame.Framework
             }
         }
 
-        #region IGraphicsDeviceService Members
+        #region IGraphicsDeviceService
 
         public event DatalessEvent<IGraphicsDeviceService> DeviceCreated;
         public event DatalessEvent<IGraphicsDeviceService> DeviceDisposing;
@@ -215,7 +215,7 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #region IDisposable Members
+        #region IDisposable
 
         public void Dispose()
         {

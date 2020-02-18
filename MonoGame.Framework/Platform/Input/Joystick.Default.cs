@@ -10,20 +10,12 @@ namespace MonoGame.Framework.Input
 
         private static JoystickCapabilities PlatformGetCapabilities(int index)
         {
-            return new JoystickCapabilities()
-            {
-                IsConnected = false,
-                DisplayName = string.Empty,
-                IsGamepad = false,
-                AxisCount = 0,
-                ButtonCount = 0,
-                HatCount = 0
-            };
+            return JoystickCapabilities.Default;
         }
 
         private static JoystickState PlatformGetState(int index)
         {
-            return _defaultJoystickState;
+            return JoystickState.Default;
         }
 
         private static int PlatformLastConnectedIndex => -1;

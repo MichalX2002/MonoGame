@@ -15,13 +15,7 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
     <Compile Remove="obj\**\*" />
     <Compile Remove="Properties\**\*" />
   </ItemGroup>
-
-  <ItemGroup>
-    
-    <Compile Include="..\ThirdParty\StbImageSharp\src\StbImageSharp\**\*.cs" LinkBase="Utilities\StbImageSharp" />
-    <Compile Include="..\ThirdParty\StbImageWriteSharp\src\StbImageWriteSharp\**\*.cs" LinkBase="Utilities\StbImageWriteSharp" />
-  </ItemGroup>
-
+  
   <ItemGroup>
     <Reference Include="SharpDX">
       <HintPath>..\ThirdParty\Dependencies\SharpDX\net40\SharpDX.dll</HintPath>

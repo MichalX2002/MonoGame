@@ -12,7 +12,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Convert a <see cref="IntPtr"/> pointing to a UTF-8 null-terminated string to a <see cref="string"/>.
         /// </summary>
-        public static unsafe string PtrToString(IntPtr handle)
+        public static unsafe string Utf8ToString(IntPtr handle)
         {
             if (handle == IntPtr.Zero)
                 return string.Empty;
