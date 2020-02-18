@@ -42,33 +42,6 @@ namespace MonoGame.Imaging
 
         #endregion
 
-        #region LoadPixelData(FromType, ToType, Span<byte>)
-
-        public static Image LoadPixelData(
-            VectorTypeInfo fromPixelType,
-            VectorTypeInfo toPixelType,
-            Span<byte> pixelData,
-            Rectangle sourceRectangle,
-            int? byteStride = null)
-        {
-            return LoadPixelData(
-                fromPixelType, toPixelType, (ReadOnlySpan<byte>)pixelData, sourceRectangle, byteStride);
-        }
-
-        public static Image LoadPixelData(
-            VectorTypeInfo fromPixelType,
-            VectorTypeInfo toPixelType,
-            Span<byte> pixelData,
-            Size size,
-            int? byteStride = null)
-        {
-            return LoadPixelData(
-                fromPixelType, toPixelType, (ReadOnlySpan<byte>)pixelData, size, byteStride);
-        }
-
-        #endregion
-
-
         #region LoadPixelData(Type, ReadOnlySpan<byte>)
 
         public static Image LoadPixelData(
@@ -84,27 +57,6 @@ namespace MonoGame.Imaging
             VectorTypeInfo pixelType, ReadOnlySpan<byte> pixelData, Size size, int? byteStride = null)
         {
             return LoadPixelData(pixelType, pixelData, new Rectangle(size), byteStride);
-        }
-
-        #endregion
-
-        #region LoadPixelData(Type, Span<byte>)
-
-        public static Image LoadPixelData(
-            VectorTypeInfo pixelType,
-            Span<byte> pixelData,
-            Rectangle sourceRectangle,
-            int? byteStride = null)
-        {
-            return LoadPixelData(
-                pixelType, (ReadOnlySpan<byte>)pixelData, sourceRectangle, byteStride);
-        }
-
-        public static Image LoadPixelData(
-            VectorTypeInfo pixelType, Span<byte> pixelData, Size size, int? byteStride = null)
-        {
-            return LoadPixelData(
-                pixelType, (ReadOnlySpan<byte>)pixelData, size, byteStride);
         }
 
         #endregion

@@ -4,7 +4,7 @@ using MonoGame.Imaging.Attributes.Coder;
 using MonoGame.Imaging.Pixels;
 using StbSharp;
 
-namespace MonoGame.Imaging.Coding
+namespace MonoGame.Imaging.Coding.Encoding
 {
     [Serializable]
     public class PngEncoderOptions : EncoderOptions
@@ -19,22 +19,19 @@ namespace MonoGame.Imaging.Coding
         }
     }
 
-    namespace Encoding
+    public class PngEncoder : StbEncoderBase, ICancellableCoderAttribute
     {
-        public class PngEncoder : StbEncoderBase, ICancellableCoderAttribute
-        {
-            public override ImageFormat Format => ImageFormat.Png;
-            public override EncoderOptions DefaultOptions => PngEncoderOptions.Default;
+        public override ImageFormat Format => ImageFormat.Png;
+        public override EncoderOptions DefaultOptions => PngEncoderOptions.Default;
 
-            protected override bool WriteFirst(
-                ImagingConfig imagingConfig,
-                in StbImageWrite.WriteContext context,
-                IReadOnlyPixelRows image,
-                EncoderOptions encoderOptions)
-            {
-                var options = encoderOptions as PngEncoderOptions;
-                return StbImageWrite.Png.WriteCore(context, options.CompressionLevel);
-            }
+        protected override bool WriteFirst(
+            ImagingConfig imagingConfig,
+            in ImageWrite.WriteContext context,
+            IReadOnlyPixelRows image,
+            EncoderOptions encoderOptions)
+        {
+            var options = encoderOptions as PngEncoderOptions;
+            return ImageWrite.Png.WriteCore(context, options.CompressionLevel);
         }
     }
 }

@@ -17,6 +17,8 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct Rg32 : IPackedVector<uint>, IEquatable<Rg32>, IPixel
     {
+        private static Vector2 MaxShortValue = new Vector2(ushort.MaxValue);
+
         VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Red, sizeof(ushort) * 8),
             new VectorComponent(VectorComponentType.Green, sizeof(ushort) * 8));
@@ -39,22 +41,16 @@ namespace MonoGame.Framework.PackedVector
         [CLSCompliant(false)]
         public Rg32(uint packed) : this() => PackedValue = packed;
 
-        public Rg32(Vector2 vector) => this = Pack(vector);
+        public Rg32(Vector2 vector) : this()
+        {
+            FromVector4(new Vector4(vector, 0, 1));
+        }
 
         public Rg32(float x, float y) : this(new Vector2(x, y))
         {
         }
 
         #endregion
-
-        private static Rg32 Pack(Vector2 vector)
-        {
-            vector = Vector2.Clamp(vector, Vector2.Zero, Vector2.One);
-            vector *= ushort.MaxValue;
-            vector.Round();
-
-            return new Rg32((ushort)vector.X, (ushort)vector.Y);
-        }
 
         /// <summary>
         /// Gets the packed vector in <see cref="Vector2"/> format.
@@ -70,7 +66,16 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Rg32, uint>(ref this) = value;
         }
 
-        public void FromVector4(Vector4 vector) => this = Pack(vector.XY);
+        public void FromVector4(Vector4 vector)
+        {
+            ref Vector2 vector2 = ref Unsafe.As<Vector4, Vector2>(ref vector);
+            vector2 *= ushort.MaxValue;
+            vector2 += Vector2.Half;
+            vector2 = Vector2.Clamp(vector2, Vector2.Zero, MaxShortValue);
+
+            R = (ushort)vector2.X;
+            G = (ushort)vector2.Y;
+        }
 
         public readonly Vector4 ToVector4() => new Vector4(ToVector2(), 0, 1f);
 

@@ -39,22 +39,16 @@ namespace MonoGame.Framework.PackedVector
         [CLSCompliant(false)]
         public Rg16(ushort packed) : this() => PackedValue = packed;
 
-        public Rg16(Vector2 vector) => this = Pack(vector);
+        public Rg16(Vector2 vector) : this()
+        {
+            FromVector4(new Vector4(vector, 0, 1));
+        }
 
         public Rg16(float x, float y) : this(new Vector2(x, y))
         {
         }
 
         #endregion
-
-        private static Rg16 Pack(Vector2 vector)
-        {
-            vector = Vector2.Clamp(vector, Vector2.Zero, Vector2.One);
-            vector *= byte.MaxValue;
-            vector.Round();
-
-            return new Rg16((byte)vector.X, (byte)vector.Y);
-        }
 
         /// <summary>
         /// Gets the packed vector in <see cref="Vector2"/> format.
@@ -70,7 +64,16 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Rg16, ushort>(ref this) = value;
         }
 
-        public void FromVector4(Vector4 vector) => this = Pack(vector.XY);
+        public void FromVector4(Vector4 vector)
+        {
+            ref Vector2 vector2 = ref Unsafe.As<Vector4, Vector2>(ref vector);
+            vector2 *= byte.MaxValue;
+            vector2 += Vector2.Half;
+            vector2 = Vector2.Clamp(vector2, Vector2.Zero, Vector2.MaxByteValue);
+
+            R = (byte)vector.X;
+            G = (byte)vector.Y;
+        }
 
         public readonly Vector4 ToVector4() => new Vector4(ToVector2(), 0, 1f);
 

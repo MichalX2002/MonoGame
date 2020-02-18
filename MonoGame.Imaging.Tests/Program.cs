@@ -15,6 +15,7 @@ using MonoGame.Framework.Memory;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Coding.Decoding;
 using MonoGame.Imaging.Coding.Encoding;
+using System.Numerics;
 
 namespace MonoGame.Imaging.Tests
 {
@@ -24,14 +25,12 @@ namespace MonoGame.Imaging.Tests
 
         static void Main(string[] args)
         {
-            Console.WriteLine(args);
-
             var archive = new ZipArchive(File.OpenRead(DataZip), ZipArchiveMode.Read, false);
             //var stream = archive.GetEntry("png/24bit.png").Open();
             var stream = archive.GetEntry("bmp/32bit.bmp").Open();
 
             var encoded = new MemoryStream(1024 * 1024 * 8);
-            //using(var stream = new FileStream("big img.png", FileMode.Open))
+            //using (var stream = new FileStream("big img.png", FileMode.Open))
                 stream.CopyTo(encoded);
 
             //var encoded = new FileStream("big img.png", FileMode.Open);
@@ -40,31 +39,36 @@ namespace MonoGame.Imaging.Tests
             //var encoded = req.GetResponse().GetResponseStream();
             //encoded = RecyclableMemoryManager.Default.GetBufferedStream(encoded, false);
 
-            int readRepeats = 1;
-            int writeRepeats = 1;
+            int readRepeats = 5000;
+            int writeRepeats = 500;
 
             void OnReadProgress(
                 ImageDecoderState decoderState,
-                double percentage, 
+                double percentage,
                 Rectangle? rectangle)
             {
                 Console.WriteLine("Read: " + Math.Round(percentage * 100, 2) + "%");
             }
-            
+
             var watch = new Stopwatch();
             Image image = null;
             for (int i = 0; i < readRepeats; i++)
             {
                 encoded.Seek(0, SeekOrigin.Begin);
-                if (readRepeats == 1 || i != 0)
-                    watch.Start();
 
                 image?.Dispose();
+                watch.Start();
                 image = Image.Load(encoded, null, null, OnReadProgress);
                 watch.Stop();
+
+                if (i == 0)
+                {
+                    Console.WriteLine("Initial Read: " + Math.Round(watch.Elapsed.TotalMilliseconds, 3) + "ms");
+                    Console.WriteLine(image.Width + "x" + image.Height + " # " + image.PixelType.Type);
+                    watch.Reset();
+                }
             }
-            Console.WriteLine(image.Width + "x" + image.Height + " # " + image.PixelType.Type);
-            Console.WriteLine("Buffer Read Average: " +
+            Console.WriteLine("Read Average: " +
                 Math.Round(watch.Elapsed.TotalMilliseconds / (readRepeats == 1 ? 1 : readRepeats - 1), 3) + "ms");
 
             Thread.Sleep(500);
@@ -76,19 +80,25 @@ namespace MonoGame.Imaging.Tests
                 double percentage,
                 Rectangle? rectangle)
             {
-                //Console.WriteLine("Write: " + Math.Round(progress * 100, 2) + "%");
+                //Console.WriteLine("Write: " + Math.Round(percentage * 100, 2) + "%");
             }
 
             var result = new MemoryStream(1024 * 1024 * 85);
             var writeFormat = ImageFormat.Png;
+            watch.Restart();
             for (int i = 0; i < writeRepeats; i++)
             {
                 result.Seek(0, SeekOrigin.Begin);
-                if (writeRepeats == 1 || i != 0)
-                    watch.Start();
 
+                watch.Start();
                 image.Save(result, ImageFormat.Png, null, null, OnWriteProgress);
                 watch.Stop();
+
+                if (i == 0)
+                {
+                    Console.WriteLine("Initial Write: " + Math.Round(watch.Elapsed.TotalMilliseconds, 3) + "ms");
+                    watch.Reset();
+                }
             }
             image.Dispose();
 

@@ -51,8 +51,8 @@ namespace MonoGame.Framework.PackedVector
 
         private static Short4 Pack(ref Vector4 vector)
         {
+            vector += Vector4.Half;
             vector = Vector4.Clamp(vector, MinNeg, MaxPos);
-            vector.Round();
 
             return new Short4(
                 (short)vector.X,

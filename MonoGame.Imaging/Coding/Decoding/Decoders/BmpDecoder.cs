@@ -1,5 +1,5 @@
 ﻿using StbSharp;
-using static StbSharp.StbImage;
+using static StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
@@ -7,14 +7,12 @@ namespace MonoGame.Imaging.Coding.Decoding
     {
         public override ImageFormat Format => ImageFormat.Bmp;
 
-        protected override unsafe bool ReadFirst(
+        protected override unsafe IMemoryHolder ReadFirst(
             ImagingConfig imagingConfig,
             ReadContext context,
-            out IMemoryResult result,
             ref ReadState state)
         {
-            result = stbi__bmp_load(context, ref state);
-            return result != null;
+            return Bmp.Load(context, ref state);
         }
     }
 }

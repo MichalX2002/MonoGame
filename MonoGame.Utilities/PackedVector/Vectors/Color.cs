@@ -254,12 +254,13 @@ namespace MonoGame.Framework
 
         #region IPixel
 
-        public readonly Vector4 ToScaledVector4() => new Vector4(R, G, B, A) / 255f;
+        public readonly Vector4 ToScaledVector4() => new Vector4(R, G, B, A) / byte.MaxValue;
 
         public void FromScaledVector4(Vector4 vector) 
         {
-            vector *= 255;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.ByteMaxValue);
+            vector *= byte.MaxValue;
+            vector += Vector4.Half;
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxByteValue);
 
             R = (byte)vector.X;
             G = (byte)vector.Y;

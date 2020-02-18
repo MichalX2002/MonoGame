@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading;
 using MonoGame.Imaging.Pixels;
-using static StbSharp.StbImageWrite;
+using static StbSharp.ImageWrite;
 
 namespace MonoGame.Imaging.Coding.Encoding
 {
@@ -10,7 +10,7 @@ namespace MonoGame.Imaging.Coding.Encoding
     {
         static StbEncoderBase()
         {
-            ZlibCompress.CustomDeflateCompress = CustomDeflateCompress;
+            Zlib.CustomDeflateCompress = CustomDeflateCompress;
         }
 
         public abstract ImageFormat Format { get; }
@@ -130,11 +130,6 @@ namespace MonoGame.Imaging.Coding.Encoding
             var writeContext = CreateWriteContext(image, state, cancellationToken, onProgress);
 
             return WriteNext(encoderState.ImagingConfig, writeContext, image, encoderOptions);
-        }
-
-        public virtual void FinishState(ImageEncoderState encoderState)
-        {
-            encoderState.Dispose();
         }
 
         #endregion

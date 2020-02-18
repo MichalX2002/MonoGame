@@ -62,26 +62,16 @@ namespace MonoGame.Framework.PackedVector
             A = a;
         }
 
-        public Rgba64(Vector4 vector) => this = Pack(ref vector);
+        public Rgba64(Vector4 vector) : this()
+        {
+            FromVector4(vector);
+        }
 
         public Rgba64(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
         {
         }
 
         #endregion
-
-        private static Rgba64 Pack(ref Vector4 vector)
-        {
-            vector *= ushort.MaxValue;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Max);
-            vector.Round();
-
-            return new Rgba64(
-                (ushort)vector.X,
-                (ushort)vector.Y,
-                (ushort)vector.Z,
-                (ushort)vector.W);
-        }
 
         #region IPackedVector
 
@@ -92,7 +82,17 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Rgba64, ulong>(ref this) = value;
         }
 
-        public void FromVector4(Vector4 vector) => this = Pack(ref vector);
+        public void FromVector4(Vector4 vector)
+        {
+            vector *= ushort.MaxValue;
+            vector += Vector4.Half;
+            vector = Vector4.Clamp(vector, Vector4.Zero, Max);
+
+            R = (ushort)vector.X;
+            G = (ushort)vector.Y;
+            B = (ushort)vector.Z;
+            A = (ushort)vector.W;
+        }
 
         public readonly Vector4 ToVector4() => new Vector4(R, G, B, A) / ushort.MaxValue;
 

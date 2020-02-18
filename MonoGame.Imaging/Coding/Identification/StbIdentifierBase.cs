@@ -1,7 +1,7 @@
 ﻿using System;
 using MonoGame.Framework;
 using MonoGame.Framework.PackedVector;
-using static StbSharp.StbImage;
+using static StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coding.Identification
 {

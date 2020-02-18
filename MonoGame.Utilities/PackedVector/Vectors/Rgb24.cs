@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
@@ -40,7 +41,10 @@ namespace MonoGame.Framework.PackedVector
             B = b;
         }
 
-        public Rgb24(Vector3 vector) => this = Pack(vector);
+        public Rgb24(Vector3 vector) : this()
+        {
+            FromVector4(new Vector4(vector, 1));
+        }
 
         public Rgb24(float x, float y, float z) : this(new Vector3(x, y, z))
         {
@@ -48,23 +52,21 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        private static Rgb24 Pack(Vector3 vector)
-        {
-            vector *= byte.MaxValue;
-            vector = Vector3.Clamp(vector, Vector3.Zero, Vector3.MaxByteValue);
-            vector.Round();
-
-            return new Rgb24(
-                (byte)vector.X,
-                (byte)vector.Y,
-                (byte)vector.Z);
-        }
-
         public readonly Vector3 ToVector3() => new Vector3(R, G, B) / byte.MaxValue;
-    
+
         #region IPackedVector
 
-        public void FromVector4(Vector4 vector) => this = Pack(vector.XYZ);
+        public void FromVector4(Vector4 vector)
+        {
+            ref Vector3 vector3 = ref Unsafe.As<Vector4, Vector3>(ref vector);
+            vector3 *= byte.MaxValue;
+            vector3 += Vector3.Half;
+            Vector3.Clamp(vector3, Vector3.Zero, Vector3.MaxByteValue, out vector3);
+
+            R = (byte)vector3.X;
+            G = (byte)vector3.Y;
+            B = (byte)vector3.Z;
+        }
 
         public readonly Vector4 ToVector4() => new Vector4(ToVector3(), 1);
 

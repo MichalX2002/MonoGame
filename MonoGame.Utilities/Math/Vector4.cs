@@ -23,7 +23,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// <see cref="Vector4"/> with all values set to <see cref="byte.MaxValue"/>.
         /// </summary>
-        internal static readonly Vector4 ByteMaxValue = new Vector4(byte.MaxValue);
+        internal static readonly Vector4 MaxByteValue = new Vector4(byte.MaxValue);
 
         VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Red, sizeof(float) * 8),
@@ -280,11 +280,22 @@ namespace MonoGame.Framework
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
         /// <returns>The clamped value.</returns>
-        public static Vector4 Clamp(in Vector4 value, in Vector4 min, in Vector4 max) => new Vector4(
-            MathHelper.Clamp(value.X, min.X, max.X),
-            MathHelper.Clamp(value.Y, min.Y, max.Y),
-            MathHelper.Clamp(value.Z, min.Z, max.Z),
-            MathHelper.Clamp(value.W, min.W, max.W));
+        public static Vector4 Clamp(in Vector4 value, in Vector4 min, in Vector4 max)
+        {
+            return new Vector4(
+                MathHelper.Clamp(value.X, min.X, max.X),
+                MathHelper.Clamp(value.Y, min.Y, max.Y),
+                MathHelper.Clamp(value.Z, min.Z, max.Z),
+                MathHelper.Clamp(value.W, min.W, max.W));
+        }
+
+        public static void Clamp(in Vector4 value, in Vector4 min, in Vector4 max, out Vector4 result)
+        {
+            result.X = MathHelper.Clamp(value.X, min.X, max.X);
+            result.Y = MathHelper.Clamp(value.Y, min.Y, max.Y);
+            result.Z = MathHelper.Clamp(value.Z, min.Z, max.Z);
+            result.W = MathHelper.Clamp(value.W, min.W, max.W);
+        }
 
         /// <summary>
         /// Returns the distance between two vectors.

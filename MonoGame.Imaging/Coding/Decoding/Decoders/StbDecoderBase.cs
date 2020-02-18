@@ -3,7 +3,7 @@ using MonoGame.Framework;
 using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Coding.Identification;
 using StbSharp;
-using static StbSharp.StbImage;
+using static StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
@@ -13,15 +13,14 @@ namespace MonoGame.Imaging.Coding.Decoding
 
         #region Decode Abstraction
 
-        protected abstract bool ReadFirst(
-            ImagingConfig config, ReadContext context, out IMemoryResult data, ref ReadState state);
+        protected abstract IMemoryHolder ReadFirst(
+            ImagingConfig config, ReadContext context, ref ReadState state);
 
-        protected virtual bool ReadNext(
-            ImagingConfig config, ReadContext context, out IMemoryResult data, ref ReadState state)
+        protected virtual IMemoryHolder ReadNext(
+            ImagingConfig config, ReadContext context, ref ReadState state)
         {
             ImagingArgumentGuard.AssertAnimationSupport(this, config);
-            data = null;
-            return false;
+            return null;
         }
 
         private static ReadState CreateReadState(
@@ -46,14 +45,14 @@ namespace MonoGame.Imaging.Coding.Decoding
         }
 
         protected virtual unsafe Image ParseMemoryResult(
-            ImagingConfig config, IMemoryResult result, in ReadState state, VectorTypeInfo pixelType = null)
+            ImagingConfig config, IMemoryHolder result, in ReadState state, VectorTypeInfo pixelType = null)
         {
             try
             {
                 var fromType = StbIdentifierBase.CompToVectorType(state.OutComponents, state.OutDepth);
                 var toType = pixelType ?? fromType;
 
-                if(fromType == toType)
+                if (fromType == toType)
                 {
                     var memory = new ResultWrapper(result);
                     var image = Image.WrapMemory(fromType, memory, leaveOpen: false, state.Width, state.Height);
@@ -63,8 +62,8 @@ namespace MonoGame.Imaging.Coding.Decoding
                 {
                     using (result)
                     {
-                        var span = new ReadOnlySpan<byte>((void*)result.Pointer, result.Length);
-                        var image = Image.LoadPixelData(fromType, toType, span, new Size(state.Width, state.Height));
+                        var size = new Size(state.Width, state.Height);
+                        var image = Image.LoadPixelData(fromType, toType, result.Span, size);
                         return image;
                     }
                 }
@@ -92,17 +91,18 @@ namespace MonoGame.Imaging.Coding.Decoding
             VectorTypeInfo pixelType = null,
             DecodeProgressCallback onProgress = null)
         {
-            var decoderState = new ImageStbDecoderState(config, this, stream);
-            var readState = CreateReadState(decoderState, null, onProgress);
-            if (ReadFirst(config, stream.Context, out var result, ref readState))
+            var state = new ImageStbDecoderState(config, this, stream);
+            var readState = CreateReadState(state, null, onProgress);
+            var result = ReadFirst(config, stream.Context, ref readState);
+            if (result != null)
             {
-                var image = ParseMemoryResult(config, result, readState, pixelType);
-                decoderState.CurrentImage = image;
-                decoderState.ImageIndex++;
-                return decoderState;
+                state.CurrentImage = ParseMemoryResult(config, result, readState, pixelType);
+                state.ImageIndex++;
+                return state;
             }
             else
             {
+                state.CurrentImage = null;
                 throw GetFailureException(config, stream.Context);
             }
         }
@@ -114,14 +114,13 @@ namespace MonoGame.Imaging.Coding.Decoding
         {
             var state = (ImageStbDecoderState)decoderState;
             if (state.ImageIndex < 0)
-                throw new InvalidOperationException(
-                    $"The decoder state has an invalid {nameof(state.ImageIndex)}.");
+                throw new InvalidOperationException("The decoder state is invalid.");
 
             var readState = CreateReadState(state, null, onProgress);
-            if (ReadNext(decoderState.ImagingConfig, state.Stream.Context, out var result, ref readState))
+            var result = ReadNext(decoderState.ImagingConfig, state.Stream.Context, ref readState);
+            if (result != null)
             {
-                var image = ParseMemoryResult(state.ImagingConfig, result, readState, pixelType);
-                state.CurrentImage = image;
+                state.CurrentImage = ParseMemoryResult(state.ImagingConfig, result, readState, pixelType);
                 state.ImageIndex++;
             }
             else
@@ -129,10 +128,6 @@ namespace MonoGame.Imaging.Coding.Decoding
                 state.CurrentImage = null;
                 throw GetFailureException(state.ImagingConfig, decoderState.Stream.Context);
             }
-        }
-
-        public virtual void FinishState(ImageDecoderState decoderState)
-        {
         }
 
         #endregion

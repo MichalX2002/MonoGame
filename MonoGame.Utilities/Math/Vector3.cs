@@ -264,10 +264,20 @@ namespace MonoGame.Framework
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
         /// <returns>The clamped value.</returns>
-        public static Vector3 Clamp(in Vector3 value, in Vector3 min, in Vector3 max) => new Vector3(
-            MathHelper.Clamp(value.X, min.X, max.X),
-            MathHelper.Clamp(value.Y, min.Y, max.Y),
-            MathHelper.Clamp(value.Z, min.Z, max.Z));
+        public static Vector3 Clamp(in Vector3 value, in Vector3 min, in Vector3 max)
+        {
+            return new Vector3(
+                MathHelper.Clamp(value.X, min.X, max.X),
+                MathHelper.Clamp(value.Y, min.Y, max.Y),
+                MathHelper.Clamp(value.Z, min.Z, max.Z));
+        }
+
+        public static void Clamp(in Vector3 value, in Vector3 min, in Vector3 max, out Vector3 result)
+        {
+            result.X = MathHelper.Clamp(value.X, min.X, max.X);
+            result.Y = MathHelper.Clamp(value.Y, min.Y, max.Y);
+            result.Z = MathHelper.Clamp(value.Z, min.Z, max.Z);
+        }
 
         /// <summary>
         /// Computes the cross product of two vectors.
@@ -298,7 +308,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The squared distance between two vectors.</returns>
-        public static float DistanceSquared(in Vector3 a, in Vector3 b) => 
+        public static float DistanceSquared(in Vector3 a, in Vector3 b) =>
             (a.X - b.X) * (a.X - b.X) +
             (a.Y - b.Y) * (a.Y - b.Y) +
             (a.Z - b.Z) * (a.Z - b.Z);
@@ -619,7 +629,7 @@ namespace MonoGame.Framework
             for (int i = 0; i < source.Length; i++)
             {
                 Vector3 position = source[i];
-                destination[i] = new Vector3( 
+                destination[i] = new Vector3(
                     (position.X * matrix.M11) + (position.Y * matrix.M21) + (position.Z * matrix.M31) + matrix.M41,
                     (position.X * matrix.M12) + (position.Y * matrix.M22) + (position.Z * matrix.M32) + matrix.M42,
                     (position.X * matrix.M13) + (position.Y * matrix.M23) + (position.Z * matrix.M33) + matrix.M43);
@@ -763,10 +773,13 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector3"/> on the left of the mul sign.</param>
         /// <param name="scaleFactor">Scalar value on the right of the mul sign.</param>
         /// <returns>Result of the vector multiplication with a scalar.</returns>
-        public static Vector3 operator *(in Vector3 value, float scaleFactor) => new Vector3(
-            value.X * scaleFactor,
-            value.Y * scaleFactor,
-            value.Z * scaleFactor);
+        public static Vector3 operator *(in Vector3 value, float scaleFactor)
+        {
+            return new Vector3(
+                value.X * scaleFactor,
+                value.Y * scaleFactor,
+                value.Z * scaleFactor);
+        }
 
         /// <summary>
         /// Multiplies the components of vector by a scalar.

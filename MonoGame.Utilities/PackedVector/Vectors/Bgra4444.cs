@@ -22,6 +22,8 @@ namespace MonoGame.Framework.PackedVector
             new VectorComponent(VectorComponentType.Red, 4),
             new VectorComponent(VectorComponentType.Alpha, 4));
 
+        private static readonly Vector4 Max = new Vector4(15f);
+
         #region Constructors
 
         /// <summary>
@@ -34,7 +36,10 @@ namespace MonoGame.Framework.PackedVector
         /// Constructs the packed vector with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public Bgra4444(Vector4 vector) => PackedValue = Pack(ref vector);
+        public Bgra4444(Vector4 vector) : this()
+        {
+            FromVector4(vector);
+        }
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
@@ -45,33 +50,32 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        private static ushort Pack(ref Vector4 vector)
-        {
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.One);
-            vector *= 15f;
-            vector.Round();
+        #region IPackedVector
 
-            return (ushort)(
+        [CLSCompliant(false)]
+        public ushort PackedValue { get; set; }
+
+        public void FromVector4(Vector4 vector)
+        {
+            vector *= 15f;
+            vector += Vector4.Half;
+            vector = Vector4.Clamp(vector, Vector4.Zero, Max);
+
+            PackedValue = (ushort)(
                 (((int)vector.W & 0x0F) << 12) |
                 (((int)vector.X & 0x0F) << 8) |
                 (((int)vector.Y & 0x0F) << 4) |
                 ((int)vector.Z & 0x0F));
         }
 
-        #region IPackedVector
-
-        [CLSCompliant(false)]
-        public ushort PackedValue { get; set; }
-
-        public void FromVector4(Vector4 vector) => PackedValue = Pack(ref vector);
-
         public readonly Vector4 ToVector4()
         {
-            return Vector4.Multiply(new Vector4(
-                (PackedValue >> 8) & 0x0F,
-                (PackedValue >> 4) & 0x0F,
-                PackedValue & 0x0F,
-                (PackedValue >> 12) & 0x0F),
+            return Vector4.Multiply(
+                new Vector4(
+                    (PackedValue >> 8) & 0x0F,
+                    (PackedValue >> 4) & 0x0F,
+                    PackedValue & 0x0F,
+                    (PackedValue >> 12) & 0x0F),
                 scaleFactor: 1 / 15f);
         }
 

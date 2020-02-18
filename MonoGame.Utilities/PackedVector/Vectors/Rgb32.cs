@@ -56,28 +56,20 @@ namespace MonoGame.Framework.PackedVector
             Padding = padding;
         }
 
-        public Rgb32(Vector4 vector) => this = Pack(vector);
+        public Rgb32(Vector4 vector) : this()
+        {
+            FromVector4(vector);
+        }
 
-        public Rgb32(Vector3 vector) => this = Pack(new Vector4(vector, 1));
+        public Rgb32(Vector3 vector) : this(new Vector4(vector, 1))
+        {
+        }
 
         public Rgb32(float x, float y, float z) : this(new Vector3(x, y, z))
         {
         }
 
         #endregion
-
-        private static Rgb32 Pack(Vector4 vector)
-        {
-            vector *= byte.MaxValue;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.ByteMaxValue);
-            vector.Round();
-
-            return new Rgb32(
-                (byte)vector.X,
-                (byte)vector.Y,
-                (byte)vector.Z,
-                (byte)vector.W);
-        }
 
         public readonly Vector3 ToVector3() => new Vector3(R, G, B) / byte.MaxValue;
 
@@ -90,7 +82,12 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Rgb32, uint>(ref this) = value;
         }
 
-        public void FromVector4(Vector4 vector) => this = Pack(vector);
+        public void FromVector4(Vector4 vector)
+        {
+            Rgb24 rgb = default;
+            rgb.FromVector4(vector);
+            FromRgb24(rgb);
+        }
 
         public readonly Vector4 ToVector4() => new Vector4(ToVector3(), Padding);
 

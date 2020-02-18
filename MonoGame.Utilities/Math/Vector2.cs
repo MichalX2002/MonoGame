@@ -30,6 +30,11 @@ namespace MonoGame.Framework
         #region Public Constants
 
         /// <summary>
+        /// <see cref="Vector2"/> with all values set to <see cref="byte.MaxValue"/>.
+        /// </summary>
+        internal static readonly Vector2 MaxByteValue = new Vector2(byte.MaxValue);
+
+        /// <summary>
         /// Returns a <see cref="Vector2"/> with all components set to 0.
         /// </summary>
         public static readonly Vector2 Zero = new Vector2(0f);

@@ -42,28 +42,20 @@ namespace MonoGame.Framework.PackedVector
             Padding = padding;
         }
 
-        public Bgr32(Vector4 vector) => this = Pack(vector);
+        public Bgr32(Vector4 vector) : this()
+        {
+            FromVector4(vector);
+        }
 
-        public Bgr32(Vector3 vector) => this = Pack(new Vector4(vector, 1));
+        public Bgr32(Vector3 vector) : this(new Vector4(vector, 1))
+        {
+        }
 
         public Bgr32(float x, float y, float z) : this(new Vector3(x, y, z))
         {
         }
 
         #endregion
-
-        private static Bgr32 Pack(Vector4 vector)
-        {
-            vector *= byte.MaxValue;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.ByteMaxValue);
-            vector.Round();
-
-            return new Bgr32(
-                (byte)vector.X,
-                (byte)vector.Y,
-                (byte)vector.Z,
-                (byte)vector.W);
-        }
 
         public readonly Vector3 ToVector3() => new Vector3(R, G, B) / byte.MaxValue;
 
@@ -76,9 +68,14 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Bgr32, uint>(ref this) = value;
         }
 
-        public void FromVector4(Vector4 vector) => this = Pack(vector);
+        public void FromVector4(Vector4 vector)
+        {
+            Color rgba = default;
+            rgba.FromVector4(vector);
+            FromColor(rgba);
+        }
 
-        public readonly Vector4 ToVector4() => new Vector4(ToVector3(), Padding);
+        public readonly Vector4 ToVector4() => new Vector4(ToVector3(), 1);
 
         #endregion
 

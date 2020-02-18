@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.IO.Compression;
-using System.Runtime.InteropServices;
 using System.Threading;
 using MonoGame.Framework.Memory;
 using StbSharp;
@@ -10,11 +9,11 @@ namespace MonoGame.Imaging.Coding.Encoding
 {
     public abstract partial class StbEncoderBase : IImageEncoder
     {
-        private static IMemoryResult CustomDeflateCompress(
+        private static IMemoryHolder CustomDeflateCompress(
             ReadOnlySpan<byte> data,
             CompressionLevel level,
             CancellationToken cancellation,
-            StbImageWrite.WriteProgressCallback onProgress = null)
+            ImageWrite.WriteProgressCallback onProgress = null)
         {
             cancellation.ThrowIfCancellationRequested();
 
@@ -44,12 +43,12 @@ namespace MonoGame.Imaging.Coding.Encoding
                     }
                 }
 
-                uint adlerSum = StbImageWrite.Adler32.Calculate(data);
+                uint adlerSum = ImageWrite.Adler32.Calculate(data);
                 Span<byte> adlerSumBytes = stackalloc byte[sizeof(uint)];
                 BinaryPrimitives.WriteUInt32BigEndian(adlerSumBytes, adlerSum);
                 output.Write(adlerSumBytes);
 
-                return new RecyclableDeflateResult(output);
+                return new RecyclableMemoryHolder(output);
             }
             catch
             {
@@ -59,12 +58,12 @@ namespace MonoGame.Imaging.Coding.Encoding
             }
         }
 
-        private class RecyclableDeflateResult : GCHandleResult
+        private class RecyclableMemoryHolder : ByteMemoryHolder
         {
             private RecyclableMemoryStream _stream;
 
-            public RecyclableDeflateResult(RecyclableMemoryStream stream) : 
-                base(GCHandle.Alloc(stream.GetBuffer(), GCHandleType.Pinned), (int)stream.Length)
+            public RecyclableMemoryHolder(RecyclableMemoryStream stream) :
+                base(stream.GetBuffer().AsMemory(0, (int)stream.Length))
             {
                 _stream = stream;
             }

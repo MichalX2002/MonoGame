@@ -8,25 +8,23 @@ namespace MonoGame.Imaging.Coding.Decoding
     {
         private class ResultWrapper : IMemory
         {
-            private IMemoryResult _memoryResult;
+            private IMemoryHolder _memory;
 
-            public unsafe Span<byte> Span => new Span<byte>(
-                (void*)_memoryResult.Pointer, _memoryResult.Length);
-            
+            public Span<byte> Span => _memory.Span;
             ReadOnlySpan<byte> IReadOnlyMemory.Span => Span;
 
-            public int Count => _memoryResult.Length;
+            public int Count => _memory.Length;
             public int ElementSize => sizeof(byte);
 
-            public ResultWrapper(IMemoryResult memoryResult)
+            public ResultWrapper(IMemoryHolder memory)
             {
-                _memoryResult = memoryResult ?? throw new ArgumentNullException(nameof(memoryResult));
+                _memory = memory ?? throw new ArgumentNullException(nameof(memory));
             }
 
             public void Dispose()
             {
-                _memoryResult?.Dispose();
-                _memoryResult = null;
+                _memory?.Dispose();
+                _memory = null;
             }
         }
     }

@@ -46,11 +46,5 @@ namespace MonoGame.Imaging.Coding.Decoding
             ImageDecoderState decoderState,
             VectorTypeInfo pixelType = null,
             DecodeProgressCallback onProgress = null);
-
-        /// <summary>
-        /// Finishes a decoding operation.
-        /// </summary>
-        /// <param name="decoderState">The state from the first decode call.</param>
-        void FinishState(ImageDecoderState decoderState);
     }
 }

@@ -24,8 +24,8 @@ namespace MonoGame.Imaging
             fixed (TPixelFrom* srcPixelPtr = &MemoryMarshal.GetReference(pixels))
             fixed (TPixelTo* dstPixelPtr = &MemoryMarshal.GetReference(destination.GetPixelSpan()))
             {
-                byte* srcPtr = (byte*)srcPixelPtr + sourceRectangle.X * sizeof(TPixelFrom);
-                byte* dstPtr = (byte*)dstPixelPtr + sourceRectangle.X * sizeof(TPixelTo);
+                byte* srcPtr = (byte*)(srcPixelPtr + sourceRectangle.X);
+                byte* dstPtr = (byte*)(dstPixelPtr + sourceRectangle.X);
 
                 if (typeof(TPixelFrom) == typeof(TPixelTo))
                 {
@@ -38,13 +38,27 @@ namespace MonoGame.Imaging
                 }
                 else
                 {
-                    for (int y = 0; y < sourceRectangle.Height; y++)
+                    if (typeof(TPixelFrom) == typeof(Color))
                     {
-                        var srcRow = (TPixelFrom*)(srcPtr + (sourceRectangle.Y + y) * srcStride);
-                        var dstRow = (TPixelTo*)(dstPtr + (sourceRectangle.Y + y) * dstStride);
+                        for (int y = 0; y < sourceRectangle.Height; y++)
+                        {
+                            var srcRow = (Color*)(srcPtr + (sourceRectangle.Y + y) * srcStride);
+                            var dstRow = (TPixelTo*)(dstPtr + (sourceRectangle.Y + y) * dstStride);
 
-                        for (int x = 0; x < sourceRectangle.Width; x++)
-                            dstRow[x].FromScaledVector4(srcRow[x + sourceRectangle.X].ToScaledVector4());
+                            for (int x = 0; x < sourceRectangle.Width; x++)
+                                dstRow[x].FromColor(srcRow[x]);
+                        }
+                    }
+                    else
+                    {
+                        for (int y = 0; y < sourceRectangle.Height; y++)
+                        {
+                            var srcRow = (TPixelFrom*)(srcPtr + (sourceRectangle.Y + y) * srcStride);
+                            var dstRow = (TPixelTo*)(dstPtr + (sourceRectangle.Y + y) * dstStride);
+
+                            for (int x = 0; x < sourceRectangle.Width; x++)
+                                dstRow[x].FromScaledVector4(srcRow[x].ToScaledVector4());
+                        }
                     }
                 }
             }

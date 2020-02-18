@@ -26,9 +26,9 @@ namespace MonoGame.Framework.PackedVector
 
         private static void Pack(ref Vector4 vector, out byte luminance, out byte alpha)
         {
-            vector *= Vector4.ByteMaxValue;
+            vector *= Vector4.MaxByteValue;
             vector += Vector4.Half;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.ByteMaxValue);
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxByteValue);
 
             luminance = PackedVectorHelper.Get8BitBT709Luminance(
                 (byte)vector.X, (byte)vector.Y, (byte)vector.Z);

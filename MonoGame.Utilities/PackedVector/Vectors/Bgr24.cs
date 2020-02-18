@@ -40,7 +40,10 @@ namespace MonoGame.Framework.PackedVector
             B = b;
         }
 
-        public Bgr24(Vector3 vector) => this = Pack(vector);
+        public Bgr24(Vector3 vector) : this()
+        {
+            FromVector4(vector.ToVector4());
+        }
 
         public Bgr24(float x, float y, float z) : this(new Vector3(x, y, z))
         {
@@ -48,23 +51,16 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        private static Bgr24 Pack(Vector3 vector)
-        {
-            vector *= byte.MaxValue;
-            vector = Vector3.Clamp(vector, Vector3.Zero, Vector3.MaxByteValue);
-            vector.Round();
-
-            return new Bgr24(
-                (byte)vector.X,
-                (byte)vector.Y,
-                (byte)vector.Z);
-        }
-
         public readonly Vector3 ToVector3() => new Vector3(R, G, B) / byte.MaxValue;
 
         #region IPackedVector
 
-        public void FromVector4(Vector4 vector) => this = Pack(vector.XYZ);
+        public void FromVector4(Vector4 vector)
+        {
+            Rgb24 rgb = default;
+            rgb.FromVector4(vector);
+            FromRgb24(rgb);
+        }
 
         public readonly Vector4 ToVector4() => new Vector4(ToVector3(), 1);
 

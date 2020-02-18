@@ -5,7 +5,7 @@ using System.Threading;
 using MonoGame.Framework;
 using MonoGame.Framework.IO;
 using MonoGame.Framework.Memory;
-using static StbSharp.StbImage;
+using static StbSharp.ImageRead;
 
 namespace MonoGame.Imaging
 {
@@ -94,9 +94,9 @@ namespace MonoGame.Imaging
                 }
                 else
                 {
-                    long current = context.Stream.Position;
-                    long seeked = context.Stream.Seek(n, SeekOrigin.Current);
-                    return (int)(seeked - current);
+                    long previous = context.Stream.Position;
+                    long current = context.Stream.Seek(n, SeekOrigin.Current);
+                    return (int)(current - previous);
                 }
             }
             catch (Exception ex)

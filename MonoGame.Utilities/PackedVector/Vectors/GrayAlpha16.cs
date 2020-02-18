@@ -37,9 +37,9 @@ namespace MonoGame.Framework.PackedVector
 
         private static GrayAlpha16 Pack(ref Vector4 vector)
         {
-            vector *= Vector4.ByteMaxValue;
+            vector *= Vector4.MaxByteValue;
             vector += Vector4.Half;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.ByteMaxValue);
+            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxByteValue);
 
             return new GrayAlpha16(PackedVectorHelper.Get8BitBT709Luminance(
                 (byte)vector.X, (byte)vector.Y, (byte)vector.Z), (byte)vector.W);
