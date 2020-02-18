@@ -22,7 +22,8 @@ internal static class Sdl
         var ret = IntPtr.Zero;
 
         // Load bundled library
-        var assemblyLocation = Path.GetDirectoryName(typeof(Sdl).Assembly.Location);
+        var assemblyLocation = Path.GetDirectoryName(typeof(Sdl).Assembly.Location) ?? "./";
+        
         if (CurrentPlatform.OS == OS.Windows && Environment.Is64BitProcess)
             ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "x64/SDL2.dll"));
         else if (CurrentPlatform.OS == OS.Windows && !Environment.Is64BitProcess)
@@ -32,7 +33,13 @@ internal static class Sdl
         else if (CurrentPlatform.OS == OS.Linux && !Environment.Is64BitProcess)
             ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "x86/libSDL2-2.0.so.0"));
         else if (CurrentPlatform.OS == OS.MacOSX)
-            ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "libSDL2-2.0.0.dylib"));
+        {
+            ret = FuncLoader.LoadLibrary(Path.Combine(assemblyLocation, "libSDL2-2.0.0.dylib"));
+
+            //Look in Frameworks for .app bundles
+            if (ret == IntPtr.Zero)
+                ret = FuncLoader.LoadLibrary(Path.Combine(assemblyLocation, "..", "Frameworks", "libSDL2-2.0.0.dylib"));
+        }
 
         // Load system library
         if (ret == IntPtr.Zero)
@@ -858,6 +865,15 @@ internal static class Sdl
         public static d_sdl_joystickgetbutton GetButton = FL.LoadFunction<d_sdl_joystickgetbutton>(NativeLibrary, "SDL_JoystickGetButton");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate IntPtr d_sdl_joystickname(IntPtr joystick);
+        private static d_sdl_joystickname JoystickName = FuncLoader.LoadFunction<d_sdl_joystickname>(NativeLibrary, "SDL_JoystickName");
+
+        public static string GetJoystickName(IntPtr joystick)
+        {
+            return InteropHelpers.Utf8ToString(JoystickName(joystick));
+        }
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate Guid d_sdl_joystickgetguid(IntPtr joystick);
         public static d_sdl_joystickgetguid GetGUID = FL.LoadFunction<d_sdl_joystickgetguid>(NativeLibrary, "SDL_JoystickGetGUID");
 
@@ -959,6 +975,10 @@ internal static class Sdl
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void d_sdl_free(IntPtr ptr);
+        public static d_sdl_free SDL_Free = FuncLoader.LoadFunction<d_sdl_free>(NativeLibrary, "SDL_free");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int d_sdl_gamecontrolleraddmapping(string mappingString);
         public static d_sdl_gamecontrolleraddmapping AddMapping = FL.LoadFunction<d_sdl_gamecontrolleraddmapping>(NativeLibrary, "SDL_GameControllerAddMapping");
 
@@ -1006,14 +1026,17 @@ internal static class Sdl
 
         public static string GetMapping(IntPtr gamecontroller)
         {
-            IntPtr data = SDL_GameControllerMapping(gamecontroller);
+            IntPtr nativeStr = SDL_GameControllerMapping(gamecontroller);
+            if (nativeStr == IntPtr.Zero)
+                return string.Empty;
             try
             {
-                return InteropHelpers.PtrToString(data);
+                return InteropHelpers.Utf8ToString(nativeStr);
             }
             finally
             {
-                SDL_free(data);
+                //The mapping string returned by SDL is owned by us and thus must be freed
+                SDL_Free(nativeStr);
             }
         }
 

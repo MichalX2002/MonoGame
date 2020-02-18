@@ -41,6 +41,7 @@ namespace MonoGame.Framework.Input
 
                 return new JoystickCapabilities(
                     isConnected: true,
+                    displayName: Sdl.Joystick.GetJoystickName(Device),
                     identifier: _identifier,
                     isGamepad: Sdl.GameController.IsGameController(index) == 1,
                     axisCount: Sdl.Joystick.NumAxes(Device),

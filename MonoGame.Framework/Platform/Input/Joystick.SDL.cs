@@ -9,8 +9,8 @@ namespace MonoGame.Framework.Input
 {
     public static partial class Joystick
     {
-        internal static Dictionary<int, Instance> Joysticks =
-            new Dictionary<int, Instance>();
+        internal static Dictionary<int, Instance> Joysticks = new Dictionary<int, Instance>();
+        private static int _lastConnectedIndex = -1;
 
         internal static void AddDevice(int deviceId)
         {
@@ -18,6 +18,9 @@ namespace MonoGame.Framework.Input
             int id = 0;
             while (Joysticks.ContainsKey(id))
                 id++;
+
+            if (id > _lastConnectedIndex)
+                _lastConnectedIndex = id;
 
             var instance = new Instance(id, jdevice);
             Joysticks.Add(id, instance);
@@ -30,10 +33,14 @@ namespace MonoGame.Framework.Input
         {
             foreach (var entry in Joysticks)
             {
-                if (Sdl.Joystick.InstanceId(entry.Value.Device) == instanceid)
+                if (Sdl.Joystick.InstanceID(entry.Value.Device) == instanceid)
                 {
-                    entry.Value.Close();
+                    Sdl.Joystick.Close(Joysticks[entry.Key]);
                     Joysticks.Remove(entry.Key);
+
+                    if (entry.Key == _lastConnectedIndex)
+                        RecalculateLastConnectedIndex();
+
                     break;
                 }
             }
@@ -47,6 +54,21 @@ namespace MonoGame.Framework.Input
                 entry.Value.Close();
 
             Joysticks.Clear();
+        }
+
+        private static void RecalculateLastConnectedIndex()
+        {
+            _lastConnectedIndex = -1;
+            foreach (var entry in Joysticks)
+            {
+                if (entry.Key > _lastConnectedIndex)
+                    _lastConnectedIndex = entry.Key;
+            }
+        }
+
+        private static int PlatformLastConnectedIndex
+        {
+            get { return _lastConnectedIndex; }
         }
 
         private const bool PlatformIsSupported = true;

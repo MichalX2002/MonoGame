@@ -236,6 +236,8 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
     </Compile>
   </ItemGroup>
 
+  <Import Project="..\Stadia\Pipeline.targets" Condition="exists('..\Stadia\Pipeline.targets')"/>
+
   <ItemGroup>
     <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj" />
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />

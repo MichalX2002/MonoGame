@@ -41,16 +41,15 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
 			{
 				var directories = new List<string> { Path.GetDirectoryName(input.Identity.SourceFilename) };
 
-				// Add special per platform directories
-				if (CurrentPlatform.OS == OS.Windows)
-				{
-					directories.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts"));
-				}
-				else if (CurrentPlatform.OS == OS.MacOSX)
-				{
-					directories.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Fonts"));
-					directories.Add("/Library/Fonts");
-				}
+                // Add special per platform directories
+                if (CurrentPlatform.OS == OS.Windows)
+                    directories.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts"));
+                else if (CurrentPlatform.OS == OS.MacOSX)
+                {
+                    directories.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Fonts"));
+                    directories.Add("/Library/Fonts");
+                    directories.Add("/System/Library/Fonts/Supplemental");
+                }
 
 				foreach (var dir in directories)
 				{

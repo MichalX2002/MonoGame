@@ -15,6 +15,8 @@ namespace MonoGame.Tools.Pipeline
 
         public override void OnCreate()
         {
+            HasDialog = true;
+
             if (Value != null)
             {
                 var tmp = (Framework.Color)Value;

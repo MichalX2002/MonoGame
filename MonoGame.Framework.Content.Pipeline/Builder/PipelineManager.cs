@@ -169,6 +169,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
                     Logger.LogWarning(null, null, "Assembly is either corrupt or built using a different " +
                         "target platform than this process. Reference another target architecture (x86, x64, " +
                         "AnyCPU, etc.) of this assembly. '{0}': {1}", assemblyPath, e.Message);
+                    
                     // The assembly failed to load... nothing
                     // we can do but ignore it.
                     continue;

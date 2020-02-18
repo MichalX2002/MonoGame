@@ -121,6 +121,8 @@ namespace MonoGame.Framework.Graphics
 
             SupportsInstancing = GL.VertexAttribDivisor != null;
 
+            SupportsBaseIndexInstancing = GL.DrawElementsInstancedBaseInstance != null;
+
 #if GLES
             SupportsSeparateBlendStates = false;
 #else

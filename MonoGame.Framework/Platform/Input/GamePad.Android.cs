@@ -61,7 +61,19 @@ namespace Microsoft.Xna.Framework.Input
             keyMap[15] = (int)Keycode.Back;
 
             // get a bool[] with indices matching the keyMap
-            bool[] hasMap = device.HasKeys(keyMap);
+            bool[] hasMap = new bool[16];
+            // HasKeys() was defined in Kitkat / API19 / Android 4.4
+            if (Android.OS.Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.Kitkat)
+            {
+                var keyMap2 = new Keycode[keyMap.Length];
+                for(int i=0; i<keyMap.Length;i++)
+                    keyMap2[i] = (Keycode)keyMap[i];
+                hasMap = KeyCharacterMap.DeviceHasKeys(keyMap2);
+            }
+            else
+            {
+                hasMap = device.HasKeys(keyMap);
+            }
 
             capabilities.HasAButton = hasMap[0];
             capabilities.HasBButton = hasMap[1];
@@ -150,7 +162,6 @@ namespace Microsoft.Xna.Framework.Input
                 if (index == 0 && Back)
                 {
                     // Consume state
-                    Back = false;
                     state = new GamePadState(new GamePadThumbSticks(), new GamePadTriggers(), new GamePadButtons(Buttons.Back), new GamePadDPad());
                     state.IsConnected = false;
                 }

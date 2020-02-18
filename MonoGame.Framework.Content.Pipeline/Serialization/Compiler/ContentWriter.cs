@@ -55,6 +55,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             'v', // PSVita
             'O', // XboxOne
             'S', // Nintendo Switch
+            'G', // Google Stadia
         };
 
         /// <summary>

@@ -280,8 +280,10 @@ namespace MonoGame.Framework.Graphics
             for (int i = 0; i < _bufferBindingInfos.Length; i++)
                 _bufferBindingInfos[i] = new BufferBindingInfo(null, IntPtr.Zero, 0, -1);
         }
+        
+        private DepthStencilState clearDepthStencilState = new DepthStencilState { StencilEnable = true };
 
-        internal void PlatformClear(ClearOptions options, Vector4 color, float depth, int stencil)
+        private void PlatformClear(ClearOptions options, Vector4 color, float depth, int stencil)
         {
             // TODO: We need to figure out how to detect if we have a
             // depth stencil buffer or not, and clear options relating
@@ -476,7 +478,7 @@ namespace MonoGame.Framework.Graphics
         }
 #endif
 
-        internal void PlatformPresent()
+        private void PlatformPresent()
         {
 #if DESKTOPGL || ANGLE
             Context.SwapBuffers();
@@ -1108,8 +1110,8 @@ namespace MonoGame.Framework.Graphics
         }
 
         private void PlatformDrawInstancedPrimitives(
-            PrimitiveType primitiveType, int baseVertex,
-            int startIndex, int primitiveCount, int instanceCount)
+            PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount, 
+            int instanceCount, int baseInstance = 0)
         {
             AssertSupportsInstancing();
             ApplyState(true);
@@ -1122,7 +1124,25 @@ namespace MonoGame.Framework.Graphics
 
             ApplyAttribs(_vertexShader, baseVertex);
 
-            GL.DrawElementsInstanced(target, indexElementCount, indexElementType, indexOffsetInBytes, instanceCount);
+            if (baseInstance > 0)
+            {
+                if (!GraphicsCapabilities.SupportsBaseIndexInstancing)
+                    throw new PlatformNotSupportedException("Instanced geometry drawing with base instance requires at least OpenGL 4.2. Try upgrading your graphics card drivers.");
+
+                GL.DrawElementsInstancedBaseInstance(target,
+                                          indexElementCount,
+                                          indexElementType,
+                                          indexOffsetInBytes,
+                                          instanceCount,
+                                          baseInstance);
+            }
+            else
+                GL.DrawElementsInstanced(target,
+                                     indexElementCount,
+                                     indexElementType,
+                                     indexOffsetInBytes,
+                                     instanceCount);
+
             GraphicsExtensions.CheckGLError();
         }
 

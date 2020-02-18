@@ -402,16 +402,17 @@ namespace MonoGame.Framework
             if (IsFixedTimeStep && _accumulatedElapsedTime < TargetElapsedTime)
             {
                 // Sleep for as long as possible without overshooting the update time
-                TimeSpan sleepTime = TargetElapsedTime - _accumulatedElapsedTime;
-
+                var sleepTime = (TargetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
                 // We only have a precision timer on Windows, so other platforms may still overshoot
 #if WINDOWS && !DESKTOPGL
-                TimerHelper.SleepForNoMoreThan(sleepTime.TotalMilliseconds);
+                MonoGame.Utilities.TimerHelper.SleepForNoMoreThan(sleepTime);
 #elif WINDOWS_UAP
                 lock (_locker)
-                    Monitor.Wait(_locker, (int)sleepTime.TotalMilliseconds);
-#else
-                Thread.Sleep(sleepTime);
+                    if (sleepTime >= 2.0)
+                        System.Threading.Monitor.Wait(_locker, 1);
+#elif DESKTOPGL || ANDROID || IOS
+                if (sleepTime >= 2.0)
+                    System.Threading.Thread.Sleep(1);
 #endif
                 // Keep looping until it's time to perform the next update
                 goto RetryTick;

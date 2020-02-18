@@ -16,6 +16,7 @@ namespace MonoGame.Framework.Input
         /// </summary>
         public static JoystickCapabilities Default { get; } = new JoystickCapabilities(
             isConnected: false,
+            displayName: string.Empty,
             identifier: string.Empty,
             isGamepad: false,
             axisCount: 0,
@@ -31,6 +32,12 @@ namespace MonoGame.Framework.Input
         /// Gets the unique identifier of the joystick.
         /// </summary>
         public string Identifier { get;  }
+
+        /// <summary>
+        /// Gets the joystick's display name.
+        /// </summary>
+        /// <value>String representing the display name of the joystick.</value>
+        public string DisplayName { get; internal set; }
 
         /// <summary>
         /// Gets a value indicating if the joystick is a gamepad.
@@ -56,9 +63,11 @@ namespace MonoGame.Framework.Input
         /// Constructs the <see cref="JoystickCapabilities"/>.
         /// </summary>
         public JoystickCapabilities(
-            bool isConnected, string identifier, bool isGamepad, int axisCount, int buttonCount, int hatCount)
+            bool isConnected, string displayName, string identifier, bool isGamepad,
+            int axisCount, int buttonCount, int hatCount)
         {
             IsConnected = isConnected;
+            DisplayName = displayName;
             Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
             IsGamepad = isGamepad;
             AxisCount = axisCount;
@@ -93,14 +102,11 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Returns a string that represents the current <see cref="JoystickCapabilities"/>.
         /// </summary>
-        public override string ToString() => 
-            "[JoystickCapabilities: IsConnected=" + IsConnected + 
-            ", Identifier=" + Identifier + 
-            ", IsGamepad=" + IsGamepad + 
-            " , AxisCount=" + AxisCount +
-            ", ButtonCount=" + ButtonCount +
-            ", HatCount=" + HatCount +
-            "]";
+        /// <returns>A <see cref="T:System.String"/> that represents the current <see cref="T:Microsoft.Xna.Framework.Input.JoystickCapabilities"/>.</returns>
+        public override string ToString()
+        {
+            return "[JoystickCapabilities: IsConnected=" + IsConnected + ", Identifier=" + Identifier + ", DisplayName=" + DisplayName + ", IsGamepad=" + IsGamepad + " , AxisCount=" + AxisCount + ", ButtonCount=" + ButtonCount + ", HatCount=" + HatCount + "]";
+        }
     }
 }
 

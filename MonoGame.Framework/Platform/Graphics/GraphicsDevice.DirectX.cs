@@ -1437,15 +1437,16 @@ namespace MonoGame.Framework.Graphics
         }
 
         private void PlatformDrawInstancedPrimitives(
-            PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount, int instanceCount)
+            PrimitiveType primitiveType, int baseVertex, int startIndex,
+            int primitiveCount, int instanceCount, int baseInstance = 0)
         {
             lock (_d3dContext)
             {
                 ApplyState(true);
 
                 _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
-                int indexCount = GetElementCountForType(primitiveType, primitiveCount);
-                _d3dContext.DrawIndexedInstanced(indexCount, instanceCount, startIndex, baseVertex, 0);
+                int indexCount = GetElementCountArray(primitiveType, primitiveCount);
+                _d3dContext.DrawIndexedInstanced(indexCount, instanceCount, startIndex, baseVertex, baseInstance);
             }
         }
 

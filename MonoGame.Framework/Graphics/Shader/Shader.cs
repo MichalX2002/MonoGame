@@ -79,7 +79,7 @@ namespace MonoGame.Framework.Graphics
                 Attributes[a].Location = reader.ReadInt16();
             }
 
-            PlatformConstruct(isVertexShader, shaderBytecode);
+            PlatformConstruct(Stage, shaderBytecode);
         }
 
         internal protected override void GraphicsDeviceResetting()
