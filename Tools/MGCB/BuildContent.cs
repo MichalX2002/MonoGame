@@ -472,7 +472,7 @@ namespace MGCB
 
                     // Destination file should not be read-only even if original was.
                     var fileAttr = File.GetAttributes(dest);
-                    fileAttr &= (~FileAttributes.ReadOnly);
+                    fileAttr &= ~FileAttributes.ReadOnly;
                     File.SetAttributes(dest, fileAttr);
 
                     var buildTime = DateTime.UtcNow - startTime;

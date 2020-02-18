@@ -121,7 +121,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             }
             try
             {
-                BitmapContent.Copy(sourceBitmap, sourceRegion, this, destinationRegion);
+                Copy(sourceBitmap, sourceRegion, this, destinationRegion);
                 return true;
             }
             catch (InvalidOperationException)

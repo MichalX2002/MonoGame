@@ -440,7 +440,7 @@ namespace MonoGame.Framework.Content.Pipeline
                     // We might have multiple textures of the same type so number
                     // them starting with 2 like in DualTextureMaterialContent.
                     if (tex.TextureIndex > 0)
-                        name += (tex.TextureIndex + 1);
+                        name += tex.TextureIndex + 1;
 
                     material.Textures.Add(name, ImportTextureContentRef(tex));
                 }

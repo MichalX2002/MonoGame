@@ -1226,7 +1226,7 @@ namespace MonoGame.Framework.Graphics
                     // Dispose of all remaining graphics resources before disposing of the graphics device
                     lock (_resourcesLock)
                     {
-                        foreach (var resource in _resources)
+                        foreach (var resource in _resources.ToArray())
                         {
                             if (resource.Target is IDisposable target)
                                 target.Dispose();

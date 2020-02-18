@@ -78,10 +78,10 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 				while (hc4.nextToUpdate < src_p)
 				{
 					var p = hc4.nextToUpdate;
-					var delta = (int)((p) - (hashTable[((((*(uint*)(p))) * 2654435761u) >> HASHHC_ADJUST)] + src_base));
+					var delta = (int)(p - (hashTable[(*(uint*)p * 2654435761u) >> HASHHC_ADJUST] + src_base));
 					if (delta > MAX_DISTANCE) delta = MAX_DISTANCE;
 					chainTable[((int)p) & MAXD_MASK] = (ushort)delta;
-					hashTable[((((*(uint*)(p))) * 2654435761u) >> HASHHC_ADJUST)] = (int)(p - src_base);
+					hashTable[(*(uint*)p * 2654435761u) >> HASHHC_ADJUST] = (int)(p - src_base);
 					hc4.nextToUpdate++;
 				}
 			}
@@ -95,22 +95,22 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 
 				while (p1t < src_LASTLITERALS - (STEPSIZE_64 - 1))
 				{
-					var diff = (*(long*)(p2)) ^ (*(long*)(p1t));
+					var diff = (*(long*)p2) ^ (*(long*)p1t);
 					if (diff == 0)
 					{
 						p1t += STEPSIZE_64;
 						p2 += STEPSIZE_64;
 						continue;
 					}
-					p1t += debruijn64[(((ulong)((diff) & -(diff)) * 0x0218A392CDABBD3FL)) >> 58];
+					p1t += debruijn64[((ulong)((diff) & -diff) * 0x0218A392CDABBD3FL) >> 58];
 					return (int)(p1t - p1);
 				}
-				if ((p1t < (src_LASTLITERALS - 3)) && ((*(uint*)(p2)) == (*(uint*)(p1t))))
+				if ((p1t < (src_LASTLITERALS - 3)) && ((*(uint*)p2) == (*(uint*)p1t)))
 				{
 					p1t += 4;
 					p2 += 4;
 				}
-				if ((p1t < (src_LASTLITERALS - 1)) && ((*(ushort*)(p2)) == (*(ushort*)(p1t))))
+				if ((p1t < (src_LASTLITERALS - 1)) && ((*(ushort*)p2) == (*(ushort*)p1t)))
 				{
 					p1t += 2;
 					p2 += 2;
@@ -133,25 +133,25 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 
 				// HC4 match finder
 				LZ4HC_Insert_64(hc4, src_p);
-				var src_ref = (hashTable[((((*(uint*)(src_p))) * 2654435761u) >> HASHHC_ADJUST)] + src_base);
+				var src_ref = hashTable[(*(uint*)src_p * 2654435761u) >> HASHHC_ADJUST] + src_base;
 
 				// Detect repetitive sequences of length <= 4
 				if (src_ref >= src_p - 4) // potential repetition
 				{
-					if ((*(uint*)(src_ref)) == (*(uint*)(src_p))) // confirmed
+					if ((*(uint*)src_ref) == (*(uint*)src_p)) // confirmed
 					{
 						delta = (ushort)(src_p - src_ref);
 						repl = ml = LZ4HC_CommonLength_64(src_p + MINMATCH, src_ref + MINMATCH, src_LASTLITERALS) + MINMATCH;
 						matchpos = src_ref;
 					}
-					src_ref = ((src_ref) - chainTable[((int)src_ref) & MAXD_MASK]);
+					src_ref = src_ref - chainTable[((int)src_ref) & MAXD_MASK];
 				}
 
 				while ((src_ref >= src_p - MAX_DISTANCE) && (nbAttempts != 0))
 				{
 					nbAttempts--;
 					if (*(src_ref + ml) == *(src_p + ml))
-						if ((*(uint*)(src_ref)) == (*(uint*)(src_p)))
+						if ((*(uint*)src_ref) == (*(uint*)src_p))
 						{
 							var mlt = LZ4HC_CommonLength_64(src_p + MINMATCH, src_ref + MINMATCH, src_LASTLITERALS) + MINMATCH;
 							if (mlt > ml)
@@ -160,7 +160,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 								matchpos = src_ref;
 							}
 						}
-					src_ref = ((src_ref) - chainTable[((int)src_ref) & MAXD_MASK]);
+					src_ref = src_ref - chainTable[((int)src_ref) & MAXD_MASK];
 				}
 
 				// Complete table
@@ -177,7 +177,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 					do
 					{
 						chainTable[((int)ptr) & MAXD_MASK] = delta;
-						hashTable[((((*(uint*)(ptr))) * 2654435761u) >> HASHHC_ADJUST)] = (int)(ptr - src_base); // Head of chain
+						hashTable[(*(uint*)ptr * 2654435761u) >> HASHHC_ADJUST] = (int)(ptr - src_base); // Head of chain
 						ptr++;
 					} while (ptr < end);
 					hc4.nextToUpdate = end;
@@ -201,14 +201,14 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 
 				// First Match
 				LZ4HC_Insert_64(hc4, src_p);
-				var src_ref = (hashTable[((((*(uint*)(src_p))) * 2654435761u) >> HASHHC_ADJUST)] + src_base);
+				var src_ref = hashTable[(*(uint*)src_p * 2654435761u) >> HASHHC_ADJUST] + src_base;
 
 				while ((src_ref >= src_p - MAX_DISTANCE) && (nbAttempts != 0))
 				{
 					nbAttempts--;
 					if (*(startLimit + longest) == *(src_ref - delta + longest))
 					{
-						if ((*(uint*)(src_ref)) == (*(uint*)(src_p)))
+						if ((*(uint*)src_ref) == (*(uint*)src_p))
 						{
 							var reft = src_ref + MINMATCH;
 							var ipt = src_p + MINMATCH;
@@ -216,22 +216,22 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 
 							while (ipt < src_LASTLITERALS - (STEPSIZE_64 - 1))
 							{
-								var diff = (*(long*)(reft)) ^ (*(long*)(ipt));
+								var diff = (*(long*)reft) ^ (*(long*)ipt);
 								if (diff == 0)
 								{
 									ipt += STEPSIZE_64;
 									reft += STEPSIZE_64;
 									continue;
 								}
-								ipt += debruijn64[(((ulong)((diff) & -(diff)) * 0x0218A392CDABBD3FL)) >> 58];
+								ipt += debruijn64[((ulong)((diff) & -diff) * 0x0218A392CDABBD3FL) >> 58];
 								goto _endCount;
 							}
-							if ((ipt < (src_LASTLITERALS - 3)) && ((*(uint*)(reft)) == (*(uint*)(ipt))))
+							if ((ipt < (src_LASTLITERALS - 3)) && ((*(uint*)reft) == (*(uint*)ipt)))
 							{
 								ipt += 4;
 								reft += 4;
 							}
-							if ((ipt < (src_LASTLITERALS - 1)) && ((*(ushort*)(reft)) == (*(ushort*)(ipt))))
+							if ((ipt < (src_LASTLITERALS - 1)) && ((*(ushort*)reft) == (*(ushort*)ipt)))
 							{
 								ipt += 2;
 								reft += 2;
@@ -255,7 +255,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 							}
 						}
 					}
-					src_ref = ((src_ref) - chainTable[((int)src_ref) & MAXD_MASK]);
+					src_ref = src_ref - chainTable[((int)src_ref) & MAXD_MASK];
 				}
 
 				return longest;
@@ -266,17 +266,17 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 			ref byte* src_p, ref byte* dst_p, ref byte* src_anchor, int matchLength, byte* src_ref, byte* dst_end)
 		{
 			int len;
-			var dst_token = (dst_p)++;
+			var dst_token = dst_p++;
 
 			// Encode Literal length
 			var length = (int)(src_p - src_anchor);
 			if ((dst_p + length + (2 + 1 + LASTLITERALS) + (length >> 8)) > dst_end) return 1; // Check output limit
 			if (length >= RUN_MASK)
 			{
-				*dst_token = (RUN_MASK << ML_BITS);
+				*dst_token = RUN_MASK << ML_BITS;
 				len = length - RUN_MASK;
-				for (; len > 254; len -= 255) *(dst_p)++ = 255;
-				*(dst_p)++ = (byte)len;
+				for (; len > 254; len -= 255) *dst_p++ = 255;
+				*dst_p++ = (byte)len;
 			}
 			else
 			{
@@ -284,7 +284,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 			}
 
 			// Copy Literals
-			var _p = dst_p + (length);
+			var _p = dst_p + length;
 			do
 			{
 				*(ulong*)dst_p = *(ulong*)src_anchor;
@@ -298,7 +298,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 			dst_p += 2;
 
 			// Encode MatchLength
-			len = (matchLength - MINMATCH);
+			len = matchLength - MINMATCH;
 			if (dst_p + (1 + LASTLITERALS) + (length >> 8) > dst_end) return 1; // Check output limit
 			if (len >= ML_MASK)
 			{
@@ -306,15 +306,15 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 				len -= ML_MASK;
 				for (; len > 509; len -= 510)
 				{
-					*(dst_p)++ = 255;
-					*(dst_p)++ = 255;
+					*dst_p++ = 255;
+					*dst_p++ = 255;
 				}
 				if (len > 254)
 				{
 					len -= 255;
-					*(dst_p)++ = 255;
+					*dst_p++ = 255;
 				}
-				*(dst_p)++ = (byte)len;
+				*dst_p++ = (byte)len;
 			}
 			else
 			{
@@ -339,7 +339,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 			var src_anchor = src_p;
 			var src_end = src_p + src_len;
 			var src_mflimit = src_end - MFLIMIT;
-			var src_LASTLITERALS = (src_end - LASTLITERALS);
+			var src_LASTLITERALS = src_end - LASTLITERALS;
 
 			var dst_p = dst;
 			var dst_end = dst_p + dst_maxlen;
@@ -503,10 +503,10 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 
 			// Encode Last Literals
 			var lastRun = (int)(src_end - src_anchor);
-			if ((dst_p - dst) + lastRun + 1 + ((lastRun + 255 - RUN_MASK) / 255) > (uint)dst_maxlen) return 0; // Check output limit
+			if (dst_p - dst + lastRun + 1 + ((lastRun + 255 - RUN_MASK) / 255) > (uint)dst_maxlen) return 0; // Check output limit
 			if (lastRun >= RUN_MASK)
 			{
-				*dst_p++ = (RUN_MASK << ML_BITS);
+				*dst_p++ = RUN_MASK << ML_BITS;
 				lastRun -= RUN_MASK;
 				for (; lastRun > 254; lastRun -= 255) *dst_p++ = 255;
 				*dst_p++ = (byte)lastRun;
@@ -519,7 +519,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 			dst_p += src_end - src_anchor;
 
 			// End
-			return (int)((dst_p) - dst);
+			return (int)(dst_p - dst);
 		}
 	}
 }

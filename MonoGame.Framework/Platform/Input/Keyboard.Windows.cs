@@ -86,7 +86,7 @@ namespace MonoGame.Framework.Input
 
         private static bool IsKeyReleased(byte keyCode)
         {
-            return ((_keyState[keyCode] & 0x80) == 0);
+            return (_keyState[keyCode] & 0x80) == 0;
         }
 
         internal static void SetActive(bool isActive)

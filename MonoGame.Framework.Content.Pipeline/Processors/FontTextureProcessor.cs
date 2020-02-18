@@ -31,7 +31,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
 
         protected virtual char GetCharacterForIndex(int index)
         {
-            return (char)((FirstCharacter) + index);
+            return (char)(FirstCharacter + index);
         }
 
         private List<Glyph> ExtractGlyphs(PixelBitmapContent<Color> bitmap)

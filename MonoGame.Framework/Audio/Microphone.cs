@@ -136,12 +136,18 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// Starts microphone capture.
         /// </summary>
-        public void Start() => PlatformStart();
+        public void Start()
+        {
+            PlatformStart();
+        }
 
         /// <summary>
         /// Stops microphone capture.
         /// </summary>
-        public void Stop() => PlatformStop();
+        public void Stop()
+        {
+            PlatformStop();
+        }
 
         /// <summary>
         /// Gets the latest available data from the microphone.

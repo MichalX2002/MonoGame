@@ -8,7 +8,7 @@ namespace MonoGame.Framework.Graphics
 {
     public abstract partial class Texture
     {
-        internal int _glTexture;
+        internal int _glTexture = -1;
         internal TextureTarget _glTarget;
         internal TextureUnit glTextureUnit = TextureUnit.Texture0;
         internal PixelInternalFormat glInternalFormat;

@@ -4,11 +4,10 @@
 
 using System;
 using System.IO;
-using MonoGame.Imaging;
+using System.Linq;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
-using System.Linq;
-using MonoGame.Imaging.Pixels;
+using MonoGame.Imaging;
 
 namespace MonoGame.Framework.Graphics
 {

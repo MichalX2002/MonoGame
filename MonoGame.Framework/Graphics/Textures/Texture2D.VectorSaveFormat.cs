@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Reflection;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
 
@@ -82,12 +83,20 @@ namespace MonoGame.Framework.Graphics
 
         public class VectorSaveFormat
         {
-            public delegate IMemory GetDataDelegate(Texture2D texture, Rectangle rect, int level, int arraySlice);
+            private static MethodInfo _getDataMethod;
+
+            public delegate IMemory GetDataDelegate(Texture2D texture, Rectangle? rectangle, int level, int arraySlice);
 
             public SurfaceFormat Format { get; }
             public VectorTypeInfo VectorType { get; }
 
             public GetDataDelegate GetData { get; }
+
+            static VectorSaveFormat()
+            {
+                var methodParams = typeof(GetDataDelegate).GetDelegateParameters().Skip(1);
+                _getDataMethod = typeof(Texture2D).GetMethod("GetData", methodParams.Select(x => x.ParameterType).ToArray());
+            }
 
             public VectorSaveFormat(SurfaceFormat format, Type vectorType)
             {
@@ -96,21 +105,14 @@ namespace MonoGame.Framework.Graphics
 
                 Format = format;
                 VectorType = VectorTypeInfo.Get(vectorType);
-                GetData = GetDelegate<GetDataDelegate>(vectorType, typeof(Texture2D), "GetData");
+                GetData = GetGetDataDelegate(vectorType);
             }
 
-            private static TDelegate GetDelegate<TDelegate>(
-                Type vectorType, Type methodHost, string methodName)
-                where TDelegate : Delegate
+            private static GetDataDelegate GetGetDataDelegate(Type vectorType)
             {
-                var methodParams = typeof(TDelegate).GetDelegateParameters();
-                var method = methodHost.GetMethod(
-                    methodName, methodParams.Select(x => x.ParameterType).ToArray());
-
-                var genericMethod = method.MakeGenericMethod(vectorType);
-                return (TDelegate)genericMethod.CreateDelegate(typeof(TDelegate));
+                var genericMethod = _getDataMethod.MakeGenericMethod(vectorType);
+                return genericMethod.CreateDelegate<GetDataDelegate>();
             }
         }
     }
 }
- 

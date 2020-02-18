@@ -118,23 +118,22 @@ namespace MonoGame.Framework.Input
             try
             {
                 ReadOnlySpan<Color> pixelSpan;
-                int stride;
 
-                if (rect.Position == Point.Zero && pixels is IReadOnlyPixelMemory<Color> rgbaMemory)
+                if (rect.Position == Point.Zero &&
+                    pixels is IReadOnlyPixelMemory<Color> rgbaMemory &&
+                    rgbaMemory.IsPixelContiguous)
                 {
                     // PlatformFromPixels takes stride so we don't need to worry
                     // about a source rect whose width differs from the buffer's stride.
                     pixelSpan = rgbaMemory.GetPixelSpan();
-                    stride = rgbaMemory.ByteStride;
                 }
                 else
                 {
                     pixelBuffer = Image.LoadPixels<Color>(pixels.Project(x => x.Crop(rect)));
                     pixelSpan = pixelBuffer.GetPixelSpan();
-                    stride = pixelBuffer.ByteStride;
                 }
 
-                return PlatformFromPixels(pixelSpan, rect.Width, rect.Height, stride, origin);
+                return PlatformFromPixels(pixelSpan, rect.Width, rect.Height, origin);
             }
             finally
             {

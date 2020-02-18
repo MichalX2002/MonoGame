@@ -233,7 +233,7 @@ namespace MonoGame.Framework.Content.Pipeline
                 case SurfaceFormat.Dxt1:
                 case SurfaceFormat.Dxt3:
                 case SurfaceFormat.Dxt5:
-                    pitch = ((width + 3) / 4) * format.GetSize();
+                    pitch = (width + 3) / 4 * format.GetSize();
                     rows = (height + 3) / 4;
                     break;
 

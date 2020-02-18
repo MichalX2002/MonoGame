@@ -1,5 +1,6 @@
 ﻿using System;
 using MonoGame.Framework.Memory;
+using MonoGame.Imaging;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -45,7 +46,10 @@ namespace MonoGame.Framework.Graphics
 
             _vertexBuffer = new UnmanagedMemory<VertexPositionColorTexture>();
             _indexBuffer = new UnmanagedMemory<ushort>();
-            _batchItems = Array.Empty<SpriteBatchItem>();
+
+            _batchItems = new SpriteBatchItem[InitialBatchSize];
+            for (int i = 0; i < _batchItems.Length; i++)
+                _batchItems[i] = new SpriteBatchItem();
 
             SetupBuffers(InitialBatchSize);
         }

@@ -275,7 +275,7 @@ namespace MonoGame.Framework.Audio
                 if (pan <= 0f)
                 {
                     outputMatrix[0] = (1f + pan * 0.5f) * scale; // Front-left output, Left input
-                    outputMatrix[1] = (-pan * 0.5f) * scale; // Front-left output, Right input
+                    outputMatrix[1] = -pan * 0.5f * scale; // Front-left output, Right input
                     outputMatrix[2] = 0f; // Front-right output, Left input
                     outputMatrix[3] = (1f + pan) * scale; // Front-right output, Right input
                 }
@@ -283,7 +283,7 @@ namespace MonoGame.Framework.Audio
                 {
                     outputMatrix[0] = (1f - pan) * scale; // Front-left output, Left input
                     outputMatrix[1] = 0f; // Front-left output, Right input
-                    outputMatrix[2] = (pan * 0.5f) * scale; // Front-right output, Left input
+                    outputMatrix[2] = pan * 0.5f * scale; // Front-right output, Left input
                     outputMatrix[3] = (1f - pan * 0.5f) * scale; // Front-right output, Right input
                 }
             }

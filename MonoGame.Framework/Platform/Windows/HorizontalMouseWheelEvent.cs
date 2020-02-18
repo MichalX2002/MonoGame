@@ -5,7 +5,7 @@ namespace MonoGame.Framework.Windows
     {
         public int Delta { get; }
 
-        internal HorizontalMouseWheelEvent(int delta)
+        public HorizontalMouseWheelEvent(int delta)
         {
             Delta = delta;
         }

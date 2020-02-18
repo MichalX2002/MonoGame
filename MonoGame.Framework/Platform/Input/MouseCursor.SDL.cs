@@ -31,7 +31,7 @@ namespace MonoGame.Framework.Input
         }
 
         private static unsafe MouseCursor PlatformFromPixels(
-            ReadOnlySpan<Color> data, int width, int height, int stride, Point origin)
+            ReadOnlySpan<Color> data, int width, int height, Point origin)
         {
             var surface = IntPtr.Zero;
             var handle = IntPtr.Zero;
@@ -40,7 +40,7 @@ namespace MonoGame.Framework.Input
                 fixed (Color* ptr = &MemoryMarshal.GetReference(data))
                 {
                     surface = Sdl.CreateRGBSurfaceFrom(
-                        (IntPtr)ptr, width, height, 32, stride,
+                        (IntPtr)ptr, width, height, 32, width * sizeof(Color),
                         0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
                 }
 

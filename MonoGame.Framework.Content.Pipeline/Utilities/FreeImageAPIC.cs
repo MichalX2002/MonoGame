@@ -23,10 +23,10 @@ namespace FreeImageAPI
             {
                 do
                 {
-                    *((int*)dest) = *((int*)src);
-                    *((int*)(dest + 4)) = *((int*)(src + 4));
-                    *((int*)(dest + 8)) = *((int*)(src + 8));
-                    *((int*)(dest + 12)) = *((int*)(src + 12));
+                    *(int*)dest = *(int*)src;
+                    *(int*)(dest + 4) = *(int*)(src + 4);
+                    *(int*)(dest + 8) = *(int*)(src + 8);
+                    *(int*)(dest + 12) = *(int*)(src + 12);
                     dest += 0x10;
                     src += 0x10;
                 }
@@ -36,20 +36,20 @@ namespace FreeImageAPI
             {
                 if ((len & 8) != 0)
                 {
-                    *((int*)dest) = *((int*)src);
-                    *((int*)(dest + 4)) = *((int*)(src + 4));
+                    *(int*)dest = *(int*)src;
+                    *(int*)(dest + 4) = *(int*)(src + 4);
                     dest += 8;
                     src += 8;
                 }
                 if ((len & 4) != 0)
                 {
-                    *((int*)dest) = *((int*)src);
+                    *(int*)dest = *(int*)src;
                     dest += 4;
                     src += 4;
                 }
                 if ((len & 2) != 0)
                 {
-                    *((short*)dest) = *((short*)src);
+                    *(short*)dest = *(short*)src;
                     dest += 2;
                     src += 2;
                 }

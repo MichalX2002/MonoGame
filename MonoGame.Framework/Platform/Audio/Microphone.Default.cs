@@ -13,20 +13,20 @@ namespace MonoGame.Framework.Audio
     {
         internal void PlatformStart()
         {
-			throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         internal void PlatformStop()
         {
-			throw new NotImplementedException();
+            throw new NotImplementedException();
         }
-		
-		internal void Update()
-		{
-			throw new NotImplementedException();
-		}
-		
-		internal int PlatformGetData(byte[] buffer, int offset, int count)
+        
+        internal void Update()
+        {
+            throw new NotImplementedException();
+        }
+        
+        internal int PlatformGetData(byte[] buffer, int offset, int count)
         {
             throw new NotImplementedException();
         }

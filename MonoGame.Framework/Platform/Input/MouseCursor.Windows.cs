@@ -40,9 +40,9 @@ namespace MonoGame.Framework.Input
         }
 
         private static unsafe MouseCursor PlatformFromPixels(
-            ReadOnlySpan<Color> data, int width, int height, int stride, Point origin)
+            ReadOnlySpan<Color> data, int width, int height, Point origin)
         {
-            // the bitmap can not be constructed from Rgba data directly
+            // bitmaps can not be constructed from Rgba directly
             using (var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb))
             {
                 var rect = new System.Drawing.Rectangle(0, 0, width, height);
@@ -50,18 +50,13 @@ namespace MonoGame.Framework.Input
 
                 try
                 {
-                    fixed (Color* srcPtr = &MemoryMarshal.GetReference(data))
+                    for (int y = 0; y < bmpData.Height; y++)
                     {
-                        int columns = stride / sizeof(Color);
-                        for (int y = 0; y < bmpData.Height; y++)
-                        {
-                            Color* srcRow = srcPtr + y * columns;
-                            byte* dstRow = (byte*)bmpData.Scan0 + y * bmpData.Stride;
-                            Bgra32* dstColorRow = (Bgra32*)dstRow;
-
-                            for (int x = 0; x < columns; x++)
-                                dstColorRow[x] = srcRow[x]; // implicit cast
-                        }
+                        var srcRow = data.Slice(y * width);
+                        var dstRow = new Span<Bgra32>((byte*)bmpData.Scan0 + y * bmpData.Stride, bmpData.Width);
+                        
+                        for (int x = 0; x < width; x++)
+                            dstRow[x].FromColor(srcRow[x]);
                     }
                 }
                 finally

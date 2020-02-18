@@ -16,7 +16,6 @@ using MonoGame.Framework.Content;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input.Touch;
 
-
 namespace MonoGame.Framework
 {
     public partial class Game : IDisposable

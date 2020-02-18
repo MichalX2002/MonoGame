@@ -144,7 +144,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
 
                         case "format.bit_rate":
                             if (averageBytesPerSecond == 0)
-                                averageBytesPerSecond = (int.Parse(kv[1].Trim('"'), numberFormat) / 8);
+                                averageBytesPerSecond = int.Parse(kv[1].Trim('"'), numberFormat) / 8;
                             break;
 
                         case "format.format_name":
@@ -234,8 +234,8 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             // the bits per sample and channel count regardless of the 
             // format of the audio data.
             // ffprobe doesn't report blockAlign for ADPCM and we cannot calculate it like this
-            if (bitsPerSample > 0 && (format != 2 && format != 17))
-                blockAlign = (bitsPerSample * channelCount) / 8;
+            if (bitsPerSample > 0 && format != 2 && format != 17)
+                blockAlign = bitsPerSample * channelCount / 8;
 
             // XNA seems to only be accurate to the millisecond.
             duration = TimeSpan.FromMilliseconds(durationMs);

@@ -78,16 +78,6 @@ namespace MonoGame.Framework
             }
         }
 
-        public override bool AllowAltF4
-        {
-            get => base.AllowAltF4;
-            set
-            {
-                Form.AllowAltF4 = value;
-                base.AllowAltF4 = value;
-            }
-        }
-
         public override Point Position
         {
             get => new Point(Form.Location.X, Form.Location.Y);
@@ -176,7 +166,7 @@ namespace MonoGame.Framework
         private static extern IntPtr ExtractIcon(IntPtr hInst, string exeFileName, int iconIndex);
 
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
-        [return: MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+        [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool GetCursorPos(out POINTSTRUCT pt);
 
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
@@ -186,11 +176,12 @@ namespace MonoGame.Framework
         {
             // When running unit tests this can return null.
             var assembly = Assembly.GetEntryAssembly();
-            if (assembly == null)
-                return;
-            var handle = ExtractIcon(IntPtr.Zero, assembly.Location, 0);
-            if (handle != IntPtr.Zero)
-                Form.Icon = Icon.FromHandle(handle);
+            if (assembly != null)
+            {
+                var handle = ExtractIcon(IntPtr.Zero, assembly.Location, 0);
+                if (handle != IntPtr.Zero)
+                    Form.Icon = Icon.FromHandle(handle);
+            }
         }
 
         ~WinFormsGameWindow()
@@ -201,7 +192,6 @@ namespace MonoGame.Framework
         private void RegisterToAllWindows()
         {
             _allWindowsReaderWriterLockSlim.EnterWriteLock();
-
             try
             {
                 _allWindows.Add(this);
@@ -215,7 +205,6 @@ namespace MonoGame.Framework
         private void UnregisterFromAllWindows()
         {
             _allWindowsReaderWriterLockSlim.EnterWriteLock();
-
             try
             {
                 _allWindows.Remove(this);
@@ -265,11 +254,12 @@ namespace MonoGame.Framework
 
             GetCursorPos(out _);
             MapWindowPoints(new HandleRef(null, IntPtr.Zero), new HandleRef(Form, Form.Handle), out POINTSTRUCT pos, 1);
+
             var clientPos = new DrawingPoint(pos.X, pos.Y);
             var withinClient = Form.ClientRectangle.Contains(clientPos);
             var buttons = Control.MouseButtons;
 
-            var previousState = MouseState.LeftButton;
+            var previousLeftButton = MouseState.LeftButton;
 
             MouseState.X = clientPos.X;
             MouseState.Y = clientPos.Y;
@@ -295,11 +285,11 @@ namespace MonoGame.Framework
 
             TouchLocationState? touchState = null;
             if (MouseState.LeftButton == ButtonState.Pressed)
-                if (previousState == ButtonState.Released)
+                if (previousLeftButton == ButtonState.Released)
                     touchState = TouchLocationState.Pressed;
                 else
                     touchState = TouchLocationState.Moved;
-            else if (previousState == ButtonState.Pressed)
+            else if (previousLeftButton == ButtonState.Pressed)
                 touchState = TouchLocationState.Released;
 
             if (touchState.HasValue)
@@ -443,13 +433,11 @@ namespace MonoGame.Framework
             Application.Run(Form);
             Application.Idle -= TickOnIdle;
 
-            // We need to remove the WM_QUIT message in the message 
-            // pump as it will keep us from restarting on this 
-            // same thread.
+            // We need to remove the WM_QUIT message in the message pump 
+            // as it will keep us from restarting on this same thread.
             //
-            // This is critical for some NUnit runners which
-            // typically will run all the tests on the same
-            // process/thread.
+            // This is critical for some NUnit runners which typically 
+            // will run all the tests on the same process/thread.
             var msg = new NativeMessage();
             do
             {
@@ -520,7 +508,8 @@ namespace MonoGame.Framework
 
         [System.Security.SuppressUnmanagedCodeSecurity] // We won't use this maliciously
         [DllImport("User32.dll", CharSet = CharSet.Auto)]
-        private static extern bool PeekMessage(out NativeMessage msg, IntPtr hWnd, uint messageFilterMin, uint messageFilterMax, uint flags);
+        private static extern bool PeekMessage(
+            out NativeMessage msg, IntPtr hWnd, uint messageFilterMin, uint messageFilterMax, uint flags);
 
         public void Dispose()
         {

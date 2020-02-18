@@ -5,8 +5,6 @@
 using System;
 using System.Windows.Forms;
 using MonoGame.Framework.Input.Touch;
-using MonoGame.Framework;
-
 
 namespace MonoGame.Framework.Windows
 {
@@ -22,10 +20,10 @@ namespace MonoGame.Framework.Windows
             var lowword = msg.LParam.ToInt32();
 
             return new System.Drawing.Point()
-                       {
-                           X = (short)(lowword),
-                           Y = (short)(lowword >> 16),
-                       };
+            {
+                X = (short)lowword,
+                Y = (short)(lowword >> 16),
+            };
         }
     }
 
@@ -42,14 +40,12 @@ namespace MonoGame.Framework.Windows
         public const int WM_KEYUP = 0x0101;
         public const int WM_SYSKEYDOWN = 0x0104;
         public const int WM_SYSKEYUP = 0x0105;
-        public const int WM_TABLET_QUERYSYSTEMGESTURESTA = (0x02C0 + 12);
+        public const int WM_TABLET_QUERYSYSTEMGESTURESTA = 0x02C0 + 12;
 
         public const int WM_ENTERSIZEMOVE = 0x0231;
         public const int WM_EXITSIZEMOVE = 0x0232;
 
         public const int WM_SYSCOMMAND = 0x0112;
-
-        public bool AllowAltF4 = true;
 
         internal bool IsResizing { get; set; }
 
@@ -91,7 +87,7 @@ namespace MonoGame.Framework.Windows
                         return;
                     }
 
-#if (WINDOWS && DIRECTX)
+#if WINDOWS && DIRECTX
                 case WM_KEYDOWN:
                     HandleKeyMessage(ref m);
                     switch (m.WParam.ToInt32())
@@ -118,7 +114,7 @@ namespace MonoGame.Framework.Windows
                 case WM_SYSCOMMAND:
                     int wParam = m.WParam.ToInt32();
 
-                    if (!AllowAltF4 && wParam == 0xF060 && m.LParam.ToInt32() == 0 && Focused)
+                    if (!_window.AllowAltF4 && wParam == 0xF060 && m.LParam.ToInt32() == 0 && Focused)
                     {
                         m.Result = IntPtr.Zero;
                         return;

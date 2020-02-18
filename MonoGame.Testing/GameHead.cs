@@ -75,8 +75,8 @@ namespace MonoGame.Testing
 
             string[] songs = new string[]
             {
-                "Ending",
-                "Title Screen"
+                "Title Screen",
+                "Ending"
             };
 
             _songs = new Song[songs.Length];
@@ -85,13 +85,14 @@ namespace MonoGame.Testing
                 _watch.Restart();
                 _songs[i] = Content.Load<Song>(songs[i]);
                 _songs[i].IsLooped = false;
-                _songs[i].Volume = 0.005f;
+                _songs[i].Volume = 0.004f;
                 _songs[i].Pitch = 1.5f;
                 _watch.Stop();
                 Console.WriteLine("Content.Load<Song>('" + songs[i] + "') Time: " + _watch.ElapsedMilliseconds + "ms");
             }
 
-            _songs[0].Volume *= 1.5f;
+            if (_songs.Length > 0)
+                _songs[0].Volume *= 0.9f;
         }
 
         protected override void UnloadContent()
@@ -109,18 +110,18 @@ namespace MonoGame.Testing
                 Exit();
 
             f += time.ElapsedTotalSeconds;
-            if (f >= 2f)
+            if (f >= 2f && _songs.Length > 0)
             {
                 f = 0f;
 
                 _watch.Restart();
-                
+
                 //_lastSong?.Stop();
                 _lastSong = _songs[songIndex++];
                 _lastSong.Play(immediate: false);
                 if (songIndex >= _songs.Length)
                     songIndex = 0;
-                
+
                 _watch.Stop();
                 Console.WriteLine("Moved next in " + _watch.Elapsed.TotalMilliseconds.ToString("0.00") + "ms");
 
@@ -133,7 +134,7 @@ namespace MonoGame.Testing
 
                     var image = new Image<Color>(w, h);
                     GraphicsDevice.GetBackBufferData(new Rectangle(x, y, w, h), image.GetPixelSpan());
-                    
+
                     Task.Run(() =>
                     {
                         void OnProgress(

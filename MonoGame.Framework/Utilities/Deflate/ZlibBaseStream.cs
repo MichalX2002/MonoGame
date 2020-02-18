@@ -84,7 +84,7 @@ namespace MonoGame.Framework.Deflate
         {
             get
             {
-                return (this._compressionMode == CompressionMode.Compress);
+                return this._compressionMode == CompressionMode.Compress;
             }
         }
 
@@ -94,7 +94,7 @@ namespace MonoGame.Framework.Deflate
             {
                 if (_z == null)
                 {
-                    bool wantRfc1950Header = (this._flavor == ZlibStreamFlavor.ZLIB);
+                    bool wantRfc1950Header = this._flavor == ZlibStreamFlavor.ZLIB;
                     _z = new ZlibCodec();
                     if (this._compressionMode == CompressionMode.Decompress)
                     {
@@ -149,7 +149,7 @@ namespace MonoGame.Framework.Deflate
                 _z.OutputBuffer = workingBuffer;
                 _z.NextOut = 0;
                 _z.AvailableBytesOut = _workingBuffer.Length;
-                int rc = (_wantCompress)
+                int rc = _wantCompress
                     ? _z.Deflate(_flushMode)
                     : _z.Inflate(_flushMode);
                 if (rc != ZlibConstants.Z_OK && rc != ZlibConstants.Z_STREAM_END)
@@ -162,7 +162,7 @@ namespace MonoGame.Framework.Deflate
 
                 // If GZIP and de-compress, we're done when 8 bytes remain.
                 if (_flavor == ZlibStreamFlavor.GZIP && !_wantCompress)
-                    done = (_z.AvailableBytesIn == 8 && _z.AvailableBytesOut != 0);
+                    done = _z.AvailableBytesIn == 8 && _z.AvailableBytesOut != 0;
 
             }
             while (!done);
@@ -182,7 +182,7 @@ namespace MonoGame.Framework.Deflate
                     _z.OutputBuffer = workingBuffer;
                     _z.NextOut = 0;
                     _z.AvailableBytesOut = _workingBuffer.Length;
-                    int rc = (_wantCompress)
+                    int rc = _wantCompress
                         ? _z.Deflate(FlushType.Finish)
                         : _z.Inflate(FlushType.Finish);
 
@@ -203,7 +203,7 @@ namespace MonoGame.Framework.Deflate
                     done = _z.AvailableBytesIn == 0 && _z.AvailableBytesOut != 0;
                     // If GZIP and de-compress, we're done when 8 bytes remain.
                     if (_flavor == ZlibStreamFlavor.GZIP && !_wantCompress)
-                        done = (_z.AvailableBytesIn == 8 && _z.AvailableBytesOut != 0);
+                        done = _z.AvailableBytesIn == 8 && _z.AvailableBytesOut != 0;
 
                 }
                 while (!done);
@@ -476,7 +476,7 @@ namespace MonoGame.Framework.Deflate
 
                 }
                 // we have data in InputBuffer; now compress or decompress as appropriate
-                rc = (_wantCompress)
+                rc = _wantCompress
                     ? _z.Deflate(_flushMode)
                     : _z.Inflate(_flushMode);
 
@@ -484,7 +484,7 @@ namespace MonoGame.Framework.Deflate
                     return 0;
 
                 if (rc != ZlibConstants.Z_OK && rc != ZlibConstants.Z_STREAM_END)
-                    throw new ZlibException(string.Format("{0}flating:  rc={1}  msg={2}", (_wantCompress ? "de" : "in"), rc, _z.Message));
+                    throw new ZlibException(string.Format("{0}flating:  rc={1}  msg={2}", _wantCompress ? "de" : "in", rc, _z.Message));
 
                 if ((nomoreinput || rc == ZlibConstants.Z_STREAM_END) && (_z.AvailableBytesOut == count))
                     break; // nothing more to read
@@ -519,7 +519,7 @@ namespace MonoGame.Framework.Deflate
             }
 
 
-            rc = (count - _z.AvailableBytesOut);
+            rc = count - _z.AvailableBytesOut;
 
             // calculate CRC after reading
             if (crc != null)

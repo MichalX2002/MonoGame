@@ -61,7 +61,7 @@ namespace MonoGame.Framework.Deflate
         {
             get
             {
-                return unchecked((int)(~_register));
+                return unchecked((int)~_register);
             }
         }
 
@@ -104,7 +104,7 @@ namespace MonoGame.Framework.Deflate
                     _TotalBytesRead += count;
                 }
 
-                return (int)(~_register);
+                return (int)~_register;
             }
         }
 
@@ -511,7 +511,7 @@ namespace MonoGame.Framework.Deflate
         /// </remarks>
         /// <param name="stream">The underlying stream</param>
         public CrcCalculatorStream(System.IO.Stream stream)
-            : this(true, CrcCalculatorStream.UnsetLengthLimit, stream, null)
+            : this(true, UnsetLengthLimit, stream, null)
         {
         }
 
@@ -529,7 +529,7 @@ namespace MonoGame.Framework.Deflate
         /// <param name="leaveOpen">true to leave the underlying stream
         /// open upon close of the <c>CrcCalculatorStream</c>; false otherwise.</param>
         public CrcCalculatorStream(System.IO.Stream stream, bool leaveOpen)
-            : this(leaveOpen, CrcCalculatorStream.UnsetLengthLimit, stream, null)
+            : this(leaveOpen, UnsetLengthLimit, stream, null)
         {
         }
 
@@ -680,7 +680,7 @@ namespace MonoGame.Framework.Deflate
             // calling ReadToEnd() on it, We can "over-read" the zip data and get a
             // corrupt string.  The length limits that, prevents that problem.
 
-            if (_lengthLimit != CrcCalculatorStream.UnsetLengthLimit)
+            if (_lengthLimit != UnsetLengthLimit)
             {
                 if (_Crc32.TotalBytesRead >= _lengthLimit) return 0; // EOF
                 long bytesRemaining = _lengthLimit - _Crc32.TotalBytesRead;
@@ -747,7 +747,7 @@ namespace MonoGame.Framework.Deflate
         {
             get
             {
-                if (_lengthLimit == CrcCalculatorStream.UnsetLengthLimit)
+                if (_lengthLimit == UnsetLengthLimit)
                     return _innerStream.Length;
                 else return _lengthLimit;
             }

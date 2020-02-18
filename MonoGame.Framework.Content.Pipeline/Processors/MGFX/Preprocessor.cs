@@ -37,16 +37,16 @@ namespace TwoMGFX
                 var token = pp.token();
                 switch (token.getType())
                 {
-                    case CppNet.Token.EOF:
+                    case Token.EOF:
                         endOfStream = true;
                         break;
-                    case CppNet.Token.CPPCOMMENT:
+                    case Token.CPPCOMMENT:
                         if (token.getText().StartsWith("//--WORKAROUND#line"))
                         {
                             result.Append(token.getText().Replace("//--WORKAROUND#line", "#line"));
                         }
                         break;
-                    case CppNet.Token.CCOMMENT:
+                    case Token.CCOMMENT:
                     {
                         var tokenText = token.getText();
                         if (tokenText != null)

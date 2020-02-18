@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
-    <TargetFrameworks>net472;netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks>net472;netcoreapp3.1</TargetFrameworks>
     <DefineConstants>WINDOWS;XNADESIGNPROVIDED;STBSHARP_INTERNAL</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Description>MonoGame is an open source implementation of the Microsoft XNA 4.x Framework. The goal is to make it easy for XNA developers to create cross-platform games with extremely high code reuse.
@@ -42,15 +42,6 @@ This package provides you with MonoGame Framework that uses DirectX for renderin
     <Compile Include="Platform\Audio\OpenAL\OpenAL.XRam.cs" />
     <Compile Include="Platform\GamePlatform.Desktop.cs" />
     <Compile Include="Platform\Graphics\Shader\Shader.Structure.cs" />
-    <Compile Include="Platform\Graphics\Textures\IRenderTarget.DirectX.cs" />
-    <Compile Include="Platform\Graphics\Textures\RenderTarget2D.DirectX.cs" />
-    <Compile Include="Platform\Graphics\Textures\RenderTarget3D.DirectX.cs" />
-    <Compile Include="Platform\Graphics\Textures\RenderTargetCube.DirectX.cs" />
-    <Compile Include="Platform\Graphics\Textures\Texture.DirectX.cs" />
-    <Compile Include="Platform\Graphics\Textures\Texture2D.DirectX.cs" />
-    <Compile Include="Platform\Graphics\Textures\Texture3D.DirectX.cs" />
-    <Compile Include="Platform\Graphics\Textures\TextureCollection.DirectX.cs" />
-    <Compile Include="Platform\Graphics\Textures\TextureCube.DirectX.cs" />
     <Compile Include="Platform\Input\GamePad.XInput.cs" />
     <Compile Include="Platform\Input\Joystick.Default.cs" />
     <Compile Include="Platform\Input\Keyboard.Windows.cs" />
@@ -61,9 +52,7 @@ This package provides you with MonoGame Framework that uses DirectX for renderin
     <Compile Include="Platform\Input\MouseCursor.Windows.cs" />
     <Compile Include="Platform\Input\TextInputEvent.cs" />
 
-    <Compile Include="Platform\Media\MediaLibrary.Default.cs" />
     <Compile Include="Platform\Media\MediaManagerState.cs" />
-    <Compile Include="Platform\Media\MediaPlayer.WMS.cs" />
     <Compile Include="Platform\Media\OggStream.cs" />
     <Compile Include="Platform\Media\OggStreamer.cs" />
     <Compile Include="Platform\Media\Song.NVorbis.cs" />
@@ -74,7 +63,6 @@ This package provides you with MonoGame Framework that uses DirectX for renderin
     <Compile Include="Platform\Utilities\AssemblyHelper.cs" />
     <Compile Include="Platform\Utilities\CurrentPlatform.cs" />
     <Compile Include="Platform\Utilities\FuncLoader.Desktop.cs" />
-    <Compile Include="Platform\Utilities\ReflectionHelpers.Legacy.cs" />
     <Compile Include="Platform\Utilities\Threading.cs" />
     <Compile Include="Platform\Utilities\TimerHelper.cs" />
     <Compile Include="Platform\Windows\HorizontalMouseWheelEvent.cs" />

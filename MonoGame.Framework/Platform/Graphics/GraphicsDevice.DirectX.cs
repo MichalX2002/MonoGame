@@ -796,7 +796,7 @@ namespace MonoGame.Framework.Graphics
 
             // Obtain the backbuffer for this window which will be the final 3D rendertarget.
             Point targetSize;
-            using (var backBuffer = DXTexture2D.FromSwapChain<SharpDX.Direct3D11.Texture2D>(_swapChain, 0))
+            using (var backBuffer = DXResource.FromSwapChain<DXTexture2D>(_swapChain, 0))
             {
                 // Create a view interface on the rendertarget to use on bind.
                 _renderTargetView = new RenderTargetView(_d3dDevice, backBuffer);

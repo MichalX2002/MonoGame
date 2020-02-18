@@ -20,6 +20,12 @@
 /processorParam:TextureFormat=Compressed
 /build:arial.spritefont
 
+#begin Ending.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Ending.ogg
+
 #begin hit_reflect_0.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor
@@ -43,6 +49,12 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:test.png
+
+#begin Title Screen.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Title Screen.ogg
 
 #begin Win Jingle.ogg
 /importer:OggImporter

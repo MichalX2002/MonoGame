@@ -137,7 +137,7 @@ namespace MonoGame.Framework.Utilities
         public bool MoveNext()
         {
             _iteratorIndex++;
-            return (_iteratorIndex < Count);
+            return _iteratorIndex < Count;
         }
 
         #endregion

@@ -15,7 +15,7 @@ namespace MonoGame.Framework.Content
         private ContentTypeReaderManager _typeReaderManager;
         private List<KeyValuePair<int, Action<object>>> _sharedResourceFixups;
         internal int Version { get; private set; }
-		internal int SharedResourceCount { get; private set; }
+        internal int SharedResourceCount { get; private set; }
 
         internal ContentTypeReader[] TypeReaders { get; private set; }
         
@@ -29,7 +29,7 @@ namespace MonoGame.Framework.Content
         {
             ContentManager = manager;
             AssetName = assetName;
-			Version = version;
+            Version = version;
             _recordDisposableObject = recordDisposableObject;
         }
 
@@ -74,7 +74,7 @@ namespace MonoGame.Framework.Content
 
             var sharedResources = new object[SharedResourceCount];
             for (var i = 0; i < SharedResourceCount; ++i)
-                sharedResources[i] = InnerReadObject<object>(null);
+                sharedResources[i] = ReadObject<object>(null);
 
             // Fixup shared resources by calling each registered action
             foreach (var fixup in _sharedResourceFixups)
@@ -104,22 +104,10 @@ namespace MonoGame.Framework.Content
 
         public T ReadObject<T>()
         {
-            return InnerReadObject(default(T));
+            return ReadObject(default(T));
         }
 
         public T ReadObject<T>(T existingInstance)
-        {
-            return InnerReadObject(existingInstance);
-        }
-
-        public T ReadObject<T>(ContentTypeReader typeReader)
-        {
-            var result = (T)typeReader.Read(this, default(T));            
-            RecordDisposable(result);
-            return result;
-        }
-
-        private T InnerReadObject<T>(T existingInstance)
         {
             var typeReaderIndex = Read7BitEncodedInt();
             if (typeReaderIndex == 0)
@@ -131,6 +119,13 @@ namespace MonoGame.Framework.Content
             var typeReader = TypeReaders[typeReaderIndex - 1];
             var result = (T)typeReader.Read(this, existingInstance);
 
+            RecordDisposable(result);
+            return result;
+        }
+
+        public T ReadObject<T>(ContentTypeReader typeReader)
+        {
+            var result = (T)typeReader.Read(this, default(T));            
             RecordDisposable(result);
             return result;
         }
@@ -148,7 +143,7 @@ namespace MonoGame.Framework.Content
 
         public T ReadRawObject<T>()
         {
-			return ReadRawObject(default(T));
+            return ReadRawObject(default(T));
         }
 
         public T ReadRawObject<T>(ContentTypeReader typeReader)
@@ -269,12 +264,12 @@ namespace MonoGame.Framework.Content
         {
             return base.Read7BitEncodedInt();
         }
-		
-		internal BoundingSphere ReadBoundingSphere()
-		{
-			var position = ReadVector3();
+        
+        internal BoundingSphere ReadBoundingSphere()
+        {
+            var position = ReadVector3();
             var radius = ReadSingle();
             return new BoundingSphere(position, radius);
-		}
+        }
     }
 }

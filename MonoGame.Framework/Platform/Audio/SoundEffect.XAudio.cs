@@ -225,13 +225,13 @@ namespace MonoGame.Framework.Audio
                 case WaveFormatEncoding.Adpcm:
                     {
                         var samplesPerBlock = (soundStream.Format.BlockAlign / soundStream.Format.Channels - 7) * 2 + 2;
-                        sampleCount = ((int)dataStream.Length / soundStream.Format.BlockAlign) * samplesPerBlock;
+                        sampleCount = (int)dataStream.Length / soundStream.Format.BlockAlign * samplesPerBlock;
                     }
                     break;
 
                 case WaveFormatEncoding.Pcm:
                 case WaveFormatEncoding.IeeeFloat:
-                    sampleCount = (int)(dataStream.Length / ((soundStream.Format.Channels * soundStream.Format.BitsPerSample) / 8));
+                    sampleCount = (int)(dataStream.Length / (soundStream.Format.Channels * soundStream.Format.BitsPerSample / 8));
                     break;
 
                 default:

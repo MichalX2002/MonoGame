@@ -328,7 +328,7 @@ namespace MonoGame.Framework.Deflate
         /// </summary>
         virtual public FlushType FlushMode
         {
-            get { return (this._baseStream._flushMode); }
+            get { return this._baseStream._flushMode; }
             set
             {
                 if (_disposed) throw new ObjectDisposedException("ZlibStream");
@@ -500,9 +500,9 @@ namespace MonoGame.Framework.Deflate
         {
             get
             {
-                if (this._baseStream._streamMode == MonoGame.Framework.Deflate.ZlibBaseStream.StreamMode.Writer)
+                if (this._baseStream._streamMode == ZlibBaseStream.StreamMode.Writer)
                     return this._baseStream._z.TotalBytesOut;
-                if (this._baseStream._streamMode == MonoGame.Framework.Deflate.ZlibBaseStream.StreamMode.Reader)
+                if (this._baseStream._streamMode == ZlibBaseStream.StreamMode.Reader)
                     return this._baseStream._z.TotalBytesIn;
                 return 0;
             }

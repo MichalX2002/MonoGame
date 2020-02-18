@@ -67,7 +67,7 @@ namespace MonoGame.Framework.Deflate
 {
     sealed class Tree
     {
-        private static readonly int HEAP_SIZE = (2 * InternalConstants.L_CODES + 1);
+        private static readonly int HEAP_SIZE = 2 * InternalConstants.L_CODES + 1;
                 
         // extra bits for each length code
         internal static readonly int[] ExtraLengthBits = new int[]
@@ -315,7 +315,7 @@ namespace MonoGame.Framework.Deflate
             // two codes of non zero frequency.
             while (s.heap_len < 2)
             {
-                node = s.heap[++s.heap_len] = (max_code < 2?++max_code:0);
+                node = s.heap[++s.heap_len] = max_code < 2?++max_code:0;
                 tree[node * 2] = 1;
                 s.depth[node] = 0;
                 s.opt_len--;
@@ -348,7 +348,7 @@ namespace MonoGame.Framework.Deflate
                                 
                 // Create a new node father of n and m
                 tree[node * 2] = unchecked((short) (tree[n * 2] + tree[m * 2]));
-                s.depth[node] = (sbyte) (System.Math.Max((byte) s.depth[n], (byte) s.depth[m]) + 1);
+                s.depth[node] = (sbyte) (Math.Max((byte) s.depth[n], (byte) s.depth[m]) + 1);
                 tree[n * 2 + 1] = tree[m * 2 + 1] = (short) node;
                                 
                 // and insert the new node in the heap
@@ -400,7 +400,7 @@ namespace MonoGame.Framework.Deflate
                 if (len == 0)
                     continue;
                 // Now reverse the bits
-                tree[n * 2] =  unchecked((short) (bi_reverse(next_code[len]++, len)));
+                tree[n * 2] =  unchecked((short) bi_reverse(next_code[len]++, len));
             }
         }
                 

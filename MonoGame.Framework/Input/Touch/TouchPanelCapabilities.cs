@@ -45,7 +45,7 @@ namespace MonoGame.Framework.Input.Touch
                 }
 #elif WINDOWS
                 MaximumTouchCount = GetSystemMetrics(SM_MAXIMUMTOUCHES);
-                isConnected = (MaximumTouchCount > 0);
+                isConnected = MaximumTouchCount > 0;
 #elif ANDROID
                 // http://developer.android.com/reference/android/content/pm/PackageManager.html#FEATURE_TOUCHSCREEN
                 var pm = Game.Activity.PackageManager;

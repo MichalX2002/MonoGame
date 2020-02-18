@@ -26,15 +26,15 @@ namespace MonoGame.Framework.Graphics
 
                 switch ( CullMode )
                 {
-                    case Graphics.CullMode.CullClockwiseFace:
+                    case CullMode.CullClockwiseFace:
                         desc.CullMode = SharpDX.Direct3D11.CullMode.Front;
                         break;
 
-                    case Graphics.CullMode.CullCounterClockwiseFace:
+                    case CullMode.CullCounterClockwiseFace:
                         desc.CullMode = SharpDX.Direct3D11.CullMode.Back;
                         break;
 
-                    case Graphics.CullMode.None:
+                    case CullMode.None:
                         desc.CullMode = SharpDX.Direct3D11.CullMode.None;
                         break;
                 }
@@ -63,7 +63,7 @@ namespace MonoGame.Framework.Graphics
                 desc.DepthBias = (int) (DepthBias * depthMul);
                 desc.SlopeScaledDepthBias = SlopeScaleDepthBias;
 
-                if (FillMode == Graphics.FillMode.WireFrame)
+                if (FillMode == FillMode.WireFrame)
                     desc.FillMode = SharpDX.Direct3D11.FillMode.Wireframe;
                 else
                     desc.FillMode = SharpDX.Direct3D11.FillMode.Solid;

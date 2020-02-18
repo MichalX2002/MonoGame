@@ -11,7 +11,7 @@ namespace MonoGame.Framework.Input
     public static partial class Mouse
     {
         [DllImport("user32.dll", EntryPoint = "SetCursorPos")]
-        [return: MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+        [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetCursorPos(int X, int Y);
 
         private static Control _window;
