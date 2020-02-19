@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System.Runtime.InteropServices;
 using MonoGame.Framework.Utilities;
 using MonoGame.OpenGL;
 
@@ -62,19 +63,15 @@ namespace MonoGame.Framework.Graphics
             if (!ReferenceEquals(this, _lastConstantBufferApplied))
                 IsDirty = true;
 
-            // If the buffer content hasn't changed then we're
-            // done... use the previously set uniform state.
+            // If the buffer content hasn't changed then we're done... use the previously set uniform state.
             if (!IsDirty)
                 return;
 
             // TODO: We need to know the type of buffer float/int/bool
             // and cast this correctly... else it doesn't work as i guess
             // GL is checking the type of the uniform.
-            fixed (byte* ptr = _buffer)
-            {
-                GL.Uniform4(_location, _buffer.Length / 16, (float*)ptr);
-                GraphicsExtensions.CheckGLError();
-            }
+            GL.Uniform4(_location, _buffer.Length / 16, MemoryMarshal.Cast<byte, float>(_buffer));
+            GraphicsExtensions.CheckGLError();
 
             // Clear the dirty flag.
             IsDirty = false;

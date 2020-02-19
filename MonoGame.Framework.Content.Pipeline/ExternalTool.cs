@@ -101,11 +101,11 @@ namespace MonoGame.Framework.Content.Pipeline
                 return command;
 
             // For Linux check specific subfolder
-            if (CurrentPlatform.OS == OS.Linux)
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Linux)
                 return "linux/" + command;
 
             // For Mac check specific subfolder
-            if (CurrentPlatform.OS == OS.MacOSX)
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
                 return "osx/" + command;
 
             // We don't have a full path, so try running through the system path to find it.
@@ -113,16 +113,16 @@ namespace MonoGame.Framework.Content.Pipeline
                 Path.PathSeparator +
                 Environment.GetEnvironmentVariable("PATH");
 
-            var justTheName = Path.GetFileName(command);
+            string fileName = Path.GetFileName(command);
             foreach (var path in paths.Split(Path.PathSeparator))
             {
-                var fullName = Path.Combine(path, justTheName);
+                string fullName = Path.Combine(path, fileName);
                 if (File.Exists(fullName))
                     return fullName;
 
-                if (CurrentPlatform.OS == OS.Windows)
+                if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
                 {
-                    var fullExeName = string.Concat(fullName, ".exe");
+                    string fullExeName = string.Concat(fullName, ".exe");
                     if (File.Exists(fullExeName))
                         return fullExeName;
                 }
@@ -164,7 +164,7 @@ namespace MonoGame.Framework.Content.Pipeline
                 File.Delete(filePath);
             }
             catch (Exception)
-            {              
+            {
             }
         }
     }

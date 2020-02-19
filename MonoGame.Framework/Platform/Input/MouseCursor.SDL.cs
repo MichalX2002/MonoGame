@@ -9,25 +9,25 @@ namespace MonoGame.Framework.Input
 {
     public partial class MouseCursor
     {
-        private MouseCursor(Sdl.Mouse.SystemCursor cursor)
+        private MouseCursor(SDL.Mouse.SystemCursor cursor)
         {
-            Handle = Sdl.Mouse.CreateSystemCursor(cursor);
+            Handle = SDL.Mouse.CreateSystemCursor(cursor);
         }
 
         private static void PlatformInitalize()
         {
-            Arrow = new MouseCursor(Sdl.Mouse.SystemCursor.Arrow);
-            IBeam = new MouseCursor(Sdl.Mouse.SystemCursor.IBeam);
-            Wait = new MouseCursor(Sdl.Mouse.SystemCursor.Wait);
-            Crosshair = new MouseCursor(Sdl.Mouse.SystemCursor.Crosshair);
-            WaitArrow = new MouseCursor(Sdl.Mouse.SystemCursor.WaitArrow);
-            SizeNWSE = new MouseCursor(Sdl.Mouse.SystemCursor.SizeNWSE);
-            SizeNESW = new MouseCursor(Sdl.Mouse.SystemCursor.SizeNESW);
-            SizeWE = new MouseCursor(Sdl.Mouse.SystemCursor.SizeWE);
-            SizeNS = new MouseCursor(Sdl.Mouse.SystemCursor.SizeNS);
-            SizeAll = new MouseCursor(Sdl.Mouse.SystemCursor.SizeAll);
-            No = new MouseCursor(Sdl.Mouse.SystemCursor.No);
-            Hand = new MouseCursor(Sdl.Mouse.SystemCursor.Hand);
+            Arrow = new MouseCursor(SDL.Mouse.SystemCursor.Arrow);
+            IBeam = new MouseCursor(SDL.Mouse.SystemCursor.IBeam);
+            Wait = new MouseCursor(SDL.Mouse.SystemCursor.Wait);
+            Crosshair = new MouseCursor(SDL.Mouse.SystemCursor.Crosshair);
+            WaitArrow = new MouseCursor(SDL.Mouse.SystemCursor.WaitArrow);
+            SizeNWSE = new MouseCursor(SDL.Mouse.SystemCursor.SizeNWSE);
+            SizeNESW = new MouseCursor(SDL.Mouse.SystemCursor.SizeNESW);
+            SizeWE = new MouseCursor(SDL.Mouse.SystemCursor.SizeWE);
+            SizeNS = new MouseCursor(SDL.Mouse.SystemCursor.SizeNS);
+            SizeAll = new MouseCursor(SDL.Mouse.SystemCursor.SizeAll);
+            No = new MouseCursor(SDL.Mouse.SystemCursor.No);
+            Hand = new MouseCursor(SDL.Mouse.SystemCursor.Hand);
         }
 
         private static unsafe MouseCursor PlatformFromPixels(
@@ -39,24 +39,24 @@ namespace MonoGame.Framework.Input
             {
                 fixed (Color* ptr = &MemoryMarshal.GetReference(data))
                 {
-                    surface = Sdl.CreateRGBSurfaceFrom(
+                    surface = SDL.CreateRGBSurfaceFrom(
                         (IntPtr)ptr, width, height, 32, width * sizeof(Color),
                         0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
                 }
 
                 if (surface == IntPtr.Zero)
                     throw new InvalidOperationException(
-                        "Failed to create surface for mouse cursor.", new Exception(Sdl.GetError()));
+                        "Failed to create surface for mouse cursor.", new Exception(SDL.GetError()));
 
-                handle = Sdl.Mouse.CreateColorCursor(surface, origin.X, origin.Y);
+                handle = SDL.Mouse.CreateColorCursor(surface, origin.X, origin.Y);
                 if (handle == IntPtr.Zero)
                     throw new InvalidOperationException(
-                        "Failed to create mouse cursor from surface.", new Exception(Sdl.GetError()));
+                        "Failed to create mouse cursor from surface.", new Exception(SDL.GetError()));
             }
             finally
             {
                 if (surface != IntPtr.Zero)
-                    Sdl.FreeSurface(surface);
+                    SDL.FreeSurface(surface);
             }
             return new MouseCursor(handle);
         }
@@ -66,7 +66,7 @@ namespace MonoGame.Framework.Input
             if (Handle == IntPtr.Zero)
                 return;
 
-            Sdl.Mouse.FreeCursor(Handle);
+            SDL.Mouse.FreeCursor(Handle);
             Handle = IntPtr.Zero;
         }
     }

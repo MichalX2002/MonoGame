@@ -5,7 +5,7 @@
 using System.Windows.Media.Imaging;
 using Eto.Drawing;
 using Eto.Wpf.Drawing;
-using MonoGame.Utilities.Memory;
+using MonoGame.Framework.Memory;
 
 namespace MonoGame.Tools.Pipeline
 {

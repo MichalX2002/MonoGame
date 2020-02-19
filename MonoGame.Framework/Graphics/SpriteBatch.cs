@@ -709,7 +709,7 @@ namespace MonoGame.Framework.Graphics
                 }
             }
 
-            Matrix transformation = Matrix.Identity;
+            var transformation = Matrix.Identity;
             float cos = 0, sin = 0;
             if (rotation == 0)
             {
@@ -951,7 +951,7 @@ namespace MonoGame.Framework.Graphics
                 }
             }
 
-            Matrix transformation = Matrix.Identity;
+            var transformation = Matrix.Identity;
             float cos = 0, sin = 0;
             if (rotation == 0)
             {

@@ -46,7 +46,7 @@ namespace MonoGame.Framework.Graphics
 
 
 #if IOS
-		private UIScreen _screen;
+        private UIScreen _screen;
         internal GraphicsAdapter(UIScreen screen)
         {
             _screen = screen;
@@ -77,9 +77,9 @@ namespace MonoGame.Framework.Graphics
                 View view = ((AndroidGameWindow)Game.Instance.Window).GameView;
                 return new DisplayMode(view.Width, view.Height, SurfaceFormat.Rgba32);
 #elif DESKTOPGL
-                var displayIndex = Sdl.Display.GetWindowDisplayIndex(SdlGameWindow.Instance.Handle);
+                var displayIndex = SDL.Display.GetWindowDisplayIndex(SdlGameWindow.Instance.Handle);
 
-                Sdl.Display.GetCurrentDisplayMode(displayIndex, out Sdl.Display.Mode mode);
+                SDL.Display.GetCurrentDisplayMode(displayIndex, out SDL.Display.Mode mode);
 
                 return new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Rgba32);
 #elif WINDOWS
@@ -106,8 +106,8 @@ namespace MonoGame.Framework.Graphics
                 if (_adapters == null)
                 {
 #if IOS
-					_adapters = new ReadOnlyCollection<GraphicsAdapter>(
-						new [] {new GraphicsAdapter(UIScreen.MainScreen)});
+                    _adapters = new ReadOnlyCollection<GraphicsAdapter>(
+                        new [] {new GraphicsAdapter(UIScreen.MainScreen)});
 #else
                     _adapters = new ReadOnlyCollection<GraphicsAdapter>(new[] { new GraphicsAdapter() });
 #endif
@@ -152,7 +152,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="selectedDepthFormat">Set to the best format supported by the adaptor for the requested depth stencil format.</param>
         /// <param name="selectedMultiSampleCount">Set to the best count supported by the adaptor for the requested multisample count.</param>
         /// <returns>True if the requested format is supported by the adaptor. False if one or more of the values was changed.</returns>
-		public bool QueryRenderTargetFormat(
+        public bool QueryRenderTargetFormat(
             GraphicsProfile graphicsProfile,
             SurfaceFormat format,
             DepthFormat depthFormat,
@@ -287,7 +287,7 @@ namespace MonoGame.Framework.Graphics
             {
                 bool displayChanged = false;
 #if DESKTOPGL
-                var displayIndex = Sdl.Display.GetWindowDisplayIndex(SdlGameWindow.Instance.Handle);
+                var displayIndex = SDL.Display.GetWindowDisplayIndex(SdlGameWindow.Instance.Handle);
                 displayChanged = displayIndex != _displayIndex;
 #endif
                 if (_supportedDisplayModes == null || displayChanged)
@@ -298,11 +298,11 @@ namespace MonoGame.Framework.Graphics
                     _displayIndex = displayIndex;
                     modes.Clear();
 
-                    var modeCount = Sdl.Display.GetNumDisplayModes(displayIndex);
+                    var modeCount = SDL.Display.GetNumDisplayModes(displayIndex);
 
                     for (int i = 0; i < modeCount; i++)
                     {
-                        Sdl.Display.GetDisplayMode(displayIndex, i, out Sdl.Display.Mode mode);
+                        SDL.Display.GetDisplayMode(displayIndex, i, out SDL.Display.Mode mode);
 
                         // We are only using one format, Color
                         // mode.Format gets the Color format from SDL

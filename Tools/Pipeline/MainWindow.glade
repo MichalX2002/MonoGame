@@ -115,7 +115,7 @@
             <property name="can_focus">False</property>
             <property name="receives_default">False</property>
             <property name="text" translatable="yes">Debug Mode</property>
-			<property name="role">1</property>
+      <property name="role">1</property>
           </object>
           <packing>
             <property name="expand">False</property>

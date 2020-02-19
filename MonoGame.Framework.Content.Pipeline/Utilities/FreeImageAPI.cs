@@ -5,6 +5,7 @@
 using System;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
+using MonoGame.Framework.Utilities;
 
 namespace FreeImageAPI
 {
@@ -116,7 +117,7 @@ namespace FreeImageAPI
 
         public static FREE_IMAGE_FORMAT GetFileType(string filename, int size)
         {
-            if (CurrentPlatform.OS == OS.Windows)
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
                 return GetFileTypeU(filename, size);
             else
                 return GetFileTypeS(filename, size);
@@ -130,7 +131,7 @@ namespace FreeImageAPI
 
         public static IntPtr Load(FREE_IMAGE_FORMAT fif, string filename, int flags)
         {
-            if (CurrentPlatform.OS == OS.Windows)
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
                 return LoadU(fif, filename, flags);
             else
                 return LoadS(fif, filename, flags);

@@ -32,7 +32,7 @@ namespace MonoGame.Framework.Input
 
             public JoystickCapabilities GetCapabilities(int index)
             {
-                var guid = Sdl.Joystick.GetGUID(Device);
+                var guid = SDL.Joystick.GetGUID(Device);
                 if (Guid != guid)
                 {
                     Guid = guid;
@@ -41,12 +41,12 @@ namespace MonoGame.Framework.Input
 
                 return new JoystickCapabilities(
                     isConnected: true,
-                    displayName: Sdl.Joystick.GetJoystickName(Device),
+                    displayName: SDL.Joystick.GetName(Device),
                     identifier: _identifier,
-                    isGamepad: Sdl.GameController.IsGameController(index) == 1,
-                    axisCount: Sdl.Joystick.NumAxes(Device),
-                    buttonCount: Sdl.Joystick.NumButtons(Device),
-                    hatCount: Sdl.Joystick.NumHats(Device));
+                    isGamepad: SDL.GameController.IsGameController(index) == 1,
+                    axisCount: SDL.Joystick.NumAxes(Device),
+                    buttonCount: SDL.Joystick.NumButtons(Device),
+                    hatCount: SDL.Joystick.NumHats(Device));
             }
 
             public int[] GetAxes(in JoystickCapabilities jcap)
@@ -55,7 +55,7 @@ namespace MonoGame.Framework.Input
                     Axes = new int[jcap.AxisCount];
 
                 for (var i = 0; i < Axes.Length; i++)
-                    Axes[i] = Sdl.Joystick.GetAxis(Device, i);
+                    Axes[i] = SDL.Joystick.GetAxis(Device, i);
                 return Axes;
             }
 
@@ -65,7 +65,7 @@ namespace MonoGame.Framework.Input
                     Buttons = new ButtonState[jcap.ButtonCount];
 
                 for (var i = 0; i < Buttons.Length; i++)
-                    Buttons[i] = (Sdl.Joystick.GetButton(Device, i) == 0) ? ButtonState.Released : ButtonState.Pressed;
+                    Buttons[i] = (SDL.Joystick.GetButton(Device, i) == 0) ? ButtonState.Released : ButtonState.Pressed;
                 return Buttons;
             }
 
@@ -76,20 +76,20 @@ namespace MonoGame.Framework.Input
 
                 for (var i = 0; i < Hats.Length; i++)
                 {
-                    var hatstate = Sdl.Joystick.GetHat(Device, i);
+                    var hatstate = SDL.Joystick.GetHat(Device, i);
 
                     Hats[i] = new JoystickHat(
-                        up: hatstate.HasFlags(Sdl.Joystick.Hat.Up) ? ButtonState.Pressed : ButtonState.Released,
-                        down: hatstate.HasFlags(Sdl.Joystick.Hat.Down) ? ButtonState.Pressed : ButtonState.Released,
-                        left: hatstate.HasFlags(Sdl.Joystick.Hat.Left) ? ButtonState.Pressed : ButtonState.Released,
-                        right: hatstate.HasFlags(Sdl.Joystick.Hat.Right) ? ButtonState.Pressed : ButtonState.Released);
+                        up: hatstate.HasFlags(SDL.Joystick.Hat.Up) ? ButtonState.Pressed : ButtonState.Released,
+                        down: hatstate.HasFlags(SDL.Joystick.Hat.Down) ? ButtonState.Pressed : ButtonState.Released,
+                        left: hatstate.HasFlags(SDL.Joystick.Hat.Left) ? ButtonState.Pressed : ButtonState.Released,
+                        right: hatstate.HasFlags(SDL.Joystick.Hat.Right) ? ButtonState.Pressed : ButtonState.Released);
                 }
                 return Hats;
             }
 
             public void Close()
             {
-                Sdl.Joystick.Close(Device);
+                SDL.Joystick.Close(Device);
                 Device = IntPtr.Zero;
             }
         }

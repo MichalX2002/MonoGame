@@ -13,7 +13,7 @@ namespace MonoGame.Framework.Input
 
         internal static void AddDevice(int deviceId)
         {
-            IntPtr jdevice = Sdl.Joystick.Open(deviceId);
+            IntPtr jdevice = SDL.Joystick.Open(deviceId);
             int id = 0;
             while (Joysticks.ContainsKey(id))
                 id++;
@@ -24,7 +24,7 @@ namespace MonoGame.Framework.Input
             var instance = new Instance(id, jdevice);
             Joysticks.Add(id, instance);
 
-            if (Sdl.GameController.IsGameController(deviceId) == 1)
+            if (SDL.GameController.IsGameController(deviceId) == 1)
                 GamePad.AddDevice(deviceId);
         }
 
@@ -32,7 +32,7 @@ namespace MonoGame.Framework.Input
         {
             foreach (var entry in Joysticks)
             {
-                if (Sdl.Joystick.InstanceID(entry.Value.Device) == instanceid)
+                if (SDL.Joystick.InstanceID(entry.Value.Device) == instanceid)
                 {
                     Joysticks[entry.Key].Close();
                     Joysticks.Remove(entry.Key);

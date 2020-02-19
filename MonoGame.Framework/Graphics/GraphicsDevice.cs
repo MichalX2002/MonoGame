@@ -140,7 +140,7 @@ namespace MonoGame.Framework.Graphics
         /// This is typically referred to as the half-pixel offset.
         /// MonoGame replicates XNA behavior if this flag is set to <see langword="true"/>.
         /// </remarks>
-        public bool UseHalfPixelOffset { get; private set; }
+        public bool UseHalfPixelOffset { get; }
 
         #endregion
 
@@ -414,14 +414,16 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="adapter">The graphics adapter.</param>
         /// <param name="graphicsProfile">The graphics profile.</param>
-        /// <param name="preferHalfPixelOffset"> Indicates if DX9 style pixel addressing or current standard pixel addressing should be used. This value is passed to <see cref="GraphicsDevice.UseHalfPixelOffset"/></param>
+        /// <param name="useHalfPixelOffset">
+        /// Indicates if DX9 style pixel addressing or standard pixel addressing should be used.
+        /// </param>
         /// <param name="presentationParameters">The presentation options.</param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="presentationParameters"/> is <see langword="null"/>.
-        /// </exception>
+        /// <exception cref="ArgumentNullException"><paramref name="presentationParameters"/> is <see langword="null"/>.</exception>
         public GraphicsDevice(
-            GraphicsAdapter adapter, GraphicsProfile graphicsProfile,
-            bool preferHalfPixelOffset, PresentationParameters presentationParameters)
+            GraphicsAdapter adapter, 
+            GraphicsProfile graphicsProfile,
+            bool useHalfPixelOffset,
+            PresentationParameters presentationParameters)
         {
             Adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
             if (!adapter.IsProfileSupported(graphicsProfile))
@@ -432,13 +434,13 @@ namespace MonoGame.Framework.Graphics
                 throw new ArgumentNullException(nameof(presentationParameters));
 
 #if DIRECTX
-            // TODO we need to figure out how to inject the half pixel offset into DX shaders
-            preferHalfPixelOffset = false;
+            // TODO: we need to figure out how to inject the half pixel offset into DX shaders
+            useHalfPixelOffset = false;
 #endif
 
             Adapter = adapter;
             GraphicsProfile = graphicsProfile;
-            UseHalfPixelOffset = preferHalfPixelOffset;
+            UseHalfPixelOffset = useHalfPixelOffset;
             Setup();
             GraphicsCapabilities = new GraphicsCapabilities();
             GraphicsCapabilities.Initialize(this);

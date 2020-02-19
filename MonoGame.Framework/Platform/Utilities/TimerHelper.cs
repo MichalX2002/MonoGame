@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -33,13 +34,13 @@ namespace MonoGame.Framework.Utilities
         /// <summary>
         /// Sleeps as long as possible without exceeding the specified period.
         /// </summary>
-        public static void SleepForNoMoreThan(double milliseconds)
+        public static void SleepForNoMoreThan(TimeSpan time)
         {
             // Assumption is that Thread.Sleep(t) will sleep for at least (t), and at most (t + timerResolution)
-            if (milliseconds < LowestSleepThreshold)
+            if (time.TotalMilliseconds < LowestSleepThreshold)
                 return;
 
-            int sleepTime = (int)(milliseconds - GetCurrentResolution());
+            int sleepTime = (int)(time.TotalMilliseconds - GetCurrentResolution());
             if (sleepTime > 0)
                 Thread.Sleep(sleepTime);
         }

@@ -16,7 +16,7 @@ namespace MonoGame.Framework.Input
         private static readonly MouseState _defaultState = new MouseState();
 
         /// <summary>
-        /// Gets or sets the window handle for current mouse processing.
+        /// Gets the window handle for current mouse processing.
         /// </summary> 
         public static IntPtr WindowHandle
         {
@@ -25,11 +25,10 @@ namespace MonoGame.Framework.Input
         }
 
         /// <summary>
-        /// This API is an extension to XNA.
         /// Gets mouse state information that includes position and button
-        /// presses for the provided window
+        /// presses for the provided window.
         /// </summary>
-        /// <returns>Current state of the mouse.</returns>
+        /// <returns>Snapshot of current mouse state.</returns>
         public static MouseState GetState(GameWindow window)
         {
             return PlatformGetState(window);
@@ -39,12 +38,11 @@ namespace MonoGame.Framework.Input
         /// Gets mouse state information that includes position and button presses
         /// for the primary window
         /// </summary>
-        /// <returns>Current state of the mouse.</returns>
+        /// <returns>Snapshot of current mouse state.</returns>
         public static MouseState GetState()
         {
             if (PrimaryWindow != null)
                 return GetState(PrimaryWindow);
-
             return _defaultState;
         }
 

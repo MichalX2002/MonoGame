@@ -21,7 +21,11 @@ namespace MonoGame.Framework
 {
     public partial class Game : IDisposable
     {
+        private static PlatformInfo.OperatingSystem _currentOS = PlatformInfo.OS;
+
         private ContentManager _content;
+
+        private readonly object _locker = new object();
 
         internal GamePlatform Platform { get; }
 
@@ -58,10 +62,6 @@ namespace MonoGame.Framework
         private bool _isDisposed;
         private bool _shouldExit;
         private bool _suppressDraw;
-
-#if WINDOWS_UAP
-        private readonly object _locker = new object();
-#endif
 
         partial void PlatformConstruct();
 
@@ -383,7 +383,7 @@ namespace MonoGame.Framework
             // any change fully in both the fixed and variable timestep 
             // modes across multiple devices and platforms.
 
-        RetryTick:
+            RetryTick:
 
             if (!IsActive && (InactiveSleepTime.TotalMilliseconds >= 1.0))
             {
@@ -403,18 +403,28 @@ namespace MonoGame.Framework
             if (IsFixedTimeStep && _accumulatedElapsedTime < TargetElapsedTime)
             {
                 // Sleep for as long as possible without overshooting the update time
-                var sleepTime = (TargetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
+                TimeSpan sleepTime = TargetElapsedTime - _accumulatedElapsedTime;
+
                 // We only have a precision timer on Windows, so other platforms may still overshoot
-#if WINDOWS && !DESKTOPGL
-                TimerHelper.SleepForNoMoreThan(sleepTime);
-#elif WINDOWS_UAP
-                lock (_locker)
-                    if (sleepTime >= 2.0)
-                        System.Threading.Monitor.Wait(_locker, 1);
-#elif DESKTOPGL || ANDROID || IOS
-                if (sleepTime >= 2.0)
-                    System.Threading.Thread.Sleep(1);
-#endif
+                switch (_currentOS)
+                {
+                    case PlatformInfo.OperatingSystem.Windows:
+                        if (PlatformInfo.Platform == MonoGamePlatform.Windows)
+                        {
+                            TimerHelper.SleepForNoMoreThan(sleepTime);
+                        }
+                        else if (PlatformInfo.Platform == MonoGamePlatform.WindowsUniversal)
+                        {
+                            lock (_locker)
+                                Monitor.Wait(_locker, sleepTime);
+                        }
+                        break;
+
+                    default:
+                        Thread.Sleep(sleepTime);
+                        break;
+                }
+
                 // Keep looping until it's time to perform the next update
                 goto RetryTick;
             }
@@ -488,9 +498,9 @@ namespace MonoGame.Framework
             }
         }
 
-        #endregion
+#endregion
 
-        #region Protected Methods
+#region Protected Methods
 
         protected virtual bool BeginDraw() => true;
         protected virtual void EndDraw() => Platform.Present();
@@ -559,9 +569,9 @@ namespace MonoGame.Framework
             Deactivated?.Invoke(sender);
         }
 
-        #endregion Protected Methods
+#endregion Protected Methods
 
-        #region Event Handlers
+#region Event Handlers
 
         private void Components_ComponentAdded(object sender, IGameComponent gameComponent)
         {
@@ -585,13 +595,13 @@ namespace MonoGame.Framework
             DoExiting();
         }
 
-        #endregion Event Handlers
+#endregion Event Handlers
 
         // TODO: We should work toward eliminating internal methods.  They
         //       break entirely the possibility that additional platforms could
         //       be added by third parties without changing MonoGame itself.
 
-        #region Internal Methods
+#region Internal Methods
 
 #if !(WINDOWS && DIRECTX)
         internal void InternalApplyChanges()
@@ -666,7 +676,7 @@ namespace MonoGame.Framework
             UnloadContent();
         }
 
-        #endregion Internal Methods
+#endregion Internal Methods
 
         internal GraphicsDeviceManager GraphicsDeviceManager
         {

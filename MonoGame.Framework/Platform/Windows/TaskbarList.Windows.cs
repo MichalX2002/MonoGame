@@ -9,7 +9,7 @@ namespace MonoGame.Framework.Utilities
 
         private void PlatformConstruct()
         {
-            if (CurrentPlatform.OS != OS.Windows)
+            if (PlatformInfo.OS != PlatformInfo.OperatingSystem.Windows)
                 return;
 
             _comObject = (ITaskbarList)new COMTaskbarList();

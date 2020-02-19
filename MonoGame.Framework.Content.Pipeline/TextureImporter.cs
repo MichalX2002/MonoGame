@@ -89,7 +89,6 @@ namespace MonoGame.Framework.Content.Pipeline
 
             var height = (int)FreeImage.GetHeight(fBitmap);
             var width = (int)FreeImage.GetWidth(fBitmap);
-            //uint bpp = FreeImage.GetBPP(fBitmap);
             var imageType = FreeImage.GetImageType(fBitmap);
 
             // Swizzle channels and expand to include an alpha channel

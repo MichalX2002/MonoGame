@@ -249,11 +249,10 @@ namespace MonoGame.Framework.Content.Pipeline
 
         public override NodeContent Import(string filename, ContentImporterContext context)
         {
-            if (filename == null)
-                throw new ArgumentNullException("filename");
-            _context = context ?? throw new ArgumentNullException("context");
+            if (filename == null) throw new ArgumentNullException(nameof(filename));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
 
-            if (CurrentPlatform.OS == OS.Linux)
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Linux)
             {
                 var targetDir = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory.FullName;
                 try

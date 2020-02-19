@@ -302,7 +302,7 @@ namespace MonoGame.Framework.Graphics
         {
             var texture = new Texture2D(graphicsDevice, image.Width, image.Height, mipmap, format);
             throw new NotImplementedException(); // TODO: FIXME:
-            ///texture.SetData(image.GetPixelSpan());
+            // texture.SetData(image.GetPixelSpan());
             return texture;
         }
 

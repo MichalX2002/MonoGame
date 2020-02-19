@@ -2,17 +2,24 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace MonoGame.Framework.Utilities
+using MonoGame.Framework.Utilities;
+
+namespace MonoGame.Framework
 {
     /// <summary>
-    /// Utility class that returns information about the underlying platform
+    /// Utility class that returns information about the underlying platform.
     /// </summary>
-    public static class PlatformInfo
+    public static partial class PlatformInfo
     {
         /// <summary>
-        /// Underlying game platform type
+        /// Gets the executing operating system type.
         /// </summary>
-        public static MonoGamePlatform MonoGamePlatform
+        public static OperatingSystem OS => OperatingSystemProbe.Probe();
+
+        /// <summary>
+        /// Gets the underlying game platform type.
+        /// </summary>
+        public static MonoGamePlatform Platform
         {
             get
             {
@@ -45,7 +52,7 @@ namespace MonoGame.Framework.Utilities
         }
 
         /// <summary>
-        /// Graphics backend
+        /// Gets the graphics backend type of the game platform.
         /// </summary>
         public static GraphicsBackend GraphicsBackend
         {

@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework
 {
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Interop")]
     internal class FuncLoader
     {
         private class Windows
@@ -18,22 +19,18 @@ namespace MonoGame.Framework
         private class Linux
         {
             [DllImport("libdl.so.2")]
-            [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Interop")]
             public static extern IntPtr dlopen(string path, int flags);
 
             [DllImport("libdl.so.2")]
-            [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Interop")]
             public static extern IntPtr dlsym(IntPtr handle, string symbol);
         }
 
         private class OSX
         {
             [DllImport("/usr/lib/libSystem.dylib")]
-            [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Interop")]
             public static extern IntPtr dlopen(string path, int flags);
 
             [DllImport("/usr/lib/libSystem.dylib")]
-            [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Interop")]
             public static extern IntPtr dlsym(IntPtr handle, string symbol);
         }
         
@@ -41,10 +38,10 @@ namespace MonoGame.Framework
 
         public static IntPtr LoadLibrary(string libname)
         {
-            if (CurrentPlatform.OS == OS.Windows)
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
                 return Windows.LoadLibraryW(libname);
 
-            if (CurrentPlatform.OS == OS.MacOSX)
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
                 return OSX.dlopen(libname, RTLD_LAZY);
 
             return Linux.dlopen(libname, RTLD_LAZY);
@@ -52,11 +49,11 @@ namespace MonoGame.Framework
 
         public static T LoadFunction<T>(IntPtr library, string function, bool throwIfNotFound = false)
         {
-            var ret = IntPtr.Zero;
+            IntPtr ret;
 
-            if (CurrentPlatform.OS == OS.Windows)
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
                 ret = Windows.GetProcAddress(library, function);
-            else if (CurrentPlatform.OS == OS.MacOSX)
+            else if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
                 ret = OSX.dlsym(library, function);
             else
                 ret = Linux.dlsym(library, function);
@@ -69,11 +66,7 @@ namespace MonoGame.Framework
                 return default;
             }
 
-#if NETSTANDARD
             return Marshal.GetDelegateForFunctionPointer<T>(ret);
-#else
-            return (T)(object)Marshal.GetDelegateForFunctionPointer(ret, typeof(T));
-#endif
         }
     }
 }

@@ -16,7 +16,7 @@ namespace MonoGame.OpenGL
 
         private static T LoadFunction<T>(string function, bool throwIfNotFound = false)
         {
-            var ret = Sdl.GL.GetProcAddress(function);
+            var ret = SDL.GL.GetProcAddress(function);
 
             if (ret == IntPtr.Zero)
             {

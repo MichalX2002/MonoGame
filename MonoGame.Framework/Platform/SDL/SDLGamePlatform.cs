@@ -5,11 +5,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 using System.Runtime.InteropServices;
+using System.Threading;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
-using MonoGame.Framework;
 
 namespace MonoGame.Framework
 {
@@ -29,27 +28,27 @@ namespace MonoGame.Framework
             _keys = new List<Keys>();
             Keyboard.SetKeysDownList(_keys);
 
-            Sdl.GetVersion(out Sdl.Version sdlVersion);
-            Sdl.Major = sdlVersion.Major;
-            Sdl.Minor = sdlVersion.Minor;
-            Sdl.Patch = sdlVersion.Patch;
+            SDL.GetVersion(out SDL.Version sdlVersion);
+            SDL.Major = sdlVersion.Major;
+            SDL.Minor = sdlVersion.Minor;
+            SDL.Patch = sdlVersion.Patch;
 
-            int version = 100 * Sdl.Major + 10 * Sdl.Minor + Sdl.Patch;
+            int version = 100 * SDL.Major + 10 * SDL.Minor + SDL.Patch;
             if (version <= 204)
                 Debug.WriteLine("Please use SDL 2.0.5 or higher.");
 
             // Needed so VS can debug the project on Windows
-            if (version >= 205 && CurrentPlatform.OS == OS.Windows && Debugger.IsAttached)
-                Sdl.SetHint("SDL_WINDOWS_DISABLE_THREAD_NAMING", "1");
+            if (version >= 205 && PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows && Debugger.IsAttached)
+                SDL.SetHint("SDL_WINDOWS_DISABLE_THREAD_NAMING", "1");
 
-            Sdl.Init((int)(
-                Sdl.InitFlags.Video |
-                Sdl.InitFlags.Joystick |
-                Sdl.InitFlags.GameController |
-                Sdl.InitFlags.Haptic
+            SDL.Init((int)(
+                SDL.InitFlags.Video |
+                SDL.InitFlags.Joystick |
+                SDL.InitFlags.GameController |
+                SDL.InitFlags.Haptic
             ));
 
-            Sdl.DisableScreenSaver();
+            SDL.DisableScreenSaver();
 
             GamePad.InitDatabase();
             Window = _window = new SdlGameWindow(_game);
@@ -69,21 +68,21 @@ namespace MonoGame.Framework
 
         internal override void OnPresentationChanged(PresentationParameters pp)
         {
-            var displayIndex = Sdl.Window.GetDisplayIndex(Window.Handle);
-            var displayName = Sdl.Display.GetDisplayName(displayIndex);
+            var displayIndex = SDL.Window.GetDisplayIndex(Window.Handle);
+            var displayName = SDL.Display.GetDisplayName(displayIndex);
             BeginScreenDeviceChange(pp.IsFullScreen);
             EndScreenDeviceChange(displayName, pp.BackBufferWidth, pp.BackBufferHeight);
         }
 
         public override void RunLoop()
         {
-            Sdl.Window.Show(Window.Handle);
+            SDL.Window.Show(Window.Handle);
             _window.TaskbarList.WindowHandle = _window.GetOSWindowHandle();
 
             while (true)
             {
                 PollSdlEvents();
-                Keyboard.Modifiers = Sdl.Keyboard.GetModState();
+                Keyboard.Modifiers = SDL.Keyboard.GetModState();
 
                 Game.Tick();
 
@@ -97,44 +96,44 @@ namespace MonoGame.Framework
 
         private unsafe void PollSdlEvents() 
         { 
-            while (Sdl.PollEvent(out Sdl.Event ev) == 1)
+            while (SDL.PollEvent(out SDL.Event ev) == 1)
             {
                 switch (ev.Type)
                 {
-                    case Sdl.EventType.Quit:
+                    case SDL.EventType.Quit:
                         _isExiting++;
                         break;
 
-                    case Sdl.EventType.JoyDeviceAdded:
+                    case SDL.EventType.JoyDeviceAdded:
                         Joystick.AddDevice(ev.JoystickDevice.Which);
                         break;
 
-                    case Sdl.EventType.JoyDeviceRemoved:
+                    case SDL.EventType.JoyDeviceRemoved:
                         Joystick.RemoveDevice(ev.JoystickDevice.Which);
                         break;
 
-                    case Sdl.EventType.ControllerDeviceRemoved:
+                    case SDL.EventType.ControllerDeviceRemoved:
                         GamePad.RemoveDevice(ev.ControllerDevice.Which);
                         break;
 
-                    case Sdl.EventType.ControllerButtonUp:
-                    case Sdl.EventType.ControllerButtonDown:
-                    case Sdl.EventType.ControllerAxisMotion:
+                    case SDL.EventType.ControllerButtonUp:
+                    case SDL.EventType.ControllerButtonDown:
+                    case SDL.EventType.ControllerAxisMotion:
                         GamePad.UpdatePacketInfo(ev.ControllerDevice.Which, ev.ControllerDevice.TimeStamp);
                         break;
 
-                    case Sdl.EventType.MouseWheel:
+                    case SDL.EventType.MouseWheel:
                         const int wheelDelta = 120;
                         Mouse.ScrollY += ev.Wheel.Y * wheelDelta;
                         Mouse.ScrollX += ev.Wheel.X * wheelDelta;
                         break;
 
-                    case Sdl.EventType.MouseMotion:
+                    case SDL.EventType.MouseMotion:
                         Window.MouseState.X = ev.Motion.X;
                         Window.MouseState.Y = ev.Motion.Y;
                         break;
 
-                    case Sdl.EventType.KeyDown:
+                    case SDL.EventType.KeyDown:
                     {
                         var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
                         if (!_keys.Contains(key))
@@ -148,7 +147,7 @@ namespace MonoGame.Framework
                         break;
                     }
 
-                    case Sdl.EventType.KeyUp:
+                    case SDL.EventType.KeyUp:
                     {
                         var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
                         _keys.Remove(key);
@@ -156,33 +155,33 @@ namespace MonoGame.Framework
                         break;
                     }
 
-                    case Sdl.EventType.TextInput:
+                    case SDL.EventType.TextInput:
                         if (_window.IsTextInputHandled)
                             ProcessTextInput(ev.Text.Text);
                         break;
 
-                    case Sdl.EventType.WindowEvent:
+                    case SDL.EventType.WindowEvent:
 
                         switch (ev.Window.EventId)
                         {
-                            case Sdl.Window.EventId.Resized:
-                            case Sdl.Window.EventId.SizeChanged:
+                            case SDL.Window.EventId.Resized:
+                            case SDL.Window.EventId.SizeChanged:
                                 _window.ClientResize(ev.Window.Data1, ev.Window.Data2);
                                 break;
 
-                            case Sdl.Window.EventId.FocusGained:
+                            case SDL.Window.EventId.FocusGained:
                                 IsActive = true;
                                 break;
 
-                            case Sdl.Window.EventId.FocusLost:
+                            case SDL.Window.EventId.FocusLost:
                                 IsActive = false;
                                 break;
 
-                            case Sdl.Window.EventId.Moved:
+                            case SDL.Window.EventId.Moved:
                                 _window.Moved();
                                 break;
 
-                            case Sdl.Window.EventId.Close:
+                            case SDL.Window.EventId.Close:
                                 _isExiting++;
                                 break;
                         }
@@ -320,7 +319,7 @@ namespace MonoGame.Framework
                 _window = null;
 
                 Joystick.CloseDevices();
-                Sdl.Quit();
+                SDL.Quit();
             }
 
             base.Dispose(disposing);

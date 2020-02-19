@@ -472,7 +472,7 @@ namespace MonoGame.Framework.Graphics
             {
                 int count = _disposeContexts.Count;
                 for (int i = 0; i < count; ++i)
-                    Sdl.GL.DeleteContext(_disposeContexts[i]);
+                    SDL.GL.DeleteContext(_disposeContexts[i]);
                 _disposeContexts.Clear();
             }
         }
@@ -913,11 +913,11 @@ namespace MonoGame.Framework.Graphics
             // 1.0 or -1.0 to turn the rendering upside down for offscreen rendering. PosFixup.x
             // contains 1.0 to allow a mad.
 
-            float* posFixup = stackalloc float[4];
+            Span<float> posFixup = stackalloc float[4];
             posFixup[0] = 1f;
             posFixup[1] = 1f;
 
-            if (!UseHalfPixelOffset)
+            if (UseHalfPixelOffset)
             {
                 posFixup[2] = 63.0f / 64.0f / Viewport.Width;
                 posFixup[3] = -(63.0f / 64.0f) / Viewport.Height;
