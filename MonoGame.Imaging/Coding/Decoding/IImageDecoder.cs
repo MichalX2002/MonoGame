@@ -14,7 +14,7 @@ namespace MonoGame.Imaging.Coding.Decoding
     /// <summary>
     /// Encapsulates decoding of images.
     /// </summary>
-    public interface IImageDecoder : IImageCoder
+    public interface IImageDecoder : IImageCodec
     {
         /// <summary>
         /// Decodes the first image of a stream and returns a

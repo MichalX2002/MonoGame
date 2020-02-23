@@ -34,11 +34,11 @@ namespace MonoGame.Imaging
                 AssertNonEmptyRectangle(rectangle.GetValueOrDefault(), paramName);
         }
 
-        public static void AssertContigousLargeEnough(int sourceLength, int pixelCount, string paramName)
+        public static void AssertContigousLargeEnough(int length, int expectedLength, string paramName)
         {
-            if (sourceLength < pixelCount)
+            if (length < expectedLength)
                 throw new ArgumentException(
-                    "The contigous memory is not large enough for the given dimensions.", paramName);
+                    "The memory is not large enough for the given dimensions.", paramName);
         }
 
         public static void AssertRectangleInSource(
@@ -47,14 +47,14 @@ namespace MonoGame.Imaging
             // Rectangle.Contains would suffice, but exception details would suffer
             AssertNonEmptyRectangle(rectangle, rectParamName);
 
-            if (rectangle.Width > source.Width)
+            if (rectangle.Width > source.Size.Width)
                 throw new ArgumentOutOfRangeException(rectParamName + ".Width");
-            if (rectangle.Height > source.Height)
+            if (rectangle.Height > source.Size.Height)
                 throw new ArgumentOutOfRangeException(rectParamName + ".Height");
 
-            if (rectangle.X + rectangle.Width > source.Width)
+            if (rectangle.X + rectangle.Width > source.Size.Width)
                 throw new ArgumentOutOfRangeException(rectParamName + ".X");
-            if (rectangle.Y + rectangle.Height > source.Height)
+            if (rectangle.Y + rectangle.Height > source.Size.Height)
                 throw new ArgumentOutOfRangeException(rectParamName + ".Y");
         }
 
@@ -68,13 +68,13 @@ namespace MonoGame.Imaging
                     throw new AnimationNotSupportedException(format);
         }
 
-        public static void AssertAnimationSupport(IImageCoder coder, ImagingConfig config)
+        public static void AssertAnimationSupport(IImageCodec codec, ImagingConfig config)
         {
-            AssertAnimationSupport(coder.Format, config);
+            AssertAnimationSupport(codec.Format, config);
 
             if (config.ShouldThrowOnException<AnimationNotImplementedException>())
-                if (!coder.HasAttribute<IAnimatedFormatAttribute>())
-                    throw new AnimationNotImplementedException(coder);
+                if (!codec.HasAttribute<IAnimatedFormatAttribute>())
+                    throw new AnimationNotImplementedException(codec);
         }
     }
 }

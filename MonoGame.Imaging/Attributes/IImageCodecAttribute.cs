@@ -2,9 +2,9 @@
 namespace MonoGame.Imaging.Attributes
 {
     /// <summary>
-    /// Base interface for image coder attributes.
+    /// Base interface for image codec attributes.
     /// </summary>
-    public interface IImageCoderAttribute
+    public interface IImageCodecAttribute
     {
     }
 }

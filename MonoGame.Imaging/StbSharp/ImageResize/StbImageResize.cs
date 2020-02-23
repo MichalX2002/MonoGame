@@ -1,31 +1,38 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace StbSharp
 {
-    internal static unsafe partial class StbImageResize
+    public static unsafe partial class StbImageResize
     {
-        public delegate float KernelFunction(float x, float scale);
-        public delegate float SupportFunction(float scale);
+        public delegate float FilterKernelFunction(float x, float scale);
+        public delegate float FilterSupportFunction(float scale);
 
-        public readonly struct FilterInfo
+        public class Filter
         {
-            public readonly KernelFunction Kernel;
-            public readonly SupportFunction Support;
+            public static Filter Box { get; } = new Filter(FilterTrapezoid, SupportTrapezoid);
+            public static Filter Triangle { get; } = new Filter(FilterTriangle, SupportOne);
+            public static Filter Cubic { get; } = new Filter(FilterCubic, SupportTwo);
+            public static Filter CatmullRom { get; } = new Filter(FilterCatmullRom, SupportTwo);
+            public static Filter Mitchell { get; } = new Filter(FilterMitchell, SupportTwo);
 
-            public FilterInfo(KernelFunction kernel, SupportFunction support)
+            public FilterKernelFunction Kernel { get; }
+            public FilterSupportFunction Support { get; }
+
+            public Filter(FilterKernelFunction kernel, FilterSupportFunction support)
             {
-                Kernel = kernel;
-                Support = support;
+                Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
+                Support = support ?? throw new ArgumentNullException(nameof(support));
             }
         }
 
-        public class ImageResizeInfo
+        public ref struct ResizeContext
         {
-            public void* input_data;
+            public ReadOnlySpan<byte> input_data;
             public int input_w;
             public int input_h;
             public int input_stride_bytes;
-            public void* output_data;
+            public Span<byte> output_data;
             public int output_w;
             public int output_h;
             public int output_stride_bytes;
@@ -40,19 +47,19 @@ namespace StbSharp
             public int channels;
             public int alpha_channel;
             public uint flags;
-            public DataType type;
-            public int horizontal_filter;
-            public int vertical_filter;
-            public int edge_horizontal;
-            public int edge_vertical;
-            public int colorspace;
-            public stbir__contributors* horizontal_contributors;
-            public float* horizontal_coefficients;
-            public stbir__contributors* vertical_contributors;
-            public float* vertical_coefficients;
+            public DataType datatype;
+            public Filter horizontal_filter;
+            public Filter vertical_filter;
+            public WrapMode wrap_horizontal;
+            public WrapMode wrap_vertical;
+            public ColorSpace colorspace;
+            public Span<Contributors> horizontal_contributors;
+            public Span<float> horizontal_coefficients;
+            public Span<Contributors> vertical_contributors;
+            public Span<float> vertical_coefficients;
             public int decode_buffer_pixels;
-            public float* decode_buffer;
-            public float* horizontal_buffer;
+            public Span<float> decode_buffer;
+            public Span<float> horizontal_buffer;
             public int horizontal_coefficient_width;
             public int vertical_coefficient_width;
             public int horizontal_filter_pixel_width;
@@ -66,8 +73,8 @@ namespace StbSharp
             public int ring_buffer_first_scanline;
             public int ring_buffer_last_scanline;
             public int ring_buffer_begin_index;
-            public float* ring_buffer;
-            public float* encode_buffer;
+            public Span<float> ring_buffer;
+            public Span<float> encode_buffer;
             public int horizontal_contributors_size;
             public int horizontal_coefficients_size;
             public int vertical_contributors_size;
@@ -76,35 +83,30 @@ namespace StbSharp
             public int horizontal_buffer_size;
             public int ring_buffer_size;
             public int encode_buffer_size;
+
+            public int ring_buffer_length => ring_buffer_length_bytes / sizeof(float);
         }
 
         [StructLayout(LayoutKind.Explicit)]
-        public struct stbir__FP32
+        public struct FloatIntUnion
         {
             [FieldOffset(0)] public uint u;
             [FieldOffset(0)] public float f;
         }
 
-        public static FilterInfo[] stbir__filter_info_table =
+        public static byte LinearToSrgbByte(float value)
         {
-            new FilterInfo(null, stbir__support_zero),
-            new FilterInfo(stbir__filter_trapezoid, stbir__support_trapezoid),
-            new FilterInfo(stbir__filter_triangle, stbir__support_one),
-            new FilterInfo(stbir__filter_cubic, stbir__support_two),
-            new FilterInfo(stbir__filter_catmullrom, stbir__support_two),
-            new FilterInfo(stbir__filter_mitchell, stbir__support_two),
-        };
+            var almost_one = new FloatIntUnion { u = 0x3f7fffff };
+            var minval = new FloatIntUnion { u = (127 - 13) << 23 };
 
-        public static byte stbir__linear_to_srgb_uchar(float _in_)
-        {
-            var almostone = new stbir__FP32 { u = 0x3f7fffff };
-            var minval = new stbir__FP32 { u = (127 - 13) << 23 };
-            if (!(_in_ > minval.f)) _in_ = minval.f;
-            if (_in_ > almostone.f) _in_ = almostone.f;
+            if (!(value > minval.f))
+                value = minval.f;
+            if (value > almost_one.f)
+                value = almost_one.f;
 
-            var f = new stbir__FP32();
-            f.f = _in_;
-            uint tab = fp32_to_srgb8_tab4[(f.u - minval.u) >> 20];
+            var f = new FloatIntUnion();
+            f.f = value;
+            uint tab = float_to_srgb8_tab4[(int)((f.u - minval.u) >> 20)];
             uint bias = (tab >> 16) << 9;
             uint scale = tab & 0xffff;
             uint t = (f.u >> 12) & 0xff;

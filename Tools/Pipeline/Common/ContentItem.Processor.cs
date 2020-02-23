@@ -30,7 +30,7 @@ namespace MonoGame.Tools.Pipeline
             }
             else
             {
-                var contentItem = (context.Instance as ContentItem);
+                var contentItem = context.Instance as ContentItem;
                 if (contentItem.BuildAction == BuildAction.Copy)
                     return false;
             }                
@@ -169,7 +169,7 @@ namespace MonoGame.Tools.Pipeline
 
             if (context.Instance is Array)
             {
-                var array = (context.Instance as Array);
+                var array = context.Instance as Array;
                 var first = array.GetValue(0) as ContentItem;
 
                 if (!first.Processor.Properties.Any())

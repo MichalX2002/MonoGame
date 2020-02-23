@@ -3,12 +3,12 @@
 namespace MonoGame.Imaging.Coding
 {
     /// <summary>
-    /// Base interface for image coders.
+    /// Base interface for image codecs.
     /// </summary>
-    public interface IImageCoder : IImageCoderAttribute
+    public interface IImageCodec : IImageCodecAttribute
     {
         /// <summary>
-        /// Gets the format associated with this coder.
+        /// Gets the format associated with this codec.
         /// </summary>
         ImageFormat Format { get; }
     }

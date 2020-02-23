@@ -13,7 +13,7 @@ namespace MonoGame.Imaging.Coding.Encoding
             ReadOnlySpan<byte> data,
             CompressionLevel level,
             CancellationToken cancellation,
-            ImageWrite.WriteProgressCallback onProgress = null)
+            Action<double> onProgress = null)
         {
             cancellation.ThrowIfCancellationRequested();
 

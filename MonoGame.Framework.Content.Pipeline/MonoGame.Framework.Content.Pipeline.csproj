@@ -43,7 +43,7 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
     </Reference>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(SolutionName)' != 'MonoGame.Framework.WindowsDX'">
+  <ItemGroup Condition="'$(SolutionName)' == 'MonoGame.Framework.DesktopGL'">
     <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj">
       <PrivateAssets>All</PrivateAssets>
     </ProjectReference>
@@ -230,7 +230,7 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
     </Compile>
   </ItemGroup>
 
-  <Import Project="..\Stadia\Pipeline.targets" Condition="exists('..\Stadia\Pipeline.targets')"/>
+  <Import Project="..\Stadia\Pipeline.targets" Condition="exists('..\Stadia\Pipeline.targets')" />
 
   <ItemGroup>
     <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj" />

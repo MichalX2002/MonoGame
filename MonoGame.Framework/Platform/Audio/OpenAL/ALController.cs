@@ -21,7 +21,7 @@ namespace MonoGame.Framework.Audio
 {
     internal sealed class ALController : IDisposable
     {
-        private static object _initMutex = new object();
+        private static readonly object _initMutex = new object();
         private static ALController _instance;
 
         private static bool _closed;
@@ -195,7 +195,9 @@ namespace MonoGame.Framework.Audio
                 int updateBuffers = DEFAULT_UPDATE_BUFFER_COUNT;
                 if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.JellyBeanMr1)
                 {
-                    Android.Util.Log.Debug("OAL", Game.Activity.PackageManager.HasSystemFeature(PackageManager.FeatureAudioLowLatency) ? "Supports low latency audio playback." : "Does not support low latency audio playback.");
+                    Android.Util.Log.Debug("OAL", Game.Activity.PackageManager.HasSystemFeature(PackageManager.FeatureAudioLowLatency) 
+                        ? "Supports low latency audio playback." 
+                        : "Does not support low latency audio playback.");
 
                     if (Game.Activity.GetSystemService(Context.AudioService) is AudioManager audioManager)
                     {
@@ -237,7 +239,7 @@ namespace MonoGame.Framework.Audio
                 // NOTE: Do not override AVAudioSessionCategory set by the game developer:
                 //       see https://github.com/MonoGame/MonoGame/issues/6595
 
-                EventHandler<AVAudioSessionInterruptionEventArgs> handler = delegate (object sender, AVAudioSessionInterruptionEventArgs e)
+                EventHandler<AVAudioSessionInterruptionEventArgs> handler = () => (sender, e)
                 {
                     switch (e.InterruptionType)
                     {
@@ -282,6 +284,20 @@ namespace MonoGame.Framework.Audio
                 return false;
             }
         }
+
+#if ANDROID
+        void Activity_Paused(MonoGameAndroidGameView view)
+        {
+            // Pause all currently playing sounds by pausing the mixer
+            ALC.DevicePause(_device);
+        }
+
+        void Activity_Resumed(MonoGameAndroidGameView view)
+        {
+            // Resume all sounds that were playing when the activity was paused
+            ALC.DeviceResume(_device);
+        }
+#endif
 
         public static void DestroyInstance()
         {
@@ -328,20 +344,6 @@ namespace MonoGame.Framework.Audio
             ALHelper.CheckError("Failed to set source offset.");
             return pos;
         }
-
-#if ANDROID
-        void Activity_Paused(MonoGameAndroidGameView view)
-        {
-            // Pause all currently playing sounds by pausing the mixer
-            ALC.DevicePause(_device);
-        }
-
-        void Activity_Resumed(MonoGameAndroidGameView view)
-        {
-            // Resume all sounds that were playing when the activity was paused
-            ALC.DeviceResume(_device);
-        }
-#endif
 
         /// <summary>
         /// Destroys the AL context and closes the device, when they exist.

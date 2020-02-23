@@ -30,14 +30,14 @@ namespace MonoGame.Imaging.Pixels
         private readonly byte[] _rowBuffer; // TODO: replace with smarter buffer
 
         public int Components { get; }
-        public int Width => _pixels.Width;
-        public int Height => _pixels.Height;
+        public int Width => _pixels.Size.Width;
+        public int Height => _pixels.Size.Height;
 
         public RowsPixelProvider(IReadOnlyPixelRows pixels, int components)
         {
             _pixels = pixels;
             Components = components;
-            _rowBuffer = new byte[pixels.Width * pixels.ElementSize];
+            _rowBuffer = new byte[pixels.Size.Width * pixels.ElementSize];
 
             if (!_transform32DelegateCache.TryGetValue(pixels.PixelType, out _transform32))
             {
@@ -63,7 +63,7 @@ namespace MonoGame.Imaging.Pixels
             while (pixelsLeft > 0)
             {
                 int lastByteOffset = destinationOffset;
-                int count = Math.Min(pixelsLeft, _pixels.Width - column);
+                int count = Math.Min(pixelsLeft, _pixels.Size.Width - column);
 
                 _pixels.GetPixelByteRow(column, row, _rowBuffer);
 

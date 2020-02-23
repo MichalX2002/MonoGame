@@ -6,7 +6,7 @@ namespace MonoGame.Imaging
 {
     public partial class Image
     {
-        // TODO: fix up this mess of coder lists
+        // TODO: fix up this mess of codec lists
 
         private static List<IImageEncoder> _encoders;
         private static ConcurrentDictionary<ImageFormat, IImageEncoder> _encoderByFormat;

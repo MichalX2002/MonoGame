@@ -64,14 +64,13 @@ namespace MonoGame.Imaging
             ImagingArgumentGuard.AssertNonEmptyRectangle(sourceRectangle, nameof(sourceRectangle));
             var rect = sourceRectangle ?? pixels.GetBounds();
 
-            var dstImage = new Image<TPixel>(rect.Width, rect.Height);
+            var dstImage = new Image<TPixel>(rect.Size);
 
             if (pixels.PixelType.Type == typeof(TPixel) &&
                 pixels is IReadOnlyPixelMemory typeEqualMemory &&
                 typeEqualMemory.IsPixelContiguous &&
                 rect.Position == Point.Zero &&
-                rect.Width == pixels.Width &&
-                rect.Height == pixels.Height)
+                rect.Size == pixels.Size)
             {
                 typeEqualMemory.GetPixelByteSpan().CopyTo(dstImage.GetPixelByteSpan());
             }

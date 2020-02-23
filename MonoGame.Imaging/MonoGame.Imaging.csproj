@@ -17,7 +17,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Coding\Encoding\EncoderExtensions.cs" />
     <Compile Remove="ColorEncoding.cs" />
     <Compile Remove="Utilities\BufferPixelProvider.Expressions.cs" />
     <Compile Remove="Utilities\ImageWriter.cs" />
@@ -41,6 +40,10 @@
     <Compile Remove="Image\Specialized\**" />
     <EmbeddedResource Remove="Image\Specialized\**" />
     <None Remove="Image\Specialized\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\ImageWrite.cs" />
   </ItemGroup>
 
   <ItemGroup>

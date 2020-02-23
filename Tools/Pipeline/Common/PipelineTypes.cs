@@ -242,7 +242,7 @@ namespace MonoGame.Tools.Pipeline
             if (string.IsNullOrEmpty(_currentAssemblyDirectory))
                 return null;
 
-            var path = Path.Combine(_currentAssemblyDirectory, (new AssemblyName(args.Name).Name) + ".dll");
+            var path = Path.Combine(_currentAssemblyDirectory, new AssemblyName(args.Name).Name + ".dll");
             if (!File.Exists(path))
                 return null;
 

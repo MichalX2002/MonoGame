@@ -55,7 +55,7 @@ namespace MonoGame.Imaging.Coding.Decoding
                 if (fromType == toType)
                 {
                     var memory = new ResultWrapper(result);
-                    var image = Image.WrapMemory(fromType, memory, leaveOpen: false, state.Width, state.Height);
+                    var image = Image.WrapMemory(fromType, memory, new Size(state.Width, state.Height), leaveOpen: false);
                     return image;
                 }
                 else

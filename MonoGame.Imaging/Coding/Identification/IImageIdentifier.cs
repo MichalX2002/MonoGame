@@ -4,7 +4,7 @@ namespace MonoGame.Imaging.Coding.Identification
     /// <summary>
     /// Encapsulates detection of image formats and reading of image information.
     /// </summary>
-    public interface IImageIdentifier : IImageCoder
+    public interface IImageIdentifier : IImageCodec
     {
         /// <summary>
         /// Tries to detect the format of an image from a stream.

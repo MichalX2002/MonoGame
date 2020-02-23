@@ -26,7 +26,7 @@ namespace MonoGame.Tools.Pipeline
             {
                 Tag = this,
                 Checked = (bool?)Value,
-                ThreeState = (Value == null)
+                ThreeState = Value == null
             };
             checkbox.Text = (checkbox.Checked == null) ? "Not Set" : checkbox.Checked.ToString();
             checkbox.Width = _lastRec.Width - 10;

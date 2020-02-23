@@ -4,7 +4,7 @@ using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging.Coding.Encoding
 {
-    public abstract class ImageEncoderState : ImageCoderState
+    public abstract class ImageEncoderState : ImageCodecState
     {
         /// <summary>
         /// Gets the encoder that the state originates from.

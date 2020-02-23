@@ -94,7 +94,7 @@ namespace MonoGame.Tools.Pipeline
             var item = GetorAddItem(root, split.Length > 1 ? new DirectoryItem(split[0], currentPath) : citem);
 
             if (path.Contains("/"))
-                AddItem(item, citem, string.Join("/", split, 1, split.Length - 1), (currentPath + Path.DirectorySeparatorChar + split[0]));
+                AddItem(item, citem, string.Join("/", split, 1, split.Length - 1), currentPath + Path.DirectorySeparatorChar + split[0]);
         }
 
         public void RemoveItem(IProjectItem item)

@@ -2,7 +2,7 @@
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
-    public abstract class ImageDecoderState : ImageCoderState
+    public abstract class ImageDecoderState : ImageCodecState
     {
         #region Properties
 

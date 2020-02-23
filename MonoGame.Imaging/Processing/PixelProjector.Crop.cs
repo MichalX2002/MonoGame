@@ -112,9 +112,8 @@ namespace MonoGame.Imaging.Processing
             protected IReadOnlyPixelRows Pixels { get; }
             public Rectangle SourceRectangle { get; }
 
-            public int Width => SourceRectangle.Width;
-            public int Height => SourceRectangle.Height;
-            public int Count => Width * Height;
+            public Size Size => SourceRectangle.Size;
+            public int Count => Size.Area;
 
             public int ElementSize => Pixels.ElementSize;
             public VectorTypeInfo PixelType => Pixels.PixelType;
@@ -135,12 +134,12 @@ namespace MonoGame.Imaging.Processing
             protected void AssertValidRange(int x, int y, int count, string verb)
             {
                 ArgumentGuard.AssertAtleastZero(x, nameof(x));
-                if (x + count > SourceRectangle.X + Width)
+                if (x + count > SourceRectangle.X + SourceRectangle.Width)
                     throw new ArgumentOutOfRangeException(
                         nameof(x), $"The {verb} amount of pixels exceeds the cropped row.");
 
                 ArgumentGuard.AssertAtleastZero(y, nameof(y));
-                if (y >= Height)
+                if (y >= SourceRectangle.Height)
                     throw new ArgumentOutOfRangeException(
                         nameof(y), $"The {verb} row is not within the cropped view.");
             }

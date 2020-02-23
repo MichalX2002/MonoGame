@@ -97,7 +97,7 @@ namespace MonoGame.Tools.Pipeline
             {
             }
 
-            return _files[(link) ? "1." : "0."];
+            return _files[link ? "1." : "0."];
         }
 
         public static Image GetEtoIcon(string resource)

@@ -133,16 +133,15 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
         /// <param name="level">Layer of the texture to modify.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
-        /// <exception cref="ArgumentEmptyException"><paramref name="data"/> is empty.</exception>
         /// <exception cref="ArgumentException">
-        ///  <paramref name="arraySlice"/> is greater than 0 and
-        ///  the graphics device does not support texture arrays.
+        ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
         public void SetData<T>(
             ReadOnlySpan<T> data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
             where T : unmanaged
         {
-            ValidateParams(level, arraySlice, rectangle, data, out Rectangle checkedRect);
+            ValidateParams<T>(level, arraySlice, rectangle, data.Length, out Rectangle checkedRect);
+
             if (rectangle.HasValue)
                 PlatformSetData(level, arraySlice, checkedRect, data);
             else
@@ -157,12 +156,11 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
         /// <param name="level">Layer of the texture to modify.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
-        /// <exception cref="ArgumentEmptyException"><paramref name="data"/> is empty.</exception>
         /// <exception cref="ArgumentException">
-        ///  <paramref name="arraySlice"/> is greater than 0 and
-        ///  the graphics device does not support texture arrays.
+        ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
-        public void SetData<T>(Span<T> data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
+        public void SetData<T>(
+            Span<T> data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
             where T : unmanaged
         {
             SetData((ReadOnlySpan<T>)data, rectangle, level, arraySlice);
@@ -181,27 +179,25 @@ namespace MonoGame.Framework.Graphics
         /// <param name="arraySlice">Index inside the texture array.</param>
         /// <exception cref="ArgumentEmptyException"><paramref name="destination"/> is empty.</exception>
         /// <exception cref="ArgumentException">
-        ///  <paramref name="arraySlice"/> is greater than 0
-        ///  and the graphics device does not support texture arrays.
+        ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
         public void GetData<T>(
             Span<T> destination, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
             where T : unmanaged
         {
-            ValidateParams<T>(level, arraySlice, rectangle, destination, out Rectangle checkedRect);
+            ValidateParams<T>(level, arraySlice, rectangle, destination.Length, out Rectangle checkedRect);
 
             PlatformGetData(level, arraySlice, checkedRect, destination);
         }
 
         /// <summary>
-        /// Retrieves the contents of the texture.
+        /// Retrieves the contents of the texture and stores them in unmanaged memory.
         /// </summary>
-        /// <param name="rectangle">Area of the texture; defaults to texture bounds.</param>
+        /// <param name="rectangle">Area of the texture; defaults to texture bound.</param>
         /// <param name="level">Layer of the texture.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
         /// /// <exception cref="ArgumentException">
-        ///  <paramref name="arraySlice"/> is greater than 0
-        ///  and the graphics device does not support texture arrays.
+        ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
         public UnmanagedMemory<T> GetData<T>(Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
             where T : unmanaged
@@ -389,22 +385,35 @@ namespace MonoGame.Framework.Graphics
 
         /// <summary>
         /// Retrieves the contents of the texture and puts them into an <see cref="Image{TPixel}"/>, 
-        /// converting the surface format into the appropriate pixel type.
+        /// converting the surface format into the specified pixel type.
         /// </summary>
         [CLSCompliant(false)]
         public Image<TPixel> ToImage<TPixel>(
             Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
             where TPixel : unmanaged, IPixel
         {
-            var pixelSaveFormat = GetVectorSaveFormat(Format);
-            if (pixelSaveFormat.VectorType.Type != typeof(TPixel))
-                throw new ArgumentException(nameof(TPixel));
-
             CheckRect(level, rectangle, out Rectangle checkedRect);
 
-            using (var data = pixelSaveFormat.GetData(this, checkedRect, level, arraySlice))
-                return Image.LoadPixelData<TPixel>(
-                    pixelSaveFormat.VectorType, data.Span, checkedRect.Size);
+            var pixelSaveFormat = GetVectorSaveFormat(Format);
+            var data = pixelSaveFormat.GetData(this, checkedRect, level, arraySlice);
+            try
+            {
+                if (pixelSaveFormat.VectorType.Type == typeof(TPixel))
+                {
+                    return Image.WrapMemory<TPixel>(data, checkedRect.Size, leaveOpen: false);
+                }
+                else
+                {
+                    using (data)
+                        return Image.LoadPixelData<TPixel>(
+                            pixelSaveFormat.VectorType, data.Span, checkedRect.Size);
+                }
+            }
+            catch
+            {
+                data.Dispose();
+                throw;
+            }
         }
 
         #endregion
@@ -434,18 +443,9 @@ namespace MonoGame.Framework.Graphics
             if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
             if (stream == null) throw new ArgumentNullException(nameof(stream));
             if (format == null) throw new ArgumentNullException(nameof(format));
-
-            void SaveByType<TPixel>() where TPixel : unmanaged, IPixel
-            {
-                using (var textureImage = ToImage<TPixel>(rectangle, level, arraySlice))
-                    textureImage.Save(imagingConfig, stream, format, encoderOptions);
-            }
-
-            throw new NotImplementedException();
-
-            // TODO: check if commit is re-implemented;
-            // https://github.com/MonoGame/MonoGame/commit/f2f50bcd6c88e927ddbbc1fe677acd85b7bc6c0d#diff-b1287b3ea3e4f14da31f425817f5920eR427
-
+            
+            using(var image = ToImage(rectangle, level, arraySlice))
+                image.Save(imagingConfig, stream, format, encoderOptions);
         }
 
         /// <summary>
@@ -536,12 +536,9 @@ namespace MonoGame.Framework.Graphics
         private unsafe void ValidateSizes<T>(int elementCount, int minimumByteSize)
             where T : unmanaged
         {
-            if (elementCount <= 0)
-                throw new ArgumentEmptyException(nameof(elementCount));
-
             if (elementCount * sizeof(T) < minimumByteSize)
                 throw new ArgumentException(
-                    "The span is too small for the current texture format.", nameof(elementCount));
+                    "The given memory is not enough for the current texture format.", nameof(elementCount));
         }
 
         private unsafe void ValidateParams<T>(
@@ -611,11 +608,11 @@ namespace MonoGame.Framework.Graphics
         }
 
         private unsafe void ValidateParams<T>(
-            int level, int arraySlice, Rectangle? rect, ReadOnlySpan<T> data, out Rectangle checkedRect)
+            int level, int arraySlice, Rectangle? rect, int elementCount, out Rectangle checkedRect)
             where T : unmanaged
         {
             ValidateParams<T>(level, arraySlice, rect, out int byteSize, out checkedRect);
-            ValidateSizes<T>(data.Length, byteSize);
+            ValidateSizes<T>(elementCount, byteSize);
         }
 
         private Rectangle CheckRect(int level, Rectangle? rect, out Rectangle checkedRect)

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO.Compression;
-using MonoGame.Imaging.Attributes.Coder;
+using MonoGame.Imaging.Attributes.Codec;
 using MonoGame.Imaging.Pixels;
 using StbSharp;
 
@@ -19,7 +19,7 @@ namespace MonoGame.Imaging.Coding.Encoding
         }
     }
 
-    public class PngEncoder : StbEncoderBase, ICancellableCoderAttribute
+    public class PngEncoder : StbEncoderBase, ICancellableCodecAttribute
     {
         public override ImageFormat Format => ImageFormat.Png;
         public override EncoderOptions DefaultOptions => PngEncoderOptions.Default;

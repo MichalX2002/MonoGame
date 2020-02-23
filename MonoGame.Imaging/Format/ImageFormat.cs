@@ -13,8 +13,8 @@ namespace MonoGame.Imaging
 {
     using FormatDictionary = Dictionary<string, FormatList>;
 
-    // TODO: add coder priority so the user can implement
-    // an alternative coder in place of an existing one
+    // TODO: add codec priority so the user can implement
+    // an alternative codec in place of an existing one
 
     [DebuggerDisplay("{ToString(),nq}")]
     public partial class ImageFormat : IImageFormatAttribute

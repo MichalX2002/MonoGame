@@ -5,28 +5,21 @@ using System.Runtime.InteropServices;
 
 namespace StbSharp
 {
-    static unsafe partial class StbImageResize
+    public static unsafe partial class StbImageResize
     {
-        [StructLayout(LayoutKind.Sequential)]
-        public struct stbir__contributors
+        public enum WrapMode
         {
-            public int n0;
-            public int n1;
+            Clamp = 1,
+            Reflect = 2,
+            Wrap = 3,
+            Zero = 4
         }
 
-        public const int STBIR_EDGE_CLAMP = 1;
-        public const int STBIR_EDGE_REFLECT = 2;
-        public const int STBIR_EDGE_WRAP = 3;
-        public const int STBIR_EDGE_ZERO = 4;
-        public const int STBIR_FILTER_DEFAULT = 0;
-        public const int STBIR_FILTER_BOX = 1;
-        public const int STBIR_FILTER_TRIANGLE = 2;
-        public const int STBIR_FILTER_CUBICBSPLINE = 3;
-        public const int STBIR_FILTER_CATMULLROM = 4;
-        public const int STBIR_FILTER_MITCHELL = 5;
-        public const int STBIR_COLORSPACE_LINEAR = 0;
-        public const int STBIR_COLORSPACE_SRGB = 1;
-        public const int STBIR_MAX_COLORSPACES = 2;
+        public enum ColorSpace
+        {
+            Linear = 0,
+            SRgb = 1
+        }
 
         public enum DataType
         {
@@ -36,42 +29,52 @@ namespace StbSharp
             Float = 3
         }
 
-        public static byte[] stbir__type_size = { 1, 2, 4, 4 };
-
-        public static float[] stbir__srgb_uchar_to_linear_float =
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Contributors
         {
-            0.000000f, 0.000304f, 0.000607f, 0.000911f, 0.001214f, 0.001518f, 0.001821f, 0.002125f, 0.002428f,
-            0.002732f, 0.003035f, 0.003347f, 0.003677f, 0.004025f, 0.004391f, 0.004777f, 0.005182f, 0.005605f,
-            0.006049f, 0.006512f, 0.006995f, 0.007499f, 0.008023f, 0.008568f, 0.009134f, 0.009721f, 0.010330f,
-            0.010960f, 0.011612f, 0.012286f, 0.012983f, 0.013702f, 0.014444f, 0.015209f, 0.015996f, 0.016807f,
-            0.017642f, 0.018500f, 0.019382f, 0.020289f, 0.021219f, 0.022174f, 0.023153f, 0.024158f, 0.025187f,
-            0.026241f, 0.027321f, 0.028426f, 0.029557f, 0.030713f, 0.031896f, 0.033105f, 0.034340f, 0.035601f,
-            0.036889f, 0.038204f, 0.039546f, 0.040915f, 0.042311f, 0.043735f, 0.045186f, 0.046665f, 0.048172f,
-            0.049707f, 0.051269f, 0.052861f, 0.054480f, 0.056128f, 0.057805f, 0.059511f, 0.061246f, 0.063010f,
-            0.064803f, 0.066626f, 0.068478f, 0.070360f, 0.072272f, 0.074214f, 0.076185f, 0.078187f, 0.080220f,
-            0.082283f, 0.084376f, 0.086500f, 0.088656f, 0.090842f, 0.093059f, 0.095307f, 0.097587f, 0.099899f,
-            0.102242f, 0.104616f, 0.107023f, 0.109462f, 0.111932f, 0.114435f, 0.116971f, 0.119538f, 0.122139f,
-            0.124772f, 0.127438f, 0.130136f, 0.132868f, 0.135633f, 0.138432f, 0.141263f, 0.144128f, 0.147027f,
-            0.149960f, 0.152926f, 0.155926f, 0.158961f, 0.162029f, 0.165132f, 0.168269f, 0.171441f, 0.174647f,
-            0.177888f, 0.181164f, 0.184475f, 0.187821f, 0.191202f, 0.194618f, 0.198069f, 0.201556f, 0.205079f,
-            0.208637f, 0.212231f, 0.215861f, 0.219526f, 0.223228f, 0.226966f, 0.230740f, 0.234551f, 0.238398f,
-            0.242281f, 0.246201f, 0.250158f, 0.254152f, 0.258183f, 0.262251f, 0.266356f, 0.270498f, 0.274677f,
-            0.278894f, 0.283149f, 0.287441f, 0.291771f, 0.296138f, 0.300544f, 0.304987f, 0.309469f, 0.313989f,
-            0.318547f, 0.323143f, 0.327778f, 0.332452f, 0.337164f, 0.341914f, 0.346704f, 0.351533f, 0.356400f,
-            0.361307f, 0.366253f, 0.371238f, 0.376262f, 0.381326f, 0.386430f, 0.391573f, 0.396755f, 0.401978f,
-            0.407240f, 0.412543f, 0.417885f, 0.423268f, 0.428691f, 0.434154f, 0.439657f, 0.445201f, 0.450786f,
-            0.456411f, 0.462077f, 0.467784f, 0.473532f, 0.479320f, 0.485150f, 0.491021f, 0.496933f, 0.502887f,
-            0.508881f, 0.514918f, 0.520996f, 0.527115f, 0.533276f, 0.539480f, 0.545725f, 0.552011f, 0.558340f,
-            0.564712f, 0.571125f, 0.577581f, 0.584078f, 0.590619f, 0.597202f, 0.603827f, 0.610496f, 0.617207f,
-            0.623960f, 0.630757f, 0.637597f, 0.644480f, 0.651406f, 0.658375f, 0.665387f, 0.672443f, 0.679543f,
-            0.686685f, 0.693872f, 0.701102f, 0.708376f, 0.715694f, 0.723055f, 0.730461f, 0.737911f, 0.745404f,
-            0.752942f, 0.760525f, 0.768151f, 0.775822f, 0.783538f, 0.791298f, 0.799103f, 0.806952f, 0.814847f,
-            0.822786f, 0.830770f, 0.838799f, 0.846873f, 0.854993f, 0.863157f, 0.871367f, 0.879622f, 0.887923f,
-            0.896269f, 0.904661f, 0.913099f, 0.921582f, 0.930111f, 0.938686f, 0.947307f, 0.955974f, 0.964686f,
-            0.973445f, 0.982251f, 0.991102f, 1f
+            public int n0;
+            public int n1;
+        }
+
+        private static int[] datatype_size { get; } = new[] { sizeof(byte), sizeof(ushort), sizeof(uint), sizeof(float) };
+
+        private static float[] srgb_byte_to_linear_float { get; } = new[]
+        {
+            0.000000f, 0.000304f, 0.000607f, 0.000911f, 0.001214f, 0.001518f, 0.001821f, 0.002125f,
+            0.002428f, 0.002732f, 0.003035f, 0.003347f, 0.003677f, 0.004025f, 0.004391f, 0.004777f,
+            0.005182f, 0.005605f, 0.006049f, 0.006512f, 0.006995f, 0.007499f, 0.008023f, 0.008568f,
+            0.009134f, 0.009721f, 0.010330f, 0.010960f, 0.011612f, 0.012286f, 0.012983f, 0.013702f,
+            0.014444f, 0.015209f, 0.015996f, 0.016807f, 0.017642f, 0.018500f, 0.019382f, 0.020289f,
+            0.021219f, 0.022174f, 0.023153f, 0.024158f, 0.025187f, 0.026241f, 0.027321f, 0.028426f,
+            0.029557f, 0.030713f, 0.031896f, 0.033105f, 0.034340f, 0.035601f, 0.036889f, 0.038204f,
+            0.039546f, 0.040915f, 0.042311f, 0.043735f, 0.045186f, 0.046665f, 0.048172f, 0.049707f,
+            0.051269f, 0.052861f, 0.054480f, 0.056128f, 0.057805f, 0.059511f, 0.061246f, 0.063010f,
+            0.064803f, 0.066626f, 0.068478f, 0.070360f, 0.072272f, 0.074214f, 0.076185f, 0.078187f,
+            0.080220f, 0.082283f, 0.084376f, 0.086500f, 0.088656f, 0.090842f, 0.093059f, 0.095307f,
+            0.097587f, 0.099899f, 0.102242f, 0.104616f, 0.107023f, 0.109462f, 0.111932f, 0.114435f,
+            0.116971f, 0.119538f, 0.122139f, 0.124772f, 0.127438f, 0.130136f, 0.132868f, 0.135633f,
+            0.138432f, 0.141263f, 0.144128f, 0.147027f, 0.149960f, 0.152926f, 0.155926f, 0.158961f,
+            0.162029f, 0.165132f, 0.168269f, 0.171441f, 0.174647f, 0.177888f, 0.181164f, 0.184475f,
+            0.187821f, 0.191202f, 0.194618f, 0.198069f, 0.201556f, 0.205079f, 0.208637f, 0.212231f,
+            0.215861f, 0.219526f, 0.223228f, 0.226966f, 0.230740f, 0.234551f, 0.238398f, 0.242281f,
+            0.246201f, 0.250158f, 0.254152f, 0.258183f, 0.262251f, 0.266356f, 0.270498f, 0.274677f,
+            0.278894f, 0.283149f, 0.287441f, 0.291771f, 0.296138f, 0.300544f, 0.304987f, 0.309469f,
+            0.313989f, 0.318547f, 0.323143f, 0.327778f, 0.332452f, 0.337164f, 0.341914f, 0.346704f,
+            0.351533f, 0.356400f, 0.361307f, 0.366253f, 0.371238f, 0.376262f, 0.381326f, 0.386430f,
+            0.391573f, 0.396755f, 0.401978f, 0.407240f, 0.412543f, 0.417885f, 0.423268f, 0.428691f,
+            0.434154f, 0.439657f, 0.445201f, 0.450786f, 0.456411f, 0.462077f, 0.467784f, 0.473532f,
+            0.479320f, 0.485150f, 0.491021f, 0.496933f, 0.502887f, 0.508881f, 0.514918f, 0.520996f,
+            0.527115f, 0.533276f, 0.539480f, 0.545725f, 0.552011f, 0.558340f, 0.564712f, 0.571125f,
+            0.577581f, 0.584078f, 0.590619f, 0.597202f, 0.603827f, 0.610496f, 0.617207f, 0.623960f,
+            0.630757f, 0.637597f, 0.644480f, 0.651406f, 0.658375f, 0.665387f, 0.672443f, 0.679543f,
+            0.686685f, 0.693872f, 0.701102f, 0.708376f, 0.715694f, 0.723055f, 0.730461f, 0.737911f,
+            0.745404f, 0.752942f, 0.760525f, 0.768151f, 0.775822f, 0.783538f, 0.791298f, 0.799103f,
+            0.806952f, 0.814847f, 0.822786f, 0.830770f, 0.838799f, 0.846873f, 0.854993f, 0.863157f,
+            0.871367f, 0.879622f, 0.887923f, 0.896269f, 0.904661f, 0.913099f, 0.921582f, 0.930111f,
+            0.938686f, 0.947307f, 0.955974f, 0.964686f, 0.973445f, 0.982251f, 0.991102f, 1.000000f
         };
 
-        public static uint[] fp32_to_srgb8_tab4 =
+        private static uint[] float_to_srgb8_tab4 { get; } = new uint[]
         {
             0x0073000d, 0x007a000d, 0x0080000d, 0x0087000d, 0x008d000d, 0x0094000d, 0x009a000d, 0x00a1000d,
             0x00a7001a, 0x00b4001a, 0x00c1001a, 0x00ce001a, 0x00da001a, 0x00e7001a, 0x00f4001a, 0x0101001a,
@@ -88,17 +91,9 @@ namespace StbSharp
             0x5e0c0a23, 0x631c0980, 0x67db08f6, 0x6c55087f, 0x70940818, 0x74a007bd, 0x787d076c, 0x7c330723
         };
 
-        public static int stbir__min(int a, int b)
-        {
-            return (int)((a) < (b) ? a : b);
-        }
+        private const int MAX_COLORSPACES = 2;
 
-        public static int stbir__max(int a, int b)
-        {
-            return (int)((a) > (b) ? a : b);
-        }
-
-        public static float stbir__saturate(float x)
+        public static float Saturate(float x)
         {
             if ((x) < (0))
                 return 0f;
@@ -107,7 +102,7 @@ namespace StbSharp
             return (float)(x);
         }
 
-        public static float stbir__srgb_to_linear(float f)
+        public static float SrgbToLinear(float f)
         {
             if (f <= 0.04045f)
                 return (float)(f / 12.92f);
@@ -115,7 +110,7 @@ namespace StbSharp
                 return (float)(Math.Pow((f + 0.055) / 1.055, 2.4));
         }
 
-        public static float stbir__linear_to_srgb(float f)
+        public static float LinearToSrgb(float f)
         {
             if (f <= 0.0031308f)
                 return (float)(f * 12.92f);
@@ -123,13 +118,16 @@ namespace StbSharp
                 return (float)(1.055 * Math.Pow(f, 1 / 2.4) - 0.055);
         }
 
-        public static float stbir__filter_trapezoid(float x, float scale)
+        public static float FilterTrapezoid(float x, float scale)
         {
             float halfscale = (float)(scale / 2);
             float t = (float)(0.5f + halfscale);
-            x = ((float)(Math.Abs((double)(x))));
+
+            x = ((float)(Math.Abs(x)));
             if ((x) >= (t))
+            {
                 return 0f;
+            }
             else
             {
                 float r = (float)(0.5f - halfscale);
@@ -141,12 +139,12 @@ namespace StbSharp
 
         }
 
-        public static float stbir__support_trapezoid(float scale)
+        public static float SupportTrapezoid(float scale)
         {
             return (float)(0.5f + scale / 2);
         }
 
-        public static float stbir__filter_triangle(float x, float s)
+        public static float FilterTriangle(float x, float s)
         {
             x = ((float)(Math.Abs((double)(x))));
             if (x <= 1f)
@@ -155,7 +153,7 @@ namespace StbSharp
                 return 0f;
         }
 
-        public static float stbir__filter_cubic(float x, float s)
+        public static float FilterCubic(float x, float s)
         {
             x = ((float)(Math.Abs((double)(x))));
             if ((x) < (1f))
@@ -165,7 +163,7 @@ namespace StbSharp
             return (float)(0f);
         }
 
-        public static float stbir__filter_catmullrom(float x, float s)
+        public static float FilterCatmullRom(float x, float s)
         {
             x = ((float)(Math.Abs((double)(x))));
             if ((x) < (1f))
@@ -175,7 +173,7 @@ namespace StbSharp
             return (float)(0f);
         }
 
-        public static float stbir__filter_mitchell(float x, float s)
+        public static float FilterMitchell(float x, float s)
         {
             x = ((float)(Math.Abs((double)(x))));
             if ((x) < (1f))
@@ -185,93 +183,89 @@ namespace StbSharp
             return (float)(0f);
         }
 
-        public static float stbir__support_zero(float s) => 0f;
-        public static float stbir__support_one(float s) => 1f;
-        public static float stbir__support_two(float s) => 2f;
+        public static float SupportZero(float s) => 0f;
+        public static float SupportOne(float s) => 1f;
+        public static float SupportTwo(float s) => 2f;
 
-        public static int stbir__use_upsampling(float ratio)
+        public static bool UseUpsampling(float ratio)
         {
-            return (int)((ratio) > (1) ? 1 : 0);
+            return (ratio) > (1);
         }
 
-        public static int stbir__use_width_upsampling(ImageResizeInfo stbir_info)
+        public static bool UseWidthUpsampling(in ResizeContext s)
         {
-            return (int)(stbir__use_upsampling((float)(stbir_info.horizontal_scale)));
+            return (UseUpsampling((float)(s.horizontal_scale)));
         }
 
-        public static int stbir__use_height_upsampling(ImageResizeInfo stbir_info)
+        public static bool UseHeightUpsampling(in ResizeContext s)
         {
-            return (int)(stbir__use_upsampling((float)(stbir_info.vertical_scale)));
+            return (UseUpsampling((float)(s.vertical_scale)));
         }
 
-        public static int stbir__get_filter_pixel_width(int filter, float scale)
+        public static int GetFilterPixelWidth(Filter filter, float scale)
         {
-            if ((stbir__use_upsampling((float)(scale))) != 0)
-                return (int)(Math.Ceiling(stbir__filter_info_table[filter].Support(1 / scale) * 2));
+            if ((UseUpsampling((float)(scale))))
+                return (int)(Math.Ceiling(filter.Support(1 / scale) * 2));
             else
-                return (int)(Math.Ceiling(stbir__filter_info_table[filter].Support(scale) * 2 / scale));
+                return (int)(Math.Ceiling(filter.Support(scale) * 2 / scale));
         }
 
-        public static int stbir__get_filter_pixel_margin(int filter, float scale)
+        public static int GetFilterPixelMargin(Filter filter, float scale)
         {
-            return (int)(stbir__get_filter_pixel_width((int)(filter), (float)(scale)) / 2);
+            return (int)(GetFilterPixelWidth((filter), (float)(scale)) / 2);
         }
 
-        public static int stbir__get_coefficient_width(int filter, float scale)
+        public static int GetCoefficientWidth(Filter filter, float scale)
         {
-            if ((stbir__use_upsampling((float)(scale))) != 0)
-                return (int)(Math.Ceiling(stbir__filter_info_table[filter].Support(1 / scale) * 2));
+            if ((UseUpsampling((float)(scale))))
+                return (int)(Math.Ceiling(filter.Support(1 / scale) * 2));
             else
-                return (int)(Math.Ceiling((double)(stbir__filter_info_table[filter].Support((float)(scale)) * 2)));
+                return (int)(Math.Ceiling((double)(filter.Support((float)(scale)) * 2)));
         }
 
-        public static int stbir__get_contributors(float scale, int filter, int input_size, int output_size)
+        public static int GetContributors(float scale, Filter filter, int input_size, int output_size)
         {
-            if ((stbir__use_upsampling((float)(scale))) != 0)
+            if ((UseUpsampling((float)(scale))))
                 return (int)(output_size);
             else
-                return (int)(input_size + stbir__get_filter_pixel_margin((int)(filter), (float)(scale)) * 2);
+                return (int)(input_size + GetFilterPixelMargin((filter), (float)(scale)) * 2);
         }
 
-        public static int stbir__get_total_horizontal_coefficients(ImageResizeInfo info)
+        public static int GetTotalHorizontalCoefficients(in ResizeContext info)
         {
             return (int)(info.horizontal_num_contributors *
-                 stbir__get_coefficient_width((int)(info.horizontal_filter), (float)(info.horizontal_scale)));
+                 GetCoefficientWidth((info.horizontal_filter), (float)(info.horizontal_scale)));
         }
 
-        public static int stbir__get_total_vertical_coefficients(ImageResizeInfo info)
+        public static int GetTotalVerticalCoefficients(in ResizeContext info)
         {
             return (int)(info.vertical_num_contributors *
-                 stbir__get_coefficient_width((int)(info.vertical_filter), (float)(info.vertical_scale)));
+                 GetCoefficientWidth((info.vertical_filter), (float)(info.vertical_scale)));
         }
 
-        public static stbir__contributors* stbir__get_contributor(stbir__contributors* contributors, int n)
+        public static Span<float> GetCoefficients(Span<float> coefficients, Filter filter, float scale, int y, int x)
         {
-            return &contributors[n];
+            int width = (int)(GetCoefficientWidth((filter), (float)(scale)));
+            return coefficients.Slice(width * y + x);
         }
 
-        public static float* stbir__get_coefficient(float* coefficients, int filter, float scale, int n, int c)
+        public static ref float GetCoefficient(Span<float> coefficients, Filter filter, float scale, int y, int x)
         {
-            int width = (int)(stbir__get_coefficient_width((int)(filter), (float)(scale)));
-            return &coefficients[width * n + c];
+            return ref GetCoefficients(coefficients, filter, scale, y, x)[0];
         }
 
-        public static int stbir__edge_wrap_slow(int edge, int n, int max)
+        public static int EdgeWrapSlow(WrapMode wrap, int n, int max)
         {
-            switch (edge)
+            switch (wrap)
             {
-                case STBIR_EDGE_ZERO:
-                    return 0;
-
-                case STBIR_EDGE_CLAMP:
+                case WrapMode.Clamp:
                     if ((n) < (0))
                         return 0;
                     if ((n) >= (max))
                         return (int)(max - 1);
                     return n;
 
-                case STBIR_EDGE_REFLECT:
-                {
+                case WrapMode.Reflect:
                     if ((n) < (0))
                     {
                         if ((n) < (max))
@@ -288,11 +282,12 @@ namespace StbSharp
                             return (int)(max2 - n - 1);
                     }
                     return n;
-                }
 
-                case STBIR_EDGE_WRAP:
+                case WrapMode.Wrap:
                     if ((n) >= (0))
+                    {
                         return (int)(n % max);
+                    }
                     else
                     {
                         int m = (int)((-n) % max);
@@ -300,65 +295,67 @@ namespace StbSharp
                             m = (int)(max - m);
                         return (int)(m);
                     }
-                //unreachable
-                //return n;
+
+                case WrapMode.Zero:
                 default:
                     return 0;
             }
 
         }
 
-        public static int stbir__edge_wrap(int edge, int n, int max)
+        public static int EdgeWrap(WrapMode wrap, int n, int max)
         {
             if (((n) >= (0)) && ((n) < (max)))
                 return n;
-            return (int)(stbir__edge_wrap_slow((int)(edge), n, (int)(max)));
+            return (int)(EdgeWrapSlow(wrap, n, (int)(max)));
         }
 
-        public static void stbir__calculate_sample_range_upsample(int n, float out_filter_radius, float scale_ratio,
-            float out_shift, int* in_first_pixel, int* in_last_pixel, float* in_center_of_out)
+        public static void CalculateSampleRangeUpsample(
+            int n, float out_filter_radius, float scale_ratio, float out_shift,
+            out int in_first_pixel, out int in_last_pixel, out float in_center_of_out)
         {
             float out_pixel_center = (float)((float)(n) + 0.5f);
             float out_pixel_influence_lowerbound = (float)(out_pixel_center - out_filter_radius);
             float out_pixel_influence_upperbound = (float)(out_pixel_center + out_filter_radius);
             float in_pixel_influence_lowerbound = (float)((out_pixel_influence_lowerbound + out_shift) / scale_ratio);
             float in_pixel_influence_upperbound = (float)((out_pixel_influence_upperbound + out_shift) / scale_ratio);
-            *in_center_of_out = (float)((out_pixel_center + out_shift) / scale_ratio);
-            *in_first_pixel = ((int)(Math.Floor((double)(in_pixel_influence_lowerbound + 0.5))));
-            *in_last_pixel = ((int)(Math.Floor((double)(in_pixel_influence_upperbound - 0.5))));
+            in_center_of_out = (float)((out_pixel_center + out_shift) / scale_ratio);
+            in_first_pixel = ((int)(Math.Floor((double)(in_pixel_influence_lowerbound + 0.5))));
+            in_last_pixel = ((int)(Math.Floor((double)(in_pixel_influence_upperbound - 0.5))));
         }
 
-        public static void stbir__calculate_sample_range_downsample(int n, float in_pixels_radius, float scale_ratio,
-            float out_shift, int* out_first_pixel, int* out_last_pixel, float* out_center_of_in)
+        public static void CalculateSampleRangeDownsample(
+            int n, float in_pixels_radius, float scale_ratio, float out_shift,
+            out int out_first_pixel, out int out_last_pixel, out float out_center_of_in)
         {
             float in_pixel_center = (float)((float)(n) + 0.5f);
             float in_pixel_influence_lowerbound = (float)(in_pixel_center - in_pixels_radius);
             float in_pixel_influence_upperbound = (float)(in_pixel_center + in_pixels_radius);
             float out_pixel_influence_lowerbound = (float)(in_pixel_influence_lowerbound * scale_ratio - out_shift);
             float out_pixel_influence_upperbound = (float)(in_pixel_influence_upperbound * scale_ratio - out_shift);
-            *out_center_of_in = (float)(in_pixel_center * scale_ratio - out_shift);
-            *out_first_pixel = ((int)(Math.Floor((double)(out_pixel_influence_lowerbound + 0.5))));
-            *out_last_pixel = ((int)(Math.Floor((double)(out_pixel_influence_upperbound - 0.5))));
+            out_center_of_in = (float)(in_pixel_center * scale_ratio - out_shift);
+            out_first_pixel = ((int)(Math.Floor((double)(out_pixel_influence_lowerbound + 0.5))));
+            out_last_pixel = ((int)(Math.Floor((double)(out_pixel_influence_upperbound - 0.5))));
         }
 
-        public static void stbir__calculate_coefficients_upsample(ImageResizeInfo stbir_info, int filter, float scale,
-            int in_first_pixel, int in_last_pixel, float in_center_of_out, stbir__contributors* contributor,
-            float* coefficient_group)
+        public static void CalculateCoefficientsUpsample(
+            Filter filter, float scale,
+            int in_first_pixel, int in_last_pixel, float in_center_of_out,
+            ref Contributors contributor, Span<float> coefficient_group)
         {
             int i;
             float total_filter = 0f;
             float filter_scale;
-            contributor->n0 = (int)(in_first_pixel);
-            contributor->n1 = (int)(in_last_pixel);
+            contributor.n0 = (int)(in_first_pixel);
+            contributor.n1 = (int)(in_last_pixel);
             for (i = 0; i <= in_last_pixel - in_first_pixel; i++)
             {
                 float in_pixel_center = (float)((float)(i + in_first_pixel) + 0.5f);
-                coefficient_group[i] = stbir__filter_info_table[filter].Kernel(
-                        in_center_of_out - in_pixel_center, 1 / scale);
+                coefficient_group[i] = filter.Kernel(in_center_of_out - in_pixel_center, 1 / scale);
 
                 if (((i) == 0) && (coefficient_group[i] == 0))
                 {
-                    contributor->n0 = (int)(++in_first_pixel);
+                    contributor.n0 = (int)(++in_first_pixel);
                     i--;
                     continue;
                 }
@@ -373,50 +370,50 @@ namespace StbSharp
             {
                 if ((coefficient_group[i]) != 0)
                     break;
-                contributor->n1 = (int)(contributor->n0 + i - 1);
+                contributor.n1 = (int)(contributor.n0 + i - 1);
             }
         }
 
-        public static void stbir__calculate_coefficients_downsample(
-            ImageResizeInfo stbir_info, int filter, float scale_ratio, int out_first_pixel, int out_last_pixel,
-            float out_center_of_in, stbir__contributors* contributor, float* coefficient_group)
+        public static void CalculateCoefficientsDownsample(
+            Filter filter, float scale_ratio,
+            int out_first_pixel, int out_last_pixel, float out_center_of_in,
+            ref Contributors contributor, Span<float> coefficient_group)
         {
-            int i;
-            contributor->n0 = (int)(out_first_pixel);
-            contributor->n1 = (int)(out_last_pixel);
-            for (i = 0; i <= out_last_pixel - out_first_pixel; i++)
+            contributor.n0 = (int)(out_first_pixel);
+            contributor.n1 = (int)(out_last_pixel);
+
+            for (int i = 0; i <= out_last_pixel - out_first_pixel; i++)
             {
                 float out_pixel_center = (float)((float)(i + out_first_pixel) + 0.5f);
                 float x = (float)(out_pixel_center - out_center_of_in);
-                coefficient_group[i] = stbir__filter_info_table[filter].Kernel(x, scale_ratio) * scale_ratio;
+                coefficient_group[i] = filter.Kernel(x, scale_ratio) * scale_ratio;
             }
 
-            for (i = (int)(out_last_pixel - out_first_pixel); (i) >= (0); i--)
+            for (int i = (int)(out_last_pixel - out_first_pixel); (i) >= (0); i--)
             {
                 if ((coefficient_group[i]) != 0)
                     break;
-                contributor->n1 = (int)(contributor->n0 + i - 1);
+                contributor.n1 = (int)(contributor.n0 + i - 1);
             }
         }
 
-        public static void stbir__normalize_downsample_coefficients(ImageResizeInfo stbir_info,
-            stbir__contributors* contributors,
-            float* coefficients, int filter, float scale_ratio, float shift, int input_size, int output_size)
+        public static void NormalizeDownsampleCoefficients(
+            Span<Contributors> contributors, Span<float> coefficients,
+            Filter filter, float scale_ratio, float shift, int input_size, int output_size)
         {
-            int num_contributors = stbir__get_contributors(scale_ratio, filter, input_size, output_size);
-            int num_coefficients = (int)(stbir__get_coefficient_width((int)(filter), (float)(scale_ratio)));
-            int i;
-            int j;
+            int num_contributors = GetContributors(scale_ratio, filter, input_size, output_size);
+            int num_coefficients = (GetCoefficientWidth((filter), (float)(scale_ratio)));
+
             int skip;
-            for (i = 0; (i) < (output_size); i++)
+            for (int i = 0; (i) < (output_size); i++)
             {
                 float scale;
                 float total = 0f;
-                for (j = 0; (j) < (num_contributors); j++)
+                for (int j = 0; (j) < (num_contributors); j++)
                 {
                     if (((i) >= (contributors[j].n0)) && (i <= contributors[j].n1))
                     {
-                        float coefficient = *stbir__get_coefficient(coefficients, filter, scale_ratio, j, i - contributors[j].n0);
+                        float coefficient = GetCoefficient(coefficients, filter, scale_ratio, j, i - contributors[j].n0);
                         total += (float)(coefficient);
                     }
                     else if ((i) < (contributors[j].n0))
@@ -424,22 +421,22 @@ namespace StbSharp
                 }
 
                 scale = (float)(1 / total);
-                for (j = 0; (j) < (num_contributors); j++)
+                for (int j = 0; (j) < (num_contributors); j++)
                 {
                     if (((i) >= (contributors[j].n0)) && (i <= contributors[j].n1))
-                        *stbir__get_coefficient(coefficients, filter, scale_ratio, j, i - contributors[j].n0) *= scale;
+                        GetCoefficient(coefficients, filter, scale_ratio, j, i - contributors[j].n0) *= scale;
                     else if ((i) < (contributors[j].n0))
                         break;
                 }
             }
 
-            for (j = 0; (j) < (num_contributors); j++)
+            for (int j = 0; (j) < (num_contributors); j++)
             {
                 int range;
                 int max;
                 int width;
                 skip = 0;
-                while ((*stbir__get_coefficient(coefficients, filter, scale_ratio, j, skip)) == 0)
+                while ((GetCoefficient(coefficients, filter, scale_ratio, j, skip)) == 0)
                     skip++;
 
                 contributors[j].n0 += (int)(skip);
@@ -450,690 +447,718 @@ namespace StbSharp
                 }
 
                 range = (int)(contributors[j].n1 - contributors[j].n0 + 1);
-                max = (int)(stbir__min((int)(num_coefficients), (int)(range)));
-                width = (int)(stbir__get_coefficient_width((int)(filter), (float)(scale_ratio)));
-                for (i = 0; (i) < (max); i++)
+                max = (int)(Math.Min((int)(num_coefficients), (int)(range)));
+                width = (int)(GetCoefficientWidth((filter), (float)(scale_ratio)));
+                for (int i = 0; (i) < (max); i++)
                 {
                     if ((i + skip) >= (width))
                         break;
 
-                    *stbir__get_coefficient(coefficients, filter, (float)(scale_ratio), (int)(j), (int)(i)) =
-                        (float)(*stbir__get_coefficient(coefficients, filter, scale_ratio, j, i + skip));
+                    GetCoefficient(coefficients, filter, (float)(scale_ratio), (int)(j), (int)(i)) =
+                        GetCoefficient(coefficients, filter, scale_ratio, j, i + skip);
                 }
                 continue;
             }
 
-            for (i = 0; (i) < (num_contributors); i++)
-                contributors[i].n1 = (int)(stbir__min((int)(contributors[i].n1), (int)(output_size - 1)));
+            for (int i = 0; (i) < (num_contributors); i++)
+                contributors[i].n1 = (int)(Math.Min((int)(contributors[i].n1), (int)(output_size - 1)));
         }
 
-        public static void stbir__calculate_filters(ImageResizeInfo stbir_info, stbir__contributors* contributors,
-            float* coefficients, int filter, float scale_ratio, float shift, int input_size, int output_size)
+        public static void CalculateFilters(
+            Span<Contributors> contributors, Span<float> coefficients,
+            Filter filter, float scale_ratio, float shift, int input_size, int output_size)
         {
-            int n;
-            int total_contributors = stbir__get_contributors(scale_ratio, filter, input_size, output_size);
-            if ((stbir__use_upsampling((float)(scale_ratio))) != 0)
+            int total_contributors = GetContributors(scale_ratio, filter, input_size, output_size);
+            if ((UseUpsampling((float)(scale_ratio))))
             {
-                float out_pixels_radius = stbir__filter_info_table[filter].Support((1 / scale_ratio) * scale_ratio);
-                for (n = 0; (n) < (total_contributors); n++)
+                float out_pixels_radius = filter.Support(1 / scale_ratio) * scale_ratio;
+                for (int y = 0; (y) < (total_contributors); y++)
                 {
-                    float in_center_of_out;
-                    int in_first_pixel;
-                    int in_last_pixel;
-                    stbir__calculate_sample_range_upsample(n, (float)(out_pixels_radius),
-                        (float)(scale_ratio), (float)(shift), &in_first_pixel, &in_last_pixel, &in_center_of_out);
+                    CalculateSampleRangeUpsample(
+                        y, (float)(out_pixels_radius), (float)(scale_ratio), (float)(shift),
+                        out int in_first_pixel, out int in_last_pixel, out float in_center_of_out);
 
-                    stbir__calculate_coefficients_upsample(stbir_info, (int)(filter), (float)(scale_ratio),
+                    CalculateCoefficientsUpsample(
+                        (filter), (float)(scale_ratio),
                         (int)(in_first_pixel), (int)(in_last_pixel), (float)(in_center_of_out),
-                        stbir__get_contributor(contributors, n),
-                        stbir__get_coefficient(coefficients, (int)(filter), (float)(scale_ratio), n, 0));
+                        ref contributors[y],
+                        GetCoefficients(coefficients, (filter), (float)(scale_ratio), y, 0));
                 }
             }
             else
             {
-                float in_pixels_radius = stbir__filter_info_table[filter].Support(scale_ratio / scale_ratio);
-                for (n = 0; (n) < (total_contributors); n++)
+                float in_pixels_radius = filter.Support(scale_ratio) / scale_ratio;
+                for (int y = 0; (y) < (total_contributors); y++)
                 {
-                    float out_center_of_in;
-                    int out_first_pixel;
-                    int out_last_pixel;
-                    int n_adjusted = (int)(n - stbir__get_filter_pixel_margin((int)(filter), (float)(scale_ratio)));
-                    stbir__calculate_sample_range_downsample((int)(n_adjusted), (float)(in_pixels_radius),
-                        (float)(scale_ratio), (float)(shift), &out_first_pixel, &out_last_pixel, &out_center_of_in);
+                    int n_adjusted = (int)(y - GetFilterPixelMargin((filter), (float)(scale_ratio)));
 
-                    stbir__calculate_coefficients_downsample(stbir_info, (int)(filter), (float)(scale_ratio),
+                    CalculateSampleRangeDownsample(
+                        (int)(n_adjusted), (float)(in_pixels_radius), (float)(scale_ratio), (float)(shift),
+                        out int out_first_pixel, out int out_last_pixel, out float out_center_of_in);
+
+                    CalculateCoefficientsDownsample(
+                        (filter), (float)(scale_ratio),
                         (int)(out_first_pixel), (int)(out_last_pixel), (float)(out_center_of_in),
-                        stbir__get_contributor(contributors, n),
-                        stbir__get_coefficient(coefficients, (int)(filter), (float)(scale_ratio), n, 0));
+                        ref contributors[y],
+                        GetCoefficients(coefficients, (filter), (float)(scale_ratio), y, 0));
                 }
 
-                stbir__normalize_downsample_coefficients(stbir_info, contributors, coefficients, (int)(filter),
-                    (float)(scale_ratio), (float)(shift), (int)(input_size), (int)(output_size));
+                NormalizeDownsampleCoefficients(
+                    contributors, coefficients, (filter), (float)(scale_ratio), (float)(shift),
+                    (int)(input_size), (int)(output_size));
             }
-
         }
 
-        public static float* stbir__get_decode_buffer(ImageResizeInfo stbir_info)
+        public static int GetDecodeBufferOffset(in ResizeContext s)
         {
-            return &stbir_info.decode_buffer[stbir_info.horizontal_filter_pixel_margin * stbir_info.channels];
+            return s.horizontal_filter_pixel_margin * s.channels;
         }
 
-        public static void stbir__decode_scanline(ImageResizeInfo stbir_info, int n)
+        public static void DecodeScanline(in ResizeContext s, int y)
         {
-            int channels = (int)(stbir_info.channels);
-            int alpha_channel = (int)(stbir_info.alpha_channel);
-            int type = (int)(stbir_info.type);
-            int colorspace = (int)(stbir_info.colorspace);
-            int input_w = (int)(stbir_info.input_w);
-            ulong input_stride_bytes = (ulong)(stbir_info.input_stride_bytes);
-            float* decode_buffer = stbir__get_decode_buffer(stbir_info);
-            int edge_horizontal = (int)(stbir_info.edge_horizontal);
-            int edge_vertical = (int)(stbir_info.edge_vertical);
-            ulong in_buffer_row_offset = (ulong)stbir__edge_wrap(
-                edge_vertical, n, stbir_info.input_h * (int)input_stride_bytes);
-            byte* input_data = (byte*)(stbir_info.input_data) + in_buffer_row_offset;
-            int max_x = (int)(input_w + stbir_info.horizontal_filter_pixel_margin);
-            int decode = (int)((type) * (STBIR_MAX_COLORSPACES) + (colorspace));
-            int x = (int)(-stbir_info.horizontal_filter_pixel_margin);
-
+            int in_buffer_row_offset = EdgeWrap(s.wrap_vertical, y, s.input_h) * s.input_stride_bytes;
+            var input_data = s.input_data.Slice(in_buffer_row_offset);
+            int max_x = (int)(s.input_w + s.horizontal_filter_pixel_margin);
+            int decode = (int)((int)(s.datatype) * (MAX_COLORSPACES) + (int)(s.colorspace));
+            int x = (int)(-s.horizontal_filter_pixel_margin);
             int c = 0;
-            if (((edge_vertical) == (STBIR_EDGE_ZERO)) && (((n) < (0)) || ((n) >= (stbir_info.input_h))))
+
+            fixed (float* decode_buffer_ptr = &MemoryMarshal.GetReference(s.decode_buffer))
             {
-                for (; (x) < (max_x); x++)
+                var dst = decode_buffer_ptr + GetDecodeBufferOffset(s);
+
+                if (((s.wrap_vertical) == (WrapMode.Zero)) && (((y) < (0)) || ((y) >= (s.input_h))))
                 {
-                    for (c = 0; (c) < (channels); c++)
-                        decode_buffer[x * channels + c] = 0;
+                    for (; (x) < (max_x); x++)
+                    {
+                        for (c = 0; (c) < (s.channels); c++)
+                            dst[x * s.channels + c] = 0;
+                    }
+                    return;
                 }
-                return;
-            }
 
-            bool srgbAlpha = (stbir_info.flags & (1 << 1)) == 0;
-            switch (decode)
-            {
-                case (((int)DataType.UInt8) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_LINEAR)):
-                    for (; (x) < (max_x); x++)
-                    {
-                        int decode_pixel_index = x * channels;
-                        int input_pixel_index = stbir__edge_wrap(edge_horizontal, x, input_w) * channels;
-                        for (c = 0; (c) < (channels); c++)
-                            decode_buffer[decode_pixel_index + c] = input_data[input_pixel_index + c] / 255f;
-                    }
-                    break;
-
-                case (((int)DataType.UInt8) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_SRGB)):
-                    for (; (x) < (max_x); x++)
-                    {
-                        int decode_pixel_index = x * channels;
-                        int input_pixel_index = stbir__edge_wrap(edge_horizontal, x, input_w) * channels;
-                        for (c = 0; (c) < (channels); c++)
-                            decode_buffer[decode_pixel_index + c] =
-                                stbir__srgb_uchar_to_linear_float[input_data[input_pixel_index + c]];
-
-                        if (srgbAlpha)
-                            decode_buffer[decode_pixel_index + alpha_channel] =
-                                input_data[input_pixel_index + alpha_channel] / 255f;
-                    }
-                    break;
-
-                case (((int)DataType.UInt16) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_LINEAR)):
-                    for (; (x) < (max_x); x++)
-                    {
-                        int decode_pixel_index = x * channels;
-                        int input_pixel_index = stbir__edge_wrap(edge_horizontal, x, input_w) * channels;
-                        for (c = 0; (c) < (channels); c++)
-                            decode_buffer[decode_pixel_index + c] =
-                                ((ushort*)input_data)[input_pixel_index + c] / 65535f;
-                    }
-                    break;
-
-                case (((int)DataType.UInt16) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_SRGB)):
-                    for (; (x) < (max_x); x++)
-                    {
-                        int decode_pixel_index = x * channels;
-                        int input_pixel_index = stbir__edge_wrap(edge_horizontal, x, input_w) * channels;
-                        for (c = 0; (c) < (channels); c++)
-                            decode_buffer[decode_pixel_index + c] = stbir__srgb_to_linear(
-                                ((ushort*)input_data)[input_pixel_index + c] / 65535f);
-
-                        if (srgbAlpha)
-                            decode_buffer[decode_pixel_index + alpha_channel] =
-                                ((ushort*)input_data)[input_pixel_index + alpha_channel] / 65535f;
-                    }
-                    break;
-
-                case (((int)DataType.UInt32) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_LINEAR)):
-                    for (; (x) < (max_x); x++)
-                    {
-                        int decode_pixel_index = x * channels;
-                        int input_pixel_index = stbir__edge_wrap(edge_horizontal, x, input_w) * channels;
-                        for (c = 0; (c) < (channels); c++)
-                            decode_buffer[decode_pixel_index + c] =
-                                (float)(((uint*)input_data)[input_pixel_index + c] / 4294967295d);
-                    }
-                    break;
-
-                case (((int)DataType.UInt32) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_SRGB)):
-                    for (; (x) < (max_x); x++)
-                    {
-                        int decode_pixel_index = x * channels;
-                        int input_pixel_index = stbir__edge_wrap(edge_horizontal, x, input_w) * channels;
-                        for (c = 0; (c) < (channels); c++)
-                            decode_buffer[decode_pixel_index + c] = stbir__srgb_to_linear(
-                                    (float)(((uint*)input_data)[input_pixel_index + c] / 4294967295d));
-
-                        if (srgbAlpha)
-                            decode_buffer[decode_pixel_index + alpha_channel] =
-                                (float)(((uint*)input_data)[input_pixel_index + alpha_channel] / 4294967295d);
-                    }
-                    break;
-
-                case (((int)DataType.Float) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_LINEAR)):
-                    for (; (x) < (max_x); x++)
-                    {
-                        int decode_pixel_index = x * channels;
-                        int input_pixel_index = stbir__edge_wrap(edge_horizontal, x, input_w) * channels;
-                        for (c = 0; (c) < (channels); c++)
-                            decode_buffer[decode_pixel_index + c] = ((float*)input_data)[input_pixel_index + c];
-                    }
-                    break;
-
-                case (((int)DataType.Float) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_SRGB)):
-                    for (; (x) < (max_x); x++)
-                    {
-                        int decode_pixel_index = x * channels;
-                        int input_pixel_index = stbir__edge_wrap(edge_horizontal, x, input_w) * channels;
-                        for (c = 0; (c) < (channels); c++)
-                            decode_buffer[decode_pixel_index + c] =
-                                stbir__srgb_to_linear(((float*)input_data)[input_pixel_index + c]);
-
-                        if (srgbAlpha)
-                            decode_buffer[decode_pixel_index + alpha_channel] =
-                                ((float*)input_data)[input_pixel_index + alpha_channel];
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-
-            if ((stbir_info.flags & (1 << 0)) == 0)
-            {
-                for (x = (int)(-stbir_info.horizontal_filter_pixel_margin); (x) < (max_x); x++)
+                fixed (byte* src8 = &MemoryMarshal.GetReference(input_data))
                 {
-                    int decode_pixel_index = (int)(x * channels);
-                    float alpha = decode_buffer[decode_pixel_index + alpha_channel];
-                    if (stbir_info.type != DataType.Float)
-                    {
-                        alpha += 1f / (1 << 20) / (1 << 20) / (1 << 20) / (1 << 20);
-                        decode_buffer[decode_pixel_index + alpha_channel] = alpha;
-                    }
+                    var src16 = (ushort*)src8;
+                    var src32 = (uint*)src8;
+                    var srcF = (float*)src8;
 
-                    for (c = 0; (c) < (channels); c++)
+                    bool srgbAlpha = (s.flags & (1 << 1)) == 0;
+                    switch (decode)
                     {
-                        if ((c) == (alpha_channel))
-                            continue;
-                        decode_buffer[decode_pixel_index + c] *= alpha;
+                        case (((int)DataType.UInt8) * (MAX_COLORSPACES) + (int)(ColorSpace.Linear)):
+                            for (; (x) < (max_x); x++)
+                            {
+                                int decode_pixel_index = x * s.channels;
+                                int input_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
+                                for (c = 0; (c) < (s.channels); c++)
+                                    dst[decode_pixel_index + c] = src8[input_pixel_index + c] / 255f;
+                            }
+                            break;
+
+                        case (((int)DataType.UInt8) * (MAX_COLORSPACES) + (int)(ColorSpace.SRgb)):
+                            for (; (x) < (max_x); x++)
+                            {
+                                int decode_pixel_index = x * s.channels;
+                                int input_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
+                                for (c = 0; (c) < (s.channels); c++)
+                                    dst[decode_pixel_index + c] = srgb_byte_to_linear_float[src8[input_pixel_index + c]];
+
+                                if (srgbAlpha)
+                                    dst[decode_pixel_index + s.alpha_channel] =
+                                        src8[input_pixel_index + s.alpha_channel] / 255f;
+                            }
+                            break;
+
+                        case (((int)DataType.UInt16) * (MAX_COLORSPACES) + (int)(ColorSpace.Linear)):
+                        {
+                            for (; (x) < (max_x); x++)
+                            {
+                                int decode_pixel_index = x * s.channels;
+                                int input_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
+                                for (c = 0; (c) < (s.channels); c++)
+                                    dst[decode_pixel_index + c] = src16[input_pixel_index + c] / 65535f;
+                            }
+                            break;
+                        }
+
+                        case (((int)DataType.UInt16) * (MAX_COLORSPACES) + (int)(ColorSpace.SRgb)):
+                        {
+                            for (; (x) < (max_x); x++)
+                            {
+                                int decode_pixel_index = x * s.channels;
+                                int input_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
+                                for (c = 0; (c) < (s.channels); c++)
+                                    dst[decode_pixel_index + c] = SrgbToLinear(src16[input_pixel_index + c] / 65535f);
+
+                                if (srgbAlpha)
+                                    dst[decode_pixel_index + s.alpha_channel] =
+                                        src16[input_pixel_index + s.alpha_channel] / 65535f;
+                            }
+                            break;
+                        }
+
+                        case (((int)DataType.UInt32) * (MAX_COLORSPACES) + (int)(ColorSpace.Linear)):
+                        {
+                            for (; (x) < (max_x); x++)
+                            {
+                                int decode_pixel_index = x * s.channels;
+                                int input_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
+                                for (c = 0; (c) < (s.channels); c++)
+                                    dst[decode_pixel_index + c] = (float)(src32[input_pixel_index + c] / 4294967295d);
+                            }
+                            break;
+                        }
+
+                        case (((int)DataType.UInt32) * (MAX_COLORSPACES) + (int)(ColorSpace.SRgb)):
+                        {
+                            for (; (x) < (max_x); x++)
+                            {
+                                int decode_pixel_index = x * s.channels;
+                                int input_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
+                                for (c = 0; (c) < (s.channels); c++)
+                                    dst[decode_pixel_index + c] = SrgbToLinear(
+                                        (float)(src32[input_pixel_index + c] / 4294967295d));
+
+                                if (srgbAlpha)
+                                    dst[decode_pixel_index + s.alpha_channel] =
+                                        (float)(src32[input_pixel_index + s.alpha_channel] / 4294967295d);
+                            }
+                            break;
+                        }
+
+                        case (((int)DataType.Float) * (MAX_COLORSPACES) + (int)(ColorSpace.Linear)):
+                        {
+                            for (; (x) < (max_x); x++)
+                            {
+                                int decode_pixel_index = x * s.channels;
+                                int input_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
+                                for (c = 0; (c) < (s.channels); c++)
+                                    dst[decode_pixel_index + c] = srcF[input_pixel_index + c];
+                            }
+                            break;
+                        }
+
+                        case (((int)DataType.Float) * (MAX_COLORSPACES) + (int)(ColorSpace.SRgb)):
+                        {
+                            for (; (x) < (max_x); x++)
+                            {
+                                int decode_pixel_index = x * s.channels;
+                                int input_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
+                                for (c = 0; (c) < (s.channels); c++)
+                                    dst[decode_pixel_index + c] = SrgbToLinear(srcF[input_pixel_index + c]);
+
+                                if (srgbAlpha)
+                                    dst[decode_pixel_index + s.alpha_channel] = srcF[input_pixel_index + s.alpha_channel];
+                            }
+                            break;
+                        }
+
+                        default:
+                            break;
                     }
                 }
-            }
 
-            if ((edge_horizontal) == (STBIR_EDGE_ZERO))
-            {
-                for (x = (int)(-stbir_info.horizontal_filter_pixel_margin); (x) < (0); x++)
-                    for (c = 0; (c) < (channels); c++)
-                        decode_buffer[x * channels + c] = 0;
+                if ((s.flags & (1 << 0)) == 0)
+                {
+                    for (x = (int)(-s.horizontal_filter_pixel_margin); (x) < (max_x); x++)
+                    {
+                        int decode_pixel_index = (x * s.channels);
+                        float alpha = dst[decode_pixel_index + s.alpha_channel];
+                        if (s.datatype != DataType.Float)
+                        {
+                            alpha += 1f / (1 << 20) / (1 << 20) / (1 << 20) / (1 << 20);
+                            dst[decode_pixel_index + s.alpha_channel] = alpha;
+                        }
 
-                for (x = (int)(input_w); (x) < (max_x); x++)
-                    for (c = 0; (c) < (channels); c++)
-                        decode_buffer[x * channels + c] = 0;
+                        for (c = 0; (c) < (s.channels); c++)
+                        {
+                            if ((c) == (s.alpha_channel))
+                                continue;
+                            dst[decode_pixel_index + c] *= alpha;
+                        }
+                    }
+                }
+
+                if ((s.wrap_horizontal) == (WrapMode.Zero))
+                {
+                    for (x = (int)(-s.horizontal_filter_pixel_margin); (x) < (0); x++)
+                        for (c = 0; (c) < (s.channels); c++)
+                            dst[x * s.channels + c] = 0;
+
+                    for (x = (int)(s.input_w); (x) < (max_x); x++)
+                        for (c = 0; (c) < (s.channels); c++)
+                            dst[x * s.channels + c] = 0;
+                }
             }
         }
 
-        public static float* stbir__get_ring_buffer_entry(float* ring_buffer, int index, int ring_buffer_length)
+        public static Span<float> GetRingBufferEntry(Span<float> ring_buffer, int index, int length)
         {
-            return &ring_buffer[index * ring_buffer_length];
+            return ring_buffer.Slice(index * length, length);
         }
 
-        public static float* stbir__add_empty_ring_buffer_entry(ImageResizeInfo stbir_info, int n)
+        public static Span<float> AddEmptyRingBufferEntry(ref ResizeContext s, int n)
         {
             int ring_buffer_index;
-            float* ring_buffer;
-            stbir_info.ring_buffer_last_scanline = n;
-            if ((stbir_info.ring_buffer_begin_index) < (0))
+            s.ring_buffer_last_scanline = n;
+            if ((s.ring_buffer_begin_index) < (0))
             {
-                ring_buffer_index = stbir_info.ring_buffer_begin_index = 0;
-                stbir_info.ring_buffer_first_scanline = n;
+                ring_buffer_index = s.ring_buffer_begin_index = 0;
+                s.ring_buffer_first_scanline = n;
             }
             else
             {
                 ring_buffer_index =
-                    (stbir_info.ring_buffer_begin_index +
-                    stbir_info.ring_buffer_last_scanline -
-                    stbir_info.ring_buffer_first_scanline) %
-                    stbir_info.ring_buffer_num_entries;
+                    (s.ring_buffer_begin_index +
+                    s.ring_buffer_last_scanline -
+                    s.ring_buffer_first_scanline) %
+                    s.ring_buffer_num_entries;
             }
 
-            ring_buffer = stbir__get_ring_buffer_entry(stbir_info.ring_buffer, ring_buffer_index,
-                stbir_info.ring_buffer_length_bytes / sizeof(float));
+            Span<float> ring_buffer = GetRingBufferEntry(s.ring_buffer, ring_buffer_index, s.ring_buffer_length);
+            ring_buffer.Fill(0);
 
-            CRuntime.MemSet(ring_buffer, 0, stbir_info.ring_buffer_length_bytes);
             return ring_buffer;
         }
 
-        public static void stbir__resample_horizontal_upsample(ImageResizeInfo stbir_info, int n, float* output_buffer)
+        public static void ResampleHorizontalUpsample(in ResizeContext s, Span<float> output_buffer)
         {
             int x;
             int k;
-            int output_w = (int)(stbir_info.output_w);
-            int kernel_pixel_width = (int)(stbir_info.horizontal_filter_pixel_width);
-            int channels = (int)(stbir_info.channels);
-            float* decode_buffer = stbir__get_decode_buffer(stbir_info);
-            stbir__contributors* horizontal_contributors = stbir_info.horizontal_contributors;
-            float* horizontal_coefficients = stbir_info.horizontal_coefficients;
-            int coefficient_width = (int)(stbir_info.horizontal_coefficient_width);
-            for (x = 0; (x) < (output_w); x++)
+            int output_w = (int)(s.output_w);
+            int kernel_pixel_width = (int)(s.horizontal_filter_pixel_width);
+            int channels = (int)(s.channels);
+            var horizontal_contributors = s.horizontal_contributors;
+            var horizontal_coefficients = s.horizontal_coefficients;
+            int coefficient_width = (int)(s.horizontal_coefficient_width);
+
+            fixed (float* dst = &MemoryMarshal.GetReference(output_buffer))
+            fixed (float* decode_buffer_ptr = &MemoryMarshal.GetReference(s.decode_buffer))
             {
-                int n0 = (int)(horizontal_contributors[x].n0);
-                int n1 = (int)(horizontal_contributors[x].n1);
-                int out_pixel_index = (int)(x * channels);
-                int coefficient_group = (int)(coefficient_width * x);
-                int coefficient_counter = 0;
+                float* src = decode_buffer_ptr + GetDecodeBufferOffset(s);
+
+                for (x = 0; (x) < (output_w); x++)
+                {
+                    int n0 = (int)(horizontal_contributors[x].n0);
+                    int n1 = (int)(horizontal_contributors[x].n1);
+                    int out_pixel_index = (int)(x * channels);
+                    int coefficient_group = (int)(coefficient_width * x);
+                    int coefficient_counter = 0;
+                    switch (channels)
+                    {
+                        case 1:
+                            for (k = (int)(n0); k <= n1; k++)
+                            {
+                                int in_pixel_index = (k * 1);
+                                float coefficient = horizontal_coefficients[coefficient_group + coefficient_counter++];
+                                dst[out_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
+                            }
+                            break;
+
+                        case 2:
+                            for (k = (int)(n0); k <= n1; k++)
+                            {
+                                int in_pixel_index = (int)(k * 2);
+                                float coefficient = horizontal_coefficients[coefficient_group + coefficient_counter++];
+                                dst[out_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
+                                dst[out_pixel_index + 1] += src[in_pixel_index + 1] * coefficient;
+                            }
+                            break;
+
+                        case 3:
+                            for (k = (int)(n0); k <= n1; k++)
+                            {
+                                int in_pixel_index = (int)(k * 3);
+                                float coefficient = horizontal_coefficients[coefficient_group + coefficient_counter++];
+                                dst[out_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
+                                dst[out_pixel_index + 1] += src[in_pixel_index + 1] * coefficient;
+                                dst[out_pixel_index + 2] += src[in_pixel_index + 2] * coefficient;
+                            }
+                            break;
+
+                        case 4:
+                            for (k = (int)(n0); k <= n1; k++)
+                            {
+                                int in_pixel_index = (int)(k * 4);
+                                float coefficient = horizontal_coefficients[coefficient_group + coefficient_counter++];
+                                dst[out_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
+                                dst[out_pixel_index + 1] += src[in_pixel_index + 1] * coefficient;
+                                dst[out_pixel_index + 2] += src[in_pixel_index + 2] * coefficient;
+                                dst[out_pixel_index + 3] += src[in_pixel_index + 3] * coefficient;
+                            }
+                            break;
+
+                        default:
+                            int c;
+                            for (k = (int)(n0); k <= n1; k++)
+                            {
+                                int in_pixel_index = (int)(k * channels);
+                                float coefficient = horizontal_coefficients[coefficient_group + coefficient_counter++];
+                                for (c = 0; (c) < (channels); c++)
+                                    dst[out_pixel_index + c] += src[in_pixel_index + c] * coefficient;
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+
+        public static void ResampleHorizontalDownsample(in ResizeContext s, Span<float> output_buffer)
+        {
+            int x;
+            int k;
+            int c;
+            int input_w = (int)(s.input_w);
+            int output_w = (int)(s.output_w);
+            int kernel_pixel_width = (int)(s.horizontal_filter_pixel_width);
+            int channels = (int)(s.channels);
+            var horizontal_contributors = s.horizontal_contributors;
+            var horizontal_coefficients = s.horizontal_coefficients;
+            int coefficient_width = (int)(s.horizontal_coefficient_width);
+            int filter_pixel_margin = (int)(s.horizontal_filter_pixel_margin);
+            int max_x = (int)(input_w + filter_pixel_margin * 2);
+
+            fixed (float* dst = &MemoryMarshal.GetReference(output_buffer))
+            fixed (float* decode_buffer_ptr = &MemoryMarshal.GetReference(s.decode_buffer))
+            {
+                float* src = decode_buffer_ptr + GetDecodeBufferOffset(s);
+
                 switch (channels)
                 {
                     case 1:
-                        for (k = (int)(n0); k <= n1; k++)
+                        for (x = 0; (x) < (max_x); x++)
                         {
-                            int in_pixel_index = (int)(k * 1);
-                            float coefficient = horizontal_coefficients[coefficient_group + coefficient_counter++];
-                            output_buffer[out_pixel_index + 0] += decode_buffer[in_pixel_index + 0] * coefficient;
+                            int n0 = (int)(horizontal_contributors[x].n0);
+                            int n1 = (int)(horizontal_contributors[x].n1);
+                            int in_x = (int)(x - filter_pixel_margin);
+                            int in_pixel_index = (int)(in_x * 1);
+                            int max_n = (int)(n1);
+                            int coefficient_group = (int)(coefficient_width * x);
+                            for (k = (int)(n0); k <= max_n; k++)
+                            {
+                                int out_pixel_index = (int)(k * 1);
+                                float coefficient = (float)(horizontal_coefficients[coefficient_group + k - n0]);
+                                dst[out_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
+                            }
                         }
                         break;
 
                     case 2:
-                        for (k = (int)(n0); k <= n1; k++)
+                        for (x = 0; (x) < (max_x); x++)
                         {
-                            int in_pixel_index = (int)(k * 2);
-                            float coefficient = horizontal_coefficients[coefficient_group + coefficient_counter++];
-                            output_buffer[out_pixel_index + 0] += decode_buffer[in_pixel_index + 0] * coefficient;
-                            output_buffer[out_pixel_index + 1] += decode_buffer[in_pixel_index + 1] * coefficient;
+                            int n0 = (int)(horizontal_contributors[x].n0);
+                            int n1 = (int)(horizontal_contributors[x].n1);
+                            int in_x = (int)(x - filter_pixel_margin);
+                            int in_pixel_index = (int)(in_x * 2);
+                            int max_n = (int)(n1);
+                            int coefficient_group = (int)(coefficient_width * x);
+                            for (k = (int)(n0); k <= max_n; k++)
+                            {
+                                int out_pixel_index = (int)(k * 2);
+                                float coefficient = (float)(horizontal_coefficients[coefficient_group + k - n0]);
+                                dst[out_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
+                                dst[out_pixel_index + 1] += src[in_pixel_index + 1] * coefficient;
+                            }
                         }
                         break;
 
                     case 3:
-                        for (k = (int)(n0); k <= n1; k++)
+                        for (x = 0; (x) < (max_x); x++)
                         {
-                            int in_pixel_index = (int)(k * 3);
-                            float coefficient = horizontal_coefficients[coefficient_group + coefficient_counter++];
-                            output_buffer[out_pixel_index + 0] += decode_buffer[in_pixel_index + 0] * coefficient;
-                            output_buffer[out_pixel_index + 1] += decode_buffer[in_pixel_index + 1] * coefficient;
-                            output_buffer[out_pixel_index + 2] += decode_buffer[in_pixel_index + 2] * coefficient;
+                            int n0 = (int)(horizontal_contributors[x].n0);
+                            int n1 = (int)(horizontal_contributors[x].n1);
+                            int in_x = (int)(x - filter_pixel_margin);
+                            int in_pixel_index = (int)(in_x * 3);
+                            int max_n = (int)(n1);
+                            int coefficient_group = (int)(coefficient_width * x);
+                            for (k = (int)(n0); k <= max_n; k++)
+                            {
+                                int out_pixel_index = (int)(k * 3);
+                                float coefficient = horizontal_coefficients[coefficient_group + k - n0];
+                                dst[out_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
+                                dst[out_pixel_index + 1] += src[in_pixel_index + 1] * coefficient;
+                                dst[out_pixel_index + 2] += src[in_pixel_index + 2] * coefficient;
+                            }
                         }
                         break;
 
                     case 4:
-                        for (k = (int)(n0); k <= n1; k++)
+                        for (x = 0; (x) < (max_x); x++)
                         {
-                            int in_pixel_index = (int)(k * 4);
-                            float coefficient = horizontal_coefficients[coefficient_group + coefficient_counter++];
-                            output_buffer[out_pixel_index + 0] += decode_buffer[in_pixel_index + 0] * coefficient;
-                            output_buffer[out_pixel_index + 1] += decode_buffer[in_pixel_index + 1] * coefficient;
-                            output_buffer[out_pixel_index + 2] += decode_buffer[in_pixel_index + 2] * coefficient;
-                            output_buffer[out_pixel_index + 3] += decode_buffer[in_pixel_index + 3] * coefficient;
+                            int n0 = (int)(horizontal_contributors[x].n0);
+                            int n1 = (int)(horizontal_contributors[x].n1);
+                            int in_x = (int)(x - filter_pixel_margin);
+                            int in_pixel_index = (int)(in_x * 4);
+                            int max_n = (int)(n1);
+                            int coefficient_group = (int)(coefficient_width * x);
+                            for (k = (int)(n0); k <= max_n; k++)
+                            {
+                                int out_pixel_index = (int)(k * 4);
+                                float coefficient = (float)(horizontal_coefficients[coefficient_group + k - n0]);
+                                dst[out_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
+                                dst[out_pixel_index + 1] += src[in_pixel_index + 1] * coefficient;
+                                dst[out_pixel_index + 2] += src[in_pixel_index + 2] * coefficient;
+                                dst[out_pixel_index + 3] += src[in_pixel_index + 3] * coefficient;
+                            }
                         }
                         break;
 
                     default:
-                        int c;
-                        for (k = (int)(n0); k <= n1; k++)
+                        for (x = 0; (x) < (max_x); x++)
                         {
-                            int in_pixel_index = (int)(k * channels);
-                            float coefficient = horizontal_coefficients[coefficient_group + coefficient_counter++];
-                            for (c = 0; (c) < (channels); c++)
-                                output_buffer[out_pixel_index + c] += decode_buffer[in_pixel_index + c] * coefficient;
+                            int n0 = (int)(horizontal_contributors[x].n0);
+                            int n1 = (int)(horizontal_contributors[x].n1);
+                            int in_x = (int)(x - filter_pixel_margin);
+                            int in_pixel_index = (int)(in_x * channels);
+                            int max_n = (int)(n1);
+                            int coefficient_group = (int)(coefficient_width * x);
+                            for (k = (int)(n0); k <= max_n; k++)
+                            {
+                                int out_pixel_index = (int)(k * channels);
+                                float coefficient = (float)(horizontal_coefficients[coefficient_group + k - n0]);
+                                for (c = 0; (c) < (channels); c++)
+                                    dst[out_pixel_index + c] += src[in_pixel_index + c] * coefficient;
+                            }
                         }
                         break;
                 }
             }
         }
 
-        public static void stbir__resample_horizontal_downsample(ImageResizeInfo stbir_info, int n, float* output_buffer)
+        public static void DecodeAndResampleUpsample(ref ResizeContext s, int n)
         {
-            int x;
-            int k;
-            int c;
-            int input_w = (int)(stbir_info.input_w);
-            int output_w = (int)(stbir_info.output_w);
-            int kernel_pixel_width = (int)(stbir_info.horizontal_filter_pixel_width);
-            int channels = (int)(stbir_info.channels);
-            float* decode_buffer = stbir__get_decode_buffer(stbir_info);
-            stbir__contributors* horizontal_contributors = stbir_info.horizontal_contributors;
-            float* horizontal_coefficients = stbir_info.horizontal_coefficients;
-            int coefficient_width = (int)(stbir_info.horizontal_coefficient_width);
-            int filter_pixel_margin = (int)(stbir_info.horizontal_filter_pixel_margin);
-            int max_x = (int)(input_w + filter_pixel_margin * 2);
-            switch (channels)
-            {
-                case 1:
-                    for (x = 0; (x) < (max_x); x++)
-                    {
-                        int n0 = (int)(horizontal_contributors[x].n0);
-                        int n1 = (int)(horizontal_contributors[x].n1);
-                        int in_x = (int)(x - filter_pixel_margin);
-                        int in_pixel_index = (int)(in_x * 1);
-                        int max_n = (int)(n1);
-                        int coefficient_group = (int)(coefficient_width * x);
-                        for (k = (int)(n0); k <= max_n; k++)
-                        {
-                            int out_pixel_index = (int)(k * 1);
-                            float coefficient = (float)(horizontal_coefficients[coefficient_group + k - n0]);
-                            output_buffer[out_pixel_index + 0] += decode_buffer[in_pixel_index + 0] * coefficient;
-                        }
-                    }
-                    break;
-
-                case 2:
-                    for (x = 0; (x) < (max_x); x++)
-                    {
-                        int n0 = (int)(horizontal_contributors[x].n0);
-                        int n1 = (int)(horizontal_contributors[x].n1);
-                        int in_x = (int)(x - filter_pixel_margin);
-                        int in_pixel_index = (int)(in_x * 2);
-                        int max_n = (int)(n1);
-                        int coefficient_group = (int)(coefficient_width * x);
-                        for (k = (int)(n0); k <= max_n; k++)
-                        {
-                            int out_pixel_index = (int)(k * 2);
-                            float coefficient = (float)(horizontal_coefficients[coefficient_group + k - n0]);
-                            output_buffer[out_pixel_index + 0] += decode_buffer[in_pixel_index + 0] * coefficient;
-                            output_buffer[out_pixel_index + 1] += decode_buffer[in_pixel_index + 1] * coefficient;
-                        }
-                    }
-                    break;
-
-                case 3:
-                    for (x = 0; (x) < (max_x); x++)
-                    {
-                        int n0 = (int)(horizontal_contributors[x].n0);
-                        int n1 = (int)(horizontal_contributors[x].n1);
-                        int in_x = (int)(x - filter_pixel_margin);
-                        int in_pixel_index = (int)(in_x * 3);
-                        int max_n = (int)(n1);
-                        int coefficient_group = (int)(coefficient_width * x);
-                        for (k = (int)(n0); k <= max_n; k++)
-                        {
-                            int out_pixel_index = (int)(k * 3);
-                            float coefficient = horizontal_coefficients[coefficient_group + k - n0];
-                            output_buffer[out_pixel_index + 0] += decode_buffer[in_pixel_index + 0] * coefficient;
-                            output_buffer[out_pixel_index + 1] += decode_buffer[in_pixel_index + 1] * coefficient;
-                            output_buffer[out_pixel_index + 2] += decode_buffer[in_pixel_index + 2] * coefficient;
-                        }
-                    }
-
-                    break;
-                case 4:
-                    for (x = 0; (x) < (max_x); x++)
-                    {
-                        int n0 = (int)(horizontal_contributors[x].n0);
-                        int n1 = (int)(horizontal_contributors[x].n1);
-                        int in_x = (int)(x - filter_pixel_margin);
-                        int in_pixel_index = (int)(in_x * 4);
-                        int max_n = (int)(n1);
-                        int coefficient_group = (int)(coefficient_width * x);
-                        for (k = (int)(n0); k <= max_n; k++)
-                        {
-                            int out_pixel_index = (int)(k * 4);
-                            float coefficient = (float)(horizontal_coefficients[coefficient_group + k - n0]);
-                            output_buffer[out_pixel_index + 0] += decode_buffer[in_pixel_index + 0] * coefficient;
-                            output_buffer[out_pixel_index + 1] += decode_buffer[in_pixel_index + 1] * coefficient;
-                            output_buffer[out_pixel_index + 2] += decode_buffer[in_pixel_index + 2] * coefficient;
-                            output_buffer[out_pixel_index + 3] += decode_buffer[in_pixel_index + 3] * coefficient;
-                        }
-                    }
-                    break;
-
-                default:
-                    for (x = 0; (x) < (max_x); x++)
-                    {
-                        int n0 = (int)(horizontal_contributors[x].n0);
-                        int n1 = (int)(horizontal_contributors[x].n1);
-                        int in_x = (int)(x - filter_pixel_margin);
-                        int in_pixel_index = (int)(in_x * channels);
-                        int max_n = (int)(n1);
-                        int coefficient_group = (int)(coefficient_width * x);
-                        for (k = (int)(n0); k <= max_n; k++)
-                        {
-                            int out_pixel_index = (int)(k * channels);
-                            float coefficient = (float)(horizontal_coefficients[coefficient_group + k - n0]);
-                            for (c = 0; (c) < (channels); c++)
-                                output_buffer[out_pixel_index + c] += decode_buffer[in_pixel_index + c] * coefficient;
-                        }
-                    }
-                    break;
-            }
-
-        }
-
-        public static void stbir__decode_and_resample_upsample(ImageResizeInfo stbir_info, int n)
-        {
-            stbir__decode_scanline(stbir_info, n);
-            if ((stbir__use_width_upsampling(stbir_info)) != 0)
-                stbir__resample_horizontal_upsample(stbir_info, n,
-                    stbir__add_empty_ring_buffer_entry(stbir_info, n));
+            DecodeScanline(s, n);
+            if ((UseWidthUpsampling(s)))
+                ResampleHorizontalUpsample(s, AddEmptyRingBufferEntry(ref s, n));
             else
-                stbir__resample_horizontal_downsample(stbir_info, n,
-                    stbir__add_empty_ring_buffer_entry(stbir_info, n));
+                ResampleHorizontalDownsample(s, AddEmptyRingBufferEntry(ref s, n));
         }
 
-        public static void stbir__decode_and_resample_downsample(ImageResizeInfo stbir_info, int n)
+        public static void DecodeAndResampleDownsample(in ResizeContext s, int y)
         {
-            stbir__decode_scanline(stbir_info, n);
-            CRuntime.MemSet(stbir_info.horizontal_buffer, 0,
-                stbir_info.output_w * stbir_info.channels * sizeof(float));
-            if ((stbir__use_width_upsampling(stbir_info)) != 0)
-                stbir__resample_horizontal_upsample(stbir_info, n, stbir_info.horizontal_buffer);
+            DecodeScanline(s, y);
+            s.horizontal_buffer.Fill(0);
+
+            if ((UseWidthUpsampling(s)))
+                ResampleHorizontalUpsample(s, s.horizontal_buffer);
             else
-                stbir__resample_horizontal_downsample(stbir_info, n, stbir_info.horizontal_buffer);
+                ResampleHorizontalDownsample(s, s.horizontal_buffer);
         }
 
-        public static float* stbir__get_ring_buffer_scanline(int get_scanline, float* ring_buffer, int begin_index,
+        public static Span<float> GetRingBufferScanline(
+            int get_scanline, Span<float> ring_buffer, int begin_index,
             int first_scanline, int ring_buffer_num_entries, int ring_buffer_length)
         {
             int ring_buffer_index = (int)((begin_index + (get_scanline - first_scanline)) % ring_buffer_num_entries);
-            return stbir__get_ring_buffer_entry(ring_buffer, (int)(ring_buffer_index), (int)(ring_buffer_length));
+            return GetRingBufferEntry(ring_buffer, (int)(ring_buffer_index), ring_buffer_length);
         }
 
-        public static void stbir__encode_scanline(
-            ImageResizeInfo stbir_info, int num_pixels, void* output_buffer,
-            float* encode_buffer, int channels, int alpha_channel, int decode)
+        public static void EncodeScanline(
+            in ResizeContext s, int num_pixels,
+            Span<byte> output_buffer, Span<float> encode_buffer,
+            int channels, int alpha_channel, int decode)
         {
             int x;
             int n;
-            int num_nonalpha;
-            ushort* nonalpha = stackalloc ushort[64];
-            if ((stbir_info.flags & (1 << 0)) == 0)
-            {
-                for (x = 0; (x) < (num_pixels); ++x)
-                {
-                    int pixel_index = (int)(x * channels);
-                    float alpha = encode_buffer[pixel_index + alpha_channel];
-                    float reciprocal_alpha = (float)((alpha) != 0 ? 1f / alpha : 0);
-                    for (n = 0; (n) < (channels); n++)
-                        if (n != alpha_channel)
-                            encode_buffer[pixel_index + n] *= (float)(reciprocal_alpha);
-                }
-            }
 
+            ushort* nonalpha = stackalloc ushort[64];
+            int num_nonalpha;
             for (x = 0, num_nonalpha = 0; (x) < (channels); ++x)
             {
-                if ((x != alpha_channel) || ((stbir_info.flags & (1 << 1)) != 0))
+                if ((x != alpha_channel) || ((s.flags & (1 << 1)) != 0))
                     nonalpha[num_nonalpha++] = (ushort)(x);
             }
 
-            bool srgbAlpha = (stbir_info.flags & (1 << 1)) == 0;
-            switch (decode)
+            fixed (float* src = &MemoryMarshal.GetReference(s.encode_buffer))
             {
-                case (((int)DataType.UInt8) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_LINEAR)):
+                if ((s.flags & (1 << 0)) == 0)
+                {
                     for (x = 0; (x) < (num_pixels); ++x)
                     {
                         int pixel_index = (int)(x * channels);
+                        float alpha = encode_buffer[pixel_index + alpha_channel];
+                        float reciprocal_alpha = (float)((alpha) != 0 ? 1f / alpha : 0);
                         for (n = 0; (n) < (channels); n++)
-                        {
-                            int index = (int)(pixel_index + n);
-                            ((byte*)output_buffer)[index] =
-                                ((byte)((int)((stbir__saturate(encode_buffer[index]) * 255) + 0.5)));
-                        }
+                            if (n != alpha_channel)
+                                src[pixel_index + n] *= (float)(reciprocal_alpha);
                     }
-                    break;
 
-                case (((int)DataType.UInt8) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_SRGB)):
-                    for (x = 0; (x) < (num_pixels); ++x)
+                    fixed (byte* dst8 = &MemoryMarshal.GetReference(output_buffer))
                     {
-                        int pixel_index = (int)(x * channels);
-                        for (n = 0; (n) < (num_nonalpha); n++)
+                        var dst16 = (ushort*)dst8;
+                        var dst32 = (uint*)dst8;
+                        var dstF = (float*)dst8;
+
+                        bool srgbAlpha = (s.flags & (1 << 1)) == 0;
+                        switch (decode)
                         {
-                            int index = (int)(pixel_index + nonalpha[n]);
-                            ((byte*)output_buffer)[index] =
-                                (byte)(stbir__linear_to_srgb_uchar(encode_buffer[index]));
+                            case (((int)DataType.UInt8) * (MAX_COLORSPACES) + (int)(ColorSpace.Linear)):
+                                for (x = 0; (x) < (num_pixels); ++x)
+                                {
+                                    int pixel_index = (int)(x * channels);
+                                    for (n = 0; (n) < (channels); n++)
+                                    {
+                                        int index = (int)(pixel_index + n);
+                                        (dst8)[index] =
+                                            ((byte)((int)((Saturate(src[index]) * 255) + 0.5)));
+                                    }
+                                }
+                                break;
+
+                            case (((int)DataType.UInt8) * (MAX_COLORSPACES) + (int)(ColorSpace.SRgb)):
+                                for (x = 0; (x) < (num_pixels); ++x)
+                                {
+                                    int pixel_index = (int)(x * channels);
+                                    for (n = 0; (n) < (num_nonalpha); n++)
+                                    {
+                                        int index = (int)(pixel_index + nonalpha[n]);
+                                        (dst8)[index] = (byte)(LinearToSrgbByte(src[index]));
+                                    }
+
+                                    if (srgbAlpha)
+                                        (dst8)[pixel_index + alpha_channel] = (byte)((int)(
+                                            Saturate(src[pixel_index + alpha_channel]) * 255 + 0.5));
+                                }
+                                break;
+
+                            case (((int)DataType.UInt16) * (MAX_COLORSPACES) + (int)(ColorSpace.Linear)):
+                            {
+                                for (x = 0; (x) < (num_pixels); ++x)
+                                {
+                                    int pixel_index = (int)(x * channels);
+                                    for (n = 0; (n) < (channels); n++)
+                                    {
+                                        int index = (int)(pixel_index + n);
+                                        dst16[index] = (ushort)((int)(
+                                            Saturate(src[index]) * 65535 + 0.5));
+                                    }
+                                }
+                                break;
+                            }
+
+                            case (((int)DataType.UInt16) * (MAX_COLORSPACES) + (int)(ColorSpace.SRgb)):
+                            {
+                                for (x = 0; (x) < (num_pixels); ++x)
+                                {
+                                    int pixel_index = (int)(x * channels);
+                                    for (n = 0; (n) < (num_nonalpha); n++)
+                                    {
+                                        int index = (int)(pixel_index + nonalpha[n]);
+                                        dst16[index] = (ushort)((int)(
+                                            LinearToSrgb(Saturate(src[index])) * 65535 + 0.5));
+                                    }
+
+                                    if (srgbAlpha)
+                                        dst16[pixel_index + alpha_channel] = (ushort)((int)(
+                                            Saturate(src[pixel_index + alpha_channel]) * 65535 + 0.5));
+                                }
+                                break;
+                            }
+
+                            case (((int)DataType.UInt32) * (MAX_COLORSPACES) + (int)(ColorSpace.Linear)):
+                            {
+                                for (x = 0; (x) < (num_pixels); ++x)
+                                {
+                                    int pixel_index = (int)(x * channels);
+                                    for (n = 0; (n) < (channels); n++)
+                                    {
+                                        int index = (int)(pixel_index + n);
+                                        dst32[index] =
+                                            ((uint)((((double)(Saturate(src[index]))) * 4294967295) +
+                                                     0.5));
+                                    }
+                                }
+                                break;
+                            }
+
+                            case (((int)DataType.UInt32) * (MAX_COLORSPACES) + (int)(ColorSpace.SRgb)):
+                            {
+                                for (x = 0; (x) < (num_pixels); ++x)
+                                {
+                                    int pixel_index = (int)(x * channels);
+                                    for (n = 0; (n) < (num_nonalpha); n++)
+                                    {
+                                        int index = (int)(pixel_index + nonalpha[n]);
+                                        dst32[index] = (uint)((((double)(LinearToSrgb(
+                                            (float)(Saturate(src[index]))))) * 4294967295) + 0.5);
+                                    }
+
+                                    if (srgbAlpha)
+                                        dst32[pixel_index + alpha_channel] = ((uint)((int)((((double)(Saturate(
+                                            src[pixel_index + alpha_channel]))) * 4294967295) + 0.5)));
+                                }
+                                break;
+                            }
+
+                            case (((int)DataType.Float) * (MAX_COLORSPACES) + (int)(ColorSpace.Linear)):
+                            {
+                                for (x = 0; (x) < (num_pixels); ++x)
+                                {
+                                    int pixel_index = (int)(x * channels);
+                                    for (n = 0; (n) < (channels); n++)
+                                    {
+                                        int index = (int)(pixel_index + n);
+                                        dstF[index] = src[index];
+                                    }
+                                }
+                                break;
+                            }
+
+                            case (((int)DataType.Float) * (MAX_COLORSPACES) + (int)(ColorSpace.SRgb)):
+                            {
+                                for (x = 0; (x) < (num_pixels); ++x)
+                                {
+                                    int pixel_index = (int)(x * channels);
+                                    for (n = 0; (n) < (num_nonalpha); n++)
+                                    {
+                                        int index = (int)(pixel_index + nonalpha[n]);
+                                        dstF[index] = (float)(LinearToSrgb(src[index]));
+                                    }
+
+                                    if (srgbAlpha)
+                                        dstF[pixel_index + alpha_channel] = src[pixel_index + alpha_channel];
+                                }
+                                break;
+                            }
+
+                            default:
+                                break;
                         }
-
-                        if (srgbAlpha)
-                            ((byte*)output_buffer)[pixel_index + alpha_channel] = (byte)((int)(
-                                stbir__saturate(encode_buffer[pixel_index + alpha_channel]) * 255 + 0.5));
                     }
-                    break;
-
-                case (((int)DataType.UInt16) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_LINEAR)):
-                    for (x = 0; (x) < (num_pixels); ++x)
-                    {
-                        int pixel_index = (int)(x * channels);
-                        for (n = 0; (n) < (channels); n++)
-                        {
-                            int index = (int)(pixel_index + n);
-                            ((ushort*)output_buffer)[index] = (ushort)((int)(
-                                stbir__saturate(encode_buffer[index]) * 65535 + 0.5));
-                        }
-                    }
-                    break;
-
-                case (((int)DataType.UInt16) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_SRGB)):
-                    for (x = 0; (x) < (num_pixels); ++x)
-                    {
-                        int pixel_index = (int)(x * channels);
-                        for (n = 0; (n) < (num_nonalpha); n++)
-                        {
-                            int index = (int)(pixel_index + nonalpha[n]);
-                            ((ushort*)output_buffer)[index] = (ushort)((int)(
-                                stbir__linear_to_srgb(stbir__saturate(encode_buffer[index])) * 65535 + 0.5));
-                        }
-
-                        if (srgbAlpha)
-                            ((ushort*)output_buffer)[pixel_index + alpha_channel] = (ushort)((int)(
-                                stbir__saturate(encode_buffer[pixel_index + alpha_channel]) * 65535 + 0.5));
-                    }
-                    break;
-
-                case (((int)DataType.UInt32) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_LINEAR)):
-                    for (x = 0; (x) < (num_pixels); ++x)
-                    {
-                        int pixel_index = (int)(x * channels);
-                        for (n = 0; (n) < (channels); n++)
-                        {
-                            int index = (int)(pixel_index + n);
-                            ((uint*)output_buffer)[index] =
-                                ((uint)((((double)(stbir__saturate(encode_buffer[index]))) * 4294967295) +
-                                         0.5));
-                        }
-                    }
-                    break;
-
-                case (((int)DataType.UInt32) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_SRGB)):
-                    for (x = 0; (x) < (num_pixels); ++x)
-                    {
-                        int pixel_index = (int)(x * channels);
-                        for (n = 0; (n) < (num_nonalpha); n++)
-                        {
-                            int index = (int)(pixel_index + nonalpha[n]);
-                            ((uint*)output_buffer)[index] =
-                                ((uint)
-                                    ((((double)(stbir__linear_to_srgb(
-                                          (float)(stbir__saturate(encode_buffer[index]))))) * 4294967295) +
-                                     0.5));
-                        }
-
-                        if (srgbAlpha)
-                            ((uint*)output_buffer)[pixel_index + alpha_channel] =
-                                ((uint)
-                                    ((int)((((double)(stbir__saturate(
-                                                 encode_buffer[pixel_index + alpha_channel]))) * 4294967295) +
-                                            0.5)));
-                    }
-                    break;
-
-                case (((int)DataType.Float) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_LINEAR)):
-                    for (x = 0; (x) < (num_pixels); ++x)
-                    {
-                        int pixel_index = (int)(x * channels);
-                        for (n = 0; (n) < (channels); n++)
-                        {
-                            int index = (int)(pixel_index + n);
-                            ((float*)output_buffer)[index] = encode_buffer[index];
-                        }
-                    }
-                    break;
-
-                case (((int)DataType.Float) * (STBIR_MAX_COLORSPACES) + (STBIR_COLORSPACE_SRGB)):
-                    for (x = 0; (x) < (num_pixels); ++x)
-                    {
-                        int pixel_index = (int)(x * channels);
-                        for (n = 0; (n) < (num_nonalpha); n++)
-                        {
-                            int index = (int)(pixel_index + nonalpha[n]);
-                            ((float*)output_buffer)[index] =
-                                (float)(stbir__linear_to_srgb(encode_buffer[index]));
-                        }
-
-                        if (srgbAlpha)
-                            ((float*)output_buffer)[pixel_index + alpha_channel] =
-                                encode_buffer[pixel_index + alpha_channel];
-                    }
-                    break;
-
-                default:
-                    break;
+                }
             }
-
         }
 
-        public static void stbir__resample_vertical_upsample(ImageResizeInfo stbir_info, int n, int in_first_scanline,
-            int in_last_scanline, float in_center_of_out)
+        public static void ResampleVerticalUpsample(
+            in ResizeContext s, int n, int in_first_scanline, int in_last_scanline, float in_center_of_out)
         {
             int x;
             int k;
             int c;
-            int output_w = (int)(stbir_info.output_w);
-            stbir__contributors* vertical_contributors = stbir_info.vertical_contributors;
-            float* vertical_coefficients = stbir_info.vertical_coefficients;
-            int channels = (int)(stbir_info.channels);
-            int alpha_channel = (int)(stbir_info.alpha_channel);
-            int type = (int)(stbir_info.type);
-            int colorspace = (int)(stbir_info.colorspace);
-            int ring_buffer_entries = (int)(stbir_info.ring_buffer_num_entries);
-            void* output_data = stbir_info.output_data;
-            float* encode_buffer = stbir_info.encode_buffer;
-            int decode = (int)((type) * (STBIR_MAX_COLORSPACES) + (colorspace));
-            int coefficient_width = (int)(stbir_info.vertical_coefficient_width);
+            int output_w = (int)(s.output_w);
+            var vertical_contributors = s.vertical_contributors;
+            var vertical_coefficients = s.vertical_coefficients;
+            int channels = (int)(s.channels);
+            int alpha_channel = (int)(s.alpha_channel);
+            int ring_buffer_entries = (int)(s.ring_buffer_num_entries);
+            var output_data = s.output_data;
+            int decode = (int)((int)(s.datatype) * (MAX_COLORSPACES) + (int)(s.colorspace));
+            int coefficient_width = (int)(s.vertical_coefficient_width);
             int coefficient_counter = 0;
             int contributor = n;
-            float* ring_buffer = stbir_info.ring_buffer;
-            int ring_buffer_begin_index = (int)(stbir_info.ring_buffer_begin_index);
-            int ring_buffer_first_scanline = (int)(stbir_info.ring_buffer_first_scanline);
-            int ring_buffer_last_scanline = (int)(stbir_info.ring_buffer_last_scanline);
-            int ring_buffer_length = (int)(stbir_info.ring_buffer_length_bytes / sizeof(float));
+            int ring_buffer_begin_index = (int)(s.ring_buffer_begin_index);
+            int ring_buffer_first_scanline = (int)(s.ring_buffer_first_scanline);
+            int ring_buffer_last_scanline = (int)(s.ring_buffer_last_scanline);
+            int ring_buffer_length = s.ring_buffer_length;
             int coefficient_group = (int)(coefficient_width * contributor);
             int n0 = (int)(vertical_contributors[contributor].n0);
             int n1 = (int)(vertical_contributors[contributor].n1);
-            int output_row_start = (int)(n * stbir_info.output_stride_bytes);
-            CRuntime.MemSet(encode_buffer, 0, output_w * sizeof(float) * channels);
+            int output_row_start = (int)(n * s.output_stride_bytes);
+
+            var encode_buffer = s.encode_buffer;
+            encode_buffer.Fill(0);
+
             switch (channels)
             {
                 case 1:
@@ -1141,10 +1166,12 @@ namespace StbSharp
                     {
                         int coefficient_index = (int)(coefficient_counter++);
                         float coefficient = (float)(vertical_coefficients[coefficient_group + coefficient_index]);
-                        float* ring_buffer_entry = stbir__get_ring_buffer_scanline((int)(k), ring_buffer,
+                        var ring_buffer_entry = GetRingBufferScanline(
+                            (int)(k), s.ring_buffer,
                             (int)(ring_buffer_begin_index),
-                            (int)(ring_buffer_first_scanline), (int)(ring_buffer_entries),
-                            (int)(ring_buffer_length));
+                            (int)(ring_buffer_first_scanline),
+                            (int)(ring_buffer_entries),
+                            ring_buffer_length);
                         for (x = 0; (x) < (output_w); ++x)
                         {
                             int in_pixel_index = (int)(x * 1);
@@ -1158,10 +1185,13 @@ namespace StbSharp
                     {
                         int coefficient_index = (int)(coefficient_counter++);
                         float coefficient = (float)(vertical_coefficients[coefficient_group + coefficient_index]);
-                        float* ring_buffer_entry = stbir__get_ring_buffer_scanline((int)(k), ring_buffer,
+                        var ring_buffer_entry = GetRingBufferScanline(
+                            (int)(k), s.ring_buffer,
                             (int)(ring_buffer_begin_index),
-                            (int)(ring_buffer_first_scanline), (int)(ring_buffer_entries),
-                            (int)(ring_buffer_length));
+                            (int)(ring_buffer_first_scanline),
+                            (int)(ring_buffer_entries),
+                            ring_buffer_length);
+
                         for (x = 0; (x) < (output_w); ++x)
                         {
                             int in_pixel_index = (int)(x * 2);
@@ -1176,10 +1206,13 @@ namespace StbSharp
                     {
                         int coefficient_index = (int)(coefficient_counter++);
                         float coefficient = (float)(vertical_coefficients[coefficient_group + coefficient_index]);
-                        float* ring_buffer_entry = stbir__get_ring_buffer_scanline((int)(k), ring_buffer,
+                        var ring_buffer_entry = GetRingBufferScanline(
+                            (int)(k), s.ring_buffer,
                             (int)(ring_buffer_begin_index),
-                            (int)(ring_buffer_first_scanline), (int)(ring_buffer_entries),
-                            (int)(ring_buffer_length));
+                            (int)(ring_buffer_first_scanline),
+                            (int)(ring_buffer_entries),
+                            ring_buffer_length);
+
                         for (x = 0; (x) < (output_w); ++x)
                         {
                             int in_pixel_index = (int)(x * 3);
@@ -1188,17 +1221,20 @@ namespace StbSharp
                             encode_buffer[in_pixel_index + 2] += ring_buffer_entry[in_pixel_index + 2] * coefficient;
                         }
                     }
-
                     break;
+
                 case 4:
                     for (k = (int)(n0); k <= n1; k++)
                     {
                         int coefficient_index = (int)(coefficient_counter++);
                         float coefficient = (float)(vertical_coefficients[coefficient_group + coefficient_index]);
-                        float* ring_buffer_entry = stbir__get_ring_buffer_scanline((int)(k), ring_buffer,
+                        var ring_buffer_entry = GetRingBufferScanline(
+                            (int)(k), s.ring_buffer,
                             (int)(ring_buffer_begin_index),
-                            (int)(ring_buffer_first_scanline), (int)(ring_buffer_entries),
-                            (int)(ring_buffer_length));
+                            (int)(ring_buffer_first_scanline),
+                            (int)(ring_buffer_entries),
+                            ring_buffer_length);
+
                         for (x = 0; (x) < (output_w); ++x)
                         {
                             int in_pixel_index = (int)(x * 4);
@@ -1215,10 +1251,13 @@ namespace StbSharp
                     {
                         int coefficient_index = (int)(coefficient_counter++);
                         float coefficient = (float)(vertical_coefficients[coefficient_group + coefficient_index]);
-                        float* ring_buffer_entry = stbir__get_ring_buffer_scanline((int)(k), ring_buffer,
+                        var ring_buffer_entry = GetRingBufferScanline(
+                            (int)(k), s.ring_buffer,
                             (int)(ring_buffer_begin_index),
-                            (int)(ring_buffer_first_scanline), (int)(ring_buffer_entries),
-                            (int)(ring_buffer_length));
+                            (int)(ring_buffer_first_scanline),
+                            (int)(ring_buffer_entries),
+                            ring_buffer_length);
+
                         for (x = 0; (x) < (output_w); ++x)
                         {
                             int in_pixel_index = (int)(x * channels);
@@ -1229,564 +1268,728 @@ namespace StbSharp
                     break;
             }
 
-            stbir__encode_scanline(
-                stbir_info, (int)(output_w), (sbyte*)(output_data) + output_row_start,
+            EncodeScanline(
+                s, (int)(output_w), output_data.Slice(output_row_start),
                 encode_buffer, (int)(channels), (int)(alpha_channel), (int)(decode));
         }
 
-        public static void stbir__resample_vertical_downsample(ImageResizeInfo stbir_info, int n, int in_first_scanline,
-            int in_last_scanline, float in_center_of_out)
+        public static void ResampleVerticalDownsample(
+            in ResizeContext s, int n, int in_first_scanline, int in_last_scanline, float in_center_of_out)
         {
             int x;
-            int k;
             int c;
-            int output_w = (int)(stbir_info.output_w);
-            int output_h = (int)(stbir_info.output_h);
-            stbir__contributors* vertical_contributors = stbir_info.vertical_contributors;
-            float* vertical_coefficients = stbir_info.vertical_coefficients;
-            int channels = (int)(stbir_info.channels);
-            int ring_buffer_entries = (int)(stbir_info.ring_buffer_num_entries);
-            void* output_data = stbir_info.output_data;
-            float* horizontal_buffer = stbir_info.horizontal_buffer;
-            int coefficient_width = (int)(stbir_info.vertical_coefficient_width);
-            int contributor = (int)(n + stbir_info.vertical_filter_pixel_margin);
-            float* ring_buffer = stbir_info.ring_buffer;
-            int ring_buffer_begin_index = (int)(stbir_info.ring_buffer_begin_index);
-            int ring_buffer_first_scanline = (int)(stbir_info.ring_buffer_first_scanline);
-            int ring_buffer_last_scanline = (int)(stbir_info.ring_buffer_last_scanline);
-            int ring_buffer_length = (int)(stbir_info.ring_buffer_length_bytes / sizeof(float));
-            int n0 = (int)(vertical_contributors[contributor].n0);
-            int n1 = (int)(vertical_contributors[contributor].n1);
-            for (k = (int)(n0); k <= n1; k++)
+            int contributor = (int)(n + s.vertical_filter_pixel_margin);
+            int n0 = (int)(s.vertical_contributors[contributor].n0);
+            int n1 = (int)(s.vertical_contributors[contributor].n1);
+            int ring_buffer_length = s.ring_buffer_length;
+
+            fixed (float* src = &MemoryMarshal.GetReference(s.horizontal_buffer))
             {
-                int coefficient_index = (int)(k - n0);
-                int coefficient_group = (int)(coefficient_width * contributor);
-                float coefficient = (float)(vertical_coefficients[coefficient_group + coefficient_index]);
-                float* ring_buffer_entry = stbir__get_ring_buffer_scanline((int)(k), ring_buffer,
-                    (int)(ring_buffer_begin_index),
-                    (int)(ring_buffer_first_scanline), (int)(ring_buffer_entries), (int)(ring_buffer_length));
-                switch (channels)
+                for (int k = (int)(n0); k <= n1; k++)
                 {
-                    case 1:
-                        for (x = 0; (x) < (output_w); x++)
-                        {
-                            int in_pixel_index = (int)(x * 1);
-                            ring_buffer_entry[in_pixel_index + 0] += horizontal_buffer[in_pixel_index + 0] * coefficient;
-                        }
-                        break;
+                    int coefficient_index = (int)(k - n0);
+                    int coefficient_group = (int)(s.vertical_coefficient_width * contributor);
+                    float coefficient = (float)(s.vertical_coefficients[coefficient_group + coefficient_index]);
+                    var ring_buffer_entry = GetRingBufferScanline(
+                        (int)(k), s.ring_buffer,
+                        (int)(s.ring_buffer_begin_index),
+                        (int)(s.ring_buffer_first_scanline),
+                        (int)(s.ring_buffer_num_entries),
+                        ring_buffer_length);
 
-                    case 2:
-                        for (x = 0; (x) < (output_w); x++)
-                        {
-                            int in_pixel_index = (int)(x * 2);
-                            ring_buffer_entry[in_pixel_index + 0] += horizontal_buffer[in_pixel_index + 0] * coefficient;
-                            ring_buffer_entry[in_pixel_index + 1] += horizontal_buffer[in_pixel_index + 1] * coefficient;
-                        }
-                        break;
+                    switch (s.channels)
+                    {
+                        case 1:
+                            for (x = 0; (x) < (s.output_w); x++)
+                            {
+                                int in_pixel_index = (int)(x * 1);
+                                ring_buffer_entry[in_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
+                            }
+                            break;
 
-                    case 3:
-                        for (x = 0; (x) < (output_w); x++)
-                        {
-                            int in_pixel_index = (int)(x * 3);
-                            ring_buffer_entry[in_pixel_index + 0] += horizontal_buffer[in_pixel_index + 0] * coefficient;
-                            ring_buffer_entry[in_pixel_index + 1] += horizontal_buffer[in_pixel_index + 1] * coefficient;
-                            ring_buffer_entry[in_pixel_index + 2] += horizontal_buffer[in_pixel_index + 2] * coefficient;
-                        }
-                        break;
+                        case 2:
+                            for (x = 0; (x) < (s.output_w); x++)
+                            {
+                                int in_pixel_index = (int)(x * 2);
+                                ring_buffer_entry[in_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
+                                ring_buffer_entry[in_pixel_index + 1] += src[in_pixel_index + 1] * coefficient;
+                            }
+                            break;
 
-                    case 4:
-                        for (x = 0; (x) < (output_w); x++)
-                        {
-                            int in_pixel_index = (int)(x * 4);
-                            ring_buffer_entry[in_pixel_index + 0] += horizontal_buffer[in_pixel_index + 0] * coefficient;
-                            ring_buffer_entry[in_pixel_index + 1] += horizontal_buffer[in_pixel_index + 1] * coefficient;
-                            ring_buffer_entry[in_pixel_index + 2] += horizontal_buffer[in_pixel_index + 2] * coefficient;
-                            ring_buffer_entry[in_pixel_index + 3] += horizontal_buffer[in_pixel_index + 3] * coefficient;
-                        }
-                        break;
+                        case 3:
+                            for (x = 0; (x) < (s.output_w); x++)
+                            {
+                                int in_pixel_index = (int)(x * 3);
+                                ring_buffer_entry[in_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
+                                ring_buffer_entry[in_pixel_index + 1] += src[in_pixel_index + 1] * coefficient;
+                                ring_buffer_entry[in_pixel_index + 2] += src[in_pixel_index + 2] * coefficient;
+                            }
+                            break;
 
-                    default:
-                        for (x = 0; (x) < (output_w); x++)
-                        {
-                            int in_pixel_index = (int)(x * channels);
-                            for (c = 0; (c) < (channels); c++)
-                                ring_buffer_entry[in_pixel_index + c] += horizontal_buffer[in_pixel_index + c] * coefficient;
-                        }
-                        break;
+                        case 4:
+                            for (x = 0; (x) < (s.output_w); x++)
+                            {
+                                int in_pixel_index = (int)(x * 4);
+                                ring_buffer_entry[in_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
+                                ring_buffer_entry[in_pixel_index + 1] += src[in_pixel_index + 1] * coefficient;
+                                ring_buffer_entry[in_pixel_index + 2] += src[in_pixel_index + 2] * coefficient;
+                                ring_buffer_entry[in_pixel_index + 3] += src[in_pixel_index + 3] * coefficient;
+                            }
+                            break;
+
+                        default:
+                            for (x = 0; (x) < (s.output_w); x++)
+                            {
+                                int in_pixel_index = (int)(x * s.channels);
+                                for (c = 0; (c) < (s.channels); c++)
+                                    ring_buffer_entry[in_pixel_index + c] += src[in_pixel_index + c] * coefficient;
+                            }
+                            break;
+                    }
                 }
             }
         }
 
-        public static void stbir__buffer_loop_upsample(ImageResizeInfo stbir_info)
+        public static void BufferLoopUpsample(ref ResizeContext s)
         {
-            float scale_ratio = (float)(stbir_info.vertical_scale);
-            float out_scanlines_radius =
-                stbir__filter_info_table[stbir_info.vertical_filter].Support(1 / scale_ratio) * scale_ratio;
+            float scale_ratio = (float)(s.vertical_scale);
+            float out_scanlines_radius = s.vertical_filter.Support(1 / scale_ratio) * scale_ratio;
 
-            for (int y = 0; (y) < (stbir_info.output_h); y++)
+            for (int y = 0; (y) < (s.output_h); y++)
             {
-                float in_center_of_out = 0f;
-                int in_first_scanline = 0;
-                int in_last_scanline = 0;
-                stbir__calculate_sample_range_upsample((int)(y), (float)(out_scanlines_radius), (float)(scale_ratio),
-                    (float)(stbir_info.vertical_shift), &in_first_scanline, &in_last_scanline, &in_center_of_out);
-                if ((stbir_info.ring_buffer_begin_index) >= (0))
+                CalculateSampleRangeUpsample(
+                    (int)(y), (float)(out_scanlines_radius), (float)(scale_ratio), (float)(s.vertical_shift),
+                    out int in_first_scanline, out int in_last_scanline, out float in_center_of_out);
+
+                if ((s.ring_buffer_begin_index) >= (0))
                 {
-                    while ((in_first_scanline) > (stbir_info.ring_buffer_first_scanline))
+                    while ((in_first_scanline) > (s.ring_buffer_first_scanline))
                     {
-                        if ((stbir_info.ring_buffer_first_scanline) == (stbir_info.ring_buffer_last_scanline))
+                        if ((s.ring_buffer_first_scanline) == (s.ring_buffer_last_scanline))
                         {
-                            stbir_info.ring_buffer_begin_index = (int)(-1);
-                            stbir_info.ring_buffer_first_scanline = 0;
-                            stbir_info.ring_buffer_last_scanline = 0;
+                            s.ring_buffer_begin_index = (int)(-1);
+                            s.ring_buffer_first_scanline = 0;
+                            s.ring_buffer_last_scanline = 0;
                             break;
                         }
                         else
                         {
-                            stbir_info.ring_buffer_first_scanline++;
-                            stbir_info.ring_buffer_begin_index =
-                                (int)((stbir_info.ring_buffer_begin_index + 1) % stbir_info.ring_buffer_num_entries);
+                            s.ring_buffer_first_scanline++;
+                            s.ring_buffer_begin_index =
+                                (int)((s.ring_buffer_begin_index + 1) % s.ring_buffer_num_entries);
                         }
                     }
                 }
 
-                if ((stbir_info.ring_buffer_begin_index) < (0))
-                    stbir__decode_and_resample_upsample(stbir_info, (int)(in_first_scanline));
+                if ((s.ring_buffer_begin_index) < (0))
+                    DecodeAndResampleUpsample(ref s, (int)(in_first_scanline));
 
-                while ((in_last_scanline) > (stbir_info.ring_buffer_last_scanline))
-                    stbir__decode_and_resample_upsample(stbir_info, (int)(stbir_info.ring_buffer_last_scanline + 1));
+                while ((in_last_scanline) > (s.ring_buffer_last_scanline))
+                    DecodeAndResampleUpsample(ref s, (int)(s.ring_buffer_last_scanline + 1));
 
-                stbir__resample_vertical_upsample(
-                    stbir_info, y, in_first_scanline, in_last_scanline, in_center_of_out);
+                ResampleVerticalUpsample(
+                    s, y, in_first_scanline, in_last_scanline, in_center_of_out);
             }
         }
 
-        public static void stbir__empty_ring_buffer(ImageResizeInfo stbir_info, int first_necessary_scanline)
+        public static void EmptyRingBuffer(ref ResizeContext s, int first_necessary_scanline)
         {
-            int output_stride_bytes = (int)(stbir_info.output_stride_bytes);
-            int channels = (int)(stbir_info.channels);
-            int alpha_channel = (int)(stbir_info.alpha_channel);
-            int type = (int)(stbir_info.type);
-            int colorspace = (int)(stbir_info.colorspace);
-            int output_w = (int)(stbir_info.output_w);
-            void* output_data = stbir_info.output_data;
-            int decode = (int)((type) * (STBIR_MAX_COLORSPACES) + (colorspace));
-            float* ring_buffer = stbir_info.ring_buffer;
-            int ring_buffer_length = (int)(stbir_info.ring_buffer_length_bytes / sizeof(float));
-            if ((stbir_info.ring_buffer_begin_index) >= (0))
-            {
-                while ((first_necessary_scanline) > (stbir_info.ring_buffer_first_scanline))
-                {
-                    if (((stbir_info.ring_buffer_first_scanline) >= (0)) &&
-                        ((stbir_info.ring_buffer_first_scanline) < (stbir_info.output_h)))
-                    {
-                        int output_row_start = (int)(stbir_info.ring_buffer_first_scanline * output_stride_bytes);
-                        float* ring_buffer_entry = stbir__get_ring_buffer_entry(ring_buffer,
-                            (int)(stbir_info.ring_buffer_begin_index),
-                            (int)(ring_buffer_length));
-                        stbir__encode_scanline(stbir_info, (int)(output_w), (sbyte*)(output_data) + output_row_start,
-                            ring_buffer_entry, (int)(channels), (int)(alpha_channel), (int)(decode));
-                    }
+            int decode = (int)((int)(s.datatype) * (MAX_COLORSPACES) + (int)(s.colorspace));
+            int ring_buffer_length = s.ring_buffer_length;
 
-                    if ((stbir_info.ring_buffer_first_scanline) == (stbir_info.ring_buffer_last_scanline))
-                    {
-                        stbir_info.ring_buffer_begin_index = (int)(-1);
-                        stbir_info.ring_buffer_first_scanline = 0;
-                        stbir_info.ring_buffer_last_scanline = 0;
-                        break;
-                    }
-                    else
-                    {
-                        stbir_info.ring_buffer_first_scanline++;
-                        stbir_info.ring_buffer_begin_index =
-                            (int)((stbir_info.ring_buffer_begin_index + 1) % stbir_info.ring_buffer_num_entries);
-                    }
+            if ((s.ring_buffer_begin_index) < (0))
+                return;
+
+            while ((first_necessary_scanline) > (s.ring_buffer_first_scanline))
+            {
+                if (((s.ring_buffer_first_scanline) >= (0)) &&
+                    ((s.ring_buffer_first_scanline) < (s.output_h)))
+                {
+                    int output_row_start = (int)(s.ring_buffer_first_scanline * s.output_stride_bytes);
+                    var ring_buffer_entry = GetRingBufferEntry(
+                         s.ring_buffer,
+                        (int)(s.ring_buffer_begin_index),
+                        ring_buffer_length);
+
+                    EncodeScanline(
+                        s, (int)(s.output_w), s.output_data.Slice(output_row_start),
+                        ring_buffer_entry, (int)(s.channels), (int)(s.alpha_channel), (int)(decode));
+                }
+
+                if ((s.ring_buffer_first_scanline) == (s.ring_buffer_last_scanline))
+                {
+                    s.ring_buffer_begin_index = (int)(-1);
+                    s.ring_buffer_first_scanline = 0;
+                    s.ring_buffer_last_scanline = 0;
+                    break;
+                }
+                else
+                {
+                    s.ring_buffer_first_scanline++;
+                    s.ring_buffer_begin_index =
+                        (int)((s.ring_buffer_begin_index + 1) % s.ring_buffer_num_entries);
                 }
             }
-
         }
 
-        public static void stbir__buffer_loop_downsample(ImageResizeInfo stbir_info)
+        public static void BufferLoopDownsample(ref ResizeContext s)
         {
-            int y;
-            float scale_ratio = (float)(stbir_info.vertical_scale);
-            int output_h = (int)(stbir_info.output_h);
-            float in_pixels_radius =
-                (float)(stbir__filter_info_table[stbir_info.vertical_filter].Support((float)(scale_ratio)) /
-                         scale_ratio);
-            int pixel_margin = (int)(stbir_info.vertical_filter_pixel_margin);
-            int max_y = (int)(stbir_info.input_h + pixel_margin);
-            for (y = (int)(-pixel_margin); (y) < (max_y); y++)
+            float scale_ratio = (float)(s.vertical_scale);
+            float in_pixels_radius = (float)(s.vertical_filter.Support(scale_ratio) / scale_ratio);
+            int pixel_margin = (int)(s.vertical_filter_pixel_margin);
+            int max_y = (int)(s.input_h + pixel_margin);
+
+            for (int y = (int)(-pixel_margin); (y) < (max_y); y++)
             {
-                float out_center_of_in;
-                int out_first_scanline;
-                int out_last_scanline;
-                stbir__calculate_sample_range_downsample((int)(y), (float)(in_pixels_radius), (float)(scale_ratio),
-                    (float)(stbir_info.vertical_shift), &out_first_scanline, &out_last_scanline, &out_center_of_in);
-                if (((out_last_scanline) < (0)) || ((out_first_scanline) >= (output_h)))
+                CalculateSampleRangeDownsample(
+                    (int)(y), (float)(in_pixels_radius), (float)(scale_ratio), (float)(s.vertical_shift),
+                    out int out_first_scanline, out int out_last_scanline, out float out_center_of_in);
+
+                if (((out_last_scanline) < (0)) || ((out_first_scanline) >= (s.output_h)))
                     continue;
-                stbir__empty_ring_buffer(stbir_info, (int)(out_first_scanline));
-                stbir__decode_and_resample_downsample(stbir_info, (int)(y));
-                if ((stbir_info.ring_buffer_begin_index) < (0))
-                    stbir__add_empty_ring_buffer_entry(stbir_info, (int)(out_first_scanline));
 
-                while ((out_last_scanline) > (stbir_info.ring_buffer_last_scanline))
-                    stbir__add_empty_ring_buffer_entry(stbir_info, (int)(stbir_info.ring_buffer_last_scanline + 1));
+                EmptyRingBuffer(ref s, (int)(out_first_scanline));
+                DecodeAndResampleDownsample(s, (int)(y));
 
-                stbir__resample_vertical_downsample(stbir_info, (int)(y), (int)(out_first_scanline),
+                if ((s.ring_buffer_begin_index) < (0))
+                    AddEmptyRingBufferEntry(ref s, (int)(out_first_scanline));
+
+                while ((out_last_scanline) > (s.ring_buffer_last_scanline))
+                    AddEmptyRingBufferEntry(ref s, (int)(s.ring_buffer_last_scanline + 1));
+
+                ResampleVerticalDownsample(
+                    s,
+                    (int)(y),
+                    (int)(out_first_scanline),
                     (int)(out_last_scanline),
                     (float)(out_center_of_in));
             }
 
-            stbir__empty_ring_buffer(stbir_info, (int)(stbir_info.output_h));
+            EmptyRingBuffer(ref s, (int)(s.output_h));
         }
 
-        public static void stbir__setup(
-            ImageResizeInfo info, int input_w, int input_h, int output_w, int output_h, int channels)
+        public static void Setup(
+            ref ResizeContext s, int input_w, int input_h, int output_w, int output_h, int channels)
         {
-            info.input_w = (int)(input_w);
-            info.input_h = (int)(input_h);
-            info.output_w = (int)(output_w);
-            info.output_h = (int)(output_h);
-            info.channels = (int)(channels);
+            s.input_w = (int)(input_w);
+            s.input_h = (int)(input_h);
+            s.output_w = (int)(output_w);
+            s.output_h = (int)(output_h);
+            s.channels = (int)(channels);
         }
 
-        public static void stbir__calculate_transform(
-            ImageResizeInfo info, float s0, float t0, float s1, float t1, float* transform)
+        public static void CalculateTransform(
+            ref ResizeContext s, float s0, float t0, float s1, float t1, float* transform)
         {
-            info.s0 = (float)(s0);
-            info.t0 = (float)(t0);
-            info.s1 = (float)(s1);
-            info.t1 = (float)(t1);
+            s.s0 = (float)(s0);
+            s.t0 = (float)(t0);
+            s.s1 = (float)(s1);
+            s.t1 = (float)(t1);
+
             if ((transform) != null)
             {
-                info.horizontal_scale = (float)(transform[0]);
-                info.vertical_scale = (float)(transform[1]);
-                info.horizontal_shift = (float)(transform[2]);
-                info.vertical_shift = (float)(transform[3]);
+                s.horizontal_scale = (float)(transform[0]);
+                s.vertical_scale = (float)(transform[1]);
+                s.horizontal_shift = (float)(transform[2]);
+                s.vertical_shift = (float)(transform[3]);
             }
             else
             {
-                info.horizontal_scale = (float)(((float)(info.output_w) / info.input_w) / (s1 - s0));
-                info.vertical_scale = (float)(((float)(info.output_h) / info.input_h) / (t1 - t0));
-                info.horizontal_shift = (float)(s0 * info.output_w / (s1 - s0));
-                info.vertical_shift = (float)(t0 * info.output_h / (t1 - t0));
+                s.horizontal_scale = (float)(((float)(s.output_w) / s.input_w) / (s1 - s0));
+                s.vertical_scale = (float)(((float)(s.output_h) / s.input_h) / (t1 - t0));
+                s.horizontal_shift = (float)(s0 * s.output_w / (s1 - s0));
+                s.vertical_shift = (float)(t0 * s.output_h / (t1 - t0));
             }
 
         }
 
-        public static void stbir__choose_filter(ImageResizeInfo info, int h_filter, int v_filter)
+        public static void ChooseFilters(
+            ref ResizeContext s, Filter h_filter, Filter v_filter)
         {
-            if ((h_filter) == 0)
-                h_filter = (int)((stbir__use_upsampling((float)(info.horizontal_scale))) != 0
-                        ? STBIR_FILTER_CATMULLROM
-                        : STBIR_FILTER_MITCHELL);
-            if ((v_filter) == 0)
-                v_filter = (int)((stbir__use_upsampling((float)(info.vertical_scale))) != 0
-                        ? STBIR_FILTER_CATMULLROM
-                        : STBIR_FILTER_MITCHELL);
-            info.horizontal_filter = (int)(h_filter);
-            info.vertical_filter = (int)(v_filter);
+            if (h_filter == null)
+                h_filter = ((UseUpsampling((float)(s.horizontal_scale)))
+                    ? Filter.CatmullRom
+                    : Filter.Mitchell);
+
+            if (v_filter == null)
+                v_filter = ((UseUpsampling((float)(s.vertical_scale)))
+                    ? Filter.CatmullRom
+                    : Filter.Mitchell);
+
+            s.horizontal_filter = (h_filter);
+            s.vertical_filter = (v_filter);
         }
 
-        public static int stbir__calculate_memory(ImageResizeInfo info)
+        public static int CalculateMemory(ref ResizeContext s)
         {
-            int pixel_margin = stbir__get_filter_pixel_margin(info.horizontal_filter, info.horizontal_scale);
-            int filter_height = stbir__get_filter_pixel_width(info.vertical_filter, info.vertical_scale);
-            info.horizontal_num_contributors = stbir__get_contributors(
-                info.horizontal_scale, info.horizontal_filter, info.input_w, info.output_w);
-            info.vertical_num_contributors = stbir__get_contributors(
-                info.vertical_scale, info.vertical_filter, info.input_h, info.output_h);
+            int pixel_margin = GetFilterPixelMargin(s.horizontal_filter, s.horizontal_scale);
+            int filter_height = GetFilterPixelWidth(s.vertical_filter, s.vertical_scale);
 
-            info.ring_buffer_num_entries = (int)(filter_height + 1);
-            info.horizontal_contributors_size = (int)(info.horizontal_num_contributors * sizeof(stbir__contributors));
-            info.horizontal_coefficients_size = (int)(stbir__get_total_horizontal_coefficients(info) * sizeof(float));
-            info.vertical_contributors_size = (int)(info.vertical_num_contributors * sizeof(stbir__contributors));
-            info.vertical_coefficients_size = (int)(stbir__get_total_vertical_coefficients(info) * sizeof(float));
-            info.decode_buffer_size = (int)((info.input_w + pixel_margin * 2) * info.channels * sizeof(float));
-            info.horizontal_buffer_size = (int)(info.output_w * info.channels * sizeof(float));
-            info.ring_buffer_size = info.output_w * info.channels * info.ring_buffer_num_entries * sizeof(float);
-            info.encode_buffer_size = (int)(info.output_w * info.channels * sizeof(float));
+            s.horizontal_num_contributors = GetContributors(
+                s.horizontal_scale, s.horizontal_filter, s.input_w, s.output_w);
+            s.vertical_num_contributors = GetContributors(
+                s.vertical_scale, s.vertical_filter, s.input_h, s.output_h);
 
-            if ((stbir__use_height_upsampling(info)) != 0)
-                info.horizontal_buffer_size = 0;
+            s.ring_buffer_num_entries = (int)(filter_height + 1);
+            s.horizontal_contributors_size = (int)(s.horizontal_num_contributors * sizeof(Contributors));
+            s.horizontal_coefficients_size = (int)(GetTotalHorizontalCoefficients(s) * sizeof(float));
+            s.vertical_contributors_size = (int)(s.vertical_num_contributors * sizeof(Contributors));
+            s.vertical_coefficients_size = (int)(GetTotalVerticalCoefficients(s) * sizeof(float));
+            s.decode_buffer_size = (int)((s.input_w + pixel_margin * 2) * s.channels * sizeof(float));
+            s.horizontal_buffer_size = (int)(s.output_w * s.channels * sizeof(float));
+            s.ring_buffer_length_bytes = s.output_w * s.channels * sizeof(float);
+            s.ring_buffer_size = s.ring_buffer_length_bytes * s.ring_buffer_num_entries;
+            s.encode_buffer_size = (int)(s.output_w * s.channels * sizeof(float));
+
+            if ((UseHeightUpsampling(s)))
+                s.horizontal_buffer_size = 0;
             else
-                info.encode_buffer_size = 0;
+                s.encode_buffer_size = 0;
 
-            return 
-                (info.horizontal_contributors_size + info.horizontal_coefficients_size +
-                 info.vertical_contributors_size +
-                 info.vertical_coefficients_size + info.decode_buffer_size + info.horizontal_buffer_size +
-                 info.ring_buffer_size +
-                 info.encode_buffer_size);
+            return
+                s.horizontal_contributors_size +
+                s.horizontal_coefficients_size +
+                s.vertical_contributors_size +
+                s.vertical_coefficients_size +
+                s.decode_buffer_size +
+                s.horizontal_buffer_size +
+                s.ring_buffer_size +
+                s.encode_buffer_size;
         }
 
-        public static int stbir__resize_allocated(ImageResizeInfo info, void* input_data, int input_stride_in_bytes,
-            void* output_data, int output_stride_in_bytes, int alpha_channel, uint flags, DataType type, int edge_horizontal,
-            int edge_vertical, int colorspace, void* tempmem, int tempmem_size_in_bytes)
+        public static int ResizeAllocated(
+            ref ResizeContext s,
+            int alpha_channel, uint flags, DataType datatype,
+            WrapMode wrap_horizontal, WrapMode wrap_vertical,
+            ColorSpace colorspace,
+            Span<byte> tmp_memory)
         {
-            int memory_required = stbir__calculate_memory(info);
-            int width_stride_input = (int)((input_stride_in_bytes) != 0
-                    ? input_stride_in_bytes
-                    : info.channels * info.input_w * stbir__type_size[(int)type]);
-            int width_stride_output = (int)((output_stride_in_bytes) != 0
-                    ? output_stride_in_bytes
-                    : info.channels * info.output_w * stbir__type_size[(int)type]);
-            if (((info.channels) < (0)) || ((info.channels) > (64)))
+            if (tmp_memory.IsEmpty)
                 return 0;
-            if ((info.horizontal_filter) >= (6))
+            if ((s.horizontal_filter == null))
                 return 0;
-            if ((info.vertical_filter) >= (6))
+            if ((s.vertical_filter == null))
                 return 0;
+            if (((s.channels) < (0)) || ((s.channels) > (64)))
+                return 0;
+            if ((alpha_channel) >= (s.channels))
+                return 0;
+
             if ((alpha_channel) < (0))
                 flags |= (uint)((1 << 1) | (1 << 0));
-            //if (((flags & (1 << 1)) == 0) || ((flags & (1 << 0)) == 0))
-            //	; // empty statement
-            if ((alpha_channel) >= (info.channels))
-                return 0;
-            if (tempmem == null)
-                return 0;
-            if ((tempmem_size_in_bytes) < (memory_required))
+
+            int memory_required = CalculateMemory(ref s);
+            if ((tmp_memory.Length) < (memory_required))
                 return 0;
 
-            CRuntime.MemSet(tempmem, 0, tempmem_size_in_bytes);
-            info.input_data = input_data;
-            info.input_stride_bytes = (int)(width_stride_input);
-            info.output_data = output_data;
-            info.output_stride_bytes = (int)(width_stride_output);
-            info.alpha_channel = (int)(alpha_channel);
-            info.flags = (uint)(flags);
-            info.type = type;
-            info.edge_horizontal = (int)(edge_horizontal);
-            info.edge_vertical = (int)(edge_vertical);
-            info.colorspace = (int)(colorspace);
-            info.horizontal_coefficient_width =
-                (int)(stbir__get_coefficient_width((int)(info.horizontal_filter), (float)(info.horizontal_scale)));
-            info.vertical_coefficient_width =
-                (int)(stbir__get_coefficient_width((int)(info.vertical_filter), (float)(info.vertical_scale)));
-            info.horizontal_filter_pixel_width =
-                (int)(stbir__get_filter_pixel_width((int)(info.horizontal_filter), (float)(info.horizontal_scale)));
-            info.vertical_filter_pixel_width =
-                (int)(stbir__get_filter_pixel_width((int)(info.vertical_filter), (float)(info.vertical_scale)));
-            info.horizontal_filter_pixel_margin =
-                (int)(stbir__get_filter_pixel_margin((int)(info.horizontal_filter), (float)(info.horizontal_scale)));
-            info.vertical_filter_pixel_margin =
-                (int)(stbir__get_filter_pixel_margin((int)(info.vertical_filter), (float)(info.vertical_scale)));
-            info.ring_buffer_length_bytes = (int)(info.output_w * info.channels * sizeof(float));
-            info.decode_buffer_pixels = (int)(info.input_w + info.horizontal_filter_pixel_margin * 2);
-            info.horizontal_contributors = (stbir__contributors*)(tempmem);
-            info.horizontal_coefficients =
-                (float*)(((byte*)(info.horizontal_contributors)) + info.horizontal_contributors_size);
-            info.vertical_contributors =
-                (stbir__contributors*)(((byte*)(info.horizontal_coefficients)) + info.horizontal_coefficients_size);
-            info.vertical_coefficients =
-                (float*)(((byte*)(info.vertical_contributors)) + info.vertical_contributors_size);
-            info.decode_buffer = (float*)(((byte*)(info.vertical_coefficients)) + info.vertical_coefficients_size);
-            if ((stbir__use_height_upsampling(info)) != 0)
+            tmp_memory.Fill(0);
+
+            s.alpha_channel = (int)(alpha_channel);
+            s.flags = (uint)(flags);
+            s.datatype = datatype;
+            s.wrap_horizontal = (wrap_horizontal);
+            s.wrap_vertical = (wrap_vertical);
+            s.colorspace = colorspace;
+            s.horizontal_coefficient_width =
+                (int)(GetCoefficientWidth((s.horizontal_filter), (float)(s.horizontal_scale)));
+            s.vertical_coefficient_width =
+                (int)(GetCoefficientWidth((s.vertical_filter), (float)(s.vertical_scale)));
+            s.horizontal_filter_pixel_width =
+                (int)(GetFilterPixelWidth((s.horizontal_filter), (float)(s.horizontal_scale)));
+            s.vertical_filter_pixel_width =
+                (int)(GetFilterPixelWidth((s.vertical_filter), (float)(s.vertical_scale)));
+            s.horizontal_filter_pixel_margin =
+                (int)(GetFilterPixelMargin((s.horizontal_filter), (float)(s.horizontal_scale)));
+            s.vertical_filter_pixel_margin =
+                (int)(GetFilterPixelMargin((s.vertical_filter), (float)(s.vertical_scale)));
+
+            s.decode_buffer_pixels = (int)(s.input_w + s.horizontal_filter_pixel_margin * 2);
+            s.ring_buffer_begin_index = (int)(-1);
+
+            s.horizontal_contributors = MemoryMarshal.Cast<byte, Contributors>(tmp_memory.Slice(0, s.horizontal_contributors_size));
+            tmp_memory = tmp_memory.Slice(s.horizontal_contributors_size);
+
+            s.horizontal_coefficients = MemoryMarshal.Cast<byte, float>(tmp_memory.Slice(0, s.horizontal_coefficients_size));
+            tmp_memory = tmp_memory.Slice(s.horizontal_coefficients_size);
+
+            s.vertical_contributors = MemoryMarshal.Cast<byte, Contributors>(tmp_memory.Slice(0, s.vertical_contributors_size));
+            tmp_memory = tmp_memory.Slice(s.vertical_contributors_size);
+
+            s.vertical_coefficients = MemoryMarshal.Cast<byte, float>(tmp_memory.Slice(0, s.vertical_coefficients_size));
+            tmp_memory = tmp_memory.Slice(s.vertical_coefficients_size);
+
+            s.decode_buffer = MemoryMarshal.Cast<byte, float>(tmp_memory.Slice(0, s.decode_buffer_size));
+            tmp_memory = tmp_memory.Slice(s.decode_buffer_size);
+
+            if ((UseHeightUpsampling(s)))
             {
-                info.horizontal_buffer = null;
-                info.ring_buffer = (float*)(((byte*)(info.decode_buffer)) + info.decode_buffer_size);
-                info.encode_buffer = (float*)(((byte*)(info.ring_buffer)) + info.ring_buffer_size);
+                s.horizontal_buffer = default;
+
+                s.ring_buffer = MemoryMarshal.Cast<byte, float>(tmp_memory.Slice(0, s.ring_buffer_size));
+                tmp_memory = tmp_memory.Slice(s.ring_buffer_size);
+
+                s.encode_buffer = MemoryMarshal.Cast<byte, float>(tmp_memory.Slice(0, s.encode_buffer_size));
+                tmp_memory = tmp_memory.Slice(s.encode_buffer_size);
             }
             else
             {
-                info.horizontal_buffer = (float*)(((byte*)(info.decode_buffer)) + info.decode_buffer_size);
-                info.ring_buffer = (float*)(((byte*)(info.horizontal_buffer)) + info.horizontal_buffer_size);
-                info.encode_buffer = null;
+                s.horizontal_buffer = MemoryMarshal.Cast<byte, float>(tmp_memory.Slice(0, s.horizontal_buffer_size));
+                tmp_memory = tmp_memory.Slice(s.horizontal_buffer_size);
+
+                s.ring_buffer = MemoryMarshal.Cast<byte, float>(tmp_memory.Slice(0, s.ring_buffer_size));
+                tmp_memory = tmp_memory.Slice(s.ring_buffer_size);
+
+                s.encode_buffer = default;
             }
 
-            info.ring_buffer_begin_index = (int)(-1);
-            stbir__calculate_filters(info, info.horizontal_contributors, info.horizontal_coefficients,
-                (int)(info.horizontal_filter), (float)(info.horizontal_scale), (float)(info.horizontal_shift),
-                (int)(info.input_w), (int)(info.output_w));
-            stbir__calculate_filters(info, info.vertical_contributors, info.vertical_coefficients,
-                (int)(info.vertical_filter), (float)(info.vertical_scale), (float)(info.vertical_shift),
-                (int)(info.input_h), (int)(info.output_h));
-            if ((stbir__use_height_upsampling(info)) != 0)
-                stbir__buffer_loop_upsample(info);
+            CalculateFilters(
+                s.horizontal_contributors, s.horizontal_coefficients,
+                (s.horizontal_filter), (float)(s.horizontal_scale), (float)(s.horizontal_shift),
+                (int)(s.input_w), (int)(s.output_w));
+
+            CalculateFilters(
+                s.vertical_contributors, s.vertical_coefficients,
+                (s.vertical_filter), (float)(s.vertical_scale), (float)(s.vertical_shift),
+                (int)(s.input_h), (int)(s.output_h));
+
+            if ((UseHeightUpsampling(s)))
+                BufferLoopUpsample(ref s);
             else
-                stbir__buffer_loop_downsample(info);
+                BufferLoopDownsample(ref s);
             return 1;
         }
 
-        public static int stbir__resize_arbitrary(void* alloc_context, void* input_data, int input_w, int input_h,
-            int input_stride_in_bytes, void* output_data, int output_w, int output_h, int output_stride_in_bytes,
-            float s0, float t0, float s1, float t1, float* transform, int channels, int alpha_channel, uint flags,
-            DataType type, int h_filter, int v_filter, int edge_horizontal, int edge_vertical, int colorspace)
+        public static int ResizeArbitrary(
+            ReadOnlySpan<byte> input_data, int input_w, int input_h, int input_stride_in_bytes,
+            Span<byte> output_data, int output_w, int output_h, int output_stride_in_bytes,
+            float s0, float t0, float s1, float t1, float* transform,
+            int channels, int alpha_channel, uint flags, DataType datatype,
+            Filter h_filter, Filter v_filter,
+            WrapMode wrap_horizontal, WrapMode wrap_vertical,
+            ColorSpace colorspace)
         {
-            var info = new ImageResizeInfo();
-            stbir__setup(info, (int)(input_w), (int)(input_h), (int)(output_w), (int)(output_h), (int)(channels));
-            stbir__calculate_transform(info, (float)(s0), (float)(t0), (float)(s1), (float)(t1), transform);
-            stbir__choose_filter(info, (int)(h_filter), (int)(v_filter));
-            int memory_required = stbir__calculate_memory(info);
-            void* extra_memory = CRuntime.MAlloc(memory_required);
-            if (extra_memory == null)
+            var s = new ResizeContext();
+            Setup(ref s, (int)(input_w), (int)(input_h), (int)(output_w), (int)(output_h), (int)(channels));
+            CalculateTransform(ref s, (float)(s0), (float)(t0), (float)(s1), (float)(t1), transform);
+            ChooseFilters(ref s, (h_filter), (v_filter));
+
+            int tmp_memory_required = CalculateMemory(ref s);
+            void* tmp_memory = CRuntime.MAlloc(tmp_memory_required);
+            if (tmp_memory == null)
                 return 0;
-            int result = (int)(stbir__resize_allocated(
-                info, input_data, (int)(input_stride_in_bytes), output_data,
-                (int)(output_stride_in_bytes), (int)(alpha_channel), (uint)(flags), type,
-                (int)(edge_horizontal),
-                (int)(edge_vertical), (int)(colorspace), extra_memory, memory_required));
-            CRuntime.Free(extra_memory);
-            return (int)(result);
+
+            try
+            {
+                s.input_data = input_data;
+                s.input_stride_bytes = (int)((input_stride_in_bytes) != 0
+                        ? input_stride_in_bytes
+                        : s.channels * s.input_w * datatype_size[(int)datatype]);
+
+                s.output_data = output_data;
+                s.output_stride_bytes = (int)((output_stride_in_bytes) != 0
+                        ? output_stride_in_bytes
+                        : s.channels * s.output_w * datatype_size[(int)datatype]);
+
+                return (int)(ResizeAllocated(
+                    ref s,
+                    (int)(alpha_channel), (uint)(flags), datatype,
+                    (wrap_horizontal), (wrap_vertical),
+                    colorspace,
+                    new Span<byte>(tmp_memory, tmp_memory_required)));
+            }
+            finally
+            {
+                CRuntime.Free(tmp_memory);
+            }
         }
 
-        public static int stbir_resize_uint8(byte* input_pixels, int input_w, int input_h, int input_stride_in_bytes,
-            byte* output_pixels, int output_w, int output_h, int output_stride_in_bytes, int num_channels)
+        public static unsafe long Hash(StbImageResize.ResizeContext x)
         {
-            return (int)(stbir__resize_arbitrary(null, input_pixels, (int)(input_w), (int)(input_h),
-                    (int)(input_stride_in_bytes),
-                    output_pixels, (int)(output_w), (int)(output_h), (int)(output_stride_in_bytes), 0f,
-                    0f,
-                    1f, 1f, null, (int)(num_channels), (int)(-1), (uint)(0),
-                    (int)(DataType.UInt8),
-                    (int)(STBIR_FILTER_DEFAULT), (int)(STBIR_FILTER_DEFAULT), (int)(STBIR_EDGE_CLAMP),
-                    (int)(STBIR_EDGE_CLAMP),
-                    (int)(STBIR_COLORSPACE_LINEAR)));
+            long hash = 17;
+            hash = hash * 31 + x.input_w;
+            hash = hash * 31 + x.input_h;
+            hash = hash * 31 + x.input_stride_bytes;
+            hash = hash * 31 + x.output_w;
+            hash = hash * 31 + x.output_h;
+            hash = hash * 31 + x.output_stride_bytes;
+            hash = hash * 31 + x.s0.GetHashCode();
+            hash = hash * 31 + x.t0.GetHashCode();
+            hash = hash * 31 + x.s1.GetHashCode();
+            hash = hash * 31 + x.t1.GetHashCode();
+            hash = hash * 31 + x.horizontal_shift.GetHashCode();
+            hash = hash * 31 + x.vertical_shift.GetHashCode();
+            hash = hash * 31 + x.horizontal_scale.GetHashCode();
+            hash = hash * 31 + x.vertical_scale.GetHashCode();
+            hash = hash * 31 + x.channels;
+            hash = hash * 31 + x.alpha_channel;
+            hash = hash * 31 + x.flags;
+            hash = hash * 31 + (int)x.datatype;
+            //hash = hash * 31 + (int)x.horizontal_filter;
+            //hash = hash * 31 + (int)x.vertical_filter;
+            hash = hash * 31 + (int)x.wrap_horizontal;
+            hash = hash * 31 + (int)x.wrap_vertical;
+            hash = hash * 31 + (int)x.colorspace;
+            hash = hash * 31 + x.horizontal_coefficient_width;
+            hash = hash * 31 + x.vertical_coefficient_width;
+            hash = hash * 31 + x.horizontal_filter_pixel_width;
+            hash = hash * 31 + x.vertical_filter_pixel_width;
+            hash = hash * 31 + x.horizontal_filter_pixel_margin;
+            hash = hash * 31 + x.vertical_filter_pixel_margin;
+            hash = hash * 31 + x.horizontal_num_contributors;
+            hash = hash * 31 + x.vertical_num_contributors;
+            hash = hash * 31 + x.ring_buffer_num_entries;
+            hash = hash * 31 + x.ring_buffer_first_scanline;
+            hash = hash * 31 + x.ring_buffer_last_scanline;
+            hash = hash * 31 + x.ring_buffer_begin_index;
+            hash = hash * 31 + x.horizontal_contributors_size;
+            hash = hash * 31 + x.horizontal_coefficients_size;
+            hash = hash * 31 + x.vertical_contributors_size;
+            hash = hash * 31 + x.vertical_coefficients_size;
+            hash = hash * 31 + x.decode_buffer_size;
+            hash = hash * 31 + x.horizontal_buffer_size;
+            hash = hash * 31 + x.ring_buffer_size;
+            hash = hash * 31 + x.encode_buffer_size;
+            hash = hash * 31 + x.decode_buffer_pixels;
+
+            for (int i = 0; i < x.input_stride_bytes * x.input_h; i++)
+            {
+                if (x.input_data.IsEmpty)
+                    continue;
+                hash = hash * 31 + (x.input_data)[i];
+            }
+            for (int i = 0; i < x.output_stride_bytes * x.output_h; i++)
+            {
+                if (x.output_data.IsEmpty)
+                    continue;
+                hash = hash * 31 + (x.output_data)[i];
+            }
+            for (int i = 0; i < x.horizontal_contributors_size / sizeof(Contributors); i++)
+            {
+                if (x.horizontal_contributors == null)
+                    continue;
+                hash = hash * 31 + x.horizontal_contributors[i].n0;
+                hash = hash * 31 + x.horizontal_contributors[i].n1;
+            }
+            for (int i = 0; i < x.horizontal_coefficients_size / sizeof(float); i++)
+            {
+                if (x.horizontal_coefficients == null)
+                    continue;
+                hash = hash * 31 + x.horizontal_coefficients[i].GetHashCode();
+            }
+            for (int i = 0; i < x.vertical_contributors_size / sizeof(Contributors); i++)
+            {
+                if (x.vertical_contributors == null)
+                    continue;
+                hash = hash * 31 + x.vertical_contributors[i].n0;
+                hash = hash * 31 + x.vertical_contributors[i].n1;
+            }
+            for (int i = 0; i < x.vertical_coefficients_size / sizeof(float); i++)
+            {
+                if (x.vertical_coefficients == null)
+                    continue;
+                hash = hash * 31 + x.vertical_coefficients[i].GetHashCode();
+            }
+            for (int i = 0; i < x.decode_buffer_size / sizeof(float); i++)
+            {
+                if (x.decode_buffer == null)
+                    continue;
+                hash = hash * 31 + x.decode_buffer[i].GetHashCode();
+            }
+            for (int i = 0; i < x.horizontal_buffer_size / sizeof(float); i++)
+            {
+                if (x.horizontal_buffer == null)
+                    continue;
+                hash = hash * 31 + x.horizontal_buffer[i].GetHashCode();
+            }
+            for (int i = 0; i < x.ring_buffer_size / sizeof(float); i++)
+            {
+                if (x.ring_buffer == null)
+                    continue;
+                hash = hash * 31 + x.ring_buffer[i].GetHashCode();
+            }
+            for (int i = 0; i < x.encode_buffer_size / sizeof(float); i++)
+            {
+                if (x.encode_buffer == null)
+                    continue;
+                hash = hash * 31 + x.encode_buffer[i].GetHashCode();
+            }
+            return hash;
         }
 
-        public static int stbir_resize_float(float* input_pixels, int input_w, int input_h, int input_stride_in_bytes,
-            float* output_pixels, int output_w, int output_h, int output_stride_in_bytes, int num_channels)
+        public static int Resize(
+            ReadOnlySpan<byte> input_pixels, int input_w, int input_h, int input_stride_in_bytes,
+            Span<byte> output_pixels, int output_w, int output_h, int output_stride_in_bytes,
+            int num_channels)
         {
-            return (int)(stbir__resize_arbitrary(null, input_pixels, (int)(input_w), (int)(input_h),
-                    (int)(input_stride_in_bytes),
-                    output_pixels, (int)(output_w), (int)(output_h), (int)(output_stride_in_bytes), 0f,
-                    0f,
-                    1f, 1f, null, (int)(num_channels), (int)(-1), (uint)(0),
-                    DataType.Float,
-                    (int)(STBIR_FILTER_DEFAULT), (int)(STBIR_FILTER_DEFAULT), (int)(STBIR_EDGE_CLAMP),
-                    (int)(STBIR_EDGE_CLAMP),
-                    (int)(STBIR_COLORSPACE_LINEAR)));
+            return (int)(ResizeArbitrary(
+                input_pixels, (int)(input_w), (int)(input_h), (int)(input_stride_in_bytes),
+                output_pixels, (int)(output_w), (int)(output_h), (int)(output_stride_in_bytes),
+                0f, 0f, 1f, 1f, null,
+                (int)(num_channels), (int)(-1), (uint)(0), (int)(DataType.UInt8),
+                null, null,
+                (WrapMode.Clamp), (WrapMode.Clamp),
+                ColorSpace.Linear));
         }
 
-        public static int stbir_resize_uint8_srgb(
-            byte* input_pixels, int input_w, int input_h, int input_stride_in_bytes,
-            byte* output_pixels, int output_w, int output_h, int output_stride_in_bytes, int num_channels,
-            int alpha_channel, int flags)
+        public static int Resize(
+            ReadOnlySpan<float> input_pixels, int input_w, int input_h, int input_stride_in_bytes,
+            Span<byte> output_pixels, int output_w, int output_h, int output_stride_in_bytes,
+            int num_channels)
         {
-            return (int)(stbir__resize_arbitrary(null, input_pixels, (int)(input_w), (int)(input_h),
-                    (int)(input_stride_in_bytes),
-                    output_pixels, (int)(output_w), (int)(output_h), (int)(output_stride_in_bytes), 0f,
-                    0f,
-                    1f, 1f, null, (int)(num_channels), (int)(alpha_channel), (uint)(flags),
-                    DataType.UInt8,
-                    (int)(STBIR_FILTER_DEFAULT), (int)(STBIR_FILTER_DEFAULT), (int)(STBIR_EDGE_CLAMP),
-                    (int)(STBIR_EDGE_CLAMP),
-                    (int)(STBIR_COLORSPACE_SRGB)));
+            return (int)(ResizeArbitrary(
+                MemoryMarshal.AsBytes(input_pixels), (int)(input_w), (int)(input_h), (int)(input_stride_in_bytes),
+                output_pixels, (int)(output_w), (int)(output_h), (int)(output_stride_in_bytes),
+                0f, 0f, 1f, 1f, null,
+                (int)(num_channels), (int)(-1), (uint)(0), DataType.Float,
+                null, null,
+                (WrapMode.Clamp), (WrapMode.Clamp),
+                ColorSpace.Linear));
         }
 
-        public static int stbir_resize_uint8_srgb_edgemode(byte* input_pixels, int input_w, int input_h,
-            int input_stride_in_bytes, byte* output_pixels, int output_w, int output_h, int output_stride_in_bytes,
-            int num_channels, int alpha_channel, int flags, int edge_wrap_mode)
+        public static int ResizeSrgb(
+            ReadOnlySpan<byte> input_pixels, int input_w, int input_h, int input_stride_in_bytes,
+            Span<byte> output_pixels, int output_w, int output_h, int output_stride_in_bytes,
+            int num_channels, int alpha_channel, int flags)
         {
-            return (int)(stbir__resize_arbitrary(null, input_pixels, (int)(input_w), (int)(input_h),
-                    (int)(input_stride_in_bytes),
-                    output_pixels, (int)(output_w), (int)(output_h), (int)(output_stride_in_bytes), 0f,
-                    0f,
-                    1f, 1f, null, (int)(num_channels), (int)(alpha_channel), (uint)(flags),
-                    DataType.UInt8,
-                    (int)(STBIR_FILTER_DEFAULT), (int)(STBIR_FILTER_DEFAULT), (int)(edge_wrap_mode),
-                    (int)(edge_wrap_mode),
-                    (int)(STBIR_COLORSPACE_SRGB)));
+            return (int)(ResizeArbitrary(
+                input_pixels, (int)(input_w), (int)(input_h), (int)(input_stride_in_bytes),
+                output_pixels, (int)(output_w), (int)(output_h), (int)(output_stride_in_bytes),
+                0f, 0f, 1f, 1f, null,
+                (int)(num_channels), (int)(alpha_channel), (uint)(flags), DataType.UInt8,
+                null, null,
+                (WrapMode.Clamp), (WrapMode.Clamp),
+                ColorSpace.SRgb));
         }
 
-        public static int stbir_resize_uint8_generic(
-            byte* input_pixels, int input_w, int input_h, int input_stride_in_bytes,
-            byte* output_pixels, int output_w, int output_h, int output_stride_in_bytes, int num_channels,
-            int alpha_channel, int flags, int edge_wrap_mode, int filter, int space, void* alloc_context)
+        public static int ResizeSrgbEdgemode(
+            ReadOnlySpan<byte> input_pixels, int input_w, int input_h, int input_stride_in_bytes,
+            Span<byte> output_pixels, int output_w, int output_h, int output_stride_in_bytes,
+            int num_channels, int alpha_channel, int flags,
+            WrapMode wrapmode)
         {
-            return (int)(stbir__resize_arbitrary(alloc_context, input_pixels, (int)(input_w), (int)(input_h),
-                    (int)(input_stride_in_bytes), output_pixels, (int)(output_w), (int)(output_h),
-                    (int)(output_stride_in_bytes),
-                    0f, 0f, 1f, 1f, null, (int)(num_channels),
-                    (int)(alpha_channel),
-                    (uint)(flags),
-                    DataType.UInt8, (int)(filter), (int)(filter), (int)(edge_wrap_mode),
-                    (int)(edge_wrap_mode),
-                    (int)(space)));
+            return (int)(ResizeArbitrary(
+                input_pixels, (int)(input_w), (int)(input_h), (int)(input_stride_in_bytes),
+                output_pixels, (int)(output_w), (int)(output_h), (int)(output_stride_in_bytes),
+                0f, 0f, 1f, 1f, null,
+                (int)(num_channels), (int)(alpha_channel), (uint)(flags), DataType.UInt8,
+                null, null,
+                (wrapmode), (wrapmode),
+                ColorSpace.SRgb));
         }
 
-        public static int stbir_resize_uint16_generic(
-            ushort* input_pixels, int input_w, int input_h, int input_stride_in_bytes,
-            ushort* output_pixels, int output_w, int output_h, int output_stride_in_bytes,
-            int num_channels, int alpha_channel, int flags, int edge_wrap_mode, int filter, int space, void* alloc_context)
+        public static int ResizeGeneric(
+            ReadOnlySpan<byte> input_pixels, int input_w, int input_h, int input_stride_in_bytes,
+            Span<byte> output_pixels, int output_w, int output_h, int output_stride_in_bytes,
+            int num_channels, int alpha_channel, int flags,
+            WrapMode wrapmode, Filter filter,
+            ColorSpace colorspace)
         {
-            return (int)(stbir__resize_arbitrary(alloc_context, input_pixels, (int)(input_w), (int)(input_h),
-                    (int)(input_stride_in_bytes), output_pixels, (int)(output_w), (int)(output_h),
-                    (int)(output_stride_in_bytes),
-                    0f, 0f, 1f, 1f, null, (int)(num_channels),
-                    (int)(alpha_channel),
-                    (uint)(flags),
-                    DataType.UInt16, (int)(filter), (int)(filter), (int)(edge_wrap_mode),
-                    (int)(edge_wrap_mode),
-                    (int)(space)));
+            return (int)(ResizeArbitrary(
+                input_pixels, (int)(input_w), (int)(input_h),
+                (int)(input_stride_in_bytes), output_pixels, (int)(output_w), (int)(output_h),
+                (int)(output_stride_in_bytes),
+                0f, 0f, 1f, 1f, null, (int)(num_channels),
+                (int)(alpha_channel), (uint)(flags), DataType.UInt8,
+                (filter), (filter),
+                (wrapmode), (wrapmode),
+                colorspace));
         }
 
-        public static int stbir_resize_float_generic(
-            float* input_pixels, int input_w, int input_h, int input_stride_in_bytes,
-            float* output_pixels, int output_w, int output_h, int output_stride_in_bytes, int num_channels,
-            int alpha_channel, int flags, int edge_wrap_mode, int filter, int space, void* alloc_context)
+        public static int ResizeGeneric(
+            ReadOnlySpan<ushort> input_pixels, int input_w, int input_h, int input_stride_in_bytes,
+            Span<ushort> output_pixels, int output_w, int output_h, int output_stride_in_bytes,
+            int num_channels, int alpha_channel, int flags,
+            WrapMode wrapmode, Filter filter,
+            ColorSpace colorspace)
         {
-            return (int)(stbir__resize_arbitrary(alloc_context, input_pixels, (int)(input_w), (int)(input_h),
-                    (int)(input_stride_in_bytes), output_pixels, (int)(output_w), (int)(output_h),
-                    (int)(output_stride_in_bytes),
-                    0f, 0f, 1f, 1f, null, (int)(num_channels),
-                    (int)(alpha_channel),
-                    (uint)(flags),
-                    DataType.Float, (int)(filter), (int)(filter), (int)(edge_wrap_mode),
-                    (int)(edge_wrap_mode),
-                    (int)(space)));
+            return (int)(ResizeArbitrary(
+                MemoryMarshal.AsBytes(input_pixels), (int)(input_w), (int)(input_h),
+                (int)(input_stride_in_bytes), MemoryMarshal.AsBytes(output_pixels), (int)(output_w), (int)(output_h),
+                (int)(output_stride_in_bytes),
+                0f, 0f, 1f, 1f, null, (int)(num_channels),
+                (int)(alpha_channel), (uint)(flags), DataType.UInt16,
+                (filter), (filter),
+                (wrapmode), (wrapmode),
+                colorspace));
         }
 
-        public static int stbir_resize(void* input_pixels, int input_w, int input_h, int input_stride_in_bytes,
-            void* output_pixels, int output_w, int output_h, int output_stride_in_bytes, DataType datatype, int num_channels,
-            int alpha_channel, int flags, int edge_mode_horizontal, int edge_mode_vertical, int filter_horizontal,
-            int filter_vertical, int space, void* alloc_context)
+        public static int ResizeGeneric(
+            ReadOnlySpan<float> input_pixels, int input_w, int input_h, int input_stride_in_bytes,
+            Span<float> output_pixels, int output_w, int output_h, int output_stride_in_bytes,
+            int num_channels, int alpha_channel, int flags,
+            WrapMode wrapmode, Filter filter,
+            ColorSpace colorspace)
         {
-            return (int)(stbir__resize_arbitrary(alloc_context, input_pixels, (int)(input_w), (int)(input_h),
-                    (int)(input_stride_in_bytes), output_pixels, (int)(output_w), (int)(output_h),
-                    (int)(output_stride_in_bytes),
-                    0f, 0f, 1f, 1f, null, (int)(num_channels),
-                    (int)(alpha_channel),
-                    (uint)(flags),
-                    datatype, (int)(filter_horizontal), (int)(filter_vertical), (int)(edge_mode_horizontal),
-                    (int)(edge_mode_vertical), (int)(space)));
+            return (int)(ResizeArbitrary(
+                MemoryMarshal.AsBytes(input_pixels), (int)(input_w), (int)(input_h), (int)(input_stride_in_bytes),
+                MemoryMarshal.AsBytes(output_pixels), (int)(output_w), (int)(output_h), (int)(output_stride_in_bytes),
+                0f, 0f, 1f, 1f, null,
+                (int)(num_channels), (int)(alpha_channel), (uint)(flags), DataType.Float,
+                (filter), (filter),
+                (wrapmode), (wrapmode),
+                colorspace));
         }
 
-        public static int stbir_resize_subpixel(void* input_pixels, int input_w, int input_h, int input_stride_in_bytes,
-            void* output_pixels, int output_w, int output_h, int output_stride_in_bytes, DataType datatype, int num_channels,
-            int alpha_channel, int flags, int edge_mode_horizontal, int edge_mode_vertical, int filter_horizontal,
-            int filter_vertical, int space, void* alloc_context, float x_scale, float y_scale, float x_offset,
-            float y_offset)
+        public static int Resize(
+            ReadOnlySpan<byte> input_pixels, int input_w, int input_h, int input_stride_in_bytes,
+            Span<byte> output_pixels, int output_w, int output_h, int output_stride_in_bytes,
+            DataType datatype, int num_channels, int alpha_channel, int flags,
+            WrapMode wrap_horizontal, WrapMode wrap_vertical,
+            Filter filter_horizontal, Filter filter_vertical,
+            ColorSpace colorspace)
+        {
+            return (int)(ResizeArbitrary(
+                input_pixels, (int)(input_w), (int)(input_h), (int)(input_stride_in_bytes),
+                output_pixels, (int)(output_w), (int)(output_h), (int)(output_stride_in_bytes),
+                0f, 0f, 1f, 1f, null,
+                (int)(num_channels), (int)(alpha_channel), (uint)(flags), datatype,
+                (filter_horizontal), (filter_vertical),
+                (wrap_horizontal), (wrap_vertical),
+                colorspace));
+        }
+
+        public static int ResizeSubpixel(
+            ReadOnlySpan<byte> input_pixels, int input_w, int input_h, int input_stride_in_bytes,
+            Span<byte> output_pixels, int output_w, int output_h, int output_stride_in_bytes,
+            DataType datatype, int num_channels, int alpha_channel, int flags,
+            WrapMode wrap_horizontal, WrapMode wrap_vertical,
+            Filter filter_horizontal, Filter filter_vertical,
+            ColorSpace colorspace, void* alloc_context,
+            float x_scale, float y_scale, float x_offset, float y_offset)
         {
             float* transform = stackalloc float[4];
             transform[0] = (float)(x_scale);
             transform[1] = (float)(y_scale);
             transform[2] = (float)(x_offset);
             transform[3] = (float)(y_offset);
-            return (int)(stbir__resize_arbitrary(alloc_context, input_pixels, (int)(input_w), (int)(input_h),
-                    (int)(input_stride_in_bytes), output_pixels, (int)(output_w), (int)(output_h),
-                    (int)(output_stride_in_bytes),
-                    0f, 0f, 1f, 1f, transform, (int)(num_channels),
-                    (int)(alpha_channel),
-                    (uint)(flags), datatype, (int)(filter_horizontal), (int)(filter_vertical),
-                    (int)(edge_mode_horizontal),
-                    (int)(edge_mode_vertical), (int)(space)));
+
+            return (int)(ResizeArbitrary(
+                input_pixels, (int)(input_w), (int)(input_h), (int)(input_stride_in_bytes),
+                output_pixels, (int)(output_w), (int)(output_h), (int)(output_stride_in_bytes),
+                0f, 0f, 1f, 1f, transform,
+                (int)(num_channels), (int)(alpha_channel), (uint)(flags), datatype,
+                (filter_horizontal), (filter_vertical),
+                (wrap_horizontal), (wrap_vertical),
+                colorspace));
         }
 
-        public static int stbir_resize_region(void* input_pixels, int input_w, int input_h, int input_stride_in_bytes,
-            void* output_pixels, int output_w, int output_h, int output_stride_in_bytes, DataType datatype, int num_channels,
-            int alpha_channel, int flags, int edge_mode_horizontal, int edge_mode_vertical, int filter_horizontal,
-            int filter_vertical, int space, void* alloc_context, float s0, float t0, float s1, float t1)
+        public static int ResizeRegion(
+            ReadOnlySpan<byte> input_pixels, int input_w, int input_h, int input_stride_in_bytes,
+            Span<byte> output_pixels, int output_w, int output_h, int output_stride_in_bytes,
+            DataType datatype, int num_channels, int alpha_channel, int flags,
+            WrapMode wrap_horizontal, WrapMode wrap_vertical,
+            Filter filter_horizontal, Filter filter_vertical,
+            ColorSpace colorspace,
+            float s0, float t0, float s1, float t1)
         {
-            return (int)(stbir__resize_arbitrary(alloc_context, input_pixels, (int)(input_w), (int)(input_h),
-                    (int)(input_stride_in_bytes), output_pixels, (int)(output_w), (int)(output_h),
-                    (int)(output_stride_in_bytes),
-                    (float)(s0), (float)(t0), (float)(s1), (float)(t1), null, (int)(num_channels),
-                    (int)(alpha_channel),
-                    (uint)(flags), datatype, (int)(filter_horizontal), (int)(filter_vertical),
-                    (int)(edge_mode_horizontal),
-                    (int)(edge_mode_vertical), (int)(space)));
+            return (int)(ResizeArbitrary(
+                input_pixels, (int)(input_w), (int)(input_h), (int)(input_stride_in_bytes),
+                output_pixels, (int)(output_w), (int)(output_h), (int)(output_stride_in_bytes),
+                (float)(s0), (float)(t0), (float)(s1), (float)(t1), null,
+                (int)(num_channels), (int)(alpha_channel), (uint)(flags), datatype,
+                (filter_horizontal), (filter_vertical),
+                (wrap_horizontal), (wrap_vertical),
+                colorspace));
         }
     }
 }

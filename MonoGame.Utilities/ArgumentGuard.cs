@@ -48,6 +48,19 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
+        /// Throws if any dimension of <paramref name="value"/> is less or equal to zero.
+        /// </summary>
+        public static void AssertDimensionsGreaterThanZero(Size value, string paramName, bool inlineParamName = true)
+        {
+            if (value.Width <= 0 || value.Height <= 0)
+            {
+                string name = inlineParamName ? paramName : "Value";
+                string message = $"{name} dimensions must be greater than zero.";
+                throw new ArgumentOutOfRangeException(message, paramName);
+            }
+        }
+
+        /// <summary>
         /// Throws if the <paramref name="value"/> is less than zero.
         /// </summary>
         public static void AssertAtleastZero(long value, string paramName, bool inlineParamName = true)

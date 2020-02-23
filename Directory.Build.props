@@ -7,8 +7,5 @@
     <PackageLicenseExpression>MS-PL</PackageLicenseExpression>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)Images\Icon.png" Pack="true" PackagePath="\" />
-  </ItemGroup>
 </Project>
 

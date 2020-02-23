@@ -116,7 +116,7 @@ namespace MonoGame.Imaging
         #region WrapMemory
 
         private delegate Image WrapMemoryDelegate(
-            IMemory memory, bool leaveOpen, int width, int height, int? byteStride = null);
+            IMemory memory, Size size, bool leaveOpen = false, int? byteStride = null);
 
         private static MethodInfo _wrapMemoryMethod;
         private static ConcurrentDictionary<VectorTypeInfo, WrapMemoryDelegate> _wrapMemoryDelegateCache;
@@ -146,7 +146,7 @@ namespace MonoGame.Imaging
 
         #region Create
 
-        private delegate Image CreateDelegate(int width, int height);
+        private delegate Image CreateDelegate(Size size);
 
         private static Type[] _createMethodArguments;
         private static ConcurrentDictionary<VectorTypeInfo, CreateDelegate> _createDelegateCache;

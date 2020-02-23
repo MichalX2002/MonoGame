@@ -21,7 +21,7 @@ namespace MonoGame.Framework
         /// <summary>
         ///     Returns a <see cref="Size" /> with <see cref="Width" /> and <see cref="Height" /> equal to <c>0f</c>.
         /// </summary>
-        public static readonly Size Empty = new Size();
+        public static readonly Size Empty = new Size(0, 0);
 
         /// <summary>
         ///     The horizontal component of this <see cref="Size" />.
@@ -36,7 +36,9 @@ namespace MonoGame.Framework
         /// <summary>
         ///     Gets a value that indicates whether this <see cref="Size" /> is empty.
         /// </summary>
-        public bool IsEmpty => Width == 0 && Height == 0;
+        public readonly bool IsEmpty => Width == 0 && Height == 0;
+
+        public readonly int Area => Width * Height;
 
         private string DebuggerDisplay => $"Width = {Width}, Height = {Height}";
 

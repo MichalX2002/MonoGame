@@ -76,7 +76,7 @@ namespace MonoGame.Imaging
             if (pixels.IsEmpty) throw new ArgumentEmptyException(nameof(pixels));
             ImagingArgumentGuard.AssertNonEmptyRectangle(sourceRectangle, nameof(sourceRectangle));
 
-            var image = new Image<TPixelTo>(sourceRectangle.Width, sourceRectangle.Height);
+            var image = new Image<TPixelTo>(sourceRectangle.Size);
             try
             {
                 LoadPixelSpan(pixels, sourceRectangle, byteStride, image);

@@ -16,6 +16,8 @@ using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Coding.Decoding;
 using MonoGame.Imaging.Coding.Encoding;
 using System.Numerics;
+using StbSharp;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Tests
 {
@@ -31,7 +33,7 @@ namespace MonoGame.Imaging.Tests
 
             var encoded = new MemoryStream(1024 * 1024 * 8);
             //using (var stream = new FileStream("big img.png", FileMode.Open))
-                stream.CopyTo(encoded);
+            stream.CopyTo(encoded);
 
             //var encoded = new FileStream("big img.png", FileMode.Open);
 
@@ -39,8 +41,8 @@ namespace MonoGame.Imaging.Tests
             //var encoded = req.GetResponse().GetResponseStream();
             //encoded = RecyclableMemoryManager.Default.GetBufferedStream(encoded, false);
 
-            int readRepeats = 5000;
-            int writeRepeats = 500;
+            int readRepeats = 1;
+            int writeRepeats = 1;
 
             void OnReadProgress(
                 ImageDecoderState decoderState,
@@ -58,7 +60,7 @@ namespace MonoGame.Imaging.Tests
 
                 image?.Dispose();
                 watch.Start();
-                image = Image.Load(encoded, null, null, OnReadProgress);
+                image = Image.Load(encoded, VectorTypeInfo.Get<Rgb24>(), null, OnReadProgress);
                 watch.Stop();
 
                 if (i == 0)
@@ -100,7 +102,6 @@ namespace MonoGame.Imaging.Tests
                     watch.Reset();
                 }
             }
-            image.Dispose();
 
             using (var fs = new FileStream("recoded" + writeFormat.Extension, FileMode.Create))
             {
@@ -110,6 +111,38 @@ namespace MonoGame.Imaging.Tests
             Console.WriteLine("Write Average: " +
                 Math.Round(watch.Elapsed.TotalMilliseconds / (writeRepeats == 1 ? 1 : writeRepeats - 1), 3) + "ms");
 
+            Thread.Sleep(500);
+
+            using (var resizeDst = Image<Rgb24>.Create(image.Size / 2))
+            {
+                watch.Restart();
+
+                //fixed (byte* src = &MemoryMarshal.GetReference(image.GetPixelByteSpan()))
+                //fixed (byte* dst = &MemoryMarshal.GetReference(resizeDst.GetPixelByteSpan()))
+                //{
+                //    StbImageResize2.stbir_resize_uint8(
+                //        src, image.Width, image.Height, image.ByteStride,
+                //        dst, resizeDst.Width, resizeDst.Height, resizeDst.ByteStride,
+                //        num_channels: 3);
+                //}
+                //resizeDst.GetPixelSpan().Fill(default);
+
+                for (int i = 0; i < 1000; i++)
+                {
+                    StbImageResize.Resize(
+                        image.GetPixelByteSpan(), image.Width, image.Height, image.ByteStride,
+                        resizeDst.GetPixelByteSpan(), resizeDst.Width, resizeDst.Height, resizeDst.ByteStride,
+                        num_channels: 3);
+                }
+                watch.Stop();
+
+                Console.WriteLine("resized in " +
+                    Math.Round(watch.Elapsed.TotalMilliseconds / (writeRepeats == 1 ? 1 : writeRepeats - 1), 3) + "ms");
+
+                resizeDst.Save("resized" + writeFormat.Extension);
+            }
+
+            image.Dispose();
             GC.Collect();
 
             Console.ReadKey();

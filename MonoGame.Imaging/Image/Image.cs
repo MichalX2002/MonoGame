@@ -23,15 +23,17 @@ namespace MonoGame.Imaging
         /// </summary>
         public bool IsDisposed { get; private set; }
 
+        public Size Size { get; }
+
         /// <summary>
         /// Gets the width of the image in pixels.
         /// </summary>
-        public int Width { get; }
+        public int Width => Size.Width;
 
         /// <summary>
         /// Gets the height of the image in pixels.
         /// </summary>
-        public int Height { get; }
+        public int Height => Size.Height;
 
         /// <summary>
         /// Gets info about the pixel type of the image.
@@ -52,32 +54,31 @@ namespace MonoGame.Imaging
             SetupReflection();
         }
 
-        protected Image(VectorTypeInfo pixelType, int width, int height)
+        protected Image(VectorTypeInfo pixelType, Size size)
         {
             PixelType = pixelType ?? throw new ArgumentNullException(nameof(pixelType));
-            ArgumentGuard.AssertGreaterThanZero(width, nameof(width));
-            ArgumentGuard.AssertGreaterThanZero(height, nameof(height));
-            Width = width;
-            Height = height;
+
+            ArgumentGuard.AssertDimensionsGreaterThanZero(size, nameof(size), false);
+            Size = size;
         }
 
         #region Create
 
         /// <summary>
-        /// Creates an empty image.
-        /// </summary>
-        public static Image Create(VectorTypeInfo pixelType, int width, int height)
-        {
-            var createDelegate = GetCreateDelegate(pixelType);
-            return createDelegate.Invoke(width, height);
-        }
-
-        /// <summary>
-        /// Creates an empty image.
+        /// Creates an empty image with the given size and pixel type.
         /// </summary>
         public static Image Create(VectorTypeInfo pixelType, Size size)
         {
-            return Create(pixelType, size.Width, size.Height);
+            var createDelegate = GetCreateDelegate(pixelType);
+            return createDelegate.Invoke(size);
+        }
+
+        /// <summary>
+        /// Creates an empty image with the given size and pixel type.
+        /// </summary>
+        public static Image Create(VectorTypeInfo pixelType, int width, int height)
+        {
+            return Create(pixelType, new Size(width, height));
         }
 
         #endregion

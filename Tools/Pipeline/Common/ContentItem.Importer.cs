@@ -30,7 +30,7 @@ namespace MonoGame.Tools.Pipeline
             }
             else
             {
-                var contentItem = (context.Instance as ContentItem);
+                var contentItem = context.Instance as ContentItem;
                 if (contentItem.BuildAction == BuildAction.Copy)
                     return false;
             }                

@@ -15,7 +15,7 @@ namespace MonoGame.Framework.PackedVector
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static ushort Pack(float value)
         {
-            var uif = new FloatInt { F = value };
+            var uif = new FloatIntUnion { F = value };
             return Pack(uif.I);
         }
 
@@ -93,12 +93,12 @@ namespace MonoGame.Framework.PackedVector
                 result = (((uint)value & 0x8000) << 16) | (((((uint)value >> 10) & 0x1f) - 15 + 127) << 23) | (mantissa << 13);
             }
 
-            var uif = new FloatInt { U = result };
+            var uif = new FloatIntUnion { U = result };
             return uif.F;
         }
 
         [StructLayout(LayoutKind.Explicit)]
-        private struct FloatInt
+        private struct FloatIntUnion
         {
             [FieldOffset(0)]
             public float F;

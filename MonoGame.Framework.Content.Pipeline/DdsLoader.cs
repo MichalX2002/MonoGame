@@ -18,22 +18,65 @@ namespace MonoGame.Framework.Content.Pipeline
         [Flags]
         private enum Ddsd : uint
         {
-            Caps = 0x1,             // Required in every DDS file
-            Height = 0x2,           // Required in every DDS file
-            Width = 0x4,            // Required in every DDS file
-            Pitch = 0x8,            // Required when pitch is provided for an uncompressed texture
-            PixelFormat = 0x1000,   // Required in every DDS file
-            MipMapCount = 0x2000,   // Required in a mipmapped texture
-            LinearSize = 0x80000,   // Required when pitch is provided for a compressed texture
-            Depth = 0x800000,       // Required in a depth texture
+            /// <summary>
+            /// Required in every DDS file.
+            /// </summary>
+            Caps = 0x1,
+
+            /// <summary>
+            /// Required in every DDS file.
+            /// </summary>
+            Height = 0x2,
+
+            /// <summary>
+            /// Required in every DDS file.
+            /// </summary>
+            Width = 0x4,
+
+            /// <summary>
+            /// Required when pitch is provided for an uncompressed texture
+            /// </summary>
+            Pitch = 0x8,
+
+            /// <summary>
+            /// Required in every DDS file.
+            /// </summary>
+            PixelFormat = 0x1000,
+
+            /// <summary>
+            /// Required in a mipmapped texture.
+            /// </summary>
+            MipMapCount = 0x2000,
+
+            /// <summary>
+            /// Required when pitch is provided for a compressed texture.
+            /// </summary>
+            LinearSize = 0x80000,
+
+            /// <summary>
+            /// Required in a depth texture.
+            /// </summary>
+            Depth = 0x800000
         }
 
         [Flags]
         private enum DdsCaps : uint
         {
-            Complex = 0x8,       // Optional; must be used on any file that contains more than one surface (a mipmap, a cubic environment map, or mipmapped volume texture)
-            MipMap = 0x400000,   // Optional; should be used for a mipmap
-            Texture = 0x1000,    // Required
+            /// <summary>
+            /// Optional; must be used on any file that contains more than one surface 
+            /// (a mipmap, a cubic environment map, or mipmapped volume texture).
+            /// </summary>
+            Complex = 0x8,
+
+            /// <summary>
+            /// Optional; should be used for a mipmap.
+            /// </summary>
+            MipMap = 0x400000,
+
+            /// <summary>
+            /// Required.
+            /// </summary>
+            Texture = 0x1000,
         }
 
         [Flags]
@@ -48,7 +91,11 @@ namespace MonoGame.Framework.Content.Pipeline
             CubemapNegativeZ = 0x8000,
             Volume = 0x200000,
 
-            CubemapAllFaces = Cubemap | CubemapPositiveX | CubemapNegativeX | CubemapPositiveY | CubemapNegativeY | CubemapPositiveZ | CubemapNegativeZ,
+            CubemapAllFaces = 
+                Cubemap |
+                CubemapPositiveX | CubemapNegativeX |
+                CubemapPositiveY | CubemapNegativeY |
+                CubemapPositiveZ | CubemapNegativeZ,
         }
 
         [Flags]
@@ -244,7 +291,7 @@ namespace MonoGame.Framework.Content.Pipeline
             return pitch * rows;
         }
 
-        static internal TextureContent Import(string filename, ContentImporterContext context)
+        internal static TextureContent Import(string filename, ContentImporterContext context)
         {
             var identity = new ContentIdentity(filename);
             TextureContent output = null;
@@ -252,7 +299,7 @@ namespace MonoGame.Framework.Content.Pipeline
             using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
             using (var reader = new BinaryReader(fileStream))
             {
-                // Read signature ("DDS ")
+                // Signature ("DDS ")
                 if (reader.ReadByte() != 0x44 ||
                     reader.ReadByte() != 0x44 ||
                     reader.ReadByte() != 0x53 ||
@@ -264,6 +311,7 @@ namespace MonoGame.Framework.Content.Pipeline
                     // Read DDS_HEADER
                     dwSize = reader.ReadUInt32()
                 };
+
                 if (header.dwSize != 124)
                     throw new ContentLoadException("Invalid DDS_HEADER dwSize value");
 
@@ -355,7 +403,9 @@ namespace MonoGame.Framework.Content.Pipeline
                                     break;
                             }
                         }
-                        if ((format == SurfaceFormat.Rgba32) && header.ddspf.dwFlags.HasFlag(Ddpf.Rgb) && !header.ddspf.dwFlags.HasFlag(Ddpf.AlphaPixels))
+                        if ((format == SurfaceFormat.Rgba32) &&
+                            header.ddspf.dwFlags.HasFlag(Ddpf.Rgb) && 
+                            !header.ddspf.dwFlags.HasFlag(Ddpf.AlphaPixels))
                         {
                             // Fill or add alpha with opaque
                             if (header.ddspf.dwRgbBitCount == 32)
@@ -452,7 +502,7 @@ namespace MonoGame.Framework.Content.Pipeline
             using (var fileStream = new FileStream(filename, FileMode.Create, FileAccess.Write))
             using (var writer = new BinaryWriter(fileStream))
             {
-                // Write signature ("DDS ")
+                // Signature ("DDS ")
                 writer.Write((byte)0x44);
                 writer.Write((byte)0x44);
                 writer.Write((byte)0x53);
@@ -477,18 +527,9 @@ namespace MonoGame.Framework.Content.Pipeline
                 writer.Write(header.dwDepth);
                 writer.Write(header.dwMipMapCount);
 
-                // 11 unsed and reserved DWORDS.
-                writer.Write((uint)0);
-                writer.Write((uint)0);
-                writer.Write((uint)0);
-                writer.Write((uint)0);
-                writer.Write((uint)0);
-                writer.Write((uint)0);
-                writer.Write((uint)0);
-                writer.Write((uint)0);
-                writer.Write((uint)0);
-                writer.Write((uint)0);
-                writer.Write((uint)0);
+                // 11 unused and reserved DWORDS.
+                for (int i = 0; i < 11; i++)
+                    writer.Write((uint)0);
 
                 if (!bitmapContent.TryGetFormat(out SurfaceFormat format) || format != SurfaceFormat.Rgba32)
                     throw new NotSupportedException("Unsupported bitmap content!");
@@ -520,9 +561,8 @@ namespace MonoGame.Framework.Content.Pipeline
                 writer.Write((uint)header.dwCaps2);
 
                 // More reserved unused DWORDs.
-                writer.Write((uint)0);
-                writer.Write((uint)0);
-                writer.Write((uint)0);
+                for (int i = 0; i < 3; i++)
+                    writer.Write((uint)0);
 
                 // Write out the face data.
                 writer.Write(bitmapContent.GetPixelData());

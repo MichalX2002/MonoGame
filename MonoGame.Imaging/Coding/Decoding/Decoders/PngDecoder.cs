@@ -1,4 +1,4 @@
-﻿using MonoGame.Imaging.Attributes.Coder;
+﻿using MonoGame.Imaging.Attributes.Codec;
 using StbSharp;
 using static StbSharp.ImageRead;
 

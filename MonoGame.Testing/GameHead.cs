@@ -132,7 +132,7 @@ namespace MonoGame.Testing
                     int w = GraphicsDevice.Viewport.Width;
                     int h = GraphicsDevice.Viewport.Height;
 
-                    var image = new Image<Color>(w, h);
+                    var image = Image<Color>.Create(w, h);
                     GraphicsDevice.GetBackBufferData(new Rectangle(x, y, w, h), image.GetPixelSpan());
 
                     Task.Run(() =>

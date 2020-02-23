@@ -282,7 +282,8 @@ namespace MonoGame.Framework.Audio
                         {
                             case FormatIma4:
                             case FormatMsAdpcm:
-                                sampleCount = ((int)audioData.Length / blockAlignment * samplesPerBlock) +
+                                sampleCount = 
+                                    ((int)audioData.Length / blockAlignment * samplesPerBlock) +
                                     SampleAlignment(format, (int)audioData.Length % blockAlignment);
                                 break;
 

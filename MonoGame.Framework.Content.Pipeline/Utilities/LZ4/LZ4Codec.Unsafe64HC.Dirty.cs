@@ -144,7 +144,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 						repl = ml = LZ4HC_CommonLength_64(src_p + MINMATCH, src_ref + MINMATCH, src_LASTLITERALS) + MINMATCH;
 						matchpos = src_ref;
 					}
-					src_ref = src_ref - chainTable[((int)src_ref) & MAXD_MASK];
+					src_ref -= chainTable[((int)src_ref) & MAXD_MASK];
 				}
 
 				while ((src_ref >= src_p - MAX_DISTANCE) && (nbAttempts != 0))
@@ -160,7 +160,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 								matchpos = src_ref;
 							}
 						}
-					src_ref = src_ref - chainTable[((int)src_ref) & MAXD_MASK];
+					src_ref -= chainTable[((int)src_ref) & MAXD_MASK];
 				}
 
 				// Complete table
@@ -255,7 +255,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 							}
 						}
 					}
-					src_ref = src_ref - chainTable[((int)src_ref) & MAXD_MASK];
+					src_ref -= chainTable[((int)src_ref) & MAXD_MASK];
 				}
 
 				return longest;

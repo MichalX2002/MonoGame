@@ -3,10 +3,13 @@ using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Pixels
 {
+    /// <summary>
+    /// Represents a read-only view of pixels in contiguous memory.
+    /// </summary>
     public interface IReadOnlyPixelMemory : IReadOnlyPixelBuffer
     {
         /// <summary>
-        /// Gets the data stride (row width including padding) of the view in bytes.
+        /// Gets the data stride (row width including padding) of the source in bytes.
         /// </summary>
         int ByteStride { get; }
 

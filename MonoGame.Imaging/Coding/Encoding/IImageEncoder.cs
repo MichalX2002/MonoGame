@@ -17,7 +17,7 @@ namespace MonoGame.Imaging.Coding.Encoding
     /// <summary>
     /// Encapsulates encoding of images to a stream.
     /// </summary>
-    public interface IImageEncoder : IImageCoder
+    public interface IImageEncoder : IImageCodec
     {
         /// <summary>
         /// Gets the default options for this encoder.

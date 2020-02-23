@@ -4,18 +4,18 @@ using MonoGame.Imaging.Attributes;
 namespace MonoGame.Imaging.Coding
 {
     /// <summary>
-    /// Helper for identifying attributes on image formats and coders.
+    /// Helper for identifying attributes on image formats and codecs.
     /// </summary>
     public readonly struct ImageAttributeQuery
     {
         /// <summary>
         /// Gets the object which was queried.
         /// </summary>
-        public IImageCoderAttribute Source { get; }
+        public IImageCodecAttribute Source { get; }
 
         /// <summary>
         /// Gets the image format.
-        /// Can be the queried object, <see cref="IImageCoder.Format"/>, or <see langword="null"/>.
+        /// Can be the queried object, <see cref="IImageCodec.Format"/>, or <see langword="null"/>.
         /// </summary>
         public ImageFormat Format { get; }
 
@@ -30,21 +30,21 @@ namespace MonoGame.Imaging.Coding
         public bool IsFormatAttribute => Source is IImageFormatAttribute;
 
         /// <summary>
-        /// Gets whether <see cref="Source"/> is an <see cref="IImageCoder"/>.
+        /// Gets whether <see cref="Source"/> is an <see cref="IImageCodec"/>.
         /// </summary>
-        public bool IsCoder => Source is IImageCoder;
+        public bool IsCodec => Source is IImageCodec;
 
         /// <summary>
         /// Gets whether <see cref="Source"/> is an <see cref="ImageFormat"/>.
         /// </summary>
         public bool IsFormat => Source is ImageFormat;
 
-        public ImageAttributeQuery(IImageCoderAttribute source)
+        public ImageAttributeQuery(IImageCodecAttribute source)
         {
             Source = source ?? throw new ArgumentNullException(nameof(source));
             Format =
                 source is ImageFormat format ? format :
-                source is IImageCoder coder ? coder.Format :
+                source is IImageCodec codec ? codec.Format :
                 null;
         }
     }
