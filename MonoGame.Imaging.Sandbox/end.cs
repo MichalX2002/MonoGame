@@ -1770,50 +1770,53 @@ namespace StbSharp
             }
         }
 
-        public static void stbir__empty_ring_buffer(stbir__info stbir_info, int first_necessary_scanline)
+        public static void stbir__empty_ring_buffer(stbir__info s, int first_necessary_scanline)
         {
-            int output_stride_bytes = (int)(stbir_info.output_stride_bytes);
-            int channels = (int)(stbir_info.channels);
-            int alpha_channel = (int)(stbir_info.alpha_channel);
-            int type = (int)(stbir_info.type);
-            int colorspace = (int)(stbir_info.colorspace);
-            int output_w = (int)(stbir_info.output_w);
-            void* output_data = stbir_info.output_data;
+            int output_stride_bytes = (int)(s.output_stride_bytes);
+            int channels = (int)(s.channels);
+            int alpha_channel = (int)(s.alpha_channel);
+            int type = (int)(s.type);
+            int colorspace = (int)(s.colorspace);
+            int output_w = (int)(s.output_w);
+            void* output_data = s.output_data;
             int decode = (int)((type) * (STBIR_MAX_COLORSPACES) + (colorspace));
-            float* ring_buffer = stbir_info.ring_buffer;
-            int ring_buffer_length = (int)(stbir_info.ring_buffer_length_bytes / sizeof(float));
-            if ((stbir_info.ring_buffer_begin_index) >= (0))
+            float* ring_buffer = s.ring_buffer;
+            int ring_buffer_length = (int)(s.ring_buffer_length_bytes / sizeof(float));
+
+            if ((s.ring_buffer_begin_index) >= (0))
             {
-                while ((first_necessary_scanline) > (stbir_info.ring_buffer_first_scanline))
+                while ((first_necessary_scanline) > (s.ring_buffer_first_scanline))
                 {
-                    if (((stbir_info.ring_buffer_first_scanline) >= (0)) &&
-                        ((stbir_info.ring_buffer_first_scanline) < (stbir_info.output_h)))
+                    if (((s.ring_buffer_first_scanline) >= (0)) &&
+                        ((s.ring_buffer_first_scanline) < (s.output_h)))
                     {
-                        int output_row_start = (int)(stbir_info.ring_buffer_first_scanline * output_stride_bytes);
+                        int output_row_start = (int)(s.ring_buffer_first_scanline * output_stride_bytes);
                         float* ring_buffer_entry = stbir__get_ring_buffer_entry(ring_buffer,
-                            (int)(stbir_info.ring_buffer_begin_index),
+                            (int)(s.ring_buffer_begin_index),
                             (int)(ring_buffer_length));
-                        stbir__encode_scanline(stbir_info, (int)(output_w), (sbyte*)(output_data) + output_row_start,
+
+                        stbir__encode_scanline(s, (int)(output_w), (sbyte*)(output_data) + output_row_start,
                             ring_buffer_entry,
                             (int)(channels), (int)(alpha_channel), (int)(decode));
                     }
 
-                    if ((stbir_info.ring_buffer_first_scanline) == (stbir_info.ring_buffer_last_scanline))
+                    if ((s.ring_buffer_first_scanline) == (s.ring_buffer_last_scanline))
                     {
-                        stbir_info.ring_buffer_begin_index = (int)(-1);
-                        stbir_info.ring_buffer_first_scanline = (int)(0);
-                        stbir_info.ring_buffer_last_scanline = (int)(0);
+                        s.ring_buffer_begin_index = (int)(-1);
+                        s.ring_buffer_first_scanline = (int)(0);
+                        s.ring_buffer_last_scanline = (int)(0);
                         break;
                     }
                     else
                     {
-                        stbir_info.ring_buffer_first_scanline++;
-                        stbir_info.ring_buffer_begin_index =
-                            (int)((stbir_info.ring_buffer_begin_index + 1) % stbir_info.ring_buffer_num_entries);
+                        s.ring_buffer_first_scanline++;
+                        s.ring_buffer_begin_index =
+                            (int)((s.ring_buffer_begin_index + 1) % s.ring_buffer_num_entries);
                     }
                 }
-            }
 
+                Console.WriteLine("OLD: " + Hash(s));
+            }
         }
 
         public static void stbir__buffer_loop_downsample(stbir__info stbir_info)

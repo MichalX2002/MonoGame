@@ -29,10 +29,11 @@ namespace MonoGame.Imaging.Tests
         {
             var archive = new ZipArchive(File.OpenRead(DataZip), ZipArchiveMode.Read, false);
             //var stream = archive.GetEntry("png/24bit.png").Open();
-            var stream = archive.GetEntry("bmp/32bit.bmp").Open();
+            //var stream = archive.GetEntry("bmp/32bit.bmp").Open();
 
             var encoded = new MemoryStream(1024 * 1024 * 8);
             //using (var stream = new FileStream("big img.png", FileMode.Open))
+            using (var stream = new FileStream("smol img.png", FileMode.Open))
             stream.CopyTo(encoded);
 
             //var encoded = new FileStream("big img.png", FileMode.Open);
@@ -117,17 +118,18 @@ namespace MonoGame.Imaging.Tests
             {
                 watch.Restart();
 
-                //fixed (byte* src = &MemoryMarshal.GetReference(image.GetPixelByteSpan()))
-                //fixed (byte* dst = &MemoryMarshal.GetReference(resizeDst.GetPixelByteSpan()))
-                //{
-                //    StbImageResize2.stbir_resize_uint8(
-                //        src, image.Width, image.Height, image.ByteStride,
-                //        dst, resizeDst.Width, resizeDst.Height, resizeDst.ByteStride,
-                //        num_channels: 3);
-                //}
-                //resizeDst.GetPixelSpan().Fill(default);
+                fixed (byte* src = &MemoryMarshal.GetReference(image.GetPixelByteSpan()))
+                fixed (byte* dst = &MemoryMarshal.GetReference(resizeDst.GetPixelByteSpan()))
+                {
+                    StbImageResize2.stbir_resize_uint8(
+                        src, image.Width, image.Height, image.ByteStride,
+                        dst, resizeDst.Width, resizeDst.Height, resizeDst.ByteStride,
+                        num_channels: 3);
+                }
+                
+                resizeDst.GetPixelSpan().Fill(default);
 
-                for (int i = 0; i < 1000; i++)
+                for (int i = 0; i < 1; i++)
                 {
                     StbImageResize.Resize(
                         image.GetPixelByteSpan(), image.Width, image.Height, image.ByteStride,
