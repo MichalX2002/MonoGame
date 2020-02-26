@@ -984,7 +984,7 @@ namespace StbSharp
 
             fixed (float* src = &MemoryMarshal.GetReference(encode_buffer))
             {
-                if ((s.flags & (1 << 0)) != 0)
+                if ((s.flags & (1 << 0)) == 0)
                 {
                     for (x = 0; (x) < (num_pixels); ++x)
                     {
