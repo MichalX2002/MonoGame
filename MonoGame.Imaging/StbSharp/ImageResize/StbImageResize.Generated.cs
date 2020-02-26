@@ -1170,7 +1170,7 @@ namespace StbSharp
             s.encode_buffer.Fill(0);
 
             fixed (float* vertical_coefficients_ptr = &MemoryMarshal.GetReference(s.vertical_coefficients))
-            fixed (float* dst = &MemoryMarshal.GetReference(s.decode_buffer))
+            fixed (float* dst = &MemoryMarshal.GetReference(s.encode_buffer))
             {
                 int coefficient_group = (int)(coefficient_width * contributor);
                 float* coefficients = vertical_coefficients_ptr + coefficient_group;
@@ -1445,7 +1445,7 @@ namespace StbSharp
                 }
             }
 
-            Console.WriteLine("NEW: " + Hash(s));
+            //Console.WriteLine("NEW: " + Hash(s));
         }
 
         public static void BufferLoopDownsample(ref ResizeContext s)

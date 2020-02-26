@@ -28,11 +28,11 @@ namespace MonoGame.Imaging.Tests
         static void Main(string[] args)
         {
             var archive = new ZipArchive(File.OpenRead(DataZip), ZipArchiveMode.Read, false);
-            var stream = archive.GetEntry("png/24bit.png").Open();
+            //var stream = archive.GetEntry("png/24bit.png").Open();
             //var stream = archive.GetEntry("bmp/32bit.bmp").Open();
 
             var encoded = new MemoryStream(1024 * 1024 * 8);
-            //using (var stream = new FileStream("big img.png", FileMode.Open))
+            using (var stream = new FileStream("big img.png", FileMode.Open))
             //using (var stream = new FileStream("smol img.png", FileMode.Open))
             stream.CopyTo(encoded);
 
@@ -61,7 +61,7 @@ namespace MonoGame.Imaging.Tests
 
                 image?.Dispose();
                 watch.Start();
-                image = Image.Load(encoded, VectorTypeInfo.Get<Rgb24>(), null, OnReadProgress);
+                image = Image.Load(encoded, VectorTypeInfo.Get<Color>(), null, OnReadProgress);
                 watch.Stop();
 
                 if (i == 0)
@@ -114,27 +114,27 @@ namespace MonoGame.Imaging.Tests
 
             Thread.Sleep(500);
 
-            using (var resizeDst = Image<Rgb24>.Create(image.Size / 2))
+            using (var resizeDst = Image<Color>.Create(image.Size * 2))
             {
                 watch.Restart();
 
                 //fixed (byte* src = &MemoryMarshal.GetReference(image.GetPixelByteSpan()))
                 //fixed (byte* dst = &MemoryMarshal.GetReference(resizeDst.GetPixelByteSpan()))
                 //{
-                //    StbImageResize2.stbir_resize_uint8(
+                //    int code = StbImageResize2.stbir_resize_uint8(
                 //        src, image.Width, image.Height, image.ByteStride,
                 //        dst, resizeDst.Width, resizeDst.Height, resizeDst.ByteStride,
-                //        num_channels: 3);
+                //        num_channels: 4);
                 //}
                 //
                 //resizeDst.GetPixelSpan().Fill(default);
-
+                 
                 for (int i = 0; i < 1; i++)
                 {
                     StbImageResize.Resize(
                         image.GetPixelByteSpan(), image.Width, image.Height, image.ByteStride,
                         resizeDst.GetPixelByteSpan(), resizeDst.Width, resizeDst.Height, resizeDst.ByteStride,
-                        num_channels: 3);
+                        num_channels: 4);
                 }
 
                 watch.Stop();
@@ -142,7 +142,15 @@ namespace MonoGame.Imaging.Tests
                 Console.WriteLine("resized in " +
                     Math.Round(watch.Elapsed.TotalMilliseconds / (writeRepeats == 1 ? 1 : writeRepeats - 1), 3) + "ms");
 
+                Thread.Sleep(500);
+
+                watch.Restart();
                 resizeDst.Save("resized" + writeFormat.Extension);
+                watch.Stop();
+
+                Console.WriteLine("Saved resized in " +
+                    Math.Round(watch.Elapsed.TotalMilliseconds / (writeRepeats == 1 ? 1 : writeRepeats - 1), 3) + "ms");
+
             }
 
             image.Dispose();

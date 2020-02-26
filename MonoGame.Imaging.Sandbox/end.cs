@@ -1728,8 +1728,8 @@ namespace StbSharp
             int y;
             float scale_ratio = (float)(stbir_info.vertical_scale);
             float out_scanlines_radius =
-                (float)(stbir__filter_info_table[stbir_info.vertical_filter].support((float)(1 / scale_ratio)) *
-                         scale_ratio);
+                (float)(stbir__filter_info_table[stbir_info.vertical_filter].support((float)(1 / scale_ratio)) * scale_ratio);
+
             for (y = (int)(0); (y) < (stbir_info.output_h); y++)
             {
                 float in_center_of_out = (float)(0);
@@ -1759,6 +1759,7 @@ namespace StbSharp
 
                 if ((stbir_info.ring_buffer_begin_index) < (0))
                     stbir__decode_and_resample_upsample(stbir_info, (int)(in_first_scanline));
+
                 while ((in_last_scanline) > (stbir_info.ring_buffer_last_scanline))
                 {
                     stbir__decode_and_resample_upsample(stbir_info, (int)(stbir_info.ring_buffer_last_scanline + 1));
@@ -1815,7 +1816,7 @@ namespace StbSharp
                     }
                 }
 
-                Console.WriteLine("OLD: " + Hash(s));
+                //Console.WriteLine("OLD: " + Hash(s));
             }
         }
 
