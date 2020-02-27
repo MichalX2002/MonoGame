@@ -6,10 +6,6 @@
 	path = ThirdParty/NVorbis
 	url=https://github.com/TechnologicalPizza/MonoGame.NVorbis.git
 
-[submodule "ThirdParty/SDL_GameControllerDB"]
-	path = ThirdParty/SDL_GameControllerDB
-	url = https://github.com/gabomdq/SDL_GameControllerDB
-	
 [submodule "ThirdParty/StbSharp/Image"]
 	path = ThirdParty/StbSharp/Image
 	url = https://github.com/TechnologicalPizza/StbSharp.Image
