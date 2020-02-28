@@ -52,6 +52,7 @@ namespace MonoGame.Framework.Collections
                 private int _index;
 
                 public TValue Current { get; private set; }
+
                 object IEnumerator.Current
                 {
                     get

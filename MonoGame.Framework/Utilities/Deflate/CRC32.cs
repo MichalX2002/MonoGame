@@ -28,7 +28,7 @@
 
 using System;
 
-namespace MonoGame.Framework.Deflate
+namespace MonoGame.Framework.Utilities.Deflate
 {
     /// <summary>
     ///   Computes a CRC-32. The CRC-32 algorithm is parameterized - you
@@ -123,7 +123,7 @@ namespace MonoGame.Framework.Deflate
 
         internal int _InternalComputeCrc32(uint W, byte B)
         {
-            return (int)(crc32Table[(W ^ B) & 0xFF] ^ (W >> 8));
+            return (int)(crc32Table[(W ^ B) & 0xFF] ^ W >> 8);
         }
 
 
@@ -144,15 +144,15 @@ namespace MonoGame.Framework.Deflate
             {
                 int x = offset + i;
                 byte b = block[x];
-                if (this.reverseBits)
+                if (reverseBits)
                 {
-                    uint temp = (_register >> 24) ^ b;
-                    _register = (_register << 8) ^ crc32Table[temp];
+                    uint temp = _register >> 24 ^ b;
+                    _register = _register << 8 ^ crc32Table[temp];
                 }
                 else
                 {
-                    uint temp = (_register & 0x000000FF) ^ b;
-                    _register = (_register >> 8) ^ crc32Table[temp];
+                    uint temp = _register & 0x000000FF ^ b;
+                    _register = _register >> 8 ^ crc32Table[temp];
                 }
             }
             _TotalBytesRead += count;
@@ -165,15 +165,15 @@ namespace MonoGame.Framework.Deflate
         /// <param name = "b">the byte to include into the CRC .  </param>
         public void UpdateCRC(byte b)
         {
-            if (this.reverseBits)
+            if (reverseBits)
             {
-                uint temp = (_register >> 24) ^ b;
-                _register = (_register << 8) ^ crc32Table[temp];
+                uint temp = _register >> 24 ^ b;
+                _register = _register << 8 ^ crc32Table[temp];
             }
             else
             {
-                uint temp = (_register & 0x000000FF) ^ b;
-                _register = (_register >> 8) ^ crc32Table[temp];
+                uint temp = _register & 0x000000FF ^ b;
+                _register = _register >> 8 ^ crc32Table[temp];
             }
         }
 
@@ -195,19 +195,19 @@ namespace MonoGame.Framework.Deflate
         {
             while (n-- > 0)
             {
-                if (this.reverseBits)
+                if (reverseBits)
                 {
-                    uint temp = (_register >> 24) ^ b;
-                    _register = (_register << 8) ^ crc32Table[(temp >= 0)
+                    uint temp = _register >> 24 ^ b;
+                    _register = _register << 8 ^ crc32Table[temp >= 0
                                                               ? temp
-                                                              : (temp + 256)];
+                                                              : temp + 256];
                 }
                 else
                 {
-                    uint temp = (_register & 0x000000FF) ^ b;
-                    _register = (_register >> 8) ^ crc32Table[(temp >= 0)
+                    uint temp = _register & 0x000000FF ^ b;
+                    _register = _register >> 8 ^ crc32Table[temp >= 0
                                                               ? temp
-                                                              : (temp + 256)];
+                                                              : temp + 256];
 
                 }
             }
@@ -220,10 +220,10 @@ namespace MonoGame.Framework.Deflate
             unchecked
             {
                 uint ret = data;
-                ret = (ret & 0x55555555) << 1 | (ret >> 1) & 0x55555555;
-                ret = (ret & 0x33333333) << 2 | (ret >> 2) & 0x33333333;
-                ret = (ret & 0x0F0F0F0F) << 4 | (ret >> 4) & 0x0F0F0F0F;
-                ret = (ret << 24) | ((ret & 0xFF00) << 8) | ((ret >> 8) & 0xFF00) | (ret >> 24);
+                ret = (ret & 0x55555555) << 1 | ret >> 1 & 0x55555555;
+                ret = (ret & 0x33333333) << 2 | ret >> 2 & 0x33333333;
+                ret = (ret & 0x0F0F0F0F) << 4 | ret >> 4 & 0x0F0F0F0F;
+                ret = ret << 24 | (ret & 0xFF00) << 8 | ret >> 8 & 0xFF00 | ret >> 24;
                 return ret;
             }
         }
@@ -235,8 +235,8 @@ namespace MonoGame.Framework.Deflate
                 uint u = (uint)data * 0x00020202;
                 uint m = 0x01044010;
                 uint s = u & m;
-                uint t = (u << 2) & (m << 1);
-                return (byte)((0x01001001 * (s + t)) >> 24);
+                uint t = u << 2 & m << 1;
+                return (byte)(0x01001001 * (s + t) >> 24);
             }
         }
 
@@ -256,7 +256,7 @@ namespace MonoGame.Framework.Deflate
                     {
                         if ((dwCrc & 1) == 1)
                         {
-                            dwCrc = (dwCrc >> 1) ^ dwPolynomial;
+                            dwCrc = dwCrc >> 1 ^ dwPolynomial;
                         }
                         else
                         {
@@ -272,7 +272,7 @@ namespace MonoGame.Framework.Deflate
                         crc32Table[i] = dwCrc;
                     }
                     i++;
-                } while (i!=0);
+                } while (i != 0);
             }
 
 #if VERBOSE
@@ -296,10 +296,10 @@ namespace MonoGame.Framework.Deflate
         private uint gf2_matrix_times(uint[] matrix, uint vec)
         {
             uint sum = 0;
-            int i=0;
+            int i = 0;
             while (vec != 0)
             {
-                if ((vec & 0x01)== 0x01)
+                if ((vec & 0x01) == 0x01)
                     sum ^= matrix[i];
                 vec >>= 1;
                 i++;
@@ -334,11 +334,11 @@ namespace MonoGame.Framework.Deflate
             if (length == 0)
                 return;
 
-            uint crc1= ~_register;
-            uint crc2= (uint) crc;
+            uint crc1 = ~_register;
+            uint crc2 = (uint)crc;
 
             // put operator for one zero bit in odd
-            odd[0] = this.dwPolynomial;  // the CRC-32 polynomial
+            odd[0] = dwPolynomial;  // the CRC-32 polynomial
             uint row = 1;
             for (int i = 1; i < 32; i++)
             {
@@ -352,15 +352,16 @@ namespace MonoGame.Framework.Deflate
             // put operator for four zero bits in odd
             gf2_matrix_square(odd, even);
 
-            uint len2 = (uint) length;
+            uint len2 = (uint)length;
 
             // apply len2 zeros to crc1 (first square will put the operator for one
             // zero byte, eight zero bits, in even)
-            do {
+            do
+            {
                 // apply zeros operator for this bit of len2
                 gf2_matrix_square(even, odd);
 
-                if ((len2 & 1)== 1)
+                if ((len2 & 1) == 1)
                     crc1 = gf2_matrix_times(even, crc1);
                 len2 >>= 1;
 
@@ -369,7 +370,7 @@ namespace MonoGame.Framework.Deflate
 
                 // another iteration of the loop with odd and even swapped
                 gf2_matrix_square(odd, even);
-                if ((len2 & 1)==1)
+                if ((len2 & 1) == 1)
                     crc1 = gf2_matrix_times(odd, crc1);
                 len2 >>= 1;
 
@@ -378,7 +379,7 @@ namespace MonoGame.Framework.Deflate
 
             crc1 ^= crc2;
 
-            _register= ~crc1;
+            _register = ~crc1;
 
             //return (int) crc1;
             return;
@@ -410,7 +411,7 @@ namespace MonoGame.Framework.Deflate
         ///   </para>
         /// </remarks>
         public CRC32(bool reverseBits) :
-            this( unchecked((int)0xEDB88320), reverseBits)
+            this(unchecked((int)0xEDB88320), reverseBits)
         {
         }
 
@@ -443,8 +444,8 @@ namespace MonoGame.Framework.Deflate
         public CRC32(int polynomial, bool reverseBits)
         {
             this.reverseBits = reverseBits;
-            this.dwPolynomial = (uint) polynomial;
-            this.GenerateLookupTable();
+            dwPolynomial = (uint)polynomial;
+            GenerateLookupTable();
         }
 
         /// <summary>

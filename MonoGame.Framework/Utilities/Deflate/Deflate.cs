@@ -69,7 +69,7 @@
 
 using System;
 
-namespace MonoGame.Framework.Deflate
+namespace MonoGame.Framework.Utilities.Deflate
 {
 
     internal enum BlockState
@@ -117,11 +117,11 @@ namespace MonoGame.Framework.Deflate
 
             private Config(int goodLength, int maxLazy, int niceLength, int maxChainLength, DeflateFlavor flavor)
             {
-                this.GoodLength = goodLength;
-                this.MaxLazy = maxLazy;
-                this.NiceLength = niceLength;
-                this.MaxChainLength = maxChainLength;
-                this.Flavor = flavor;
+                GoodLength = goodLength;
+                MaxLazy = maxLazy;
+                NiceLength = niceLength;
+                MaxChainLength = maxChainLength;
+                Flavor = flavor;
             }
 
             public static Config Lookup(CompressionLevel level)
@@ -429,7 +429,7 @@ namespace MonoGame.Framework.Deflate
         {
             short tn2 = tree[n * 2];
             short tm2 = tree[m * 2];
-            return tn2 < tm2 || (tn2 == tm2 && depth[n] <= depth[m]);
+            return tn2 < tm2 || tn2 == tm2 && depth[n] <= depth[m];
         }
 
 
@@ -440,7 +440,7 @@ namespace MonoGame.Framework.Deflate
             int n; // iterates over all tree elements
             int prevlen = -1; // last emitted length
             int curlen; // length of current code
-            int nextlen = (int)tree[0 * 2 + 1]; // length of next code
+            int nextlen = tree[0 * 2 + 1]; // length of next code
             int count = 0; // repeat count of the current code
             int max_count = 7; // max repeat count
             int min_count = 4; // min repeat count
@@ -449,11 +449,11 @@ namespace MonoGame.Framework.Deflate
             {
                 max_count = 138; min_count = 3;
             }
-            tree[(max_code + 1) * 2 + 1] = (short)0x7fff; // guard //??
+            tree[(max_code + 1) * 2 + 1] = 0x7fff; // guard //??
 
             for (n = 0; n <= max_code; n++)
             {
-                curlen = nextlen; nextlen = (int)tree[(n + 1) * 2 + 1];
+                curlen = nextlen; nextlen = tree[(n + 1) * 2 + 1];
                 if (++count < max_count && curlen == nextlen)
                 {
                     continue;
@@ -545,10 +545,10 @@ namespace MonoGame.Framework.Deflate
         internal void send_tree(short[] tree, int max_code)
         {
             int n;                           // iterates over all tree elements
-            int prevlen   = -1;              // last emitted length
+            int prevlen = -1;              // last emitted length
             int curlen;                      // length of current code
-            int nextlen   = tree[0 * 2 + 1]; // length of next code
-            int count     = 0;               // repeat count of the current code
+            int nextlen = tree[0 * 2 + 1]; // length of next code
+            int count = 0;               // repeat count of the current code
             int max_count = 7;               // max repeat count
             int min_count = 4;               // min repeat count
 
@@ -649,24 +649,24 @@ namespace MonoGame.Framework.Deflate
             int len = length;
             unchecked
             {
-                if (bi_valid > (int)Buf_size - len)
+                if (bi_valid > Buf_size - len)
                 {
                     //int val = value;
                     //      bi_buf |= (val << bi_valid);
 
-                    bi_buf |= (short)((value << bi_valid) & 0xffff);
+                    bi_buf |= (short)(value << bi_valid & 0xffff);
                     //put_short(bi_buf);
-                        pending[pendingCount++] = (byte)bi_buf;
-                        pending[pendingCount++] = (byte)(bi_buf >> 8);
+                    pending[pendingCount++] = (byte)bi_buf;
+                    pending[pendingCount++] = (byte)(bi_buf >> 8);
 
 
-                    bi_buf = (short)((uint)value >> (Buf_size - bi_valid));
+                    bi_buf = (short)((uint)value >> Buf_size - bi_valid);
                     bi_valid += len - Buf_size;
                 }
                 else
                 {
                     //      bi_buf |= (value) << bi_valid;
-                    bi_buf |= (short)((value << bi_valid) & 0xffff);
+                    bi_buf |= (short)(value << bi_valid & 0xffff);
                     bi_valid += len;
                 }
             }
@@ -706,7 +706,7 @@ namespace MonoGame.Framework.Deflate
         // the current block must be flushed.
         internal bool _tr_tally(int dist, int lc)
         {
-            pending[_distanceOffset + last_lit * 2] = unchecked((byte) ( (uint)dist >> 8 ) );
+            pending[_distanceOffset + last_lit * 2] = unchecked((byte)((uint)dist >> 8));
             pending[_distanceOffset + last_lit * 2 + 1] = unchecked((byte)dist);
             pending[_lengthOffset + last_lit] = unchecked((byte)lc);
             last_lit++;
@@ -733,14 +733,14 @@ namespace MonoGame.Framework.Deflate
                 int dcode;
                 for (dcode = 0; dcode < InternalConstants.D_CODES; dcode++)
                 {
-                    out_length = (int)(out_length + (int)dyn_dtree[dcode * 2] * (5L + Tree.ExtraDistanceBits[dcode]));
+                    out_length = (int)(out_length + dyn_dtree[dcode * 2] * (5L + Tree.ExtraDistanceBits[dcode]));
                 }
                 out_length >>= 3;
-                if ((matches < (last_lit / 2)) && out_length < in_length / 2)
+                if (matches < last_lit / 2 && out_length < in_length / 2)
                     return true;
             }
 
-            return (last_lit == lit_bufsize - 1) || (last_lit == lit_bufsize);
+            return last_lit == lit_bufsize - 1 || last_lit == lit_bufsize;
             // dinoch - wraparound?
             // We avoid equality with lit_bufsize because of wraparound at 64K
             // on 16 bit machines and because stored blocks are restricted to
@@ -763,9 +763,9 @@ namespace MonoGame.Framework.Deflate
                 do
                 {
                     int ix = _distanceOffset + lx * 2;
-                    distance = ((pending[ix] << 8) & 0xff00) |
-                        (pending[ix + 1] & 0xff);
-                    lc = (pending[_lengthOffset + lx]) & 0xff;
+                    distance = pending[ix] << 8 & 0xff00 |
+                        pending[ix + 1] & 0xff;
+                    lc = pending[_lengthOffset + lx] & 0xff;
                     lx++;
 
                     if (distance == 0)
@@ -834,7 +834,7 @@ namespace MonoGame.Framework.Deflate
             {
                 bin_freq += dyn_ltree[n * 2]; n++;
             }
-            data_type = (sbyte)(bin_freq > (ascii_freq >> 2) ? Z_BINARY : Z_ASCII);
+            data_type = (sbyte)(bin_freq > ascii_freq >> 2 ? Z_BINARY : Z_ASCII);
         }
 
 
@@ -944,8 +944,8 @@ namespace MonoGame.Framework.Deflate
                 if (strstart == 0 || strstart >= max_start)
                 {
                     // strstart == 0 is possible when wraparound on 16-bit machine
-                    lookahead = (int)(strstart - max_start);
-                    strstart = (int)max_start;
+                    lookahead = strstart - max_start;
+                    strstart = max_start;
 
                     flush_block_only(false);
                     if (_codec.AvailableBytesOut == 0)
@@ -964,7 +964,7 @@ namespace MonoGame.Framework.Deflate
 
             flush_block_only(flush == FlushType.Finish);
             if (_codec.AvailableBytesOut == 0)
-                return (flush == FlushType.Finish) ? BlockState.FinishStarted : BlockState.NeedMore;
+                return flush == FlushType.Finish ? BlockState.FinishStarted : BlockState.NeedMore;
 
             return flush == FlushType.Finish ? BlockState.FinishDone : BlockState.BlockDone;
         }
@@ -1004,8 +1004,8 @@ namespace MonoGame.Framework.Deflate
                 max_blindex = build_bl_tree();
 
                 // Determine the best encoding. Compute first the block length in bytes
-                opt_lenb = (opt_len + 3 + 7) >> 3;
-                static_lenb = (static_len + 3 + 7) >> 3;
+                opt_lenb = opt_len + 3 + 7 >> 3;
+                static_lenb = static_len + 3 + 7 >> 3;
 
                 if (static_lenb <= opt_lenb)
                     opt_lenb = static_lenb;
@@ -1098,7 +1098,7 @@ namespace MonoGame.Framework.Deflate
                     do
                     {
                         m = head[--p] & 0xffff;
-                        head[p] = (short)((m >= w_size) ? (m - w_size) : 0);
+                        head[p] = (short)(m >= w_size ? m - w_size : 0);
                     }
                     while (--n != 0);
 
@@ -1107,7 +1107,7 @@ namespace MonoGame.Framework.Deflate
                     do
                     {
                         m = prev[--p] & 0xffff;
-                        prev[p] = (short)((m >= w_size) ? (m - w_size) : 0);
+                        prev[p] = (short)(m >= w_size ? m - w_size : 0);
                         // If n is not on any hash chain, prev[n] is garbage but
                         // its value will never be used.
                     }
@@ -1136,7 +1136,7 @@ namespace MonoGame.Framework.Deflate
                 if (lookahead >= MIN_MATCH)
                 {
                     ins_h = window[strstart] & 0xff;
-                    ins_h = (((ins_h) << hash_shift) ^ (window[strstart + 1] & 0xff)) & hash_mask;
+                    ins_h = (ins_h << hash_shift ^ window[strstart + 1] & 0xff) & hash_mask;
                 }
                 // If the whole input has less than MIN_MATCH bytes, ins_h is garbage,
                 // but this is not important since only literal bytes will be emitted.
@@ -1176,7 +1176,7 @@ namespace MonoGame.Framework.Deflate
                 // dictionary, and set hash_head to the head of the hash chain:
                 if (lookahead >= MIN_MATCH)
                 {
-                    ins_h = (((ins_h) << hash_shift) ^ (window[strstart + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
+                    ins_h = (ins_h << hash_shift ^ window[strstart + (MIN_MATCH - 1)] & 0xff) & hash_mask;
 
                     //  prev[strstart&w_mask]=hash_head=head[ins_h];
                     hash_head = head[ins_h] & 0xffff;
@@ -1187,7 +1187,7 @@ namespace MonoGame.Framework.Deflate
                 // Find the longest match, discarding those <= prev_length.
                 // At this point we have always match_length < MIN_MATCH
 
-                if (hash_head != 0L && ((strstart - hash_head) & 0xffff) <= w_size - MIN_LOOKAHEAD)
+                if (hash_head != 0L && (strstart - hash_head & 0xffff) <= w_size - MIN_LOOKAHEAD)
                 {
                     // To simplify the code, we prevent matches with the string
                     // of window index 0 (in particular we have to avoid a match
@@ -1215,7 +1215,7 @@ namespace MonoGame.Framework.Deflate
                         {
                             strstart++;
 
-                            ins_h = ((ins_h << hash_shift) ^ (window[strstart + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
+                            ins_h = (ins_h << hash_shift ^ window[strstart + (MIN_MATCH - 1)] & 0xff) & hash_mask;
                             //      prev[strstart&w_mask]=hash_head=head[ins_h];
                             hash_head = head[ins_h] & 0xffff;
                             prev[strstart & w_mask] = head[ins_h];
@@ -1233,7 +1233,7 @@ namespace MonoGame.Framework.Deflate
                         match_length = 0;
                         ins_h = window[strstart] & 0xff;
 
-                        ins_h = (((ins_h) << hash_shift) ^ (window[strstart + 1] & 0xff)) & hash_mask;
+                        ins_h = (ins_h << hash_shift ^ window[strstart + 1] & 0xff) & hash_mask;
                         // If lookahead < MIN_MATCH, ins_h is garbage, but it does not
                         // matter since it will be recomputed at next deflate call.
                     }
@@ -1297,7 +1297,7 @@ namespace MonoGame.Framework.Deflate
 
                 if (lookahead >= MIN_MATCH)
                 {
-                    ins_h = (((ins_h) << hash_shift) ^ (window[strstart + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
+                    ins_h = (ins_h << hash_shift ^ window[strstart + (MIN_MATCH - 1)] & 0xff) & hash_mask;
                     //  prev[strstart&w_mask]=hash_head=head[ins_h];
                     hash_head = head[ins_h] & 0xffff;
                     prev[strstart & w_mask] = head[ins_h];
@@ -1310,7 +1310,7 @@ namespace MonoGame.Framework.Deflate
                 match_length = MIN_MATCH - 1;
 
                 if (hash_head != 0 && prev_length < config.MaxLazy &&
-                    ((strstart - hash_head) & 0xffff) <= w_size - MIN_LOOKAHEAD)
+                    (strstart - hash_head & 0xffff) <= w_size - MIN_LOOKAHEAD)
                 {
                     // To simplify the code, we prevent matches with the string
                     // of window index 0 (in particular we have to avoid a match
@@ -1323,7 +1323,7 @@ namespace MonoGame.Framework.Deflate
                     // longest_match() sets match_start
 
                     if (match_length <= 5 && (compressionStrategy == CompressionStrategy.Filtered ||
-                                              (match_length == MIN_MATCH && strstart - match_start > 4096)))
+                                              match_length == MIN_MATCH && strstart - match_start > 4096))
                     {
 
                         // If prev_match is also MIN_MATCH, match_start is garbage
@@ -1353,7 +1353,7 @@ namespace MonoGame.Framework.Deflate
                     {
                         if (++strstart <= max_insert)
                         {
-                            ins_h = (((ins_h) << hash_shift) ^ (window[strstart + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
+                            ins_h = (ins_h << hash_shift ^ window[strstart + (MIN_MATCH - 1)] & 0xff) & hash_mask;
                             //prev[strstart&w_mask]=hash_head=head[ins_h];
                             hash_head = head[ins_h] & 0xffff;
                             prev[strstart & w_mask] = head[ins_h];
@@ -1403,7 +1403,8 @@ namespace MonoGame.Framework.Deflate
 
             if (match_available != 0)
             {
-                /*bflush = */ _tr_tally(0, window[strstart - 1] & 0xff);
+                /*bflush = */
+                _tr_tally(0, window[strstart - 1] & 0xff);
                 match_available = 0;
             }
             flush_block_only(flush == FlushType.Finish);
@@ -1423,11 +1424,11 @@ namespace MonoGame.Framework.Deflate
         internal int longest_match(int cur_match)
         {
             int chain_length = config.MaxChainLength; // max hash chain length
-            int scan         = strstart;              // current string
+            int scan = strstart;              // current string
             int match;                                // matched string
             int len;                                  // length of current match
-            int best_len     = prev_length;           // best match length so far
-            int limit        = strstart > (w_size - MIN_LOOKAHEAD) ? strstart - (w_size - MIN_LOOKAHEAD) : 0;
+            int best_len = prev_length;           // best match length so far
+            int limit = strstart > w_size - MIN_LOOKAHEAD ? strstart - (w_size - MIN_LOOKAHEAD) : 0;
 
             int niceLength = config.NiceLength;
 
@@ -1487,7 +1488,7 @@ namespace MonoGame.Framework.Deflate
                        window[++scan] == window[++match] &&
                        window[++scan] == window[++match] && scan < strend);
 
-                len = MAX_MATCH - (int)(strend - scan);
+                len = MAX_MATCH - (strend - scan);
                 scan = strend - MAX_MATCH;
 
                 if (len > best_len)
@@ -1560,7 +1561,7 @@ namespace MonoGame.Framework.Deflate
             head = new short[hash_size];
 
             // for memLevel==8, this will be 16384, 16k
-            lit_bufsize = 1 << (memLevel + 6);
+            lit_bufsize = 1 << memLevel + 6;
 
             // Use a single array as the buffer for data pending compression,
             // the output distance codes, and the output length codes (aka tree).
@@ -1575,8 +1576,8 @@ namespace MonoGame.Framework.Deflate
             // The middle slice, of 32k, is used for distance codes.
             // The final 16k are length codes.
 
-            this.compressionLevel = level;
-            this.compressionStrategy = strategy;
+            compressionLevel = level;
+            compressionStrategy = strategy;
 
             Reset();
             return ZlibConstants.Z_OK;
@@ -1691,11 +1692,11 @@ namespace MonoGame.Framework.Deflate
             // call of fill_window.
 
             ins_h = window[0] & 0xff;
-            ins_h = (((ins_h) << hash_shift) ^ (window[1] & 0xff)) & hash_mask;
+            ins_h = (ins_h << hash_shift ^ window[1] & 0xff) & hash_mask;
 
             for (int n = 0; n <= length - MIN_MATCH; n++)
             {
-                ins_h = (((ins_h) << hash_shift) ^ (window[n + (MIN_MATCH - 1)] & 0xff)) & hash_mask;
+                ins_h = (ins_h << hash_shift ^ window[n + (MIN_MATCH - 1)] & 0xff) & hash_mask;
                 prev[n & w_mask] = head[ins_h];
                 head[ins_h] = (short)n;
             }
@@ -1709,8 +1710,8 @@ namespace MonoGame.Framework.Deflate
             int old_flush;
 
             if (_codec.OutputBuffer == null ||
-                (_codec.InputBuffer == null && _codec.AvailableBytesIn != 0) ||
-                (status == FINISH_STATE && flush != FlushType.Finish))
+                _codec.InputBuffer == null && _codec.AvailableBytesIn != 0 ||
+                status == FINISH_STATE && flush != FlushType.Finish)
             {
                 _codec.Message = _ErrorMessage[ZlibConstants.Z_NEED_DICT - ZlibConstants.Z_STREAM_ERROR];
                 throw new ZlibException(string.Format("Something is fishy. [{0}]", _codec.Message));
@@ -1727,15 +1728,15 @@ namespace MonoGame.Framework.Deflate
             // Write the zlib (rfc1950) header bytes
             if (status == INIT_STATE)
             {
-                int header = (Z_DEFLATED + ((w_bits - 8) << 4)) << 8;
-                int level_flags = (((int)compressionLevel - 1) & 0xff) >> 1;
+                int header = Z_DEFLATED + (w_bits - 8 << 4) << 8;
+                int level_flags = ((int)compressionLevel - 1 & 0xff) >> 1;
 
                 if (level_flags > 3)
                     level_flags = 3;
                 header |= level_flags << 6;
                 if (strstart != 0)
                     header |= PRESET_DICT;
-                header += 31 - (header % 31);
+                header += 31 - header % 31;
 
                 status = BUSY_STATE;
                 //putShortMSB(header);
@@ -1800,7 +1801,7 @@ namespace MonoGame.Framework.Deflate
             }
 
             // Start a new block or continue the current one.
-            if (_codec.AvailableBytesIn != 0 || lookahead != 0 || (flush != FlushType.None && status != FINISH_STATE))
+            if (_codec.AvailableBytesIn != 0 || lookahead != 0 || flush != FlushType.None && status != FINISH_STATE)
             {
                 BlockState bstate = DeflateFunction(flush);
 

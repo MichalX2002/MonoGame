@@ -204,6 +204,20 @@ namespace MonoGame.Framework.Graphics
             AssertBeginCalled(callerName);
         }
 
+        public void Flush()
+        {
+            _batcher.DrawBatch(_sortMode, _effect);
+        }
+
+        /// <summary>
+        /// Called at the end of a draw operation for <see cref="SpriteSortMode.Immediate"/>.
+        /// </summary>
+        public void FlushIfNeeded()
+        {
+            if (_sortMode == SpriteSortMode.Immediate)
+                Flush();
+        }
+
         public void Draw(
             Texture2D texture,
             in VertexPositionColorTexture vertexTL, in VertexPositionColorTexture vertexTR,
@@ -262,7 +276,6 @@ namespace MonoGame.Framework.Graphics
             SpriteEffects effects = SpriteEffects.None,
             float layerDepth = 0f)
         {
-
             // Assign default values to null parameters here, as they are not compile-time constants
             if (!color.HasValue)
                 color = Color.White;
@@ -275,17 +288,14 @@ namespace MonoGame.Framework.Graphics
 
             // If both drawRectangle and position are null, or if both have been assigned a value, raise an error
             if (destinationRectangle.HasValue == position.HasValue)
-            {
                 throw new ArgumentException("Expected drawRectangle or position, but received neither or both.");
-            }
-            else if (position != null)
+
+            if (position.HasValue) // Call Draw() using position
             {
-                // Call Draw() using position
                 Draw(texture, position.Value, sourceRectangle, color.Value, rotation, origin.Value, scale.Value, effects, layerDepth);
             }
-            else
+            else // Call Draw() using drawRectangle
             {
-                // Call Draw() using drawRectangle
                 Draw(texture, destinationRectangle.Value, sourceRectangle, color.Value, rotation, origin.Value, effects, layerDepth);
             }
         }
@@ -295,7 +305,10 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="texture">A texture.</param>
         /// <param name="position">The drawing location on screen.</param>
-        /// <param name="sourceRectangle">An optional region on the texture which will be rendered. If null - draws full texture.</param>
+        /// <param name="sourceRectangle">
+        /// An optional region on the texture which will be rendered.
+        /// If null; draws full texture.
+        /// </param>
         /// <param name="color">A color mask.</param>
         /// <param name="rotation">A rotation of this sprite.</param>
         /// <param name="origin">Center of the rotation. 0,0 by default.</param>
@@ -414,7 +427,7 @@ namespace MonoGame.Framework.Graphics
                     (srcRect.X + srcRect.Width) * texture.Texel.X,
                     (srcRect.Y + srcRect.Height) * texture.Texel.Y);
 
-                originX = srcRect.Width != 0 
+                originX = srcRect.Width != 0
                     ? origin.X * destinationRectangle.Width / srcRect.Width
                     : origin.X * destinationRectangle.Width * texture.Texel.X;
 
@@ -449,15 +462,6 @@ namespace MonoGame.Framework.Graphics
             }
 
             FlushIfNeeded();
-        }
-
-        /// <summary>
-        /// Called at the end of a draw operation for <see cref="SpriteSortMode.Immediate"/>.
-        /// </summary>
-        public void FlushIfNeeded()
-        {
-            if (_sortMode == SpriteSortMode.Immediate)
-                _batcher.DrawBatch(_sortMode, _effect);
         }
 
         /// <summary>
@@ -883,7 +887,7 @@ namespace MonoGame.Framework.Graphics
                         (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
 
                     item.Set(
-                        pos.X, pos.Y, pCurrentGlyph->BoundsInTexture.Width, pCurrentGlyph->BoundsInTexture.Height, 
+                        pos.X, pos.Y, pCurrentGlyph->BoundsInTexture.Width, pCurrentGlyph->BoundsInTexture.Height,
                         color, texCoord, 0);
 
                     offset.X += pCurrentGlyph->Width + pCurrentGlyph->RightSideBearing;

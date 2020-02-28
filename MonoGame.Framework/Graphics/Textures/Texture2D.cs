@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MonoGame.Framework.Memory;
@@ -351,7 +352,7 @@ namespace MonoGame.Framework.Graphics
 
             using (var image = Image.Load(config, readStream))
                 throw new NotImplementedException(); // TODO: FIXME:
-                //SetData(image.GetPixelSpan());
+                                                     //SetData(image.GetPixelSpan());
         }
 
         /// <summary>
@@ -377,16 +378,26 @@ namespace MonoGame.Framework.Graphics
         {
             CheckRect(level, rectangle, out Rectangle checkedRect);
 
-            var pixelFormat = GetVectorSaveFormat(Format);
-            var data = pixelFormat.GetData(this, checkedRect, level, arraySlice);
-            var image = Image.LoadPixelData(pixelFormat.VectorType, data.Span, checkedRect.Size);
-            return image;
+            var saveFormat = GetVectorSaveFormat(Format);
+            var data = saveFormat.GetData(this, checkedRect, level, arraySlice);
+            try
+            {
+                return Image.WrapMemory(saveFormat.Types.Span[0], data, checkedRect.Size, leaveOpen: false);
+            }
+            catch
+            {
+                data.Dispose();
+                throw;
+            }
         }
 
         /// <summary>
-        /// Retrieves the contents of the texture and puts them into an <see cref="Image{TPixel}"/>, 
-        /// converting the surface format into the specified pixel type.
+        /// Retrieves the contents of the texture and puts them into an <see cref="Image{TPixel}"/>.
         /// </summary>
+        /// <remarks>
+        /// The surface format is converted into the specified <typeparamref name="TPixel"/> type.
+        /// 
+        /// </remarks>
         [CLSCompliant(false)]
         public Image<TPixel> ToImage<TPixel>(
             Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
@@ -394,20 +405,18 @@ namespace MonoGame.Framework.Graphics
         {
             CheckRect(level, rectangle, out Rectangle checkedRect);
 
-            var pixelSaveFormat = GetVectorSaveFormat(Format);
-            var data = pixelSaveFormat.GetData(this, checkedRect, level, arraySlice);
+            var saveFormat = GetVectorSaveFormat(Format);
+            var data = saveFormat.GetData(this, checkedRect, level, arraySlice);
             try
             {
-                if (pixelSaveFormat.VectorType.Type == typeof(TPixel))
-                {
-                    return Image.WrapMemory<TPixel>(data, checkedRect.Size, leaveOpen: false);
-                }
-                else
-                {
-                    using (data)
-                        return Image.LoadPixelData<TPixel>(
-                            pixelSaveFormat.VectorType, data.Span, checkedRect.Size);
-                }
+                var types = saveFormat.Types.Span;
+                foreach (var vectorType in types)
+                    if (vectorType.Type == typeof(TPixel))
+                        return Image.WrapMemory<TPixel>(data, checkedRect.Size, leaveOpen: false);
+
+                using (data)
+                    return Image.LoadPixelData<TPixel>(
+                        types[0], data.Span, checkedRect.Size);
             }
             catch
             {
@@ -443,8 +452,8 @@ namespace MonoGame.Framework.Graphics
             if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
             if (stream == null) throw new ArgumentNullException(nameof(stream));
             if (format == null) throw new ArgumentNullException(nameof(format));
-            
-            using(var image = ToImage(rectangle, level, arraySlice))
+
+            using (var image = ToImage(rectangle, level, arraySlice))
                 image.Save(imagingConfig, stream, format, encoderOptions);
         }
 

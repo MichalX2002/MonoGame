@@ -18,10 +18,10 @@ namespace MonoGame.Framework.PackedVector
     public struct NormalizedByte4 : IPackedVector<uint>, IEquatable<NormalizedByte4>, IPixel
     {
         VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Blue, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Alpha, sizeof(byte) * 8));
+            new VectorComponent(VectorComponentType.Red, sizeof(sbyte) * 8),
+            new VectorComponent(VectorComponentType.Green, sizeof(sbyte) * 8),
+            new VectorComponent(VectorComponentType.Blue, sizeof(sbyte) * 8),
+            new VectorComponent(VectorComponentType.Alpha, sizeof(sbyte) * 8));
 
         [CLSCompliant(false)] 
         public sbyte X;

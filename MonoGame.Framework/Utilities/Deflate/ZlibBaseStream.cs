@@ -27,12 +27,12 @@
 using System;
 using System.IO;
 
-namespace MonoGame.Framework.Deflate
+namespace MonoGame.Framework.Utilities.Deflate
 {
 
     internal enum ZlibStreamFlavor { ZLIB = 1950, DEFLATE = 1951, GZIP = 1952 }
 
-    internal class ZlibBaseStream : System.IO.Stream
+    internal class ZlibBaseStream : Stream
     {
         protected internal ZlibCodec _z = null; // deferred init... new ZlibCodec();
 
@@ -46,7 +46,7 @@ namespace MonoGame.Framework.Deflate
         protected internal int _bufferSize = ZlibConstants.WorkingBufferSizeDefault;
         protected internal byte[] _buf1 = new byte[1];
 
-        protected internal System.IO.Stream _stream;
+        protected internal Stream _stream;
         protected internal CompressionStrategy Strategy = CompressionStrategy.Default;
 
         // workitem 7159
@@ -58,24 +58,24 @@ namespace MonoGame.Framework.Deflate
 
         internal int Crc32 { get { if (crc == null) return 0; return crc.Crc32Result; } }
 
-        public ZlibBaseStream(System.IO.Stream stream,
+        public ZlibBaseStream(Stream stream,
                               CompressionMode compressionMode,
                               CompressionLevel level,
                               ZlibStreamFlavor flavor,
                               bool leaveOpen)
             : base()
         {
-            this._flushMode = FlushType.None;
+            _flushMode = FlushType.None;
             //this._workingBuffer = new byte[WORKING_BUFFER_SIZE_DEFAULT];
-            this._stream = stream;
-            this._leaveOpen = leaveOpen;
-            this._compressionMode = compressionMode;
-            this._flavor = flavor;
-            this._level = level;
+            _stream = stream;
+            _leaveOpen = leaveOpen;
+            _compressionMode = compressionMode;
+            _flavor = flavor;
+            _level = level;
             // workitem 7159
             if (flavor == ZlibStreamFlavor.GZIP)
             {
-                this.crc = new CRC32();
+                crc = new CRC32();
             }
         }
 
@@ -84,7 +84,7 @@ namespace MonoGame.Framework.Deflate
         {
             get
             {
-                return this._compressionMode == CompressionMode.Compress;
+                return _compressionMode == CompressionMode.Compress;
             }
         }
 
@@ -94,16 +94,16 @@ namespace MonoGame.Framework.Deflate
             {
                 if (_z == null)
                 {
-                    bool wantRfc1950Header = this._flavor == ZlibStreamFlavor.ZLIB;
+                    bool wantRfc1950Header = _flavor == ZlibStreamFlavor.ZLIB;
                     _z = new ZlibCodec();
-                    if (this._compressionMode == CompressionMode.Decompress)
+                    if (_compressionMode == CompressionMode.Decompress)
                     {
                         _z.InitializeInflate(wantRfc1950Header);
                     }
                     else
                     {
                         _z.Strategy = Strategy;
-                        _z.InitializeDeflate(this._level, wantRfc1950Header);
+                        _z.InitializeDeflate(_level, wantRfc1950Header);
                     }
                 }
                 return _z;
@@ -321,7 +321,7 @@ namespace MonoGame.Framework.Deflate
             _stream.Flush();
         }
 
-        public override long Seek(long offset, System.IO.SeekOrigin origin)
+        public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotImplementedException();
             //_outStream.Seek(offset, origin);
@@ -426,7 +426,7 @@ namespace MonoGame.Framework.Deflate
 
             if (_streamMode == StreamMode.Undefined)
             {
-                if (!this._stream.CanRead) throw new ZlibException("The stream is not readable.");
+                if (!_stream.CanRead) throw new ZlibException("The stream is not readable.");
                 // for the first read, set up some controls.
                 _streamMode = StreamMode.Reader;
                 // (The first reference to _z goes through the private accessor which
@@ -449,7 +449,7 @@ namespace MonoGame.Framework.Deflate
             if (buffer == null) throw new ArgumentNullException("buffer");
             if (count < 0) throw new ArgumentOutOfRangeException("count");
             if (offset < buffer.GetLowerBound(0)) throw new ArgumentOutOfRangeException("offset");
-            if ((offset + count) > buffer.GetLength(0)) throw new ArgumentOutOfRangeException("count");
+            if (offset + count > buffer.GetLength(0)) throw new ArgumentOutOfRangeException("count");
 
             int rc = 0;
 
@@ -466,7 +466,7 @@ namespace MonoGame.Framework.Deflate
             do
             {
                 // need data in _workingBuffer in order to deflate/inflate.  Here, we check if we have any.
-                if ((_z.AvailableBytesIn == 0) && (!nomoreinput))
+                if (_z.AvailableBytesIn == 0 && !nomoreinput)
                 {
                     // No data available, so try to Read data from the captive stream.
                     _z.NextIn = 0;
@@ -480,13 +480,13 @@ namespace MonoGame.Framework.Deflate
                     ? _z.Deflate(_flushMode)
                     : _z.Inflate(_flushMode);
 
-                if (nomoreinput && (rc == ZlibConstants.Z_BUF_ERROR))
+                if (nomoreinput && rc == ZlibConstants.Z_BUF_ERROR)
                     return 0;
 
                 if (rc != ZlibConstants.Z_OK && rc != ZlibConstants.Z_STREAM_END)
                     throw new ZlibException(string.Format("{0}flating:  rc={1}  msg={2}", _wantCompress ? "de" : "in", rc, _z.Message));
 
-                if ((nomoreinput || rc == ZlibConstants.Z_STREAM_END) && (_z.AvailableBytesOut == count))
+                if ((nomoreinput || rc == ZlibConstants.Z_STREAM_END) && _z.AvailableBytesOut == count)
                     break; // nothing more to read
             }
             //while (_z.AvailableBytesOut == count && rc == ZlibConstants.Z_OK);
@@ -532,17 +532,17 @@ namespace MonoGame.Framework.Deflate
 
         public override bool CanRead
         {
-            get { return this._stream.CanRead; }
+            get { return _stream.CanRead; }
         }
 
         public override bool CanSeek
         {
-            get { return this._stream.CanSeek; }
+            get { return _stream.CanSeek; }
         }
 
         public override bool CanWrite
         {
-            get { return this._stream.CanWrite; }
+            get { return _stream.CanWrite; }
         }
 
         public override long Length

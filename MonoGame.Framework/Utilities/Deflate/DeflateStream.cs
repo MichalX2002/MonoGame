@@ -27,7 +27,7 @@
 
 using System;
 
-namespace MonoGame.Framework.Deflate
+namespace MonoGame.Framework.Utilities.Deflate
 {
     /// <summary>
     /// A class for compressing and decompressing streams using the Deflate algorithm.
@@ -318,11 +318,11 @@ namespace MonoGame.Framework.Deflate
         /// </remarks>
         virtual public FlushType FlushMode
         {
-            get { return this._baseStream._flushMode; }
+            get { return _baseStream._flushMode; }
             set
             {
                 if (_disposed) throw new ObjectDisposedException("DeflateStream");
-                this._baseStream._flushMode = value;
+                _baseStream._flushMode = value;
             }
         }
 
@@ -347,16 +347,16 @@ namespace MonoGame.Framework.Deflate
         {
             get
             {
-                return this._baseStream._bufferSize;
+                return _baseStream._bufferSize;
             }
             set
             {
                 if (_disposed) throw new ObjectDisposedException("DeflateStream");
-                if (this._baseStream._workingBuffer != null)
+                if (_baseStream._workingBuffer != null)
                     throw new ZlibException("The working buffer is already set.");
                 if (value < ZlibConstants.WorkingBufferSizeMin)
                     throw new ZlibException(string.Format("Don't be silly. {0} bytes?? Use a bigger buffer, at least {1}.", value, ZlibConstants.WorkingBufferSizeMin));
-                this._baseStream._bufferSize = value;
+                _baseStream._bufferSize = value;
             }
         }
 
@@ -372,12 +372,12 @@ namespace MonoGame.Framework.Deflate
         {
             get
             {
-                return this._baseStream.Strategy;
+                return _baseStream.Strategy;
             }
             set
             {
-            if (_disposed) throw new ObjectDisposedException("DeflateStream");
-                this._baseStream.Strategy = value;
+                if (_disposed) throw new ObjectDisposedException("DeflateStream");
+                _baseStream.Strategy = value;
             }
         }
 
@@ -386,7 +386,7 @@ namespace MonoGame.Framework.Deflate
         {
             get
             {
-                return this._baseStream._z.TotalBytesIn;
+                return _baseStream._z.TotalBytesIn;
             }
         }
 
@@ -395,7 +395,7 @@ namespace MonoGame.Framework.Deflate
         {
             get
             {
-                return this._baseStream._z.TotalBytesOut;
+                return _baseStream._z.TotalBytesOut;
             }
         }
 
@@ -432,8 +432,8 @@ namespace MonoGame.Framework.Deflate
             {
                 if (!_disposed)
                 {
-                    if (disposing && (this._baseStream != null))
-                        this._baseStream.Dispose();
+                    if (disposing && _baseStream != null)
+                        _baseStream.Dispose();
                     _disposed = true;
                 }
             }
@@ -519,10 +519,10 @@ namespace MonoGame.Framework.Deflate
         {
             get
             {
-                if (this._baseStream._streamMode == ZlibBaseStream.StreamMode.Writer)
-                    return this._baseStream._z.TotalBytesOut;
-                if (this._baseStream._streamMode == ZlibBaseStream.StreamMode.Reader)
-                    return this._baseStream._z.TotalBytesIn;
+                if (_baseStream._streamMode == ZlibBaseStream.StreamMode.Writer)
+                    return _baseStream._z.TotalBytesOut;
+                if (_baseStream._streamMode == ZlibBaseStream.StreamMode.Reader)
+                    return _baseStream._z.TotalBytesIn;
                 return 0;
             }
             set { throw new NotImplementedException(); }
@@ -625,11 +625,11 @@ namespace MonoGame.Framework.Deflate
         /// </summary>
         ///
         /// <remarks>
-        ///   Uncompress it with <see cref="DeflateStream.UncompressString(byte[])"/>.
+        ///   Uncompress it with <see cref="UncompressString(byte[])"/>.
         /// </remarks>
         ///
-        /// <seealso cref="DeflateStream.UncompressString(byte[])">DeflateStream.UncompressString(byte[])</seealso>
-        /// <seealso cref="DeflateStream.CompressBuffer(byte[])">DeflateStream.CompressBuffer(byte[])</seealso>
+        /// <seealso cref="UncompressString(byte[])">DeflateStream.UncompressString(byte[])</seealso>
+        /// <seealso cref="CompressBuffer(byte[])">DeflateStream.CompressBuffer(byte[])</seealso>
         /// <seealso cref="GZipStream.CompressString(string)">GZipStream.CompressString(string)</seealso>
         /// <seealso cref="ZlibStream.CompressString(string)">ZlibStream.CompressString(string)</seealso>
         ///
@@ -656,11 +656,11 @@ namespace MonoGame.Framework.Deflate
         /// </summary>
         ///
         /// <remarks>
-        ///   Uncompress it with <see cref="DeflateStream.UncompressBuffer(byte[])"/>.
+        ///   Uncompress it with <see cref="UncompressBuffer(byte[])"/>.
         /// </remarks>
         ///
-        /// <seealso cref="DeflateStream.CompressString(string)">DeflateStream.CompressString(string)</seealso>
-        /// <seealso cref="DeflateStream.UncompressBuffer(byte[])">DeflateStream.UncompressBuffer(byte[])</seealso>
+        /// <seealso cref="CompressString(string)">DeflateStream.CompressString(string)</seealso>
+        /// <seealso cref="UncompressBuffer(byte[])">DeflateStream.UncompressBuffer(byte[])</seealso>
         /// <seealso cref="GZipStream.CompressBuffer(byte[])">GZipStream.CompressBuffer(byte[])</seealso>
         /// <seealso cref="ZlibStream.CompressBuffer(byte[])">ZlibStream.CompressBuffer(byte[])</seealso>
         ///
@@ -674,7 +674,7 @@ namespace MonoGame.Framework.Deflate
             using (var ms = new System.IO.MemoryStream())
             {
                 System.IO.Stream compressor =
-                    new DeflateStream( ms, CompressionMode.Compress, CompressionLevel.BestCompression );
+                    new DeflateStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression);
 
                 ZlibBaseStream.CompressBuffer(b, compressor);
                 return ms.ToArray();
@@ -686,8 +686,8 @@ namespace MonoGame.Framework.Deflate
         ///   Uncompress a DEFLATE'd byte array into a single string.
         /// </summary>
         ///
-        /// <seealso cref="DeflateStream.CompressString(string)">DeflateStream.CompressString(String)</seealso>
-        /// <seealso cref="DeflateStream.UncompressBuffer(byte[])">DeflateStream.UncompressBuffer(byte[])</seealso>
+        /// <seealso cref="CompressString(string)">DeflateStream.CompressString(String)</seealso>
+        /// <seealso cref="UncompressBuffer(byte[])">DeflateStream.UncompressBuffer(byte[])</seealso>
         /// <seealso cref="GZipStream.UncompressString(byte[])">GZipStream.UncompressString(byte[])</seealso>
         /// <seealso cref="ZlibStream.UncompressString(byte[])">ZlibStream.UncompressString(byte[])</seealso>
         ///
@@ -712,8 +712,8 @@ namespace MonoGame.Framework.Deflate
         ///   Uncompress a DEFLATE'd byte array into a byte array.
         /// </summary>
         ///
-        /// <seealso cref="DeflateStream.CompressBuffer(byte[])">DeflateStream.CompressBuffer(byte[])</seealso>
-        /// <seealso cref="DeflateStream.UncompressString(byte[])">DeflateStream.UncompressString(byte[])</seealso>
+        /// <seealso cref="CompressBuffer(byte[])">DeflateStream.CompressBuffer(byte[])</seealso>
+        /// <seealso cref="UncompressString(byte[])">DeflateStream.UncompressString(byte[])</seealso>
         /// <seealso cref="GZipStream.UncompressBuffer(byte[])">GZipStream.UncompressBuffer(byte[])</seealso>
         /// <seealso cref="ZlibStream.UncompressBuffer(byte[])">ZlibStream.UncompressBuffer(byte[])</seealso>
         ///
@@ -727,7 +727,7 @@ namespace MonoGame.Framework.Deflate
             using (var input = new System.IO.MemoryStream(compressed))
             {
                 System.IO.Stream decompressor =
-                    new DeflateStream( input, CompressionMode.Decompress );
+                    new DeflateStream(input, CompressionMode.Decompress);
 
                 return ZlibBaseStream.UncompressBuffer(compressed, decompressor);
             }

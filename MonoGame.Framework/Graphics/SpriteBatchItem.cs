@@ -16,9 +16,10 @@ namespace MonoGame.Framework.Graphics
             float x, float y, float dx, float dy, float w, float h,
             float sin, float cos, Color color, in Vector4 texCoord, float depth)
         {
-            // TODO, Should we be just assigning the Depth Value to Z?
-            // According to http://blogs.msdn.com/b/shawnhar/archive/2011/01/12/spritebatch-billboards-in-a-3d-world.aspx
-            // We do.
+            // Should we be just assigning the Depth Value to Z?
+            // We do according to:
+            // http://blogs.msdn.com/b/shawnhar/archive/2011/01/12/spritebatch-billboards-in-a-3d-world.aspx
+            
             VertexTL.Position.X = x + dx * cos - dy * sin;
             VertexTL.Position.Y = y + dx * sin + dy * cos;
             VertexTL.Position.Z = depth;
@@ -79,6 +80,9 @@ namespace MonoGame.Framework.Graphics
             VertexBR.TextureCoordinate.Y = texCoord.W;
         }
 
-        public int CompareTo(SpriteBatchItem other) => SortKey.CompareTo(other.SortKey);
+        public int CompareTo(SpriteBatchItem other)
+        {
+            return SortKey.CompareTo(other.SortKey);
+        }
     }
 }
