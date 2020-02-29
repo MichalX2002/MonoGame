@@ -63,7 +63,21 @@ namespace MonoGame.Framework.Graphics
         {
         }
 
-        public string Description { get; private set; } = string.Empty;
+#if DESKTOPGL
+        public string Description {
+            get {
+                try {
+                    return MonoGame.OpenGL.GL.GetString(MonoGame.OpenGL.StringName.Renderer);
+                } catch {
+                    return string.Empty;
+                }
+            }
+            private set { }
+        }
+#else
+        string _description = string.Empty;
+        public string Description { get { return _description; } private set { _description = value; } }
+#endif
 
         public DisplayMode CurrentDisplayMode
         {
@@ -75,13 +89,14 @@ namespace MonoGame.Framework.Graphics
                        SurfaceFormat.Color);
 #elif ANDROID
                 View view = ((AndroidGameWindow)Game.Instance.Window).GameView;
-                return new DisplayMode(view.Width, view.Height, SurfaceFormat.Rgba32);
+                return new DisplayMode(view.Width, view.Height, SurfaceFormat.Color);
 #elif DESKTOPGL
-                var displayIndex = SDL.Display.GetWindowDisplayIndex(SdlGameWindow.Instance.Handle);
+                var displayIndex = Sdl.Display.GetWindowDisplayIndex(SdlGameWindow.Instance.Handle);
 
-                SDL.Display.GetCurrentDisplayMode(displayIndex, out SDL.Display.Mode mode);
+                Sdl.Display.Mode mode;
+                Sdl.Display.GetCurrentDisplayMode(displayIndex, out mode);
 
-                return new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Rgba32);
+                return new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Color);
 #elif WINDOWS
                 using (var graphics = System.Drawing.Graphics.FromHwnd(IntPtr.Zero))
                 {
@@ -89,15 +104,18 @@ namespace MonoGame.Framework.Graphics
                     int width = GetDeviceCaps(dc, HORZRES);
                     int height = GetDeviceCaps(dc, VERTRES);
                     graphics.ReleaseHdc(dc);
-                    return new DisplayMode(width, height, SurfaceFormat.Rgba32);
+                    return new DisplayMode(width, height, SurfaceFormat.Color);
                 }
 #else
-                return new DisplayMode(800, 600, SurfaceFormat.Rgba32);
+                return new DisplayMode(800, 600, SurfaceFormat.Color);
 #endif
             }
         }
 
-        public static GraphicsAdapter DefaultAdapter => Adapters[0];
+        public static GraphicsAdapter DefaultAdapter
+        {
+            get { return Adapters[0]; }
+        }
 
         public static ReadOnlyCollection<GraphicsAdapter> Adapters
         {

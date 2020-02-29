@@ -76,11 +76,6 @@ monodroid*.msi
 # Output docs
 Documentation/Output/
 
-# Protobuild Generated Files
-*.speccache
-*.ncrunchproject
-*.ncrunchsolution
-
 #Mac Package Files
 *.pkg
 *.mpack

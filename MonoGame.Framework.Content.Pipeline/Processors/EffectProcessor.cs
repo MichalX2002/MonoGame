@@ -4,16 +4,13 @@
 
 using System;
 using System.IO;
-using System.Text;
 using System.Text.RegularExpressions;
-using MonoGame.Framework.Content.Pipeline.Graphics;
-using MonoGame.Framework.Graphics;
-using MonoGame.Framework.Memory;
-#if WINDOWS
-using TwoMGFX;
-#endif
+using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
+using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Effect;
+using MonoGame.Utilities;
 
-namespace MonoGame.Framework.Content.Pipeline.Processors
+namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 {
     /// <summary>
     /// Processes a string representation to a platform-specific compiled effect.
@@ -28,13 +25,13 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
         /// The debug mode for compiling effects.
         /// </summary>
         /// <value>The debug mode to use when compiling effects.</value>
-        public virtual EffectProcessorDebugMode DebugMode { get => debugMode; set => debugMode = value; }
+        public virtual EffectProcessorDebugMode DebugMode { get { return debugMode; } set { debugMode = value; } }
 
         /// <summary>
         /// Define assignments for the effect.
         /// </summary>
         /// <value>A list of define assignments delimited by semicolons.</value>
-        public virtual string Defines { get => defines; set => defines = value; }
+        public virtual string Defines { get { return defines; } set { defines = value; } }
 
         /// <summary>
         /// Initializes a new instance of EffectProcessor.
@@ -52,13 +49,13 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
         /// <remarks>If you get an error during processing, compilation stops immediately. The effect processor displays an error message. Once you fix the current error, it is possible you may get more errors on subsequent compilation attempts.</remarks>
         public override CompiledEffectContent Process(EffectContent input, ContentProcessorContext context)
         {
-#if WINDOWS
-            var options = new Options
-            {
-                SourceFile = input.Identity.SourceFilename,
+            if (CurrentPlatform.OS != OS.Windows)
+                throw new NotImplementedException();
 
-                Profile = ShaderProfile.ForPlatform(context.TargetPlatform.ToString())
-            };
+            var options = new Options();
+            options.SourceFile = input.Identity.SourceFilename;
+
+            options.Profile = ShaderProfile.ForPlatform(context.TargetPlatform.ToString());
             if (options.Profile == null)
                 throw new InvalidContentException(string.Format("{0} effects are not supported.", context.TargetPlatform), input.Identity);
 
@@ -113,12 +110,12 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             CompiledEffectContent result;
             try
             {
-                using (var stream = RecyclableMemoryManager.Default.GetMemoryStream())
+                using (var stream = new MemoryStream())
                 {
-                    using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
+                    using (var writer = new BinaryWriter(stream))
                         effect.Write(writer, options);
 
-                    result = new CompiledEffectContent(stream.ToArray());
+                    result = new CompiledEffectContent(stream.GetBuffer());
                 }
             }
             catch (Exception ex)
@@ -127,12 +124,8 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             }
 
             return result;
-#else
-            throw new NotImplementedException();
-#endif
         }
 
-#if WINDOWS
         private class ContentPipelineEffectCompilerOutput : IEffectCompilerOutput
         {
             private readonly ContentProcessorContext _context;
@@ -157,7 +150,6 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
                 return new ContentIdentity(file, null, line + "," + column);
             }
         }
-#endif
 
         private static void ProcessErrorsAndWarnings(bool buildFailed, string shaderErrorsAndWarnings, EffectContent input, ContentProcessorContext context)
         {
