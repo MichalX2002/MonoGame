@@ -1,7 +1,7 @@
 [submodule "ThirdParty/Dependencies"]
 	path = ThirdParty/Dependencies
-	url = https://github.com/TechnologicalPizza/MonoGame.Dependencies.git
-	
+	url = https://github.com/MonoGame/MonoGame.Dependencies.git
+
 [submodule "ThirdParty/NVorbis"]
 	path = ThirdParty/NVorbis
 	url=https://github.com/TechnologicalPizza/MonoGame.NVorbis.git
@@ -9,14 +9,15 @@
 [submodule "ThirdParty/StbSharp/Image"]
 	path = ThirdParty/StbSharp/Image
 	url = https://github.com/TechnologicalPizza/StbSharp.Image
-	
+
 [submodule "ThirdParty/StbSharp/Shared"]
 	path = ThirdParty/StbSharp/Shared
 	url = https://github.com/TechnologicalPizza/StbSharp.Shared
-	
+
 [submodule "ThirdParty/StbSharp/ImageWrite"]
 	path = ThirdParty/StbSharp/ImageWrite
 	url = https://github.com/TechnologicalPizza/StbSharp.ImageWrite
+
 [submodule "ThirdParty/SDL_GameControllerDB"]
 	path = ThirdParty/SDL_GameControllerDB
 	url = https://github.com/gabomdq/gamecontrollerdb
