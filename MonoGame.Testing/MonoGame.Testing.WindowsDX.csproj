@@ -87,7 +87,7 @@
     <EmbeddedResource Include="Icon.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\ThirdParty\Dependencies\Config\Windows\MonoGame.Framework.dll.config">
+    <None Include="..\ThirdParty\Dependencies\MonoGame.Framework.dll.config">
       <Platforms>WindowsGL,Linux,MacOS</Platforms>
       <Link>MonoGame.Framework.dll.config</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
