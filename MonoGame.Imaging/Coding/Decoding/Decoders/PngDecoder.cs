@@ -9,11 +9,9 @@ namespace MonoGame.Imaging.Coding.Decoding
         public override ImageFormat Format => ImageFormat.Png;
 
         protected override unsafe IMemoryHolder ReadFirst(
-            ImagingConfig imagingConfig,
-            ReadContext context,
-            ref ReadState state)
+            ImageStbDecoderState decoderState, ref ReadState readState)
         {
-            return Png.Load(context, ref state);
+            return Png.Load(decoderState.ReadContext, ref readState);
         }
     }
 }

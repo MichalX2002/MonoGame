@@ -23,27 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\**\*.cs" Exclude="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\obj\**">
-      <Link>StbSharp\ImageWrite\%(FileName)%(Extension)</Link>
-    </Compile>
-
-    <Compile Include="..\ThirdParty\StbSharp\Image\src\StbImageSharp\**\*.cs" Exclude="..\ThirdParty\StbSharp\Image\src\StbImageSharp\obj\**">
-      <Link>StbSharp\Image\%(FileName)%(Extension)</Link>
-    </Compile>
-
-    <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\**\*.cs" Exclude="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\obj\**">
-      <Link>StbSharp\Shared\%(FileName)%(Extension)</Link>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Remove="Image\Specialized\**" />
     <EmbeddedResource Remove="Image\Specialized\**" />
     <None Remove="Image\Specialized\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\ImageWrite.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,10 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="StbSharp\Image\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\MonoGame.StbSharp\MonoGame.StbSharp.csproj" />
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
   </ItemGroup>
 </Project>

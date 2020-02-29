@@ -8,11 +8,9 @@ namespace MonoGame.Imaging.Coding.Decoding
         public override ImageFormat Format => ImageFormat.Bmp;
 
         protected override unsafe IMemoryHolder ReadFirst(
-            ImagingConfig imagingConfig,
-            ReadContext context,
-            ref ReadState state)
+            ImageStbDecoderState decoderState, ref ReadState readState)
         {
-            return Bmp.Load(context, ref state);
+            return Bmp.Load(decoderState.ReadContext, ref readState);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using StbSharp;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
@@ -14,7 +15,8 @@ namespace MonoGame.Imaging.Coding.Decoding
         public Image CurrentImage { get; protected set; }
 
         public new ImageReadStream Stream => (ImageReadStream)base.Stream;
-        
+        public ImageRead.ReadContext ReadContext => Stream.Context;
+
         #endregion
 
         public ImageDecoderState(

@@ -13,13 +13,11 @@ namespace MonoGame.Imaging.Coding.Decoding
 
         #region Decode Abstraction
 
-        protected abstract IMemoryHolder ReadFirst(
-            ImagingConfig config, ReadContext context, ref ReadState state);
+        protected abstract IMemoryHolder ReadFirst(ImageStbDecoderState decoderState, ref ReadState readState);
 
-        protected virtual IMemoryHolder ReadNext(
-            ImagingConfig config, ReadContext context, ref ReadState state)
+        protected virtual IMemoryHolder ReadNext(ImageStbDecoderState decoderState, ref ReadState readState)
         {
-            ImagingArgumentGuard.AssertAnimationSupport(this, config);
+            ImagingArgumentGuard.AssertAnimationSupport(this, decoderState.ImagingConfig);
             return null;
         }
 
@@ -78,7 +76,7 @@ namespace MonoGame.Imaging.Coding.Decoding
         protected Exception GetFailureException(ImagingConfig config, ReadContext context)
         {
             // TODO: get some error message from the context
-            return new Exception();
+            return new ImagingException(context.ErrorCode.ToString());
         }
 
         #endregion
@@ -93,8 +91,8 @@ namespace MonoGame.Imaging.Coding.Decoding
         {
             var state = new ImageStbDecoderState(config, this, stream);
             var readState = CreateReadState(state, null, onProgress);
-            var result = ReadFirst(config, stream.Context, ref readState);
-            if (result != null)
+            var result = ReadFirst(state, ref readState);
+            if (state.ReadContext.ErrorCode == ErrorCode.Ok && result != null)
             {
                 state.CurrentImage = ParseMemoryResult(config, result, readState, pixelType);
                 state.ImageIndex++;
@@ -117,8 +115,8 @@ namespace MonoGame.Imaging.Coding.Decoding
                 throw new InvalidOperationException("The decoder state is invalid.");
 
             var readState = CreateReadState(state, null, onProgress);
-            var result = ReadNext(decoderState.ImagingConfig, state.Stream.Context, ref readState);
-            if (result != null)
+            var result = ReadNext(state, ref readState);
+            if (state.ReadContext.ErrorCode == ErrorCode.Ok && result != null)
             {
                 state.CurrentImage = ParseMemoryResult(state.ImagingConfig, result, readState, pixelType);
                 state.ImageIndex++;
