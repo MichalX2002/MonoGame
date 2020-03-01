@@ -236,12 +236,12 @@ namespace MonoGame.Framework
 
         private void OnMouseScroll(object sender, MouseEventArgs mouseEventArgs)
         {
-            MouseState.ScrollWheelValue += mouseEventArgs.Delta;
+            MouseState.Scroll += mouseEventArgs.Delta;
         }
 
         private void OnMouseHorizontalScroll(object sender, HorizontalMouseWheelEvent mouseEventArgs)
         {
-            MouseState.HorizontalScrollWheelValue += mouseEventArgs.Delta;
+            MouseState.HorizontalScroll += mouseEventArgs.Delta;
         }
 
         private void UpdateMouseState()

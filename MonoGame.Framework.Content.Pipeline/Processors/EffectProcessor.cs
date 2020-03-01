@@ -5,10 +5,11 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Content.Pipeline.Graphics;
 using MonoGame.Effect;
-using MonoGame.Utilities;
+using MonoGame.Framework.Content.Pipeline;
+using MonoGame.Framework.Content.Pipeline.Processors;
+using MonoGame.Framework;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 {
@@ -18,20 +19,17 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
     [ContentProcessor(DisplayName = "Effect - MonoGame")]
     public class EffectProcessor : ContentProcessor<EffectContent, CompiledEffectContent>
     {
-        EffectProcessorDebugMode debugMode;
-        string defines;
-
         /// <summary>
         /// The debug mode for compiling effects.
         /// </summary>
         /// <value>The debug mode to use when compiling effects.</value>
-        public virtual EffectProcessorDebugMode DebugMode { get { return debugMode; } set { debugMode = value; } }
+        public virtual EffectProcessorDebugMode DebugMode { get; set; }
 
         /// <summary>
         /// Define assignments for the effect.
         /// </summary>
         /// <value>A list of define assignments delimited by semicolons.</value>
-        public virtual string Defines { get { return defines; } set { defines = value; } }
+        public virtual string Defines { get; set; }
 
         /// <summary>
         /// Initializes a new instance of EffectProcessor.
@@ -41,15 +39,20 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         }
 
         /// <summary>
-        /// Processes the string representation of the specified effect into a platform-specific binary format using the specified context.
+        /// Processes the string representation of the specified effect into 
+        /// a platform-specific binary format using the specified context.
         /// </summary>
         /// <param name="input">The effect string to be processed.</param>
         /// <param name="context">Context for the specified processor.</param>
         /// <returns>A platform-specific compiled binary effect.</returns>
-        /// <remarks>If you get an error during processing, compilation stops immediately. The effect processor displays an error message. Once you fix the current error, it is possible you may get more errors on subsequent compilation attempts.</remarks>
+        /// <remarks>
+        /// If you get an error during processing, compilation stops immediately.
+        /// The effect processor displays an error message.
+        /// Once you fix the current error, it is possible you may get more errors on subsequent compilation attempts.
+        /// </remarks>
         public override CompiledEffectContent Process(EffectContent input, ContentProcessorContext context)
         {
-            if (CurrentPlatform.OS != OS.Windows)
+            if (PlatformInfo.OS != PlatformInfo.OperatingSystem.Windows)
                 throw new NotImplementedException();
 
             var options = new Options();
@@ -151,11 +154,12 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             }
         }
 
-        private static void ProcessErrorsAndWarnings(bool buildFailed, string shaderErrorsAndWarnings, EffectContent input, ContentProcessorContext context)
+        private static void ProcessErrorsAndWarnings(
+            bool buildFailed, string shaderErrorsAndWarnings, EffectContent input, ContentProcessorContext context)
         {
             // Split the errors and warnings into individual lines.
-            var errorsAndWarningArray = shaderErrorsAndWarnings.Split(new[] {"\n", "\r", Environment.NewLine},
-                                                                      StringSplitOptions.RemoveEmptyEntries);
+            var errorsAndWarningArray = shaderErrorsAndWarnings.Split(
+                new[] {"\n", "\r", Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
 
             var errorOrWarning = new Regex(@"(.*)\(([0-9]*(,[0-9]+(-[0-9]+)?)?)\)\s*:\s*(.*)", RegexOptions.Compiled);
             ContentIdentity identity = null;

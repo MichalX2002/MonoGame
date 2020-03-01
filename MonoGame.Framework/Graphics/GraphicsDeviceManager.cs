@@ -56,7 +56,7 @@ namespace MonoGame.Framework
             _game = game ?? throw new ArgumentNullException(nameof(game));
 
             _supportedOrientations = DisplayOrientation.Default;
-            _preferredBackBufferFormat = SurfaceFormat.Rgba32;
+            _preferredBackBufferFormat = SurfaceFormat.Color;
             _preferredDepthStencilFormat = DepthFormat.Depth24;
             _presentInterval = PresentInterval.One;
 

@@ -34,7 +34,7 @@ namespace MonoGame.Framework.Graphics
             AddVectorSaveFormat(SurfaceFormat.Alpha8, typeof(Alpha8));
             AddVectorSaveFormat(SurfaceFormat.Single, typeof(Gray32));
             // AddSaveFormat(SurfaceFormat.Rgba32SRgb, typeof(Rgba32SRgb));
-            AddVectorSaveFormat(SurfaceFormat.Rgba32, typeof(Color), typeof(Byte4), typeof(NormalizedByte4));
+            AddVectorSaveFormat(SurfaceFormat.Color, typeof(Color), typeof(Byte4), typeof(NormalizedByte4));
             AddVectorSaveFormat(SurfaceFormat.Rg32, typeof(Rg32));
             AddVectorSaveFormat(SurfaceFormat.Rgba64, typeof(Rgba64));
             AddVectorSaveFormat(SurfaceFormat.Rgba1010102, typeof(Rgba1010102));
@@ -75,8 +75,8 @@ namespace MonoGame.Framework.Graphics
                     set.Add(saveFormat);
 
                     lock (output)
-                        output.Add(key, set.AsReadOnly());
-
+                        output[key] = set.AsReadOnly();
+                    
                     return set;
                 }
 

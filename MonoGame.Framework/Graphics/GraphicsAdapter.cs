@@ -47,8 +47,8 @@ namespace MonoGame.Framework.Graphics
         public static ReadOnlyCollection<GraphicsAdapter> Adapters => _adapters;
 
         /// <summary>
-        /// Used to request creation of the reference graphics device, 
-        /// or the default hardware accelerated device (when set to false).
+        /// Used to request creation of the reference graphics device 
+        /// (or the default hardware accelerated device when set to false).
         /// </summary>
         /// <remarks>
         /// This only works on DirectX platforms where a reference graphics
@@ -123,19 +123,19 @@ namespace MonoGame.Framework.Graphics
         /// <param name="selectedDepthFormat">Set to the best format supported by the adaptor for the requested depth stencil format.</param>
         /// <param name="selectedMultiSampleCount">Set to the best count supported by the adaptor for the requested multisample count.</param>
         /// <returns>True if the requested format is supported by the adaptor. False if one or more of the values was changed.</returns>
-		public bool QueryRenderTargetFormat(
-			GraphicsProfile graphicsProfile,
-			SurfaceFormat format,
-			DepthFormat depthFormat,
-			int multiSampleCount,
-			out SurfaceFormat selectedFormat,
-			out DepthFormat selectedDepthFormat,
-			out int selectedMultiSampleCount)
-		{
+        public bool QueryRenderTargetFormat(
+            GraphicsProfile graphicsProfile,
+            SurfaceFormat format,
+            DepthFormat depthFormat,
+            int multiSampleCount,
+            out SurfaceFormat selectedFormat,
+            out DepthFormat selectedDepthFormat,
+            out int selectedMultiSampleCount)
+        {
             selectedFormat = format;
             selectedDepthFormat = depthFormat;
             selectedMultiSampleCount = multiSampleCount;
-			
+            
             // fallback for unsupported renderTarget surface formats.
             if (selectedFormat == SurfaceFormat.Alpha8 ||
                 selectedFormat == SurfaceFormat.NormalizedByte2 ||
@@ -147,10 +147,10 @@ namespace MonoGame.Framework.Graphics
                 selectedFormat == SurfaceFormat.Dxt1SRgb ||
                 selectedFormat == SurfaceFormat.Dxt3SRgb ||
                 selectedFormat == SurfaceFormat.Dxt5SRgb)
-                selectedFormat = SurfaceFormat.Rgba32;
+                selectedFormat = SurfaceFormat.Color;
 
             return (format == selectedFormat) && (depthFormat == selectedDepthFormat) && (multiSampleCount == selectedMultiSampleCount);
-		}
+        }
 
         public bool IsProfileSupported(GraphicsProfile graphicsProfile)
         {

@@ -1967,8 +1967,8 @@ namespace StbSharp
                 return (int)(0);
             if ((alpha_channel) < (0))
                 flags |= (uint)((1 << 1) | (1 << 0));
-            if (((flags & (1 << 1)) == 0) || ((flags & (1 << 0)) == 0))
-                ;
+            //if (((flags & (1 << 1)) == 0) || ((flags & (1 << 0)) == 0))
+            //    ; empty statement
             if ((alpha_channel) >= (info.channels))
                 return (int)(0);
             if (tempmem == null)

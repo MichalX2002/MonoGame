@@ -11,7 +11,7 @@ namespace MonoGame.Framework.Graphics
 {
     partial class GraphicsAdapter
     {
-        SharpDX.DXGI.Adapter1 _adapter;
+        private SharpDX.DXGI.Adapter1 _adapter;
 
         private static void PlatformInitializeAdapters(out ReadOnlyCollection<GraphicsAdapter> adapters)
         {
@@ -41,10 +41,11 @@ namespace MonoGame.Framework.Graphics
             adapters = new ReadOnlyCollection<GraphicsAdapter>(adapterList);
         }
 
-        private static readonly Dictionary<SharpDX.DXGI.Format, SurfaceFormat> FormatTranslations = new Dictionary<SharpDX.DXGI.Format, SurfaceFormat>
+        private static readonly Dictionary<SharpDX.DXGI.Format, SurfaceFormat> FormatTranslations =
+            new Dictionary<SharpDX.DXGI.Format, SurfaceFormat>
         {
-            { SharpDX.DXGI.Format.R8G8B8A8_UNorm, SurfaceFormat.Rgba32 },
-            { SharpDX.DXGI.Format.B8G8R8A8_UNorm, SurfaceFormat.Rgba32 },
+            { SharpDX.DXGI.Format.R8G8B8A8_UNorm, SurfaceFormat.Color },
+            { SharpDX.DXGI.Format.B8G8R8A8_UNorm, SurfaceFormat.Color },
             { SharpDX.DXGI.Format.B5G6R5_UNorm, SurfaceFormat.Bgr565 },
         };
 
@@ -80,7 +81,7 @@ namespace MonoGame.Framework.Graphics
                 }
                 catch (SharpDX.SharpDXException)
                 {
-                    var mode = new DisplayMode(desktopWidth, desktopHeight, SurfaceFormat.Rgba32);
+                    var mode = new DisplayMode(desktopWidth, desktopHeight, SurfaceFormat.Color);
                     modes.Add(mode);
                     adapter.CurrentDisplayMode = mode;
                     break;
@@ -99,7 +100,9 @@ namespace MonoGame.Framework.Graphics
 
                     if (adapter.CurrentDisplayMode == null)
                     {
-                        if (mode.Width == desktopWidth && mode.Height == desktopHeight && mode.Format == SurfaceFormat.Rgba32)
+                        if (mode.Width == desktopWidth &&
+                            mode.Height == desktopHeight &&
+                            mode.Format == SurfaceFormat.Color)
                             adapter.CurrentDisplayMode = mode;
                     }
                 }
@@ -107,15 +110,15 @@ namespace MonoGame.Framework.Graphics
 
             adapter.SupportedDisplayModes = new DisplayModeCollection(modes);
 
-            if (adapter.CurrentDisplayMode == null) //(i.e. desktop mode wasn't found in the available modes)
-                adapter.CurrentDisplayMode = new DisplayMode(desktopWidth, desktopHeight, SurfaceFormat.Rgba32);
+            if (adapter.CurrentDisplayMode == null) // (i.e. desktop mode wasn't found in the available modes)
+                adapter.CurrentDisplayMode = new DisplayMode(desktopWidth, desktopHeight, SurfaceFormat.Color);
 
             return adapter;
         }
 
         private bool PlatformIsProfileSupported(GraphicsProfile graphicsProfile)
         {
-            if(UseReferenceDevice)
+            if (UseReferenceDevice)
                 return true;
 
             FeatureLevel highestSupportedLevel;
@@ -130,7 +133,7 @@ namespace MonoGame.Framework.Graphics
                 throw;
             }
 
-            switch(graphicsProfile)
+            switch (graphicsProfile)
             {
                 case GraphicsProfile.Reach:
                     return highestSupportedLevel >= FeatureLevel.Level_9_1;

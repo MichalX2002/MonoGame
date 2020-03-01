@@ -64,19 +64,22 @@ namespace MonoGame.Framework.Graphics
         }
 
 #if DESKTOPGL
-        public string Description {
-            get {
-                try {
-                    return MonoGame.OpenGL.GL.GetString(MonoGame.OpenGL.StringName.Renderer);
-                } catch {
+        public string Description
+        {
+            get
+            {
+                try
+                {
+                    return OpenGL.GL.GetString(OpenGL.StringName.Renderer);
+                }
+                catch
+                {
                     return string.Empty;
                 }
             }
-            private set { }
         }
 #else
-        string _description = string.Empty;
-        public string Description { get { return _description; } private set { _description = value; } }
+        public string Description { get; } = string.Empty;
 #endif
 
         public DisplayMode CurrentDisplayMode
@@ -84,17 +87,16 @@ namespace MonoGame.Framework.Graphics
             get
             {
 #if IOS
-                return new DisplayMode((int)(_screen.Bounds.Width * _screen.Scale),
-                       (int)(_screen.Bounds.Height * _screen.Scale),
-                       SurfaceFormat.Color);
+                return new DisplayMode(
+                    (int)(_screen.Bounds.Width * _screen.Scale),
+                    (int)(_screen.Bounds.Height * _screen.Scale),
+                    SurfaceFormat.Color);
 #elif ANDROID
                 View view = ((AndroidGameWindow)Game.Instance.Window).GameView;
                 return new DisplayMode(view.Width, view.Height, SurfaceFormat.Color);
 #elif DESKTOPGL
-                var displayIndex = Sdl.Display.GetWindowDisplayIndex(SdlGameWindow.Instance.Handle);
-
-                Sdl.Display.Mode mode;
-                Sdl.Display.GetCurrentDisplayMode(displayIndex, out mode);
+                var displayIndex = SDL.Display.GetWindowDisplayIndex(SdlGameWindow.Instance.Handle);
+                SDL.Display.GetCurrentDisplayMode(displayIndex, out SDL.Display.Mode mode);
 
                 return new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Color);
 #elif WINDOWS
@@ -194,7 +196,7 @@ namespace MonoGame.Framework.Graphics
                 selectedFormat == SurfaceFormat.Dxt1SRgb ||
                 selectedFormat == SurfaceFormat.Dxt3SRgb ||
                 selectedFormat == SurfaceFormat.Dxt5SRgb)
-                selectedFormat = SurfaceFormat.Rgba32;
+                selectedFormat = SurfaceFormat.Color;
 
 
             return (format == selectedFormat) && (depthFormat == selectedDepthFormat) && (multiSampleCount == selectedMultiSampleCount);
@@ -324,7 +326,7 @@ namespace MonoGame.Framework.Graphics
 
                         // We are only using one format, Color
                         // mode.Format gets the Color format from SDL
-                        var displayMode = new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Rgba32);
+                        var displayMode = new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Color);
                         if (!modes.Contains(displayMode))
                             modes.Add(displayMode);
                     }

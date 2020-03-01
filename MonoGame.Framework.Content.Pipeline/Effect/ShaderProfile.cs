@@ -2,14 +2,13 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.Xna.Framework.Content.Pipeline;
 using MonoGame.Effect.TPGParser;
+using MonoGame.Framework.Content.Pipeline;
 
 namespace MonoGame.Effect
 {
@@ -25,7 +24,6 @@ namespace MonoGame.Effect
         }
 
         public static readonly ShaderProfile OpenGL = FromName("OpenGL");
-
         public static readonly ShaderProfile DirectX_11 = FromName("DirectX_11");
 
         /// <summary>
@@ -64,7 +62,9 @@ namespace MonoGame.Effect
 
         internal abstract void ValidateShaderModels(PassInfo pass);
 
-        internal abstract ShaderData CreateShader(ShaderResult shaderResult, string shaderFunction, string shaderProfile, bool isVertexShader, EffectObject effect, ref string errorsAndWarnings);
+        internal abstract ShaderData CreateShader(
+            ShaderResult shaderResult, string shaderFunction, string shaderProfile,
+            bool isVertexShader, EffectObject effect, ref string errorsAndWarnings);
 
         internal abstract bool Supports(string platform);
 

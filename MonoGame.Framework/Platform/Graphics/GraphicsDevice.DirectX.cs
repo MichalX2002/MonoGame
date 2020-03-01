@@ -1461,7 +1461,7 @@ namespace MonoGame.Framework.Graphics
         {
             // TODO share code with Texture2D.GetData and do pooling for staging textures
             // first set up a staging texture
-            const SurfaceFormat format = SurfaceFormat.Rgba32;
+            const SurfaceFormat format = SurfaceFormat.Color;
 
             //You can't Map the BackBuffer surface, so we copy to another texture
             using (var backBufferTexture = DXResource.FromSwapChain<DXTexture2D>(_swapChain, 0))

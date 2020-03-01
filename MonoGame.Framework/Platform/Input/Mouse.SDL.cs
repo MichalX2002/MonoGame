@@ -34,8 +34,8 @@ namespace MonoGame.Framework.Input
                 window.MouseState.XButton1 = (state & SDL.Mouse.Button.X1Mask) != 0 ? ButtonState.Pressed : ButtonState.Released;
                 window.MouseState.XButton2 = (state & SDL.Mouse.Button.X2Mask) != 0 ? ButtonState.Pressed : ButtonState.Released;
 
-                window.MouseState.HorizontalScrollWheelValue = ScrollX;
-                window.MouseState.ScrollWheelValue = ScrollY;
+                window.MouseState.HorizontalScroll = ScrollX;
+                window.MouseState.Scroll = ScrollY;
             }
             else
             {

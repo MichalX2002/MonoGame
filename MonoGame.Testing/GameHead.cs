@@ -75,8 +75,8 @@ namespace MonoGame.Testing
 
             string[] songs = new string[]
             {
-                "Title Screen",
-                "Ending"
+            //    "Title Screen",
+            //    "Ending"
             };
 
             _songs = new Song[songs.Length];

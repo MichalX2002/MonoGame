@@ -18,7 +18,6 @@ namespace MonoGame.OpenGL
         Front = 0x0404,
         Back = 0x0405,
     }
-
     internal enum DrawBuffersEnum
     {
         UnsignedShort,
@@ -304,8 +303,6 @@ namespace MonoGame.OpenGL
         MaxTextureImageUnits = 0x8872,
         MaxVertexAttribs = 0x8869,
         MaxTextureSize = 0x0D33,
-        MaxTexture3DSize = 0x8073,
-        MaxTextureCubeSize = 0x851C,
         MaxDrawBuffers = 0x8824,
         TextureBinding2D = 0x8069,
         MaxTextureMaxAnisotropyExt = 0x84FF,
@@ -314,8 +311,10 @@ namespace MonoGame.OpenGL
 
     internal enum StringName
     {
-        Extensions = 0x1F03,
+        Vendor = 0x1F00,
+        Renderer = 0x1F01,
         Version = 0x1F02,
+        Extensions = 0x1F03,
     }
 
     internal enum FramebufferAttachment
@@ -517,7 +516,6 @@ namespace MonoGame.OpenGL
         ClampToEdge = 0x812F,
         Repeat = 0x2901,
         MirroredRepeat = 0x8370,
-        //GLES
-        ClampToBorder = 0x812D,
+        ClampToBorder = 0x812D, //GLES
     }
 }

@@ -38,7 +38,7 @@ namespace MonoGame.Framework.Content
                 case SurfaceFormat.Dxt1:
                 case SurfaceFormat.Dxt1a:
                     if (!reader.GetGraphicsDevice().GraphicsCapabilities.SupportsDxt1)
-                        convertedFormat = SurfaceFormat.Rgba32;
+                        convertedFormat = SurfaceFormat.Color;
                     break;
 
                 case SurfaceFormat.Dxt1SRgb:
@@ -49,7 +49,7 @@ namespace MonoGame.Framework.Content
                 case SurfaceFormat.Dxt3:
                 case SurfaceFormat.Dxt5:
                     if (!reader.GetGraphicsDevice().GraphicsCapabilities.SupportsS3tc)
-                        convertedFormat = SurfaceFormat.Rgba32;
+                        convertedFormat = SurfaceFormat.Color;
                     break;
 
                 case SurfaceFormat.Dxt3SRgb:
@@ -59,7 +59,7 @@ namespace MonoGame.Framework.Content
                     break;
 
                 case SurfaceFormat.NormalizedByte4:
-                    convertedFormat = SurfaceFormat.Rgba32;
+                    convertedFormat = SurfaceFormat.Color;
                     break;
             }
 
@@ -89,7 +89,7 @@ namespace MonoGame.Framework.Content
                         case SurfaceFormat.Dxt1SRgb:
                         case SurfaceFormat.Dxt1a:
                             if (!reader.GetGraphicsDevice().GraphicsCapabilities.SupportsDxt1 &&
-                                convertedFormat == SurfaceFormat.Rgba32)
+                                convertedFormat == SurfaceFormat.Color)
                             {
                                 levelData = DxtUtil.DecompressDxt1(levelData, levelWidth, levelHeight);
                                 levelDataSizeInBytes = levelData.Length;
@@ -99,7 +99,7 @@ namespace MonoGame.Framework.Content
                         case SurfaceFormat.Dxt3:
                         case SurfaceFormat.Dxt3SRgb:
                             if (!reader.GetGraphicsDevice().GraphicsCapabilities.SupportsS3tc &&
-                                    convertedFormat == SurfaceFormat.Rgba32)
+                                    convertedFormat == SurfaceFormat.Color)
                             {
                                 levelData = DxtUtil.DecompressDxt3(levelData, levelWidth, levelHeight);
                                 levelDataSizeInBytes = levelData.Length;
@@ -109,7 +109,7 @@ namespace MonoGame.Framework.Content
                         case SurfaceFormat.Dxt5:
                         case SurfaceFormat.Dxt5SRgb:
                             if (!reader.GetGraphicsDevice().GraphicsCapabilities.SupportsS3tc &&
-                                convertedFormat == SurfaceFormat.Rgba32)
+                                convertedFormat == SurfaceFormat.Color)
                             {
                                 levelData = DxtUtil.DecompressDxt5(levelData, levelWidth, levelHeight);
                                 levelDataSizeInBytes = levelData.Length;

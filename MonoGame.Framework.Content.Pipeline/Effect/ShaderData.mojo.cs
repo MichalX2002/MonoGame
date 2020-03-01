@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
 using MonoGame.Effect.TPGParser;
 
 namespace MonoGame.Effect
@@ -144,9 +146,21 @@ namespace MonoGame.Effect
             // Gather all the parameters used by this shader.
             var symbol_types = new[] 
             {
-                new { name = dxshader.IsVertexShader ? "vs_uniforms_bool" : "ps_uniforms_bool", set = MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_BOOL, },
-                new { name = dxshader.IsVertexShader ? "vs_uniforms_ivec4" : "ps_uniforms_ivec4", set = MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_INT4, },
-                new { name = dxshader.IsVertexShader ? "vs_uniforms_vec4" : "ps_uniforms_vec4", set = MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_FLOAT4, },
+                new 
+                { 
+                    name = dxshader.IsVertexShader ? "vs_uniforms_bool" : "ps_uniforms_bool",
+                    set = MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_BOOL
+                }, 
+                new 
+                {
+                    name = dxshader.IsVertexShader ? "vs_uniforms_ivec4" : "ps_uniforms_ivec4", 
+                    set = MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_INT4
+                },
+                new 
+                { 
+                    name = dxshader.IsVertexShader ? "vs_uniforms_vec4" : "ps_uniforms_vec4", 
+                    set = MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_FLOAT4
+                }
             };
 
             var cbuffer_index = new List<int>();

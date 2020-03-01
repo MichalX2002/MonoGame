@@ -70,7 +70,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public override bool TryGetFormat(out SurfaceFormat format)
         {
             if (typeof(TPixel) == typeof(Color) || typeof(TPixel) == typeof(Byte4))
-                format = SurfaceFormat.Rgba32;
+                format = SurfaceFormat.Color;
             else if (typeof(TPixel) == typeof(Bgra4444))
                 format = SurfaceFormat.Bgra4444;
             else if (typeof(TPixel) == typeof(Bgra5551))
@@ -103,7 +103,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 format = SurfaceFormat.HalfVector4;
             else
             {
-                format = SurfaceFormat.Rgba32;
+                format = SurfaceFormat.Color;
                 return false;
             }
             return true;

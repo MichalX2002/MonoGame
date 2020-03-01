@@ -58,7 +58,7 @@ namespace MonoGame.Framework
         {
             switch (format)
             {
-                case SurfaceFormat.Rgba32:
+                case SurfaceFormat.Color:
                 default:
                     return SharpDX.DXGI.Format.R8G8B8A8_UNorm;
 

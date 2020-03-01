@@ -12,7 +12,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Unsigned 32-bit RGBA pixel format. 8 bits per channel. 
         /// </summary>
-        Rgba32,
+        Color,
 
         /// <summary>
         /// Unsigned 24-bit RGB pixel format. 8 bits per channel. 
