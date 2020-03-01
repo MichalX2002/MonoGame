@@ -94,7 +94,7 @@ namespace MonoGame.Framework.Graphics
             }
 
             GenerateGLTextureIfRequired();
-            int unpackSize = _format.GetSize();
+            int unpackSize = Format.GetSize();
             if (unpackSize == 3)
                 unpackSize = 1;
             GL.PixelStore(PixelStoreParameter.UnpackAlignment, Math.Min(unpackSize, 8));
@@ -243,7 +243,7 @@ namespace MonoGame.Framework.Graphics
                 GL.BindTexture(TextureTarget.Texture2D, _glTexture);
                 GraphicsExtensions.CheckGLError();
 
-                var minFilter = (_levelCount > 1) ? (int)TextureMinFilter.LinearMipmapLinear : (int)TextureMinFilter.Linear;
+                var minFilter = (LevelCount > 1) ? (int)TextureMinFilter.LinearMipmapLinear : (int)TextureMinFilter.Linear;
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, minFilter);
                 GraphicsExtensions.CheckGLError();
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
@@ -262,8 +262,8 @@ namespace MonoGame.Framework.Graphics
                 if (GraphicsDevice.GraphicsCapabilities.SupportsTextureMaxLevel)
                 {
                     var paramName = SamplerState.TextureParameterNameTextureMaxLevel;
-                    if (_levelCount > 0)
-                        GL.TexParameter(TextureTarget.Texture2D, paramName, _levelCount - 1);
+                    if (LevelCount > 0)
+                        GL.TexParameter(TextureTarget.Texture2D, paramName, LevelCount - 1);
                     else
                         GL.TexParameter(TextureTarget.Texture2D, paramName, 1000);
                     GraphicsExtensions.CheckGLError();

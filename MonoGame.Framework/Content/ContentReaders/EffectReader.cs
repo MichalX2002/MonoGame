@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using System.IO;
 using MonoGame.Framework.Graphics;
 
@@ -22,7 +23,7 @@ namespace MonoGame.Framework.Content
                 if (input.Read(data, 0, dataSize) != dataSize)
                     throw new InvalidDataException();
 
-                var effect = new Effect(input.GetGraphicsDevice(), data, 0, dataSize)
+                var effect = new Effect(input.GetGraphicsDevice(), data.AsSpan(0, dataSize))
                 {
                     Name = input.AssetName
                 };

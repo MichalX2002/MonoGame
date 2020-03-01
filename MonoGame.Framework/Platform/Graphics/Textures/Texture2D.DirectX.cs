@@ -53,7 +53,7 @@ namespace MonoGame.Framework.Graphics
 
                 // For DXT compressed formats the width and height must be
                 // a multiple of 4 for the complete mip level to be set.
-                if (_format.IsCompressedFormat())
+                if (Format.IsCompressedFormat())
                 {
                     w = (w + 3) & ~3;
                     h = (h + 3) & ~3;
@@ -92,7 +92,7 @@ namespace MonoGame.Framework.Graphics
             // TODO: We should probably be pooling these staging resources
             // and not creating a new one each time.
             
-            int min = _format.IsCompressedFormat() ? 4 : 1;
+            int min = Format.IsCompressedFormat() ? 4 : 1;
             int levelWidth = Math.Max(Width >> level, min);
             int levelHeight = Math.Max(Height >> level, min);
 
@@ -104,7 +104,7 @@ namespace MonoGame.Framework.Graphics
                     Height = levelHeight,
                     MipLevels = 1,
                     ArraySize = 1,
-                    Format = SharpDXHelper.ToFormat(_format),
+                    Format = SharpDXHelper.ToFormat(Format),
                     BindFlags = BindFlags.None,
                     CpuAccessFlags = CpuAccessFlags.Read,
                     SampleDescription = CreateSampleDescription(),
@@ -132,7 +132,7 @@ namespace MonoGame.Framework.Graphics
                 // Copy the data to the array.
                 try
                 {
-                    if (_format.IsCompressedFormat())
+                    if (Format.IsCompressedFormat())
                     {
                         // for 4x4 block compression formats an element is one block, so elementsInRow
                         // and number of rows are 1/4 of number of pixels in width and height of the rectangle
@@ -141,7 +141,7 @@ namespace MonoGame.Framework.Graphics
                     }
 
                     var box = d3dContext.MapSubresource(_cachedStagingTexture, 0, MapMode.Read, MapFlags.None);
-                    GraphicsDevice.CopyResourceTo(_format, box, columns, rows, destination);
+                    GraphicsDevice.CopyResourceTo(Format, box, columns, rows, destination);
                 }
                 finally
                 {
@@ -159,7 +159,7 @@ namespace MonoGame.Framework.Graphics
 
         private int CalculateSubresourceIndex(int arraySlice, int level)
         {
-            return arraySlice * _levelCount + level;
+            return arraySlice * LevelCount + level;
         }
 
         internal virtual Texture2DDescription GetTexture2DDescription()
@@ -168,9 +168,9 @@ namespace MonoGame.Framework.Graphics
             {
                 Width = Width,
                 Height = Height,
-                MipLevels = _levelCount,
+                MipLevels = LevelCount,
                 ArraySize = ArraySize,
-                Format = SharpDXHelper.ToFormat(_format),
+                Format = SharpDXHelper.ToFormat(Format),
                 BindFlags = BindFlags.ShaderResource,
                 CpuAccessFlags = CpuAccessFlags.None,
                 SampleDescription = CreateSampleDescription(),

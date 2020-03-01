@@ -31,9 +31,9 @@ namespace MonoGame.Framework.Graphics
             {
                 Width = Size,
                 Height = Size,
-                MipLevels = _levelCount,
+                MipLevels = LevelCount,
                 ArraySize = 6, // A texture cube is a 2D texture array with 6 textures.
-                Format = SharpDXHelper.ToFormat(_format),
+                Format = SharpDXHelper.ToFormat(Format),
                 BindFlags = BindFlags.ShaderResource,
                 CpuAccessFlags = CpuAccessFlags.None,
                 SampleDescription = { Count = 1, Quality = 0 },
@@ -60,7 +60,7 @@ namespace MonoGame.Framework.Graphics
             // TODO: Like in Texture2D, we should probably be pooling these staging resources
             // and not creating a new one each time.
 
-            var min = _format.IsCompressedFormat() ? 4 : 1;
+            var min = Format.IsCompressedFormat() ? 4 : 1;
             var levelSize = Math.Max(Size >> level, min);
 
             var desc = new Texture2DDescription
@@ -69,7 +69,7 @@ namespace MonoGame.Framework.Graphics
                 Height = levelSize,
                 MipLevels = 1,
                 ArraySize = 1,
-                Format = SharpDXHelper.ToFormat(_format),
+                Format = SharpDXHelper.ToFormat(Format),
                 SampleDescription = new SampleDescription(1, 0),
                 BindFlags = BindFlags.None,
                 CpuAccessFlags = CpuAccessFlags.Read,
@@ -95,8 +95,8 @@ namespace MonoGame.Framework.Graphics
                     {
                         var databox = d3dContext.MapSubresource(stagingTex, 0, MapMode.Read, MapFlags.None, out stream);
 
-                        var elementSize = _format.GetSize();
-                        if (_format.IsCompressedFormat())
+                        var elementSize = Format.GetSize();
+                        if (Format.IsCompressedFormat())
                         {
                             // for 4x4 block compression formats an element is one block, so elementsInRow
                             // and number of rows are 1/4 of number of pixels in width and height of the rectangle
@@ -165,7 +165,7 @@ namespace MonoGame.Framework.Graphics
 
         private int CalculateSubresourceIndex(CubeMapFace face, int level)
         {
-            return (int)face * _levelCount + level;
+            return (int)face * LevelCount + level;
         }
     }
 }

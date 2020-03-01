@@ -63,6 +63,13 @@ namespace MonoGame.Testing
 
             _font = Content.Load<SpriteFont>("arial");
 
+            using (var s = File.OpenRead(@"C:\Users\Michal Piatkowski\Pictures\ikon 100.png"))
+            {
+                var tex = Texture2D.FromStream(s, GraphicsDevice);
+                using(var u  = tex.GetData<Color>())
+                Console.WriteLine(u);
+            }
+
             //using (var file = File.OpenRead("risgrot.png"))
             //using (var img = Image.Load<Color>(file))
             //using (var cropped = img.Mutate(x => x.Crop(8, 0, 20, 14)))

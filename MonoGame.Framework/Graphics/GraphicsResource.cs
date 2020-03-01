@@ -45,7 +45,8 @@ namespace MonoGame.Framework.Graphics
             get => _graphicsDevice;
             internal set
             {
-                Debug.Assert(value != null);
+                if (value == null)
+                    throw new ArgumentNullException(nameof(value));
 
                 if (_graphicsDevice == value)
                     return;
@@ -64,19 +65,29 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
+        internal GraphicsResource(GraphicsDevice graphicsDevice = null)
+        {
+            GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
+                nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
+        }
+
         internal GraphicsResource()
         {
+        }
+
+        internal void InvokeGraphicsDeviceResetting()
+        {
+            GraphicsDeviceResetting();
         }
 
         /// <summary>
         /// Called before the device is reset. Allows graphics resources to 
         /// invalidate their state so they can be recreated after the device resets.
         /// <para>
-        /// This may be called after <see cref="Dispose()"/> up until
-        /// the resource is garbage collected.
+        /// This may be called after <see cref="Dispose()"/> up until the resource is garbage collected.
         /// </para>
         /// </summary>
-        internal protected virtual void GraphicsDeviceResetting()
+        protected virtual void GraphicsDeviceResetting()
         {
         }
 
@@ -103,15 +114,6 @@ namespace MonoGame.Framework.Graphics
         }
 
         /// <summary>
-        /// Releases resources used by the <see cref="GraphicsResource"/>.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
         /// The method that derived classes should override to implement disposing of managed and native resources.
         /// </summary>
         /// <param name="disposing">True if managed objects should be disposed.</param>
@@ -134,6 +136,15 @@ namespace MonoGame.Framework.Graphics
                 _graphicsDevice = null;
                 IsDisposed = true;
             }
+        }
+
+        /// <summary>
+        /// Releases resources used by the <see cref="GraphicsResource"/>.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>

@@ -172,8 +172,7 @@ namespace MonoGame.Framework.Graphics
             FilterMode = TextureFilterMode.Default;
         }
 
-        private SamplerState(string name, TextureFilter filter, TextureAddressMode addressMode)
-            : this()
+        private SamplerState(string name, TextureFilter filter, TextureAddressMode addressMode) : this()
         {
             Name = name;
             _filter = filter;

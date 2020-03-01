@@ -17,7 +17,6 @@ namespace MonoGame.Imaging
                 AssertNotDisposed();
                 return _buffer;
             }
-            private set => _buffer = value;
         }
 
         public override int ByteStride => Buffer.ByteStride;
@@ -29,7 +28,7 @@ namespace MonoGame.Imaging
             if (buffer.IsEmpty)
                 throw new ArgumentEmptyException(nameof(buffer));
 
-            Buffer = buffer;
+            _buffer = buffer;
         }
 
         /// <summary>
@@ -40,7 +39,7 @@ namespace MonoGame.Imaging
         {
             var memory = new UnmanagedMemory<TPixel>(size.Width * size.Height, zeroFill: true);
             int byteStride = size.Width * PixelType.ElementSize;
-            Buffer = new PixelBuffer(memory, byteStride, leaveOpen: false);
+            _buffer = new PixelBuffer(memory, byteStride, leaveOpen: false);
         }
 
         #endregion

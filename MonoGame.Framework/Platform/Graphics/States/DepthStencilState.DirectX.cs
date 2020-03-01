@@ -11,9 +11,10 @@ namespace MonoGame.Framework.Graphics
     {
         private SharpDX.Direct3D11.DepthStencilState _state;
 
-        protected internal override void GraphicsDeviceResetting()
+        protected override void GraphicsDeviceResetting()
         {
             SharpDX.Utilities.Dispose(ref _state);
+
             base.GraphicsDeviceResetting();
         }
 

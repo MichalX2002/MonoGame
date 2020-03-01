@@ -14,19 +14,11 @@ namespace MonoGame.Framework.Graphics
 
         #region Constructors
 
-        public Texture3D(
-            GraphicsDevice graphicsDevice, int width, int height, int depth, bool mipMap, SurfaceFormat format)
-            : this(graphicsDevice, width, height, depth, mipMap, format, false)
-        {
-        }
-
         protected Texture3D(
-            GraphicsDevice graphicsDevice, int width, int height, int depth,
+            GraphicsDevice graphicsDevice, int width, int height, int depth, 
             bool mipMap, SurfaceFormat format, bool renderTarget)
+            : base(graphicsDevice)
         {
-            GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
-                nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
-
             if (width <= 0)
                 throw new ArgumentOutOfRangeException(nameof(width), "Width must be greater than zero.");
             if (height <= 0)
@@ -37,10 +29,17 @@ namespace MonoGame.Framework.Graphics
             Width = width;
             Height = height;
             Depth = depth;
-            _levelCount = 1;
-            _format = format;
+            LevelCount = 1;
+            Format = format;
 
             PlatformConstruct(graphicsDevice, width, height, depth, mipMap, format, renderTarget);
+        }
+
+        public Texture3D(
+            GraphicsDevice graphicsDevice, int width, int height, int depth,
+            bool mipMap, SurfaceFormat format)
+            : this(graphicsDevice, width, height, depth, mipMap, format, false)
+        {
         }
 
         #endregion

@@ -4,7 +4,6 @@
 
 using MonoGame.OpenGL;
 using System;
-using System.Diagnostics;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -12,10 +11,11 @@ namespace MonoGame.Framework.Graphics
     {
         internal int _vbo;
         internal BufferUsageHint _usageHint;
+
         private BufferTarget _target;
         private int _elementSize;
 
-        internal protected override void GraphicsDeviceResetting()
+        protected override void GraphicsDeviceResetting()
         {
             _vbo = 0;
         }

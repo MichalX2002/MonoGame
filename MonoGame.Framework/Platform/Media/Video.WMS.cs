@@ -24,7 +24,7 @@ namespace MonoGame.Framework.Media
             {
                 using (var resolver = new SourceResolver())
                 using (ComObject source = resolver.CreateObjectFromURL(
-                        FileName, SourceResolverFlags.MediaSource, null, out _))
+                    FileName, SourceResolverFlags.MediaSource, null, out _))
                 {
                     mediaSource = source.QueryInterface<MediaSource>();
                 }

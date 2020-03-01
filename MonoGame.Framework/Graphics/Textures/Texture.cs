@@ -3,21 +3,22 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using MonoGame.Framework.Collections;
 
 namespace MonoGame.Framework.Graphics
 {
-	public abstract partial class Texture : GraphicsResource
-	{
-		internal SurfaceFormat _format;
-		internal int _levelCount;
-        internal static int _lastSortingKey = 0;
-        public static List<Texture> AllTextures = new List<Texture>();
+    public abstract partial class Texture : GraphicsResource
+    {
+        private static CachedReadOnlySet<Texture> _allTextures = CachedReadOnlySet<Texture>.Create();
 
-        public SurfaceFormat Format => _format;
-        public int LevelCount => _levelCount;
+        public static ReadOnlySet<Texture> AllTextures => _allTextures.ReadOnly;
+
+        private static int _lastSortingKey = 0;
+
+        public SurfaceFormat Format { get; internal set; }
+        public int LevelCount { get; internal set; }
 
         /// <summary>
         ///   Gets a unique identifier of this texture for sorting purposes.
@@ -31,9 +32,10 @@ namespace MonoGame.Framework.Graphics
         /// </remarks>
         public int SortingKey { get; } = Interlocked.Increment(ref _lastSortingKey);
 
-        public Texture()
+        public Texture(GraphicsDevice graphicsDevice) : base(graphicsDevice)
         {
-            AllTextures.Add(this);
+            lock (_allTextures.Source)
+                _allTextures.Source.Add(this);
         }
 
         internal static int CalculateMipLevels(int width, int height = 0, int depth = 0)
@@ -87,8 +89,8 @@ namespace MonoGame.Framework.Graphics
         internal int GetPitch(int width)
         {
             Debug.Assert(width > 0, "The width is negative.");
-            
-            switch (_format)
+
+            switch (Format)
             {
                 case SurfaceFormat.Dxt1:
                 case SurfaceFormat.Dxt1SRgb:
@@ -105,25 +107,27 @@ namespace MonoGame.Framework.Graphics
                 case SurfaceFormat.Dxt5:
                 case SurfaceFormat.Dxt5SRgb:
                 case SurfaceFormat.RgbPvrtc4Bpp:
-                case SurfaceFormat.RgbaPvrtc4Bpp:                    
-                    return (width + 3) / 4 * _format.GetSize();
+                case SurfaceFormat.RgbaPvrtc4Bpp:
+                    return (width + 3) / 4 * Format.GetSize();
 
                 default:
-                    return width * _format.GetSize();
+                    return width * Format.GetSize();
             };
         }
 
-        internal protected override void GraphicsDeviceResetting()
+        protected override void GraphicsDeviceResetting()
         {
             PlatformGraphicsDeviceResetting();
         }
 
-        internal unsafe static void CopyMemory(
-            IntPtr src, int srcIndex, IntPtr dst, int dstIndex, int dstSize, int elementCount, int elementSize)
+        protected override void Dispose(bool disposing)
         {
-            IntPtr srcOffset = new IntPtr(src.ToInt64() + srcIndex * elementSize);
-            IntPtr dstOffset = new IntPtr(dst.ToInt64() + dstIndex * elementSize);
-            Buffer.MemoryCopy((void*)srcOffset, (void*)dstOffset, dstSize, elementCount * elementSize);
+            PlatformDispose(disposing);
+
+            lock (_allTextures.Source)
+                _allTextures.Source.Add(this);
+
+            base.Dispose(disposing);
         }
     }
 }

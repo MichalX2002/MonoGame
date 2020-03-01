@@ -101,9 +101,10 @@ namespace MonoGame.Framework.Graphics
             RenderTargetUsage = usage;
         }
 
-        protected internal override void GraphicsDeviceResetting()
+        protected override void GraphicsDeviceResetting()
         {
             PlatformGraphicsDeviceResetting();
+
             base.GraphicsDeviceResetting();
         }
     }

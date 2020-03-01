@@ -7,7 +7,7 @@ using System.IO;
 namespace MonoGame.Framework.Graphics
 {
     internal partial class Shader : GraphicsResource
-	{
+    {
         /// <summary>
         /// Returns the platform specific shader profile identifier.
         /// </summary>
@@ -19,14 +19,12 @@ namespace MonoGame.Framework.Graphics
         internal int HashKey { get; private set; }
 
         public SamplerInfo[] Samplers { get; private set; }
-	    public int[] CBuffers { get; private set; }
+        public int[] CBuffers { get; private set; }
         public ShaderStage Stage { get; private set; }
         public VertexAttribute[] Attributes { get; private set; }
 
-        internal Shader(GraphicsDevice device, BinaryReader reader)
+        internal Shader(GraphicsDevice graphicsDevice, BinaryReader reader) : base(graphicsDevice)
         {
-            GraphicsDevice = device;
-
             bool isVertexShader = reader.ReadBoolean();
             Stage = isVertexShader ? ShaderStage.Vertex : ShaderStage.Pixel;
 
@@ -41,8 +39,8 @@ namespace MonoGame.Framework.Graphics
                 Samplers[s].TextureSlot = reader.ReadByte();
                 Samplers[s].SamplerSlot = reader.ReadByte();
 
-				if (reader.ReadBoolean())
-				{
+                if (reader.ReadBoolean())
+                {
                     Samplers[s].State = new SamplerState
                     {
                         AddressU = (TextureAddressMode)reader.ReadByte(),
@@ -82,10 +80,10 @@ namespace MonoGame.Framework.Graphics
             PlatformConstruct(Stage, shaderBytecode);
         }
 
-        internal protected override void GraphicsDeviceResetting()
+        protected override void GraphicsDeviceResetting()
         {
             PlatformGraphicsDeviceResetting();
         }
-	}
+    }
 }
 

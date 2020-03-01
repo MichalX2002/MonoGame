@@ -10,7 +10,7 @@ namespace MonoGame.Framework.Graphics
     {
         private SharpDX.Direct3D11.BlendState _state;
 
-        protected internal override void GraphicsDeviceResetting()
+        protected override void GraphicsDeviceResetting()
         {
             SharpDX.Utilities.Dispose(ref _state);
             base.GraphicsDeviceResetting();
@@ -38,8 +38,8 @@ namespace MonoGame.Framework.Graphics
 
             Debug.Assert(GraphicsDevice == device, "The state was created for a different device!");
 
-			// Apply the state!
-			return _state;
+            // Apply the state!
+            return _state;
         }
 
         partial void PlatformDispose()

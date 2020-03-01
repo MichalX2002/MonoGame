@@ -21,17 +21,15 @@ namespace MonoGame.Framework.Graphics
         }
 
         internal TextureCube(
-            GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format, bool renderTarget)
+            GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format, bool renderTarget) 
+            : base(graphicsDevice)
         {
-            GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
-                nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
-
             if (size <= 0)
                 throw new ArgumentOutOfRangeException(nameof(size), "Cube size must be greater than zero");
 
             Size = size;
-            _format = format;
-            _levelCount = mipMap ? CalculateMipLevels(size) : 1;
+            Format = format;
+            LevelCount = mipMap ? CalculateMipLevels(size) : 1;
 
             PlatformConstruct(graphicsDevice, size, mipMap, format, renderTarget);
         }

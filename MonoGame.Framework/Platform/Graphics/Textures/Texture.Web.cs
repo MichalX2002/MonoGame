@@ -18,15 +18,13 @@ namespace Microsoft.Xna.Framework.Graphics
             glLastSamplerState = null;
         }
 
-        protected override void Dispose(bool disposing)
+        private void PlatformDispose(bool disposing)
         {
             if (!IsDisposed)
             {
                 glTexture = -1;
                 glLastSamplerState = null;
             }
-
-            base.Dispose(disposing);
         }
     }
 }

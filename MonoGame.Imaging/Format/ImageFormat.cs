@@ -150,7 +150,7 @@ namespace MonoGame.Imaging
                             // as the format dictionaries should be case-insensitive.
                             dictionary.Add(key.ToLower(), list);
                         }
-                        list.List.Add(format);
+                        list.Source.Add(format);
                     }
                 }
 

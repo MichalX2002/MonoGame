@@ -3,9 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging;
@@ -44,14 +44,14 @@ namespace MonoGame.Framework.Graphics
 
         static Texture2D()
         {
-            InitializeVectorSaveFormat();
+            InitializeVectorSaveFormats();
         }
 
         /// <summary>
         /// Creates a new texture of the given size
         /// </summary>
-        public Texture2D(GraphicsDevice graphicsDevice, int width, int height) : this(
-            graphicsDevice, width, height, false, SurfaceFormat.Color, SurfaceType.Texture, false, 1)
+        public Texture2D(GraphicsDevice graphicsDevice, int width, int height) 
+            : this(graphicsDevice, width, height, false, SurfaceFormat.Color, SurfaceType.Texture, false, 1)
         {
         }
 
@@ -71,9 +71,8 @@ namespace MonoGame.Framework.Graphics
         /// Given <see cref="GraphicsDevice"/> can't work with texture arrays.
         /// </exception>
         public Texture2D(
-            GraphicsDevice graphicsDevice, int width, int height, bool mipmap,
-            SurfaceFormat format, int arraySize) : this(
-                graphicsDevice, width, height, mipmap, format, SurfaceType.Texture, false, arraySize)
+            GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format, int arraySize) 
+            : this(graphicsDevice, width, height, mipmap, format, SurfaceType.Texture, false, arraySize)
         {
 
         }
@@ -82,20 +81,16 @@ namespace MonoGame.Framework.Graphics
         /// Creates a new texture of a given size with a surface format and optional mipmaps.
         /// </summary>
         internal Texture2D(
-            GraphicsDevice graphicsDevice, int width, int height, bool mipmap,
-            SurfaceFormat format, SurfaceType type) : this(
-                graphicsDevice, width, height, mipmap, format, type, false, 1)
+            GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format, SurfaceType type) 
+            : this(graphicsDevice, width, height, mipmap, format, type, false, 1)
         {
         }
 
         protected Texture2D(
             GraphicsDevice graphicsDevice, int width, int height, bool mipmap,
-            SurfaceFormat format, SurfaceType type, bool shared, int arraySize)
+            SurfaceFormat format, SurfaceType type, bool shared, int arraySize) 
+            : base(graphicsDevice)
         {
-            if (graphicsDevice == null)
-                throw new ArgumentNullException(
-                    nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
-
             if (arraySize > 1 && !graphicsDevice.GraphicsCapabilities.SupportsTextureArrays)
                 throw new ArgumentException(
                     "Texture arrays are not supported on this graphics device", nameof(arraySize));
@@ -111,8 +106,8 @@ namespace MonoGame.Framework.Graphics
             Bounds = new Rectangle(0, 0, width, height);
             Texel = new Vector2(1f / width, 1f / height);
 
-            _format = format;
-            _levelCount = mipmap ? CalculateMipLevels(width, height) : 1;
+            Format = format;
+            LevelCount = mipmap ? CalculateMipLevels(width, height) : 1;
             ArraySize = arraySize;
 
             // Texture will be assigned by the swap chain.
@@ -124,7 +119,7 @@ namespace MonoGame.Framework.Graphics
 
         #endregion
 
-        #region SetData
+        #region SetData(Span)
 
         /// <summary>
         /// Changes the pixels of the texture.
@@ -169,6 +164,34 @@ namespace MonoGame.Framework.Graphics
 
         #endregion
 
+        #region SetData(Image)
+
+        /// <summary>
+        /// Changes the pixels of the texture.
+        /// </summary>
+        /// <param name="image">New data for the texture.</param>
+        /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
+        /// <param name="level">Layer of the texture to modify.</param>
+        /// <param name="arraySlice">Index inside the texture array.</param>
+        /// <exception cref="ArgumentException">
+        ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
+        /// </exception>
+        [CLSCompliant(false)]
+        public void SetData(
+            Image image, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
+        {
+            var pixelType = image.PixelType;
+
+            ValidateParams(
+                pixelType.ElementSize, pixelType.Type.Name, level, arraySlice, rectangle,
+                image.Width * image.Height, out Rectangle checkedRect);
+
+            // TODO: finish this magical function
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
         #region GetData
 
         /// <summary>
@@ -194,7 +217,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Retrieves the contents of the texture and stores them in unmanaged memory.
         /// </summary>
-        /// <param name="rectangle">Area of the texture; defaults to texture bound.</param>
+        /// <param name="rectangle">Area of the texture; defaults to texture bounds.</param>
         /// <param name="level">Layer of the texture.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
         /// /// <exception cref="ArgumentException">
@@ -206,7 +229,7 @@ namespace MonoGame.Framework.Graphics
             ValidateParams<T>(level, arraySlice, rectangle, out int byteSize, out Rectangle checkedRect);
 
             int elementCount = checkedRect.Width * checkedRect.Height;
-            ValidateSizes<T>(elementCount, byteSize);
+            ValidateSizes(Unsafe.SizeOf<T>(), elementCount, byteSize);
 
             var ptr = new UnmanagedMemory<T>(elementCount);
             PlatformGetData(level, arraySlice, checkedRect, ptr.Span);
@@ -216,6 +239,21 @@ namespace MonoGame.Framework.Graphics
         #endregion
 
         #region Loading/Construction
+
+        #region FromImage
+
+        [CLSCompliant(false)]
+        public static Texture2D FromImage(
+            Image image, GraphicsDevice graphicsDevice, bool mipmap, SurfaceFormat format)
+        {
+            ValidateFromImageParams(graphicsDevice, nameof(graphicsDevice), format, nameof(format));
+
+            var texture = new Texture2D(graphicsDevice, image.Width, image.Height, mipmap, format);
+            texture.SetData(image);
+            return texture;
+        }
+
+        #endregion
 
         #region FromStream
 
@@ -241,8 +279,7 @@ namespace MonoGame.Framework.Graphics
             bool mipmap,
             SurfaceFormat format)
         {
-            if (graphicsDevice == null)
-                throw new ArgumentNullException(nameof(graphicsDevice));
+            ValidateFromImageParams(graphicsDevice, nameof(graphicsDevice), format, nameof(format));
 
             using (var image = Image.Load(imagingConfig, stream))
                 return FromImage(image, graphicsDevice, mipmap, format);
@@ -291,42 +328,6 @@ namespace MonoGame.Framework.Graphics
 
         #endregion
 
-        #region FromImage
-
-        [CLSCompliant(false)]
-        public static Texture2D FromImage(
-            Image image, GraphicsDevice graphicsDevice, bool mipmap, SurfaceFormat format)
-        {
-            var texture = new Texture2D(graphicsDevice, image.Width, image.Height, mipmap, format);
-            throw new NotImplementedException(); // TODO: FIXME:
-            // texture.SetData(image.GetPixelSpan());
-            return texture;
-        }
-
-        //[CLSCompliant(false)]
-        //public static unsafe Image LoadImage(ImagingConfig config, Stream stream)
-        //{
-        //    if (config == null) throw new ArgumentNullException(nameof(config));
-        //    if (stream == null) throw new ArgumentNullException(nameof(stream));
-        //
-        //    Image.Load()
-        //
-        //    var image = Image.Load<Color>(config, stream, CancellationToken.None);
-        //    fixed (Color* pixelPtr = &MemoryMarshal.GetReference(image.GetPixelSpan()))
-        //    {
-        //        int pixels = image.Width * image.Height;
-        //        for (int i = 0; i < pixels; i++)
-        //        {
-        //            // XNA blacks out any pixel with an alpha of zero
-        //            if (pixelPtr[i].A == 0)
-        //                pixelPtr[i] = default;
-        //        }
-        //    }
-        //    return image;
-        //}
-
-        #endregion
-
         #region Reload
 
         /// <summary>
@@ -351,8 +352,7 @@ namespace MonoGame.Framework.Graphics
             if (info.Height != Height) throw GetSizeException("height");
 
             using (var image = Image.Load(config, readStream))
-                throw new NotImplementedException(); // TODO: FIXME:
-                                                     //SetData(image.GetPixelSpan());
+                SetData(image);
         }
 
         /// <summary>
@@ -542,17 +542,20 @@ namespace MonoGame.Framework.Graphics
 
         #region Parameter Validation
 
-        private unsafe void ValidateSizes<T>(int elementCount, int minimumByteSize)
-            where T : unmanaged
+        private static void ValidateFromImageParams(
+            GraphicsDevice graphicsDevice, string deviceParamName,
+            SurfaceFormat format, string formatParamName)
         {
-            if (elementCount * sizeof(T) < minimumByteSize)
-                throw new ArgumentException(
-                    "The given memory is not enough for the current texture format.", nameof(elementCount));
+            if (graphicsDevice == null)
+                throw new ArgumentNullException(deviceParamName);
+
+            if (!SaveFormatsBySurfaceRO.TryGetValue(format, out _))
+                throw GetUnsupportedSurfaceFormatForImagingException(format, formatParamName);
         }
 
-        private unsafe void ValidateParams<T>(
-            int level, int arraySlice, Rectangle? rect, out int byteSize, out Rectangle checkedRect)
-            where T : unmanaged
+        private void ValidateParams(
+            int typeSize, string typeName, int level, int arraySlice, Rectangle? rect,
+            out int byteSize, out Rectangle checkedRect)
         {
             if (level < 0 || level >= LevelCount)
                 throw new ArgumentException(
@@ -568,9 +571,9 @@ namespace MonoGame.Framework.Graphics
                     $"{nameof(ArraySize)} of this texture and larger than 0.", nameof(arraySlice));
 
             var fSize = Format.GetSize();
-            if (sizeof(T) > fSize || fSize % sizeof(T) != 0)
+            if (typeSize > fSize || fSize % typeSize != 0)
                 throw new ArgumentException(
-                    $"Type {nameof(T)} is of an invalid size for the format of this texture.", nameof(T));
+                    $"Type {typeName} is of an invalid size for the format of this texture.", typeName);
 
             Rectangle texBounds = CheckRect(level, rect, out checkedRect);
 
@@ -616,12 +619,34 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        private unsafe void ValidateParams<T>(
+        private void ValidateSizes(int elementSize, int elementCount, int minimumByteSize)
+        {
+            if (elementCount * elementSize < minimumByteSize)
+                throw new ArgumentException(
+                    "The given memory is not enough for the current texture format.", nameof(elementCount));
+        }
+
+        private void ValidateParams<T>(
+            int level, int arraySlice, Rectangle? rect,
+            out int byteSize, out Rectangle checkedRect)
+        {
+            ValidateParams(Unsafe.SizeOf<T>(), typeof(T).Name, level, arraySlice, rect, out byteSize, out checkedRect);
+        }
+
+        private void ValidateParams(
+            int typeSize, string typeName, int level, int arraySlice, Rectangle? rect, int elementCount,
+            out Rectangle checkedRect)
+        {
+            ValidateParams(typeSize, typeName, level, arraySlice, rect, out int byteSize, out checkedRect);
+            ValidateSizes(typeSize, elementCount, byteSize);
+        }
+
+        private void ValidateParams<T>(
             int level, int arraySlice, Rectangle? rect, int elementCount, out Rectangle checkedRect)
             where T : unmanaged
         {
             ValidateParams<T>(level, arraySlice, rect, out int byteSize, out checkedRect);
-            ValidateSizes<T>(elementCount, byteSize);
+            ValidateSizes(Unsafe.SizeOf<T>(), elementCount, byteSize);
         }
 
         private Rectangle CheckRect(int level, Rectangle? rect, out Rectangle checkedRect)

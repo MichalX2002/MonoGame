@@ -22,15 +22,13 @@ namespace MonoGame.Framework.Graphics
             glLastSamplerState = null;
         }
 
-        protected override void Dispose(bool disposing)
-        {
+        private void PlatformDispose(bool disposing) 
+        { 
             if (!IsDisposed)
             {
                 DeleteGLTexture();
                 glLastSamplerState = null;
             }
-
-            base.Dispose(disposing);
         }
 
         private void DeleteGLTexture()

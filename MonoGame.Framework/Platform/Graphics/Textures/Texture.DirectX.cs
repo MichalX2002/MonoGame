@@ -52,15 +52,13 @@ namespace MonoGame.Framework.Graphics
             SharpDX.Utilities.Dispose(ref _texture);
         }
 
-        protected override void Dispose(bool disposing)
+        private void PlatformDispose(bool disposing)
         {
             if (disposing)
             {
                 SharpDX.Utilities.Dispose(ref _resourceView);
                 SharpDX.Utilities.Dispose(ref _texture);
             }
-
-            base.Dispose(disposing);
         }
     }
 }

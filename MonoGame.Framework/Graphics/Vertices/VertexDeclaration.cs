@@ -133,8 +133,8 @@ namespace MonoGame.Framework.Graphics
         /// <exception cref="ArgumentNullException"><paramref name="elements"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentEmptyException"><paramref name="elements"/> is empty.</exception>
         public VertexDeclaration(params VertexElement[] elements) : this(GetVertexStride(elements), elements)
-		{
-		}
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VertexDeclaration"/> class.
@@ -167,16 +167,16 @@ namespace MonoGame.Framework.Graphics
         }
 
         private static int GetVertexStride(VertexElement[] elements)
-		{
-			int max = 0;
-			for (var i = 0; i < elements.Length; i++)
-			{
+        {
+            int max = 0;
+            for (var i = 0; i < elements.Length; i++)
+            {
                 var start = elements[i].Offset + elements[i].VertexElementFormat.GetSize();
-				if (max < start)
-					max = start;
-			}
-			return max;
-		}
+                if (max < start)
+                    max = start;
+            }
+            return max;
+        }
 
         /// <summary>
         /// Returns the <see cref="VertexDeclaration"/> for Type.
@@ -186,26 +186,26 @@ namespace MonoGame.Framework.Graphics
         /// Prefer to use <see cref="VertexDeclarationCache{T}"/> when the declaration lookup
         /// can be performed with a templated type.
         /// </remarks>
-		internal static VertexDeclaration FromType(Type vertexType)
-		{
-			if (vertexType == null)
-				throw new ArgumentNullException(nameof(vertexType));
+        internal static VertexDeclaration FromType(Type vertexType)
+        {
+            if (vertexType == null)
+                throw new ArgumentNullException(nameof(vertexType));
 
             if (!ReflectionHelpers.IsValueType(vertexType))
-				throw new ArgumentException("Must be value type.", nameof(vertexType));
+                throw new ArgumentException("Must be value type.", nameof(vertexType));
 
             var type = Activator.CreateInstance(vertexType) as IVertexType;
             var vertexDeclaration = type.VertexDeclaration;
 
             if (type == null)
-				throw new ArgumentException(
+                throw new ArgumentException(
                     $"{nameof(vertexType)} does not inherit {nameof(IVertexType)}.", nameof(vertexType));
 
-			if (vertexDeclaration == null)
-				throw new Exception($"{nameof(IVertexType)}.{nameof(IVertexType.VertexDeclaration)} cannot be null.");
+            if (vertexDeclaration == null)
+                throw new Exception($"{nameof(IVertexType)}.{nameof(IVertexType.VertexDeclaration)} cannot be null.");
 
-			return vertexDeclaration;
-		}
+            return vertexDeclaration;
+        }
 
         /// <summary>
         /// Creates a copy of the vertex elements.

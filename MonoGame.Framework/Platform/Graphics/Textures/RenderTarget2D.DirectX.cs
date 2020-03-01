@@ -133,7 +133,7 @@ namespace MonoGame.Framework.Graphics
         internal override SampleDescription CreateSampleDescription()
         {
             return this.GraphicsDevice.GetSupportedSampleDescription
-                (SharpDXHelper.ToFormat(this._format), this.MultiSampleCount);
+                (SharpDXHelper.ToFormat(this.Format), this.MultiSampleCount);
         }
 
         internal void ResolveSubresource()
@@ -145,7 +145,7 @@ namespace MonoGame.Framework.Graphics
                     0,
                     _resolvedTexture._texture,
                     0,
-                    SharpDXHelper.ToFormat(_format));
+                    SharpDXHelper.ToFormat(Format));
             }
         }
 

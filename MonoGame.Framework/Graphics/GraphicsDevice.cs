@@ -664,7 +664,7 @@ namespace MonoGame.Framework.Graphics
                 foreach (var resource in _resources)
                 {
                     if (resource.Target is GraphicsResource target)
-                        target.GraphicsDeviceResetting();
+                        target.InvokeGraphicsDeviceResetting();
                 }
 
                 // Remove references to resources that have been garbage collected.

@@ -16,10 +16,8 @@ namespace MonoGame.Framework.Graphics
         private ulong _stateKey;
         private bool IsDirty { get; set; }
 
-        public ConstantBuffer(ConstantBuffer cloneSource)
+        public ConstantBuffer(ConstantBuffer cloneSource) : base(cloneSource.GraphicsDevice)
         {
-            GraphicsDevice = cloneSource.GraphicsDevice;
-
             // Share the immutable types.
             _name = cloneSource._name;
             _parameters = cloneSource._parameters;
@@ -32,9 +30,8 @@ namespace MonoGame.Framework.Graphics
 
         public ConstantBuffer(
             GraphicsDevice device, int sizeInBytes,
-            int[] parameterIndexes, int[] parameterOffsets, string name)
+            int[] parameterIndexes, int[] parameterOffsets, string name) : base(device)
         {
-            GraphicsDevice = device;
             _buffer = new byte[sizeInBytes];
             _parameters = parameterIndexes;
             _offsets = parameterOffsets;

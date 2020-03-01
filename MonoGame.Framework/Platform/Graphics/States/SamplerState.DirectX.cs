@@ -11,9 +11,10 @@ namespace MonoGame.Framework.Graphics
     {
         private SharpDX.Direct3D11.SamplerState _state;
 
-        protected internal override void GraphicsDeviceResetting()
+        protected override void GraphicsDeviceResetting()
         {
             SharpDX.Utilities.Dispose(ref _state);
+
             base.GraphicsDeviceResetting();
         }
 
@@ -29,11 +30,11 @@ namespace MonoGame.Framework.Graphics
                     AddressW = GetAddressMode(AddressW),
 
 #if WINDOWS_UAP
-				desc.BorderColor = new SharpDX.Mathematics.Interop.RawColor4(
-					BorderColor.R / 255.0f,
-					BorderColor.G / 255.0f,
-					BorderColor.B / 255.0f,
-					BorderColor.A / 255.0f);
+                    desc.BorderColor = new SharpDX.Mathematics.Interop.RawColor4(
+                        BorderColor.R / 255.0f,
+                        BorderColor.G / 255.0f,
+                        BorderColor.B / 255.0f,
+                        BorderColor.A / 255.0f);
 #else
                     BorderColor = BorderColor.ToColor4(),
 #endif

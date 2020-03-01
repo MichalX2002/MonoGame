@@ -27,7 +27,7 @@ namespace MonoGame.Framework.Graphics
         private static Dictionary<Type, ReadOnlySet<VectorSaveFormat>> SaveFormatsByTypeRO { get; } =
             new Dictionary<Type, ReadOnlySet<VectorSaveFormat>>();
 
-        private static void InitializeVectorSaveFormat()
+        private static void InitializeVectorSaveFormats()
         {
             // TODO: implement SRgb
 
@@ -95,15 +95,19 @@ namespace MonoGame.Framework.Graphics
         public static ReadOnlySet<VectorSaveFormat> GetVectorSaveFormats(SurfaceFormat textureFormat)
         {
             if (!SaveFormatsBySurfaceRO.TryGetValue(textureFormat, out var formatSet))
-            {
-                var innerException = textureFormat.IsCompressedFormat()
-                    ? new NotSupportedException("Compressed texture formats are currently not supported.")
-                    : null;
-
-                throw new NotSupportedException(
-                    $"The format {textureFormat} is not supported.", innerException);
-            }
+                throw GetUnsupportedSurfaceFormatForImagingException(textureFormat, nameof(textureFormat));
             return formatSet;
+        }
+
+        private static Exception GetUnsupportedSurfaceFormatForImagingException(
+            SurfaceFormat textureFormat, string paramName)
+        {
+            var innerException = textureFormat.IsCompressedFormat()
+                ? new ArgumentException("Compressed texture formats are currently not supported.")
+                : null;
+
+            return new ArgumentException(
+                $"The format {textureFormat} is not supported.", paramName, innerException);
         }
 
         public static VectorSaveFormat GetVectorSaveFormat(SurfaceFormat textureFormat)
@@ -116,10 +120,7 @@ namespace MonoGame.Framework.Graphics
         public static ReadOnlySet<VectorSaveFormat> GetVectorSaveFormats(Type vectorType)
         {
             if (!SaveFormatsByTypeRO.TryGetValue(vectorType, out var formatSet))
-            {
-                throw new NotSupportedException(
-                    $"The vector type {vectorType} is not supported.");
-            }
+                throw new NotSupportedException($"The vector type {vectorType} is not supported.");
             return formatSet;
         }
 

@@ -32,7 +32,6 @@ namespace MonoGame.Framework.Audio
         public static Speakers Speakers
         {
             get => _speakers;
-
             set
             {
                 if (_speakers == value)
@@ -56,7 +55,6 @@ namespace MonoGame.Framework.Audio
                 return _device3D;
             }
         }
-
 
         private static SubmixVoice _reverbVoice;
 
@@ -97,6 +95,7 @@ namespace MonoGame.Framework.Audio
         internal static void PlatformInitialize()
         {
             ALController.EnsureInitialized();
+
             try
             {
                 if (Device == null)
@@ -154,12 +153,7 @@ namespace MonoGame.Framework.Audio
 
         private static DataStream ToDataStream(ReadOnlySpan<byte> buffer)
         {
-            // NOTE: old versions of DataStream.Create didn't work correctly for offsets
-            
-            var data = new byte[buffer.Length];
-            buffer.CopyTo(data);
-
-            return DataStream.Create(data, true, false);
+            return DataStream.Create(buffer.ToArray(), true, false);
         }
 
         private void PlatformInitializePcm(

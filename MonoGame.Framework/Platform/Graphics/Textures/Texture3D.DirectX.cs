@@ -25,7 +25,7 @@ namespace MonoGame.Framework.Graphics
             this.mipMap = mipMap;
 
             if (mipMap)
-                this._levelCount = CalculateMipLevels(width, height, depth);
+                this.LevelCount = CalculateMipLevels(width, height, depth);
 
             // Create texture
             GetTexture();
@@ -39,8 +39,8 @@ namespace MonoGame.Framework.Graphics
                 Width = Width,
                 Height = Height,
                 Depth = Depth,
-                MipLevels = _levelCount,
-                Format = SharpDXHelper.ToFormat(_format),
+                MipLevels = LevelCount,
+                Format = SharpDXHelper.ToFormat(Format),
                 BindFlags = BindFlags.ShaderResource,
                 CpuAccessFlags = CpuAccessFlags.None,
                 Usage = ResourceUsage.Default,
@@ -97,7 +97,7 @@ namespace MonoGame.Framework.Graphics
                 Height = Height,
                 Depth = Depth,
                 MipLevels = 1,
-                Format = SharpDXHelper.ToFormat(_format),
+                Format = SharpDXHelper.ToFormat(Format),
                 BindFlags = BindFlags.None,
                 CpuAccessFlags = CpuAccessFlags.Read,
                 Usage = ResourceUsage.Staging,
@@ -118,7 +118,7 @@ namespace MonoGame.Framework.Graphics
 
                     // Copy the data to the array.
                     var box = d3dContext.MapSubresource(stagingTex, 0, MapMode.Read, MapFlags.None);
-                    GraphicsDevice.CopyResourceTo(_format, box, columns, rows, destination);
+                    GraphicsDevice.CopyResourceTo(Format, box, columns, rows, destination);
                 }
             }
         }

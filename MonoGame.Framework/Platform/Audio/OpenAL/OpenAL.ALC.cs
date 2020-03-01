@@ -10,7 +10,7 @@ namespace MonoGame.OpenAL
         public delegate IntPtr d_alccreatecontext(IntPtr device, int* attributes);
         private static d_alccreatecontext alcCreateContext = FL.LoadFunction<d_alccreatecontext>(AL.NativeLibrary, "alcCreateContext");
 
-        public static IntPtr CreateContext(IntPtr device, Span<int> attributes)
+        public static IntPtr CreateContext(IntPtr device, ReadOnlySpan<int> attributes)
         {
             fixed (int* ptr = &MemoryMarshal.GetReference(attributes))
                 return alcCreateContext(device, ptr);
