@@ -270,7 +270,7 @@ namespace MonoGame.Framework
                 float sqDist = diff.LengthSquared();
                 if (sqDist > sqRadius)
                 {
-                    float distance = (float)Math.Sqrt(sqDist); // equal to diff.Length();
+                    float distance = MathF.Sqrt(sqDist); // equal to diff.Length();
                     Vector3 direction = diff / distance;
                     Vector3 G = center - radius * direction;
                     center = (G + pt) / 2;
@@ -350,7 +350,7 @@ namespace MonoGame.Framework
                 float sqDist = diff.LengthSquared();
                 if (sqDist > sqRadius)
                 {
-                    float distance = (float)Math.Sqrt(sqDist); // equal to diff.Length();
+                    float distance = MathF.Sqrt(sqDist); // equal to diff.Length();
                     Vector3 direction = diff / distance;
                     Vector3 G = center - radius * direction;
                     center = (G + pt) / 2;
@@ -500,7 +500,7 @@ namespace MonoGame.Framework
             float v2 = (matrix.M21 * matrix.M21) + (matrix.M22 * matrix.M22) + (matrix.M23 * matrix.M23);
             float v3 = (matrix.M31 * matrix.M31) + (matrix.M32 * matrix.M32) + (matrix.M33 * matrix.M33);
             return new BoundingSphere(
-                Vector3.Transform(Center, matrix), Radius * (float)Math.Sqrt(Math.Max(v1, Math.Max(v2, v3))));
+                Vector3.Transform(Center, matrix), Radius * MathF.Sqrt(Math.Max(v1, Math.Max(v2, v3))));
         }
 
         /// <summary>

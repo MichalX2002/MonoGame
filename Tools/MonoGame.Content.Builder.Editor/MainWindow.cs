@@ -3,12 +3,12 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Eto.Forms;
-using Eto.Drawing;
+using System.IO;
 using System.Reflection;
+using Eto.Drawing;
+using Eto.Forms;
 
 namespace MonoGame.Tools.Pipeline
 {
@@ -16,13 +16,8 @@ namespace MonoGame.Tools.Pipeline
     {
         public EventHandler<EventArgs> RecentChanged;
         public EventHandler<EventArgs> TitleChanged;
-<<<<<<< HEAD:Tools/Pipeline/MainWindow.cs
 
-        public const string TitleBase = "MonoGame Pipeline Tool";
-=======
-#pragma warning restore 649
         public const string TitleBase = "MonoGame Content Builder Editor";
->>>>>>> 6138570b31a9edcd5daec43774106b822ac4f4e6:Tools/MonoGame.Content.Builder.Editor/MainWindow.cs
         public static MainWindow Instance;
 
         private List<Pad> _pads;

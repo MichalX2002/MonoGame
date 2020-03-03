@@ -192,17 +192,17 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 
             var str = Xml.ReadElementContentAsString();
 
-            Action<Type, string> fixup = (type, filename) =>
+            if (!_externalReferences.TryGetValue(str, out List<Action<Type, string>> fixups))
+                _externalReferences.Add(str, fixups = new List<Action<Type, string>>());
+
+            void Fixup(Type type, string filename)
             {
                 if (type != typeof(T))
                     throw NewInvalidContentException(null, "Invalid external reference type");
 
                 existingInstance.Filename = filename;
-            };
-
-            if (!_externalReferences.TryGetValue(str, out List<Action<Type, string>> fixups))
-                _externalReferences.Add(str, fixups = new List<Action<Type, string>>());
-            fixups.Add(fixup);
+            }
+            fixups.Add(Fixup);
         }
 
         internal void ReadExternalReferences()

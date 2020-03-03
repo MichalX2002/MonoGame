@@ -15,12 +15,10 @@ namespace MonoGame.Framework.Graphics
         #region Constructors
 
         protected VertexBuffer(
-            GraphicsDevice graphicsDevice, VertexDeclaration vertexDeclaration, int capacity, BufferUsage bufferUsage, bool dynamic) :
-            base(capacity)
+            GraphicsDevice graphicsDevice, VertexDeclaration vertexDeclaration, 
+            int capacity, BufferUsage bufferUsage, bool dynamic) :
+            base(graphicsDevice, capacity)
         {
-            GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
-                nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
-
             BufferUsage = bufferUsage;
             VertexDeclaration = vertexDeclaration;
 
@@ -32,13 +30,16 @@ namespace MonoGame.Framework.Graphics
             PlatformConstruct();
         }
 
-        public VertexBuffer(GraphicsDevice graphicsDevice, VertexDeclaration vertexDeclaration, int vertexCount, BufferUsage bufferUsage) :
-            this(graphicsDevice, vertexDeclaration, vertexCount, bufferUsage, false)
+        public VertexBuffer(
+            GraphicsDevice graphicsDevice, VertexDeclaration vertexDeclaration, 
+            int capacity, BufferUsage bufferUsage) :
+            this(graphicsDevice, vertexDeclaration, capacity, bufferUsage, false)
         {
         }
 
-        public VertexBuffer(GraphicsDevice graphicsDevice, Type type, int vertexCount, BufferUsage bufferUsage) :
-            this(graphicsDevice, VertexDeclaration.FromType(type), vertexCount, bufferUsage, false)
+        public VertexBuffer(
+            GraphicsDevice graphicsDevice, Type type, int capacity, BufferUsage bufferUsage) :
+            this(graphicsDevice, VertexDeclaration.FromType(type), capacity, bufferUsage, false)
         {
         }
 

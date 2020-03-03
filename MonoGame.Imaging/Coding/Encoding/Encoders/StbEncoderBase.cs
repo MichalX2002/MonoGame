@@ -16,50 +16,6 @@ namespace MonoGame.Imaging.Coding.Encoding
         public abstract ImageFormat Format { get; }
         public abstract EncoderOptions DefaultOptions { get; }
 
-        // TODO: FIXME: make this into an extension method for IImageEncoder
-
-        //public void Encode(
-        //    ImagingConfig imagingConfig,
-        //    IEnumerable<IReadOnlyPixelRows> images,
-        //    Stream stream,
-        //    bool leaveOpen,
-        //    EncoderOptions encoderOptions = null,
-        //    CancellationToken? cancellationToken = null,
-        //    EncodeProgressCallback onProgress = null)
-        //{
-        //    var cancelToken = cancellationToken ?? CancellationToken.None;
-        //    cancelToken.ThrowIfCancellationRequested();
-        //
-        //    int index = 0;
-        //    foreach (var image in images)
-        //    {
-        //        byte[] writeBuffer = RecyclableMemoryManager.Default.GetBlock();
-        //        try
-        //        {
-        //            int components = 4; // TODO: change this so it's dynamic/controlled
-        //            var provider = new RowsPixelProvider(image, components);
-        //            var state = new ImageStbEncoderState(imagingConfig, this, stream, leaveOpen);
-        //
-        //            cancelToken.ThrowIfCancellationRequested();
-        //
-        //            if (index == 0)
-        //            {
-        //                if (!WriteFirst(imagingConfig, context, image, encoderOptions))
-        //                    throw new ImagingException(Format);
-        //            }
-        //            else if (!WriteNext(imagingConfig, context, image, encoderOptions))
-        //            {
-        //                break;
-        //            }
-        //            index++;
-        //        }
-        //        finally
-        //        {
-        //            RecyclableMemoryManager.Default.ReturnBlock(writeBuffer);
-        //        }
-        //    }
-        //}
-
         private static WriteContext CreateWriteContext(
             IReadOnlyPixelRows image,
             ImageStbEncoderState encoderState,

@@ -36,12 +36,12 @@ namespace MonoGame.Tools.Pipeline
             /// </summary>
             public void FirstDo()
             {
-                var parser = new PipelineProjectParser(_con, _con._project);
+                //var parser = new PipelineProjectParser(_con, _con._project);
 
                 for (int i = 0; i < _includes.Count; i++)
                 {
-                    var item = _includes[i].IsDirectory ?
-                        (IProjectItem)new DirectoryItem("") : new ContentItem();
+                    var item = _includes[i].IsDirectory 
+                        ? (IProjectItem)new DirectoryItem("") : new ContentItem();
 
                     if (_includes[i].IncludeType == IncludeType.Create ||
                         _includes[i].IncludeType == IncludeType.Link)

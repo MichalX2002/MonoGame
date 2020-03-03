@@ -47,10 +47,10 @@ namespace MonoGame.Framework.PackedVector
             vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.One);
 
             return (uint)(
-                (((int)Math.Round(vector.X * 1023f) & 0x03FF) << 0) |
-                (((int)Math.Round(vector.Y * 1023f) & 0x03FF) << 10) |
-                (((int)Math.Round(vector.Z * 1023f) & 0x03FF) << 20) |
-                (((int)Math.Round(vector.W * 3f) & 0x03) << 30));
+                (((int)MathF.Round(vector.X * 1023f) & 0x03FF) << 0) |
+                (((int)MathF.Round(vector.Y * 1023f) & 0x03FF) << 10) |
+                (((int)MathF.Round(vector.Z * 1023f) & 0x03FF) << 20) |
+                (((int)MathF.Round(vector.W * 3f) & 0x03) << 30));
         }
 
         #region IPackedVector

@@ -49,7 +49,7 @@ namespace MonoGame.Imaging.Pixels
         public unsafe void Fill(Span<byte> destination, int dataOffset)
         {
             int startPixelOffset = dataOffset / Components;
-            int requestedPixelCount = (int)Math.Ceiling(destination.Length / (double)Components);
+            int requestedPixelCount = (int)MathF.Ceiling(destination.Length / (float)Components);
 
             int column = startPixelOffset % Width;
             int row = startPixelOffset / Width;

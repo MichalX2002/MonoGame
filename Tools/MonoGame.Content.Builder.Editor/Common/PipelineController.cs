@@ -333,7 +333,7 @@ namespace MonoGame.Tools.Pipeline
                     return false;
 
                 _project.OriginalPath = newFilePath;
-				View.SetTreeRoot(_project);
+                View.SetTreeRoot(_project);
             }
 
             // Do the save.
@@ -607,7 +607,8 @@ namespace MonoGame.Tools.Pipeline
 
         public void DragDrop(string initialDirectory, string[] folders, string[] files)
         {
-            initialDirectory = GetFullPath(initialDirectory);
+            // TODO: what is this
+            //initialDirectory = GetFullPath(initialDirectory);
             //IncludeFolder(initialDirectory, folders);
             //Include(initialDirectory, files);
         }

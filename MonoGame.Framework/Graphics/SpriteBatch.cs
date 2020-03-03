@@ -34,14 +34,10 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="graphicsDevice">The <see cref="GraphicsDevice"/>, which will be used for sprite rendering.</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="graphicsDevice"/> is null.</exception>
-        public SpriteBatch(GraphicsDevice graphicsDevice)
+        public SpriteBatch(GraphicsDevice graphicsDevice) : base(graphicsDevice)
         {
-            GraphicsDevice = graphicsDevice ??
-                throw new ArgumentNullException(
-                    nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
-
-            _batcher = new SpriteBatcher(graphicsDevice);
-            _spriteEffect = new SpriteEffect(graphicsDevice);
+            _batcher = new SpriteBatcher(GraphicsDevice);
+            _spriteEffect = new SpriteEffect(GraphicsDevice);
             _spritePass = _spriteEffect.CurrentTechnique.Passes[0];
 
             _beginCalled = false;
@@ -357,7 +353,7 @@ namespace MonoGame.Framework.Graphics
             {
                 item.Set(
                     position.X, position.Y, -origin.X, -origin.Y, w, h,
-                    (float)Math.Sin(rotation), (float)Math.Cos(rotation),
+                    MathF.Sin(rotation), MathF.Cos(rotation),
                     color, texCoord, layerDepth);
             }
 
@@ -457,7 +453,7 @@ namespace MonoGame.Framework.Graphics
                 item.Set(
                     destinationRectangle.X, destinationRectangle.Y, -originX, -originY,
                     destinationRectangle.Width, destinationRectangle.Height,
-                    (float)Math.Sin(rotation), (float)Math.Cos(rotation),
+                    MathF.Sin(rotation), MathF.Cos(rotation),
                     color, texCoord, layerDepth);
             }
 
@@ -724,8 +720,8 @@ namespace MonoGame.Framework.Graphics
             }
             else
             {
-                cos = (float)Math.Cos(rotation);
-                sin = (float)Math.Sin(rotation);
+                cos = MathF.Cos(rotation);
+                sin = MathF.Sin(rotation);
                 transformation.M11 = (flippedHorz ? -scale.X : scale.X) * cos;
                 transformation.M12 = (flippedHorz ? -scale.X : scale.X) * sin;
                 transformation.M21 = (flippedVert ? -scale.Y : scale.Y) * (-sin);
@@ -966,8 +962,8 @@ namespace MonoGame.Framework.Graphics
             }
             else
             {
-                cos = (float)Math.Cos(rotation);
-                sin = (float)Math.Sin(rotation);
+                cos = MathF.Cos(rotation);
+                sin = MathF.Sin(rotation);
                 transformation.M11 = (flippedHorz ? -scale.X : scale.X) * cos;
                 transformation.M12 = (flippedHorz ? -scale.X : scale.X) * sin;
                 transformation.M21 = (flippedVert ? -scale.Y : scale.Y) * (-sin);

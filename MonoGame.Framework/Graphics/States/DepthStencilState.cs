@@ -191,51 +191,56 @@ namespace MonoGame.Framework.Graphics
         {
             if (_defaultStateObject)
                 throw new InvalidOperationException("You cannot bind a default state object.");
+
             if (GraphicsDevice != null && GraphicsDevice != device)
-                throw new InvalidOperationException("This depth stencil state is already bound to a different graphics device.");
+                throw new InvalidOperationException(
+                    "This depth stencil state is already bound to a different graphics device.");
             GraphicsDevice = device;
         }
 
         internal void ThrowIfBound()
         {
             if (_defaultStateObject)
-                throw new InvalidOperationException("You cannot modify a default depth stencil state object.");
+                throw new InvalidOperationException(
+                    "You cannot modify a default depth stencil state object.");
+
             if (GraphicsDevice != null)
-                throw new InvalidOperationException("You cannot modify the depth stencil state after it has been bound to the graphics device!");
+                throw new InvalidOperationException(
+                    "You cannot modify the depth stencil state after it has been bound to the graphics device!");
         }
 
         public DepthStencilState ()
-		{
+        {
             DepthBufferEnable = true;
             DepthBufferWriteEnable = true;
-			DepthBufferFunction = CompareFunction.LessEqual;
-			StencilEnable = false;
-			StencilFunction = CompareFunction.Always;
-			StencilPass = StencilOperation.Keep;
-			StencilFail = StencilOperation.Keep;
-			StencilDepthBufferFail = StencilOperation.Keep;
-			TwoSidedStencilMode = false;
-			CounterClockwiseStencilFunction = CompareFunction.Always;
-			CounterClockwiseStencilFail = StencilOperation.Keep;
-			CounterClockwiseStencilPass = StencilOperation.Keep;
-			CounterClockwiseStencilDepthBufferFail = StencilOperation.Keep;
-			StencilMask = int.MaxValue;
-			StencilWriteMask = int.MaxValue;
-			ReferenceStencil = 0;
-		}
+            DepthBufferFunction = CompareFunction.LessEqual;
+            StencilEnable = false;
+            StencilFunction = CompareFunction.Always;
+            StencilPass = StencilOperation.Keep;
+            StencilFail = StencilOperation.Keep;
+            StencilDepthBufferFail = StencilOperation.Keep;
+            TwoSidedStencilMode = false;
+            CounterClockwiseStencilFunction = CompareFunction.Always;
+            CounterClockwiseStencilFail = StencilOperation.Keep;
+            CounterClockwiseStencilPass = StencilOperation.Keep;
+            CounterClockwiseStencilDepthBufferFail = StencilOperation.Keep;
+            StencilMask = int.MaxValue;
+            StencilWriteMask = int.MaxValue;
+            ReferenceStencil = 0;
+        }
 
         private DepthStencilState(string name, bool depthBufferEnable, bool depthBufferWriteEnable)
             : this()
-	    {
-	        Name = name;
+        {
+            Name = name;
             _depthBufferEnable = depthBufferEnable;
             _depthBufferWriteEnable = depthBufferWriteEnable;
-	        _defaultStateObject = true;
-	    }
+            _defaultStateObject = true;
+        }
 
         private DepthStencilState(DepthStencilState cloneSource)
-	    {
-	        Name = cloneSource.Name;
+        {
+            Name = cloneSource.Name;
             _depthBufferEnable = cloneSource._depthBufferEnable;
             _depthBufferWriteEnable = cloneSource._depthBufferWriteEnable;
             _counterClockwiseStencilDepthBufferFail = cloneSource._counterClockwiseStencilDepthBufferFail;
@@ -252,18 +257,18 @@ namespace MonoGame.Framework.Graphics
             _stencilPass = cloneSource._stencilPass;
             _stencilWriteMask = cloneSource._stencilWriteMask;
             _twoSidedStencilMode = cloneSource._twoSidedStencilMode;
-	    }
+        }
 
         public static readonly DepthStencilState Default;
         public static readonly DepthStencilState DepthRead;
         public static readonly DepthStencilState None;
 
-		static DepthStencilState ()
-		{
-		    Default = new DepthStencilState("DepthStencilState.Default", true, true);
-			DepthRead = new DepthStencilState("DepthStencilState.DepthRead", true, false);
-		    None = new DepthStencilState("DepthStencilState.None", false, false);
-		}
+        static DepthStencilState ()
+        {
+            Default = new DepthStencilState("DepthStencilState.Default", true, true);
+            DepthRead = new DepthStencilState("DepthStencilState.DepthRead", true, false);
+            None = new DepthStencilState("DepthStencilState.None", false, false);
+        }
 
         internal DepthStencilState Clone()
         {

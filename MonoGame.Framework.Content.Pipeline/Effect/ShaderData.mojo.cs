@@ -34,8 +34,7 @@ namespace MonoGame.Effect
             {
                 var errors = MarshalHelper.UnmarshalArray<MojoShader.MOJOSHADER_error>(
                     parseData.errors,
-                    parseData.error_count
-                );
+                    parseData.error_count);
                 throw new Exception(errors[0].error);
             }
 
@@ -111,8 +110,8 @@ namespace MonoGame.Effect
             for (var i = 0; i < samplers.Length; i++)
             {
                 // We need the original sampler name... look for that in the symbols.
-                var originalSamplerName =
-                    symbols.First(
+                var originalSamplerName = symbols
+                    .First(
                         e => e.register_set == MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_SAMPLER &&
                         e.register_index == samplers[i].index)
                     .name;
@@ -144,21 +143,21 @@ namespace MonoGame.Effect
             }
 
             // Gather all the parameters used by this shader.
-            var symbol_types = new[] 
+            var symbol_types = new[]
             {
-                new 
-                { 
+                new
+                {
                     name = dxshader.IsVertexShader ? "vs_uniforms_bool" : "ps_uniforms_bool",
                     set = MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_BOOL
-                }, 
-                new 
+                },
+                new
                 {
-                    name = dxshader.IsVertexShader ? "vs_uniforms_ivec4" : "ps_uniforms_ivec4", 
+                    name = dxshader.IsVertexShader ? "vs_uniforms_ivec4" : "ps_uniforms_ivec4",
                     set = MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_INT4
                 },
-                new 
-                { 
-                    name = dxshader.IsVertexShader ? "vs_uniforms_vec4" : "ps_uniforms_vec4", 
+                new
+                {
+                    name = dxshader.IsVertexShader ? "vs_uniforms_vec4" : "ps_uniforms_vec4",
                     set = MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_FLOAT4
                 }
             };

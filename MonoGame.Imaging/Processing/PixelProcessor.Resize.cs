@@ -1,4 +1,5 @@
 ﻿using System;
+using MonoGame.Framework;
 using MonoGame.Framework.PackedVector;
 using StbSharp;
 
@@ -10,11 +11,11 @@ namespace MonoGame.Imaging.Processing
         /// Creates a resized version of the source image using the default resampler.
         /// </summary>
         public static Image Resize(
-            this ReadOnlyPixelRowsContext context, int width, int height)
+            this ReadOnlyPixelRowsContext context, Size size)
         {
             throw new NotImplementedException();
 
-            var outputImage = Image.Create(context.PixelType, width, height);
+            var outputImage = Image.Create(context.PixelType, size);
             
             // TODO: FIXME:
             //StbImageResize.stbir_resize(
@@ -28,7 +29,7 @@ namespace MonoGame.Imaging.Processing
         /// Creates a resized version of the source image using the default resampler.
         /// </summary>
         public static Image<TPixel> Resize<TPixel>(
-            this ReadOnlyPixelRowsContext<TPixel> context, int width, int height)
+            this ReadOnlyPixelRowsContext<TPixel> context, Size size)
             where TPixel : unmanaged, IPixel
         {
             //var inputImg = context.Image;

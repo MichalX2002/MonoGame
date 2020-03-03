@@ -269,7 +269,6 @@ namespace MonoGame.Tools.Pipeline
         private void Drawable_Paint(object sender, PaintEventArgs e)
         {
             var g = e.Graphics;
-            var count = _items.Count;
             var y = 0;
 
             g.Clear(DrawInfo.BackColor);

@@ -152,8 +152,8 @@ namespace MonoGame.Framework
         public static Quaternion CreateFromAxisAngle(in Vector3 axis, float angle)
         {
             float half = angle * 0.5f;
-            float sin = (float)Math.Sin(half);
-            float cos = (float)Math.Cos(half);
+            float sin = MathF.Sin(half);
+            float cos = MathF.Cos(half);
             return new Quaternion(axis.X * sin, axis.Y * sin, axis.Z * sin, cos);
         }
 
@@ -171,7 +171,7 @@ namespace MonoGame.Framework
             float scale = matrix.M11 + matrix.M22 + matrix.M33;
             if (scale > 0f)
             {
-                sqrt = (float)Math.Sqrt(scale + 1f);
+                sqrt = MathF.Sqrt(scale + 1f);
                 quaternion.W = sqrt * 0.5f;
                 sqrt = 0.5f / sqrt;
 
@@ -183,7 +183,7 @@ namespace MonoGame.Framework
 
             if ((matrix.M11 >= matrix.M22) && (matrix.M11 >= matrix.M33))
             {
-                sqrt = (float)Math.Sqrt(1f + matrix.M11 - matrix.M22 - matrix.M33);
+                sqrt = MathF.Sqrt(1f + matrix.M11 - matrix.M22 - matrix.M33);
                 half = 0.5f / sqrt;
 
                 quaternion.X = 0.5f * sqrt;
@@ -195,7 +195,7 @@ namespace MonoGame.Framework
 
             if (matrix.M22 > matrix.M33)
             {
-                sqrt = (float)Math.Sqrt(1f + matrix.M22 - matrix.M11 - matrix.M33);
+                sqrt = MathF.Sqrt(1f + matrix.M22 - matrix.M11 - matrix.M33);
                 half = 0.5f / sqrt;
 
                 quaternion.X = (matrix.M21 + matrix.M12) * half;
@@ -205,7 +205,7 @@ namespace MonoGame.Framework
                 return quaternion;
             }
 
-            sqrt = (float)Math.Sqrt(1f + matrix.M33 - matrix.M11 - matrix.M22);
+            sqrt = MathF.Sqrt(1f + matrix.M33 - matrix.M11 - matrix.M22);
             half = 0.5f / sqrt;
 
             quaternion.X = (matrix.M31 + matrix.M13) * half;
@@ -228,12 +228,12 @@ namespace MonoGame.Framework
             float halfPitch = pitch * 0.5f;
             float halfYaw = yaw * 0.5f;
 
-            float sinRoll = (float)Math.Sin(halfRoll);
-            float cosRoll = (float)Math.Cos(halfRoll);
-            float sinPitch = (float)Math.Sin(halfPitch);
-            float cosPitch = (float)Math.Cos(halfPitch);
-            float sinYaw = (float)Math.Sin(halfYaw);
-            float cosYaw = (float)Math.Cos(halfYaw);
+            float sinRoll = MathF.Sin(halfRoll);
+            float cosRoll = MathF.Cos(halfRoll);
+            float sinPitch = MathF.Sin(halfPitch);
+            float cosPitch = MathF.Cos(halfPitch);
+            float sinYaw = MathF.Sin(halfYaw);
+            float cosYaw = MathF.Cos(halfYaw);
 
             return new Quaternion(
                 (cosYaw * sinPitch * cosRoll) + (sinYaw * cosPitch * sinRoll),
@@ -348,7 +348,7 @@ namespace MonoGame.Framework
         /// <returns>The magnitude of the quaternion components.</returns>
         public float Length()
         {
-            return (float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
+            return MathF.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
         }
 
         /// <summary>
@@ -393,7 +393,7 @@ namespace MonoGame.Framework
                 (quaternion.Z * quaternion.Z) +
                 (quaternion.W * quaternion.W);
 
-            float num3 = 1f / ((float)Math.Sqrt(num4));
+            float num3 = 1f / MathF.Sqrt(num4);
             quaternion.X *= num3;
             quaternion.Y *= num3;
             quaternion.Z *= num3;
@@ -433,10 +433,10 @@ namespace MonoGame.Framework
             }
             else
             {
-                float num5 = (float)Math.Acos(num4);
-                float num6 = (float)(1.0 / Math.Sin(num5));
-                num3 = ((float)Math.Sin((1f - num) * num5)) * num6;
-                num2 = flag ? (((float)-Math.Sin(num * num5)) * num6) : (((float)Math.Sin(num * num5)) * num6);
+                float num5 = MathF.Acos(num4);
+                float num6 = 1f / MathF.Sin(num5);
+                num3 = MathF.Sin((1f - num) * num5) * num6;
+                num2 = flag ? ((-MathF.Sin(num * num5)) * num6) : (MathF.Sin(num * num5) * num6);
             }
             quaternion.X = (num3 * a.X) + (num2 * b.X);
             quaternion.Y = (num3 * a.Y) + (num2 * b.Y);
@@ -492,7 +492,7 @@ namespace MonoGame.Framework
         /// </summary>
         public void Normalize()
         {
-            float num = 1f / ((float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W)));
+            float num = 1f / MathF.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
             X *= num;
             Y *= num;
             Z *= num;
@@ -506,11 +506,11 @@ namespace MonoGame.Framework
         /// <returns>The unit length quaternion.</returns>
         public static Quaternion Normalize(in Quaternion quaternion)
         {
-            float num = 1f / ((float)Math.Sqrt(
+            float num = 1f / MathF.Sqrt(
                 (quaternion.X * quaternion.X) +
                 (quaternion.Y * quaternion.Y) +
                 (quaternion.Z * quaternion.Z) + 
-                (quaternion.W * quaternion.W)));
+                (quaternion.W * quaternion.W));
 
             return new Quaternion(quaternion.X * num, quaternion.Y * num, quaternion.Z * num, quaternion.W * num);
         }

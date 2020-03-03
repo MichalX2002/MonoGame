@@ -137,21 +137,22 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             var channel = this[index];
             // Remove it because we cannot add a new channel with the same name
             RemoveAt(index);
-            VertexChannel<TargetType> result = null;
+            
             try
             {
                 // Insert a new converted channel at the same index
-                result = Insert(index, channel.Name, channel.ReadConvertedContent<TargetType>());
+                var result = Insert(index, channel.Name, channel.ReadConvertedContent<TargetType>());
+
+                // Return the new converted channel
+                return result;
             }
             catch
             {
                 // If anything went wrong, put the old channel back...
                 channels.Insert(index, channel);
-                // ...before throwing the exception again
+                // ...before rethrowing the exception
                 throw;
             }
-            // Return the new converted channel
-            return result;
         }
 
         /// <summary>

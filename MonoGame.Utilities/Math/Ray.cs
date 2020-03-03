@@ -175,7 +175,7 @@ namespace MonoGame.Framework
             if (dist < 0)
                 return false;
 
-            distance = distanceAlongRay - (float)Math.Sqrt(dist);
+            distance = distanceAlongRay - MathF.Sqrt(dist);
             return true;
         }
 

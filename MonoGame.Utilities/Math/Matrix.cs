@@ -383,7 +383,7 @@ namespace MonoGame.Framework
             float num = vector.LengthSquared();
             vector = num < 0.0001f
                 ? cameraForwardVector.HasValue ? -cameraForwardVector.Value : Vector3.Forward
-                : Vector3.Multiply(vector, 1f / ((float)Math.Sqrt(num)));
+                : Vector3.Multiply(vector, 1f / (MathF.Sqrt(num)));
 
             Vector3 vector3 = Vector3.Cross(cameraUpVector, vector);
             vector3.Normalize();
@@ -425,7 +425,7 @@ namespace MonoGame.Framework
             float num2 = vector2.LengthSquared();
             vector2 = num2 < 0.0001f
                 ? cameraForwardVector.HasValue ? -cameraForwardVector.Value : Vector3.Forward
-                : Vector3.Multiply(vector2, 1f / ((float)Math.Sqrt(num2)));
+                : Vector3.Multiply(vector2, 1f / (MathF.Sqrt(num2)));
 
             Vector3 vector1;
             Vector3 vector3;
@@ -489,8 +489,8 @@ namespace MonoGame.Framework
             float x = axis.X;
             float y = axis.Y;
             float z = axis.Z;
-            float num2 = (float)Math.Sin(angle);
-            float num = (float)Math.Cos(angle);
+            float num2 = MathF.Sin(angle);
+            float num = MathF.Cos(angle);
             float num11 = x * x;
             float num10 = y * y;
             float num9 = z * z;
@@ -563,7 +563,7 @@ namespace MonoGame.Framework
         /// <remarks>
         /// For more information about yaw, pitch and roll visit http://en.wikipedia.org/wiki/Euler_angles.
         /// </remarks>
-		public static Matrix CreateFromYawPitchRoll(float yaw, float pitch, float roll)
+        public static Matrix CreateFromYawPitchRoll(float yaw, float pitch, float roll)
         {
             Quaternion quaternion = Quaternion.CreateFromYawPitchRoll(yaw, pitch, roll);
             return CreateFromQuaternion(quaternion);
@@ -753,7 +753,7 @@ namespace MonoGame.Framework
                     nameof(nearPlaneDistance), $"{nameof(nearPlaneDistance)} >= {nameof(farPlaneDistance)} " +
                     $"({nearPlaneDistance} >= {farPlaneDistance})");
 
-            float num = 1f / ((float)Math.Tan(fieldOfView * 0.5f));
+            float num = 1f / (MathF.Tan(fieldOfView * 0.5f));
             float num9 = num / aspectRatio;
             
             return new Matrix(
@@ -846,8 +846,8 @@ namespace MonoGame.Framework
         /// <returns>The rotation <see cref="Matrix"/> around X axis.</returns>
         public static Matrix CreateRotationX(float radians)
         {
-            var val1 = (float)Math.Cos(radians);
-            var val2 = (float)Math.Sin(radians);
+            var val1 = MathF.Cos(radians);
+            var val2 = MathF.Sin(radians);
 
             var result = Identity;
             result.M22 = val1;
@@ -864,8 +864,8 @@ namespace MonoGame.Framework
         /// <returns>The rotation <see cref="Matrix"/> around Y axis.</returns>
         public static Matrix CreateRotationY(float radians)
         {
-            var val1 = (float)Math.Cos(radians);
-            var val2 = (float)Math.Sin(radians);
+            var val1 = MathF.Cos(radians);
+            var val2 = MathF.Sin(radians);
 
             var result = Identity;
             result.M11 = val1;
@@ -882,8 +882,8 @@ namespace MonoGame.Framework
         /// <returns>The rotation <see cref="Matrix"/> around Z axis.</returns>
         public static Matrix CreateRotationZ(float radians)
         {
-            var val1 = (float)Math.Cos(radians);
-            var val2 = (float)Math.Sin(radians);
+            var val1 = MathF.Cos(radians);
+            var val2 = MathF.Sin(radians);
 
             var result = Identity;
             result.M11 = val1;
@@ -1076,9 +1076,9 @@ namespace MonoGame.Framework
             float ys = (Math.Sign(M21 * M22 * M23 * M24) < 0) ? -1 : 1;
             float zs = (Math.Sign(M31 * M32 * M33 * M34) < 0) ? -1 : 1;
 
-            scale.X = xs * (float)Math.Sqrt(M11 * M11 + M12 * M12 + M13 * M13);
-            scale.Y = ys * (float)Math.Sqrt(M21 * M21 + M22 * M22 + M23 * M23);
-            scale.Z = zs * (float)Math.Sqrt(M31 * M31 + M32 * M32 + M33 * M33);
+            scale.X = xs * MathF.Sqrt(M11 * M11 + M12 * M12 + M13 * M13);
+            scale.Y = ys * MathF.Sqrt(M21 * M21 + M22 * M22 + M23 * M23);
+            scale.Z = zs * MathF.Sqrt(M31 * M31 + M32 * M32 + M33 * M33);
 
             if (scale.X == 0.0 || scale.Y == 0.0 || scale.Z == 0.0)
             {

@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <BaseOutputPath>..\..\Artifacts\MonoGame.Content.Builder.Editor\Wpf</BaseOutputPath>
     <DefineConstants>WINDOWS;WPF</DefineConstants>
     <ApplicationIcon>App.ico</ApplicationIcon>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
-    <AssemblyName>mgcb-editor</AssemblyName>
+    <AssemblyName>mgcb-editor</AssemblyName> 
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,13 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-<<<<<<< HEAD:Tools/Pipeline/PipelineTool.Wpf.csproj
-    <PackageReference Include="Eto.Forms" Version="2.5.0-rc.6" />
-    <PackageReference Include="Eto.Platform.Wpf" Version="2.5.0-rc.6" />
-=======
     <PackageReference Include="Eto.Forms" Version="2.5.0" />
     <PackageReference Include="Eto.Platform.Wpf" Version="2.5.0" />
->>>>>>> 6138570b31a9edcd5daec43774106b822ac4f4e6:Tools/MonoGame.Content.Builder.Editor/MonoGame.Content.Builder.Editor.Windows.csproj
   </ItemGroup>
 
   <ItemGroup>

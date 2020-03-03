@@ -108,7 +108,7 @@ namespace StbSharp
             if (f <= 0.04045f)
                 return (float)(f / 12.92f);
             else
-                return (float)(Math.Pow((f + 0.055) / 1.055, 2.4));
+                return (MathF.Pow((f + 0.055f) / 1.055f, 2.4f));
         }
 
         public static float LinearToSrgb(float f)
@@ -116,7 +116,7 @@ namespace StbSharp
             if (f <= 0.0031308f)
                 return (float)(f * 12.92f);
             else
-                return (float)(1.055 * Math.Pow(f, 1 / 2.4) - 0.055);
+                return (1.055f * MathF.Pow(f, 1 / 2.4f) - 0.055f);
         }
 
         public static float FilterTrapezoid(float x, float scale)
@@ -124,7 +124,7 @@ namespace StbSharp
             float halfscale = (float)(scale / 2);
             float t = (float)(0.5f + halfscale);
 
-            x = ((float)(Math.Abs(x)));
+            x = ((MathF.Abs(x)));
             if ((x) >= (t))
             {
                 return 0f;
@@ -147,7 +147,7 @@ namespace StbSharp
 
         public static float FilterTriangle(float x, float s)
         {
-            x = ((float)(Math.Abs((double)(x))));
+            x = ((float)(MathF.Abs((x))));
             if (x <= 1f)
                 return (float)(1 - x);
             else
@@ -156,7 +156,7 @@ namespace StbSharp
 
         public static float FilterCubic(float x, float s)
         {
-            x = ((float)(Math.Abs((double)(x))));
+            x = ((float)(MathF.Abs((x))));
             if ((x) < (1f))
                 return (float)((4 + x * x * (3 * x - 6)) / 6);
             else if ((x) < (2.0f))
@@ -166,7 +166,7 @@ namespace StbSharp
 
         public static float FilterCatmullRom(float x, float s)
         {
-            x = ((float)(Math.Abs((double)(x))));
+            x = ((float)(MathF.Abs((x))));
             if ((x) < (1f))
                 return (float)(1 - x * x * (2.5f - 1.5f * x));
             else if ((x) < (2.0f))
@@ -176,7 +176,7 @@ namespace StbSharp
 
         public static float FilterMitchell(float x, float s)
         {
-            x = ((float)(Math.Abs((double)(x))));
+            x = ((float)(MathF.Abs((x))));
             if ((x) < (1f))
                 return (float)((16 + x * x * (21 * x - 36)) / 18);
             else if ((x) < (2.0f))
@@ -206,9 +206,9 @@ namespace StbSharp
         public static int GetFilterPixelWidth(Filter filter, float scale)
         {
             if ((UseUpsampling((float)(scale))))
-                return (int)(Math.Ceiling(filter.Support(1 / scale) * 2));
+                return (int)(MathF.Ceiling(filter.Support(1 / scale) * 2));
             else
-                return (int)(Math.Ceiling(filter.Support(scale) * 2 / scale));
+                return (int)(MathF.Ceiling(filter.Support(scale) * 2 / scale));
         }
 
         public static int GetFilterPixelMargin(Filter filter, float scale)
@@ -219,9 +219,9 @@ namespace StbSharp
         public static int GetCoefficientWidth(Filter filter, float scale)
         {
             if ((UseUpsampling((float)(scale))))
-                return (int)(Math.Ceiling(filter.Support(1 / scale) * 2));
+                return (int)(MathF.Ceiling(filter.Support(1 / scale) * 2));
             else
-                return (int)(Math.Ceiling((double)(filter.Support((float)(scale)) * 2)));
+                return (int)(MathF.Ceiling((filter.Support(scale) * 2)));
         }
 
         public static int GetContributors(float scale, Filter filter, int input_size, int output_size)
