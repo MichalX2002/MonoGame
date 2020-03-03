@@ -2,9 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
-using System.Diagnostics;
-
 namespace MonoGame.Framework.Graphics
 {
     public abstract partial class BufferBase : GraphicsResource
@@ -14,7 +11,7 @@ namespace MonoGame.Framework.Graphics
         public int Capacity { get; }
         public int Count { get; protected set; }
 
-        public BufferBase(int capacity)
+        public BufferBase(GraphicsDevice graphicsDevice, int capacity) : base(graphicsDevice)
         {
             Capacity = capacity;
         }

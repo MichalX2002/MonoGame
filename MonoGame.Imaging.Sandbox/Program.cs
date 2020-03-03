@@ -45,7 +45,7 @@ namespace MonoGame.Imaging.Tests
             int readRepeats = 1;
             int writeRepeats = 1;
 
-            void OnReadProgress(
+            static void OnReadProgress(
                 ImageDecoderState decoderState,
                 double percentage,
                 Rectangle? rectangle)
@@ -78,7 +78,7 @@ namespace MonoGame.Imaging.Tests
 
             watch.Reset();
 
-            void OnWriteProgress(
+            static void OnWriteProgress(
                 ImageEncoderState encoderState,
                 double percentage,
                 Rectangle? rectangle)

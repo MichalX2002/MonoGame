@@ -359,7 +359,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="point">The point.</param>
         /// <returns>The distance from this <see cref="RectangleF"/> to the <paramref name="point"/>.</returns>
-        public float DistanceTo(PointF point) => (float)Math.Sqrt(SquaredDistanceTo(point));
+        public float DistanceTo(PointF point) => MathF.Sqrt(SquaredDistanceTo(point));
 
         //TODO: Document this.
         public void Inflate(float horizontalAmount, float verticalAmount)

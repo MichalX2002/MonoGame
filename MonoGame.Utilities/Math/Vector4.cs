@@ -303,7 +303,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The distance between two vectors.</returns>
-        public static float Distance(in Vector4 a, in Vector4 b) => (float)Math.Sqrt(DistanceSquared(a, b));
+        public static float Distance(in Vector4 a, in Vector4 b) => MathF.Sqrt(DistanceSquared(a, b));
 
         /// <summary>
         /// Returns the squared distance between two vectors.
@@ -391,7 +391,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns the length of this <see cref="Vector4"/>.
         /// </summary>
-        public readonly float Length() => (float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
+        public readonly float Length() => MathF.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
 
         /// <summary>
         /// Returns the squared length of this <see cref="Vector4"/>.
@@ -477,14 +477,14 @@ namespace MonoGame.Framework
         /// <summary>
         /// Turns this <see cref="Vector4"/> to a unit vector with the same direction.
         /// </summary>
-        public void Normalize() => this /= (float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
+        public void Normalize() => this /= MathF.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains a normalized values from another vector.
         /// </summary>
         /// <param name="value">Source <see cref="Vector4"/>.</param>
         /// <returns>Unit vector.</returns>
-        public static Vector4 Normalize(in Vector4 value) => value / (float)Math.Sqrt(
+        public static Vector4 Normalize(in Vector4 value) => value / MathF.Sqrt(
             (value.X * value.X) + (value.Y * value.Y) + (value.Z * value.Z) + (value.W * value.W));
 
         /// <summary>
@@ -492,10 +492,10 @@ namespace MonoGame.Framework
         /// </summary>
         public void Round()
         {
-            X = (float)Math.Round(X);
-            Y = (float)Math.Round(Y);
-            Z = (float)Math.Round(Z);
-            W = (float)Math.Round(W);
+            X = MathF.Round(X);
+            Y = MathF.Round(Y);
+            Z = MathF.Round(Z);
+            W = MathF.Round(W);
         }
 
         /// <summary>
@@ -503,10 +503,10 @@ namespace MonoGame.Framework
         /// another vector rounded to the nearest integer value.
         /// </summary>
         public static Vector4 Round(in Vector4 value) => new Vector4(
-            (float)Math.Round(value.X),
-            (float)Math.Round(value.Y),
-            (float)Math.Round(value.Z),
-            (float)Math.Round(value.W));
+            MathF.Round(value.X),
+            MathF.Round(value.Y),
+            MathF.Round(value.Z),
+            MathF.Round(value.W));
         
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains cubic interpolation of the specified vectors.

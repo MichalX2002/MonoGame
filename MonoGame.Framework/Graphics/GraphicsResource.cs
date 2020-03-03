@@ -102,7 +102,7 @@ namespace MonoGame.Framework.Graphics
         {
             if (!Threading.IsOnMainThread)
                 throw new AsyncResourceNotSupportedException(
-                    FrameworkResources.AsyncResourceNotSupportedMessage);
+                    FrameworkResources.AsyncResourceNotSupported);
         }
 
         /// <summary>

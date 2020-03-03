@@ -18,11 +18,8 @@ namespace MonoGame.Framework.Graphics
 
         protected IndexBuffer(
             GraphicsDevice graphicsDevice, IndexElementSize indexElementSize, int capacity, BufferUsage usage, bool dynamic) :
-            base(capacity)
+            base(graphicsDevice, capacity)
         {
-            GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
-                nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
-
             BufferUsage = usage;
             IndexElementSize = indexElementSize;
             _indexElementSize = IndexElementSize == IndexElementSize.SixteenBits ? 2 : 4;
@@ -31,19 +28,21 @@ namespace MonoGame.Framework.Graphics
             PlatformConstruct();
         }
 
-        protected IndexBuffer(GraphicsDevice graphicsDevice, Type indexType, int indexCount, BufferUsage usage, bool dynamic)
-           : this(graphicsDevice, SizeForType(graphicsDevice, indexType), indexCount, usage, dynamic)
+        protected IndexBuffer(
+            GraphicsDevice graphicsDevice, Type indexType, int capacity, BufferUsage usage, bool dynamic)
+           : this(graphicsDevice, SizeForType(graphicsDevice, indexType), capacity, usage, dynamic)
         {
         }
 
 
-        public IndexBuffer(GraphicsDevice graphicsDevice, IndexElementSize indexElementSize, int indexCount, BufferUsage bufferUsage) :
-            this(graphicsDevice, indexElementSize, indexCount, bufferUsage, false)
+        public IndexBuffer(
+            GraphicsDevice graphicsDevice, IndexElementSize indexElementSize, int capacity, BufferUsage bufferUsage) :
+            this(graphicsDevice, indexElementSize, capacity, bufferUsage, false)
         {
         }
 
-        public IndexBuffer(GraphicsDevice graphicsDevice, Type indexType, int indexCount, BufferUsage usage) :
-            this(graphicsDevice, SizeForType(graphicsDevice, indexType), indexCount, usage, false)
+        public IndexBuffer(GraphicsDevice graphicsDevice, Type indexType, int capacity, BufferUsage usage) :
+            this(graphicsDevice, SizeForType(graphicsDevice, indexType), capacity, usage, false)
         {
         }
 

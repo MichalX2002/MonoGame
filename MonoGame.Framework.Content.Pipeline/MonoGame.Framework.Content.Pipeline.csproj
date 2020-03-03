@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <BaseOutputPath>..\Artifacts\MonoGame.Framework.Content.Pipeline</BaseOutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Description>MonoGame is an open source implementation of the Microsoft XNA 4.x Framework. The goal is to make it easy for XNA developers to create cross-platform games with extremely high code reuse.
@@ -47,12 +47,6 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
     <Reference Include="PVRTexLibNET">
       <HintPath>..\ThirdParty\Dependencies\PVRTexLibNET\PVRTexLibNET.dll</HintPath>
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(SolutionName)' == 'MonoGame.Framework.DesktopGL'">
-    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj">
-      <PrivateAssets>All</PrivateAssets>
-    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup Condition="'$(SolutionName)' == 'MonoGame.Framework.WindowsDX'">
@@ -243,6 +237,7 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
   <Import Project="..\Stadia\Pipeline.targets" Condition="exists('..\Stadia\Pipeline.targets')" />
 
   <ItemGroup>
+    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj" />
     <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj" />
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
   </ItemGroup>

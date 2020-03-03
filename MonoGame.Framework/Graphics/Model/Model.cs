@@ -10,12 +10,10 @@ namespace MonoGame.Framework.Graphics
     /// <summary>
     /// A basic 3D model with per mesh parent bones.
     /// </summary>
-	public sealed class Model
-	{
-		private static Matrix[] _sharedDrawBoneMatrices;
-		
-		private GraphicsDevice _graphicsDevice;
-
+    public sealed class Model : GraphicsResource
+    {
+        private static Matrix[] _sharedDrawBoneMatrices;
+        
         /// <summary>
         /// A collection of <see cref="ModelBone"/> objects which describe how each mesh in the
         /// mesh collection for this model relates to its parent mesh.
@@ -42,9 +40,9 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public object Tag { get; set; }
 
-		internal Model()
-		{
-		}
+        internal Model()
+        {
+        }
 
         /// <summary>
         /// Constructs a model. 
@@ -61,40 +59,39 @@ namespace MonoGame.Framework.Graphics
         /// <exception cref="ArgumentNullException">
         /// <paramref name="meshes"/> is null.
         /// </exception>
-        public Model(GraphicsDevice graphicsDevice, IList<ModelBone> bones, IList<ModelMesh> meshes)
-		{
-            _graphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
-                    nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
-
+        public Model(
+            GraphicsDevice graphicsDevice, IList<ModelBone> bones, IList<ModelMesh> meshes) 
+            : base(graphicsDevice)
+        {
             // TODO: Complete member initialization
             Bones = new ModelBoneCollection(bones);
-			Meshes = new ModelMeshCollection(meshes);
-		}
+            Meshes = new ModelMeshCollection(meshes);
+        }
 
         internal void BuildHierarchy()
-		{
-			var globalScale = Matrix.CreateScale(0.01f);
-			
-			foreach(var node in Root.Children)
-				BuildHierarchy(node, Root.Transform * globalScale, 0);
-		}
-		
-		private void BuildHierarchy(ModelBone node, in Matrix parentTransform, int level)
-		{
-			node.ModelTransform = node.Transform * parentTransform;
-			
-			foreach (var child in node.Children)
-				BuildHierarchy(child, node.ModelTransform, level + 1);
-			
-			//string s = string.Empty;
-			//
-			//for (int i = 0; i < level; i++) 
-			//{
-			//	s += "\t";
-			//}
-			//
-			//Debug.WriteLine("{0}:{1}", s, node.Name);
-		}
+        {
+            var globalScale = Matrix.CreateScale(0.01f);
+            
+            foreach(var node in Root.Children)
+                BuildHierarchy(node, Root.Transform * globalScale, 0);
+        }
+        
+        private void BuildHierarchy(ModelBone node, in Matrix parentTransform, int level)
+        {
+            node.ModelTransform = node.Transform * parentTransform;
+            
+            foreach (var child in node.Children)
+                BuildHierarchy(child, node.ModelTransform, level + 1);
+            
+            //string s = string.Empty;
+            //
+            //for (int i = 0; i < level; i++) 
+            //{
+            //	s += "\t";
+            //}
+            //
+            //Debug.WriteLine("{0}:{1}", s, node.Name);
+        }
 
         /// <summary>
         /// Draws the model meshes.
@@ -103,15 +100,15 @@ namespace MonoGame.Framework.Graphics
         /// <param name="view">The view transform.</param>
         /// <param name="projection">The projection transform.</param>
         public void Draw(in Matrix world, in Matrix view, in Matrix projection) 
-		{       
+        {       
             int boneCount = Bones.Count;
-			
-			if (_sharedDrawBoneMatrices == null ||
-				_sharedDrawBoneMatrices.Length < boneCount)
-				_sharedDrawBoneMatrices = new Matrix[boneCount];
-			
-			// Look up combined bone matrices for the entire model.            
-			CopyAbsoluteBoneTransformsTo(_sharedDrawBoneMatrices);
+            
+            if (_sharedDrawBoneMatrices == null ||
+                _sharedDrawBoneMatrices.Length < boneCount)
+                _sharedDrawBoneMatrices = new Matrix[boneCount];
+            
+            // Look up combined bone matrices for the entire model.            
+            CopyAbsoluteBoneTransformsTo(_sharedDrawBoneMatrices);
 
             // Draw the model.
             foreach (ModelMesh mesh in Meshes)
@@ -128,35 +125,35 @@ namespace MonoGame.Framework.Graphics
 
                 mesh.Draw();
             }
-		}
+        }
 
         /// <summary>
         /// Copies bone transforms relative to all parent bones of the each bone from this model to a given span.
         /// </summary>
         /// <param name="destinationBoneTransforms">The span receiving the transformed bones.</param>
         public void CopyAbsoluteBoneTransformsTo(Span<Matrix> destinationBoneTransforms)
-		{
-			if (destinationBoneTransforms.IsEmpty)
-				throw new ArgumentNullException(nameof(destinationBoneTransforms));
+        {
+            if (destinationBoneTransforms.IsEmpty)
+                throw new ArgumentNullException(nameof(destinationBoneTransforms));
             if (destinationBoneTransforms.Length < Bones.Count)
-				throw new ArgumentOutOfRangeException(nameof(destinationBoneTransforms));
+                throw new ArgumentOutOfRangeException(nameof(destinationBoneTransforms));
 
             int count = Bones.Count;
-			for (int i = 0; i < count; ++i)
-			{
+            for (int i = 0; i < count; ++i)
+            {
                 ModelBone modelBone = Bones[i];
-				if (modelBone.Parent == null)
-				{
-					destinationBoneTransforms[i] = modelBone.Transform;
-				}
-				else
-				{
-					int index2 = modelBone.Parent.Index;
+                if (modelBone.Parent == null)
+                {
+                    destinationBoneTransforms[i] = modelBone.Transform;
+                }
+                else
+                {
+                    int index2 = modelBone.Parent.Index;
                     destinationBoneTransforms[i] = Matrix.Multiply(
                         modelBone.Transform, destinationBoneTransforms[index2]);
-				}
-			}
-		}
+                }
+            }
+        }
 
         /// <summary>
         /// Copies bone transforms relative to <see cref="Root"/> bone from a given span to this model.

@@ -8,15 +8,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml;
-<<<<<<< HEAD:Tools/Pipeline/Common/PipelineProjectParser.cs
-using MGCB;
+using MonoGame.Content.Builder;
 using MonoGame.Framework.Content.Pipeline;
 using MonoGame.Framework.Graphics;
-=======
-using MonoGame.Content.Builder;
-using Microsoft.Xna.Framework.Content.Pipeline;
-using Microsoft.Xna.Framework.Graphics;
->>>>>>> 6138570b31a9edcd5daec43774106b822ac4f4e6:Tools/MonoGame.Content.Builder.Editor/Common/PipelineProjectParser.cs
 using PathHelper = MonoGame.Framework.Content.Pipeline.Builder.PathHelper;
 
 namespace MonoGame.Tools.Pipeline
@@ -47,7 +41,8 @@ namespace MonoGame.Tools.Pipeline
             {
                 var projectDir = Path.GetDirectoryName(_project.OriginalPath);
                 if (!value.Equals(projectDir) && !value.Equals(Directory.GetCurrentDirectory()))
-                    _errors.Add("Nested response files or changing the working directory are not supported from Pipeline Tool.");
+                    _errors.Add(
+                        "Nested response files or changing the working directory are not supported by the Pipeline.");
             }
         }
 
@@ -190,7 +185,9 @@ namespace MonoGame.Tools.Pipeline
             sourceFile = PathHelper.GetRelativePath(projectDir, sourceFile);
 
             // Do we have a duplicate?
-            var previous = _project.ContentItems.FindIndex(e => string.Equals(e.OriginalPath, sourceFile, StringComparison.InvariantCultureIgnoreCase));
+            var previous = _project.ContentItems.FindIndex(
+                e => string.Equals(e.OriginalPath, sourceFile, StringComparison.InvariantCultureIgnoreCase));
+
             if (previous != -1)
             {
                 if (skipDuplicates)
@@ -245,7 +242,9 @@ namespace MonoGame.Tools.Pipeline
             sourceFile = PathHelper.GetRelativePath(projectDir, sourceFile);
 
             // Remove duplicates... keep this new one.
-            var previous = _project.ContentItems.FirstOrDefault(e => e.OriginalPath.Equals(sourceFile));
+            var previous = _project.ContentItems.FirstOrDefault(
+                e => e.OriginalPath.Equals(sourceFile));
+
             if (previous != null)
                 _project.ContentItems.Remove(previous);
 
@@ -272,7 +271,7 @@ namespace MonoGame.Tools.Pipeline
         {
             _observer = observer;
             _project = project;
-        }        
+        }
 
         public void OpenProject(string projectFilePath, MGBuildParser.ErrorCallback errorCallback)
         {
@@ -297,7 +296,8 @@ namespace MonoGame.Tools.Pipeline
             parser.Parse(commands);
 
             if (_errors.Any())
-                errorCallback('\n' + string.Join("\n", _errors.ToArray()), new object[0]);
+                errorCallback(
+                    '\n' + string.Join("\n", _errors.ToArray()), Array.Empty<object>());
         }
 
         public void SaveProject()
@@ -350,7 +350,8 @@ namespace MonoGame.Tools.Pipeline
 
             // Sort the items alphabetically to ensure a consistent output
             // and better mergability of the resulting MGCB file.
-            var sortedItems = _project.ContentItems.OrderBy(c => c.OriginalPath, StringComparer.InvariantCulture);
+            var sortedItems = _project.ContentItems.OrderBy(
+                c => c.OriginalPath, StringComparer.InvariantCulture);
 
             foreach (var i in sortedItems)
             {
@@ -395,7 +396,8 @@ namespace MonoGame.Tools.Pipeline
                             // If so, write the string parameters from import.
                             foreach (var j in i.ProcessorParams)
                             {
-                                line = string.Format(lineFormat, "processorParam", string.Format(processorParamFormat, j.Key, j.Value));
+                                line = string.Format(lineFormat, "processorParam", string.Format(
+                                    processorParamFormat, j.Key, j.Value));
                                 io.WriteLine(line);
                             }
                         }
@@ -408,13 +410,17 @@ namespace MonoGame.Tools.Pipeline
                                 if (i.ProcessorParams.ContainsKey(j.Name))
                                     value = i.ProcessorParams[j.Name];
 
-                                // JCF: I 'think' writting an empty string for null would be appropriate but to be on the safe side
-                                //      im just not writting the value at all.
+                                // JCF: I 'think' writting an empty string for null would 
+                                //      be appropriate but to be on the safe side
+                                //      I'm just not writing the value at all.
                                 if (value != null)
                                 {
                                     var converter = PipelineTypes.FindConverter(value.GetType());
-                                    var valueStr = converter.ConvertTo(null, CultureInfo.InvariantCulture, value, typeof(string));
-                                    line = string.Format(lineFormat, "processorParam", string.Format(processorParamFormat, j.Name, valueStr));
+                                    var valueStr = converter.ConvertTo(
+                                        null, CultureInfo.InvariantCulture, value, typeof(string));
+
+                                    line = string.Format(lineFormat, "processorParam", string.Format(
+                                        processorParamFormat, j.Name, valueStr));
                                     io.WriteLine(line);
                                 }
                             }
@@ -443,7 +449,7 @@ namespace MonoGame.Tools.Pipeline
                     var buildAction = io.LocalName;
                     if (buildAction.Equals("Reference"))
                     {
-                        ReadIncludeReference(io, out string include, out string hintPath);
+                        ReadIncludeReference(io, out _, out string hintPath);
 
                         if (!string.IsNullOrEmpty(hintPath) &&
                             hintPath.IndexOf("microsoft", StringComparison.CurrentCultureIgnoreCase) == -1 &&
@@ -456,7 +462,8 @@ namespace MonoGame.Tools.Pipeline
                     {
                         ReadIncludeContent(io, out string include, out string copyToOutputDirectory);
 
-                        if (!string.IsNullOrEmpty(copyToOutputDirectory) && !copyToOutputDirectory.Equals("Never"))
+                        if (!string.IsNullOrEmpty(copyToOutputDirectory) &&
+                            !copyToOutputDirectory.Equals("Never"))
                         {
                             var sourceFilePath = Path.GetDirectoryName(projectFilePath);
                             sourceFilePath += "\\" + include;
@@ -466,7 +473,9 @@ namespace MonoGame.Tools.Pipeline
                     }
                     else if (buildAction.Equals("Compile"))
                     {
-                        ReadIncludeCompile(io, out string include, out string name, out string importer, out string processor, out string[] processorParams);
+                        ReadIncludeCompile(
+                            io, out string include, out _, out string importer,
+                            out string processor, out string[] processorParams);
 
                         Importer = importer;
                         Processor = processor;
@@ -507,7 +516,8 @@ namespace MonoGame.Tools.Pipeline
             }
         }
 
-        private void ReadIncludeContent(XmlReader io, out string include, out string copyToOutputDirectory)
+        private void ReadIncludeContent(
+            XmlReader io, out string include, out string copyToOutputDirectory)
         {
             copyToOutputDirectory = null;
             include = io.GetAttribute("Include").Unescape();
@@ -533,12 +543,13 @@ namespace MonoGame.Tools.Pipeline
             }
         }
 
-        private void ReadIncludeCompile(XmlReader io,
-                                        out string include,
-                                        out string name,
-                                        out string importer,
-                                        out string processor,
-                                        out string[] processorParams)
+        private void ReadIncludeCompile(
+            XmlReader io,
+            out string include,
+            out string name,
+            out string importer,
+            out string processor,
+            out string[] processorParams)
         {
             name = null;
             importer = null;
@@ -590,7 +601,10 @@ namespace MonoGame.Tools.Pipeline
 
         private string FormatDivider(string label)
         {
-            var commentFormat = Environment.NewLine + "#----------------------------------------------------------------------------#" + Environment.NewLine;
+            string commentFormat = 
+                Environment.NewLine + 
+                "#----------------------------------------------------------------------------#" + 
+                Environment.NewLine;
 
             label = " " + label + " ";
             var src = commentFormat.Length / 2 - label.Length / 2;

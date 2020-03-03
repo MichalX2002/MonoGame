@@ -1,5 +1,4 @@
-﻿using System;
-using MonoGame.Framework;
+﻿using MonoGame.Framework;
 using MonoGame.Framework.Graphics;
 
 namespace MonoGame.Effect.TPGParser

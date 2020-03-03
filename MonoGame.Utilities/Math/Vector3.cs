@@ -242,9 +242,9 @@ namespace MonoGame.Framework
         /// </summary>
         public void Ceiling()
         {
-            X = (float)Math.Ceiling(X);
-            Y = (float)Math.Ceiling(Y);
-            Z = (float)Math.Ceiling(Z);
+            X = MathF.Ceiling(X);
+            Y = MathF.Ceiling(Y);
+            Z = MathF.Ceiling(Z);
         }
 
         /// <summary>
@@ -253,9 +253,9 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <returns>The rounded <see cref="Vector3"/>.</returns>
         public static Vector3 Ceiling(in Vector3 value) => new Vector3(
-            (float)Math.Ceiling(value.X),
-            (float)Math.Ceiling(value.Y),
-            (float)Math.Ceiling(value.Z));
+            MathF.Ceiling(value.X),
+            MathF.Ceiling(value.Y),
+            MathF.Ceiling(value.Z));
 
         /// <summary>
         /// Clamps the specified value within a range.
@@ -299,7 +299,7 @@ namespace MonoGame.Framework
         public static float Distance(in Vector3 a, in Vector3 b)
         {
             float result = DistanceSquared(a, b);
-            return (float)Math.Sqrt(result);
+            return MathF.Sqrt(result);
         }
 
         /// <summary>
@@ -340,9 +340,9 @@ namespace MonoGame.Framework
         /// </summary>
         public void Floor()
         {
-            X = (float)Math.Floor(X);
-            Y = (float)Math.Floor(Y);
-            Z = (float)Math.Floor(Z);
+            X = MathF.Floor(X);
+            Y = MathF.Floor(Y);
+            Z = MathF.Floor(Z);
         }
 
         /// <summary>
@@ -351,9 +351,9 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <returns>The rounded <see cref="Vector3"/>.</returns>
         public static Vector3 Floor(in Vector3 value) => new Vector3(
-            (float)Math.Floor(value.X),
-            (float)Math.Floor(value.Y),
-            (float)Math.Floor(value.Z));
+            MathF.Floor(value.X),
+            MathF.Floor(value.Y),
+            MathF.Floor(value.Z));
 
         /// <summary>
         /// Gets the hash code of this <see cref="Vector3"/>.
@@ -386,7 +386,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns the length of this <see cref="Vector3"/>.
         /// </summary>
-        public readonly float Length() => (float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z));
+        public readonly float Length() => MathF.Sqrt((X * X) + (Y * Y) + (Z * Z));
 
         /// <summary>
         /// Returns the squared length of this <see cref="Vector3"/>.
@@ -502,8 +502,7 @@ namespace MonoGame.Framework
         /// </summary>
         public void Normalize()
         {
-            float factor = (float)Math.Sqrt((X * X) + (Y * Y) + (Z * Z));
-            factor = 1f / factor;
+            float factor = 1f / MathF.Sqrt((X * X) + (Y * Y) + (Z * Z));
             X *= factor;
             Y *= factor;
             Z *= factor;
@@ -516,8 +515,7 @@ namespace MonoGame.Framework
         /// <returns>Unit vector.</returns>
         public static Vector3 Normalize(in Vector3 value)
         {
-            float factor = (float)Math.Sqrt((value.X * value.X) + (value.Y * value.Y) + (value.Z * value.Z));
-            factor = 1f / factor;
+            float factor = 1f / MathF.Sqrt((value.X * value.X) + (value.Y * value.Y) + (value.Z * value.Z));
             return new Vector3(value.X * factor, value.Y * factor, value.Z * factor);
         }
 
@@ -546,9 +544,9 @@ namespace MonoGame.Framework
         /// </summary>
         public void Round()
         {
-            X = (float)Math.Round(X);
-            Y = (float)Math.Round(Y);
-            Z = (float)Math.Round(Z);
+            X = MathF.Round(X);
+            Y = MathF.Round(Y);
+            Z = MathF.Round(Z);
         }
 
         /// <summary>
@@ -558,9 +556,9 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <returns>The rounded <see cref="Vector3"/>.</returns>
         public static Vector3 Round(in Vector3 value) => new Vector3(
-            (float)Math.Round(value.X),
-            (float)Math.Round(value.Y),
-            (float)Math.Round(value.Z));
+            MathF.Round(value.X),
+            MathF.Round(value.Y),
+            MathF.Round(value.Z));
 
         /// <summary>
         /// Creates a new <see cref="Vector3"/> that contains cubic interpolation of the specified vectors.

@@ -46,16 +46,17 @@ namespace MonoGame.Tools.Pipeline
 
                     if (_delete)
                     {
-                        // Only delete if the item is in the project folder, otherwise we may (and have done!) delete files/folders outside of the project
+                        // Only delete if the item is in the project folder,
+                        // otherwise we may (and have done!) delete files/folders outside of the project
                         if (!item.OriginalPath.Contains(".."))
                         {
                             var fullItemPath = _con.GetFullPath(item.OriginalPath);
                             try
                             {
                                 if (item is DirectoryItem)
-                                    Directory.Delete(_con.GetFullPath(item.OriginalPath), true);
+                                    Directory.Delete(fullItemPath, true);
                                 else
-                                    File.Delete(_con.GetFullPath(item.OriginalPath));
+                                    File.Delete(fullItemPath);
                             }
                             catch (FileNotFoundException)
                             {

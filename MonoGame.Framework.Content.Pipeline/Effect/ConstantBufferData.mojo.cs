@@ -5,32 +5,35 @@ namespace MonoGame.Effect
 {
     internal partial class ConstantBufferData
     {
-        public ConstantBufferData (string name,
-                                MojoShader.MOJOSHADER_symbolRegisterSet set, 
-                                MojoShader.MOJOSHADER_symbol[] symbols)
-		{
-			Name = name ?? string.Empty;
+        public ConstantBufferData(
+            string name,
+            MojoShader.MOJOSHADER_symbolRegisterSet set,
+            MojoShader.MOJOSHADER_symbol[] symbols)
+        {
+            Name = name ?? string.Empty;
 
-			ParameterIndex = new List<int> ();
-			ParameterOffset = new List<int> ();
-			Parameters = new List<EffectObject.d3dx_parameter> ();
+            ParameterIndex = new List<int>();
+            ParameterOffset = new List<int>();
+            Parameters = new List<EffectObject.d3dx_parameter>();
 
-			int minRegister = short.MaxValue;
-			int maxRegister = 0;
+            int minRegister = short.MaxValue;
+            int maxRegister = 0;
 
-			var registerSize = (set == MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_BOOL ? 1 : 4) * 4;
+            var registerSize =
+                (set == MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_BOOL ? 1 : 4) * 4;
 
-			foreach (var symbol in symbols) {
-				if (symbol.register_set != set)
-					continue;
+            foreach (var symbol in symbols)
+            {
+                if (symbol.register_set != set)
+                    continue;
 
-				// Create the parameter.
-				var parm = GetParameterFromSymbol (symbol);
+                // Create the parameter.
+                var parm = GetParameterFromSymbol(symbol);
 
-				var offset = (int)symbol.register_index * registerSize;
-				parm.bufferOffset = offset;
+                var offset = (int)symbol.register_index * registerSize;
+                parm.bufferOffset = offset;
 
-				Parameters.Add (parm);
+                Parameters.Add(parm);
                 ParameterOffset.Add(offset);
 
                 minRegister = Math.Min(minRegister, (int)symbol.register_index);
@@ -50,7 +53,8 @@ namespace MonoGame.Effect
                 semantic = string.Empty // TODO: How do i do this with only MojoShader?
             };
 
-            var registerSize = (symbol.register_set == MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_BOOL ? 1 : 4) * 4;
+            var registerSize =
+                (symbol.register_set == MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_BOOL ? 1 : 4) * 4;
             var offset = (int)symbol.register_index * registerSize;
             param.bufferOffset = offset;
 

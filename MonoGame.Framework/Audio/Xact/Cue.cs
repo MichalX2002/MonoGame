@@ -269,9 +269,10 @@ namespace MonoGame.Framework.Audio
                 // Calculate the orientation.
                 if (distance > 0f)
                     direction /= distance;
+                
                 var right = Vector3.Cross(listener.Up, listener.Forward);
                 var slope = Vector3.Dot(direction, listener.Forward);
-                var angle = MathHelper.ToDegrees((float)Math.Acos(slope));
+                var angle = MathHelper.ToDegrees(MathF.Acos(slope));
                 var j = FindVariable("OrientationAngle");
                 _variables[j].SetValue(angle);
                 if (_curSound != null)

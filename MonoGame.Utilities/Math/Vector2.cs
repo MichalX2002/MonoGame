@@ -198,8 +198,8 @@ namespace MonoGame.Framework
         /// </summary>
         public void Ceiling()
         {
-            X = (float)Math.Ceiling(X);
-            Y = (float)Math.Ceiling(Y);
+            X = MathF.Ceiling(X);
+            Y = MathF.Ceiling(Y);
         }
 
         /// <summary>
@@ -208,8 +208,8 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>The rounded <see cref="Vector2"/>.</returns>
         public static Vector2 Ceiling(in Vector2 value) => new Vector2(
-            (float)Math.Ceiling(value.X),
-            (float)Math.Ceiling(value.Y));
+            MathF.Ceiling(value.X),
+            MathF.Ceiling(value.Y));
 
         /// <summary>
         /// Clamps the specified value within a range.
@@ -231,7 +231,7 @@ namespace MonoGame.Framework
         public static float Distance(in Vector2 a, in Vector2 b)
         {
             float v1 = a.X - b.X, v2 = a.Y - b.Y;
-            return (float)Math.Sqrt((v1 * v1) + (v2 * v2));
+            return MathF.Sqrt((v1 * v1) + (v2 * v2));
         }
 
         /// <summary>
@@ -289,8 +289,8 @@ namespace MonoGame.Framework
         /// </summary>
         public void Floor()
         {
-            X = (float)Math.Floor(X);
-            Y = (float)Math.Floor(Y);
+            X = MathF.Floor(X);
+            Y = MathF.Floor(Y);
         }
 
         /// <summary>
@@ -299,8 +299,8 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>The rounded <see cref="Vector2"/>.</returns>
         public static Vector2 Floor(in Vector2 value) => new Vector2(
-                (float)Math.Floor(value.X),
-                (float)Math.Floor(value.Y));
+            MathF.Floor(value.X),
+            MathF.Floor(value.Y));
 
         /// <summary>
         /// Gets the hash code of this <see cref="Vector2"/>.
@@ -333,7 +333,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns the length of this <see cref="Vector2"/>.
         /// </summary>
-        public readonly float Length() => (float)Math.Sqrt(LengthSquared());
+        public readonly float Length() => MathF.Sqrt(LengthSquared());
 
         /// <summary>
         /// Returns the squared length of this <see cref="Vector2"/>.
@@ -413,7 +413,7 @@ namespace MonoGame.Framework
         /// </summary>
         public void Normalize()
         {
-            float val = 1f / (float)Math.Sqrt((X * X) + (Y * Y));
+            float val = 1f / MathF.Sqrt((X * X) + (Y * Y));
             X *= val;
             Y *= val;
         }
@@ -425,7 +425,7 @@ namespace MonoGame.Framework
         /// <returns>Unit vector.</returns>
         public static Vector2 Normalize(in Vector2 value)
         {
-            float factor = 1f / (float)Math.Sqrt((value.X * value.X) + (value.Y * value.Y));
+            float factor = 1f / MathF.Sqrt((value.X * value.X) + (value.Y * value.Y));
             return new Vector2(value.X * factor, value.Y * factor);
         }
 
@@ -446,8 +446,8 @@ namespace MonoGame.Framework
         /// </summary>
         public void Round()
         {
-            X = (float)Math.Round(X);
-            Y = (float)Math.Round(Y);
+            X = MathF.Round(X);
+            Y = MathF.Round(Y);
         }
 
         /// <summary>
@@ -456,7 +456,8 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>The rounded <see cref="Vector2"/>.</returns>
         public static Vector2 Round(in Vector2 value) => new Vector2(
-            (float)Math.Round(value.X), (float)Math.Round(value.Y));
+            MathF.Round(value.X),
+            MathF.Round(value.Y));
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains cubic interpolation of the specified vectors.

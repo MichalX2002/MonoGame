@@ -6,8 +6,8 @@ using System;
 
 namespace MonoGame.Framework.Audio
 {
-	static class XactHelpers
-	{
+    static class XactHelpers
+    {
         static internal readonly Random Random = new Random();
 
         public static float ParseDecibels(byte decibles)
@@ -53,8 +53,8 @@ namespace MonoGame.Framework.Audio
         public static float ParseVolumeFromDecibels(float decibles)
         {
             // Convert from decibles to linear volume.
-            return (float)Math.Pow(10.0, decibles / 20.0);
+            return MathF.Pow(10f, decibles / 20f);
         }
-	}
+    }
 }
 
