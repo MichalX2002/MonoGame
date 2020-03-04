@@ -211,11 +211,16 @@ namespace MonoGame.Framework.Utilities.Deflate
                 {
                     if (WantCompress)
                     {
+                        Span<byte> tmp = stackalloc byte[sizeof(int)];
+
                         // Emit the GZIP trailer: CRC32 and  size mod 2^32
                         int c1 = _crc32.Crc32Result;
-                        _stream.Write(BitConverter.GetBytes(c1), 0, 4);
+                        BinaryPrimitives.WriteInt32LittleEndian(tmp, c1);
+                        _stream.Write(tmp);
+
                         int c2 = (int)(_crc32.TotalBytesRead & 0x00000000FFFFFFFF);
-                        _stream.Write(BitConverter.GetBytes(c2), 0, 4);
+                        BinaryPrimitives.WriteInt32LittleEndian(tmp, c2);
+                        _stream.Write(tmp);
                     }
                     else
                     {
@@ -384,6 +389,7 @@ namespace MonoGame.Framework.Utilities.Deflate
 
             int timet = BinaryPrimitives.ReadInt32LittleEndian(header.Slice(4));
             _GzipMtime = GZipStream._unixEpoch.AddSeconds(timet);
+
             int totalBytesRead = n;
             if ((header[3] & 0x04) == 0x04)
             {

@@ -6,7 +6,6 @@ using System;
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -17,7 +16,7 @@ namespace MonoGame.Framework.Graphics
             /// <summary>
             /// The MonoGame Effect file format header identifier ("MGFX"). 
             /// </summary>
-            public static readonly int MGFXSignature = BitConverter.IsLittleEndian ? 0x5846474D : 0x4D474658;
+            public static readonly int MGFXSignature = 0x5846474D;
 
             /// <summary>
             /// The current MonoGame Effect file format versions used to detect old packaged content.
@@ -106,7 +105,6 @@ namespace MonoGame.Framework.Graphics
         private MGFXHeader ReadHeader(ReadOnlySpan<byte> effectCode)
         {
             int index = 0;
-
             MGFXHeader header;
 
             header.Signature = BinaryPrimitives.ReadInt32LittleEndian(effectCode.Slice(index));
@@ -122,12 +120,10 @@ namespace MonoGame.Framework.Graphics
 
             if (header.Signature != MGFXHeader.MGFXSignature)
                 throw new InvalidDataException("This does not appear to be a MonoGame MGFX file!");
-
             if (header.Version < MGFXHeader.MGFXVersion)
                 throw new Exception("This MGFX effect is for an older release of MonoGame and needs to be rebuilt.");
             if (header.Version > MGFXHeader.MGFXVersion)
                 throw new Exception("This MGFX effect seems to be for a newer release of MonoGame.");
-
             if (header.Profile != Shader.Profile)
                 throw new Exception("This MGFX effect was built for a different platform!");
 

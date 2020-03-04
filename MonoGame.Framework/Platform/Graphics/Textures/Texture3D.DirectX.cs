@@ -12,8 +12,8 @@ using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Framework.Graphics
 {
-	public partial class Texture3D : Texture
-	{
+    public partial class Texture3D : Texture
+    {
         private bool renderTarget;
         private bool mipMap;
 
@@ -67,7 +67,7 @@ namespace MonoGame.Framework.Graphics
             int width, int height, int depth, ReadOnlySpan<T> data)
             where T : unmanaged
         {
-            fixed (T* dataPtr = &MemoryMarshal.GetReference(data))
+            fixed (T* dataPtr = data)
             {
                 int rowPitch = GetPitch(width);
                 int slicePitch = rowPitch * height; // For 3D texture: Size of 2D image.
@@ -122,6 +122,6 @@ namespace MonoGame.Framework.Graphics
                 }
             }
         }
-	}
+    }
 }
 

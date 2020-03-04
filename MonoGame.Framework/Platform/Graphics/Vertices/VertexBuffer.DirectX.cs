@@ -171,7 +171,7 @@ namespace MonoGame.Framework.Graphics
 
                     lock (deviceContext)
                     {
-                        fixed (T* ptr = &MemoryMarshal.GetReference(data))
+                        fixed (T* ptr = data)
                         {
                             var box = new SharpDX.DataBox((IntPtr)ptr, bytes, 0);
                             deviceContext.UpdateSubresource(box, _buffer, 0, region);

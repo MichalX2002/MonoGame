@@ -28,7 +28,6 @@ using System.Threading;
 
 namespace MonoGame.Framework.Memory
 {
-
     /// <summary>
     /// MemoryStream implementation that deals with pooling and managing memory streams which use potentially large
     /// buffers.
@@ -511,7 +510,7 @@ namespace MonoGame.Framework.Memory
         /// <param name="buffer">Destination buffer</param>
         /// <returns>The number of bytes read</returns>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
-        public int Read(Span<byte> buffer) => SafeRead(buffer, ref _position);
+        public override int Read(Span<byte> buffer) => SafeRead(buffer, ref _position);
 
         /// <summary>
         /// Reads from the specified position into the provided buffer.
@@ -547,7 +546,7 @@ namespace MonoGame.Framework.Memory
         /// <param name="source">Source buffer</param>
         /// <exception cref="ArgumentNullException">buffer is null</exception>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
-        public void Write(ReadOnlySpan<byte> source)
+        public override void Write(ReadOnlySpan<byte> source)
         {
             CheckDisposed();
 

@@ -1,8 +1,9 @@
 // MonoGame - Copyright (C) The MonoGame Team
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
-﻿
+
 using System;
+using System.Buffers.Binary;
 using System.IO;
 using System.Runtime.InteropServices;
 using MonoGame.Framework.Memory;
@@ -41,7 +42,8 @@ namespace MonoGame.Framework.Audio
         }
 
         private void PlatformInitializePcm<T>(
-            ReadOnlySpan<T> data, int sampleBits, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
+            ReadOnlySpan<T> data, int sampleBits, int sampleRate, AudioChannels channels,
+            int loopStart, int loopLength)
             where T : unmanaged
         {
             byte[] largeBuffer = null;
@@ -128,11 +130,11 @@ namespace MonoGame.Framework.Audio
 
         private void PlatformInitializeFormat(ReadOnlySpan<byte> header, ReadOnlySpan<byte> data, int loopStart, int loopLength)
         {
-            var wavFormat = header.ToInt16();
-            var channels = header.Slice(2).ToInt16();
-            var sampleRate = header.Slice(4).ToInt32();
-            var blockAlignment = header.Slice(12).ToInt16();
-            var bitsPerSample = header.Slice(14).ToInt16();
+            short wavFormat = BinaryPrimitives.ReadInt16LittleEndian(header);
+            short channels = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(2));
+            int sampleRate = BinaryPrimitives.ReadInt32LittleEndian(header.Slice(4));
+            short blockAlignment = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(12));
+            short bitsPerSample = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(14));
 
             var format = AudioLoader.GetSoundFormat(wavFormat, channels, bitsPerSample);
             PlatformInitializeBuffer(data, format, channels, sampleRate, blockAlignment, bitsPerSample, loopStart, loopLength);

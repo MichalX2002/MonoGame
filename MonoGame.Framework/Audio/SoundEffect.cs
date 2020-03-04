@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 ﻿
 using System;
+using System.Buffers.Binary;
 using System.Diagnostics;
 using System.IO;
 using MonoGame.Framework.Memory;
@@ -75,7 +76,8 @@ namespace MonoGame.Framework.Audio
         }
 
         // Only used from SoundEffectReader.
-        internal SoundEffect(ReadOnlySpan<byte> header, ReadOnlySpan<byte> data,
+        internal SoundEffect(
+            ReadOnlySpan<byte> header, ReadOnlySpan<byte> data,
             int durationMs, int loopStart, int loopLength)
         {
             Initialize();
@@ -84,12 +86,12 @@ namespace MonoGame.Framework.Audio
             _duration = TimeSpan.FromMilliseconds(durationMs);
 
             // Peek at the format... handle regular PCM data.
-            var format = header.ToInt16();
+            var format = BinaryPrimitives.ReadInt16LittleEndian(header);
             if (format == 1)
             {
-                var channels = header.Slice(2).ToInt16();
-                var sampleRate = header.Slice(4).ToInt32();
-                var bitsPerSample = header.Slice(14).ToInt16();
+                var channels = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(2));
+                var sampleRate = BinaryPrimitives.ReadInt32LittleEndian(header.Slice(4));
+                var bitsPerSample = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(14));
                 PlatformInitializePcm(data, bitsPerSample, sampleRate, (AudioChannels)channels, loopStart, loopLength);
                 return;
             }
@@ -530,12 +532,14 @@ namespace MonoGame.Framework.Audio
 
         #region IDisposable Members
 
-        /// <summary>Indicates whether the object is disposed.</summary>
+        /// <summary>
+        /// Gets whether the object is disposed.
+        /// </summary>
         public bool IsDisposed { get; private set; }
 
         /// <summary>
-        /// Releases the resources held by this <see cref="SoundEffect"/>.
-        /// Instances currently playing will stop immediately and become invalid.
+        /// Releases resources held by the <see cref="SoundEffect"/>.
+        /// Instances currently playing will immediately stop and become invalid.
         /// </summary>
         public void Dispose()
         {
@@ -553,6 +557,9 @@ namespace MonoGame.Framework.Audio
             }
         }
 
+        /// <summary>
+        /// Disposes the <see cref="SoundEffect"/>.
+        /// </summary>
         ~SoundEffect()
         {
             Dispose(false);

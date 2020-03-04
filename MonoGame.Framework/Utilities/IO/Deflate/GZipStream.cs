@@ -28,6 +28,7 @@
 
 
 using System;
+using System.Buffers.Binary;
 using System.IO;
 using MonoGame.Framework.Memory;
 
@@ -150,7 +151,7 @@ namespace MonoGame.Framework.Utilities.Deflate
             }
             set
             {
-                if (_disposed) throw new ObjectDisposedException("GZipStream");
+                if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
                 _Comment = value;
             }
         }
@@ -183,7 +184,7 @@ namespace MonoGame.Framework.Utilities.Deflate
             get { return _FileName; }
             set
             {
-                if (_disposed) throw new ObjectDisposedException("GZipStream");
+                if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
                 _FileName = value;
                 if (_FileName == null) return;
                 if (_FileName.IndexOf("/") != -1)
@@ -550,7 +551,7 @@ namespace MonoGame.Framework.Utilities.Deflate
             get { return _baseStream._flushMode; }
             set
             {
-                if (_disposed) throw new ObjectDisposedException("GZipStream");
+                if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
                 _baseStream._flushMode = value;
             }
         }
@@ -580,7 +581,7 @@ namespace MonoGame.Framework.Utilities.Deflate
             }
             set
             {
-                if (_disposed) throw new ObjectDisposedException("GZipStream");
+                if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
                 if (_baseStream._workingBuffer != null)
                     throw new ZlibException("The working buffer is already set.");
                 if (value < ZlibConstants.WorkingBufferSizeMin)
@@ -666,7 +667,7 @@ namespace MonoGame.Framework.Utilities.Deflate
         {
             get
             {
-                if (_disposed) throw new ObjectDisposedException("GZipStream");
+                if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
                 return _baseStream._stream.CanRead;
             }
         }
@@ -693,7 +694,7 @@ namespace MonoGame.Framework.Utilities.Deflate
         {
             get
             {
-                if (_disposed) throw new ObjectDisposedException("GZipStream");
+                if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
                 return _baseStream._stream.CanWrite;
             }
         }
@@ -703,7 +704,7 @@ namespace MonoGame.Framework.Utilities.Deflate
         /// </summary>
         public override void Flush()
         {
-            if (_disposed) throw new ObjectDisposedException("GZipStream");
+            if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
             _baseStream.Flush();
         }
 
@@ -773,7 +774,7 @@ namespace MonoGame.Framework.Utilities.Deflate
         /// <returns>the number of bytes actually read</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (_disposed) throw new ObjectDisposedException("GZipStream");
+            if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
             int n = _baseStream.Read(buffer, offset, count);
 
             // Console.WriteLine("GZipStream::Read(buffer, off({0}), c({1}) = {2}", offset, count, n);
@@ -834,7 +835,7 @@ namespace MonoGame.Framework.Utilities.Deflate
         /// <param name="count">the number of bytes to write.</param>
         public override void Write(byte[] buffer, int offset, int count)
         {
-            if (_disposed) throw new ObjectDisposedException("GZipStream");
+            if (_disposed) throw new ObjectDisposedException(nameof(GZipStream));
             if (_baseStream._streamMode == ZlibBaseStream.StreamMode.Undefined)
             {
                 //Console.WriteLine("GZipStream: First write");
@@ -894,7 +895,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                 LastModified = DateTime.Now;
             TimeSpan delta = LastModified.Value - _unixEpoch;
             int timet = (int)delta.TotalSeconds;
-            Array.Copy(BitConverter.GetBytes(timet), 0, header, i, 4);
+            BinaryPrimitives.WriteInt32LittleEndian(header.AsSpan(i), timet);
             i += 4;
 
             // xflg

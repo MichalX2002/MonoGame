@@ -10,6 +10,7 @@ using SharpDX.XAudio2;
 using SharpDX.Multimedia;
 using SharpDX.X3DAudio;
 using MonoGame.Framework.Memory;
+using System.Buffers.Binary;
 
 namespace MonoGame.Framework.Audio
 {
@@ -166,11 +167,11 @@ namespace MonoGame.Framework.Audio
 
         private void PlatformInitializeFormat(ReadOnlySpan<byte> header, ReadOnlySpan<byte> buffer, int loopStart, int loopLength)
         {
-            short format = header.ToInt16();
-            short channels = header.Slice(2).ToInt16();
-            int sampleRate = header.Slice(4).ToInt32();
-            short blockAlignment = header.Slice(12).ToInt16();
-            short sampleBits = header.Slice(14).ToInt16();
+            short format = BinaryPrimitives.ReadInt16LittleEndian(header);
+            short channels = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(2));
+            int sampleRate = BinaryPrimitives.ReadInt32LittleEndian(header.Slice(4));
+            short blockAlignment = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(12));
+            short sampleBits = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(14));
 
             WaveFormat waveFormat;
             if (format == 1)

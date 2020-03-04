@@ -134,7 +134,7 @@ namespace MonoGame.Framework.Graphics
                 var d3dContext = GraphicsDevice._d3dContext;
                 lock (d3dContext)
                 {
-                    fixed (T* ptr = &MemoryMarshal.GetReference(data))
+                    fixed (T* ptr = data)
                     {
                         var box = new SharpDX.DataBox((IntPtr)ptr, bytes, 0);
                         d3dContext.UpdateSubresource(box, _buffer, 0, region);

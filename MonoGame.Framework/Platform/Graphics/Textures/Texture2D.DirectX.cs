@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Runtime.InteropServices;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
@@ -76,10 +75,8 @@ namespace MonoGame.Framework.Graphics
             var d3dContext = GraphicsDevice._d3dContext;
             lock (d3dContext)
             {
-                fixed (T* ptr = &MemoryMarshal.GetReference(data))
-                {
+                fixed (T* ptr = data)
                     d3dContext.UpdateSubresource(GetTexture(), subresourceIndex, region, (IntPtr)ptr, pitch, 0);
-                }
             }
         }
 
@@ -150,6 +147,9 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
+        /// <summary>
+        /// Releases resources held by the <see cref="Texture2D"/>.
+        /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)

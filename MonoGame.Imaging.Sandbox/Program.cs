@@ -118,8 +118,8 @@ namespace MonoGame.Imaging.Tests
             {
                 watch.Restart();
 
-                //fixed (byte* src = &MemoryMarshal.GetReference(image.GetPixelByteSpan()))
-                //fixed (byte* dst = &MemoryMarshal.GetReference(resizeDst.GetPixelByteSpan()))
+                //fixed (byte* src = image.GetPixelByteSpan())
+                //fixed (byte* dst = resizeDst.GetPixelByteSpan())
                 //{
                 //    int code = StbImageResize2.stbir_resize_uint8(
                 //        src, image.Width, image.Height, image.ByteStride,

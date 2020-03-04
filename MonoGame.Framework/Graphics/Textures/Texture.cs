@@ -120,12 +120,15 @@ namespace MonoGame.Framework.Graphics
             PlatformGraphicsDeviceResetting();
         }
 
+        /// <summary>
+        /// Releases resources held by the <see cref="Texture"/>.
+        /// </summary>
         protected override void Dispose(bool disposing)
         {
             PlatformDispose(disposing);
 
             lock (_allTextures.Source)
-                _allTextures.Source.Add(this);
+                _allTextures.Source.Remove(this);
 
             base.Dispose(disposing);
         }
