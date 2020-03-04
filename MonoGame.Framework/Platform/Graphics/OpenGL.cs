@@ -1010,7 +1010,7 @@ namespace MonoGame.OpenGL
 
         internal static unsafe void Uniform4(int location, int size, ReadOnlySpan<float> values)
         {
-            fixed (float* ptr = &MemoryMarshal.GetReference(values))
+            fixed (float* ptr = values)
             {
                 Uniform4fv(location, size, ptr);
             }

@@ -62,7 +62,7 @@ namespace MonoGame.OpenAL
 
             return loaded;
         }
-        
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_alenable(int cap);
         public static d_alenable Enable = FuncLoader.LoadFunction<d_alenable>(NativeLibrary, "alEnable");
@@ -74,10 +74,8 @@ namespace MonoGame.OpenAL
         public static unsafe void BufferData<T>(uint buffer, ALFormat format, ReadOnlySpan<T> data, int freq)
             where T : unmanaged
         {
-            fixed (T* ptr = &MemoryMarshal.GetReference(data))
-            {
+            fixed (T* ptr = data)
                 alBufferData(buffer, (int)format, (IntPtr)ptr, data.Length * sizeof(T), freq);
-            }
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -89,18 +87,16 @@ namespace MonoGame.OpenAL
             if (buffers.IsEmpty)
                 return;
 
-            fixed (uint* ptr = &MemoryMarshal.GetReference(buffers))
-            {
+            fixed (uint* ptr = buffers)
                 alDeleteBuffers(buffers.Length, ptr);
-            }
         }
 
         public unsafe static void DeleteBuffer(uint buffer)
         {
-            Span<uint> tmp = stackalloc uint[] { buffer };
-            DeleteBuffers(tmp);
+            Span<uint> buffers = stackalloc uint[] { buffer };
+            DeleteBuffers(buffers);
         }
-        
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void d_albufferi(uint buffer, ALBufferi param, int value);
         internal static d_albufferi Bufferi = FuncLoader.LoadFunction<d_albufferi>(NativeLibrary, "alBufferi");
@@ -120,10 +116,8 @@ namespace MonoGame.OpenAL
 
         public static unsafe void Bufferiv(uint buffer, ALBufferi param, ReadOnlySpan<int> values)
         {
-            fixed (int* ptr = &MemoryMarshal.GetReference(values))
-            {
+            fixed (int* ptr = values)
                 alBufferiv(buffer, param, ptr);
-            }
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -135,10 +129,8 @@ namespace MonoGame.OpenAL
             if (output.IsEmpty)
                 return;
 
-            fixed(uint* ptr = &MemoryMarshal.GetReference(output))
-            {
+            fixed (uint* ptr = output)
                 alGenBuffers(output.Length, ptr);
-            }
         }
 
         public static unsafe uint GenBuffer()
@@ -157,10 +149,8 @@ namespace MonoGame.OpenAL
             if (output.IsEmpty)
                 return;
 
-            fixed (uint* ptr = &MemoryMarshal.GetReference(output))
-            {
+            fixed (uint* ptr = output)
                 alGenSources(output.Length, ptr);
-            }
         }
 
         public static unsafe uint GenSource()
@@ -189,7 +179,7 @@ namespace MonoGame.OpenAL
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate bool d_alissource(uint source);
         public static d_alissource IsSource = FuncLoader.LoadFunction<d_alissource>(NativeLibrary, "alIsSource");
-        
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private unsafe delegate void d_aldeletesources(int n, uint* sources);
         private static d_aldeletesources alDeleteSources = FuncLoader.LoadFunction<d_aldeletesources>(NativeLibrary, "alDeleteSources");
@@ -199,12 +189,10 @@ namespace MonoGame.OpenAL
             if (sources.IsEmpty)
                 return;
 
-            fixed (uint* ptr = &MemoryMarshal.GetReference(sources))
-            {
+            fixed (uint* ptr = sources)
                 alDeleteSources(sources.Length, ptr);
-            }
         }
-        
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_alsourcestop(uint source);
         public static d_alsourcestop SourceStop = FuncLoader.LoadFunction<d_alsourcestop>(NativeLibrary, "alSourceStop");
@@ -212,7 +200,7 @@ namespace MonoGame.OpenAL
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void d_alsourcei(uint source, int i, int a);
         private static d_alsourcei alSourcei = FuncLoader.LoadFunction<d_alsourcei>(NativeLibrary, "alSourcei");
-        
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void d_alsource3i(uint source, ALSource3i i, int a, int b, int c);
         private static d_alsource3i alSource3i = FuncLoader.LoadFunction<d_alsource3i>(NativeLibrary, "alSource3i");
@@ -220,7 +208,7 @@ namespace MonoGame.OpenAL
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void d_alsourcef(uint source, ALSourcef i, float a);
         private static d_alsourcef alSourcef = FuncLoader.LoadFunction<d_alsourcef>(NativeLibrary, "alSourcef");
-        
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void d_alsource3f(uint source, ALSource3f i, float x, float y, float z);
         private static d_alsource3f alSource3f = FuncLoader.LoadFunction<d_alsource3f>(NativeLibrary, "alSource3f");
@@ -250,32 +238,30 @@ namespace MonoGame.OpenAL
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_algetlistener3f(ALListener3f param, out float x, out float y, out float z);
         public static d_algetlistener3f GetListener = FuncLoader.LoadFunction<d_algetlistener3f>(NativeLibrary, "alGetListener3f");
-        
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_aldistancemodel(ALDistanceModel model);
         public static d_aldistancemodel DistanceModel = FuncLoader.LoadFunction<d_aldistancemodel>(NativeLibrary, "alDistanceModel");
-        
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_aldopplerfactor(float value);
         public static d_aldopplerfactor DopplerFactor = FuncLoader.LoadFunction<d_aldopplerfactor>(NativeLibrary, "alDopplerFactor");
-        
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private unsafe delegate void d_alsourcequeuebuffers(uint source, int numEntries, uint* buffers);
         private static d_alsourcequeuebuffers alSourceQueueBuffers = FuncLoader.LoadFunction<d_alsourcequeuebuffers>(NativeLibrary, "alSourceQueueBuffers");
-        
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private unsafe delegate void d_alsourceunqueuebuffers(uint source, int numEntries, uint* output);
         private static d_alsourceunqueuebuffers alSourceUnqueueBuffers = FuncLoader.LoadFunction<d_alsourceunqueuebuffers>(NativeLibrary, "alSourceUnqueueBuffers");
-        
+
         public static unsafe void SourceQueueBuffers(uint source, ReadOnlySpan<uint> buffers)
         {
             if (buffers.IsEmpty)
                 return;
 
-            fixed (uint* ptr = &MemoryMarshal.GetReference(buffers))
-            {
+            fixed (uint* ptr = buffers)
                 alSourceQueueBuffers(source, buffers.Length, ptr);
-            }
         }
 
         public unsafe static void SourceQueueBuffer(uint source, uint buffer)
@@ -283,15 +269,13 @@ namespace MonoGame.OpenAL
             alSourceQueueBuffers(source, 1, &buffer);
         }
 
-        public static unsafe void SourceUnqueueBuffers(uint source, Span<uint> output)
+        public static unsafe void SourceUnqueueBuffers(uint source, Span<uint> salvaged)
         {
-            if (output.IsEmpty)
+            if (salvaged.IsEmpty)
                 return;
 
-            fixed (uint* ptr = &MemoryMarshal.GetReference(output))
-            {
-                alSourceUnqueueBuffers(source, output.Length, ptr);
-            }
+            fixed (uint* ptr = salvaged)
+                alSourceUnqueueBuffers(source, salvaged.Length, ptr);
         }
 
         public static unsafe void SourceUnqueueBuffers(uint source, int count)

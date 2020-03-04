@@ -7,15 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\**\*.cs" Exclude="..\ThirdParty\StbSharp\ImageWrite\src\StbImageWriteSharp\obj\**">
+    <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\**\*.cs" Exclude="..\ThirdParty\StbSharp\ImageWrite\src\obj\**">
       <Link>ImageWrite\%(FileName)%(Extension)</Link>
     </Compile>
 
-    <Compile Include="..\ThirdParty\StbSharp\Image\src\StbImageSharp\**\*.cs" Exclude="..\ThirdParty\StbSharp\Image\src\StbImageSharp\obj\**">
+    <Compile Include="..\ThirdParty\StbSharp\Image\src\**\*.cs" Exclude="..\ThirdParty\StbSharp\Image\src\obj\**">
       <Link>Image\%(FileName)%(Extension)</Link>
     </Compile>
-
-    <Compile Include="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\**\*.cs" Exclude="..\ThirdParty\StbSharp\Shared\src\StbSharp.Shared\obj\**">
+ 
+    <Compile Include="..\ThirdParty\StbSharp\Shared\src\**\*.cs" Exclude="..\ThirdParty\StbSharp\Shared\src\obj\**">
       <Link>Shared\%(FileName)%(Extension)</Link>
     </Compile>
   </ItemGroup>

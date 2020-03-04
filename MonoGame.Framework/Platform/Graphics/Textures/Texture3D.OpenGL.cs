@@ -43,7 +43,7 @@ namespace MonoGame.Framework.Graphics
             throw new NotSupportedException("OpenGL ES 2.0 doesn't support 3D textures.");
 #else
 
-            fixed (T* ptr = &MemoryMarshal.GetReference(data))
+            fixed (T* ptr = data)
             {
                 GL.BindTexture(_glTarget, _glTexture);
                 GraphicsExtensions.CheckGLError();

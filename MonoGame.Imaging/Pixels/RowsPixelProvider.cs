@@ -139,8 +139,8 @@ namespace MonoGame.Imaging.Pixels
                 case 4:
                     if (typeof(TPixel) == typeof(Color))
                     {
-                        fixed (TPixel* srcPtr = &MemoryMarshal.GetReference(sourceRow))
-                        fixed (byte* dstPtr = &MemoryMarshal.GetReference(destination))
+                        fixed (TPixel* srcPtr =sourceRow)
+                        fixed (byte* dstPtr = destination)
                         {
                             int bytes = count * sizeof(TPixel);
                             Buffer.MemoryCopy(srcPtr, dstPtr + bufferOffset, bytes, bytes);

@@ -68,7 +68,7 @@ namespace MonoGame.Framework.Graphics
 
             DiscardBuffer(BufferTarget.ArrayBuffer, options, Capacity * VertexDeclaration.VertexStride);
 
-            fixed (T* ptr = &MemoryMarshal.GetReference(data))
+            fixed (T* ptr = data)
             {
                 if (sizeof(T) % dataStride == 0)
                 {

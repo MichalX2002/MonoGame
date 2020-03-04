@@ -1059,7 +1059,7 @@ namespace MonoGame.Framework.Graphics
             GraphicsExtensions.CheckGLError();
             _indexBufferDirty = true;
 
-            fixed (T* vertexPtr = &MemoryMarshal.GetReference(vertices))
+            fixed (T* vertexPtr = vertices)
             {
                 // Setup the vertex declaration to point at the VB data.
                 declaration.GraphicsDevice = this;
@@ -1092,13 +1092,13 @@ namespace MonoGame.Framework.Graphics
             GraphicsExtensions.CheckGLError();
             _indexBufferDirty = true;
 
-            fixed (TVertex* vertexPtr = &MemoryMarshal.GetReference(vertices))
+            fixed (TVertex* vertexPtr = vertices)
             {
                 // Setup the vertex declaration to point at the data.
                 declaration.GraphicsDevice = this;
                 declaration.Apply(_vertexShader, (IntPtr)vertexPtr, ShaderProgramHash);
 
-                fixed (TIndex* indexPtr = &MemoryMarshal.GetReference(indices))
+                fixed (TIndex* indexPtr = indices)
                 {
                     var glPrimitive = PrimitiveTypeGL(type);
                     int count = GetElementCountForType(type, primitiveCount);
@@ -1163,7 +1163,7 @@ namespace MonoGame.Framework.Graphics
         private unsafe void PlatformGetBackBufferData<T>(Rectangle rect, Span<T> destination)
             where T : unmanaged
         {
-            fixed (T* ptr = &MemoryMarshal.GetReference(destination))
+            fixed (T* ptr = destination)
             {
                 int flippedY = PresentationParameters.BackBufferHeight - rect.Bottom;
                 GL.ReadPixels(

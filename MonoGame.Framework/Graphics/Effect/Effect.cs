@@ -84,7 +84,7 @@ namespace MonoGame.Framework.Graphics
             if (!graphicsDevice.EffectCache.TryGetValue(effectKey, out Effect cloneSource))
             {
                 // Create one.
-                fixed (byte* effectCodePtr = &MemoryMarshal.GetReference(effectCode.Slice(headerSize)))
+                fixed (byte* effectCodePtr = effectCode.Slice(headerSize))
                 {
                     using (var stream = new UnmanagedMemoryStream(effectCodePtr, effectCode.Length - headerSize))
                     using (var reader = new BinaryReader(stream))

@@ -327,7 +327,7 @@ namespace MonoGame.Framework.Audio
             byte[] outData = isRecyclable ?
                 RecyclableMemoryManager.Default.GetLargeBuffer(size, bufferTag) : new byte[size];
 
-            fixed (byte* src = &MemoryMarshal.GetReference(byteSpan))
+            fixed (byte* src = byteSpan)
             {
                 fixed (byte* dst = &outData[0])
                 {
@@ -356,7 +356,7 @@ namespace MonoGame.Framework.Audio
             // Sample count includes both channels if stereo
             int sampleCount = byteSpan.Length / 4;
             var outData = new byte[sampleCount * sizeof(short)];
-            fixed (byte* src = &MemoryMarshal.GetReference(byteSpan))
+            fixed (byte* src = byteSpan)
             {
                 float* f = (float*)src;
                 fixed (byte* dst = &outData[0])

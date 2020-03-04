@@ -525,7 +525,7 @@ namespace StbSharp
             int x = (int)(-s.horizontal_filter_pixel_margin);
             int c = 0;
 
-            fixed (float* decode_buffer_ptr = &MemoryMarshal.GetReference(s.decode_buffer))
+            fixed (float* decode_buffer_ptr = s.decode_buffer)
             {
                 var dst = decode_buffer_ptr + GetDecodeBufferOffset(s);
 
@@ -539,7 +539,7 @@ namespace StbSharp
                     return;
                 }
 
-                fixed (byte* src8 = &MemoryMarshal.GetReference(input_data))
+                fixed (byte* src8 = input_data)
                 {
                     var src16 = (ushort*)src8;
                     var src32 = (uint*)src8;
@@ -728,9 +728,9 @@ namespace StbSharp
             int channels = (int)(s.channels);
             int coefficient_width = (int)(s.horizontal_coefficient_width);
 
-            fixed (float* dst = &MemoryMarshal.GetReference(output_buffer))
-            fixed (float* horizontal_coefficients_ptr = &MemoryMarshal.GetReference(s.horizontal_coefficients))
-            fixed (float* decode_buffer_ptr = &MemoryMarshal.GetReference(s.decode_buffer))
+            fixed (float* dst = output_buffer)
+            fixed (float* horizontal_coefficients_ptr = s.horizontal_coefficients)
+            fixed (float* decode_buffer_ptr = s.decode_buffer)
             {
                 float* src = decode_buffer_ptr + GetDecodeBufferOffset(s);
 
@@ -818,9 +818,9 @@ namespace StbSharp
             int filter_pixel_margin = (int)(s.horizontal_filter_pixel_margin);
             int max_x = (int)(input_w + filter_pixel_margin * 2);
 
-            fixed (float* horizontal_coefficients_ptr = &MemoryMarshal.GetReference(s.horizontal_coefficients))
-            fixed (float* decode_buffer_ptr = &MemoryMarshal.GetReference(s.decode_buffer))
-            fixed (float* dst = &MemoryMarshal.GetReference(output_buffer))
+            fixed (float* horizontal_coefficients_ptr = s.horizontal_coefficients)
+            fixed (float* decode_buffer_ptr = s.decode_buffer)
+            fixed (float* dst = output_buffer)
             {
                 float* src = decode_buffer_ptr + GetDecodeBufferOffset(s);
 
@@ -982,7 +982,7 @@ namespace StbSharp
             int x;
             int n;
 
-            fixed (float* src = &MemoryMarshal.GetReference(encode_buffer))
+            fixed (float* src = encode_buffer)
             {
                 if ((s.flags & (1 << 0)) == 0)
                 {
@@ -1006,7 +1006,7 @@ namespace StbSharp
                         nonalpha[num_nonalpha++] = (ushort)(x);
                 }
 
-                fixed (byte* dst8 = &MemoryMarshal.GetReference(output_buffer))
+                fixed (byte* dst8 = output_buffer)
                 {
                     var dst16 = (ushort*)dst8;
                     var dst32 = (uint*)dst8;
@@ -1169,8 +1169,8 @@ namespace StbSharp
 
             s.encode_buffer.Fill(0);
 
-            fixed (float* vertical_coefficients_ptr = &MemoryMarshal.GetReference(s.vertical_coefficients))
-            fixed (float* dst = &MemoryMarshal.GetReference(s.encode_buffer))
+            fixed (float* vertical_coefficients_ptr = s.vertical_coefficients)
+            fixed (float* dst = s.encode_buffer)
             {
                 int coefficient_group = (int)(coefficient_width * contributor);
                 float* coefficients = vertical_coefficients_ptr + coefficient_group;
@@ -1295,7 +1295,7 @@ namespace StbSharp
 
             int coefficient_group = (int)(s.vertical_coefficient_width * contributor);
 
-            fixed (float* src = &MemoryMarshal.GetReference(s.horizontal_buffer))
+            fixed (float* src = s.horizontal_buffer)
             {
                 int x;
                 int c;

@@ -99,7 +99,7 @@ namespace MonoGame.Framework.Graphics
                 unpackSize = 1;
             GL.PixelStore(PixelStoreParameter.UnpackAlignment, Math.Min(unpackSize, 8));
 
-            fixed (T* ptr = &MemoryMarshal.GetReference(data))
+            fixed (T* ptr = data)
             {
                 int bytes = data.Length * sizeof(T);
                 if (rect.HasValue)

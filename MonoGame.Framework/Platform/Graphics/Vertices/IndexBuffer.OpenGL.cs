@@ -52,7 +52,7 @@ namespace MonoGame.Framework.Graphics
 
             DiscardBuffer(BufferTarget.ElementArrayBuffer, options, Capacity * _indexElementSize);
 
-            fixed (T* ptr = &MemoryMarshal.GetReference(data))
+            fixed (T* ptr = data)
             {
                 var size = new IntPtr(data.Length * sizeof(T));
                 GL.BufferSubData(BufferTarget.ElementArrayBuffer, (IntPtr)offsetInBytes, size, (IntPtr)ptr);

@@ -37,7 +37,7 @@ namespace MonoGame.Framework.Input
             var handle = IntPtr.Zero;
             try
             {
-                fixed (Color* ptr = &MemoryMarshal.GetReference(data))
+                fixed (Color* ptr = data)
                 {
                     surface = SDL.CreateRGBSurfaceFrom(
                         (IntPtr)ptr, width, height, 32, width * sizeof(Color),

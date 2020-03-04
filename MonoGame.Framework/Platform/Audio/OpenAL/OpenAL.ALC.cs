@@ -12,7 +12,7 @@ namespace MonoGame.OpenAL
 
         public static IntPtr CreateContext(IntPtr device, ReadOnlySpan<int> attributes)
         {
-            fixed (int* ptr = &MemoryMarshal.GetReference(attributes))
+            fixed (int* ptr = attributes)
                 return alcCreateContext(device, ptr);
         }
 
@@ -31,7 +31,7 @@ namespace MonoGame.OpenAL
 
         public static void GetInteger(IntPtr device, ALCGetInteger param, int size, Span<int> values)
         {
-            fixed (int* ptr = &MemoryMarshal.GetReference(values))
+            fixed (int* ptr = values)
                 alcGetIntegerv(device, (int)param, size, ptr);
         }
 
@@ -74,7 +74,7 @@ namespace MonoGame.OpenAL
 
         public static void CaptureSamples(IntPtr device, Span<byte> buffer, int samples)
         {
-            fixed (byte* ptr = &MemoryMarshal.GetReference(buffer))
+            fixed (byte* ptr = buffer)
                 alcCaptureSamples(device, ptr, samples);
         }
 

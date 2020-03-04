@@ -109,7 +109,7 @@ namespace MonoGame.Framework.Audio
             if (output.IsEmpty)
                 return;
 
-            fixed (uint* ptr = &MemoryMarshal.GetReference(output))
+            fixed (uint* ptr = output)
             {
                 alGenAuxiliaryEffectSlots(output.Length, ptr);
                 ALHelper.CheckError("Failed to genereate aux slot.");
@@ -128,7 +128,7 @@ namespace MonoGame.Framework.Audio
             if (output.IsEmpty)
                 return;
 
-            fixed (uint* ptr = &MemoryMarshal.GetReference(output))
+            fixed (uint* ptr = output)
             {
                 alGenEffects(output.Length, ptr);
                 ALHelper.CheckError("Failed to generate effects.");
@@ -147,10 +147,8 @@ namespace MonoGame.Framework.Audio
             if (slots.IsEmpty)
                 return;
 
-            fixed (uint* ptr = &MemoryMarshal.GetReference(slots))
-            {
+            fixed (uint* ptr = slots)
                 alDeleteAuxiliaryEffectSlots(slots.Length, ptr);
-            }
         }
 
         public void DeleteAuxiliaryEffectSlot(uint slot)
@@ -164,10 +162,8 @@ namespace MonoGame.Framework.Audio
             if (effects.IsEmpty)
                 return;
 
-            fixed (uint* ptr = &MemoryMarshal.GetReference(effects))
-            {
+            fixed (uint* ptr = effects)
                 alDeleteEffects(effects.Length, ptr);
-            }
         }
 
         public void DeleteEffect(uint effect)
@@ -210,10 +206,8 @@ namespace MonoGame.Framework.Audio
             if (output.IsEmpty)
                 return;
 
-            fixed (uint* ptr = &MemoryMarshal.GetReference(output))
-            {
+            fixed (uint* ptr = output)
                 alGenFilters(output.Length, ptr);
-            }
         }
 
         public uint GenFilter()
@@ -243,10 +237,8 @@ namespace MonoGame.Framework.Audio
             if (filters.IsEmpty)
                 return;
 
-            fixed (uint* ptr = &MemoryMarshal.GetReference(filters))
-            {
+            fixed (uint* ptr = filters)
                 alDeleteFilters(filters.Length, ptr);
-            }
         }
 
         public void DeleteFilter(uint filter)
