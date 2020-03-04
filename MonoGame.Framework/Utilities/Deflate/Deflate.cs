@@ -900,7 +900,7 @@ namespace MonoGame.Framework.Utilities.Deflate
         {
             _tr_flush_block(block_start >= 0 ? block_start : -1, strstart - block_start, eof);
             block_start = strstart;
-            _codec.flush_pending();
+            _codec.FlushPending();
         }
 
         // Copy without compression as much as possible from the input stream, return
@@ -1129,7 +1129,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                 // Otherwise, window_size == 2*WSIZE so more >= 2.
                 // If there was sliding, more >= WSIZE. So in all cases, more >= 2.
 
-                n = _codec.read_buf(window, strstart + lookahead, more);
+                n = _codec.ReadBuffer(window, strstart + lookahead, more);
                 lookahead += n;
 
                 // Initialize the hash value now that we have some input:
@@ -1759,7 +1759,7 @@ namespace MonoGame.Framework.Utilities.Deflate
             // Flush as much pending output as possible
             if (pendingCount != 0)
             {
-                _codec.flush_pending();
+                _codec.FlushPending();
                 if (_codec.AvailableBytesOut == 0)
                 {
                     //System.out.println("  avail_out==0");
@@ -1843,7 +1843,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                                 head[i] = 0;
                         }
                     }
-                    _codec.flush_pending();
+                    _codec.FlushPending();
                     if (_codec.AvailableBytesOut == 0)
                     {
                         last_flush = -1; // avoid BUF_ERROR at next call, see above
@@ -1866,7 +1866,7 @@ namespace MonoGame.Framework.Utilities.Deflate
             //putShortMSB((int)(SharedUtils.URShift(_codec._Adler32, 16)));
             //putShortMSB((int)(_codec._Adler32 & 0xffff));
 
-            _codec.flush_pending();
+            _codec.FlushPending();
 
             // If avail_out is zero, the application will call deflate again
             // to flush the rest.

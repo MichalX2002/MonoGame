@@ -76,12 +76,11 @@ namespace MonoGame.Framework.Graphics
                     continue;
 
                 var tex = _textures[i];
-
-                if (_textures[i] == null || _textures[i].IsDisposed)
+                if (tex == null || tex.IsDisposed)
                     shaderStage.SetShaderResource(i, null);
                 else
                 {
-                    shaderStage.SetShaderResource(i, _textures[i].GetShaderResourceView());
+                    shaderStage.SetShaderResource(i, tex.GetShaderResourceView());
                     unchecked
                     {
                         _graphicsDevice._graphicsMetrics._textureCount++;

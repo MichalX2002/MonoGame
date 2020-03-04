@@ -171,9 +171,10 @@ namespace MonoGame.Framework.Utilities.Deflate
 
 
         /// <summary>
-        /// The Adler32 checksum on the data transferred through the codec so far. You probably don't need to look at this.
+        /// The Adler32 checksum on the data transferred through the codec so far. 
+        /// You probably don't need to look at this.
         /// </summary>
-        public int Adler32 { get { return (int)_Adler32; } }
+        public int Adler32 => (int)_Adler32;
 
 
         /// <summary>
@@ -197,12 +198,14 @@ namespace MonoGame.Framework.Utilities.Deflate
             if (mode == CompressionMode.Compress)
             {
                 int rc = InitializeDeflate();
-                if (rc != ZlibConstants.Z_OK) throw new ZlibException("Cannot initialize for deflate.");
+                if (rc != ZlibConstants.Z_OK) 
+                    throw new ZlibException("Cannot initialize for deflate.");
             }
             else if (mode == CompressionMode.Decompress)
             {
                 int rc = InitializeInflate();
-                if (rc != ZlibConstants.Z_OK) throw new ZlibException("Cannot initialize for inflate.");
+                if (rc != ZlibConstants.Z_OK) 
+                    throw new ZlibException("Cannot initialize for inflate.");
             }
             else throw new ZlibException("Invalid ZlibStreamFlavor.");
         }
@@ -277,7 +280,9 @@ namespace MonoGame.Framework.Utilities.Deflate
         public int InitializeInflate(int windowBits, bool expectRfc1950Header)
         {
             WindowBits = windowBits;
-            if (dstate != null) throw new ZlibException("You may not call InitializeInflate() after calling InitializeDeflate().");
+            if (dstate != null)
+                throw new ZlibException(
+                    "You may not call InitializeInflate() after calling InitializeDeflate().");
             istate = new InflateManager(expectRfc1950Header);
             return istate.Initialize(this, windowBits);
         }
@@ -424,7 +429,7 @@ namespace MonoGame.Framework.Utilities.Deflate
         /// <returns>Z_OK if all goes well. You generally don't need to check the return code.</returns>
         public int InitializeDeflate()
         {
-            return _InternalInitializeDeflate(true);
+            return InternalInitializeDeflate(true);
         }
 
         /// <summary>
@@ -439,7 +444,7 @@ namespace MonoGame.Framework.Utilities.Deflate
         public int InitializeDeflate(CompressionLevel level)
         {
             CompressLevel = level;
-            return _InternalInitializeDeflate(true);
+            return InternalInitializeDeflate(true);
         }
 
 
@@ -460,7 +465,7 @@ namespace MonoGame.Framework.Utilities.Deflate
         public int InitializeDeflate(CompressionLevel level, bool wantRfc1950Header)
         {
             CompressLevel = level;
-            return _InternalInitializeDeflate(wantRfc1950Header);
+            return InternalInitializeDeflate(wantRfc1950Header);
         }
 
 
@@ -478,7 +483,7 @@ namespace MonoGame.Framework.Utilities.Deflate
         {
             CompressLevel = level;
             WindowBits = bits;
-            return _InternalInitializeDeflate(true);
+            return InternalInitializeDeflate(true);
         }
 
         /// <summary>
@@ -495,12 +500,14 @@ namespace MonoGame.Framework.Utilities.Deflate
         {
             CompressLevel = level;
             WindowBits = bits;
-            return _InternalInitializeDeflate(wantRfc1950Header);
+            return InternalInitializeDeflate(wantRfc1950Header);
         }
 
-        private int _InternalInitializeDeflate(bool wantRfc1950Header)
+        private int InternalInitializeDeflate(bool wantRfc1950Header)
         {
-            if (istate != null) throw new ZlibException("You may not call InitializeDeflate() after calling InitializeInflate().");
+            if (istate != null)
+                throw new ZlibException(
+                    "You may not call InitializeDeflate() after calling InitializeInflate().");
             dstate = new DeflateManager();
             dstate.WantRfc1950HeaderBytes = wantRfc1950Header;
 
@@ -650,7 +657,7 @@ namespace MonoGame.Framework.Utilities.Deflate
         // through this function so some applications may wish to modify it
         // to avoid allocating a large strm->next_out buffer and copying into it.
         // (See also read_buf()).
-        internal void flush_pending()
+        internal void FlushPending()
         {
             int len = dstate.pendingCount;
 
@@ -686,7 +693,7 @@ namespace MonoGame.Framework.Utilities.Deflate
         // this function so some applications may wish to modify it to avoid
         // allocating a large strm->next_in buffer and copying from it.
         // (See also flush_pending()).
-        internal int read_buf(byte[] buf, int start, int size)
+        internal int ReadBuffer(byte[] buf, int start, int size)
         {
             int len = AvailableBytesIn;
 
@@ -698,9 +705,8 @@ namespace MonoGame.Framework.Utilities.Deflate
             AvailableBytesIn -= len;
 
             if (dstate.WantRfc1950HeaderBytes)
-            {
                 _Adler32 = Adler.Adler32(_Adler32, InputBuffer, NextIn, len);
-            }
+
             Array.Copy(InputBuffer, NextIn, buf, start, len);
             NextIn += len;
             TotalBytesIn += len;

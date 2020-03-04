@@ -93,9 +93,6 @@ This package provides you with MonoGame Framework that uses DirectX for renderin
     <PackageReference Version="4.0.1" Include="SharpDX.MediaFoundation" />
     <PackageReference Version="4.0.1" Include="SharpDX.XAudio2" />
     <PackageReference Version="4.0.1" Include="SharpDX.XInput" />
-    <PackageReference Include="System.Buffers" Version="4.5.0" />
-    <PackageReference Include="System.Memory" Version="4.5.3" />
-    <PackageReference Include="System.Numerics.Vectors" Version="4.6.0-preview5.19224.8" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.0" />
   </ItemGroup>
 

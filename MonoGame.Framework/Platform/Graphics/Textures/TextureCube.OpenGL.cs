@@ -116,7 +116,7 @@ namespace MonoGame.Framework.Graphics
                 Threading.BlockOnMainThread(Construct);
         }
 
-        private unsafe void PlatformGetData<T>(
+        private void PlatformGetData<T>(
             CubeMapFace cubeMapFace, int level, Rectangle rect, T[] data, int startIndex, int elementCount)
             where T : unmanaged
         {
@@ -188,7 +188,7 @@ namespace MonoGame.Framework.Graphics
 #endif
         }
 
-        private unsafe void PlatformSetData<T>(
+        private void PlatformSetData<T>(
             CubeMapFace face, int level, Rectangle rect, T[] data, int startIndex, int elementCount)
             where T : unmanaged
         {

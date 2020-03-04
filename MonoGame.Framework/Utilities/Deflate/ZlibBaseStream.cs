@@ -25,12 +25,19 @@
 // ------------------------------------------------------------------
 
 using System;
+using System.Buffers.Binary;
 using System.IO;
+using System.Text;
+using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework.Utilities.Deflate
 {
-
-    internal enum ZlibStreamFlavor { ZLIB = 1950, DEFLATE = 1951, GZIP = 1952 }
+    internal enum ZlibStreamFlavor
+    {
+        ZLIB = 1950,
+        DEFLATE = 1951,
+        GZIP = 1952
+    }
 
     internal class ZlibBaseStream : Stream
     {
@@ -44,25 +51,26 @@ namespace MonoGame.Framework.Utilities.Deflate
         protected internal bool _leaveOpen;
         protected internal byte[] _workingBuffer;
         protected internal int _bufferSize = ZlibConstants.WorkingBufferSizeDefault;
-        protected internal byte[] _buf1 = new byte[1];
 
         protected internal Stream _stream;
         protected internal CompressionStrategy Strategy = CompressionStrategy.Default;
 
-        // workitem 7159
-        CRC32 crc;
         protected internal string _GzipFileName;
         protected internal string _GzipComment;
         protected internal DateTime _GzipMtime;
         protected internal int _gzipHeaderByteCount;
 
-        internal int Crc32 { get { if (crc == null) return 0; return crc.Crc32Result; } }
+        private bool nomoreinput = false;
+        private CRC32 _crc32; // workitem 7159
 
-        public ZlibBaseStream(Stream stream,
-                              CompressionMode compressionMode,
-                              CompressionLevel level,
-                              ZlibStreamFlavor flavor,
-                              bool leaveOpen)
+        internal int Crc32 => _crc32.Crc32Result;
+
+        public ZlibBaseStream(
+            Stream stream,
+            CompressionMode compressionMode,
+            CompressionLevel level,
+            ZlibStreamFlavor flavor,
+            bool leaveOpen)
             : base()
         {
             _flushMode = FlushType.None;
@@ -72,30 +80,22 @@ namespace MonoGame.Framework.Utilities.Deflate
             _compressionMode = compressionMode;
             _flavor = flavor;
             _level = level;
-            // workitem 7159
+
             if (flavor == ZlibStreamFlavor.GZIP)
-            {
-                crc = new CRC32();
-            }
+                _crc32 = new CRC32(reverseBits: false);
         }
 
+        protected internal bool WantCompress => _compressionMode == CompressionMode.Compress;
 
-        protected internal bool _wantCompress
-        {
-            get
-            {
-                return _compressionMode == CompressionMode.Compress;
-            }
-        }
-
-        private ZlibCodec z
+        private ZlibCodec Codec
         {
             get
             {
                 if (_z == null)
                 {
-                    bool wantRfc1950Header = _flavor == ZlibStreamFlavor.ZLIB;
                     _z = new ZlibCodec();
+
+                    bool wantRfc1950Header = _flavor == ZlibStreamFlavor.ZLIB;
                     if (_compressionMode == CompressionMode.Decompress)
                     {
                         _z.InitializeInflate(wantRfc1950Header);
@@ -110,9 +110,7 @@ namespace MonoGame.Framework.Utilities.Deflate
             }
         }
 
-
-
-        private byte[] workingBuffer
+        private byte[] WorkingBuffer
         {
             get
             {
@@ -123,13 +121,11 @@ namespace MonoGame.Framework.Utilities.Deflate
         }
 
 
-
         public override void Write(byte[] buffer, int offset, int count)
         {
             // workitem 7159
             // calculate the CRC on the unccompressed data  (before writing)
-            if (crc != null)
-                crc.SlurpBlock(buffer, offset, count);
+            _crc32.SlurpBlock(buffer.AsSpan(offset, count));
 
             if (_streamMode == StreamMode.Undefined)
                 _streamMode = StreamMode.Writer;
@@ -140,20 +136,21 @@ namespace MonoGame.Framework.Utilities.Deflate
                 return;
 
             // first reference of z property will initialize the private var _z
-            z.InputBuffer = buffer;
+            Codec.InputBuffer = buffer;
             _z.NextIn = offset;
             _z.AvailableBytesIn = count;
-            bool done = false;
+
+            bool done;
             do
             {
-                _z.OutputBuffer = workingBuffer;
+                _z.OutputBuffer = WorkingBuffer;
                 _z.NextOut = 0;
                 _z.AvailableBytesOut = _workingBuffer.Length;
-                int rc = _wantCompress
+                int rc = WantCompress
                     ? _z.Deflate(_flushMode)
                     : _z.Inflate(_flushMode);
                 if (rc != ZlibConstants.Z_OK && rc != ZlibConstants.Z_STREAM_END)
-                    throw new ZlibException((_wantCompress ? "de" : "in") + "flating: " + _z.Message);
+                    throw new ZlibException((WantCompress ? "de" : "in") + "flating: " + _z.Message);
 
                 //if (_workingBuffer.Length - _z.AvailableBytesOut > 0)
                 _stream.Write(_workingBuffer, 0, _workingBuffer.Length - _z.AvailableBytesOut);
@@ -161,7 +158,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                 done = _z.AvailableBytesIn == 0 && _z.AvailableBytesOut != 0;
 
                 // If GZIP and de-compress, we're done when 8 bytes remain.
-                if (_flavor == ZlibStreamFlavor.GZIP && !_wantCompress)
+                if (_flavor == ZlibStreamFlavor.GZIP && !WantCompress)
                     done = _z.AvailableBytesIn == 8 && _z.AvailableBytesOut != 0;
 
             }
@@ -170,25 +167,26 @@ namespace MonoGame.Framework.Utilities.Deflate
 
 
 
-        private void finish()
+        private void Finish()
         {
-            if (_z == null) return;
+            if (_z == null)
+                return;
 
             if (_streamMode == StreamMode.Writer)
             {
                 bool done = false;
                 do
                 {
-                    _z.OutputBuffer = workingBuffer;
+                    _z.OutputBuffer = WorkingBuffer;
                     _z.NextOut = 0;
                     _z.AvailableBytesOut = _workingBuffer.Length;
-                    int rc = _wantCompress
+                    int rc = WantCompress
                         ? _z.Deflate(FlushType.Finish)
                         : _z.Inflate(FlushType.Finish);
 
                     if (rc != ZlibConstants.Z_STREAM_END && rc != ZlibConstants.Z_OK)
                     {
-                        string verb = (_wantCompress ? "de" : "in") + "flating";
+                        string verb = (WantCompress ? "de" : "in") + "flating";
                         if (_z.Message == null)
                             throw new ZlibException(string.Format("{0}: (rc = {1})", verb, rc));
                         else
@@ -196,13 +194,11 @@ namespace MonoGame.Framework.Utilities.Deflate
                     }
 
                     if (_workingBuffer.Length - _z.AvailableBytesOut > 0)
-                    {
                         _stream.Write(_workingBuffer, 0, _workingBuffer.Length - _z.AvailableBytesOut);
-                    }
 
                     done = _z.AvailableBytesIn == 0 && _z.AvailableBytesOut != 0;
                     // If GZIP and de-compress, we're done when 8 bytes remain.
-                    if (_flavor == ZlibStreamFlavor.GZIP && !_wantCompress)
+                    if (_flavor == ZlibStreamFlavor.GZIP && !WantCompress)
                         done = _z.AvailableBytesIn == 8 && _z.AvailableBytesOut != 0;
 
                 }
@@ -213,12 +209,12 @@ namespace MonoGame.Framework.Utilities.Deflate
                 // workitem 7159
                 if (_flavor == ZlibStreamFlavor.GZIP)
                 {
-                    if (_wantCompress)
+                    if (WantCompress)
                     {
                         // Emit the GZIP trailer: CRC32 and  size mod 2^32
-                        int c1 = crc.Crc32Result;
+                        int c1 = _crc32.Crc32Result;
                         _stream.Write(BitConverter.GetBytes(c1), 0, 4);
-                        int c2 = (int)(crc.TotalBytesRead & 0x00000000FFFFFFFF);
+                        int c2 = (int)(_crc32.TotalBytesRead & 0x00000000FFFFFFFF);
                         _stream.Write(BitConverter.GetBytes(c2), 0, 4);
                     }
                     else
@@ -232,7 +228,7 @@ namespace MonoGame.Framework.Utilities.Deflate
             {
                 if (_flavor == ZlibStreamFlavor.GZIP)
                 {
-                    if (!_wantCompress)
+                    if (!WantCompress)
                     {
                         // workitem 8501: handle edge case (decompress empty stream)
                         if (_z.TotalBytesOut == 0L)
@@ -240,38 +236,41 @@ namespace MonoGame.Framework.Utilities.Deflate
 
                         // Read and potentially verify the GZIP trailer:
                         // CRC32 and size mod 2^32
-                        byte[] trailer = new byte[8];
+                        Span<byte> trailer = stackalloc byte[8];
 
                         // workitems 8679 & 12554
                         if (_z.AvailableBytesIn < 8)
                         {
                             // Make sure we have read to the end of the stream
-                            Array.Copy(_z.InputBuffer, _z.NextIn, trailer, 0, _z.AvailableBytesIn);
+                            _z.InputBuffer.AsSpan(_z.NextIn, _z.AvailableBytesIn).CopyTo(trailer);
                             int bytesNeeded = 8 - _z.AvailableBytesIn;
-                            int bytesRead = _stream.Read(trailer,
-                                                         _z.AvailableBytesIn,
-                                                         bytesNeeded);
+                            int bytesRead = _stream.Read(trailer.Slice(_z.AvailableBytesIn, bytesNeeded));
                             if (bytesNeeded != bytesRead)
                             {
-                                throw new ZlibException(string.Format("Missing or incomplete GZIP trailer. Expected 8 bytes, got {0}.",
-                                                                      _z.AvailableBytesIn + bytesRead));
+                                throw new ZlibException(string.Format(
+                                    "Missing or incomplete GZIP trailer. Expected 8 bytes, got {0}.",
+                                    _z.AvailableBytesIn + bytesRead));
                             }
                         }
                         else
                         {
-                            Array.Copy(_z.InputBuffer, _z.NextIn, trailer, 0, trailer.Length);
+                            _z.InputBuffer.AsSpan(_z.NextIn, trailer.Length).CopyTo(trailer);
                         }
 
-                        int crc32_expected = BitConverter.ToInt32(trailer, 0);
-                        int crc32_actual = crc.Crc32Result;
-                        int isize_expected = BitConverter.ToInt32(trailer, 4);
+                        int crc32_expected = BinaryPrimitives.ReadInt32LittleEndian(trailer);
+                        int crc32_actual = _crc32.Crc32Result;
+                        int isize_expected = BinaryPrimitives.ReadInt32LittleEndian(trailer.Slice(4));
                         int isize_actual = (int)(_z.TotalBytesOut & 0x00000000FFFFFFFF);
 
                         if (crc32_actual != crc32_expected)
-                            throw new ZlibException(string.Format("Bad CRC32 in GZIP trailer. (actual({0:X8})!=expected({1:X8}))", crc32_actual, crc32_expected));
+                            throw new ZlibException(string.Format(
+                                "Bad CRC32 in GZIP trailer. (actual({0:X8})!=expected({1:X8}))",
+                                crc32_actual, crc32_expected));
 
                         if (isize_actual != isize_expected)
-                            throw new ZlibException(string.Format("Bad size in GZIP trailer. (actual({0})!=expected({1}))", isize_actual, isize_expected));
+                            throw new ZlibException(string.Format(
+                                "Bad size in GZIP trailer. (actual({0})!=expected({1}))",
+                                isize_actual, isize_expected));
 
                     }
                     else
@@ -283,11 +282,12 @@ namespace MonoGame.Framework.Utilities.Deflate
         }
 
 
-        private void end()
+        private void End()
         {
-            if (z == null)
+            if (Codec == null)
                 return;
-            if (_wantCompress)
+
+            if (WantCompress)
             {
                 _z.EndDeflate();
             }
@@ -305,11 +305,11 @@ namespace MonoGame.Framework.Utilities.Deflate
                 if (_stream == null) return;
                 try
                 {
-                    finish();
+                    Finish();
                 }
                 finally
                 {
-                    end();
+                    End();
                     if (!_leaveOpen) _stream.Dispose();
                     _stream = null;
                 }
@@ -332,21 +332,15 @@ namespace MonoGame.Framework.Utilities.Deflate
         }
 
 
-#if NOT
-        public int Read()
-        {
-            if (Read(_buf1, 0, 1) == 0)
-                return 0;
-            // calculate CRC after reading
-            if (crc!=null)
-                crc.SlurpBlock(_buf1,0,1);
-            return (_buf1[0] & 0xFF);
-        }
-#endif
-
-        private bool nomoreinput = false;
-
-
+        //public int Read()
+        //{
+        //
+        //    if (Read(_buf1, 0, 1) == 0)
+        //        return 0;
+        //    // calculate CRC after reading
+        //    _crc32.SlurpBlock(_buf1,0,1);
+        //    return (_buf1[0] & 0xFF);
+        //}
 
         private string ReadZeroTerminatedString()
         {
@@ -355,15 +349,16 @@ namespace MonoGame.Framework.Utilities.Deflate
             do
             {
                 // workitem 7740
-                int n = _stream.Read(_buf1, 0, 1);
+                Span<byte> buffer = stackalloc byte[1];
+                int n = _stream.Read(buffer);
                 if (n != 1)
                     throw new ZlibException("Unexpected EOF reading GZIP header.");
                 else
                 {
-                    if (_buf1[0] == 0)
+                    if (buffer[0] == 0)
                         done = true;
                     else
-                        list.Add(_buf1[0]);
+                        list.Add(buffer[0]);
                 }
             } while (!done);
             byte[] a = list.ToArray();
@@ -371,12 +366,11 @@ namespace MonoGame.Framework.Utilities.Deflate
         }
 
 
-        private int _ReadAndValidateGzipHeader()
+        private int ReadAndValidateGzipHeader()
         {
-            int totalBytesRead = 0;
             // read the header on the first read
-            byte[] header = new byte[10];
-            int n = _stream.Read(header, 0, header.Length);
+            Span<byte> header = stackalloc byte[10];
+            int n = _stream.Read(header);
 
             // workitem 8501: handle edge case (decompress empty stream)
             if (n == 0)
@@ -388,13 +382,13 @@ namespace MonoGame.Framework.Utilities.Deflate
             if (header[0] != 0x1F || header[1] != 0x8B || header[2] != 8)
                 throw new ZlibException("Bad GZIP header.");
 
-            int timet = BitConverter.ToInt32(header, 4);
+            int timet = BinaryPrimitives.ReadInt32LittleEndian(header.Slice(4));
             _GzipMtime = GZipStream._unixEpoch.AddSeconds(timet);
-            totalBytesRead += n;
+            int totalBytesRead = n;
             if ((header[3] & 0x04) == 0x04)
             {
                 // read and discard extra field
-                n = _stream.Read(header, 0, 2); // 2-byte length field
+                n = _stream.Read(header.Slice(0, 2)); // 2-byte length field
                 totalBytesRead += n;
 
                 short extraLength = (short)(header[0] + header[1] * 256);
@@ -409,7 +403,7 @@ namespace MonoGame.Framework.Utilities.Deflate
             if ((header[3] & 0x10) == 0x010)
                 _GzipComment = ReadZeroTerminatedString();
             if ((header[3] & 0x02) == 0x02)
-                Read(_buf1, 0, 1); // CRC16, ignore
+                ReadByte(); // CRC16, ignore
 
             return totalBytesRead;
         }
@@ -431,10 +425,10 @@ namespace MonoGame.Framework.Utilities.Deflate
                 _streamMode = StreamMode.Reader;
                 // (The first reference to _z goes through the private accessor which
                 // may initialize it.)
-                z.AvailableBytesIn = 0;
+                Codec.AvailableBytesIn = 0;
                 if (_flavor == ZlibStreamFlavor.GZIP)
                 {
-                    _gzipHeaderByteCount = _ReadAndValidateGzipHeader();
+                    _gzipHeaderByteCount = ReadAndValidateGzipHeader();
                     // workitem 8501: handle edge case (decompress empty stream)
                     if (_gzipHeaderByteCount == 0)
                         return 0;
@@ -444,14 +438,18 @@ namespace MonoGame.Framework.Utilities.Deflate
             if (_streamMode != StreamMode.Reader)
                 throw new ZlibException("Cannot Read after Writing.");
 
-            if (count == 0) return 0;
-            if (nomoreinput && _wantCompress) return 0;  // workitem 8557
-            if (buffer == null) throw new ArgumentNullException("buffer");
-            if (count < 0) throw new ArgumentOutOfRangeException("count");
-            if (offset < buffer.GetLowerBound(0)) throw new ArgumentOutOfRangeException("offset");
-            if (offset + count > buffer.GetLength(0)) throw new ArgumentOutOfRangeException("count");
-
-            int rc = 0;
+            if (count == 0) 
+                return 0;
+            if (nomoreinput && WantCompress)
+                return 0;  // workitem 8557
+            if (buffer == null) 
+                throw new ArgumentNullException(nameof(buffer));
+            if (count < 0) 
+                throw new ArgumentOutOfRangeException(nameof(count));
+            if (offset < buffer.GetLowerBound(0))
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            if (offset + count > buffer.GetLength(0))
+                throw new ArgumentOutOfRangeException(nameof(count));
 
             // set up the output of the deflate/inflate codec:
             _z.OutputBuffer = buffer;
@@ -461,8 +459,9 @@ namespace MonoGame.Framework.Utilities.Deflate
             // This is necessary in case _workingBuffer has been resized. (new byte[])
             // (The first reference to _workingBuffer goes through the private accessor which
             // may initialize it.)
-            _z.InputBuffer = workingBuffer;
+            _z.InputBuffer = WorkingBuffer;
 
+            int rc;
             do
             {
                 // need data in _workingBuffer in order to deflate/inflate.  Here, we check if we have any.
@@ -476,7 +475,7 @@ namespace MonoGame.Framework.Utilities.Deflate
 
                 }
                 // we have data in InputBuffer; now compress or decompress as appropriate
-                rc = _wantCompress
+                rc = WantCompress
                     ? _z.Deflate(_flushMode)
                     : _z.Inflate(_flushMode);
 
@@ -484,9 +483,12 @@ namespace MonoGame.Framework.Utilities.Deflate
                     return 0;
 
                 if (rc != ZlibConstants.Z_OK && rc != ZlibConstants.Z_STREAM_END)
-                    throw new ZlibException(string.Format("{0}flating:  rc={1}  msg={2}", _wantCompress ? "de" : "in", rc, _z.Message));
+                    throw new ZlibException(string.Format(
+                        "{0}flating:  rc={1}  msg={2}", 
+                        WantCompress ? "de" : "in", rc, _z.Message));
 
-                if ((nomoreinput || rc == ZlibConstants.Z_STREAM_END) && _z.AvailableBytesOut == count)
+                if ((nomoreinput || rc == ZlibConstants.Z_STREAM_END) &&
+                    _z.AvailableBytesOut == count)
                     break; // nothing more to read
             }
             //while (_z.AvailableBytesOut == count && rc == ZlibConstants.Z_OK);
@@ -506,14 +508,15 @@ namespace MonoGame.Framework.Utilities.Deflate
                 if (nomoreinput)
                 {
                     // and in compression?
-                    if (_wantCompress)
+                    if (WantCompress)
                     {
                         // no more input data available; therefore we flush to
                         // try to complete the read
                         rc = _z.Deflate(FlushType.Finish);
 
                         if (rc != ZlibConstants.Z_OK && rc != ZlibConstants.Z_STREAM_END)
-                            throw new ZlibException(string.Format("Deflating:  rc={0}  msg={1}", rc, _z.Message));
+                            throw new ZlibException(string.Format(
+                                "Deflating:  rc={0}  msg={1}", rc, _z.Message));
                     }
                 }
             }
@@ -522,38 +525,20 @@ namespace MonoGame.Framework.Utilities.Deflate
             rc = count - _z.AvailableBytesOut;
 
             // calculate CRC after reading
-            if (crc != null)
-                crc.SlurpBlock(buffer, offset, rc);
+            _crc32.SlurpBlock(buffer.AsSpan(offset, rc));
 
             return rc;
         }
 
-
-
-        public override bool CanRead
-        {
-            get { return _stream.CanRead; }
-        }
-
-        public override bool CanSeek
-        {
-            get { return _stream.CanSeek; }
-        }
-
-        public override bool CanWrite
-        {
-            get { return _stream.CanWrite; }
-        }
-
-        public override long Length
-        {
-            get { return _stream.Length; }
-        }
+        public override bool CanRead => _stream.CanRead;
+        public override bool CanSeek => _stream.CanSeek;
+        public override bool CanWrite => _stream.CanWrite;
+        public override long Length => _stream.Length;
 
         public override long Position
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         internal enum StreamMode
@@ -563,67 +548,31 @@ namespace MonoGame.Framework.Utilities.Deflate
             Undefined,
         }
 
-
-        public static void CompressString(string s, Stream compressor)
+        public static void CompressString(ReadOnlySpan<char> value, Stream compressor)
         {
-            byte[] uncompressed = System.Text.Encoding.UTF8.GetBytes(s);
-            using (compressor)
-            {
-                compressor.Write(uncompressed, 0, uncompressed.Length);
-            }
+            using (var writer = new StreamWriter(compressor, Encoding.UTF8, 1024, leaveOpen: true))
+                writer.Write(value);
         }
 
-        public static void CompressBuffer(byte[] b, Stream compressor)
+        public static string UncompressString(Stream decompressor)
         {
             // workitem 8460
-            using (compressor)
-            {
-                compressor.Write(b, 0, b.Length);
-            }
+
+            var sr = new StreamReader(decompressor, Encoding.UTF8, true, 1024, leaveOpen: true);
+            return sr.ReadToEnd();
         }
 
-        public static string UncompressString(byte[] compressed, Stream decompressor)
+        public static RecyclableMemoryStream UncompressBuffer(Stream decompressor)
         {
             // workitem 8460
-            byte[] working = new byte[1024];
-            var encoding = System.Text.Encoding.UTF8;
-            using (var output = new MemoryStream())
-            {
-                using (decompressor)
-                {
-                    int n;
-                    while ((n = decompressor.Read(working, 0, working.Length)) != 0)
-                    {
-                        output.Write(working, 0, n);
-                    }
-                }
+            var output = RecyclableMemoryManager.Default.GetMemoryStream();
 
-                // reset to allow read from start
-                output.Seek(0, SeekOrigin.Begin);
-                var sr = new StreamReader(output, encoding);
-                return sr.ReadToEnd();
-            }
+            Span<byte> working = stackalloc byte[1024];
+            int n;
+            while ((n = decompressor.Read(working)) != 0)
+                output.Write(working.Slice(0, n));
+
+            return output;
         }
-
-        public static byte[] UncompressBuffer(byte[] compressed, Stream decompressor)
-        {
-            // workitem 8460
-            byte[] working = new byte[1024];
-            using (var output = new MemoryStream())
-            {
-                using (decompressor)
-                {
-                    int n;
-                    while ((n = decompressor.Read(working, 0, working.Length)) != 0)
-                    {
-                        output.Write(working, 0, n);
-                    }
-                }
-                return output.ToArray();
-            }
-        }
-
     }
-
-
 }

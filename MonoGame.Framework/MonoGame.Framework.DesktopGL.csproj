@@ -126,7 +126,7 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Memory" Version="4.5.3" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.0" />
   </ItemGroup>
 
   <ItemGroup>
