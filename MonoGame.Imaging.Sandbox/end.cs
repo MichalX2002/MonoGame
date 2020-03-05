@@ -7,7 +7,7 @@ namespace StbSharp
 {
     public static unsafe partial class StbImageResize2
     {
-        public static unsafe long Hash(StbImageResize2.stbir__info x)
+        public static unsafe long Hash(stbir__info x)
         {
             long hash = 17;
             hash = hash * 31 + x.input_w;

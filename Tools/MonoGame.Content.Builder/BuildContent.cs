@@ -334,7 +334,9 @@ namespace MonoGame.Content.Builder
                     destFile = previousContent.DestFiles[i];
                 }
 
-                var inContent = _content.Any(e => string.Equals(e.SourceFile, sourceFile, StringComparison.InvariantCultureIgnoreCase));
+                var inContent = _content.Any(
+                    e => string.Equals(e.SourceFile, sourceFile, StringComparison.InvariantCultureIgnoreCase));
+                
                 var cleanOldContent = !inContent && !Incremental;
                 var cleanRebuiltContent = inContent && (Rebuild || Clean);
                 if (cleanRebuiltContent || cleanOldContent || targetChanged)
@@ -370,11 +372,12 @@ namespace MonoGame.Content.Builder
             {
                 try
                 {
-                    _manager.BuildContent(c.SourceFile,
-                                          c.OutputFile,
-                                          c.Importer,
-                                          c.Processor,
-                                          c.ProcessorParams);
+                    _manager.BuildContent(
+                        c.SourceFile,
+                        c.OutputFile,
+                        c.Importer,
+                        c.Processor,
+                        c.ProcessorParams);
 
                     newContent.SourceFiles.Add(c.SourceFile);
                     newContent.DestFiles.Add(c.OutputFile);
@@ -437,8 +440,8 @@ namespace MonoGame.Content.Builder
                     var relativeName = c.Link;
                     if (string.IsNullOrWhiteSpace(relativeName))
                         relativeName = c.SourceFile.Replace(projectDirectory, string.Empty)
-                                            .TrimStart(Path.DirectorySeparatorChar)
-                                            .TrimStart(Path.AltDirectorySeparatorChar);
+                            .TrimStart(Path.DirectorySeparatorChar)
+                            .TrimStart(Path.AltDirectorySeparatorChar);
                     var dest = Path.Combine(outputPath, relativeName);
 
                     // Only copy if the source file is newer than the destination.

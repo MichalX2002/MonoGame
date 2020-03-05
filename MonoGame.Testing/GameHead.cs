@@ -7,6 +7,7 @@ using MonoGame.Imaging;
 using MonoGame.Imaging.Coding.Encoding;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Processing;
+using NVorbis;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -63,12 +64,12 @@ namespace MonoGame.Testing
 
             _font = Content.Load<SpriteFont>("arial");
 
-            using (var s = File.OpenRead(@"C:\Users\Michal Piatkowski\Pictures\ikon 100.png"))
-            {
-                var tex = Texture2D.FromStream(s, GraphicsDevice);
-                using(var u  = tex.GetData<Color>())
-                Console.WriteLine(u);
-            }
+            //using (var s = File.OpenRead(@"C:\Users\Michal Piatkowski\Pictures\ikon 100.png"))
+            //{
+            //    var tex = Texture2D.FromStream(s, GraphicsDevice);
+            //    using(var u  = tex.GetData<Color>())
+            //    Console.WriteLine(u);
+            //}
 
             //using (var file = File.OpenRead("risgrot.png"))
             //using (var img = Image.Load<Color>(file))
@@ -79,6 +80,7 @@ namespace MonoGame.Testing
             //    _customCursor = MouseCursor.FromPixels(cropped, new Point(2, 2)/*(img.GetSize() / 2).ToPoint()*/);
             //    Mouse.SetCursor(_customCursor);
             //}
+            Content.Load<SoundEffect>("Win Jingle").Play(0.02f, 1f, 0);
 
             string[] songs = new string[]
             {
@@ -144,7 +146,7 @@ namespace MonoGame.Testing
 
                     Task.Run(() =>
                     {
-                        void OnProgress(
+                        static void OnProgress(
                             ImageEncoderState encoderState,
                             double percentage,
                             Rectangle? rectangle)

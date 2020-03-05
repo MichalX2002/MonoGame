@@ -203,7 +203,7 @@ namespace MonoGame.Framework.Media
                 {
                     OggStreamer.Instance.RemoveStream(this);
                     Empty();
-                    Reader.DecodedPosition = 0;
+                    Reader.SamplePosition = 0;
                 }
 
                 AL.Source(SourceId, ALSourcei.Buffer, 0);
@@ -251,13 +251,12 @@ namespace MonoGame.Framework.Media
         /// <summary>
         /// Seeking stops playback and empties buffers.
         /// </summary>
-        /// <param name="pos"></param>
-        public void SeekToPosition(TimeSpan pos)
+        public void SeekTo(TimeSpan pos)
         {
             lock (PrepareMutex)
             {
-                Reader.DecodedTime = pos;
                 Stop();
+                Reader.TimePosition = pos;
             }
         }
 
@@ -265,7 +264,12 @@ namespace MonoGame.Framework.Media
         {
             if (Reader == null)
                 return TimeSpan.Zero;
-            return Reader.DecodedTime;
+            return Reader.TimePosition;
+        }
+
+        public TimeSpan? GetLength()
+        {
+            return Reader.TotalTime;
         }
 
         public ALSourceState GetState()
@@ -273,11 +277,6 @@ namespace MonoGame.Framework.Media
             var state = AL.GetSourceState(SourceId);
             ALHelper.CheckError("Failed to get source state.");
             return state;
-        }
-
-        public TimeSpan GetLength()
-        {
-            return Reader.TotalTime;
         }
 
         internal void Open(bool precache = false)

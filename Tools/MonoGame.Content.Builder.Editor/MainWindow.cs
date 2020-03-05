@@ -21,7 +21,6 @@ namespace MonoGame.Tools.Pipeline
         public static MainWindow Instance;
 
         private List<Pad> _pads;
-        private Clipboard _clipboard;
         private ContextMenu _contextMenu;
         private FileFilter _mgcbFileFilter, _allFileFilter, _xnaFileFilter;
 
@@ -40,7 +39,6 @@ namespace MonoGame.Tools.Pipeline
         public MainWindow()
         {
             _pads = new List<Pad>();
-            _clipboard = new Clipboard();
 
             InitializeComponent();
 
@@ -372,17 +370,17 @@ namespace MonoGame.Tools.Pipeline
                 TitleChanged(this, EventArgs.Empty);
             else
             {
-                var title = TitleBase;
-
+                string title = string.Empty;
                 if (PipelineController.Instance.ProjectOpen)
                 {
-                    title += " - " + Path.GetFileName(PipelineController.Instance.ProjectItem.OriginalPath);
+                    title += Path.GetFileName(PipelineController.Instance.ProjectItem.OriginalPath);
 
                     if (PipelineController.Instance.ProjectDirty)
                         title += "*";
-                }
 
-                Title = title;
+                    title += " - ";
+                }
+                Title = title + TitleBase;
             }
 
             // Menu
@@ -500,8 +498,8 @@ namespace MonoGame.Tools.Pipeline
 
         public void SetClipboard(string text)
         {
-            _clipboard.Clear();
-            _clipboard.Text = text;
+            Clipboard.Instance.Clear();
+            Clipboard.Instance.Text = text;
         }
 
 #endregion
@@ -658,7 +656,10 @@ namespace MonoGame.Tools.Pipeline
         private void CmdOpenItemLocation_Executed(object sender, EventArgs e)
         {
             if (PipelineController.Instance.SelectedItem != null)
-                Process.Start(PipelineController.Instance.GetFullPath(PipelineController.Instance.SelectedItem.Location));
+            {
+                var path = PipelineController.Instance.GetFullPath(PipelineController.Instance.SelectedItem.Location);
+                Process.Start(new ProcessStartInfo() { FileName = path, UseShellExecute = true });
+            }
         }
 
         private void CmdOpenOutputItemLocation_Executed(object sender, EventArgs e)

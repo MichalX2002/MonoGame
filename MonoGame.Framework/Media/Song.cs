@@ -79,7 +79,7 @@ namespace MonoGame.Framework.Media
             }
         }
 
-        public TimeSpan Duration
+        public TimeSpan? Duration
         {
             get
             {

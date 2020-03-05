@@ -243,7 +243,7 @@ namespace MonoGame.Framework.Media
                         //stream.Open();
 
                         // we don't support non-seekable streams anyway
-                        stream.Reader.DecodedPosition = 0;
+                        stream.Reader.SamplePosition = 0;
                     }
                     else
                     {

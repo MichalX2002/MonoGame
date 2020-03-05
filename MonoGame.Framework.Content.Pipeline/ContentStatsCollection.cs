@@ -16,7 +16,9 @@ namespace MonoGame.Framework.Content.Pipeline
     /// </summary>
     public class ContentStatsCollection
     {
-        private static readonly string _header = "Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds";
+        private static readonly string _header =
+            "Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds";
+        
         private static readonly Regex _split = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
 
         private readonly object _locker = new object();
@@ -64,7 +66,8 @@ namespace MonoGame.Framework.Content.Pipeline
         /// <param name="processorType">The type name of the content processor.</param>
         /// <param name="contentType">The content type object.</param>
         /// <param name="buildSeconds">The build time in seconds.</param>
-        public void RecordStats(string sourceFile, string destFile, string processorType, Type contentType, float buildSeconds)
+        public void RecordStats(
+            string sourceFile, string destFile, string processorType, Type contentType, float buildSeconds)
         {
             var sourceSize = new FileInfo(sourceFile).Length;
             var destSize = new FileInfo(destFile).Length;
@@ -132,7 +135,8 @@ namespace MonoGame.Framework.Content.Pipeline
             else if (type.IsArray)
                 return GetFriendlyTypeName(type.GetElementType()) + "[" + new string(',', type.GetArrayRank() - 1) + "]";
             else if (type.IsGenericType)
-                return type.Name.Split('`')[0] + "<" + string.Join(", ", type.GetGenericArguments().Select(x => GetFriendlyTypeName(x)).ToArray()) + ">";
+                return type.Name.Split('`')[0] + "<" + 
+                    string.Join(", ", type.GetGenericArguments().Select(x => GetFriendlyTypeName(x)).ToArray()) + ">";
             else
                 return type.Name;
         }
@@ -193,6 +197,7 @@ namespace MonoGame.Framework.Content.Pipeline
         {
             // ensure the output folder exists
             Directory.CreateDirectory(outputPath);
+
             var filePath = Path.Combine(outputPath, Extension);
             using (var textWriter = new StreamWriter(filePath, false, new UTF8Encoding(false)))
             {
@@ -202,7 +207,10 @@ namespace MonoGame.Framework.Content.Pipeline
 
                 textWriter.WriteLine(_header);
                 foreach (var stats in contentStats)
-                    textWriter.WriteLine("\"{0}\",\"{1}\",\"{2}\",\"{3}\",{4},{5},{6}", stats.SourceFile, stats.DestFile, stats.ProcessorType, stats.ContentType, stats.SourceFileSize, stats.DestFileSize, stats.BuildSeconds);
+                    textWriter.WriteLine(
+                        "\"{0}\",\"{1}\",\"{2}\",\"{3}\",{4},{5},{6}",
+                        stats.SourceFile, stats.DestFile, stats.ProcessorType, 
+                        stats.ContentType, stats.SourceFileSize, stats.DestFileSize, stats.BuildSeconds);
             }
         }
 

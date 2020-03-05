@@ -3,6 +3,9 @@
 MonoGame.Testing/Content/Ending.ogg
 MonoGame.Testing/Content/Title Screen.ogg
 
+[Bb]in/
+[Oo]bj/
+
 #OS junk files
 [Tt]humbs.db
 *.DS_Store

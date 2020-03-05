@@ -44,11 +44,11 @@ namespace MonoGame.Framework.Audio
                 pcmBufferBlock = RecyclableMemoryManager.Default.GetBlock();
                 floatBufferBlock = RecyclableMemoryManager.Default.GetBlock();
 
-                // Cast then AsBytes to prevent misalignment
-                Span<short> pcmBuffer = MemoryMarshal.Cast<byte, short>(pcmBufferBlock);
+                // First cast then use AsBytes to prevent misalignment
                 Span<float> sampleBuffer = MemoryMarshal.Cast<byte, float>(floatBufferBlock);
-                Span<byte> pcmBufferBytes = MemoryMarshal.AsBytes(pcmBuffer);
                 Span<byte> sampleBufferBytes = MemoryMarshal.AsBytes(sampleBuffer);
+                Span<short> pcmBuffer = MemoryMarshal.Cast<byte, short>(pcmBufferBlock);
+                Span<byte> pcmBufferBytes = MemoryMarshal.AsBytes(pcmBuffer);
 
                 int totalSamples = 0;
                 int samplesRead;
@@ -58,9 +58,7 @@ namespace MonoGame.Framework.Audio
                     {
                         // we can copy directly to output
                         int bytes = samplesRead * sizeof(float);
-                        var src = sampleBufferBytes.Slice(0, bytes);
-                        src.CopyTo(pcmBufferBytes);
-                        result.Write(pcmBufferBlock, 0, bytes);
+                        result.Write(sampleBufferBytes.Slice(0, bytes));
                     }
                     else
                     {
@@ -70,13 +68,13 @@ namespace MonoGame.Framework.Audio
                         ConvertSingleToInt16(src, dst);
 
                         int bytes = samplesRead * sizeof(short);
-                        result.Write(pcmBufferBlock, 0, bytes);
+                        result.Write(pcmBufferBytes.Slice(0, bytes));
                     }
                     totalSamples += samplesRead;
                 }
 
-                long readerSamples = reader.TotalSamples;
-                if (readerSamples != long.MaxValue && totalSamples < readerSamples)
+                long? readerSamples = reader.TotalSamples;
+                if (readerSamples.HasValue && totalSamples < readerSamples)
                     throw new InvalidDataException(
                         "Reached end of stream before reading expected amount of samples.");
 

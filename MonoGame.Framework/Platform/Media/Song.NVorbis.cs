@@ -13,7 +13,7 @@ namespace MonoGame.Framework.Media
     {
         internal OggStream _stream;
         private float _volume;
-        private TimeSpan _duration;
+        private TimeSpan? _duration;
         private bool _isAtEnd;
 
         private void PlatformInitialize(Stream stream, bool leaveOpen)
@@ -109,7 +109,7 @@ namespace MonoGame.Framework.Media
             {
                 var initialState = _stream.GetState();
 
-                _stream.SeekToPosition(time);
+                _stream.SeekTo(time);
 
                 if (initialState == ALSourceState.Playing)
                     _stream.Play(immediate: true);
@@ -141,7 +141,7 @@ namespace MonoGame.Framework.Media
                 _stream.Pitch = value;
         }
 
-        private TimeSpan PlatformGetDuration()
+        private TimeSpan? PlatformGetDuration()
         {
             return _duration;
         }
