@@ -2,10 +2,6 @@
 	path = ThirdParty/Dependencies
 	url = https://github.com/MonoGame/MonoGame.Dependencies.git
 
-[submodule "ThirdParty/NVorbis"]
-	path = ThirdParty/NVorbis
-	url=https://github.com/TechnologicalPizza/MonoGame.NVorbis.git
-
 [submodule "ThirdParty/StbSharp/Image"]
 	path = ThirdParty/StbSharp/Image
 	url = https://github.com/TechnologicalPizza/StbSharp.Image
