@@ -17,3 +17,6 @@
 [submodule "ThirdParty/SDL_GameControllerDB"]
 	path = ThirdParty/SDL_GameControllerDB
 	url = https://github.com/gabomdq/gamecontrollerdb
+[submodule "ThirdParty/NVorbis"]
+	path = ThirdParty/NVorbis
+	url = https://github.com/TechnologicalPizza/NVorbis
