@@ -706,8 +706,15 @@ namespace MonoGame.Tools.Pipeline
                 return;
             }
 
-            var info = new ProcessStartInfo() { FileName = path, UseShellExecute = true };
-            Process.Start(info);
+            try
+            {
+                var info = new ProcessStartInfo() { FileName = path, UseShellExecute = true };
+                Process.Start(info);
+            }
+            catch (System.ComponentModel.Win32Exception e)
+            {
+                ShowError(e.GetType().Name + ": " + e.NativeErrorCode, e.Message);
+            }
         }
     }
 }
