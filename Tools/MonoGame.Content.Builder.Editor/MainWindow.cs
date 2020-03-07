@@ -60,7 +60,8 @@ namespace MonoGame.Tools.Pipeline
             }
 
 #if MONOMAC
-            splitterVertical.PositionChanged += delegate {
+            splitterVertical.PositionChanged += delegate 
+            {
                 setw++;
                 if (setw > 2)
                 {
@@ -105,7 +106,9 @@ namespace MonoGame.Tools.Pipeline
 
         public AskResult AskSaveOrCancel()
         {
-            var result = MessageBox.Show(this, "Do you want to save the project first?", "Save Project", MessageBoxButtons.YesNoCancel, MessageBoxType.Question);
+            var result = MessageBox.Show(
+                this, "Do you want to save the project first?", "Save Project", 
+                MessageBoxButtons.YesNoCancel, MessageBoxType.Question);
 
             if (result == DialogResult.Yes)
                 return AskResult.Yes;
@@ -336,8 +339,9 @@ namespace MonoGame.Tools.Pipeline
                 {
                     var port = Environment.GetEnvironmentVariable("MONO_DEBUGGER_PORT");
                     port = !string.IsNullOrEmpty(port) ? port : "55555";
-                    var monodebugger = string.Format("--debug --debugger-agent=transport=dt_socket,server=y,address=127.0.0.1:{0}",
- port);
+                    var monodebugger = string.Format(
+                        "--debug --debugger-agent=transport=dt_socket,server=y,address=127.0.0.1:{0}", port);
+
                     proc.StartInfo.Arguments = string.Format("{0} \"{1}\" {2}", monodebugger, exe, commands);
                     OutputAppend("************************************************");
                     OutputAppend("RUNNING MGCB IN DEBUG MODE!!!");
@@ -356,7 +360,7 @@ namespace MonoGame.Tools.Pipeline
 
                 // TODO: Fix debugging .NET Core stuff from Unix
 
-                System.Console.WriteLine(exe + " " + commands);
+                Console.WriteLine(exe + " " + commands);
             }
 
             return proc;
