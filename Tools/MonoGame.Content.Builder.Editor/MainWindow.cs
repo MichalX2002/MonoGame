@@ -24,7 +24,7 @@ namespace MonoGame.Tools.Pipeline
         private ContextMenu _contextMenu;
         private FileFilter _mgcbFileFilter, _allFileFilter, _xnaFileFilter;
 
-        private string[] monoLocations = 
+        private string[] monoLocations =
             {
             "/usr/bin/mono",
             "/usr/local/bin/mono",
@@ -85,7 +85,7 @@ namespace MonoGame.Tools.Pipeline
             base.OnClosing(e);
         }
 
-#region IView implements
+        #region IView implements
 
         public void Attach(IController controller)
         {
@@ -128,7 +128,7 @@ namespace MonoGame.Tools.Pipeline
                 filePath = dialog.FileName;
                 if (dialog.CurrentFilter == _mgcbFileFilter && !filePath.EndsWith(".mgcb"))
                     filePath += ".mgcb";
-                
+
                 return true;
             }
 
@@ -206,7 +206,7 @@ namespace MonoGame.Tools.Pipeline
 
         public void EndTreeUpdate()
         {
-            
+
         }
 
         public void UpdateProperties()
@@ -337,7 +337,7 @@ namespace MonoGame.Tools.Pipeline
                     var port = Environment.GetEnvironmentVariable("MONO_DEBUGGER_PORT");
                     port = !string.IsNullOrEmpty(port) ? port : "55555";
                     var monodebugger = string.Format("--debug --debugger-agent=transport=dt_socket,server=y,address=127.0.0.1:{0}",
-                        port);
+ port);
                     proc.StartInfo.Arguments = string.Format("{0} \"{1}\" {2}", monodebugger, exe, commands);
                     OutputAppend("************************************************");
                     OutputAppend("RUNNING MGCB IN DEBUG MODE!!!");
@@ -502,9 +502,9 @@ namespace MonoGame.Tools.Pipeline
             Clipboard.Instance.Text = text;
         }
 
-#endregion
+        #endregion
 
-#region Commands
+        #region Commands
 
         private void CmdNew_Executed(object sender, EventArgs e)
         {
@@ -624,8 +624,8 @@ namespace MonoGame.Tools.Pipeline
             adialog.Website = new Uri("http://www.monogame.net/");
 
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("LICENSE.txt"))
-                using (var reader = new StreamReader(stream))
-                    adialog.License = reader.ReadToEnd();
+            using (var reader = new StreamReader(stream))
+                adialog.License = reader.ReadToEnd();
 
             adialog.ShowDialog(this);
         }
@@ -633,7 +633,10 @@ namespace MonoGame.Tools.Pipeline
         private void CmdOpenItem_Executed(object sender, EventArgs e)
         {
             if (PipelineController.Instance.SelectedItem is ContentItem)
-                Process.Start(PipelineController.Instance.GetFullPath(PipelineController.Instance.SelectedItem.OriginalPath));
+            {
+                var path = PipelineController.Instance.GetFullPath(PipelineController.Instance.SelectedItem.OriginalPath);
+                OpenItemThroughShell(path);
+            }
         }
 
         private void CmdOpenItemWith_Executed(object sender, EventArgs e)
@@ -657,8 +660,8 @@ namespace MonoGame.Tools.Pipeline
         {
             if (PipelineController.Instance.SelectedItem != null)
             {
-                var path = PipelineController.Instance.GetFullPath(PipelineController.Instance.SelectedItem.Location);
-                Process.Start(new ProcessStartInfo() { FileName = path, UseShellExecute = true });
+                var dir = PipelineController.Instance.GetFullPath(PipelineController.Instance.SelectedItem.Location);
+                OpenItemThroughShell(dir);
             }
         }
 
@@ -669,18 +672,14 @@ namespace MonoGame.Tools.Pipeline
                 var dir = Path.Combine(
                     PipelineController.Instance.ProjectItem.Location,
                     PipelineController.Instance.ProjectOutputDir,
-                    PipelineController.Instance.SelectedItem.Location
-                );
+                    PipelineController.Instance.SelectedItem.Location);
 
                 dir = dir.Replace("$(Platform)", PipelineController.Instance.ProjectItem.Platform.ToString());
                 dir = dir.Replace("$(Configuration)", PipelineController.Instance.ProjectItem.Config);
                 dir = dir.Replace("$(Config)", PipelineController.Instance.ProjectItem.Config);
                 dir = dir.Replace("$(Profile)", PipelineController.Instance.ProjectItem.Profile.ToString());
 
-                if (Directory.Exists(dir))
-                    Process.Start(dir);
-                else
-                    ShowError("Directory Not Found", "The project output directory was not found, did you forget to build the project?");
+                OpenItemThroughShell(dir, "The project output directory was not found, did you forget to build the project?");
             }
         }
 
@@ -694,8 +693,22 @@ namespace MonoGame.Tools.Pipeline
             PipelineController.Instance.RebuildItems();
         }
 
-#endregion
+        #endregion
 
+        private void OpenItemThroughShell(string path, string errorMessage = null)
+        {
+            bool fileExists = File.Exists(path);
+            bool dirExists = Directory.Exists(path);
+            if (!fileExists && !dirExists)
+            {
+                string subject = !fileExists ? "File" : "Directory";
+                ShowError(subject + " Not Found", errorMessage);
+                return;
+            }
+
+            var info = new ProcessStartInfo() { FileName = path, UseShellExecute = true };
+            Process.Start(info);
+        }
     }
 }
 
