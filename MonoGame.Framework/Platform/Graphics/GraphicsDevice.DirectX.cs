@@ -1456,7 +1456,7 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        private unsafe void PlatformGetBackBufferData<T>(Rectangle rect, Span<T> destination)
+        private unsafe void PlatformGetBackBufferData<T>(Span<T> destination, Rectangle rect)
             where T : unmanaged
         {
             // TODO share code with Texture2D.GetData and do pooling for staging textures
@@ -1473,7 +1473,7 @@ namespace MonoGame.Framework.Graphics
                 desc.Usage = ResourceUsage.Staging;
                 desc.OptionFlags = ResourceOptionFlags.None;
 
-                bool isRectFull =
+                bool rectFillsBackBuffer =
                     rect.X == 0 &&
                     rect.Y == 0 &&
                     rect.Width == desc.Width &&
@@ -1492,7 +1492,7 @@ namespace MonoGame.Framework.Graphics
                             using (var noMsTex = new DXTexture2D(_d3dDevice, desc))
                             {
                                 _d3dContext.ResolveSubresource(backBufferTexture, 0, noMsTex, 0, desc.Format);
-                                if (isRectFull)
+                                if (rectFillsBackBuffer)
                                 {
                                     _d3dContext.CopySubresourceRegion(noMsTex, 0,
                                         new ResourceRegion(rect.Left, rect.Top, 0, rect.Right, rect.Bottom, 1), stagingTex,
@@ -1504,7 +1504,7 @@ namespace MonoGame.Framework.Graphics
                         }
                         else
                         {
-                            if (isRectFull)
+                            if (rectFillsBackBuffer)
                             {
                                 _d3dContext.CopySubresourceRegion(backBufferTexture, 0,
                                     new ResourceRegion(rect.Left, rect.Top, 0, rect.Right, rect.Bottom, 1), stagingTex, 0);
@@ -1521,7 +1521,7 @@ namespace MonoGame.Framework.Graphics
                                 stagingTex, 0, MapMode.Read, SharpDX.Direct3D11.MapFlags.None, out stream);
 
                             int elementsInRow, rows;
-                            if (isRectFull)
+                            if (rectFillsBackBuffer)
                             {
                                 elementsInRow = rect.Width;
                                 rows = rect.Height;

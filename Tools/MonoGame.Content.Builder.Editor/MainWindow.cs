@@ -25,7 +25,7 @@ namespace MonoGame.Tools.Pipeline
         private FileFilter _mgcbFileFilter, _allFileFilter, _xnaFileFilter;
 
         private string[] monoLocations =
-            {
+        {
             "/usr/bin/mono",
             "/usr/local/bin/mono",
             "/Library/Frameworks/Mono.framework/Versions/Current/bin/mono",
@@ -33,7 +33,7 @@ namespace MonoGame.Tools.Pipeline
         };
 
 #if MONOMAC
-        int setw = 0;
+        private int _setw = 0;
 #endif
 
         public MainWindow()
@@ -62,11 +62,11 @@ namespace MonoGame.Tools.Pipeline
 #if MONOMAC
             splitterVertical.PositionChanged += delegate 
             {
-                setw++;
-                if (setw > 2)
+                _setw++;
+                if (_setw > 2)
                 {
                     propertyGridControl.SetWidth();
-                    setw = 0;
+                    _setw = 0;
                 }
             };
 #endif

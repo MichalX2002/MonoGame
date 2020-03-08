@@ -152,7 +152,9 @@ namespace MonoGame.Tools.Pipeline
 
                 propertyTable.AddEntry("Processor Parameters", p.DisplayName, value, p.Type, (sender, e) =>
                 {
-                    var action = new UpdateProcessorAction(MainWindow.Instance, objects.Cast<ContentItem>().ToList(), p.Name, sender);
+                    var action = new UpdateProcessorAction(
+                        MainWindow.Instance, objects.Cast<ContentItem>().ToList(), p.Name, sender);
+                    
                     PipelineController.Instance.AddAction(action);
                     action.Do();
                 }, true);

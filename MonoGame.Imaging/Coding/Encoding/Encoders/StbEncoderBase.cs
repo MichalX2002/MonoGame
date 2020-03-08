@@ -16,7 +16,7 @@ namespace MonoGame.Imaging.Coding.Encoding
         public abstract ImageFormat Format { get; }
         public abstract EncoderOptions DefaultOptions { get; }
 
-        private static WriteContext CreateWriteContext(
+        private static WriteState CreateWriteState(
             IReadOnlyPixelRows image,
             ImageStbEncoderState encoderState,
             CancellationToken? cancellationToken = null,
@@ -29,7 +29,7 @@ namespace MonoGame.Imaging.Coding.Encoding
             int components = 4; // TODO: change this so it's dynamic/controlled
             var provider = new RowsPixelProvider(image, components);
 
-            var writeContext = new WriteContext(
+            var state = new WriteState(
                 readBytePixels: provider.Fill,
                 readFloatPixels: provider.Fill,
                 progressCallback,
@@ -38,10 +38,9 @@ namespace MonoGame.Imaging.Coding.Encoding
                 components,
                 encoderState.Stream,
                 cancellationToken ?? CancellationToken.None,
-                encoderState.WriteBuffer,
                 encoderState.ScratchBuffer);
 
-            return writeContext;
+            return state;
         }
 
         #region IImageEncoder
@@ -63,7 +62,7 @@ namespace MonoGame.Imaging.Coding.Encoding
 
             // TODO: do something about leaveOpen
             var encoderState = new ImageStbEncoderState(imagingConfig, this, stream, leaveOpen: true);
-            var writeContext = CreateWriteContext(image, encoderState, cancellationToken, onProgress);
+            var writeContext = CreateWriteState(image, encoderState, cancellationToken, onProgress);
 
             WriteFirst(encoderState.ImagingConfig, writeContext, image, encoderOptions);
             return encoderState;
@@ -83,7 +82,7 @@ namespace MonoGame.Imaging.Coding.Encoding
             encoderOptions = ValidateEncoderOptions(encoderOptions);
 
             var state = (ImageStbEncoderState)encoderState;
-            var writeContext = CreateWriteContext(image, state, cancellationToken, onProgress);
+            var writeContext = CreateWriteState(image, state, cancellationToken, onProgress);
 
             return WriteNext(encoderState.ImagingConfig, writeContext, image, encoderOptions);
         }
@@ -101,13 +100,13 @@ namespace MonoGame.Imaging.Coding.Encoding
 
         protected abstract bool WriteFirst(
             ImagingConfig imagingConfig,
-            in WriteContext context,
+            in WriteState state,
             IReadOnlyPixelRows image,
             EncoderOptions encoderOptions);
 
         protected virtual bool WriteNext(
             ImagingConfig imagingConfig,
-            in WriteContext context, 
+            in WriteState state, 
             IReadOnlyPixelRows image,
             EncoderOptions encoderOptions)
         {

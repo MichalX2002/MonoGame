@@ -80,10 +80,12 @@ namespace MonoGame.Testing
             //    _customCursor = MouseCursor.FromPixels(cropped, new Point(2, 2)/*(img.GetSize() / 2).ToPoint()*/);
             //    Mouse.SetCursor(_customCursor);
             //}
-            Content.Load<SoundEffect>("Win Jingle").Play(0.02f, 1f, 0);
+
+            //Content.Load<SoundEffect>("Win Jingle").Play(0.02f, 1f, 0);
 
             string[] songs = new string[]
             {
+                "retro level 3"
             //    "Title Screen",
             //    "Ending"
             };
@@ -94,7 +96,7 @@ namespace MonoGame.Testing
                 _watch.Restart();
                 _songs[i] = Content.Load<Song>(songs[i]);
                 _songs[i].IsLooped = false;
-                _songs[i].Volume = 0.004f;
+                _songs[i].Volume = 0.01f;
                 _songs[i].Pitch = 1.5f;
                 _watch.Stop();
                 Console.WriteLine("Content.Load<Song>('" + songs[i] + "') Time: " + _watch.ElapsedMilliseconds + "ms");
@@ -142,7 +144,7 @@ namespace MonoGame.Testing
                     int h = GraphicsDevice.Viewport.Height;
 
                     var image = Image<Color>.Create(w, h);
-                    GraphicsDevice.GetBackBufferData(new Rectangle(x, y, w, h), image.GetPixelSpan());
+                    GraphicsDevice.GetBackBufferData(image.GetPixelSpan(), new Rectangle(x, y, w, h));
 
                     Task.Run(() =>
                     {

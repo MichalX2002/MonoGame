@@ -58,8 +58,8 @@ namespace MonoGame.Imaging.Coding.Identification
         {
             if (GetInfo(config, context, out var readState))
             {
-                int comp = readState.OutComponents;
-                int bitsPerComp = readState.OutDepth;
+                int comp = readState.Components;
+                int bitsPerComp = readState.Depth;
 
                 var vectorType = CompToVectorType(comp, bitsPerComp);
                 var compInfo = vectorType != null

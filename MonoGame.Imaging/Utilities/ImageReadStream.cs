@@ -13,7 +13,6 @@ namespace MonoGame.Imaging
     {
         private Stream _stream;
         private CancellationTokenRegistration _cancellationRegistration;
-        private byte[] _readBuffer;
 
         public override bool CanSeek => false;
         public override bool CanRead => _stream.CanRead;
@@ -54,9 +53,7 @@ namespace MonoGame.Imaging
             if (DisposalMethod == StreamDisposeMethod.CancellableClose && cancellationToken.CanBeCanceled)
                 _cancellationRegistration = cancellationToken.Register(() => _stream?.Dispose());
 
-            _readBuffer = RecyclableMemoryManager.Default.GetBlock();
-            Context = new ReadContext(
-                _stream, _readBuffer, cancellationToken, ReadCallback, SkipCallback);
+            Context = new ReadContext(_stream, cancellationToken, ReadCallback, SkipCallback);
         }
 
         public override int Read(byte[] buffer, int offset, int count) => _stream.Read(buffer, offset, count);
@@ -68,22 +65,29 @@ namespace MonoGame.Imaging
 
         #region IO Callbacks
 
-        private static int SkipCallback(ReadContext context, int n)
+        private static int SkipCallback(ReadContext context, int count)
         {
-            ArgumentGuard.AssertAtleastZero(n, nameof(n), false);
+            ArgumentGuard.AssertAtleastZero(count, nameof(count), false);
             try
             {
-                if (n == 0)
+                if (count == 0)
                     return 0;
 
-                if (!context.Stream.CanSeek)
+                if (context.Stream.CanSeek)
                 {
+                    long previous = context.Stream.Position;
+                    long current = context.Stream.Seek(count, SeekOrigin.Current);
+                    return (int)(current - previous);
+                }
+                else
+                {
+                    Span<byte> buffer = stackalloc byte[1024];
                     int skipped = 0;
-                    int left = n;
+                    int left = count;
                     while (left > 0)
                     {
-                        int count = Math.Min(left, context.ReadBuffer.Length);
-                        int read = context.Stream.Read(context.ReadBuffer, 0, count);
+                        int toRead = Math.Min(left, buffer.Length);
+                        int read = context.Stream.Read(buffer.Slice(0, toRead));
                         if (read == 0)
                             break;
 
@@ -91,12 +95,6 @@ namespace MonoGame.Imaging
                         skipped += read;
                     }
                     return skipped;
-                }
-                else
-                {
-                    long previous = context.Stream.Position;
-                    long current = context.Stream.Seek(n, SeekOrigin.Current);
-                    return (int)(current - previous);
                 }
             }
             catch (Exception ex)
@@ -107,28 +105,11 @@ namespace MonoGame.Imaging
             }
         }
 
-        private static unsafe int ReadCallback(ReadContext context, Span<byte> data)
+        private static int ReadCallback(ReadContext context, Span<byte> buffer)
         {
             try
             {
-                if (data.IsEmpty)
-                    return 0;
-
-                byte[] buffer = context.ReadBuffer;
-                int total = 0;
-                int left = data.Length;
-                int read;
-                while (left > 0 && (read = context.Stream.Read(buffer, 0, Math.Min(buffer.Length, left))) > 0)
-                {
-                    var src = buffer.AsSpan(0, read);
-                    var dst = data.Slice(total);
-                    src.CopyTo(dst);
-
-                    left -= read;
-                    total += read;
-                }
-
-                return total;
+                return context.Stream.Read(buffer);
             }
             catch (Exception ex)
             {
@@ -142,12 +123,6 @@ namespace MonoGame.Imaging
 
         protected override void Dispose(bool disposing)
         {
-            if (_readBuffer != null)
-            {
-                RecyclableMemoryManager.Default.ReturnBlock(_readBuffer);
-                _readBuffer = null;
-            }
-
             try
             {
                 if (disposing)

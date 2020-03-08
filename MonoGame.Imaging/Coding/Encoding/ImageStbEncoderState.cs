@@ -11,8 +11,7 @@ namespace MonoGame.Imaging.Coding.Encoding
         public new int ImageIndex { get => base.ImageIndex; set => base.ImageIndex = value; }
 
         private byte[] Buffer { get; set; }
-        public ArraySegment<byte> WriteBuffer { get; private set; }
-        public ArraySegment<byte> ScratchBuffer { get; private set; }
+        public Memory<byte> ScratchBuffer => Buffer;
 
         public ImageStbEncoderState(
             ImagingConfig config,
@@ -22,11 +21,6 @@ namespace MonoGame.Imaging.Coding.Encoding
             base(config, encoder, stream, leaveOpen)
         {
             Buffer = RecyclableMemoryManager.Default.GetBlock();
-
-            int halfBufferLength = Buffer.Length / 2;
-            int scratchBufferLength = Buffer.Length - halfBufferLength;
-            WriteBuffer = new ArraySegment<byte>(Buffer, 0, halfBufferLength);
-            ScratchBuffer = new ArraySegment<byte>(Buffer, halfBufferLength, scratchBufferLength);
         }
 
         protected override void Dispose(bool disposing)

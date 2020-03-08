@@ -1160,7 +1160,7 @@ namespace MonoGame.Framework.Graphics
                     "Try upgrading your graphics card drivers.");
         }
 
-        private unsafe void PlatformGetBackBufferData<T>(Rectangle rect, Span<T> destination)
+        private unsafe void PlatformGetBackBufferData<T>(Span<T> destination, Rectangle rect)
             where T : unmanaged
         {
             fixed (T* ptr = destination)
@@ -1176,7 +1176,7 @@ namespace MonoGame.Framework.Graphics
             int rowSize = rowBytes / sizeof(T);
             int count = destination.Length;
 
-            Span<byte> buffer = stackalloc byte[Math.Min(4096, rowBytes)];
+            Span<byte> buffer = stackalloc byte[Math.Min(2048, rowBytes)];
             var rowBuffer = MemoryMarshal.Cast<byte, T>(buffer);
 
             for (int dy = 0; dy < rect.Height / 2; dy++)

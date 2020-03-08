@@ -1147,10 +1147,10 @@ namespace MonoGame.Framework.Graphics
         #region GetBackBufferData
 
         /// <summary>
-        /// Gets the pixel data of what is currently drawn on screen.
+        /// Gets the pixels that are currently drawn on screen.
         /// The format is the backbuffer's current format.
         /// </summary>
-        public unsafe void GetBackBufferData<T>(Rectangle? rectangle, Span<T> destination)
+        public unsafe void GetBackBufferData<T>(Span<T> destination, Rectangle? rectangle = null)
             where T : unmanaged
         {
             Rectangle rect;
@@ -1158,7 +1158,8 @@ namespace MonoGame.Framework.Graphics
             {
                 rect = rectangle.Value;
                 if (rect.X < 0 || rect.Y < 0 || rect.Width <= 0 || rect.Height <= 0 ||
-                    rect.Right > PresentationParameters.BackBufferWidth || rect.Top > PresentationParameters.BackBufferHeight)
+                    rect.Right > PresentationParameters.BackBufferWidth || 
+                    rect.Top > PresentationParameters.BackBufferHeight)
                     throw new ArgumentException("The rectangle must fit in the backbuffer dimensions.", nameof(rectangle));
             }
             else
@@ -1176,7 +1177,7 @@ namespace MonoGame.Framework.Graphics
                 throw new ArgumentOutOfRangeException(
                      nameof(destination), "The amount of data requested exceeds the backbuffer size.");
 
-            PlatformGetBackBufferData(rect, destination);
+            PlatformGetBackBufferData(destination, rect);
         }
 
         #endregion

@@ -1,8 +1,12 @@
-﻿
+﻿using StbSharp;
+
 namespace MonoGame.Imaging.Coding.Decoding
 {
     public class ImageStbDecoderState : ImageDecoderState
     {
+        public new ImageReadStream Stream => (ImageReadStream)base.Stream;
+        public ImageRead.ReadContext Context => Stream.Context;
+
         public new Image CurrentImage { get => base.CurrentImage; set => base.CurrentImage = value; }
         public new int ImageIndex { get => base.ImageIndex; set => base.ImageIndex = value; }
 

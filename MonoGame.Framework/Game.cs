@@ -409,14 +409,14 @@ namespace MonoGame.Framework
                 switch (_currentOS)
                 {
                     case PlatformInfo.OperatingSystem.Windows:
-                        if (PlatformInfo.Platform == MonoGamePlatform.Windows)
-                        {
-                            TimerHelper.SleepForNoMoreThan(sleepTime);
-                        }
-                        else if (PlatformInfo.Platform == MonoGamePlatform.WindowsUniversal)
+                        if (PlatformInfo.Platform == MonoGamePlatform.WindowsUniversal)
                         {
                             lock (_locker)
                                 Monitor.Wait(_locker, sleepTime);
+                        }
+                        else
+                        {
+                            TimerHelper.SleepForNoMoreThan(sleepTime);
                         }
                         break;
 
@@ -498,9 +498,9 @@ namespace MonoGame.Framework
             }
         }
 
-#endregion
+        #endregion
 
-#region Protected Methods
+        #region Protected Methods
 
         protected virtual bool BeginDraw() => true;
         protected virtual void EndDraw() => Platform.Present();
@@ -569,9 +569,9 @@ namespace MonoGame.Framework
             Deactivated?.Invoke(sender);
         }
 
-#endregion Protected Methods
+        #endregion Protected Methods
 
-#region Event Handlers
+        #region Event Handlers
 
         private void Components_ComponentAdded(object sender, IGameComponent gameComponent)
         {
@@ -595,13 +595,13 @@ namespace MonoGame.Framework
             DoExiting();
         }
 
-#endregion Event Handlers
+        #endregion Event Handlers
 
         // TODO: We should work toward eliminating internal methods.  They
         //       break entirely the possibility that additional platforms could
         //       be added by third parties without changing MonoGame itself.
 
-#region Internal Methods
+        #region Internal Methods
 
 #if !(WINDOWS && DIRECTX)
         internal void InternalApplyChanges()
@@ -676,7 +676,7 @@ namespace MonoGame.Framework
             UnloadContent();
         }
 
-#endregion Internal Methods
+        #endregion Internal Methods
 
         internal GraphicsDeviceManager GraphicsDeviceManager
         {

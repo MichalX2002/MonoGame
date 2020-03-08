@@ -20,6 +20,12 @@
 /processorParam:TextureFormat=Compressed
 /build:arial.spritefont
 
+#begin retro level 3.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:retro level 3.ogg
+
 #begin test.png
 /importer:TextureImporter
 /processor:TextureProcessor

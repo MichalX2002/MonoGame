@@ -13,33 +13,30 @@ namespace MonoGame.Imaging.Coding.Decoding
 
         #region Decode Abstraction
 
-        protected abstract IMemoryHolder ReadFirst(ImageStbDecoderState decoderState, ref ReadState readState);
+        protected abstract bool ReadFirst(ImageStbDecoderState decoderState, ref ReadState readState);
 
-        protected virtual IMemoryHolder ReadNext(ImageStbDecoderState decoderState, ref ReadState readState)
+        protected virtual bool ReadNext(ImageStbDecoderState decoderState, ref ReadState readState)
         {
             ImagingArgumentGuard.AssertAnimationSupport(this, decoderState.ImagingConfig);
-            return null;
+            return false;
         }
 
-        private static ReadState CreateReadState(
-            ImageDecoderState decoderState,
-            BufferReadyCallback onBufferReady,
-            DecodeProgressCallback onProgress)
+        private static ReadState CreateReadState(ImageStbDecoderState decoderState)
         {
-            var progressCallback = onProgress == null
-                ? (ReadProgressCallback)null
-                : (percentage, rect) =>
-                {
-                    Rectangle? rectangle = null;
-                    if (rect.HasValue)
-                    {
-                        var r = rect.Value;
-                        rectangle = new Rectangle(r.X, r.Y, r.W, r.H);
-                    }
-                    onProgress.Invoke(decoderState, percentage, rectangle);
-                };
-
-            return new ReadState(null, null, onBufferReady, progressCallback);
+            //var progressCallback = onProgress == null
+            //    ? (ReadProgressCallback)null
+            //    : (percentage, rect) =>
+            //    {
+            //        Rectangle? rectangle = null;
+            //        if (rect.HasValue)
+            //        {
+            //            var r = rect.Value;
+            //            rectangle = new Rectangle(r.X, r.Y, r.W, r.H);
+            //        }
+            //        onProgress.Invoke(decoderState, percentage, rectangle);
+            //    };
+            //
+            return new ReadState();
         }
 
         protected virtual unsafe Image ParseMemoryResult(
@@ -47,7 +44,7 @@ namespace MonoGame.Imaging.Coding.Decoding
         {
             try
             {
-                var fromType = StbIdentifierBase.CompToVectorType(state.OutComponents, state.OutDepth);
+                var fromType = StbIdentifierBase.CompToVectorType(state.Components, state.Depth);
                 var toType = pixelType ?? fromType;
 
                 if (fromType == toType)
@@ -90,11 +87,11 @@ namespace MonoGame.Imaging.Coding.Decoding
             DecodeProgressCallback onProgress = null)
         {
             var state = new ImageStbDecoderState(config, this, stream);
-            var readState = CreateReadState(state, null, onProgress);
-            var result = ReadFirst(state, ref readState);
-            if (state.ReadContext.ErrorCode == ErrorCode.Ok && result != null)
+            var readState = CreateReadState(state);
+            bool result = ReadFirst(state, ref readState);
+            if (result && state.Context.ErrorCode == ErrorCode.Ok)
             {
-                state.CurrentImage = ParseMemoryResult(config, result, readState, pixelType);
+                state.CurrentImage = ParseMemoryResult(config, readState, pixelType);
                 state.ImageIndex++;
                 return state;
             }
@@ -114,17 +111,17 @@ namespace MonoGame.Imaging.Coding.Decoding
             if (state.ImageIndex < 0)
                 throw new InvalidOperationException("The decoder state is invalid.");
 
-            var readState = CreateReadState(state, null, onProgress);
-            var result = ReadNext(state, ref readState);
-            if (state.ReadContext.ErrorCode == ErrorCode.Ok && result != null)
+            var readState = CreateReadState(state);
+            bool result = ReadNext(state, ref readState);
+            if (result && state.Context.ErrorCode == ErrorCode.Ok)
             {
-                state.CurrentImage = ParseMemoryResult(state.ImagingConfig, result, readState, pixelType);
+                state.CurrentImage = ParseMemoryResult(state.ImagingConfig, readState, pixelType);
                 state.ImageIndex++;
             }
             else
             {
                 state.CurrentImage = null;
-                throw GetFailureException(state.ImagingConfig, decoderState.Stream.Context);
+                throw GetFailureException(state.ImagingConfig, state.Context);
             }
         }
 
