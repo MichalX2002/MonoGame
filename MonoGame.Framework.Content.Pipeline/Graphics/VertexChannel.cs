@@ -93,7 +93,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <param name="index">Starting index for copy operation.</param>
         public void CopyTo(Array array, int index)
         {
-            ((ICollection)Items).CopyTo(array, index);
+            Items.CopyTo(array, index);
         }
 
         /// <summary>

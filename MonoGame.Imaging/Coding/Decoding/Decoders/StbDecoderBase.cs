@@ -21,7 +21,9 @@ namespace MonoGame.Imaging.Coding.Decoding
             return false;
         }
 
-        private static ReadState CreateReadState(ImageStbDecoderState decoderState)
+        private static ReadState CreateReadState(
+            ImageStbDecoderState decoderState,
+            VectorTypeInfo pixelType = null)
         {
             //var progressCallback = onProgress == null
             //    ? (ReadProgressCallback)null
@@ -35,40 +37,62 @@ namespace MonoGame.Imaging.Coding.Decoding
             //        }
             //        onProgress.Invoke(decoderState, percentage, rectangle);
             //    };
-            //
-            return new ReadState();
+
+            void OnStateReady(in ReadState state)
+            {
+                decoderState.SourcePixelType = GetVectorType(state);
+                var dstType = pixelType ?? decoderState.SourcePixelType;
+                var size = new Size(state.Width, state.Height);
+                decoderState.CurrentImage = Image.Create(dstType, size);
+            }
+
+            void OnOutputBytes(in ReadState state, int row, ReadOnlySpan<byte> pixels)
+            {
+                if (decoderState.SourcePixelType == null)
+                    throw new InvalidOperationException("Missing source pixel type.");
+                if (decoderState.CurrentImage == null)
+                    throw new InvalidOperationException("Missing image buffer.");
+
+                if (decoderState.SourcePixelType != decoderState.CurrentImage.PixelType)
+                    throw new NotImplementedException();
+
+                decoderState.CurrentImage.SetPixelByteRow(0, row, pixels);
+            }
+
+            return new ReadState(OnStateReady, OnOutputBytes, null, null);
         }
 
-        protected virtual unsafe Image ParseMemoryResult(
-            ImagingConfig config, IMemoryHolder result, in ReadState state, VectorTypeInfo pixelType = null)
-        {
-            try
-            {
-                var fromType = StbIdentifierBase.CompToVectorType(state.Components, state.Depth);
-                var toType = pixelType ?? fromType;
-
-                if (fromType == toType)
-                {
-                    var memory = new ResultWrapper(result);
-                    var image = Image.WrapMemory(fromType, memory, new Size(state.Width, state.Height), leaveOpen: false);
-                    return image;
-                }
-                else
-                {
-                    using (result)
-                    {
-                        var size = new Size(state.Width, state.Height);
-                        var image = Image.LoadPixelData(fromType, toType, result.Span, size);
-                        return image;
-                    }
-                }
-            }
-            catch
-            {
-                result?.Dispose();
-                throw;
-            }
-        }
+        //protected virtual unsafe Image ParseMemoryResult(
+        //    ImagingConfig config, IMemoryHolder result, in ReadState state, VectorTypeInfo pixelType = null)
+        //{
+        //    try
+        //    {
+        //        var fromType = StbIdentifierBase.CompToVectorType(state.Components, state.Depth);
+        //        var toType = pixelType ?? fromType;
+        //
+        //        if (fromType == toType)
+        //        {
+        //            var memory = new ResultWrapper(result);
+        //            var image = Image.WrapMemory(
+        //                fromType, memory, new Size(state.Width, state.Height), leaveOpen: false);
+        //            return image;
+        //        }
+        //        else
+        //        {
+        //            using (result)
+        //            {
+        //                var size = new Size(state.Width, state.Height);
+        //                var image = Image.LoadPixelData(fromType, toType, result.Span, size);
+        //                return image;
+        //            }
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        result?.Dispose();
+        //        throw;
+        //    }
+        //}
 
         protected Exception GetFailureException(ImagingConfig config, ReadContext context)
         {
@@ -80,29 +104,29 @@ namespace MonoGame.Imaging.Coding.Decoding
 
         #region IImageDecoder
 
-        public unsafe ImageDecoderState DecodeFirst(
+        public ImageDecoderState DecodeFirst(
             ImagingConfig config,
             ImageReadStream stream,
             VectorTypeInfo pixelType = null,
             DecodeProgressCallback onProgress = null)
         {
             var state = new ImageStbDecoderState(config, this, stream);
-            var readState = CreateReadState(state);
+            var readState = CreateReadState(state, pixelType);
             bool result = ReadFirst(state, ref readState);
             if (result && state.Context.ErrorCode == ErrorCode.Ok)
             {
-                state.CurrentImage = ParseMemoryResult(config, readState, pixelType);
                 state.ImageIndex++;
                 return state;
             }
             else
             {
+                state.CurrentImage?.Dispose();
                 state.CurrentImage = null;
                 throw GetFailureException(config, stream.Context);
             }
         }
 
-        public unsafe void DecodeNext(
+        public void DecodeNext(
             ImageDecoderState decoderState,
             VectorTypeInfo pixelType = null,
             DecodeProgressCallback onProgress = null)
@@ -111,20 +135,25 @@ namespace MonoGame.Imaging.Coding.Decoding
             if (state.ImageIndex < 0)
                 throw new InvalidOperationException("The decoder state is invalid.");
 
-            var readState = CreateReadState(state);
+            var readState = CreateReadState(state, pixelType);
             bool result = ReadNext(state, ref readState);
             if (result && state.Context.ErrorCode == ErrorCode.Ok)
             {
-                state.CurrentImage = ParseMemoryResult(state.ImagingConfig, readState, pixelType);
                 state.ImageIndex++;
             }
             else
             {
+                state.CurrentImage?.Dispose();
                 state.CurrentImage = null;
                 throw GetFailureException(state.ImagingConfig, state.Context);
             }
         }
 
         #endregion
+
+        public static VectorTypeInfo GetVectorType(in ReadState state)
+        {
+            return StbIdentifierBase.GetVectorType(state.Components, state.OutDepth);
+        }
     }
 }

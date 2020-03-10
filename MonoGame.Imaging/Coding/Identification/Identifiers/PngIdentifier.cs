@@ -8,6 +8,7 @@ namespace MonoGame.Imaging.Coding.Identification
 
         protected override bool TestFormat(ImagingConfig config, ReadContext context)
         {
+            return false;
             throw new System.Exception("fix me");
             //return Png.Test(context);
         }

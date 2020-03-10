@@ -48,7 +48,9 @@ namespace MonoGame.Framework.PackedVector
             vector = Vector2.Clamp(vector, -Vector2.One, Vector2.One);
             vector *= 32767f;
 
-            return new NormalizedShort2((short)vector.X, (short)vector.Y);
+            return new NormalizedShort2(
+                (short)vector.X,
+                (short)vector.Y);
         }
 
         public readonly Vector2 ToVector2() => new Vector2(X, Y) / 32767f;

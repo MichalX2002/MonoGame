@@ -200,7 +200,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             Write(targetPlatformIdentifiers[(int)TargetPlatform]);
             Write(XnbFormatVersion);
             // We cannot use LZX compression, so we use the public domain LZ4 compression. Use one of the spare bits in the flags byte to specify LZ4.
-            byte flags = (byte)((TargetProfile == GraphicsProfile.HiDef ? HiDefContent : (byte)0) | (compressContent ? ContentCompressedLz4 : (byte)0));
+            byte flags = (byte)((TargetProfile == GraphicsProfile.HiDef ? HiDefContent : 0) | (compressContent ? ContentCompressedLz4 : 0));
             Write(flags);
         }
 

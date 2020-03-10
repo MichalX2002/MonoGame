@@ -9,26 +9,48 @@ namespace MonoGame.Imaging.Coding.Identification
     {
         public abstract ImageFormat Format { get; }
 
-        public static VectorTypeInfo CompToVectorType(int comp, int compDepth)
+        public static VectorTypeInfo GetVectorType(int components, int depth)
         {
-            switch (comp)
+            Exception CreateDepthNotSupportedException()
+            {
+                return new ArgumentOutOfRangeException(
+                    nameof(depth), $"Given depth of {depth} is not supported.");
+            }
+
+            switch (components)
             {
                 case 1:
-                    return compDepth == 16 ? VectorTypeInfo.Get<Gray16>() : VectorTypeInfo.Get<Gray8>();
+                    return
+                        depth == 8 ? VectorTypeInfo.Get<Gray8>() :
+                        depth == 16 ? VectorTypeInfo.Get<Gray16>() :
+                        depth == 32 ? VectorTypeInfo.Get<Gray32>() :
+                        throw CreateDepthNotSupportedException();
 
                 case 2:
-                    if (compDepth == 16)
-                        throw new NotSupportedException("16-bit gray and alpha color is not supported.");
-                    return VectorTypeInfo.Get<GrayAlpha16>();
+                    return
+                        depth == 8 ? VectorTypeInfo.Get<GrayAlpha16>() :
+                        depth == 16 ? VectorTypeInfo.Get<Short2>() :
+                        depth == 32 ? VectorTypeInfo.Get<Vector2>() :
+                        throw CreateDepthNotSupportedException();
 
                 case 3:
-                    return compDepth == 16 ? VectorTypeInfo.Get<Rgb48>() : VectorTypeInfo.Get<Rgb24>();
+                    return
+                        depth == 8 ? VectorTypeInfo.Get<Rgb24>() :
+                        depth == 16 ? VectorTypeInfo.Get<Rgb48>() :
+                        depth == 32 ? VectorTypeInfo.Get<Vector3>() :
+                        throw CreateDepthNotSupportedException();
 
                 case 4:
-                    return compDepth == 16 ? VectorTypeInfo.Get<Rgba64>() : VectorTypeInfo.Get<Color>();
+                    return
+                        depth == 8 ? VectorTypeInfo.Get<Color>() :
+                        depth == 16 ? VectorTypeInfo.Get<Rgba64>() :
+                        depth == 32 ? VectorTypeInfo.Get<RgbaVector>() :
+                        throw CreateDepthNotSupportedException();
 
                 default:
-                    return default;
+                    throw new ArgumentOutOfRangeException(
+                        $"Given component count of {components} is not supported.",
+                        nameof(components));
             }
         }
 
@@ -52,7 +74,8 @@ namespace MonoGame.Imaging.Coding.Identification
 
         #region Identify Abstraction
 
-        protected abstract bool GetInfo(ImagingConfig config, ReadContext context, out ReadState readState);
+        protected abstract bool GetInfo(
+            ImagingConfig config, ReadContext context, out ReadState readState);
 
         private ImageInfo Identify(ImagingConfig config, ReadContext context)
         {
@@ -61,10 +84,11 @@ namespace MonoGame.Imaging.Coding.Identification
                 int comp = readState.Components;
                 int bitsPerComp = readState.Depth;
 
-                var vectorType = CompToVectorType(comp, bitsPerComp);
+                var vectorType = GetVectorType(comp, bitsPerComp);
                 var compInfo = vectorType != null
                     ? vectorType.ComponentInfo :
-                    new VectorComponentInfo(new VectorComponent(VectorComponentType.Raw, comp * bitsPerComp));
+                    new VectorComponentInfo(
+                        new VectorComponent(VectorComponentType.Raw, comp * bitsPerComp));
 
                 return new ImageInfo(readState.Width, readState.Height, compInfo, Format);
             }

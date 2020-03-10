@@ -28,11 +28,13 @@ namespace MonoGame.Imaging.Tests
         static void Main(string[] args)
         {
             var archive = new ZipArchive(File.OpenRead(DataZip), ZipArchiveMode.Read, false);
-            //var stream = archive.GetEntry("png/24bit.png").Open();
-            //var stream = archive.GetEntry("bmp/32bit.bmp").Open();
+            //var stream = archive.GetEntry("png/32bit.png").Open();
+            var stream = archive.GetEntry("bmp/32bit.bmp").Open();
+            //var stream = archive.GetEntry("bmp/24bit.bmp").Open();
+            //var stream = archive.GetEntry("bmp/8bit.bmp").Open();
 
             var encoded = new MemoryStream(1024 * 1024 * 8);
-            using (var stream = new FileStream("big img.png", FileMode.Open))
+            //using (var stream = new FileStream("big img.png", FileMode.Open))
             //using (var stream = new FileStream("smol img.png", FileMode.Open))
             stream.CopyTo(encoded);
 
@@ -61,7 +63,7 @@ namespace MonoGame.Imaging.Tests
 
                 image?.Dispose();
                 watch.Start();
-                image = Image.Load(encoded, VectorTypeInfo.Get<Color>(), null, OnReadProgress);
+                image = Image.Load(encoded, null, null, OnReadProgress);
                 watch.Stop();
 
                 if (i == 0)
@@ -113,6 +115,8 @@ namespace MonoGame.Imaging.Tests
                 Math.Round(watch.Elapsed.TotalMilliseconds / (writeRepeats == 1 ? 1 : writeRepeats - 1), 3) + "ms");
 
             Thread.Sleep(500);
+
+            return;
 
             using (var resizeDst = Image<Color>.Create(image.Size * 2))
             {

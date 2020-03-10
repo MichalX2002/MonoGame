@@ -24,7 +24,7 @@ namespace MonoGame.Framework.Audio
                 writer.Write((short)1); //format (PCM)
                 writer.Write((short)channels);
                 writer.Write((int)sampleRate);
-                short blockAlign = (short)(bitsPerSample / 8 * (int)channels);
+                short blockAlign = (short)(bitsPerSample / 8 * channels);
                 writer.Write((int)(sampleRate * blockAlign)); //byte rate
                 writer.Write((short)blockAlign);
                 writer.Write((short)bitsPerSample);

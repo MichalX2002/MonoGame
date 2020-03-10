@@ -808,7 +808,7 @@ namespace MonoGame.Effect
             {
                 index = 0,
                 type = STATE_TYPE.CONSTANT,
-                operation = isVertexShader ? (uint)146 : (uint)147,
+                operation = isVertexShader ? 146 : (uint)147,
 
                 parameter = new d3dx_parameter
                 {

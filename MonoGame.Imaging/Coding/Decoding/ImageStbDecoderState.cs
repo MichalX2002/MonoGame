@@ -1,4 +1,5 @@
-﻿using StbSharp;
+﻿using MonoGame.Framework.PackedVector;
+using StbSharp;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
@@ -6,6 +7,7 @@ namespace MonoGame.Imaging.Coding.Decoding
     {
         public new ImageReadStream Stream => (ImageReadStream)base.Stream;
         public ImageRead.ReadContext Context => Stream.Context;
+        public VectorTypeInfo SourcePixelType { get; set; }
 
         public new Image CurrentImage { get => base.CurrentImage; set => base.CurrentImage = value; }
         public new int ImageIndex { get => base.ImageIndex; set => base.ImageIndex = value; }
