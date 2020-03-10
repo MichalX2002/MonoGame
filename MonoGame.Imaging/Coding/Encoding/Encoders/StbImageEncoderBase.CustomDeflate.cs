@@ -7,7 +7,7 @@ using StbSharp;
 
 namespace MonoGame.Imaging.Coding.Encoding
 {
-    public abstract partial class StbEncoderBase : IImageEncoder
+    public abstract partial class StbImageEncoderBase : IImageEncoder
     {
         private static IMemoryHolder CustomDeflateCompress(
             ReadOnlySpan<byte> data,

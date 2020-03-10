@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Coding\Decoding\Decoders\StbImageDecoderBase.ResultWrapper.cs" />
+    <Compile Remove="Coding\Encoding\Encoders\StbImageEncoderBase.CustomDeflate.cs" />
     <Compile Remove="ColorEncoding.cs" />
     <Compile Remove="Utilities\BufferPixelProvider.Expressions.cs" />
     <Compile Remove="Utilities\ImageWriter.cs" />

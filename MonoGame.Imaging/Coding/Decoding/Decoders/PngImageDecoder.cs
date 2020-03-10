@@ -4,7 +4,7 @@ using static StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
-    public class PngDecoder : StbDecoderBase
+    public class PngImageDecoder : StbImageDecoderBase
     {
         public override ImageFormat Format => ImageFormat.Png;
 

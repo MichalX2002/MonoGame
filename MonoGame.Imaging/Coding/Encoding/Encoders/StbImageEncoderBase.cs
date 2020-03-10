@@ -6,13 +6,8 @@ using static StbSharp.ImageWrite;
 
 namespace MonoGame.Imaging.Coding.Encoding
 {
-    public abstract partial class StbEncoderBase : IImageEncoder
+    public abstract partial class StbImageEncoderBase : IImageEncoder
     {
-        static StbEncoderBase()
-        {
-            Zlib.CustomDeflateCompress = CustomDeflateCompress;
-        }
-
         public abstract ImageFormat Format { get; }
         public abstract EncoderOptions DefaultOptions { get; }
 

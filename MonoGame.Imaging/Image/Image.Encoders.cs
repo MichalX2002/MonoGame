@@ -16,7 +16,7 @@ namespace MonoGame.Imaging
             if (_encoders == null)
             {
                 _encoders = new List<IImageEncoder>();
-                _encoders.Add(new PngEncoder());
+                _encoders.Add(new PngImageEncoder());
             }
             return _encoders;
         }

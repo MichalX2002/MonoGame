@@ -15,6 +15,8 @@ namespace MonoGame.Imaging
             Rectangle sourceRectangle,
             int? byteStride = null)
         {
+            // TODO: make this row based instead
+
             var loadDelegate = GetLoadPixelSpanDelegate(fromPixelType, toPixelType);
             var image = Create(toPixelType, sourceRectangle.Size);
             try

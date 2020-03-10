@@ -2,7 +2,7 @@
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
-    public class BmpDecoder : StbDecoderBase
+    public class BmpImageDecoder : StbImageDecoderBase
     {
         public override ImageFormat Format => ImageFormat.Bmp;
 
