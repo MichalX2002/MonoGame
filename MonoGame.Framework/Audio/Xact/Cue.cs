@@ -270,8 +270,8 @@ namespace MonoGame.Framework.Audio
                 if (distance > 0f)
                     direction /= distance;
                 
-                var right = Vector3.Cross(listener.Up, listener.Forward);
-                var slope = Vector3.Dot(direction, listener.Forward);
+                Vector3.Cross(listener.Up, listener.Forward, out var right);
+                Vector3.Dot(direction, listener.Forward, out var slope);
                 var angle = MathHelper.ToDegrees(MathF.Acos(slope));
                 var j = FindVariable("OrientationAngle");
                 _variables[j].SetValue(angle);

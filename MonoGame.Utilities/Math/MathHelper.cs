@@ -11,55 +11,50 @@ namespace MonoGame.Framework
     /// </summary>
     public static class MathHelper
     {
-        /// <summary>
-        /// Represents the mathematical constant e(2.71828175).
-        /// </summary>
-        public const float E = (float)Math.E;
+        #region Constants
 
         /// <summary>
-        /// Represents the log base ten of e(0.4342945).
+        /// Represents the log base ten of E.
         /// </summary>
         public const float Log10E = 0.4342945f;
 
         /// <summary>
-        /// Represents the log base two of e(1.442695).
+        /// Represents the log base two of E.
         /// </summary>
         public const float Log2E = 1.442695f;
 
         /// <summary>
-        /// Represents the value of pi(3.14159274).
-        /// </summary>
-        public const float Pi = (float)Math.PI;
-
-        /// <summary>
-        /// Represents the value of pi divided by two(1.57079637).
+        /// Represents the value of pi divided by two.
         /// </summary>
         public const float PiOver2 = (float)(Math.PI / 2.0);
 
         /// <summary>
-        /// Represents the value of pi divided by four(0.7853982).
+        /// Represents the value of pi divided by four.
         /// </summary>
         public const float PiOver4 = (float)(Math.PI / 4.0);
 
         /// <summary>
-        /// Represents the value of pi times two(6.28318548).
+        /// Represents the value of pi times two.
         /// </summary>
         public const float TwoPi = (float)(Math.PI * 2.0);
+        
+        #endregion
 
         /// <summary>
-        /// Represents the value of pi times two(6.28318548).
-        /// This is an alias of TwoPi.
-        /// </summary>
-        public const float Tau = TwoPi;
-        
-        /// <summary>
-        /// Returns the Cartesian coordinate for one axis of a point that is defined by a given triangle and two normalized barycentric (areal) coordinates.
+        /// Returns the Cartesian coordinate for one axis of a point that 
+        /// is defined by a given triangle and two normalized barycentric (areal) coordinates.
         /// </summary>
         /// <param name="a">The coordinate on one axis of vertex 1 of the defining triangle.</param>
         /// <param name="b">The coordinate on the same axis of vertex 2 of the defining triangle.</param>
         /// <param name="c">The coordinate on the same axis of vertex 3 of the defining triangle.</param>
-        /// <param name="amount1">The normalized barycentric (areal) coordinate b2, equal to the weighting factor for vertex 2, the coordinate of which is specified in value2.</param>
-        /// <param name="amount2">The normalized barycentric (areal) coordinate b3, equal to the weighting factor for vertex 3, the coordinate of which is specified in value3.</param>
+        /// <param name="amount1">
+        /// The normalized barycentric (areal) coordinate b2, equal to the weighting factor for vertex 2,
+        /// the coordinate of which is specified in value2.
+        /// </param>
+        /// <param name="amount2">
+        /// The normalized barycentric (areal) coordinate b3, equal to the weighting factor for vertex 3, 
+        /// the coordinate of which is specified in value3.
+        /// </param>
         /// <returns>Cartesian coordinate of the specified point with respect to the axis being used.</returns>
         public static float Barycentric(float a, float b, float c, float amount1, float amount2)
         {
@@ -156,23 +151,32 @@ namespace MonoGame.Framework
         /// <returns>The result of the Hermite spline interpolation.</returns>
         public static float Hermite(float position1, float tangent1, float position2, float tangent2, float amount)
         {
-            // All transformed to double not to lose precission
-            // Otherwise, for high numbers of param:amount the result is NaN instead of Infinity
-            double v1 = position1, v2 = position2, t1 = tangent1, t2 = tangent2, s = amount, result;
-            double sCubed = s * s * s;
-            double sSquared = s * s;
-
             if (amount == 0f)
-                result = position1;
+            {
+                return position1;
+            }
             else if (amount == 1f)
-                result = position2;
+            {
+                return position2;
+            }
             else
-                result = (2 * v1 - 2 * v2 + t2 + t1) * sCubed +
+            {
+                // All transformed to double not to lose precission
+                // Otherwise, for high numbers of "amount" the result is NaN instead of Infinity
+                double v1 = position1;
+                double v2 = position2;
+                double t1 = tangent1;
+                double t2 = tangent2;
+                double s = amount;
+                double sSquared = s * s;
+                double sCubed = s * s * s;
+
+                return (float)(
+                    (2 * v1 - 2 * v2 + t2 + t1) * sCubed +
                     (3 * v2 - 3 * v1 - 2 * t1 - t2) * sSquared +
                     t1 * s +
-                    v1;
-
-            return (float)result;
+                    v1);
+            }
         }
 
 
@@ -217,50 +221,6 @@ namespace MonoGame.Framework
         public static float LerpPrecise(float a, float b, float amount)
         {
             return ((1 - amount) * a) + (b * amount);
-        }
-
-        /// <summary>
-        /// Returns the greater of two values.
-        /// </summary>
-        /// <param name="a">Source value.</param>
-        /// <param name="b">Source value.</param>
-        /// <returns>The greater value.</returns>
-        public static float Max(float a, float b)
-        {
-            return a > b ? a : b;
-        }
-
-        /// <summary>
-        /// Returns the greater of two values.
-        /// </summary>
-        /// <param name="a">Source value.</param>
-        /// <param name="b">Source value.</param>
-        /// <returns>The greater value.</returns>
-        public static int Max(int a, int b)
-        {
-            return a > b ? a : b;
-        }
-
-        /// <summary>
-        /// Returns the lesser of two values.
-        /// </summary>
-        /// <param name="a">Source value.</param>
-        /// <param name="b">Source value.</param>
-        /// <returns>The lesser value.</returns>
-        public static float Min(float a, float b)
-        {
-            return a < b ? a : b;
-        }
-
-        /// <summary>
-        /// Returns the lesser of two values.
-        /// </summary>
-        /// <param name="a">Source value.</param>
-        /// <param name="b">Source value.</param>
-        /// <returns>The lesser value.</returns>
-        public static int Min(int a, int b)
-        {
-            return a < b ? a : b;
         }
 
         /// <summary>
@@ -318,12 +278,12 @@ namespace MonoGame.Framework
         /// <returns>The new angle, in radians.</returns>
         public static float WrapAngle(float angle)
         {
-            if ((angle > -Pi) && (angle <= Pi))
+            if ((angle > -MathF.PI) && (angle <= MathF.PI))
                 return angle;
             angle %= TwoPi;
-            if (angle <= -Pi)
+            if (angle <= -MathF.PI)
                 return angle + TwoPi;
-            if (angle > Pi)
+            if (angle > MathF.PI)
                 return angle - TwoPi;
             return angle;
         }

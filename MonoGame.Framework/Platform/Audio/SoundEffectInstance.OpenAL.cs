@@ -9,9 +9,9 @@ namespace MonoGame.Framework.Audio
 {
     public partial class SoundEffectInstance : IDisposable
     {
-		private SoundState SoundState = SoundState.Stopped;
-		private bool _looped = false;
-		private float _alVolume = 1f;
+        private SoundState SoundState = SoundState.Stopped;
+        private bool _looped = false;
+        private float _alVolume = 1f;
 
         internal ALController Controller { get; private set; }
         internal uint? SourceId { get; set; }
@@ -50,11 +50,11 @@ namespace MonoGame.Framework.Audio
             Vector3 posOffset = emitter.Position - listener.Position;
 
             // set up orientation matrix
-            var orientation = Matrix.CreateWorld(Vector3.Zero, listener.Forward, listener.Up);
+            Matrix.CreateWorld(Vector3.Zero, listener.Forward, listener.Up, out var orientation);
 
             // set up our final position and velocity according to orientation of listener
-            var finalPos = Vector3.Transform(new Vector3(x, y, z) + posOffset, orientation);
-            var finalVel = Vector3.Transform(emitter.Velocity, orientation);
+            Vector3.Transform(new Vector3(x, y, z) + posOffset, orientation, out var finalPos);
+            Vector3.Transform(emitter.Velocity, orientation, out var finalVel);
 
             // set the position based on relative positon
             AL.Source(SourceId.Value, ALSource3f.Position, finalPos.X, finalPos.Y, finalPos.Z);

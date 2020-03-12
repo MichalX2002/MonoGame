@@ -21,7 +21,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             return ((IList) value).Count == 0;
         }
 
-        protected internal override object Deserialize(IntermediateReader input, ContentSerializerAttribute format, object existingInstance)
+        protected internal override object Deserialize(
+            IntermediateReader input, ContentSerializerAttribute format, object existingInstance)
         {
             var result = (IList) (existingInstance ?? Activator.CreateInstance(TargetType));
 
@@ -41,7 +42,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             return result;
         }
 
-        protected internal override void Serialize(IntermediateWriter output, object value, ContentSerializerAttribute format)
+        protected internal override void Serialize(
+            IntermediateWriter output, object value, ContentSerializerAttribute format)
         {
             // Create the item serializer attribute.
             var itemFormat = new ContentSerializerAttribute

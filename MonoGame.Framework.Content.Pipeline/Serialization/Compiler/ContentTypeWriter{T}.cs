@@ -5,17 +5,20 @@
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     /// <summary>
-    /// Provides a generic implementation of ContentTypeWriter methods and properties for compiling a specific managed type into a binary format.
+    /// Provides a generic implementation of <see cref="ContentTypeWriter"/>
+    /// methods and properties for compiling a specific managed type into a binary format.
     /// </summary>
-    /// <typeparam name="T">The type to write</typeparam>
-    /// <remarks>This is a generic implementation of ContentTypeWriter and, therefore, can handle strongly typed content data.</remarks>
+    /// <typeparam name="T">The type to write.</typeparam>
+    /// <remarks>
+    /// This is a generic implementation of <see cref="ContentTypeWriter"/> 
+    /// and, therefore, can handle strongly typed content data.
+    /// </remarks>
     public abstract class ContentTypeWriter<T> : ContentTypeWriter
     {
         /// <summary>
-        /// Initializes a new instance of the ContentTypeWriter class.
+        /// Initializes a new instance of the <see cref="ContentTypeWriter"/> class.
         /// </summary>
-        protected ContentTypeWriter()
-            : base(typeof(T))
+        protected ContentTypeWriter() : base(typeof(T))
         {
         }
 

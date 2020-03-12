@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
@@ -75,11 +73,11 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 var bb = geom.Vertices.Positions[ib];
                 var cc = geom.Vertices.Positions[ic];                
                 
-                var faceNormal = Vector3.Cross(cc - bb, bb - aa);
-                var len = faceNormal.Length();
-                if (len > 0.0f)
+                Vector3.Cross(cc - bb, bb - aa, out var faceNormal);
+                var length = faceNormal.Length();
+                if (length > 0.0f)
                 {
-                    faceNormal /= len;
+                    faceNormal /= length;
 
                     // We are using the "Mean Weighted Equally" method where each
                     // face has an equal weight in the final normal calculation.
@@ -134,24 +132,27 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// Generate the tangents and binormals (tangent frames) for each vertex in the mesh.
         /// </summary>
         /// <param name="mesh">The mesh which will have add tangent and binormal channels added.</param>
-        /// <param name="textureCoordinateChannelName">The Vector2 texture coordinate channel used to generate tangent frames.</param>
+        /// <param name="textureCoordinateChannelName">The texture coordinate channel used to generate tangent frames.</param>
         /// <param name="tangentChannelName"></param>
         /// <param name="binormalChannelName"></param>
-        public static void CalculateTangentFrames(MeshContent mesh, string textureCoordinateChannelName, string tangentChannelName, string binormalChannelName)
+        public static void CalculateTangentFrames(
+            MeshContent mesh, string textureCoordinateChannelName, string tangentChannelName, string binormalChannelName)
         {
             foreach (var geom in mesh.Geometry)
-                CalculateTangentFrames(geom, textureCoordinateChannelName, tangentChannelName, binormalChannelName);                            
+                CalculateTangentFrames(geom, textureCoordinateChannelName, tangentChannelName, binormalChannelName);
         }
 
-        public static void CalculateTangentFrames(GeometryContent geom, string textureCoordinateChannelName, string tangentChannelName, string binormalChannelName)
+        public static void CalculateTangentFrames(
+            GeometryContent geom, string textureCoordinateChannelName, string tangentChannelName, string binormalChannelName)
         {
             var verts = geom.Vertices;
             var indices = geom.Indices;
             var channels = geom.Vertices.Channels;
-
             var normals = channels.Get<Vector3>(VertexChannelNames.Normal(0));
             var uvs = channels.Get<Vector2>(textureCoordinateChannelName);
-            CalculateTangentFrames(verts.Positions, indices, normals, uvs, out Vector3[] tangents, out Vector3[] bitangents);
+
+            CalculateTangentFrames(
+                verts.Positions, indices, normals, uvs, out Vector3[] tangents, out Vector3[] bitangents);
 
             // All the indices are 1:1 with the others, so we 
             // can just add the new channels in place.
@@ -163,12 +164,13 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 channels.Add(binormalChannelName, bitangents);
         }
 
-        public static void CalculateTangentFrames(IList<Vector3> positions,
-                                                  IList<int> indices,
-                                                  IList<Vector3> normals,
-                                                  IList<Vector2> textureCoords,
-                                                  out Vector3[] tangents,
-                                                  out Vector3[] bitangents)
+        public static void CalculateTangentFrames(
+            IReadOnlyList<Vector3> positions,
+            IReadOnlyList<int> indices,
+            IReadOnlyList<Vector3> normals,
+            IReadOnlyList<Vector2> textureCoords,
+            out Vector3[] tangents,
+            out Vector3[] bitangents)
         {
             // Lengyel, Eric. “Computing Tangent Space Basis Vectors for an Arbitrary Mesh”. 
             // Terathon Software 3D Graphics Library, 2001.
@@ -275,12 +277,12 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                     // errors in other parts of the pipeline, we just take        
                     // a guess at something that may look ok.
 
-                    t = Vector3.Cross(n, Vector3.UnitX);
+                    Vector3.Cross(n, Vector3.UnitX, out t);
                     if (t.LengthSquared() < float.Epsilon)
-                        t = Vector3.Cross(n, Vector3.UnitY);
+                        Vector3.Cross(n, Vector3.UnitY, out t);
 
-                    tangents[i] = Vector3.Normalize(t);
-                    bitangents[i] = Vector3.Cross(n, tangents[i]);
+                    Vector3.Normalize(t, out tangents[i]);
+                    Vector3.Cross(n, tangents[i], out bitangents[i]);
                     continue;
                 }
 
@@ -288,7 +290,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 // TODO: This can be zero can cause NaNs on 
                 // normalize... how do we fix this?
                 var tangent = t - n * Vector3.Dot(n, t);
-                tangent = Vector3.Normalize(tangent);
+                tangent.Normalize();
                 Debug.Assert(tangent.IsFinite(), "Bad tangent!");
                 tangents[i] = tangent;
 
@@ -561,7 +563,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 foreach (var animationContent in node.Animations.Values)
                     foreach (var animationChannel in animationContent.Channels.Values)
                         for (int i = 0; i < animationChannel.Count; i++)
-                            animationChannel[i].Transform = inverseTransform * animationChannel[i].Transform * transform;
+                            animationChannel[i].Transform = 
+                                inverseTransform * animationChannel[i].Transform * transform;
             }
         }
 
@@ -582,7 +585,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             // Since XNA does not have a 3x3 matrix, use the "scalar triple product"
             // (see http://en.wikipedia.org/wiki/Triple_product) to calculate the
             // determinant.
-            float d = Vector3.Dot(xform.Right, Vector3.Cross(xform.Forward, xform.Up));
+
+            Vector3.Dot(xform.Right, Vector3.Cross(xform.Forward, xform.Up), out float d);
             return d < 0.0f;
         }
 

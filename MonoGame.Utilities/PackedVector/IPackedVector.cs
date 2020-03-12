@@ -11,6 +11,10 @@ namespace MonoGame.Framework.PackedVector
     /// </summary>
     public interface IPackedVector
     {
+        /// <summary>
+        /// Describes the components of this vector.
+        /// Should be retrieved through <see cref="VectorTypeInfo"/>.
+        /// </summary>
         VectorComponentInfo ComponentInfo { get; }
 
         /// <summary>

@@ -10,7 +10,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
     /// Provides methods and properties for maintaining a vertex channel.
-    /// A vertex channel is a list of arbitrary data with one value for each vertex. Channels are stored inside a GeometryContent and identified by name.
+    /// A vertex channel is a list of arbitrary data with one value for each vertex.
+    /// Channels are stored inside a <see cref="GeometryContent"/> and identified by name.
     /// </summary>
     public abstract class VertexChannel : IList, ICollection, IEnumerable
     {
@@ -18,10 +19,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Allows overriding classes to implement the list, and for properties/methods in this class to access it.
         /// </summary>
-        internal abstract IList Items
-        {
-            get;
-        }
+        internal abstract IList Items  { get; }
 
         /// <summary>
         /// Gets the number of elements in the vertex channel
@@ -68,7 +66,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         bool IList.IsReadOnly => false;
 
         /// <summary>
-        /// Creates an instance of VertexChannel.
+        /// Creates an instance of <see cref="VertexChannel"/>.
         /// </summary>
         /// <param name="name">Name of the channel.</param>
         internal VertexChannel(string name)
