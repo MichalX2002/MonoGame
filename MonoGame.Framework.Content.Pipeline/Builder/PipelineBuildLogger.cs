@@ -2,9 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
-using MonoGame.Framework.Content.Pipeline;
-
 namespace MonoGame.Framework.Content.Pipeline.Builder
 {
     public class PipelineBuildLogger : ContentBuildLogger
@@ -20,7 +17,8 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
 			System.Diagnostics.Trace.WriteLine(string.Format(message, messageArgs));
         }
 
-        public override void LogWarning(string helpLink, ContentIdentity contentIdentity, string message, params object[] messageArgs)
+        public override void LogWarning(
+            string helpLink, ContentIdentity contentIdentity, string message, params object[] messageArgs)
         {
             var msg = string.Format(message, messageArgs);
             var fileName = GetCurrentFilename(contentIdentity);

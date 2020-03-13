@@ -16,15 +16,16 @@ namespace MonoGame.Framework.Content.Pipeline
     /// </summary>
     public class ContentStatsCollection
     {
-        private static readonly string _header =
+        public static string Extension { get; } = ".mgstats";
+
+        private static Encoding RawUtf8Encoding { get; } = new UTF8Encoding(false);
+        private static Regex SplitRegex { get; } = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+        private static string Header { get; } =
             "Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds";
-        
-        private static readonly Regex _split = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
 
         private readonly object _locker = new object();
-        private readonly Dictionary<string, ContentStats> _statsBySource = new Dictionary<string, ContentStats>(1024);
-
-        public static readonly string Extension = ".mgstats";
+        private readonly Dictionary<string, ContentStats> _statsBySource =
+            new Dictionary<string, ContentStats>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Optionally used for copying stats that were stored in another collection.
@@ -72,23 +73,17 @@ namespace MonoGame.Framework.Content.Pipeline
             var sourceSize = new FileInfo(sourceFile).Length;
             var destSize = new FileInfo(destFile).Length;
 
+            var stats = new ContentStats(
+                sourceFile,
+                destFile,
+                processorType,
+                GetFriendlyTypeName(contentType),
+                sourceSize,
+                destSize,
+                buildSeconds);
+
             lock (_locker)
-            {
-                _statsBySource.TryGetValue(sourceFile, out ContentStats stats);
-
-                stats.SourceFile = sourceFile;
-                stats.DestFile = destFile;
-
-                stats.SourceFileSize = sourceSize;
-                stats.DestFileSize = destSize;
-
-                stats.ContentType = GetFriendlyTypeName(contentType);
-                stats.ProcessorType = processorType;
-
-                stats.BuildSeconds = buildSeconds;
-
-                _statsBySource[stats.SourceFile] = stats;
-            }
+                _statsBySource[sourceFile] = stats;
         }
 
         /// <summary>
@@ -113,30 +108,12 @@ namespace MonoGame.Framework.Content.Pipeline
         private static string GetFriendlyTypeName(Type type)
         {
             if (type == null)
-                return "";
-            if (type == typeof(int))
-                return "int";
-            else if (type == typeof(short))
-                return "short";
-            else if (type == typeof(byte))
-                return "byte";
-            else if (type == typeof(bool))
-                return "bool";
-            else if (type == typeof(long))
-                return "long";
-            else if (type == typeof(float))
-                return "float";
-            else if (type == typeof(double))
-                return "double";
-            else if (type == typeof(decimal))
-                return "decimal";
-            else if (type == typeof(string))
-                return "string";
+                return "null";
             else if (type.IsArray)
                 return GetFriendlyTypeName(type.GetElementType()) + "[" + new string(',', type.GetArrayRank() - 1) + "]";
             else if (type.IsGenericType)
-                return type.Name.Split('`')[0] + "<" + 
-                    string.Join(", ", type.GetGenericArguments().Select(x => GetFriendlyTypeName(x)).ToArray()) + ">";
+                return type.Name.Split('`')[0] + "<" + string.Join(
+                    ", ", type.GetGenericArguments().Select(x => GetFriendlyTypeName(x))) + ">";
             else
                 return type.Name;
         }
@@ -153,27 +130,26 @@ namespace MonoGame.Framework.Content.Pipeline
             var filePath = Path.Combine(outputPath, Extension);
             try
             {
-                var lines = File.ReadAllLines(filePath);
-
-                // The first line is the CSV header... if it doesn't match then
-                // assume the data is invalid or changed formats.
-                if (lines[0] != _header)
-                    return collection;
-
-                for (var i = 1; i < lines.Length; i++)
+                int lineIndex = 0;
+                foreach (string line in File.ReadLines(filePath))
                 {
-                    var columns = _split.Split(lines[i]);
+                    // The first line is the CSV header... if it doesn't match 
+                    // then assume the data is invalid or changed formats.
+                    if (lineIndex++ == 0 && line != Header)
+                        return collection;
+                    
+                    var columns = SplitRegex.Split(line);
                     if (columns.Length != 7)
                         continue;
 
-                    ContentStats stats;
-                    stats.SourceFile = columns[0].Trim('"');
-                    stats.DestFile = columns[1].Trim('"');
-                    stats.ProcessorType = columns[2].Trim('"');
-                    stats.ContentType = columns[3].Trim('"');
-                    stats.SourceFileSize = long.Parse(columns[4]);
-                    stats.DestFileSize = long.Parse(columns[5]);
-                    stats.BuildSeconds = float.Parse(columns[6]);
+                    var stats = new ContentStats(
+                        sourceFile: columns[0].Trim('"'),
+                        destFile: columns[1].Trim('"'),
+                        processorType: columns[2].Trim('"'),
+                        contentType: columns[3].Trim('"'),
+                        sourceFileSize: long.Parse(columns[4]),
+                        destFileSize: long.Parse(columns[5]),
+                        buildSeconds: float.Parse(columns[6]));
 
                     if (!collection._statsBySource.ContainsKey(stats.SourceFile))
                         collection._statsBySource.Add(stats.SourceFile, stats);
@@ -199,17 +175,18 @@ namespace MonoGame.Framework.Content.Pipeline
             Directory.CreateDirectory(outputPath);
 
             var filePath = Path.Combine(outputPath, Extension);
-            using (var textWriter = new StreamWriter(filePath, false, new UTF8Encoding(false)))
+            using (var textWriter = new StreamWriter(filePath, false, RawUtf8Encoding))
             {
                 // Sort the items alphabetically to ensure a consistent output
                 // and better mergability of the resulting file.
-                var contentStats = _statsBySource.Values.OrderBy(c => c.SourceFile, StringComparer.InvariantCulture).ToList();
+                var contentStats = _statsBySource.Values.OrderBy(
+                    c => c.SourceFile, StringComparer.InvariantCulture).ToList();
 
-                textWriter.WriteLine(_header);
+                textWriter.WriteLine(Header);
                 foreach (var stats in contentStats)
                     textWriter.WriteLine(
                         "\"{0}\",\"{1}\",\"{2}\",\"{3}\",{4},{5},{6}",
-                        stats.SourceFile, stats.DestFile, stats.ProcessorType, 
+                        stats.SourceFile, stats.DestFile, stats.ProcessorType,
                         stats.ContentType, stats.SourceFileSize, stats.DestFileSize, stats.BuildSeconds);
             }
         }

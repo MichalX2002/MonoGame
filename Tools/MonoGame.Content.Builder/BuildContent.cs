@@ -133,7 +133,7 @@ namespace MonoGame.Content.Builder
         public void SetProcessor(string processor)
         {
             _processor = processor;
-            
+
             // If you are changing the processor then reset all 
             // the processor parameters.
             _processorParams.Clear();
@@ -173,7 +173,7 @@ namespace MonoGame.Content.Builder
                 var split = sourceFile.Split(';');
                 sourceFile = split[0];
 
-                if(split.Length > 0)
+                if (split.Length > 0)
                     link = split[1];
             }
 
@@ -193,9 +193,9 @@ namespace MonoGame.Content.Builder
             // Create the item for processing later.
             var item = new ContentItem
             {
-                SourceFile = sourceFile, 
+                SourceFile = sourceFile,
                 OutputFile = link,
-                Importer = Importer, 
+                Importer = Importer,
                 Processor = _processor,
                 ProcessorParams = new OpaqueDataDictionary()
             };
@@ -267,7 +267,7 @@ namespace MonoGame.Content.Builder
 
         public bool HasWork
         {
-            get { return _content.Count > 0 || _copyItems.Count > 0 || Clean; }    
+            get { return _content.Count > 0 || _copyItems.Count > 0 || Clean; }
         }
 
         string ReplaceSymbols(string parameter)
@@ -291,8 +291,9 @@ namespace MonoGame.Content.Builder
 
             var intermediatePath = ReplaceSymbols(_intermediateDir);
             if (!Path.IsPathRooted(intermediatePath))
-                intermediatePath = PathHelper.Normalize(Path.GetFullPath(Path.Combine(projectDirectory, intermediatePath)));
-            
+                intermediatePath = PathHelper.Normalize(
+                    Path.GetFullPath(Path.Combine(projectDirectory, intermediatePath)));
+
             _manager = new PipelineManager(projectDirectory, outputPath, intermediatePath);
             _manager.Logger = new ConsoleLogger();
             _manager.CompressContent = CompressContent;
@@ -318,29 +319,28 @@ namespace MonoGame.Content.Builder
 
             // If the target changed in any way then we need to force
             // a full rebuild even under incremental builds.
-            var targetChanged = previousContent.Config != Config ||
-                                previousContent.Platform != Platform ||
-                                previousContent.Profile != Profile;
+            var targetChanged =
+                previousContent.Config != Config ||
+                previousContent.Platform != Platform ||
+                previousContent.Profile != Profile;
 
             // First clean previously built content.
-            for(int i = 0; i < previousContent.SourceFiles.Count; i++)
+            for (int i = 0; i < previousContent.SourceFiles.Count; i++)
             {
                 var sourceFile = previousContent.SourceFiles[i];
 
                 // This may be an old file (prior to MG 3.7) which doesn't have destination files:
                 string destFile = null;
-                if(i < previousContent.DestFiles.Count)
-                {
+                if (i < previousContent.DestFiles.Count)
                     destFile = previousContent.DestFiles[i];
-                }
 
                 var inContent = _content.Any(
                     e => string.Equals(e.SourceFile, sourceFile, StringComparison.InvariantCultureIgnoreCase));
-                
-                var cleanOldContent = !inContent && !Incremental;
-                var cleanRebuiltContent = inContent && (Rebuild || Clean);
+
+                bool cleanOldContent = !inContent && !Incremental;
+                bool cleanRebuiltContent = inContent && (Rebuild || Clean);
                 if (cleanRebuiltContent || cleanOldContent || targetChanged)
-                    _manager.CleanContent(sourceFile, destFile);                
+                    _manager.CleanContent(sourceFile, destFile);
             }
 
             // TODO: Should we be cleaning copy items?  I think maybe we should.
@@ -354,13 +354,14 @@ namespace MonoGame.Content.Builder
             errorCount = 0;
             successCount = 0;
 
-            // Before building the content, register all files to be built. (Necessary to
-            // correctly resolve external references.)
+            // Before building the content, register all files to be built.
+            // (Necessary to correctly resolve external references.)
             foreach (var c in _content)
             {
                 try
                 {
-                    _manager.RegisterContent(c.SourceFile, c.OutputFile, c.Importer, c.Processor, c.ProcessorParams);
+                    _manager.RegisterContent(
+                        c.SourceFile, c.OutputFile, c.Importer, c.Processor, c.ProcessorParams);
                 }
                 catch
                 {
@@ -387,7 +388,8 @@ namespace MonoGame.Content.Builder
                 catch (InvalidContentException ex)
                 {
                     var message = string.Empty;
-                    if (ex.ContentIdentity != null && !string.IsNullOrEmpty(ex.ContentIdentity.SourceFilename))
+                    if (ex.ContentIdentity != null &&
+                        !string.IsNullOrEmpty(ex.ContentIdentity.SourceFilename))
                     {
                         message = ex.ContentIdentity.SourceFilename;
                         if (!string.IsNullOrEmpty(ex.ContentIdentity.FragmentIdentifier))
@@ -478,15 +480,15 @@ namespace MonoGame.Content.Builder
                     fileAttr &= (~FileAttributes.ReadOnly);
                     File.SetAttributes(dest, fileAttr);
 
-                    var buildTime = DateTime.UtcNow - startTime;
-
                     if (string.IsNullOrEmpty(c.Link))
                         Console.WriteLine("{0}", c.SourceFile);
                     else
                         Console.WriteLine("{0} => {1}", c.SourceFile, c.Link);
 
                     // Record content stats on the copy.
-                    _manager.ContentStats.RecordStats(c.SourceFile, dest, "CopyItem", typeof(File), (float)buildTime.TotalSeconds);
+                    var buildTime = DateTime.UtcNow - startTime;
+                    _manager.ContentStats.RecordStats(
+                        c.SourceFile, dest, "CopyItem", typeof(File), (float)buildTime.TotalSeconds);
 
                     ++successCount;
                 }

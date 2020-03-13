@@ -14,6 +14,8 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
     {
         private static readonly char[] _newlineChars = new[] { '\r', '\n', '\0' };
 
+        public const int FfmpegThreads = 0; // 0 = optimal
+
         public override bool Supports(TargetPlatform platform)
         {
             return platform == TargetPlatform.Android ||
@@ -27,14 +29,19 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                    platform == TargetPlatform.iOS;
         }
 
-        public override ConversionQuality ConvertAudio(TargetPlatform platform, ConversionQuality quality, AudioContent content)
+        public override ConversionQuality ConvertAudio(
+            TargetPlatform platform, ConversionQuality quality, AudioContent content)
         {
             //// Default to PCM data, or ADPCM if the source is ADPCM.
             //var targetFormat = ConversionFormat.Pcm;
             //
-            //if (quality != ConversionQuality.Best || content.Format.Format == 2 || content.Format.Format == 17)
+            //if (quality != ConversionQuality.Best || 
+            //    content.Format.Format == 2 ||
+            //    content.Format.Format == 17)
             //{
-            //    if (platform == TargetPlatform.iOS || platform == TargetPlatform.MacOSX || platform == TargetPlatform.DesktopGL)
+            //    if (platform == TargetPlatform.iOS ||
+            //        platform == TargetPlatform.MacOSX || 
+            //        platform == TargetPlatform.DesktopGL)
             //        targetFormat = ConversionFormat.ImaAdpcm;
             //    else
             //        targetFormat = ConversionFormat.Adpcm;
@@ -321,20 +328,23 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
         public static void WritePcmFile(
             AudioContent content, string saveToFile, int bitRate = 192000, int? sampleRate = null)
         {
+            string arguments = string.Format(
+                "-y -i \"{0}\" -vn -c:a pcm_s16le -b:a {2} {3} -f:a wav " +
+                "-strict experimental -threads {4} \"{1}\"",
+                content.FileName,
+                saveToFile,
+                bitRate,
+                sampleRate != null ? "-ar " + sampleRate.Value : string.Empty,
+                FfmpegThreads);
+
             var ffmpegExitCode = ExternalTool.Run(
                 "ffmpeg",
-                string.Format(
-                    "-y -i \"{0}\" -vn -c:a pcm_s16le -b:a {2} {3} -f:a wav -strict experimental \"{1}\"",
-                    content.FileName,
-                    saveToFile,
-                    bitRate,
-                    sampleRate != null ? "-ar " + sampleRate.Value : string.Empty
-                    ),
+                arguments,
                 out string ffmpegStdout,
                 out string ffmpegStderr);
 
             if (ffmpegExitCode != 0)
-                throw new InvalidOperationException(
+                throw new PipelineException(
                     "ffmpeg exited with non-zero exit code: \n" + ffmpegStdout + "\n" + ffmpegStderr);          
         }
 
@@ -438,7 +448,8 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                 } while (quality >= 0 && ffmpegExitCode != 0);
 
                 if (ffmpegExitCode != 0)
-                    throw new InvalidOperationException("ffmpeg exited with non-zero exit code: \n" + ffmpegStdout + "\n" + ffmpegStderr);
+                    throw new InvalidOperationException(
+                        "ffmpeg exited with non-zero exit code: \n" + ffmpegStdout + "\n" + ffmpegStderr);
 
                 ProbeFormat(
                     outputFile, out AudioFileType audioFileType, out AudioFormat audioFormat,
@@ -486,8 +497,10 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             return quality;
         }
 
-        // Converts block alignment in bytes to sample alignment, primarily for compressed formats
-        // Calculation of sample alignment from http://kcat.strangesoft.net/openal-extensions/SOFT_block_alignment.txt
+        /// <summary>
+        /// Converts block alignment in bytes to sample alignment, primarily for compressed formats.
+        /// Calculation of sample alignment from http://kcat.strangesoft.net/openal-extensions/SOFT_block_alignment.txt
+        /// </summary>
         static int SampleAlignment(AudioFormat format)
         {
             switch (format.Format)

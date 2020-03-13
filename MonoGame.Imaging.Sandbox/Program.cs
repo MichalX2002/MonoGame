@@ -25,9 +25,29 @@ namespace MonoGame.Imaging.Tests
     {
         public const string DataZip = "testdata.zip";
 
+        static void TestBmp(ZipArchive archive)
+        {
+            using (var stream = archive.GetEntry("bmp/32bit.bmp").Open())
+            using (var img = Image.Load(stream))
+                img.Save("32.png");
+
+            using (var stream = archive.GetEntry("bmp/24bit.bmp").Open())
+            using (var img = Image.Load(stream))
+                img.Save("24.png");
+
+            using (var stream = archive.GetEntry("bmp/8bit.bmp").Open())
+            using (var img = Image.Load(stream))
+                img.Save("8.png");
+
+            using (var stream = archive.GetEntry("bmp/4bit.bmp").Open())
+            using (var img = Image.Load(stream))
+                img.Save("4.png");
+        }
+
         static void Main(string[] args)
         {
             var archive = new ZipArchive(File.OpenRead(DataZip), ZipArchiveMode.Read, false);
+            
             //var stream = archive.GetEntry("png/32bit.png").Open();
             var stream = archive.GetEntry("bmp/32bit.bmp").Open();
             //var stream = archive.GetEntry("bmp/24bit.bmp").Open();
@@ -203,8 +223,10 @@ namespace MonoGame.Imaging.Tests
             //var nonD = new SaveConfiguration(false, 0, RecyclableMemoryManager.Instance);
             //var ms = new MemoryStream();
             //
+            //TestEntry(ms, d, archive, "bmp/4bit.bmp");
             //TestEntry(ms, d, archive, "bmp/8bit.bmp");
             //TestEntry(ms, d, archive, "bmp/24bit.bmp");
+            //TestEntry(ms, d, archive, "bmp/32bit.bmp");
             //
             //TestEntry(ms, d, archive, "jpg/quality_0.jpg");
             //TestEntry(ms, d, archive, "jpg/quality_25.jpg");
@@ -217,9 +239,9 @@ namespace MonoGame.Imaging.Tests
             //TestEntry(ms, d, archive, "png/8bit.png");
             //
             //TestEntry(ms, nonD, archive, "tga/32bit.tga");
-            //TestEntry(ms, d, archive, "tga/32bit_compressed.tga");
+            //TestEntry(ms, d, archive, "tga/32bit_rle.tga");
             //TestEntry(ms, nonD, archive, "tga/24bit.tga");
-            //TestEntry(ms, d, archive, "tga/24bit_compressed.tga");
+            //TestEntry(ms, d, archive, "tga/24bit_rle.tga");
             //
             //Console.WriteLine(RecyclableMemoryManager.Instance.SmallBlocksFree);
 

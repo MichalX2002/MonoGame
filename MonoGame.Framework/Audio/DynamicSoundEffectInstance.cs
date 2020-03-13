@@ -268,7 +268,7 @@ namespace MonoGame.Framework.Audio
         private void AssertNotDisposed()
         {
             if (IsDisposed)
-                throw new ObjectDisposedException(null);
+                throw new ObjectDisposedException(this.GetType().FullName);
         }
 
         protected override void Dispose(bool disposing)

@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="fak\" />
+    <Folder Include="reference\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 

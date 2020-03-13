@@ -1021,9 +1021,7 @@ namespace MonoGame.Framework.Graphics
                 throw new MonoGameGLException("GL.GetError() returned " + error);
             }
         }
-#endif
 
-#if OPENGL
         [Conditional("DEBUG")]
         internal static void LogGLError(string location)
         {
