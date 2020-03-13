@@ -30,7 +30,10 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
         }
 
         public override ConversionQuality ConvertAudio(
-            TargetPlatform platform, ConversionQuality quality, AudioContent content)
+            TargetPlatform platform,
+            ConversionQuality quality,
+            AudioContent content,
+            ContentBuildLogger logger = null)
         {
             //// Default to PCM data, or ADPCM if the source is ADPCM.
             //var targetFormat = ConversionFormat.Pcm;
@@ -48,7 +51,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             //}
 
             var targetFormat = ConversionFormat.Vorbis;
-            return ConvertToFormat(content, targetFormat, quality, null);
+            return ConvertToFormat(content, targetFormat, quality, null, logger);
         }
 
         private ConversionFormat PlatformToFormat(TargetPlatform platform)
@@ -70,8 +73,12 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
         }
 
         public override ConversionQuality ConvertStreamingAudio(
-            TargetPlatform platform, ConversionQuality quality, 
-            AudioContent content, string inputFile, out string outputFile)
+            TargetPlatform platform,
+            ConversionQuality quality,
+            AudioContent content,
+            string inputFile, 
+            out string outputFile,
+            ContentBuildLogger logger = null)
         {
             var targetFormat = PlatformToFormat(platform);
 
@@ -81,22 +88,26 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             // Make sure the output folder for the file exists.
             Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
 
-            return ConvertToFormat(content, targetFormat, quality, outputFile);
+            return ConvertToFormat(content, targetFormat, quality, outputFile, logger);
         }
 
         public static void ProbeFormat(
-            string sourceFile, out AudioFileType audioFileType, out AudioFormat audioFormat,
-            out TimeSpan duration, out int loopStart, out int loopLength)
+            string sourceFile, 
+            out AudioFileType audioFileType,
+            out AudioFormat audioFormat, 
+            out TimeSpan duration, 
+            out int loopStart,
+            out int loopLength)
         {
             var ffprobeExitCode = ExternalTool.Run(
                 "ffprobe",
                 string.Format("-i \"{0}\" -show_format -show_entries streams -v quiet -of flat", sourceFile),
-                out string ffprobeStdout,
-                out string ffprobeStderr);
+                out var ffprobeStdout,
+                out var ffprobeStderr);
 
             if (ffprobeExitCode != 0)
                 throw new InvalidOperationException(
-                    "ffprobe exited with non-zero exit code.", new Exception(ffprobeStderr));
+                    "ffprobe exited with non-zero exit code.", new Exception(ffprobeStderr.ToString()));
 
             // Set default values if information is not available.
             int averageBytesPerSecond = 0;
@@ -112,7 +123,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             try
             {
                 var numberFormat = CultureInfo.InvariantCulture.NumberFormat;
-                foreach (var line in ffprobeStdout.Split(_newlineChars, StringSplitOptions.RemoveEmptyEntries))
+                foreach (var line in ffprobeStdout.ToString().Split(_newlineChars, StringSplitOptions.RemoveEmptyEntries))
                 {
                     string[] kv = line.Split(new[] { '=' }, 2);
                     switch (kv[0])
@@ -145,7 +156,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                         case "streams.stream.0.bit_rate":
                             if (averageBytesPerSecond != 0)
                                 break;
-                            if(int.TryParse(kv[1].Trim('"'), NumberStyles.Integer, numberFormat, out int bitsPerSec))
+                            if (int.TryParse(kv[1].Trim('"'), NumberStyles.Integer, numberFormat, out int bitsPerSec))
                                 averageBytesPerSecond = bitsPerSec / 8;
                             break;
 
@@ -235,7 +246,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                 bitsPerSample = Math.Min(bitsPerSample, 16);
             }
             else
-                audioFileType = (AudioFileType) (-1);
+                audioFileType = (AudioFileType)(-1);
 
             // XNA seems to calculate the block alignment directly from 
             // the bits per sample and channel count regardless of the 
@@ -340,16 +351,20 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             var ffmpegExitCode = ExternalTool.Run(
                 "ffmpeg",
                 arguments,
-                out string ffmpegStdout,
-                out string ffmpegStderr);
+                out var ffmpegStdout,
+                out var ffmpegStderr);
 
             if (ffmpegExitCode != 0)
                 throw new PipelineException(
-                    "ffmpeg exited with non-zero exit code: \n" + ffmpegStdout + "\n" + ffmpegStderr);          
+                    "ffmpeg exited with non-zero exit code: \n" + ffmpegStdout + "\n" + ffmpegStderr);
         }
 
         public static ConversionQuality ConvertToFormat(
-            AudioContent content, ConversionFormat formatType, ConversionQuality quality, string saveToFile)
+            AudioContent content,
+            ConversionFormat formatType,
+            ConversionQuality quality,
+            string saveToFile,
+            ContentBuildLogger logger = null)
         {
             if (saveToFile != null)
             {
@@ -357,7 +372,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                 if (File.Exists(saveToFile))
                     ExternalTool.DeleteFile(saveToFile);
             }
-            
+
             string outputFile = saveToFile ?? Path.GetTempFileName();
             FileStream result = null;
             try
@@ -427,11 +442,12 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                         throw new NotSupportedException();
                 }
 
-                string ffmpegStdout, ffmpegStderr;
+                StringBuilder ffmpegStdout, ffmpegStderr;
                 int ffmpegExitCode;
                 do
                 {
-                    ffmpegExitCode = ExternalTool.Run("ffmpeg",
+                    ffmpegExitCode = ExternalTool.Run(
+                        "ffmpeg",
                         string.Format(
                             "-y -i \"{0}\" -vn -c:a {1} -b:a {2} -ar {3} -f:a {4} -strict experimental \"{5}\"",
                             content.FileName,
@@ -441,7 +457,9 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                             ffmpegMuxerName,
                             outputFile),
                         out ffmpegStdout,
-                        out ffmpegStderr);
+                        out ffmpegStderr,
+                        null,
+                        logger);
 
                     if (ffmpegExitCode != 0)
                         quality--;

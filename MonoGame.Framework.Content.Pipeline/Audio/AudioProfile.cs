@@ -41,7 +41,10 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
         /// <param name="content">The audio content to convert.</param>
         /// <returns>The quality used for conversion which could be different from the suggested quality.</returns>
         public abstract ConversionQuality ConvertAudio(
-            TargetPlatform platform, ConversionQuality quality, AudioContent content);
+            TargetPlatform platform,
+            ConversionQuality quality, 
+            AudioContent content,
+            ContentBuildLogger logger = null);
 
         /// <summary>
         /// Converts the audio content to a streaming format that works on targeted platform.
@@ -53,8 +56,12 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
         /// <param name="outputFile">The output file name, changed by platform and profile.</param>
         /// <returns>The quality used for conversion which could be different from the suggested quality.</returns>
         public abstract ConversionQuality ConvertStreamingAudio(
-            TargetPlatform platform, ConversionQuality quality, AudioContent content, 
-            string inputFile, out string outputFile);
+            TargetPlatform platform,
+            ConversionQuality quality, 
+            AudioContent content, 
+            string inputFile,
+            out string outputFile,
+            ContentBuildLogger logger = null);
 
         protected static int QualityToSampleRate(
             ConversionFormat format, ConversionQuality quality, int sourceSampleRate)

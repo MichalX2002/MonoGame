@@ -8,13 +8,13 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
     {
         public override void LogMessage(string message, params object[] messageArgs)
         {
-			System.Diagnostics.Trace.WriteLine(string.Format(message, messageArgs));
+            System.Diagnostics.Trace.WriteLine(string.Format(message, messageArgs));
         }
 
         public override void LogImportantMessage(string message, params object[] messageArgs)
         {
             // TODO: How do i make it high importance?
-			System.Diagnostics.Trace.WriteLine(string.Format(message, messageArgs));
+            System.Diagnostics.Trace.WriteLine(string.Format(message, messageArgs), "Important");
         }
 
         public override void LogWarning(
@@ -22,7 +22,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
         {
             var msg = string.Format(message, messageArgs);
             var fileName = GetCurrentFilename(contentIdentity);
-			System.Diagnostics.Trace.WriteLine(string.Format("{0}: {1}", fileName, msg));
+            System.Diagnostics.Trace.WriteLine(string.Format("{0}: {1}", fileName, msg), "Warning");
         }
 
     }

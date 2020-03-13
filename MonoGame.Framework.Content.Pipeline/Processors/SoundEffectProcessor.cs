@@ -3,17 +3,19 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using MonoGame.Framework.Audio;
 using MonoGame.Framework.Content.Pipeline.Audio;
 
 namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     /// <summary>
-    /// A sound effect processor that processes an intermediate AudioContent type. This type encapsulates the source audio content, producing a SoundEffect type that can be used in the game.
+    /// A sound effect processor that processes an intermediate <see cref="AudioContent"/> type. 
+    /// This type encapsulates the source audio content, 
+    /// producing a <see cref="SoundEffect"/> type that can be used in the game.
     /// </summary>
     [ContentProcessor(DisplayName = "Sound Effect - MonoGame")]
     public class SoundEffectProcessor : ContentProcessor<AudioContent, SoundEffectContent>
     {
-
         /// <summary>
         /// Gets or sets the target format quality of the audio content.
         /// </summary>
@@ -42,14 +44,22 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
                 throw new ArgumentNullException(nameof(context));
 
             var profile = AudioProfile.ForPlatform(context.TargetPlatform);
-            var finalQuality = profile.ConvertAudio(context.TargetPlatform, Quality, input);
+            var finalQuality = profile.ConvertAudio(
+                context.TargetPlatform, Quality, input, context.Logger);
 
             if (Quality != finalQuality)
-                context.Logger.LogMessage("Failed to convert using \"{0}\" quality, used \"{1}\" quality", Quality, finalQuality);
+                context.Logger.LogMessage(
+                    "Failed to convert using \"{0}\" quality, used \"{1}\" quality",
+                    Quality,
+                    finalQuality);
 
             return new SoundEffectContent(
-                input.Format.NativeWaveFormat, input.Data, input.DataLength, 
-                input.LoopStart, input.LoopLength, (int)input.Duration.TotalMilliseconds);
+                input.Format.NativeWaveFormat,
+                input.Data,
+                input.DataLength,
+                input.LoopStart,
+                input.LoopLength,
+                input.Duration.TotalMilliseconds);
         }
     }
 }

@@ -186,7 +186,8 @@ namespace MonoGame.Content.Builder
             sourceFile = PathHelper.Normalize(sourceFile);
 
             // Remove duplicates... keep this new one.
-            var previous = _content.FindIndex(e => string.Equals(e.SourceFile, sourceFile, StringComparison.InvariantCultureIgnoreCase));
+            var previous = _content.FindIndex(
+                e => string.Equals(e.SourceFile, sourceFile, StringComparison.InvariantCultureIgnoreCase));
             if (previous != -1)
                 _content.RemoveAt(previous);
 
@@ -230,7 +231,8 @@ namespace MonoGame.Content.Builder
             sourceFile = PathHelper.Normalize(sourceFile);
 
             // Remove duplicates... keep this new one.
-            var previous = _copyItems.FindIndex(e => string.Equals(e.SourceFile, sourceFile, StringComparison.InvariantCultureIgnoreCase));
+            var previous = _copyItems.FindIndex(
+                e => string.Equals(e.SourceFile, sourceFile, StringComparison.InvariantCultureIgnoreCase));
             if (previous != -1)
                 _copyItems.RemoveAt(previous);
 
@@ -260,15 +262,10 @@ namespace MonoGame.Content.Builder
         }
 
         private readonly List<ContentItem> _content = new List<ContentItem>();
-
         private readonly List<CopyItem> _copyItems = new List<CopyItem>();
-
         private PipelineManager _manager;
 
-        public bool HasWork
-        {
-            get { return _content.Count > 0 || _copyItems.Count > 0 || Clean; }
-        }
+        public bool HasWork => _content.Count > 0 || _copyItems.Count > 0 || Clean;
 
         string ReplaceSymbols(string parameter)
         {

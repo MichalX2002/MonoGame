@@ -78,12 +78,12 @@ namespace MonoGame.Framework.Audio
         // Only used from SoundEffectReader.
         internal SoundEffect(
             ReadOnlySpan<byte> header, ReadOnlySpan<byte> data,
-            int durationMs, int loopStart, int loopLength)
+            TimeSpan duration, int loopStart, int loopLength)
         {
             Initialize();
             AssertInitialized();
 
-            _duration = TimeSpan.FromMilliseconds(durationMs);
+            _duration = duration;
 
             // Peek at the format... handle regular PCM data.
             var format = BinaryPrimitives.ReadInt16LittleEndian(header);

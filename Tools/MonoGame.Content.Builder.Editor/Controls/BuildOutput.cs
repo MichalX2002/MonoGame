@@ -150,6 +150,7 @@ namespace MonoGame.Tools.Pipeline
                     _items.Add(new BuildItem { Text = line, Icon = _iconStart });
                     Count = -1;
                     break;
+
                 case OutputState.Cleaning:
                     _items.Add(new BuildItem
                     {
@@ -158,6 +159,7 @@ namespace MonoGame.Tools.Pipeline
                         Description = line
                     });
                     break;
+
                 case OutputState.Skipping:
                     if (_items[_items.Count - 1].Icon == _iconProcessing)
                         _items[_items.Count - 1].Icon = _iconSucceed;
@@ -169,6 +171,7 @@ namespace MonoGame.Tools.Pipeline
                         Description = _output.Filename
                     });
                     break;
+
                 case OutputState.BuildAsset:
                     if (_items[_items.Count - 1].Icon == _iconProcessing)
                         _items[_items.Count - 1].Icon = _iconSucceed;
@@ -180,18 +183,22 @@ namespace MonoGame.Tools.Pipeline
                         Description = _output.Filename
                     });
                     break;
+
                 case OutputState.BuildError:
                     _items[_items.Count - 1].Icon = _iconFail;
                     _items[_items.Count - 1].AddDescription(_output.ErrorMessage);
                     break;
+
                 case OutputState.BuildErrorContinue:
                     _items[_items.Count - 1].AddDescription(_output.ErrorMessage);
                     break;
+
                 case OutputState.BuildWarning:
                     if (_items[_items.Count - 1].Icon == _iconProcessing)
                         _items[_items.Count - 1].Icon = _iconSucceedWithWarnings;
                     _items[_items.Count - 1].AddDescription(_output.ErrorMessage);
                     break;
+
                 case OutputState.BuildEnd:
                     if (_items.Count > 0 && _items[_items.Count - 1].Icon == _iconProcessing)
                         _items[_items.Count - 1].Icon = _iconSucceed;
@@ -202,11 +209,13 @@ namespace MonoGame.Tools.Pipeline
                         Icon = line.Contains("0 failed") ? _iconEndSucceed : _iconEndFailed
                     });
                     break;
+
                 case OutputState.BuildTime:
                     var text = _items[_items.Count - 1].Text.TrimEnd(new[] { '.', ' ' }) + ", " + line;
                     _items[_items.Count - 1].Text = text;
                     Count = _items.Count * 35 - 3;
                     break;
+
                 case OutputState.BuildTerminated:
                     _items.Add(new BuildItem { Text = line, Icon = _iconEndFailed });
                     break;

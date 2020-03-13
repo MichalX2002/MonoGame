@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading;
 
 namespace MonoGame.Framework.Content.Pipeline
@@ -25,8 +26,12 @@ namespace MonoGame.Framework.Content.Pipeline
         }
 
         public static int Run(
-            string command, string arguments,
-            out string stdout, out string stderr, string stdin = null)
+            string command,
+            string arguments,
+            out StringBuilder stdout,
+            out StringBuilder stderr,
+            string stdin = null,
+            ContentBuildLogger logger = null)
         {
             // This particular case is likely to be the most common and thus
             // warrants its own specific error message rather than falling
@@ -39,8 +44,19 @@ namespace MonoGame.Framework.Content.Pipeline
             // lambdas (for the thread functions), so we have to store
             // the data in a temporary variable and then assign these
             // variables to the out parameters.
-            string stdoutTemp = string.Empty;
-            string stderrTmp = string.Empty;
+            var stdoutTmp = new StringBuilder();
+            var stderrTmp = new StringBuilder();
+
+            static void RedirectStream(
+                StreamReader input, StringBuilder output, ContentBuildLogger log = null)
+            {
+                string line;
+                while ((line = input.ReadLine()) != null)
+                {
+                    output.AppendLine(line);
+                    log?.LogMessage(line);
+                }
+            }
 
             EnsureExecutable(fullPath);
 
@@ -60,11 +76,9 @@ namespace MonoGame.Framework.Content.Pipeline
                 };
                 process.Start();
 
-                // We have to run these in threads, because using ReadToEnd
-                // on one stream can deadlock if the other stream's buffer is full.
-                var stdoutThread = new Thread(() => stdoutTemp = process.StandardOutput.ReadToEnd());
-                var stderrThread = new Thread(() => stderrTmp = process.StandardError.ReadToEnd());
-
+                // We have to run these in threads, because reading on one stream can deadlock.
+                var stdoutThread = new Thread(() => RedirectStream(process.StandardOutput, stdoutTmp));
+                var stderrThread = new Thread(() => RedirectStream(process.StandardError, stderrTmp, logger));
                 stdoutThread.Start();
                 stderrThread.Start();
 
@@ -79,7 +93,7 @@ namespace MonoGame.Framework.Content.Pipeline
                 stdoutThread.Join();
                 stderrThread.Join();
 
-                stdout = stdoutTemp;
+                stdout = stdoutTmp;
                 stderr = stderrTmp;
                 return process.ExitCode;
             }

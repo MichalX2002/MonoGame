@@ -10,7 +10,8 @@ namespace MonoGame.Framework.Content.Pipeline
 {
     /// <summary>
     /// Provides methods for reporting informational messages or warnings from content importers and processors.
-    /// Do not use this class to report errors. Instead, report errors by throwing a PipelineException or InvalidContentException.
+    /// Do not use this class to report errors. 
+    /// Instead, report errors by throwing a PipelineException or InvalidContentException.
     /// </summary>
     public abstract class ContentBuildLogger
     {
@@ -27,7 +28,7 @@ namespace MonoGame.Framework.Content.Pipeline
         /// <summary>
         /// Initializes a new instance of ContentBuildLogger.
         /// </summary>
-        protected ContentBuildLogger ()
+        protected ContentBuildLogger()
         {
         }
 
@@ -51,9 +52,7 @@ namespace MonoGame.Framework.Content.Pipeline
         /// </summary>
         /// <param name="contentIdentity">Identity of a content item. If specified, GetCurrentFilename uses this value to refine the search. If no value is specified, the current PushFile state is used.</param>
         /// <returns>Name of the file being processed.</returns>
-        protected string GetCurrentFilename(
-            ContentIdentity contentIdentity
-            )
+        protected string GetCurrentFilename(ContentIdentity contentIdentity)
         {
             if ((contentIdentity != null) && !string.IsNullOrEmpty(contentIdentity.SourceFilename))
                 return GetRelativePath(contentIdentity.SourceFilename, LoggerRootDirectory);
@@ -69,8 +68,7 @@ namespace MonoGame.Framework.Content.Pipeline
         /// <param name="messageArgs">Arguments for the reported message.</param>
         public abstract void LogImportantMessage(
             string message,
-            params object[] messageArgs
-            );
+            params object[] messageArgs);
 
         /// <summary>
         /// Outputs a low priority status message from a content importer or processor.
@@ -79,8 +77,7 @@ namespace MonoGame.Framework.Content.Pipeline
         /// <param name="messageArgs">Arguments for the reported message.</param>
         public abstract void LogMessage(
             string message,
-            params object[] messageArgs
-            );
+            params object[] messageArgs);
 
         /// <summary>
         /// Outputs a warning message from a content importer or processor.
@@ -93,8 +90,7 @@ namespace MonoGame.Framework.Content.Pipeline
             string helpLink,
             ContentIdentity contentIdentity,
             string message,
-            params object[] messageArgs
-            );
+            params object[] messageArgs);
 
         /// <summary>
         /// Outputs a message indicating that a content asset has completed processing.

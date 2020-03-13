@@ -17,7 +17,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
         internal int dataLength;
         internal int loopStart;
         internal int loopLength;
-        internal int duration;
+        internal double duration;
 
         /// <summary>
         /// Initializes a new instance of the SoundEffectContent class.
@@ -28,7 +28,8 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
         /// <param name="loopStart">The start of the loop segment (must be block aligned).</param>
         /// <param name="loopLength">The length of the loop segment (must be block aligned).</param>
         /// <param name="duration">The duration of the wave file in milliseconds.</param>
-        internal SoundEffectContent(byte[] format, Stream data, int dataLength, int loopStart, int loopLength, int duration)
+        internal SoundEffectContent(
+            byte[] format, Stream data, int dataLength, int loopStart, int loopLength, double duration)
         {
             this.format = format;
             this.data = data;

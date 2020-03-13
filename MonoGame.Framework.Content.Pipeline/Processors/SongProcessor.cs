@@ -44,14 +44,20 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             // Convert and write out the song media file.
             var profile = AudioProfile.ForPlatform(context.TargetPlatform);
             var finalQuality = profile.ConvertStreamingAudio(
-                context.TargetPlatform, Quality, input, songInputFile, out string songOutFile);
+                context.TargetPlatform, 
+                Quality,
+                input, 
+                songInputFile, 
+                out string songOutFile, 
+                context.Logger);
 
             // Let the pipeline know about the song file so it can clean things up.
             context.AddOutputFile(songOutFile);
 
             if (Quality != finalQuality)
                 context.Logger.LogMessage(
-                    "Failed to convert using \"{0}\" quality, used \"{1}\" quality", Quality, finalQuality);
+                    "Failed to convert using \"{0}\" quality, used \"{1}\" quality", 
+                    Quality, finalQuality);
 
             // Return the XNB song content.
             var dirPath = Path.GetDirectoryName(context.OutputFilename) + Path.DirectorySeparatorChar;

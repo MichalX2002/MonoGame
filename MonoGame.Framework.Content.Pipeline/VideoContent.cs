@@ -64,9 +64,11 @@ namespace MonoGame.Framework.Content.Pipeline
             
             ExternalTool.Run("ffprobe",
                 string.Format("-i \"{0}\" -show_format -select_streams v -show_streams -print_format ini", Filename), 
-                out string stdout, out _);
+                out var stdout, out _);
 
-            var lines = stdout.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var lines = stdout.ToString().Split(
+                Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
             foreach (var line in lines)
             {
                 if (!line.Contains('='))

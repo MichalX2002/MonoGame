@@ -17,7 +17,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
     [ContentProcessor(DisplayName = "Sprite Font Description - MonoGame")]
     public class FontDescriptionProcessor : ContentProcessor<FontDescription, SpriteFontContent>
     {
-        private static readonly string[] _fontExtensions = new [] { "", ".ttf", ".ttc", ".otf" };
+        private static readonly string[] _fontExtensions = new[] { "", ".ttf", ".ttc", ".otf" };
         private static readonly HashSet<string> _trueTypeFileExtensions =
             new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) { ".ttf", ".ttc", ".otf" };
 
@@ -141,13 +141,13 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
 
         private static List<Glyph> ImportFont(
             FontDescription options,
-            out float lineSpacing, 
+            out float lineSpacing,
             out int yOffsetMin,
             ContentProcessorContext context,
             string fontName)
         {
             string fileExtension = Path.GetExtension(fontName);
-            if (!_trueTypeFileExtensions.Contains(fileExtension)) 
+            if (!_trueTypeFileExtensions.Contains(fileExtension))
                 throw new PipelineException("Unknown file extension " + fileExtension);
 
             IFontImporter importer = new SharpFontImporter();
@@ -217,10 +217,10 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             {
                 ExternalTool.Run(
                     "/bin/bash", $"-c \"fc-match -f '%{{file}}:%{{family}}\\n' '{name}:style={style}'\"",
-                    out string s, out string e);
-                s = s.Trim();
+                    out var s, out var e);
 
-                var split = s.Split(':');
+                var ss = s.ToString().Trim();
+                var split = ss.Split(':');
                 if (split.Length < 2)
                     return string.Empty;
 

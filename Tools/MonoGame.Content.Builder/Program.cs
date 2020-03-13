@@ -10,6 +10,8 @@ namespace MonoGame.Content.Builder
     {
         static int Main(string[] args)
         {
+            args = new[] { @"C:\Projects\Repos\MonoGame\MonoGame.Testing\Content\Content.DesktopGL.mgcb" };
+
             // We force all stderr to redirect to stdout
             // to avoid any out of order console output.
             Console.SetError(Console.Out);

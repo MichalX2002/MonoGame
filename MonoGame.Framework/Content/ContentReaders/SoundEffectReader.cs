@@ -12,7 +12,8 @@ namespace MonoGame.Framework.Content
 {
     internal class SoundEffectReader : ContentTypeReader<SoundEffect>
     {
-        protected internal override SoundEffect Read(ContentReader input, SoundEffect existingInstance)
+        protected internal override SoundEffect Read(
+            ContentReader input, SoundEffect existingInstance)
         {
             // XNB format for SoundEffect...
             //            
@@ -42,7 +43,7 @@ namespace MonoGame.Framework.Content
 
             int loopStart = input.ReadInt32();
             int loopLength = input.ReadInt32();
-            int durationMs = input.ReadInt32();
+            double durationMs = input.ReadDouble();
 
             SoundEffect effect;
             int rawSize = input.ReadInt32();
@@ -52,7 +53,9 @@ namespace MonoGame.Framework.Content
             {
                 var buffer = stream.GetBuffer();
                 var data = buffer.AsSpan(0, (int)stream.Length);
-                return new SoundEffect(header, data, durationMs, loopStart, loopLength)
+                var duration = TimeSpan.FromMilliseconds(durationMs);
+
+                return new SoundEffect(header, data, duration, loopStart, loopLength)
                 {
                     // Store the original asset name for debugging later.
                     Name = input.AssetName

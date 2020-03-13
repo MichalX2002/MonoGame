@@ -12,7 +12,9 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
     /// source audio. This type is produced by the audio importers and used by audio
     /// processors to produce compiled audio assets.
     /// </summary>
-    /// <remarks>Note that AudioContent can load and process audio files that are not supported by the importers.</remarks>
+    /// <remarks>
+    /// Note that AudioContent can load and process audio files that are not supported by the importers.
+    /// </remarks>
     public class AudioContent : ContentItem, IDisposable
     {
         private bool _disposed;
@@ -88,7 +90,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                 // Looks like XNA only cares about type mismatch when
                 // the type is WAV... else it is ok.
                 if ((audioFileType == AudioFileType.Wav || _fileType == AudioFileType.Wav) &&
-                        audioFileType != _fileType)
+                    audioFileType != _fileType)
                     throw new ArgumentException("Incorrect file type!", "audioFileType");
 
                 //// Only provide the data for WAV files.
@@ -128,23 +130,6 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                     Path.GetFileNameWithoutExtension(audioFileName));
                 throw new InvalidContentException(message, ex);
             }
-        }
-
-        /// <summary>
-        /// Transcodes the source audio to the target format and quality.
-        /// </summary>
-        /// <param name="formatType">Format to convert this audio to.</param>
-        /// <param name="quality">Quality of the processed output audio. For streaming formats, it can be one of the following: Low (96 kbps), Medium (128 kbps), Best (192 kbps).  For WAV formats, it can be one of the following: Low (11kHz ADPCM), Medium (22kHz ADPCM), Best (44kHz PCM)</param>
-        /// <param name="saveToFile">
-        /// The name of the file that the converted audio should be saved into.  This is used for SongContent, where
-        /// the audio is stored external to the XNB file.  If this is null, then the converted audio is stored in
-        /// the Data property.
-        /// </param>
-        [Obsolete("You should prefer to use AudioProfile.")]
-        public void ConvertFormat(ConversionFormat formatType, ConversionQuality quality, string saveToFile)
-        {
-            // Call the legacy conversion code.
-            DefaultAudioProfile.ConvertToFormat(this, formatType, quality, saveToFile);
         }
 
         public void SetData(
