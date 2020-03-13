@@ -55,7 +55,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets the aspect ratio of this <see cref="Viewport"/>, which is width / height. 
         /// </summary>
-        public float AspectRatio
+        public readonly float AspectRatio
         {
             get
             {
@@ -70,7 +70,7 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public Rectangle Bounds
         {
-            get => new Rectangle(X, Y, Width, Height);
+            readonly get => new Rectangle(X, Y, Width, Height);
             set
             {
                 X = value.X;
@@ -85,22 +85,7 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public Rectangle TitleSafeArea => GraphicsDevice.GetTitleSafeArea(X, Y, Width, Height);
 
-        /// <summary>
-        /// Constructs a viewport from the given values. The <see cref="MinDepth"/> will be 0.0 and <see cref="MaxDepth"/> will be 1.0.
-        /// </summary>
-        /// <param name="x">The x coordinate of the upper-left corner of the view bounds in pixels.</param>
-        /// <param name="y">The y coordinate of the upper-left corner of the view bounds in pixels.</param>
-        /// <param name="width">The width of the view bounds in pixels.</param>
-        /// <param name="height">The height of the view bounds in pixels.</param>
-        public Viewport(int x, int y, int width, int height)
-        {
-            X = x;
-            Y = y;
-            Width = width;
-            Height = height;
-            MinDepth = 0f;
-            MaxDepth = 1f;
-        }
+        #region Constructors
 
         /// <summary>
         /// Constructs a viewport from the given values.
@@ -122,6 +107,17 @@ namespace MonoGame.Framework.Graphics
         }
 
         /// <summary>
+        /// Constructs a viewport from the given values. The <see cref="MinDepth"/> will be zero and <see cref="MaxDepth"/> will be one.
+        /// </summary>
+        /// <param name="x">The x coordinate of the upper-left corner of the view bounds in pixels.</param>
+        /// <param name="y">The y coordinate of the upper-left corner of the view bounds in pixels.</param>
+        /// <param name="width">The width of the view bounds in pixels.</param>
+        /// <param name="height">The height of the view bounds in pixels.</param>
+        public Viewport(int x, int y, int width, int height) : this(x, y, width, height, minDepth: 0, maxDepth: 1)
+        {
+        }
+
+        /// <summary>
         /// Creates a new instance of <see cref="Viewport"/> struct.
         /// </summary>
         /// <param name="bounds">
@@ -129,6 +125,38 @@ namespace MonoGame.Framework.Graphics
         /// </param>
         public Viewport(in Rectangle bounds) : this(bounds.X, bounds.Y, bounds.Width, bounds.Height)
         {
+        }
+
+        #endregion
+
+        #region Project
+
+        /// <summary>
+        /// Projects a <see cref="Vector3"/> from model space into screen space.
+        /// The source point is transformed from model space to world space by the world matrix,
+        /// then from world space to view space by the view matrix, and
+        /// finally from view space to screen space by the projection matrix.
+        /// </summary>
+        /// <param name="source">The <see cref="Vector3"/> to project.</param>
+        /// <param name="projection">The projection <see cref="Matrix"/>.</param>
+        /// <param name="view">The view <see cref="Matrix"/>.</param>
+        /// <param name="world">The world <see cref="Matrix"/>.</param>
+        /// <param name="result">The vector projected into screen space.</param>
+        public void Project(in Vector3 source, in Matrix projection, in Matrix view, in Matrix world, out Vector3 result)
+        {
+            Matrix.Multiply(Matrix.Multiply(world, view), projection, out var matrix);
+            Vector3.Transform(source, matrix, out result);
+
+            float a = (source.X * matrix.M14) + (source.Y * matrix.M24) + (source.Z * matrix.M34) + matrix.M44;
+            if (!WithinEpsilon(a, 1f))
+            {
+                result.X /= a;
+                result.Y /= a;
+                result.Z /= a;
+            }
+            result.X = ((result.X + 1f) * 0.5f * Width) + X;
+            result.Y = ((-result.Y + 1f) * 0.5f * Height) + Y;
+            result.Z = (result.Z * (MaxDepth - MinDepth)) + MinDepth;
         }
 
         /// <summary>
@@ -141,21 +169,48 @@ namespace MonoGame.Framework.Graphics
         /// <param name="projection">The projection <see cref="Matrix"/>.</param>
         /// <param name="view">The view <see cref="Matrix"/>.</param>
         /// <param name="world">The world <see cref="Matrix"/>.</param>
+        /// <returns>The vector projected into screen space.</returns>
         public Vector3 Project(in Vector3 source, in Matrix projection, in Matrix view, in Matrix world)
         {
-            var matrix = Matrix.Multiply(Matrix.Multiply(world, view), projection);
-            var vector = Vector3.Transform(source, matrix);
-            float a = (source.X * matrix.M14) + (source.Y * matrix.M24) + (source.Z * matrix.M34) + matrix.M44;
+            Project(source, projection, view, world, out var result);
+            return result;
+        }
+
+        #endregion
+
+        #region Unproject
+
+        /// <summary>
+        /// Unprojects a <see cref="Vector3"/> from screen space into model space.
+        /// The source point is transformed from screen space to view space by the inverse of the projection matrix,
+        /// then from view space to world space by the inverse of the view matrix, and
+        /// finally from world space to model space by the inverse of the world matrix.
+        /// Note source.Z must be less than or equal to MaxDepth.
+        /// </summary>
+        /// <param name="source">The <see cref="Vector3"/> to unproject.</param>
+        /// <param name="projection">The projection <see cref="Matrix"/>.</param>
+        /// <param name="view">The view <see cref="Matrix"/>.</param>
+        /// <param name="world">The world <see cref="Matrix"/>.</param>
+        /// <param name="result">The vector vector unprojected into model space.</param>
+        public void Unproject(in Vector3 source, in Matrix projection, in Matrix view, in Matrix world, out Vector3 result)
+        {
+            Matrix.Multiply(world, view, out var wvMatrix);
+            Matrix.Multiply(wvMatrix, projection, out var matrix);
+            Matrix.Invert(matrix, out matrix);
+
+            var usource = new Vector3(
+                ((source.X - X) / Width * 2f) - 1f,
+                -(((source.Y - Y) / Height * 2f) - 1f),
+                (source.Z - MinDepth) / (MaxDepth - MinDepth));
+
+            Vector3.Transform(usource, matrix, out result);
+            float a = (usource.X * matrix.M14) + (usource.Y * matrix.M24) + (usource.Z * matrix.M34) + matrix.M44;
             if (!WithinEpsilon(a, 1f))
             {
-                vector.X /= a;
-                vector.Y /= a;
-                vector.Z /= a;
+                result.X /= a;
+                result.Y /= a;
+                result.Z /= a;
             }
-            vector.X = ((vector.X + 1f) * 0.5f * Width) + X;
-            vector.Y = ((-vector.Y + 1f) * 0.5f * Height) + Y;
-            vector.Z = (vector.Z * (MaxDepth - MinDepth)) + MinDepth;
-            return vector;
         }
 
         /// <summary>
@@ -169,24 +224,14 @@ namespace MonoGame.Framework.Graphics
         /// <param name="projection">The projection <see cref="Matrix"/>.</param>
         /// <param name="view">The view <see cref="Matrix"/>.</param>
         /// <param name="world">The world <see cref="Matrix"/>.</param>
+        /// <returns>The vector vector unprojected into model space.</returns>
         public Vector3 Unproject(in Vector3 source, in Matrix projection, in Matrix view, in Matrix world)
         {
-            var matrix = Matrix.Invert(Matrix.Multiply(Matrix.Multiply(world, view), projection));
-            var usource = new Vector3(
-                ((source.X - X) / Width * 2f) - 1f,
-                -(((source.Y - Y) / Height * 2f) - 1f),
-                (source.Z - MinDepth) / (MaxDepth - MinDepth));
-
-            var vector = Vector3.Transform(usource, matrix);
-            float a = (usource.X * matrix.M14) + (usource.Y * matrix.M24) + (usource.Z * matrix.M34) + matrix.M44;
-            if (!WithinEpsilon(a, 1f))
-            {
-                vector.X /= a;
-                vector.Y /= a;
-                vector.Z /= a;
-            }
-            return vector;
+            Unproject(source, projection, view, world, out var result);
+            return result;
         }
+
+        #endregion
 
         private static bool WithinEpsilon(float a, float b)
         {
@@ -201,11 +246,12 @@ namespace MonoGame.Framework.Graphics
         /// MinDepth:[<see cref="MinDepth"/>] MaxDepth:[<see cref="MaxDepth"/>]}
         /// </summary>
         /// <returns>A <see cref="string"/> representation of this <see cref="Viewport"/>.</returns>
-        public override string ToString()
+        public readonly override string ToString()
         {
-            return "{X:" + X + " Y:" + Y 
-                + " Width:" + Width + " Height:" + Height
-                + " MinDepth:" + MinDepth + " MaxDepth:" + MaxDepth + "}";
+            return
+                "{X:" + X + " Y:" + Y + 
+                " Width:" + Width + " Height:" + Height +
+                " MinDepth:" + MinDepth + " MaxDepth:" + MaxDepth + "}";
         }
     }
 }

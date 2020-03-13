@@ -213,13 +213,8 @@ namespace MonoGame.Framework
             var maxVec = Vector3.MinValue;
             foreach (var ptVector in points)
             {
-                minVec.X = (minVec.X < ptVector.X) ? minVec.X : ptVector.X;
-                minVec.Y = (minVec.Y < ptVector.Y) ? minVec.Y : ptVector.Y;
-                minVec.Z = (minVec.Z < ptVector.Z) ? minVec.Z : ptVector.Z;
-
-                maxVec.X = (maxVec.X > ptVector.X) ? maxVec.X : ptVector.X;
-                maxVec.Y = (maxVec.Y > ptVector.Y) ? maxVec.Y : ptVector.Y;
-                maxVec.Z = (maxVec.Z > ptVector.Z) ? maxVec.Z : ptVector.Z;
+                Vector3.Min(minVec, ptVector, out minVec);
+                Vector3.Max(maxVec, ptVector, out maxVec);
             }
             return new BoundingBox(minVec, maxVec);
         }
@@ -232,8 +227,8 @@ namespace MonoGame.Framework
 
         public static BoundingBox CreateMerged(in BoundingBox original, in BoundingBox additional)
         {
-            var min = Vector3.Min(original.Min, additional.Min);
-            var max = Vector3.Max(original.Min, additional.Min);
+            Vector3.Min(original.Min, additional.Min, out var min);
+            Vector3.Max(original.Min, additional.Min, out var max);
             return new BoundingBox(min, max);
         }
 
@@ -244,7 +239,7 @@ namespace MonoGame.Framework
 
         public override bool Equals(object obj)
         {
-            return obj is BoundingBox other ? this == other : false;
+            return obj is BoundingBox other && this == other;
         }
 
         /// <summary>
@@ -395,15 +390,11 @@ namespace MonoGame.Framework
             return !(a == b);
         }
 
-        internal string DebugDisplayString
-        {
-            get => string.Concat(
-                    "Min( ", Min.DebuggerDisplay, " )  \r\n",
-                    "Max( ", Max.DebuggerDisplay, " )"
-                    );
-        }
+        internal string DebugDisplayString => string.Concat(
+            "Min( ", Min.DebuggerDisplay, " )  \r\n",
+            "Max( ", Max.DebuggerDisplay, " )");
 
-        public override string ToString()
+        public readonly override string ToString()
         {
             return "{{Min:" + Min.ToString() + " Max:" + Max.ToString() + "}}";
         }
@@ -413,12 +404,12 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="min"></param>
         /// <param name="max"></param>
-        public void Deconstruct(out Vector3 min, out Vector3 max)
+        public readonly void Deconstruct(out Vector3 min, out Vector3 max)
         {
             min = Min;
             max = Max;
         }
 
-        #endregion Public Methods
+        #endregion
     }
 }

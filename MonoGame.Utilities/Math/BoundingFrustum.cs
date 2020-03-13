@@ -348,7 +348,7 @@ namespace MonoGame.Framework
 
         private static Vector3 IntersectionPoint(in Plane a, in Plane b, in Plane c)
         {
-            Vector3 bcCross = Vector3.Cross(b.Normal, c.Normal);
+            Vector3.Cross(b.Normal, c.Normal, out var bcCross);
             Vector3 v1 = bcCross * a.D;
             Vector3 v2 = Vector3.Cross(c.Normal, a.Normal) * b.D;
             Vector3 v3 = Vector3.Cross(a.Normal, b.Normal) * c.D;
@@ -363,9 +363,7 @@ namespace MonoGame.Framework
         private void NormalizePlane(ref Plane p)
         {
             float factor = 1f / p.Normal.Length();
-            p.Normal.X *= factor;
-            p.Normal.Y *= factor;
-            p.Normal.Z *= factor;
+            p.Normal *= factor;
             p.D *= factor;
         }
 

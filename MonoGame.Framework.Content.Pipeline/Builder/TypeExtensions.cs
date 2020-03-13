@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace MonoGame.Framework.Content.Pipeline.Builder
 {
-    static public class TypeExtensions
+    public static class TypeExtensions
     {
         public static Color ToColor(this System.Drawing.Color color)
         {

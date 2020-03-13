@@ -56,7 +56,6 @@ namespace MonoGame.Framework
 
         public Plane(in Vector4 value) : this(new Vector3(value.X, value.Y, value.Z), value.W)
         {
-
         }
 
         public Plane(Vector3 a, Vector3 b, Vector3 c)
@@ -64,7 +63,7 @@ namespace MonoGame.Framework
             Vector3 ab = b - a;
             Vector3 ac = c - a;
 
-            Vector3 cross = Vector3.Cross(ab, ac);
+            Vector3.Cross(ab, ac, out var cross);
             Normal = Vector3.Normalize(cross);
             D = -Vector3.Dot(Normal, a);
         }

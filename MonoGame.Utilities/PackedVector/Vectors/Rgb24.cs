@@ -61,7 +61,7 @@ namespace MonoGame.Framework.PackedVector
             ref Vector3 vector3 = ref Unsafe.As<Vector4, Vector3>(ref vector);
             vector3 *= byte.MaxValue;
             vector3 += Vector3.Half;
-            Vector3.Clamp(vector3, Vector3.Zero, Vector3.MaxByteValue, out vector3);
+            vector3.Clamp(Vector3.Zero, Vector3.MaxByteValue);
 
             R = (byte)vector3.X;
             G = (byte)vector3.Y;

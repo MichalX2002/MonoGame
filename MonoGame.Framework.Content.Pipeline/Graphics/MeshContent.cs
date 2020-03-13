@@ -56,9 +56,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                     {
                         for (int i = 0; i < vector3Channel.Count; i++)
                         {
-                            Vector3 normal = vector3Channel[i];
-                            normal = Vector3.TransformNormal(normal, inverseTranspose);
-                            normal = Vector3.Normalize(normal);
+                            Vector3.TransformNormal(vector3Channel[i], inverseTranspose, out var normal);
+                            normal.Normalize();
                             vector3Channel[i] = normal;
                         }
                     }

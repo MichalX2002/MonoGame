@@ -434,10 +434,10 @@ namespace MonoGame.Framework
         /// <param name="b">The second vector.</param>
         /// <returns>The <see cref="Vector4"/> with maximal values from the two vectors.</returns>
         public static Vector4 Max(in Vector4 a, in Vector4 b) => new Vector4(
-            MathHelper.Max(a.X, b.X),
-            MathHelper.Max(a.Y, b.Y),
-            MathHelper.Max(a.Z, b.Z),
-            MathHelper.Max(a.W, b.W));
+            Math.Max(a.X, b.X),
+            Math.Max(a.Y, b.Y),
+            Math.Max(a.Z, b.Z),
+            Math.Max(a.W, b.W));
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains a minimal values from the two vectors.
@@ -446,10 +446,10 @@ namespace MonoGame.Framework
         /// <param name="b">The second vector.</param>
         /// <returns>The <see cref="Vector4"/> with minimal values from the two vectors.</returns>
         public static Vector4 Min(in Vector4 a, in Vector4 b) => new Vector4(
-            MathHelper.Min(a.X, b.X),
-            MathHelper.Min(a.Y, b.Y),
-            MathHelper.Min(a.Z, b.Z),
-            MathHelper.Min(a.W, b.W));
+            Math.Min(a.X, b.X),
+            Math.Min(a.Y, b.Y),
+            Math.Min(a.Z, b.Z),
+            Math.Min(a.W, b.W));
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains a multiplication of two vectors.

@@ -371,7 +371,7 @@ namespace MonoGame.Framework
         public static BoundingSphere CreateMerged(
             in BoundingSphere original, in BoundingSphere additional)
         {
-            Vector3 ocenterToaCenter = Vector3.Subtract(additional.Center, original.Center);
+            Vector3.Subtract(additional.Center, original.Center, out var ocenterToaCenter);
             float distance = ocenterToaCenter.Length();
             if (distance <= original.Radius + additional.Radius)//intersect
             {

@@ -48,8 +48,8 @@ namespace MonoGame.Framework.PackedVector
 
         private static ushort Pack(Vector3 vector)
         {
-            vector = Vector3.Clamp(vector, Vector3.Zero, Vector3.One);
-            
+            vector.Clamp(Vector3.Zero, Vector3.One);
+
             return (ushort)(
                 (((int)MathF.Round(vector.X * 31f) & 0x1F) << 11) |
                 (((int)MathF.Round(vector.Y * 63f) & 0x3F) << 5) |

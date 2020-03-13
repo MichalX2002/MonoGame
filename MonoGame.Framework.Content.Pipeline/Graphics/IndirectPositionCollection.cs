@@ -16,7 +16,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
     /// of the PositionIndices property (of the contained VertexContent object) to index into the Positions 
     /// property of the parent mesh.
     /// </remarks>
-    public sealed class IndirectPositionCollection : IList<Vector3>
+    public sealed class IndirectPositionCollection : IReadOnlyList<Vector3>
     {
         private readonly VertexChannel<int> _positionIndices;
         private readonly GeometryContent _geometry;
@@ -38,14 +38,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 var remap = _positionIndices[index];
                 return _geometry.Parent.Positions[remap];
             }
-            set => throw Readonly();
         }
-
-        /// <summary>
-        /// Gets a value indicating whether this object is read-only.
-        /// </summary>
-        /// <value>true if this object is read-only; false otherwise.</value>
-        bool ICollection<Vector3>.IsReadOnly => true;
 
         /// <summary>
         /// Initializes a new instance of IndirectPositionCollection.
@@ -78,16 +71,6 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         }
 
         /// <summary>
-        /// Gets an enumerator interface for reading the position values.
-        /// </summary>
-        /// <returns>Interface for enumerating the collection of position values.</returns>
-        public IEnumerator<Vector3> GetEnumerator()
-        {
-            for (var i = 0; i < Count; i++)
-                yield return this[i];
-        }
-
-        /// <summary>
         /// Gets the index of the specified position in a collection.
         /// </summary>
         /// <param name="item">Position being searched for.</param>
@@ -101,34 +84,14 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             return -1;
         }
 
-        internal Exception Readonly()
+        /// <summary>
+        /// Gets an enumerator interface for reading the position values.
+        /// </summary>
+        /// <returns>Interface for enumerating the collection of position values.</returns>
+        public IEnumerator<Vector3> GetEnumerator()
         {
-            return new NotSupportedException("The collection is read only!");
-        }
-
-        void ICollection<Vector3>.Add(Vector3 item)
-        {
-            throw Readonly();
-        }
-
-        void ICollection<Vector3>.Clear()
-        {
-            throw Readonly();
-        }
-
-        bool ICollection<Vector3>.Remove(Vector3 item)
-        {
-            throw Readonly();
-        }
-
-        void IList<Vector3>.Insert(int index, Vector3 item)
-        {
-            throw Readonly();
-        }
-
-        void IList<Vector3>.RemoveAt(int index)
-        {
-            throw Readonly();
+            for (var i = 0; i < Count; i++)
+                yield return this[i];
         }
 
         /// <summary>

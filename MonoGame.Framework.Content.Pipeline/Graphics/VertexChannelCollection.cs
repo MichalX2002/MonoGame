@@ -67,7 +67,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         {
             this.vertexContent = vertexContent;
             channels = new List<VertexChannel>();
-             _insertOverload = GetType().GetMethods().First(m => m.Name == "Insert" && m.IsGenericMethodDefinition);
+            _insertOverload = GetType().GetMethods().First(m => m.Name == "Insert" && m.IsGenericMethodDefinition);
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             var channel = this[index];
             // Remove it because we cannot add a new channel with the same name
             RemoveAt(index);
-            
+
             try
             {
                 // Insert a new converted channel at the same index
@@ -236,33 +236,35 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Inserts a new vertex channel at the specified position.
         /// </summary>
-        /// <typeparam name="ElementType">Type of the new channel.</typeparam>
+        /// <typeparam name="TElementType">Type of the new channel.</typeparam>
         /// <param name="index">Index for channel insertion.</param>
         /// <param name="name">Name of the new channel.</param>
         /// <param name="channelData">The new channel.</param>
         /// <returns>The inserted vertex channel.</returns>
-        public VertexChannel<ElementType> Insert<ElementType>(int index, string name, IEnumerable<ElementType> channelData)
+        public VertexChannel<TElementType> Insert<TElementType>(int index, string name, IEnumerable<TElementType> channelData)
         {
             if ((index < 0) || (index > channels.Count))
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
+
             // Don't insert a channel with the same name
             if (IndexOf(name) >= 0)
-                throw new ArgumentException("Vertex channel with name " + name + " already exists");
-            var channel = new VertexChannel<ElementType>(name);
+                throw new ArgumentException("Vertex channel with name " + name + " already exists", nameof(name));
+
+            var channel = new VertexChannel<TElementType>(name);
             if (channelData != null)
             {
                 // Insert the values from the enumerable into the channel
                 channel.InsertRange(0, channelData);
                 // Make sure we have the right number of vertices
                 if (channel.Count != vertexContent.VertexCount)
-                    throw new ArgumentOutOfRangeException("channelData");
+                    throw new ArgumentOutOfRangeException(nameof(channelData));
             }
             else
             {
                 // Insert enough default values to fill the channel
-                channel.InsertRange(0, new ElementType[vertexContent.VertexCount]);
+                channel.InsertRange(0, new TElementType[vertexContent.VertexCount]);
             }
             channels.Insert(index, channel);
             return channel;
@@ -282,7 +284,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public VertexChannel Insert(int index, string name, Type elementType, IEnumerable channelData)
         {
             // Call the generic version of this method
-            return (VertexChannel) _insertOverload.MakeGenericMethod(elementType).Invoke(this, new object[] { index, name, channelData });
+            return (VertexChannel)_insertOverload.MakeGenericMethod(elementType).Invoke(this, new object[] { index, name, channelData });
         }
 
         /// <summary>

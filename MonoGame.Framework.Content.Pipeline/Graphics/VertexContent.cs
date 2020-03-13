@@ -11,15 +11,18 @@ using MonoGame.Framework.PackedVector;
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
-    /// Provides methods and properties for maintaining the vertex data of a GeometryContent.
+    /// Provides methods and properties for maintaining the vertex data of a <see cref="GeometryContent"/>.
     /// </summary>
-    /// <remarks>This class combines a collection of arbitrarily named data channels with a list of position indices that reference the Positions collection of the parent MeshContent.</remarks>
+    /// <remarks>
+    /// This class combines a collection of arbitrarily named data channels with a list of 
+    /// position indices that reference the <see cref="Positions"/> collection of the parent <see cref="MeshContent"/>.
+    /// </remarks>
     public sealed class VertexContent
     {
         IndirectPositionCollection positions;
 
         /// <summary>
-        /// Gets the list of named vertex data channels in the VertexContent.
+        /// Gets the list of named vertex data channels in the <see cref="VertexContent"/>.
         /// </summary>
         /// <value>Collection of vertex data channels.</value>
         public VertexChannelCollection Channels { get; }
@@ -28,16 +31,25 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// Gets the list of position indices.
         /// </summary>
         /// <value>Position of the position index being retrieved.</value>
-        /// <remarks>This list adds a level of indirection between the actual triangle indices and the Positions member of the parent. This indirection preserves the topological vertex identity in cases where a single vertex position is used by triangles that straddle a discontinuity in some other data channel.
-        /// For example, the following code gets the position of the first vertex of the first triangle in a GeometryContent object:
-        /// parent.Positions[Vertices.PositionIndices[Indices[0]]]</remarks>
+        /// <remarks>
+        /// This list adds a level of indirection between the actual triangle indices and <see cref="Positions"/> of the parent. 
+        /// This indirection preserves the topological vertex identity in cases where a single vertex position is
+        /// used by triangles that straddle a discontinuity in some other data channel.
+        /// For example, the following code gets the position of the first vertex of the first triangle in a <see cref="GeometryContent"/> object:
+        /// <code>parent.Positions[Vertices.PositionIndices[Indices[0]]]</code> 
+        /// </remarks>
         public VertexChannel<int> PositionIndices { get; }
 
         /// <summary>
         /// Gets position data from the parent mesh object.
         /// </summary>
         /// <value>Collection of vertex positions for the mesh.</value>
-        /// <remarks>The collection returned from this call provides a virtualized view of the vertex positions for this batch. The collection uses the contents of the PositionIndices property to index into the parent Positions. This collection is read-only. If you need to modify any contained values, edit the PositionIndices or Positions members directly.</remarks>
+        /// <remarks>
+        /// The collection returned from this call provides a virtualized view of the vertex positions for this batch. 
+        /// The collection uses the contents of <see cref="PositionIndices"/> to index into the parent Positions. 
+        /// This collection is read-only. If you need to modify any contained values,
+        /// edit <see cref="PositionIndices"/> or <see cref="Positions"/> members directly.
+        /// </remarks>
         public IndirectPositionCollection Positions => positions;
 
         /// <summary>
@@ -47,7 +59,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public int VertexCount => PositionIndices.Count;
 
         /// <summary>
-        /// Constructs a VertexContent instance.
+        /// Constructs a <see cref="VertexContent"/> instance.
         /// </summary>
         internal VertexContent(GeometryContent geom)
         {
@@ -57,10 +69,10 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         }
 
         /// <summary>
-        /// Appends a new vertex index to the end of the PositionIndices collection.
+        /// Appends a new vertex index to the end of the <see cref="PositionIndices"/> collection.
         /// Other vertex channels will automatically be extended and the new indices populated with default values.
         /// </summary>
-        /// <param name="positionIndex">Index into the MeshContent.Positions member of the parent.</param>
+        /// <param name="positionIndex">Index into the <see cref="MeshContent.Positions"/> member of the parent.</param>
         /// <returns>Index of the new entry. This can be added to the Indices member of the parent.</returns>
         public int Add(int positionIndex)
         {
@@ -68,10 +80,10 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         }
 
         /// <summary>
-        /// Appends multiple vertex indices to the end of the PositionIndices collection.
+        /// Appends multiple vertex indices to the end of the <see cref="PositionIndices"/> collection.
         /// Other vertex channels will automatically be extended and the new indices populated with default values.
         /// </summary>
-        /// <param name="positionIndexCollection">Index into the Positions member of the parent.</param>
+        /// <param name="positionIndexCollection">Index into the <see cref="Positions"/> member of the parent.</param>
         public void AddRange(IEnumerable<int> positionIndexCollection)
         {
             PositionIndices.InsertRange(PositionIndices.Items.Count, positionIndexCollection);
@@ -81,7 +93,9 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// Converts design-time vertex position and channel data into a vertex buffer format that a graphics device can recognize.
         /// </summary>
         /// <returns>A packed vertex buffer.</returns>
-        /// <exception cref="InvalidContentException">One or more of the vertex channel types are invalid or an unrecognized name was passed to VertexElementUsage.</exception>
+        /// <exception cref="InvalidContentException">
+        /// One or more of the vertex channel types are invalid or an unrecognized name was passed to <see cref="VertexElementUsage"/>.
+        /// </exception>
         public VertexBufferContent CreateVertexBuffer()
         {
             var vertexBuffer = new VertexBufferContent(positions.Count);
@@ -170,7 +184,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         }
 
         /// <summary>
-        /// Inserts a new vertex index to the PositionIndices collection.
+        /// Inserts a new vertex index to the <see cref="PositionIndices"/> collection.
         /// Other vertex channels will automatically be extended and the new indices populated with default values.
         /// </summary>
         /// <param name="index">Vertex index to be inserted.</param>
@@ -181,7 +195,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         }
 
         /// <summary>
-        /// Inserts multiple vertex indices to the PositionIndices collection.
+        /// Inserts multiple vertex indices to the <see cref="PositionIndices"/> collection.
         /// Other vertex channels will automatically be extended and the new indices populated with default values.
         /// </summary>
         /// <param name="index">Vertex index to be inserted.</param>
@@ -192,7 +206,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         }
 
         /// <summary>
-        /// Removes a vertex index from the specified location in both PositionIndices and VertexChannel&lt;T&gt;.
+        /// Removes a vertex index from the specified location in both <see cref="PositionIndices"/> and <see cref="Channels"/>.
         /// </summary>
         /// <param name="index">Index of the vertex to be removed.</param>
         public void RemoveAt(int index)
@@ -207,7 +221,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         }
 
         /// <summary>
-        /// Removes a range of vertex indices from the specified location in both PositionIndices and VertexChannel&lt;T&gt;.
+        /// Removes a range of vertex indices from the specified location in both <see cref="PositionIndices"/> and <see cref="Channels"/>.
         /// </summary>
         /// <param name="index">Index of the first vertex index to be removed.</param>
         /// <param name="count">Number of indices to remove.</param>

@@ -198,7 +198,7 @@ namespace MonoGame.Framework
 
         public float this[int index]
         {
-            get
+            readonly get
             {
                 switch (index)
                 {
@@ -262,7 +262,7 @@ namespace MonoGame.Framework
         /// </summary>
         public Vector3 Backward
         {
-            get => new Vector3(M31, M32, M33);
+            readonly get => new Vector3(M31, M32, M33);
             set
             {
                 M31 = value.X;
@@ -276,7 +276,7 @@ namespace MonoGame.Framework
         /// </summary>
         public Vector3 Down
         {
-            get => new Vector3(-M21, -M22, -M23);
+            readonly get => new Vector3(-M21, -M22, -M23);
             set
             {
                 M21 = -value.X;
@@ -290,7 +290,7 @@ namespace MonoGame.Framework
         /// </summary>
         public Vector3 Forward
         {
-            get => new Vector3(-M31, -M32, -M33);
+            readonly get => new Vector3(-M31, -M32, -M33);
             set
             {
                 M31 = -value.X;
@@ -304,7 +304,7 @@ namespace MonoGame.Framework
         /// </summary>
         public Vector3 Left
         {
-            get => new Vector3(-M11, -M12, -M13);
+            readonly get => new Vector3(-M11, -M12, -M13);
             set
             {
                 M11 = -value.X;
@@ -318,7 +318,7 @@ namespace MonoGame.Framework
         /// </summary>
         public Vector3 Right
         {
-            get => new Vector3(M11, M12, M13);
+            readonly get => new Vector3(M11, M12, M13);
             set
             {
                 M11 = value.X;
@@ -332,7 +332,7 @@ namespace MonoGame.Framework
         /// </summary>
         public Vector3 Up
         {
-            get => new Vector3(M21, M22, M23);
+            readonly get => new Vector3(M21, M22, M23);
             set
             {
                 M21 = value.X;
@@ -342,11 +342,11 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Gets or sets the position stored in this matrix.
+        /// Gets or sets the position (M41, M42, M43) stored in this matrix.
         /// </summary>
         public Vector3 Translation
         {
-            get => new Vector3(M41, M42, M43);
+            readonly get => new Vector3(M41, M42, M43);
             set
             {
                 M41 = value.X;
@@ -383,11 +383,12 @@ namespace MonoGame.Framework
             float num = vector.LengthSquared();
             vector = num < 0.0001f
                 ? cameraForwardVector.HasValue ? -cameraForwardVector.Value : Vector3.Forward
-                : Vector3.Multiply(vector, 1f / (MathF.Sqrt(num)));
+                : Vector3.Multiply(vector, 1f / MathF.Sqrt(num));
 
-            Vector3 vector3 = Vector3.Cross(cameraUpVector, vector);
+            Vector3.Cross(cameraUpVector, vector, out var vector3);
             vector3.Normalize();
-            Vector3 vector2 = Vector3.Cross(vector, vector3);
+            
+            Vector3.Cross(vector, vector3, out var vector2);
 
             return new Matrix(
                 m11: vector3.X,
@@ -418,7 +419,7 @@ namespace MonoGame.Framework
         /// <param name="objectForwardVector">Optional object forward vector.</param>
         /// <returns>The <see cref="Matrix"/> for cylindrical billboarding.</returns>
         public static Matrix CreateConstrainedBillboard(
-            Vector3 objectPosition, Vector3 cameraPosition, Vector3 rotateAxis, 
+            Vector3 objectPosition, Vector3 cameraPosition, Vector3 rotateAxis,
             Vector3? cameraForwardVector, Vector3? objectForwardVector)
         {
             Vector3 vector2 = objectPosition - cameraPosition;
@@ -755,7 +756,7 @@ namespace MonoGame.Framework
 
             float num = 1f / (MathF.Tan(fieldOfView * 0.5f));
             float num9 = num / aspectRatio;
-            
+
             return new Matrix(
                 m11: num9,
                 m12: 0,
@@ -902,7 +903,7 @@ namespace MonoGame.Framework
         {
             return new Matrix(
                 m11: scale.X, m12: 0, m13: 0, m14: 0,
-                m21: 0, m22: scale.Y, m23: 0, m24: 0, 
+                m21: 0, m22: scale.Y, m23: 0, m24: 0,
                 m31: 0, m32: 0, m33: scale.Z, m34: 0,
                 m41: 0, m42: 0, m43: 0, m44: 1);
         }
@@ -1034,6 +1035,46 @@ namespace MonoGame.Framework
                 m44: 1);
         }
 
+        #region CreateWorld
+
+        /// <summary>
+        /// Creates a new world <see cref="Matrix"/>.
+        /// </summary>
+        /// <param name="position">The position vector.</param>
+        /// <param name="forward">The forward direction vector.</param>
+        /// <param name="up">The upward direction vector. Usually <see cref="Vector3.Up"/>.</param>
+        /// <param name="result">The world <see cref="Matrix"/>.</param>
+        public static void CreateWorld(in Vector3 position, in Vector3 forward, in Vector3 up, out Matrix result)
+        {
+            Vector3.Cross(forward, up, out var x);
+            x.Normalize();
+            
+            Vector3.Cross(x, forward, out var y);
+            y.Normalize();
+
+            Vector3.Normalize(forward, out var z);
+
+            result.M11 = x.X;
+            result.M12 = x.Y;
+            result.M13 = x.Z;
+            result.M14 = 0;
+
+            result.M21 = y.X;
+            result.M22 = y.Y;
+            result.M23 = y.Z;
+            result.M24 = 0;
+
+            result.M31 = -z.X;
+            result.M32 = -z.Y;
+            result.M33 = -z.Z;
+            result.M34 = 0;
+
+            result.M41 = position.X;
+            result.M42 = position.Y;
+            result.M43 = position.Z;
+            result.M44 = 1f;
+        }
+
         /// <summary>
         /// Creates a new world <see cref="Matrix"/>.
         /// </summary>
@@ -1043,21 +1084,11 @@ namespace MonoGame.Framework
         /// <returns>The world <see cref="Matrix"/>.</returns>
         public static Matrix CreateWorld(in Vector3 position, in Vector3 forward, in Vector3 up)
         {
-            var z = Vector3.Normalize(forward);
-            var x = Vector3.Cross(forward, up);
-            var y = Vector3.Cross(x, forward);
-            x.Normalize();
-            y.Normalize();
-
-            return new Matrix
-            {
-                Right = x,
-                Up = y,
-                Forward = z,
-                Translation = position,
-                M44 = 1f
-            };
+            CreateWorld(position, forward, up, out var result);
+            return result;
         }
+
+        #endregion
 
         /// <summary>
         /// Decomposes this matrix to translation, rotation and scale elements. Returns <see langword="true"/> if matrix can be decomposed; <see langword="false"/> otherwise.
@@ -1127,9 +1158,9 @@ namespace MonoGame.Framework
             float num14 = (num8 * num2) - (num6 * num4);
             float num13 = (num8 * num3) - (num7 * num4);
 
-            return 
+            return
                 (num22 * ((num11 * num18) - (num10 * num17) + (num9 * num16))) -
-                (num21 * ((num12 * num18) - (num10 * num15) + (num9 * num14))) + 
+                (num21 * ((num12 * num18) - (num10 * num15) + (num9 * num14))) +
                 (num20 * ((num12 * num17) - (num11 * num15) + (num9 * num13))) -
                 (num19 * ((num12 * num16) - (num11 * num14) + (num10 * num13)));
         }
@@ -1198,66 +1229,76 @@ namespace MonoGame.Framework
         /// Creates a new <see cref="Matrix"/> which contains inversion of the specified matrix. 
         /// </summary>
         /// <param name="matrix">Source <see cref="Matrix"/>.</param>
+        /// <param name="result">The inverted matrix.</param>
+        public static void Invert(in Matrix matrix, out Matrix result)
+        {
+            float n1 = matrix.M11;
+            float n2 = matrix.M12;
+            float n3 = matrix.M13;
+            float n4 = matrix.M14;
+            float n5 = matrix.M21;
+            float n6 = matrix.M22;
+            float n7 = matrix.M23;
+            float n8 = matrix.M24;
+            float n9 = matrix.M31;
+            float n10 = matrix.M32;
+            float n11 = matrix.M33;
+            float n12 = matrix.M34;
+            float n13 = matrix.M41;
+            float n14 = matrix.M42;
+            float n15 = matrix.M43;
+            float n16 = matrix.M44;
+            float n17 = (float)(n11 * (double)n16 - n12 * (double)n15);
+            float n18 = (float)(n10 * (double)n16 - n12 * (double)n14);
+            float n19 = (float)(n10 * (double)n15 - n11 * (double)n14);
+            float n20 = (float)(n9 * (double)n16 - n12 * (double)n13);
+            float n21 = (float)(n9 * (double)n15 - n11 * (double)n13);
+            float n22 = (float)(n9 * (double)n14 - n10 * (double)n13);
+            float n23 = (float)(n6 * (double)n17 - n7 * (double)n18 + n8 * (double)n19);
+            float n24 = (float)-(n5 * (double)n17 - n7 * (double)n20 + n8 * (double)n21);
+            float n25 = (float)(n5 * (double)n18 - n6 * (double)n20 + n8 * (double)n22);
+            float n26 = (float)-(n5 * (double)n19 - n6 * (double)n21 + n7 * (double)n22);
+            float n27 = (float)(1.0 / (n1 * (double)n23 + n2 * (double)n24 + n3 * (double)n25 + n4 * (double)n26));
+            float n28 = (float)(n7 * (double)n16 - n8 * (double)n15);
+            float n29 = (float)(n6 * (double)n16 - n8 * (double)n14);
+            float n30 = (float)(n6 * (double)n15 - n7 * (double)n14);
+            float n31 = (float)(n5 * (double)n16 - n8 * (double)n13);
+            float n32 = (float)(n5 * (double)n15 - n7 * (double)n13);
+            float n33 = (float)(n5 * (double)n14 - n6 * (double)n13);
+            float n34 = (float)(n7 * (double)n12 - n8 * (double)n11);
+            float n35 = (float)(n6 * (double)n12 - n8 * (double)n10);
+            float n36 = (float)(n6 * (double)n11 - n7 * (double)n10);
+            float n37 = (float)(n5 * (double)n12 - n8 * (double)n9);
+            float n38 = (float)(n5 * (double)n11 - n7 * (double)n9);
+            float n39 = (float)(n5 * (double)n10 - n6 * (double)n9);
+
+            result.M11 = n23 * n27;
+            result.M21 = n24 * n27;
+            result.M31 = n25 * n27;
+            result.M41 = n26 * n27;
+            result.M12 = (float)-(n2 * (double)n17 - n3 * (double)n18 + n4 * (double)n19) * n27;
+            result.M22 = (float)(n1 * (double)n17 - n3 * (double)n20 + n4 * (double)n21) * n27;
+            result.M32 = (float)-(n1 * (double)n18 - n2 * (double)n20 + n4 * (double)n22) * n27;
+            result.M42 = (float)(n1 * (double)n19 - n2 * (double)n21 + n3 * (double)n22) * n27;
+            result.M13 = (float)(n2 * (double)n28 - n3 * (double)n29 + n4 * (double)n30) * n27;
+            result.M23 = (float)-(n1 * (double)n28 - n3 * (double)n31 + n4 * (double)n32) * n27;
+            result.M33 = (float)(n1 * (double)n29 - n2 * (double)n31 + n4 * (double)n33) * n27;
+            result.M43 = (float)-(n1 * (double)n30 - n2 * (double)n32 + n3 * (double)n33) * n27;
+            result.M14 = (float)-(n2 * (double)n34 - n3 * (double)n35 + n4 * (double)n36) * n27;
+            result.M24 = (float)(n1 * (double)n34 - n3 * (double)n37 + n4 * (double)n38) * n27;
+            result.M34 = (float)-(n1 * (double)n35 - n2 * (double)n37 + n4 * (double)n39) * n27;
+            result.M44 = (float)(n1 * (double)n36 - n2 * (double)n38 + n3 * (double)n39) * n27;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Matrix"/> which contains inversion of the specified matrix. 
+        /// </summary>
+        /// <param name="matrix">Source <see cref="Matrix"/>.</param>
         /// <returns>The inverted matrix.</returns>
         public static Matrix Invert(in Matrix matrix)
         {
-            float num1 = matrix.M11;
-            float num2 = matrix.M12;
-            float num3 = matrix.M13;
-            float num4 = matrix.M14;
-            float num5 = matrix.M21;
-            float num6 = matrix.M22;
-            float num7 = matrix.M23;
-            float num8 = matrix.M24;
-            float num9 = matrix.M31;
-            float num10 = matrix.M32;
-            float num11 = matrix.M33;
-            float num12 = matrix.M34;
-            float num13 = matrix.M41;
-            float num14 = matrix.M42;
-            float num15 = matrix.M43;
-            float num16 = matrix.M44;
-            float num17 = (float)(num11 * (double)num16 - num12 * (double)num15);
-            float num18 = (float)(num10 * (double)num16 - num12 * (double)num14);
-            float num19 = (float)(num10 * (double)num15 - num11 * (double)num14);
-            float num20 = (float)(num9 * (double)num16 - num12 * (double)num13);
-            float num21 = (float)(num9 * (double)num15 - num11 * (double)num13);
-            float num22 = (float)(num9 * (double)num14 - num10 * (double)num13);
-            float num23 = (float)(num6 * (double)num17 - num7 * (double)num18 + num8 * (double)num19);
-            float num24 = (float)-(num5 * (double)num17 - num7 * (double)num20 + num8 * (double)num21);
-            float num25 = (float)(num5 * (double)num18 - num6 * (double)num20 + num8 * (double)num22);
-            float num26 = (float)-(num5 * (double)num19 - num6 * (double)num21 + num7 * (double)num22);
-            float num27 = (float)(1.0 / (num1 * (double)num23 + num2 * (double)num24 + num3 * (double)num25 + num4 * (double)num26));
-            float num28 = (float)(num7 * (double)num16 - num8 * (double)num15);
-            float num29 = (float)(num6 * (double)num16 - num8 * (double)num14);
-            float num30 = (float)(num6 * (double)num15 - num7 * (double)num14);
-            float num31 = (float)(num5 * (double)num16 - num8 * (double)num13);
-            float num32 = (float)(num5 * (double)num15 - num7 * (double)num13);
-            float num33 = (float)(num5 * (double)num14 - num6 * (double)num13);
-            float num34 = (float)(num7 * (double)num12 - num8 * (double)num11);
-            float num35 = (float)(num6 * (double)num12 - num8 * (double)num10);
-            float num36 = (float)(num6 * (double)num11 - num7 * (double)num10);
-            float num37 = (float)(num5 * (double)num12 - num8 * (double)num9);
-            float num38 = (float)(num5 * (double)num11 - num7 * (double)num9);
-            float num39 = (float)(num5 * (double)num10 - num6 * (double)num9);
-
-            return new Matrix(
-                m11: num23 * num27,
-                m21: num24 * num27,
-                m31: num25 * num27,
-                m41: num26 * num27,
-                m12: (float)-(num2 * (double)num17 - num3 * (double)num18 + num4 * (double)num19) * num27,
-                m22: (float)(num1 * (double)num17 - num3 * (double)num20 + num4 * (double)num21) * num27,
-                m32: (float)-(num1 * (double)num18 - num2 * (double)num20 + num4 * (double)num22) * num27,
-                m42: (float)(num1 * (double)num19 - num2 * (double)num21 + num3 * (double)num22) * num27,
-                m13: (float)(num2 * (double)num28 - num3 * (double)num29 + num4 * (double)num30) * num27,
-                m23: (float)-(num1 * (double)num28 - num3 * (double)num31 + num4 * (double)num32) * num27,
-                m33: (float)(num1 * (double)num29 - num2 * (double)num31 + num4 * (double)num33) * num27,
-                m43: (float)-(num1 * (double)num30 - num2 * (double)num32 + num3 * (double)num33) * num27,
-                m14: (float)-(num2 * (double)num34 - num3 * (double)num35 + num4 * (double)num36) * num27,
-                m24: (float)(num1 * (double)num34 - num3 * (double)num37 + num4 * (double)num38) * num27,
-                m34: (float)-(num1 * (double)num35 - num2 * (double)num37 + num4 * (double)num39) * num27,
-                m44: (float)(num1 * (double)num36 - num2 * (double)num38 + num3 * (double)num39) * num27);
+            Invert(matrix, out var result);
+            return result;
         }
 
         /// <summary>
@@ -1293,8 +1334,38 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="matrix1">Source <see cref="Matrix"/>.</param>
         /// <param name="matrix2">Source <see cref="Matrix"/>.</param>
+        /// <param name="result">Result of the matrix multiplication.</param>
+        public static void Multiply(in Matrix left, in Matrix right, out Matrix result)
+        {
+            result.M11 = (left.M11 * right.M11) + (left.M12 * right.M21) + (left.M13 * right.M31) + (left.M14 * right.M41);
+            result.M12 = (left.M11 * right.M12) + (left.M12 * right.M22) + (left.M13 * right.M32) + (left.M14 * right.M42);
+            result.M13 = (left.M11 * right.M13) + (left.M12 * right.M23) + (left.M13 * right.M33) + (left.M14 * right.M43);
+            result.M14 = (left.M11 * right.M14) + (left.M12 * right.M24) + (left.M13 * right.M34) + (left.M14 * right.M44);
+            result.M21 = (left.M21 * right.M11) + (left.M22 * right.M21) + (left.M23 * right.M31) + (left.M24 * right.M41);
+            result.M22 = (left.M21 * right.M12) + (left.M22 * right.M22) + (left.M23 * right.M32) + (left.M24 * right.M42);
+            result.M23 = (left.M21 * right.M13) + (left.M22 * right.M23) + (left.M23 * right.M33) + (left.M24 * right.M43);
+            result.M24 = (left.M21 * right.M14) + (left.M22 * right.M24) + (left.M23 * right.M34) + (left.M24 * right.M44);
+            result.M31 = (left.M31 * right.M11) + (left.M32 * right.M21) + (left.M33 * right.M31) + (left.M34 * right.M41);
+            result.M32 = (left.M31 * right.M12) + (left.M32 * right.M22) + (left.M33 * right.M32) + (left.M34 * right.M42);
+            result.M33 = (left.M31 * right.M13) + (left.M32 * right.M23) + (left.M33 * right.M33) + (left.M34 * right.M43);
+            result.M34 = (left.M31 * right.M14) + (left.M32 * right.M24) + (left.M33 * right.M34) + (left.M34 * right.M44);
+            result.M41 = (left.M41 * right.M11) + (left.M42 * right.M21) + (left.M43 * right.M31) + (left.M44 * right.M41);
+            result.M42 = (left.M41 * right.M12) + (left.M42 * right.M22) + (left.M43 * right.M32) + (left.M44 * right.M42);
+            result.M43 = (left.M41 * right.M13) + (left.M42 * right.M23) + (left.M43 * right.M33) + (left.M44 * right.M43);
+            result.M44 = (left.M41 * right.M14) + (left.M42 * right.M24) + (left.M43 * right.M34) + (left.M44 * right.M44);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Matrix"/> that contains a multiplication of two matrix.
+        /// </summary>
+        /// <param name="matrix1">Source <see cref="Matrix"/>.</param>
+        /// <param name="matrix2">Source <see cref="Matrix"/>.</param>
         /// <returns>Result of the matrix multiplication.</returns>
-        public static Matrix Multiply(in Matrix left, in Matrix right) => left * right;
+        public static Matrix Multiply(in Matrix left, in Matrix right)
+        {
+            Multiply(left, right, out var result);
+            return result;
+        }
 
         /// <summary>
         /// Creates a new <see cref="Matrix"/> that contains a multiplication of <see cref="Matrix"/> and a scalar.
@@ -1412,23 +1483,7 @@ namespace MonoGame.Framework
         /// </remarks>
         public static Matrix operator *(in Matrix left, in Matrix right)
         {
-            return new Matrix(
-                (left.M11 * right.M11) + (left.M12 * right.M21) + (left.M13 * right.M31) + (left.M14 * right.M41),
-                (left.M11 * right.M12) + (left.M12 * right.M22) + (left.M13 * right.M32) + (left.M14 * right.M42),
-                (left.M11 * right.M13) + (left.M12 * right.M23) + (left.M13 * right.M33) + (left.M14 * right.M43),
-                (left.M11 * right.M14) + (left.M12 * right.M24) + (left.M13 * right.M34) + (left.M14 * right.M44),
-                (left.M21 * right.M11) + (left.M22 * right.M21) + (left.M23 * right.M31) + (left.M24 * right.M41),
-                (left.M21 * right.M12) + (left.M22 * right.M22) + (left.M23 * right.M32) + (left.M24 * right.M42),
-                (left.M21 * right.M13) + (left.M22 * right.M23) + (left.M23 * right.M33) + (left.M24 * right.M43),
-                (left.M21 * right.M14) + (left.M22 * right.M24) + (left.M23 * right.M34) + (left.M24 * right.M44),
-                (left.M31 * right.M11) + (left.M32 * right.M21) + (left.M33 * right.M31) + (left.M34 * right.M41),
-                (left.M31 * right.M12) + (left.M32 * right.M22) + (left.M33 * right.M32) + (left.M34 * right.M42),
-                (left.M31 * right.M13) + (left.M32 * right.M23) + (left.M33 * right.M33) + (left.M34 * right.M43),
-                (left.M31 * right.M14) + (left.M32 * right.M24) + (left.M33 * right.M34) + (left.M34 * right.M44),
-                (left.M41 * right.M11) + (left.M42 * right.M21) + (left.M43 * right.M31) + (left.M44 * right.M41),
-                (left.M41 * right.M12) + (left.M42 * right.M22) + (left.M43 * right.M32) + (left.M44 * right.M42),
-                (left.M41 * right.M13) + (left.M42 * right.M23) + (left.M43 * right.M33) + (left.M44 * right.M43),
-                (left.M41 * right.M14) + (left.M42 * right.M24) + (left.M43 * right.M34) + (left.M44 * right.M44));
+            return Multiply(left, right);
         }
 
         /// <summary>
@@ -1506,7 +1561,7 @@ namespace MonoGame.Framework
         /// {M41:[<see cref="M41"/>] M42:[<see cref="M42"/>] M43:[<see cref="M43"/>] M44:[<see cref="M44"/>]}
         /// </summary>
         /// <returns>A <see cref="string"/> representation of this <see cref="Matrix"/>.</returns>
-        public override string ToString()
+        public readonly override string ToString()
         {
             return "{M11:" + M11 + " M12:" + M12 + " M13:" + M13 + " M14:" + M14 + "}"
                 + " {M21:" + M21 + " M22:" + M22 + " M23:" + M23 + " M24:" + M24 + "}"

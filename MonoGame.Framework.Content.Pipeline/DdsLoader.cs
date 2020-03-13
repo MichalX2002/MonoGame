@@ -415,8 +415,8 @@ namespace MonoGame.Framework.Content.Pipeline
                         }
                         content.SetPixelData(bytes);
                         mipMaps.Add(content);
-                        w = MathHelper.Max(1, w / 2);
-                        h = MathHelper.Max(1, h / 2);
+                        w = Math.Max(1, w / 2);
+                        h = Math.Max(1, h / 2);
                     }
                     output.Faces[f] = mipMaps;
                 }
