@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Framework.PackedVector
 {
     /// <summary>
-    /// Packed pixel type containing four unsigned 16-bit XYZW components.
+    /// Packed vector type containing four unsigned 16-bit XYZW components.
     /// <para>
     /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
     /// </para>
@@ -17,8 +17,6 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct Rgba64 : IPackedVector<ulong>, IEquatable<Rgba64>, IPixel
     {
-        private static readonly Vector4 Max = new Vector4(ushort.MaxValue);
-
         VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Red, sizeof(ushort) * 8),
             new VectorComponent(VectorComponentType.Green, sizeof(ushort) * 8),
@@ -82,27 +80,34 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Rgba64, ulong>(ref this) = value;
         }
 
-        public void FromVector4(Vector4 vector)
-        {
-            vector *= ushort.MaxValue;
-            vector += Vector4.Half;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Max);
+        public void FromVector4(in Vector4 vector) => FromScaledVector4(vector);
 
-            R = (ushort)vector.X;
-            G = (ushort)vector.Y;
-            B = (ushort)vector.Z;
-            A = (ushort)vector.W;
+        public readonly void ToVector4(out Vector4 vector) => ToScaledVector4(out vector);
+
+        public void FromScaledVector4(in Vector4 scaledVector)
+        {
+            Vector4.Multiply(scaledVector, ushort.MaxValue, out var v);
+            v += Vector4.Half;
+            v.Clamp(0, ushort.MaxValue);
+
+            R = (ushort)v.X;
+            G = (ushort)v.Y;
+            B = (ushort)v.Z;
+            A = (ushort)v.W;
         }
 
-        public readonly Vector4 ToVector4() => new Vector4(R, G, B, A) / ushort.MaxValue;
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        {
+            scaledVector.X = R;
+            scaledVector.Y = G;
+            scaledVector.Z = B;
+            scaledVector.W = A;
+            scaledVector /= ushort.MaxValue;
+        }
 
         #endregion
 
         #region IPixel
-
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
-
-        public readonly Vector4 ToScaledVector4() => ToVector4();
 
         public readonly void ToColor(ref Color destination)
         {

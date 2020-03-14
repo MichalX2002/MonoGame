@@ -894,7 +894,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
                     // Matching pipeline build event found.
                     string existingName = matchingEvent.DestFile;
                     existingName = PathHelper.GetRelativePath(OutputDirectory, existingName);
-                    existingName = existingName.Substring(0, existingName.Length - 4);   // Remove ".xnb".
+                    existingName = Path.ChangeExtension(existingName, null); // Remove ".xnb".
                     return existingName;
                 }
 

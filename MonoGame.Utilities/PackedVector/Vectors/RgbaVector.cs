@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Framework.PackedVector
 {
     /// <summary>
-    /// Packed pixel type containing four 32-bit floating-point XYZW components.
+    /// Packed vector type containing four 32-bit floating-point XYZW components.
     /// <para>
     /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
     /// </para>
@@ -41,7 +41,7 @@ namespace MonoGame.Framework.PackedVector
         /// Constructs the packed vector with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public RgbaVector(Vector4 vector) : this(vector.X, vector.Y, vector.Z, vector.W)
+        public RgbaVector(in Vector4 vector) : this(vector.X, vector.Y, vector.Z, vector.W)
         {
         }
 
@@ -49,33 +49,48 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPackedVector
 
-        public void FromVector4(Vector4 vector) => this = Unsafe.As<Vector4, RgbaVector>(ref vector);
+        public void FromVector4(in Vector4 vector) => FromScaledVector4(vector);
 
-        public readonly Vector4 ToVector4() => UnsafeUtils.As<RgbaVector, Vector4>(this);
+        public readonly void ToVector4(out Vector4 vector) => ToScaledVector4(out vector);
+
+        public void FromScaledVector4(in Vector4 scaledVector)
+        {
+            R = scaledVector.X;
+            G = scaledVector.Y;
+            B = scaledVector.Z;
+            A = scaledVector.W;
+        }
+
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        {
+            scaledVector.X = R;
+            scaledVector.Y = G;
+            scaledVector.Z = B;
+            scaledVector.W = A;
+        }
 
         #endregion
 
         #region IPixel
 
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
+        public void FromGray8(Gray8 source) => source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
 
-        public readonly Vector4 ToScaledVector4() => ToVector4();
+        public void FromGray16(Gray16 source) => source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
 
-        public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(ToScaledVector4());
+        public void FromGrayAlpha16(GrayAlpha16 source) => source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
 
-        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromRgb24(Rgb24 source) => source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
 
-        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromRgb48(Rgb48 source) => source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
 
-        public void FromGrayAlpha16(GrayAlpha16 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromRgba64(Rgba64 source) => source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
 
-        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromColor(Color source) => source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
 
-        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
-
-        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
-
-        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
+        public readonly void ToColor(ref Color destination)
+        {
+            destination.FromScaledVector4(UnsafeUtils.As<RgbaVector, Vector4>(this));
+        }
 
         #endregion
 
@@ -99,7 +114,7 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => ToVector4().GetHashCode();
+        public override int GetHashCode() => HashCode.Combine(R, G, B, A);
 
         #endregion
     }

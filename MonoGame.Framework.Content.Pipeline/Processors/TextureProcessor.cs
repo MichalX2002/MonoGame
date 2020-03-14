@@ -72,8 +72,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
 
                         if (ColorKeyEnabled)
                         {
-                            var v4 = ColorKeyColor.ToScaledVector4();
-                            var original = new RgbaVector(v4.X, v4.Y, v4.Z, v4.W);
+                            var original = new RgbaVector(ColorKeyColor.ToScaledVector4());
                             bmp.ReplaceColor(original, new RgbaVector(0, 0, 0, 0));
                         }
 

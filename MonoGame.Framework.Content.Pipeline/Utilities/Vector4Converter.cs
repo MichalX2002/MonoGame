@@ -46,7 +46,8 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities
 
         Vector4 IVector4Converter<Color>.ToVector4(Color value)
         {
-            return value.ToVector4();
+            value.ToVector4(out var vector);
+            return vector;
         }
 
         Vector4 IVector4Converter<Vector4>.ToVector4(Vector4 value)

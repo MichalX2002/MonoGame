@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Framework.PackedVector
 {
     /// <summary>
-    /// Packed pixel type containing signed 8-bit XY components.
+    /// Packed vector type containing signed 8-bit XY components.
     /// <para>
     /// Ranges from [0, 0, 0, 1] to [1, 1, 0, 1] in vector form.
     /// </para>
@@ -64,15 +64,14 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Rg16, ushort>(ref this) = value;
         }
 
-        public void FromVector4(Vector4 vector)
+        public void FromVector4(in Vector4 vector)
         {
-            ref Vector2 vector2 = ref Unsafe.As<Vector4, Vector2>(ref vector);
-            vector2 *= byte.MaxValue;
-            vector2 += Vector2.Half;
-            vector2 = Vector2.Clamp(vector2, Vector2.Zero, Vector2.MaxByteValue);
+            Vector2.Multiply(vector.ToVector2(), byte.MaxValue, out var v);
+            v.Add(Vector2.Half);
+            v.Clamp(v, 0, byte.MaxValue);
 
-            R = (byte)vector.X;
-            G = (byte)vector.Y;
+            R = (byte)v.X;
+            G = (byte)v.Y;
         }
 
         public readonly Vector4 ToVector4() => new Vector4(ToVector2(), 0, 1f);

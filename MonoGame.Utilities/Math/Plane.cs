@@ -181,9 +181,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Deconstruction method for <see cref="Plane"/>.
         /// </summary>
-        /// <param name="normal"></param>
-        /// <param name="d"></param>
-        public void Deconstruct(out Vector3 normal, out float d)
+        public readonly void Deconstruct(out Vector3 normal, out float d)
         {
             normal = Normal;
             d = D;

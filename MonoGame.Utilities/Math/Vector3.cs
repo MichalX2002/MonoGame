@@ -168,25 +168,24 @@ namespace MonoGame.Framework
 
         #region IPackedVector
 
-        public void FromVector4(Vector4 vector)
+        public void FromVector4(in Vector4 vector)
         {
-            this = vector.ToVector3();
+            X = vector.X;
+            Y = vector.Y;
+            Z = vector.Z;
         }
 
-        public readonly Vector4 ToVector4()
+        public readonly void ToVector4(out Vector4 vector)
         {
-            return new Vector4(this, 1);
+            vector.X = X;
+            vector.Y = Y;
+            vector.Z = Z;
+            vector.W = 1f;
         }
 
-        void IPackedVector.FromScaledVector4(Vector4 vector)
-        {
-            FromVector4(vector);
-        }
+        void IPackedVector.FromScaledVector4(in Vector4 scaledVector) => FromVector4(scaledVector);
 
-        readonly Vector4 IPackedVector.ToScaledVector4()
-        {
-            return ToVector4();
-        }
+        readonly void IPackedVector.ToScaledVector4(out Vector4 scaledVector) => ToVector4(out scaledVector);
 
         #endregion
 
@@ -194,42 +193,50 @@ namespace MonoGame.Framework
 
         public readonly void ToColor(ref Color destination)
         {
-            destination.FromVector4(ToVector4());
+            ToVector4(out var vector);
+            destination.FromVector4(vector);
         }
 
         void IPixel.FromGray8(Gray8 source)
         {
-            FromVector4(source.ToScaledVector4());
+            source.ToScaledVector4(out var vector);
+            FromVector4(vector);
         }
 
         void IPixel.FromGray16(Gray16 source)
         {
-            FromVector4(source.ToScaledVector4());
+            source.ToScaledVector4(out var vector);
+            FromVector4(vector);
         }
 
         void IPixel.FromGrayAlpha16(GrayAlpha16 source)
         {
-            FromVector4(source.ToScaledVector4());
+            source.ToScaledVector4(out var vector);
+            FromVector4(vector);
         }
 
         void IPixel.FromRgb24(Rgb24 source)
         {
-            FromVector4(source.ToScaledVector4());
+            source.ToScaledVector4(out var vector);
+            FromVector4(vector);
         }
 
         public void FromColor(Color source)
         {
-            FromVector4(source.ToScaledVector4());
+            source.ToScaledVector4(out var vector);
+            FromVector4(vector);
         }
 
         void IPixel.FromRgb48(Rgb48 source)
         {
-            FromVector4(source.ToScaledVector4());
+            source.ToScaledVector4(out var vector);
+            FromVector4(vector);
         }
 
         void IPixel.FromRgba64(Rgba64 source)
         {
-            FromVector4(source.ToScaledVector4());
+            source.ToScaledVector4(out var vector);
+            FromVector4(vector);
         }
 
         #endregion
@@ -602,10 +609,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the hash code of this <see cref="Vector3"/>.
         /// </summary>
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(X, Y, Z);
-        }
+        public override int GetHashCode() => HashCode.Combine(X, Y, Z);
 
         #endregion
 

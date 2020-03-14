@@ -103,12 +103,14 @@ namespace MonoGame.Imaging.Pixels
             // some for-loops in the following cases use "count - 1" so
             // we can copy leftover bytes if the request length is irregular
             int i = 0;
+            Vector4 tmpVector;
             switch (components)
             {
                 case 1:
                     for (; i < count; i++, bufferOffset++)
                     {
-                        pixelConverter.Gray.FromScaledVector4(sourceRow[i].ToScaledVector4());
+                        sourceRow[i].ToScaledVector4(out tmpVector);
+                        pixelConverter.Gray.FromScaledVector4(tmpVector);
                         destination[bufferOffset] = pixelConverter.Raw[0];
                     }
                     return true;
@@ -119,21 +121,27 @@ namespace MonoGame.Imaging.Pixels
                 case 2:
                     for (; i < count - 1; i++, bufferOffset += sizeof(GrayAlpha16))
                     {
-                        pixelConverter.GrayAlpha.FromScaledVector4(sourceRow[i].ToScaledVector4());
+                        sourceRow[i].ToScaledVector4(out tmpVector);
+                        pixelConverter.GrayAlpha.FromScaledVector4(tmpVector);
                         for (int j = 0; j < sizeof(GrayAlpha16); j++)
                             destination[j + bufferOffset] = pixelConverter.Raw[j];
                     }
-                    pixelConverter.GrayAlpha.FromScaledVector4(sourceRow[i].ToScaledVector4());
+
+                    sourceRow[i].ToScaledVector4(out tmpVector);
+                    pixelConverter.GrayAlpha.FromScaledVector4(tmpVector);
                     return false;
 
                 case 3:
                     for (; i < count - 1; i++, bufferOffset += sizeof(Rgb24))
                     {
-                        pixelConverter.Rgb.FromScaledVector4(sourceRow[i].ToScaledVector4());
+                        sourceRow[i].ToScaledVector4(out tmpVector);
+                        pixelConverter.Rgb.FromScaledVector4(tmpVector);
                         for (int j = 0; j < sizeof(Rgb24); j++)
                             destination[j + bufferOffset] = pixelConverter.Raw[j];
                     }
-                    pixelConverter.Rgb.FromScaledVector4(sourceRow[i].ToScaledVector4());
+
+                    sourceRow[i].ToScaledVector4(out tmpVector);
+                    pixelConverter.Rgb.FromScaledVector4(tmpVector);
                     return false;
 
                 case 4:

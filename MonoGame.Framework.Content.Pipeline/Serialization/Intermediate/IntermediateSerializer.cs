@@ -250,7 +250,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             // If this is an array then handle it separately.
             if (typeName.EndsWith("[]"))
             {
-                var arrayType = typeName.Substring(0, typeName.Length - 2);
+                var arrayType = typeName[0..^2];
                 foundType = FindType(arrayType);
                 return foundType?.MakeArrayType();
             }

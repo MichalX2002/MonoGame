@@ -23,16 +23,12 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Vector2 : IEquatable<Vector2>, IPackedVector<ulong>, IPixel
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(float) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(float) * 8));
-
-        #region Public Constants
-
         /// <summary>
         /// <see cref="Vector2"/> with all values set to <see cref="byte.MaxValue"/>.
         /// </summary>
         internal static readonly Vector2 MaxByteValue = new Vector2(byte.MaxValue);
+
+        #region Public Constants
 
         /// <summary>
         /// Returns a <see cref="Vector2"/> with all components set to 0.
@@ -61,7 +57,12 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #region Public Fields
+        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Red, sizeof(float) * 8),
+            new VectorComponent(VectorComponentType.Green, sizeof(float) * 8));
+
+        private string DebuggerDisplay => string.Concat(
+            X.ToString(), "  ", Y.ToString());
 
         /// <summary>
         /// The x coordinate of this <see cref="Vector2"/>.
@@ -74,11 +75,6 @@ namespace MonoGame.Framework
         /// </summary>
         [DataMember]
         public float Y;
-
-        #endregion
-
-        private string DebuggerDisplay => string.Concat(
-            X.ToString(), "  ", Y.ToString());
 
         #region Constructors
 
@@ -114,48 +110,74 @@ namespace MonoGame.Framework
             set => Unsafe.As<Vector2, ulong>(ref this) = value;
         }
 
-        public void FromVector4(Vector4 vector)
+        public void FromVector4(in Vector4 vector)
         {
             X = vector.X;
             Y = vector.Y;
         }
 
-        public readonly Vector4 ToVector4() => new Vector4(X, Y, 0, 1);
+        public readonly void ToVector4(out Vector4 vector)
+        {
+            vector.X = X;
+            vector.Y = Y;
+            vector.Z = 0;
+            vector.W = 1;
+        }
 
-        void IPackedVector.FromScaledVector4(Vector4 vector) => FromVector4(vector);
+        void IPackedVector.FromScaledVector4(in Vector4 scaledVector)
+        {
+            FromVector4(scaledVector);
+        }
 
-        readonly Vector4 IPackedVector.ToScaledVector4() => ToVector4();
+        readonly void IPackedVector.ToScaledVector4(out Vector4 scaledVector)
+        {
+            ToVector4(out scaledVector);
+        }
 
         #endregion
 
         #region IPixel
 
-        public readonly void ToColor(ref Color destination) => destination.FromVector4(ToVector4());
+        public readonly void ToColor(ref Color destination)
+        {
+            ToVector4(out var vector);
+            destination.FromScaledVector4(vector);
+        }
 
         void IPixel.FromGray8(Gray8 source) => FromVector4(source.ToScaledVector4());
 
         void IPixel.FromGray16(Gray16 source) => FromVector4(source.ToScaledVector4());
 
-        void IPixel.FromGrayAlpha16(GrayAlpha16 source) => FromVector4(source.ToScaledVector4());
+        void IPixel.FromGrayAlpha16(GrayAlpha16 source)
+        {
+            source.ToScaledVector4(out var result);
+            FromVector4(result);
+        }
 
         void IPixel.FromRgb24(Rgb24 source) => FromVector4(source.ToScaledVector4());
 
-        public void FromColor(Color source) => FromVector4(source.ToScaledVector4());
+        public void FromColor(Color source)
+        {
+            source.ToScaledVector4(out var result);
+            FromVector4(result);
+        }
 
         void IPixel.FromRgb48(Rgb48 source) => FromVector4(source.ToScaledVector4());
 
-        void IPixel.FromRgba64(Rgba64 source) => FromVector4(source.ToScaledVector4());
+        public void FromRgba64(Rgba64 source) => FromVector4(source.ToScaledVector4());
+
+        #endregion
+
+        #region ToVector3
+
+        /// <summary>
+        /// Gets the <see cref="Vector3"/> representation of this <see cref="Vector2"/>.
+        /// </summary>
+        public readonly Vector3 ToVector3() => new Vector3(X, Y, 0);
 
         #endregion
 
         #region Public Methods
-
-        /// <summary>
-        /// Gets a <see cref="Vector3"/> representation for this
-        /// object with <see cref="Vector3.Z"/> axis set to 0.
-        /// </summary>
-        /// <returns>A <see cref="Vector3"/> representation for this object.</returns>
-        public readonly Vector3 ToVector3() => new Vector3(X, Y, 0);
 
         /// <summary>
         /// Performs vector addition on <paramref name="a"/> and <paramref name="b"/>.
@@ -306,14 +328,7 @@ namespace MonoGame.Framework
         /// Gets the hash code of this <see cref="Vector2"/>.
         /// </summary>
         /// <returns>Hash code of this <see cref="Vector2"/>.</returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int code = 7 + X.GetHashCode();
-                return code * 31 + Y.GetHashCode();
-            }
-        }
+        public override int GetHashCode() => HashCode.Combine(X, Y);
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains hermite spline interpolation.

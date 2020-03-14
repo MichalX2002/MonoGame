@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Framework.PackedVector
 {
     /// <summary>
-    /// Packed pixel type containing three unsigned 8-bit XYZ components.
+    /// Packed vector type containing three unsigned 8-bit XYZ components.
     /// <para>
     /// Ranges from [0, 0, 0, 1] to [1, 1, 1, 1] in vector form.
     /// </para>
@@ -42,7 +42,8 @@ namespace MonoGame.Framework.PackedVector
 
         public Bgr24(Vector3 vector) : this()
         {
-            FromVector4(vector.ToVector4());
+            vector.ToVector4(out var v);
+            FromScaledVector4(v);
         }
 
         public Bgr24(float x, float y, float z) : this(new Vector3(x, y, z))
@@ -55,22 +56,29 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPackedVector
 
-        public void FromVector4(Vector4 vector)
+        public void FromVector4(in Vector4 vector) => FromScaledVector4(vector);
+
+        public readonly void ToVector4(out Vector4 vector) => ToScaledVector4(out vector);
+
+        public void FromScaledVector4(in Vector4 scaledVector)
         {
             Rgb24 rgb = default;
-            rgb.FromVector4(vector);
+            rgb.FromScaledVector4(scaledVector);
             FromRgb24(rgb);
         }
 
-        public readonly Vector4 ToVector4() => new Vector4(ToVector3(), 1);
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        {
+            scaledVector.X = R;
+            scaledVector.Y = G;
+            scaledVector.Z = B;
+            scaledVector.W = byte.MaxValue;
+            scaledVector /= byte.MaxValue;
+        }
 
         #endregion
 
         #region IPixel
-
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
-
-        public readonly Vector4 ToScaledVector4() => ToVector4();
 
         public readonly void ToColor(ref Color destination)
         {
@@ -138,16 +146,7 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int code = 17;
-                code = code * 23 + B;
-                code = code * 23 + G;
-                return code * 23 + R;
-            }
-        }
+        public override int GetHashCode() => HashCode.Combine(R, G, B);
 
         #endregion
     }

@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Framework.PackedVector
 {
     /// <summary>
-    /// Packed pixel type containing four unsigned 16-bit XYZW components.
+    /// Packed vector type containing four unsigned 16-bit XYZW components.
     /// <para>
     /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
     /// </para>

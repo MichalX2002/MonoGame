@@ -24,45 +24,38 @@ namespace MonoGame.Framework.PackedVector
 
         public Gray8(byte luminance) => L = luminance;
 
-        private static void Pack(ref Vector4 vector, out byte luminance, out byte alpha)
-        {
-            vector *= Vector4.MaxByteValue;
-            vector += Vector4.Half;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxByteValue);
-
-            luminance = PackedVectorHelper.Get8BitBT709Luminance(
-                (byte)vector.X, (byte)vector.Y, (byte)vector.Z);
-            alpha = (byte)vector.W;
-        }
-
         public byte PackedValue { readonly get => L; set => L = value; }
 
-        public void FromVector4(Vector4 vector) => Pack(ref vector, out L, out _);
+        public void FromVector4(in Vector4 vector) => FromScaledVector4(vector);
 
-        public readonly Vector4 ToVector4()
+        public readonly void ToVector4(out Vector4 vector) => ToScaledVector4(out vector);
+
+        public void FromScaledVector4(in Vector4 scaledVector)
         {
-            float l = L / 255f;
-            return new Vector4(l, l, l, 1);
+            Vector4.Multiply(scaledVector, byte.MaxValue, out var v);
+            v += Vector4.Half;
+            v.Clamp(0, byte.MaxValue);
+
+            L = PackedVectorHelper.Get8BitBT709Luminance((byte)v.X, (byte)v.Y, (byte)v.Z);
+        }
+
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        {
+            scaledVector.X = scaledVector.Y = scaledVector.Z = L / (float)byte.MaxValue;
+            scaledVector.W = 1;
         }
 
         #region IPixel
 
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
-
-        public readonly Vector4 ToScaledVector4() => ToVector4();
-
         public void FromGray8(Gray8 source) => L = source.L;
 
-        public void FromGray16(Gray16 source) =>
-            L = PackedVectorHelper.DownScale16To8Bit(source.L);
+        public void FromGray16(Gray16 source) => L = PackedVectorHelper.DownScale16To8Bit(source.L);
 
         public void FromGrayAlpha16(GrayAlpha16 source) => L = source.L;
 
-        public void FromRgb24(Rgb24 source) =>
-            L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
+        public void FromRgb24(Rgb24 source) => L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
 
-        public void FromColor(Color source) =>
-            L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
+        public void FromColor(Color source) => L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
 
         public void FromRgb48(Rgb48 source) =>
             L = PackedVectorHelper.Get8BitBT709Luminance(
@@ -84,14 +77,11 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        public void FromArgb32(Argb32 source) =>
-            L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
+        public void FromArgb32(Argb32 source) => L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
 
-        public void FromBgr24(Bgr24 source) =>
-            L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
+        public void FromBgr24(Bgr24 source) => L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
 
-        public void FromBgra32(Bgra32 source) =>
-            L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
+        public void FromBgra32(Bgra32 source) => L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
 
         #region Equals
 

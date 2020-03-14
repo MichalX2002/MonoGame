@@ -43,8 +43,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 var dstRow = GetRowSpan(y);
                 for (int x = 0; x < Width; x++)
                 {
-                    var scaled = srcRow[x].ToVector4();
-                    dstRow[x].FromVector4(scaled);
+                    srcRow[x].ToScaledVector4(out var vector);
+                    dstRow[x].FromScaledVector4(vector);
                 }
             }
         }
@@ -145,7 +145,10 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                     var dstRow = GetRowSpan(dstRegion.Top + y);
 
                     for (int x = 0; x < srcRegion.Width; x++)
-                        dstRow[dstRegion.X + x].FromVector4(srcRow[srcRegion.Left + x].ToVector4());
+                    {
+                        srcRow[srcRegion.Left + x].ToScaledVector4(out var vector);
+                        dstRow[dstRegion.X + x].FromScaledVector4(vector);
+                    }
                 }
                 return true;
             }
@@ -187,7 +190,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                     var dstRow = dst.GetRowSpan(dstRegion.Top + y);
                     for (int x = 0; x < srcRegion.Width; x++)
                     {
-                        dstRow[dstRegion.Left + x].FromVector4(srcRow[srcRegion.Left + x].ToVector4());
+                        srcRow[srcRegion.Left + x].ToScaledVector4(out var vector);
+                        dstRow[dstRegion.Left + x].FromScaledVector4(vector);
                     }
                 }
                 return true;

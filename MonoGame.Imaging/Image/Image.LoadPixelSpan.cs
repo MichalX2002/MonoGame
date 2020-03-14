@@ -57,7 +57,10 @@ namespace MonoGame.Imaging
                             var dstRow = (TPixelTo*)(dstPtr + (sourceRectangle.Y + y) * dstStride);
 
                             for (int x = 0; x < sourceRectangle.Width; x++)
-                                dstRow[x].FromScaledVector4(srcRow[x].ToScaledVector4());
+                            {
+                                srcRow[x].ToScaledVector4(out var vector);
+                                dstRow[x].FromScaledVector4(vector);
+                            }
                         }
                     }
                 }

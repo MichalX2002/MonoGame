@@ -75,6 +75,15 @@ namespace MonoGame.Framework
         public readonly bool IsEmpty => (Width == 0) && (Height == 0) && (X == 0) && (Y == 0);
 
         /// <summary>
+        /// A <see cref="Point"/> located in the center of this <see cref="Rectangle"/>.
+        /// </summary>
+        /// <remarks>
+        /// If <see cref="Width"/> or <see cref="Height"/> is an odd number,
+        /// the center point will be rounded down.
+        /// </remarks>
+        public readonly Point Center => new Point(X + (Width / 2), Y + (Height / 2));
+
+        /// <summary>
         /// The top-left coordinates of this <see cref="Rectangle"/>.
         /// </summary>
         public Point Position
@@ -99,15 +108,6 @@ namespace MonoGame.Framework
                 Height = value.Height;
             }
         }
-
-        /// <summary>
-        /// A <see cref="Point"/> located in the center of this <see cref="Rectangle"/>.
-        /// </summary>
-        /// <remarks>
-        /// If <see cref="Width"/> or <see cref="Height"/> is an odd number,
-        /// the center point will be rounded down.
-        /// </remarks>
-        public readonly Point Center => new Point(X + (Width / 2), Y + (Height / 2));
 
         #endregion
 
@@ -206,7 +206,7 @@ namespace MonoGame.Framework
         /// <param name="x">The x coordinate of the point to check for containment.</param>
         /// <param name="y">The y coordinate of the point to check for containment.</param>
         /// <returns><see langword="true"/> if the provided coordinates lie inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
-        public bool Contains(int x, int y) =>
+        public readonly bool Contains(int x, int y) =>
             (X <= x) && (x < (X + Width)) && (Y <= y) && (y < (Y + Height));
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace MonoGame.Framework
         /// <param name="x">The x coordinate of the point to check for containment.</param>
         /// <param name="y">The y coordinate of the point to check for containment.</param>
         /// <returns><see langword="true"/> if the provided coordinates lie inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
-        public bool Contains(float x, float y) => 
+        public readonly bool Contains(float x, float y) => 
             (X <= x) && (x < (X + Width)) && (Y <= y) && (y < (Y + Height));
 
         /// <summary>
@@ -223,7 +223,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">The coordinates to check for inclusion in this <see cref="Rectangle"/>.</param>
         /// <returns><see langword="true"/> if the provided <see cref="Point"/> lies inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
-        public bool Contains(Point value) =>
+        public readonly bool Contains(Point value) =>
             (X <= value.X) && (value.X < (X + Width)) &&
             (Y <= value.Y) && (value.Y < (Y + Height));
 
@@ -232,7 +232,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">The coordinates to check for inclusion in this <see cref="Rectangle"/>.</param>
         /// <returns><see langword="true"/> if the provided <see cref="Vector2"/> lies inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
-        public bool Contains(Vector2 value) =>
+        public readonly bool Contains(Vector2 value) =>
             (X <= value.X) && (value.X < (X + Width)) &&
             (Y <= value.Y) && (value.Y < (Y + Height));
 
@@ -241,33 +241,24 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">The <see cref="Rectangle"/> to check for inclusion in this <see cref="Rectangle"/>.</param>
         /// <returns><see langword="true"/> if the provided <see cref="Rectangle"/>'s bounds lie entirely inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
-        public bool Contains(in Rectangle value) => 
+        public readonly bool Contains(in Rectangle value) => 
             (X <= value.X) && ((value.X + value.Width) <= (X + Width)) && 
             (Y <= value.Y) && ((value.Y + value.Height) <= (Y + Height));
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="object"/>.
         /// </summary>
-        public override bool Equals(object obj) => obj is Rectangle other && Equals(other);
+        public override readonly bool Equals(object obj) => obj is Rectangle other && Equals(other);
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="Rectangle"/>.
         /// </summary>
-        public bool Equals(Rectangle other) => this == other;
+        public readonly bool Equals(Rectangle other) => this == other;
 
         /// <summary>
         /// Gets the hash code of this <see cref="Rectangle"/>.
         /// </summary>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 7 + X.GetHashCode();
-                hash = hash * 31 + Y.GetHashCode();
-                hash = hash * 31 + Width.GetHashCode();
-                return hash * 31 + Height.GetHashCode();
-            }
-        }
+        public override readonly int GetHashCode() => HashCode.Combine(X, Y, Width, Height);
 
         /// <summary>
         /// Adjusts the edges of this <see cref="Rectangle"/> by specified horizontal and vertical amounts. 
@@ -300,12 +291,12 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">The other rectangle for testing.</param>
         /// <returns><see langword="true"/> if other <see cref="Rectangle"/> intersects with this rectangle; <see langword="false"/> otherwise.</returns>
-        public bool Intersects(in Rectangle value)
+        public readonly bool Intersects(in Rectangle value)
         {
-            return value.Left < Right &&
-                   Left < value.Right &&
-                   value.Top < Bottom &&
-                   Top < value.Bottom;
+            return value.Left < Right
+                && Left < value.Right 
+                && value.Top < Bottom 
+                && Top < value.Bottom;
         }
 
         /// <summary>
@@ -377,7 +368,7 @@ namespace MonoGame.Framework
         /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>] Width:[<see cref="Width"/>] Height:[<see cref="Height"/>]}
         /// </summary>
         /// <returns><see cref="string"/> representation of this <see cref="Rectangle"/>.</returns>
-        public override string ToString() =>
+        public override readonly string ToString() =>
             "{X:" + X + " Y:" + Y + " Width:" + Width + " Height:" + Height + "}";
 
         /// <summary>
@@ -398,7 +389,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Deconstruction method for <see cref="Rectangle"/>.
         /// </summary>
-        public void Deconstruct(out int x, out int y, out int width, out int height)
+        public readonly void Deconstruct(out int x, out int y, out int width, out int height)
         {
             x = X;
             y = Y;
@@ -406,7 +397,7 @@ namespace MonoGame.Framework
             height = Height;
         }
 
-        public RectangleF ToRectangleF() => new RectangleF(X, Y, Width, Height);
+        public readonly RectangleF ToRectangleF() => new RectangleF(X, Y, Width, Height);
 
         #endregion
     }

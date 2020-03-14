@@ -16,11 +16,6 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct Gray32 : IPackedVector<uint>, IEquatable<Gray32>, IPixel
     {
-        // skip using the PackedVectorHelper class as Gray32 is the
-        // only pixel type that needs these kinds of 32-bit conversions
-        private const double ByteMul = uint.MaxValue / (double)byte.MaxValue;
-        private const double ShortMul = uint.MaxValue / (double)short.MaxValue;
-
         VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Gray, sizeof(uint) * 8));
 
@@ -32,50 +27,57 @@ namespace MonoGame.Framework.PackedVector
         [CLSCompliant(false)]
         public uint PackedValue { readonly get => L; set => L = value; }
 
-        public void FromVector4(Vector4 vector)
-        {
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.One);
-            vector *= uint.MaxValue;
+        public void FromVector4(in Vector4 vector) => FromScaledVector4(vector);
 
-            L = PackedVectorHelper.Get32BitBT709Luminance(
-                (uint)vector.X, (uint)vector.Y, (uint)vector.Z);
+        public readonly void ToVector4(out Vector4 vector) => ToScaledVector4(out vector);
+
+        public void FromScaledVector4(in Vector4 scaledVector)
+        {
+            Vector4.Clamp(scaledVector, 0, 1, out var v);
+            v.Multiply(uint.MaxValue);
+
+            L = PackedVectorHelper.Get32BitBT709Luminance((uint)v.X, (uint)v.Y, (uint)v.Z);
         }
 
-        public readonly Vector4 ToVector4()
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
         {
-            float l = (float)(L / (double)uint.MaxValue);
-            return new Vector4(l, l, l, 1f);
+            scaledVector.X = scaledVector.Y = scaledVector.Z = (float)(L / (double)uint.MaxValue);
+            scaledVector.W = 1;
         }
 
         #endregion
 
         #region IPixel
 
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
+        public void FromGray8(Gray8 source) => L = PackedVectorHelper.UpScale8To32Bit(source.L);
 
-        public readonly Vector4 ToScaledVector4() => ToVector4();
+        public void FromGray16(Gray16 source) => L = PackedVectorHelper.UpScale16To32Bit(source.L);
 
-        public void FromGray8(Gray8 source) => L = (uint)(source.PackedValue * ByteMul);
+        public void FromGrayAlpha16(GrayAlpha16 source) => L = PackedVectorHelper.UpScale8To32Bit(source.L);
 
-        public void FromGray16(Gray16 source) => L = (uint)(source.PackedValue * ShortMul);
+        public void FromRgb24(Rgb24 source)
+        {
+            L = PackedVectorHelper.UpScale8To32Bit(PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
+        }
 
-        public void FromGrayAlpha16(GrayAlpha16 source) => L = (uint)(source.PackedValue * ByteMul);
+        public void FromColor(Color source)
+        {
+            L = PackedVectorHelper.UpScale8To32Bit(PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
+        }
 
-        public void FromRgb24(Rgb24 source) =>
-            L = (uint)(PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B) * ByteMul);
+        public void FromRgb48(Rgb48 source)
+        {
+            L = PackedVectorHelper.UpScale16To32Bit(PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
+        }
 
-        public void FromColor(Color source) =>
-            L = (uint)(PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B) * ByteMul);
-
-        public void FromRgb48(Rgb48 source) =>
-            L = (uint)(PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B) * ShortMul);
-
-        public void FromRgba64(Rgba64 source) =>
-            L = (uint)(PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B) * ShortMul);
+        public void FromRgba64(Rgba64 source)
+        {
+            L = PackedVectorHelper.UpScale16To32Bit(PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
+        }
 
         public readonly void ToColor(ref Color destination)
         {
-            destination.R = destination.G = destination.B = (byte)(L * 255);
+            destination.R = destination.G = destination.B = PackedVectorHelper.DownScale32To8Bit(L);
             destination.A = byte.MaxValue;
         }
 

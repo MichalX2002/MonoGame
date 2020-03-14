@@ -20,17 +20,6 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Vector4 : IEquatable<Vector4>, IPixel
     {
-        /// <summary>
-        /// <see cref="Vector4"/> with all values set to <see cref="byte.MaxValue"/>.
-        /// </summary>
-        internal static readonly Vector4 MaxByteValue = new Vector4(byte.MaxValue);
-
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(float) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(float) * 8),
-            new VectorComponent(VectorComponentType.Blue, sizeof(float) * 8),
-            new VectorComponent(VectorComponentType.Alpha, sizeof(float) * 8));
-
         #region Public Constants
 
         /// <summary>
@@ -70,7 +59,17 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #region Public Fields
+        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Red, sizeof(float) * 8),
+            new VectorComponent(VectorComponentType.Green, sizeof(float) * 8),
+            new VectorComponent(VectorComponentType.Blue, sizeof(float) * 8),
+            new VectorComponent(VectorComponentType.Alpha, sizeof(float) * 8));
+
+        private string DebuggerDisplay => string.Concat(
+            X.ToString(), "  ",
+            Y.ToString(), "  ",
+            Z.ToString(), "  ",
+            W.ToString());
 
         /// <summary>
         /// The x coordinate of this <see cref="Vector4"/>.
@@ -95,8 +94,6 @@ namespace MonoGame.Framework
         /// </summary>
         [DataMember]
         public float W;
-
-        #endregion
 
         #region Public Properties
 
@@ -132,11 +129,7 @@ namespace MonoGame.Framework
 
         #endregion
 
-        private string DebuggerDisplay => string.Concat(
-            X.ToString(), "  ",
-            Y.ToString(), "  ",
-            Z.ToString(), "  ",
-            W.ToString());
+        #region Constructors
 
         /// <summary>
         /// Constructs a 4D vector with XYZW values.
@@ -192,6 +185,8 @@ namespace MonoGame.Framework
             W = value;
         }
 
+        #endregion
+
         /// <summary>
         /// Gets the <see cref="Vector2"/> representation of this vector.
         /// </summary>
@@ -204,35 +199,57 @@ namespace MonoGame.Framework
 
         #region IPackedVector 
 
-        void IPackedVector.FromVector4(Vector4 vector) => this = vector;
+        void IPackedVector.FromVector4(in Vector4 vector)
+        {
+            this = vector;
+        }
 
-        readonly Vector4 IPackedVector.ToVector4() => this;
+        readonly void IPackedVector.ToVector4(out Vector4 vector)
+        {
+            vector = this;
+        }
 
-        void IPackedVector.FromScaledVector4(Vector4 vector) => this = Clamp(vector, Zero, One);
+        void IPackedVector.FromScaledVector4(in Vector4 scaledVector) => this = scaledVector;
 
-        readonly Vector4 IPackedVector.ToScaledVector4() => this;
+        readonly void IPackedVector.ToScaledVector4(out Vector4 scaledVector) => scaledVector = this;
 
         #endregion
 
         #region IPixel
 
-        void IPixel.FromGray8(Gray8 source) => this = source.ToVector4();
+        void IPixel.FromGray8(Gray8 source) => source.ToScaledVector4(out this);
 
-        void IPixel.FromGray16(Gray16 source) => this = source.ToVector4();
+        void IPixel.FromGray16(Gray16 source) => source.ToScaledVector4(out this);
 
-        void IPixel.FromGrayAlpha16(GrayAlpha16 source) => this = source.ToVector4();
+        void IPixel.FromGrayAlpha16(GrayAlpha16 source) => source.ToScaledVector4(out this);
 
-        void IPixel.FromRgb24(Rgb24 source) => this = source.ToVector4();
+        void IPixel.FromRgb24(Rgb24 source) => source.ToScaledVector4(out this);
 
-        void IPixel.FromRgb48(Rgb48 source) => this = source.ToVector4();
+        void IPixel.FromRgb48(Rgb48 source) => source.ToScaledVector4(out this);
 
-        void IPixel.FromRgba64(Rgba64 source) => this = source.ToVector4();
+        void IPixel.FromRgba64(Rgba64 source) => source.ToScaledVector4(out this);
 
-        public void FromColor(Color source) => this = source.ToVector4();
+        public void FromColor(Color source) => source.ToScaledVector4(out this);
 
-        public readonly void ToColor(ref Color destination) => destination.FromVector4(this);
+        public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(this);
 
         #endregion
+
+        #region Add
+
+        /// <summary>
+        /// Performs vector addition on <paramref name="a"/> and <paramref name="b"/>.
+        /// </summary>
+        /// <param name="a">The first vector to add.</param>
+        /// <param name="b">The second vector to add.</param>
+        /// <param name="result">The result of the vector addition.</param>
+        public static void Add(in Vector4 a, in Vector4 b, out Vector4 result)
+        {
+            result.X = a.X + b.X;
+            result.Y = a.Y + b.Y;
+            result.Z = a.Z + b.Z;
+            result.W = a.W + b.W;
+        }
 
         /// <summary>
         /// Performs vector addition on <paramref name="a"/> and <paramref name="b"/>.
@@ -240,7 +257,24 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector to add.</param>
         /// <param name="b">The second vector to add.</param>
         /// <returns>The result of the vector addition.</returns>
-        public static Vector4 Add(in Vector4 a, in Vector4 b) => a + b;
+        public static Vector4 Add(in Vector4 a, in Vector4 b)
+        {
+            Add(a, b, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Adds two vectors.
+        /// </summary>
+        /// <param name="a">Source <see cref="Vector4"/> on the left of the add sign.</param>
+        /// <param name="b">Source <see cref="Vector4"/> on the right of the add sign.</param>
+        /// <returns>Sum of the vectors.</returns>
+        public static Vector4 operator +(in Vector4 a, in Vector4 b)
+        {
+            return Add(a, b);
+        }
+
+        #endregion
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains the cartesian coordinates
@@ -273,6 +307,23 @@ namespace MonoGame.Framework
             MathHelper.CatmullRom(a.Z, b.Z, c.Z, d.Z, amount),
             MathHelper.CatmullRom(a.W, b.W, c.W, d.W, amount));
 
+        #region Clamp
+
+        /// <summary>
+        /// Clamps the specified value within a range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <param name="result">The clamped value.</param>
+        public static void Clamp(in Vector4 value, in Vector4 min, in Vector4 max, out Vector4 result)
+        {
+            result.X = MathHelper.Clamp(value.X, min.X, max.X);
+            result.Y = MathHelper.Clamp(value.Y, min.Y, max.Y);
+            result.Z = MathHelper.Clamp(value.Z, min.Z, max.Z);
+            result.W = MathHelper.Clamp(value.W, min.W, max.W);
+        }
+
         /// <summary>
         /// Clamps the specified value within a range.
         /// </summary>
@@ -282,20 +333,61 @@ namespace MonoGame.Framework
         /// <returns>The clamped value.</returns>
         public static Vector4 Clamp(in Vector4 value, in Vector4 min, in Vector4 max)
         {
-            return new Vector4(
-                MathHelper.Clamp(value.X, min.X, max.X),
-                MathHelper.Clamp(value.Y, min.Y, max.Y),
-                MathHelper.Clamp(value.Z, min.Z, max.Z),
-                MathHelper.Clamp(value.W, min.W, max.W));
+            Clamp(value, min, max, out var result);
+            return result;
         }
 
-        public static void Clamp(in Vector4 value, in Vector4 min, in Vector4 max, out Vector4 result)
+        /// <summary>
+        /// Clamps this <see cref="Vector4"/> within a range.
+        /// </summary>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <returns>The clamped value.</returns>
+        public void Clamp(in Vector4 min, in Vector4 max)
         {
-            result.X = MathHelper.Clamp(value.X, min.X, max.X);
-            result.Y = MathHelper.Clamp(value.Y, min.Y, max.Y);
-            result.Z = MathHelper.Clamp(value.Z, min.Z, max.Z);
-            result.W = MathHelper.Clamp(value.W, min.W, max.W);
+            Clamp(this, min, max, out this);
         }
+
+        /// <summary>
+        /// Clamps the specified value within a range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <param name="result">The clamped value.</param>
+        public static void Clamp(in Vector4 value, float min, float max, out Vector4 result)
+        {
+            result.X = MathHelper.Clamp(value.X, min, max);
+            result.Y = MathHelper.Clamp(value.Y, min, max);
+            result.Z = MathHelper.Clamp(value.Z, min, max);
+            result.W = MathHelper.Clamp(value.W, min, max);
+        }
+
+        /// <summary>
+        /// Clamps the specified value within a range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <returns>The clamped value.</returns>
+        public static Vector4 Clamp(in Vector4 value, in float min, in float max)
+        {
+            Clamp(value, min, max, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Clamps this <see cref="Vector4"/> within a range.
+        /// </summary>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <returns>The clamped value.</returns>
+        public void Clamp(float min, float max)
+        {
+            Clamp(this, min, max, out this);
+        }
+
+        #endregion
 
         /// <summary>
         /// Returns the distance between two vectors.
@@ -311,11 +403,27 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The squared distance between two vectors.</returns>
-        public static float DistanceSquared(in Vector4 a, in Vector4 b) => 
+        public static float DistanceSquared(in Vector4 a, in Vector4 b) =>
             (a.X - b.X) * (a.X - b.X) +
             (a.Y - b.Y) * (a.Y - b.Y) +
             (a.Z - b.Z) * (a.Z - b.Z) +
             (a.W - b.W) * (a.W - b.W);
+
+        #region Divide
+
+        /// <summary>
+        /// Divides the components of a <see cref="Vector4"/> by the components of another <see cref="Vector4"/>.
+        /// </summary>
+        /// <param name="left">Source <see cref="Vector4"/>.</param>
+        /// <param name="right">Divisor <see cref="Vector4"/>.</param>
+        /// <param name="result">The result of dividing the vectors.</param>
+        public static void Divide(in Vector4 left, in Vector4 right, out Vector4 result)
+        {
+            result.X = left.X / right.X;
+            result.Y = left.Y / right.Y;
+            result.Z = left.Z / right.Z;
+            result.W = left.W / right.W;
+        }
 
         /// <summary>
         /// Divides the components of a <see cref="Vector4"/> by the components of another <see cref="Vector4"/>.
@@ -323,7 +431,25 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector4"/>.</param>
         /// <param name="right">Divisor <see cref="Vector4"/>.</param>
         /// <returns>The result of dividing the vectors.</returns>
-        public static Vector4 Divide(in Vector4 left, in Vector4 right) => left / right;
+        public static Vector4 Divide(in Vector4 left, in Vector4 right)
+        {
+            Divide(left, right, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Divides the components of a <see cref="Vector4"/> by a scalar.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/>.</param>
+        /// <param name="divider">Divisor scalar.</param>
+        /// <param name="result">The result of dividing a vector by a scalar.</param>
+        public static void Divide(in Vector4 value, float divider, out Vector4 result)
+        {
+            result.X = value.X / divider;
+            result.Y = value.Y / divider;
+            result.Z = value.Z / divider;
+            result.W = value.W / divider;
+        }
 
         /// <summary>
         /// Divides the components of a <see cref="Vector4"/> by a scalar.
@@ -331,7 +457,35 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector4"/>.</param>
         /// <param name="divider">Divisor scalar.</param>
         /// <returns>The result of dividing a vector by a scalar.</returns>
-        public static Vector4 Divide(in Vector4 value, float divider) => value / divider;
+        public static Vector4 Divide(in Vector4 value, float divider)
+        {
+            Divide(value, divider, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Divides the components of a <see cref="Vector4"/> by the components of another <see cref="Vector4"/>.
+        /// </summary>
+        /// <param name="left">Source <see cref="Vector4"/> on the left of the div sign.</param>
+        /// <param name="right">Divisor <see cref="Vector4"/> on the right of the div sign.</param>
+        /// <returns>The result of dividing the vectors.</returns>
+        public static Vector4 operator /(in Vector4 left, in Vector4 right)
+        {
+            return Divide(left, right);
+        }
+
+        /// <summary>
+        /// Divides the components of a <see cref="Vector4"/> by a scalar.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/> on the left of the div sign.</param>
+        /// <param name="divider">Divisor scalar on the right of the div sign.</param>
+        /// <returns>The result of dividing a vector by a scalar.</returns>
+        public static Vector4 operator /(in Vector4 value, float divider)
+        {
+            return Divide(value, divider);
+        }
+
+        #endregion
 
         /// <summary>
         /// Returns a dot product of two vectors.
@@ -358,16 +512,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the hash code of this <see cref="Vector4"/>.
         /// </summary>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int code = 7 + X.GetHashCode();
-                code = code * 31 + Y.GetHashCode();
-                code = code * 31 + Z.GetHashCode();
-                return code * 31 + W.GetHashCode();
-            }
-        }
+        public override int GetHashCode() => HashCode.Combine(X, Y, Z, W);
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains hermite spline interpolation.
@@ -451,13 +596,47 @@ namespace MonoGame.Framework
             Math.Min(a.Z, b.Z),
             Math.Min(a.W, b.W));
 
+        #region Multiply (operator *)
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a multiplication of two vectors.
+        /// </summary>
+        /// <param name="a">Source <see cref="Vector4"/>.</param>
+        /// <param name="b">Source <see cref="Vector4"/>.</param>
+        /// <param name="result">The result of the vector multiplication.</param>
+        public static void Multiply(in Vector4 a, in Vector4 b, out Vector4 result)
+        {
+            result.X = a.X * b.X;
+            result.Y = a.Y * b.Y;
+            result.Z = a.Z * b.Z;
+            result.W = a.W * b.W;
+        }
+
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains a multiplication of two vectors.
         /// </summary>
         /// <param name="a">Source <see cref="Vector4"/>.</param>
         /// <param name="b">Source <see cref="Vector4"/>.</param>
         /// <returns>The result of the vector multiplication.</returns>
-        public static Vector4 Multiply(in Vector4 a, in Vector4 b) => a * b;
+        public static Vector4 Multiply(in Vector4 a, in Vector4 b)
+        {
+            Multiply(a, b, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a multiplication of <see cref="Vector4"/> and a scalar.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/>.</param>
+        /// <param name="scaleFactor">Scalar value.</param>
+        /// <param name="result">The result of the vector multiplication with a scalar.</param>
+        public static void Multiply(in Vector4 value, float scaleFactor, out Vector4 result)
+        {
+            result.X = value.X * scaleFactor;
+            result.Y = value.Y * scaleFactor;
+            result.Z = value.Z * scaleFactor;
+            result.W = value.W * scaleFactor;
+        }
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains a multiplication of <see cref="Vector4"/> and a scalar.
@@ -465,7 +644,46 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector4"/>.</param>
         /// <param name="scaleFactor">Scalar value.</param>
         /// <returns>The result of the vector multiplication with a scalar.</returns>
-        public static Vector4 Multiply(in Vector4 value, float scaleFactor) => value * scaleFactor;
+        public static Vector4 Multiply(in Vector4 value, float scaleFactor)
+        {
+            Multiply(value, scaleFactor, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Multiplies the components of two vectors by each other.
+        /// </summary>
+        /// <param name="a">Source <see cref="Vector4"/> on the left of the mul sign.</param>
+        /// <param name="b">Source <see cref="Vector4"/> on the right of the mul sign.</param>
+        /// <returns>Result of the vector multiplication.</returns>
+        public static Vector4 operator *(in Vector4 a, in Vector4 b)
+        {
+            return Multiply(a, b);
+        }
+
+        /// <summary>
+        /// Multiplies the components of vector by a scalar.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/> on the left of the mul sign.</param>
+        /// <param name="scaleFactor">Scalar value on the right of the mul sign.</param>
+        /// <returns>Result of the vector multiplication with a scalar.</returns>
+        public static Vector4 operator *(in Vector4 value, float scaleFactor)
+        {
+            return Multiply(value, scaleFactor);
+        }
+
+        /// <summary>
+        /// Multiplies the components of vector by a scalar.
+        /// </summary>
+        /// <param name="scaleFactor">Scalar value on the left of the mul sign.</param>
+        /// <param name="value">Source <see cref="Vector4"/> on the right of the mul sign.</param>
+        /// <returns>Result of the vector multiplication with a scalar.</returns>
+        public static Vector4 operator *(float scaleFactor, in Vector4 value)
+        {
+            return Multiply(value, scaleFactor);
+        }
+
+        #endregion
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains the specified vector inversion.
@@ -475,17 +693,16 @@ namespace MonoGame.Framework
         public static Vector4 Negate(in Vector4 value) => -value;
 
         /// <summary>
-        /// Turns this <see cref="Vector4"/> to a unit vector with the same direction.
-        /// </summary>
-        public void Normalize() => this /= MathF.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
-
-        /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains a normalized values from another vector.
         /// </summary>
         /// <param name="value">Source <see cref="Vector4"/>.</param>
         /// <returns>Unit vector.</returns>
-        public static Vector4 Normalize(in Vector4 value) => value / MathF.Sqrt(
-            (value.X * value.X) + (value.Y * value.Y) + (value.Z * value.Z) + (value.W * value.W));
+        public static Vector4 Normalize(in Vector4 value) => value / value.Length();
+
+        /// <summary>
+        /// Turns this <see cref="Vector4"/> to a unit vector with the same direction.
+        /// </summary>
+        public void Normalize() => Divide(this, Length(), out this);
 
         /// <summary>
         /// Round the members of this <see cref="Vector4"/> towards the nearest integer value.
@@ -507,7 +724,7 @@ namespace MonoGame.Framework
             MathF.Round(value.Y),
             MathF.Round(value.Z),
             MathF.Round(value.W));
-        
+
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains cubic interpolation of the specified vectors.
         /// </summary>
@@ -521,13 +738,46 @@ namespace MonoGame.Framework
                 MathHelper.SmoothStep(a.Z, b.Z, amount),
                 MathHelper.SmoothStep(a.W, b.W, amount));
 
+        #region Subtract
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains subtraction of on <see cref="Vector4"/> from a another.
+        /// </summary>
+        /// <param name="left">Source <see cref="Vector4"/>.</param>
+        /// <param name="right">Source <see cref="Vector4"/>.</param>
+        /// <param name="result">The result of the vector subtraction.</param>
+        public static void Subtract(in Vector4 left, in Vector4 right, out Vector4 result)
+        {
+            result.X = left.X - right.X;
+            result.Y = left.Y - right.Y;
+            result.Z = left.Z - right.Z;
+            result.W = left.W - right.W;
+        }
+
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains subtraction of on <see cref="Vector4"/> from a another.
         /// </summary>
         /// <param name="left">Source <see cref="Vector4"/>.</param>
         /// <param name="right">Source <see cref="Vector4"/>.</param>
         /// <returns>The result of the vector subtraction.</returns>
-        public static Vector4 Subtract(in Vector4 left, in Vector4 right) => left - right;
+        public static Vector4 Subtract(in Vector4 left, in Vector4 right)
+        {
+            Subtract(left, right, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Subtracts a <see cref="Vector4"/> from a <see cref="Vector4"/>.
+        /// </summary>
+        /// <param name="left">Source <see cref="Vector4"/> on the left of the sub sign.</param>
+        /// <param name="right">Source <see cref="Vector4"/> on the right of the sub sign.</param>
+        /// <returns>Result of the vector subtraction.</returns>
+        public static Vector4 operator -(in Vector4 left, in Vector4 right)
+        {
+            return Subtract(left, right);
+        }
+
+        #endregion
 
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains a transformation of 2D-vector by the specified <see cref="Matrix"/>.
@@ -647,7 +897,7 @@ namespace MonoGame.Framework
         /// {X:{X} Y:{Y} Z:{Z} W:{W}}
         /// </summary>
         /// <returns>A <see cref="string"/> representation of this <see cref="Vector4"/>.</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return "{X:" + X + " Y:" + Y + " Z:" + Z + " W:" + W + "}";
         }
@@ -655,11 +905,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Deconstruction method for <see cref="Vector4"/>.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="z"></param>
-        /// <param name="w"></param>
-        public void Deconstruct(out float x, out float y, out float z, out float w)
+        public readonly void Deconstruct(out float x, out float y, out float z, out float w)
         {
             x = X;
             y = Y;
@@ -672,8 +918,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector4"/> on the right of the sub sign.</param>
         /// <returns>Result of the inversion.</returns>
-        public static Vector4 operator -(in Vector4 value) =>
-            new Vector4(-value.X, -value.Y, -value.Z, -value.W);
+        public static Vector4 operator -(in Vector4 value) => new Vector4(-value.X, -value.Y, -value.Z, -value.W);
 
         /// <summary>
         /// Compares whether two <see cref="Vector4"/> instances are equal.
@@ -681,7 +926,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Vector4"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="Vector4"/> instance on the right of the equal sign.</param>
         /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
-        public static bool operator ==(in Vector4 a, in Vector4 b) => 
+        public static bool operator ==(in Vector4 a, in Vector4 b) =>
             a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
 
         /// <summary>
@@ -691,83 +936,5 @@ namespace MonoGame.Framework
         /// <param name="b"><see cref="Vector4"/> instance on the right of the not equal sign.</param>
         /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>	
         public static bool operator !=(in Vector4 a, in Vector4 b) => !(a == b);
-
-        /// <summary>
-        /// Adds two vectors.
-        /// </summary>
-        /// <param name="a">Source <see cref="Vector4"/> on the left of the add sign.</param>
-        /// <param name="b">Source <see cref="Vector4"/> on the right of the add sign.</param>
-        /// <returns>Sum of the vectors.</returns>
-        public static Vector4 operator +(in Vector4 a, in Vector4 b) =>
-            new Vector4(a.X + b.X, a.Y + b.Y, a.Z + b.Z, a.W + b.W);
-
-        /// <summary>
-        /// Subtracts a <see cref="Vector4"/> from a <see cref="Vector4"/>.
-        /// </summary>
-        /// <param name="left">Source <see cref="Vector4"/> on the left of the sub sign.</param>
-        /// <param name="right">Source <see cref="Vector4"/> on the right of the sub sign.</param>
-        /// <returns>Result of the vector subtraction.</returns>
-        public static Vector4 operator -(in Vector4 left, in Vector4 right) =>
-            new Vector4(left.X - right.X, left.Y - right.Y, left.Z - right.Z, left.W - right.W);
-
-        /// <summary>
-        /// Multiplies the components of two vectors by each other.
-        /// </summary>
-        /// <param name="a">Source <see cref="Vector4"/> on the left of the mul sign.</param>
-        /// <param name="b">Source <see cref="Vector4"/> on the right of the mul sign.</param>
-        /// <returns>Result of the vector multiplication.</returns>
-        public static Vector4 operator *(in Vector4 a, in Vector4 b) =>
-            new Vector4(a.X * b.X, a.Y * b.Y, a.Z * b.Z, a.W * b.W);
-
-        /// <summary>
-        /// Multiplies the components of vector by a scalar.
-        /// </summary>
-        /// <param name="value">Source <see cref="Vector4"/> on the left of the mul sign.</param>
-        /// <param name="scaleFactor">Scalar value on the right of the mul sign.</param>
-        /// <returns>Result of the vector multiplication with a scalar.</returns>
-        public static Vector4 operator *(in Vector4 value, float scaleFactor)
-        {
-            return new Vector4(
-                value.X * scaleFactor,
-                value.Y * scaleFactor,
-                value.Z * scaleFactor,
-                value.W * scaleFactor);
-        }
-
-        /// <summary>
-        /// Multiplies the components of vector by a scalar.
-        /// </summary>
-        /// <param name="scaleFactor">Scalar value on the left of the mul sign.</param>
-        /// <param name="value">Source <see cref="Vector4"/> on the right of the mul sign.</param>
-        /// <returns>Result of the vector multiplication with a scalar.</returns>
-        public static Vector4 operator *(float scaleFactor, in Vector4 value)
-        {
-            return new Vector4(
-                value.W * scaleFactor,
-                value.X * scaleFactor,
-                value.Y * scaleFactor,
-                value.Z * scaleFactor);
-        }
-
-        /// <summary>
-        /// Divides the components of a <see cref="Vector4"/> by the components of another <see cref="Vector4"/>.
-        /// </summary>
-        /// <param name="left">Source <see cref="Vector4"/> on the left of the div sign.</param>
-        /// <param name="right">Divisor <see cref="Vector4"/> on the right of the div sign.</param>
-        /// <returns>The result of dividing the vectors.</returns>
-        public static Vector4 operator /(in Vector4 left, in Vector4 right) =>
-            new Vector4(left.X / right.X, left.Y / right.Y, left.Z / right.Z, left.W / right.W);
-
-        /// <summary>
-        /// Divides the components of a <see cref="Vector4"/> by a scalar.
-        /// </summary>
-        /// <param name="value">Source <see cref="Vector4"/> on the left of the div sign.</param>
-        /// <param name="divider">Divisor scalar on the right of the div sign.</param>
-        /// <returns>The result of dividing a vector by a scalar.</returns>
-        public static Vector4 operator /(in Vector4 value, float divider)
-        {
-            float factor = 1f / divider;
-            return new Vector4(value.X * factor, value.Y * factor, value.Z * factor, value.W * factor);
-        }
     }
 }

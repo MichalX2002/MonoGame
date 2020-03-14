@@ -23,7 +23,10 @@ namespace MonoGame.Imaging
 
                 var dstRow = destination.GetPixelRowSpan(y);
                 for (int x = 0; x < sourceRectangle.Width; x++)
-                    dstRow[x].FromScaledVector4(rowBuffer[x].ToScaledVector4());
+                {
+                    rowBuffer[x].ToScaledVector4(out var vector);
+                    dstRow[x].FromScaledVector4(vector);
+                }
             }
         }
 

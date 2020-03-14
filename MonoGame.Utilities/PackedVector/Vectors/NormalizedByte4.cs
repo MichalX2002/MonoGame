@@ -23,13 +23,13 @@ namespace MonoGame.Framework.PackedVector
             new VectorComponent(VectorComponentType.Blue, sizeof(sbyte) * 8),
             new VectorComponent(VectorComponentType.Alpha, sizeof(sbyte) * 8));
 
-        [CLSCompliant(false)] 
+        [CLSCompliant(false)]
         public sbyte X;
 
-        [CLSCompliant(false)] 
+        [CLSCompliant(false)]
         public sbyte Y;
 
-        [CLSCompliant(false)] 
+        [CLSCompliant(false)]
         public sbyte Z;
 
         [CLSCompliant(false)]
@@ -59,7 +59,7 @@ namespace MonoGame.Framework.PackedVector
         /// Constructs the packed vector with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public NormalizedByte4(Vector4 vector) => this = Pack(ref vector);
+        public NormalizedByte4(Vector4 vector) : this() => FromVector4(vector);
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
@@ -70,18 +70,6 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        private static NormalizedByte4 Pack(ref Vector4 vector)
-        {
-            vector = Vector4.Clamp(vector, -Vector4.One, Vector4.One);
-            vector *= 127f;
-
-            return new NormalizedByte4(
-                (sbyte)vector.X,
-                (sbyte)vector.Y,
-                (sbyte)vector.Z,
-                (sbyte)vector.W);
-        }
-
         #region IPackedVector
 
         [CLSCompliant(false)]
@@ -91,45 +79,91 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<NormalizedByte4, uint>(ref this) = value;
         }
 
-        public void FromVector4(Vector4 vector) => this = Pack(ref vector);
+        public void FromVector4(in Vector4 vector)
+        {
+            Vector4.Clamp(vector, -1, 1, out var v);
+            v *= sbyte.MaxValue;
 
-        public readonly Vector4 ToVector4() => new Vector4(X, Y, Z, W) / 127f;
+            X = (sbyte)v.X;
+            Y = (sbyte)v.Y;
+            Z = (sbyte)v.Z;
+            W = (sbyte)v.W;
+        }
+
+        public readonly void ToVector4(out Vector4 vector)
+        {
+            vector.X = X;
+            vector.Y = Y;
+            vector.Z = Z;
+            vector.W = W;
+            vector /= sbyte.MaxValue;
+        }
+
+        public void FromScaledVector4(in Vector4 scaledVector)
+        {
+            Vector4.Multiply(scaledVector, 2, out var v);
+            v -= Vector4.One;
+            FromVector4(v);
+        }
+
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        {
+            ToVector4(out scaledVector);
+            scaledVector += Vector4.One;
+            scaledVector /= 2;
+        }
 
         #endregion
 
         #region IPixel
 
-        public void FromScaledVector4(Vector4 vector)
+        public void FromGray8(Gray8 source)
         {
-            vector *= 2;
-            vector -= Vector4.One;
-            this = Pack(ref vector);
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
         }
 
-        public readonly Vector4 ToScaledVector4()
+        public void FromGray16(Gray16 source)
         {
-            var scaled = ToVector4();
-            scaled += Vector4.One;
-            scaled /= 2;
-            return scaled;
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
         }
 
-        public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(ToScaledVector4());
+        public void FromGrayAlpha16(GrayAlpha16 source)
+        {
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
+        }
 
-        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromRgb24(Rgb24 source)
+        {
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
+        }
 
-        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromRgb48(Rgb48 source)
+        {
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
+        }
 
-        public void FromGrayAlpha16(GrayAlpha16 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromRgba64(Rgba64 source)
+        {
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
+        }
 
-        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromColor(Color source)
+        {
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
+        }
 
-        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
-
-        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
-
-        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
-
+        public readonly void ToColor(ref Color destination)
+        {
+            ToScaledVector4(out var vector);
+            destination.FromScaledVector4(vector);
+        }
 
         #endregion
 

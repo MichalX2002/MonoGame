@@ -170,7 +170,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                             break;
 
                         case "streams.stream.0.codec_tag":
-                            var hex = kv[1].Substring(3, kv[1].Length - 4);
+                            var hex = kv[1][3..^1];
                             format = int.Parse(hex, NumberStyles.HexNumber);
                             break;
                     }

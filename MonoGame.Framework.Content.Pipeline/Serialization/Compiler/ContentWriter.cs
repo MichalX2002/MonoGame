@@ -299,7 +299,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                     if (!fileName.StartsWith(rootDirectory, StringComparison.OrdinalIgnoreCase))
                         throw new ArgumentException(string.Format("ExternalReference '{0}' must be in the root directory '{1}'", fileName, rootDirectory));
                     // Strip the .xnb extension
-                    fileName = fileName.Substring(0, fileName.Length - 4);
+                    fileName = fileName[0..^4];
                     // Get the relative directory
                     fileName = PathHelper.GetRelativePath(referenceRelocationPath, fileName);
                     Write(fileName);

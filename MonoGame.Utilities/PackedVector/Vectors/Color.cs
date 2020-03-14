@@ -142,7 +142,7 @@ namespace MonoGame.Framework
         /// <param name="r">Red component value from 0 to 255.</param>
         /// <param name="g">Green component value from 0 to 255.</param>
         /// <param name="b">Blue component value from 0 to 255.</param>
-        public Color(int r, int g, int b) : this(r, g, b, 255)
+        public Color(int r, int g, int b) : this(r, g, b, byte.MaxValue)
         {
         }
 
@@ -153,8 +153,11 @@ namespace MonoGame.Framework
         /// <param name="g">Green component value from 0 to 1.</param>
         /// <param name="b">Blue component value from 0 to 1.</param>
         /// <param name="alpha">Alpha component value from 0 to 1.</param>
-        public Color(float r, float g, float b, float alpha)
-            : this((int)(r * 255), (int)(g * 255), (int)(b * 255), (int)(alpha * 255))
+        public Color(float r, float g, float b, float alpha) : this(
+            (int)(r * byte.MaxValue), 
+            (int)(g * byte.MaxValue), 
+            (int)(b * byte.MaxValue),
+            (int)(alpha * byte.MaxValue))
         {
         }
 
@@ -201,8 +204,8 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="color">The RGB values.</param>
         /// <param name="alpha">Alpha component value from 0 to 1.</param>
-        public Color(Color color, float alpha) : 
-            this(color, MathHelper.Clamp((int)(alpha * 255), byte.MinValue, byte.MaxValue))
+        public Color(Color color, float alpha) :
+            this(color, MathHelper.Clamp((int)(alpha * byte.MaxValue), byte.MinValue, byte.MaxValue))
         {
         }
 
@@ -230,7 +233,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="color">The RGB values.</param>
         /// <param name="alpha">Alpha component value from 0 to 1.</param>
-        public Color(Rgb24 color, float alpha) : this(color, (int)(alpha * 255))
+        public Color(Rgb24 color, float alpha) : this(color, (int)(alpha * byte.MaxValue))
         {
         }
 
@@ -246,27 +249,34 @@ namespace MonoGame.Framework
             set => Unsafe.As<Color, uint>(ref this) = value;
         }
 
-        public readonly Vector4 ToVector4() => ToScaledVector4();
-
-        public void FromVector4(Vector4 vector) => FromScaledVector4(vector);
-
-        #endregion
-
-        #region IPixel
-
-        public readonly Vector4 ToScaledVector4() => new Vector4(R, G, B, A) / byte.MaxValue;
-
-        public void FromScaledVector4(Vector4 vector) 
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
         {
-            vector *= byte.MaxValue;
-            vector += Vector4.Half;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxByteValue);
+            scaledVector.X = R;
+            scaledVector.Y = G;
+            scaledVector.Z = B;
+            scaledVector.W = A;
+            Vector4.Divide(scaledVector, byte.MaxValue, out scaledVector);
+        }
+
+        public void FromScaledVector4(in Vector4 scaledVector)
+        {
+            Vector4.Multiply(scaledVector, byte.MaxValue, out var vector);
+            vector.Add(Vector4.Half);
+            vector.Clamp(0, byte.MaxValue);
 
             R = (byte)vector.X;
             G = (byte)vector.Y;
             B = (byte)vector.Z;
             A = (byte)vector.W;
         }
+
+        public readonly void ToVector4(out Vector4 vector) => ToScaledVector4(out vector);
+
+        public void FromVector4(in Vector4 vector) => FromScaledVector4(vector);
+
+        #endregion
+
+        #region IPixel
 
         public void FromGray8(Gray8 source)
         {
@@ -341,39 +351,39 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the <see cref="Bgra32"/> representation of this <see cref="Color"/>.
         /// </summary>
-        public Bgra32 ToBgra32() => new Bgra32(R, G, B, A);
+        public readonly Bgra32 ToBgra32() => new Bgra32(R, G, B, A);
 
         /// <summary>
         /// Gets the <see cref="Argb32"/> representation of this <see cref="Color"/>.
         /// </summary>
-        public Argb32 ToArgb32() => new Argb32(R, G, B, A);
-    
+        public readonly Argb32 ToArgb32() => new Argb32(R, G, B, A);
+
         /// <summary>
         /// Gets the <see cref="Rgb24"/> representation of this <see cref="Color"/>.
         /// </summary>
-        public Rgb24 ToRgb24() => new Rgb24(R, G, B);
+        public readonly Rgb24 ToRgb24() => new Rgb24(R, G, B);
 
         /// <summary>
         /// Gets the <see cref="Bgr24"/> representation of this <see cref="Color"/>.
         /// </summary>
-        public Bgr24 ToBgr24() => new Bgr24(R, G, B);
+        public readonly Bgr24 ToBgr24() => new Bgr24(R, G, B);
 
         /// <summary>
         /// Gets the <see cref="Gray8"/> representation of this <see cref="Color"/>.
         /// </summary>
-        public Gray8 ToGray8() => new Gray8(A);
+        public readonly Gray8 ToGray8() => new Gray8(A);
 
         /// <summary>
         /// Gets the <see cref="GrayAlpha16 "/> representation of this <see cref="Color"/>.
         /// </summary>
-        public GrayAlpha16 ToGrayAlpha16() => new GrayAlpha16(PackedVectorHelper.Get8BitBT709Luminance(R, G, B), A);
-        
+        public readonly GrayAlpha16 ToGrayAlpha16() => new GrayAlpha16(PackedVectorHelper.Get8BitBT709Luminance(R, G, B), A);
+
         /// <summary>
         /// Gets the <see cref="Vector3"/> representation of this <see cref="Color"/>.
         /// </summary>
-        public readonly Vector3 ToVector3() => new Vector3(R, G, B) / 255f;
+        public readonly Vector3 ToVector3() => new Vector3(R, G, B) / byte.MaxValue;
 
-        public Rgba64 ToRgba64() => new Rgba64(
+        public readonly Rgba64 ToRgba64() => new Rgba64(
             PackedVectorHelper.UpScale8To16Bit(R),
             PackedVectorHelper.UpScale8To16Bit(G),
             PackedVectorHelper.UpScale8To16Bit(B),
@@ -382,7 +392,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Deconstruction method for <see cref="Color"/>.
         /// </summary>
-        public void Deconstruct(out float r, out float g, out float b)
+        public readonly void Deconstruct(out float r, out float g, out float b)
         {
             r = R;
             g = G;
@@ -392,7 +402,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Deconstruction method for <see cref="Color"/> with alpha.
         /// </summary>
-        public void Deconstruct(out float r, out float g, out float b, out float a)
+        public readonly void Deconstruct(out float r, out float g, out float b, out float a)
         {
             r = R;
             g = G;
@@ -406,7 +416,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="vector">A <see cref="Vector4"/> representing color.</param>
         /// <returns>A <see cref="Color"/> which contains premultiplied alpha data.</returns>
-        public static Color FromNonPremultiplied(in Vector4 vector) => 
+        public static Color FromNonPremultiplied(in Vector4 vector) =>
             new Color(vector.X * vector.W, vector.Y * vector.W, vector.Z * vector.W, vector.W);
 
         /// <summary>
@@ -417,7 +427,7 @@ namespace MonoGame.Framework
         /// <param name="b">Blue component value.</param>
         /// <param name="a">Alpha component value.</param>
         /// <returns>A <see cref="Color"/> which contains premultiplied alpha data.</returns>
-        public static Color FromNonPremultiplied(int r, int g, int b, int a) => 
+        public static Color FromNonPremultiplied(int r, int g, int b, int a) =>
             new Color(r * a / 255, g * a / 255, b * a / 255, a);
 
         /// <summary>

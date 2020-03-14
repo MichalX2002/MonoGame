@@ -23,26 +23,10 @@ namespace MonoGame.Framework.PackedVector
         public byte L;
         public byte A;
 
-        public Gray8 Gray
-        {
-            readonly get => new Gray8(L);
-            set => L = value.L;
-        }
-
         public GrayAlpha16(byte luminance, byte alpha)
         {
             L = luminance;
             A = alpha;
-        }
-
-        private static GrayAlpha16 Pack(ref Vector4 vector)
-        {
-            vector *= Vector4.MaxByteValue;
-            vector += Vector4.Half;
-            vector = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxByteValue);
-
-            return new GrayAlpha16(PackedVectorHelper.Get8BitBT709Luminance(
-                (byte)vector.X, (byte)vector.Y, (byte)vector.Z), (byte)vector.W);
         }
 
         #region IPackedVector
@@ -54,17 +38,35 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<GrayAlpha16, ushort>(ref this) = value;
         }
 
-        public void FromVector4(Vector4 vector) => this = Pack(ref vector);
+        public void FromVector4(in Vector4 vector)
+        {
+            Vector4.Multiply(vector, byte.MaxValue, out var v);
+            v.Add(Vector4.Half);
+            v.Clamp(0, byte.MaxValue);
 
-        public readonly Vector4 ToVector4() => new Vector4(L, L, L, A) / byte.MaxValue;
+            L = PackedVectorHelper.Get8BitBT709Luminance((byte)v.X, (byte)v.Y, (byte)v.Z);
+            A = (byte)v.W;
+        }
+
+        public readonly void ToVector4(out Vector4 vector)
+        {
+            vector.X = vector.Y = vector.Z = L / (float)byte.MaxValue;
+            vector.W = A / (float)byte.MaxValue;
+        }
+
+        public void FromScaledVector4(in Vector4 vector)
+        {
+            FromVector4(vector);
+        }
+
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        {
+            ToVector4(out scaledVector);
+        }
 
         #endregion
 
         #region IPixel
-
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
-
-        public readonly Vector4 ToScaledVector4() => ToVector4();
 
         public void FromGray8(Gray8 source)
         {
@@ -98,19 +100,13 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromRgb48(Rgb48 source)
         {
-            L = PackedVectorHelper.Get8BitBT709Luminance(
-                    PackedVectorHelper.DownScale16To8Bit(source.R),
-                    PackedVectorHelper.DownScale16To8Bit(source.G),
-                    PackedVectorHelper.DownScale16To8Bit(source.B));
+            L = PackedVectorHelper.DownScale16To8Bit(PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
             A = byte.MaxValue;
         }
 
         public void FromRgba64(Rgba64 source)
         {
-            L = PackedVectorHelper.Get8BitBT709Luminance(
-                    PackedVectorHelper.DownScale16To8Bit(source.R),
-                    PackedVectorHelper.DownScale16To8Bit(source.G),
-                    PackedVectorHelper.DownScale16To8Bit(source.B));
+            L = PackedVectorHelper.DownScale16To8Bit(PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
             A = byte.MaxValue;
         }
 
@@ -146,7 +142,7 @@ namespace MonoGame.Framework.PackedVector
         public static bool operator !=(GrayAlpha16 a, GrayAlpha16 b) => !(a == b);
 
         public bool Equals(GrayAlpha16 other) => this == other;
-        public override bool Equals(object obj) => obj is Gray8 other && Equals(other);
+        public override bool Equals(object obj) => obj is GrayAlpha16 other && Equals(other);
 
         #endregion
 
