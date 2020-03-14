@@ -245,6 +245,17 @@ namespace MonoGame.Framework
             MathHelper.Clamp(value.Y, min.Y, max.Y));
 
         /// <summary>
+        /// Clamps the specified value within a range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <returns>The clamped value.</returns>
+        public static Vector2 Clamp(in Vector2 value, float min, float max) => new Vector2(
+            MathHelper.Clamp(value.X, min, max),
+            MathHelper.Clamp(value.Y, min, max));
+
+        /// <summary>
         /// Returns the distance between two vectors.
         /// </summary>
         /// <param name="a">The first vector.</param>

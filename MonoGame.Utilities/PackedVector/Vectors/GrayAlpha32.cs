@@ -45,7 +45,7 @@ namespace MonoGame.Framework.PackedVector
         public void FromVector4(in Vector4 vector)
         {
             Vector4.Multiply(vector, ushort.MaxValue, out var v);
-            v.Add(Vector4.Half);
+            v += Vector4.Half;
             v.Clamp(0, ushort.MaxValue);
 
             L = PackedVectorHelper.Get16BitBT709Luminance((ushort)v.X, (ushort)v.Y, (ushort)v.Z);
