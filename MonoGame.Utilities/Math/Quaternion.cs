@@ -76,7 +76,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">The x, y, z coordinates in 3d-space.</param>
         /// <param name="w">The rotation component.</param>
-        public Quaternion(Vector3 value, float w)
+        public Quaternion(in Vector3 value, float w)
         {
             X = value.X;
             Y = value.Y;
@@ -88,7 +88,7 @@ namespace MonoGame.Framework
         /// Constructs a quaternion from <see cref="Vector4"/>.
         /// </summary>
         /// <param name="value">The x, y, z coordinates in 3d-space and the rotation component.</param>
-        public Quaternion(Vector4 value)
+        public Quaternion(in Vector4 value)
         {
             X = value.X;
             Y = value.Y;
@@ -97,6 +97,11 @@ namespace MonoGame.Framework
         }
 
         #endregion
+
+        /// <summary>
+        /// Gets a <see cref="Vector4"/> representation for this object.
+        /// </summary>
+        public readonly Vector4 ToVector4() => UnsafeUtils.As<Quaternion, Vector4>(this);
 
         #region Public Methods
 
@@ -343,21 +348,21 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Returns the magnitude of the quaternion components.
-        /// </summary>
-        /// <returns>The magnitude of the quaternion components.</returns>
-        public float Length()
-        {
-            return MathF.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
-        }
-
-        /// <summary>
         /// Returns the squared magnitude of the quaternion components.
         /// </summary>
         /// <returns>The squared magnitude of the quaternion components.</returns>
         public float LengthSquared()
         {
             return (X * X) + (Y * Y) + (Z * Z) + (W * W);
+        }
+
+        /// <summary>
+        /// Returns the magnitude of the quaternion components.
+        /// </summary>
+        /// <returns>The magnitude of the quaternion components.</returns>
+        public float Length()
+        {
+            return MathF.Sqrt(LengthSquared());
         }
 
         /// <summary>
@@ -492,11 +497,11 @@ namespace MonoGame.Framework
         /// </summary>
         public void Normalize()
         {
-            float num = 1f / MathF.Sqrt((X * X) + (Y * Y) + (Z * Z) + (W * W));
-            X *= num;
-            Y *= num;
-            Z *= num;
-            W *= num;
+            float factor = 1f / Length();
+            X *= factor;
+            Y *= factor;
+            Z *= factor;
+            W *= factor;
         }
 
         /// <summary>
@@ -520,11 +525,6 @@ namespace MonoGame.Framework
         /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>] Z:[<see cref="Z"/>] W:[<see cref="W"/>]}
         /// </summary>
         public override string ToString() => "{X:" + X + " Y:" + Y + " Z:" + Z + " W:" + W + "}";
-
-        /// <summary>
-        /// Gets a <see cref="Vector4"/> representation for this object.
-        /// </summary>
-        public readonly Vector4 ToVector4 => new Vector4(X, Y, Z, W);
 
         public readonly void Deconstruct(out float x, out float y, out float z, out float w)
         {

@@ -179,16 +179,48 @@ namespace MonoGame.Framework
 
         #region Public Methods
 
+        #region Add (operator +)
+
+        /// <summary>
+        /// Performs vector addition on <paramref name="a"/> and <paramref name="b"/>.
+        /// </summary>
+        /// <param name="a">The first vector to add.</param>
+        /// <param name="b">The second vector to add.</param>
+        /// <param name="result">The result of the vector addition.</param>
+        public static void Add(in Vector2 a, in Vector2 b, out Vector2 result)
+        {
+            result.X = a.X + b.X;
+            result.Y = a.Y + b.Y;
+        }
+
         /// <summary>
         /// Performs vector addition on <paramref name="a"/> and <paramref name="b"/>.
         /// </summary>
         /// <param name="a">The first vector to add.</param>
         /// <param name="b">The second vector to add.</param>
         /// <returns>The result of the vector addition.</returns>
-        public static Vector2 Add(in Vector2 a, in Vector2 b) => a + b;
+        public static Vector2 Add(in Vector2 a, in Vector2 b)
+        {
+            Add(a, b, out var result);
+            return result;
+        }
 
         /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains the cartesian coordinates of a vector specified in barycentric coordinates and relative to 2D-triangle.
+        /// Adds two vectors.
+        /// </summary>
+        /// <param name="a">Source <see cref="Vector2"/> on the left of the add sign.</param>
+        /// <param name="b">Source <see cref="Vector2"/> on the right of the add sign.</param>
+        /// <returns>Sum of the vectors.</returns>
+        public static Vector2 operator +(in Vector2 a, in Vector2 b)
+        {
+            return Add(a, b);
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Creates a new <see cref="Vector2"/> that contains the cartesian coordinates of 
+        /// a vector specified in barycentric coordinates and relative to 2D-triangle.
         /// </summary>
         /// <param name="a">The first vector of 2D-triangle.</param>
         /// <param name="b">The second vector of 2D-triangle.</param>
@@ -233,16 +265,20 @@ namespace MonoGame.Framework
             MathF.Ceiling(value.X),
             MathF.Ceiling(value.Y));
 
+        #region Clamp
+
         /// <summary>
         /// Clamps the specified value within a range.
         /// </summary>
         /// <param name="value">The value to clamp.</param>
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
-        /// <returns>The clamped value.</returns>
-        public static Vector2 Clamp(in Vector2 value, in Vector2 min, in Vector2 max) => new Vector2(
-            MathHelper.Clamp(value.X, min.X, max.X),
-            MathHelper.Clamp(value.Y, min.Y, max.Y));
+        /// <param name="result">The clamped value.</param>
+        public static void Clamp(in Vector2 value, in Vector2 min, in Vector2 max, out Vector2 result)
+        {
+            result.X = MathHelper.Clamp(value.X, min.X, max.X);
+            result.Y = MathHelper.Clamp(value.Y, min.Y, max.Y);
+        }
 
         /// <summary>
         /// Clamps the specified value within a range.
@@ -251,9 +287,59 @@ namespace MonoGame.Framework
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
         /// <returns>The clamped value.</returns>
-        public static Vector2 Clamp(in Vector2 value, float min, float max) => new Vector2(
-            MathHelper.Clamp(value.X, min, max),
-            MathHelper.Clamp(value.Y, min, max));
+        public static Vector2 Clamp(in Vector2 value, in Vector2 min, in Vector2 max)
+        {
+            Clamp(value, min, max, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Clamps this vector within a range.
+        /// </summary>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        public void Clamp(in Vector2 min, in Vector2 max)
+        {
+            Clamp(this, min, max, out this);
+        }
+
+        /// <summary>
+        /// Clamps the specified value within a range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <param name="result">The clamped value.</param>
+        public static void Clamp(in Vector2 value, float min, float max, out Vector2 result)
+        {
+            result.X = MathHelper.Clamp(value.X, min, max);
+            result.Y = MathHelper.Clamp(value.Y, min, max);
+        }
+
+        /// <summary>
+        /// Clamps the specified value within a range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <returns>The clamped value.</returns>
+        public static Vector2 Clamp(in Vector2 value, float min, float max)
+        {
+            Clamp(value, min, max, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Clamps this vector within a range.
+        /// </summary>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        public void Clamp(float min, float max)
+        {
+            Clamp(this, min, max, out this);
+        }
+
+        #endregion
 
         /// <summary>
         /// Returns the distance between two vectors.
@@ -411,13 +497,43 @@ namespace MonoGame.Framework
             a.X < b.X ? a.X : b.X,
             a.Y < b.Y ? a.Y : b.Y);
 
+        #region Multiply (operator *)
+
+        /// <summary>
+        /// Creates a new <see cref="Vector2"/> that contains a multiplication of two vectors.
+        /// </summary>
+        /// <param name="a">Source <see cref="Vector2"/>.</param>
+        /// <param name="b">Source <see cref="Vector2"/>.</param>
+        /// <param name="result">The result of the vector multiplication.</param>
+        public static void Multiply(in Vector2 a, in Vector2 b, out Vector2 result)
+        {
+            result.X = a.X * b.X;
+            result.Y = a.Y * b.Y;
+        }
+
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains a multiplication of two vectors.
         /// </summary>
         /// <param name="a">Source <see cref="Vector2"/>.</param>
         /// <param name="b">Source <see cref="Vector2"/>.</param>
         /// <returns>The result of the vector multiplication.</returns>
-        public static Vector2 Multiply(in Vector2 a, in Vector2 b) => a * b;
+        public static Vector2 Multiply(in Vector2 a, in Vector2 b)
+        {
+            Multiply(a, b, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector2"/> that contains a multiplication of <see cref="Vector2"/> and a scalar.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector2"/>.</param>
+        /// <param name="scaleFactor">Scalar value.</param>
+        /// <param name="result">The result of the vector multiplication with a scalar.</param>
+        public static void Multiply(in Vector2 value, float scaleFactor, out Vector2 result)
+        {
+            result.X = value.X * scaleFactor;
+            result.Y = value.Y * scaleFactor;
+        }
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains a multiplication of <see cref="Vector2"/> and a scalar.
@@ -425,7 +541,46 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <param name="scaleFactor">Scalar value.</param>
         /// <returns>The result of the vector multiplication with a scalar.</returns>
-        public static Vector2 Multiply(in Vector2 value, float scaleFactor) => value * scaleFactor;
+        public static Vector2 Multiply(in Vector2 value, float scaleFactor)
+        {
+            Multiply(value, scaleFactor, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Multiplies the components of two vectors by each other.
+        /// </summary>
+        /// <param name="a">Source <see cref="Vector2"/> on the left of the mul sign.</param>
+        /// <param name="b">Source <see cref="Vector2"/> on the right of the mul sign.</param>
+        /// <returns>Result of the vector multiplication.</returns>
+        public static Vector2 operator *(in Vector2 a, in Vector2 b)
+        {
+            return Multiply(a, b);
+        }
+
+        /// <summary>
+        /// Multiplies the components of vector by a scalar.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector2"/> on the left of the mul sign.</param>
+        /// <param name="scaleFactor">Scalar value on the right of the mul sign.</param>
+        /// <returns>Result of the vector multiplication with a scalar.</returns>
+        public static Vector2 operator *(in Vector2 value, float scaleFactor)
+        {
+            return Multiply(value, scaleFactor);
+        }
+
+        /// <summary>
+        /// Multiplies the components of vector by a scalar.
+        /// </summary>
+        /// <param name="scaleFactor">Scalar value on the left of the mul sign.</param>
+        /// <param name="value">Source <see cref="Vector2"/> on the right of the mul sign.</param>
+        /// <returns>Result of the vector multiplication with a scalar.</returns>
+        public static Vector2 operator *(float scaleFactor, in Vector2 value)
+        {
+            return Multiply(value, scaleFactor);
+        }
+
+        #endregion
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains the specified vector inversion.
@@ -496,13 +651,44 @@ namespace MonoGame.Framework
             MathHelper.SmoothStep(a.X, b.X, amount),
             MathHelper.SmoothStep(a.Y, b.Y, amount));
 
+        #region Subtract (operator -)
+
+        /// <summary>
+        /// Creates a new <see cref="Vector2"/> that contains subtraction of on <see cref="Vector2"/> from a another.
+        /// </summary>
+        /// <param name="left">Source <see cref="Vector2"/>.</param>
+        /// <param name="right">Source <see cref="Vector2"/>.</param>
+        /// <param name="result">The result of the vector subtraction.</param>
+        public static void Subtract(in Vector2 left, in Vector2 right, out Vector2 result)
+        {
+            result.X = left.X - right.X;
+            result.Y = left.Y - right.Y;
+        }
+
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains subtraction of on <see cref="Vector2"/> from a another.
         /// </summary>
         /// <param name="left">Source <see cref="Vector2"/>.</param>
         /// <param name="right">Source <see cref="Vector2"/>.</param>
         /// <returns>The result of the vector subtraction.</returns>
-        public static Vector2 Subtract(in Vector2 left, in Vector2 right) => left - right;
+        public static Vector2 Subtract(in Vector2 left, in Vector2 right)
+        {
+            Subtract(left, right, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Subtracts a <see cref="Vector2"/> from a <see cref="Vector2"/>.
+        /// </summary>
+        /// <param name="left">Source <see cref="Vector2"/> on the left of the sub sign.</param>
+        /// <param name="right">Source <see cref="Vector2"/> on the right of the sub sign.</param>
+        /// <returns>Result of the vector subtraction.</returns>
+        public static Vector2 operator -(in Vector2 left, in Vector2 right)
+        {
+            return Subtract(left, right);
+        }
+
+        #endregion
 
         /// <summary>
         /// Returns a <see cref="string"/> representation of this <see cref="Vector2"/> in the format:
@@ -631,49 +817,6 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector2"/> on the right of the sub sign.</param>
         /// <returns>Result of the inversion.</returns>
         public static Vector2 operator -(in Vector2 value) => new Vector2(-value.X, -value.Y);
-
-        /// <summary>
-        /// Adds two vectors.
-        /// </summary>
-        /// <param name="a">Source <see cref="Vector2"/> on the left of the add sign.</param>
-        /// <param name="b">Source <see cref="Vector2"/> on the right of the add sign.</param>
-        /// <returns>Sum of the vectors.</returns>
-        public static Vector2 operator +(in Vector2 a, in Vector2 b) => new Vector2(a.X + b.X, a.Y + b.Y);
-
-        /// <summary>
-        /// Subtracts a <see cref="Vector2"/> from a <see cref="Vector2"/>.
-        /// </summary>
-        /// <param name="left">Source <see cref="Vector2"/> on the left of the sub sign.</param>
-        /// <param name="right">Source <see cref="Vector2"/> on the right of the sub sign.</param>
-        /// <returns>Result of the vector subtraction.</returns>
-        public static Vector2 operator -(in Vector2 left, in Vector2 right) => new Vector2(
-            left.X - right.X, left.Y - right.Y);
-
-        /// <summary>
-        /// Multiplies the components of two vectors by each other.
-        /// </summary>
-        /// <param name="a">Source <see cref="Vector2"/> on the left of the mul sign.</param>
-        /// <param name="b">Source <see cref="Vector2"/> on the right of the mul sign.</param>
-        /// <returns>Result of the vector multiplication.</returns>
-        public static Vector2 operator *(in Vector2 a, in Vector2 b) => new Vector2(a.X * b.X, a.Y * b.Y);
-
-        /// <summary>
-        /// Multiplies the components of vector by a scalar.
-        /// </summary>
-        /// <param name="value">Source <see cref="Vector2"/> on the left of the mul sign.</param>
-        /// <param name="scaleFactor">Scalar value on the right of the mul sign.</param>
-        /// <returns>Result of the vector multiplication with a scalar.</returns>
-        public static Vector2 operator *(in Vector2 value, float scaleFactor) => new Vector2(
-            value.X * scaleFactor, value.Y * scaleFactor);
-
-        /// <summary>
-        /// Multiplies the components of vector by a scalar.
-        /// </summary>
-        /// <param name="scaleFactor">Scalar value on the left of the mul sign.</param>
-        /// <param name="value">Source <see cref="Vector2"/> on the right of the mul sign.</param>
-        /// <returns>Result of the vector multiplication with a scalar.</returns>
-        public static Vector2 operator *(float scaleFactor, in Vector2 value) => new Vector2(
-            value.X * scaleFactor, value.Y * scaleFactor);
 
         /// <summary>
         /// Divides the components of a <see cref="Vector2"/> by the components of another <see cref="Vector2"/>.

@@ -19,11 +19,6 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Vector3 : IEquatable<Vector3>, IPixel
     {
-        /// <summary>
-        /// <see cref="Vector3"/> with all values set to <see cref="byte.MaxValue"/>.
-        /// </summary>
-        internal static readonly Vector3 MaxByteValue = new Vector3(byte.MaxValue);
-
         #region Public Constants
 
         /// <summary>
@@ -126,6 +121,18 @@ namespace MonoGame.Framework
         [DataMember]
         public float Z;
 
+        /// <summary>
+        /// Gets or sets the x and y coordinates as a <see cref="Vector2"/>.
+        /// </summary>
+        [IgnoreDataMember]
+        public Vector2 XY { readonly get => ToVector2(); set { X = value.X; Y = value.Y; } }
+
+        /// <summary>
+        /// Gets or sets the z and y coordinates as a <see cref="Vector2"/>.
+        /// </summary>
+        [IgnoreDataMember]
+        public Vector2 ZY { readonly get => new Vector2(Z, Y); set { Z = value.X; Y = value.Y; } }
+
         #region Constructors
 
         /// <summary>
@@ -191,10 +198,10 @@ namespace MonoGame.Framework
 
         #region IPixel
 
-        public readonly void ToColor(ref Color destination)
+        public void FromColor(Color source)
         {
-            ToVector4(out var vector);
-            destination.FromVector4(vector);
+            source.ToScaledVector4(out var vector);
+            FromVector4(vector);
         }
 
         void IPixel.FromGray8(Gray8 source)
@@ -221,12 +228,6 @@ namespace MonoGame.Framework
             FromVector4(vector);
         }
 
-        public void FromColor(Color source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromVector4(vector);
-        }
-
         void IPixel.FromRgb48(Rgb48 source)
         {
             source.ToScaledVector4(out var vector);
@@ -237,6 +238,12 @@ namespace MonoGame.Framework
         {
             source.ToScaledVector4(out var vector);
             FromVector4(vector);
+        }
+
+        public readonly void ToColor(ref Color destination)
+        {
+            ToVector4(out var vector);
+            destination.FromVector4(vector);
         }
 
         #endregion
@@ -357,7 +364,7 @@ namespace MonoGame.Framework
         #region Clamp
 
         /// <summary>
-        /// Clamps the specified <see cref="Vector3"/> within a range.
+        /// Clamps the specified vector within a range.
         /// </summary>
         /// <param name="value">The value to clamp.</param>
         /// <param name="min">The min value.</param>
@@ -371,7 +378,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Clamps the specified <see cref="Vector3"/> within a range.
+        /// Clamps the specified vector within a range.
         /// </summary>
         /// <param name="value">The value to clamp.</param>
         /// <param name="min">The min value.</param>
@@ -384,11 +391,48 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Clamp this <see cref="Vector3"/> within a range.
+        /// Clamp this vector within a range.
         /// </summary>
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
         public void Clamp(in Vector3 min, in Vector3 max)
+        {
+            Clamp(this, min, max, out this);
+        }
+
+        /// <summary>
+        /// Clamps the specified vector within a range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <param name="result">The clamped value.</param>
+        public static void Clamp(in Vector3 value, float min, float max, out Vector3 result)
+        {
+            result.X = MathHelper.Clamp(value.X, min, max);
+            result.Y = MathHelper.Clamp(value.Y, min, max);
+            result.Z = MathHelper.Clamp(value.Z, min, max);
+        }
+
+        /// <summary>
+        /// Clamps the specified vector within a range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <returns>The clamped value.</returns>
+        public static Vector3 Clamp(in Vector3 value, float min, float max)
+        {
+            Clamp(value, min, max, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Clamp this vector within a range.
+        /// </summary>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        public void Clamp(float min, float max)
         {
             Clamp(this, min, max, out this);
         }
@@ -1237,10 +1281,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the <see cref="Vector2"/> representation of this <see cref="Vector3"/>.
         /// </summary>
-        public readonly Vector2 ToVector2()
-        {
-            return UnsafeUtils.As<Vector3, Vector2>(this);
-        }
+        public readonly Vector2 ToVector2() => UnsafeUtils.As<Vector3, Vector2>(this);
 
         #endregion
 

@@ -98,11 +98,10 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToScaledVector4(out Vector4 scaledVector)
         {
-            scaledVector.X = R;
-            scaledVector.Y = G;
-            scaledVector.Z = B;
-            scaledVector.W = A;
-            scaledVector /= ushort.MaxValue;
+            scaledVector.X = R / (float)ushort.MaxValue;
+            scaledVector.Y = G / (float)ushort.MaxValue;
+            scaledVector.Z = B / (float)ushort.MaxValue;
+            scaledVector.W = A / (float)ushort.MaxValue;
         }
 
         #endregion

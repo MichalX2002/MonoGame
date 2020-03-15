@@ -67,22 +67,28 @@ namespace MonoGame.Framework.PackedVector
         public void FromVector4(in Vector4 vector)
         {
             Vector2.Multiply(vector.ToVector2(), byte.MaxValue, out var v);
-            v.Add(Vector2.Half);
-            v.Clamp(v, 0, byte.MaxValue);
+            Vector2.Add(v, Vector2.Half, out v);
+            v.Clamp(0, byte.MaxValue);
 
             R = (byte)v.X;
             G = (byte)v.Y;
         }
 
-        public readonly Vector4 ToVector4() => new Vector4(ToVector2(), 0, 1f);
+        public readonly void ToVector4(out Vector4 vector)
+        {
+            vector.X = R / (float)byte.MaxValue;
+            vector.Y = G / (float)byte.MaxValue;
+            vector.Z = 0;
+            vector.W = 1;
+        }
+
+        public void FromScaledVector4(in Vector4 scaledVector) => FromVector4(scaledVector);
+
+        public readonly void ToScaledVector4(out Vector4 scaledVector) => ToVector4(out scaledVector);
 
         #endregion
 
         #region IPixel
-
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
-
-        public readonly Vector4 ToScaledVector4() => ToVector4();
 
         public void FromGray8(Gray8 source) => R = G = source.L;
 

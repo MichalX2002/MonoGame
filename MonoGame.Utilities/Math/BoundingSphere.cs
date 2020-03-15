@@ -108,7 +108,7 @@ namespace MonoGame.Framework
             //check if all corner is in sphere
             bool inside = true;
 
-            foreach (Vector3 corner in frustum.GetCorners())
+            foreach (Vector3 corner in frustum.Corners)
             {
                 if (Contains(corner) == ContainmentType.Disjoint)
                 {
@@ -193,7 +193,7 @@ namespace MonoGame.Framework
         /// <returns>The new <see cref="BoundingSphere"/>.</returns>
         public static BoundingSphere CreateFromFrustum(BoundingFrustum frustum)
         {
-            return CreateFromPoints(frustum.GetCorners());
+            return CreateFromPoints(frustum.Corners);
         }
 
         /// <summary>

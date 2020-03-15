@@ -98,31 +98,31 @@ namespace MonoGame.Framework
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets the x and y coordinates as a (x,y) <see cref="Vector2"/>.
+        /// Gets or sets the x and y coordinates as a <see cref="Vector2"/>.
         /// </summary>
         [IgnoreDataMember]
         public Vector2 XY { readonly get => ToVector2(); set { X = value.X; Y = value.Y; } }
 
         /// <summary>
-        /// Gets or sets the z and w coordinates as a (z,w) <see cref="Vector2"/>.
+        /// Gets or sets the z and w coordinates as a <see cref="Vector2"/>.
         /// </summary>
         [IgnoreDataMember]
         public Vector2 ZW { readonly get => new Vector2(Z, W); set { Z = value.X; W = value.Y; } }
 
         /// <summary>
-        /// Gets or sets the z and y coordinates as a (z,y) <see cref="Vector2"/>.
+        /// Gets or sets the z and y coordinates as a <see cref="Vector2"/>.
         /// </summary>
         [IgnoreDataMember]
         public Vector2 ZY { readonly get => new Vector2(Z, Y); set { Z = value.X; Y = value.Y; } }
 
         /// <summary>
-        /// Gets or sets the x and w coordinates as a (x,w) <see cref="Vector2"/>.
+        /// Gets or sets the x and w coordinates as a <see cref="Vector2"/>.
         /// </summary>
         [IgnoreDataMember]
         public Vector2 XW { readonly get => new Vector2(X, W); set { X = value.X; W = value.Y; } }
 
         /// <summary>
-        /// Gets or sets the x and y coordinates as a (x,y) <see cref="Vector2"/>.
+        /// Gets or sets the x and y coordinates as a <see cref="Vector2"/>.
         /// </summary>
         [IgnoreDataMember]
         public Vector3 XYZ { readonly get => ToVector3(); set { X = value.X; Y = value.Y; Z = value.Z; } }
@@ -197,17 +197,11 @@ namespace MonoGame.Framework
         /// </summary>
         public readonly Vector3 ToVector3() => UnsafeUtils.As<Vector4, Vector3>(this);
 
-        #region IPackedVector 
+        #region IPackedVector
 
-        void IPackedVector.FromVector4(in Vector4 vector)
-        {
-            this = vector;
-        }
+        void IPackedVector.FromVector4(in Vector4 vector) => this = vector;
 
-        readonly void IPackedVector.ToVector4(out Vector4 vector)
-        {
-            vector = this;
-        }
+        readonly void IPackedVector.ToVector4(out Vector4 vector) => vector = this;
 
         void IPackedVector.FromScaledVector4(in Vector4 scaledVector) => this = scaledVector;
 
@@ -216,6 +210,8 @@ namespace MonoGame.Framework
         #endregion
 
         #region IPixel
+
+        public void FromColor(Color source) => source.ToScaledVector4(out this);
 
         void IPixel.FromGray8(Gray8 source) => source.ToScaledVector4(out this);
 
@@ -228,8 +224,6 @@ namespace MonoGame.Framework
         void IPixel.FromRgb48(Rgb48 source) => source.ToScaledVector4(out this);
 
         void IPixel.FromRgba64(Rgba64 source) => source.ToScaledVector4(out this);
-
-        public void FromColor(Color source) => source.ToScaledVector4(out this);
 
         public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(this);
 
@@ -779,6 +773,8 @@ namespace MonoGame.Framework
 
         #endregion
 
+        #region Transform
+
         /// <summary>
         /// Creates a new <see cref="Vector4"/> that contains a transformation of 2D-vector by the specified <see cref="Matrix"/>.
         /// </summary>
@@ -808,18 +804,31 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Creates a new <see cref="Vector4"/> that contains a transformation of 3D-vector by the specified <see cref="Matrix"/>.
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 
+        /// 3D-vector by the specified <see cref="Matrix"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector3"/>.</param>
+        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
+        /// <param name="result">Transformed <see cref="Vector4"/>.</param>
+        public static void Transform(in Vector3 value, in Matrix matrix, out Vector4 result)
+        {
+            result.X = (value.X * matrix.M11) + (value.Y * matrix.M21) + (value.Z * matrix.M31) + matrix.M41;
+            result.Y = (value.X * matrix.M12) + (value.Y * matrix.M22) + (value.Z * matrix.M32) + matrix.M42;
+            result.Z = (value.X * matrix.M13) + (value.Y * matrix.M23) + (value.Z * matrix.M33) + matrix.M43;
+            result.W = (value.X * matrix.M14) + (value.Y * matrix.M24) + (value.Z * matrix.M34) + matrix.M44;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of
+        /// 3D-vector by the specified <see cref="Matrix"/>.
         /// </summary>
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
         public static Vector4 Transform(in Vector3 value, in Matrix matrix)
         {
-            return new Vector4(
-                (value.X * matrix.M11) + (value.Y * matrix.M21) + (value.Z * matrix.M31) + matrix.M41,
-                (value.X * matrix.M12) + (value.Y * matrix.M22) + (value.Z * matrix.M32) + matrix.M42,
-                (value.X * matrix.M13) + (value.Y * matrix.M23) + (value.Z * matrix.M33) + matrix.M43,
-                (value.X * matrix.M14) + (value.Y * matrix.M24) + (value.Z * matrix.M34) + matrix.M44);
+            Transform(value, matrix, out var result);
+            return result;
         }
 
         /// <summary>
@@ -836,18 +845,31 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Creates a new <see cref="Vector4"/> that contains a transformation of 4D-vector by the specified <see cref="Matrix"/>.
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 
+        /// 4D-vector by the specified <see cref="Matrix"/>.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/>.</param>
+        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
+        /// <param name="result">Transformed <see cref="Vector4"/>.</param>
+        public static void Transform(in Vector4 value, in Matrix matrix, out Vector4 result)
+        {
+            result.X = (value.X * matrix.M11) + (value.Y * matrix.M21) + (value.Z * matrix.M31) + (value.W * matrix.M41);
+            result.Y = (value.X * matrix.M12) + (value.Y * matrix.M22) + (value.Z * matrix.M32) + (value.W * matrix.M42);
+            result.Z = (value.X * matrix.M13) + (value.Y * matrix.M23) + (value.Z * matrix.M33) + (value.W * matrix.M43);
+            result.W = (value.X * matrix.M14) + (value.Y * matrix.M24) + (value.Z * matrix.M34) + (value.W * matrix.M44);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Vector4"/> that contains a transformation of 
+        /// 4D-vector by the specified <see cref="Matrix"/>.
         /// </summary>
         /// <param name="value">Source <see cref="Vector4"/>.</param>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
         public static Vector4 Transform(in Vector4 value, in Matrix matrix)
         {
-            return new Vector4(
-                (value.X * matrix.M11) + (value.Y * matrix.M21) + (value.Z * matrix.M31) + (value.W * matrix.M41),
-                (value.X * matrix.M12) + (value.Y * matrix.M22) + (value.Z * matrix.M32) + (value.W * matrix.M42),
-                (value.X * matrix.M13) + (value.Y * matrix.M23) + (value.Z * matrix.M33) + (value.W * matrix.M43),
-                (value.X * matrix.M14) + (value.Y * matrix.M24) + (value.Z * matrix.M34) + (value.W * matrix.M44));
+            Transform(value, matrix, out var result);
+            return result;
         }
 
         /// <summary>
@@ -879,11 +901,12 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Apply transformation on all vectors within span of <see cref="Vector4"/> by the specified <see cref="Quaternion"/> and places the results in an another array.
+        /// Apply transformation on all vectors within span of <see cref="Vector4"/> by the 
+        /// specified <see cref="Quaternion"/> and places the results in an another span.
         /// </summary>
-        /// <param name="sourceArray">Source span.</param>
+        /// <param name="source">Source span.</param>
         /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
-        /// <param name="destinationArray">Destination span.</param>
+        /// <param name="destination">Destination span.</param>
         public static void Transform(
             ReadOnlySpan<Vector4> source, in Quaternion rotation, Span<Vector4> destination)
         {
@@ -891,6 +914,8 @@ namespace MonoGame.Framework
             for (var i = 0; i < source.Length; i++)
                 destination[i] = Transform(source[i], rotation);
         }
+
+        #endregion
 
         /// <summary>
         /// Returns a <see cref="string"/> representation of this <see cref="Vector4"/> in the format:

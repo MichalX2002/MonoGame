@@ -5,50 +5,22 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace MonoGame.Framework
 {
-    internal class PlaneHelper
-    {
-        /// <summary>
-        /// Returns a value indicating what side (positive/negative) of a plane a point is
-        /// </summary>
-        /// <param name="point">The point to check with</param>
-        /// <param name="plane">The plane to check against</param>
-        /// <returns>Greater than zero if on the positive side, less than zero if on the negative size, 0 otherwise</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float ClassifyPoint(Vector3 point, in Plane plane)
-        {
-            return point.X * plane.Normal.X + point.Y * plane.Normal.Y + point.Z * plane.Normal.Z + plane.D;
-        }
-
-        ///// <summary>
-        ///// Returns the perpendicular distance from a point to a plane
-        ///// </summary>
-        ///// <param name="point">The point to check</param>
-        ///// <param name="plane">The place to check</param>
-        ///// <returns>The perpendicular distance from the point to the plane</returns>
-        //public static float PerpendicularDistance(ref Vector3 point, ref Plane plane)
-        //{
-        //    // dist = (ax + by + cz + d) / sqrt(a*a + b*b + c*c)
-        //    return (float)Math.Abs((plane.Normal.X * point.X + plane.Normal.Y * point.Y + plane.Normal.Z * point.Z)
-        //                            / Math.Sqrt(plane.Normal.X * plane.Normal.X + plane.Normal.Y * plane.Normal.Y + plane.Normal.Z * plane.Normal.Z));
-        //}
-    }
-    
     [DataContract]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Plane : IEquatable<Plane>
     {
         [DataMember]
-        public float D;
-
-        [DataMember]
         public Vector3 Normal;
 
-        public Plane(Vector3 normal, float d)
+        [DataMember]
+        public float D;
+
+        public Plane(in Vector3 normal, float d)
         {
             Normal = normal;
             D = d;
@@ -58,33 +30,56 @@ namespace MonoGame.Framework
         {
         }
 
-        public Plane(Vector3 a, Vector3 b, Vector3 c)
+        public Plane(in Vector3 a, in Vector3 b, in Vector3 c)
         {
             Vector3 ab = b - a;
             Vector3 ac = c - a;
 
             Vector3.Cross(ab, ac, out var cross);
-            Normal = Vector3.Normalize(cross);
+            Vector3.Normalize(cross, out Normal);
             D = -Vector3.Dot(Normal, a);
         }
 
         public Plane(float a, float b, float c, float d) : this(new Vector3(a, b, c), d)
         {
         }
+
+        public readonly Vector4 ToVector4()
+        {
+            return UnsafeUtils.As<Plane, Vector4>(this);
+        }
         
-        public float Dot(in Vector4 value)
+        public readonly float Dot(in Vector4 value)
         {
-            return (Normal.X * value.X) + (Normal.Y * value.Y) + (Normal.Z * value.Z) + (D * value.W);
+            return Vector4.Dot(ToVector4(), value);
         }
 
-        public float DotCoordinate(Vector3 value)
+        public readonly float DotNormal(in Vector3 value)
         {
-            return (Normal.X * value.X) + (Normal.Y * value.Y) + (Normal.Z * value.Z) + D;
+            return Vector3.Dot(Normal, value);
         }
 
-        public float DotNormal(Vector3 value)
+        public readonly float DotCoordinate(in Vector3 value)
         {
-            return (Normal.X * value.X) + (Normal.Y * value.Y) + (Normal.Z * value.Z);
+            return DotNormal(value) + D;
+        }
+
+        /// <summary>
+        /// Transforms a normalized plane by a matrix.
+        /// </summary>
+        /// <param name="plane">The normalized plane to transform.</param>
+        /// <param name="matrix">The transformation matrix.</param>
+        /// <param name="result">The transformed plane.</param>
+        public static void Transform(in Plane plane, in Matrix matrix, out Plane result)
+        {
+            // See "Transforming Normals" in http://www.glprogramming.com/red/appendixf.html
+            // for an explanation of how this works.
+
+            Matrix.Invert(matrix, out var transformedMatrix);
+            Matrix.Transpose(transformedMatrix, out transformedMatrix);
+
+            Vector4.Transform(plane.ToVector4(), transformedMatrix, out var transformedVector);
+            result = Unsafe.As<Vector4, Plane>(ref transformedVector);
         }
 
         /// <summary>
@@ -95,15 +90,8 @@ namespace MonoGame.Framework
         /// <returns>The transformed plane.</returns>
         public static Plane Transform(in Plane plane, in Matrix matrix)
         {
-            // See "Transforming Normals" in http://www.glprogramming.com/red/appendixf.html
-            // for an explanation of how this works.
-
-            Matrix transformedMatrix = Matrix.Invert(matrix);
-            transformedMatrix = Matrix.Transpose(transformedMatrix);
-
-            var vector = new Vector4(plane.Normal, plane.D);
-            var transformedVector = Vector4.Transform(vector, transformedMatrix);
-            return new Plane(transformedVector);
+            Transform(plane, matrix, out var result);
+            return result;
         }
 
         /// <summary>
@@ -117,20 +105,28 @@ namespace MonoGame.Framework
             return new Plane(Vector3.Transform(plane.Normal, rotation), plane.D);
         }
 
-        public void Normalize()
+        #region Normalize
+
+        public static void Normalize(in Plane value, out Plane result)
         {
-            float length = Normal.Length();
-            float factor =  1f / length;
-            Normal = Vector3.Multiply(Normal, factor);
-            D *= factor;
+            float length = value.Normal.Length();
+
+            Vector3.Divide(value.Normal, length, out result.Normal);
+            result.D = value.D / length;
         }
 
         public static Plane Normalize(in Plane value)
         {
-            float length = value.Normal.Length();
-            float factor =  1f / length;            
-            return new Plane(Vector3.Multiply(value.Normal, factor), value.D * factor);
+            Normalize(value, out var result);
+            return result;
         }
+
+        public void Normalize()
+        {
+            Normalize(this, out this);
+        }
+
+        #endregion
 
         public static bool operator !=(in Plane plane1, in Plane plane2)
         {
@@ -139,7 +135,8 @@ namespace MonoGame.Framework
 
         public static bool operator ==(in Plane plane1, in Plane plane2)
         {
-            return plane1.Normal == plane2.Normal && plane1.D == plane2.D;
+            return plane1.Normal == plane2.Normal
+                && plane1.D == plane2.D;
         }
 
         public override bool Equals(object obj)
@@ -186,5 +183,29 @@ namespace MonoGame.Framework
             normal = Normal;
             d = D;
         }
+
+        /// <summary>
+        /// Returns a value indicating what side (positive/negative) of a plane a point is
+        /// </summary>
+        /// <param name="point">The point to check with</param>
+        /// <param name="plane">The plane to check against</param>
+        /// <returns>Greater than zero if on the positive side, less than zero if on the negative size, 0 otherwise</returns>
+        public static float ClassifyPoint(in Vector3 point, in Plane plane)
+        {
+            return Vector3.Dot(point, plane.Normal) + plane.D;
+        }
+
+        ///// <summary>
+        ///// Returns the perpendicular distance from a point to a plane
+        ///// </summary>
+        ///// <param name="point">The point to check</param>
+        ///// <param name="plane">The place to check</param>
+        ///// <returns>The perpendicular distance from the point to the plane</returns>
+        //public static float PerpendicularDistance(ref Vector3 point, ref Plane plane)
+        //{
+        //    // dist = (ax + by + cz + d) / sqrt(a*a + b*b + c*c)
+        //    return (float)Math.Abs((plane.Normal.X * point.X + plane.Normal.Y * point.Y + plane.Normal.Z * point.Z)
+        //                            / Math.Sqrt(plane.Normal.X * plane.Normal.X + plane.Normal.Y * plane.Normal.Y + plane.Normal.Z * plane.Normal.Z));
+        //}
     }
 }

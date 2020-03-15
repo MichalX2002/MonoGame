@@ -18,26 +18,26 @@ namespace MonoGame.Framework.PackedVector
         VectorComponentInfo ComponentInfo { get; }
 
         /// <summary>
-        /// Sets the vector from a scaled <see cref="Vector4"/>.
-        /// The XYZW vector components correspond to RGBA. 
+        /// Sets the vector from a scaled <see cref="Vector4"/>
+        /// where the XYZW components correspond to RGBA. 
         /// </summary>
         void FromScaledVector4(in Vector4 scaledVector);
 
         /// <summary>
-        /// Gets the vector as a scaled <see cref="Vector4"/>.
-        /// The XYZW vector components correspond to RGBA. 
+        /// Gets the vector as a scaled <see cref="Vector4"/>
+        /// where the XYZW components correspond to RGBA. 
         /// </summary>
         void ToScaledVector4(out Vector4 scaledVector);
 
         /// <summary>
-        /// Sets the vector from a <see cref="Vector4"/>.
-        /// The XYZW vector components correspond to RGBA. 
+        /// Sets the vector from a <see cref="Vector4"/> 
+        /// where the XYZW components correspond to RGBA. 
         /// </summary>
         void FromVector4(in Vector4 vector);
 
         /// <summary>
-        /// Gets the vector as a <see cref="Vector4"/>.
-        /// The XYZW vector components correspond to RGBA. 
+        /// Gets the vector as a <see cref="Vector4"/>
+        /// where the XYZW components correspond to RGBA. 
         /// </summary>
         void ToVector4(out Vector4 vector);
     }

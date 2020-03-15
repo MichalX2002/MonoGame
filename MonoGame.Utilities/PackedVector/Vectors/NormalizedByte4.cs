@@ -92,11 +92,10 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToVector4(out Vector4 vector)
         {
-            vector.X = X;
-            vector.Y = Y;
-            vector.Z = Z;
-            vector.W = W;
-            vector /= sbyte.MaxValue;
+            vector.X = X / (float)sbyte.MaxValue;
+            vector.Y = Y / (float)sbyte.MaxValue;
+            vector.Z = Z / (float)sbyte.MaxValue;
+            vector.W = W / (float)sbyte.MaxValue;
         }
 
         public void FromScaledVector4(in Vector4 scaledVector)
@@ -116,6 +115,12 @@ namespace MonoGame.Framework.PackedVector
         #endregion
 
         #region IPixel
+
+        public void FromColor(Color source)
+        {
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
+        }
 
         public void FromGray8(Gray8 source)
         {
@@ -148,12 +153,6 @@ namespace MonoGame.Framework.PackedVector
         }
 
         public void FromRgba64(Rgba64 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromColor(Color source)
         {
             source.ToScaledVector4(out var vector);
             FromScaledVector4(vector);

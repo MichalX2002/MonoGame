@@ -4,7 +4,10 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace MonoGame.Framework
 {
@@ -16,6 +19,10 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Matrix : IEquatable<Matrix>
     {
+        public const int Width = 4;
+        public const int Height = 4;
+        public const int ElementCount = Width * Height;
+
         /// <summary>
         /// The identity matrix.
         /// </summary>
@@ -200,28 +207,27 @@ namespace MonoGame.Framework
         {
             readonly get
             {
-                switch (index)
+                return index switch
                 {
-                    case 0: return M11;
-                    case 1: return M12;
-                    case 2: return M13;
-                    case 3: return M14;
-                    case 4: return M21;
-                    case 5: return M22;
-                    case 6: return M23;
-                    case 7: return M24;
-                    case 8: return M31;
-                    case 9: return M32;
-                    case 10: return M33;
-                    case 11: return M34;
-                    case 12: return M41;
-                    case 13: return M42;
-                    case 14: return M43;
-                    case 15: return M44;
-                }
-                throw new ArgumentOutOfRangeException();
+                    0 => M11,
+                    1 => M12,
+                    2 => M13,
+                    3 => M14,
+                    4 => M21,
+                    5 => M22,
+                    6 => M23,
+                    7 => M24,
+                    8 => M31,
+                    9 => M32,
+                    10 => M33,
+                    11 => M34,
+                    12 => M41,
+                    13 => M42,
+                    14 => M43,
+                    15 => M44,
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
             }
-
             set
             {
                 switch (index)
@@ -376,32 +382,35 @@ namespace MonoGame.Framework
         /// <param name="cameraForwardVector">Optional camera forward vector.</param>
         /// <returns>The <see cref="Matrix"/> for spherical billboarding.</returns>
         public static Matrix CreateBillboard(
-            Vector3 objectPosition, Vector3 cameraPosition,
-            Vector3 cameraUpVector, Vector3? cameraForwardVector)
+            in Vector3 objectPosition,
+            in Vector3 cameraPosition,
+            in Vector3 cameraUpVector,
+            in Vector3? cameraForwardVector)
         {
-            Vector3 vector = objectPosition - cameraPosition;
-            float num = vector.LengthSquared();
-            vector = num < 0.0001f
-                ? cameraForwardVector.HasValue ? -cameraForwardVector.Value : Vector3.Forward
-                : Vector3.Multiply(vector, 1f / MathF.Sqrt(num));
+            Vector3 v1 = objectPosition - cameraPosition;
+            float num = v1.LengthSquared();
 
-            Vector3.Cross(cameraUpVector, vector, out var vector3);
-            vector3.Normalize();
-            
-            Vector3.Cross(vector, vector3, out var vector2);
+            v1 = num < 0.0001f
+                ? cameraForwardVector.HasValue ? -cameraForwardVector.Value : Vector3.Forward
+                : Vector3.Multiply(v1, 1f / MathF.Sqrt(num));
+
+            Vector3.Cross(cameraUpVector, v1, out var v3);
+            v3.Normalize();
+
+            Vector3.Cross(v1, v3, out var v2);
 
             return new Matrix(
-                m11: vector3.X,
-                m12: vector3.Y,
-                m13: vector3.Z,
+                m11: v3.X,
+                m12: v3.Y,
+                m13: v3.Z,
                 m14: 0,
-                m21: vector2.X,
-                m22: vector2.Y,
-                m23: vector2.Z,
+                m21: v2.X,
+                m22: v2.Y,
+                m23: v2.Z,
                 m24: 0,
-                m31: vector.X,
-                m32: vector.Y,
-                m33: vector.Z,
+                m31: v1.X,
+                m32: v1.Y,
+                m33: v1.Z,
                 m34: 0,
                 m41: objectPosition.X,
                 m42: objectPosition.Y,
@@ -419,11 +428,17 @@ namespace MonoGame.Framework
         /// <param name="objectForwardVector">Optional object forward vector.</param>
         /// <returns>The <see cref="Matrix"/> for cylindrical billboarding.</returns>
         public static Matrix CreateConstrainedBillboard(
-            Vector3 objectPosition, Vector3 cameraPosition, Vector3 rotateAxis,
-            Vector3? cameraForwardVector, Vector3? objectForwardVector)
+            in Vector3 objectPosition,
+            in Vector3 cameraPosition,
+            in Vector3 rotateAxis,
+            in Vector3? cameraForwardVector,
+            in Vector3? objectForwardVector)
         {
+            const float MaxDot = 0.9982547f;
+
             Vector3 vector2 = objectPosition - cameraPosition;
             float num2 = vector2.LengthSquared();
+
             vector2 = num2 < 0.0001f
                 ? cameraForwardVector.HasValue ? -cameraForwardVector.Value : Vector3.Forward
                 : Vector3.Multiply(vector2, 1f / (MathF.Sqrt(num2)));
@@ -431,22 +446,23 @@ namespace MonoGame.Framework
             Vector3 vector1;
             Vector3 vector3;
             float num = Vector3.Dot(rotateAxis, vector2);
-            if (Math.Abs(num) > 0.9982547f)
+
+            if (Math.Abs(num) > MaxDot)
             {
                 if (objectForwardVector.HasValue)
                 {
                     vector1 = objectForwardVector.Value;
                     num = Vector3.Dot(rotateAxis, vector1);
-                    if (Math.Abs(num) > 0.9982547f)
+                    if (Math.Abs(num) > MaxDot)
                     {
                         num = (rotateAxis.X * Vector3.Forward.X) + (rotateAxis.Y * Vector3.Forward.Y) + (rotateAxis.Z * Vector3.Forward.Z);
-                        vector1 = (Math.Abs(num) > 0.9982547f) ? Vector3.Right : Vector3.Forward;
+                        vector1 = (Math.Abs(num) > MaxDot) ? Vector3.Right : Vector3.Forward;
                     }
                 }
                 else
                 {
                     num = (rotateAxis.X * Vector3.Forward.X) + (rotateAxis.Y * Vector3.Forward.Y) + (rotateAxis.Z * Vector3.Forward.Z);
-                    vector1 = (Math.Abs(num) > 0.9982547f) ? Vector3.Right : Vector3.Forward;
+                    vector1 = (Math.Abs(num) > MaxDot) ? Vector3.Right : Vector3.Forward;
                 }
                 vector3 = Vector3.Cross(rotateAxis, vector1);
                 vector3.Normalize();
@@ -485,32 +501,29 @@ namespace MonoGame.Framework
         /// <param name="axis">The axis of rotation.</param>
         /// <param name="angle">The angle of rotation in radians.</param>
         /// <returns>The rotation <see cref="Matrix"/>.</returns>
-        public static Matrix CreateFromAxisAngle(Vector3 axis, float angle)
+        public static Matrix CreateFromAxisAngle(in Vector3 axis, float angle)
         {
-            float x = axis.X;
-            float y = axis.Y;
-            float z = axis.Z;
+            float num1 = MathF.Cos(angle);
             float num2 = MathF.Sin(angle);
-            float num = MathF.Cos(angle);
-            float num11 = x * x;
-            float num10 = y * y;
-            float num9 = z * z;
-            float num8 = x * y;
-            float num7 = x * z;
-            float num6 = y * z;
+            float num11 = axis.X * axis.X;
+            float num10 = axis.Y * axis.Y;
+            float num9 = axis.Z * axis.Z;
+            float num8 = axis.X * axis.Y;
+            float num7 = axis.X * axis.Z;
+            float num6 = axis.Y * axis.Z;
 
             return new Matrix(
-                m11: num11 + (num * (1f - num11)),
-                m12: num8 - (num * num8) + (num2 * z),
-                m13: num7 - (num * num7) - (num2 * y),
+                m11: num11 + (num1 * (1f - num11)),
+                m12: num8 - (num1 * num8) + (num2 * axis.Z),
+                m13: num7 - (num1 * num7) - (num2 * axis.Y),
                 m14: 0,
-                m21: num8 - (num * num8) - (num2 * z),
-                m22: num10 + (num * (1f - num10)),
-                m23: num6 - (num * num6) + (num2 * x),
+                m21: num8 - (num1 * num8) - (num2 * axis.Z),
+                m22: num10 + (num1 * (1f - num10)),
+                m23: num6 - (num1 * num6) + (num2 * axis.X),
                 m24: 0,
-                m31: num7 - (num * num7) + (num2 * y),
-                m32: num6 - (num * num6) - (num2 * x),
-                m33: num9 + (num * (1f - num9)),
+                m31: num7 - (num1 * num7) + (num2 * axis.Y),
+                m32: num6 - (num1 * num6) - (num2 * axis.X),
+                m33: num9 + (num1 * (1f - num9)),
                 m34: 0,
                 m41: 0,
                 m42: 0,
@@ -578,11 +591,13 @@ namespace MonoGame.Framework
         /// <param name="cameraUpVector">The direction of the upper edge of the camera.</param>
         /// <returns>The viewing <see cref="Matrix"/>.</returns>
         public static Matrix CreateLookAt(
-            in Vector3 cameraPosition, in Vector3 cameraTarget, in Vector3 cameraUpVector)
+            in Vector3 cameraPosition,
+            in Vector3 cameraTarget,
+            in Vector3 cameraUpVector)
         {
-            var vector1 = Vector3.Normalize(cameraPosition - cameraTarget);
-            var vector2 = Vector3.Normalize(Vector3.Cross(cameraUpVector, vector1));
-            var vector3 = Vector3.Cross(vector1, vector2);
+            Vector3.Normalize(cameraPosition - cameraTarget, out var vector1);
+            Vector3.Normalize(Vector3.Cross(cameraUpVector, vector1), out var vector2);
+            Vector3.Cross(vector1, vector2, out var vector3);
 
             return new Matrix(
                 m11: vector2.X,
@@ -611,7 +626,8 @@ namespace MonoGame.Framework
         /// <param name="zNearPlane">Depth of the near plane.</param>
         /// <param name="zFarPlane">Depth of the far plane.</param>
         /// <returns>The new projection <see cref="Matrix"/> for orthographic view.</returns>
-        public static Matrix CreateOrthographic(float width, float height, float zNearPlane, float zFarPlane)
+        public static Matrix CreateOrthographic(
+            float width, float height, float zNearPlane, float zFarPlane)
         {
             CreateOrthographic(width, height, zNearPlane, zFarPlane, out Matrix matrix);
             return matrix;
@@ -625,7 +641,8 @@ namespace MonoGame.Framework
         /// <param name="zNearPlane">Depth of the near plane.</param>
         /// <param name="zFarPlane">Depth of the far plane.</param>
         /// <param name="result">The new projection <see cref="Matrix"/> for orthographic view as an output parameter.</param>
-        public static void CreateOrthographic(float width, float height, float zNearPlane, float zFarPlane, out Matrix result)
+        public static void CreateOrthographic(
+            float width, float height, float zNearPlane, float zFarPlane, out Matrix result)
         {
             result.M11 = 2f / width;
             result.M12 = result.M13 = result.M14 = 0f;
@@ -645,10 +662,12 @@ namespace MonoGame.Framework
         /// <param name="zNearPlane">Depth of the near plane.</param>
         /// <param name="zFarPlane">Depth of the far plane.</param>
         /// <returns>The new projection <see cref="Matrix"/> for customized orthographic view.</returns>
-        public static Matrix CreateOrthographicOffCenter(Rectangle viewingVolume, float zNearPlane, float zFarPlane)
+        public static Matrix CreateOrthographicOffCenter(
+            in RectangleF viewingVolume, float zNearPlane, float zFarPlane)
         {
             return CreateOrthographicOffCenter(
-                viewingVolume.Left, viewingVolume.Right, viewingVolume.Bottom, viewingVolume.Top, zNearPlane, zFarPlane);
+                viewingVolume.Left, viewingVolume.Right, viewingVolume.Bottom, viewingVolume.Top,
+                zNearPlane, zFarPlane);
         }
 
         /// <summary>
@@ -662,7 +681,8 @@ namespace MonoGame.Framework
         /// <param name="zFarPlane">Depth of the far plane.</param>
         /// <returns>The new projection <see cref="Matrix"/> for customized orthographic view.</returns>
         public static Matrix CreateOrthographicOffCenter(
-            float left, float right, float bottom, float top, float zNearPlane, float zFarPlane)
+            float left, float right, float bottom, float top,
+            float zNearPlane, float zFarPlane)
         {
             return new Matrix(
                 m11: (float)(2.0 / (right - (double)left)),
@@ -787,24 +807,21 @@ namespace MonoGame.Framework
         /// <param name="farPlaneDistance">Distance to the far plane.</param>
         /// <returns>The new <see cref="Matrix"/> for customized perspective view.</returns>
         public static Matrix CreatePerspectiveOffCenter(
-            float left, float right, float bottom, float top, float nearPlaneDistance, float farPlaneDistance)
+            float left, float right, float bottom, float top,
+            float nearPlaneDistance, float farPlaneDistance)
         {
             if (nearPlaneDistance <= 0f)
-            {
                 throw new ArgumentOutOfRangeException(
                     nameof(nearPlaneDistance), $"{nameof(nearPlaneDistance)} <= 0 ({nearPlaneDistance})");
-            }
+
             if (farPlaneDistance <= 0f)
-            {
                 throw new ArgumentException(
                     nameof(farPlaneDistance), $"{nameof(farPlaneDistance)} <= 0 ({farPlaneDistance})");
-            }
+
             if (nearPlaneDistance >= farPlaneDistance)
-            {
                 throw new ArgumentException(
                     nameof(nearPlaneDistance), $"{nameof(nearPlaneDistance)} >= {nameof(farPlaneDistance)} " +
                     $"({nearPlaneDistance} >= {farPlaneDistance})");
-            }
 
             return new Matrix(
                 m11: 2f * nearPlaneDistance / (right - left),
@@ -833,7 +850,8 @@ namespace MonoGame.Framework
         /// <param name="farPlaneDistance">Distance to the far plane.</param>
         /// <returns>The new <see cref="Matrix"/> for customized perspective view.</returns>
         public static Matrix CreatePerspectiveOffCenter(
-            RectangleF viewingVolume, float nearPlaneDistance, float farPlaneDistance)
+            in RectangleF viewingVolume,
+            float nearPlaneDistance, float farPlaneDistance)
         {
             return CreatePerspectiveOffCenter(
                 viewingVolume.Left, viewingVolume.Right, viewingVolume.Bottom, viewingVolume.Top,
@@ -931,14 +949,15 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Creates a new <see cref="Matrix"/> that flattens geometry into a specified <see cref="Plane"/> as if casting a shadow from a specified light source. 
+        /// Creates a new <see cref="Matrix"/> that flattens geometry into a specified 
+        /// <see cref="Plane"/> as if casting a shadow from a specified light source. 
         /// </summary>
         /// <param name="lightDirection">A vector specifying the direction from which the light that will cast the shadow is coming.</param>
         /// <param name="plane">The plane onto which the new matrix should flatten geometry so as to cast a shadow.</param>
         /// <returns>A <see cref="Matrix"/> that can be used to flatten geometry onto the specified plane from the specified direction. </returns>
         public static Matrix CreateShadow(in Vector3 lightDirection, in Plane plane)
         {
-            float dot = (plane.Normal.X * lightDirection.X) + (plane.Normal.Y * lightDirection.Y) + (plane.Normal.Z * lightDirection.Z);
+            float dot = Vector3.Dot(plane.Normal, lightDirection);
             float x = -plane.Normal.X;
             float y = -plane.Normal.Y;
             float z = -plane.Normal.Z;
@@ -1008,7 +1027,7 @@ namespace MonoGame.Framework
         /// <returns>The reflection <see cref="Matrix"/>.</returns>
         public static Matrix CreateReflection(in Plane value)
         {
-            Plane plane = Plane.Normalize(value);
+            Plane.Normalize(value, out var plane);
             float x = plane.Normal.X;
             float y = plane.Normal.Y;
             float z = plane.Normal.Z;
@@ -1044,11 +1063,15 @@ namespace MonoGame.Framework
         /// <param name="forward">The forward direction vector.</param>
         /// <param name="up">The upward direction vector. Usually <see cref="Vector3.Up"/>.</param>
         /// <param name="result">The world <see cref="Matrix"/>.</param>
-        public static void CreateWorld(in Vector3 position, in Vector3 forward, in Vector3 up, out Matrix result)
+        public static void CreateWorld(
+            in Vector3 position,
+            in Vector3 forward,
+            in Vector3 up,
+            out Matrix result)
         {
             Vector3.Cross(forward, up, out var x);
             x.Normalize();
-            
+
             Vector3.Cross(x, forward, out var y);
             y.Normalize();
 
@@ -1091,12 +1114,12 @@ namespace MonoGame.Framework
         #endregion
 
         /// <summary>
-        /// Decomposes this matrix to translation, rotation and scale elements. Returns <see langword="true"/> if matrix can be decomposed; <see langword="false"/> otherwise.
+        /// Decomposes this matrix to translation, rotation and scale elements.
         /// </summary>
         /// <param name="scale">Scale vector as an output parameter.</param>
         /// <param name="rotation">Rotation quaternion as an output parameter.</param>
         /// <param name="translation">Translation vector as an output parameter.</param>
-        /// <returns><see langword="true"/> if matrix can be decomposed; <see langword="false"/> otherwise.</returns>
+        /// <returns><see langword="true"/> if matrix was decomposed; otherwise <see langword="false"/>.</returns>
         public bool Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation)
         {
             translation.X = M41;
@@ -1111,7 +1134,7 @@ namespace MonoGame.Framework
             scale.Y = ys * MathF.Sqrt(M21 * M21 + M22 * M22 + M23 * M23);
             scale.Z = zs * MathF.Sqrt(M31 * M31 + M32 * M32 + M33 * M33);
 
-            if (scale.X == 0.0 || scale.Y == 0.0 || scale.Z == 0.0)
+            if (scale.X == 0 || scale.Y == 0 || scale.Z == 0)
             {
                 rotation = Quaternion.Identity;
                 return false;
@@ -1135,10 +1158,6 @@ namespace MonoGame.Framework
         /// </remarks>
         public float Determinant()
         {
-            float num22 = M11;
-            float num21 = M12;
-            float num20 = M13;
-            float num19 = M14;
             float num12 = M21;
             float num11 = M22;
             float num10 = M23;
@@ -1150,19 +1169,19 @@ namespace MonoGame.Framework
             float num4 = M41;
             float num3 = M42;
             float num2 = M43;
-            float num = M44;
-            float num18 = (num6 * num) - (num5 * num2);
-            float num17 = (num7 * num) - (num5 * num3);
+            float num1 = M44;
+            float num18 = (num6 * num1) - (num5 * num2);
+            float num17 = (num7 * num1) - (num5 * num3);
             float num16 = (num7 * num2) - (num6 * num3);
-            float num15 = (num8 * num) - (num5 * num4);
+            float num15 = (num8 * num1) - (num5 * num4);
             float num14 = (num8 * num2) - (num6 * num4);
             float num13 = (num8 * num3) - (num7 * num4);
 
             return
-                (num22 * ((num11 * num18) - (num10 * num17) + (num9 * num16))) -
-                (num21 * ((num12 * num18) - (num10 * num15) + (num9 * num14))) +
-                (num20 * ((num12 * num17) - (num11 * num15) + (num9 * num13))) -
-                (num19 * ((num12 * num16) - (num11 * num14) + (num10 * num13)));
+                (M11 * ((num11 * num18) - (num10 * num17) + (num9 * num16))) -
+                (M12 * ((num12 * num18) - (num10 * num15) + (num9 * num14))) +
+                (M13 * ((num12 * num17) - (num11 * num15) + (num9 * num13))) -
+                (M14 * ((num12 * num16) - (num11 * num14) + (num10 * num13)));
         }
 
         /// <summary>
@@ -1186,7 +1205,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="other">The <see cref="Matrix"/> to compare.</param>
         /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
-        public bool Equals(Matrix other)
+        public readonly bool Equals(Matrix other)
         {
             return this == other;
         }
@@ -1196,7 +1215,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="obj">The <see cref="object"/> to compare.</param>
         /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
-        public override bool Equals(object obj)
+        public readonly override bool Equals(object obj)
         {
             return obj is Matrix other ? this == other : false;
         }
@@ -1207,22 +1226,24 @@ namespace MonoGame.Framework
         /// <returns>Hash code of this <see cref="Matrix"/>.</returns>
         public override int GetHashCode()
         {
-            int code = 7 + M11.GetHashCode();
-            code = code * 31 + M12.GetHashCode();
-            code = code * 31 + M13.GetHashCode();
-            code = code * 31 + M14.GetHashCode();
-            code = code * 31 + M21.GetHashCode();
-            code = code * 31 + M22.GetHashCode();
-            code = code * 31 + M23.GetHashCode();
-            code = code * 31 + M24.GetHashCode();
-            code = code * 31 + M31.GetHashCode();
-            code = code * 31 + M32.GetHashCode();
-            code = code * 31 + M33.GetHashCode();
-            code = code * 31 + M34.GetHashCode();
-            code = code * 31 + M41.GetHashCode();
-            code = code * 31 + M42.GetHashCode();
-            code = code * 31 + M43.GetHashCode();
-            return code * 31 + M44.GetHashCode();
+            var code = new HashCode();
+            code.Add(M11);
+            code.Add(M12);
+            code.Add(M13);
+            code.Add(M14);
+            code.Add(M21);
+            code.Add(M22);
+            code.Add(M23);
+            code.Add(M24);
+            code.Add(M31);
+            code.Add(M32);
+            code.Add(M33);
+            code.Add(M34);
+            code.Add(M41);
+            code.Add(M42);
+            code.Add(M43);
+            code.Add(M44);
+            return code.ToHashCode();
         }
 
         /// <summary>
@@ -1376,22 +1397,16 @@ namespace MonoGame.Framework
         public static Matrix Multiply(in Matrix matrix, float scaleFactor) => matrix * scaleFactor;
 
         /// <summary>
-        /// Creates an array copy of the specified <see cref="Matrix"/>.
+        /// Copies the values of this <see cref="Matrix"/> into a span.
         /// </summary>
-        /// <param name="matrix">The source <see cref="Matrix"/>.</param>
-        /// <returns>The array which matrix values will be stored.</returns>
-        /// <remarks>
-        /// Required for OpenGL 2.0 projection matrix stuff.
-        /// </remarks>
-        public static float[] ToFloatArray(in Matrix matrix)
+        public readonly bool CopyTo(Span<float> destination)
         {
-            return new float[]
-            {
-                matrix.M11, matrix.M12, matrix.M13, matrix.M14,
-                matrix.M21, matrix.M22, matrix.M23, matrix.M24,
-                matrix.M31, matrix.M32, matrix.M33, matrix.M34,
-                matrix.M41, matrix.M42, matrix.M43, matrix.M44
-            };
+            if (destination.Length < 16)
+                throw new ArgumentException("Span is too small.", nameof(destination));
+
+            var matrixSpan = MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(this), 1);
+            var floatSpan = MemoryMarshal.Cast<Matrix, float>(matrixSpan);
+            return floatSpan.TryCopyTo(destination);
         }
 
         /// <summary>
@@ -1563,10 +1578,60 @@ namespace MonoGame.Framework
         /// <returns>A <see cref="string"/> representation of this <see cref="Matrix"/>.</returns>
         public readonly override string ToString()
         {
-            return "{M11:" + M11 + " M12:" + M12 + " M13:" + M13 + " M14:" + M14 + "}"
-                + " {M21:" + M21 + " M22:" + M22 + " M23:" + M23 + " M24:" + M24 + "}"
-                + " {M31:" + M31 + " M32:" + M32 + " M33:" + M33 + " M34:" + M34 + "}"
-                + " {M41:" + M41 + " M42:" + M42 + " M43:" + M43 + " M44:" + M44 + "}";
+            var builder = new StringBuilder();
+
+            builder.Append("{M11:").Append(M11);
+            builder.Append(" M12:").Append(M12);
+            builder.Append(" M13:").Append(M13);
+            builder.Append(" M14:").Append(M14);
+            builder.Append("} ");
+
+            builder.Append("{M21:").Append(M21);
+            builder.Append(" M22:").Append(M22);
+            builder.Append(" M23:").Append(M23);
+            builder.Append(" M24:").Append(M24);
+            builder.Append("} ");
+
+            builder.Append("{M31:").Append(M31);
+            builder.Append(" M32:").Append(M32);
+            builder.Append(" M33:").Append(M33);
+            builder.Append(" M34:").Append(M34);
+            builder.Append("} ");
+
+            builder.Append("{M41:").Append(M41);
+            builder.Append(" M42:").Append(M42);
+            builder.Append(" M43:").Append(M43);
+            builder.Append(" M44:").Append(M44);
+            builder.Append("}");
+
+            return builder.ToString();
+        }
+
+        #region Transpose
+
+        /// <summary>
+        /// Swaps the matrix rows and columns.
+        /// </summary>
+        /// <param name="matrix">The matrix for transposing operation.</param>
+        /// <param name="result">The new <see cref="Matrix"/> which contains the transposed result.</param>
+        public static void Transpose(in Matrix matrix, out Matrix result)
+        {
+            result.M11 = matrix.M11;
+            result.M21 = matrix.M12;
+            result.M31 = matrix.M13;
+            result.M41 = matrix.M14;
+            result.M12 = matrix.M21;
+            result.M22 = matrix.M22;
+            result.M32 = matrix.M23;
+            result.M42 = matrix.M24;
+            result.M13 = matrix.M31;
+            result.M23 = matrix.M32;
+            result.M33 = matrix.M33;
+            result.M43 = matrix.M34;
+            result.M14 = matrix.M41;
+            result.M24 = matrix.M42;
+            result.M34 = matrix.M43;
+            result.M44 = matrix.M44;
         }
 
         /// <summary>
@@ -1576,12 +1641,11 @@ namespace MonoGame.Framework
         /// <returns>The new <see cref="Matrix"/> which contains the transposed result.</returns>
         public static Matrix Transpose(in Matrix matrix)
         {
-            return new Matrix(
-                m11: matrix.M11, m12: matrix.M21, m13: matrix.M31, m14: matrix.M41,
-                m21: matrix.M12, m22: matrix.M22, m23: matrix.M32, m24: matrix.M42,
-                m31: matrix.M13, m32: matrix.M23, m33: matrix.M33, m34: matrix.M43,
-                m41: matrix.M14, m42: matrix.M24, m43: matrix.M34, m44: matrix.M44);
+            Transpose(matrix, out var result);
+            return result;
         }
+
+        #endregion
 
         #endregion
 

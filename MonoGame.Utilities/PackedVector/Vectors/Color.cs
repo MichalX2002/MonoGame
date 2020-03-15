@@ -261,7 +261,7 @@ namespace MonoGame.Framework
         public void FromScaledVector4(in Vector4 scaledVector)
         {
             Vector4.Multiply(scaledVector, byte.MaxValue, out var vector);
-            vector.Add(Vector4.Half);
+            vector += Vector4.Half;
             vector.Clamp(0, byte.MaxValue);
 
             R = (byte)vector.X;

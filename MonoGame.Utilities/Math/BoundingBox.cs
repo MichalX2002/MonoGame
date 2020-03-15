@@ -54,7 +54,7 @@ namespace MonoGame.Framework
             //TODO: bad done here need a fix. 
             // Because question is not frustum contain box but reverse and this is not the same
             int i;
-            var corners = frustum.GetCorners();
+            var corners = frustum.Corners;
 
             // First we check if frustum is in box
             for (i = 0; i < corners.Length; i++)

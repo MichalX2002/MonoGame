@@ -10,17 +10,17 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
     [ContentTypeSerializer]
     class PlaneSerializer : ElementSerializer<Plane>
     {
-        public PlaneSerializer() :
-            base("Plane", 4)
+        public PlaneSerializer() : base(nameof(Plane), 4)
         {
         }
 
         protected internal override Plane Deserialize(string[] inputs, ref int index)
         {
-            return new Plane(   XmlConvert.ToSingle(inputs[index++]),
-                                XmlConvert.ToSingle(inputs[index++]),
-                                XmlConvert.ToSingle(inputs[index++]),
-                                XmlConvert.ToSingle(inputs[index++]));
+            return new Plane(
+                XmlConvert.ToSingle(inputs[index++]),
+                XmlConvert.ToSingle(inputs[index++]),
+                XmlConvert.ToSingle(inputs[index++]),
+                XmlConvert.ToSingle(inputs[index++]));
         }
 
         protected internal override void Serialize(Plane value, List<string> results)

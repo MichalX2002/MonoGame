@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
@@ -17,8 +16,6 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct Rgb48 : IEquatable<Rgb48>, IPixel
     {
-        private static readonly Vector3 Max = new Vector3(ushort.MaxValue);
-
         VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Red, sizeof(ushort) * 8),
             new VectorComponent(VectorComponentType.Green, sizeof(ushort) * 8),
@@ -58,27 +55,32 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPackedVector
 
-        public void FromVector4(Vector4 vector)
+        public void FromVector4(in Vector4 vector)
         {
-            ref Vector3 vector3 = ref Unsafe.As<Vector4, Vector3>(ref vector);
-            vector3 *= ushort.MaxValue;
-            vector3 += Vector3.Half;
-            vector3.Clamp(Vector3.Zero, Max);
+            Vector3.Multiply(vector.ToVector3(), ushort.MaxValue, out var v);
+            v += Vector3.Half;
+            v.Clamp(0, ushort.MaxValue);
 
             R = (ushort)vector.X;
             G = (ushort)vector.Y;
             B = (ushort)vector.Z;
         }
 
-        public readonly Vector4 ToVector4() => new Vector4(ToVector3(), 1);
+        public readonly void ToVector4(out Vector4 vector)
+        {
+            vector.X = R / (float)ushort.MaxValue;
+            vector.Y = G / (float)ushort.MaxValue;
+            vector.Z = B / (float)ushort.MaxValue;
+            vector.W = 1;
+        }
+
+        public void FromScaledVector4(in Vector4 scaledVector) => FromVector4(scaledVector);
+
+        public readonly void ToScaledVector4(out Vector4 scaledVector) => ToVector4(out scaledVector);
 
         #endregion
 
         #region IPixel
-
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
-
-        public readonly Vector4 ToScaledVector4() => ToVector4();
 
         public readonly void ToColor(ref Color destination)
         {

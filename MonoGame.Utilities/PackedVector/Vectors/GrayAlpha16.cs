@@ -17,7 +17,7 @@ namespace MonoGame.Framework.PackedVector
     public struct GrayAlpha16 : IPackedVector<ushort>, IEquatable<GrayAlpha16>, IPixel
     {
         VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Gray, sizeof(byte) * 8),
+            new VectorComponent(VectorComponentType.Luminance, sizeof(byte) * 8),
             new VectorComponent(VectorComponentType.Alpha, sizeof(byte) * 8));
 
         public byte L;

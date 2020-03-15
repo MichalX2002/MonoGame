@@ -85,7 +85,7 @@ namespace MonoGame.Framework.Graphics
 
         /// <summary>
         /// The current state key which is used to detect
-		/// if the parameter value has been changed.
+        /// if the parameter value has been changed.
         /// </summary>
         internal ulong StateKey { get; private set; }
 
@@ -175,10 +175,10 @@ namespace MonoGame.Framework.Graphics
         }
 
         /*
-		public bool[] GetValueBooleanArray ()
-		{
-			throw new NotImplementedException();
-		}
+        public bool[] GetValueBooleanArray ()
+        {
+            throw new NotImplementedException();
+        }
         */
 
         public int GetValueInt32()
@@ -196,10 +196,10 @@ namespace MonoGame.Framework.Graphics
         }
 
         /*
-		public int[] GetValueInt32Array ()
-		{
-			throw new NotImplementedException();
-		}
+        public int[] GetValueInt32Array ()
+        {
+            throw new NotImplementedException();
+        }
         */
 
         public Matrix GetValueMatrix()
@@ -242,10 +242,10 @@ namespace MonoGame.Framework.Graphics
         }
 
         /*
-		public Quaternion[] GetValueQuaternionArray ()
-		{
-			throw new NotImplementedException();
-		}
+        public Quaternion[] GetValueQuaternionArray ()
+        {
+            throw new NotImplementedException();
+        }
         */
 
         public float GetValueSingle()
@@ -279,10 +279,16 @@ namespace MonoGame.Framework.Graphics
 
                 case EffectParameterClass.Vector:
                 case EffectParameterClass.Matrix:
-                    if (Data is Matrix)
-                        return Matrix.ToFloatArray((Matrix)Data);
+                    if (Data is Matrix matrix)
+                    {
+                        var array = new float[Matrix.ElementCount];
+                        matrix.CopyTo(array);
+                        return array;
+                    }
                     else
+                    {
                         return (float[])Data;
+                    }
 
                 default:
                     throw new NotImplementedException();
@@ -433,10 +439,10 @@ namespace MonoGame.Framework.Graphics
         }
 
         /*
-		public void SetValue (bool[] value)
-		{
-			throw new NotImplementedException();
-		}
+        public void SetValue (bool[] value)
+        {
+            throw new NotImplementedException();
+        }
         */
 
         public void SetValue(int value)
@@ -455,10 +461,10 @@ namespace MonoGame.Framework.Graphics
         }
 
         /*
-		public void SetValue (int[] value)
-		{
-			throw new NotImplementedException();
-		}
+        public void SetValue (int[] value)
+        {
+            throw new NotImplementedException();
+        }
         */
 
         public void SetValue(Matrix value)
@@ -798,10 +804,10 @@ namespace MonoGame.Framework.Graphics
         }
 
         /*
-		public void SetValue (Quaternion[] value)
-		{
-			throw new NotImplementedException();
-		}
+        public void SetValue (Quaternion[] value)
+        {
+            throw new NotImplementedException();
+        }
         */
 
         public void SetValue(float value)
@@ -821,10 +827,10 @@ namespace MonoGame.Framework.Graphics
         }
 
         /*
-		public void SetValue (string value)
-		{
-			throw new NotImplementedException();
-		}
+        public void SetValue (string value)
+        {
+            throw new NotImplementedException();
+        }
         */
 
         public void SetValue(Texture value)

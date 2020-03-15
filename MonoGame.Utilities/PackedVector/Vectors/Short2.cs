@@ -17,7 +17,7 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct Short2 : IPackedVector<uint>, IEquatable<Short2>, IPixel
     {
-        private static readonly Vector2 Offset = new Vector2(32768);
+        private static readonly Vector2 Offset = new Vector2(-short.MinValue);
 
         VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Red, sizeof(short) * 8),
@@ -48,7 +48,7 @@ namespace MonoGame.Framework.PackedVector
         /// Constructs the packed vector with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public Short2(Vector2 vector) => this = Pack(vector);
+        public Short2(Vector2 vector) => Pack(vector, out this);
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
@@ -61,14 +61,13 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly Vector2 ToVector2() => new Vector2(X, Y);
 
-        private static Short2 Pack(Vector2 vector)
+        private static void Pack(in Vector2 vector, out Short2 destination)
         {
-            vector += Vector2.Half;
-            vector = Vector2.Clamp(vector, short.MinValue, short.MaxValue);
+            Vector2.Add(vector, Vector2.Half, out var v);
+            v.Clamp(short.MinValue, short.MaxValue);
 
-            return new Short2(
-                (short)vector.X,
-                (short)vector.Y);
+            destination.X = (short)v.X;
+            destination.Y = (short)v.Y;
         }
 
         #region IPackedVector
@@ -80,23 +79,31 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Short2, uint>(ref this) = value;
         }
 
-        public void FromVector4(Vector4 vector) => this = Pack(vector.ToVector2());
-
-        public readonly Vector4 ToVector4() => new Vector4(X, Y, 0, 1);
-
-        public void FromScaledVector4(Vector4 vector)
+        public void FromVector4(in Vector4 vector)
         {
-            var scaled = vector.ToVector2() * 65535f;
-            scaled -= Offset;
-            this = Pack(scaled);
+            Pack(vector.ToVector2(), out this);
         }
 
-        public readonly Vector4 ToScaledVector4()
+        public readonly void ToVector4(out Vector4 vector)
         {
-            var scaled = ToVector2();
-            scaled += Offset;
-            scaled /= 65535f;
-            return new Vector4(scaled, 0, 1);
+            vector.X = X;
+            vector.Y = Y;
+            vector.Z = 0;
+            vector.W = 1;
+        }
+
+        public void FromScaledVector4(in Vector4 scaledVector)
+        {
+            var v = scaledVector.ToVector2() * ushort.MaxValue;
+            v -= Offset;
+            Pack(v, out this);
+        }
+
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        {
+            ToVector4(out scaledVector);
+            scaledVector.X = (scaledVector.X + Offset.X) / ushort.MaxValue;
+            scaledVector.Y = (scaledVector.Y + Offset.Y) / ushort.MaxValue;
         }
 
         #endregion

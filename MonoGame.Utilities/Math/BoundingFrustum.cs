@@ -44,6 +44,16 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
+        /// Gets a span of this frustum's corners.
+        /// </summary>
+        public ReadOnlySpan<Vector3> Corners => _corners.AsSpan();
+
+        /// <summary>
+        /// Gets a span of this frustum's planes.
+        /// </summary>
+        public ReadOnlySpan<Plane> Planes => _planes.AsSpan();
+
+        /// <summary>
         /// Gets the near plane of the frustum.
         /// </summary>
         public Plane Near => _planes[0];
@@ -91,7 +101,7 @@ namespace MonoGame.Framework
         /// Constructs the frustum by extracting the view planes from a matrix.
         /// </summary>
         /// <param name="value">Combined matrix which usually is (View * Projection).</param>
-        public BoundingFrustum(Matrix value)
+        public BoundingFrustum(in Matrix value)
         {
             _matrix = value;
             CreatePlanes();
@@ -166,7 +176,7 @@ namespace MonoGame.Framework
                 {
                     case PlaneIntersectionType.Front:
                         return ContainmentType.Disjoint;
-                        
+
                     case PlaneIntersectionType.Intersecting:
                         intersects = true;
                         break;
@@ -180,11 +190,11 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="point">A <see cref="Vector3"/> for testing.</param>
         /// <returns>Containment between this <see cref="BoundingFrustum"/> and specified <see cref="Vector3"/>.</returns>
-        public ContainmentType Contains(Vector3 point)
+        public ContainmentType Contains(in Vector3 point)
         {
             for (var i = 0; i < _planes.Length; ++i)
             {
-                if (PlaneHelper.ClassifyPoint(point, _planes[i]) > 0)
+                if (Plane.ClassifyPoint(point, _planes[i]) > 0)
                     return ContainmentType.Disjoint;
             }
             return ContainmentType.Contains;
@@ -209,30 +219,6 @@ namespace MonoGame.Framework
         public override bool Equals(object obj) => obj is BoundingFrustum other && Equals(other);
 
         #endregion
-
-        /// <summary>
-        /// Copies the frustum corners into an array.
-        /// </summary>
-        /// <param name="corners">
-        /// The destination array for this frustum's corners.
-        /// It must have size of <see cref="CornerCount"/>.
-        /// </param>
-        public void GetCorners(Vector3[] corners)
-        {
-            if (corners == null)
-                throw new ArgumentNullException(nameof(corners));
-
-            if (corners.Length < CornerCount)
-                throw new ArgumentOutOfRangeException(nameof(corners), "Not enough corners.");
-
-            _corners.CopyTo(corners, 0);
-        }
-
-        /// <summary>
-        /// Returns a span of this frustum's corners.
-        /// </summary>
-        /// <returns>The span of corners.</returns>
-        public ReadOnlySpan<Vector3> GetCorners() => _corners.AsSpan();
 
         /// <summary>
         /// Returns the hash code of the <see cref="BoundingFrustum"/>.
@@ -303,14 +289,14 @@ namespace MonoGame.Framework
         /// <returns><see cref="string"/> representation of this <see cref="BoundingFrustum"/>.</returns>
         public override string ToString()
         {
-            return
-                "{Near: " + _planes[0] +
-                " Far:" + _planes[1] +
-                " Left:" + _planes[2] +
-                " Right:" + _planes[3] +
-                " Top:" + _planes[4] +
-                " Bottom:" + _planes[5] +
-                "}";
+            return string.Concat(
+                "{Near: " + _planes[0].ToString() +
+                " Far:" + _planes[1].ToString() +
+                " Left:" + _planes[2].ToString() +
+                " Right:" + _planes[3].ToString() +
+                " Top:" + _planes[4].ToString() +
+                " Bottom:" + _planes[5].ToString() +
+                "}");
         }
 
         #endregion
@@ -319,25 +305,25 @@ namespace MonoGame.Framework
 
         private void CreateCorners()
         {
-            _corners[0] = IntersectionPoint(_planes[0], _planes[2], _planes[4]);
-            _corners[1] = IntersectionPoint(_planes[0], _planes[3], _planes[4]);
-            _corners[2] = IntersectionPoint(_planes[0], _planes[3], _planes[5]);
-            _corners[3] = IntersectionPoint(_planes[0], _planes[2], _planes[5]);
-            _corners[4] = IntersectionPoint(_planes[1], _planes[2], _planes[4]);
-            _corners[5] = IntersectionPoint(_planes[1], _planes[3], _planes[4]);
-            _corners[6] = IntersectionPoint(_planes[1], _planes[3], _planes[5]);
-            _corners[7] = IntersectionPoint(_planes[1], _planes[2], _planes[5]);
+            IntersectionPoint(_planes[0], _planes[2], _planes[4], out _corners[0]);
+            IntersectionPoint(_planes[0], _planes[3], _planes[4], out _corners[1]);
+            IntersectionPoint(_planes[0], _planes[3], _planes[5], out _corners[2]);
+            IntersectionPoint(_planes[0], _planes[2], _planes[5], out _corners[3]);
+            IntersectionPoint(_planes[1], _planes[2], _planes[4], out _corners[4]);
+            IntersectionPoint(_planes[1], _planes[3], _planes[4], out _corners[5]);
+            IntersectionPoint(_planes[1], _planes[3], _planes[5], out _corners[6]);
+            IntersectionPoint(_planes[1], _planes[2], _planes[5], out _corners[7]);
         }
 
         private void CreatePlanes()
-        {            
+        {
             _planes[0] = new Plane(-_matrix.M13, -_matrix.M23, -_matrix.M33, -_matrix.M43);
             _planes[1] = new Plane(_matrix.M13 - _matrix.M14, _matrix.M23 - _matrix.M24, _matrix.M33 - _matrix.M34, _matrix.M43 - _matrix.M44);
             _planes[2] = new Plane(-_matrix.M14 - _matrix.M11, -_matrix.M24 - _matrix.M21, -_matrix.M34 - _matrix.M31, -_matrix.M44 - _matrix.M41);
             _planes[3] = new Plane(_matrix.M11 - _matrix.M14, _matrix.M21 - _matrix.M24, _matrix.M31 - _matrix.M34, _matrix.M41 - _matrix.M44);
             _planes[4] = new Plane(_matrix.M12 - _matrix.M14, _matrix.M22 - _matrix.M24, _matrix.M32 - _matrix.M34, _matrix.M42 - _matrix.M44);
             _planes[5] = new Plane(-_matrix.M14 - _matrix.M12, -_matrix.M24 - _matrix.M22, -_matrix.M34 - _matrix.M32, -_matrix.M44 - _matrix.M42);
-            
+
             NormalizePlane(ref _planes[0]);
             NormalizePlane(ref _planes[1]);
             NormalizePlane(ref _planes[2]);
@@ -346,25 +332,28 @@ namespace MonoGame.Framework
             NormalizePlane(ref _planes[5]);
         }
 
-        private static Vector3 IntersectionPoint(in Plane a, in Plane b, in Plane c)
+        private static void IntersectionPoint(in Plane a, in Plane b, in Plane c, out Vector3 destination)
         {
             Vector3.Cross(b.Normal, c.Normal, out var bcCross);
-            Vector3 v1 = bcCross * a.D;
-            Vector3 v2 = Vector3.Cross(c.Normal, a.Normal) * b.D;
-            Vector3 v3 = Vector3.Cross(a.Normal, b.Normal) * c.D;
-            
+            Vector3.Multiply(bcCross, a.D, out var v1);
+
+            Vector3.Cross(c.Normal, a.Normal, out var v2);
+            Vector3.Multiply(v2, b.D, out v2);
+
+            Vector3.Cross(a.Normal, b.Normal, out var v3);
+            Vector3.Multiply(v3, c.D, out v3);
+
             float f = Vector3.Dot(a.Normal, bcCross) * -1f;
-            return new Vector3(
-                (v1.X + v2.X + v3.X) / f,
-                (v1.Y + v2.Y + v3.Y) / f,
-                (v1.Z + v2.Z + v3.Z) / f);
+            destination.X = (v1.X + v2.X + v3.X) / f;
+            destination.Y = (v1.Y + v2.Y + v3.Y) / f;
+            destination.Z = (v1.Z + v2.Z + v3.Z) / f;
         }
 
         private void NormalizePlane(ref Plane p)
         {
-            float factor = 1f / p.Normal.Length();
-            p.Normal *= factor;
-            p.D *= factor;
+            float length = p.Normal.Length();
+            p.Normal /= length;
+            p.D /= length;
         }
 
         #endregion

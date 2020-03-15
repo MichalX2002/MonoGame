@@ -17,8 +17,6 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct Rg32 : IPackedVector<uint>, IEquatable<Rg32>, IPixel
     {
-        private static Vector2 MaxShortValue = new Vector2(ushort.MaxValue);
-
         VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Red, sizeof(ushort) * 8),
             new VectorComponent(VectorComponentType.Green, sizeof(ushort) * 8));
@@ -66,26 +64,31 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Rg32, uint>(ref this) = value;
         }
 
-        public void FromVector4(Vector4 vector)
+        public void FromVector4(in Vector4 vector)
         {
-            ref Vector2 vector2 = ref Unsafe.As<Vector4, Vector2>(ref vector);
-            vector2 *= ushort.MaxValue;
-            vector2 += Vector2.Half;
-            vector2 = Vector2.Clamp(vector2, Vector2.Zero, MaxShortValue);
+            Vector2.Multiply(vector.ToVector2(), ushort.MaxValue, out var v);
+            Vector2.Add(v, Vector2.Half, out v);
+            v.Clamp(0, ushort.MaxValue);
 
-            R = (ushort)vector2.X;
-            G = (ushort)vector2.Y;
+            R = (ushort)v.X;
+            G = (ushort)v.Y;
         }
 
-        public readonly Vector4 ToVector4() => new Vector4(ToVector2(), 0, 1f);
+        public readonly void ToVector4(out Vector4 vector)
+        {
+            vector.X = R / (float)ushort.MaxValue;
+            vector.Y = G / (float)ushort.MaxValue;
+            vector.Z = 0;
+            vector.W = 1;
+        }
+
+        public void FromScaledVector4(in Vector4 scaledVector) => FromVector4(scaledVector);
+
+        public readonly void ToScaledVector4(out Vector4 scaledVector) => ToVector4(out scaledVector);
 
         #endregion
 
         #region IPixel
-
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
-
-        public readonly Vector4 ToScaledVector4() => ToVector4();
 
         public void FromGray8(Gray8 source) => R = G = PackedVectorHelper.UpScale8To16Bit(source.L);
 
