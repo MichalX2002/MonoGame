@@ -132,7 +132,7 @@ namespace MonoGame.Framework
                 return;
 
             GraphicsDevice = new GraphicsDevice(
-                gdi.Adapter, gdi.GraphicsProfile, this.PreferHalfPixelOffset, gdi.PresentationParameters);
+                gdi.Adapter, gdi.GraphicsProfile, PreferHalfPixelOffset, gdi.PresentationParameters);
             _shouldApplyChanges = false;
 
             // hook up reset events

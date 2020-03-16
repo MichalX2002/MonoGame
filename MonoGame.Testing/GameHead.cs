@@ -177,8 +177,8 @@ namespace MonoGame.Testing
                 avg += Song.UpdateTime[i].TotalMilliseconds;
             avg /= Song.UpdateTime.Count;
 
-            float xx = ((float)Math.Sin(time.TotalGameTime.TotalSeconds) + 1) / 2 * 50;
-            float yy = ((float)Math.Cos(time.TotalGameTime.TotalSeconds) + 1) / 2 * 50;
+            float xx = (MathF.Sin((float)time.TotalGameTime.TotalSeconds) + 1) / 2 * 50;
+            float yy = (MathF.Cos((float)time.TotalGameTime.TotalSeconds) + 1) / 2 * 50;
             _spriteBatch.Draw(_test, new Vector2(0 + xx, 0 + yy), Color.White);
 
             DrawShadedString(

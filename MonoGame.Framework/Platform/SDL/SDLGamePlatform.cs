@@ -140,10 +140,10 @@ namespace MonoGame.Framework
                             _keys.Add(key);
 
                         char character = (char)ev.Key.Keysym.Sym;
-                        _window.OnKeyDown(new KeyInputEvent(key));
+                        _window.OnKeyDown(new KeyInputEventArgs(key));
 
                         if (char.IsControl(character))
-                            _window.OnTextInput(new TextInputEvent(character, key));
+                            _window.OnTextInput(new TextInputEventArgs(character, key));
                         break;
                     }
 
@@ -151,7 +151,7 @@ namespace MonoGame.Framework
                     {
                         var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
                         _keys.Remove(key);
-                        _window.OnKeyUp(new KeyInputEvent(key));
+                        _window.OnKeyUp(new KeyInputEventArgs(key));
                         break;
                     }
 
@@ -233,7 +233,7 @@ namespace MonoGame.Framework
                     int codepoint = UTF8ToUnicode(utf8character);
                     if (codepoint >= 0)
                     {
-                        _window.OnTextInput(new TextInputEvent(codepoint, KeyboardUtil.ToXna(codepoint)));
+                        _window.OnTextInput(new TextInputEventArgs(codepoint, KeyboardUtil.ToXna(codepoint)));
                     }
                 }
 

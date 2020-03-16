@@ -363,7 +363,7 @@ namespace MonoGame.Framework.Graphics
         public event DatalessEvent<GraphicsDevice> DeviceReset;
         public event DatalessEvent<GraphicsDevice> DeviceResetting;
         public event DataEvent<GraphicsDevice, object> ResourceCreated;
-        public event DataEvent<GraphicsDevice, ResourceDestroyedEvent> ResourceDestroyed;
+        public event DataEvent<GraphicsDevice, ResourceDestroyedEventArgs> ResourceDestroyed;
         public event DatalessEvent<GraphicsDevice> Disposing;
 
         #endregion

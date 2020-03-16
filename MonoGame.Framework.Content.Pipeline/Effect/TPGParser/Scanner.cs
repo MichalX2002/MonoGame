@@ -518,7 +518,7 @@ namespace MonoGame.Effect.TPGParser
 
         public void Init(string input, string fileName)
         {
-            this.Input = input;
+            Input = input;
             StartPos = 0;
             EndPos = 0;
             CurrentFile = fileName;
@@ -530,7 +530,7 @@ namespace MonoGame.Effect.TPGParser
 
         public Token GetToken(TokenType type)
         {
-            return new Token(this.StartPos, this.EndPos)
+            return new Token(StartPos, EndPos)
             {
                 Type = type
             };

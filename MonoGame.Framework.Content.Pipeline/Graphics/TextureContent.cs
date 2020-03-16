@@ -24,7 +24,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <param name="faces">Mipmap chain containing the face collection.</param>
         protected TextureContent(MipmapChainCollection faces)
         {
-            this.Faces = faces;
+            Faces = faces;
         }
 
         /// <summary>

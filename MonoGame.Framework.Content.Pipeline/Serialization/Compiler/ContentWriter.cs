@@ -84,17 +84,17 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             : base(output)
         {
             this.compiler = compiler;
-            this.TargetPlatform = targetPlatform;
-            this.TargetProfile = targetProfile;
+            TargetPlatform = targetPlatform;
+            TargetProfile = targetProfile;
             this.compressContent = compressContent;
             this.rootDirectory = rootDirectory;
 
             // Normalize the directory format so PathHelper.GetRelativePath will compute external references correctly.
             this.referenceRelocationPath = PathHelper.NormalizeDirectory(referenceRelocationPath);
 
-            outputStream = this.OutStream;
+            outputStream = OutStream;
             bodyStream = RecyclableMemoryManager.Default.GetMemoryStream();
-            this.OutStream = bodyStream;
+            OutStream = bodyStream;
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                 if (disposing)
                 {
                     // Make sure the binary writer has the original stream back
-                    this.OutStream = outputStream;
+                    OutStream = outputStream;
 
                     // Dispose managed resources we allocated
                     if (bodyStream != null)
@@ -131,7 +131,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 
             using (var contentStream = RecyclableMemoryManager.Default.GetMemoryStream())
             {
-                this.OutStream = contentStream;
+                OutStream = contentStream;
                 WriteTypeWriters();
                 bodyStream.Position = 0;
                 bodyStream.WriteTo(contentStream);
@@ -145,7 +145,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                     if (compressContent)
                     {
                         compressedStream = RecyclableMemoryManager.Default.GetMemoryStream();
-                        this.OutStream = compressedStream;
+                        OutStream = compressedStream;
                         if (!WriteCompressedStream(contentStream))
                         {
                             // The compression failed (sometimes LZ4 does fail, for various reasons), so just write
@@ -156,7 +156,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                         }
                     }
 
-                    this.OutStream = outputStream;
+                    OutStream = outputStream;
                     WriteHeader();
                     if (compressedStream != null)
                     {

@@ -547,22 +547,10 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
-        /// <param name="result">The dot product of two vectors.</param>
-        public static void Dot(in Vector3 a, in Vector3 b, out float result)
-        {
-            result = a.X * b.X + a.Y * b.Y + a.Z * b.Z;
-        }
-
-        /// <summary>
-        /// Returns the dot product of two vectors.
-        /// </summary>
-        /// <param name="a">The first vector.</param>
-        /// <param name="b">The second vector.</param>
         /// <returns>The dot product of two vectors.</returns>
         public static float Dot(in Vector3 a, in Vector3 b)
         {
-            Dot(a, b, out var result);
-            return result;
+            return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
         }
 
         #endregion
@@ -1176,10 +1164,11 @@ namespace MonoGame.Framework
             // I is the original array
             // N is the normal of the incident plane
             // R = I - (2 * N * ( DotProduct[ I,N] ))
+            //result = vector - normal * dot;
 
-            Dot(vector, normal, out float dot);
-            dot *= 2f;
-            result = vector - normal * dot;
+            float dot = Dot(vector, normal) * 2;
+            Multiply(normal, dot, out result);
+            Subtract(vector, result, out result);
         }
 
         /// <summary>
