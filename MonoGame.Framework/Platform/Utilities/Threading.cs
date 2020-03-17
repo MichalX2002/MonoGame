@@ -9,8 +9,6 @@ using System.Threading;
 #if IOS
 using Foundation;
 using OpenGLES;
-#endif
-#if DESKTOPGL || ANGLE || GLES
 using MonoGame.OpenGL;
 #endif
 
@@ -18,31 +16,28 @@ namespace MonoGame.Framework
 {
     internal class Threading
     {
-        public const int MaxWaitForMainThread = 10000; // In milliseconds
+        // nothing should stall the main thread for more than a second
+        public static readonly TimeSpan MaxWaitForMainThread = TimeSpan.FromMilliseconds(1000);
 
         private static int _mainThreadId;
-
-#if ANDROID || WINDOWS || DESKTOPGL || ANGLE
-        private static List<Action> actions = new List<Action>();
-#elif IOS
-        public static EAGLContext BackgroundContext;
-#endif
 
         static Threading()
         {
             _mainThreadId = Thread.CurrentThread.ManagedThreadId;
         }
+
 #if ANDROID
-        internal static void ResetThread (int id)
+        internal static void ResetThread(int id)
         {
             _mainThreadId = id;
         }
 #endif
+
         /// <summary>
         /// Gets whether the caller is running on the main thread.
         /// </summary>
         /// <returns><see langword="true"/> if the caller is running on the main thread.</returns>
-        public static bool IsOnMainThread => _mainThreadId == Thread.CurrentThread.ManagedThreadId;
+        public static bool IsOnMainThread => Thread.CurrentThread.ManagedThreadId == _mainThreadId;
 
         /// <summary>
         /// Throws an exception if the caller is not running on the main thread.
@@ -57,19 +52,19 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Runs the given action on the main thread and blocks the current thread while the action is running.
-        /// If the current thread is the main thread, the action will run immediately.
+        /// Runs the given action on the main thread and blocks while the action is running.
         /// </summary>
-        /// <param name="action">The action to be run on the main thread</param>
+        /// <param name="action">The action to be run on the main thread.</param>
         internal static void BlockOnMainThread(Action action)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
 
 #if DIRECTX || PSM
-            action();
+            // The platform supports doesn't need any special handling.
+            action.Invoke();
 #else
-            // If we are already on the main thread, just call the action and be done with it
+            // If we are already on the main thread, just call the action and be done with it.
             if (IsOnMainThread)
             {
                 action.Invoke();
@@ -80,37 +75,47 @@ namespace MonoGame.Framework
             lock (BackgroundContext)
             {
                 // Make the context current on this thread if it is not already
-                if (!Object.ReferenceEquals(EAGLContext.CurrentContext, BackgroundContext))
+                if (!ReferenceEquals(EAGLContext.CurrentContext, BackgroundContext))
                     EAGLContext.SetCurrentContext(BackgroundContext);
+
                 // Execute the action
-                action();
+                action.Invoke();
+
                 // Must flush the GL calls so the GPU asset is ready for the main context to use it
                 GL.Flush();
                 GraphicsExtensions.CheckGLError();
             }
 #else
+
             var resetEvent = new ManualResetEventSlim(false);
             Add(() =>
             {
 #if ANDROID
                 //if (!Game.Instance.Window.GraphicsContext.IsCurrent)
-                    ((AndroidGameWindow)Game.Instance.Window).GameView.MakeCurrent();
+                ((AndroidGameWindow)Game.Instance.Window).GameView.MakeCurrent();
 #endif
                 action.Invoke();
                 resetEvent.Set();
             });
+
             if (!resetEvent.Wait(MaxWaitForMainThread))
                 throw new TimeoutException();
 #endif // IOS
-#endif // DIRECTX ||PSM
+
+#endif // DIRECTX || PSM
         }
 
-#if ANDROID || WINDOWS || DESKTOPGL || ANGLE
+#if IOS
+        public static EAGLContext BackgroundContext;
+
+#elif !(DIRECTX || PSM)
+        private static List<Action> _actionList = new List<Action>();
+
         private static void Add(Action action)
         {
-            lock (actions)
+            lock (_actionList)
             {
-                actions.Add(action);
+                _actionList.Add(action);
             }
         }
 
@@ -121,11 +126,11 @@ namespace MonoGame.Framework
         {
             EnsureMainThread();
 
-            lock (actions)
+            lock (_actionList)
             {
-                foreach (Action action in actions)
+                foreach (Action action in _actionList)
                     action.Invoke();
-                actions.Clear();
+                _actionList.Clear();
             }
         }
 #endif

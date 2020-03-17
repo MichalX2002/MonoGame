@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 #if ANGLE
 using OpenTK.Graphics;
@@ -75,7 +76,7 @@ namespace MonoGame.Framework.Graphics
                     return _vertexShader.HashKey;
 
                 int hash = 17 * 23 + _vertexShader.HashKey;
-                return hash * 23 +  _pixelShader.HashKey;
+                return hash * 23 + _pixelShader.HashKey;
             }
         }
 
@@ -105,7 +106,7 @@ namespace MonoGame.Framework.Graphics
             bool bindingsChanged = false;
 
             int vertexBufferCount = _vertexBuffers.Count;
-            for (var slot = 0; slot < vertexBufferCount; slot++)
+            for (int slot = 0; slot < vertexBufferCount; slot++)
             {
                 var vertexBufferBinding = _vertexBuffers.Get(slot);
                 var vertexDeclaration = vertexBufferBinding.VertexBuffer.VertexDeclaration;
@@ -114,12 +115,15 @@ namespace MonoGame.Framework.Graphics
                 var vertexStride = vertexDeclaration.VertexStride;
                 var offset = (IntPtr)(vertexDeclaration.VertexStride * (baseVertex + vertexBufferBinding.VertexOffset));
 
-                if (!_attribsDirty &&
-                    _bufferBindingInfos[slot].VertexOffset == offset &&
-                    ReferenceEquals(_bufferBindingInfos[slot].AttributeInfo, attrInfo) &&
-                    _bufferBindingInfos[slot].InstanceFrequency == vertexBufferBinding.InstanceFrequency &&
-                    _bufferBindingInfos[slot].Vbo == vertexBufferBinding.VertexBuffer._vbo)
-                    continue;
+                if (!_attribsDirty)
+                {
+                    var info = _bufferBindingInfos[slot];
+                    if (info.VertexOffset == offset &&
+                        info.InstanceFrequency == vertexBufferBinding.InstanceFrequency &&
+                        info.Vbo == vertexBufferBinding.VertexBuffer._vbo &&
+                        ReferenceEquals(info.AttributeInfo, attrInfo))
+                        continue;
+                }
 
                 bindingsChanged = true;
 
@@ -141,7 +145,7 @@ namespace MonoGame.Framework.Graphics
                         element.VertexAttribPointerType,
                         element.Normalized,
                         vertexStride,
-                        new IntPtr(offset.ToInt64() + element.Offset));
+                        offset + element.Offset);
 
                     // only set the divisor if instancing is supported
                     if (GraphicsCapabilities.SupportsInstancing)
@@ -278,10 +282,8 @@ namespace MonoGame.Framework.Graphics
 
             _bufferBindingInfos = new BufferBindingInfo[_maxVertexBufferSlots];
             for (int i = 0; i < _bufferBindingInfos.Length; i++)
-                _bufferBindingInfos[i] = new BufferBindingInfo(null, IntPtr.Zero, 0, -1);
+                _bufferBindingInfos[i] = new BufferBindingInfo { Vbo = -1 };
         }
-        
-        private DepthStencilState clearDepthStencilState = new DepthStencilState { StencilEnable = true };
 
         private void PlatformClear(ClearOptions options, Vector4 color, float depth, int stencil)
         {
@@ -345,13 +347,11 @@ namespace MonoGame.Framework.Graphics
 
 #if MONOMAC
             if (GL.CheckFramebufferStatus(FramebufferTarget.FramebufferExt) == FramebufferErrorCode.FramebufferComplete)
+#endif
             {
-#endif
-            GL.Clear(bufferMask);
-            GraphicsExtensions.CheckGLError();
-#if MONOMAC
+                GL.Clear(bufferMask);
+                GraphicsExtensions.CheckGLError();
             }
-#endif
 
             // Restore the previous render state.
             ScissorRectangle = prevScissorRect;
@@ -393,67 +393,67 @@ namespace MonoGame.Framework.Graphics
 
         internal void DisposeTexture(int handle)
         {
-            if (!IsDisposed)
+            if (IsDisposed)
+                return;
+
+            lock (_disposeActionsLock)
             {
-                lock (_disposeActionsLock)
-                {
-                    _disposeNextFrame.Add(ResourceHandle.Texture(handle));
-                }
+                _disposeNextFrame.Add(ResourceHandle.Texture(handle));
             }
         }
 
         internal void DisposeBuffer(int handle)
         {
-            if (!IsDisposed)
+            if (IsDisposed)
+                return;
+
+            lock (_disposeActionsLock)
             {
-                lock (_disposeActionsLock)
-                {
-                    _disposeNextFrame.Add(ResourceHandle.Buffer(handle));
-                }
+                _disposeNextFrame.Add(ResourceHandle.Buffer(handle));
             }
         }
 
         internal void DisposeShader(int handle)
         {
-            if (!IsDisposed)
+            if (IsDisposed)
+                return;
+
+            lock (_disposeActionsLock)
             {
-                lock (_disposeActionsLock)
-                {
-                    _disposeNextFrame.Add(ResourceHandle.Shader(handle));
-                }
+                _disposeNextFrame.Add(ResourceHandle.Shader(handle));
             }
         }
 
         internal void DisposeProgram(int handle)
         {
-            if (!IsDisposed)
+            if (IsDisposed)
+                return;
+
+            lock (_disposeActionsLock)
             {
-                lock (_disposeActionsLock)
-                {
-                    _disposeNextFrame.Add(ResourceHandle.Program(handle));
-                }
+                _disposeNextFrame.Add(ResourceHandle.Program(handle));
             }
         }
 
         internal void DisposeQuery(int handle)
         {
-            if (!IsDisposed)
+            if (IsDisposed)
+                return;
+
+            lock (_disposeActionsLock)
             {
-                lock (_disposeActionsLock)
-                {
-                    _disposeNextFrame.Add(ResourceHandle.Query(handle));
-                }
+                _disposeNextFrame.Add(ResourceHandle.Query(handle));
             }
         }
 
         internal void DisposeFramebuffer(int handle)
         {
-            if (!IsDisposed)
+            if (IsDisposed)
+                return;
+
+            lock (_disposeActionsLock)
             {
-                lock (_disposeActionsLock)
-                {
-                    _disposeNextFrame.Add(ResourceHandle.Framebuffer(handle));
-                }
+                _disposeNextFrame.Add(ResourceHandle.Framebuffer(handle));
             }
         }
 
@@ -500,10 +500,12 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        private void PlatformSetViewport(Viewport value)
+        private void PlatformSetViewport(in Viewport value)
         {
             if (IsRenderTargetBound)
+            {
                 GL.Viewport(value.X, value.Y, value.Width, value.Height);
+            }
             else
             {
                 var pp = PresentationParameters;
@@ -531,53 +533,10 @@ namespace MonoGame.Framework.Graphics
             Textures.Dirty();
         }
 
-        private class RenderTargetBindingArrayComparer : IEqualityComparer<RenderTargetBinding[]>
-        {
-            public static readonly RenderTargetBindingArrayComparer Instance = new RenderTargetBindingArrayComparer();
-
-            public bool Equals(RenderTargetBinding[] first, RenderTargetBinding[] second)
-            {
-                if (ReferenceEquals(first, second))
-                    return true;
-
-                if (first == null || second == null)
-                    return false;
-
-                if (first.Length != second.Length)
-                    return false;
-
-                for (var i = 0; i < first.Length; ++i)
-                {
-                    if (first[i].RenderTarget != second[i].RenderTarget || 
-                        first[i].ArraySlice != second[i].ArraySlice)
-                        return false;
-                }
-
-                return true;
-            }
-
-            public int GetHashCode(RenderTargetBinding[] array)
-            {
-                if (array == null)
-                    return 0;
-                unchecked
-                {
-                    int code = 7;
-                    foreach (var item in array)
-                    {
-                        if (item.RenderTarget != null)
-                            code = code * 31 + item.RenderTarget.GetHashCode();
-                        code = code * 31 + item.ArraySlice.GetHashCode();
-                    }
-                    return code;
-                }
-            }
-        }
-
         /// <summary>
         /// FBO cache, we create 1 FBO per RenderTargetBinding combination.
         /// </summary>
-        private Dictionary<RenderTargetBinding[], int> _glFramebuffers = 
+        private Dictionary<RenderTargetBinding[], int> _glFramebuffers =
             new Dictionary<RenderTargetBinding[], int>(RenderTargetBindingArrayComparer.Instance);
 
         /// <summary>
@@ -1110,7 +1069,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         private void PlatformDrawInstancedPrimitives(
-            PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount, 
+            PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount,
             int instanceCount, int baseInstance = 0)
         {
             AssertSupportsInstancing();
@@ -1160,20 +1119,23 @@ namespace MonoGame.Framework.Graphics
                     "Try upgrading your graphics card drivers.");
         }
 
-        private unsafe void PlatformGetBackBufferData<T>(Span<T> destination, Rectangle rect)
+        private void PlatformGetBackBufferData<T>(Span<T> destination, Rectangle rect)
             where T : unmanaged
         {
-            fixed (T* ptr = destination)
+            unsafe
             {
-                int flippedY = PresentationParameters.BackBufferHeight - rect.Bottom;
-                GL.ReadPixels(
-                    rect.X, flippedY, rect.Width, rect.Height,
-                    PixelFormat.Rgba, PixelType.UnsignedByte, (IntPtr)ptr);
+                fixed (T* ptr = destination)
+                {
+                    int flippedY = PresentationParameters.BackBufferHeight - rect.Bottom;
+                    GL.ReadPixels(
+                        rect.X, flippedY, rect.Width, rect.Height,
+                        PixelFormat.Rgba, PixelType.UnsignedByte, (IntPtr)ptr);
+                }
             }
 
             // ReadPixels returns data upside down, so we must swap rows around
             int rowBytes = rect.Width * PresentationParameters.BackBufferFormat.GetSize();
-            int rowSize = rowBytes / sizeof(T);
+            int rowSize = rowBytes / Unsafe.SizeOf<T>();
             int count = destination.Length;
 
             Span<byte> buffer = stackalloc byte[Math.Min(2048, rowBytes)];
@@ -1223,7 +1185,7 @@ namespace MonoGame.Framework.Graphics
         internal void OnPresentationChanged()
         {
 #if DESKTOPGL || ANGLE
-            Context.MakeCurrent(new WindowInfo( SdlGameWindow.Instance.Handle));
+            Context.MakeCurrent(new WindowInfo(SdlGameWindow.Instance.Handle));
             Context.SwapInterval = PresentationParameters.PresentationInterval.GetSwapInterval();
 #endif
 
@@ -1233,20 +1195,10 @@ namespace MonoGame.Framework.Graphics
         // Holds information for caching
         private class BufferBindingInfo
         {
-            public VertexDeclaration.VertexDeclarationAttributeInfo AttributeInfo;
             public IntPtr VertexOffset;
             public int InstanceFrequency;
             public int Vbo;
-
-            public BufferBindingInfo(
-                VertexDeclaration.VertexDeclarationAttributeInfo attributeInfo,
-                IntPtr vertexOffset, int instanceFrequency, int vbo)
-            {
-                AttributeInfo = attributeInfo;
-                VertexOffset = vertexOffset;
-                InstanceFrequency = instanceFrequency;
-                Vbo = vbo;
-            }
+            public VertexDeclaration.VertexDeclarationAttributeInfo AttributeInfo;
         }
 
         // FIXME: why is this even here

@@ -35,7 +35,7 @@ namespace MonoGame.Framework
         /// </summary>
         [DataMember] public int Height;
 
-        private string DebuggerDisplay => string.Concat(
+        internal string DebuggerDisplay => string.Concat(
             X.ToString(), "  ",
             Y.ToString(), "  ",
             Width.ToString(), "  ",

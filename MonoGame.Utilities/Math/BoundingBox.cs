@@ -21,7 +21,7 @@ namespace MonoGame.Framework
         [DataMember]
         public Vector3 Max;
 
-        private string DebuggerDisplay => string.Concat(
+        internal string DebuggerDisplay => string.Concat(
             "Min(", Min.ToString(), " \n",
             "Max(", Max.ToString());
 

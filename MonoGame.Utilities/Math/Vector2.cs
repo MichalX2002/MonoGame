@@ -61,7 +61,7 @@ namespace MonoGame.Framework
             new VectorComponent(VectorComponentType.Red, sizeof(float) * 8),
             new VectorComponent(VectorComponentType.Green, sizeof(float) * 8));
 
-        private string DebuggerDisplay => string.Concat(
+        internal string DebuggerDisplay => string.Concat(
             X.ToString(), "  ", Y.ToString());
 
         /// <summary>

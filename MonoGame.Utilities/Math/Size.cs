@@ -40,7 +40,7 @@ namespace MonoGame.Framework
 
         public readonly int Area => Width * Height;
 
-        private string DebuggerDisplay => $"Width = {Width}, Height = {Height}";
+        internal string DebuggerDisplay => $"Width = {Width}, Height = {Height}";
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Size" /> structure from the specified dimensions.

@@ -43,7 +43,7 @@ namespace MonoGame.Framework
 
         #region Properties
 
-        private string DebuggerDisplay => string.Concat(
+        internal string DebuggerDisplay => string.Concat(
             X.ToString(), "  ",
             Y.ToString(), "  ");
 

@@ -78,7 +78,7 @@ namespace MonoGame.Framework
         /// </summary>
         public readonly bool IsEmpty => Width == 0 && Height == 0 && X == 0 && Y == 0;
 
-        private string DebuggerDisplay => string.Concat(
+        internal string DebuggerDisplay => string.Concat(
             X.ToString(), "  ",
             Y.ToString(), "  ",
             Width.ToString(), "  ",
@@ -147,7 +147,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="position">The top-left point.</param>
         /// <param name="size">The extents.</param>
-        public RectangleF(PointF position, SizeF size)
+        public RectangleF(in PointF position, in SizeF size)
         {
             X = position.X;
             Y = position.Y;
@@ -162,7 +162,7 @@ namespace MonoGame.Framework
         /// <param name="minimum">The minimum point.</param>
         /// <param name="maximum">The maximum point.</param>
         /// <returns>The resulting <see cref="RectangleF" />.</returns>
-        public static RectangleF CreateFrom(PointF minimum, PointF maximum)
+        public static RectangleF CreateFrom(in PointF minimum, in PointF maximum)
         {
             return new RectangleF(
                 minimum.X, minimum.Y,
@@ -213,20 +213,20 @@ namespace MonoGame.Framework
         ///     A <see cref="RectangleF" /> that is in common between both the <paramref name="rectangle" /> and
         ///     this <see cref="RectangleF"/>, if they intersect; otherwise, <see cref="Empty"/>.
         /// </returns>
-        public static RectangleF Intersection(RectangleF a, RectangleF b)
+        public static RectangleF Intersection(in RectangleF a, in RectangleF b)
         {
             var firstMinimum = a.TopLeft;
             var firstMaximum = a.BottomRight;
             var secondMinimum = b.TopLeft;
             var secondMaximum = b.BottomRight;
-            
-            var minimum = PointF.Maximum(firstMinimum, secondMinimum);
-            var maximum = PointF.Minimum(firstMaximum, secondMaximum);
 
-            if ((maximum.X < minimum.X) || (maximum.Y < minimum.Y))
+            var min = PointF.Max(firstMinimum, secondMinimum);
+            var max = PointF.Min(firstMaximum, secondMaximum);
+
+            if ((max.X < min.X) || (max.Y < min.Y))
                 return Empty;
             else
-                return CreateFrom(minimum, maximum);
+                return CreateFrom(min, max);
         }
 
         /// <summary>
@@ -249,10 +249,10 @@ namespace MonoGame.Framework
         /// </returns>
         public static bool Intersects(in RectangleF a, in RectangleF b)
         {
-            return a.X < b.X + b.Width && a.X + a.Width > b.X &&
-                   a.Y < b.Y + b.Height && a.Y + a.Height > b.Y;
+            return a.X < b.X + b.Width && a.X + a.Width > b.X
+                && a.Y < b.Y + b.Height && a.Y + a.Height > b.Y;
         }
-        
+
         /// <summary>
         ///     Determines whether the specified <see cref="RectangleF" /> intersects with this
         ///     <see cref="RectangleF" />.
@@ -263,7 +263,7 @@ namespace MonoGame.Framework
         ///     <see cref="RectangleF" />; otherwise,
         ///     <see langword="false"/>.
         /// </returns>
-        public bool Intersects(in RectangleF rectangle)
+        public readonly bool Intersects(in RectangleF rectangle)
         {
             return Intersects(this, rectangle);
         }
@@ -278,13 +278,12 @@ namespace MonoGame.Framework
         ///     <see langword="true"/> if the <paramref name="rectangle" /> contains the <paramref name="point" />; otherwise,
         ///     <see langword="false"/>.
         /// </returns>
-        public static bool Contains(in RectangleF rectangle, PointF point)
+        public static bool Contains(in RectangleF rectangle, in PointF point)
         {
-            return 
-                rectangle.X <= point.X &&
-                point.X < rectangle.X + rectangle.Width &&
-                rectangle.Y <= point.Y &&
-                point.Y < rectangle.Y + rectangle.Height;
+            return rectangle.X <= point.X
+                && point.X < rectangle.X + rectangle.Width
+                && rectangle.Y <= point.Y
+                && point.Y < rectangle.Y + rectangle.Height;
         }
 
         /// <summary>
@@ -296,7 +295,7 @@ namespace MonoGame.Framework
         ///     <see langword="true"/> if the this <see cref="RectangleF"/> contains the <paramref name="point" />; otherwise,
         ///     <see langword="false"/>.
         /// </returns>
-        public bool Contains(PointF point)
+        public readonly bool Contains(in PointF point)
         {
             return Contains(this, point);
         }
@@ -305,13 +304,12 @@ namespace MonoGame.Framework
         ///     Determines whether this <see cref="RectangleF" /> contains the specified
         ///     <see cref="RectangleF" />.
         /// </summary>
-        public bool Contains(in RectangleF value)
+        public readonly bool Contains(in RectangleF value)
         {
-            return
-                X < value.X &&
-                value.X + value.Width <= X + Width &&
-                Y < value.Y &&
-                value.Y + value.Height <= Y + Height;
+            return X < value.X 
+                && value.X + value.Width <= X + Width
+                && Y < value.Y 
+                && value.Y + value.Height <= Y + Height;
         }
 
         /// <summary>
@@ -319,9 +317,10 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="point">The point.</param>
         /// <returns>The squared distance from this <see cref="RectangleF"/> to the <paramref name="point"/>.</returns>
-        public float SquaredDistanceTo(PointF point)
+        public readonly float SquaredDistanceTo(in PointF point)
         {
-            // Real-Time Collision Detection, Christer Ericson, 2005. Chapter 5.1.3.1; Basic Primitive Tests - Closest-point Computations - Distance of Point to AABB.  pg 130-131
+            // Real-Time Collision Detection, Christer Ericson, 2005. Chapter 5.1.3.1;
+            // Basic Primitive Tests - Closest-point Computations - Distance of Point to AABB.  pg 130-131
             var squaredDistance = 0f;
             var minimum = TopLeft;
             var maximum = BottomRight;
@@ -359,7 +358,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="point">The point.</param>
         /// <returns>The distance from this <see cref="RectangleF"/> to the <paramref name="point"/>.</returns>
-        public float DistanceTo(PointF point) => MathF.Sqrt(SquaredDistanceTo(point));
+        public readonly float DistanceTo(in PointF point) => MathF.Sqrt(SquaredDistanceTo(point));
 
         //TODO: Document this.
         public void Inflate(float horizontalAmount, float verticalAmount)
@@ -378,7 +377,7 @@ namespace MonoGame.Framework
         }
 
         //TODO: Document this.
-        public void Offset(PointF amount)
+        public void Offset(in PointF amount)
         {
             X += amount.X;
             Y += amount.Y;
@@ -420,7 +419,7 @@ namespace MonoGame.Framework
         /// <summary>
         ///     Indicates whether this <see cref="RectangleF" /> is equal to another <see cref="RectangleF" />.
         /// </summary>
-        public bool Equals(RectangleF rectangle) => rectangle == this;
+        public readonly bool Equals(RectangleF rectangle) => rectangle == this;
 
         /// <summary>
         ///     Returns a value indicating whether this <see cref="RectangleF" /> is equal to a specified object.
@@ -429,21 +428,12 @@ namespace MonoGame.Framework
         /// <returns>
         ///     <see langword="true"/> if this <see cref="RectangleF" /> is equal to <paramref name="obj" />; otherwise, <see langword="false"/>.
         /// </returns>
-        public override bool Equals(object obj) => obj is RectangleF rect && Equals(rect);
+        public readonly override bool Equals(object obj) => obj is RectangleF rect && Equals(rect);
 
         /// <summary>
         /// Returns a hash code of this <see cref="RectangleF" />.
         /// </summary>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int code = 7 + X.GetHashCode();
-                code = code * 31 + Y.GetHashCode();
-                code = code * 31 + Width.GetHashCode();
-                return code * 31 + Height.GetHashCode();
-            }
-        }
+        public readonly override int GetHashCode() => HashCode.Combine(X, Y, Width, Height);
 
         /// <summary>
         /// Performs an implicit conversion from a <see cref="Rectangle" /> to a <see cref="RectangleF" />.
@@ -469,8 +459,8 @@ namespace MonoGame.Framework
         {
             return new Rectangle((int)rectangle.X, (int)rectangle.Y, (int)rectangle.Width, (int)rectangle.Height);
         }
-        
-        public Rectangle ToRectangle()
+
+        public readonly Rectangle ToRectangle()
         {
             return new Rectangle((int)X, (int)Y, (int)Width, (int)Height);
         }
@@ -481,7 +471,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     A <see cref="string" /> that represents this <see cref="RectangleF" />.
         /// </returns>
-        public override string ToString()
+        public readonly override string ToString()
         {
             return $"{{X: {X}, Y: {Y}, Width: {Width}, Height: {Height}";
         }

@@ -38,7 +38,7 @@ namespace MonoGame.Framework
         /// </summary>
         public bool IsEmpty => (Width == 0) && (Height == 0);
 
-        private string DebuggerDisplay => $"Width = {Width}, Height = {Height}";
+        internal string DebuggerDisplay => $"Width = {Width}, Height = {Height}";
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SizeF" /> structure from the specified dimensions.

@@ -48,7 +48,7 @@ namespace MonoGame.Framework
 
         #endregion
 
-        private string DebuggerDisplay => this == Identity ? "Identity" : string.Concat(
+        internal string DebuggerDisplay => this == Identity ? "Identity" : string.Concat(
             X.ToString(), " ",
             Y.ToString(), " ",
             Z.ToString(), " ",

@@ -37,6 +37,7 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Platform\Graphics\RenderTargetBindingArrayComparer.cs" />
     <Compile Include="Platform\Graphics\Shader\Shader.Structure.cs" />
     <Compile Include="Platform\Input\Joystick.Instance.SDL.cs" />
     <Compile Include="Platform\Input\TextInputEvent.cs" />
