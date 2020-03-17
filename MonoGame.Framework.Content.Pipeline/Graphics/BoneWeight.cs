@@ -32,7 +32,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <param name="weight">Amount of influence, ranging from zero to one.</param>
         public BoneWeight(string boneName, float weight)
         {
-            this.BoneName = boneName;
+            BoneName = boneName;
             this.weight = weight;
         }
     }

@@ -33,7 +33,7 @@ namespace MonoGame.Effect
         // Constructor.
         public CommandLineParser(object optionsObject)
         {
-            this._optionsObject = optionsObject;
+            _optionsObject = optionsObject;
 
             // Reflect to find what commandline options are available.
             foreach (var field in optionsObject.GetType().GetFields())

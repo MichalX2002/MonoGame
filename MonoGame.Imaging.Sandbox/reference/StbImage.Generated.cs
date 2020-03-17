@@ -257,7 +257,7 @@ namespace StbImageSharp
 			ulong bytes_per_row = (ulong)(w * bytes_per_pixel);
 			byte* temp = stackalloc byte[2048];
 			byte* bytes = (byte*)(image);
-			for (row = (int)(0); (row) < (h >> 1); row++)
+			for (row = (int)(0); (row) < (h / 2); row++)
 			{
 				byte* row0 = bytes + (ulong)row * bytes_per_row;
 				byte* row1 = bytes + (ulong)(h - row - 1) * bytes_per_row;
@@ -2096,7 +2096,7 @@ namespace StbImageSharp
 					}
 					r.hs = (int)(z.img_h_max / z.img_comp[k].h);
 					r.vs = (int)(z.img_v_max / z.img_comp[k].v);
-					r.ystep = (int)(r.vs >> 1);
+					r.ystep = (int)(r.vs / 2);
 					r.w_lores = (int)((z.s.img_x + r.hs - 1) / r.hs);
 					r.ypos = (int)(0);
 					r.line0 = r.line1 = z.img_comp[k].data;
@@ -2123,7 +2123,7 @@ namespace StbImageSharp
 					for (k = (int)(0); (k) < (decode_n); ++k)
 					{
 						stbi__resample r = res_comp[k];
-						int y_bot = (int)((r.ystep) >= (r.vs >> 1) ? 1 : 0);
+						int y_bot = (int)((r.ystep) >= (r.vs / 2) ? 1 : 0);
 						coutput[k] = r.resample(z.img_comp[k].linebuf, (y_bot) != 0 ? r.line1 : r.line0, (y_bot) != 0 ? r.line0 : r.line1, (int)(r.w_lores), (int)(r.hs));
 						if ((++r.ystep) >= (r.vs))
 						{

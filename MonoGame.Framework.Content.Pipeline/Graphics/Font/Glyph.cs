@@ -20,11 +20,11 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
 		// Constructor.
         public Glyph(char character, BitmapContent bitmap, Rectangle? subrect = null)
 		{
-			this.Character = character;
-			this.Bitmap = bitmap;
-			this.Subrect = subrect.GetValueOrDefault(new Rectangle(0, 0, bitmap.Width, bitmap.Height));
-			this.Width = bitmap.Width;
-			this.Height = bitmap.Height;
+			Character = character;
+			Bitmap = bitmap;
+			Subrect = subrect.GetValueOrDefault(new Rectangle(0, 0, bitmap.Width, bitmap.Height));
+			Width = bitmap.Width;
+			Height = bitmap.Height;
 		}
             
 		// Unicode codepoint.

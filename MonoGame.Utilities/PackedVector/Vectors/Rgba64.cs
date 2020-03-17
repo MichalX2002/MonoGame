@@ -87,7 +87,7 @@ namespace MonoGame.Framework.PackedVector
         public void FromScaledVector4(in Vector4 scaledVector)
         {
             Vector4.Multiply(scaledVector, ushort.MaxValue, out var v);
-            v += Vector4.Half;
+            Vector4.Add(v, Vector4.Half, out v);
             v.Clamp(0, ushort.MaxValue);
 
             R = (ushort)v.X;
@@ -98,10 +98,11 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToScaledVector4(out Vector4 scaledVector)
         {
-            scaledVector.X = R / (float)ushort.MaxValue;
-            scaledVector.Y = G / (float)ushort.MaxValue;
-            scaledVector.Z = B / (float)ushort.MaxValue;
-            scaledVector.W = A / (float)ushort.MaxValue;
+            scaledVector.X = R;
+            scaledVector.Y = G;
+            scaledVector.Z = B;
+            scaledVector.W = A;
+            Vector4.Divide(scaledVector, ushort.MaxValue, out scaledVector);
         }
 
         #endregion

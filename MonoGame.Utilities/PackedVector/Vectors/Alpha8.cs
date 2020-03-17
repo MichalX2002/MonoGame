@@ -32,7 +32,7 @@ namespace MonoGame.Framework.PackedVector
         /// Constructs the packed vector with a vector form value.
         /// </summary>
         /// <param name="alpha">The W component.</param>
-        public Alpha8(float alpha) => A = Pack(alpha);
+        public Alpha8(float alpha) => Pack(alpha, out A);
 
         #endregion
 
@@ -41,12 +41,12 @@ namespace MonoGame.Framework.PackedVector
         /// </summary>
         public readonly float ToAlpha() => A / (float)byte.MaxValue;
 
-        private static byte Pack(float alpha)
+        private static void Pack(float alpha, out byte destination)
         {
             alpha *= byte.MaxValue;
             alpha += 0.5f;
             alpha = MathHelper.Clamp(alpha, 0, 255);
-            return (byte)alpha;
+            destination = (byte)alpha;
         }
 
         #region IPackedVector
@@ -59,7 +59,7 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromScaledVector4(in Vector4 scaledVector)
         {
-            A = Pack(scaledVector.W);
+            Pack(scaledVector.W, out A);
         }
 
         public readonly void ToScaledVector4(out Vector4 scaledVector)

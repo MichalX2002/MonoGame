@@ -38,9 +38,9 @@ namespace MonoGame.Framework.Content
                 }
 
                 // Calculate dimensions of next mip level.
-                width = Math.Max(width >> 1, 1);
-                height = Math.Max(height >> 1, 1);
-                depth = Math.Max(depth >> 1, 1);
+                width = Math.Max(width / 2, 1);
+                height = Math.Max(height / 2, 1);
+                depth = Math.Max(depth / 2, 1);
             }
 
             return texture;

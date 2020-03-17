@@ -275,7 +275,7 @@ namespace MonoGame.Content.Builder
                 .Replace("$(Platform)", Platform.ToString())
                 .Replace("$(Configuration)", Config)
                 .Replace("$(Config)", Config)
-                .Replace("$(Profile)", this.Profile.ToString());
+                .Replace("$(Profile)", Profile.ToString());
         }
 
         public void Build(out int successCount, out int errorCount)
