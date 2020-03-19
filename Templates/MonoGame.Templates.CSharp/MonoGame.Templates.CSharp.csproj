@@ -13,12 +13,20 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <ContentTargetFolders>content</ContentTargetFolders>
 
-    <PackageIconUrl>https://pbs.twimg.com/profile_images/487954549441691649/O3KsHAsb_400x400.png</PackageIconUrl>
+    <PackageIconUrl></PackageIconUrl>
     <PackageProjectUrl>http://monogame.net/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MonoGame/MonoGame</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageIcon>Icon.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="content\**\*" Exclude="content\**\.DS_Store;content\**\bin;content\**\obj" />
     <Compile Remove="**\*" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="content\MonoGame.Application.Android.CSharp\Resources\Drawable\Icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 </Project>
