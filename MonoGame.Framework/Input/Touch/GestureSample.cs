@@ -48,15 +48,17 @@ namespace MonoGame.Framework.Input.Touch
         /// Initializes a new <see cref="GestureSample"/>.
         /// </summary>
         public GestureSample(
-            GestureType gestureType, TimeSpan timestamp,
-            Vector2 position1, Vector2 position2, Vector2 delta1, Vector2 delta2)
+            GestureType gestureType,
+            TimeSpan timestamp,
+            Vector2 position1, Vector2 position2,
+            Vector2 delta1, Vector2 delta2)
         {
-			GestureType = gestureType;
-			Timestamp = timestamp;
-			Position1 = position1;
-			Position2 = position2;
-			Delta1 = delta1;
-			Delta2 = delta2;
+            GestureType = gestureType;
+            Timestamp = timestamp;
+            Position1 = position1;
+            Position2 = position2;
+            Delta1 = delta1;
+            Delta2 = delta2;
         }
     }
 }

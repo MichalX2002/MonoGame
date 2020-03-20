@@ -12,31 +12,45 @@ namespace MonoGame.Framework
 {
     internal class SdlGameWindow : GameWindow, IDisposable
     {
+        public static GameWindow Instance;
+
+        public bool IsFullScreen;
+        internal readonly Game _game;
+        private IntPtr _handle;
+        private IntPtr _icon;
+        private string _defaultTitle;
+        private bool _isDisposed;
+        private bool _resizable, _borderless, _willBeFullScreen, _mouseVisible, _hardwareSwitch;
+        private string _screenDeviceName;
+        private int _width, _height;
+        private bool _wasMoved, _supressMoved;
+
+        public override DisplayOrientation CurrentOrientation => DisplayOrientation.Default;
+
+        public override IntPtr Handle => _handle;
+        public override string ScreenDeviceName => _screenDeviceName;
+
+        public override bool HasClipboardText => SDL.HasClipboardText();
+        public override string ClipboardText { get => SDL.GetClipboardText(); set => SDL.SetClipboardText(value); }
+
         public override bool AllowUserResizing
         {
             get => !IsBorderless && _resizable;
             set
             {
-                if (SDL.Major >= 2 && SDL.Minor >= 0 && SDL.Patch > 4)
+                SDL.GetVersion(out var version);
+                if (version.Major >= 2 &&
+                    version.Minor >= 0 &&
+                    version.Patch > 4)
                 {
                     SDL.Window.SetResizable(_handle, value);
                 }
                 else
                 {
-                    string version = string.Join(".", SDL.Major, SDL.Minor, SDL.Patch);
                     throw new Exception(
                         $"SDL {version} does not support changing the resizable parameter of the window after it's already been created.");
                 }
                 _resizable = value;
-            }
-        }
-
-        public override Rectangle ClientBounds
-        {
-            get
-            {
-                SDL.Window.GetPosition(Handle, out int x, out int y);
-                return new Rectangle(x, y, _width, _height);
             }
         }
 
@@ -58,9 +72,14 @@ namespace MonoGame.Framework
             }
         }
 
-        public override DisplayOrientation CurrentOrientation => DisplayOrientation.Default;
-        public override IntPtr Handle => _handle;
-        public override string ScreenDeviceName => _screenDeviceName;
+        public override Rectangle ClientBounds
+        {
+            get
+            {
+                var position = Position;
+                return new Rectangle(position.X, position.Y, _width, _height);
+            }
+        }
 
         public override bool IsBorderless
         {
@@ -72,62 +91,73 @@ namespace MonoGame.Framework
             }
         }
 
-        public override bool HasClipboardText => SDL.HasClipboardText();
-        public override string ClipboardText { get => SDL.GetClipboardText(); set => SDL.SetClipboardText(value); }
-
-        public static GameWindow Instance;
-        public bool IsFullScreen;
-
-        internal readonly Game _game;
-        private IntPtr _handle;
-        private IntPtr _icon;
-        private string _defaultTitle;
-        private bool _disposed;
-        private bool _resizable, _borderless, _willBeFullScreen, _mouseVisible, _hardwareSwitch;
-        private string _screenDeviceName;
-        private int _width, _height;
-        private bool _wasMoved, _supressMoved;
-
         public SdlGameWindow(Game game)
         {
             Instance = this;
 
             _game = game;
-            _screenDeviceName = "";
+            _screenDeviceName = string.Empty;
             _width = GraphicsDeviceManager.DefaultBackBufferWidth;
             _height = GraphicsDeviceManager.DefaultBackBufferHeight;
             _defaultTitle = AssemblyHelper.GetDefaultWindowTitle();
 
             byte[] iconBytes = ReadEmbeddedIconBytes();
             if (iconBytes != null)
-            {
-                var dataSrc = SDL.RwFromMem(iconBytes, iconBytes.Length);
-                _icon = SDL.LoadBMP_RW(dataSrc, 1);
-            }
+                _icon = LoadBmp(iconBytes);
 
             SDL.SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "0");
             SDL.SetHint("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1");
 
             _handle = SDL.Window.Create(
                 _defaultTitle,
-                x: 0, y: 0,
-                GraphicsDeviceManager.DefaultBackBufferWidth,
-                GraphicsDeviceManager.DefaultBackBufferHeight,
+                x: 0,
+                y: 0,
+                _width,
+                _height,
                 SDL.Window.State.Hidden);
         }
 
-        public IntPtr GetOSWindowHandle()
+        private static IntPtr LoadBmp(byte[] data)
+        {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
+            var dataSrc = SDL.RwFromMem(data, data.Length);
+            if (dataSrc == IntPtr.Zero)
+                return IntPtr.Zero;
+
+            var icon = SDL.LoadBMP_RW(dataSrc, freesrc: 1);
+            if (icon == IntPtr.Zero)
+                return IntPtr.Zero;
+
+            return icon;
+        }
+
+        public IntPtr GetSubsystemWindowHandle()
         {
             if (_handle != IntPtr.Zero)
             {
                 SDL.Window.SysWMinfo wmInfo = default;
                 SDL.GetVersion(out wmInfo.version);
+
                 if (SDL.Window.GetWindowWMInfo(_handle, ref wmInfo))
                 {
-                    if (wmInfo.subsystem == SDL.Window.SysWMType.Windows)
+                    if (wmInfo.subsystem == SDL.Window.SysWMType.Windows &&
+                        wmInfo.version.Major >= 2 && 
+                        wmInfo.version.Minor >= 0 &&
+                        wmInfo.version.Patch >= 6)
                     {
                         return wmInfo.data.Windows.window;
                     }
+                    // TODO:
+                    //else if(wmInfo.subsystem == SDL.Window.SysWMType.UIKit)
+                    //{
+                    //    return wmInfo.data.UIKit.window;
+                    //}
+                    //else if(wmInfo.subsystem == SDL.Window.SysWMType.X11)
+                    //{
+                    //    return wmInfo.data.X11.window;
+                    //}
                 }
             }
             return IntPtr.Zero;
@@ -200,13 +230,12 @@ namespace MonoGame.Framework
 
         private static int GetMouseDisplay()
         {
-            var rect = new SDL.Rectangle();
             SDL.Mouse.GetGlobalState(out int x, out int y);
 
-            var displayCount = SDL.Display.GetNumVideoDisplays();
+            int displayCount = SDL.Display.GetNumVideoDisplays();
             for (int i = 0; i < displayCount; i++)
             {
-                SDL.Display.GetBounds(i, out rect);
+                SDL.Display.GetBounds(i, out var rect);
 
                 if (x >= rect.X && x < rect.X + rect.Width &&
                     y >= rect.Y && y < rect.Y + rect.Height)
@@ -251,7 +280,7 @@ namespace MonoGame.Framework
             // If going to exclusive full-screen mode, force the window to minimize on focus loss (Windows only)
             if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
                 SDL.SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", _willBeFullScreen && _hardwareSwitch ? "1" : "0");
-            
+
             if (!_willBeFullScreen || _game.GraphicsDeviceManager.HardwareModeSwitch)
             {
                 SDL.Window.SetSize(Handle, clientWidth, clientHeight);
@@ -285,7 +314,8 @@ namespace MonoGame.Framework
             // after the window gets resized, window position information
             // becomes wrong (for me it always returned 10 8). Solution is
             // to not try and set the window position because it will be wrong.
-            if ((SDL.Patch > 4 || !AllowUserResizing) && !_wasMoved)
+            SDL.GetVersion(out var version);
+            if ((version.Patch > 4 || !AllowUserResizing) && !_wasMoved)
                 SDL.Window.SetPosition(Handle, centerX, centerY);
 
             if (IsFullScreen != _willBeFullScreen)
@@ -327,7 +357,6 @@ namespace MonoGame.Framework
 
         protected internal override void SetSupportedOrientations(DisplayOrientation orientations)
         {
-            // Nothing to do here
         }
 
         protected override void SetTitle(string title)
@@ -343,7 +372,7 @@ namespace MonoGame.Framework
 
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposed)
+            if (_isDisposed)
                 return;
 
             SDL.Window.Destroy(_handle);
@@ -352,7 +381,7 @@ namespace MonoGame.Framework
             if (_icon != IntPtr.Zero)
                 SDL.FreeSurface(_icon);
 
-            _disposed = true;
+            _isDisposed = true;
         }
 
         ~SdlGameWindow()

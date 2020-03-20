@@ -23,6 +23,9 @@ namespace MonoGame.Framework.Utilities
 
         private void PlatformSetProgressState(TaskbarProgressState state)
         {
+            if (!PlatformGetIsSupported())
+                return;
+
             int flags = state switch
             {
                 TaskbarProgressState.None => 0,
@@ -37,6 +40,9 @@ namespace MonoGame.Framework.Utilities
 
         private void PlatformSetProgressValue(TaskbarProgressValue value)
         {
+            if (!PlatformGetIsSupported())
+                return;
+
             _comObject.SetProgressValue(WindowHandle, (ulong)value.Completed, (ulong)value.Total);
         }
 
