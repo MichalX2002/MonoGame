@@ -2,6 +2,14 @@
 	path = ThirdParty/Dependencies
 	url = https://github.com/MonoGame/MonoGame.Dependencies.git
 
+[submodule "ThirdParty/SDL_GameControllerDB"]
+	path = ThirdParty/SDL_GameControllerDB
+	url = https://github.com/gabomdq/SDL_GameControllerDB/
+	
+[submodule "ThirdParty/NVorbis"]
+	path = ThirdParty/NVorbis
+	url = https://github.com/TechnologicalPizza/NVorbis
+
 [submodule "ThirdParty/StbSharp/Image"]
 	path = ThirdParty/StbSharp/Image
 	url = https://github.com/TechnologicalPizza/StbSharp.Image
@@ -13,10 +21,3 @@
 [submodule "ThirdParty/StbSharp/ImageWrite"]
 	path = ThirdParty/StbSharp/ImageWrite
 	url = https://github.com/TechnologicalPizza/StbSharp.ImageWrite
-
-[submodule "ThirdParty/SDL_GameControllerDB"]
-	path = ThirdParty/SDL_GameControllerDB
-	url = https://github.com/gabomdq/gamecontrollerdb
-[submodule "ThirdParty/NVorbis"]
-	path = ThirdParty/NVorbis
-	url = https://github.com/TechnologicalPizza/NVorbis
