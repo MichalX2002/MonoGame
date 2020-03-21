@@ -59,7 +59,9 @@ namespace Microsoft.Devices.Sensors
         public Accelerometer()
         {
             if (instanceCount >= MaxSensorCount)
-                throw new SensorFailedException("The limit of 10 simultaneous instances of the Accelerometer class per application has been exceeded.");
+                throw new SensorFailedException(
+			        "The limit of 10 simultaneous instances of the Accelerometer class per application has been exceeded.");
+					
             ++instanceCount;
 
             state = sensor != null ? SensorState.Initializing : SensorState.NotSupported;
