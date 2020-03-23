@@ -57,7 +57,9 @@ namespace Microsoft.Devices.Sensors
         public Compass()
         {
             if (instanceCount >= MaxSensorCount)
-                throw new SensorFailedException("The limit of 10 simultaneous instances of the Compass class per application has been exceeded.");
+                throw new SensorFailedException(
+			        "The limit of 10 simultaneous instances of the Compass class per application has been exceeded.");
+					
             ++instanceCount;
 
             state = sensorMagneticField != null ? SensorState.Initializing : SensorState.NotSupported;

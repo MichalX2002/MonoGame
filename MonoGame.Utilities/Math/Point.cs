@@ -4,7 +4,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace MonoGame.Framework
@@ -43,7 +42,7 @@ namespace MonoGame.Framework
 
         #region Properties
 
-        private string DebuggerDisplay => string.Concat(
+        internal string DebuggerDisplay => string.Concat(
             X.ToString(), "  ",
             Y.ToString(), "  ");
 
@@ -185,6 +184,11 @@ namespace MonoGame.Framework
         }
 
         #endregion
+
+        public static implicit operator Vector2(Point point)
+        {
+            return new Vector2(point.X, point.Y);
+        }
     }
 }
 

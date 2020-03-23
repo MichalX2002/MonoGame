@@ -87,7 +87,7 @@ namespace MonoGame.Framework
 
         #region Internal Properties
 
-        private string DebuggerDisplay => string.Concat(
+        internal string DebuggerDisplay => string.Concat(
             "Near(", _planes[0].DebuggerDisplay, ") \n",
             "Far(", _planes[1].DebuggerDisplay, ") \n",
             "Left(", _planes[2].DebuggerDisplay, ") \n",

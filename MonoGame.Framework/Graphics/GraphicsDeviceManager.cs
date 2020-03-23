@@ -35,12 +35,220 @@ namespace MonoGame.Framework
         /// <summary>
         /// The default back buffer width.
         /// </summary>
-        public static readonly int DefaultBackBufferWidth = 800;
+        public const int DefaultBackBufferWidth = 800;
 
         /// <summary>
         /// The default back buffer height.
         /// </summary>
-        public static readonly int DefaultBackBufferHeight = 480;
+        public const int DefaultBackBufferHeight = 480;
+
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets the profile which determines the graphics feature level.
+        /// </summary>
+        public GraphicsProfile GraphicsProfile
+        {
+            get => _graphicsProfile;
+            set
+            {
+                _shouldApplyChanges = true;
+                _graphicsProfile = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the the graphics device for this manager.
+        /// </summary>
+        public GraphicsDevice GraphicsDevice { get; private set; }
+
+        /// <summary>
+        /// Gets or sets whether to switch into fullscreen mode.
+        /// </summary>
+        /// <remarks>
+        /// When called at startup this will automatically set fullscreen mode during initialization. 
+        /// If set after startup you must call <see cref="ApplyChanges"/> for the fullscreen mode to be changed.
+        /// Note that for some platforms that do not support windowed modes this property has no affect.
+        /// </remarks>
+        public bool IsFullScreen
+        {
+            get => _wantFullScreen;
+            set
+            {
+                _shouldApplyChanges = true;
+                _wantFullScreen = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets how the window switches from windowed to fullscreen state.
+        /// <para>
+        /// "Hard" mode (<see langword="true"/>) is slow to switch, 
+        /// but more effecient for performance, while "soft" mode (<see langword="false"/>) is vice versa.
+        /// This flag is set to <see langword="true"/> by default.
+        /// </para>
+        /// </summary>
+        public bool HardwareModeSwitch
+        {
+            get => _hardwareModeSwitch;
+            set
+            {
+                _shouldApplyChanges = true;
+                _hardwareModeSwitch = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether DX9 style pixel addressing or current standard pixel addressing should be used.
+        /// <para>
+        /// Set to <see langword="true"/> for XNA compatibility. 
+        /// It is recommended to leave this flag set to <see langword="false"/> 
+        /// for projects that are not ported from XNA. 
+        /// This flag is set to <see langword="false"/> by default.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// XNA uses DirectX9 for its graphics. DirectX9 interprets UV
+        /// coordinates differently from other graphics API's. 
+        /// This is typically referred to as the half-pixel offset. 
+        /// MonoGame replicates XNA behavior if this flag is set to <see langword="true"/>.
+        /// This value is passed to <see cref="GraphicsDevice.UseHalfPixelOffset"/>.
+        /// </remarks>
+        public bool PreferHalfPixelOffset
+        {
+            get => _preferHalfPixelOffset;
+            set
+            {
+                if (GraphicsDevice != null)
+                    throw new InvalidOperationException(
+                        "Setting PreferHalfPixelOffset is not allowed after the creation of GraphicsDevice.");
+                _preferHalfPixelOffset = value;
+            }
+        }
+
+        /// <summary>
+        /// Indicates the desire for a multisampled back buffer.
+        /// </summary>
+        /// <remarks>
+        /// When called at startup this will automatically set the MSAA mode during initialization.  If
+        /// set after startup you must call ApplyChanges() for the MSAA mode to be changed.
+        /// </remarks>
+        public bool PreferMultiSampling
+        {
+            get => _preferMultiSampling;
+            set
+            {
+                _shouldApplyChanges = true;
+                _preferMultiSampling = value;
+            }
+        }
+
+        /// <summary>
+        /// Indicates the desired back buffer color format.
+        /// </summary>
+        /// <remarks>
+        /// When called at startup this will automatically set the format during initialization.  If
+        /// set after startup you must call ApplyChanges() for the format to be changed.
+        /// </remarks>
+        public SurfaceFormat PreferredBackBufferFormat
+        {
+            get => _preferredBackBufferFormat;
+            set
+            {
+                _shouldApplyChanges = true;
+                _preferredBackBufferFormat = value;
+            }
+        }
+
+        /// <summary>
+        /// Indicates the desired back buffer height in pixels.
+        /// </summary>
+        /// <remarks>
+        /// When called at startup this will automatically set the height during initialization.  If
+        /// set after startup you must call ApplyChanges() for the height to be changed.
+        /// </remarks>
+        public int PreferredBackBufferHeight
+        {
+            get => _preferredBackBufferHeight;
+            set
+            {
+                _shouldApplyChanges = true;
+                _preferredBackBufferHeight = value;
+            }
+        }
+
+        /// <summary>
+        /// Indicates the desired back buffer width in pixels.
+        /// </summary>
+        /// <remarks>
+        /// When called at startup this will automatically set the width during initialization.  If
+        /// set after startup you must call ApplyChanges() for the width to be changed.
+        /// </remarks>
+        public int PreferredBackBufferWidth
+        {
+            get => _preferredBackBufferWidth;
+            set
+            {
+                _shouldApplyChanges = true;
+                _preferredBackBufferWidth = value;
+            }
+        }
+
+        /// <summary>
+        /// Indicates the desired depth-stencil buffer format.
+        /// </summary>
+        /// <remarks>
+        /// The depth-stencil buffer format defines the scene depth precision and stencil bits available for effects during rendering.
+        /// When called at startup this will automatically set the format during initialization.  If
+        /// set after startup you must call ApplyChanges() for the format to be changed.
+        /// </remarks>
+        public DepthFormat PreferredDepthStencilFormat
+        {
+            get => _preferredDepthStencilFormat;
+            set
+            {
+                _shouldApplyChanges = true;
+                _preferredDepthStencilFormat = value;
+            }
+        }
+
+        /// <summary>
+        /// Indicates the desire for VSync when presenting the back buffer.
+        /// </summary>
+        /// <remarks>
+        /// VSync limits the frame rate of the game to the monitor referesh rate to prevent screen tearing.
+        /// When called at startup this will automatically set the VSync mode during initialization.
+        /// If set after startup you must call ApplyChanges() for the VSync mode to be changed.
+        /// </remarks>
+        public PresentInterval VerticalSyncInterval
+        {
+            get => _presentInterval;
+            set
+            {
+                _shouldApplyChanges = true;
+                _presentInterval = value;
+            }
+        }
+
+        /// <summary>
+        /// Indicates the desired allowable display orientations when the device is rotated.
+        /// </summary>
+        /// <remarks>
+        /// This property only applies to mobile platforms with automatic display rotation.
+        /// When called at startup this will automatically apply the supported orientations during initialization.  If
+        /// set after startup you must call ApplyChanges() for the supported orientations to be changed.
+        /// </remarks>
+        public DisplayOrientation SupportedOrientations
+        {
+            get => _supportedOrientations;
+            set
+            {
+                _shouldApplyChanges = true;
+                _supportedOrientations = value;
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// Optional override for platform specific defaults.
@@ -348,7 +556,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Toggles between windowed and fullscreen modes.
+        /// Toggles between windowed and fullscreen mode and calls <see cref="ApplyChanges"/>.
         /// </summary>
         /// <remarks>
         /// Note that on platforms that do not support windowed modes this has no affect.
@@ -362,205 +570,6 @@ namespace MonoGame.Framework
         private void OnPresentationChanged(object sender, PresentationParameters presentationParams)
         {
             _game.Platform.OnPresentationChanged(presentationParams);
-        }
-
-        /// <summary>
-        /// The profile which determines the graphics feature level.
-        /// </summary>
-        public GraphicsProfile GraphicsProfile
-        {
-            get => _graphicsProfile;
-            set
-            {
-                _shouldApplyChanges = true;
-                _graphicsProfile = value;
-            }
-        }
-
-        /// <summary>
-        /// Returns the graphics device for this manager.
-        /// </summary>
-        public GraphicsDevice GraphicsDevice { get; private set; }
-
-        /// <summary>
-        /// Indicates the desire to switch into fullscreen mode.
-        /// </summary>
-        /// <remarks>
-        /// When called at startup this will automatically set fullscreen mode during initialization.  If
-        /// set after startup you must call <see cref="ApplyChanges"/> for the fullscreen mode to be changed.
-        /// Note that for some platforms that do not support windowed modes this property has no affect.
-        /// </remarks>
-        public bool IsFullScreen
-        {
-            get => _wantFullScreen;
-            set
-            {
-                _shouldApplyChanges = true;
-                _wantFullScreen = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the boolean which defines how window switches from windowed to fullscreen state.
-        /// "Hard" mode (true) is slow to switch, but more effecient for performance, while "soft" mode (false) is vice versa.
-        /// The default value is <see langword="true"/>.
-        /// </summary>
-        public bool HardwareModeSwitch
-        {
-            get => _hardwareModeSwitch;
-            set
-            {
-                _shouldApplyChanges = true;
-                _hardwareModeSwitch = value;
-            }
-        }
-
-        /// <summary>
-        /// Indicates if DX9 style pixel addressing or current standard
-        /// pixel addressing should be used. This flag is set to
-        /// <see langword="false"/> by default. It should be set to <see langword="true"/>
-        /// for XNA compatibility. It is recommended to leave this flag
-        /// set to <see langword="false"/> for projects that are not ported from
-        /// XNA. This value is passed to <see cref="GraphicsDevice.UseHalfPixelOffset"/>.
-        /// </summary>
-        /// <remarks>
-        /// XNA uses DirectX9 for its graphics. DirectX9 interprets UV
-        /// coordinates differently from other graphics API's. This is
-        /// typically referred to as the half-pixel offset. MonoGame
-        /// replicates XNA behavior if this flag is set to <see langword="true"/>.
-        /// </remarks>
-        public bool PreferHalfPixelOffset
-        {
-            get => _preferHalfPixelOffset;
-            set
-            {
-                if (GraphicsDevice != null)
-                    throw new InvalidOperationException(
-                        "Setting PreferHalfPixelOffset is not allowed after the creation of GraphicsDevice.");
-                _preferHalfPixelOffset = value;
-            }
-        }
-
-        /// <summary>
-        /// Indicates the desire for a multisampled back buffer.
-        /// </summary>
-        /// <remarks>
-        /// When called at startup this will automatically set the MSAA mode during initialization.  If
-        /// set after startup you must call ApplyChanges() for the MSAA mode to be changed.
-        /// </remarks>
-        public bool PreferMultiSampling
-        {
-            get => _preferMultiSampling;
-            set
-            {
-                _shouldApplyChanges = true;
-                _preferMultiSampling = value;
-            }
-        }
-
-        /// <summary>
-        /// Indicates the desired back buffer color format.
-        /// </summary>
-        /// <remarks>
-        /// When called at startup this will automatically set the format during initialization.  If
-        /// set after startup you must call ApplyChanges() for the format to be changed.
-        /// </remarks>
-        public SurfaceFormat PreferredBackBufferFormat
-        {
-            get => _preferredBackBufferFormat;
-            set
-            {
-                _shouldApplyChanges = true;
-                _preferredBackBufferFormat = value;
-            }
-        }
-
-        /// <summary>
-        /// Indicates the desired back buffer height in pixels.
-        /// </summary>
-        /// <remarks>
-        /// When called at startup this will automatically set the height during initialization.  If
-        /// set after startup you must call ApplyChanges() for the height to be changed.
-        /// </remarks>
-        public int PreferredBackBufferHeight
-        {
-            get => _preferredBackBufferHeight;
-            set
-            {
-                _shouldApplyChanges = true;
-                _preferredBackBufferHeight = value;
-            }
-        }
-
-        /// <summary>
-        /// Indicates the desired back buffer width in pixels.
-        /// </summary>
-        /// <remarks>
-        /// When called at startup this will automatically set the width during initialization.  If
-        /// set after startup you must call ApplyChanges() for the width to be changed.
-        /// </remarks>
-        public int PreferredBackBufferWidth
-        {
-            get => _preferredBackBufferWidth;
-            set
-            {
-                _shouldApplyChanges = true;
-                _preferredBackBufferWidth = value;
-            }
-        }
-
-        /// <summary>
-        /// Indicates the desired depth-stencil buffer format.
-        /// </summary>
-        /// <remarks>
-        /// The depth-stencil buffer format defines the scene depth precision and stencil bits available for effects during rendering.
-        /// When called at startup this will automatically set the format during initialization.  If
-        /// set after startup you must call ApplyChanges() for the format to be changed.
-        /// </remarks>
-        public DepthFormat PreferredDepthStencilFormat
-        {
-            get => _preferredDepthStencilFormat;
-            set
-            {
-                _shouldApplyChanges = true;
-                _preferredDepthStencilFormat = value;
-            }
-        }
-
-        /// <summary>
-        /// Indicates the desire for VSync when presenting the back buffer.
-        /// </summary>
-        /// <remarks>
-        /// VSync limits the frame rate of the game to the monitor referesh rate to prevent screen tearing.
-        /// When called at startup this will automatically set the VSync mode during initialization.
-        /// If set after startup you must call ApplyChanges() for the VSync mode to be changed.
-        /// </remarks>
-        public PresentInterval VerticalSyncInterval
-        {
-            get => _presentInterval;
-            set
-            {
-                _shouldApplyChanges = true;
-                _presentInterval = value;
-            }
-        }
-
-        /// <summary>
-        /// Indicates the desired allowable display orientations when the device is rotated.
-        /// </summary>
-        /// <remarks>
-        /// This property only applies to mobile platforms with automatic display rotation.
-        /// When called at startup this will automatically apply the supported orientations during initialization.  If
-        /// set after startup you must call ApplyChanges() for the supported orientations to be changed.
-        /// </remarks>
-        public DisplayOrientation SupportedOrientations
-        {
-            get => _supportedOrientations;
-            set
-            {
-                _shouldApplyChanges = true;
-                _supportedOrientations = value;
-            }
         }
     }
 }

@@ -9,11 +9,15 @@ namespace MonoGame.Framework.Input.Touch
 {
     public struct TouchLocation : IEquatable<TouchLocation>
     {
+        /// <summary>
+        /// Helper for assigning an invalid touch location.
+        /// </summary>
+        internal static readonly TouchLocation Invalid = new TouchLocation();
+
         private Vector2 _position;
-		private Vector2 _previousPosition;
+        private Vector2 _previousPosition;
         private TouchLocationState _previousState;
         private float _previousPressure;
-        private TimeSpan _timestamp;
 
         /// <summary>
         /// True if this touch was pressed and released on the same frame.
@@ -22,17 +26,12 @@ namespace MonoGame.Framework.Input.Touch
         /// </summary>
         internal bool SameFrameReleased;
 
-        /// <summary>
-        /// Helper for assigning an invalid touch location.
-        /// </summary>
-        internal static readonly TouchLocation Invalid = new TouchLocation();
-
         #region Properties
 
         internal TimeSpan PressTimestamp { get; private set; }
         internal Vector2 PressPosition { get; private set; }
         internal Vector2 Velocity { get; private set; }
-        internal TimeSpan Timestamp => _timestamp;
+        internal TimeSpan Timestamp { get; private set; }
 
         public int Id { get; private set; }
         public Vector2 Position => _position;
@@ -71,7 +70,7 @@ namespace MonoGame.Framework.Input.Touch
             _previousPosition = previousPosition;
             _previousPressure = 0f;
 
-            _timestamp = timestamp;
+            Timestamp = timestamp;
             Velocity = Vector2.Zero;
 
             // If this is a pressed location then store the 
@@ -79,7 +78,7 @@ namespace MonoGame.Framework.Input.Touch
             if (state == TouchLocationState.Pressed)
             {
                 PressPosition = _position;
-                PressTimestamp = _timestamp;
+                PressTimestamp = Timestamp;
             }
             else
             {
@@ -90,7 +89,7 @@ namespace MonoGame.Framework.Input.Touch
             SameFrameReleased = false;
         }
 
-		#endregion
+        #endregion
 
         /// <summary>
         /// Returns a copy of the touch with the state changed to moved.
@@ -119,9 +118,9 @@ namespace MonoGame.Framework.Input.Touch
         {
             Debug.Assert(Id == touchEvent.Id, "The touch event must have the same Id!");
             Debug.Assert(State != TouchLocationState.Released, "We shouldn't be changing state on a released location!");
-            Debug.Assert(   touchEvent.State == TouchLocationState.Moved ||
-                            touchEvent.State == TouchLocationState.Released, "The new touch event should be a move or a release!");
-            Debug.Assert(touchEvent.Timestamp >= _timestamp, "The touch event is older than our timestamp!");
+            Debug.Assert(touchEvent.State == TouchLocationState.Moved || touchEvent.State == TouchLocationState.Released, 
+                "The new touch event should be a move or a release!");
+            Debug.Assert(touchEvent.Timestamp >= Timestamp, "The touch event is older than our timestamp!");
 
             // Store the current state as the previous one.
             _previousPosition = _position;
@@ -136,7 +135,7 @@ namespace MonoGame.Framework.Input.Touch
 
             // If time has elapsed then update the velocity.
             var delta = _position - _previousPosition;
-            var elapsed = touchEvent.Timestamp - _timestamp;
+            var elapsed = touchEvent.Timestamp - Timestamp;
             if (elapsed > TimeSpan.Zero)
             {
                 // Use a simple low pass filter to accumulate velocity.
@@ -153,7 +152,7 @@ namespace MonoGame.Framework.Input.Touch
             }
 
             // Set the new timestamp.
-            _timestamp = touchEvent.Timestamp;
+            Timestamp = touchEvent.Timestamp;
 
             // Return true if the state actually changed.
             return State != _previousState || delta.LengthSquared() > 0.001f;
@@ -193,11 +192,11 @@ namespace MonoGame.Framework.Input.Touch
 
         public bool TryGetPreviousLocation(out TouchLocation previousLocation)
         {
-			if (_previousState == TouchLocationState.Invalid)
-			{
+            if (_previousState == TouchLocationState.Invalid)
+            {
                 previousLocation = default;
                 return false;
-			}
+            }
 
             previousLocation = new TouchLocation
             {
@@ -208,7 +207,7 @@ namespace MonoGame.Framework.Input.Touch
                 _previousPosition = Vector2.Zero,
                 Pressure = _previousPressure,
                 _previousPressure = 0f,
-                _timestamp = _timestamp,
+                Timestamp = Timestamp,
                 PressPosition = PressPosition,
                 PressTimestamp = PressTimestamp,
                 Velocity = Velocity,

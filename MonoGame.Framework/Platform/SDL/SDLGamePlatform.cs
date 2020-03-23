@@ -28,25 +28,22 @@ namespace MonoGame.Framework
             _keys = new List<Keys>();
             Keyboard.SetKeysDownList(_keys);
 
-            SDL.GetVersion(out SDL.Version sdlVersion);
-            SDL.Major = sdlVersion.Major;
-            SDL.Minor = sdlVersion.Minor;
-            SDL.Patch = sdlVersion.Patch;
+            SDL.GetVersion(out SDL.Version version);
 
-            int version = 100 * SDL.Major + 10 * SDL.Minor + SDL.Patch;
-            if (version <= 204)
+            if (version.Major < 2 || version.Minor < 0 || version.Patch < 5)
                 Debug.WriteLine("Please use SDL 2.0.5 or higher.");
 
             // Needed so VS can debug the project on Windows
-            if (version >= 205 && PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows && Debugger.IsAttached)
+            if (version.Major >= 2 && version.Minor >= 0 && version.Patch >= 5 &&
+                Debugger.IsAttached &&
+                PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
                 SDL.SetHint("SDL_WINDOWS_DISABLE_THREAD_NAMING", "1");
 
             SDL.Init((int)(
                 SDL.InitFlags.Video |
                 SDL.InitFlags.Joystick |
                 SDL.InitFlags.GameController |
-                SDL.InitFlags.Haptic
-            ));
+                SDL.InitFlags.Haptic));
 
             SDL.DisableScreenSaver();
 
@@ -77,7 +74,7 @@ namespace MonoGame.Framework
         public override void RunLoop()
         {
             SDL.Window.Show(Window.Handle);
-            _window.TaskbarList.WindowHandle = _window.GetOSWindowHandle();
+            _window.TaskbarList.WindowHandle = _window.GetSubsystemWindowHandle();
 
             while (true)
             {
@@ -94,8 +91,8 @@ namespace MonoGame.Framework
             }
         }
 
-        private unsafe void PollSdlEvents() 
-        { 
+        private unsafe void PollSdlEvents()
+        {
             while (SDL.PollEvent(out SDL.Event ev) == 1)
             {
                 switch (ev.Type)

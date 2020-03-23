@@ -94,13 +94,13 @@ namespace MonoGame.Framework.Utilities
 
         internal void Update()
         {
-            if (IsSupported)
+            if (!IsSupported)
+                return;
+
+            lock (SyncRoot)
             {
-                lock (SyncRoot)
-                {
-                    PlatformSetProgressState(_progressState);
-                    PlatformSetProgressValue(_progressValue);
-                }
+                PlatformSetProgressState(_progressState);
+                PlatformSetProgressValue(_progressValue);
             }
         }
     }

@@ -142,8 +142,8 @@ namespace MonoGame.Framework
         public bool Intersects(BoundingFrustum frustum, out float distance)
         {
             if (frustum == null)
-				throw new ArgumentNullException(nameof(frustum));
-			return frustum.Intersects(this, out distance);
+                throw new ArgumentNullException(nameof(frustum));
+            return frustum.Intersects(this, out distance);
         }
 
         public bool Intersects(in BoundingSphere sphere, out float distance)
@@ -209,7 +209,7 @@ namespace MonoGame.Framework
                 && a.Direction.Equals(b.Direction);
         }
 
-        private string DebuggerDisplay => string.Concat(
+        internal string DebuggerDisplay => string.Concat(
             "Pos(", Position.DebuggerDisplay, ") \n",
             "Dir(", Direction.DebuggerDisplay, ")");
 

@@ -57,7 +57,7 @@ namespace MonoGame.Framework
         [IgnoreDataMember]
         public readonly bool IsIdentity => Base.IsIdentity;
 
-        private string DebuggerDisplay => IsIdentity ? "Identity" : string.Concat(
+        internal string DebuggerDisplay => IsIdentity ? "Identity" : string.Concat(
             X.ToString(), " ",
             Y.ToString(), " ",
             Z.ToString(), " ",

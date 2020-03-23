@@ -2,91 +2,118 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
+#if WINDOWS
+using System.Runtime.InteropServices;
+#endif
+
 #if ANDROID
 using Android.Content.PM;
 #endif
+
 #if IOS
 using UIKit;
 #endif
 
-
 namespace MonoGame.Framework.Input.Touch
 {
     /// <summary>
-    /// Allows retrieval of capabilities information from touch panel device.
+    /// Allows retrieval of capability information from the touch panel device.
     /// </summary>
-    public struct TouchPanelCapabilities
+    public readonly struct TouchPanelCapabilities
     {
-        private bool isConnected;
-        private bool initialized;
+#if WINDOWS
+        private const int SM_MAXIMUMTOUCHES = 95;
 
-        internal void Initialize()
-        {
-            if (!initialized)
-            {
-                initialized = true;
-
-                // There does not appear to be a way of finding out if a touch device supports pressure.
-                // XNA does not expose a pressure value, so let's assume it doesn't support it.
-                HasPressure = false;
-
-#if WINDOWS_UAP
-                // Is a touch device present?
-                // Iterate through all pointer devices and find the maximum number of concurrent touches possible
-                MaximumTouchCount = 0;
-                var pointerDevices = Windows.Devices.Input.PointerDevice.GetPointerDevices();
-                foreach (var pointerDevice in pointerDevices)
-                {
-                    MaximumTouchCount = Math.Max(MaximumTouchCount, (int)pointerDevice.MaxContacts);
-
-                    if (pointerDevice.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Touch)
-                        isConnected = true;
-                }
-#elif WINDOWS
-                MaximumTouchCount = GetSystemMetrics(SM_MAXIMUMTOUCHES);
-                isConnected = MaximumTouchCount > 0;
-#elif ANDROID
-                // http://developer.android.com/reference/android/content/pm/PackageManager.html#FEATURE_TOUCHSCREEN
-                var pm = Game.Activity.PackageManager;
-                isConnected = pm.HasSystemFeature(PackageManager.FeatureTouchscreen);
-                if (pm.HasSystemFeature(PackageManager.FeatureTouchscreenMultitouchJazzhand))
-                    MaximumTouchCount = 5;
-                else if (pm.HasSystemFeature(PackageManager.FeatureTouchscreenMultitouchDistinct))
-                    MaximumTouchCount = 2;
-                else
-                    MaximumTouchCount = 1;
-#elif IOS
-                //iPhone supports 5, iPad 11
-                isConnected = true;
-                if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone)
-                    MaximumTouchCount = 5;
-                else //Pad
-                    MaximumTouchCount = 11;
-#else
-                //Touch isn't implemented in OpenTK, so no linux or mac https://github.com/opentk/opentk/issues/80
-                isConnected = false;
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        static extern int GetSystemMetrics(int nIndex);
 #endif
-            }
+
+        /// <summary>
+        /// Gets whether a touch device is available.
+        /// </summary>
+        public bool IsConnected { get; }
+
+        /// <summary>
+        /// Gets the maximum number of touch locations tracked by the touch panel device.
+        /// </summary>
+        public int MaximumTouchCount { get; }
+
+        // There does not appear to be a way of finding out if a touch device supports pressure.
+        // XNA does not expose a pressure value, so let's assume it doesn't support it.
+
+        /// <summary>
+        /// Gets whether the device has pressure sensitivity support.
+        /// </summary>
+        public bool HasPressure { get; }
+
+        /// <summary>
+        /// Constructs the <see cref="TouchPanelCapabilities"/>.
+        /// </summary>
+        public TouchPanelCapabilities(bool isConnected, int maximumTouchCount, bool hasPressure)
+        {
+            IsConnected = isConnected;
+            MaximumTouchCount = maximumTouchCount;
+            HasPressure = hasPressure;
         }
 
-        public bool HasPressure { get; private set; }
-
-        /// <summary>
-        /// Returns true if a device is available for use.
-        /// </summary>
-        public bool IsConnected => isConnected;
-
-        /// <summary>
-        /// Returns the maximum number of touch locations tracked by the touch panel device.
-        /// </summary>
-        public int MaximumTouchCount { get; private set; }
-
-#if WINDOWS
-        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto, ExactSpelling = true)]
-        static extern int GetSystemMetrics(int nIndex);
-
-        const int SM_MAXIMUMTOUCHES = 95;
+        static internal bool CheckIfConnected()
+        {
+#if WINDOWS_UAP
+            // Is a touch device present?
+            var pointerDevices = Windows.Devices.Input.PointerDevice.GetPointerDevices();
+            foreach (var pointerDevice in pointerDevices)
+            {
+                if (pointerDevice.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Touch)
+                    return true;
+            }
+            return false;
+#elif WINDOWS
+            int maximumTouchCount = GetSystemMetrics(SM_MAXIMUMTOUCHES);
+            return maximumTouchCount > 0;
+#elif ANDROID
+            // http://developer.android.com/reference/android/content/pm/PackageManager.html#FEATURE_TOUCHSCREEN
+            return pm.HasSystemFeature(PackageManager.FeatureTouchscreen);
+#elif IOS
+            return true;
+#else
+            //Touch isn't implemented in OpenTK, so no linux or mac https://github.com/opentk/opentk/issues/80
+            return false;
 #endif
+        }
+
+        static internal int GetMaxTouchCount()
+        {
+#if WINDOWS_UAP
+            // Iterate through all pointer devices and find the maximum number of concurrent touches possible
+            int maximumTouchCount = 0;
+            var pointerDevices = Windows.Devices.Input.PointerDevice.GetPointerDevices();
+            foreach (var pointerDevice in pointerDevices)
+            {
+                if (pointerDevice.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Touch)
+                    maximumTouchCount = Math.Max(maximumTouchCount, (int)pointerDevice.MaxContacts);
+            }
+            return maximumTouchCount;
+#elif WINDOWS
+            return GetSystemMetrics(SM_MAXIMUMTOUCHES);
+#elif ANDROID
+            // http://developer.android.com/reference/android/content/pm/PackageManager.html#FEATURE_TOUCHSCREEN
+            var pm = Game.Activity.PackageManager;
+            if (pm.HasSystemFeature(PackageManager.FeatureTouchscreenMultitouchJazzhand))
+                return 5;
+            else if (pm.HasSystemFeature(PackageManager.FeatureTouchscreenMultitouchDistinct))
+                return 2;
+            else
+                return 1;
+#elif IOS
+            //iPhone supports 5, iPad 11
+            if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone)
+                return 5;
+            else
+                return 11;
+#else
+            //Touch isn't implemented in OpenTK, so no linux or mac https://github.com/opentk/opentk/issues/80
+            return 0;
+#endif
+        }
     }
 }

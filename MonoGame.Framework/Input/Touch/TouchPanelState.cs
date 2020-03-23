@@ -10,6 +10,13 @@ namespace MonoGame.Framework.Input.Touch
     public class TouchPanelState
     {
         /// <summary>
+        /// Maximum distance a touch location can wiggle and not be considered to have moved.
+        /// </summary>
+        internal const float TapJitterTolerance = 35.0f;
+
+        internal static readonly TimeSpan TimeRequiredForHold = TimeSpan.FromMilliseconds(1024);
+
+        /// <summary>
         /// The reserved touchId for all mouse touch points.
         /// </summary>
         private const int MouseTouchId = 1;
@@ -46,224 +53,13 @@ namespace MonoGame.Framework.Input.Touch
         internal static TimeSpan CurrentTimestamp { get; set; }
 
         /// <summary>
-        /// The mapping between platform specific touch ids
-        /// and the touch ids we assign to touch locations.
+        /// The mapping between platform specific touch ids and the touch ids we assign to touch locations.
         /// </summary>
         private readonly Dictionary<int, int> _touchIds = new Dictionary<int, int>();
 
-        internal readonly Queue<GestureSample> GestureList = new Queue<GestureSample>();
-
-        private TouchPanelCapabilities Capabilities = new TouchPanelCapabilities();
+        internal readonly Queue<GestureSample> GestureQueue = new Queue<GestureSample>();
 
         internal readonly GameWindow Window;
-
-        internal TouchPanelState(GameWindow window)
-        {
-            Window = window;
-        }
-
-        /// <summary>
-        /// The window handle of the touch panel. Purely for Xna compatibility.
-        /// </summary>
-        public IntPtr WindowHandle { get; set; }
-
-        /// <summary>
-        /// Returns capabilities of touch panel device.
-        /// </summary>
-        /// <returns><see cref="TouchPanelCapabilities"/></returns>
-        public TouchPanelCapabilities GetCapabilities()
-        {
-            Capabilities.Initialize();
-            return Capabilities;
-        }
-
-        /// <summary>
-        /// Age all the touches, so any that were Pressed become Moved, and any that were Released are removed
-        /// </summary>
-        private void AgeTouches(List<TouchLocation> state)
-        {
-            for (var i = state.Count - 1; i >= 0; i--)
-            {
-                var touch = state[i];
-                switch (touch.State)
-                {
-                    case TouchLocationState.Released:
-                        state.RemoveAt(i);
-                        break;
-                    case TouchLocationState.Pressed:
-                    case TouchLocationState.Moved:
-                        touch.AgeState();
-                        state[i] = touch;
-                        break;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Apply the given new touch to the state. If it is a Pressed it will be added as a new touch, otherwise we update the existing touch it matches
-        /// </summary>
-        private void ApplyTouch(List<TouchLocation> state, TouchLocation touch)
-        {
-            if (touch.State == TouchLocationState.Pressed)
-            {
-                state.Add(touch);
-                return;
-            }
-
-            //Find the matching touch
-            for (var i = 0; i < state.Count; i++)
-            {
-                var existingTouch = state[i];
-
-                if (existingTouch.Id == touch.Id)
-                {
-                    //If we are moving straight from Pressed to Released and we've existed for multiple frames, that means we've never been seen, so just get rid of us
-                    if (existingTouch.State == TouchLocationState.Pressed && touch.State == TouchLocationState.Released && existingTouch.PressTimestamp != touch.Timestamp)
-                    {
-                        state.RemoveAt(i);
-                    }
-                    else
-                    {
-                        //Otherwise update the touch based on the new one
-                        existingTouch.UpdateState(touch);
-                        state[i] = existingTouch;
-                    }
-
-                    break;
-                }
-            }
-        }
-
-        public TouchCollection GetState()
-        {
-            //Clear out touches from previous frames that were released on the same frame they were touched that haven't been seen
-            for (var i = _touchState.Count - 1; i >= 0; i--)
-            {
-                var touch = _touchState[i];
-
-                //If a touch was pressed and released in a previous frame and the user didn't ask about it then trash it.
-                if (touch.SameFrameReleased && touch.Timestamp < CurrentTimestamp && touch.State == TouchLocationState.Pressed)
-                {
-                    _touchState.RemoveAt(i);
-                }
-            }
-
-            var result = (_touchState.Count > 0) ? new TouchCollection(_touchState.ToArray()) : TouchCollection.Empty;
-            AgeTouches(_touchState);
-            return result;
-        }
-
-        internal void AddEvent(int id, TouchLocationState state, Vector2 position)
-        {
-            AddEvent(id, state, position, false);
-        }
-
-        internal void AddEvent(int id, TouchLocationState state, Vector2 position, bool isMouse)
-        {
-            // Different platforms return different touch identifiers
-            // based on the specifics of their implementation and the
-            // system drivers.
-            //
-            // Sometimes these ids are suitable for our use, but other
-            // times it can recycle ids or do cute things like return
-            // the same id for double tap events.
-            //
-            // We instead provide consistent ids by generating them
-            // ourselves on the press and looking them up on move 
-            // and release events.
-            // 
-            if (state == TouchLocationState.Pressed)
-            {
-                if (isMouse)
-                {
-                    // Mouse pointing devices always use a reserved Id
-                    _touchIds[id] = MouseTouchId;
-                }
-                else
-                {
-                    _touchIds[id] = _nextTouchId++;
-                }
-            }
-
-            // Try to find the touch id.
-            if (!_touchIds.TryGetValue(id, out int touchId))
-            {
-                // If we got here that means either the device is sending
-                // us bad, out of order, or old touch events.  In any case
-                // just ignore them.
-                return;
-            }
-
-            if (!isMouse || EnableMouseTouchPoint || EnableMouseGestures)
-            {
-                // Add the new touch event keeping the list from getting
-                // too large if no one happens to be requesting the state.
-                var evt = new TouchLocation(touchId, state, position * _touchScale, CurrentTimestamp);
-
-                if (!isMouse || EnableMouseTouchPoint)
-                {
-                    ApplyTouch(_touchState, evt);
-                }
-
-                //If we have gestures enabled then collect events for those too.
-                //We also have to keep tracking any touches while we know about touches so we don't miss releases even if gesture recognition is disabled
-                if ((EnabledGestures != GestureType.None || _gestureState.Count > 0) && (!isMouse || EnableMouseGestures))
-                {
-                    ApplyTouch(_gestureState, evt);
-
-                    if (EnabledGestures != GestureType.None)
-                        UpdateGestures(true);
-
-                    AgeTouches(_gestureState);
-                }
-            }
-
-            // If this is a release unmap the hardware id.
-            if (state == TouchLocationState.Released)
-                _touchIds.Remove(id);
-        }
-
-        private void UpdateTouchScale()
-        {
-            // Get the window size.
-            var windowSize = new Vector2(Window.ClientBounds.Width, Window.ClientBounds.Height);
-
-            // Recalculate the touch scale.
-            _touchScale = new Vector2(_displaySize.X / windowSize.X,
-                                        _displaySize.Y / windowSize.Y);
-        }
-
-        /// <summary>
-        /// This will release all touch locations.  It should only be 
-        /// called on platforms where touch state is reset all at once.
-        /// </summary>
-        internal void ReleaseAllTouches()
-        {
-            var mostToRemove = Math.Max(_touchState.Count, _gestureState.Count);
-            if (mostToRemove > 0)
-            {
-                var temp = new List<TouchLocation>(mostToRemove);
-
-                // Submit a new event for each non-released location.
-                temp.AddRange(_touchState);
-                foreach (var touch in temp)
-                {
-                    if (touch.State != TouchLocationState.Released)
-                        ApplyTouch(_touchState, new TouchLocation(touch.Id, TouchLocationState.Released, touch.Position, CurrentTimestamp));
-                }
-
-                temp.Clear();
-                temp.AddRange(_gestureState);
-                foreach (var touch in temp)
-                {
-                    if (touch.State != TouchLocationState.Released)
-                        ApplyTouch(_gestureState, new TouchLocation(touch.Id, TouchLocationState.Released, touch.Position, CurrentTimestamp));
-                }
-            }
-
-            // Release all the touch id mappings.
-            _touchIds.Clear();
-        }
 
         /// <summary>
         /// Gets or sets the display height of the touch panel.
@@ -314,8 +110,238 @@ namespace MonoGame.Framework.Input.Touch
             {
                 // Process the pending gesture events. (May cause hold events)
                 UpdateGestures(false);
+                return GestureQueue.Count > 0;
+            }
+        }
 
-                return GestureList.Count > 0;
+        internal TouchPanelState(GameWindow window)
+        {
+            Window = window;
+        }
+
+        /// <summary>
+        /// The window handle of the touch panel. Purely for Xna compatibility.
+        /// </summary>
+        public IntPtr WindowHandle { get; set; }
+
+        /// <summary>
+        /// Returns capabilities of touch panel device.
+        /// </summary>
+        /// <returns><see cref="TouchPanelCapabilities"/></returns>
+        public TouchPanelCapabilities GetCapabilities()
+        {
+            bool connected = TouchPanelCapabilities.CheckIfConnected();
+            int maxTouchCount = TouchPanelCapabilities.GetMaxTouchCount();
+            return new TouchPanelCapabilities(connected, maxTouchCount, hasPressure: false);
+        }
+
+        /// <summary>
+        /// Age all the touches, so any that were Pressed become Moved, and any that were Released are removed
+        /// </summary>
+        private void AgeTouches(List<TouchLocation> state)
+        {
+            for (int i = state.Count - 1; i >= 0; i--)
+            {
+                var touch = state[i];
+                switch (touch.State)
+                {
+                    case TouchLocationState.Released:
+                        state.RemoveAt(i);
+                        break;
+
+                    case TouchLocationState.Pressed:
+                    case TouchLocationState.Moved:
+                        touch.AgeState();
+                        state[i] = touch;
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Apply the given new touch to the state.
+        /// If it is a Pressed it will be added as a new touch, otherwise we update the existing touch it matches
+        /// </summary>
+        private void ApplyTouch(List<TouchLocation> state, TouchLocation touch)
+        {
+            if (touch.State == TouchLocationState.Pressed)
+            {
+                state.Add(touch);
+                return;
+            }
+
+            //Find the matching touch
+            for (var i = 0; i < state.Count; i++)
+            {
+                var existingTouch = state[i];
+
+                if (existingTouch.Id == touch.Id)
+                {
+                    //If we are moving straight from Pressed to Released and we've existed for multiple frames,
+                    // that means we've never been seen, so just get rid of us
+                    if (existingTouch.State == TouchLocationState.Pressed &&
+                        touch.State == TouchLocationState.Released &&
+                        existingTouch.PressTimestamp != touch.Timestamp)
+                    {
+                        state.RemoveAt(i);
+                    }
+                    else
+                    {
+                        //Otherwise update the touch based on the new one
+                        existingTouch.UpdateState(touch);
+                        state[i] = existingTouch;
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        public TouchCollection GetState()
+        {
+            //Clear out touches from previous frames that were released on
+            // the same frame they were touched that haven't been seen
+            for (var i = _touchState.Count - 1; i >= 0; i--)
+            {
+                var touch = _touchState[i];
+
+                //If a touch was pressed and released in a previous frame and 
+                // the user didn't ask about it then trash it.
+                if (touch.SameFrameReleased &&
+                    touch.Timestamp < CurrentTimestamp &&
+                    touch.State == TouchLocationState.Pressed)
+                {
+                    _touchState.RemoveAt(i);
+                }
+            }
+
+            bool connected = TouchPanelCapabilities.CheckIfConnected();
+            var result = new TouchCollection(_touchState.ToArray(), connected);
+
+            AgeTouches(_touchState);
+            return result;
+        }
+
+        internal void AddEvent(int id, TouchLocationState state, Vector2 position)
+        {
+            AddEvent(id, state, position, false);
+        }
+
+        internal void AddEvent(int id, TouchLocationState state, Vector2 position, bool isMouse)
+        {
+            // Different platforms return different touch identifiers
+            // based on the specifics of their implementation and the
+            // system drivers.
+            //
+            // Sometimes these ids are suitable for our use, but other
+            // times it can recycle ids or do cute things like return
+            // the same id for double tap events.
+            //
+            // We instead provide consistent ids by generating them
+            // ourselves on the press and looking them up on move 
+            // and release events.
+
+            if (state == TouchLocationState.Pressed)
+            {
+                if (isMouse)
+                {
+                    // Mouse pointing devices always use a reserved Id
+                    _touchIds[id] = MouseTouchId;
+                }
+                else
+                {
+                    _touchIds[id] = _nextTouchId++;
+                }
+            }
+
+            // Try to find the touch id.
+            if (!_touchIds.TryGetValue(id, out int touchId))
+            {
+                // If we got here that means either the device is sending
+                // us bad, out of order, or old touch events.  In any case
+                // just ignore them.
+                return;
+            }
+
+            if (!isMouse || EnableMouseTouchPoint || EnableMouseGestures)
+            {
+                // Add the new touch event keeping the list from getting
+                // too large if no one happens to be requesting the state.
+                var location = new TouchLocation(touchId, state, position * _touchScale, CurrentTimestamp);
+
+                if (!isMouse || EnableMouseTouchPoint)
+                    ApplyTouch(_touchState, location);
+
+                //If we have gestures enabled then collect events for those too.
+                //We also have to keep tracking any touches while we know about touches so 
+                // we don't miss releases even if gesture recognition is disabled
+                if ((EnabledGestures != GestureType.None || _gestureState.Count > 0) &&
+                    (!isMouse || EnableMouseGestures))
+                {
+                    ApplyTouch(_gestureState, location);
+
+                    if (EnabledGestures != GestureType.None)
+                        UpdateGestures(true);
+
+                    AgeTouches(_gestureState);
+                }
+            }
+
+            // If this is a release unmap the hardware id.
+            if (state == TouchLocationState.Released)
+                _touchIds.Remove(id);
+        }
+
+        private void UpdateTouchScale()
+        {
+            // Recalculate the touch scale.
+            _touchScale = _displaySize.ToVector2() / Window.ClientBounds.Size;
+        }
+
+        private List<TouchLocation> _tmpReleased = new List<TouchLocation>();
+
+        /// <summary>
+        /// This will release all touch locations.
+        /// It should only be called on platforms where touch state is reset all at once.
+        /// </summary>
+        internal void ReleaseAllTouches()
+        {
+            try
+            {
+                // Submit a new event for each non-released location.
+                if (_touchState.Count > 0)
+                {
+                    _tmpReleased.AddRange(_touchState);
+                    foreach (var touch in _tmpReleased)
+                    {
+                        if (touch.State != TouchLocationState.Released)
+                            ApplyTouch(_touchState, new TouchLocation(
+                                touch.Id, TouchLocationState.Released, touch.Position, CurrentTimestamp));
+                    }
+                    _tmpReleased.Clear();
+                }
+
+                if (_gestureState.Count > 0)
+                {
+                    _tmpReleased.AddRange(_gestureState);
+                    foreach (var touch in _tmpReleased)
+                    {
+                        if (touch.State != TouchLocationState.Released)
+                            ApplyTouch(_gestureState, new TouchLocation(
+                                touch.Id, TouchLocationState.Released, touch.Position, CurrentTimestamp));
+                    }
+                    _tmpReleased.Clear();
+                }
+            }
+            catch
+            {
+                _tmpReleased.Clear();
+                throw;
+            }
+            finally
+            {
+                // Release all the touch id mappings.
+                _touchIds.Clear();
             }
         }
 
@@ -326,18 +352,10 @@ namespace MonoGame.Framework.Input.Touch
         public GestureSample ReadGesture()
         {
             // Return the next gesture.
-            return GestureList.Dequeue();
+            return GestureQueue.Dequeue();
         }
 
         #region Gesture Recognition
-
-        /// <summary>
-        /// Maximum distance a touch location can wiggle and 
-        /// not be considered to have moved.
-        /// </summary>
-        internal const float TapJitterTolerance = 35.0f;
-
-        internal static readonly TimeSpan TimeRequiredForHold = TimeSpan.FromMilliseconds(1024);
 
         /// <summary>
         /// The pinch touch locations.
@@ -345,15 +363,11 @@ namespace MonoGame.Framework.Input.Touch
         private readonly TouchLocation[] _pinchTouch = new TouchLocation[2];
 
         /// <summary>
-        /// If true the pinch touch locations are valid and
-        /// a pinch gesture has begun.
+        /// If true the pinch touch locations are valid and a pinch gesture has begun.
         /// </summary>
         private bool _pinchGestureStarted;
 
-        private bool GestureIsEnabled(GestureType gestureType)
-        {
-            return (EnabledGestures & gestureType) != 0;
-        }
+        private GestureType _dragGestureStarted = GestureType.None;
 
         /// <summary>
         /// Used to disable emitting of tap gestures.
@@ -365,6 +379,10 @@ namespace MonoGame.Framework.Input.Touch
         /// </summary>
         bool _holdDisabled;
 
+        private bool GestureIsEnabled(GestureType gestureType)
+        {
+            return (EnabledGestures & gestureType) != 0;
+        }
 
         private void UpdateGestures(bool stateChanged)
         {
@@ -414,14 +432,15 @@ namespace MonoGame.Framework.Input.Touch
                         if (GestureIsEnabled(GestureType.Pinch) && heldLocations > 1)
                         {
                             // Save or update the first pinch point.
-                            if (_pinchTouch[0].State == TouchLocationState.Invalid ||
-                                    _pinchTouch[0].Id == touch.Id)
+                            if (_pinchTouch[0].State == TouchLocationState.Invalid || _pinchTouch[0].Id == touch.Id)
+                            {
                                 _pinchTouch[0] = touch;
-
+                            }
                             // Save or update the second pinch point.
-                            else if (_pinchTouch[1].State == TouchLocationState.Invalid ||
-                                        _pinchTouch[1].Id == touch.Id)
+                            else if (_pinchTouch[1].State == TouchLocationState.Invalid || _pinchTouch[1].Id == touch.Id)
+                            {
                                 _pinchTouch[1] = touch;
+                            }
 
                             // NOTE: Actual pinch processing happens outside and
                             // below this loop to ensure both points are updated
@@ -453,13 +472,12 @@ namespace MonoGame.Framework.Input.Touch
                         // If this is one of the pinch locations then we
                         // need to fire off the complete event and stop
                         // the pinch gesture operation.
-                        if (_pinchGestureStarted &&
-                                (touch.Id == _pinchTouch[0].Id ||
-                                    touch.Id == _pinchTouch[1].Id))
+                        if (_pinchGestureStarted && (touch.Id == _pinchTouch[0].Id || touch.Id == _pinchTouch[1].Id))
                         {
                             if (GestureIsEnabled(GestureType.PinchComplete))
-                                GestureList.Enqueue(new GestureSample(
-                                    GestureType.PinchComplete, touch.Timestamp,
+                                GestureQueue.Enqueue(new GestureSample(
+                                    GestureType.PinchComplete,
+                                    touch.Timestamp,
                                     Vector2.Zero, Vector2.Zero,
                                     Vector2.Zero, Vector2.Zero));
 
@@ -477,12 +495,12 @@ namespace MonoGame.Framework.Input.Touch
                         // From testing XNA it seems we need a velocity 
                         // of about 100 to classify this as a flick.
                         var dist = Vector2.Distance(touch.Position, touch.PressPosition);
-                        if (dist > TapJitterTolerance &&
-                                touch.Velocity.Length() > 100f &&
-                                GestureIsEnabled(GestureType.Flick))
+                        if (GestureIsEnabled(GestureType.Flick) &&
+                            dist > TapJitterTolerance && touch.Velocity.Length() > 100f)
                         {
-                            GestureList.Enqueue(new GestureSample(
-                                GestureType.Flick, touch.Timestamp,
+                            GestureQueue.Enqueue(new GestureSample(
+                                GestureType.Flick,
+                                touch.Timestamp,
                                 Vector2.Zero, Vector2.Zero,
                                 touch.Velocity, Vector2.Zero));
 
@@ -493,8 +511,9 @@ namespace MonoGame.Framework.Input.Touch
                         if (_dragGestureStarted != GestureType.None)
                         {
                             if (GestureIsEnabled(GestureType.DragComplete))
-                                GestureList.Enqueue(new GestureSample(
-                                    GestureType.DragComplete, touch.Timestamp,
+                                GestureQueue.Enqueue(new GestureSample(
+                                    GestureType.DragComplete,
+                                    touch.Timestamp,
                                     Vector2.Zero, Vector2.Zero,
                                     Vector2.Zero, Vector2.Zero));
 
@@ -516,8 +535,8 @@ namespace MonoGame.Framework.Input.Touch
 
             // If we have two pinch points then update the pinch state.
             if (GestureIsEnabled(GestureType.Pinch) &&
-                    _pinchTouch[0].State != TouchLocationState.Invalid &&
-                    _pinchTouch[1].State != TouchLocationState.Invalid)
+                _pinchTouch[0].State != TouchLocationState.Invalid &&
+                _pinchTouch[1].State != TouchLocationState.Invalid)
                 ProcessPinch(_pinchTouch);
             else
             {
@@ -548,7 +567,7 @@ namespace MonoGame.Framework.Input.Touch
 
             _holdDisabled = true;
 
-            GestureList.Enqueue(new GestureSample(
+            GestureQueue.Enqueue(new GestureSample(
                 GestureType.Hold,
                 touch.Timestamp,
                 touch.Position, Vector2.Zero,
@@ -572,7 +591,7 @@ namespace MonoGame.Framework.Input.Touch
             if (elapsed.TotalMilliseconds > 300)
                 return false;
 
-            GestureList.Enqueue(new GestureSample(
+            GestureQueue.Enqueue(new GestureSample(
                 GestureType.DoubleTap, touch.Timestamp,
                 touch.Position, Vector2.Zero,
                 Vector2.Zero, Vector2.Zero));
@@ -610,14 +629,13 @@ namespace MonoGame.Framework.Input.Touch
             if (GestureIsEnabled(GestureType.Tap))
             {
                 var tap = new GestureSample(
-                    GestureType.Tap, touch.Timestamp,
+                    GestureType.Tap,
+                    touch.Timestamp,
                     touch.Position, Vector2.Zero,
                     Vector2.Zero, Vector2.Zero);
-                GestureList.Enqueue(tap);
+                GestureQueue.Enqueue(tap);
             }
         }
-
-        private GestureType _dragGestureStarted = GestureType.None;
 
         private void ProcessDrag(in TouchLocation touch)
         {
@@ -630,7 +648,8 @@ namespace MonoGame.Framework.Input.Touch
 
             // Make sure this is a move event and that we have
             // a previous touch location.
-            if (touch.State != TouchLocationState.Moved || !touch.TryGetPreviousLocation(out TouchLocation prevTouch))
+            if (touch.State != TouchLocationState.Moved ||
+                !touch.TryGetPreviousLocation(out TouchLocation prevTouch))
                 return;
 
             var delta = touch.Position - prevTouch.Position;
@@ -638,8 +657,8 @@ namespace MonoGame.Framework.Input.Touch
             // If we're free dragging then stick to it.
             if (_dragGestureStarted != GestureType.FreeDrag)
             {
-                var isHorizontalDelta = Math.Abs(delta.X) > Math.Abs(delta.Y * 2.0f);
-                var isVerticalDelta = Math.Abs(delta.Y) > Math.Abs(delta.X * 2.0f);
+                var isHorizontalDelta = Math.Abs(delta.X) > Math.Abs(delta.Y * 2f);
+                var isVerticalDelta = Math.Abs(delta.Y) > Math.Abs(delta.X * 2f);
                 var classify = _dragGestureStarted == GestureType.None;
 
                 // Once we enter either vertical or horizontal drags
@@ -676,7 +695,7 @@ namespace MonoGame.Framework.Input.Touch
             _tapDisabled = true;
             _holdDisabled = true;
 
-            GestureList.Enqueue(new GestureSample(
+            GestureQueue.Enqueue(new GestureSample(
                 _dragGestureStarted, touch.Timestamp,
                 touch.Position, Vector2.Zero,
                 delta, Vector2.Zero));
@@ -694,22 +713,25 @@ namespace MonoGame.Framework.Input.Touch
             var delta1 = touches[1].Position - prevPos1.Position;
 
             // Get the newest timestamp.
-            var timestamp = touches[0].Timestamp > touches[1].Timestamp ? touches[0].Timestamp : touches[1].Timestamp;
+            var timestamp = touches[0].Timestamp > touches[1].Timestamp
+                ? touches[0].Timestamp
+                : touches[1].Timestamp;
 
             // If we were already in a drag state then fire
             // off the drag completion event.
             if (_dragGestureStarted != GestureType.None)
             {
                 if (GestureIsEnabled(GestureType.DragComplete))
-                    GestureList.Enqueue(new GestureSample(
-                        GestureType.DragComplete, timestamp,
+                    GestureQueue.Enqueue(new GestureSample(
+                        GestureType.DragComplete,
+                        timestamp,
                         Vector2.Zero, Vector2.Zero,
                         Vector2.Zero, Vector2.Zero));
 
                 _dragGestureStarted = GestureType.None;
             }
 
-            GestureList.Enqueue(new GestureSample(
+            GestureQueue.Enqueue(new GestureSample(
                 GestureType.Pinch,
                 timestamp,
                 touches[0].Position, touches[1].Position,

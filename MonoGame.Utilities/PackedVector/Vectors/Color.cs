@@ -81,7 +81,7 @@ namespace MonoGame.Framework
             }
         }
 
-        private string DebuggerDisplay => string.Concat(
+        internal string DebuggerDisplay => string.Concat(
             R.ToString(), "  ",
             G.ToString(), "  ",
             B.ToString(), "  ",

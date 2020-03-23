@@ -12,36 +12,34 @@ namespace MonoGame.Framework.Input.Touch
     /// Provides state information for a touch screen enabled device.
     /// </summary>
     public readonly struct TouchCollection : IReadOnlyList<TouchLocation>
-	{
+    {
+        public static TouchCollection Empty { get; } = new TouchCollection();
+
         private readonly TouchLocation[] _collection;
 
         private TouchLocation[] Collection => _collection ?? Array.Empty<TouchLocation>();
 
-        #region Properties
-
         /// <summary>
-        /// States if a touch screen is available.
+        /// Gets whether a touch screen is available.
         /// </summary>
-        public bool IsConnected => TouchPanel.GetCapabilities().IsConnected;
-
-        internal static readonly TouchCollection Empty = new TouchCollection(Array.Empty<TouchLocation>());
-
-		#endregion
+        public bool IsConnected { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TouchCollection"/> with a pre-determined set of touch locations.
         /// </summary>
         /// <param name="touches">Array of <see cref="TouchLocation"/> items to initialize with.</param>
-        public TouchCollection(TouchLocation[] touches)
+        /// <param name="isConnected">Whether a touch device is connected.</param>
+        public TouchCollection(TouchLocation[] touches, bool isConnected)
         {
             _collection = touches ?? throw new ArgumentNullException(nameof(touches));
+            IsConnected = isConnected;
         }
 
         /// <summary>
-        /// Returns <see cref="TouchLocation"/> specified by ID.
+        /// Returns a <see cref="TouchLocation"/> specified by the identifier.
         /// </summary>
         public bool FindById(int id, out TouchLocation touchLocation)
-		{
+        {
             for (int i = 0; i < Collection.Length; i++)
             {
                 var location = Collection[i];
@@ -53,7 +51,7 @@ namespace MonoGame.Framework.Input.Touch
             }
             touchLocation = default;
             return false;
-		}
+        }
 
         #region IReadOnlyList<TouchLocation>
 

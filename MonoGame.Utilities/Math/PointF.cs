@@ -46,7 +46,7 @@ namespace MonoGame.Framework
         /// </summary>
         [DataMember] public float Y;
 
-        private string DebuggerDisplay => string.Concat(
+        internal string DebuggerDisplay => string.Concat(
             X.ToString(), "  ",
             Y.ToString(), "  ");
 
@@ -184,7 +184,7 @@ namespace MonoGame.Framework
         ///     The the <see cref="PointF" /> that contains the minimal coordinate values from two <see cref="PointF" />
         ///     structures.
         /// </returns>
-        public static PointF Minimum(in PointF first, in PointF second) =>
+        public static PointF Min(in PointF first, in PointF second) =>
             new PointF(
                 first.X < second.X ? first.X : second.X,
                 first.Y < second.Y ? first.Y : second.Y);
@@ -200,7 +200,7 @@ namespace MonoGame.Framework
         ///     The the <see cref="PointF" /> that contains the maximal coordinate values from two <see cref="PointF" />
         ///     structures.
         /// </returns>
-        public static PointF Maximum(in PointF first, in PointF second) => new PointF(
+        public static PointF Max(in PointF first, in PointF second) => new PointF(
                 first.X > second.X ? first.X : second.X,
                 first.Y > second.Y ? first.Y : second.Y);
 

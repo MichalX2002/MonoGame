@@ -28,7 +28,7 @@ namespace MonoGame.Framework
         [DataMember]
         public float Radius;
 
-        private string DebuggerDisplay => string.Concat(
+        internal string DebuggerDisplay => string.Concat(
             "Center(", Center.DebuggerDisplay, ") \n",
             "Radius(", Radius.ToString(), ")");
 

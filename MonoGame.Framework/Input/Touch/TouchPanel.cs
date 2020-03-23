@@ -7,7 +7,7 @@ using System;
 namespace MonoGame.Framework.Input.Touch
 {
     /// <summary>
-    /// Allows retrieval of information from Touch Panel device.
+    /// Allows retrieval of information from touch panel device.
     /// </summary>
     public static class TouchPanel
     {
@@ -16,7 +16,6 @@ namespace MonoGame.Framework.Input.Touch
         /// <summary>
         /// Gets the current state of the touch panel.
         /// </summary>
-        /// <returns><see cref="TouchCollection"/></returns>
         public static TouchCollection GetState()
         {
             return PrimaryWindow.TouchPanelState.GetState();
@@ -46,10 +45,10 @@ namespace MonoGame.Framework.Input.Touch
         /// Returns the next available gesture on touch panel device.
         /// </summary>
         /// <returns><see cref="GestureSample"/></returns>
-		public static GestureSample ReadGesture()
+        public static GestureSample ReadGesture()
         {
             // Return the next gesture.
-            return PrimaryWindow.TouchPanelState.GestureList.Dequeue();			
+            return PrimaryWindow.TouchPanelState.GestureQueue.Dequeue();			
         }
 
         /// <summary>
