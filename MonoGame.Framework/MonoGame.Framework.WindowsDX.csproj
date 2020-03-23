@@ -50,7 +50,7 @@ This package provides you with MonoGame Framework that uses DirectX for renderin
     <Compile Include="Platform\Input\MessageBox.Windows.cs" />
     <Compile Include="Platform\Input\Mouse.Windows.cs" />
     <Compile Include="Platform\Input\MouseCursor.Windows.cs" />
-    <Compile Include="Platform\Input\TextInputEvent.cs" />
+    <Compile Include="Platform\Input\TextInputEventArgs.cs" />
 
     <Compile Include="Platform\Media\MediaManagerState.cs" />
     <Compile Include="Platform\Media\OggStream.cs" />

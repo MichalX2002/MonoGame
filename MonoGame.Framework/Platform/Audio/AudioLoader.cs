@@ -5,6 +5,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using MonoGame.Framework.IO;
@@ -282,7 +283,7 @@ namespace MonoGame.Framework.Audio
                         {
                             case FormatIma4:
                             case FormatMsAdpcm:
-                                sampleCount = 
+                                sampleCount =
                                     ((int)audioData.Length / blockAlignment * samplesPerBlock) +
                                     SampleAlignment(format, (int)audioData.Length % blockAlignment);
                                 break;
@@ -310,16 +311,14 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// Convert buffer containing 24-bit signed PCM wav data to a 16-bit signed PCM buffer
         /// </summary>
-        internal static unsafe byte[] Convert24To16<T>(
-            ReadOnlySpan<T> span, out string bufferTag, out int size)
-            where T : unmanaged
+        internal static unsafe byte[] Convert24To16(
+            ReadOnlySpan<byte> data, out string bufferTag, out int size)
         {
-            ReadOnlySpan<byte> byteSpan = MemoryMarshal.AsBytes(span);
-            if (byteSpan.Length % 3 != 0)
+            if (data.Length % 3 != 0)
                 throw new ArgumentException("Invalid 24-bit PCM data received");
 
             // Sample count includes both channels if stereo
-            int sampleCount = byteSpan.Length / 3;
+            int sampleCount = data.Length / 3;
             size = sampleCount * sizeof(short);
             bool isRecyclable = size <= RecyclableMemoryManager.Default.MaximumLargeBufferSize;
 
@@ -327,61 +326,57 @@ namespace MonoGame.Framework.Audio
             byte[] outData = isRecyclable ?
                 RecyclableMemoryManager.Default.GetLargeBuffer(size, bufferTag) : new byte[size];
 
-            fixed (byte* src = byteSpan)
+            fixed (byte* src = data)
+            fixed (byte* dst = outData)
             {
-                fixed (byte* dst = &outData[0])
+                int srcIndex = 0;
+                int dstIndex = 0;
+                for (int i = 0; i < sampleCount; ++i)
                 {
-                    int srcIndex = 0;
-                    int dstIndex = 0;
-                    for (int i = 0; i < sampleCount; ++i)
-                    {
-                        // Drop the least significant byte from the 24-bit sample to get the 16-bit sample
-                        dst[dstIndex] = src[srcIndex + 1];
-                        dst[dstIndex + 1] = src[srcIndex + 2];
-                        dstIndex += 2;
-                        srcIndex += 3;
-                    }
+                    // Drop the least significant byte from the 24-bit sample to get the 16-bit sample
+                    dst[dstIndex] = src[srcIndex + 1];
+                    dst[dstIndex + 1] = src[srcIndex + 2];
+                    dstIndex += 2;
+                    srcIndex += 3;
                 }
             }
             return outData;
         }
 
-        // Convert buffer containing IEEE 32-bit float wav data to a 16-bit signed PCM buffer
-        internal static unsafe byte[] ConvertSingleToInt16<T>(ReadOnlySpan<T> span) where T : unmanaged
-        {
-            ReadOnlySpan<byte> byteSpan = MemoryMarshal.AsBytes(span);
-            if (byteSpan.Length % 4 != 0)
-                throw new ArgumentException("Invalid 32-bit float PCM data received.");
-
-            // Sample count includes both channels if stereo
-            int sampleCount = byteSpan.Length / 4;
-            var outData = new byte[sampleCount * sizeof(short)];
-            fixed (byte* src = byteSpan)
-            {
-                float* f = (float*)src;
-                fixed (byte* dst = &outData[0])
-                {
-                    byte* d = dst;
-                    for (int i = 0; i < sampleCount; ++i)
-                    {
-                        short s = (short)(*f * 32767.0f);
-                        *d++ = (byte)(s & 0xff);
-                        *d++ = (byte)(s >> 8);
-                        f++;
-                    }
-                }
-            }
-            return outData;
-        }
-
+        /// <summary>
+        /// Convert buffer containing IEEE 32-bit float data to a 16-bit signed PCM buffer.
+        /// </summary>
         public static void ConvertSingleToInt16(ReadOnlySpan<float> src, Span<short> dst)
         {
             if (dst.Length < src.Length)
                 throw new ArgumentException("The destination span is too small.");
 
+            if (Vector.IsHardwareAccelerated)
+            {
+                var maxValueVec = new Vector<float>(short.MaxValue);
+                var minValueVec = new Vector<float>(short.MinValue);
+                var halfValueVec = new Vector<float>(0.5f);
+
+                while (src.Length >= Vector<float>.Count)
+                {
+                    var srcVec = new Vector<float>(src);
+                    var resultVec = Vector.Multiply(srcVec, maxValueVec);
+                    resultVec = Vector.Max(resultVec, minValueVec);
+                    resultVec = Vector.Min(resultVec, maxValueVec);
+                    resultVec = Vector.Add(resultVec, halfValueVec);
+
+                    var resultInt32 = Vector.ConvertToInt32(resultVec);
+                    for (int j = 0; j < Vector<float>.Count; j++)
+                        dst[j] = (short)resultInt32[j];
+
+                    src = src.Slice(Vector<float>.Count);
+                    dst = dst.Slice(Vector<float>.Count);
+                }
+            }
+
             for (int i = 0; i < src.Length; i++)
             {
-                int tmp = (int)(32767f * src[i]);
+                int tmp = (int)(src[i] * short.MaxValue);
                 if (tmp > short.MaxValue)
                     dst[i] = short.MaxValue;
                 else if (tmp < short.MinValue)
@@ -389,6 +384,13 @@ namespace MonoGame.Framework.Audio
                 else
                     dst[i] = (short)tmp;
             }
+        }
+
+        public static short[] ConvertSingleToInt16(ReadOnlySpan<float> source)
+        {
+            var outData = new short[source.Length];
+            ConvertSingleToInt16(source, outData);
+            return outData;
         }
 
         #region IMA4 decoding

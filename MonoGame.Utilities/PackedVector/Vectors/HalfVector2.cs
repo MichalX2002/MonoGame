@@ -153,7 +153,7 @@ namespace MonoGame.Framework.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => nameof(HalfVector2) + $"({ToVector2().ToString()})";
+        public override string ToString() => nameof(HalfVector2) + $"({ToVector2()})";
 
         public override int GetHashCode() => PackedValue.GetHashCode();
 

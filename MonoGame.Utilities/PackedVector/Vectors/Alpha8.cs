@@ -109,7 +109,7 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(Alpha8) + $"({A.ToString()})";
+        public override string ToString() => nameof(Alpha8) + $"({A})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

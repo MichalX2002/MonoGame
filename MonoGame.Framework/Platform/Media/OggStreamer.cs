@@ -4,13 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 
 namespace MonoGame.Framework.Media
 {
     internal class OggStreamer : IDisposable
     {
-        public const float DefaultUpdateRate = 20;
+        public const float DefaultUpdateRate = 16;
         public const int DefaultBufferSize = 8000;
         public const int MaxQueuedBuffers = 4;
 
@@ -26,9 +27,13 @@ namespace MonoGame.Framework.Media
         private float _updateRate;
 
         private readonly Thread _thread;
-        private Stopwatch _threadWatch;
         private bool _pendingFinish;
         private volatile bool _cancelled;
+
+        public int BufferSize { get; }
+        public ReadOnlyMemory<TimeSpan> UpdateTime { get; }
+
+        public TimeSpan UpdateDelay { get; private set; }
 
         public float UpdateRate
         {
@@ -39,10 +44,6 @@ namespace MonoGame.Framework.Media
                 UpdateDelay = TimeSpan.FromSeconds(1 / ((value <= 0) ? 1 : value));
             }
         }
-        public TimeSpan UpdateDelay { get; private set; }
-
-        public int BufferSize { get; }
-        public ReadOnlyCollection<TimeSpan> UpdateTime { get; }
 
         public static OggStreamer Instance
         {
@@ -70,10 +71,9 @@ namespace MonoGame.Framework.Media
             UpdateRate = updateRate;
 
             _threadTiming = new TimeSpan[(int)(UpdateRate < 1 ? 1 : UpdateRate)];
-            UpdateTime = new ReadOnlyCollection<TimeSpan>(_threadTiming);
+            UpdateTime = _threadTiming;
 
             _streams = new HashSet<OggStream>();
-            _threadWatch = new Stopwatch();
 
             _readBuffer = new float[BufferSize];
             if (!ALController.Instance.SupportsFloat32)
@@ -91,8 +91,8 @@ namespace MonoGame.Framework.Media
         {
             lock (SingletonMutex)
             {
-                Debug.Assert(
-                    _instance == this, "A new instance was assigned without locking the singleton mutex.");
+                Debug.Assert(_instance == this,
+                    "A new instance was assigned without locking the singleton mutex.");
 
                 _cancelled = true;
                 lock (IterationMutex)
@@ -124,12 +124,12 @@ namespace MonoGame.Framework.Media
                 if (readSamples > 0)
                 {
                     var channels = (AudioChannels)reader.Channels;
-                    bool supportsFloat = ALController.Instance.SupportsFloat32;
-                    ALFormat format = ALHelper.GetALFormat(channels, supportsFloat);
+                    bool useFloat = ALController.Instance.SupportsFloat32;
+                    ALFormat format = ALHelper.GetALFormat(channels, useFloat);
 
-                    buffer = ALBufferPool.Rent();
                     Span<float> dataSpan = _readBuffer.AsSpan(0, readSamples);
-                    if (supportsFloat)
+                    buffer = ALBufferPool.Rent();
+                    if (useFloat)
                     {
                         buffer.BufferData(dataSpan, format, reader.SampleRate);
                     }
@@ -148,19 +148,18 @@ namespace MonoGame.Framework.Media
 
         private void SongStreamingThread()
         {
+            var watch = new Stopwatch();
             var localStreams = new List<OggStream>();
-            var lastTickElapsed = TimeSpan.Zero;
 
             while (!_cancelled)
             {
-                var toSleep = UpdateDelay - lastTickElapsed;
-                if (toSleep.TotalMilliseconds > 0)
-                    Thread.Sleep(toSleep);
+                var sleepTime = UpdateDelay - watch.Elapsed;
+                if (sleepTime.TotalMilliseconds > 0)
+                    Thread.Sleep(sleepTime);
 
                 if (_cancelled)
                     break;
 
-                _threadWatch.Restart();
                 localStreams.Clear();
                 lock (IterationMutex)
                 {
@@ -197,12 +196,11 @@ namespace MonoGame.Framework.Media
                         }
                     }
                 }
-                _threadWatch.Stop();
+                watch.Stop();
 
                 // move all elements forward one index and update the first element
                 Array.Copy(_threadTiming, 0, _threadTiming, destinationIndex: 1, _threadTiming.Length - 1);
-                lastTickElapsed = _threadWatch.Elapsed;
-                _threadTiming[0] = lastTickElapsed;
+                _threadTiming[0] = watch.Elapsed;
             }
         }
 
@@ -231,7 +229,7 @@ namespace MonoGame.Framework.Media
             {
                 if (TryFillBuffer(stream, out ALBuffer buffer))
                 {
-                    stream.EnqueueBuffer(buffer);
+                    stream.QueueBuffer(buffer);
                     buffersFilled++;
                 }
                 else

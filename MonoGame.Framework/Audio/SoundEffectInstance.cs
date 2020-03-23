@@ -145,7 +145,7 @@ namespace MonoGame.Framework.Audio
 			// if we're resuming from a paused state.
 			if (State != SoundState.Paused)
 			{
-				if (!SoundEffectInstancePool.SoundsAvailable)
+				if (!SoundEffectInstancePool.SlotsAvailable)
 					throw new InstancePlayLimitException();
 				SoundEffectInstancePool.AddToPlaying(this);
 			}

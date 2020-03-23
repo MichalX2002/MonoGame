@@ -95,7 +95,7 @@ namespace MonoGame.Framework.PackedVector
 
         #region Object Overrides
 
-        public override string ToString() => nameof(Gray8) + $"({L.ToString()})";
+        public override string ToString() => nameof(Gray8) + $"({L})";
 
         public override int GetHashCode() => L;
 

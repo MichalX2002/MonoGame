@@ -147,7 +147,7 @@ namespace MonoGame.Framework.Audio
                 Volume = Volume;
 
                 // Add the instance to the pool
-                if (!SoundEffectInstancePool.SoundsAvailable)
+                if (!SoundEffectInstancePool.SlotsAvailable)
                     throw new InstancePlayLimitException();
 
                 SoundEffectInstancePool.AddToPlaying(this);
@@ -188,7 +188,7 @@ namespace MonoGame.Framework.Audio
                 Volume = Volume;
 
                 // Add the instance to the pool
-                if (!SoundEffectInstancePool.SoundsAvailable)
+                if (!SoundEffectInstancePool.SlotsAvailable)
                     throw new InstancePlayLimitException();
                 SoundEffectInstancePool.AddToPlaying(this);
             }

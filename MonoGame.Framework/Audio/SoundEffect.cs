@@ -417,7 +417,7 @@ namespace MonoGame.Framework.Audio
         /// </summary>
         internal SoundEffectInstance GetPooledInstance(bool forXAct)
         {
-            if (!SoundEffectInstancePool.SoundsAvailable)
+            if (!SoundEffectInstancePool.SlotsAvailable)
                 return null;
 
             var inst = SoundEffectInstancePool.GetInstance(forXAct);

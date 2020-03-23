@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using System.Collections.Generic;
 
 namespace MonoGame.Framework.Audio
@@ -19,7 +20,7 @@ namespace MonoGame.Framework.Audio
 
             // Reduce garbage generation by allocating enough capacity for
             // the maximum playing instances or at least some reasonable value.
-            var maxInstances = SoundEffect.MAX_PLAYING_INSTANCES < 1024 ? SoundEffect.MAX_PLAYING_INSTANCES : 1024;
+            int maxInstances = Math.Min(SoundEffect.MAX_PLAYING_INSTANCES, 1024);
             _playingInstances = new List<SoundEffectInstance>(maxInstances);
             _pooledInstances = new List<SoundEffectInstance>(maxInstances);
         }
@@ -28,7 +29,7 @@ namespace MonoGame.Framework.Audio
         /// Gets a value indicating whether the platform has capacity for more sounds to be played at this time.
         /// </summary>
         /// <value><see langword="true"/> if more sounds can be played; otherwise, <see langword="false"/>.</value>
-        internal static bool SoundsAvailable
+        internal static bool SlotsAvailable
         {
             get
             {
@@ -72,36 +73,36 @@ namespace MonoGame.Framework.Audio
         {
             lock (_syncRoot)
             {
-                SoundEffectInstance inst;
+                SoundEffectInstance instance;
 
-                var count = _pooledInstances.Count;
+                int count = _pooledInstances.Count;
                 if (count > 0)
                 {
                     // Grab the item at the end of the list so the remove doesn't copy all
                     // the list items down one slot.
-                    inst = _pooledInstances[count - 1];
+                    instance = _pooledInstances[count - 1];
                     _pooledInstances.RemoveAt(count - 1);
 
                     // Reset used instance to the "default" state.
-                    inst._isPooled = true;
-                    inst._isXAct = forXAct;
-                    inst.Volume = 1f;
-                    inst.Pan = 0f;
-                    inst.Pitch = 0f;
-                    inst.IsLooped = false;
-                    inst.PlatformSetReverbMix(0);
-                    inst.PlatformClearFilter();
+                    instance._isPooled = true;
+                    instance._isXAct = forXAct;
+                    instance.Volume = 1f;
+                    instance.Pan = 0f;
+                    instance.Pitch = 0f;
+                    instance.IsLooped = false;
+                    instance.PlatformSetReverbMix(0);
+                    instance.PlatformClearFilter();
                 }
                 else
                 {
-                    inst = new SoundEffectInstance
+                    instance = new SoundEffectInstance
                     {
                         _isPooled = true,
                         _isXAct = forXAct
                     };
                 }
 
-                return inst;
+                return instance;
             }
         }
 
@@ -114,30 +115,30 @@ namespace MonoGame.Framework.Audio
             lock (_syncRoot)
             {
                 // Cleanup instances which have finished playing.                    
-                for (var x = 0; x < _playingInstances.Count;)
+                for (int i = 0; i < _playingInstances.Count; i++)
                 {
-                    SoundEffectInstance inst = _playingInstances[x];
+                    var instance = _playingInstances[i];
 
                     // Don't consume XACT instances... XACT will
                     // clear this flag when it is done with the wave.
-                    if (inst._isXAct)
+                    if (instance._isXAct)
                     {
-                        x++;
+                        i++;
                         continue;
                     }
 
-                    if (inst.IsDisposed ||
-                        inst.State == SoundState.Stopped ||
-                        (inst._effect == null && !inst._isDynamic))
+                    if (instance.IsDisposed ||
+                        instance.State == SoundState.Stopped ||
+                        (instance._effect == null && !instance._isDynamic))
                     {
-                        if (!inst.IsDisposed)
-                            inst.Stop(true);
+                        if (!instance.IsDisposed)
+                            instance.Stop(true);
 
-                        Return(inst);
+                        Return(instance);
                         continue;
                     }
 
-                    x++;
+                    i++;
                 }
 
             }
@@ -165,16 +166,16 @@ namespace MonoGame.Framework.Audio
         {
             lock (_syncRoot)
             {
-                for (var x = 0; x < _playingInstances.Count;)
+                for (int i = 0; i < _playingInstances.Count;)
                 {
-                    SoundEffectInstance inst = _playingInstances[x];
-                    if (inst._effect == effect)
+                    var instance = _playingInstances[i];
+                    if (instance._effect == effect)
                     {
-                        inst.Stop(true); // stop immediatly
-                        Return(inst);
+                        instance.Stop(true); // stop immediatly
+                        Return(instance);
                         continue;
                     }
-                    x++;
+                    i++;
                 }
             }
         }
@@ -183,16 +184,16 @@ namespace MonoGame.Framework.Audio
         {
             lock (_syncRoot)
             {
-                foreach (var inst in _playingInstances)
+                foreach (var instance in _playingInstances)
                 {
                     // XAct sounds are not controlled by the SoundEffect
                     // master volume, so we can skip them completely.
-                    if (inst._isXAct)
+                    if (instance._isXAct)
                         continue;
 
                     // Re-applying the volume to itself will update
                     // the sound with the current master volume.
-                    inst.Volume = inst.Volume;
+                    instance.Volume = instance.Volume;
                 }
             }
 

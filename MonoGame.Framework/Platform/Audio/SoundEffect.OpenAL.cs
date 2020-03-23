@@ -11,6 +11,7 @@ using MonoGame.Framework.Memory;
 #if OPENAL
 using MonoGame.OpenAL;
 #endif
+
 #if IOS
 using AudioToolbox;
 using AudioUnit;
@@ -37,14 +38,13 @@ namespace MonoGame.Framework.Audio
                 duration = TimeSpan.FromSeconds(sampleCount / (float)freq);
 
                 var span = data.GetBuffer().AsSpan(0, (int)data.Length);
-                PlatformInitializeBuffer<byte>(span, format, channels, freq, blockAlignment, bitsPerSample, 0, 0);
+                PlatformInitializeBuffer(span, format, channels, freq, blockAlignment, bitsPerSample, 0, 0);
             }
         }
 
-        private void PlatformInitializePcm<T>(
-            ReadOnlySpan<T> data, int sampleBits, int sampleRate, AudioChannels channels,
+        private void PlatformInitializePcm(
+            ReadOnlySpan<byte> data, int sampleBits, int sampleRate, AudioChannels channels,
             int loopStart, int loopLength)
-            where T : unmanaged
         {
             byte[] largeBuffer = null;
             string bufferTag = null;
@@ -54,7 +54,7 @@ namespace MonoGame.Framework.Audio
                 {
                     // Convert 24-bit signed PCM to 16-bit signed PCM
                     largeBuffer = AudioLoader.Convert24To16(data, out bufferTag, out int size);
-                    data = MemoryMarshal.Cast<byte, T>(largeBuffer.AsSpan(0, size));
+                    data = largeBuffer.AsSpan(0, size);
                     sampleBits = 16;
                 }
 
@@ -64,21 +64,38 @@ namespace MonoGame.Framework.Audio
             }
             finally
             {
-                if (largeBuffer != null && bufferTag != null)
+                if (largeBuffer != null)
                     RecyclableMemoryManager.Default.ReturnLargeBuffer(largeBuffer, bufferTag);
             }
         }
 
-        private void PlatformInitializeIeeeFloat<T>(
-            ReadOnlySpan<T> data, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
-            where T : unmanaged
+        private void PlatformInitializeIeeeFloat(
+            ReadOnlySpan<byte> data, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
         {
             if (!ALController.Instance.SupportsFloat32)
             {
-                // If 32-bit IEEE float is not supported, convert to 16-bit signed PCM
-                data = MemoryMarshal.Cast<byte, T>(AudioLoader.ConvertSingleToInt16(data));
-                PlatformInitializePcm(data, 16, sampleRate, channels, loopStart, loopLength);
-                return;
+                var floatData = MemoryMarshal.Cast<byte, float>(data);
+                int byteCount = floatData.Length * sizeof(short);
+                bool isRecyclable = byteCount <= RecyclableMemoryManager.Default.MaximumLargeBufferSize;
+
+                byte[] largeBuffer = null;
+                string bufferTag = nameof(PlatformInitializeIeeeFloat);
+                try
+                {
+                    largeBuffer = isRecyclable
+                        ? RecyclableMemoryManager.Default.GetLargeBuffer(byteCount, bufferTag)
+                        : new byte[byteCount];
+
+                    // If 32-bit IEEE float is not supported, convert to 16-bit signed PCM
+                    AudioLoader.ConvertSingleToInt16(floatData, MemoryMarshal.Cast<byte, short>(largeBuffer));
+                    PlatformInitializePcm(largeBuffer, 16, sampleRate, channels, loopStart, loopLength);
+                    return;
+                }
+                finally
+                {
+                    if (isRecyclable)
+                        RecyclableMemoryManager.Default.ReturnLargeBuffer(largeBuffer, bufferTag);
+                }
             }
 
             var format = AudioLoader.GetSoundFormat(AudioLoader.FormatIeee, (int)channels, 32);
@@ -86,16 +103,15 @@ namespace MonoGame.Framework.Audio
             SoundBuffer.BufferData(data, format, sampleRate);
         }
 
-        private void PlatformInitializeAdpcm<T>(
-            ReadOnlySpan<T> data, int sampleRate, AudioChannels channels, int blockAlignment, int loopStart, int loopLength)
-            where T : unmanaged
+        private void PlatformInitializeAdpcm(
+            ReadOnlySpan<byte> data, int sampleRate, AudioChannels channels, int blockAlignment,
+            int loopStart, int loopLength)
         {
-            ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(data);
             if (!ALController.Instance.SupportsAdpcm)
             {
                 // If MS-ADPCM is not supported, convert to 16-bit signed PCM
-                bytes = AudioLoader.ConvertMsAdpcmToPcm(bytes, (int)channels, blockAlignment);
-                PlatformInitializePcm(bytes, 16, sampleRate, channels, loopStart, loopLength);
+                var pcmData = AudioLoader.ConvertMsAdpcmToPcm(data, (int)channels, blockAlignment);
+                PlatformInitializePcm(pcmData, 16, sampleRate, channels, loopStart, loopLength);
                 return;
             }
 
@@ -103,21 +119,21 @@ namespace MonoGame.Framework.Audio
             int sampleAlignment = AudioLoader.SampleAlignment(format, blockAlignment);
 
             // Buffer length must be aligned with the block alignment
-            int alignedCount = bytes.Length - (bytes.Length % blockAlignment);
-            bytes = bytes.Slice(0, alignedCount);
+            int alignedCount = data.Length - (data.Length % blockAlignment);
+            data = data.Slice(0, alignedCount);
 
             SoundBuffer = ALBufferPool.Rent();
-            SoundBuffer.BufferData(bytes, format, sampleRate, sampleAlignment);
+            SoundBuffer.BufferData(data, format, sampleRate, sampleAlignment);
         }
 
-        private void PlatformInitializeIma4<T>(
-            ReadOnlySpan<T> data, int sampleRate, AudioChannels channels, int blockAlignment, int loopStart, int loopLength)
-            where T : unmanaged
+        private void PlatformInitializeIma4(
+            ReadOnlySpan<byte> data, int sampleRate, AudioChannels channels, int blockAlignment,
+            int loopStart, int loopLength)
         {
             if (!ALController.Instance.SupportsIma4)
             {
                 // If IMA/ADPCM is not supported, convert to 16-bit signed PCM
-                data = MemoryMarshal.Cast<byte, T>(AudioLoader.ConvertIma4ToPcm(data, (int)channels, blockAlignment));
+                data = AudioLoader.ConvertIma4ToPcm(data, (int)channels, blockAlignment);
                 PlatformInitializePcm(data, 16, sampleRate, channels, loopStart, loopLength);
                 return;
             }
@@ -128,7 +144,8 @@ namespace MonoGame.Framework.Audio
             SoundBuffer.BufferData(data, format, sampleRate, sampleAlignment);
         }
 
-        private void PlatformInitializeFormat(ReadOnlySpan<byte> header, ReadOnlySpan<byte> data, int loopStart, int loopLength)
+        private void PlatformInitializeFormat(
+            ReadOnlySpan<byte> header, ReadOnlySpan<byte> data, int loopStart, int loopLength)
         {
             short wavFormat = BinaryPrimitives.ReadInt16LittleEndian(header);
             short channels = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(2));
@@ -137,13 +154,13 @@ namespace MonoGame.Framework.Audio
             short bitsPerSample = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(14));
 
             var format = AudioLoader.GetSoundFormat(wavFormat, channels, bitsPerSample);
-            PlatformInitializeBuffer(data, format, channels, sampleRate, blockAlignment, bitsPerSample, loopStart, loopLength);
+            PlatformInitializeBuffer(
+                data, format, channels, sampleRate, blockAlignment, bitsPerSample, loopStart, loopLength);
         }
 
-        private void PlatformInitializeBuffer<T>(
-            ReadOnlySpan<T> buffer, ALFormat format, int channels, int sampleRate,
+        private void PlatformInitializeBuffer(
+            ReadOnlySpan<byte> buffer, ALFormat format, int channels, int sampleRate,
             int blockAlignment, int bitsPerSample, int loopStart, int loopLength)
-            where T : unmanaged
         {
             switch (format)
             {
@@ -151,22 +168,26 @@ namespace MonoGame.Framework.Audio
                 case ALFormat.Mono16:
                 case ALFormat.Stereo8:
                 case ALFormat.Stereo16:
-                    PlatformInitializePcm(buffer, bitsPerSample, sampleRate, (AudioChannels)channels, loopStart, loopLength);
+                    PlatformInitializePcm(
+                        buffer, bitsPerSample, sampleRate, (AudioChannels)channels, loopStart, loopLength);
                     break;
 
                 case ALFormat.MonoMSAdpcm:
                 case ALFormat.StereoMSAdpcm:
-                    PlatformInitializeAdpcm(buffer, sampleRate, (AudioChannels)channels, blockAlignment, loopStart, loopLength);
+                    PlatformInitializeAdpcm(
+                        buffer, sampleRate, (AudioChannels)channels, blockAlignment, loopStart, loopLength);
                     break;
 
                 case ALFormat.MonoFloat32:
                 case ALFormat.StereoFloat32:
-                    PlatformInitializeIeeeFloat(buffer, sampleRate, (AudioChannels)channels, loopStart, loopLength);
+                    PlatformInitializeIeeeFloat(
+                        buffer, sampleRate, (AudioChannels)channels, loopStart, loopLength);
                     break;
 
                 case ALFormat.MonoIma4:
                 case ALFormat.StereoIma4:
-                    PlatformInitializeIma4(buffer, sampleRate, (AudioChannels)channels, blockAlignment, loopStart, loopLength);
+                    PlatformInitializeIma4(
+                        buffer, sampleRate, (AudioChannels)channels, blockAlignment, loopStart, loopLength);
                     break;
 
                 default:
@@ -174,15 +195,15 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        private void PlatformInitializeXact<T>(
-            MiniFormatTag codec, ReadOnlySpan<T> data, int channels, int sampleRate, int blockAlignment,
+        private void PlatformInitializeXact(
+            ReadOnlySpan<byte> data, MiniFormatTag codec, int channels, int sampleRate, int blockAlignment,
             int loopStart, int loopLength, out TimeSpan duration)
-            where T : unmanaged
         {
             if (codec != MiniFormatTag.Adpcm)
                 throw new NotSupportedException("Unsupported sound format.");
 
-            PlatformInitializeAdpcm(data, sampleRate, (AudioChannels)channels, (blockAlignment + 16) * channels, loopStart, loopLength);
+            PlatformInitializeAdpcm(
+                data, sampleRate, (AudioChannels)channels, (blockAlignment + 16) * channels, loopStart, loopLength);
             duration = TimeSpan.FromSeconds(SoundBuffer.Duration);
         }
 
@@ -211,31 +232,35 @@ namespace MonoGame.Framework.Audio
             // map these from range 0-15 to 0-1
             efx.Effect(ReverbEffect, EfxEffectf.EaxReverbDiffusion, reverbSettings.EarlyDiffusion / 15f);
             efx.Effect(ReverbEffect, EfxEffectf.EaxReverbDiffusion, reverbSettings.LateDiffusion / 15f);
-            efx.Effect(ReverbEffect, EfxEffectf.EaxReverbGainLF, Math.Min(XactHelpers.ParseVolumeFromDecibels(reverbSettings.LowEqGain - 8f), 1f));
+            efx.Effect(ReverbEffect, EfxEffectf.EaxReverbGainLF, 
+                Math.Min(XactHelpers.ParseVolumeFromDecibels(reverbSettings.LowEqGain - 8f), 1f));
             efx.Effect(ReverbEffect, EfxEffectf.EaxReverbLFReference, (reverbSettings.LowEqCutoff * 50f) + 50f);
-            efx.Effect(ReverbEffect, EfxEffectf.EaxReverbGainHF, XactHelpers.ParseVolumeFromDecibels(reverbSettings.HighEqGain - 8f));
+            efx.Effect(ReverbEffect, EfxEffectf.EaxReverbGainHF,
+                XactHelpers.ParseVolumeFromDecibels(reverbSettings.HighEqGain - 8f));
             efx.Effect(ReverbEffect, EfxEffectf.EaxReverbHFReference, (reverbSettings.HighEqCutoff * 500f) + 1000f);
 
             // According to Xamarin docs EaxReverbReflectionsGain Unit: Linear gain Range [0f .. 3.16f] Default: 0.05f
-            efx.Effect(ReverbEffect, EfxEffectf.EaxReverbReflectionsGain, Math.Min(XactHelpers.ParseVolumeFromDecibels(reverbSettings.ReflectionsGainDb), 3.16f));
-            efx.Effect(ReverbEffect, EfxEffectf.EaxReverbGain, Math.Min(XactHelpers.ParseVolumeFromDecibels(reverbSettings.ReverbGainDb), 1f));
+            efx.Effect(ReverbEffect, EfxEffectf.EaxReverbReflectionsGain, 
+                Math.Min(XactHelpers.ParseVolumeFromDecibels(reverbSettings.ReflectionsGainDb), 3.16f));
+            efx.Effect(ReverbEffect, EfxEffectf.EaxReverbGain,
+                Math.Min(XactHelpers.ParseVolumeFromDecibels(reverbSettings.ReverbGainDb), 1f));
 
             // map these from 0-100 down to 0-1
             efx.Effect(ReverbEffect, EfxEffectf.EaxReverbDensity, reverbSettings.DensityPct / 100f);
             efx.AuxiliaryEffectSlot(ReverbSlot, EfxEffectSlotf.EffectSlotGain, reverbSettings.WetDryMixPct / 200f);
 
-            // Dont know what to do with these EFX has no mapping for them. 
+            // Dont know what to do with these; EFX has no mapping for them. 
             // Just ignore for now we can enable them as we go. 
-            //efx.SetEffectParam (ReverbEffect, EfxEffectf.PositionLeft, reverbSettings.PositionLeft);
-            //efx.SetEffectParam (ReverbEffect, EfxEffectf.PositionRight, reverbSettings.PositionRight);
-            //efx.SetEffectParam (ReverbEffect, EfxEffectf.PositionLeftMatrix, reverbSettings.PositionLeftMatrix);
-            //efx.SetEffectParam (ReverbEffect, EfxEffectf.PositionRightMatrix, reverbSettings.PositionRightMatrix);
-            //efx.SetEffectParam (ReverbEffect, EfxEffectf.LowFrequencyReference, reverbSettings.RearDelayMs);
-            //efx.SetEffectParam (ReverbEffect, EfxEffectf.LowFrequencyReference, reverbSettings.RoomFilterFrequencyHz);
-            //efx.SetEffectParam (ReverbEffect, EfxEffectf.LowFrequencyReference, reverbSettings.RoomFilterMainDb);
-            //efx.SetEffectParam (ReverbEffect, EfxEffectf.LowFrequencyReference, reverbSettings.RoomFilterHighFrequencyDb);
-            //efx.SetEffectParam (ReverbEffect, EfxEffectf.LowFrequencyReference, reverbSettings.DecayTimeSec);
-            //efx.SetEffectParam (ReverbEffect, EfxEffectf.LowFrequencyReference, reverbSettings.RoomSizeFeet);
+            //efx.SetEffectParam(ReverbEffect, EfxEffectf.PositionLeft, reverbSettings.PositionLeft);
+            //efx.SetEffectParam(ReverbEffect, EfxEffectf.PositionRight, reverbSettings.PositionRight);
+            //efx.SetEffectParam(ReverbEffect, EfxEffectf.PositionLeftMatrix, reverbSettings.PositionLeftMatrix);
+            //efx.SetEffectParam(ReverbEffect, EfxEffectf.PositionRightMatrix, reverbSettings.PositionRightMatrix);
+            //efx.SetEffectParam(ReverbEffect, EfxEffectf.LowFrequencyReference, reverbSettings.RearDelayMs);
+            //efx.SetEffectParam(ReverbEffect, EfxEffectf.LowFrequencyReference, reverbSettings.RoomFilterFrequencyHz);
+            //efx.SetEffectParam(ReverbEffect, EfxEffectf.LowFrequencyReference, reverbSettings.RoomFilterMainDb);
+            //efx.SetEffectParam(ReverbEffect, EfxEffectf.LowFrequencyReference, reverbSettings.RoomFilterHighFrequencyDb);
+            //efx.SetEffectParam(ReverbEffect, EfxEffectf.LowFrequencyReference, reverbSettings.DecayTimeSec);
+            //efx.SetEffectParam(ReverbEffect, EfxEffectf.LowFrequencyReference, reverbSettings.RoomSizeFeet);
 
             efx.BindEffectToAuxiliarySlot(ReverbSlot, ReverbEffect);
         }

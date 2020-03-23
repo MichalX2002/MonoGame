@@ -295,10 +295,10 @@ namespace MonoGame.Framework.Media
         private void FillAndEnqueueBuffer()
         {
             if (OggStreamer.Instance.TryFillBuffer(this, out ALBuffer buffer))
-                EnqueueBuffer(buffer);
+                QueueBuffer(buffer);
         }
 
-        public void EnqueueBuffer(ALBuffer buffer)
+        public void QueueBuffer(ALBuffer buffer)
         {
             AL.SourceQueueBuffer(SourceId, buffer.BufferId);
             ALHelper.CheckError("Failed to queue buffer.");

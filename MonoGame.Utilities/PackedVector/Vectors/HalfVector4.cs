@@ -187,7 +187,7 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Returns a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(HalfVector4) + $"({this.ToVector4().ToString()})";
+        public override string ToString() => nameof(HalfVector4) + $"({this.ToVector4()})";
 
         /// <summary>
         /// Gets the hash code for the current instance.

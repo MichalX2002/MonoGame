@@ -74,13 +74,13 @@ namespace MonoGame.Framework.Audio
         {
             AssertNotDisposed();
 
-            if ((format == ALFormat.MonoFloat32 || format == ALFormat.StereoFloat32) && !ALController.Instance.SupportsFloat32)
+            if (!ALController.Instance.SupportsFloat32 && (format == ALFormat.MonoFloat32 || format == ALFormat.StereoFloat32))
                 throw new InvalidOperationException("Float data is not supported by this OpenAL driver.");
 
-            if ((format == ALFormat.MonoMSAdpcm || format == ALFormat.StereoMSAdpcm) && !ALController.Instance.SupportsAdpcm)
+            if (!ALController.Instance.SupportsAdpcm && (format == ALFormat.MonoMSAdpcm || format == ALFormat.StereoMSAdpcm))
                 throw new InvalidOperationException("MS-ADPCM is not supported by this OpenAL driver.");
 
-            if ((format == ALFormat.MonoIma4 || format == ALFormat.StereoIma4) && !ALController.Instance.SupportsIma4)
+            if (!ALController.Instance.SupportsIma4 && (format == ALFormat.MonoIma4 || format == ALFormat.StereoIma4))
                 throw new InvalidOperationException("IMA/ADPCM is not supported by this OpenAL driver.");
 
             if (BufferId != 0)
