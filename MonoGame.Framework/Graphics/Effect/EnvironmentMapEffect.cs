@@ -1,17 +1,7 @@
-#region File Description
-//-----------------------------------------------------------------------------
-// EnvironmentMapEffect.cs
-//
 // Microsoft XNA Community Game Platform
 // Copyright (C) Microsoft Corporation. All rights reserved.
-//-----------------------------------------------------------------------------
-#endregion
 
-#region Using Statements
 using System;
-using MonoGame.Framework;
-using MonoGame.Framework.Graphics;
-#endregion
 
 namespace MonoGame.Framework.Graphics
 {
@@ -56,8 +46,6 @@ namespace MonoGame.Framework.Graphics
         Vector3 ambientLightColor = Vector3.Zero;
 
         float alpha = 1;
-        DirectionalLight light2;
-
         float fogStart = 0;
         float fogEnd = 1;
 
@@ -67,14 +55,12 @@ namespace MonoGame.Framework.Graphics
 
         #region Public Properties
 
-
         /// <summary>
         /// Gets or sets the world matrix.
         /// </summary>
         public Matrix World
         {
             get => world;
-
             set
             {
                 world = value;
@@ -89,7 +75,6 @@ namespace MonoGame.Framework.Graphics
         public Matrix View
         {
             get => view;
-
             set
             {
                 view = value;
@@ -104,7 +89,6 @@ namespace MonoGame.Framework.Graphics
         public Matrix Projection
         {
             get => projection;
-
             set
             {
                 projection = value;
@@ -119,7 +103,6 @@ namespace MonoGame.Framework.Graphics
         public Vector3 DiffuseColor
         {
             get => diffuseColor;
-
             set
             {
                 diffuseColor = value;
@@ -134,7 +117,6 @@ namespace MonoGame.Framework.Graphics
         public Vector3 EmissiveColor
         {
             get => emissiveColor;
-
             set
             {
                 emissiveColor = value;
@@ -149,7 +131,6 @@ namespace MonoGame.Framework.Graphics
         public float Alpha
         {
             get => alpha;
-
             set
             {
                 alpha = value;
@@ -164,7 +145,6 @@ namespace MonoGame.Framework.Graphics
         public Vector3 AmbientLightColor
         {
             get => ambientLightColor;
-
             set
             {
                 ambientLightColor = value;
@@ -188,7 +168,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets the third directional light.
         /// </summary>
-        public DirectionalLight DirectionalLight2 => light2;
+        public DirectionalLight DirectionalLight2 { get; private set; }
 
 
         /// <summary>
@@ -197,7 +177,6 @@ namespace MonoGame.Framework.Graphics
         public bool FogEnabled
         {
             get => fogEnabled;
-
             set
             {
                 if (fogEnabled != value)
@@ -215,7 +194,6 @@ namespace MonoGame.Framework.Graphics
         public float FogStart
         {
             get => fogStart;
-
             set
             {
                 fogStart = value;
@@ -230,7 +208,6 @@ namespace MonoGame.Framework.Graphics
         public float FogEnd
         {
             get => fogEnd;
-
             set
             {
                 fogEnd = value;
@@ -292,13 +269,11 @@ namespace MonoGame.Framework.Graphics
         public Vector3 EnvironmentMapSpecular
         {
             get => environmentMapSpecularParam.GetValueVector3();
-
             set
             {
                 environmentMapSpecularParam.SetValue(value);
 
                 bool enabled = value != Vector3.Zero;
-
                 if (specularEnabled != enabled)
                 {
                     specularEnabled = enabled;
@@ -313,21 +288,19 @@ namespace MonoGame.Framework.Graphics
         /// Higher values make the environment map only visible around the silhouette 
         /// edges of the object, while lower values make it visible everywhere. 
         /// Setting this property to 0 disables Fresnel entirely, making the 
-        /// environment map equally visible regardless of view angle. The default is 
-        /// 1. Fresnel only affects the environment map RGB (the intensity of which is 
+        /// environment map equally visible regardless of view angle. The default is 1.
+        /// Fresnel only affects the environment map RGB (the intensity of which is 
         /// controlled by EnvironmentMapAmount). The alpha contribution (controlled by 
         /// EnvironmentMapSpecular) is not affected by the Fresnel setting.
         /// </summary>
         public float FresnelFactor
         {
             get => fresnelFactorParam.GetValueSingle();
-
             set
             {
                 fresnelFactorParam.SetValue(value);
 
                 bool enabled = value != 0;
-
                 if (fresnelEnabled != enabled)
                 {
                     fresnelEnabled = enabled;
@@ -344,7 +317,12 @@ namespace MonoGame.Framework.Graphics
         bool IEffectLights.LightingEnabled
         {
             get => true;
-            set { if (!value) throw new NotSupportedException("EnvironmentMapEffect does not support setting LightingEnabled to false."); }
+            set
+            {
+                if (!value)
+                    throw new NotSupportedException(
+                        "EnvironmentMapEffect does not support setting LightingEnabled to false.");
+            }
         }
 
 
@@ -357,7 +335,7 @@ namespace MonoGame.Framework.Graphics
         /// Creates a new EnvironmentMapEffect with default parameter settings.
         /// </summary>
         public EnvironmentMapEffect(GraphicsDevice device)
-            : base(device, EffectResource.EnvironmentMapEffect.Bytecode)
+            : base(device, EffectResource.EnvironmentMapEffect.ByteCode)
         {
             CacheEffectParameters(null);
 
@@ -410,7 +388,7 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public void EnableDefaultLighting()
         {
-            AmbientLightColor = EffectHelpers.EnableDefaultLighting(DirectionalLight0, DirectionalLight1, light2);
+            AmbientLightColor = EffectHelpers.EnableDefaultLighting(DirectionalLight0, DirectionalLight1, DirectionalLight2);
         }
 
 
@@ -419,19 +397,19 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         void CacheEffectParameters(EnvironmentMapEffect cloneSource)
         {
-            textureParam                = Parameters["Texture"];
-            environmentMapParam         = Parameters["EnvironmentMap"];
-            environmentMapAmountParam   = Parameters["EnvironmentMapAmount"];
+            textureParam = Parameters["Texture"];
+            environmentMapParam = Parameters["EnvironmentMap"];
+            environmentMapAmountParam = Parameters["EnvironmentMapAmount"];
             environmentMapSpecularParam = Parameters["EnvironmentMapSpecular"];
-            fresnelFactorParam          = Parameters["FresnelFactor"];
-            diffuseColorParam           = Parameters["DiffuseColor"];
-            emissiveColorParam          = Parameters["EmissiveColor"];
-            eyePositionParam            = Parameters["EyePosition"];
-            fogColorParam               = Parameters["FogColor"];
-            fogVectorParam              = Parameters["FogVector"];
-            worldParam                  = Parameters["World"];
-            worldInverseTransposeParam  = Parameters["WorldInverseTranspose"];
-            worldViewProjParam          = Parameters["WorldViewProj"];
+            fresnelFactorParam = Parameters["FresnelFactor"];
+            diffuseColorParam = Parameters["DiffuseColor"];
+            emissiveColorParam = Parameters["EmissiveColor"];
+            eyePositionParam = Parameters["EyePosition"];
+            fogColorParam = Parameters["FogColor"];
+            fogVectorParam = Parameters["FogVector"];
+            worldParam = Parameters["World"];
+            worldInverseTransposeParam = Parameters["WorldInverseTranspose"];
+            worldViewProjParam = Parameters["WorldViewProj"];
 
             DirectionalLight0 = new DirectionalLight(Parameters["DirLight0Direction"],
                                           Parameters["DirLight0DiffuseColor"],
@@ -443,10 +421,10 @@ namespace MonoGame.Framework.Graphics
                                           null,
                                           cloneSource?.DirectionalLight1);
 
-            light2 = new DirectionalLight(Parameters["DirLight2Direction"],
+            DirectionalLight2 = new DirectionalLight(Parameters["DirLight2Direction"],
                                           Parameters["DirLight2DiffuseColor"],
                                           null,
-                                          cloneSource?.light2);
+                                          cloneSource?.DirectionalLight2);
         }
 
 
@@ -456,22 +434,28 @@ namespace MonoGame.Framework.Graphics
         protected internal override void OnApply()
         {
             // Recompute the world+view+projection matrix or fog vector?
-            dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(dirtyFlags, ref world, ref view, ref projection, ref worldView, fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
+            dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(
+                dirtyFlags, world, view, projection, worldView,
+                fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
 
             // Recompute the world inverse transpose and eye position?
-            dirtyFlags = EffectHelpers.SetLightingMatrices(dirtyFlags, ref world, ref view, worldParam, worldInverseTransposeParam, eyePositionParam);
-            
+            dirtyFlags = EffectHelpers.SetLightingMatrices(
+                dirtyFlags, world, view,
+                worldParam, worldInverseTransposeParam, eyePositionParam);
+
             // Recompute the diffuse/emissive/alpha material color parameters?
             if ((dirtyFlags & EffectDirtyFlags.MaterialColor) != 0)
             {
-                EffectHelpers.SetMaterialColor(true, alpha, ref diffuseColor, ref emissiveColor, ref ambientLightColor, diffuseColorParam, emissiveColorParam);
+                EffectHelpers.SetMaterialColor(
+                    true, alpha, diffuseColor, emissiveColor, ambientLightColor,
+                    diffuseColorParam, emissiveColorParam);
 
                 dirtyFlags &= ~EffectDirtyFlags.MaterialColor;
             }
 
             // Check if we can use the only-bother-with-the-first-light shader optimization.
-            bool newOneLight = !DirectionalLight1.Enabled && !light2.Enabled;
-            
+            bool newOneLight = !DirectionalLight1.Enabled && !DirectionalLight2.Enabled;
+
             if (oneLight != newOneLight)
             {
                 oneLight = newOneLight;
@@ -482,13 +466,13 @@ namespace MonoGame.Framework.Graphics
             if ((dirtyFlags & EffectDirtyFlags.ShaderIndex) != 0)
             {
                 int shaderIndex = 0;
-                
+
                 if (!fogEnabled)
                     shaderIndex += 1;
-                
+
                 if (fresnelEnabled)
                     shaderIndex += 2;
-                
+
                 if (specularEnabled)
                     shaderIndex += 4;
 

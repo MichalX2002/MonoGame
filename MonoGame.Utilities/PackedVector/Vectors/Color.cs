@@ -251,23 +251,23 @@ namespace MonoGame.Framework
 
         public readonly void ToScaledVector4(out Vector4 scaledVector)
         {
-            scaledVector.X = R;
-            scaledVector.Y = G;
-            scaledVector.Z = B;
-            scaledVector.W = A;
-            Vector4.Divide(scaledVector, byte.MaxValue, out scaledVector);
+            scaledVector.Base.X = R;
+            scaledVector.Base.Y = G;
+            scaledVector.Base.Z = B;
+            scaledVector.Base.W = A;
+            scaledVector /= byte.MaxValue;
         }
 
         public void FromScaledVector4(in Vector4 scaledVector)
         {
-            Vector4.Multiply(scaledVector, byte.MaxValue, out var vector);
-            vector += Vector4.Half;
-            vector.Clamp(0, byte.MaxValue);
+            var v = scaledVector * byte.MaxValue;
+            v += Vector4.Half;
+            v.Clamp(0, byte.MaxValue);
 
-            R = (byte)vector.X;
-            G = (byte)vector.Y;
-            B = (byte)vector.Z;
-            A = (byte)vector.W;
+            R = (byte)v.X;
+            G = (byte)v.Y;
+            B = (byte)v.Z;
+            A = (byte)v.W;
         }
 
         public readonly void ToVector4(out Vector4 vector)

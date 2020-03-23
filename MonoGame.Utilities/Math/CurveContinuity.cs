@@ -13,8 +13,10 @@ namespace MonoGame.Framework
         /// Interpolation can be used between this key and the next.
         /// </summary>
         Smooth,
+
         /// <summary>
-        /// Interpolation cannot be used. A position between the two points returns this point.
+        /// Interpolation cannot be used. 
+        /// A position between the two points returns this point.
         /// </summary>
         Step
     }

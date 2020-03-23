@@ -14,16 +14,17 @@ namespace MonoGame.Framework.Content
         private Action<IDisposable> _recordDisposableObject;
         private ContentTypeReaderManager _typeReaderManager;
         private List<KeyValuePair<int, Action<object>>> _sharedResourceFixups;
+
         internal int Version { get; private set; }
         internal int SharedResourceCount { get; private set; }
 
         internal ContentTypeReader[] TypeReaders { get; private set; }
-        
+
         public ContentManager ContentManager { get; }
         public string AssetName { get; }
 
         internal ContentReader(
-            ContentManager manager, Stream stream, 
+            ContentManager manager, Stream stream,
             string assetName, int version, Action<IDisposable> recordDisposableObject)
             : base(stream)
         {
@@ -42,7 +43,7 @@ namespace MonoGame.Framework.Content
 
             // Read shared resources
             ReadSharedResources();
-            
+
             return result;
         }
 
@@ -86,11 +87,12 @@ namespace MonoGame.Framework.Content
             string externalReference = ReadString();
 
             if (!string.IsNullOrEmpty(externalReference))
-                return ContentManager.Load<T>(FileHelpers.ResolveRelativePath(AssetName, externalReference));
+                return ContentManager.Load<T>(
+                    FileHelpers.ResolveRelativePath(AssetName, externalReference));
 
             return default;
         }
-            
+
         private void RecordDisposable<T>(T result)
         {
             if (!(result is IDisposable disposable))
@@ -109,7 +111,7 @@ namespace MonoGame.Framework.Content
 
         public T ReadObject<T>(T existingInstance)
         {
-            var typeReaderIndex = Read7BitEncodedInt();
+            int typeReaderIndex = Read7BitEncodedInt();
             if (typeReaderIndex == 0)
                 return existingInstance;
 
@@ -125,7 +127,7 @@ namespace MonoGame.Framework.Content
 
         public T ReadObject<T>(ContentTypeReader typeReader)
         {
-            var result = (T)typeReader.Read(this, default(T));            
+            var result = (T)typeReader.Read(this, default(T));
             RecordDisposable(result);
             return result;
         }
@@ -154,9 +156,9 @@ namespace MonoGame.Framework.Content
         public T ReadRawObject<T>(T existingInstance)
         {
             Type objectType = typeof(T);
-            foreach(var typeReader in TypeReaders)
+            foreach (var typeReader in TypeReaders)
             {
-                if(typeReader.TargetType == objectType)
+                if (typeReader.TargetType == objectType)
                     return ReadRawObject(typeReader, existingInstance);
             }
             throw new NotSupportedException();
@@ -170,106 +172,98 @@ namespace MonoGame.Framework.Content
         public void ReadSharedResource<T>(Action<T> fixup)
         {
             int index = Read7BitEncodedInt();
-            if (index > 0)
-            {
-                _sharedResourceFixups.Add(new KeyValuePair<int, Action<object>>(index - 1, delegate (object v)
-                {
-                    if (!(v is T))
-                        throw new ContentLoadException(
-                            string.Format("Error loading shared resource. Expected type {0}, received type {1}.",
-                            typeof(T).Name, v.GetType().Name));
+            if (index <= 0)
+                return;
 
-                    fixup.Invoke((T)v);
-                }));
-            }
+            _sharedResourceFixups.Add(
+                new KeyValuePair<int, Action<object>>(index - 1, delegate (object v)
+            {
+                if (!(v is T))
+                    throw new ContentLoadException(string.Format(
+                        "Error loading shared resource. Expected type {0}, received type {1}.",
+                        typeof(T).Name, v.GetType().Name));
+
+                fixup.Invoke((T)v);
+            }));
         }
+
+        #region Read helpers
 
         public Matrix ReadMatrix()
         {
-            Matrix result = new Matrix
-            {
-                M11 = ReadSingle(),
-                M12 = ReadSingle(),
-                M13 = ReadSingle(),
-                M14 = ReadSingle(),
-                M21 = ReadSingle(),
-                M22 = ReadSingle(),
-                M23 = ReadSingle(),
-                M24 = ReadSingle(),
-                M31 = ReadSingle(),
-                M32 = ReadSingle(),
-                M33 = ReadSingle(),
-                M34 = ReadSingle(),
-                M41 = ReadSingle(),
-                M42 = ReadSingle(),
-                M43 = ReadSingle(),
-                M44 = ReadSingle()
-            };
-            return result;
+            return new Matrix(
+                m11: ReadSingle(),
+                m12: ReadSingle(),
+                m13: ReadSingle(),
+                m14: ReadSingle(),
+                m21: ReadSingle(),
+                m22: ReadSingle(),
+                m23: ReadSingle(),
+                m24: ReadSingle(),
+                m31: ReadSingle(),
+                m32: ReadSingle(),
+                m33: ReadSingle(),
+                m34: ReadSingle(),
+                m41: ReadSingle(),
+                m42: ReadSingle(),
+                m43: ReadSingle(),
+                m44: ReadSingle());
         }
 
         public Quaternion ReadQuaternion()
         {
-            return new Quaternion
-            {
-                X = ReadSingle(),
-                Y = ReadSingle(),
-                Z = ReadSingle(),
-                W = ReadSingle()
-            };
+            return new Quaternion(
+                x: ReadSingle(),
+                y: ReadSingle(),
+                z: ReadSingle(),
+                w: ReadSingle());
         }
 
         public Vector2 ReadVector2()
         {
-            return new Vector2
-            {
-                X = ReadSingle(),
-                Y = ReadSingle()
-            };
+            return new Vector2(
+                x: ReadSingle(),
+                y: ReadSingle());
         }
 
         public Vector3 ReadVector3()
         {
-            return new Vector3
-            {
-                X = ReadSingle(),
-                Y = ReadSingle(),
-                Z = ReadSingle()
-            };
+            return new Vector3(
+                x: ReadSingle(),
+                y: ReadSingle(),
+                z: ReadSingle());
         }
 
         public Vector4 ReadVector4()
         {
-            return new Vector4
-            {
-                X = ReadSingle(),
-                Y = ReadSingle(),
-                Z = ReadSingle(),
-                W = ReadSingle()
-            };
+            return new Vector4(
+                x: ReadSingle(),
+                y: ReadSingle(),
+                z: ReadSingle(),
+                w: ReadSingle());
         }
 
         public Color ReadColor()
         {
-            return new Color
-            {
-                R = ReadByte(),
-                G = ReadByte(),
-                B = ReadByte(),
-                A = ReadByte()
-            };
+            return new Color(
+                r: ReadByte(),
+                g: ReadByte(),
+                b: ReadByte(),
+                a: ReadByte());
         }
 
-        internal new int Read7BitEncodedInt()
-        {
-            return base.Read7BitEncodedInt();
-        }
-        
-        internal BoundingSphere ReadBoundingSphere()
+        public BoundingSphere ReadBoundingSphere()
         {
             var position = ReadVector3();
             var radius = ReadSingle();
             return new BoundingSphere(position, radius);
         }
+
+        public new int Read7BitEncodedInt()
+        {
+            return base.Read7BitEncodedInt();
+        }
+
+        #endregion
     }
 }

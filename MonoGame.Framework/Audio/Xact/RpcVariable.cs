@@ -14,11 +14,8 @@ namespace MonoGame.Framework.Audio
         public float MinValue;
 
         public bool IsPublic => (Flags & 0x1) != 0;
-
         public bool IsReadOnly => (Flags & 0x2) != 0;
-
         public bool IsGlobal => (Flags & 0x4) == 0;
-
         public bool IsReserved => (Flags & 0x8) != 0;
 
         public void SetValue(float value)

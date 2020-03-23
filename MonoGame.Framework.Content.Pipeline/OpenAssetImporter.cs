@@ -236,7 +236,7 @@ namespace MonoGame.Framework.Content.Pipeline
         }
 
         internal OpenAssetImporter(string importerName, bool xnaCompatible)
-        {            
+        {
             _importerName = importerName;
             _xnaCompatible = xnaCompatible;
         }
@@ -322,7 +322,7 @@ namespace MonoGame.Framework.Content.Pipeline
                 if (_xnaCompatible)
                     ImportXnaMaterials();
                 else
-                    ImportMaterials();  
+                    ImportMaterials();
 
                 ImportNodes();      // Create _pivots and _rootNode (incl. children).
                 ImportSkeleton();   // Create skeleton (incl. animations) and add to _rootNode.
@@ -386,7 +386,7 @@ namespace MonoGame.Framework.Content.Pipeline
 
                 if (aiMaterial.HasShininessStrength)
                     material.SpecularPower = aiMaterial.Shininess;
-                
+
                 _materials.Add(material);
             }
         }
@@ -405,7 +405,7 @@ namespace MonoGame.Framework.Content.Pipeline
             }
 
             return texture;
-        }            
+        }
 
         /// <summary>
         /// Returns all the Assimp <see cref="Material"/> features as a <see cref="MaterialContent"/>.
@@ -485,7 +485,7 @@ namespace MonoGame.Framework.Content.Pipeline
         private void ImportNodes()
         {
             _pivots = new Dictionary<string, FbxPivot>();
-            _rootNode = ImportNodes(_scene.RootNode, null,  null);
+            _rootNode = ImportNodes(_scene.RootNode, null, null);
         }
 
         /// <summary>
@@ -614,8 +614,8 @@ namespace MonoGame.Framework.Content.Pipeline
         {
             var geom = new GeometryContent
             {
-              Identity = _identity,
-              Material = _materials[aiMesh.MaterialIndex]
+                Identity = _identity,
+                Material = _materials[aiMesh.MaterialIndex]
             };
 
             // Vertices
@@ -652,14 +652,14 @@ namespace MonoGame.Framework.Content.Pipeline
                         list.Add(new BoneWeight(aiMesh.Bones[0].Name, 1));
                     }
 
-                        xnaWeights.Add(list);
+                    xnaWeights.Add(list);
                 }
 
                 if (missingBoneWeights)
                 {
                     _context.Logger.LogWarning(
-                        string.Empty, 
-                        _identity, 
+                        string.Empty,
+                        _identity,
                         "No bone weights found for one or more vertices of skinned mesh '{0}'.",
                         aiMesh.Name);
                 }
@@ -812,11 +812,16 @@ namespace MonoGame.Framework.Content.Pipeline
                     // Bone
                     node = new BoneContent
                     {
-                      Name = aiNode.Name,
-                      Identity = _identity
+                        Name = aiNode.Name,
+                        Identity = _identity
                     };
-                    bool isOffsetMatrixValid = _deformationBones.TryGetValue(aiNode.Name, out Matrix offsetMatrix);
-                    bool isParentOffsetMatrixValid = _deformationBones.TryGetValue(aiParent.Name, out Matrix parentOffsetMatrix);
+
+                    bool isOffsetMatrixValid = _deformationBones.TryGetValue(
+                        aiNode.Name, out Matrix offsetMatrix);
+
+                    bool isParentOffsetMatrixValid = _deformationBones.TryGetValue(
+                        aiParent.Name, out Matrix parentOffsetMatrix);
+
                     if (isOffsetMatrixValid && isParentOffsetMatrixValid)
                     {
                         node.Transform = Matrix.Invert(offsetMatrix) * parentOffsetMatrix;
@@ -882,7 +887,8 @@ namespace MonoGame.Framework.Content.Pipeline
             {
                 Name = GetAnimationName(aiAnimation.Name),
                 Identity = _identity,
-                Duration = TimeSpan.FromSeconds(aiAnimation.DurationInTicks / aiAnimation.TicksPerSecond)
+                Duration = TimeSpan.FromSeconds(
+                    aiAnimation.DurationInTicks / aiAnimation.TicksPerSecond)
             };
 
             // In Assimp animation channels may be split into separate channels.
@@ -890,17 +896,19 @@ namespace MonoGame.Framework.Content.Pipeline
             //                 "nodeXyz_$AssimpFbx$_Rotation",
             //                 "nodeXyz_$AssimpFbx$_Scaling"
             // Group animation channels by name (strip the "_$AssimpFbx$" part).
-            IEnumerable < IGrouping < string,NodeAnimationChannel >> channelGroups;
+            IEnumerable<IGrouping<string, NodeAnimationChannel>> channelGroups;
             if (nodeName != null)
             {
-                channelGroups = aiAnimation.NodeAnimationChannels
-                                           .Where(channel => nodeName == GetNodeName(channel.NodeName))
-                                           .GroupBy(channel => GetNodeName(channel.NodeName));
+                channelGroups = aiAnimation
+                    .NodeAnimationChannels
+                    .Where(channel => nodeName == GetNodeName(channel.NodeName))
+                    .GroupBy(channel => GetNodeName(channel.NodeName));
             }
             else
             {
-                channelGroups = aiAnimation.NodeAnimationChannels
-                                           .GroupBy(channel => GetNodeName(channel.NodeName));
+                channelGroups = aiAnimation
+                    .NodeAnimationChannels
+                    .GroupBy(channel => GetNodeName(channel.NodeName));
             }
 
             foreach (var channelGroup in channelGroups)
@@ -952,13 +960,16 @@ namespace MonoGame.Framework.Content.Pipeline
 
                 // Get all unique keyframe times. (Assuming that no two key frames
                 // have the same time, which is usually a safe assumption.)
-                var times = scaleKeys.Select(k => k.Time)
-                                     .Union(rotationKeys.Select(k => k.Time))
-                                     .Union(translationKeys.Select(k => k.Time))
-                                     .OrderBy(t => t)
-                                     .ToList();
+                var times = scaleKeys
+                    .Select(k => k.Time)
+                    .Union(rotationKeys.Select(k => k.Time))
+                    .Union(translationKeys.Select(k => k.Time))
+                    .OrderBy(t => t)
+                    .ToList();
 
-                Debug.Assert(times.Count == times.Distinct().Count(), "Sequences combined with Union() should not have duplicates.");
+                Debug.Assert(
+                    times.Count == times.Distinct().Count(),
+                    "Sequences combined with Union() should not have duplicates.");
 
                 int prevScaleIndex = -1;
                 int prevRotationIndex = -1;
@@ -1113,7 +1124,8 @@ namespace MonoGame.Framework.Content.Pipeline
             }
 
             if (parent == null && ancestor != null)
-                throw new ArgumentException(string.Format("Node \"{0}\" is not an ancestor of \"{1}\".", ancestor.Name, node.Name));
+                throw new ArgumentException(string.Format(
+                    "Node \"{0}\" is not an ancestor of \"{1}\".", ancestor.Name, node.Name));
 
             return transform;
         }
@@ -1144,29 +1156,26 @@ namespace MonoGame.Framework.Content.Pipeline
         [DebuggerStepThrough]
         public static Matrix ToXna(Matrix4x4 matrix)
         {
-            var result = Matrix.Identity;
+            return new Matrix(
+                m11: matrix.A1,
+                m12: matrix.B1,
+                m13: matrix.C1,
+                m14: matrix.D1,
 
-            result.M11 = matrix.A1;
-            result.M12 = matrix.B1;
-            result.M13 = matrix.C1;
-            result.M14 = matrix.D1;
+                m21: matrix.A2,
+                m22: matrix.B2,
+                m23: matrix.C2,
+                m24: matrix.D2,
 
-            result.M21 = matrix.A2;
-            result.M22 = matrix.B2;
-            result.M23 = matrix.C2;
-            result.M24 = matrix.D2;
+                m31: matrix.A3,
+                m32: matrix.B3,
+                m33: matrix.C3,
+                m34: matrix.D3,
 
-            result.M31 = matrix.A3;
-            result.M32 = matrix.B3;
-            result.M33 = matrix.C3;
-            result.M34 = matrix.D3;
-
-            result.M41 = matrix.A4;
-            result.M42 = matrix.B4;
-            result.M43 = matrix.C4;
-            result.M44 = matrix.D4;
-
-            return result;
+                m41: matrix.A4,
+                m42: matrix.B4,
+                m43: matrix.C4,
+                m44: matrix.D4);
         }
 
         [DebuggerStepThrough]
@@ -1204,6 +1213,7 @@ namespace MonoGame.Framework.Content.Pipeline
         {
             return new Color(color.R, color.G, color.B, color.A);
         }
+
         #endregion
     }
 }

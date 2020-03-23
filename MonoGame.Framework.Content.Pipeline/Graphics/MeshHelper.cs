@@ -71,8 +71,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
 
                 var aa = geom.Vertices.Positions[ia];
                 var bb = geom.Vertices.Positions[ib];
-                var cc = geom.Vertices.Positions[ic];                
-                
+                var cc = geom.Vertices.Positions[ic];
+
                 Vector3.Cross(cc - bb, bb - aa, out var faceNormal);
                 var length = faceNormal.Length();
                 if (length > 0.0f)
@@ -115,7 +115,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
 
                     // TODO: We could maybe void this by a better algorithm
                     // above for generating the normals.
-                    
+
                     // We have a zero length normal.  You can argue that putting
                     // anything here is better than nothing, but by leaving it to
                     // zero it allows the caller to detect this and react to it.
@@ -442,7 +442,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                     PositionIndex = verts.PositionIndices[vIndex],
                     ChannelData = new object[verts.Channels.Count]
                 };
-                
+
                 for (var channel = 0; channel < verts.Channels.Count; channel++)
                     iData.ChannelData[channel] = verts.Channels[channel][vIndex];
 
@@ -489,7 +489,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public static void MergeDuplicateVertices(MeshContent mesh)
         {
             if (mesh == null)
-                throw new ArgumentNullException("mesh");
+                throw new ArgumentNullException(nameof(mesh));
+
             foreach (var geom in mesh.Geometry)
                 MergeDuplicateVertices(geom);
         }
@@ -498,7 +499,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         {
             // We don't throw here as non-optimized still works.
         }
-        
+
         /// <summary>
         /// Reverses the triangle winding order of the mesh.
         /// </summary>
@@ -509,18 +510,17 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// </remarks>
         public static void SwapWindingOrder(MeshContent mesh)
         {
-            // Gotta have a mesh to run!
             if (mesh == null)
-                throw new ArgumentNullException("mesh");
+                throw new ArgumentNullException(nameof(mesh));
 
             foreach (var geom in mesh.Geometry)
             {
-                for (var i = 0; i < geom.Indices.Count; i += 3)
+                for (int i = 0; i < geom.Indices.Count; i += 3)
                 {
-                    var first = geom.Indices[i];
-                    var last = geom.Indices[i+2];
+                    int first = geom.Indices[i];
+                    int last = geom.Indices[i + 2];
                     geom.Indices[i] = last;
-                    geom.Indices[i+2] = first;
+                    geom.Indices[i + 2] = first;
                 }
             }
         }
@@ -563,7 +563,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 foreach (var animationContent in node.Animations.Values)
                     foreach (var animationChannel in animationContent.Channels.Values)
                         for (int i = 0; i < animationChannel.Count; i++)
-                            animationChannel[i].Transform = 
+                            animationChannel[i].Transform =
                                 inverseTransform * animationChannel[i].Transform * transform;
             }
         }
@@ -586,7 +586,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             // (see http://en.wikipedia.org/wiki/Triple_product) to calculate the
             // determinant.
 
-            Vector3.Dot(xform.Right, Vector3.Cross(xform.Forward, xform.Up), out float d);
+            float d = Vector3.Dot(xform.Right, Vector3.Cross(xform.Forward, xform.Up));
             return d < 0.0f;
         }
 
@@ -596,9 +596,9 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         {
             foreach (var geom in mesh.Geometry)
             {
-                for (var i = 0; i < geom.Vertices.PositionIndices.Count; i++)
+                for (int i = 0; i < geom.Vertices.PositionIndices.Count; i++)
                 {
-                    var index = geom.Vertices.PositionIndices[i];
+                    int index = geom.Vertices.PositionIndices[i];
                     if (index == from)
                         geom.Vertices.PositionIndices[i] = to;
                 }
@@ -632,7 +632,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
 
                 for (var i = 0; i < ChannelData.Length; i++)
                 {
-                        if (!Equals(ChannelData[i], other.ChannelData[i]))
+                    if (!Equals(ChannelData[i], other.ChannelData[i]))
                         return false;
                 }
 
@@ -662,7 +662,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                     if (_indexPositions.ContainsKey(v))
                         _indexPositions[v].Add(pos);
                     else
-                        _indexPositions.Add(v, new List<int> {pos});
+                        _indexPositions.Add(v, new List<int> { pos });
                 }
             }
 

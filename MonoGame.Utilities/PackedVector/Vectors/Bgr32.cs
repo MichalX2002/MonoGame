@@ -68,22 +68,31 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Bgr32, uint>(ref this) = value;
         }
 
-        public void FromVector4(Vector4 vector)
+        public void FromVector4(in Vector4 vector)
         {
             Color rgba = default;
             rgba.FromVector4(vector);
             FromColor(rgba);
         }
 
-        public readonly Vector4 ToVector4() => new Vector4(ToVector3(), 1);
+        public readonly void ToVector4(out Vector4 vector)
+        {
+            vector = new Vector4(R,G,B, byte.MaxValue) / byte.MaxValue;
+        }
+
+        public void FromScaledVector4(in Vector4 scaledVector)
+        {
+            FromVector4(scaledVector);
+        }
+
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        {
+            ToVector4(out scaledVector);
+        }
 
         #endregion
 
         #region IPixel
-
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
-
-        public readonly Vector4 ToScaledVector4() => new Vector4(ToVector3(), 1);
 
         public readonly void ToColor(ref Color destination)
         {

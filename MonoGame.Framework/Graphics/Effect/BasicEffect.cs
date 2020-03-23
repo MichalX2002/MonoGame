@@ -1,17 +1,5 @@
-#region File Description
-//-----------------------------------------------------------------------------
-// BasicEffect.cs
-//
 // Microsoft XNA Community Game Platform
 // Copyright (C) Microsoft Corporation. All rights reserved.
-//-----------------------------------------------------------------------------
-#endregion
-
-#region Using Statements
-using MonoGame.Framework;
-using MonoGame.Framework.Graphics;
-using System;
-#endregion
 
 namespace MonoGame.Framework.Graphics
 {
@@ -56,15 +44,13 @@ namespace MonoGame.Framework.Graphics
         Vector3 ambientLightColor = Vector3.Zero;
 
         float alpha = 1;
-        DirectionalLight light2;
-
         float fogStart = 0;
         float fogEnd = 1;
 
         EffectDirtyFlags dirtyFlags = EffectDirtyFlags.All;
 
         #endregion
-        
+
         #region Public Properties
 
 
@@ -229,7 +215,7 @@ namespace MonoGame.Framework.Graphics
         public DirectionalLight DirectionalLight1 { get; private set; }
 
         /// <inheritdoc/>
-        public DirectionalLight DirectionalLight2 => light2;
+        public DirectionalLight DirectionalLight2 { get; private set; }
 
         /// <inheritdoc/>
         public bool FogEnabled
@@ -334,7 +320,7 @@ namespace MonoGame.Framework.Graphics
         /// Creates a new BasicEffect with default parameter settings.
         /// </summary>
         public BasicEffect(GraphicsDevice device)
-            : base(device, EffectResource.BasicEffect.Bytecode)
+            : base(device, EffectResource.BasicEffect.ByteCode)
         {
             CacheEffectParameters(null);
 
@@ -353,7 +339,7 @@ namespace MonoGame.Framework.Graphics
 
             lightingEnabled = cloneSource.lightingEnabled;
             preferPerPixelLighting = cloneSource.preferPerPixelLighting;
-            fogEnabled = cloneSource.fogEnabled;            
+            fogEnabled = cloneSource.fogEnabled;
             textureEnabled = cloneSource.textureEnabled;
             vertexColorEnabled = cloneSource.vertexColorEnabled;
 
@@ -380,47 +366,49 @@ namespace MonoGame.Framework.Graphics
             return new BasicEffect(this);
         }
 
-
         /// <inheritdoc/>
         public void EnableDefaultLighting()
         {
             LightingEnabled = true;
 
-            AmbientLightColor = EffectHelpers.EnableDefaultLighting(DirectionalLight0, DirectionalLight1, light2);
+            AmbientLightColor = EffectHelpers.EnableDefaultLighting(
+                DirectionalLight0, DirectionalLight1, DirectionalLight2);
         }
-
 
         /// <summary>
         /// Looks up shortcut references to our effect parameters.
         /// </summary>
         void CacheEffectParameters(BasicEffect cloneSource)
         {
-            textureParam                = Parameters["Texture"];
-            diffuseColorParam           = Parameters["DiffuseColor"];
-            emissiveColorParam          = Parameters["EmissiveColor"];
-            specularColorParam          = Parameters["SpecularColor"];
-            specularPowerParam          = Parameters["SpecularPower"];
-            eyePositionParam            = Parameters["EyePosition"];
-            fogColorParam               = Parameters["FogColor"];
-            fogVectorParam              = Parameters["FogVector"];
-            worldParam                  = Parameters["World"];
-            worldInverseTransposeParam  = Parameters["WorldInverseTranspose"];
-            worldViewProjParam          = Parameters["WorldViewProj"];
+            textureParam = Parameters["Texture"];
+            diffuseColorParam = Parameters["DiffuseColor"];
+            emissiveColorParam = Parameters["EmissiveColor"];
+            specularColorParam = Parameters["SpecularColor"];
+            specularPowerParam = Parameters["SpecularPower"];
+            eyePositionParam = Parameters["EyePosition"];
+            fogColorParam = Parameters["FogColor"];
+            fogVectorParam = Parameters["FogVector"];
+            worldParam = Parameters["World"];
+            worldInverseTransposeParam = Parameters["WorldInverseTranspose"];
+            worldViewProjParam = Parameters["WorldViewProj"];
 
-            DirectionalLight0 = new DirectionalLight(Parameters["DirLight0Direction"],
-                                          Parameters["DirLight0DiffuseColor"],
-                                          Parameters["DirLight0SpecularColor"],
-                                          cloneSource?.DirectionalLight0);
+            DirectionalLight0 = new DirectionalLight(
+                Parameters["DirLight0Direction"],
+                Parameters["DirLight0DiffuseColor"],
+                Parameters["DirLight0SpecularColor"],
+                cloneSource?.DirectionalLight0);
 
-            DirectionalLight1 = new DirectionalLight(Parameters["DirLight1Direction"],
-                                          Parameters["DirLight1DiffuseColor"],
-                                          Parameters["DirLight1SpecularColor"],
-                                          cloneSource?.DirectionalLight1);
+            DirectionalLight1 = new DirectionalLight(
+                Parameters["DirLight1Direction"],
+                Parameters["DirLight1DiffuseColor"],
+                Parameters["DirLight1SpecularColor"],
+                cloneSource?.DirectionalLight1);
 
-            light2 = new DirectionalLight(Parameters["DirLight2Direction"],
-                                          Parameters["DirLight2DiffuseColor"],
-                                          Parameters["DirLight2SpecularColor"],
-                                          cloneSource?.light2);
+            DirectionalLight2 = new DirectionalLight(
+                Parameters["DirLight2Direction"],
+                Parameters["DirLight2DiffuseColor"],
+                Parameters["DirLight2SpecularColor"],
+                cloneSource?.DirectionalLight2);
         }
 
 
@@ -430,12 +418,16 @@ namespace MonoGame.Framework.Graphics
         protected internal override void OnApply()
         {
             // Recompute the world+view+projection matrix or fog vector?
-            dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(dirtyFlags, ref world, ref view, ref projection, ref worldView, fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
-            
+            dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(
+                dirtyFlags, world, view, projection, worldView,
+                fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
+
             // Recompute the diffuse/emissive/alpha material color parameters?
             if ((dirtyFlags & EffectDirtyFlags.MaterialColor) != 0)
             {
-                EffectHelpers.SetMaterialColor(lightingEnabled, alpha, ref diffuseColor, ref emissiveColor, ref ambientLightColor, diffuseColorParam, emissiveColorParam);
+                EffectHelpers.SetMaterialColor(
+                    lightingEnabled, alpha, diffuseColor, emissiveColor, ambientLightColor,
+                    diffuseColorParam, emissiveColorParam);
 
                 dirtyFlags &= ~EffectDirtyFlags.MaterialColor;
             }
@@ -443,12 +435,14 @@ namespace MonoGame.Framework.Graphics
             if (lightingEnabled)
             {
                 // Recompute the world inverse transpose and eye position?
-                dirtyFlags = EffectHelpers.SetLightingMatrices(dirtyFlags, ref world, ref view, worldParam, worldInverseTransposeParam, eyePositionParam);
+                dirtyFlags = EffectHelpers.SetLightingMatrices(
+                    dirtyFlags, world, view,
+                    worldParam, worldInverseTransposeParam, eyePositionParam);
 
-                
+
                 // Check if we can use the only-bother-with-the-first-light shader optimization.
-                bool newOneLight = !DirectionalLight1.Enabled && !light2.Enabled;
-                
+                bool newOneLight = !DirectionalLight1.Enabled && !DirectionalLight2.Enabled;
+
                 if (oneLight != newOneLight)
                 {
                     oneLight = newOneLight;
@@ -460,13 +454,13 @@ namespace MonoGame.Framework.Graphics
             if ((dirtyFlags & EffectDirtyFlags.ShaderIndex) != 0)
             {
                 int shaderIndex = 0;
-                
+
                 if (!fogEnabled)
                     shaderIndex += 1;
-                
+
                 if (vertexColorEnabled)
                     shaderIndex += 2;
-                
+
                 if (textureEnabled)
                     shaderIndex += 4;
 

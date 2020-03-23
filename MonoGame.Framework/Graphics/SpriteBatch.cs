@@ -9,7 +9,7 @@ using System.Text;
 namespace MonoGame.Framework.Graphics
 {
     /// <summary>
-    /// Helper class for drawing text strings and sprites in one or more optimized batches.
+    /// Helper class for drawing text and sprites in optimized batches.
     /// </summary>
     public class SpriteBatch : GraphicsResource
     {
@@ -29,11 +29,13 @@ namespace MonoGame.Framework.Graphics
 
         #endregion
 
+        #region Constructors
+
         /// <summary>
-        /// Constructs a <see cref="SpriteBatch"/>.
+        /// Constructs the <see cref="SpriteBatch"/>.
         /// </summary>
-        /// <param name="graphicsDevice">The <see cref="GraphicsDevice"/>, which will be used for sprite rendering.</param>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="graphicsDevice"/> is null.</exception>
+        /// <param name="graphicsDevice">The <see cref="GraphicsDevice"/> which will be used for sprite rendering.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="graphicsDevice"/> is null.</exception>
         public SpriteBatch(GraphicsDevice graphicsDevice) : base(graphicsDevice)
         {
             _batcher = new SpriteBatcher(GraphicsDevice);
@@ -42,6 +44,80 @@ namespace MonoGame.Framework.Graphics
 
             _beginCalled = false;
         }
+
+        #endregion
+
+        #region Begin
+
+        /// <summary>
+        /// Begins a new sprite and text batch with the specified render state.
+        /// </summary>
+        /// <param name="sortMode">The drawing order for sprite and text drawing. <see cref="SpriteSortMode.Deferred"/> by default.</param>
+        /// <param name="blendState">State of the blending. Uses <see cref="BlendState.AlphaBlend"/> if null.</param>
+        /// <param name="samplerState">State of the sampler. Uses <see cref="SamplerState.LinearClamp"/> if null.</param>
+        /// <param name="depthStencilState">State of the depth-stencil buffer. Uses <see cref="DepthStencilState.None"/> if null.</param>
+        /// <param name="rasterizerState">State of the rasterization. Uses <see cref="RasterizerState.CullCounterClockwise"/> if null.</param>
+        /// <param name="effect">A custom <see cref="Effect"/> to override the default sprite effect. Uses default sprite effect if null.</param>
+        /// <param name="transformMatrix">An optional matrix used to transform the sprite geometry. Uses <see cref="Matrix.Identity"/> if null.</param>
+        /// <exception cref="InvalidOperationException">Thrown if <see cref="Begin"/> is called next time without previous <see cref="End"/>.</exception>
+        /// <remarks>
+        /// <see cref="Begin"/> should be called before draw methods,
+        /// and you cannot call it again before subsequent <see cref="End"/>.
+        /// </remarks>
+        public void Begin(
+            SpriteSortMode sortMode = SpriteSortMode.Deferred,
+            BlendState blendState = null,
+            SamplerState samplerState = null,
+            DepthStencilState depthStencilState = null,
+            RasterizerState rasterizerState = null,
+            Effect effect = null,
+            Matrix? transformMatrix = null)
+        {
+            if (_beginCalled)
+                throw new InvalidOperationException(
+                    "Begin cannot be called again until End has been successfully called.");
+
+            // defaults
+            _sortMode = sortMode;
+            _blendState = blendState ?? BlendState.AlphaBlend;
+            _samplerState = samplerState ?? SamplerState.LinearClamp;
+            _depthStencilState = depthStencilState ?? DepthStencilState.None;
+            _rasterizerState = rasterizerState ?? RasterizerState.CullCounterClockwise;
+            _effect = effect;
+            _spriteEffect.TransformMatrix = transformMatrix;
+
+            // Setup things now so a user can change them.
+            if (sortMode == SpriteSortMode.Immediate)
+                Setup();
+
+            _beginCalled = true;
+        }
+
+        #endregion
+
+        #region End
+
+        /// <summary>
+        /// Flushes all batched text and sprites to the screen.
+        /// </summary>
+        /// <remarks>
+        /// This should be called after <see cref="Begin"/> and draw methods.
+        /// </remarks>
+        public void End()
+        {
+            if (!_beginCalled)
+                throw new InvalidOperationException(
+                    "Begin must be called before calling End.");
+
+            _beginCalled = false;
+
+            if (_sortMode != SpriteSortMode.Immediate)
+                Setup();
+
+            _batcher.DrawBatch(_sortMode, _effect);
+        }
+
+        #endregion
 
         /// <summary>
         /// Reuse a previously allocated <see cref="SpriteBatchItem"/> from the item pool. 
@@ -91,65 +167,6 @@ namespace MonoGame.Framework.Graphics
                 default:
                     return depth;
             }
-        }
-
-        /// <summary>
-        /// Begins a new sprite and text batch with the specified render state.
-        /// </summary>
-        /// <param name="sortMode">The drawing order for sprite and text drawing. <see cref="SpriteSortMode.Deferred"/> by default.</param>
-        /// <param name="blendState">State of the blending. Uses <see cref="BlendState.AlphaBlend"/> if null.</param>
-        /// <param name="samplerState">State of the sampler. Uses <see cref="SamplerState.LinearClamp"/> if null.</param>
-        /// <param name="depthStencilState">State of the depth-stencil buffer. Uses <see cref="DepthStencilState.None"/> if null.</param>
-        /// <param name="rasterizerState">State of the rasterization. Uses <see cref="RasterizerState.CullCounterClockwise"/> if null.</param>
-        /// <param name="effect">A custom <see cref="Effect"/> to override the default sprite effect. Uses default sprite effect if null.</param>
-        /// <param name="transformMatrix">An optional matrix used to transform the sprite geometry. Uses <see cref="Matrix.Identity"/> if null.</param>
-        /// <exception cref="InvalidOperationException">Thrown if <see cref="Begin"/> is called next time without previous <see cref="End"/>.</exception>
-        /// <remarks>This method uses optional parameters.</remarks>
-        /// <remarks>The <see cref="Begin"/> Begin should be called before drawing commands, and you cannot call it again before subsequent <see cref="End"/>.</remarks>
-        public void Begin(
-            SpriteSortMode sortMode = SpriteSortMode.Deferred,
-            BlendState blendState = null,
-            SamplerState samplerState = null,
-            DepthStencilState depthStencilState = null,
-            RasterizerState rasterizerState = null,
-            Effect effect = null,
-            Matrix? transformMatrix = null)
-        {
-            if (_beginCalled)
-                throw new InvalidOperationException(
-                    "Begin cannot be called again until End has been successfully called.");
-
-            // defaults
-            _sortMode = sortMode;
-            _blendState = blendState ?? BlendState.AlphaBlend;
-            _samplerState = samplerState ?? SamplerState.LinearClamp;
-            _depthStencilState = depthStencilState ?? DepthStencilState.None;
-            _rasterizerState = rasterizerState ?? RasterizerState.CullCounterClockwise;
-            _effect = effect;
-            _spriteEffect.TransformMatrix = transformMatrix;
-
-            // Setup things now so a user can change them.
-            if (sortMode == SpriteSortMode.Immediate)
-                Setup();
-
-            _beginCalled = true;
-        }
-
-        /// <summary>
-        /// Flushes all batched text and sprites to the screen.
-        /// </summary>
-        /// <remarks>This command should be called after <see cref="Begin"/> and drawing commands.</remarks>
-        public void End()
-        {
-            if (!_beginCalled)
-                throw new InvalidOperationException("Begin must be called before calling End.");
-
-            _beginCalled = false;
-
-            if (_sortMode != SpriteSortMode.Immediate)
-                Setup();
-
-            _batcher.DrawBatch(_sortMode, _effect);
         }
 
         private void Setup()
@@ -257,7 +274,8 @@ namespace MonoGame.Framework.Graphics
         /// </exception>
         /// <remarks>
         /// This overload uses optional parameters. 
-        /// This overload requires only one of <paramref name="position"/> and <paramref name="destinationRectangle"/> been used.
+        /// This overload requires only one of <paramref name="position"/> and 
+        /// <paramref name="destinationRectangle"/> been used.
         /// </remarks>
         [Obsolete("In future versions this method can be removed.")]
         public void Draw(
@@ -282,17 +300,23 @@ namespace MonoGame.Framework.Graphics
             if (!scale.HasValue)
                 scale = Vector2.One;
 
-            // If both drawRectangle and position are null, or if both have been assigned a value, raise an error
+            // If both drawRectangle and position are null,
+            // or if both have been assigned a value, raise an error
             if (destinationRectangle.HasValue == position.HasValue)
-                throw new ArgumentException("Expected drawRectangle or position, but received neither or both.");
+                throw new ArgumentException(
+                    "Expected drawRectangle or position, but received neither or both.");
 
             if (position.HasValue) // Call Draw() using position
             {
-                Draw(texture, position.Value, sourceRectangle, color.Value, rotation, origin.Value, scale.Value, effects, layerDepth);
+                Draw(
+                    texture, position.Value, sourceRectangle, color.Value,
+                    rotation, origin.Value, scale.Value, effects, layerDepth);
             }
             else // Call Draw() using drawRectangle
             {
-                Draw(texture, destinationRectangle.Value, sourceRectangle, color.Value, rotation, origin.Value, effects, layerDepth);
+                Draw(
+                    texture, destinationRectangle.Value, sourceRectangle, color.Value, 
+                    rotation, origin.Value, effects, layerDepth);
             }
         }
 
@@ -329,10 +353,10 @@ namespace MonoGame.Framework.Graphics
                 RectangleF srcRect = sourceRectangle.Value;
                 w = srcRect.Width * scale.X;
                 h = srcRect.Height * scale.Y;
-                texCoord.X = srcRect.X * texture.Texel.X;
-                texCoord.Y = srcRect.Y * texture.Texel.Y;
-                texCoord.Z = (srcRect.X + srcRect.Width) * texture.Texel.X;
-                texCoord.W = (srcRect.Y + srcRect.Height) * texture.Texel.Y;
+                texCoord.Base.X = srcRect.X * texture.Texel.X;
+                texCoord.Base.Y = srcRect.Y * texture.Texel.Y;
+                texCoord.Base.Z = (srcRect.X + srcRect.Width) * texture.Texel.X;
+                texCoord.Base.W = (srcRect.Y + srcRect.Height) * texture.Texel.Y;
             }
             else
             {
@@ -365,7 +389,9 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="texture">A texture.</param>
         /// <param name="position">The drawing location on screen.</param>
-        /// <param name="sourceRectangle">An optional region on the texture which will be rendered. If null - draws full texture.</param>
+        /// <param name="sourceRectangle">
+        /// An optional region on the texture which will be rendered, drawing full texture otherwise.
+        /// </param>
         /// <param name="color">A color mask.</param>
         /// <param name="rotation">A rotation of this sprite.</param>
         /// <param name="origin">Center of the rotation. 0,0 by default.</param>
@@ -383,7 +409,9 @@ namespace MonoGame.Framework.Graphics
             SpriteEffects effects,
             float layerDepth)
         {
-            Draw(texture, position, sourceRectangle, color, rotation, origin, new Vector2(scale, scale), effects, layerDepth);
+            Draw(
+                texture, position, sourceRectangle, color,
+                rotation, origin, new Vector2(scale, scale), effects, layerDepth);
         }
 
         /// <summary>
@@ -391,7 +419,9 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="texture">A texture.</param>
         /// <param name="destinationRectangle">The drawing bounds on screen.</param>
-        /// <param name="sourceRectangle">An optional region on the texture which will be rendered. If null - draws full texture.</param>
+        /// <param name="sourceRectangle">
+        /// An optional region on the texture which will be rendered, drawing full texture otherwise.
+        /// </param>
         /// <param name="color">A color mask.</param>
         /// <param name="rotation">A rotation of this sprite.</param>
         /// <param name="origin">Center of the rotation. 0,0 by default.</param>
@@ -591,61 +621,58 @@ namespace MonoGame.Framework.Graphics
             float sortKey = GetSortKey(spriteFont.Texture, 0);
 
             var offset = Vector2.Zero;
-            var firstGlyphOfLine = true;
+            bool firstGlyphOfLine = true;
+            var glyphs = spriteFont.Glyphs.Span;
 
-            fixed (SpriteFont.Glyph* pGlyphs = spriteFont.Glyphs)
+            for (var i = 0; i < text.Length; ++i)
             {
-                for (var i = 0; i < text.Length; ++i)
+                char c = text[i];
+                if (c == '\r')
+                    continue;
+
+                if (c == '\n')
                 {
-                    var c = text[i];
-
-                    if (c == '\r')
-                        continue;
-
-                    if (c == '\n')
-                    {
-                        offset.X = 0;
-                        offset.Y += spriteFont.LineSpacing;
-                        firstGlyphOfLine = true;
-                        continue;
-                    }
-
-                    var currentGlyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
-                    var pCurrentGlyph = pGlyphs + currentGlyphIndex;
-
-                    // The first character on a line might have a negative left side bearing.
-                    // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
-                    // so that text does not hang off the left side of its rectangle.
-                    if (firstGlyphOfLine)
-                    {
-                        offset.X = Math.Max(pCurrentGlyph->LeftSideBearing, 0);
-                        firstGlyphOfLine = false;
-                    }
-                    else
-                    {
-                        offset.X += spriteFont.Spacing + pCurrentGlyph->LeftSideBearing;
-                    }
-
-                    var p = offset;
-                    p.X += pCurrentGlyph->Cropping.X;
-                    p.Y += pCurrentGlyph->Cropping.Y;
-                    p += position;
-
-                    var item = GetBatchItem(spriteFont.Texture);
-                    item.SortKey = sortKey;
-
-                    var texCoord = new Vector4(
-                        pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.Texel.X,
-                        pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
-                        (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
-                        (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
-
-                    item.Set(
-                        p.X, p.Y, pCurrentGlyph->BoundsInTexture.Width, pCurrentGlyph->BoundsInTexture.Height,
-                        color, texCoord, 0);
-
-                    offset.X += pCurrentGlyph->Width + pCurrentGlyph->RightSideBearing;
+                    offset.X = 0;
+                    offset.Y += spriteFont.LineSpacing;
+                    firstGlyphOfLine = true;
+                    continue;
                 }
+
+                int currentGlyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
+                SpriteFont.Glyph glyph = glyphs[currentGlyphIndex];
+
+                // The first character on a line might have a negative left side bearing.
+                // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
+                // so that text does not hang off the left side of its rectangle.
+                if (firstGlyphOfLine)
+                {
+                    offset.X = Math.Max(glyph.LeftSideBearing, 0);
+                    firstGlyphOfLine = false;
+                }
+                else
+                {
+                    offset.X += spriteFont.Spacing + glyph.LeftSideBearing;
+                }
+
+                var p = offset;
+                p.X += glyph.Cropping.X;
+                p.Y += glyph.Cropping.Y;
+                p += position;
+
+                var item = GetBatchItem(spriteFont.Texture);
+                item.SortKey = sortKey;
+
+                var texCoord = new Vector4(
+                    glyph.BoundsInTexture.X * spriteFont.Texture.Texel.X,
+                    glyph.BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
+                    (glyph.BoundsInTexture.X + glyph.BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
+                    (glyph.BoundsInTexture.Y + glyph.BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
+
+                item.Set(
+                    p.X, p.Y, glyph.BoundsInTexture.Width, glyph.BoundsInTexture.Height,
+                    color, texCoord, 0);
+
+                offset.X += glyph.Width + glyph.RightSideBearing;
             }
 
             // We need to flush if we're using Immediate sort mode.
@@ -732,87 +759,84 @@ namespace MonoGame.Framework.Graphics
 
             var offset = Vector2.Zero;
             var firstGlyphOfLine = true;
+            var glyphs = spriteFont.Glyphs.Span;
 
-            fixed (SpriteFont.Glyph* pGlyphs = spriteFont.Glyphs)
+            for (int i = 0; i < text.Length; ++i)
             {
-                for (int i = 0; i < text.Length; ++i)
+                char c = text[i];
+                if (c == '\r')
+                    continue;
+
+                if (c == '\n')
                 {
-                    char c = text[i];
-
-                    if (c == '\r')
-                        continue;
-
-                    if (c == '\n')
-                    {
-                        offset.X = 0;
-                        offset.Y += spriteFont.LineSpacing;
-                        firstGlyphOfLine = true;
-                        continue;
-                    }
-
-                    var currentGlyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
-                    var pCurrentGlyph = pGlyphs + currentGlyphIndex;
-
-                    // The first character on a line might have a negative left side bearing.
-                    // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
-                    //  so that text does not hang off the left side of its rectangle.
-                    if (firstGlyphOfLine)
-                    {
-                        offset.X = Math.Max(pCurrentGlyph->LeftSideBearing, 0);
-                        firstGlyphOfLine = false;
-                    }
-                    else
-                    {
-                        offset.X += spriteFont.Spacing + pCurrentGlyph->LeftSideBearing;
-                    }
-
-                    Vector2 pos = offset;
-
-                    if (flippedHorz)
-                        pos.X += pCurrentGlyph->BoundsInTexture.Width;
-                    pos.X += pCurrentGlyph->Cropping.X;
-
-                    if (flippedVert)
-                        pos.Y += pCurrentGlyph->BoundsInTexture.Height - spriteFont.LineSpacing;
-                    pos.Y += pCurrentGlyph->Cropping.Y;
-
-                    pos = Vector2.Transform(pos, transformation);
-
-                    var item = GetBatchItem(spriteFont.Texture);
-                    item.SortKey = sortKey;
-
-                    var texCoord = new Vector4(
-                        pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.Texel.X,
-                        pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
-                        (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
-                        (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
-
-                    FlipTexCoords(ref texCoord, effects);
-
-                    if (rotation == 0f)
-                    {
-                        item.Set(
-                            pos.X, pos.Y,
-                            pCurrentGlyph->BoundsInTexture.Width * scale.X,
-                            pCurrentGlyph->BoundsInTexture.Height * scale.Y,
-                            color,
-                            texCoord,
-                            layerDepth);
-                    }
-                    else
-                    {
-                        item.Set(
-                            pos.X, pos.Y, 0, 0,
-                            pCurrentGlyph->BoundsInTexture.Width * scale.X,
-                            pCurrentGlyph->BoundsInTexture.Height * scale.Y,
-                            sin, cos,
-                            color,
-                            texCoord,
-                            layerDepth);
-                    }
-
-                    offset.X += pCurrentGlyph->Width + pCurrentGlyph->RightSideBearing;
+                    offset.X = 0;
+                    offset.Y += spriteFont.LineSpacing;
+                    firstGlyphOfLine = true;
+                    continue;
                 }
+
+                int currentGlyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
+                SpriteFont.Glyph glyph = glyphs[currentGlyphIndex];
+
+                // The first character on a line might have a negative left side bearing.
+                // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
+                //  so that text does not hang off the left side of its rectangle.
+                if (firstGlyphOfLine)
+                {
+                    offset.X = Math.Max(glyph.LeftSideBearing, 0);
+                    firstGlyphOfLine = false;
+                }
+                else
+                {
+                    offset.X += spriteFont.Spacing + glyph.LeftSideBearing;
+                }
+
+                Vector2 pos = offset;
+
+                if (flippedHorz)
+                    pos.X += glyph.BoundsInTexture.Width;
+                pos.X += glyph.Cropping.X;
+
+                if (flippedVert)
+                    pos.Y += glyph.BoundsInTexture.Height - spriteFont.LineSpacing;
+                pos.Y += glyph.Cropping.Y;
+
+                pos = Vector2.Transform(pos, transformation);
+
+                var item = GetBatchItem(spriteFont.Texture);
+                item.SortKey = sortKey;
+
+                var texCoord = new Vector4(
+                    glyph.BoundsInTexture.X * spriteFont.Texture.Texel.X,
+                    glyph.BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
+                    (glyph.BoundsInTexture.X + glyph.BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
+                    (glyph.BoundsInTexture.Y + glyph.BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
+
+                FlipTexCoords(ref texCoord, effects);
+
+                if (rotation == 0f)
+                {
+                    item.Set(
+                        pos.X, pos.Y,
+                        glyph.BoundsInTexture.Width * scale.X,
+                        glyph.BoundsInTexture.Height * scale.Y,
+                        color,
+                        texCoord,
+                        layerDepth);
+                }
+                else
+                {
+                    item.Set(
+                        pos.X, pos.Y, 0, 0,
+                        glyph.BoundsInTexture.Width * scale.X,
+                        glyph.BoundsInTexture.Height * scale.Y,
+                        sin, cos,
+                        color,
+                        texCoord,
+                        layerDepth);
+                }
+
+                offset.X += glyph.Width + glyph.RightSideBearing;
             }
 
             // We need to flush if we're using Immediate sort mode.
@@ -834,61 +858,59 @@ namespace MonoGame.Framework.Graphics
 
             var offset = Vector2.Zero;
             var firstGlyphOfLine = true;
+            var glyphs = spriteFont.Glyphs.Span;
 
-            fixed (SpriteFont.Glyph* pGlyphs = spriteFont.Glyphs)
+            for (var i = 0; i < text.Length; ++i)
             {
-                for (var i = 0; i < text.Length; ++i)
+                char c = text[i];
+                if (c == '\r')
+                    continue;
+
+                if (c == '\n')
                 {
-                    var c = text[i];
-
-                    if (c == '\r')
-                        continue;
-
-                    if (c == '\n')
-                    {
-                        offset.X = 0;
-                        offset.Y += spriteFont.LineSpacing;
-                        firstGlyphOfLine = true;
-                        continue;
-                    }
-
-                    var currentGlyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
-                    var pCurrentGlyph = pGlyphs + currentGlyphIndex;
-
-                    // The first character on a line might have a negative left side bearing.
-                    // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
-                    //  so that text does not hang off the left side of its rectangle.
-                    if (firstGlyphOfLine)
-                    {
-                        offset.X = Math.Max(pCurrentGlyph->LeftSideBearing, 0);
-                        firstGlyphOfLine = false;
-                    }
-                    else
-                    {
-                        offset.X += spriteFont.Spacing + pCurrentGlyph->LeftSideBearing;
-                    }
-
-                    var pos = offset;
-                    pos.X += pCurrentGlyph->Cropping.X;
-                    pos.Y += pCurrentGlyph->Cropping.Y;
-                    pos += position;
-
-                    var item = GetBatchItem(spriteFont.Texture);
-                    item.SortKey = sortKey;
-
-                    var texCoord = new Vector4(
-                        pCurrentGlyph->BoundsInTexture.X * spriteFont.Texture.Texel.X,
-                        pCurrentGlyph->BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
-                        (pCurrentGlyph->BoundsInTexture.X + pCurrentGlyph->BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
-                        (pCurrentGlyph->BoundsInTexture.Y + pCurrentGlyph->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
-
-                    item.Set(
-                        pos.X, pos.Y, pCurrentGlyph->BoundsInTexture.Width, pCurrentGlyph->BoundsInTexture.Height,
-                        color, texCoord, 0);
-
-                    offset.X += pCurrentGlyph->Width + pCurrentGlyph->RightSideBearing;
+                    offset.X = 0;
+                    offset.Y += spriteFont.LineSpacing;
+                    firstGlyphOfLine = true;
+                    continue;
                 }
+
+                int currentGlyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
+                SpriteFont.Glyph glyph = glyphs[currentGlyphIndex];
+
+                // The first character on a line might have a negative left side bearing.
+                // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
+                //  so that text does not hang off the left side of its rectangle.
+                if (firstGlyphOfLine)
+                {
+                    offset.X = Math.Max(glyph.LeftSideBearing, 0);
+                    firstGlyphOfLine = false;
+                }
+                else
+                {
+                    offset.X += spriteFont.Spacing + glyph.LeftSideBearing;
+                }
+
+                var pos = offset;
+                pos.X += glyph.Cropping.X;
+                pos.Y += glyph.Cropping.Y;
+                pos += position;
+
+                var item = GetBatchItem(spriteFont.Texture);
+                item.SortKey = sortKey;
+
+                var texCoord = new Vector4(
+                    glyph.BoundsInTexture.X * spriteFont.Texture.Texel.X,
+                    glyph.BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
+                    (glyph.BoundsInTexture.X + glyph.BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
+                    (glyph.BoundsInTexture.Y + glyph.BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
+
+                item.Set(
+                    pos.X, pos.Y, glyph.BoundsInTexture.Width, glyph.BoundsInTexture.Height,
+                    color, texCoord, 0);
+
+                offset.X += glyph.Width + glyph.RightSideBearing;
             }
+
             // We need to flush if we're using Immediate sort mode.
             FlushIfNeeded();
         }
@@ -973,80 +995,77 @@ namespace MonoGame.Framework.Graphics
             }
 
             var offset = Vector2.Zero;
-            var firstGlyphOfLine = true;
+            bool firstGlyphOfLine = true;
+            var glyphs = spriteFont.Glyphs.Span;
 
-            fixed (SpriteFont.Glyph* glyphPtr = spriteFont.Glyphs)
+            for (int i = 0; i < text.Length; ++i)
             {
-                for (var i = 0; i < text.Length; ++i)
+                char c = text[i];
+                if (c == '\r')
+                    continue;
+
+                if (c == '\n')
                 {
-                    var c = text[i];
-
-                    if (c == '\r')
-                        continue;
-
-                    if (c == '\n')
-                    {
-                        offset.X = 0;
-                        offset.Y += spriteFont.LineSpacing;
-                        firstGlyphOfLine = true;
-                        continue;
-                    }
-
-                    var currentGlyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
-                    var currGlyphPtr = glyphPtr + currentGlyphIndex;
-
-                    // The first character on a line might have a negative left side bearing.
-                    // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
-                    //  so that text does not hang off the left side of its rectangle.
-                    if (firstGlyphOfLine)
-                    {
-                        offset.X = Math.Max(currGlyphPtr->LeftSideBearing, 0);
-                        firstGlyphOfLine = false;
-                    }
-                    else
-                    {
-                        offset.X += spriteFont.Spacing + currGlyphPtr->LeftSideBearing;
-                    }
-
-                    var p = offset;
-
-                    if (flippedHorz)
-                        p.X += currGlyphPtr->BoundsInTexture.Width;
-                    p.X += currGlyphPtr->Cropping.X;
-
-                    if (flippedVert)
-                        p.Y += currGlyphPtr->BoundsInTexture.Height - spriteFont.LineSpacing;
-                    p.Y += currGlyphPtr->Cropping.Y;
-
-                    p = Vector2.Transform(p, transformation);
-
-                    var item = GetBatchItem(spriteFont.Texture);
-                    item.SortKey = sortKey;
-
-                    var texCoord = new Vector4(
-                        currGlyphPtr->BoundsInTexture.X * spriteFont.Texture.Texel.X,
-                        currGlyphPtr->BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
-                        (currGlyphPtr->BoundsInTexture.X + currGlyphPtr->BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
-                        (currGlyphPtr->BoundsInTexture.Y + currGlyphPtr->BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
-
-                    FlipTexCoords(ref texCoord, effects);
-
-                    if (rotation == 0f)
-                    {
-                        item.Set(
-                            p.X, p.Y, currGlyphPtr->BoundsInTexture.Width * scale.X, currGlyphPtr->BoundsInTexture.Height * scale.Y,
-                            color, texCoord, layerDepth);
-                    }
-                    else
-                    {
-                        item.Set(
-                            p.X, p.Y, 0, 0,
-                            currGlyphPtr->BoundsInTexture.Width * scale.X, currGlyphPtr->BoundsInTexture.Height * scale.Y,
-                            sin, cos, color, texCoord, layerDepth);
-                    }
-
-                    offset.X += currGlyphPtr->Width + currGlyphPtr->RightSideBearing;
+                    offset.X = 0;
+                    offset.Y += spriteFont.LineSpacing;
+                    firstGlyphOfLine = true;
+                    continue;
                 }
+
+                var currentGlyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
+                SpriteFont.Glyph glyph = glyphs[currentGlyphIndex];
+
+                // The first character on a line might have a negative left side bearing.
+                // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
+                //  so that text does not hang off the left side of its rectangle.
+                if (firstGlyphOfLine)
+                {
+                    offset.X = Math.Max(glyph.LeftSideBearing, 0);
+                    firstGlyphOfLine = false;
+                }
+                else
+                {
+                    offset.X += spriteFont.Spacing + glyph.LeftSideBearing;
+                }
+
+                var p = offset;
+
+                if (flippedHorz)
+                    p.X += glyph.BoundsInTexture.Width;
+                p.X += glyph.Cropping.X;
+
+                if (flippedVert)
+                    p.Y += glyph.BoundsInTexture.Height - spriteFont.LineSpacing;
+                p.Y += glyph.Cropping.Y;
+
+                p = Vector2.Transform(p, transformation);
+
+                var item = GetBatchItem(spriteFont.Texture);
+                item.SortKey = sortKey;
+
+                var texCoord = new Vector4(
+                    glyph.BoundsInTexture.X * spriteFont.Texture.Texel.X,
+                    glyph.BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
+                    (glyph.BoundsInTexture.X + glyph.BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
+                    (glyph.BoundsInTexture.Y + glyph.BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
+
+                FlipTexCoords(ref texCoord, effects);
+
+                if (rotation == 0f)
+                {
+                    item.Set(
+                        p.X, p.Y, glyph.BoundsInTexture.Width * scale.X, glyph.BoundsInTexture.Height * scale.Y,
+                        color, texCoord, layerDepth);
+                }
+                else
+                {
+                    item.Set(
+                        p.X, p.Y, 0, 0,
+                        glyph.BoundsInTexture.Width * scale.X, glyph.BoundsInTexture.Height * scale.Y,
+                        sin, cos, color, texCoord, layerDepth);
+                }
+
+                offset.X += glyph.Width + glyph.RightSideBearing;
             }
 
             // We need to flush if we're using Immediate sort mode.
@@ -1056,27 +1075,24 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Immediately releases the unmanaged resources used by this object.
         /// </summary>
-        /// <param name="disposing"><see langword="true"/> to release both managed and unmanaged resources; <see langword="false"/> to release only unmanaged resources.</param>
+        /// <param name="disposing">
+        /// <see langword="true"/> to release both managed and unmanaged resources;
+        /// <see langword="false"/> to release only unmanaged resources.
+        /// </param>
         protected override void Dispose(bool disposing)
         {
             if (!IsDisposed)
             {
-                if (disposing)
-                {
-                    if (_spriteEffect != null)
-                    {
-                        _spriteEffect.Dispose();
-                        _spriteEffect = null;
-                    }
-                }
-
                 _spritePass = null;
 
-                if (_batcher != null)
+                if (disposing)
                 {
-                    _batcher.Dispose();
-                    _batcher = null;
+                    _spriteEffect?.Dispose();
+                    _spriteEffect = null;
                 }
+
+                _batcher?.Dispose();
+                _batcher = null;
             }
             base.Dispose(disposing);
         }

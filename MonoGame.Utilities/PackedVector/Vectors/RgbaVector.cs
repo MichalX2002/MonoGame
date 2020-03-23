@@ -63,10 +63,10 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToScaledVector4(out Vector4 scaledVector)
         {
-            scaledVector.X = R;
-            scaledVector.Y = G;
-            scaledVector.Z = B;
-            scaledVector.W = A;
+            scaledVector.Base.X = R;
+            scaledVector.Base.Y = G;
+            scaledVector.Base.Z = B;
+            scaledVector.Base.W = A;
         }
 
         #endregion

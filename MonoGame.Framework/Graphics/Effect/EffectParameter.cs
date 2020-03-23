@@ -60,6 +60,7 @@ namespace MonoGame.Framework.Graphics
             // The data is mutable, so we have to clone it.
             if (cloneSource.Data is Array array)
                 Data = array.Clone();
+
             StateKey = unchecked(NextStateKey++);
         }
 
@@ -89,7 +90,7 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         internal ulong StateKey { get; private set; }
 
-        private string DebuggerDisplay
+        internal string DebuggerDisplay
         {
             get
             {
@@ -98,7 +99,8 @@ namespace MonoGame.Framework.Graphics
                     semanticStr = string.Concat("<", Semantic, "> ");
 
                 return string.Concat(
-                    "[", ParameterClass, " ", ParameterType, "]", " ", semanticStr, Name, " : ", GetDataValueString());
+                    "[", ParameterClass, " ", ParameterType, "]",
+                    " ", semanticStr, Name, " : ", GetDataValueString());
             }
         }
 
@@ -109,7 +111,7 @@ namespace MonoGame.Framework.Graphics
             if (Data == null)
             {
                 if (Elements == null)
-                    valueStr = "(null)";
+                    valueStr = "null";
                 else
                     valueStr = string.Join(", ", Elements.Select(e => e.GetDataValueString()));
             }
@@ -146,7 +148,6 @@ namespace MonoGame.Framework.Graphics
                             arrayStr[idx] = array.GetValue(idx).ToString();
                             idx++;
                         }
-
                         valueStr = string.Join(" ", arrayStr);
                         break;
 
@@ -212,10 +213,11 @@ namespace MonoGame.Framework.Graphics
                 throw new InvalidCastException();
 
             float[] floatData = (float[])Data;
-            return new Matrix(floatData[0], floatData[4], floatData[8], floatData[12],
-                              floatData[1], floatData[5], floatData[9], floatData[13],
-                              floatData[2], floatData[6], floatData[10], floatData[14],
-                              floatData[3], floatData[7], floatData[11], floatData[15]);
+            return new Matrix(
+                floatData[0], floatData[4], floatData[8], floatData[12],
+                floatData[1], floatData[5], floatData[9], floatData[13],
+                floatData[2], floatData[6], floatData[10], floatData[14],
+                floatData[3], floatData[7], floatData[11], floatData[15]);
         }
 
         public Matrix[] GetValueMatrixArray(int count)
@@ -381,7 +383,7 @@ namespace MonoGame.Framework.Graphics
 
             if (Elements != null && Elements.Count > 0)
             {
-                Vector3[] result = new Vector3[Elements.Count];
+                var result = new Vector3[Elements.Count];
                 for (int i = 0; i < Elements.Count; i++)
                 {
                     float[] v = Elements[i].GetValueSingleArray();
@@ -411,7 +413,7 @@ namespace MonoGame.Framework.Graphics
 
             if (Elements != null && Elements.Count > 0)
             {
-                Vector4[] result = new Vector4[Elements.Count];
+                var result = new Vector4[Elements.Count];
                 for (int i = 0; i < Elements.Count; i++)
                 {
                     float[] v = Elements[i].GetValueSingleArray();
@@ -467,18 +469,18 @@ namespace MonoGame.Framework.Graphics
         }
         */
 
-        public void SetValue(Matrix value)
+        public void SetValue(in Matrix value)
         {
             if (ParameterClass != EffectParameterClass.Matrix ||
                 ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
+            var fData = (float[])Data;
+
             // HLSL expects matrices to be transposed by default.
             // These unrolled loops do the transpose during assignment.
             if (RowCount == 4 && ColumnCount == 4)
             {
-                var fData = (float[])Data;
-
                 fData[0] = value.M11;
                 fData[1] = value.M21;
                 fData[2] = value.M31;
@@ -501,8 +503,6 @@ namespace MonoGame.Framework.Graphics
             }
             else if (RowCount == 4 && ColumnCount == 3)
             {
-                var fData = (float[])Data;
-
                 fData[0] = value.M11;
                 fData[1] = value.M21;
                 fData[2] = value.M31;
@@ -520,8 +520,6 @@ namespace MonoGame.Framework.Graphics
             }
             else if (RowCount == 3 && ColumnCount == 4)
             {
-                var fData = (float[])Data;
-
                 fData[0] = value.M11;
                 fData[1] = value.M21;
                 fData[2] = value.M31;
@@ -540,8 +538,6 @@ namespace MonoGame.Framework.Graphics
             }
             else if (RowCount == 3 && ColumnCount == 3)
             {
-                var fData = (float[])Data;
-
                 fData[0] = value.M11;
                 fData[1] = value.M21;
                 fData[2] = value.M31;
@@ -556,8 +552,6 @@ namespace MonoGame.Framework.Graphics
             }
             else if (RowCount == 3 && ColumnCount == 2)
             {
-                var fData = (float[])Data;
-
                 fData[0] = value.M11;
                 fData[1] = value.M21;
                 fData[2] = value.M31;
@@ -570,42 +564,22 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        public void SetValueTranspose(Matrix value)
+        public void SetValueTranspose(in Matrix value)
         {
             if (ParameterClass != EffectParameterClass.Matrix || 
                 ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
+            var fData = (float[])Data;
+
             // HLSL expects matrices to be transposed by default, so copying them straight
             // from the in-memory version effectively transposes them back to row-major.
             if (RowCount == 4 && ColumnCount == 4)
             {
-                var fData = (float[])Data;
-
-                fData[0] = value.M11;
-                fData[1] = value.M12;
-                fData[2] = value.M13;
-                fData[3] = value.M14;
-
-                fData[4] = value.M21;
-                fData[5] = value.M22;
-                fData[6] = value.M23;
-                fData[7] = value.M24;
-
-                fData[8] = value.M31;
-                fData[9] = value.M32;
-                fData[10] = value.M33;
-                fData[11] = value.M34;
-
-                fData[12] = value.M41;
-                fData[13] = value.M42;
-                fData[14] = value.M43;
-                fData[15] = value.M44;
+                value.CopyTo(fData);
             }
             else if (RowCount == 4 && ColumnCount == 3)
             {
-                var fData = (float[])Data;
-
                 fData[0] = value.M11;
                 fData[1] = value.M12;
                 fData[2] = value.M13;
@@ -624,8 +598,6 @@ namespace MonoGame.Framework.Graphics
             }
             else if (RowCount == 3 && ColumnCount == 4)
             {
-                var fData = (float[])Data;
-
                 fData[0] = value.M11;
                 fData[1] = value.M12;
                 fData[2] = value.M13;
@@ -643,8 +615,6 @@ namespace MonoGame.Framework.Graphics
             }
             else if (RowCount == 3 && ColumnCount == 3)
             {
-                var fData = (float[])Data;
-
                 fData[0] = value.M11;
                 fData[1] = value.M12;
                 fData[2] = value.M13;
@@ -659,8 +629,6 @@ namespace MonoGame.Framework.Graphics
             }
             else if (RowCount == 3 && ColumnCount == 2)
             {
-                var fData = (float[])Data;
-
                 fData[0] = value.M11;
                 fData[1] = value.M12;
                 fData[2] = value.M13;
@@ -789,7 +757,7 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        public void SetValue(Quaternion value)
+        public void SetValue(in Quaternion value)
         {
             if (ParameterClass != EffectParameterClass.Vector ||
                 ParameterType != EffectParameterType.Single)
@@ -800,6 +768,7 @@ namespace MonoGame.Framework.Graphics
             fData[1] = value.Y;
             fData[2] = value.Z;
             fData[3] = value.W;
+
             StateKey = unchecked(NextStateKey++);
         }
 
@@ -867,7 +836,7 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        public void SetValue(Vector3 value)
+        public void SetValue(in Vector3 value)
         {
             if (ParameterClass != EffectParameterClass.Vector ||
                 ParameterType != EffectParameterType.Single)
@@ -887,7 +856,7 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        public void SetValue(Vector4 value)
+        public void SetValue(in Vector4 value)
         {
             if (ParameterClass != EffectParameterClass.Vector || 
                 ParameterType != EffectParameterType.Single)

@@ -18,7 +18,8 @@ namespace MonoGame.Framework
         #region Properties
 
         /// <summary>
-        /// Gets or sets the indicator whether the segment between this point and the next point on the curve is discrete or continuous.
+        /// Gets or sets the indicator whether the segment between this
+        /// point and the next point on the curve is discrete or continuous.
         /// </summary>
         [DataMember]
         public CurveContinuity Continuity { get; set; }
@@ -56,7 +57,8 @@ namespace MonoGame.Framework
         /// </summary>
         public CurveKey() : this(0, 0)
         {
-            // This parameterless constructor is needed for correct serialization of CurveKeyCollection and CurveKey.
+            // This parameterless constructor is needed for 
+            // correct serialization of CurveKeyCollection and CurveKey.
         }
 
         /// <summary>
@@ -91,7 +93,8 @@ namespace MonoGame.Framework
         /// <param name="tangentIn">Tangent approaching point from the previous point on the curve.</param>
         /// <param name="tangentOut">Tangent leaving point toward next point on the curve.</param>
         /// <param name="continuity">Indicates whether the curve is discrete or continuous.</param>
-        public CurveKey(float position, float value, float tangentIn, float tangentOut, CurveContinuity continuity)
+        public CurveKey(
+            float position, float value, float tangentIn, float tangentOut, CurveContinuity continuity)
         {
             Position = position;
             Value = value;
@@ -106,8 +109,10 @@ namespace MonoGame.Framework
 
         public static bool operator ==(CurveKey value1, CurveKey value2)
         {
-            if (Equals(value1, null)) return Equals(value2, null);
-            if (Equals(value2, null)) return Equals(value1, null);
+            if (Equals(value1, null))
+                return Equals(value2, null);
+            if (Equals(value2, null))
+                return Equals(value1, null);
 
             return (value1.Position == value2.Position)
                 && (value1.Value == value2.Value)
@@ -116,17 +121,30 @@ namespace MonoGame.Framework
                 && (value1.Continuity == value2.Continuity);
         }
 
-        public static bool operator !=(CurveKey value1, CurveKey value2) => !(value1 == value2);
+        public static bool operator !=(CurveKey value1, CurveKey value2)
+        {
+            return !(value1 == value2);
+        }
 
-        public bool Equals(CurveKey other) => this == other;
-        public override bool Equals(object obj) => obj is CurveKey other && Equals(other);
+        public bool Equals(CurveKey other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is CurveKey other && this == other;
+        }
 
         #endregion
 
         /// <summary>
         /// Creates a copy of this key.
         /// </summary>
-        public CurveKey Clone() => new CurveKey(Position, Value, TangentIn, TangentOut, Continuity);
+        public CurveKey Clone()
+        {
+            return new CurveKey(Position, Value, TangentIn, TangentOut, Continuity);
+        }
 
         public int CompareTo(CurveKey other)
         {
@@ -135,16 +153,7 @@ namespace MonoGame.Framework
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                int code = 7;
-                code = code * 31 + Position.GetHashCode();
-                code = code * 31 + Value.GetHashCode();
-                code = code * 31 + TangentIn.GetHashCode();
-                code = code * 31 + TangentOut.GetHashCode();
-                code = code * 31 + Continuity.GetHashCode();
-                return code;
-            }
+            return HashCode.Combine(Position, Value, TangentIn, TangentOut, Continuity);
         }
     }
 }

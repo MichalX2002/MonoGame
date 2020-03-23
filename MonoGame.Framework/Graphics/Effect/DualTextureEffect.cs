@@ -61,7 +61,6 @@ namespace MonoGame.Framework.Graphics
         public Matrix World
         {
             get => world;
-
             set
             {
                 world = value;
@@ -76,7 +75,6 @@ namespace MonoGame.Framework.Graphics
         public Matrix View
         {
             get => view;
-
             set
             {
                 view = value;
@@ -91,7 +89,6 @@ namespace MonoGame.Framework.Graphics
         public Matrix Projection
         {
             get => projection;
-
             set
             {
                 projection = value;
@@ -106,7 +103,6 @@ namespace MonoGame.Framework.Graphics
         public Vector3 DiffuseColor
         {
             get => diffuseColor;
-
             set
             {
                 diffuseColor = value;
@@ -121,7 +117,6 @@ namespace MonoGame.Framework.Graphics
         public float Alpha
         {
             get => alpha;
-
             set
             {
                 alpha = value;
@@ -136,7 +131,6 @@ namespace MonoGame.Framework.Graphics
         public bool FogEnabled
         {
             get => fogEnabled;
-
             set
             {
                 if (fogEnabled != value)
@@ -154,7 +148,6 @@ namespace MonoGame.Framework.Graphics
         public float FogStart
         {
             get => fogStart;
-
             set
             {
                 fogStart = value;
@@ -169,7 +162,6 @@ namespace MonoGame.Framework.Graphics
         public float FogEnd
         {
             get => fogEnd;
-
             set
             {
                 fogEnd = value;
@@ -214,7 +206,6 @@ namespace MonoGame.Framework.Graphics
         public bool VertexColorEnabled
         {
             get => vertexColorEnabled;
-
             set
             {
                 if (vertexColorEnabled != value)
@@ -230,12 +221,11 @@ namespace MonoGame.Framework.Graphics
 
         #region Methods
 
-
         /// <summary>
         /// Creates a new DualTextureEffect with default parameter settings.
         /// </summary>
         public DualTextureEffect(GraphicsDevice device)
-            : base(device, EffectResource.DualTextureEffect.Bytecode)
+            : base(device, EffectResource.DualTextureEffect.ByteCode)
         {
             CacheEffectParameters();
         }
@@ -279,12 +269,12 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         void CacheEffectParameters()
         {
-            textureParam        = Parameters["Texture"];
-            texture2Param       = Parameters["Texture2"];
-            diffuseColorParam   = Parameters["DiffuseColor"];
-            fogColorParam       = Parameters["FogColor"];
-            fogVectorParam      = Parameters["FogVector"];
-            worldViewProjParam  = Parameters["WorldViewProj"];
+            textureParam = Parameters["Texture"];
+            texture2Param = Parameters["Texture2"];
+            diffuseColorParam = Parameters["DiffuseColor"];
+            fogColorParam = Parameters["FogColor"];
+            fogVectorParam = Parameters["FogVector"];
+            worldViewProjParam = Parameters["WorldViewProj"];
         }
 
 
@@ -294,7 +284,9 @@ namespace MonoGame.Framework.Graphics
         protected internal override void OnApply()
         {
             // Recompute the world+view+projection matrix or fog vector?
-            dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(dirtyFlags, ref world, ref view, ref projection, ref worldView, fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
+            dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(
+                dirtyFlags, world, view, projection, worldView,
+                fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
 
             // Recompute the diffuse/alpha material color parameter?
             if ((dirtyFlags & EffectDirtyFlags.MaterialColor) != 0)
@@ -308,13 +300,13 @@ namespace MonoGame.Framework.Graphics
             if ((dirtyFlags & EffectDirtyFlags.ShaderIndex) != 0)
             {
                 int shaderIndex = 0;
-                
+
                 if (!fogEnabled)
                     shaderIndex += 1;
-                
+
                 if (vertexColorEnabled)
                     shaderIndex += 2;
-                
+
                 dirtyFlags &= ~EffectDirtyFlags.ShaderIndex;
 
                 CurrentTechnique = Techniques[shaderIndex];

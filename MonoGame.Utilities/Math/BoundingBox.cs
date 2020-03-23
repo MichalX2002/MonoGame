@@ -338,35 +338,35 @@ namespace MonoGame.Framework
 
             if (plane.Normal.X >= 0)
             {
-                positiveVertex.X = Max.X;
-                negativeVertex.X = Min.X;
+                positiveVertex.Base.X = Max.X;
+                negativeVertex.Base.X = Min.X;
             }
             else
             {
-                positiveVertex.X = Min.X;
-                negativeVertex.X = Max.X;
+                positiveVertex.Base.X = Min.X;
+                negativeVertex.Base.X = Max.X;
             }
 
             if (plane.Normal.Y >= 0)
             {
-                positiveVertex.Y = Max.Y;
-                negativeVertex.Y = Min.Y;
+                positiveVertex.Base.Y = Max.Y;
+                negativeVertex.Base.Y = Min.Y;
             }
             else
             {
-                positiveVertex.Y = Min.Y;
-                negativeVertex.Y = Max.Y;
+                positiveVertex.Base.Y = Min.Y;
+                negativeVertex.Base.Y = Max.Y;
             }
 
             if (plane.Normal.Z >= 0)
             {
-                positiveVertex.Z = Max.Z;
-                negativeVertex.Z = Min.Z;
+                positiveVertex.Base.Z = Max.Z;
+                negativeVertex.Base.Z = Min.Z;
             }
             else
             {
-                positiveVertex.Z = Min.Z;
-                negativeVertex.Z = Max.Z;
+                positiveVertex.Base.Z = Min.Z;
+                negativeVertex.Base.Z = Max.Z;
             }
 
             float distance = Vector3.Dot(plane.Normal, negativeVertex) + plane.D;

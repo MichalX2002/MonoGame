@@ -23,17 +23,19 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 
         public override string GetRuntimeReader(TargetPlatform targetPlatform)
         {
-            return string.Concat(   typeof(ContentTypeReader).Namespace, 
-                                    ".", 
-                                    "ArrayReader`1[[", 
-                                    _elementWriter.GetRuntimeType(targetPlatform), 
-                                    "]]");
+            return string.Concat(
+                typeof(ContentTypeReader).Namespace,
+                ".",
+                "ArrayReader`1[[",
+                _elementWriter.GetRuntimeType(targetPlatform),
+                "]]");
         }
 
         protected internal override void Write(ContentWriter output, T[] value)
         {
             if (value == null)
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
+
             output.Write(value.Length);
             foreach (var element in value)
                 output.WriteObject(element, _elementWriter);

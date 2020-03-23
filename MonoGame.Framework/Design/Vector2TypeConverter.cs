@@ -10,7 +10,8 @@ namespace MonoGame.Framework.Design
 {
     public class Vector2TypeConverter : TypeConverter
     {
-        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        public override bool CanConvertTo(
+            ITypeDescriptorContext context, Type destinationType)
         {
             if (VectorConversion.CanConvertTo(context, destinationType))
                 return true;
@@ -20,7 +21,8 @@ namespace MonoGame.Framework.Design
             return base.CanConvertTo(context, destinationType);
         }
 
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        public override object ConvertTo(
+            ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             var vec = (Vector2)value;
 
@@ -42,7 +44,8 @@ namespace MonoGame.Framework.Design
             return base.ConvertTo(context, culture, value, destinationType);
         }
 
-        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        public override bool CanConvertFrom(
+            ITypeDescriptorContext context, Type sourceType)
         {
             if (sourceType == typeof(string))
                 return true;
@@ -50,7 +53,8 @@ namespace MonoGame.Framework.Design
             return base.CanConvertFrom(context, sourceType);
         }
 
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object ConvertFrom(
+            ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             var sourceType = value.GetType();
             var vec = Vector2.Zero;

@@ -82,10 +82,7 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToVector4(out Vector4 vector)
         {
-            vector.X = R / (float)byte.MaxValue;
-            vector.Y = G / (float)byte.MaxValue;
-            vector.Z = B / (float)byte.MaxValue;
-            vector.W = A / (float)byte.MaxValue;
+            vector = new Vector4(R, G, B, A) / byte.MaxValue;
         }
 
         public void FromScaledVector4(in Vector4 vector)

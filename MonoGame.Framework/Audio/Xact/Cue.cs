@@ -54,11 +54,15 @@ namespace MonoGame.Framework.Audio
 
         public bool IsPreparing => false;
 
-        /// <summary>Indicates whether or not the cue is currently paused.</summary>
-        /// <remarks>IsPlaying and IsPaused both return true if a cue is paused while playing.</remarks>
+        /// <summary>
+        /// Gets whether or not the cue is currently paused.
+        /// </summary>
+        /// <remarks>
+        /// IsPlaying and IsPaused both return true if a cue is paused while playing.
+        /// </remarks>
         public bool IsPaused
         {
-            get 
+            get
             {
                 if (_curSound != null)
                     return _curSound.IsPaused;
@@ -66,11 +70,15 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        /// <summary>Indicates whether or not the cue is currently playing.</summary>
-        /// <remarks>IsPlaying and IsPaused both return true if a cue is paused while playing.</remarks>
+        /// <summary>
+        /// Gets whether or not the cue is currently playing.
+        /// </summary>
+        /// <remarks>
+        /// IsPlaying and IsPaused both return true if a cue is paused while playing.
+        /// </remarks>
         public bool IsPlaying
         {
-            get 
+            get
             {
                 if (_curSound != null)
                     return _curSound.Playing;
@@ -78,10 +86,12 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        /// <summary>Indicates whether or not the cue is currently stopped.</summary>
+        /// <summary>
+        /// Gets whether or not the cue is currently stopped.
+        /// </summary>
         public bool IsStopped
         {
-            get 
+            get
             {
                 if (_curSound != null)
                     return _curSound.Stopped;
@@ -99,7 +109,7 @@ namespace MonoGame.Framework.Audio
             _probs[0] = 1f;
             _variables = engine.CreateCueVariables();
         }
-        
+
         internal Cue(AudioEngine engine, string cuename, XactSound[] sounds, float[] probs)
         {
             _engine = engine;
@@ -162,7 +172,8 @@ namespace MonoGame.Framework.Audio
 
         /// <summary>Stops playback of a <see cref="Cue"/>.</summary>
         /// <param name="options">
-        /// Specifies if the sound should play any pending release phases or transitions before stopping.
+        /// Specifies if the sound should play any pending 
+        /// release phases or transitions before stopping.
         /// </param>
         public void Stop(AudioStopOptions options)
         {
@@ -246,7 +257,7 @@ namespace MonoGame.Framework.Audio
         /// the listener's and emitter's positions.
         /// Any stereo information in the sound will be discarded.
         /// </remarks>
-        public void Apply3D(AudioListener listener, AudioEmitter emitter) 
+        public void Apply3D(AudioListener listener, AudioEmitter emitter)
         {
             if (listener == null)
                 throw new ArgumentNullException(nameof(listener));
@@ -255,7 +266,8 @@ namespace MonoGame.Framework.Audio
 
             if (_played && !_applied3D)
                 throw new InvalidOperationException(
-                    "You must call Apply3D() on a Cue before calling Play() to be able to call Apply3D() after calling Play().");
+                    "You must call Apply3D() on a Cue before calling Play() " +
+                    "to be able to call Apply3D() after calling Play().");
 
             var direction = listener.Position - emitter.Position;
 
@@ -269,9 +281,9 @@ namespace MonoGame.Framework.Audio
                 // Calculate the orientation.
                 if (distance > 0f)
                     direction /= distance;
-                
-                Vector3.Cross(listener.Up, listener.Forward, out var right);
-                Vector3.Dot(direction, listener.Forward, out var slope);
+
+                var right = Vector3.Cross(listener.Up, listener.Forward);
+                var slope = Vector3.Dot(direction, listener.Forward);
                 var angle = MathHelper.ToDegrees(MathF.Acos(slope));
                 var j = FindVariable("OrientationAngle");
                 _variables[j].SetValue(angle);
@@ -313,7 +325,8 @@ namespace MonoGame.Framework.Audio
                 {
                     var rpcCurve = _engine.RpcCurves[rpcCurves[i]];
 
-                    // Some curves are driven by global variables and others by cue instance variables.
+                    // Some curves are driven by global variables
+                    // and others by cue instance variables.
                     float value;
                     if (rpcCurve.IsGlobal)
                         value = rpcCurve.Evaluate(_engine.GetGlobalVariable(rpcCurve.Variable));
@@ -352,7 +365,8 @@ namespace MonoGame.Framework.Audio
                 if (volume < 0f)
                     volume = 0f;
 
-                _curSound.UpdateState(_engine, volume, pitch, reverbMix, filterFrequency, filterQFactor);
+                _curSound.UpdateState(
+                    _engine, volume, pitch, reverbMix, filterFrequency, filterQFactor);
             }
 
             return volume;
