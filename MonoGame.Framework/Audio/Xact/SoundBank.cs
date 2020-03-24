@@ -23,6 +23,16 @@ namespace MonoGame.Framework.Audio
         private readonly Dictionary<string, XactCueEntry> _entries = new Dictionary<string, XactCueEntry>();
 
         /// <summary>
+        /// This event is triggered when the <see cref="SoundBank"/> is disposed.
+        /// </summary>
+        public event DatalessEvent<SoundBank> Disposing;
+
+        /// <summary>
+        /// Is true if the <see cref="SoundBank"/> has been disposed.
+        /// </summary>
+        public bool IsDisposed { get; private set; }
+
+        /// <summary>
         /// Is true if the <see cref="SoundBank"/> has any live <see cref="Cue"/>s in use.
         /// </summary>
         public bool IsInUse { get; private set; }
@@ -77,20 +87,18 @@ namespace MonoGame.Framework.Audio
                 reader.ReadUInt32(); // cueNameHashValsOffset
                 reader.ReadUInt32(); // soundsOffset
 
-                //name = System.Text.Encoding.UTF8.GetString(soundbankreader.ReadBytes(64),0,64).Replace("\0","");
-
                 //parse wave bank name table
                 stream.Seek(waveBankNameTableOffset, SeekOrigin.Begin);
                 _waveBanks = new WaveBank[numWaveBanks];
                 _waveBankNames = new string[numWaveBanks];
                 for (int i = 0; i < numWaveBanks; i++)
-                    _waveBankNames[i] = System.Text.Encoding.UTF8.GetString(
-                        reader.ReadBytes(64), 0, 64).Replace("\0", "");
+                    _waveBankNames[i] = System.Text.Encoding.UTF8
+                        .GetString(reader.ReadBytes(64)).Replace("\0", "");
 
                 //parse cue name table
                 stream.Seek(cueNamesOffset, SeekOrigin.Begin);
-                string[] cueNames = System.Text.Encoding.UTF8.GetString(
-                    reader.ReadBytes((int)cueNameTableLen), 0, (int)cueNameTableLen).Split('\0');
+                string[] cueNames = System.Text.Encoding.UTF8
+                    .GetString(reader.ReadBytes((int)cueNameTableLen)).Split('\0');
 
                 // Simple cues
                 if (numSimpleCues > 0)
@@ -106,7 +114,9 @@ namespace MonoGame.Framework.Audio
                         var sound = new XactSound(audioEngine, this, reader);
                         stream.Seek(oldPosition, SeekOrigin.Begin);
 
-                        _entries.Add(cueNames[i], new XactCueEntry(new XactSound[] { sound }, _defaultProbability));
+                        _entries.Add(
+                            cueNames[i],
+                            new XactCueEntry(new XactSound[] { sound }, _defaultProbability));
                     }
                 }
 
@@ -127,8 +137,9 @@ namespace MonoGame.Framework.Audio
                             var sound = new XactSound(audioEngine, this, reader);
                             stream.Seek(oldPosition, SeekOrigin.Begin);
 
-                            _entries.Add(cueNames[numSimpleCues + i], new XactCueEntry(
-                                new XactSound[] { sound }, _defaultProbability));
+                            _entries.Add(
+                                cueNames[numSimpleCues + i], 
+                                new XactCueEntry(new XactSound[] { sound }, _defaultProbability));
                         }
                         else
                         {
@@ -206,7 +217,8 @@ namespace MonoGame.Framework.Audio
 
                             stream.Seek(savepos, SeekOrigin.Begin);
 
-                            _entries.Add(cueNames[numSimpleCues + i], new XactCueEntry(cueSounds, probs));
+                            _entries.Add(
+                                cueNames[numSimpleCues + i], new XactCueEntry(cueSounds, probs));
                         }
 
                         // Instance limiting
@@ -219,7 +231,8 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        internal SoundEffectInstance GetSoundEffectInstance(int waveBankIndex, int trackIndex, out bool streaming)
+        internal SoundEffectInstance GetSoundEffectInstance(
+            int waveBankIndex, int trackIndex, out bool streaming)
         {
             var waveBank = _waveBanks[waveBankIndex];
 
@@ -229,6 +242,7 @@ namespace MonoGame.Framework.Audio
                 var name = _waveBankNames[waveBankIndex];
                 if (!_audioengine.Wavebanks.TryGetValue(name, out waveBank))
                     throw new Exception("The wave bank '" + name + "' was not found!");
+
                 _waveBanks[waveBankIndex] = waveBank;
             }
 
@@ -291,16 +305,6 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// This event is triggered when the <see cref="SoundBank"/> is disposed.
-        /// </summary>
-        public event DatalessEvent<SoundBank> Disposing;
-
-        /// <summary>
-        /// Is true if the <see cref="SoundBank"/> has been disposed.
-        /// </summary>
-        public bool IsDisposed { get; private set; }
-
-        /// <summary>
         /// Disposes the <see cref="SoundBank"/>.
         /// </summary>
         public void Dispose()
@@ -309,6 +313,9 @@ namespace MonoGame.Framework.Audio
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Disposes this <see cref="SoundBank"/>.
+        /// </summary>
         ~SoundBank()
         {
             Dispose(false);

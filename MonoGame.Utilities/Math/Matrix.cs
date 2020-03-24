@@ -948,10 +948,7 @@ namespace MonoGame.Framework
         /// Gets the hash code of this <see cref="Matrix"/>.
         /// </summary>
         /// <returns>Hash code of this <see cref="Matrix"/>.</returns>
-        public override int GetHashCode()
-        {
-            return Base.GetHashCode();
-        }
+        public readonly override int GetHashCode() => Base.GetHashCode();
 
         #endregion
 

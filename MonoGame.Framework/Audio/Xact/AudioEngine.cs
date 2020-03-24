@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
+using System.Text;
 
 namespace MonoGame.Framework.Audio
 {
@@ -37,17 +38,20 @@ namespace MonoGame.Framework.Audio
 
         internal readonly object UpdateLock = new object();
 
-        internal RpcVariable[] CreateCueVariables()
-        {
-            var clone = new RpcVariable[_cueVariables.Length];
-            Array.Copy(_cueVariables, clone, _cueVariables.Length);
-            return clone;
-        }
-
         /// <summary>
         /// The current content version.
         /// </summary>
         public const int ContentVersion = 39;
+
+        /// <summary>
+        /// This event is triggered when the AudioEngine is disposed.
+        /// </summary>
+        public event DatalessEvent<AudioEngine> Disposing;
+
+        /// <summary>
+        /// Is true if the AudioEngine has been disposed.
+        /// </summary>
+        public bool IsDisposed { get; private set; }
 
         /// <param name="settingsFile">Path to a XACT settings file.</param>
         public AudioEngine(string settingsFile) : this(settingsFile, TimeSpan.Zero, "")
@@ -63,8 +67,17 @@ namespace MonoGame.Framework.Audio
             return stream;
         }
 
+        internal RpcVariable[] CreateCueVariables()
+        {
+            var clone = new RpcVariable[_cueVariables.Length];
+            Array.Copy(_cueVariables, clone, _cueVariables.Length);
+            return clone;
+        }
+
         /// <param name="settingsFile">Path to a XACT settings file.</param>
-        /// <param name="lookAheadTime">Determines how many milliseconds the engine will look ahead when determing when to transition to another sound.</param>
+        /// <param name="lookAheadTime">
+        /// Determines how many milliseconds the engine will look ahead when determing when to transition to another sound.
+        /// </param>
         /// <param name="rendererId">A string that specifies the audio renderer to use.</param>
         /// <remarks>For the best results, use a lookAheadTime of 250 milliseconds or greater.</remarks>
         public AudioEngine(string settingsFile, TimeSpan lookAheadTime, string rendererId)
@@ -230,25 +243,25 @@ namespace MonoGame.Framework.Audio
                 if (RpcCurves[i].FileOffset == fileOffset)
                     return i;
             }
-
             return -1;
         }
 
         private static string[] ReadNullTerminatedStrings(uint count, BinaryReader reader)
         {
-            var ret = new string[count];
+            var strings = new string[count];
+            var builder = new StringBuilder();
 
             for (var i = 0; i < count; i++)
             {
-                var s = new List<char>();
                 while (reader.PeekChar() != 0)
-                    s.Add(reader.ReadChar());
+                    builder.Append(reader.ReadChar());
+                reader.ReadChar(); // skip NULL
 
-                reader.ReadChar();
-                ret[i] = new string(s.ToArray());
+                strings[i] = builder.ToString();
+                builder.Clear();
             }
 
-            return ret;
+            return strings;
         }
 
         /// <summary>
@@ -264,10 +277,9 @@ namespace MonoGame.Framework.Audio
 
             lock (UpdateLock)
             {
-                for (var x = 0; x < ActiveCues.Count;)
+                for (int i = 0; i < ActiveCues.Count;)
                 {
-                    var cue = ActiveCues[x];
-
+                    var cue = ActiveCues[i];
                     cue.Update(dt);
 
                     if (cue.IsStopped || cue.IsDisposed)
@@ -276,7 +288,7 @@ namespace MonoGame.Framework.Audio
                         continue;
                     }
 
-                    x++;
+                    i++;
                 }
             }
 
@@ -284,11 +296,11 @@ namespace MonoGame.Framework.Audio
             // specifically for the reverb DSP effect.
             if (_reverbSettings != null)
             {
-                for (var i = 0; i < _reverbCurves.Length; i++)
+                for (int i = 0; i < _reverbCurves.Length; i++)
                 {
                     var curve = _reverbCurves[i];
-                    var result = curve.Evaluate(_variables[curve.Variable].Value);
-                    var parameter = curve.Parameter - RpcParameter.NumParameters;
+                    float result = curve.Evaluate(_variables[curve.Variable].Value);
+                    int parameter = curve.Parameter - RpcParameter.NumParameters;
                     _reverbSettings[parameter] = result;
                 }
 
@@ -348,17 +360,7 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// This event is triggered when the AudioEngine is disposed.
-        /// </summary>
-        public event DatalessEvent<AudioEngine> Disposing;
-
-        /// <summary>
-        /// Is true if the AudioEngine has been disposed.
-        /// </summary>
-        public bool IsDisposed { get; private set; }
-
-        /// <summary>
-        /// Disposes the AudioEngine.
+        /// Disposes the <see cref="AudioEngine"/>.
         /// </summary>
         public void Dispose()
         {
@@ -366,6 +368,9 @@ namespace MonoGame.Framework.Audio
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Disposes the <see cref="AudioEngine"/>
+        /// </summary>
         ~AudioEngine()
         {
             Dispose(false);

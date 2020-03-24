@@ -491,10 +491,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the hash code of this <see cref="Vector4"/>.
         /// </summary>
-        public readonly override int GetHashCode()
-        {
-            return Base.GetHashCode();
-        }
+        public readonly override int GetHashCode() => Base.GetHashCode();
 
         #endregion
 

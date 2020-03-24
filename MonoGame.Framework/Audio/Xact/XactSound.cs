@@ -127,8 +127,8 @@ namespace MonoGame.Framework.Audio
             _cueVolume = volume;
             var category = engine.Categories[_categoryId];
 
-            var curInstances = category.GetPlayingInstanceCount();
-            if (curInstances >= category.maxInstances)
+            int currentInstanceCount = category.GetPlayingInstanceCount();
+            if (currentInstanceCount >= category.maxInstances)
             {
                 var prevSound = category.GetOldestInstance();
                 if (prevSound != null)
@@ -139,7 +139,7 @@ namespace MonoGame.Framework.Audio
                 }
             }
 
-            float finalVolume = _volume * _cueVolume * category._volume[0];
+            float finalVolume = _volume * _cueVolume * category.Volume;
             float finalPitch = _pitch + _cuePitch;
             float finalMix = _useReverb ? _cueReverbMix : 0f;
 
@@ -163,11 +163,10 @@ namespace MonoGame.Framework.Audio
                 }
 
                 _wave = _soundBank.GetSoundEffectInstance(_waveBankIndex, _trackIndex, out _streaming);
-
                 if (_wave == null)
                 {
-                    // We couldn't create a sound effect instance, most likely
-                    // because we've reached the sound pool limits.
+                    // We couldn't create a sound effect instance, 
+                    // most likely because we've reached the sound pool limits.
                     return;
                 }
 
@@ -178,38 +177,18 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        internal void Update(float dt)
+        internal void Update(float deltaTime)
         {
             if (_complexSound)
             {
                 foreach (var sound in _soundClips)
-                    sound.Update(dt);
+                    sound.Update(deltaTime);
             }
             else
             {
-                if (_wave != null && _wave.State == SoundState.Stopped)
+                if (_wave != null &&
+                    _wave.State == SoundState.Stopped)
                 {
-                    if (_streaming)
-                        _wave.Dispose();
-                    else
-                        _wave._isXAct = false;
-                    _wave = null;
-                }
-            }
-        }
-
-        internal void StopAll(AudioStopOptions options)
-        {
-            if (_complexSound)
-            {
-                foreach (XactClip clip in _soundClips)
-                    clip.Stop();
-            }
-            else
-            {
-                if (_wave != null)
-                {
-                    _wave.Stop();
                     if (_streaming)
                         _wave.Dispose();
                     else
@@ -223,8 +202,8 @@ namespace MonoGame.Framework.Audio
         {
             if (_complexSound)
             {
-                foreach (var sound in _soundClips)
-                    sound.Stop();
+                foreach (var clip in _soundClips)
+                    clip.Stop();
             }
             else
             {
@@ -291,22 +270,24 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        internal void UpdateState(AudioEngine engine, float volume, float pitch, float reverbMix, float? filterFrequency, float? filterQFactor)
+        internal void UpdateState(
+            AudioEngine engine, float volume, float pitch, float reverbMix, float? filterFrequency, float? filterQFactor)
         {
             _cueVolume = volume;
-            var finalVolume = _volume * _cueVolume * engine.Categories[_categoryId]._volume[0];
+            float finalVolume = _volume * _cueVolume * engine.Categories[_categoryId].Volume;
 
             _cueReverbMix = reverbMix;
             _cueFilterFrequency = filterFrequency;
             _cueFilterQFactor = filterQFactor;
 
             _cuePitch = pitch;
-            var finalPitch = _pitch + _cuePitch;
+            float finalPitch = _pitch + _cuePitch;
 
             if (_complexSound)
             {
                 foreach (var clip in _soundClips)
-                    clip.UpdateState(finalVolume, finalPitch, _useReverb ? _cueReverbMix : 0f, _cueFilterFrequency, _cueFilterQFactor);
+                    clip.UpdateState(
+                        finalVolume, finalPitch, _useReverb ? _cueReverbMix : 0f, _cueFilterFrequency, _cueFilterQFactor);
             }
             else if (_wave != null)
             {
@@ -353,7 +334,7 @@ namespace MonoGame.Framework.Audio
             {
                 if (_complexSound)
                 {
-                    var notStopped = false;
+                    bool notStopped = false;
 
                     // All clips must be stopped for the sound to be stopped.
                     foreach (var clip in _soundClips)

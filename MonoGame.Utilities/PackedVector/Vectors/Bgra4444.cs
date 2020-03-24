@@ -68,11 +68,11 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToVector4(out Vector4 vector)
         {
-            vector.X = (PackedValue >> 8) & 0x0F;
-            vector.Y = (PackedValue >> 4) & 0x0F;
-            vector.Z = PackedValue & 0x0F;
-            vector.W = (PackedValue >> 12) & 0x0F;
-            vector /= 15f;
+            vector.Base.X = (PackedValue >> 8) & 0x0F;
+            vector.Base.Y = (PackedValue >> 4) & 0x0F;
+            vector.Base.Z = PackedValue & 0x0F;
+            vector.Base.W = (PackedValue >> 12) & 0x0F;
+            vector /= 15f; 
         }
 
         public void FromScaledVector4(in Vector4 scaledVector)

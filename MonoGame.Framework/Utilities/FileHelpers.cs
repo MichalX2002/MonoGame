@@ -89,25 +89,31 @@ namespace MonoGame.Framework.Utilities
         private static string UrlEncode(string url)
         {
             var encoder = Encoding.UTF8;
-            var safeline = new StringBuilder(encoder.GetByteCount(url) * 3);
+            var builder = new StringBuilder(encoder.GetByteCount(url) * 3);
+            Span<byte> tmp = stackalloc byte[encoder.GetMaxByteCount(1)];
 
-            foreach (var c in url)
+            for (int i = 0; i < url.Length; i++)
             {
-                if ((c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || Array.IndexOf(UrlSafeChars, c) != -1)
-                    safeline.Append(c);
+                char c = url[i];
+                if ((c >= 48 && c <= 57) ||
+                    (c >= 65 && c <= 90) ||
+                    (c >= 97 && c <= 122) ||
+                    Array.IndexOf(UrlSafeChars, c) != -1)
+                {
+                    builder.Append(c);
+                }
                 else
                 {
-                    var bytes = encoder.GetBytes(c.ToString());
-
-                    foreach (var num in bytes)
+                    int byteCount = encoder.GetBytes(url.AsSpan(i, 1), tmp);
+                    for (int j = 0; j < byteCount; j++)
                     {
-                        safeline.Append("%");
-                        safeline.Append(num.ToString("X"));
+                        builder.Append("%");
+                        builder.Append(tmp[j].ToString("X"));
                     }
                 }
             }
 
-            return safeline.ToString();
+            return builder.ToString();
         }
     }
 }

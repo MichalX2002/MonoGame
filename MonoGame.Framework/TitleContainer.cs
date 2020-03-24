@@ -12,7 +12,7 @@ namespace MonoGame.Framework
     {
         static partial void PlatformInit();
 
-        static TitleContainer() 
+        static TitleContainer()
         {
             Location = string.Empty;
             PlatformInit();
@@ -21,7 +21,7 @@ namespace MonoGame.Framework
         static internal string Location { get; private set; }
 
         /// <summary>
-        /// Returns an open stream to an exsiting file in the title storage area.
+        /// Returns a stream to an exsiting file in the title storage area.
         /// </summary>
         /// <param name="name">The filepath relative to the title storage area.</param>
         /// <returns>A open stream or null if the file is not found.</returns>
@@ -32,21 +32,19 @@ namespace MonoGame.Framework
 
             // We do not accept absolute paths here.
             if (Path.IsPathRooted(name))
-                throw new ArgumentException(
-                    $"Invalid filename. {nameof(TitleContainer)}.{nameof(TitleContainer.OpenStream)} requires a relative path.",
-                    nameof(name));
+                throw new ArgumentException($"A relative path is required.", nameof(name));
 
             // Normalize the file path.
             var safeName = NormalizeRelativePath(name);
 
-            // Call the platform code to open the stream.  Any errors
-            // at this point should result in a file not found.
-            Stream stream;
+            // Call the platform code to open the stream.  
+            // Any errors at this point should result in a file not found.
             try
             {
-                stream = PlatformOpenStream(safeName);
+                var stream = PlatformOpenStream(safeName);
                 if (stream == null)
-                    throw FileNotFoundException(name, null);
+                    throw CreateFileNotFoundException(name, null);
+                return stream;
             }
             catch (FileNotFoundException)
             {
@@ -56,13 +54,11 @@ namespace MonoGame.Framework
             {
                 throw new FileNotFoundException(name, ex);
             }
-
-            return stream;
         }
 
-        private static Exception FileNotFoundException(string name, Exception inner)
+        private static Exception CreateFileNotFoundException(string fileName, Exception inner)
         {
-            return new FileNotFoundException("Error loading file; not found.", name, inner);
+            return new FileNotFoundException(null, fileName, inner);
         }
 
         internal static string NormalizeRelativePath(string name)

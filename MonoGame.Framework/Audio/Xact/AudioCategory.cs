@@ -12,17 +12,10 @@ namespace MonoGame.Framework.Audio
     /// <summary>
     /// Provides functionality for manipulating multiple sounds at a time.
     /// </summary>
-    public struct AudioCategory : IEquatable<AudioCategory>
+    public class AudioCategory : IEquatable<AudioCategory>
     {
-        readonly AudioEngine _engine;
-        readonly List<XactSound> _sounds;
-
-        // This is a bit gross, but we use an array here
-        // instead of a field since AudioCategory is a struct
-        // This allows us to save _volume when the user
-        // holds onto a reference of AudioCategory, or when a cue
-        // is created/loaded after the volume's already been set.
-        internal float[] _volume;
+        private readonly AudioEngine _engine;
+        private readonly List<XactSound> _sounds;
 
         internal bool isBackgroundMusic;
         internal bool isPublic;
@@ -35,14 +28,21 @@ namespace MonoGame.Framework.Audio
         internal float fadeIn;
         internal float fadeOut;
 
-        internal AudioCategory(AudioEngine audioengine, string name, BinaryReader reader)
+        internal float Volume { get; private set; }
+
+        /// <summary>
+        /// Gets the category's friendly name.
+        /// </summary>
+        public string Name { get; }
+
+        internal AudioCategory(AudioEngine audioEngine, string name, BinaryReader reader)
         {
-            Debug.Assert(audioengine != null);
+            Debug.Assert(audioEngine != null);
             Debug.Assert(!string.IsNullOrEmpty(name));
 
             _sounds = new List<XactSound>();
             Name = name;
-            _engine = audioengine;
+            _engine = audioEngine;
 
             maxInstances = reader.ReadByte();
             instanceLimit = maxInstances != 0xff;
@@ -56,8 +56,7 @@ namespace MonoGame.Framework.Audio
 
             reader.ReadUInt16(); //unkn
 
-            var volume = XactHelpers.ParseVolumeFromDecibels(reader.ReadByte());
-            _volume = new float[1] { volume };
+            Volume = XactHelpers.ParseVolumeFromDecibels(reader.ReadByte());
 
             byte visibilityFlags = reader.ReadByte();
             isBackgroundMusic = (visibilityFlags & 0x1) != 0;
@@ -91,11 +90,6 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Gets the category's friendly name.
-        /// </summary>
-        public string Name { get; }
-
-        /// <summary>
         /// Pauses all associated sounds.
         /// </summary>
         public void Pause()
@@ -125,14 +119,13 @@ namespace MonoGame.Framework.Audio
         public void SetVolume(float volume)
         {
             if (volume < 0)
-                throw new ArgumentException("The volume must be positive.");
+                throw new ArgumentOutOfRangeException("The volume must be positive.");
 
             // Updating all the sounds in a category can be
             // very expensive... so avoid it if we can.
-            if (_volume[0] == volume)
+            if (Volume == volume)
                 return;
-
-            _volume[0] = volume;
+            Volume = volume;
 
             foreach (var sound in _sounds)
                 sound.UpdateCategoryVolume(volume);
@@ -141,14 +134,16 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// Determines whether two <see cref="AudioCategory"/> instances are equal.
         /// </summary>
-        public static bool operator ==(in AudioCategory a, in AudioCategory b) =>
-            a._engine == b._engine &&
-            a.Name.Equals(b.Name, StringComparison.Ordinal);
+        public static bool operator ==(AudioCategory a, AudioCategory b)
+        {
+            return a._engine == b._engine
+                && a.Name.Equals(b.Name, StringComparison.Ordinal);
+        }
 
         /// <summary>
         /// Determines whether two <see cref="AudioCategory"/> instances are not equal.
         /// </summary>
-        public static bool operator !=(in AudioCategory a, in AudioCategory b) => !(a == b);
+        public static bool operator !=(AudioCategory a, AudioCategory b) => !(a == b);
 
         /// <summary>
         /// Determines whether two <see cref="AudioCategory"/> instances are equal.
@@ -170,13 +165,6 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// Gets the hash code for this <see cref="AudioCategory"/>.
         /// </summary>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int code = 7 + Name.GetHashCode();
-                return code * 31 + _engine.GetHashCode();
-            }
-        }
+        public override int GetHashCode() => HashCode.Combine(Name, _engine);
     }
 }
