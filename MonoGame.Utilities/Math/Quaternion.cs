@@ -4,7 +4,9 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using FastQuaternion = System.Numerics.Quaternion;
 
 namespace MonoGame.Framework
 {
@@ -16,43 +18,52 @@ namespace MonoGame.Framework
     public struct Quaternion : IEquatable<Quaternion>
     {
         /// <summary>
-        /// Returns a quaternion representing no rotation.
+        /// Gets a quaternion representing no rotation (0, 0, 0, 1).
         /// </summary>
-        public static readonly Quaternion Identity = new Quaternion(0, 0, 0, 1);
+        public static Quaternion Identity { get; } = FastQuaternion.Identity;
 
-        #region Public Fields
+        [IgnoreDataMember]
+        public FastQuaternion Base;
+
+        #region Properties
 
         /// <summary>
         /// The x coordinate of this <see cref="Quaternion"/>.
         /// </summary>
         [DataMember]
-        public float X;
+        public float X { readonly get => Base.X; set => Base.X = value; }
 
         /// <summary>
         /// The y coordinate of this <see cref="Quaternion"/>.
         /// </summary>
         [DataMember]
-        public float Y;
+        public float Y { readonly get => Base.Y; set => Base.Y = value; }
 
         /// <summary>
         /// The z coordinate of this <see cref="Quaternion"/>.
         /// </summary>
         [DataMember]
-        public float Z;
+        public float Z { readonly get => Base.Z; set => Base.Z = value; }
 
         /// <summary>
         /// The rotation component of this <see cref="Quaternion"/>.
         /// </summary>
         [DataMember]
-        public float W;
+        public float W { readonly get => Base.W; set => Base.W = value; }
 
-        #endregion
+        /// <summary>
+        /// Gets whether the current instance is the identity quaternion.
+        /// </summary>
+        [IgnoreDataMember]
+        public readonly bool IsIdentity => Base.IsIdentity;
 
-        internal string DebuggerDisplay => this == Identity ? "Identity" : string.Concat(
+        internal string DebuggerDisplay => IsIdentity ? "Identity" : string.Concat(
             X.ToString(), " ",
             Y.ToString(), " ",
             Z.ToString(), " ",
             W.ToString());
+
+        #endregion
 
         #region Constructors
 
@@ -63,7 +74,7 @@ namespace MonoGame.Framework
         /// <param name="y">The y coordinate in 3d-space.</param>
         /// <param name="z">The z coordinate in 3d-space.</param>
         /// <param name="w">The rotation component.</param>
-        public Quaternion(float x, float y, float z, float w)
+        public Quaternion(float x, float y, float z, float w) : this()
         {
             X = x;
             Y = y;
@@ -75,35 +86,31 @@ namespace MonoGame.Framework
         /// Constructs a quaternion with X, Y, Z from <see cref="Vector3"/> and rotation component from a scalar.
         /// </summary>
         /// <param name="value">The x, y, z coordinates in 3d-space.</param>
-        /// <param name="w">The rotation component.</param>
-        public Quaternion(in Vector3 value, float w)
+        /// <param name="scalarPart">The rotation component.</param>
+        public Quaternion(in Vector3 value, float scalarPart) : 
+            this(value.X, value.Y, value.Z, scalarPart)
         {
-            X = value.X;
-            Y = value.Y;
-            Z = value.Z;
-            W = w;
         }
 
         /// <summary>
         /// Constructs a quaternion from <see cref="Vector4"/>.
         /// </summary>
         /// <param name="value">The x, y, z coordinates in 3d-space and the rotation component.</param>
-        public Quaternion(in Vector4 value)
+        public Quaternion(in Vector4 value) : 
+            this(value.X, value.Y, value.Z, value.W)
         {
-            X = value.X;
-            Y = value.Y;
-            Z = value.Z;
-            W = value.W;
         }
 
         #endregion
+
+        #region ToVector4
 
         /// <summary>
         /// Gets a <see cref="Vector4"/> representation for this object.
         /// </summary>
         public readonly Vector4 ToVector4() => UnsafeUtils.As<Quaternion, Vector4>(this);
-
-        #region Public Methods
+        
+        #endregion
 
         /// <summary>
         /// Creates a new <see cref="Quaternion"/> that contains the sum of two quaternions.
@@ -111,7 +118,10 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Quaternion"/>.</param>
         /// <param name="b">Source <see cref="Quaternion"/>.</param>
         /// <returns>The result of the quaternion addition.</returns>
-        public static Quaternion Add(in Quaternion a, in Quaternion b) => a + b;
+        public static Quaternion Add(in Quaternion a, in Quaternion b)
+        {
+            return FastQuaternion.Add(a, b);
+        }
 
         /// <summary>
         /// Creates a new <see cref="Quaternion"/> that contains concatenation between two quaternion.
@@ -121,22 +131,10 @@ namespace MonoGame.Framework
         /// <returns>The result of rotation of <paramref name="left"/> followed by <paramref name="right"/> rotation.</returns>
         public static Quaternion Concatenate(in Quaternion left, in Quaternion right)
         {
-            return new Quaternion(
-                (right.X * left.W) + (left.X * right.W) + ((right.Y * left.Z) - (right.Z * left.Y)),
-                (right.Y * left.W) + (left.Y * right.W) + ((right.Z * left.X) - (right.X * left.Z)),
-                (right.Z * left.W) + (left.Z * right.W) + ((right.X * left.Y) - (right.Y * left.X)),
-                (right.W * left.W) - ((right.X * left.X) + (right.Y * left.Y) + (right.Z * left.Z)));
+            return FastQuaternion.Concatenate(left, right);
         }
 
-        /// <summary>
-        /// Transforms this quaternion into its conjugated version.
-        /// </summary>
-        public void Conjugate()
-        {
-            X = -X;
-            Y = -Y;
-            Z = -Z;
-        }
+        #region Conjugate
 
         /// <summary>
         /// Creates a new <see cref="Quaternion"/> that contains conjugated version of the specified quaternion.
@@ -145,8 +143,18 @@ namespace MonoGame.Framework
         /// <returns>The conjugate version of the specified quaternion.</returns>
         public static Quaternion Conjugate(in Quaternion value)
         {
-            return new Quaternion(-value.X, -value.Y, -value.Z, value.W);
+            return FastQuaternion.Conjugate(value);
         }
+
+        /// <summary>
+        /// Transforms this quaternion into its conjugated version.
+        /// </summary>
+        public void Conjugate()
+        {
+            this = Conjugate(this);
+        }
+
+        #endregion
 
         /// <summary>
         /// Creates a new <see cref="Quaternion"/> from the specified axis and angle.
@@ -156,10 +164,7 @@ namespace MonoGame.Framework
         /// <returns>The new quaternion builded from axis and angle.</returns>
         public static Quaternion CreateFromAxisAngle(in Vector3 axis, float angle)
         {
-            float half = angle * 0.5f;
-            float sin = MathF.Sin(half);
-            float cos = MathF.Cos(half);
-            return new Quaternion(axis.X * sin, axis.Y * sin, axis.Z * sin, cos);
+            return FastQuaternion.CreateFromAxisAngle(axis, angle);
         }
 
         /// <summary>
@@ -169,55 +174,7 @@ namespace MonoGame.Framework
         /// <returns>A quaternion composed from the rotation part of the matrix.</returns>
         public static Quaternion CreateFromRotationMatrix(in Matrix matrix)
         {
-            Quaternion quaternion;
-            float sqrt;
-            float half;
-
-            float scale = matrix.M11 + matrix.M22 + matrix.M33;
-            if (scale > 0f)
-            {
-                sqrt = MathF.Sqrt(scale + 1f);
-                quaternion.W = sqrt * 0.5f;
-                sqrt = 0.5f / sqrt;
-
-                quaternion.X = (matrix.M23 - matrix.M32) * sqrt;
-                quaternion.Y = (matrix.M31 - matrix.M13) * sqrt;
-                quaternion.Z = (matrix.M12 - matrix.M21) * sqrt;
-                return quaternion;
-            }
-
-            if ((matrix.M11 >= matrix.M22) && (matrix.M11 >= matrix.M33))
-            {
-                sqrt = MathF.Sqrt(1f + matrix.M11 - matrix.M22 - matrix.M33);
-                half = 0.5f / sqrt;
-
-                quaternion.X = 0.5f * sqrt;
-                quaternion.Y = (matrix.M12 + matrix.M21) * half;
-                quaternion.Z = (matrix.M13 + matrix.M31) * half;
-                quaternion.W = (matrix.M23 - matrix.M32) * half;
-                return quaternion;
-            }
-
-            if (matrix.M22 > matrix.M33)
-            {
-                sqrt = MathF.Sqrt(1f + matrix.M22 - matrix.M11 - matrix.M33);
-                half = 0.5f / sqrt;
-
-                quaternion.X = (matrix.M21 + matrix.M12) * half;
-                quaternion.Y = 0.5f * sqrt;
-                quaternion.Z = (matrix.M32 + matrix.M23) * half;
-                quaternion.W = (matrix.M31 - matrix.M13) * half;
-                return quaternion;
-            }
-
-            sqrt = MathF.Sqrt(1f + matrix.M33 - matrix.M11 - matrix.M22);
-            half = 0.5f / sqrt;
-
-            quaternion.X = (matrix.M31 + matrix.M13) * half;
-            quaternion.Y = (matrix.M32 + matrix.M23) * half;
-            quaternion.Z = 0.5f * sqrt;
-            quaternion.W = (matrix.M12 - matrix.M21) * half;
-            return quaternion;
+            return FastQuaternion.CreateFromRotationMatrix(matrix);
         }
 
         /// <summary>
@@ -229,22 +186,7 @@ namespace MonoGame.Framework
         /// <returns>A new quaternion from the concatenated yaw, pitch, and roll angles.</returns>
         public static Quaternion CreateFromYawPitchRoll(float yaw, float pitch, float roll)
         {
-            float halfRoll = roll * 0.5f;
-            float halfPitch = pitch * 0.5f;
-            float halfYaw = yaw * 0.5f;
-
-            float sinRoll = MathF.Sin(halfRoll);
-            float cosRoll = MathF.Cos(halfRoll);
-            float sinPitch = MathF.Sin(halfPitch);
-            float cosPitch = MathF.Cos(halfPitch);
-            float sinYaw = MathF.Sin(halfYaw);
-            float cosYaw = MathF.Cos(halfYaw);
-
-            return new Quaternion(
-                (cosYaw * sinPitch * cosRoll) + (sinYaw * cosPitch * sinRoll),
-                (sinYaw * cosPitch * cosRoll) - (cosYaw * sinPitch * sinRoll),
-                (cosYaw * cosPitch * sinRoll) - (sinYaw * sinPitch * cosRoll),
-                (cosYaw * cosPitch * cosRoll) + (sinYaw * sinPitch * sinRoll));
+            return FastQuaternion.CreateFromYawPitchRoll(yaw, pitch, roll);
         }
 
         /// <summary>
@@ -255,27 +197,7 @@ namespace MonoGame.Framework
         /// <returns>The result of dividing the quaternions.</returns>
         public static Quaternion Divide(in Quaternion a, in Quaternion b)
         {
-            float n14 =
-                (b.X * b.X) +
-                (b.Y * b.Y) +
-                (b.Z * b.Z) +
-                (b.W * b.W);
-
-            float n5 = 1f / n14;
-            float n4 = -b.X * n5;
-            float n3 = -b.Y * n5;
-            float n2 = -b.Z * n5;
-            float n1 = b.W * n5;
-            float n13 = (a.Y * n2) - (a.Z * n3);
-            float n12 = (a.Z * n4) - (a.X * n2);
-            float n11 = (a.X * n3) - (a.Y * n4);
-            float n10 = (a.X * n4) + (a.Y * n3) + (a.Z * n2);
-
-            return new Quaternion(
-                (a.X * n1) + (n4 * a.W) + n13,
-                (a.Y * n1) + (n3 * a.W) + n12,
-                (a.Z * n1) + (n2 * a.W) + n11,
-                (a.W * n1) - n10);
+            return FastQuaternion.Divide(a, b);
         }
 
         /// <summary>
@@ -286,7 +208,7 @@ namespace MonoGame.Framework
         /// <returns>The dot product of two quaternions.</returns>
         public static float Dot(in Quaternion a, in Quaternion b)
         {
-            return (a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z) + (a.W * b.W);
+            return FastQuaternion.Dot(a, b);
         }
 
         /// <summary>
@@ -306,24 +228,14 @@ namespace MonoGame.Framework
         /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public bool Equals(Quaternion other)
         {
-            return this == other;
+            return Base.Equals(other.Base);
         }
 
         /// <summary>
         /// Gets the hash code of this <see cref="Quaternion"/>.
         /// </summary>
         /// <returns>Hash code of this <see cref="Quaternion"/>.</returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int code = 7 + X.GetHashCode();
-                code = code * 31 + Y.GetHashCode();
-                code = code * 31 + Z.GetHashCode();
-                code = code * 31 + W.GetHashCode();
-                return code;
-            }
-        }
+        public override int GetHashCode() => Base.GetHashCode();
 
         /// <summary>
         /// Returns the inverse quaternion which represents the opposite rotation.
@@ -332,37 +244,25 @@ namespace MonoGame.Framework
         /// <returns>The inverse quaternion.</returns>
         public static Quaternion Inverse(in Quaternion quaternion)
         {
-            float num2 =
-                (quaternion.X * quaternion.X) +
-                (quaternion.Y * quaternion.Y) +
-                (quaternion.Z * quaternion.Z) +
-                (quaternion.W * quaternion.W);
-
-            float num = 1f / num2;
-
-            return new Quaternion(
-                -quaternion.X * num,
-                -quaternion.Y * num,
-                -quaternion.Z * num,
-                quaternion.W * num);
+            return FastQuaternion.Inverse(quaternion);
         }
 
         /// <summary>
-        /// Returns the squared magnitude of the quaternion components.
+        /// Calculates the squared magnitude of the quaternion components.
         /// </summary>
         /// <returns>The squared magnitude of the quaternion components.</returns>
         public float LengthSquared()
         {
-            return (X * X) + (Y * Y) + (Z * Z) + (W * W);
+            return Base.LengthSquared();
         }
 
         /// <summary>
-        /// Returns the magnitude of the quaternion components.
+        /// Calculates the magnitude of the quaternion components.
         /// </summary>
         /// <returns>The magnitude of the quaternion components.</returns>
         public float Length()
         {
-            return MathF.Sqrt(LengthSquared());
+            return Base.Length();
         }
 
         /// <summary>
@@ -374,36 +274,7 @@ namespace MonoGame.Framework
         /// <returns>The result of linear blending between two quaternions.</returns>
         public static Quaternion Lerp(in Quaternion a, in Quaternion b, float amount)
         {
-            float num = amount;
-            float num2 = 1f - num;
-            Quaternion quaternion = new Quaternion();
-            float num5 = (a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z) + (a.W * b.W);
-            if (num5 >= 0f)
-            {
-                quaternion.X = (num2 * a.X) + (num * b.X);
-                quaternion.Y = (num2 * a.Y) + (num * b.Y);
-                quaternion.Z = (num2 * a.Z) + (num * b.Z);
-                quaternion.W = (num2 * a.W) + (num * b.W);
-            }
-            else
-            {
-                quaternion.X = (num2 * a.X) - (num * b.X);
-                quaternion.Y = (num2 * a.Y) - (num * b.Y);
-                quaternion.Z = (num2 * a.Z) - (num * b.Z);
-                quaternion.W = (num2 * a.W) - (num * b.W);
-            }
-            float num4 =
-                (quaternion.X * quaternion.X) +
-                (quaternion.Y * quaternion.Y) +
-                (quaternion.Z * quaternion.Z) +
-                (quaternion.W * quaternion.W);
-
-            float num3 = 1f / MathF.Sqrt(num4);
-            quaternion.X *= num3;
-            quaternion.Y *= num3;
-            quaternion.Z *= num3;
-            quaternion.W *= num3;
-            return quaternion;
+            return FastQuaternion.Lerp(a, b, amount);
         }
 
         /// <summary>
@@ -415,39 +286,7 @@ namespace MonoGame.Framework
         /// <returns>The result of spherical linear blending between two quaternions.</returns>
         public static Quaternion Slerp(in Quaternion a, in Quaternion b, float amount)
         {
-            float num2;
-            float num3;
-            Quaternion quaternion;
-            float num = amount;
-            float num4 =
-                (a.X * b.X) +
-                (a.Y * b.Y) +
-                (a.Z * b.Z) +
-                (a.W * b.W);
-
-            bool flag = false;
-            if (num4 < 0f)
-            {
-                flag = true;
-                num4 = -num4;
-            }
-            if (num4 > 0.999999f)
-            {
-                num3 = 1f - num;
-                num2 = flag ? -num : num;
-            }
-            else
-            {
-                float num5 = MathF.Acos(num4);
-                float num6 = 1f / MathF.Sin(num5);
-                num3 = MathF.Sin((1f - num) * num5) * num6;
-                num2 = flag ? ((-MathF.Sin(num * num5)) * num6) : (MathF.Sin(num * num5) * num6);
-            }
-            quaternion.X = (num3 * a.X) + (num2 * b.X);
-            quaternion.Y = (num3 * a.Y) + (num2 * b.Y);
-            quaternion.Z = (num3 * a.Z) + (num2 * b.Z);
-            quaternion.W = (num3 * a.W) + (num2 * b.W);
-            return quaternion;
+            return FastQuaternion.Slerp(a,b, amount);
         }
 
         /// <summary>
@@ -458,7 +297,7 @@ namespace MonoGame.Framework
         /// <returns>The result of the quaternion subtraction.</returns>
         public static Quaternion Subtract(in Quaternion left, in Quaternion right)
         {
-            return left - right;
+            return FastQuaternion.Subtract(left, right);
         }
 
         /// <summary>
@@ -469,7 +308,7 @@ namespace MonoGame.Framework
         /// <returns>The result of the quaternion multiplication with a scalar.</returns>
         public static Quaternion Multiply(in Quaternion quaternion, float scaleFactor)
         {
-            return quaternion * scaleFactor;
+            return FastQuaternion.Multiply(quaternion, scaleFactor);
         }
 
         /// <summary>
@@ -480,29 +319,20 @@ namespace MonoGame.Framework
         /// <returns>The result of the quaternion multiplication.</returns>
         public static Quaternion Multiply(in Quaternion left, in Quaternion right)
         {
-            return left * right;
+            return FastQuaternion.Multiply(left, right);
         }
-
-        #endregion
 
         /// <summary>
         /// Flips the sign of the all the quaternion components.
         /// </summary>
         /// <param name="quaternion">Source <see cref="Quaternion"/>.</param>
         /// <returns>The result of the quaternion negation.</returns>
-        public static Quaternion Negate(in Quaternion quaternion) => -quaternion;
-
-        /// <summary>
-        /// Scales the quaternion magnitude to unit length.
-        /// </summary>
-        public void Normalize()
+        public static Quaternion Negate(in Quaternion quaternion)
         {
-            float factor = 1f / Length();
-            X *= factor;
-            Y *= factor;
-            Z *= factor;
-            W *= factor;
+            return FastQuaternion.Negate(quaternion);
         }
+
+        #region Normalize
 
         /// <summary>
         /// Scales the quaternion magnitude to unit length.
@@ -511,20 +341,23 @@ namespace MonoGame.Framework
         /// <returns>The unit length quaternion.</returns>
         public static Quaternion Normalize(in Quaternion quaternion)
         {
-            float num = 1f / MathF.Sqrt(
-                (quaternion.X * quaternion.X) +
-                (quaternion.Y * quaternion.Y) +
-                (quaternion.Z * quaternion.Z) + 
-                (quaternion.W * quaternion.W));
-
-            return new Quaternion(quaternion.X * num, quaternion.Y * num, quaternion.Z * num, quaternion.W * num);
+            return FastQuaternion.Normalize(quaternion);
         }
 
         /// <summary>
-        /// Returns a <see cref="string"/> representation of this <see cref="Quaternion"/> in the format:
-        /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>] Z:[<see cref="Z"/>] W:[<see cref="W"/>]}
+        /// Scales the quaternion magnitude to unit length.
         /// </summary>
-        public override string ToString() => "{X:" + X + " Y:" + Y + " Z:" + Z + " W:" + W + "}";
+        public void Normalize()
+        {
+            this = Normalize(this);
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Returns a <see cref="string"/> representation of this <see cref="Quaternion"/>.
+        /// </summary>
+        public override string ToString() => Base.ToString();
 
         public readonly void Deconstruct(out float x, out float y, out float z, out float w)
         {
@@ -542,12 +375,11 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Quaternion"/> on the left of the add sign.</param>
         /// <param name="b">Source <see cref="Quaternion"/> on the right of the add sign.</param>
         /// <returns>Sum of the vectors.</returns>
-        public static Quaternion operator +(in Quaternion a, in Quaternion b) => new Quaternion(
-            a.X + b.X,
-            a.Y + b.Y,
-            a.Z + b.Z,
-            a.W + b.W);
-    
+        public static Quaternion operator +(in Quaternion a, in Quaternion b)
+        {
+            return a.Base + b.Base;
+        }
+
         /// <summary>
         /// Divides a <see cref="Quaternion"/> by the other <see cref="Quaternion"/>.
         /// </summary>
@@ -556,26 +388,7 @@ namespace MonoGame.Framework
         /// <returns>The result of dividing the quaternions.</returns>
         public static Quaternion operator /(in Quaternion left, in Quaternion right)
         {
-            float x = left.X;
-            float y = left.Y;
-            float z = left.Z;
-            float w = left.W;
-            float num14 = (right.X * right.X) + (right.Y * right.Y) + (right.Z * right.Z) + (right.W * right.W);
-            float num5 = 1f / num14;
-            float num4 = -right.X * num5;
-            float num3 = -right.Y * num5;
-            float num2 = -right.Z * num5;
-            float num = right.W * num5;
-            float num13 = (y * num2) - (z * num3);
-            float num12 = (z * num4) - (x * num2);
-            float num11 = (x * num3) - (y * num4);
-            float num10 = (x * num4) + (y * num3) + (z * num2);
-
-            return new Quaternion(
-                (x * num) + (num4 * w) + num13,
-                (y * num) + (num3 * w) + num12,
-                (z * num) + (num2 * w) + num11,
-                (w * num) - num10);
+            return left.Base / right.Base;
         }
 
         /// <summary>
@@ -584,19 +397,21 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Quaternion"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="Quaternion"/> instance on the right of the equal sign.</param>
         /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
-        public static bool operator ==(in Quaternion a, in Quaternion b) => 
-            (a.X == b.X) &&
-            (a.Y == b.Y) && 
-            (a.Z == b.Z) && 
-            (a.W == b.W);
-    
+        public static bool operator ==(in Quaternion a, in Quaternion b)
+        {
+            return a.Base == b.Base;
+        }
+
         /// <summary>
         /// Compares whether two <see cref="Quaternion"/> instances are not equal.
         /// </summary>
         /// <param name="a"><see cref="Quaternion"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="Quaternion"/> instance on the right of the not equal sign.</param>
         /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>
-        public static bool operator !=(in Quaternion a, in Quaternion b) => !(a == b);
+        public static bool operator !=(in Quaternion a, in Quaternion b)
+        {
+            return a.Base != b.Base;
+        }
 
         /// <summary>
         /// Multiplies two quaternions.
@@ -606,16 +421,7 @@ namespace MonoGame.Framework
         /// <returns>Result of the quaternions multiplication.</returns>
         public static Quaternion operator *(in Quaternion left, in Quaternion right)
         {
-            float n1 = (left.Y * right.Z) - (left.Z * right.Y);
-            float n2 = (left.Z * right.X) - (left.X * right.Z);
-            float n3 = (left.X * right.Y) - (left.Y * right.X);
-            float n4 = (left.X * right.X) + (left.Y * right.Y) + (left.Z * right.Z);
-
-            return new Quaternion(
-                (left.X * right.W) + (right.X * left.W) + n1,
-                (left.Y * right.W) + (right.Y * left.W) + n2,
-                (left.Z * right.W) + (right.Z * left.W) + n3,
-                (left.W * right.W) - n4);
+            return left.Base * right.Base;
         }
 
         /// <summary>
@@ -624,31 +430,41 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Quaternion"/> on the left of the mul sign.</param>
         /// <param name="scaleFactor">Scalar value on the right of the mul sign.</param>
         /// <returns>Result of the quaternion multiplication with a scalar.</returns>
-        public static Quaternion operator *(in Quaternion value, float scaleFactor) => new Quaternion(
-            value.X * scaleFactor,
-            value.Y * scaleFactor,
-            value.Z * scaleFactor,
-            value.W * scaleFactor);
-    
+        public static Quaternion operator *(in Quaternion value, float scaleFactor)
+        {
+            return value.Base * scaleFactor;
+        }
+
         /// <summary>
         /// Subtracts a <see cref="Quaternion"/> from a <see cref="Quaternion"/>.
         /// </summary>
         /// <param name="left">Source <see cref="Quaternion"/> on the left of the sub sign.</param>
         /// <param name="right">Source <see cref="Quaternion"/> on the right of the sub sign.</param>
         /// <returns>Result of the quaternion subtraction.</returns>
-        public static Quaternion operator -(in Quaternion left, in Quaternion right) => new Quaternion(
-            left.X - right.X,
-            left.Y - right.Y,
-            left.Z - right.Z,
-            left.W - right.W);
+        public static Quaternion operator -(in Quaternion left, in Quaternion right)
+        {
+            return left.Base - right.Base;
+        }
 
         /// <summary>
         /// Flips the sign of the all the quaternion components.
         /// </summary>
         /// <param name="value">Source <see cref="Quaternion"/> on the right of the sub sign.</param>
         /// <returns>The result of the quaternion negation.</returns>
-        public static Quaternion operator -(in Quaternion value) =>
-            new Quaternion(-value.X, -value.Y, -value.Z, -value.W);
+        public static Quaternion operator -(in Quaternion value)
+        {
+            return -value.Base;
+        }
+
+        public static implicit operator FastQuaternion(in Quaternion quaternion)
+        {
+            return quaternion.Base;
+        }
+
+        public static implicit operator Quaternion(in FastQuaternion quaternion)
+        {
+            return new Quaternion { Base = quaternion };
+        }
 
         #endregion
     }

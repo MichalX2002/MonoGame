@@ -9,7 +9,8 @@ using System.Collections.Generic;
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
-    /// Provides methods and properties for maintaining an animation channel. An animation channel is a collection of keyframes describing the movement of a single bone or rigid object.
+    /// Provides methods and properties for maintaining an animation channel. 
+    /// An animation channel is a collection of keyframes describing the movement of a single bone or rigid object.
     /// </summary>
     public sealed class AnimationChannel : ICollection<AnimationKeyframe>, IEnumerable<AnimationKeyframe>, IEnumerable
     {
@@ -23,17 +24,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Gets the keyframe at the specified index position.
         /// </summary>
-        public AnimationKeyframe this[int index]
-        {
-            get
-            {
-                return keyframes[index];
-            }
-        }
+        public AnimationKeyframe this[int index] => keyframes[index];
 
-        /// <summary>
-        /// Returns a value indicating whether the object is read-only.
-        /// </summary>
         bool ICollection<AnimationKeyframe>.IsReadOnly => false;
 
         /// <summary>
@@ -44,24 +36,21 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             keyframes = new List<AnimationKeyframe>();
         }
 
-        /// <summary>
-        /// To satisfy ICollection
-        /// </summary>
-        /// <param name="item"></param>
         void ICollection<AnimationKeyframe>.Add(AnimationKeyframe item)
         {
             keyframes.Add(item);
         }
 
         /// <summary>
-        /// Adds a new keyframe to the collection, automatically sorting the contents according to keyframe times.
+        /// Adds a new keyframe to the collection, 
+        /// automatically sorting the contents according to keyframe times.
         /// </summary>
         /// <param name="item">Keyframe to be added to the channel.</param>
         /// <returns>Index of the new keyframe.</returns>
         public int Add(AnimationKeyframe item)
         {
             if (item == null)
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
 
             // Find the correct place at which to insert it, so we can know the index to return.
             // The alternative is Add, Sort then return IndexOf, which would be horribly inefficient
@@ -111,11 +100,6 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             return keyframes.Contains(item);
         }
 
-        /// <summary>
-        /// To satisfy ICollection
-        /// </summary>
-        /// <param name="array"></param>
-        /// <param name="arrayIndex"></param>
         void ICollection<AnimationKeyframe>.CopyTo(AnimationKeyframe[] array, int arrayIndex)
         {
             keyframes.CopyTo(array, arrayIndex);
@@ -154,18 +138,19 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// Returns an enumerator that iterates through the keyframes.
         /// </summary>
         /// <returns>Enumerator for the keyframe collection.</returns>
-        public IEnumerator<AnimationKeyframe> GetEnumerator()
+        public List<AnimationKeyframe>.Enumerator GetEnumerator()
         {
             return keyframes.GetEnumerator();
         }
 
-        /// <summary>
-        /// To satisfy ICollection
-        /// </summary>
-        /// <returns></returns>
+        IEnumerator<AnimationKeyframe> IEnumerable<AnimationKeyframe>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return keyframes.GetEnumerator();
+            return GetEnumerator();
         }
     }
 }

@@ -4,8 +4,11 @@
 
 using System;
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.Serialization;
 using MonoGame.Framework.PackedVector;
+using FastVector3 = System.Numerics.Vector3;
+using FastVector4 = System.Numerics.Vector4;
 
 namespace MonoGame.Framework
 {
@@ -24,72 +27,72 @@ namespace MonoGame.Framework
         /// <summary>
         /// <see cref="Vector3"/> with all components set to <see cref="float.MaxValue"/>.
         /// </summary>
-        public static readonly Vector3 MaxValue = new Vector3(float.MaxValue);
+        public static Vector3 MaxValue { get; } = new Vector3(float.MaxValue);
 
         /// <summary>
         /// <see cref="Vector3"/> with all components set to <see cref="float.MinValue"/>.
         /// </summary>
-        public static readonly Vector3 MinValue = new Vector3(float.MinValue);
+        public static Vector3 MinValue { get; } = new Vector3(float.MinValue);
 
         /// <summary>
         /// <see cref="Vector3"/> with all components set to 0.
         /// </summary>
-        public static readonly Vector3 Zero = new Vector3(0f);
+        public static Vector3 Zero { get; } = new Vector3(0f);
 
         /// <summary>
         /// <see cref="Vector3"/> with all components set to 0.5.
         /// </summary>
-        public static readonly Vector3 Half = new Vector3(0.5f);
+        public static Vector3 Half { get; } = new Vector3(0.5f);
 
         /// <summary>
         /// <see cref="Vector3"/> with all components set to 1.
         /// </summary>
-        public static readonly Vector3 One = new Vector3(1f);
+        public static Vector3 One { get; } = new Vector3(1f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 1, 0, 0.
         /// </summary>
-        public static readonly Vector3 UnitX = new Vector3(1f, 0f, 0f);
+        public static Vector3 UnitX { get; } = new Vector3(1f, 0f, 0f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 0, 1, 0.
         /// </summary>
-        public static readonly Vector3 UnitY = new Vector3(0f, 1f, 0f);
+        public static Vector3 UnitY { get; } = new Vector3(0f, 1f, 0f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 0, 0, 1.
         /// </summary>
-        public static readonly Vector3 UnitZ = new Vector3(0f, 0f, 1f);
+        public static Vector3 UnitZ { get; } = new Vector3(0f, 0f, 1f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 0, 1, 0.
         /// </summary>
-        public static readonly Vector3 Up = new Vector3(0f, 1f, 0f);
+        public static Vector3 Up { get; } = new Vector3(0f, 1f, 0f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 0, -1, 0.
         /// </summary>
-        public static readonly Vector3 Down = new Vector3(0f, -1f, 0f);
+        public static Vector3 Down { get; } = new Vector3(0f, -1f, 0f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 1, 0, 0.
         /// </summary>
-        public static readonly Vector3 Right = new Vector3(1f, 0f, 0f);
+        public static Vector3 Right { get; } = new Vector3(1f, 0f, 0f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components -1, 0, 0.
         /// </summary>
-        public static readonly Vector3 Left = new Vector3(-1f, 0f, 0f);
+        public static Vector3 Left { get; } = new Vector3(-1f, 0f, 0f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 0, 0, -1.
         /// </summary>
-        public static readonly Vector3 Forward = new Vector3(0f, 0f, -1f);
+        public static Vector3 Forward { get; } = new Vector3(0f, 0f, -1f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 0, 0, 1.
         /// </summary>
-        public static readonly Vector3 Backward = new Vector3(0f, 0f, 1f);
+        public static Vector3 Backward { get; } = new Vector3(0f, 0f, 1f);
 
         #endregion
 
@@ -103,23 +106,26 @@ namespace MonoGame.Framework
             Y.ToString(), "  ",
             Z.ToString());
 
-        /// <summary>
-        /// The X coordinate of this <see cref="Vector3"/>.
-        /// </summary>
-        [DataMember]
-        public float X;
+        [IgnoreDataMember]
+        public FastVector3 Base;
 
         /// <summary>
-        /// The Y coordinate of this <see cref="Vector3"/>.
+        /// The x coordinate of this <see cref="Vector4"/>.
         /// </summary>
         [DataMember]
-        public float Y;
+        public float X { readonly get => Base.X; set => Base.X = value; }
 
         /// <summary>
-        /// The Z coordinate of this <see cref="Vector3"/>.
+        /// The y coordinate of this <see cref="Vector4"/>.
         /// </summary>
         [DataMember]
-        public float Z;
+        public float Y { readonly get => Base.Y; set => Base.Y = value; }
+
+        /// <summary>
+        /// The z coordinate of this <see cref="Vector4"/>.
+        /// </summary>
+        [DataMember]
+        public float Z { readonly get => Base.Z; set => Base.Z = value; }
 
         /// <summary>
         /// Gets or sets the x and y coordinates as a <see cref="Vector2"/>.
@@ -143,9 +149,7 @@ namespace MonoGame.Framework
         /// <param name="z">The z coordinate in 3D-space.</param>
         public Vector3(float x, float y, float z)
         {
-            X = x;
-            Y = y;
-            Z = z;
+            Base = new FastVector3(x, y, z);
         }
 
         /// <summary>
@@ -154,9 +158,7 @@ namespace MonoGame.Framework
         /// <param name="value">The x, y and z coordinates in 3D-space.</param>
         public Vector3(float value)
         {
-            X = value;
-            Y = value;
-            Z = value;
+            Base = new FastVector3(value);
         }
 
         /// <summary>
@@ -166,9 +168,7 @@ namespace MonoGame.Framework
         /// <param name="z">The z coordinate in 3D-space.</param>
         public Vector3(in Vector2 value, float z)
         {
-            X = value.X;
-            Y = value.Y;
-            Z = z;
+            Base = new FastVector3(value.Base, z);
         }
 
         #endregion
@@ -177,17 +177,14 @@ namespace MonoGame.Framework
 
         public void FromVector4(in Vector4 vector)
         {
-            X = vector.X;
-            Y = vector.Y;
-            Z = vector.Z;
+            Base.X = vector.Base.X;
+            Base.Y = vector.Base.Y;
+            Base.Z = vector.Base.Z;
         }
 
         public readonly void ToVector4(out Vector4 vector)
         {
-            vector.X = X;
-            vector.Y = Y;
-            vector.Z = Z;
-            vector.W = 1f;
+            vector.Base = new FastVector4(Base, 1);
         }
 
         void IPackedVector.FromScaledVector4(in Vector4 scaledVector) => FromVector4(scaledVector);
@@ -449,9 +446,7 @@ namespace MonoGame.Framework
         /// <param name="result">The cross product of two vectors.</param>
         public static void Cross(in Vector3 left, in Vector3 right, out Vector3 result)
         {
-            result.X = left.Y * right.Z - right.Y * left.Z;
-            result.Y = -(left.X * right.Z - right.X * left.Z);
-            result.Z = left.X * right.Y - right.X * left.Y;
+            result.Base = FastVector3.Cross(left.Base, right.Base);
         }
 
         /// <summary>
@@ -574,7 +569,7 @@ namespace MonoGame.Framework
         /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public bool Equals(Vector3 other)
         {
-            return this == other;
+            return Base.Equals(other.Base);
         }
 
         /// <summary>
@@ -585,7 +580,7 @@ namespace MonoGame.Framework
         /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
         public static bool operator ==(in Vector3 a, in Vector3 b)
         {
-            return a.X == b.X && a.Y == b.Y && a.Z == b.Z;
+            return a.Base == b.Base;
         }
 
         /// <summary>
@@ -596,7 +591,7 @@ namespace MonoGame.Framework
         /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>	
         public static bool operator !=(in Vector3 a, in Vector3 b)
         {
-            return !(a == b);
+            return a.Base != b.Base;
         }
 
         #endregion
@@ -1070,24 +1065,32 @@ namespace MonoGame.Framework
         /// Divides the components of a <see cref="Vector3"/> by a scalar.
         /// </summary>
         /// <param name="value">Source <see cref="Vector3"/>.</param>
-        /// <param name="divider">Divisor scalar.</param>
+        /// <param name="divisor">Divisor scalar.</param>
         /// <param name="result">The result of dividing a vector by a scalar.</param>
-        public static void Divide(in Vector3 value, float divider, out Vector3 result)
+        public static void Divide(in Vector3 value, float divisor, out Vector3 result)
         {
-            result.X = value.X / divider;
-            result.Y = value.Y / divider;
-            result.Z = value.Z / divider;
+            if (Vector.IsHardwareAccelerated)
+            {
+                AsFastVector(value, out var fValue);
+                FromFastVector(FastVector3.Divide(fValue, divisor), out result);
+            }
+            else
+            {
+                result.X = value.X / divisor;
+                result.Y = value.Y / divisor;
+                result.Z = value.Z / divisor;
+            }
         }
 
         /// <summary>
         /// Divides the components of a <see cref="Vector3"/> by a scalar.
         /// </summary>
         /// <param name="value">Source <see cref="Vector3"/>.</param>
-        /// <param name="divider">Divisor scalar.</param>
+        /// <param name="divisor">Divisor scalar.</param>
         /// <returns>The result of dividing a vector by a scalar.</returns>
-        public static Vector3 Divide(in Vector3 value, float divider)
+        public static Vector3 Divide(in Vector3 value, float divisor)
         {
-            Divide(value, divider, out var result);
+            Divide(value, divisor, out var result);
             return result;
         }
 
@@ -1106,11 +1109,11 @@ namespace MonoGame.Framework
         /// Divides the components of a <see cref="Vector3"/> by a scalar.
         /// </summary>
         /// <param name="value">Source <see cref="Vector3"/> on the left of the div sign.</param>
-        /// <param name="divider">Divisor scalar on the right of the div sign.</param>
+        /// <param name="divisor">Divisor scalar on the right of the div sign.</param>
         /// <returns>The result of dividing a vector by a scalar.</returns>
-        public static Vector3 operator /(in Vector3 value, float divider)
+        public static Vector3 operator /(in Vector3 value, float divisor)
         {
-            return Divide(value, divider);
+            return Divide(value, divisor);
         }
 
         #endregion
@@ -1432,5 +1435,15 @@ namespace MonoGame.Framework
         }
 
         #endregion
+
+        public static implicit operator FastVector3(in Vector3 value)
+        {
+            return value.Base;
+        }
+
+        public static implicit operator Vector3(in FastVector3 value)
+        {
+            return new Vector2 { Base = value };
+        }
     }
 }

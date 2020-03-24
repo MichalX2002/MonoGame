@@ -3,6 +3,8 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using MonoGame.Framework.Audio;
+using MonoGame.Framework.Media;
 
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
@@ -46,7 +48,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         public abstract string GetRuntimeReader(TargetPlatform targetPlatform);
 
         /// <summary>
-        /// Gets the assembly qualified name of the runtime target type. The runtime target type often matches the design time type, but may differ.
+        /// Gets the assembly qualified name of the runtime target type.
+        /// The runtime target type often matches the design time type, but may differ.
         /// </summary>
         /// <param name="targetPlatform">The target platform.</param>
         /// <returns>The qualified name.</returns>
@@ -54,7 +57,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             TargetType.FullName + ", " + TargetType.Assembly.FullName;
 
         /// <summary>
-        /// Retrieves and caches nested type writers and allows for reflection over the target data type. Called by the framework at creation time.
+        /// Retrieves and caches nested type writers and allows for reflection 
+        /// over the target data type. Called by the framework at creation time.
         /// </summary>
         /// <param name="compiler">The content compiler.</param>
         protected virtual void Initialize(ContentCompiler compiler)
@@ -73,14 +77,20 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         /// Indicates whether a given type of content should be compressed.
         /// </summary>
         /// <param name="targetPlatform">The target platform of the content build.</param>
-        /// <param name="value">The object about to be serialized, or null if a collection of objects is to be serialized.</param>
+        /// <param name="value">
+        /// The object about to be serialized, or null if a collection of objects is to be serialized.
+        /// </param>
         /// <returns>true if the content of the requested type should be compressed; false otherwise.</returns>
-        /// <remarks>This base class implementation of this method always returns true. It should be overridden
-        /// to return false if there would be little or no useful reduction in size of the content type's data
+        /// <remarks>
+        /// This base class implementation of this method always returns true. 
+        /// It should be overridden to return false if there would be little
+        /// or no useful reduction in size of the content type's data
         /// from a general-purpose lossless compression algorithm.
-        /// The implementations for Song Class and SoundEffect Class data return false because data for these
-        /// content types is already in compressed form.</remarks>
-        protected internal virtual bool ShouldCompressContent(TargetPlatform targetPlatform, object value)
+        /// The implementations for <see cref="Song"/> and <see cref="SoundEffect"/> data 
+        /// return false because data for these content types is already in compressed form.
+        /// </remarks>
+        protected internal virtual bool ShouldCompressContent(
+            TargetPlatform targetPlatform, object value)
         {
             // For now, only support uncompressed
             return false;

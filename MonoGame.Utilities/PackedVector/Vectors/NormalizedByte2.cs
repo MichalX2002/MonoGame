@@ -64,7 +64,7 @@ namespace MonoGame.Framework.PackedVector
 
         private static void Pack(in Vector2 vector, out NormalizedByte2 destination)
         {
-            Vector2.Clamp(vector, -1, 1, out var v);
+            var v = Vector2.Clamp(vector, -1, 1);
             v *= 127f;
 
             destination.X = (sbyte)v.X;
@@ -87,10 +87,11 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToVector4(out Vector4 vector)
         {
-            vector.X = X / sbyte.MaxValue;
-            vector.Y = Y / sbyte.MaxValue;
-            vector.Z = 0;
-            vector.W = 1;
+            vector.Base.X = X;
+            vector.Base.Y = Y;
+            vector.Base.Z = 0;
+            vector.Base.W = sbyte.MaxValue;
+            vector /= sbyte.MaxValue;
         }
 
         public void FromScaledVector4(in Vector4 scaledVector)

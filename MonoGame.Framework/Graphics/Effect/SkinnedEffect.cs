@@ -1,15 +1,7 @@
-#region File Description
-//-----------------------------------------------------------------------------
-// SkinnedEffect.cs
-//
 // Microsoft XNA Community Game Platform
 // Copyright (C) Microsoft Corporation. All rights reserved.
-//-----------------------------------------------------------------------------
-#endregion
 
-#region Using Statements
 using System;
-#endregion
 
 namespace MonoGame.Framework.Graphics
 {
@@ -265,9 +257,7 @@ namespace MonoGame.Framework.Graphics
                 if ((value != 1) &&
                     (value != 2) &&
                     (value != 4))
-                {
                     throw new ArgumentOutOfRangeException(nameof(value));
-                }
 
                 weightsPerVertex = value;
                 dirtyFlags |= EffectDirtyFlags.ShaderIndex;
@@ -331,7 +321,7 @@ namespace MonoGame.Framework.Graphics
         /// Creates a new SkinnedEffect with default parameter settings.
         /// </summary>
         public SkinnedEffect(GraphicsDevice device)
-            : base(device, EffectResource.SkinnedEffect.Bytecode)
+            : base(device, EffectResource.SkinnedEffect.ByteCode)
         {
             CacheEffectParameters(null);
 
@@ -439,18 +429,20 @@ namespace MonoGame.Framework.Graphics
         {
             // Recompute the world+view+projection matrix or fog vector?
             dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(
-                dirtyFlags, ref world, ref view, ref projection, ref worldView, 
+                dirtyFlags, world, view, projection, worldView,
                 fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
 
             // Recompute the world inverse transpose and eye position?
             dirtyFlags = EffectHelpers.SetLightingMatrices(
-                dirtyFlags, ref world, ref view, worldParam, worldInverseTransposeParam, eyePositionParam);
+                dirtyFlags, world, view, 
+                worldParam, worldInverseTransposeParam, eyePositionParam);
 
             // Recompute the diffuse/emissive/alpha material color parameters?
             if ((dirtyFlags & EffectDirtyFlags.MaterialColor) != 0)
             {
                 EffectHelpers.SetMaterialColor(
-                    true, alpha, ref diffuseColor, ref emissiveColor, ref ambientLightColor, diffuseColorParam, emissiveColorParam);
+                    true, alpha, diffuseColor, emissiveColor, ambientLightColor, 
+                    diffuseColorParam, emissiveColorParam);
 
                 dirtyFlags &= ~EffectDirtyFlags.MaterialColor;
             }

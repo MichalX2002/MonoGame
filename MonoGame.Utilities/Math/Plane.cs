@@ -4,9 +4,8 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using FastPlane = System.Numerics.Plane;
 
 namespace MonoGame.Framework
 {
@@ -14,72 +13,64 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Plane : IEquatable<Plane>
     {
-        [DataMember]
-        public Vector3 Normal;
+        [IgnoreDataMember]
+        public FastPlane Base;
 
         [DataMember]
-        public float D;
+        public Vector3 Normal { readonly get => Base.Normal; set => Base.Normal = value; }
+
+        [DataMember]
+        public float D { readonly get => Base.D; set => Base.D = value; }
+
+        internal string DebuggerDisplay => 
+            string.Concat(Normal.DebuggerDisplay, "  ", D.ToString());
+
+        #region Constructors
+
+        public Plane(in Vector4 value)
+        {
+            Base = new FastPlane(value);
+        }
 
         public Plane(in Vector3 normal, float d)
         {
-            Normal = normal;
-            D = d;
+            Base = new FastPlane(normal, d);
         }
 
-        public Plane(in Vector4 value) : this(new Vector3(value.X, value.Y, value.Z), value.W)
+        public Plane(float x, float y, float z, float d)
         {
+            Base = new FastPlane(x, y, z, d);
         }
 
-        public Plane(in Vector3 a, in Vector3 b, in Vector3 c)
-        {
-            Vector3 ab = b - a;
-            Vector3 ac = c - a;
-
-            Vector3.Cross(ab, ac, out var cross);
-            Vector3.Normalize(cross, out Normal);
-            D = -Vector3.Dot(Normal, a);
-        }
-
-        public Plane(float a, float b, float c, float d) : this(new Vector3(a, b, c), d)
-        {
-        }
+        #endregion
 
         public readonly Vector4 ToVector4()
         {
             return UnsafeUtils.As<Plane, Vector4>(this);
         }
-        
-        public readonly float Dot(in Vector4 value)
+
+        #region CreateFromVertices
+
+        public static Plane CreateFromVertices(in Vector3 a, in Vector3 b, in Vector3 c)
         {
-            return Vector4.Dot(ToVector4(), value);
+            return FastPlane.CreateFromVertices(a, b, c);
         }
 
-        public readonly float DotNormal(in Vector3 value)
+        #endregion
+
+        public static float Dot(in Plane plane, in Vector4 value)
         {
-            return Vector3.Dot(Normal, value);
+            return FastPlane.Dot(plane, value);
         }
 
-        public readonly float DotCoordinate(in Vector3 value)
+        public static float DotNormal(in Plane plane, in Vector3 value)
         {
-            return DotNormal(value) + D;
+            return FastPlane.DotNormal(plane, value);
         }
 
-        /// <summary>
-        /// Transforms a normalized plane by a matrix.
-        /// </summary>
-        /// <param name="plane">The normalized plane to transform.</param>
-        /// <param name="matrix">The transformation matrix.</param>
-        /// <param name="result">The transformed plane.</param>
-        public static void Transform(in Plane plane, in Matrix matrix, out Plane result)
+        public static float DotCoordinate(in Plane plane, in Vector3 value)
         {
-            // See "Transforming Normals" in http://www.glprogramming.com/red/appendixf.html
-            // for an explanation of how this works.
-
-            Matrix.Invert(matrix, out var transformedMatrix);
-            Matrix.Transpose(transformedMatrix, out transformedMatrix);
-
-            Vector4.Transform(plane.ToVector4(), transformedMatrix, out var transformedVector);
-            result = Unsafe.As<Vector4, Plane>(ref transformedVector);
+            return FastPlane.DotCoordinate(plane, value);
         }
 
         /// <summary>
@@ -90,8 +81,7 @@ namespace MonoGame.Framework
         /// <returns>The transformed plane.</returns>
         public static Plane Transform(in Plane plane, in Matrix matrix)
         {
-            Transform(plane, matrix, out var result);
-            return result;
+            return FastPlane.Transform(plane, matrix);
         }
 
         /// <summary>
@@ -102,65 +92,55 @@ namespace MonoGame.Framework
         /// <returns>The transformed plane.</returns>
         public static Plane Transform(in Plane plane, in Quaternion rotation)
         {
-            return new Plane(Vector3.Transform(plane.Normal, rotation), plane.D);
+            return FastPlane.Transform(plane, rotation);
         }
 
         #region Normalize
 
-        public static void Normalize(in Plane value, out Plane result)
-        {
-            float length = value.Normal.Length();
-
-            Vector3.Divide(value.Normal, length, out result.Normal);
-            result.D = value.D / length;
-        }
-
         public static Plane Normalize(in Plane value)
         {
-            Normalize(value, out var result);
-            return result;
+            return FastPlane.Normalize(value);
         }
 
         public void Normalize()
         {
-            Normalize(this, out this);
+            this = Normalize(this);
         }
 
         #endregion
 
-        public static bool operator !=(in Plane plane1, in Plane plane2)
-        {
-            return !plane1.Equals(plane2);
-        }
-
-        public static bool operator ==(in Plane plane1, in Plane plane2)
-        {
-            return plane1.Normal == plane2.Normal
-                && plane1.D == plane2.D;
-        }
+        #region Equals
 
         public override bool Equals(object obj)
         {
-            return (obj is Plane other) ? Equals(other) : false;
+            return obj is Plane other && this == other;
         }
 
         public bool Equals(Plane other)
         {
-            return this == other;
+            return Base.Equals(other.Base);
         }
+
+        public static bool operator ==(in Plane plane1, in Plane plane2)
+        {
+            return plane1.Base == plane2.Base;
+        }
+
+        public static bool operator !=(in Plane plane1, in Plane plane2)
+        {
+            return plane1.Base != plane2.Base;
+        }
+
+        #endregion
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                int code = 7 + Normal.GetHashCode();
-                return code * 31 + D.GetHashCode();
-            }
+            return Base.GetHashCode();
         }
 
-        internal PlaneIntersectionType Intersects(Vector3 point)
+        internal PlaneIntersectionType Intersects(in Vector3 point)
         {
-            float distance = DotCoordinate(point);
+            float distance = DotCoordinate(this, point);
             if (distance > 0)
                 return PlaneIntersectionType.Front;
             if (distance < 0)
@@ -168,11 +148,9 @@ namespace MonoGame.Framework
             return PlaneIntersectionType.Intersecting;
         }
 
-        internal string DebuggerDisplay => string.Concat(Normal.DebuggerDisplay, "  ", D.ToString());
-
-        public override string ToString()
+        public readonly override string ToString()
         {
-            return "{Normal:" + Normal + " D:" + D + "}";
+            return base.ToString();
         }
 
         /// <summary>
@@ -211,5 +189,15 @@ namespace MonoGame.Framework
         //    return Math.Abs((plane.Normal.X * point.X + plane.Normal.Y * point.Y + plane.Normal.Z * point.Z) 
         //        / MathF.Sqrt(plane.Normal.X * plane.Normal.X + plane.Normal.Y * plane.Normal.Y + plane.Normal.Z * plane.Normal.Z));
         //}
+
+        public static implicit operator FastPlane(in Plane plane)
+        {
+            return plane.Base;
+        }
+
+        public static implicit operator Plane(in FastPlane plane)
+        {
+            return new Plane { Base = plane };
+        }
     }
 }

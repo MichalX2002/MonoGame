@@ -20,18 +20,20 @@ namespace MonoGame.Framework.Graphics
         /// Creates a new SpriteEffect.
         /// </summary>
         public SpriteEffect(GraphicsDevice device)
-            : base(device, EffectResource.SpriteEffect.Bytecode)
+            : base(device, EffectResource.SpriteEffect.ByteCode)
         {
             CacheEffectParameters();
         }
 
         /// <summary>
-        /// An optional matrix used to transform the sprite geometry. Uses <see cref="Matrix.Identity"/> if null.
+        /// An optional matrix used to transform the sprite geometry.
+        /// Uses <see cref="Matrix.Identity"/> if null.
         /// </summary>
         public Matrix? TransformMatrix { get; set; }
 
         /// <summary>
-        /// Creates a new SpriteEffect by cloning parameter settings from an existing instance.
+        /// Creates a new <see cref="SpriteEffect"/> by 
+        /// cloning parameter settings from an existing instance.
         /// </summary>
         protected SpriteEffect(SpriteEffect cloneSource)
             : base(cloneSource)
@@ -58,17 +60,19 @@ namespace MonoGame.Framework.Graphics
         }
 
         /// <summary>
-        /// Lazily computes derived parameter values immediately before applying the effect.
+        /// Computes derived parameter values immediately before applying the effect.
         /// </summary>
         protected internal override void OnApply()
         {
             var vp = GraphicsDevice.Viewport;
-            if ((vp.Width != _lastViewport.Width) || (vp.Height != _lastViewport.Height))
+            if ((vp.Width != _lastViewport.Width) ||
+                (vp.Height != _lastViewport.Height))
             {
-                // Normal 3D cameras look into the -z direction (z = 1 is in front of z = 0). The
-                // sprite batch layer depth is the opposite (z = 0 is in front of z = 1).
+                // Normal 3D cameras look into the -z direction (z = 1 is in front of z = 0).
+                // The sprite batch layer depth is the opposite (z = 0 is in front of z = 1).
                 // --> We get the correct matrix with near plane 0 and far plane -1.
-                _projection = Matrix.CreateOrthographicOffCenter(0, vp.Width, vp.Height, 0, 0, -1);
+                _projection = Matrix.CreateOrthographicOffCenter(
+                    0, vp.Width, vp.Height, 0, 0, -1);
 
                 if (GraphicsDevice.UseHalfPixelOffset)
                 {

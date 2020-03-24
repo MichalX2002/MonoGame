@@ -23,8 +23,8 @@ namespace MonoGame.Framework.Audio
         private float _frequency;
         
         /// <summary>
-        /// Gets the OpenAL sound controller, constructs the sound buffer, and sets up the event delegates for
-        /// the reserved and recycled events.
+        /// Gets the OpenAL sound controller, constructs the sound buffer, 
+        /// and sets up the event delegates for the reserved and recycled events.
         /// </summary>
         internal void InitializeSound()
         {
@@ -50,11 +50,11 @@ namespace MonoGame.Framework.Audio
             Vector3 posOffset = emitter.Position - listener.Position;
 
             // set up orientation matrix
-            Matrix.CreateWorld(Vector3.Zero, listener.Forward, listener.Up, out var orientation);
+            var orientation = Matrix.CreateWorld(Vector3.Zero, listener.Forward, listener.Up);
 
             // set up our final position and velocity according to orientation of listener
-            Vector3.Transform(new Vector3(x, y, z) + posOffset, orientation, out var finalPos);
-            Vector3.Transform(emitter.Velocity, orientation, out var finalVel);
+            var finalPos = Vector3.Transform(new Vector3(x, y, z) + posOffset, orientation);
+            var finalVel = Vector3.Transform(emitter.Velocity, orientation);
 
             // set the position based on relative positon
             AL.Source(SourceId.Value, ALSource3f.Position, finalPos.X, finalPos.Y, finalPos.Z);

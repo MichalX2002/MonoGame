@@ -1,17 +1,5 @@
-#region File Description
-//-----------------------------------------------------------------------------
-// AlphaTestEffect.cs
-//
 // Microsoft XNA Community Game Platform
 // Copyright (C) Microsoft Corporation. All rights reserved.
-//-----------------------------------------------------------------------------
-#endregion
-
-#region Using Statements
-using MonoGame.Framework;
-using MonoGame.Framework.Graphics;
-using System;
-#endregion
 
 namespace MonoGame.Framework.Graphics
 {
@@ -66,7 +54,6 @@ namespace MonoGame.Framework.Graphics
         public Matrix World
         {
             get => world;
-
             set
             {
                 world = value;
@@ -81,7 +68,6 @@ namespace MonoGame.Framework.Graphics
         public Matrix View
         {
             get => view;
-
             set
             {
                 view = value;
@@ -96,7 +82,6 @@ namespace MonoGame.Framework.Graphics
         public Matrix Projection
         {
             get => projection;
-
             set
             {
                 projection = value;
@@ -111,7 +96,6 @@ namespace MonoGame.Framework.Graphics
         public Vector3 DiffuseColor
         {
             get => diffuseColor;
-
             set
             {
                 diffuseColor = value;
@@ -126,7 +110,6 @@ namespace MonoGame.Framework.Graphics
         public float Alpha
         {
             get => alpha;
-
             set
             {
                 alpha = value;
@@ -141,7 +124,6 @@ namespace MonoGame.Framework.Graphics
         public bool FogEnabled
         {
             get => fogEnabled;
-
             set
             {
                 if (fogEnabled != value)
@@ -159,7 +141,6 @@ namespace MonoGame.Framework.Graphics
         public float FogStart
         {
             get => fogStart;
-
             set
             {
                 fogStart = value;
@@ -174,7 +155,6 @@ namespace MonoGame.Framework.Graphics
         public float FogEnd
         {
             get => fogEnd;
-
             set
             {
                 fogEnd = value;
@@ -209,7 +189,6 @@ namespace MonoGame.Framework.Graphics
         public bool VertexColorEnabled
         {
             get => vertexColorEnabled;
-
             set
             {
                 if (vertexColorEnabled != value)
@@ -227,7 +206,6 @@ namespace MonoGame.Framework.Graphics
         public CompareFunction AlphaFunction
         {
             get => alphaFunction;
-
             set
             {
                 alphaFunction = value;
@@ -242,7 +220,6 @@ namespace MonoGame.Framework.Graphics
         public int ReferenceAlpha
         {
             get => referenceAlpha;
-
             set
             {
                 referenceAlpha = value;
@@ -259,7 +236,7 @@ namespace MonoGame.Framework.Graphics
         /// Creates a new AlphaTestEffect with default parameter settings.
         /// </summary>
         public AlphaTestEffect(GraphicsDevice device)
-            : base(device, EffectResource.AlphaTestEffect.Bytecode)
+            : base(device, EffectResource.AlphaTestEffect.ByteCode)
         {
             CacheEffectParameters();
         }
@@ -285,7 +262,7 @@ namespace MonoGame.Framework.Graphics
 
             fogStart = cloneSource.fogStart;
             fogEnd = cloneSource.fogEnd;
-            
+
             alphaFunction = cloneSource.alphaFunction;
             referenceAlpha = cloneSource.referenceAlpha;
 
@@ -304,42 +281,43 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         void CacheEffectParameters()
         {
-            textureParam        = Parameters["Texture"];
-            diffuseColorParam   = Parameters["DiffuseColor"];
-            alphaTestParam      = Parameters["AlphaTest"];
-            fogColorParam       = Parameters["FogColor"];
-            fogVectorParam      = Parameters["FogVector"];
-            worldViewProjParam  = Parameters["WorldViewProj"];
+            textureParam = Parameters["Texture"];
+            diffuseColorParam = Parameters["DiffuseColor"];
+            alphaTestParam = Parameters["AlphaTest"];
+            fogColorParam = Parameters["FogColor"];
+            fogVectorParam = Parameters["FogVector"];
+            worldViewProjParam = Parameters["WorldViewProj"];
         }
-        
+
         /// <summary>
         /// Lazily computes derived parameter values immediately before applying the effect.
         /// </summary>
         protected internal override void OnApply()
         {
             // Recompute the world+view+projection matrix or fog vector?
-            dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(dirtyFlags, ref world, ref view, ref projection, ref worldView, fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
+            dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(
+                dirtyFlags, world, view, projection, worldView,
+                fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
 
             // Recompute the diffuse/alpha material color parameter?
             if ((dirtyFlags & EffectDirtyFlags.MaterialColor) != 0)
             {
                 diffuseColorParam.SetValue(new Vector4(diffuseColor * alpha, alpha));
-
                 dirtyFlags &= ~EffectDirtyFlags.MaterialColor;
             }
 
             // Recompute the alpha test settings?
             if ((dirtyFlags & EffectDirtyFlags.AlphaTest) != 0)
             {
-                Vector4 alphaTest = new Vector4();
+                var alphaTest = new Vector4();
                 bool eqNe = false;
-                
+
                 // Convert reference alpha from 8-bit integer to 0-1 float format.
                 float reference = referenceAlpha / 255f;
-                
+
                 // Comparison tolerance of half the 8-bit integer precision.
                 const float threshold = 0.5f / 255f;
-                
+
                 switch (alphaFunction)
                 {
                     case CompareFunction.Less:
@@ -401,11 +379,10 @@ namespace MonoGame.Framework.Graphics
                         alphaTest.W = 1;
                         break;
                 }
-                
-                alphaTestParam.SetValue(alphaTest);
 
+                alphaTestParam.SetValue(alphaTest);
                 dirtyFlags &= ~EffectDirtyFlags.AlphaTest;
-                
+
                 // If we changed between less/greater vs. equal/notequal
                 // compare modes, we must also update the shader index.
                 if (isEqNe != eqNe)
@@ -419,13 +396,13 @@ namespace MonoGame.Framework.Graphics
             if ((dirtyFlags & EffectDirtyFlags.ShaderIndex) != 0)
             {
                 int shaderIndex = 0;
-                
+
                 if (!fogEnabled)
                     shaderIndex += 1;
-                
+
                 if (vertexColorEnabled)
                     shaderIndex += 2;
-                
+
                 if (isEqNe)
                     shaderIndex += 4;
 

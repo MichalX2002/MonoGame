@@ -12,8 +12,6 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
     /// </summary>
     public sealed class AnimationKeyframe : IComparable<AnimationKeyframe>
     {
-        private Matrix _transform;
-
         /// <summary>
         /// Gets the time offset from the start of the animation to the position described by this keyframe.
         /// </summary>
@@ -22,21 +20,17 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Gets or sets the position described by this keyframe.
         /// </summary>
-        public Matrix Transform
-        {
-            get => _transform;
-            set => _transform = value;
-        }
+        public Matrix Transform { get; set; }
 
         /// <summary>
         /// Initializes a new instance of AnimationKeyframe with the specified time offsetand transform.
         /// </summary>
         /// <param name="time">Time offset of the keyframe.</param>
         /// <param name="transform">Position of the keyframe.</param>
-        public AnimationKeyframe(TimeSpan time, Matrix transform)
+        public AnimationKeyframe(TimeSpan time, in Matrix transform)
         {
             Time = time;
-            _transform = transform;
+            Transform = transform;
         }
 
         /// <summary>

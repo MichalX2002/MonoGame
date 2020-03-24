@@ -344,9 +344,9 @@ namespace MonoGame.Framework
             Vector3.Multiply(v3, c.D, out v3);
 
             float f = Vector3.Dot(a.Normal, bcCross) * -1f;
-            destination.X = (v1.X + v2.X + v3.X) / f;
-            destination.Y = (v1.Y + v2.Y + v3.Y) / f;
-            destination.Z = (v1.Z + v2.Z + v3.Z) / f;
+            destination.Base.X = (v1.X + v2.X + v3.X) / f;
+            destination.Base.Y = (v1.Y + v2.Y + v3.Y) / f;
+            destination.Base.Z = (v1.Z + v2.Z + v3.Z) / f;
         }
 
         private void NormalizePlane(ref Plane p)

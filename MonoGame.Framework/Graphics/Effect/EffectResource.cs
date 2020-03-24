@@ -29,7 +29,7 @@ namespace MonoGame.Framework.Graphics
             _name = name;
         }
 
-        public byte[] Bytecode
+        public byte[] ByteCode
         {
             get
             {

@@ -47,8 +47,8 @@ namespace MonoGame.Framework.PackedVector
 
         private static void Pack(in Vector2 vector, out NormalizedShort2 destination)
         {
-            Vector2.Clamp(vector, -Vector2.One, Vector2.One, out var v);
-            Vector2.Multiply(v, short.MaxValue, out v);
+            var v = Vector2.Clamp(vector, -Vector2.One, Vector2.One);
+            v *= short.MaxValue;
 
             destination.X = (short)v.X;
             destination.Y = (short)v.Y;
@@ -70,10 +70,11 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToVector4(out Vector4 vector)
         {
-            vector.X = X / (float)short.MaxValue;
-            vector.Y = Y / (float)short.MaxValue;
-            vector.Z = 0;
-            vector.W = 1;
+            vector.Base.X = X;
+            vector.Base.Y = Y;
+            vector.Base.Z = 0;
+            vector.Base.W = short.MaxValue;
+            vector /= short.MaxValue;
         }
 
         public void FromScaledVector4(in Vector4 scaledVector)

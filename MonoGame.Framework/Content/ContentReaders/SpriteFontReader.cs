@@ -20,7 +20,10 @@ namespace MonoGame.Framework.Content
                 // Read the texture into the existing texture instance
                 input.ReadObject(existingInstance.Texture);
                 
-                // discard the rest of the SpriteFont data as we are only reloading GPU resources for now
+                // FIXME: is it really needed to read theses objects?
+
+                // discard the rest of the SpriteFont data as 
+                // we are only reloading GPU resources for now
                 input.ReadObject<List<Rectangle>>();
                 input.ReadObject<List<Rectangle>>();
                 input.ReadObject<List<char>>();
@@ -28,28 +31,24 @@ namespace MonoGame.Framework.Content
                 input.ReadSingle();
                 input.ReadObject<List<Vector3>>();
                 if (input.ReadBoolean())
-                {
                     input.ReadChar();
-                }
-
+                
                 return existingInstance;
             }
             else
             {
                 // Create a fresh SpriteFont instance
-                Texture2D texture = input.ReadObject<Texture2D>();
-                List<Rectangle> glyphs = input.ReadObject<List<Rectangle>>();
-                List<Rectangle> cropping = input.ReadObject<List<Rectangle>>();
-                List<char> charMap = input.ReadObject<List<char>>();
+                var texture = input.ReadObject<Texture2D>();
+                var glyphs = input.ReadObject<List<Rectangle>>();
+                var cropping = input.ReadObject<List<Rectangle>>();
+                var charMap = input.ReadObject<List<char>>();
                 int lineSpacing = input.ReadInt32();
                 float spacing = input.ReadSingle();
-                List<Vector3> kerning = input.ReadObject<List<Vector3>>();
-                char? defaultCharacter = null;
-                if (input.ReadBoolean())
-                {
-                    defaultCharacter = new char?(input.ReadChar());
-                }
-                return new SpriteFont(texture, glyphs, cropping, charMap, copyChars: false, lineSpacing, spacing, kerning, defaultCharacter);
+                var kerning = input.ReadObject<List<Vector3>>();
+                var defaultCharacter = input.ReadBoolean() ? input.ReadChar() : (char?)null;
+                
+                return new SpriteFont(
+                    texture, glyphs, cropping, charMap, lineSpacing, spacing, kerning, defaultCharacter);
             }
         }
     }
