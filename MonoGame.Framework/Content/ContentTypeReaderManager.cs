@@ -18,9 +18,9 @@ namespace MonoGame.Framework.Content
         private static readonly string _assemblyName;
 
         private Dictionary<Type, ContentTypeReader> _contentReaders;
-		
-		static ContentTypeReaderManager()
-		{
+        
+        static ContentTypeReaderManager()
+        {
             _syncRoot = new object();
             _contentReadersCache = new Dictionary<Type, ContentTypeReader>(255);
             _assemblyName = ReflectionHelpers.GetAssembly(typeof(ContentTypeReaderManager)).FullName;
@@ -45,7 +45,7 @@ namespace MonoGame.Framework.Content
         // Trick to prevent the linker removing the code, but not actually execute the code
         static readonly bool falseflag = false;
 
-		internal ContentTypeReader[] LoadAssetReaders(ContentReader reader)
+        internal ContentTypeReader[] LoadAssetReaders(ContentReader reader)
         {
             // Trick to prevent the linker removing the code, but not actually execute the code
             if (falseflag)
@@ -64,7 +64,7 @@ namespace MonoGame.Framework.Content
                 var hRectangleArrayReader = new ArrayReader<Rectangle>();
                 var hVector3ListReader = new ListReader<Vector3>();
                 var hStringListReader = new ListReader<StringReader>();
-				var hIntListReader = new ListReader<int>();
+                var hIntListReader = new ListReader<int>();
                 var hSpriteFontReader = new SpriteFontReader();
                 var hTexture2DReader = new Texture2DReader();
                 var hCharReader = new CharReader();
@@ -87,8 +87,8 @@ namespace MonoGame.Framework.Content
                 var hArrayMatrixReader = new ArrayReader<Matrix>();
                 var hEnumBlendReader = new EnumReader<Graphics.Blend>();
                 var hNullableRectReader = new NullableReader<Rectangle>();
-				var hEffectMaterialReader = new EffectMaterialReader();
-				var hExternalReferenceReader = new ExternalReferenceReader();
+                var hEffectMaterialReader = new EffectMaterialReader();
+                var hExternalReferenceReader = new ExternalReferenceReader();
                 var hSoundEffectReader = new SoundEffectReader();
                 var hSongReader = new SongReader();
                 var hModelReader = new ModelReader();
@@ -103,7 +103,7 @@ namespace MonoGame.Framework.Content
 #endif
             }
 
-		    // The first content byte i read tells me the number of content readers in this XNB file
+            // The first content byte i read tells me the number of content readers in this XNB file
             var numberOfReaders = reader.Read7BitEncodedInt();
             var contentReaders = new ContentTypeReader[numberOfReaders];
             var needsInitialize = new BitArray(numberOfReaders);
@@ -186,7 +186,7 @@ namespace MonoGame.Framework.Content
 
             } // lock (_locker)
 
-		    return contentReaders;
+            return contentReaders;
         }
 
         /// <summary>
@@ -202,28 +202,28 @@ namespace MonoGame.Framework.Content
         /// A <see cref="string"/>
         /// </returns>
         public static string PrepareType(string type)
-		{			
-			//Needed to support nested types
-			int count = type.Split(new[] {"[["}, StringSplitOptions.None).Length - 1;
-			
-			string preparedType = type;
-			
-			for(int i=0; i<count; i++)
-			{
-				preparedType = Regex.Replace(preparedType, @"\[(.+?), Version=.+?\]", "[$1]");
-			}
-						
-			//Handle non generic types
-			if(preparedType.Contains("PublicKeyToken"))
-				preparedType = Regex.Replace(preparedType, @"(.+?), Version=.+?$", "$1");
+        {			
+            //Needed to support nested types
+            int count = type.Split(new[] {"[["}, StringSplitOptions.None).Length - 1;
+            
+            string preparedType = type;
+            
+            for(int i=0; i<count; i++)
+            {
+                preparedType = Regex.Replace(preparedType, @"\[(.+?), Version=.+?\]", "[$1]");
+            }
+                        
+            //Handle non generic types
+            if(preparedType.Contains("PublicKeyToken"))
+                preparedType = Regex.Replace(preparedType, @"(.+?), Version=.+?$", "$1");
 
-			// TODO: For WinRT this is most likely broken!
-			preparedType = preparedType.Replace(", MonoGame.Framework.Graphics", string.Format(", {0}", _assemblyName));
+            // TODO: For WinRT this is most likely broken!
+            preparedType = preparedType.Replace(", MonoGame.Framework.Graphics", string.Format(", {0}", _assemblyName));
             preparedType = preparedType.Replace(", MonoGame.Framework.Video", string.Format(", {0}", _assemblyName));
             preparedType = preparedType.Replace(", MonoGame.Framework", string.Format(", {0}", _assemblyName));
-			
-			return preparedType;
-		}
+            
+            return preparedType;
+        }
 
         // Static map of type names to creation functions. Required as iOS requires all types at compile time
         private static Dictionary<string, Func<ContentTypeReader>> typeCreators = new Dictionary<string, Func<ContentTypeReader>>();

@@ -17,7 +17,7 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct Short2 : IPackedVector<uint>, IEquatable<Short2>, IPixel
     {
-        private static readonly Vector2 Offset = new Vector2(-short.MinValue);
+        private static readonly Vector2 Offset = new Vector2(32768);
 
         VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Red, sizeof(short) * 8),
@@ -63,7 +63,7 @@ namespace MonoGame.Framework.PackedVector
 
         private static void Pack(in Vector2 vector, out Short2 destination)
         {
-            Vector2.Add(vector, Vector2.Half, out var v);
+            var v = vector + Vector2.Half;
             v.Clamp(short.MinValue, short.MaxValue);
 
             destination.X = (short)v.X;
@@ -86,10 +86,10 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToVector4(out Vector4 vector)
         {
-            vector.X = X;
-            vector.Y = Y;
-            vector.Z = 0;
-            vector.W = 1;
+            vector.Base.X = X;
+            vector.Base.Y = Y;
+            vector.Base.Z = 0;
+            vector.Base.W = 1;
         }
 
         public void FromScaledVector4(in Vector4 scaledVector)
@@ -101,9 +101,11 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToScaledVector4(out Vector4 scaledVector)
         {
-            ToVector4(out scaledVector);
-            scaledVector.X = (scaledVector.X + Offset.X) / ushort.MaxValue;
-            scaledVector.Y = (scaledVector.Y + Offset.Y) / ushort.MaxValue;
+            scaledVector.Base.X = X + Offset.X;
+            scaledVector.Base.Y = Y + Offset.Y;
+            scaledVector.Base.Z = 0;
+            scaledVector.Base.W = ushort.MaxValue;
+            scaledVector /= ushort.MaxValue;
         }
 
         #endregion

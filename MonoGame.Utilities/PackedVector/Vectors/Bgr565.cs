@@ -46,14 +46,15 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        private static ushort Pack(Vector3 vector)
+        private static ushort Pack(in Vector3 vector)
         {
-            vector.Clamp(Vector3.Zero, Vector3.One);
+            var v = Vector3.Clamp(vector, Vector3.Zero, Vector3.One);
+            v *= 31;
 
             return (ushort)(
-                (((int)MathF.Round(vector.X * 31f) & 0x1F) << 11) |
-                (((int)MathF.Round(vector.Y * 63f) & 0x3F) << 5) |
-                ((int)MathF.Round(vector.Z * 31f) & 0x1F));
+                (((int)MathF.Round(v.X) & 0x1F) << 11) |
+                (((int)MathF.Round(v.Y * 2.032258f) & 0x3F) << 5) |
+                ((int)MathF.Round(v.Z) & 0x1F));
         }
 
         #region IPackedVector
@@ -61,40 +62,81 @@ namespace MonoGame.Framework.PackedVector
         [CLSCompliant(false)]
         public ushort PackedValue { get; set; }
 
-        public void FromVector4(Vector4 vector) => Pack(vector.XYZ);
-
-        public readonly Vector4 ToVector4()
+        public void FromVector4(in Vector4 vector)
         {
-            return new Vector4(
-                ((PackedValue >> 11) & 0x1F) * (1f / 31f),
-                ((PackedValue >> 5) & 0x3F) * (1f / 63f),
-                (PackedValue & 0x1F) * (1f / 31f),
-                1f);
+            Pack(vector.ToVector3());
+        }
+
+        public readonly void ToVector4(out Vector4 vector)
+        {
+            vector.Base.X = (PackedValue >> 11) & 0x1F;
+            vector.Base.Y = ((PackedValue >> 5) & 0x3F) / 2.032258f;
+            vector.Base.Z = PackedValue & 0x1F;
+            vector.Base.W = 31f;
+            vector /= 31f;
+        }
+
+        public void FromScaledVector4(in Vector4 scaledVector)
+        {
+            FromVector4(scaledVector);
+        }
+
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        {
+            ToVector4(out scaledVector);
         }
 
         #endregion
 
         #region IPixel
 
-        public void FromScaledVector4(Vector4 vector) => FromVector4(vector);
+        public void FromColor(Color source)
+        {
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
+        }
 
-        public readonly Vector4 ToScaledVector4() => ToVector4();
+        public void FromGray8(Gray8 source)
+        {
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
+        }
 
-        public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(ToScaledVector4());
+        public void FromGray16(Gray16 source)
+        {
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
+        }
 
-        public void FromGray8(Gray8 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromGrayAlpha16(GrayAlpha16 source)
+        {
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
+        }
 
-        public void FromGray16(Gray16 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromRgb24(Rgb24 source)
+        {
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
+        }
 
-        public void FromGrayAlpha16(GrayAlpha16 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromRgb48(Rgb48 source)
+        {
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
+        }
 
-        public void FromRgb24(Rgb24 source) => FromScaledVector4(source.ToScaledVector4());
+        public void FromRgba64(Rgba64 source)
+        {
+            source.ToScaledVector4(out var vector);
+            FromScaledVector4(vector);
+        }
 
-        public void FromColor(Color source) => FromScaledVector4(source.ToScaledVector4());
-
-        public void FromRgb48(Rgb48 source) => FromScaledVector4(source.ToScaledVector4());
-
-        public void FromRgba64(Rgba64 source) => FromScaledVector4(source.ToScaledVector4());
+        public readonly void ToColor(ref Color destination)
+        {
+            ToScaledVector4(out var vector);
+            destination.FromScaledVector4(vector);
+        }
 
         #endregion
 
@@ -113,7 +155,7 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(Bgr565) + $"({ToVector4().XYZ})";
+        public override string ToString() => nameof(Bgr565) + $"({this.ToVector4().XYZ})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

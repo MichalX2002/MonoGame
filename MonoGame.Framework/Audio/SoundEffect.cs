@@ -1,7 +1,7 @@
 // MonoGame - Copyright (C) The MonoGame Team
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
-﻿
+
 using System;
 using System.Buffers.Binary;
 using System.Diagnostics;
@@ -62,7 +62,7 @@ namespace MonoGame.Framework.Audio
         {
             Initialize();
             AssertInitialized();
-            
+
             // TODO: add more audio formats
             /*
               The audio has the following restrictions:
@@ -102,7 +102,7 @@ namespace MonoGame.Framework.Audio
 
         // Only used from XACT WaveBank.
         internal SoundEffect(
-            MiniFormatTag codec, ReadOnlySpan<byte> buffer, int channels, int sampleRate,
+            ReadOnlySpan<byte> buffer, MiniFormatTag codec, int channels, int sampleRate,
             int blockAlignment, int loopStart, int loopLength)
         {
             Initialize();
@@ -116,7 +116,8 @@ namespace MonoGame.Framework.Audio
                 return;
             }
 
-            PlatformInitializeXact(codec, buffer, channels, sampleRate, blockAlignment, loopStart, loopLength, out _duration);
+            PlatformInitializeXact(
+                buffer, codec, channels, sampleRate, blockAlignment, loopStart, loopLength, out _duration);
         }
 
         #endregion

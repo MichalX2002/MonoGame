@@ -16,8 +16,9 @@ namespace MonoGame.Framework.Media
         public const int MaxQueuedBuffers = 4;
 
         internal static object SingletonMutex { get; } = new object();
+
         internal object IterationMutex { get; } = new object();
-        private object ReadMutex { get; } = new object();
+        private object FillMutex { get; } = new object();
 
         private static OggStreamer _instance;
         private float[] _readBuffer;
@@ -31,9 +32,9 @@ namespace MonoGame.Framework.Media
         private volatile bool _cancelled;
 
         public int BufferSize { get; }
-        public ReadOnlyMemory<TimeSpan> UpdateTime { get; }
-
         public TimeSpan UpdateDelay { get; private set; }
+
+        public ReadOnlyMemory<TimeSpan> UpdateTiming => _threadTiming.AsMemory();
 
         public float UpdateRate
         {
@@ -41,7 +42,7 @@ namespace MonoGame.Framework.Media
             set
             {
                 _updateRate = value;
-                UpdateDelay = TimeSpan.FromSeconds(1 / ((value <= 0) ? 1 : value));
+                UpdateDelay = TimeSpan.FromSeconds(1 / ((value <= 0) ? 1.0 : value));
             }
         }
 
@@ -71,8 +72,7 @@ namespace MonoGame.Framework.Media
             UpdateRate = updateRate;
 
             _threadTiming = new TimeSpan[(int)(UpdateRate < 1 ? 1 : UpdateRate)];
-            UpdateTime = _threadTiming;
-
+            
             _streams = new HashSet<OggStream>();
 
             _readBuffer = new float[BufferSize];
@@ -117,7 +117,7 @@ namespace MonoGame.Framework.Media
 
         public bool TryFillBuffer(OggStream stream, out ALBuffer buffer)
         {
-            lock (ReadMutex)
+            lock (FillMutex)
             {
                 var reader = stream.Reader;
                 int readSamples = reader.ReadSamples(_readBuffer);
@@ -160,6 +160,8 @@ namespace MonoGame.Framework.Media
                 if (_cancelled)
                     break;
 
+                watch.Restart();
+
                 localStreams.Clear();
                 lock (IterationMutex)
                 {
@@ -169,7 +171,7 @@ namespace MonoGame.Framework.Media
 
                 foreach (OggStream stream in localStreams)
                 {
-                    lock (stream.PrepareMutex)
+                    lock (stream.ReadMutex)
                     {
                         lock (IterationMutex)
                             if (!_streams.Contains(stream))
@@ -198,7 +200,7 @@ namespace MonoGame.Framework.Media
                 }
                 watch.Stop();
 
-                // move all elements forward one index and update the first element
+                // shift all elements forward and update the first element
                 Array.Copy(_threadTiming, 0, _threadTiming, destinationIndex: 1, _threadTiming.Length - 1);
                 _threadTiming[0] = watch.Elapsed;
             }

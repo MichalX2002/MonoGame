@@ -30,7 +30,7 @@ namespace MonoGame.Framework
         #region Properties
 
         /// <summary>
-        /// Gets or sets the <see cref="Matrix"/> of the frustum.
+        /// Gets or sets the <see cref="Framework.Matrix"/> transformation of the frustum.
         /// </summary>
         public Matrix Matrix
         {
@@ -271,8 +271,11 @@ namespace MonoGame.Framework
             distance = 0f;
             switch (Contains(ray.Position))
             {
-                case ContainmentType.Disjoint: return false;
-                case ContainmentType.Contains: return true;
+                case ContainmentType.Disjoint:
+                    return false;
+
+                case ContainmentType.Contains:
+                    return true;
 
                 case ContainmentType.Intersects:
                     throw new NotImplementedException();
@@ -324,36 +327,28 @@ namespace MonoGame.Framework
             _planes[4] = new Plane(_matrix.M12 - _matrix.M14, _matrix.M22 - _matrix.M24, _matrix.M32 - _matrix.M34, _matrix.M42 - _matrix.M44);
             _planes[5] = new Plane(-_matrix.M14 - _matrix.M12, -_matrix.M24 - _matrix.M22, -_matrix.M34 - _matrix.M32, -_matrix.M44 - _matrix.M42);
 
-            NormalizePlane(ref _planes[0]);
-            NormalizePlane(ref _planes[1]);
-            NormalizePlane(ref _planes[2]);
-            NormalizePlane(ref _planes[3]);
-            NormalizePlane(ref _planes[4]);
-            NormalizePlane(ref _planes[5]);
+            _planes[0] = Plane.Normalize(_planes[0]);
+            _planes[1] = Plane.Normalize(_planes[1]);
+            _planes[2] = Plane.Normalize(_planes[2]);
+            _planes[3] = Plane.Normalize(_planes[3]);
+            _planes[4] = Plane.Normalize(_planes[4]);
+            _planes[5] = Plane.Normalize(_planes[5]);
         }
 
         private static void IntersectionPoint(in Plane a, in Plane b, in Plane c, out Vector3 destination)
         {
-            Vector3.Cross(b.Normal, c.Normal, out var bcCross);
-            Vector3.Multiply(bcCross, a.D, out var v1);
+            var bcCross = Vector3.Cross(b.Normal, c.Normal);
+            var v1 = bcCross * a.D;
 
-            Vector3.Cross(c.Normal, a.Normal, out var v2);
-            Vector3.Multiply(v2, b.D, out v2);
+            var v2 = Vector3.Cross(c.Normal, a.Normal);
+            v2 *= b.D;
 
-            Vector3.Cross(a.Normal, b.Normal, out var v3);
-            Vector3.Multiply(v3, c.D, out v3);
+            var v3 = Vector3.Cross(a.Normal, b.Normal);
+            v3 *= c.D;
 
             float f = Vector3.Dot(a.Normal, bcCross) * -1f;
-            destination.Base.X = (v1.X + v2.X + v3.X) / f;
-            destination.Base.Y = (v1.Y + v2.Y + v3.Y) / f;
-            destination.Base.Z = (v1.Z + v2.Z + v3.Z) / f;
-        }
-
-        private void NormalizePlane(ref Plane p)
-        {
-            float length = p.Normal.Length();
-            p.Normal /= length;
-            p.D /= length;
+            destination = v1 + v2 + v3;
+            destination /= f;
         }
 
         #endregion

@@ -18,7 +18,7 @@ namespace MonoGame.Framework.Media
     internal class OggStream : IDisposable
     {
         public object StopMutex { get; } = new object();
-        public object PrepareMutex { get; } = new object();
+        public object ReadMutex { get; } = new object();
 
         private bool _leaveStreamOpen;
         private Stream _stream;
@@ -108,12 +108,12 @@ namespace MonoGame.Framework.Media
 
         public void Prepare(bool immediate)
         {
-            if (IsPreparing)
-                return;
-
-            var state = GetState();
             lock (StopMutex)
             {
+                if (IsPreparing)
+                    return;
+
+                var state = GetState();
                 switch (state)
                 {
                     case ALSourceState.Playing:
@@ -121,14 +121,14 @@ namespace MonoGame.Framework.Media
                         return;
 
                     case ALSourceState.Stopped:
-                        lock (PrepareMutex)
+                        lock (ReadMutex)
                             Empty();
                         break;
                 }
 
                 if (!IsReady)
                 {
-                    lock (PrepareMutex)
+                    lock (ReadMutex)
                     {
                         IsPreparing = true;
                         Open(precache: immediate);
@@ -199,7 +199,7 @@ namespace MonoGame.Framework.Media
             {
                 StopPlayback();
 
-                lock (PrepareMutex)
+                lock (ReadMutex)
                 {
                     OggStreamer.Instance.RemoveStream(this);
                     Empty();
@@ -253,7 +253,7 @@ namespace MonoGame.Framework.Media
         /// </summary>
         public void SeekTo(TimeSpan pos)
         {
-            lock (PrepareMutex)
+            lock (ReadMutex)
             {
                 Stop();
                 Reader.TimePosition = pos;
@@ -263,13 +263,19 @@ namespace MonoGame.Framework.Media
         public TimeSpan GetPosition()
         {
             if (Reader == null)
-                return TimeSpan.Zero;
-            return Reader.TimePosition;
+                return default;
+
+            lock (ReadMutex)
+                return Reader.TimePosition;
         }
 
         public TimeSpan? GetLength()
         {
-            return Reader.TotalTime;
+            if (Reader == null)
+                return default;
+
+            lock (ReadMutex)
+                return Reader.TotalTime;
         }
 
         public ALSourceState GetState()
@@ -330,20 +336,23 @@ namespace MonoGame.Framework.Media
 
         public void Dispose()
         {
-            var state = GetState();
-            if (state == ALSourceState.Playing || state == ALSourceState.Paused)
-                StopPlayback();
-
-            lock (PrepareMutex)
+            lock (StopMutex)
             {
-                OggStreamer.Instance.RemoveStream(this);
-                if (state != ALSourceState.Initial)
-                    Empty();
-                Close();
-            }
+                var state = GetState();
+                if (state == ALSourceState.Playing || state == ALSourceState.Paused)
+                    StopPlayback();
 
-            AL.Source(SourceId, ALSourcei.Buffer, 0);
-            ALHelper.CheckError("Failed to free source from buffers.");
+                lock (ReadMutex)
+                {
+                    OggStreamer.Instance.RemoveStream(this);
+                    if (state != ALSourceState.Initial)
+                        Empty();
+                    Close();
+                }
+
+                AL.Source(SourceId, ALSourcei.Buffer, 0);
+                ALHelper.CheckError("Failed to free source from buffers.");
+            }
 
             while (_queuedBuffers.Count > 0)
                 DequeueAndReturnBuffer();

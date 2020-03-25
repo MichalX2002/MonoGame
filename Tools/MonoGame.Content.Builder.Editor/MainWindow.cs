@@ -14,8 +14,8 @@ namespace MonoGame.Tools.Pipeline
 {
     partial class MainWindow : Form, IView
     {
-        public EventHandler<EventArgs> RecentChanged;
         public EventHandler<EventArgs> TitleChanged;
+        public EventHandler<EventArgs> RecentListChanged;
 
         public const string TitleBase = "MonoGame Content Builder Editor";
         public static MainWindow Instance;
@@ -371,7 +371,9 @@ namespace MonoGame.Tools.Pipeline
             // Title
 
             if (TitleChanged != null)
-                TitleChanged(this, EventArgs.Empty);
+            {
+                TitleChanged.Invoke(this, EventArgs.Empty);
+            }
             else
             {
                 string title = string.Empty;
@@ -473,9 +475,9 @@ namespace MonoGame.Tools.Pipeline
 
         public void UpdateRecentList(List<string> recentList)
         {
-            if (RecentChanged != null)
+            if (RecentListChanged != null)
             {
-                RecentChanged(recentList, EventArgs.Empty);
+                RecentListChanged.Invoke(recentList, EventArgs.Empty);
                 return;
             }
 

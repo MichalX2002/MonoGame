@@ -4,13 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-
 using MonoGame.OpenAL;
-#if IOS || MONOMAC
-using AudioToolbox;
-using AudioUnit;
-using AVFoundation;
-#endif
 
 namespace MonoGame.Framework.Audio
 {
@@ -125,7 +119,8 @@ namespace MonoGame.Framework.Audio
                 BufferReady.Invoke(this, sampleCount);
         }
 
-        internal unsafe int PlatformGetData<T>(Span<T> buffer) where T : unmanaged
+        internal unsafe int PlatformGetData<T>(Span<T> buffer) 
+            where T : unmanaged
         {
             int sampleCount = GetQueuedSampleCount();
             sampleCount = Math.Min(buffer.Length * sizeof(T) / 2, sampleCount); // 16bit adjust

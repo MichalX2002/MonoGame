@@ -125,7 +125,7 @@ namespace MonoGame.Framework
         public Vector2 XW { readonly get => new Vector2(X, W); set { X = value.X; W = value.Y; } }
 
         /// <summary>
-        /// Gets or sets the x and y coordinates as a <see cref="Vector2"/>.
+        /// Gets or sets the x and y coordinates as a <see cref="Vector3"/>.
         /// </summary>
         [IgnoreDataMember]
         public Vector3 XYZ { readonly get => ToVector3(); set { X = value.X; Y = value.Y; Z = value.Z; } }

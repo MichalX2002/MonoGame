@@ -51,9 +51,10 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToVector4(out Vector4 vector)
         {
-            vector.X = ToSingle();
-            vector.Y = vector.Z = 0;
-            vector.W = 1;
+            vector.Base.X = ToSingle();
+            vector.Base.Y = 0;
+            vector.Base.Z = 0;
+            vector.Base.W = 1;
         }
 
         public void FromScaledVector4(in Vector4 vector)
@@ -66,11 +67,10 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToScaledVector4(out Vector4 scaledVector)
         {
-            scaledVector.X = ToSingle() + 1;
-            scaledVector.X /= 2;
-
-            scaledVector.Y = scaledVector.Z = 0;
-            scaledVector.W = 1;
+            scaledVector.Base.X = (ToSingle() + 1) / 2f;
+            scaledVector.Base.Y = 0;
+            scaledVector.Base.Z = 0;
+            scaledVector.Base.W = 1;
         }
 
         #endregion

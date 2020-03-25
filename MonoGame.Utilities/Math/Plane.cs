@@ -133,10 +133,7 @@ namespace MonoGame.Framework
 
         #endregion
 
-        public override int GetHashCode()
-        {
-            return Base.GetHashCode();
-        }
+        public override int GetHashCode() => Base.GetHashCode();
 
         internal PlaneIntersectionType Intersects(in Vector3 point)
         {
@@ -148,10 +145,7 @@ namespace MonoGame.Framework
             return PlaneIntersectionType.Intersecting;
         }
 
-        public readonly override string ToString()
-        {
-            return base.ToString();
-        }
+        public readonly override string ToString() => Base.ToString();
 
         /// <summary>
         /// Deconstruction method for <see cref="Plane"/>.

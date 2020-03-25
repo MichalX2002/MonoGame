@@ -65,15 +65,15 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             var normals = new Vector3[positionIndices.Count];
             for (var i = 0; i < geom.Indices.Count; i += 3)
             {
-                var ia = geom.Indices[i + 0];
-                var ib = geom.Indices[i + 1];
-                var ic = geom.Indices[i + 2];
+                int ia = geom.Indices[i + 0];
+                int ib = geom.Indices[i + 1];
+                int ic = geom.Indices[i + 2];
 
                 var aa = geom.Vertices.Positions[ia];
                 var bb = geom.Vertices.Positions[ib];
                 var cc = geom.Vertices.Positions[ic];
 
-                Vector3.Cross(cc - bb, bb - aa, out var faceNormal);
+                var faceNormal = Vector3.Cross(cc - bb, bb - aa);
                 var length = faceNormal.Length();
                 if (length > 0.0f)
                 {
@@ -277,12 +277,12 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                     // errors in other parts of the pipeline, we just take        
                     // a guess at something that may look ok.
 
-                    Vector3.Cross(n, Vector3.UnitX, out t);
+                    t = Vector3.Cross(n, Vector3.UnitX);
                     if (t.LengthSquared() < float.Epsilon)
-                        Vector3.Cross(n, Vector3.UnitY, out t);
+                        t = Vector3.Cross(n, Vector3.UnitY);
 
-                    Vector3.Normalize(t, out tangents[i]);
-                    Vector3.Cross(n, tangents[i], out bitangents[i]);
+                    tangents[i] = Vector3.Normalize(t);
+                    bitangents[i] = Vector3.Cross(n, tangents[i]);
                     continue;
                 }
 

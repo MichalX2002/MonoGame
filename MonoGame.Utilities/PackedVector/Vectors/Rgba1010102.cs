@@ -52,26 +52,34 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromVector4(in Vector4 vector)
         {
-            Vector4.Clamp(vector, 0, 1, out var v);
+            var v = Vector4.Clamp(vector, 0, 1);
+            v *= 1023f;
 
             PackedValue = (uint)(
-                (((int)MathF.Round(v.X * 1023f) & 0x03FF) << 0) |
-                (((int)MathF.Round(v.Y * 1023f) & 0x03FF) << 10) |
-                (((int)MathF.Round(v.Z * 1023f) & 0x03FF) << 20) |
-                (((int)MathF.Round(v.W * 3f) & 0x03) << 30));
+                (((int)MathF.Round(v.X) & 0x03FF) << 0) |
+                (((int)MathF.Round(v.Y) & 0x03FF) << 10) |
+                (((int)MathF.Round(v.Z) & 0x03FF) << 20) |
+                (((int)MathF.Round(v.W / 1023f * 3f) & 0x03) << 30));
         }
 
         public readonly void ToVector4(out Vector4 vector)
         {
-            vector.X = ((PackedValue >> 0) & 0x03FF) / 1023f;
-            vector.Y = ((PackedValue >> 10) & 0x03FF) / 1023f;
-            vector.Z = ((PackedValue >> 20) & 0x03FF) / 1023f;
-            vector.W = ((PackedValue >> 30) & 0x03) / 3f;
+            vector.Base.X = (PackedValue >> 0) & 0x03FF;
+            vector.Base.Y = (PackedValue >> 10) & 0x03FF;
+            vector.Base.Z = (PackedValue >> 20) & 0x03FF;
+            vector.Base.W = ((PackedValue >> 30) & 0x03) * 1023f / 3f;
+            vector /= 1023;
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector) => ToVector4(out scaledVector);
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        {
+            ToVector4(out scaledVector);
+        }
 
-        public void FromScaledVector4(in Vector4 vector) => FromVector4(vector);
+        public void FromScaledVector4(in Vector4 vector)
+        {
+            FromVector4(vector);
+        }
 
         #endregion
 

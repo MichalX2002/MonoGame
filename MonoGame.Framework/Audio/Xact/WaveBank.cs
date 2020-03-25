@@ -272,11 +272,14 @@ namespace MonoGame.Framework.Audio
 
                         // Read the data.
                         reader.BaseStream.Seek(info.FileOffset + _playRegionOffset, SeekOrigin.Begin);
+
+                        // TODO: pool this memory
                         var audiodata = reader.ReadBytes(info.FileLength);
                         DecodeFormat(info.Format, out MiniFormatTag codec, out int channels, out int rate, out int alignment);
 
                         // Call the special constuctor on SoundEffect to sort it out.
-                        _sounds[i] = new SoundEffect(codec, audiodata, channels, rate, alignment, info.LoopStart, info.LoopLength);
+                        _sounds[i] = new SoundEffect(
+                            audiodata, codec, channels, rate, alignment, info.LoopStart, info.LoopLength);
                     }
 
                     _streams = null;

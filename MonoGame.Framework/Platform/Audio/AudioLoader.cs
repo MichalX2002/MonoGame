@@ -353,6 +353,8 @@ namespace MonoGame.Framework.Audio
 
             if (Vector.IsHardwareAccelerated)
             {
+                // this is roughly 2x perf on AVX2
+
                 var maxValueVec = new Vector<float>(short.MaxValue);
                 var minValueVec = new Vector<float>(short.MinValue);
                 var halfValueVec = new Vector<float>(0.5f);

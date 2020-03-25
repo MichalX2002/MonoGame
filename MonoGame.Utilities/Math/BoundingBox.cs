@@ -33,7 +33,7 @@ namespace MonoGame.Framework
 
         #region Public Methods
 
-        public ContainmentType Contains(in BoundingBox box)
+        public readonly ContainmentType Contains(in BoundingBox box)
         {
             //test if all corner is in the same side of a face by just checking min and max
             if (box.Max.X < Min.X || box.Min.X > Max.X ||
@@ -49,7 +49,7 @@ namespace MonoGame.Framework
             return ContainmentType.Intersects;
         }
 
-        public ContainmentType Contains(BoundingFrustum frustum)
+        public readonly ContainmentType Contains(BoundingFrustum frustum)
         {
             //TODO: bad done here need a fix. 
             // Because question is not frustum contain box but reverse and this is not the same
@@ -84,7 +84,7 @@ namespace MonoGame.Framework
             return ContainmentType.Contains;
         }
 
-        public ContainmentType Contains(in BoundingSphere sphere)
+        public readonly ContainmentType Contains(in BoundingSphere sphere)
         {
             if (sphere.Center.X - Min.X >= sphere.Radius &&
                 sphere.Center.Y - Min.Y >= sphere.Radius &&
@@ -155,7 +155,7 @@ namespace MonoGame.Framework
             return ContainmentType.Disjoint;
         }
 
-        public ContainmentType Contains(in Vector3 point)
+        public readonly ContainmentType Contains(in Vector3 point)
         {
             //first we get if point is out of box
             if (point.X < Min.X || point.X > Max.X ||
@@ -175,7 +175,7 @@ namespace MonoGame.Framework
         public static BoundingBox CreateFromPoints(IEnumerable<Vector3> points)
         {
             if (points == null)
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(points));
 
             bool empty = true;
             var minVec = Vector3.MaxValue;
@@ -213,8 +213,8 @@ namespace MonoGame.Framework
             var maxVec = Vector3.MinValue;
             foreach (var ptVector in points)
             {
-                Vector3.Min(minVec, ptVector, out minVec);
-                Vector3.Max(maxVec, ptVector, out maxVec);
+                minVec = Vector3.Min(minVec, ptVector);
+                maxVec = Vector3.Max(maxVec, ptVector);
             }
             return new BoundingBox(minVec, maxVec);
         }
@@ -227,17 +227,17 @@ namespace MonoGame.Framework
 
         public static BoundingBox CreateMerged(in BoundingBox original, in BoundingBox additional)
         {
-            Vector3.Min(original.Min, additional.Min, out var min);
-            Vector3.Max(original.Min, additional.Min, out var max);
+            var min = Vector3.Min(original.Min, additional.Min);
+            var max = Vector3.Max(original.Min, additional.Min);
             return new BoundingBox(min, max);
         }
 
-        public bool Equals(BoundingBox other)
+        public readonly bool Equals(BoundingBox other)
         {
             return this == other;
         }
 
-        public override bool Equals(object obj)
+        public readonly override bool Equals(object obj)
         {
             return obj is BoundingBox other && this == other;
         }
@@ -245,14 +245,14 @@ namespace MonoGame.Framework
         /// <summary>
         /// Creates an array of corners from this <see cref="BoundingBox"/>.
         /// </summary>
-        public Vector3[] GetCorners()
+        public readonly Vector3[] GetCorners()
         {
             var array = new Vector3[8];
             GetCorners(array);
             return array;
         }
 
-        public void GetCorners(Span<Vector3> corners)
+        public readonly void GetCorners(Span<Vector3> corners)
         {
             if (corners.IsEmpty)
                 throw new ArgumentEmptyException(nameof(corners));
@@ -270,12 +270,9 @@ namespace MonoGame.Framework
             corners[7] = new Vector3(Min.X, Min.Y, Min.Z);
         }
 
-        public override int GetHashCode()
-        {
-            return Min.GetHashCode() + Max.GetHashCode();
-        }
+        public readonly override int GetHashCode() => HashCode.Combine(Min, Max);
 
-        public bool Intersects(in BoundingBox box)
+        public readonly bool Intersects(in BoundingBox box)
         {
             if ((Max.X >= box.Min.X) && (Min.X <= box.Max.X))
             {
@@ -286,7 +283,7 @@ namespace MonoGame.Framework
             return false;
         }
 
-        public bool Intersects(BoundingFrustum frustum)
+        public readonly bool Intersects(BoundingFrustum frustum)
         {
             return frustum.Intersects(this);
         }
@@ -295,8 +292,11 @@ namespace MonoGame.Framework
         /// Gets whether or not a specified sphere intersects with this box.
         /// </summary>
         /// <param name="box">The box for testing.</param>
-        /// <returns><see langword="true"/> if <see cref="BoundingBox"/> intersects with this sphere; <see langword="false"/> otherwise.</returns>
-        public bool Intersects(in BoundingSphere sphere)
+        /// <returns>
+        /// <see langword="true"/> if <see cref="BoundingBox"/> intersects with this sphere; 
+        /// <see langword="false"/> otherwise.
+        /// </returns>
+        public readonly bool Intersects(in BoundingSphere sphere)
         {
             if (sphere.Center.X - Min.X > sphere.Radius &&
                 sphere.Center.Y - Min.Y > sphere.Radius &&
@@ -329,7 +329,7 @@ namespace MonoGame.Framework
             return false;
         }
 
-        public PlaneIntersectionType Intersects(in Plane plane)
+        public readonly PlaneIntersectionType Intersects(in Plane plane)
         {
             // See http://zach.in.tu-clausthal.de/teaching/cg_literatur/lighthouse3d_view_frustum_culling/index.html
 
@@ -389,10 +389,6 @@ namespace MonoGame.Framework
         {
             return !(a == b);
         }
-
-        internal string DebugDisplayString => string.Concat(
-            "Min( ", Min.DebuggerDisplay, " )  \r\n",
-            "Max( ", Max.DebuggerDisplay, " )");
 
         public readonly override string ToString()
         {

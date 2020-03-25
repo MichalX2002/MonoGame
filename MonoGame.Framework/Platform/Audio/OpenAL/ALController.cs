@@ -217,7 +217,8 @@ namespace MonoGame.Framework.Audio
                 {
                     Android.Util.Log.Debug("OAL", "Android 4.2 or higher required for low latency audio playback.");
                 }
-                Android.Util.Log.Debug("OAL", "Using sample rate " + frequency + "Hz and " + updateBuffers + " buffers of " + updateSize + " frames.");
+                Android.Util.Log.Debug(
+                    "OAL", "Using sample rate " + frequency + "Hz and " + updateBuffers + " buffers of " + updateSize + " frames.");
 
                 // These are missing and non-standard ALC constants
                 const int AlcFrequency = 0x1007;

@@ -81,7 +81,7 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromVector4(in Vector4 vector)
         {
-            Vector4.Clamp(vector, -1, 1, out var v);
+            var v = Vector4.Clamp(vector, -1, 1);
             v *= sbyte.MaxValue;
 
             X = (sbyte)v.X;

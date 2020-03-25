@@ -33,7 +33,7 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromScaledVector4(in Vector4 scaledVector)
         {
-            Vector4.Clamp(scaledVector, 0, 1, out var v);
+            var v = Vector4.Clamp(scaledVector, 0, 1);
             v *= uint.MaxValue;
 
             L = PackedVectorHelper.Get32BitBT709Luminance((uint)v.X, (uint)v.Y, (uint)v.Z);
@@ -41,8 +41,8 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToScaledVector4(out Vector4 scaledVector)
         {
-            scaledVector.X = scaledVector.Y = scaledVector.Z = (float)(L / (double)uint.MaxValue);
-            scaledVector.W = 1;
+            scaledVector.Base.X = scaledVector.Base.Y = scaledVector.Base.Z = (float)(L / (double)uint.MaxValue);
+            scaledVector.Base.W = 1;
         }
 
         #endregion

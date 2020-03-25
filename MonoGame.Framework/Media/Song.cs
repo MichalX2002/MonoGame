@@ -38,20 +38,20 @@ namespace MonoGame.Framework.Media
         }
 
         /// <summary>
-        /// Gets 
+        /// Gets update times of the internal song streaming thread.
+        /// <para>
+        /// The amount of time samples indicates the update rate.
+        /// </para>
         /// </summary>
-        public static ReadOnlyCollection<TimeSpan> UpdateTime
+        public static ReadOnlyMemory<TimeSpan> UpdateTiming
         {
             get =>
 #if DIRECTX || DESKTOPGL
-                OggStreamer.Instance.UpdateTime;
+                OggStreamer.Instance.UpdateTiming;
 #else
-                return null;
+                ReadOnlyMemory<TimeSpan>.Empty;
 #endif
-
         }
-
-        #endregion
 
         /// <summary>
         /// Occurs when the <see cref="Song"/> stops though not when the it loops.
@@ -67,6 +67,8 @@ namespace MonoGame.Framework.Media
         /// Gets the name of the <see cref="Song"/>.
         /// </summary>
         public string Name { get; }
+
+        #endregion
 
         #region Method Properties
 

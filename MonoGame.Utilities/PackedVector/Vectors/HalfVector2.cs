@@ -73,19 +73,28 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<HalfVector2, uint>(ref this) = value;
         }
 
-        public void FromVector4(in Vector4 vector) => Pack(vector.ToVector2(), out this);
+        public void FromVector4(in Vector4 vector)
+        {
+            Pack(vector.ToVector2(), out this);
+        }
 
         public readonly void ToVector4(out Vector4 vector)
         {
-            vector.X = X;
-            vector.Y = Y;
-            vector.Z = 0;
-            vector.W = 1;
+            vector.Base.X = X;
+            vector.Base.Y = Y;
+            vector.Base.Z = 0;
+            vector.Base.W = 1;
         }
 
-        public void FromScaledVector4(in Vector4 scaledVector) => FromVector4(scaledVector);
+        public void FromScaledVector4(in Vector4 scaledVector)
+        {
+            FromVector4(scaledVector);
+        }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector) => ToVector4(out scaledVector);
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        {
+            ToVector4(out scaledVector);
+        }
 
         #endregion
 

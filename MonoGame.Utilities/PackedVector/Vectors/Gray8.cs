@@ -32,7 +32,7 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromScaledVector4(in Vector4 scaledVector)
         {
-            Vector4.Multiply(scaledVector, byte.MaxValue, out var v);
+            var v = scaledVector * byte.MaxValue;
             v += Vector4.Half;
             v.Clamp(0, byte.MaxValue);
 
@@ -41,8 +41,8 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToScaledVector4(out Vector4 scaledVector)
         {
-            scaledVector.X = scaledVector.Y = scaledVector.Z = L / (float)byte.MaxValue;
-            scaledVector.W = 1;
+            scaledVector.Base.X = scaledVector.Base.Y = scaledVector.Base.Z = L / (float)byte.MaxValue;
+            scaledVector.Base.W = 1;
         }
 
         #region IPixel

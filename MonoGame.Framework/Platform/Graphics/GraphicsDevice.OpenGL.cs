@@ -192,6 +192,7 @@ namespace MonoGame.Framework.Graphics
 
             Context.MakeCurrent(windowInfo);
 #endif
+
             GL.GetInteger(GetPName.MaxCombinedTextureImageUnits, out MaxTextureSlots);
             GraphicsExtensions.CheckGLError();
 

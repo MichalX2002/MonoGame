@@ -371,7 +371,7 @@ namespace MonoGame.Framework
         public static BoundingSphere CreateMerged(
             in BoundingSphere original, in BoundingSphere additional)
         {
-            Vector3.Subtract(additional.Center, original.Center, out var ocenterToaCenter);
+            Vector3 ocenterToaCenter = additional.Center - original.Center;
             float distance = ocenterToaCenter.Length();
             if (distance <= original.Radius + additional.Radius)//intersect
             {
@@ -380,7 +380,7 @@ namespace MonoGame.Framework
                 if (distance <= additional.Radius - original.Radius)//additional contain original
                     return original;
             }
-            
+
             //else find center of new sphere and radius
             float leftRadius = Math.Max(original.Radius - distance, additional.Radius);
             float Rightradius = Math.Max(original.Radius + distance, additional.Radius);

@@ -85,9 +85,9 @@ namespace MonoGame.Testing
 
             string[] songs = new string[]
             {
-                "retro level 3"
-            //    "Title Screen",
-            //    "Ending"
+                "retro level 1",
+                //"retro level 2",
+                //"retro level 3",
             };
 
             _songs = new Song[songs.Length];
@@ -96,8 +96,8 @@ namespace MonoGame.Testing
                 _watch.Restart();
                 _songs[i] = Content.Load<Song>(songs[i]);
                 _songs[i].IsLooped = false;
-                _songs[i].Volume = 0.01f;
-                _songs[i].Pitch = 1.5f;
+                _songs[i].Volume = 0.005f;
+                _songs[i].Pitch = 2f;
                 _watch.Stop();
                 Console.WriteLine("Content.Load<Song>('" + songs[i] + "') Time: " + _watch.ElapsedMilliseconds + "ms");
             }
@@ -173,10 +173,10 @@ namespace MonoGame.Testing
             _spriteBatch.Begin();
 
             double avg = 0;
-            for (int i = 0; i < Song.UpdateTime.Count; i++)
-                avg += Song.UpdateTime[i].TotalMilliseconds;
-            avg /= Song.UpdateTime.Count;
-
+            var updateTimes = Song.UpdateTiming.Span;
+            for (int i = 0; i < updateTimes.Length; i++)
+                avg += updateTimes[i].TotalMilliseconds;
+            
             float xx = (MathF.Sin((float)time.TotalGameTime.TotalSeconds) + 1) / 2 * 50;
             float yy = (MathF.Cos((float)time.TotalGameTime.TotalSeconds) + 1) / 2 * 50;
             _spriteBatch.Draw(_test, new Vector2(0 + xx, 0 + yy), Color.White);

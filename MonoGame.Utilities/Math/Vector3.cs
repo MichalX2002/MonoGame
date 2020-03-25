@@ -373,22 +373,10 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="left">The first vector.</param>
         /// <param name="right">The second vector.</param>
-        /// <param name="result">The cross product of two vectors.</param>
-        public static void Cross(in Vector3 left, in Vector3 right, out Vector3 result)
-        {
-            result.Base = FastVector3.Cross(left, right);
-        }
-
-        /// <summary>
-        /// Computes the cross product of two vectors.
-        /// </summary>
-        /// <param name="left">The first vector.</param>
-        /// <param name="right">The second vector.</param>
         /// <returns>The cross product of two vectors.</returns>
         public static Vector3 Cross(in Vector3 left, in Vector3 right)
         {
-            Cross(left, right, out var result);
-            return result;
+            return FastVector3.Cross(left, right);
         }
 
         #endregion

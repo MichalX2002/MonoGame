@@ -17,7 +17,7 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct Short4 : IPackedVector<ulong>, IEquatable<Short4>, IPixel
     {
-        private static readonly Vector4 Offset = new Vector4(-short.MinValue);
+        private static readonly Vector4 Offset = new Vector4(32768);
 
         VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Red, sizeof(short) * 8),
@@ -62,7 +62,7 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromVector4(in Vector4 vector)
         {
-            Vector4.Add(vector, Vector4.Half, out var v);
+            var v = vector + Vector4.Half;
             v.Clamp(short.MinValue, short.MaxValue);
 
             X = (short)v.X;
@@ -73,15 +73,15 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToVector4(out Vector4 vector)
         {
-            vector.X = X;
-            vector.Y = Y;
-            vector.Z = Z;
-            vector.W = W;
+            vector.Base.X = X;
+            vector.Base.Y = Y;
+            vector.Base.Z = Z;
+            vector.Base.W = W;
         }
 
         public void FromScaledVector4(in Vector4 scaledVector)
         {
-            Vector4.Multiply(scaledVector, ushort.MaxValue, out var v);
+            var v = scaledVector * ushort.MaxValue;
             v -= Offset;
             FromVector4(v);
         }
