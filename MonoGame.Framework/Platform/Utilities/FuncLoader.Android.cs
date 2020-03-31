@@ -1,19 +1,20 @@
-using Android.App;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
+using Android.App;
 
-namespace MonoGame.Utilities
+namespace MonoGame.Framework
 {
     internal class FuncLoader
     {
-#pragma warning disable IDE1006 // Naming Styles
         [DllImport("dl")]
+        [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "DllImport")]
         public static extern IntPtr dlopen(string path, int flags);
 
         [DllImport("dl")]
+        [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "DllImport")]
         public static extern IntPtr dlsym(IntPtr handle, string symbol);
-#pragma warning restore IDE1006 // Naming Styles
 
         private const int RTLD_LAZY = 0x0001;
 
@@ -29,8 +30,8 @@ namespace MonoGame.Utilities
 
             // Some Android devices won't search the native library path
             // for the library, so we have to do it manually here.
-            var nlibpath = Application.Context.ApplicationInfo.NativeLibraryDir;
-            var libpath = Path.Combine(nlibpath, libname);
+            string nlibpath = Application.Context.ApplicationInfo.NativeLibraryDir;
+            string libpath = Path.Combine(nlibpath, libname);
             lib = dlopen(libpath, RTLD_LAZY);
             if (lib != IntPtr.Zero)
             {	
@@ -42,7 +43,8 @@ namespace MonoGame.Utilities
             return IntPtr.Zero;
         }
 
-        public static T LoadFunction<T>(IntPtr library, string function, bool throwIfNotFound = false)
+        public static TDelegate LoadFunction<TDelegate>(
+            IntPtr library, string function, bool throwIfNotFound = false)
         {
             var ret = dlsym(library, function);
             if (ret == IntPtr.Zero)
@@ -55,7 +57,7 @@ namespace MonoGame.Utilities
             // TODO: Use the function below once Protobuild gets axed
             // requires .NET Framework 4.5.1 and its useful for corert
             // return Marshal.GetDelegateForFunctionPointer<T>(ret);
-            return Marshal.GetDelegateForFunctionPointer<T>(ret);
+            return Marshal.GetDelegateForFunctionPointer<TDelegate>(ret);
         }
     }
 }

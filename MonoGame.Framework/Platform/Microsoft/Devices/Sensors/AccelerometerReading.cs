@@ -3,14 +3,20 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework;
+using MonoGame.Framework;
 
 namespace Microsoft.Devices.Sensors
 {
-	public struct AccelerometerReading : ISensorReading
-	{
-		public Vector3 Acceleration { get; internal set; }
-		public DateTimeOffset Timestamp { get; internal set; }
-	}
+    public readonly struct AccelerometerReading : ISensorReading
+    {
+        public Vector3 Acceleration { get; }
+        public DateTimeOffset Timestamp { get; }
+
+        public AccelerometerReading(Vector3 acceleration, DateTimeOffset timestamp)
+        {
+            Acceleration = acceleration;
+            Timestamp = timestamp;
+        }
+    }
 }
 

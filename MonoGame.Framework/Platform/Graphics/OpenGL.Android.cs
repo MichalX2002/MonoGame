@@ -4,20 +4,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Security;
-using Android.Opengl;
 using Javax.Microedition.Khronos.Egl;
-using MonoGame.Utilities;
+using MonoGame.Framework;
 
 namespace MonoGame.OpenGL
 {
     internal partial class GL
     {
-		// internal for Android is not used on other platforms
-		// it allows us to use either GLES or Full GL (if the GPU supports it)
-		internal delegate bool BindAPIDelegate (RenderApi api);
-		internal static BindAPIDelegate BindAPI;
+        // internal for Android is not used on other platforms
+        // it allows us to use either GLES or Full GL (if the GPU supports it)
+        internal delegate bool BindAPIDelegate(RenderApi api);
+        internal static BindAPIDelegate BindAPI;
 
         public static IntPtr Library;
         public static IntPtr libES1 = FuncLoader.LoadLibrary("libGLESv1_CM.so");
@@ -37,13 +34,14 @@ namespace MonoGame.OpenGL
             }
             catch { }
 
-            var supportsFullGL = eglBindLoaded && BindAPI (RenderApi.GL);
-            if (!supportsFullGL) {
+            var supportsFullGL = eglBindLoaded && BindAPI(RenderApi.GL);
+            if (!supportsFullGL)
+            {
                 if (eglBindLoaded)
-                    BindAPI (RenderApi.ES);
+                    BindAPI(RenderApi.ES);
                 BoundApi = RenderApi.ES;
             }
-                
+
             Android.Util.Log.Verbose("GL", "Bound {0}", BoundApi);
 
             if (GL.BoundApi == GL.RenderApi.ES && libES3 != IntPtr.Zero)
@@ -60,7 +58,7 @@ namespace MonoGame.OpenGL
             return FuncLoader.LoadFunction<T>(Library, function, throwIfNotFound);
         }
 
-        private static IGraphicsContext PlatformCreateContext (IWindowInfo info)
+        private static IGraphicsContext PlatformCreateContext(IWindowInfo info)
         {
             return null;//new GraphicsContext(info);
         }

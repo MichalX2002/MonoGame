@@ -88,18 +88,36 @@ namespace MonoGame.Imaging
         public void GetPixelByteRow(int x, int y, Span<byte> destination)
         {
             var rowSpan = GetPixelByteRowSpan(y);
-            rowSpan.Slice(x).CopyTo(destination);
+            rowSpan.Slice(x * PixelType.ElementSize).CopyTo(destination);
         }
 
         public void SetPixelByteRow(int x, int y, ReadOnlySpan<byte> data)
         {
             var rowSpan = GetPixelByteRowSpan(y);
-            data.CopyTo(rowSpan.Slice(x));
+            var slice = rowSpan.Slice(x * PixelType.ElementSize);
+            data.CopyTo(slice);
         }
 
-        ReadOnlySpan<byte> IReadOnlyPixelBuffer.GetPixelByteRowSpan(int row) => GetPixelByteRowSpan(row);
+        public void SetPixelByteColumn(int x, int y, ReadOnlySpan<byte> data)
+        {
+            int rows = data.Length / PixelType.ElementSize;
+            for (int srcRow = 0; srcRow < rows; srcRow++)
+            {
+                var dstSlice = GetPixelByteRowSpan(srcRow + y).Slice(x * PixelType.ElementSize);
+                var srcSlice = data.Slice(srcRow * PixelType.ElementSize, PixelType.ElementSize);
+                srcSlice.CopyTo(dstSlice);
+            }
+        }
 
-        ReadOnlySpan<byte> IReadOnlyPixelMemory.GetPixelByteSpan() => GetPixelByteSpan();
+        ReadOnlySpan<byte> IReadOnlyPixelBuffer.GetPixelByteRowSpan(int row)
+        {
+            return GetPixelByteRowSpan(row);
+        }
+
+        ReadOnlySpan<byte> IReadOnlyPixelMemory.GetPixelByteSpan()
+        {
+            return GetPixelByteSpan();
+        }
 
         #region IDisposable
 

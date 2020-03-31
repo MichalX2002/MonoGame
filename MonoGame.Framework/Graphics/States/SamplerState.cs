@@ -8,22 +8,12 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class SamplerState : GraphicsResource
     {
-        static SamplerState()
-        {
-            AnisotropicClamp = new SamplerState("SamplerState.AnisotropicClamp", TextureFilter.Anisotropic, TextureAddressMode.Clamp);
-            AnisotropicWrap = new SamplerState("SamplerState.AnisotropicWrap", TextureFilter.Anisotropic, TextureAddressMode.Wrap);
-            LinearClamp = new SamplerState("SamplerState.LinearClamp", TextureFilter.Linear, TextureAddressMode.Clamp);
-            LinearWrap = new SamplerState("SamplerState.LinearWrap", TextureFilter.Linear, TextureAddressMode.Wrap);
-            PointClamp = new SamplerState("SamplerState.PointClamp", TextureFilter.Point, TextureAddressMode.Clamp);
-            PointWrap = new SamplerState("SamplerState.PointWrap", TextureFilter.Point, TextureAddressMode.Wrap);
-        }
-
-        public static readonly SamplerState AnisotropicClamp;
-        public static readonly SamplerState AnisotropicWrap;
-        public static readonly SamplerState LinearClamp;
-        public static readonly SamplerState LinearWrap;
-        public static readonly SamplerState PointClamp;
-        public static readonly SamplerState PointWrap;
+        public static SamplerState AnisotropicClamp { get; }
+        public static SamplerState AnisotropicWrap { get; }
+        public static SamplerState LinearClamp { get; }
+        public static SamplerState LinearWrap { get; }
+        public static SamplerState PointClamp { get; }
+        public static SamplerState PointWrap { get; }
 
         private readonly bool _defaultStateObject;
 
@@ -37,6 +27,8 @@ namespace MonoGame.Framework.Graphics
         private float _mipMapLevelOfDetailBias;
         private TextureFilterMode _filterMode;
         private CompareFunction _comparisonFunction;
+
+        #region Properties
 
         public TextureAddressMode AddressU
         {
@@ -141,21 +133,18 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        internal void BindToGraphicsDevice(GraphicsDevice device)
-        {
-            if (_defaultStateObject)
-                throw new InvalidOperationException("You cannot bind a default state object.");
-            if (GraphicsDevice != null && GraphicsDevice != device)
-                throw new InvalidOperationException("This sampler state is already bound to a different graphics device.");
-            GraphicsDevice = device;
-        }
+        #endregion
 
-        internal void ThrowIfBound()
+        #region Constructors
+
+        static SamplerState()
         {
-            if (_defaultStateObject)
-                throw new InvalidOperationException("You cannot modify a default sampler state object.");
-            if (GraphicsDevice != null)
-                throw new InvalidOperationException("You cannot modify the sampler state after it has been bound to the graphics device!");
+            AnisotropicClamp = new SamplerState("SamplerState.AnisotropicClamp", TextureFilter.Anisotropic, TextureAddressMode.Clamp);
+            AnisotropicWrap = new SamplerState("SamplerState.AnisotropicWrap", TextureFilter.Anisotropic, TextureAddressMode.Wrap);
+            LinearClamp = new SamplerState("SamplerState.LinearClamp", TextureFilter.Linear, TextureAddressMode.Clamp);
+            LinearWrap = new SamplerState("SamplerState.LinearWrap", TextureFilter.Linear, TextureAddressMode.Wrap);
+            PointClamp = new SamplerState("SamplerState.PointClamp", TextureFilter.Point, TextureAddressMode.Clamp);
+            PointWrap = new SamplerState("SamplerState.PointWrap", TextureFilter.Point, TextureAddressMode.Wrap);
         }
 
         public SamplerState()
@@ -195,6 +184,32 @@ namespace MonoGame.Framework.Graphics
             _mipMapLevelOfDetailBias = cloneSource._mipMapLevelOfDetailBias;
             _comparisonFunction = cloneSource._comparisonFunction;
             _filterMode = cloneSource._filterMode;
+        }
+
+#endregion
+
+        internal void BindToGraphicsDevice(GraphicsDevice device)
+        {
+            if (_defaultStateObject)
+                throw new InvalidOperationException(
+                    "You cannot bind a default state object.");
+
+            if (GraphicsDevice != null && GraphicsDevice != device)
+                throw new InvalidOperationException(
+                    "This sampler state is already bound to a different graphics device.");
+
+            GraphicsDevice = device;
+        }
+
+        internal void ThrowIfBound()
+        {
+            if (_defaultStateObject)
+                throw new InvalidOperationException(
+                    "You cannot modify a default sampler state object.");
+
+            if (GraphicsDevice != null)
+                throw new InvalidOperationException(
+                    "You cannot modify the sampler state after it has been bound to the graphics device!");
         }
 
         internal SamplerState Clone()

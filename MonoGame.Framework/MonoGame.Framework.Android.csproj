@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>monoandroid90</TargetFramework>
-    <DefineConstants>ANDROID;GLES;STBSHARP_INTERNAL</DefineConstants>
+    <DefineConstants>ANDROID;GLES</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MGOpenGL>GLES</MGOpenGL>
     <Description>MonoGame is an open source implementation of the Microsoft XNA 4.x Framework. The goal is to make it easy for XNA developers to create cross-platform games with extremely high code reuse.
@@ -14,6 +14,7 @@ This package provides you with MonoGame Framework that works on Android.</Descri
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
 
@@ -29,10 +30,16 @@ This package provides you with MonoGame Framework that works on Android.</Descri
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Content\ContentReaders\VideoReader.cs" />
     <Compile Remove="GraphicsDeviceManager.cs" />
     <Compile Remove="Graphics\GraphicsAdapter.cs" />
+    <Compile Remove="Graphics\GraphicsDeviceManager.cs" />
     <Compile Remove="Graphics\OcclusionQuery.cs" />
     <Compile Remove="Input\Keyboard.cs" />
+    <Compile Remove="Media\SongCollection.cs" />
+    <Compile Remove="Media\SongPart.cs" />
+    <Compile Remove="Media\Video.cs" />
+    <Compile Remove="Media\VideoPlayer.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -50,30 +57,45 @@ This package provides you with MonoGame Framework that works on Android.</Descri
     <Compile Include="Platform\Android\ResumeManager.cs" />
     <Compile Include="Platform\Android\ScreenReceiver.cs" />
     <Compile Include="Platform\GamePlatform.Mobile.cs" />
+    <Compile Include="Platform\GraphicsDeviceManager.Legacy.cs">
+      <SubType>Code</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Compile>
     <Compile Include="Platform\Graphics\GraphicsAdapter.Legacy.cs" />
     <Compile Include="Platform\Graphics\OpenGL.Android.cs" />
-    <Compile Include="Platform\Graphics\OpenGL.Common.cs" />
-    <Compile Include="Platform\Graphics\Texture2D.StbSharp.cs" />
-    <Compile Include="Platform\GraphicsDeviceManager.Legacy.cs" />
+    <Compile Include="Platform\Graphics\RenderTargetBindingArrayComparer.cs">
+      <SubType>Code</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Compile>
+    <Compile Include="Platform\Graphics\Shader\Shader.Structure.cs">
+      <SubType>Code</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Compile>
     <Compile Include="Platform\Input\GamePad.Android.cs" />
     <Compile Include="Platform\Input\Joystick.Default.cs" />
     <Compile Include="Platform\Input\KeyboardInput.Android.cs" />
     <Compile Include="Platform\Input\MessageBox.Android.cs" />
     <Compile Include="Platform\Input\Mouse.Default.cs" />
     <Compile Include="Platform\Input\MouseCursor.Default.cs" />
-    <Compile Include="Platform\Media\MediaLibrary.Android.cs" />
-    <Compile Include="Platform\Media\MediaPlayer.Default.cs" />
-    <Compile Include="Platform\Media\Song.Android.cs" />
-    <Compile Include="Platform\Media\Video.Android.cs" />
-    <Compile Include="Platform\Media\VideoPlayer.Android.cs" />
+    <Compile Include="Platform\Media\Song.NVorbis.cs">
+      <SubType>Code</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Compile>
     <Compile Include="Platform\PrimaryThreadLoader.cs" />
+    <Compile Include="Platform\TaskbarList.Default.cs">
+      <SubType>Code</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Compile>
     <Compile Include="Platform\TitleContainer.Android.cs" />
     <Compile Include="Platform\Utilities\FuncLoader.Android.cs" />
     <Compile Include="Platform\Utilities\InteropHelpers.cs" />
-    <Compile Include="Platform\Utilities\ReflectionHelpers.Default.cs" />
+    <Compile Include="Platform\Utilities\TimerHelper.cs">
+      <SubType>Code</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Compile>
     
-    <Compile Include="..\ThirdParty\StbImageSharp\src\StbImageSharp\**\*.cs" LinkBase="Utilities\StbImageSharp"/>
-    <Compile Include="..\ThirdParty\StbImageWriteSharp\src\StbImageWriteSharp\**\*.cs" LinkBase="Utilities\StbImageWriteSharp"/>
+    <Compile Include="..\ThirdParty\StbImageSharp\src\StbImageSharp\**\*.cs" LinkBase="Utilities\StbImageSharp" />
+    <Compile Include="..\ThirdParty\StbImageWriteSharp\src\StbImageWriteSharp\**\*.cs" LinkBase="Utilities\StbImageWriteSharp" />
   </ItemGroup>
 
   <ItemGroup>
@@ -93,6 +115,13 @@ This package provides you with MonoGame Framework that works on Android.</Descri
     <EmbeddedNativeLibrary Include="..\ThirdParty\Dependencies\openal-soft\libs\x86_64\libopenal32.so">
       <Link>libs\x86_64\libopenal32.so</Link>
     </EmbeddedNativeLibrary>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj" />
+    <ProjectReference Include="..\MonoGame.StbSharp\MonoGame.StbSharp.csproj" />
+    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
+    <ProjectReference Include="..\ThirdParty\NVorbis\NVorbis\NVorbis.csproj" />
   </ItemGroup>
 
   <Import Project="Platform\OpenGL.targets" />

@@ -9,7 +9,7 @@ using AVFoundation;
 using MediaPlayer;
 using CoreMedia;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     public sealed partial class Song
     {
@@ -77,21 +77,21 @@ namespace Microsoft.Xna.Framework.Media
         }
 
         internal void OnFinishedPlaying (object sender, NSNotificationEventArgs args)
-		{
-			if (DonePlaying != null)
-			    DonePlaying(sender, args);
-		}
+        {
+            if (DonePlaying != null)
+                DonePlaying(sender, args);
+        }
 
-		/// <summary>
-		/// Set the event handler for "Finished Playing". Done this way to prevent multiple bindings.
-		/// </summary>
-		internal void SetEventHandler(FinishedPlayingHandler handler)
-		{
-			if (DonePlaying != null)
-				return;
-			
-			DonePlaying += handler;
-		}
+        /// <summary>
+        /// Set the event handler for "Finished Playing". Done this way to prevent multiple bindings.
+        /// </summary>
+        internal void SetEventHandler(FinishedPlayingHandler handler)
+        {
+            if (DonePlaying != null)
+                return;
+            
+            DonePlaying += handler;
+        }
 
         internal void Play(TimeSpan? startPosition)
         {
@@ -120,54 +120,54 @@ namespace Microsoft.Xna.Framework.Media
             _player.Play();
         }
 
-		internal void Resume()
-		{
+        internal void Resume()
+        {
             if (_player == null)
-				return;
+                return;
 
             PlatformResume();
-		}
+        }
 
         private void PlatformResume()
         {
-			_player.Play();
+            _player.Play();
         }
-		
-		internal void Pause()
-		{			            
+        
+        internal void Pause()
+        {			            
             if (_player == null)
-				return;
-			
+                return;
+            
             _player.Pause();
         }
-		
-		internal void Stop()
-		{
+        
+        internal void Stop()
+        {
             if (_player == null)
-				return;
-			
+                return;
+            
             _player.Pause();
-			_playCount = 0;
-		}
+            _playCount = 0;
+        }
 
-		internal float Volume
-		{
-			get
-			{
+        internal float Volume
+        {
+            get
+            {
                 if (_player != null)
                     return _player.Volume;
-				else
-					return 0.0f;
-			}
-			
-			set
-			{
+                else
+                    return 0.0f;
+            }
+            
+            set
+            {
                 if ( _player != null && _player.Volume != value )
                     _player.Volume = value;
-			}			
-		}
+            }			
+        }
 
-		internal TimeSpan Position
+        internal TimeSpan Position
         {
             get
             {

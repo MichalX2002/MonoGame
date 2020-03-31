@@ -3,22 +3,27 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Android.Views;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Media;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     class AndroidGamePlatform : GamePlatform
     {
+        private bool _initialized;
+        private AndroidGameWindow _gameWindow;
+
+        public static bool IsPlayingVideo { get; set; }
+
         public AndroidGamePlatform(Game game) : base(game)
         {
-            System.Diagnostics.Debug.Assert(Game.Activity != null, "Must set Game.Activity before creating the Game instance");
-            Game.Activity.Game = Game;
-            AndroidGameActivity.Paused += Activity_Paused;
-            AndroidGameActivity.Resumed += Activity_Resumed;
+            var activity = AndroidGameActivity.Instance;
 
-            _gameWindow = new AndroidGameWindow(Game.Activity, game);
+            System.Diagnostics.Debug.Assert(
+                activity != null, "Must set Game.Activity before creating the Game instance");
+
+            activity.Paused += Activity_Paused;
+            activity.Resumed += Activity_Resumed;
+
+            _gameWindow = new AndroidGameWindow(activity, game);
             Window = _gameWindow;
         }
 
@@ -26,24 +31,21 @@ namespace Microsoft.Xna.Framework
         {
             if (disposing)
             {
-                AndroidGameActivity.Paused -= Activity_Paused;
-                AndroidGameActivity.Resumed -= Activity_Resumed;
+                AndroidGameActivity.Instance.Paused -= Activity_Paused;
+                AndroidGameActivity.Instance.Resumed -= Activity_Resumed;
             }
             base.Dispose(disposing);
         }
 
-        private bool _initialized;
-        public static bool IsPlayingVdeo { get; set; }
-        private AndroidGameWindow _gameWindow;
-
         public override void Exit()
         {
-            Game.Activity.MoveTaskToBack(true);
+            AndroidGameActivity.Instance.MoveTaskToBack(true);
         }
 
         public override void RunLoop()
         {
-            throw new NotSupportedException("The Android platform does not support synchronous run loops");
+            throw new NotSupportedException(
+                "The Android platform does not support synchronous run loops");
         }
 
         public override void StartRunLoop()
@@ -65,20 +67,29 @@ namespace Microsoft.Xna.Framework
         public override bool BeforeDraw(GameTime gameTime)
         {
             PrimaryThreadLoader.DoLoads();
-            return !IsPlayingVdeo;
+            return !IsPlayingVideo;
         }
 
         public override void BeforeInitialize()
         {
             var currentOrientation = AndroidCompatibility.GetAbsoluteOrientation();
 
-            switch (Game.Activity.Resources.Configuration.Orientation)
+            switch (AndroidGameActivity.Instance.Resources.Configuration.Orientation)
             {
                 case Android.Content.Res.Orientation.Portrait:
-                    this._gameWindow.SetOrientation(currentOrientation == DisplayOrientation.PortraitDown ? DisplayOrientation.PortraitDown : DisplayOrientation.Portrait, false);
+                    _gameWindow.SetOrientation(
+                        currentOrientation == DisplayOrientation.PortraitDown 
+                        ? DisplayOrientation.PortraitDown 
+                        : DisplayOrientation.Portrait,
+                        false);
                     break;
+
                 default:
-                    this._gameWindow.SetOrientation(currentOrientation == DisplayOrientation.LandscapeRight ? DisplayOrientation.LandscapeRight : DisplayOrientation.LandscapeLeft, false);
+                    _gameWindow.SetOrientation(
+                        currentOrientation == DisplayOrientation.LandscapeRight 
+                        ? DisplayOrientation.LandscapeRight 
+                        : DisplayOrientation.LandscapeLeft,
+                        false);
                     break;
             }
             base.BeforeInitialize();
@@ -87,7 +98,6 @@ namespace Microsoft.Xna.Framework
 
         public override bool BeforeRun()
         {
-
             // Run it as fast as we can to allow for more response on threaded GPU resource creation
             _gameWindow.GameView.Run();
 
@@ -109,7 +119,7 @@ namespace Microsoft.Xna.Framework
         public override void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight)
         {
             // Force the Viewport to be correctly set
-            Game.InternalGraphicsDeviceManager.ResetClientBounds();
+            Game.GraphicsDeviceManager.ResetClientBounds();
         }
 
         // EnterForeground

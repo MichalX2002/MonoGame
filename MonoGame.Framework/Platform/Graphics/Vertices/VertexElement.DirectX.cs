@@ -6,7 +6,7 @@ using System;
 
 namespace MonoGame.Framework.Graphics
 {
-    partial struct VertexElement
+    public partial struct VertexElement
     {
         /// <summary>
         /// Gets the DirectX <see cref="SharpDX.Direct3D11.InputElement"/>.
@@ -54,6 +54,7 @@ namespace MonoGame.Framework.Graphics
                 case VertexElementUsage.PointSize:
                     element.SemanticName = "PSIZE";
                     break;
+
                 default:
                     throw new NotSupportedException("Unknown vertex element usage!");
             }
@@ -98,6 +99,7 @@ namespace MonoGame.Framework.Graphics
                 case VertexElementFormat.HalfVector4:
                     element.Format =  SharpDX.DXGI.Format.R16G16B16A16_Float;
                     break;                
+
                 default:
                     throw new NotSupportedException("Unknown vertex element format!");
             }

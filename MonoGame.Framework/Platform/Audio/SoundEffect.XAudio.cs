@@ -187,7 +187,7 @@ namespace MonoGame.Framework.Audio
         }
 
         private void PlatformInitializeXact(
-            MiniFormatTag codec, ReadOnlySpan<byte> buffer, int channels, int sampleRate, int blockAlignment,
+            ReadOnlySpan<byte> buffer, MiniFormatTag codec, int channels, int sampleRate, int blockAlignment,
             int loopStart, int loopLength, out TimeSpan duration)
         {
             if (codec == MiniFormatTag.Adpcm)
@@ -218,11 +218,11 @@ namespace MonoGame.Framework.Audio
             switch (soundStream.Format.Encoding)
             {
                 case WaveFormatEncoding.Adpcm:
-                    {
-                        var samplesPerBlock = (soundStream.Format.BlockAlign / soundStream.Format.Channels - 7) * 2 + 2;
-                        sampleCount = (int)dataStream.Length / soundStream.Format.BlockAlign * samplesPerBlock;
-                    }
-                    break;
+                {
+                    var samplesPerBlock = (soundStream.Format.BlockAlign / soundStream.Format.Channels - 7) * 2 + 2;
+                    sampleCount = (int)dataStream.Length / soundStream.Format.BlockAlign * samplesPerBlock;
+                }
+                break;
 
                 case WaveFormatEncoding.Pcm:
                 case WaveFormatEncoding.IeeeFloat:
@@ -375,7 +375,7 @@ namespace MonoGame.Framework.Audio
 
             _device3DDirty = true;
             _speakers = Speakers.Stereo;
-            
+
             ALController.DestroyInstance();
         }
     }

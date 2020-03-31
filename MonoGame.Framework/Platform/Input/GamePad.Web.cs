@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using JSIL;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     static partial class GamePad
     {
@@ -103,7 +103,7 @@ namespace Microsoft.Xna.Framework.Input
                         new Vector2(gpc.AxisPressed("leftx", jstate), gpc.AxisPressed("lefty", jstate)),
                         new Vector2(gpc.AxisPressed("rightx", jstate), gpc.AxisPressed("righty", jstate)),
                         leftDeadZoneMode,
-						rightDeadZoneMode
+                        rightDeadZoneMode
                     );
                 
                 var dpad = 

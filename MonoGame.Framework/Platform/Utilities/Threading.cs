@@ -92,7 +92,7 @@ namespace MonoGame.Framework
             {
 #if ANDROID
                 //if (!Game.Instance.Window.GraphicsContext.IsCurrent)
-                ((AndroidGameWindow)Game.Instance.Window).GameView.MakeCurrent();
+                ((AndroidGameWindow)AndroidGameActivity.Instance.Game.Window).GameView.MakeCurrent();
 #endif
                 action.Invoke();
                 resetEvent.Set();

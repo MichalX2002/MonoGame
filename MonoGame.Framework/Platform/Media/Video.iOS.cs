@@ -7,9 +7,9 @@ using System.IO;
 
 using MediaPlayer;
 using Foundation;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     /// <summary>
     /// Represents a video.

@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
@@ -18,7 +17,7 @@ namespace MonoGame.Framework.Graphics
             SharpDX.Utilities.Dispose(ref _buffer);
         }
 
-        void GenerateIfRequired()
+        private void GenerateIfRequired()
         {
             if (_buffer != null)
                 return;
@@ -29,7 +28,7 @@ namespace MonoGame.Framework.Graphics
             var accessflags = SharpDX.Direct3D11.CpuAccessFlags.None;
             var usage = SharpDX.Direct3D11.ResourceUsage.Default;
 
-            if (_isDynamic)
+            if (IsDynamic)
             {
                 accessflags |= SharpDX.Direct3D11.CpuAccessFlags.Write;
                 usage = SharpDX.Direct3D11.ResourceUsage.Dynamic;
@@ -66,52 +65,48 @@ namespace MonoGame.Framework.Graphics
             if (_buffer == null)
                 return;
 
-            if (_isDynamic)
-            {
+            if (IsDynamic)
                 throw new NotImplementedException();
-            }
-            else
+
+            var deviceContext = GraphicsDevice._d3dContext;
+
+            if (_cachedStagingBuffer == null)
+                CreatedCachedStagingBuffer();
+
+            lock (deviceContext)
+                deviceContext.CopyResource(_buffer, _cachedStagingBuffer);
+
+            lock (deviceContext)
             {
-                var deviceContext = GraphicsDevice._d3dContext;
+                // Map the staging resource to a CPU accessible memory
+                var box = deviceContext.MapSubresource(
+                    _cachedStagingBuffer, 0, SharpDX.Direct3D11.MapMode.Read, SharpDX.Direct3D11.MapFlags.None);
 
-                if (_cachedStagingBuffer == null)
-                    CreatedCachedStagingBuffer();
+                int srcBytes = Capacity * VertexDeclaration.VertexStride;
+                var src = new ReadOnlySpan<T>((void*)(box.DataPointer + offsetInBytes), srcBytes);
 
-                lock (deviceContext)
-                    deviceContext.CopyResource(_buffer, _cachedStagingBuffer);
-
-                lock (deviceContext)
+                if (destinationStride == sizeof(T))
                 {
-                    // Map the staging resource to a CPU accessible memory
-                    var box = deviceContext.MapSubresource(
-                        _cachedStagingBuffer, 0, SharpDX.Direct3D11.MapMode.Read, SharpDX.Direct3D11.MapFlags.None);
-
-                    int srcBytes = Capacity * VertexDeclaration.VertexStride;
-                    var src = new ReadOnlySpan<T>((void*)(box.DataPointer + offsetInBytes), srcBytes);
-
-                    if (destinationStride == sizeof(T))
-                    {
-                        // the source and destination use tightly packed data,
-                        // we can skip the interleaved copy
-                        src.Slice(0, destination.Length).CopyTo(destination);
-                    }
-                    else
-                    {
-                        var byteSrc = MemoryMarshal.AsBytes(src);
-                        var byteDst = MemoryMarshal.AsBytes(destination);
-
-                        // interleaved copy from buffer to destination
-                        for (int i = 0; i < destination.Length; i++)
-                        {
-                            var srcElement = byteSrc.Slice(i * VertexDeclaration.VertexStride);
-                            var dstElement = byteDst.Slice(i * destinationStride, destinationStride);
-                            srcElement.Slice(0, destinationStride).CopyTo(dstElement);
-                        }
-                    }
-
-                    // Make sure that we unmap the resource in case of an exception
-                    deviceContext.UnmapSubresource(_cachedStagingBuffer, 0);
+                    // the source and destination use tightly packed data,
+                    // we can skip the interleaved copy
+                    src.Slice(0, destination.Length).CopyTo(destination);
                 }
+                else
+                {
+                    var byteSrc = MemoryMarshal.AsBytes(src);
+                    var byteDst = MemoryMarshal.AsBytes(destination);
+
+                    // interleaved copy from buffer to destination
+                    for (int i = 0; i < destination.Length; i++)
+                    {
+                        var srcElement = byteSrc.Slice(i * VertexDeclaration.VertexStride);
+                        var dstElement = byteDst.Slice(i * destinationStride, destinationStride);
+                        srcElement.Slice(0, destinationStride).CopyTo(dstElement);
+                    }
+                }
+
+                // Make sure that we unmap the resource in case of an exception
+                deviceContext.UnmapSubresource(_cachedStagingBuffer, 0);
             }
         }
 
@@ -123,7 +118,7 @@ namespace MonoGame.Framework.Graphics
             GenerateIfRequired();
 
             var deviceContext = GraphicsDevice._d3dContext;
-            if (_isDynamic)
+            if (IsDynamic)
             {
                 // We assume discard by default.
                 var mode = SharpDX.Direct3D11.MapMode.WriteDiscard;
@@ -216,6 +211,7 @@ namespace MonoGame.Framework.Graphics
         {
             if (disposing)
                 SharpDX.Utilities.Dispose(ref _buffer);
+
             base.Dispose(disposing);
         }
     }

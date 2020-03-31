@@ -40,7 +40,7 @@ purpose and non-infringement.
 
 using System;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Interface for a class that handles resuming after a device lost event.

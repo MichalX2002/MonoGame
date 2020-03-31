@@ -146,9 +146,6 @@ namespace MonoGame.Framework
 
                     SoundEffect.PlatformShutdown();
                 }
-#if ANDROID
-                Activity = null;
-#endif
                 _isDisposed = true;
             }
         }
@@ -161,11 +158,6 @@ namespace MonoGame.Framework
         #endregion IDisposable Implementation
 
         #region Properties
-
-#if ANDROID
-        [CLSCompliant(false)]
-        public static AndroidGameActivity Activity { get; internal set; }
-#endif
 
         public LaunchParameters LaunchParameters { get; private set; }
         public GameComponentCollection Components { get; private set; }
@@ -332,6 +324,10 @@ namespace MonoGame.Framework
         public void Run(GameRunBehavior runBehavior)
         {
             AssertNotDisposed();
+
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
+                TimerHelper.UpdateResolution();
+
             if (!Platform.BeforeRun())
             {
                 BeginRun();

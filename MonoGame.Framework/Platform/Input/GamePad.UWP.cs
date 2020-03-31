@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WGI = Windows.Gaming.Input;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     static partial class GamePad
     {
@@ -107,7 +107,7 @@ namespace Microsoft.Xna.Framework.Input
                     new Vector2((float)state.LeftThumbstickX, (float)state.LeftThumbstickY),
                     new Vector2((float)state.RightThumbstickX, (float)state.RightThumbstickY),
                     leftDeadZoneMode,
-					rightDeadZoneMode
+                    rightDeadZoneMode
                 );
 
             var triggers = new GamePadTriggers(

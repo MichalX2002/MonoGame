@@ -6,11 +6,11 @@ using System;
 using Foundation;
 using AVFoundation;
 using RectF = CoreGraphics.CGRect;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 using AppKit;
 using CoreAnimation;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     public sealed partial class VideoPlayer : IDisposable
     {

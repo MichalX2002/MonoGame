@@ -6,30 +6,93 @@ using System;
 
 namespace MonoGame.Framework.Graphics
 {
-	public partial class BlendState : GraphicsResource
-	{
+    public partial class BlendState : GraphicsResource
+    {
+        public static BlendState Additive { get; }
+        public static BlendState AlphaBlend { get; }
+        public static BlendState NonPremultiplied { get; }
+        public static BlendState Opaque { get; }
+
         private readonly TargetBlendState[] _targetBlendState;
         private readonly bool _defaultStateObject;
 
-	    private Color _blendFactor;
-	    private int _multiSampleMask;
-	    private bool _independentBlendEnable;
+        private Color _blendFactor;
+        private int _multiSampleMask;
+        private bool _independentBlendEnable;
+
+        #region Constructors
+
+        static BlendState()
+        {
+            Additive = new BlendState("BlendState.Additive", Blend.SourceAlpha, Blend.One);
+            AlphaBlend = new BlendState("BlendState.AlphaBlend", Blend.One, Blend.InverseSourceAlpha);
+            NonPremultiplied = new BlendState("BlendState.NonPremultiplied", Blend.SourceAlpha, Blend.InverseSourceAlpha);
+            Opaque = new BlendState("BlendState.Opaque", Blend.One, Blend.Zero);
+        }
+
+        public BlendState()
+        {
+            _targetBlendState = new TargetBlendState[4];
+            _targetBlendState[0] = new TargetBlendState(this);
+            _targetBlendState[1] = new TargetBlendState(this);
+            _targetBlendState[2] = new TargetBlendState(this);
+            _targetBlendState[3] = new TargetBlendState(this);
+
+            _blendFactor = Color.White;
+            _multiSampleMask = int.MaxValue;
+            _independentBlendEnable = false;
+        }
+
+        private BlendState(string name, Blend sourceBlend, Blend destinationBlend)
+            : this()
+        {
+            Name = name;
+            ColorSourceBlend = sourceBlend;
+            AlphaSourceBlend = sourceBlend;
+            ColorDestinationBlend = destinationBlend;
+            AlphaDestinationBlend = destinationBlend;
+            _defaultStateObject = true;
+        }
+
+        private BlendState(BlendState cloneSource)
+        {
+            Name = cloneSource.Name;
+
+            _targetBlendState = new TargetBlendState[4];
+            _targetBlendState[0] = cloneSource[0].Clone(this);
+            _targetBlendState[1] = cloneSource[1].Clone(this);
+            _targetBlendState[2] = cloneSource[2].Clone(this);
+            _targetBlendState[3] = cloneSource[3].Clone(this);
+
+            _blendFactor = cloneSource._blendFactor;
+            _multiSampleMask = cloneSource._multiSampleMask;
+            _independentBlendEnable = cloneSource._independentBlendEnable;
+        }
+
+        #endregion
 
         internal void BindToGraphicsDevice(GraphicsDevice device)
         {
             if (_defaultStateObject)
-                throw new InvalidOperationException("You cannot bind a default state object.");
+                throw new InvalidOperationException(
+                    "You cannot bind a default state object.");
+
             if (GraphicsDevice != null && GraphicsDevice != device)
-                throw new InvalidOperationException("This blend state is already bound to a different graphics device.");
+                throw new InvalidOperationException(
+                    "This blend state is already bound to a different graphics device.");
+
             GraphicsDevice = device;
         }
 
         internal void ThrowIfBound()
         {
             if (_defaultStateObject)
-                throw new InvalidOperationException("You cannot modify a default blend state object.");
+                throw new InvalidOperationException(
+                    "You cannot modify a default blend state object.");
+
             if (GraphicsDevice != null)
-                throw new InvalidOperationException("You cannot modify the blend state after it has been bound to the graphics device!");
+                throw new InvalidOperationException(
+                    "You cannot modify the blend state after it has been bound to the graphics device!");
         }
 
         /// <summary>
@@ -37,12 +100,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="index">The 0 to 3 target blend state index.</param>
         /// <returns>A target blend state.</returns>
-        public TargetBlendState this[int index]
-        {
-            get { return _targetBlendState[index]; }
-        }
+        public TargetBlendState this[int index] => _targetBlendState[index];
 
-	    public BlendFunction AlphaBlendFunction
+        #region Properties
+
+        public BlendFunction AlphaBlendFunction
         {
             get => _targetBlendState[0].AlphaBlendFunction;
             set
@@ -149,7 +211,7 @@ namespace MonoGame.Framework.Graphics
         /// <see cref="GraphicsDevice.BlendFactor"/> is set to this value when 
         /// this <see cref="BlendState"/> is bound to a GraphicsDevice.
         /// </remarks>
-	    public Color BlendFactor
+        public Color BlendFactor
         {
             get => _blendFactor;
             set
@@ -182,63 +244,12 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
+#endregion
 
-        public static readonly BlendState Additive;
-        public static readonly BlendState AlphaBlend;
-        public static readonly BlendState NonPremultiplied;
-        public static readonly BlendState Opaque;
-
-        public BlendState()
+        internal BlendState Clone()
         {
-            _targetBlendState = new TargetBlendState[4];
-            _targetBlendState[0] = new TargetBlendState(this);
-            _targetBlendState[1] = new TargetBlendState(this);
-            _targetBlendState[2] = new TargetBlendState(this);
-            _targetBlendState[3] = new TargetBlendState(this);
-
-			_blendFactor = Color.White;
-            _multiSampleMask = int.MaxValue;
-            _independentBlendEnable = false;
+            return new BlendState(this);
         }
-
-        private BlendState(string name, Blend sourceBlend, Blend destinationBlend)
-            : this()
-        {
-            Name = name;
-            ColorSourceBlend = sourceBlend;
-            AlphaSourceBlend = sourceBlend;
-            ColorDestinationBlend = destinationBlend;
-            AlphaDestinationBlend = destinationBlend;
-            _defaultStateObject = true;
-        }
-
-        private BlendState(BlendState cloneSource)
-        {
-            Name = cloneSource.Name;
-
-            _targetBlendState = new TargetBlendState[4];
-            _targetBlendState[0] = cloneSource[0].Clone(this);
-            _targetBlendState[1] = cloneSource[1].Clone(this);
-            _targetBlendState[2] = cloneSource[2].Clone(this);
-            _targetBlendState[3] = cloneSource[3].Clone(this);
-
-            _blendFactor = cloneSource._blendFactor;
-            _multiSampleMask = cloneSource._multiSampleMask;
-            _independentBlendEnable = cloneSource._independentBlendEnable;
-        }
-
-        static BlendState()
-        {
-            Additive = new BlendState("BlendState.Additive", Blend.SourceAlpha, Blend.One);
-            AlphaBlend = new BlendState("BlendState.AlphaBlend", Blend.One, Blend.InverseSourceAlpha);
-            NonPremultiplied = new BlendState("BlendState.NonPremultiplied", Blend.SourceAlpha, Blend.InverseSourceAlpha);
-            Opaque = new BlendState("BlendState.Opaque", Blend.One, Blend.Zero);
-		}
-
-	    internal BlendState Clone()
-	    {
-	        return new BlendState(this);
-	    }
 
         partial void PlatformDispose();
 

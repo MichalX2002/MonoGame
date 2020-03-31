@@ -50,7 +50,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Marks all texture slots as dirty.
         /// </summary>
-        internal void Dirty()
+        internal void MarkDirty()
         {
             _dirty = int.MaxValue;
         }

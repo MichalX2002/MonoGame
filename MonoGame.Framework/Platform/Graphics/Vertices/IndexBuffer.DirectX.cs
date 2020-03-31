@@ -7,7 +7,7 @@ namespace MonoGame.Framework.Graphics
     public partial class IndexBuffer : BufferBase
     {
         internal SharpDX.Direct3D11.Buffer _buffer;
-        
+
         private void PlatformConstruct()
         {
         }
@@ -16,7 +16,7 @@ namespace MonoGame.Framework.Graphics
         {
             SharpDX.Utilities.Dispose(ref _buffer);
         }
-        
+
         private void GenerateIfRequired()
         {
             if (_buffer != null)
@@ -28,7 +28,7 @@ namespace MonoGame.Framework.Graphics
             var accessflags = SharpDX.Direct3D11.CpuAccessFlags.None;
             var resUsage = SharpDX.Direct3D11.ResourceUsage.Default;
 
-            if (_isDynamic)
+            if (IsDynamic)
             {
                 accessflags |= SharpDX.Direct3D11.CpuAccessFlags.Write;
                 resUsage = SharpDX.Direct3D11.ResourceUsage.Dynamic;
@@ -36,7 +36,7 @@ namespace MonoGame.Framework.Graphics
 
             _buffer = new SharpDX.Direct3D11.Buffer(
                 GraphicsDevice._d3dDevice,
-                Capacity * _indexElementSize,
+                Capacity * _elementSize,
                 resUsage,
                 SharpDX.Direct3D11.BindFlags.IndexBuffer,
                 accessflags,
@@ -50,43 +50,38 @@ namespace MonoGame.Framework.Graphics
             if (_buffer == null)
                 return;
 
-            if (_isDynamic)
-            {
+            if (IsDynamic)
                 throw new NotImplementedException();
-            }
-            else
+
+            // Copy the texture to a staging resource
+            var stagingDesc = _buffer.Description;
+            stagingDesc.BindFlags = SharpDX.Direct3D11.BindFlags.None;
+            stagingDesc.CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags.Read | SharpDX.Direct3D11.CpuAccessFlags.Write;
+            stagingDesc.Usage = SharpDX.Direct3D11.ResourceUsage.Staging;
+            stagingDesc.OptionFlags = SharpDX.Direct3D11.ResourceOptionFlags.None;
+
+            using (var stagingBuffer = new SharpDX.Direct3D11.Buffer(GraphicsDevice._d3dDevice, stagingDesc))
             {
-
-                // Copy the texture to a staging resource
-                var stagingDesc = _buffer.Description;
-                stagingDesc.BindFlags = SharpDX.Direct3D11.BindFlags.None;
-                stagingDesc.CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags.Read | SharpDX.Direct3D11.CpuAccessFlags.Write;
-                stagingDesc.Usage = SharpDX.Direct3D11.ResourceUsage.Staging;
-                stagingDesc.OptionFlags = SharpDX.Direct3D11.ResourceOptionFlags.None;
-
-                using (var stagingBuffer = new SharpDX.Direct3D11.Buffer(GraphicsDevice._d3dDevice, stagingDesc))
+                var deviceContext = GraphicsDevice._d3dContext;
+                lock (deviceContext)
                 {
-                    var deviceContext = GraphicsDevice._d3dContext;
-                    lock (deviceContext)
+                    deviceContext.CopyResource(_buffer, stagingBuffer);
+
+                    // Map the staging resource to CPU accessible memory
+                    try
                     {
-                        deviceContext.CopyResource(_buffer, stagingBuffer);
+                        var box = deviceContext.MapSubresource(
+                            stagingBuffer, 0, SharpDX.Direct3D11.MapMode.Read, SharpDX.Direct3D11.MapFlags.None);
 
-                        // Map the staging resource to CPU accessible memory
-                        try
-                        {
-                            var box = deviceContext.MapSubresource(
-                                stagingBuffer, 0, SharpDX.Direct3D11.MapMode.Read, SharpDX.Direct3D11.MapFlags.None);
-
-                            int srcBytes = Capacity * _indexElementSize;
-                            var byteSrc = new ReadOnlySpan<byte>((void*)(box.DataPointer + offsetInBytes), srcBytes);
-                            var byteDst = MemoryMarshal.AsBytes(destination);
-                            byteSrc.Slice(0, byteDst.Length).CopyTo(byteDst);
-                        }
-                        finally
-                        {
-                            // Make sure that we unmap the resource in case of an exception
-                            deviceContext.UnmapSubresource(stagingBuffer, 0);
-                        }
+                        int srcBytes = Capacity * _elementSize;
+                        var byteSrc = new ReadOnlySpan<byte>((void*)(box.DataPointer + offsetInBytes), srcBytes);
+                        var byteDst = MemoryMarshal.AsBytes(destination);
+                        byteSrc.Slice(0, byteDst.Length).CopyTo(byteDst);
+                    }
+                    finally
+                    {
+                        // Make sure that we unmap the resource in case of an exception
+                        deviceContext.UnmapSubresource(stagingBuffer, 0);
                     }
                 }
             }
@@ -99,7 +94,7 @@ namespace MonoGame.Framework.Graphics
             int bytes = data.Length * sizeof(T);
             GenerateIfRequired();
 
-            if (_isDynamic)
+            if (IsDynamic)
             {
                 // We assume discard by default.
                 var mode = SharpDX.Direct3D11.MapMode.WriteDiscard;
@@ -111,7 +106,7 @@ namespace MonoGame.Framework.Graphics
                 {
                     var box = d3dContext.MapSubresource(_buffer, 0, mode, SharpDX.Direct3D11.MapFlags.None);
 
-                    int dstBytes = Capacity * _indexElementSize;
+                    int dstBytes = Capacity * _elementSize;
                     var dst = new Span<T>((void*)(box.DataPointer + offsetInBytes), dstBytes);
                     data.CopyTo(dst);
 
@@ -147,6 +142,7 @@ namespace MonoGame.Framework.Graphics
         {
             if (disposing)
                 SharpDX.Utilities.Dispose(ref _buffer);
+
             base.Dispose(disposing);
         }
     }

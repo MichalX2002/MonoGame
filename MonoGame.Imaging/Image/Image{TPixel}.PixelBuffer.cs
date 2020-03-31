@@ -30,11 +30,20 @@ namespace MonoGame.Imaging
             return Buffer.PixelSpan;
         }
 
-        ReadOnlySpan<TPixel> IReadOnlyPixelMemory<TPixel>.GetPixelSpan() => GetPixelSpan();
+        ReadOnlySpan<TPixel> IReadOnlyPixelMemory<TPixel>.GetPixelSpan()
+        {
+            return GetPixelSpan();
+        }
 
-        public Span<TPixel> GetPixelRowSpan(int row) => MemoryMarshal.Cast<byte, TPixel>(GetPixelByteRowSpan(row));
+        public Span<TPixel> GetPixelRowSpan(int row)
+        {
+            return MemoryMarshal.Cast<byte, TPixel>(GetPixelByteRowSpan(row));
+        }
 
-        ReadOnlySpan<TPixel> IReadOnlyPixelBuffer<TPixel>.GetPixelRowSpan(int row) => GetPixelRowSpan(row);
+        ReadOnlySpan<TPixel> IReadOnlyPixelBuffer<TPixel>.GetPixelRowSpan(int row)
+        {
+            return GetPixelRowSpan(row);
+        }
 
         public void GetPixelRow(int x, int y, Span<TPixel> destination)
         {
@@ -48,8 +57,18 @@ namespace MonoGame.Imaging
             data.CopyTo(rowSpan.Slice(x));
         }
 
+        public void SetPixelColumn(int x, int y, ReadOnlySpan<TPixel> data)
+        {
+            int rows = data.Length / PixelType.ElementSize;
+            for (int srcRow = 0; srcRow < rows; srcRow++)
+            {
+                var dstSlice = GetPixelRowSpan(srcRow + y);
+                dstSlice[x] = data[srcRow];
+            }
+        }
+
         /// <summary>
-        /// Helper for storing and accessing image pixels from memory.
+        /// Helper for storing and accessing image pixels from different memory sources.
         /// </summary>
         public struct PixelBuffer
         {

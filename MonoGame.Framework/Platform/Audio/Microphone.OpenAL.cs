@@ -54,7 +54,7 @@ namespace MonoGame.Framework.Audio
             // arrays so we're basically only adding the default microphone
             Microphone microphone = new Microphone(defaultDevice);
             _allMicrophones.Add(microphone);
-            _default = microphone;
+            Default = microphone;
 #endif
         }
 

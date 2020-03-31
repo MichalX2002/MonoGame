@@ -30,14 +30,13 @@ namespace MonoGame.Imaging.Processing
             Pixels.SetPixelByteRow(x, y, data);
         }
 
-        public void GetPixelByteRow(int x, int y, Span<byte> destination)
-        {
-            Pixels.GetPixelByteRow(x, y, destination);
-        }
-
         public void SetPixelRow(int x, int y, ReadOnlySpan<TPixel> data)
         {
             Pixels.SetPixelRow(x, y, data);
+        }
+        public void GetPixelByteRow(int x, int y, Span<byte> destination)
+        {
+            Pixels.GetPixelByteRow(x, y, destination);
         }
 
         public void GetPixelRow(int x, int y, Span<TPixel> destination)

@@ -38,7 +38,7 @@ namespace MonoGame.Framework.Graphics
         /// Skinning data is example of attached object for model.
         /// </remarks>
         /// </summary>
-        public object Tag { get; set; }
+        public object AttachedData { get; set; }
 
         internal Model()
         {
@@ -50,15 +50,9 @@ namespace MonoGame.Framework.Graphics
         /// <param name="graphicsDevice">A valid reference to <see cref="GraphicsDevice"/>.</param>
         /// <param name="bones">The collection of bones.</param>
         /// <param name="meshes">The collection of meshes.</param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="graphicsDevice"/> is null.
-        /// </exception>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="bones"/> is null.
-        /// </exception>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="meshes"/> is null.
-        /// </exception>
+        /// <exception cref="ArgumentNullException"><paramref name="graphicsDevice"/> is null. </exception>
+        /// <exception cref="ArgumentNullException"><paramref name="bones"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="meshes"/> is null.</exception>
         public Model(
             GraphicsDevice graphicsDevice, IList<ModelBone> bones, IList<ModelMesh> meshes) 
             : base(graphicsDevice)

@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace MonoGame.Framework.Graphics
 {
     // TODO: We should convert the types below 
@@ -12,23 +14,42 @@ namespace MonoGame.Framework.Graphics
         Sampler1D = 3,
     }
 
-    internal struct SamplerInfo
+    internal readonly struct SamplerInfo
     {
-        public SamplerType Type;
-        public int TextureSlot;
-        public int SamplerSlot;
-        public string Name;
-        public SamplerState State;
+        public SamplerType Type { get; }
+        public int TextureSlot { get; }
+        public int SamplerSlot { get; }
+        public string Name { get; }
+        public SamplerState State { get; }
 
         // TODO: This should be moved to EffectPass.
-        public int Parameter;
+        public int Parameter { get; }
+
+        public SamplerInfo(
+            SamplerType type, int textureSlot, int samplerSlot, string name, SamplerState state, int parameter)
+        {
+            Type = type;
+            TextureSlot = textureSlot;
+            SamplerSlot = samplerSlot;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            State = state;
+            Parameter = parameter;
+        }
     }
 
     internal struct VertexAttribute
     {
-        public VertexElementUsage Usage;
-        public int Index;
-        public string Name;
-        public int Location;
+        public VertexElementUsage Usage { get; }
+        public int Index { get; }
+        public string Name { get; }
+        public int Location { get; set; }
+
+        public VertexAttribute(VertexElementUsage usage, int index, string name, int location)
+        {
+            Usage = usage;
+            Index = index;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Location = location;
+        }
     }
 }

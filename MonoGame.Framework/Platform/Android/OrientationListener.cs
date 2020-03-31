@@ -8,7 +8,7 @@ using Android.Hardware;
 using Android.Views;
 using Android.Provider;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     internal class OrientationListener : OrientationEventListener
     {
@@ -16,14 +16,13 @@ namespace Microsoft.Xna.Framework
         /// Constructor. SensorDelay.Ui is passed to the base class as this orientation listener 
         /// is just used for flipping the screen orientation, therefore high frequency data is not required.
         /// </summary>
-        public OrientationListener(Context context)
-            : base(context, SensorDelay.Ui)
+        public OrientationListener(Context context) : base(context, SensorDelay.Ui)
         {
         }
 
         public override void OnOrientationChanged(int orientation)
         {
-            if (orientation == OrientationEventListener.OrientationUnknown)
+            if (orientation == OrientationUnknown)
                 return;
 
             // Avoid changing orientation whilst the screen is locked
@@ -44,7 +43,7 @@ namespace Microsoft.Xna.Framework
             var disporientation = AndroidCompatibility.GetAbsoluteOrientation(orientation);
 
             // Only auto-rotate if target orientation is supported and not current
-            AndroidGameWindow gameWindow = (AndroidGameWindow)Game.Instance.Window;
+            var gameWindow = (AndroidGameWindow)AndroidGameActivity.Instance.Game.Window;
             if ((gameWindow.GetEffectiveSupportedOrientations() & disporientation) != 0 &&
                 disporientation != gameWindow.CurrentOrientation)
             {

@@ -141,14 +141,7 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Returns the hash code of the <see cref="GamePadThumbSticks"/>.
         /// </summary>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int code = 17 + Left.GetHashCode();
-                return code * 31 + Right.GetHashCode();
-            }
-        }
+        public override int GetHashCode() => HashCode.Combine(Left, Right);
 
         /// <summary>
         /// Returns a string that represents the current <see cref="GamePadThumbSticks"/>.

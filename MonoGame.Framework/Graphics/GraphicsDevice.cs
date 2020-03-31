@@ -1095,9 +1095,9 @@ namespace MonoGame.Framework.Graphics
             IndexElementSize indexElementSize;
             int indexSize = sizeof(TIndex);
             if (indexSize == 2)
-                indexElementSize = IndexElementSize.SixteenBits;
+                indexElementSize = IndexElementSize.Short16;
             else if (indexSize == 4)
-                indexElementSize = IndexElementSize.ThirtyTwoBits;
+                indexElementSize = IndexElementSize.Int32;
             else
                 throw new ArgumentException(
                     "The only index element sizes supported are 2 or 4 bytes.", nameof(indexData));

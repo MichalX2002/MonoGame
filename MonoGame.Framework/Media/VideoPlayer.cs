@@ -85,7 +85,7 @@ namespace MonoGame.Framework.Media
             {
                 // Give the platform code a chance to update 
                 // the playback state before we return the result.
-                PlatformGetState(ref _state);
+                _state = PlatformGetState();
                 return _state;
             }
         }

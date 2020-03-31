@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
 
 namespace MonoGame.Framework.Media
 {
@@ -9,16 +9,16 @@ namespace MonoGame.Framework.Media
         internal float[] _frequencies;
         internal float[] _samples;
 
-        public ReadOnlyCollection<float> Frequencies { get; }
-        public ReadOnlyCollection<float> Samples { get; }
+        public ReadOnlyMemory<float> Frequencies { get; }
+        public ReadOnlyMemory<float> Samples { get; }
 
         private VisualizationData()
         {
             _frequencies = new float[Size];
             _samples = new float[Size];
 
-            Frequencies = new ReadOnlyCollection<float>(_frequencies);
-            Samples = new ReadOnlyCollection<float>(_samples);
+            Frequencies = _frequencies;
+            Samples = _samples;
         }
     }
 }

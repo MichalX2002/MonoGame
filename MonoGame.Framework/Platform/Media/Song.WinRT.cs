@@ -6,7 +6,7 @@ using System;
 using System.IO;
 using Windows.Storage;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     public sealed partial class Song
     {
@@ -14,7 +14,7 @@ namespace Microsoft.Xna.Framework.Media
         private Artist artist;
         private Genre genre;
         
-		private MusicProperties musicProperties;
+        private MusicProperties musicProperties;
 
         [CLSCompliant(false)]
         public StorageFile StorageFile
@@ -22,15 +22,15 @@ namespace Microsoft.Xna.Framework.Media
             get { return this.musicProperties.File; }
         }
         
-		internal Song(Album album, Artist artist, Genre genre, MusicProperties musicProperties)
-		{
+        internal Song(Album album, Artist artist, Genre genre, MusicProperties musicProperties)
+        {
             this.album = album;
             this.artist = artist;
             this.genre = genre;
             this.musicProperties = musicProperties;
-		}
+        }
 
-		private void PlatformInitialize(string fileName)
+        private void PlatformInitialize(string fileName)
         {
 
         }

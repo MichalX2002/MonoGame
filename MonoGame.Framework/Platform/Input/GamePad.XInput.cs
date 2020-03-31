@@ -135,7 +135,7 @@ namespace MonoGame.Framework.Input
         private static GamePadState GetDefaultState()
         {
             return new GamePadState(
-                default, default, new GamePadButtons(Back ? Buttons.Back : 0), default);
+                false, default, default, new GamePadButtons(Back ? Buttons.Back : 0), default);
         }
 
         private static GamePadState PlatformGetState(int index, GamePadDeadZone leftDeadZoneMode, GamePadDeadZone rightDeadZoneMode)
@@ -172,7 +172,7 @@ namespace MonoGame.Framework.Input
                 leftPosition: new Vector2(gamepad.LeftThumbX, gamepad.LeftThumbY) / (float)short.MaxValue,
                 rightPosition: new Vector2(gamepad.RightThumbX, gamepad.RightThumbY) / (float)short.MaxValue,
                     leftDeadZoneMode: leftDeadZoneMode,
-					rightDeadZoneMode: rightDeadZoneMode);
+                    rightDeadZoneMode: rightDeadZoneMode);
 
             var triggers = new GamePadTriggers(
                     leftTrigger: gamepad.LeftTrigger / (float)byte.MaxValue,
@@ -189,7 +189,7 @@ namespace MonoGame.Framework.Input
                 leftTrigger: gamepad.LeftTrigger,
                 rightTrigger: gamepad.RightTrigger);
 
-            return new GamePadState(thumbSticks, triggers, buttons, dpadState, packetNumber);
+            return new GamePadState(true, thumbSticks, triggers, buttons, dpadState, packetNumber);
         }
 
         private static ButtonState ConvertToButtonState(

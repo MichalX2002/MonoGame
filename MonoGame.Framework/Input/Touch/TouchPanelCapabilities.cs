@@ -72,6 +72,7 @@ namespace MonoGame.Framework.Input.Touch
             return maximumTouchCount > 0;
 #elif ANDROID
             // http://developer.android.com/reference/android/content/pm/PackageManager.html#FEATURE_TOUCHSCREEN
+            var pm = AndroidGameActivity.Instance.PackageManager;
             return pm.HasSystemFeature(PackageManager.FeatureTouchscreen);
 #elif IOS
             return true;
@@ -97,7 +98,7 @@ namespace MonoGame.Framework.Input.Touch
             return GetSystemMetrics(SM_MAXIMUMTOUCHES);
 #elif ANDROID
             // http://developer.android.com/reference/android/content/pm/PackageManager.html#FEATURE_TOUCHSCREEN
-            var pm = Game.Activity.PackageManager;
+            var pm = AndroidGameActivity.Instance.PackageManager;
             if (pm.HasSystemFeature(PackageManager.FeatureTouchscreenMultitouchJazzhand))
                 return 5;
             else if (pm.HasSystemFeature(PackageManager.FeatureTouchscreenMultitouchDistinct))

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     public static partial class MessageBox
     {
@@ -13,9 +13,11 @@ namespace Microsoft.Xna.Framework.Input
         private static Task<int?> PlatformShow(string title, string description, List<string> buttons)
         {
             tcs = new TaskCompletionSource<int?>();
-            Game.Activity.RunOnUiThread(() =>
+            var activity = AndroidGameActivity.Instance;
+
+            activity.RunOnUiThread(() =>
             {
-                alert = new AlertDialog.Builder(Game.Activity).Create();
+                alert = new AlertDialog.Builder(activity).Create();
 
                 alert.SetTitle(title);
                 alert.SetMessage(description);

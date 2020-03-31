@@ -1,6 +1,5 @@
 ﻿using MonoGame.OpenGL;
 using System;
-using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -12,7 +11,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         private unsafe void PlatformGetData<T>(
-            int offsetInBytes, Span<T> destination, int dataStride)
+            int offsetInBytes, Span<T> destination, int elementStride)
             where T : unmanaged
         {
             AssertOnMainThreadForSpan();
@@ -31,7 +30,7 @@ namespace MonoGame.Framework.Graphics
             int bufferBytes = Capacity * VertexDeclaration.VertexStride;
             var src = new ReadOnlySpan<T>((void*)(mapPtr + offsetInBytes), bufferBytes);
             
-            if (sizeof(T) % dataStride == 0)
+            if (sizeof(T) % elementStride == 0)
             {
                 // the source and destination use tightly packed data,
                 // we can skip the interleaved copy
@@ -39,14 +38,14 @@ namespace MonoGame.Framework.Graphics
             }
             else
             {
-                var byteSrc = MemoryMarshal.AsBytes(src);
-                var byteDst = MemoryMarshal.AsBytes(destination);
+                var byteSrc = System.Runtime.InteropServices.MemoryMarshal.AsBytes(src);
+                var byteDst = System.Runtime.InteropServices.MemoryMarshal.AsBytes(destination);
 
                 // interleaved copy from buffer to destination
                 for (int i = 0; i < destination.Length; i++)
                 {
-                    var srcElement = byteSrc.Slice(i * VertexDeclaration.VertexStride, dataStride);
-                    var dstElement = byteDst.Slice(i * dataStride, dataStride);
+                    var srcElement = byteSrc.Slice(i * VertexDeclaration.VertexStride, elementStride);
+                    var dstElement = byteDst.Slice(i * elementStride, elementStride);
                     srcElement.CopyTo(dstElement);
                 }
             }

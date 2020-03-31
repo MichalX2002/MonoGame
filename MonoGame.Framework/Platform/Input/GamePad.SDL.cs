@@ -265,12 +265,13 @@ namespace MonoGame.Framework.Input
                 (SDL.GameController.GetButton(device, SDL.GameController.Button.DpadLeft) == 1) ? ButtonState.Pressed : ButtonState.Released,
                 (SDL.GameController.GetButton(device, SDL.GameController.Button.DpadRight) == 1) ? ButtonState.Pressed : ButtonState.Released);
 
-            return new GamePadState(thumbSticks, triggers, buttons, dPad, gamepad.PacketNumber);
+            return new GamePadState(
+                isConnected: true, thumbSticks, triggers, buttons, dPad, gamepad.PacketNumber);
         }
 
         private static bool PlatformSetVibration(
-            int index, 
-            float leftMotor, float rightMotor, 
+            int index,
+            float leftMotor, float rightMotor,
             float leftTrigger, float rightTrigger)
         {
             if (!GamePads.TryGetValue(index, out var gamepad))

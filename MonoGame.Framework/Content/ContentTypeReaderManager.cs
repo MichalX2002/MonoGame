@@ -18,7 +18,7 @@ namespace MonoGame.Framework.Content
         private static readonly string _assemblyName;
 
         private Dictionary<Type, ContentTypeReader> _contentReaders;
-        
+
         static ContentTypeReaderManager()
         {
             _syncRoot = new object();
@@ -98,7 +98,7 @@ namespace MonoGame.Framework.Content
 
                 // At the moment the Video class doesn't exist
                 // on all platforms... Allow it to compile anyway.
-#if ANDROID || (IOS && !TVOS) || MONOMAC || (WINDOWS && !OPENGL) || WINDOWS_UAP
+#if (IOS && !TVOS) || MONOMAC || (WINDOWS && !OPENGL) || WINDOWS_UAP
                 var hVideoReader = new VideoReader();
 #endif
             }
@@ -150,7 +150,8 @@ namespace MonoGame.Framework.Content
                                     // If you are getting here, the Mono runtime is most likely not able to JIT the type.
                                     // In particular, MonoTouch needs help instantiating types that are only defined in strings in Xnb files. 
                                     throw new InvalidOperationException(
-                                        "Failed to get default constructor for ContentTypeReader. To work around, add a creation function to ContentTypeReaderManager.AddTypeCreator() " +
+                                        "Failed to get default constructor for ContentTypeReader. " +
+                                        "To work around, add a creation function to ContentTypeReaderManager.AddTypeCreator() " +
                                         "with the following failed type string: " + originalReaderTypeString, ex);
                                 }
 
@@ -163,7 +164,8 @@ namespace MonoGame.Framework.Content
                         }
                         else
                             throw new ContentLoadException(
-                                    "Could not find ContentTypeReader Type. Please ensure the name of the Assembly that contains the Type matches the assembly in the full type name: " +
+                                    "Could not find ContentTypeReader Type. Please ensure the name of the Assembly " +
+                                    "that contains the Type matches the assembly in the full type name: " +
                                     originalReaderTypeString + " (" + readerTypeString + ")");
                     }
 
@@ -193,7 +195,8 @@ namespace MonoGame.Framework.Content
         /// Removes Version, Culture and PublicKeyToken from a type string.
         /// </summary>
         /// <remarks>
-        /// Supports multiple generic types (e.g. Dictionary&lt;TKey,TValue&gt;) and nested generic types (e.g. List&lt;List&lt;int&gt;&gt;).
+        /// Supports multiple generic types 
+        /// (e.g. <see cref="Dictionary{TKey, TValue}"/>) and nested generic types (e.g. List&lt;List&lt;int&gt;&gt;).
         /// </remarks> 
         /// <param name="type">
         /// A <see cref="string"/>
@@ -202,26 +205,26 @@ namespace MonoGame.Framework.Content
         /// A <see cref="string"/>
         /// </returns>
         public static string PrepareType(string type)
-        {			
+        {
             //Needed to support nested types
-            int count = type.Split(new[] {"[["}, StringSplitOptions.None).Length - 1;
-            
+            int count = type.Split(new[] { "[[" }, StringSplitOptions.None).Length - 1;
+
             string preparedType = type;
-            
-            for(int i=0; i<count; i++)
+
+            for (int i = 0; i < count; i++)
             {
                 preparedType = Regex.Replace(preparedType, @"\[(.+?), Version=.+?\]", "[$1]");
             }
-                        
+
             //Handle non generic types
-            if(preparedType.Contains("PublicKeyToken"))
+            if (preparedType.Contains("PublicKeyToken"))
                 preparedType = Regex.Replace(preparedType, @"(.+?), Version=.+?$", "$1");
 
             // TODO: For WinRT this is most likely broken!
             preparedType = preparedType.Replace(", MonoGame.Framework.Graphics", string.Format(", {0}", _assemblyName));
             preparedType = preparedType.Replace(", MonoGame.Framework.Video", string.Format(", {0}", _assemblyName));
             preparedType = preparedType.Replace(", MonoGame.Framework", string.Format(", {0}", _assemblyName));
-            
+
             return preparedType;
         }
 
@@ -231,12 +234,8 @@ namespace MonoGame.Framework.Content
         /// <summary>
         /// Adds the type creator.
         /// </summary>
-        /// <param name='typeString'>
-        /// Type string.
-        /// </param>
-        /// <param name='createFunction'>
-        /// Create function.
-        /// </param>
+        /// <param name='typeString'>Type string.</param>
+        /// <param name='createFunction'>Create function.</param>
         public static void AddTypeCreator(string typeString, Func<ContentTypeReader> createFunction)
         {
             if (!typeCreators.ContainsKey(typeString))

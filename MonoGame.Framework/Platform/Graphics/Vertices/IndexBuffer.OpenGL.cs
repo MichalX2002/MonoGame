@@ -2,9 +2,9 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using MonoGame.OpenGL;
 using System;
 using System.Runtime.InteropServices;
+using MonoGame.OpenGL;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -12,10 +12,10 @@ namespace MonoGame.Framework.Graphics
     {
         private void PlatformConstruct()
         {
-            base.PlatformConstruct(BufferTarget.ElementArrayBuffer, _indexElementSize);
+            base.PlatformConstruct(BufferTarget.ElementArrayBuffer, _elementSize);
         }
 
-        private unsafe void PlatformGetData<T>(int offsetInBytes, Span<T> destination) 
+        private unsafe void PlatformGetData<T>(int byteOffset, Span<T> destination) 
             where T : unmanaged
         {
             AssertOnMainThreadForSpan();
@@ -30,8 +30,8 @@ namespace MonoGame.Framework.Graphics
 
             IntPtr mapPtr = GL.MapBuffer(BufferTarget.ElementArrayBuffer, BufferAccess.ReadOnly);
 
-            int srcBytes = Capacity * _indexElementSize;
-            var byteSrc = new ReadOnlySpan<byte>((void*)(mapPtr + offsetInBytes), srcBytes);
+            int srcBytes = Capacity * _elementSize;
+            var byteSrc = new ReadOnlySpan<byte>((byte*)mapPtr + byteOffset, srcBytes);
             var byteDst = MemoryMarshal.AsBytes(destination);
             byteSrc.Slice(0, byteDst.Length).CopyTo(byteDst);
 
@@ -41,7 +41,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         private unsafe void PlatformSetData<T>(
-            int offsetInBytes, ReadOnlySpan<T> data, SetDataOptions options)
+            int byteOffset, ReadOnlySpan<T> data, SetDataOptions options)
             where T : unmanaged
         {
             AssertOnMainThreadForSpan();
@@ -50,21 +50,14 @@ namespace MonoGame.Framework.Graphics
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, _vbo);
             GraphicsExtensions.CheckGLError();
 
-            DiscardBuffer(BufferTarget.ElementArrayBuffer, options, Capacity * _indexElementSize);
+            DiscardBuffer(BufferTarget.ElementArrayBuffer, options, Capacity * _elementSize);
 
             fixed (T* ptr = data)
             {
                 var size = new IntPtr(data.Length * sizeof(T));
-                GL.BufferSubData(BufferTarget.ElementArrayBuffer, (IntPtr)offsetInBytes, size, (IntPtr)ptr);
+                GL.BufferSubData(BufferTarget.ElementArrayBuffer, (IntPtr)byteOffset, size, (IntPtr)ptr);
                 GraphicsExtensions.CheckGLError();
             }
-        }
-    
-        protected override void Dispose(bool disposing)
-        {
-            if (!IsDisposed)
-                GraphicsDevice.DisposeBuffer(_vbo);
-            base.Dispose(disposing);
         }
     }
 }

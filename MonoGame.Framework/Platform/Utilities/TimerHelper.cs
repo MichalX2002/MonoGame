@@ -14,21 +14,17 @@ namespace MonoGame.Framework.Utilities
         private static extern int NtQueryTimerResolution(
             out uint MinimumResolution, out uint MaximumResolution, out uint CurrentResolution);
 
-        private static readonly double LowestSleepThreshold;
-
-        static TimerHelper()
-        {
-            NtQueryTimerResolution(out _, out uint max, out _);
-            LowestSleepThreshold = 1.0 + (max / 10000.0);
-        }
+        public static TimeSpan MaxResolution { get; private set; }
+        public static TimeSpan Resolution { get; private set; }
 
         /// <summary>
         /// Returns the current timer resolution in milliseconds.
         /// </summary>
-        public static double GetCurrentResolution()
+        public static void UpdateResolution()
         {
-            NtQueryTimerResolution(out _, out _, out uint current);
-            return current / 10000.0;
+            NtQueryTimerResolution(out _, out uint max, out uint current);
+            MaxResolution = TimeSpan.FromTicks( 10000 + max);
+            Resolution = TimeSpan.FromTicks(current);
         }
 
         /// <summary>
@@ -37,11 +33,11 @@ namespace MonoGame.Framework.Utilities
         public static void SleepForNoMoreThan(TimeSpan time)
         {
             // Assumption is that Thread.Sleep(t) will sleep for at least (t), and at most (t + timerResolution)
-            if (time.TotalMilliseconds < LowestSleepThreshold)
+            if (time < MaxResolution)
                 return;
 
-            int sleepTime = (int)(time.TotalMilliseconds - GetCurrentResolution());
-            if (sleepTime > 0)
+            var sleepTime = time - Resolution;
+            if (sleepTime.TotalMilliseconds > 0)
                 Thread.Sleep(sleepTime);
         }
     }

@@ -3,16 +3,30 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework;
+using MonoGame.Framework;
 
 namespace Microsoft.Devices.Sensors
 {
-    public struct CompassReading : ISensorReading
+    public readonly struct CompassReading : ISensorReading
     {
-        public double HeadingAccuracy { get; internal set; }
-        public double MagneticHeading { get; internal set; }
-        public Vector3 MagnetometerReading { get; internal set; }
-        public DateTimeOffset Timestamp { get; internal set; }
-        public double TrueHeading { get; internal set; }
+        public double HeadingAccuracy { get;  }
+        public double MagneticHeading { get;}
+        public Vector3 MagnetometerReading { get;  }
+        public DateTimeOffset Timestamp { get; }
+        public double TrueHeading { get; }
+
+        public CompassReading(
+            double headingAccuracy,
+            double magneticHeading, 
+            Vector3 magnetometerReading,
+            DateTimeOffset timestamp, 
+            double trueHeading)
+        {
+            HeadingAccuracy = headingAccuracy;
+            MagneticHeading = magneticHeading;
+            MagnetometerReading = magnetometerReading;
+            Timestamp = timestamp;
+            TrueHeading = trueHeading;
+        }
     }
 }

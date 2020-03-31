@@ -174,6 +174,7 @@ namespace MonoGame.Framework.Windows
             long virtualKeyCode = m.WParam.ToInt64();
             bool extended = (m.LParam.ToInt64() & 0x01000000) != 0;
             long scancode = (m.LParam.ToInt64() & 0x00ff0000) >> 16;
+
             var key = KeyCodeTranslate(
                 (Keys)virtualKeyCode,
                 extended,
@@ -185,13 +186,14 @@ namespace MonoGame.Framework.Windows
                 {
                     case WM_KEYDOWN:
                     case WM_SYSKEYDOWN:
-                        _window.OnKeyDown(new KeyInputEvent(key));
+                        _window.OnKeyDown(new KeyInputEventArgs(key));
                         break;
 
                     case WM_KEYUP:
                     case WM_SYSKEYUP:
-                        _window.OnKeyUp(new KeyInputEvent(key));
+                        _window.OnKeyUp(new KeyInputEventArgs(key));
                         break;
+
                     default:
                         break;
                 }

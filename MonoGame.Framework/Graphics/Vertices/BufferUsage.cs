@@ -13,6 +13,7 @@ namespace MonoGame.Framework.Graphics
         /// No special usage.
         /// </summary>
         None,
+
         /// <summary>
         /// The buffer will not be readable and will be optimized for rendering and writing.
         /// </summary>

@@ -6,8 +6,12 @@ using System;
 
 namespace MonoGame.Framework.Graphics
 {
-	public partial class RasterizerState : GraphicsResource
-	{
+    public partial class RasterizerState : GraphicsResource
+    {
+        public static RasterizerState CullClockwise { get; }
+        public static RasterizerState CullCounterClockwise { get; }
+        public static RasterizerState CullNone { get; }
+
         private readonly bool _defaultStateObject;
 
         private CullMode _cullMode;
@@ -17,6 +21,8 @@ namespace MonoGame.Framework.Graphics
         private bool _scissorTestEnable;
         private float _slopeScaleDepthBias;
         private bool _depthClipEnable;
+
+        #region Properties
 
         public CullMode CullMode
         {
@@ -88,69 +94,77 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
+        #endregion
+
+        #region Constructors
+
+        static RasterizerState()
+        {
+            CullClockwise = new RasterizerState("RasterizerState.CullClockwise", CullMode.CullClockwiseFace);
+            CullCounterClockwise = new RasterizerState("RasterizerState.CullCounterClockwise", CullMode.CullCounterClockwiseFace);
+            CullNone = new RasterizerState("RasterizerState.CullNone", CullMode.None);
+        }
+
+        public RasterizerState()
+        {
+            CullMode = CullMode.CullCounterClockwiseFace;
+            FillMode = FillMode.Solid;
+            DepthBias = 0;
+            MultiSampleAntiAlias = true;
+            ScissorTestEnable = false;
+            SlopeScaleDepthBias = 0;
+            DepthClipEnable = true;
+        }
+
+        private RasterizerState(string name, CullMode cullMode) : this()
+        {
+            Name = name;
+            _cullMode = cullMode;
+            _defaultStateObject = true;
+        }
+
+        private RasterizerState(RasterizerState cloneSource)
+        {
+            Name = cloneSource.Name;
+            _cullMode = cloneSource._cullMode;
+            _fillMode = cloneSource._fillMode;
+            _depthBias = cloneSource._depthBias;
+            _multiSampleAntiAlias = cloneSource._multiSampleAntiAlias;
+            _scissorTestEnable = cloneSource._scissorTestEnable;
+            _slopeScaleDepthBias = cloneSource._slopeScaleDepthBias;
+            _depthClipEnable = cloneSource._depthClipEnable;
+        }
+
+        #endregion
+
         internal void BindToGraphicsDevice(GraphicsDevice device)
         {
             if (_defaultStateObject)
-                throw new InvalidOperationException("You cannot bind a default state object.");
+                throw new InvalidOperationException(
+                    "You cannot bind a default state object.");
+
             if (GraphicsDevice != null && GraphicsDevice != device)
-                throw new InvalidOperationException("This rasterizer state is already bound to a different graphics device.");
+                throw new InvalidOperationException(
+                    "This rasterizer state is already bound to a different graphics device.");
+
             GraphicsDevice = device;
         }
 
         internal void ThrowIfBound()
         {
             if (_defaultStateObject)
-                throw new InvalidOperationException("You cannot modify a default rasterizer state object.");
+                throw new InvalidOperationException(
+                    "You cannot modify a default rasterizer state object.");
+
             if (GraphicsDevice != null)
-                throw new InvalidOperationException("You cannot modify the rasterizer state after it has been bound to the graphics device!");
+                throw new InvalidOperationException(
+                    "You cannot modify the rasterizer state after it has been bound to the graphics device!");
         }
 
-	    public static readonly RasterizerState CullClockwise;
-        public static readonly RasterizerState CullCounterClockwise;
-        public static readonly RasterizerState CullNone;
-
-        public RasterizerState()
-		{
-			CullMode = CullMode.CullCounterClockwiseFace;
-			FillMode = FillMode.Solid;
-			DepthBias = 0;
-			MultiSampleAntiAlias = true;
-			ScissorTestEnable = false;
-			SlopeScaleDepthBias = 0;
-            DepthClipEnable = true;
-		}
-
-	    private RasterizerState(string name, CullMode cullMode)
-            : this()
-	    {
-	        Name = name;
-	        _cullMode = cullMode;
-	        _defaultStateObject = true;
-	    }
-
-	    private RasterizerState(RasterizerState cloneSource)
-	    {
-	        Name = cloneSource.Name;
-	        _cullMode = cloneSource._cullMode;
-	        _fillMode = cloneSource._fillMode;
-	        _depthBias = cloneSource._depthBias;
-	        _multiSampleAntiAlias = cloneSource._multiSampleAntiAlias;
-	        _scissorTestEnable = cloneSource._scissorTestEnable;
-	        _slopeScaleDepthBias = cloneSource._slopeScaleDepthBias;
-	        _depthClipEnable = cloneSource._depthClipEnable;
-	    }
-
-		static RasterizerState ()
-		{
-		    CullClockwise = new RasterizerState("RasterizerState.CullClockwise", CullMode.CullClockwiseFace);
-		    CullCounterClockwise = new RasterizerState("RasterizerState.CullCounterClockwise", CullMode.CullCounterClockwiseFace);
-		    CullNone = new RasterizerState("RasterizerState.CullNone", CullMode.None);
-		}
-
-	    internal RasterizerState Clone()
-	    {
-	        return new RasterizerState(this);
-	    }
+        internal RasterizerState Clone()
+        {
+            return new RasterizerState(this);
+        }
 
         partial void PlatformDispose();
 

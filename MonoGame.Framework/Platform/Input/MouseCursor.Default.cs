@@ -3,9 +3,8 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework.Graphics;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     public partial class MouseCursor
     {
@@ -25,7 +24,8 @@ namespace Microsoft.Xna.Framework.Input
             Hand = new MouseCursor(IntPtr.Zero);
         }
 
-        private static MouseCursor PlatformFromTexture2D(Texture2D texture, int originx, int originy)
+        private static MouseCursor PlatformFromPixels(
+            ReadOnlySpan<Color> colors, int width, int height, Point origin)
         {
             return new MouseCursor(IntPtr.Zero);
         }

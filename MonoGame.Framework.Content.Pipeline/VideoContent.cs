@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Linq;
 using System.Globalization;
 using MonoGame.Framework.Media;
 
@@ -15,7 +14,6 @@ namespace MonoGame.Framework.Content.Pipeline
     public class VideoContent : ContentItem, IDisposable
     {
         private bool _disposed;
-        private int _width;
 
         /// <summary>
         /// Gets the bit rate for this video.
@@ -39,11 +37,6 @@ namespace MonoGame.Framework.Content.Pipeline
         public float FramesPerSecond { get; }
 
         /// <summary>
-        /// Gets the height of this video.
-        /// </summary>
-        public int Height { get; }
-
-        /// <summary>
         /// Gets or sets the type of soundtrack accompanying the video.
         /// </summary>
         [ContentSerializer]
@@ -52,7 +45,12 @@ namespace MonoGame.Framework.Content.Pipeline
         /// <summary>
         /// Gets the width of this video.
         /// </summary>
-        public int Width => _width;
+        public int Width { get; }
+
+        /// <summary>
+        /// Gets the height of this video.
+        /// </summary>
+        public int Height { get; }
 
         /// <summary>
         /// Initializes a new copy of the VideoContent class for the specified video file.
@@ -87,7 +85,7 @@ namespace MonoGame.Framework.Content.Pipeline
                         break;
 
                     case "width":
-                        _width = int.Parse(value, CultureInfo.InvariantCulture);
+                        Width = int.Parse(value, CultureInfo.InvariantCulture);
                         break;
 
                     case "height":

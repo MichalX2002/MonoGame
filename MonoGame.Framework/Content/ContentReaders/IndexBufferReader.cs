@@ -27,7 +27,7 @@ namespace MonoGame.Framework.Content
                 {
                     indexBuffer = new IndexBuffer(
                         input.GetGraphicsDevice(),
-                        sixteenBits ? IndexElementSize.SixteenBits : IndexElementSize.ThirtyTwoBits,
+                        sixteenBits ? IndexElementSize.Short16 : IndexElementSize.Int32,
                         dataSize / (sixteenBits ? 2 : 4), BufferUsage.None);
                 }
 

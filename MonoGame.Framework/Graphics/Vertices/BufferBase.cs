@@ -6,14 +6,21 @@ namespace MonoGame.Framework.Graphics
 {
     public abstract partial class BufferBase : GraphicsResource
     {
-        internal bool _isDynamic;
-
         public int Capacity { get; }
         public int Count { get; protected set; }
 
-        public BufferBase(GraphicsDevice graphicsDevice, int capacity) : base(graphicsDevice)
+        public BufferUsage BufferUsage { get; private set; }
+        public bool IsDynamic { get; }
+
+        public BufferBase(
+            GraphicsDevice graphicsDevice, 
+            int capacity, 
+            BufferUsage bufferUsage,
+            bool isDynamic) : base(graphicsDevice)
         {
             Capacity = capacity;
+            BufferUsage = bufferUsage;
+            IsDynamic = isDynamic;
         }
     }
 }

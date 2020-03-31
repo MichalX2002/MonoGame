@@ -2,44 +2,51 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using MonoGame.Framework;
 using System;
 
 namespace MonoGame.Framework.Graphics
 {
     public partial class VertexBuffer : BufferBase
     {
-        public BufferUsage BufferUsage { get; private set; }
+        /// <summary>
+        /// The vertex declaration of the vertex type that this buffer contains.
+        /// </summary>
         public VertexDeclaration VertexDeclaration { get; protected set; }
 
         #region Constructors
 
         protected VertexBuffer(
-            GraphicsDevice graphicsDevice, VertexDeclaration vertexDeclaration, 
-            int capacity, BufferUsage bufferUsage, bool dynamic) :
-            base(graphicsDevice, capacity)
+            GraphicsDevice graphicsDevice, 
+            VertexDeclaration vertexDeclaration, 
+            int capacity, 
+            BufferUsage bufferUsage, 
+            bool isDynamic) :
+            base(graphicsDevice, capacity, bufferUsage, isDynamic)
         {
-            BufferUsage = bufferUsage;
-            VertexDeclaration = vertexDeclaration;
-
             // Make sure the graphics device is assigned in the vertex declaration.
             if (vertexDeclaration.GraphicsDevice != graphicsDevice)
                 vertexDeclaration.GraphicsDevice = graphicsDevice;
 
-            _isDynamic = dynamic;
+            VertexDeclaration = vertexDeclaration;
+
             PlatformConstruct();
         }
 
         public VertexBuffer(
-            GraphicsDevice graphicsDevice, VertexDeclaration vertexDeclaration, 
-            int capacity, BufferUsage bufferUsage) :
+            GraphicsDevice graphicsDevice, 
+            VertexDeclaration vertexDeclaration, 
+            int capacity, 
+            BufferUsage bufferUsage) :
             this(graphicsDevice, vertexDeclaration, capacity, bufferUsage, false)
         {
         }
 
         public VertexBuffer(
-            GraphicsDevice graphicsDevice, Type type, int capacity, BufferUsage bufferUsage) :
-            this(graphicsDevice, VertexDeclaration.FromType(type), capacity, bufferUsage, false)
+            GraphicsDevice graphicsDevice,
+            Type vertexType, 
+            int capacity, 
+            BufferUsage bufferUsage) :
+            this(graphicsDevice, VertexDeclaration.FromType(vertexType), capacity, bufferUsage, false)
         {
         }
 
@@ -52,45 +59,46 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <typeparam name="T">The struct you want to fill.</typeparam>
         /// <param name="destination">The span to be filled.</param>
-        /// <param name="offsetInBytes">The offset to the first element in the vertex buffer in bytes.</param>
-        /// <param name="destinationStride">The size of how a vertex buffer element should be interpreted.</param>
+        /// <param name="byteOffset">The offset to the first element in the vertex buffer in bytes.</param>
+        /// <param name="elementStride">The size of how a vertex buffer element should be interpreted.</param>
         /// <remarks>
         /// Note that this pulls data from VRAM into main memory and because of that it's an expensive operation.
         /// It is often a better idea to keep a copy of the data in main memory.
         /// </remarks>
         public unsafe void GetData<T>(
-            int offsetInBytes, Span<T> destination, int destinationStride = 0)
+            int byteOffset, Span<T> destination, int elementStride = 0)
             where T : unmanaged
         {
             if (BufferUsage == BufferUsage.WriteOnly)
                 throw new InvalidOperationException(
-                    $"Calling {nameof(GetData)} on a resource that was created with {BufferUsage.WriteOnly} is not supported.");
+                    $"Calling {nameof(GetData)} on a resource that was " +
+                    $"created with {BufferUsage.WriteOnly} is not supported.");
 
-            if (destinationStride == 0)
-                destinationStride = sizeof(T);
+            if (elementStride == 0)
+                elementStride = sizeof(T);
 
             int bufferSize = Capacity * VertexDeclaration.VertexStride;
-            int requestedBytes = destination.Length * destinationStride;
+            int requestedBytes = destination.Length * elementStride;
 
-            if (destinationStride > bufferSize)
+            if (elementStride > bufferSize)
                 throw new ArgumentOutOfRangeException(
-                    nameof(destinationStride), "The vertex stride may not be larger than the buffer capacity.");
+                    nameof(elementStride), "The vertex stride may not be larger than the buffer capacity.");
 
             if (requestedBytes > bufferSize)
                 throw new ArgumentOutOfRangeException(
                     nameof(destination), "The amount of data requested exceeds the buffer capacity.");
 
-            if (offsetInBytes + requestedBytes > bufferSize)
+            if (byteOffset + requestedBytes > bufferSize)
                 throw new ArgumentOutOfRangeException(
-                    nameof(offsetInBytes), "The requested range reaches beyond the buffer.");
+                    nameof(byteOffset), "The requested range reaches beyond the buffer.");
 
-            PlatformGetData(offsetInBytes, destination, destinationStride);
+            PlatformGetData(byteOffset, destination, elementStride);
         }
 
-        public void GetData<T>(Span<T> destination, int vertexStride = 0)
+        public void GetData<T>(Span<T> destination, int elementStride = 0)
             where T : unmanaged
         {
-            GetData(0, destination, vertexStride);
+            GetData(0, destination, elementStride);
         }
 
         #endregion
@@ -101,9 +109,9 @@ namespace MonoGame.Framework.Graphics
         /// Sets the vertex buffer data.
         /// </summary>
         /// <typeparam name="T">Type of elements in the data array.</typeparam>
-        /// <param name="offsetInBytes">Offset in bytes from the beginning of the vertex buffer to start copying to.</param>
+        /// <param name="byteOffset">Offset in bytes from the beginning of the vertex buffer to start copying to.</param>
         /// <param name="data">The span of vertex data.</param>
-        /// <param name="dataStride">
+        /// <param name="elementStride">
         /// Specifies how far apart, in bytes, elements from <paramref name="data"/> should be when 
         /// they are copied into the vertex buffer.
         /// If you specify <c>sizeof(T)</c>, elements from <paramref name="data"/> will be copied into the 
@@ -116,62 +124,69 @@ namespace MonoGame.Framework.Graphics
         /// <param name="options">The options to use when flushing the data.</param>
         /// <remarks>
         /// Example: If you only want to set the texture coordinate component of the vertex data,
-        /// you would call this method as follows (note the use of <paramref name="offsetInBytes"/>:
+        /// you would call this method as follows (note the use of <paramref name="byteOffset"/>:
         /// <code>
         /// var texCoords = new Vector2[vertexCount];
         /// vertexBuffer.SetData(offsetInBytes: 12, texCoords);
         /// </code>
         /// </remarks>
         public unsafe void SetData<T>(
-            int offsetInBytes, ReadOnlySpan<T> data, int dataStride = 0, SetDataOptions options = SetDataOptions.None)
+            int byteOffset, 
+            ReadOnlySpan<T> data,
+            int elementStride = 0,
+            SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
             if (data.IsEmpty)
                 throw new ArgumentEmptyException(nameof(data));
 
-            if (dataStride == 0)
-                dataStride = sizeof(T);
+            if (elementStride == 0)
+                elementStride = sizeof(T);
 
             var vertexByteSize = data.Length * VertexDeclaration.VertexStride;
-            if (dataStride > vertexByteSize)
+            if (elementStride > vertexByteSize)
                 throw new ArgumentOutOfRangeException(
-                    nameof(dataStride), "Data stride can not be larger than the vertex buffer size.");
+                    nameof(elementStride), "Data stride can not be larger than the vertex buffer size.");
 
             if (data.Length > 1 && data.Length * sizeof(T) > vertexByteSize)
-                throw new InvalidOperationException("The vertex stride is larger than the vertex buffer.");
+                throw new InvalidOperationException(
+                    "The vertex stride is larger than the vertex buffer.");
 
-            if (dataStride < sizeof(T))
+            if (elementStride < sizeof(T))
                 throw new ArgumentOutOfRangeException(
                     $"The data stride must be greater than or equal to the size of the specified data ({sizeof(T)}).");
 
-            PlatformSetData(offsetInBytes, data, dataStride, options);
+            PlatformSetData(byteOffset, data, elementStride, options);
             Count = data.Length * sizeof(T) / VertexDeclaration.VertexStride;
         }
 
         public unsafe void SetData<T>(
-            ReadOnlySpan<T> data, int dataStride = 0, SetDataOptions options = SetDataOptions.None)
+            ReadOnlySpan<T> data,
+            int elementStride = 0,
+            SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
-            SetData(0, data, dataStride, options);
+            SetData(0, data, elementStride, options);
         }
 
-        #region Span<T> Overloads
-
-        public unsafe void SetData<T>(
-            int offsetInBytes, Span<T> data, int dataStride = 0, SetDataOptions options = SetDataOptions.None)
+        public void SetData<T>(
+            int byteOffset, 
+            Span<T> data, 
+            int elementStride = 0, 
+            SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
-            SetData(offsetInBytes, (ReadOnlySpan<T>)data, dataStride, options);
+            SetData(byteOffset, (ReadOnlySpan<T>)data, elementStride, options);
         }
 
-        public unsafe void SetData<T>(
-            Span<T> data, int vertexStride = 0, SetDataOptions options = SetDataOptions.None)
+        public void SetData<T>(
+            Span<T> data, 
+            int elementStride = 0,
+            SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
-            SetData(0, data, vertexStride, options);
+            SetData(0, data, elementStride, options);
         }
-
-        #endregion
 
         #endregion
     }

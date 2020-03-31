@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using UIKit;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     public static partial class KeyboardInput
     {

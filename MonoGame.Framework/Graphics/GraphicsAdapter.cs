@@ -10,7 +10,8 @@ namespace MonoGame.Framework.Graphics
     public sealed partial class GraphicsAdapter : IDisposable
     {
         /// <summary>
-        /// Defines the driver type for graphics adapter. Usable only on DirectX platforms for now.
+        /// Defines the driver type for graphics adapter. 
+        /// Usable only on DirectX platforms for now.
         /// </summary>
         public enum DriverType
         {
@@ -20,14 +21,14 @@ namespace MonoGame.Framework.Graphics
             Hardware,
 
             /// <summary>
-            /// Emulates the hardware device on CPU. Slowly, only for testing.
+            /// Emulates the hardware device on CPU. Slow, only for testing.
             /// </summary>
             Reference,
 
             /// <summary>
             /// Useful when <see cref="Hardware"/> acceleration does not work.
             /// </summary>
-            FastSoftware
+            Software
         }
 
         private static readonly ReadOnlyCollection<GraphicsAdapter> _adapters;
@@ -135,7 +136,7 @@ namespace MonoGame.Framework.Graphics
             selectedFormat = format;
             selectedDepthFormat = depthFormat;
             selectedMultiSampleCount = multiSampleCount;
-            
+
             // fallback for unsupported renderTarget surface formats.
             if (selectedFormat == SurfaceFormat.Alpha8 ||
                 selectedFormat == SurfaceFormat.NormalizedByte2 ||
@@ -147,9 +148,13 @@ namespace MonoGame.Framework.Graphics
                 selectedFormat == SurfaceFormat.Dxt1SRgb ||
                 selectedFormat == SurfaceFormat.Dxt3SRgb ||
                 selectedFormat == SurfaceFormat.Dxt5SRgb)
+            {
                 selectedFormat = SurfaceFormat.Color;
+            }
 
-            return (format == selectedFormat) && (depthFormat == selectedDepthFormat) && (multiSampleCount == selectedMultiSampleCount);
+            return (format == selectedFormat) 
+                && (depthFormat == selectedDepthFormat) 
+                && (multiSampleCount == selectedMultiSampleCount);
         }
 
         public bool IsProfileSupported(GraphicsProfile graphicsProfile)

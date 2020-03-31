@@ -15,18 +15,19 @@ namespace MonoGame.Framework.Graphics
         private BufferTarget _target;
         private int _elementSize;
 
+        /// <inheritdoc/>
         protected override void GraphicsDeviceResetting()
         {
             _vbo = 0;
         }
 
-        internal virtual void DiscardBuffer(BufferTarget target, SetDataOptions options, int bufferBytes)
+        internal virtual void DiscardBuffer(BufferTarget target, SetDataOptions options, int byteSize)
         {
             if (options == SetDataOptions.Discard)
             {
                 // By assigning NULL data to the buffer this gives a hint
                 // to the device to discard the previous content.
-                GL.BufferData(target, (IntPtr)bufferBytes, IntPtr.Zero, _usageHint);
+                GL.BufferData(target, (IntPtr)byteSize, IntPtr.Zero, _usageHint);
                 GraphicsExtensions.CheckGLError();
             }
         }
@@ -35,8 +36,7 @@ namespace MonoGame.Framework.Graphics
         {
             _target = target;
             _elementSize = elementSize;
-
-            _usageHint = _isDynamic ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw;
+            _usageHint = IsDynamic ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw;
 
             if (Threading.IsOnMainThread)
                 GenerateIfRequired();
@@ -46,18 +46,30 @@ namespace MonoGame.Framework.Graphics
 
         internal void GenerateIfRequired()
         {
-            if (_vbo == 0)
-            {
-                GL.GenBuffers(1, out _vbo);
-                GraphicsExtensions.CheckGLError();
+            if (_vbo != 0)
+                return;
 
-                GL.BindBuffer(_target, _vbo);
-                GraphicsExtensions.CheckGLError();
+            GL.GenBuffers(1, out _vbo);
+            GraphicsExtensions.CheckGLError();
 
-                int sizeInBytes = Capacity * _elementSize;
-                GL.BufferData(_target, (IntPtr)sizeInBytes, IntPtr.Zero, _usageHint);
-                GraphicsExtensions.CheckGLError();
-            }
+            GL.BindBuffer(_target, _vbo);
+            GraphicsExtensions.CheckGLError();
+
+            int sizeInBytes = Capacity * _elementSize;
+            GL.BufferData(_target, (IntPtr)sizeInBytes, IntPtr.Zero, _usageHint);
+            GraphicsExtensions.CheckGLError();
+        }
+
+        /// <summary>
+        /// Releases resources associated with this buffer.
+        /// </summary>
+        /// <param name="disposing"><see langword="true"/> if managed objects should be disposed.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+                GraphicsDevice.DisposeBuffer(_vbo);
+
+            base.Dispose(disposing);
         }
     }
 }

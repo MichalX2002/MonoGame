@@ -47,14 +47,18 @@ namespace MonoGame.Framework.Input
         public GamePadTriggers Triggers { get; }
 
         internal GamePadState(
-            in GamePadThumbSticks thumbSticks, in GamePadTriggers triggers,
-            in GamePadButtons buttons, in GamePadDPad dPad, int packetNumber) : this()
+            bool isConnected,
+            in GamePadThumbSticks thumbSticks,
+            in GamePadTriggers triggers,
+            in GamePadButtons buttons,
+            in GamePadDPad dPad,
+            int packetNumber) : this()
         {
+            IsConnected = isConnected;
             ThumbSticks = thumbSticks;
             Triggers = triggers;
             Buttons = buttons;
             DPad = dPad;
-            IsConnected = true;
             PacketNumber = packetNumber;
 
             PlatformConstruct();
@@ -63,14 +67,18 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Initializes a new instance of the <see cref="GamePadState"/>.
         /// </summary>
+        /// <param name="isConnected">Whether any game pad is connected.</param>
         /// <param name="thumbSticks">Initial thumbstick state.</param>
         /// <param name="triggers">Initial trigger state..</param>
         /// <param name="buttons">Initial button state.</param>
         /// <param name="dPad">Initial directional pad state.</param>
         public GamePadState(
-            in GamePadThumbSticks thumbSticks, in GamePadTriggers triggers,
-            in GamePadButtons buttons, in GamePadDPad dPad)
-            : this(thumbSticks, triggers, buttons, dPad, 0)
+            bool isConnected,
+            in GamePadThumbSticks thumbSticks,
+            in GamePadTriggers triggers,
+            in GamePadButtons buttons,
+            in GamePadDPad dPad)
+            : this(isConnected, thumbSticks, triggers, buttons, dPad, 0)
         {
         }
 
@@ -78,15 +86,21 @@ namespace MonoGame.Framework.Input
         /// Initializes a new instance of the <see cref="GamePadState"/>
         /// using the specified stick, trigger, and button values.
         /// </summary>
+        /// <param name="isConnected">Whether any game pad is connected.</param>
         /// <param name="leftThumbStick">Left stick value. Each axis is clamped between −1.0 and 1.0.</param>
         /// <param name="rightThumbStick">Right stick value. Each axis is clamped between −1.0 and 1.0.</param>
         /// <param name="leftTrigger">Left trigger value. This value is clamped between 0.0 and 1.0.</param>
         /// <param name="rightTrigger">Right trigger value. This value is clamped between 0.0 and 1.0.</param>
         /// <param name="button">Button(s) to initialize as pressed.</param>
         public GamePadState(
-            Vector2 leftThumbStick, Vector2 rightThumbStick, float leftTrigger, float rightTrigger, Buttons button)
-            : this(
-                new GamePadThumbSticks(leftThumbStick, rightThumbStick), 
+            bool isConnected,
+            Vector2 leftThumbStick,
+            Vector2 rightThumbStick,
+            float leftTrigger,
+            float rightTrigger,
+            Buttons button) : this(
+                isConnected,
+                new GamePadThumbSticks(leftThumbStick, rightThumbStick),
                 new GamePadTriggers(leftTrigger, rightTrigger),
                 new GamePadButtons(button),
                 new GamePadDPad(button))
@@ -97,18 +111,23 @@ namespace MonoGame.Framework.Input
         /// Initializes a new instance of the <see cref="GamePadState"/> struct
         /// using the specified stick, trigger, and button values.
         /// </summary>
+        /// <param name="isConnected">Whether any game pad is connected.</param>
         /// <param name="leftThumbStick">Left stick value. Each axis is clamped between −1.0 and 1.0.</param>
         /// <param name="rightThumbStick">Right stick value. Each axis is clamped between −1.0 and 1.0.</param>
         /// <param name="leftTrigger">Left trigger value. This value is clamped between 0.0 and 1.0.</param>
         /// <param name="rightTrigger">Right trigger value. This value is clamped between 0.0 and 1.0.</param>
         /// <param name="buttons"> Array of Buttons to initialize as pressed.</param>
         public GamePadState(
-            Vector2 leftThumbStick, Vector2 rightThumbStick,
-            float leftTrigger, float rightTrigger, Buttons[] buttons) 
-            : this(
-                new GamePadThumbSticks(leftThumbStick, rightThumbStick), 
+            bool isConnected,
+            Vector2 leftThumbStick,
+            Vector2 rightThumbStick,
+            float leftTrigger,
+            float rightTrigger,
+            Buttons[] buttons) : this(
+                isConnected,
+                new GamePadThumbSticks(leftThumbStick, rightThumbStick),
                 new GamePadTriggers(leftTrigger, rightTrigger),
-                new GamePadButtons(buttons), 
+                new GamePadButtons(buttons),
                 new GamePadDPad(buttons))
         {
         }
@@ -122,7 +141,7 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Gets the button mask along with 'virtual buttons' like LeftThumbstickLeft.
         /// </summary>
-        private Buttons GetVirtualButtons ()
+        private Buttons GetVirtualButtons()
         {
             var result = Buttons._buttons;
             result |= ThumbSticks._virtualButtons;
@@ -175,17 +194,7 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Returns the hash code of the <see cref="GamePadState"/>.
         /// </summary>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int code = 7 + PacketNumber.GetHashCode();
-                code = code * 31 + Buttons.GetHashCode();
-                code = code * 31 + DPad.GetHashCode();
-                code = code * 31 + ThumbSticks.GetHashCode();
-                return code * 31 + Triggers.GetHashCode();
-            }
-        }
+        public override int GetHashCode() => HashCode.Combine(PacketNumber, Buttons, DPad, ThumbSticks, Triggers);
 
         /// <summary>
         /// Returns a string that represents the current <see cref="GamePadState"/>.

@@ -11,7 +11,7 @@ using UIKit;
 using Foundation;
 #endif
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     partial class TitleContainer
     {

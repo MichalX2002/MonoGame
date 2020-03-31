@@ -3,46 +3,48 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
 {
     public partial class IndexBuffer : BufferBase
     {
-        internal int _indexElementSize;
+        internal int _elementSize;
 
-        public BufferUsage BufferUsage { get; }
-        public IndexElementSize IndexElementSize { get; }
+        public IndexElementSize ElementSize { get; }
 
         #region Constructors
 
         protected IndexBuffer(
-            GraphicsDevice graphicsDevice, IndexElementSize indexElementSize, int capacity, BufferUsage usage, bool dynamic) :
-            base(graphicsDevice, capacity)
+            GraphicsDevice graphicsDevice,
+            IndexElementSize elementSize,
+            int capacity,
+            BufferUsage bufferUsage,
+            bool isDynamic) :
+            base(graphicsDevice, capacity, bufferUsage, isDynamic)
         {
-            BufferUsage = usage;
-            IndexElementSize = indexElementSize;
-            _indexElementSize = IndexElementSize == IndexElementSize.SixteenBits ? 2 : 4;
+            if (elementSize == IndexElementSize.Int32)
+            {
+                if (graphicsDevice.GraphicsProfile == GraphicsProfile.Reach)
+                    throw new NotSupportedException(
+                        $"The current graphics profile does not support an element size of " +
+                        $"{IndexElementSize.Int32}; use {IndexElementSize.Short16} instead.");
+            }
+            else if (elementSize != IndexElementSize.Short16)
+            {
+                throw new ArgumentOutOfRangeException(nameof(elementSize));
+            }
+            ElementSize = elementSize;
+            _elementSize = ElementSize == IndexElementSize.Int32 ? 4 : 2;
 
-            _isDynamic = dynamic;
             PlatformConstruct();
         }
 
-        protected IndexBuffer(
-            GraphicsDevice graphicsDevice, Type indexType, int capacity, BufferUsage usage, bool dynamic)
-           : this(graphicsDevice, SizeForType(graphicsDevice, indexType), capacity, usage, dynamic)
-        {
-        }
-
-
         public IndexBuffer(
-            GraphicsDevice graphicsDevice, IndexElementSize indexElementSize, int capacity, BufferUsage bufferUsage) :
-            this(graphicsDevice, indexElementSize, capacity, bufferUsage, false)
-        {
-        }
-
-        public IndexBuffer(GraphicsDevice graphicsDevice, Type indexType, int capacity, BufferUsage usage) :
-            this(graphicsDevice, SizeForType(graphicsDevice, indexType), capacity, usage, false)
+            GraphicsDevice graphicsDevice, 
+            IndexElementSize elementSize, 
+            int capacity,
+            BufferUsage bufferUsage) :
+            this(graphicsDevice, elementSize, capacity, bufferUsage, false)
         {
         }
 
@@ -56,7 +58,7 @@ namespace MonoGame.Framework.Graphics
                 throw new NotSupportedException(
                     $"Calling {nameof(GetData)} on a resource that was created with {BufferUsage.WriteOnly} is not supported.");
 
-            int bufferSize = Capacity * _indexElementSize;
+            int bufferSize = Capacity * _elementSize;
             int requestedBytes = destination.Length * sizeof(T);
 
             if (requestedBytes > bufferSize)
@@ -80,13 +82,15 @@ namespace MonoGame.Framework.Graphics
         #region SetData
 
         public unsafe void SetData<T>(
-            int byteOffset, ReadOnlySpan<T> data, SetDataOptions options = SetDataOptions.None)
+            int byteOffset,
+            ReadOnlySpan<T> data,
+            SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
             if (data.IsEmpty)
                 throw new ArgumentEmptyException(nameof(data));
 
-            int bufferBytes = Capacity * _indexElementSize;
+            int bufferBytes = Capacity * _elementSize;
             int requestedBytes = data.Length * sizeof(T);
 
             if (requestedBytes > bufferBytes)
@@ -98,60 +102,34 @@ namespace MonoGame.Framework.Graphics
                     nameof(byteOffset), "The range reaches beyond the buffer.");
 
             PlatformSetData(byteOffset, data, options);
-            Count = data.Length * sizeof(T) / _indexElementSize;
+            Count = data.Length * sizeof(T) / _elementSize;
         }
 
         public void SetData<T>(
-            ReadOnlySpan<T> data, SetDataOptions options = SetDataOptions.None)
+            ReadOnlySpan<T> data,
+            SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
             SetData(0, data, options);
         }
 
-        #region Span<T> Overloads
-
         public void SetData<T>(
-            int byteOffset, Span<T> data, SetDataOptions options = SetDataOptions.None)
+            int byteOffset,
+            Span<T> data,
+            SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
             SetData(byteOffset, (ReadOnlySpan<T>)data, options);
         }
 
         public void SetData<T>(
-            Span<T> data, SetDataOptions options = SetDataOptions.None)
+            Span<T> data,
+            SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
             SetData(0, data, options);
         }
 
         #endregion
-
-        #endregion
-
-        /// <summary>
-        /// Gets the relevant <see cref="Graphics.IndexElementSize"/> value for the given type.
-        /// </summary>
-        /// <param name="graphicsDevice">The graphics device.</param>
-        /// <param name="type">The type to use for the index buffer</param>
-        /// <returns>The <see cref="Graphics.IndexElementSize"/> value that matches the type.</returns>
-        private static unsafe IndexElementSize SizeForType(GraphicsDevice graphicsDevice, Type type)
-        {
-            switch (Marshal.SizeOf(type))
-            {
-                case 2:
-                    return IndexElementSize.SixteenBits;
-
-                case 4:
-                    if (graphicsDevice.GraphicsProfile == GraphicsProfile.Reach)
-                        throw new NotSupportedException(
-                            $"The profile does not support an {nameof(IndexElementSize)} of {IndexElementSize.ThirtyTwoBits}; " +
-                            $"use {IndexElementSize.SixteenBits} (or a type that has a size of two bytes).");
-                    return IndexElementSize.ThirtyTwoBits;
-
-                default:
-                    throw new ArgumentOutOfRangeException(
-                        nameof(type), "Index buffers can only be created for types that are sixteen or thirty two bits in length.");
-            }
-        }
     }
 }

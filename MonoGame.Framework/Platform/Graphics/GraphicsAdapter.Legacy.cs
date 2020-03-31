@@ -92,7 +92,7 @@ namespace MonoGame.Framework.Graphics
                     (int)(_screen.Bounds.Height * _screen.Scale),
                     SurfaceFormat.Color);
 #elif ANDROID
-                View view = ((AndroidGameWindow)Game.Instance.Window).GameView;
+                View view = ((AndroidGameWindow)AndroidGameActivity.Instance.Game.Window).GameView;
                 return new DisplayMode(view.Width, view.Height, SurfaceFormat.Color);
 #elif DESKTOPGL
                 var displayIndex = SDL.Display.GetWindowDisplayIndex(SdlGameWindow.Instance.Handle);

@@ -48,8 +48,8 @@ namespace MonoGame.Framework.Graphics
         {
             Offset = offset;
             VertexElementFormat = elementFormat;
-            UsageIndex = usageIndex;
             VertexElementUsage = elementUsage;
+            UsageIndex = usageIndex;
         }
 
         /// <summary>

@@ -3,10 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Android.Widget;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     public sealed partial class VideoPlayer : IDisposable
     {
@@ -24,6 +23,7 @@ namespace Microsoft.Xna.Framework.Media
 
         private MediaState PlatformGetState()
         {
+            return MediaState.Stopped;
         }
 
         private void PlatformPause()
@@ -41,14 +41,14 @@ namespace Microsoft.Xna.Framework.Media
             _currentVideo.Player.SetDisplay(((AndroidGameWindow)_game.Window).GameView.Holder);
             _currentVideo.Player.Start();
             
-            AndroidGamePlatform.IsPlayingVdeo = true;
+            AndroidGamePlatform.IsPlayingVideo = true;
         }
 
         private void PlatformStop()
         {
             _currentVideo.Player.Stop();
 
-            AndroidGamePlatform.IsPlayingVdeo = false;
+            AndroidGamePlatform.IsPlayingVideo = false;
             _currentVideo.Player.SetDisplay(null);
         }
 

@@ -3,11 +3,11 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Graphics;
 
 using SharpDX.MediaFoundation;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     public sealed partial class VideoPlayer : IDisposable
     {
@@ -79,7 +79,7 @@ namespace Microsoft.Xna.Framework.Media
                                         SurfaceFormat.Bgra32, 
                                         Texture2D.SurfaceType.RenderTarget);
 
-			var region = new SharpDX.Mathematics.Interop.RawRectangle(0, 0, _currentVideo.Width, _currentVideo.Height);
+            var region = new SharpDX.Mathematics.Interop.RawRectangle(0, 0, _currentVideo.Width, _currentVideo.Height);
             _mediaEngine.TransferVideoFrame(_lastFrame._texture, null, region, null);
 
             return _lastFrame;

@@ -10,6 +10,7 @@ namespace MonoGame.Framework.Graphics
     public enum TextureFilterMode
     {
         Default,
+
         Comparison
     }
 }

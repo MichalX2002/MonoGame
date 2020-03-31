@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using MonoGame.Framework.IO;
@@ -351,6 +352,9 @@ namespace MonoGame.Framework.Audio
             if (dst.Length < src.Length)
                 throw new ArgumentException("The destination span is too small.");
 
+            // TODO: FIXME: HACK: for netstandard2.1
+            var mSrc = MemoryMarshal.CreateSpan(ref Unsafe.AsRef(src.GetPinnableReference()), src.Length);
+
             if (Vector.IsHardwareAccelerated)
             {
                 // this is roughly 2x perf on AVX2
@@ -359,9 +363,9 @@ namespace MonoGame.Framework.Audio
                 var minValueVec = new Vector<float>(short.MinValue);
                 var halfValueVec = new Vector<float>(0.5f);
 
-                while (src.Length >= Vector<float>.Count)
+                while (mSrc.Length >= Vector<float>.Count)
                 {
-                    var srcVec = new Vector<float>(src);
+                    var srcVec = new Vector<float>(mSrc);
                     var resultVec = Vector.Multiply(srcVec, maxValueVec);
                     resultVec = Vector.Max(resultVec, minValueVec);
                     resultVec = Vector.Min(resultVec, maxValueVec);
@@ -371,14 +375,14 @@ namespace MonoGame.Framework.Audio
                     for (int j = 0; j < Vector<float>.Count; j++)
                         dst[j] = (short)resultInt32[j];
 
-                    src = src.Slice(Vector<float>.Count);
+                    mSrc = mSrc.Slice(Vector<float>.Count);
                     dst = dst.Slice(Vector<float>.Count);
                 }
             }
 
-            for (int i = 0; i < src.Length; i++)
+            for (int i = 0; i < mSrc.Length; i++)
             {
-                int tmp = (int)(src[i] * short.MaxValue);
+                int tmp = (int)(mSrc[i] * short.MaxValue);
                 if (tmp > short.MaxValue)
                     dst[i] = short.MaxValue;
                 else if (tmp < short.MinValue)

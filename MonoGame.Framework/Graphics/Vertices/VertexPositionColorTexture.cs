@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
@@ -5,25 +6,20 @@ namespace MonoGame.Framework.Graphics
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct VertexPositionColorTexture : IVertexType
     {
-        public static readonly VertexDeclaration VertexDeclaration;
+        public static VertexDeclaration VertexDeclaration { get; } = new VertexDeclaration(new[]
+        {
+            new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0),
+            new VertexElement(12, VertexElementFormat.Color, VertexElementUsage.Color, 0),
+            new VertexElement(16, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 0)
+        });
 
         VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
 
         public Vector3 Position;
         public Color Color;
         public Vector2 TextureCoordinate;
-                
-        static VertexPositionColorTexture()
-        {
-            VertexDeclaration = new VertexDeclaration(new VertexElement[]
-            {
-                new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0),
-                new VertexElement(12, VertexElementFormat.Color, VertexElementUsage.Color, 0),
-                new VertexElement(16, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 0)
-            });
-        }
 
-        public VertexPositionColorTexture(Vector3 position, Color color, Vector2 textureCoordinate)
+        public VertexPositionColorTexture(in Vector3 position, in Color color, in Vector2 textureCoordinate)
         {
             Position = position;
             Color = color;
@@ -32,12 +28,7 @@ namespace MonoGame.Framework.Graphics
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                int code = 7 + Position.GetHashCode();
-                code = code * 31 + Color.GetHashCode();
-                return code * 31 + TextureCoordinate.GetHashCode();
-            }
+            return HashCode.Combine(Position, Color, TextureCoordinate);
         }
 
         public override string ToString()
@@ -45,23 +36,21 @@ namespace MonoGame.Framework.Graphics
             return "{Position:" + Position + " Color:" + Color + " TextureCoordinate:" + TextureCoordinate + "}";
         }
 
-        public static bool operator ==(VertexPositionColorTexture left, VertexPositionColorTexture right)
+        public static bool operator ==(in VertexPositionColorTexture left, in VertexPositionColorTexture right)
         {
-            return (left.Position == right.Position) 
-                && (left.Color == right.Color) 
+            return (left.Position == right.Position)
+                && (left.Color == right.Color)
                 && (left.TextureCoordinate == right.TextureCoordinate);
         }
 
-        public static bool operator !=(VertexPositionColorTexture left, VertexPositionColorTexture right)
+        public static bool operator !=(in VertexPositionColorTexture left, in VertexPositionColorTexture right)
         {
             return !(left == right);
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is VertexPositionColorTexture v)
-                    return v == this;
-            return false;
+            return obj is VertexPositionColorTexture other && other == this;
         }
     }
 }

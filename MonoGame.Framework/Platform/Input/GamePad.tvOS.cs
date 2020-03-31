@@ -7,7 +7,7 @@ using System.Linq;
 using UIKit;
 using System;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     static partial class GamePad
     {

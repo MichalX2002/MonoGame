@@ -86,9 +86,9 @@ namespace MonoGame.Framework.Media
             _stream = stream;
 
             _queuedBuffers = new Queue<ALBuffer>();
-            _efx = ALController.Instance.Efx;
             SourceId = ALController.Instance.ReserveSource();
 
+            _efx = ALController.Instance.Efx;
             if (_efx.IsAvailable)
             {
                 _alFilterId = _efx.GenFilter();
@@ -289,7 +289,8 @@ namespace MonoGame.Framework.Media
         {
             if (Reader == null)
             {
-                Reader = new VorbisReader(_stream, _leaveStreamOpen);
+                var containerReader = new NVorbis.Ogg.OggContainerReader(_stream, _leaveStreamOpen);
+                Reader = new VorbisReader(containerReader);
                 _stream = null;
             }
 

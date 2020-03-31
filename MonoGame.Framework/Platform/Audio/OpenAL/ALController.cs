@@ -41,7 +41,9 @@ namespace MonoGame.Framework.Audio
         private const int DEFAULT_FREQUENCY = 48000;
         private const int DEFAULT_UPDATE_SIZE = 512;
         private const int DEFAULT_UPDATE_BUFFER_COUNT = 2;
-#elif DESKTOPGL || DIRECTX
+#endif
+
+#if DESKTOPGL || DIRECTX || ANDROID
         private static OggStreamer _oggstreamer;
 #endif
 
@@ -125,7 +127,7 @@ namespace MonoGame.Framework.Audio
                 throw new AudioHardwareException("Failed to initialize OpenAL.", ex);
             }
 
-#if DESKTOPGL || DIRECTX
+#if DESKTOPGL || DIRECTX || ANDROID
             _oggstreamer = new OggStreamer();
 #endif
         }
@@ -193,11 +195,12 @@ namespace MonoGame.Framework.Audio
                 int updateBuffers = DEFAULT_UPDATE_BUFFER_COUNT;
                 if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.JellyBeanMr1)
                 {
-                    Android.Util.Log.Debug("OAL", Game.Activity.PackageManager.HasSystemFeature(PackageManager.FeatureAudioLowLatency) 
+                    Android.Util.Log.Debug(
+                        "OAL", AndroidGameActivity.Instance.PackageManager.HasSystemFeature(PackageManager.FeatureAudioLowLatency) 
                         ? "Supports low latency audio playback." 
                         : "Does not support low latency audio playback.");
 
-                    if (Game.Activity.GetSystemService(Context.AudioService) is AudioManager audioManager)
+                    if (AndroidGameActivity.Instance.GetSystemService(Context.AudioService) is AudioManager audioManager)
                     {
                         var result = audioManager.GetProperty(AudioManager.PropertyOutputSampleRate);
                         if (!string.IsNullOrEmpty(result))
@@ -288,13 +291,13 @@ namespace MonoGame.Framework.Audio
         void Activity_Paused(MonoGameAndroidGameView view)
         {
             // Pause all currently playing sounds by pausing the mixer
-            ALC.DevicePause(_device);
+            ALC.DevicePause(Device);
         }
 
         void Activity_Resumed(MonoGameAndroidGameView view)
         {
             // Resume all sounds that were playing when the activity was paused
-            ALC.DeviceResume(_device);
+            ALC.DeviceResume(Device);
         }
 #endif
 

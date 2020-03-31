@@ -157,16 +157,38 @@ namespace MonoGame.Framework.Input
 
         #endregion
 
+        /// <summary>
+        /// Constructs the <see cref="GamePadCapabilities"/> with optional parameters.
+        /// </summary>
         public GamePadCapabilities(
-            bool isConnected, string displayName, string identifier,
-            bool hasAButton, bool hasBButton, bool hasBackButton,
-            bool hasDPadDownButton, bool hasDPadLeftButton, bool hasDPadRightButton, bool hasDPadUpButton,
-            bool hasLeftShoulderButton, bool hasLeftStickButton,
-            bool hasRightShoulderButton, bool hasRightStickButton,
-            bool hasStartButton, bool hasXButton, bool hasYButton, bool hasBigButton,
-            bool hasLeftXThumbStick, bool hasLeftYThumbStick, bool hasRightXThumbStick, bool hasRightYThumbStick,
-            bool hasLeftTrigger, bool hasRightTrigger, bool hasLeftVibrationMotor, bool hasRightVibrationMotor,
-            bool hasVoiceSupport, GamePadType gamePadType)
+            bool isConnected = false, 
+            string displayName = null, 
+            string identifier = null,
+            bool hasAButton = false, 
+            bool hasBButton = false,
+            bool hasBackButton = false,
+            bool hasDPadDownButton = false,
+            bool hasDPadLeftButton = false, 
+            bool hasDPadRightButton = false,
+            bool hasDPadUpButton = false,
+            bool hasLeftShoulderButton = false,
+            bool hasLeftStickButton = false,
+            bool hasRightShoulderButton = false,
+            bool hasRightStickButton = false,
+            bool hasStartButton = false,
+            bool hasXButton = false, 
+            bool hasYButton = false,
+            bool hasBigButton = false,
+            bool hasLeftXThumbStick = false,
+            bool hasLeftYThumbStick = false, 
+            bool hasRightXThumbStick = false,
+            bool hasRightYThumbStick = false,
+            bool hasLeftTrigger = false,
+            bool hasRightTrigger = false,
+            bool hasLeftVibrationMotor = false,
+            bool hasRightVibrationMotor = false,
+            bool hasVoiceSupport = false,
+            GamePadType gamePadType = GamePadType.Unknown)
         {
             IsConnected = isConnected;
             DisplayName = displayName;
@@ -202,42 +224,50 @@ namespace MonoGame.Framework.Input
 
         public static bool operator ==(in GamePadCapabilities left, in GamePadCapabilities right)
         {
-            bool eq = true;
-            eq &= left.DisplayName == right.DisplayName;
-            eq &= left.Identifier == right.Identifier;
-            eq &= left.IsConnected == right.IsConnected;
-            eq &= left.HasAButton == right.HasAButton;
-            eq &= left.HasBackButton == right.HasBackButton;
-            eq &= left.HasBButton == right.HasBButton;
-            eq &= left.HasDPadDownButton == right.HasDPadDownButton;
-            eq &= left.HasDPadLeftButton == right.HasDPadLeftButton;
-            eq &= left.HasDPadRightButton == right.HasDPadRightButton;
-            eq &= left.HasDPadUpButton == right.HasDPadUpButton;
-            eq &= left.HasLeftShoulderButton == right.HasLeftShoulderButton;
-            eq &= left.HasLeftStickButton == right.HasLeftStickButton;
-            eq &= left.HasRightShoulderButton == right.HasRightShoulderButton;
-            eq &= left.HasRightStickButton == right.HasRightStickButton;
-            eq &= left.HasStartButton == right.HasStartButton;
-            eq &= left.HasXButton == right.HasXButton;
-            eq &= left.HasYButton == right.HasYButton;
-            eq &= left.HasBigButton == right.HasBigButton;
-            eq &= left.HasLeftXThumbStick == right.HasLeftXThumbStick;
-            eq &= left.HasLeftYThumbStick == right.HasLeftYThumbStick;
-            eq &= left.HasRightXThumbStick == right.HasRightXThumbStick;
-            eq &= left.HasRightYThumbStick == right.HasRightYThumbStick;
-            eq &= left.HasLeftTrigger == right.HasLeftTrigger;
-            eq &= left.HasRightTrigger == right.HasRightTrigger;
-            eq &= left.HasLeftVibrationMotor == right.HasLeftVibrationMotor;
-            eq &= left.HasRightVibrationMotor == right.HasRightVibrationMotor;
-            eq &= left.HasVoiceSupport == right.HasVoiceSupport;
-            eq &= left.GamePadType == right.GamePadType;
-            return eq;
+            return left.DisplayName == right.DisplayName
+                && left.Identifier == right.Identifier
+                && left.IsConnected == right.IsConnected
+                && left.HasAButton == right.HasAButton
+                && left.HasBackButton == right.HasBackButton
+                && left.HasBButton == right.HasBButton
+                && left.HasDPadDownButton == right.HasDPadDownButton
+                && left.HasDPadLeftButton == right.HasDPadLeftButton
+                && left.HasDPadRightButton == right.HasDPadRightButton
+                && left.HasDPadUpButton == right.HasDPadUpButton
+                && left.HasLeftShoulderButton == right.HasLeftShoulderButton
+                && left.HasLeftStickButton == right.HasLeftStickButton
+                && left.HasRightShoulderButton == right.HasRightShoulderButton
+                && left.HasRightStickButton == right.HasRightStickButton
+                && left.HasStartButton == right.HasStartButton
+                && left.HasXButton == right.HasXButton
+                && left.HasYButton == right.HasYButton
+                && left.HasBigButton == right.HasBigButton
+                && left.HasLeftXThumbStick == right.HasLeftXThumbStick
+                && left.HasLeftYThumbStick == right.HasLeftYThumbStick
+                && left.HasRightXThumbStick == right.HasRightXThumbStick
+                && left.HasRightYThumbStick == right.HasRightYThumbStick
+                && left.HasLeftTrigger == right.HasLeftTrigger
+                && left.HasRightTrigger == right.HasRightTrigger
+                && left.HasLeftVibrationMotor == right.HasLeftVibrationMotor
+                && left.HasRightVibrationMotor == right.HasRightVibrationMotor
+                && left.HasVoiceSupport == right.HasVoiceSupport
+                && left.GamePadType == right.GamePadType;
         }
 
-        public static bool operator !=(in GamePadCapabilities a, in GamePadCapabilities b) => !(a == b);
+        public static bool operator !=(in GamePadCapabilities a, in GamePadCapabilities b)
+        {
+            return !(a == b);
+        }
 
-        public bool Equals(GamePadCapabilities other) => this == other;
-        public override bool Equals(object obj) => obj is GamePadCapabilities other && Equals(other);
+        public bool Equals(GamePadCapabilities other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is GamePadCapabilities other && this == other;
+        }
 
         #endregion
 

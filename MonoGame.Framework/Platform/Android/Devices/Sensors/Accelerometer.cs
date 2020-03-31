@@ -5,7 +5,7 @@
 using System;
 using Android.Content;
 using Android.Hardware;
-using Microsoft.Xna.Framework;
+using MonoGame.Framework;
 
 namespace Microsoft.Devices.Sensors
 {
@@ -14,42 +14,44 @@ namespace Microsoft.Devices.Sensors
     /// </summary>
     public sealed class Accelerometer : SensorBase<AccelerometerReading>
     {
-        static readonly int MaxSensorCount = 10;
-        static SensorManager sensorManager;
-        static Sensor sensor;
-        SensorListener listener;
-        SensorState state;
-        bool started = false;
-        static int instanceCount;
+        private const int MaxSensorCount = 10;
+
+        private static SensorManager _sensorManager;
+        private static Sensor _sensor;
+        private SensorListener _listener;
+        private SensorState _state;
+        private bool _started = false;
+        private static int _instanceCount;
 
         /// <summary>
-        /// Gets or sets whether the device on which the application is running supports the accelerometer sensor.
+        /// Gets whether the device on which the application is running supports the accelerometer sensor.
         /// </summary>
         public static bool IsSupported
         {
             get
             {
-                if (sensorManager == null)
+                if (_sensorManager == null)
                     Initialize();
-                return sensor != null;
+                return _sensor != null;
             }
         }
 
         /// <summary>
-        /// Gets the current state of the accelerometer. The value is a member of the SensorState enumeration.
+        /// Gets the current state of the accelerometer. 
         /// </summary>
         public SensorState State
         {
             get
             {
                 if (IsDisposed)
-                    throw new ObjectDisposedException(GetType().Name);
-                if (sensorManager == null)
+                    throw new ObjectDisposedException(GetType().FullName);
+
+                if (_sensorManager == null)
                 {
                     Initialize();
-                    state = sensor != null ? SensorState.Initializing : SensorState.NotSupported;
+                    _state = _sensor != null ? SensorState.Initializing : SensorState.NotSupported;
                 }
-                return state;
+                return _state;
             }
         }
 
@@ -58,14 +60,14 @@ namespace Microsoft.Devices.Sensors
         /// </summary>
         public Accelerometer()
         {
-            if (instanceCount >= MaxSensorCount)
+            if (_instanceCount >= MaxSensorCount)
                 throw new SensorFailedException(
-			        "The limit of 10 simultaneous instances of the Accelerometer class per application has been exceeded.");
-					
-            ++instanceCount;
+                    "The limit of 10 simultaneous instances of the Accelerometer class per application has been exceeded.");
 
-            state = sensor != null ? SensorState.Initializing : SensorState.NotSupported;
-            listener = new SensorListener();
+            _instanceCount++;
+
+            _state = _sensor != null ? SensorState.Initializing : SensorState.NotSupported;
+            _listener = new SensorListener();
         }
 
         /// <summary>
@@ -73,18 +75,18 @@ namespace Microsoft.Devices.Sensors
         /// </summary>
         static void Initialize()
         {
-            sensorManager = (SensorManager)Game.Activity.GetSystemService(Context.SensorService);
-            sensor = sensorManager.GetDefaultSensor(SensorType.Accelerometer);
+            _sensorManager = (SensorManager)AndroidGameActivity.Instance.GetSystemService(Context.SensorService);
+            _sensor = _sensorManager.GetDefaultSensor(SensorType.Accelerometer);
         }
 
         void ActivityPaused(AndroidGameActivity activity)
         {
-            sensorManager.UnregisterListener(listener, sensor);
+            _sensorManager.UnregisterListener(_listener, _sensor);
         }
 
         void ActivityResumed(AndroidGameActivity activity)
         {
-            sensorManager.RegisterListener(listener, sensor, SensorDelay.Game);
+            _sensorManager.RegisterListener(_listener, _sensor, SensorDelay.Game);
         }
 
         /// <summary>
@@ -93,30 +95,35 @@ namespace Microsoft.Devices.Sensors
         public override void Start()
         {
             if (IsDisposed)
-                throw new ObjectDisposedException(GetType().Name);
-            if (sensorManager == null)
+                throw new ObjectDisposedException(GetType().FullName);
+
+            if (_sensorManager == null)
                 Initialize();
-            if (started == false)
+
+            if (_started == false)
             {
-                if (sensorManager != null && sensor != null)
+                if (_sensorManager != null && _sensor != null)
                 {
-                    listener.accelerometer = this;
-                    sensorManager.RegisterListener(listener, sensor, SensorDelay.Game);
+                    _listener.accelerometer = this;
+                    _sensorManager.RegisterListener(_listener, _sensor, SensorDelay.Game);
+
                     // So the system can pause and resume the sensor when the activity is paused
-                    AndroidGameActivity.Paused += ActivityPaused;
-                    AndroidGameActivity.Resumed += ActivityResumed;
+                    AndroidGameActivity.Instance.Paused += ActivityPaused;
+                    AndroidGameActivity.Instance.Resumed += ActivityResumed;
                 }
                 else
                 {
-                    throw new AccelerometerFailedException("Failed to start accelerometer data acquisition. No default sensor found.", -1);
+                    throw new AccelerometerFailedException(
+                        "Failed to start accelerometer data acquisition. No default sensor found.", -1);
                 }
-                started = true;
-                state = SensorState.Ready;
+                _started = true;
+                _state = SensorState.Ready;
                 return;
             }
             else
             {
-                throw new AccelerometerFailedException("Failed to start accelerometer data acquisition. Data acquisition already started.", -1);
+                throw new AccelerometerFailedException(
+                    "Failed to start accelerometer data acquisition. Data acquisition already started.", -1);
             }
         }
 
@@ -126,19 +133,20 @@ namespace Microsoft.Devices.Sensors
         public override void Stop()
         {
             if (IsDisposed)
-                throw new ObjectDisposedException(GetType().Name);
-            if (started)
+                throw new ObjectDisposedException(GetType().FullName);
+
+            if (_started)
             {
-                if (sensorManager != null && sensor != null)
+                if (_sensorManager != null && _sensor != null)
                 {
-                    AndroidGameActivity.Paused -= ActivityPaused;
-                    AndroidGameActivity.Resumed -= ActivityResumed;
-                    sensorManager.UnregisterListener(listener, sensor);
-                    listener.accelerometer = null;
+                    AndroidGameActivity.Instance.Paused -= ActivityPaused;
+                    AndroidGameActivity.Instance.Resumed -= ActivityResumed;
+                    _sensorManager.UnregisterListener(_listener, _sensor);
+                    _listener.accelerometer = null;
                 }
             }
-            started = false;
-            state = SensorState.Disabled;
+            _started = false;
+            _state = SensorState.Disabled;
         }
 
         protected override void Dispose(bool disposing)
@@ -147,14 +155,14 @@ namespace Microsoft.Devices.Sensors
             {
                 if (disposing)
                 {
-                    if (started)
+                    if (_started)
                         Stop();
 
-                    instanceCount--;
-                    if (instanceCount == 0)
+                    _instanceCount--;
+                    if (_instanceCount == 0)
                     {
-                        sensor = null;
-                        sensorManager = null;
+                        _sensor = null;
+                        _sensorManager = null;
                     }
                 }
             }
@@ -179,20 +187,20 @@ namespace Microsoft.Devices.Sensors
                         var values = e.Values;
                         try
                         {
-                            AccelerometerReading reading = new AccelerometerReading();
+                            var reading = default(AccelerometerReading);
                             accelerometer.IsDataValid = (values != null && values.Count == 3);
                             if (accelerometer.IsDataValid)
                             {
-                                const float gravity = Android.Hardware.SensorManager.GravityEarth;
-                                reading.Acceleration = new Vector3(values[0], values[1], values[2]) / gravity;
-                                reading.Timestamp = DateTime.UtcNow;
+                                const float gravity = SensorManager.GravityEarth;
+                                reading = new AccelerometerReading(
+                                    acceleration: new Vector3(values[0], values[1], values[2]) / gravity,
+                                    timestamp: DateTime.UtcNow);
                             }
                             accelerometer.CurrentValue = reading;
                         }
                         finally
                         {
-                            if (values is IDisposable d)
-                                d.Dispose();
+                            (values as IDisposable)?.Dispose();
                         }
                     }
                 }

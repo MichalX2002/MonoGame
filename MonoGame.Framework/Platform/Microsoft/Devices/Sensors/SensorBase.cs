@@ -2,34 +2,33 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using Microsoft.Xna.Framework;
 using System;
+using MonoGame.Framework;
 
 namespace Microsoft.Devices.Sensors
 {
-	public abstract class SensorBase<TReading> : IDisposable
-		where TReading : ISensorReading
-	{
+    public abstract class SensorBase<TReading> : IDisposable
+        where TReading : ISensorReading
+    {
 #if IOS
         [CLSCompliant(false)]
         protected static readonly CoreMotion.CMMotionManager motionManager = new CoreMotion.CMMotionManager();
 #endif
-        bool disposed;
-		private TimeSpan _timeBetweenUpdates;
-	    private TReading currentValue;
+        private TimeSpan _timeBetweenUpdates;
+        private TReading _currentValue;
 
-		public TReading CurrentValue
+        public TReading CurrentValue
         {
-            get => currentValue;
+            get => _currentValue;
             protected set
             {
-                currentValue = value;
-                CurrentValueChanged?.Invoke(this, currentValue);
+                _currentValue = value;
+                CurrentValueChanged?.Invoke(this, _currentValue);
             }
         }
 
         public bool IsDataValid { get; protected set; }
-		public TimeSpan TimeBetweenUpdates
+        public TimeSpan TimeBetweenUpdates
         {
             get => _timeBetweenUpdates;
             set
@@ -42,13 +41,14 @@ namespace Microsoft.Devices.Sensors
             }
         }
 
-        public event EventDelegate<SensorBase<TReading>, TReading> CurrentValueChanged;
-		protected event SenderDelegate<SensorBase<TReading>> TimeBetweenUpdatesChanged;
-        protected bool IsDisposed { get { return disposed; } }
+        public event DataEvent<SensorBase<TReading>, TReading> CurrentValueChanged;
+        protected event DatalessEvent<SensorBase<TReading>> TimeBetweenUpdatesChanged;
 
-		public SensorBase()
-		{
-			this.TimeBetweenUpdates = TimeSpan.FromMilliseconds(2);
+        protected bool IsDisposed { get; private set; }
+
+        public SensorBase()
+        {
+            TimeBetweenUpdates = TimeSpan.FromMilliseconds(2);
         }
 
         public abstract void Start();
@@ -61,7 +61,7 @@ namespace Microsoft.Devices.Sensors
         /// <param name="disposing">True if unmanaged resources are to be disposed.</param>
         protected virtual void Dispose(bool disposing)
         {
-            disposed = true;
+            IsDisposed = true;
         }
 
         public void Dispose()

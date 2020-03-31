@@ -4,10 +4,10 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
-	public partial class TextureCube
-	{
+    public partial class TextureCube
+    {
         private void PlatformConstruct(GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format, bool renderTarget)
         {
             throw new NotImplementedException();
@@ -22,6 +22,6 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             throw new NotImplementedException();
         }
-	}
+    }
 }
 

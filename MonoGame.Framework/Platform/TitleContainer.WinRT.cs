@@ -7,7 +7,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources.Core;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     partial class TitleContainer
     {

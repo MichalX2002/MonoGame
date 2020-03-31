@@ -107,21 +107,21 @@ namespace MonoGame.OpenAL
 #if IOS
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_alcsuspendcontext(IntPtr context);
-        public static d_alcsuspendcontext SuspendContext = FuncLoader.LoadFunction<d_alcsuspendcontext>(AL.NativeLibrary, "alcSuspendContext");
+        public static d_alcsuspendcontext SuspendContext = FL.LoadFunction<d_alcsuspendcontext>(AL.NativeLibrary, "alcSuspendContext");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_alcprocesscontext(IntPtr context);
-        public static d_alcprocesscontext ProcessContext = FuncLoader.LoadFunction<d_alcprocesscontext>(AL.NativeLibrary, "alcProcessContext");
+        public static d_alcprocesscontext ProcessContext = FL.LoadFunction<d_alcprocesscontext>(AL.NativeLibrary, "alcProcessContext");
 #endif
 
 #if ANDROID
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_alcdevicepausesoft(IntPtr device);
-        public static d_alcdevicepausesoft DevicePause = FuncLoader.LoadFunction<d_alcdevicepausesoft>(AL.NativeLibrary, "alcDevicePauseSOFT");
+        public static d_alcdevicepausesoft DevicePause = FL.LoadFunction<d_alcdevicepausesoft>(AL.NativeLibrary, "alcDevicePauseSOFT");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_alcdeviceresumesoft(IntPtr device);
-        public static d_alcdeviceresumesoft DeviceResume = FuncLoader.LoadFunction<d_alcdeviceresumesoft>(AL.NativeLibrary, "alcDeviceResumeSOFT");
+        public static d_alcdeviceresumesoft DeviceResume = FL.LoadFunction<d_alcdeviceresumesoft>(AL.NativeLibrary, "alcDeviceResumeSOFT");
 #endif
     }
 }

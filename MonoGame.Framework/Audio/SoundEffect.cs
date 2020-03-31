@@ -77,8 +77,11 @@ namespace MonoGame.Framework.Audio
 
         // Only used from SoundEffectReader.
         internal SoundEffect(
-            ReadOnlySpan<byte> header, ReadOnlySpan<byte> data,
-            TimeSpan duration, int loopStart, int loopLength)
+            ReadOnlySpan<byte> header,
+            ReadOnlySpan<byte> data,
+            TimeSpan duration,
+            int loopStart,
+            int loopLength)
         {
             Initialize();
             AssertInitialized();

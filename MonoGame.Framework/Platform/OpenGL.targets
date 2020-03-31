@@ -22,7 +22,6 @@
     <Compile Include="Platform\Graphics\OpenGL.cs" />
     <Compile Include="Platform\Graphics\OpenGL.Common.cs" />
     <Compile Include="Platform\Graphics\OpenGL.Enums.cs" />
-    <Compile Include="Platform\Graphics\OpenGL.SDL.cs" />
     <Compile Include="Platform\Graphics\SamplerStateCollection.OpenGL.cs" />
     <Compile Include="Platform\Graphics\Shader\ConstantBuffer.OpenGL.cs" />
     <Compile Include="Platform\Graphics\Shader\Shader.OpenGL.cs" />

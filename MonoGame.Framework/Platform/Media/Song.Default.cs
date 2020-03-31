@@ -4,9 +4,9 @@
 
 using System;
 using System.IO;
-using Microsoft.Xna.Framework.Audio;
+using MonoGame.Framework.Audio;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     public sealed partial class Song : IEquatable<Song>, IDisposable
     {
@@ -34,31 +34,31 @@ namespace Microsoft.Xna.Framework.Media
             _sound = null;
         }
 
-		internal void OnFinishedPlaying (object sender, EventArgs args)
-		{
-			if (DonePlaying == null)
-				return;
-			
-			DonePlaying(sender, args);
-		}
+        internal void OnFinishedPlaying (object sender, EventArgs args)
+        {
+            if (DonePlaying == null)
+                return;
+            
+            DonePlaying(sender, args);
+        }
 
-		/// <summary>
-		/// Set the event handler for "Finished Playing". Done this way to prevent multiple bindings.
-		/// </summary>
-		internal void SetEventHandler(FinishedPlayingHandler handler)
-		{
-			if (DonePlaying != null)
-				return;
-			
-			DonePlaying += handler;
-		}
+        /// <summary>
+        /// Set the event handler for "Finished Playing". Done this way to prevent multiple bindings.
+        /// </summary>
+        internal void SetEventHandler(FinishedPlayingHandler handler)
+        {
+            if (DonePlaying != null)
+                return;
+            
+            DonePlaying += handler;
+        }
 
-		internal void Play(TimeSpan? startPosition)
-		{	
-			if (startPosition.HasValue)
-				throw new Exception("startPosition not implemented on this Platform"); //Should be possible to implement in OpenAL
-			if ( _sound == null )
-				return;
+        internal void Play(TimeSpan? startPosition)
+        {	
+            if (startPosition.HasValue)
+                throw new Exception("startPosition not implemented on this Platform"); //Should be possible to implement in OpenAL
+            if ( _sound == null )
+                return;
 
             PlatformPlay();
 
@@ -70,54 +70,54 @@ namespace Microsoft.Xna.Framework.Media
             _sound.Play();
         }
 
-		internal void Resume()
-		{
-			if (_sound == null)
-				return;
+        internal void Resume()
+        {
+            if (_sound == null)
+                return;
 
             PlatformResume();
-		}
+        }
 
         private void PlatformResume()
         {
             _sound.Resume();
         }
-		
-		internal void Pause()
-		{			            
-			if ( _sound == null )
-				return;
-			
-			_sound.Pause();
+        
+        internal void Pause()
+        {			            
+            if ( _sound == null )
+                return;
+            
+            _sound.Pause();
         }
-		
-		internal void Stop()
-		{
-			if ( _sound == null )
-				return;
-			
-			_sound.Stop();
-			_playCount = 0;
-		}
+        
+        internal void Stop()
+        {
+            if ( _sound == null )
+                return;
+            
+            _sound.Stop();
+            _playCount = 0;
+        }
 
-		internal float Volume
-		{
-			get
-			{
-				if (_sound != null)
-					return _sound.Volume;
-				else
-					return 0.0f;
-			}
-			
-			set
-			{
-				if ( _sound != null && _sound.Volume != value )
-					_sound.Volume = value;
-			}			
-		}
+        internal float Volume
+        {
+            get
+            {
+                if (_sound != null)
+                    return _sound.Volume;
+                else
+                    return 0.0f;
+            }
+            
+            set
+            {
+                if ( _sound != null && _sound.Volume != value )
+                    _sound.Volume = value;
+            }			
+        }
 
-		internal TimeSpan Position
+        internal TimeSpan Position
         {
             get
             {

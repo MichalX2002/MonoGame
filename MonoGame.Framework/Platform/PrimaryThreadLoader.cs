@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// Interface used to add an object to be loaded on the primary thread
@@ -57,11 +57,13 @@ namespace Microsoft.Xna.Framework
         }
 
         /// <summary>
-        /// Loops through list and loads the item.  If successful, it is removed from the list.
+        /// Loops through list and loads the item.  
+        /// If successful, it is removed from the list.
         /// </summary>
         public static void DoLoads()
         {
-            if((DateTime.UtcNow - _lastUpdate).Milliseconds < 250) return;
+            if((DateTime.UtcNow - _lastUpdate).Milliseconds < 250) 
+                return;
 
             _lastUpdate = DateTime.UtcNow;
             lock (ListLockObject)
@@ -70,9 +72,7 @@ namespace Microsoft.Xna.Framework
                 {
                     var primaryThreadLoaded = NeedToLoad[i];
                     if (primaryThreadLoaded.Load())
-                    {
                         RemoveList.Add(primaryThreadLoaded);
-                    }
                 }
 
                 for (int i = 0; i < RemoveList.Count; i++)

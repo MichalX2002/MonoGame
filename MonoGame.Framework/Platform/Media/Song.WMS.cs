@@ -7,7 +7,7 @@ using System.IO;
 using SharpDX;
 using SharpDX.MediaFoundation;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     public sealed partial class Song : IEquatable<Song>, IDisposable
     {

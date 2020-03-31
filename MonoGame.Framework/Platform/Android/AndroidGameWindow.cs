@@ -7,10 +7,9 @@ using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Views;
-using Microsoft.Xna.Framework.Input.Touch;
-using MonoGame.OpenGL;
+using MonoGame.Framework.Input.Touch;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     [CLSCompliant(false)]
     public class AndroidGameWindow : GameWindow, IDisposable
@@ -58,9 +57,9 @@ namespace Microsoft.Xna.Framework
         private void Initialize(Context context, Point size)
         {
             _clientBounds = new Rectangle(0, 0, size.X, size.Y);
-            
+
             GameView = new MonoGameAndroidGameView(context, this, _game);
-            GameView.RenderOnUIThread = Game.Activity.RenderOnUIThread;
+            GameView.RenderOnUIThread = AndroidGameActivity.Instance.RenderOnUIThread;
             GameView.RenderFrame += OnRenderFrame;
             GameView.UpdateFrame += OnUpdateFrame;
 
@@ -85,8 +84,9 @@ namespace Microsoft.Xna.Framework
 
             if (_game != null)
             {
-                if (!GameView.IsResuming && _game.Platform.IsActive && !ScreenReceiver.ScreenLocked) //Only call draw if an update has occured
+                if (!GameView.IsResuming && _game.Platform.IsActive && !ScreenReceiver.ScreenLocked)
                 {
+                    //Only call draw if an update has occured
                     _game.Tick();
                 }
                 else if (_game.GraphicsDevice != null)
@@ -118,18 +118,13 @@ namespace Microsoft.Xna.Framework
         {
             if (_supportedOrientations == DisplayOrientation.Default)
             {
-                var deviceManager = (_game.Services.GetService(typeof(IGraphicsDeviceManager)) as GraphicsDeviceManager);
-                if (deviceManager == null)
+                if (!(_game.Services.GetService<IGraphicsDeviceManager>() is GraphicsDeviceManager deviceManager))
                     return DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight;
 
                 if (deviceManager.PreferredBackBufferWidth > deviceManager.PreferredBackBufferHeight)
-                {
                     return DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight;
-                }
                 else
-                {
                     return DisplayOrientation.Portrait | DisplayOrientation.PortraitDown;
-                }
             }
             else
             {
@@ -164,8 +159,10 @@ namespace Microsoft.Xna.Framework
 
             if (applyGraphicsChanges &&
                 oldOrientation != CurrentOrientation &&
-                _game.InternalGraphicsDeviceManager != null)
-                _game.InternalGraphicsDeviceManager.ApplyChanges();
+                _game.GraphicsDeviceManager != null)
+            {
+                _game.GraphicsDeviceManager.ApplyChanges();
+            }
         }
 
         public override bool HasClipboardText => false;
@@ -178,25 +175,13 @@ namespace Microsoft.Xna.Framework
             }
             set
             {
-            }
-        }
-
-        public override string ScreenDeviceName
-        {
-            get
-            {
                 throw new NotImplementedException();
             }
         }
 
+        public override string ScreenDeviceName => throw new NotImplementedException();
 
-        public override Rectangle ClientBounds
-        {
-            get
-            {
-                return _clientBounds;
-            }
-        }
+        public override Rectangle ClientBounds => _clientBounds;
 
         internal void ChangeClientBounds(Rectangle bounds)
         {
@@ -209,10 +194,7 @@ namespace Microsoft.Xna.Framework
 
         public override bool AllowUserResizing
         {
-            get
-            {
-                return false;
-            }
+            get => false;
             set
             {
                 // Do nothing; Ignore rather than raising an exception
@@ -222,7 +204,7 @@ namespace Microsoft.Xna.Framework
         // A copy of ScreenOrientation from Android 2.3
         // This allows us to continue to support 2.2 whilst
         // utilising the 2.3 improved orientation support.
-        enum ScreenOrientationAll
+        private enum ScreenOrientationAll
         {
             Unspecified = -1,
             Landscape = 0,
@@ -238,22 +220,18 @@ namespace Microsoft.Xna.Framework
             FullSensor = 10,
         }
 
-        public override DisplayOrientation CurrentOrientation
-        {
-            get
-            {
-                return _currentOrientation;
-            }
-        }
-
+        public override DisplayOrientation CurrentOrientation => _currentOrientation;
 
         private void SetDisplayOrientation(DisplayOrientation value)
         {
             if (value != _currentOrientation)
             {
                 DisplayOrientation supported = GetEffectiveSupportedOrientations();
-                ScreenOrientation requestedOrientation = ScreenOrientation.Unspecified;
-                bool wasPortrait = _currentOrientation == DisplayOrientation.Portrait || _currentOrientation == DisplayOrientation.PortraitDown;
+                var requestedOrientation = ScreenOrientation.Unspecified;
+
+                bool wasPortrait =
+                    _currentOrientation == DisplayOrientation.Portrait ||
+                    _currentOrientation == DisplayOrientation.PortraitDown;
                 bool requestPortrait = false;
 
                 bool didOrientationChange = false;

@@ -112,7 +112,7 @@ namespace MonoGame.Framework.Graphics
                 var vertexDeclaration = vertexBufferBinding.VertexBuffer.VertexDeclaration;
                 var attrInfo = vertexDeclaration.GetAttributeInfo(shader, programHash);
 
-                var vertexStride = vertexDeclaration.VertexStride;
+                int vertexStride = vertexDeclaration.VertexStride;
                 var offset = (IntPtr)(vertexDeclaration.VertexStride * (baseVertex + vertexBufferBinding.VertexOffset));
 
                 if (!_attribsDirty)
@@ -135,12 +135,10 @@ namespace MonoGame.Framework.Graphics
                 if (vertexBufferBinding.InstanceFrequency > 0)
                     AssertSupportsInstancing();
 
-                var elements = attrInfo.Elements;
-                for (int i = 0; i < elements.Count; i++)
+                foreach (var element in attrInfo.Elements.Span)
                 {
-                    var element = elements[i];
-
-                    GL.VertexAttribPointer(element.AttributeLocation,
+                    GL.VertexAttribPointer(
+                        element.AttributeLocation,
                         element.NumberOfElements,
                         element.VertexAttribPointerType,
                         element.Normalized,
@@ -167,11 +165,10 @@ namespace MonoGame.Framework.Graphics
                 for (int i = 0; i < _newEnabledVertexAttributes.Length; i++)
                     _newEnabledVertexAttributes[i] = false;
 
-                for (var slot = 0; slot < vertexBufferCount; slot++)
+                for (int slot = 0; slot < vertexBufferCount; slot++)
                 {
-                    var elements = _bufferBindingInfos[slot].AttributeInfo.Elements;
-                    for (int i = 0, c = elements.Count; i < c; i++)
-                        _newEnabledVertexAttributes[elements[i].AttributeLocation] = true;
+                    foreach (var element in _bufferBindingInfos[slot].AttributeInfo.Elements.Span)
+                        _newEnabledVertexAttributes[element.AttributeLocation] = true;
                 }
             }
             SetVertexAttributeArray(_newEnabledVertexAttributes);
@@ -529,7 +526,7 @@ namespace MonoGame.Framework.Graphics
             _rasterizerStateDirty = true;
 
             // Textures will need to be rebound to render correctly in the new render target.
-            Textures.Dirty();
+            Textures.MarkDirty();
         }
 
         /// <summary>
@@ -553,9 +550,9 @@ namespace MonoGame.Framework.Graphics
         {
             void Create()
             {
-                var color = 0;
-                var depth = 0;
-                var stencil = 0;
+                int color = 0;
+                int depth = 0;
+                int stencil = 0;
 
                 if (preferredMultiSampleCount > 0 && _framebufferHelper.SupportsBlitFramebuffer)
                 {
@@ -575,29 +572,29 @@ namespace MonoGame.Framework.Graphics
                             depthInternalFormat = RenderbufferStorage.DepthComponent16;
                             break;
 #if GLES
-                    case DepthFormat.Depth24:
-                        if (GraphicsCapabilities.SupportsDepth24)
-                            depthInternalFormat = RenderbufferStorage.DepthComponent24Oes;
-                        else if (GraphicsCapabilities.SupportsDepthNonLinear)
-                            depthInternalFormat = (RenderbufferStorage)0x8E2C;
-                        else
-                            depthInternalFormat = RenderbufferStorage.DepthComponent16;
-                        break;
-                    case DepthFormat.Depth24Stencil8:
-                        if (GraphicsCapabilities.SupportsPackedDepthStencil)
-                            depthInternalFormat = RenderbufferStorage.Depth24Stencil8Oes;
-                        else
-                        {
+                        case DepthFormat.Depth24:
                             if (GraphicsCapabilities.SupportsDepth24)
                                 depthInternalFormat = RenderbufferStorage.DepthComponent24Oes;
                             else if (GraphicsCapabilities.SupportsDepthNonLinear)
                                 depthInternalFormat = (RenderbufferStorage)0x8E2C;
                             else
                                 depthInternalFormat = RenderbufferStorage.DepthComponent16;
-                            stencilInternalFormat = RenderbufferStorage.StencilIndex8;
                             break;
-                        }
-                        break;
+                        case DepthFormat.Depth24Stencil8:
+                            if (GraphicsCapabilities.SupportsPackedDepthStencil)
+                                depthInternalFormat = RenderbufferStorage.Depth24Stencil8Oes;
+                            else
+                            {
+                                if (GraphicsCapabilities.SupportsDepth24)
+                                    depthInternalFormat = RenderbufferStorage.DepthComponent24Oes;
+                                else if (GraphicsCapabilities.SupportsDepthNonLinear)
+                                    depthInternalFormat = (RenderbufferStorage)0x8E2C;
+                                else
+                                    depthInternalFormat = RenderbufferStorage.DepthComponent16;
+                                stencilInternalFormat = RenderbufferStorage.StencilIndex8;
+                                break;
+                            }
+                            break;
 #else
                         case DepthFormat.Depth24:
                             depthInternalFormat = RenderbufferStorage.DepthComponent24;
@@ -629,10 +626,7 @@ namespace MonoGame.Framework.Graphics
                     }
                 }
 
-                if (color != 0)
-                    renderTarget.GLColorBuffer = color;
-                else
-                    renderTarget.GLColorBuffer = renderTarget.GLTexture;
+                renderTarget.GLColorBuffer = color != 0 ? color : renderTarget.GLTexture;
                 renderTarget.GLDepthBuffer = depth;
                 renderTarget.GLStencilBuffer = stencil;
             }
@@ -689,6 +683,7 @@ namespace MonoGame.Framework.Graphics
                     }
                 }
             }
+
             if (Threading.IsOnMainThread)
                 Delete();
             else
@@ -807,7 +802,7 @@ namespace MonoGame.Framework.Graphics
             _rasterizerStateDirty = true;
 
             // Textures will need to be rebound to render correctly in the new render target.
-            Textures.Dirty();
+            Textures.MarkDirty();
 
             return _currentRenderTargetBindings[0].RenderTarget as IRenderTarget;
         }
@@ -833,6 +828,7 @@ namespace MonoGame.Framework.Graphics
             var shaderProgram = _programCache.GetProgram(VertexShader, PixelShader);
             if (shaderProgram.Program == -1)
                 return;
+
             // Set the new program if it has changed.
             if (_shaderProgram != shaderProgram)
             {
@@ -918,6 +914,7 @@ namespace MonoGame.Framework.Graphics
                     BlendFactor.G / 255f,
                     BlendFactor.B / 255f,
                     BlendFactor.A / 255f);
+
                 GraphicsExtensions.CheckGLError();
                 _lastBlendState.BlendFactor = BlendFactor;
             }
@@ -982,12 +979,13 @@ namespace MonoGame.Framework.Graphics
             ApplyState(true);
             ApplyAttribs(_vertexShader, baseVertex);
 
-            bool shortIndices = _indexBuffer.IndexElementSize == IndexElementSize.SixteenBits;
+            bool shortIndices = _indexBuffer.ElementSize == IndexElementSize.Short16;
             int indexElementCount = GetElementCountForType(primitiveType, primitiveCount);
             var indexElementType = shortIndices ? IndexElementType.UnsignedShort : IndexElementType.UnsignedInt;
             var indexOffsetInBytes = new IntPtr(startIndex * (shortIndices ? 2 : 4));
 
-            GL.DrawElements(PrimitiveTypeGL(primitiveType), indexElementCount, indexElementType, indexOffsetInBytes);
+            GL.DrawElements(
+                PrimitiveTypeGL(primitiveType), indexElementCount, indexElementType, indexOffsetInBytes);
             GraphicsExtensions.CheckGLError();
         }
 
@@ -1030,15 +1028,18 @@ namespace MonoGame.Framework.Graphics
         }
 
         private unsafe void PlatformDrawUserIndexedPrimitives<TVertex, TIndex>(
-            PrimitiveType type, ReadOnlySpan<TVertex> vertices,
-            IndexElementSize indexElementSize, ReadOnlySpan<TIndex> indices,
-            int primitiveCount, VertexDeclaration declaration)
+            PrimitiveType type,
+            ReadOnlySpan<TVertex> vertices,
+            IndexElementSize indexElementSize,
+            ReadOnlySpan<TIndex> indices,
+            int primitiveCount,
+            VertexDeclaration declaration)
             where TVertex : unmanaged
             where TIndex : unmanaged
         {
             int indexSize = sizeof(TIndex);
-            var indexType = indexElementSize == IndexElementSize.SixteenBits ?
-                IndexElementType.UnsignedShort : IndexElementType.UnsignedInt;
+            var indexType = indexElementSize == IndexElementSize.Short16
+                ? IndexElementType.UnsignedShort : IndexElementType.UnsignedInt;
 
             ApplyState(true);
 
@@ -1074,7 +1075,7 @@ namespace MonoGame.Framework.Graphics
             AssertSupportsInstancing();
             ApplyState(true);
 
-            var shortIndices = _indexBuffer.IndexElementSize == IndexElementSize.SixteenBits;
+            var shortIndices = _indexBuffer.ElementSize == IndexElementSize.Short16;
             var indexElementType = shortIndices ? IndexElementType.UnsignedShort : IndexElementType.UnsignedInt;
             var indexOffsetInBytes = new IntPtr(startIndex * (shortIndices ? 2 : 4));
             var indexElementCount = GetElementCountForType(primitiveType, primitiveCount);
@@ -1192,12 +1193,12 @@ namespace MonoGame.Framework.Graphics
         }
 
         // Holds information for caching
-        private class BufferBindingInfo
+        private struct BufferBindingInfo
         {
             public IntPtr VertexOffset;
             public int InstanceFrequency;
             public int Vbo;
-            public VertexDeclaration.VertexDeclarationAttributeInfo AttributeInfo;
+            public VertexDeclaration.AttributeInfo AttributeInfo;
         }
 
         // FIXME: why is this even here

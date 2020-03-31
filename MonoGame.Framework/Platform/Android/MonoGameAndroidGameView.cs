@@ -12,11 +12,11 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Javax.Microedition.Khronos.Egl;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Input.Touch;
+using MonoGame.Framework.Graphics;
+using MonoGame.Framework.Input;
+using MonoGame.Framework.Input.Touch;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     [CLSCompliant(false)]
     public class MonoGameAndroidGameView : SurfaceView, ISurfaceHolderCallback, View.IOnTouchListener
@@ -63,8 +63,8 @@ namespace Microsoft.Xna.Framework
         private readonly Game _game;
 
         // Events that are triggered on the game thread
-        public static event SenderDelegate<MonoGameAndroidGameView> OnPauseGameThread;
-        public static event SenderDelegate<MonoGameAndroidGameView> OnResumeGameThread;
+        public static event DatalessEvent<MonoGameAndroidGameView> OnPauseGameThread;
+        public static event DatalessEvent<MonoGameAndroidGameView> OnResumeGameThread;
 
         public bool TouchEnabled
         {
@@ -93,10 +93,10 @@ namespace Microsoft.Xna.Framework
             mHolder = Holder;
             // Add callback to get the SurfaceCreated etc events
             mHolder.AddCallback(this);
-            mHolder.SetType(SurfaceType.Gpu);
+            mHolder.SetType(Android.Views.SurfaceType.Gpu);
         }
 
-        public void SurfaceChanged(ISurfaceHolder holder, global::Android.Graphics.Format format, int width, int height)
+        public void SurfaceChanged(ISurfaceHolder holder, Android.Graphics.Format format, int width, int height)
         {
             // Set flag to recreate gl surface or rendering can be bad on orienation change or if app 
             // is closed in one orientation and re-opened in another.
@@ -142,7 +142,6 @@ namespace Microsoft.Xna.Framework
                     lostglContext = true;
                 }
             }
-
         }
 
         public virtual void MakeCurrent()
@@ -153,7 +152,6 @@ namespace Microsoft.Xna.Framework
             {
                 System.Diagnostics.Debug.WriteLine("Error Make Current" + GetErrorAsString());
             }
-
         }
 
         public virtual void ClearCurrent()
@@ -188,7 +186,7 @@ namespace Microsoft.Xna.Framework
             renderTask = Task.Factory.StartNew(
                 () => WorkerThreadFrameDispatcher(syncContext),
                 cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-            
+
             renderTask.ContinueWith((t) => OnStopped());
         }
 
@@ -611,7 +609,7 @@ namespace Microsoft.Xna.Framework
             if (prevUpdateTime.Ticks != 0)
             {
                 var t = (curUpdateTime - prevUpdateTime).TotalMilliseconds;
-                updateEventArgs.Time = t < 0 ? 0 : t;
+                updateEventArgs.Elapsed = t < 0 ? 0 : t;
             }
 
             try
@@ -624,7 +622,7 @@ namespace Microsoft.Xna.Framework
                     throw ex;
                 else
                 {
-                    Game.Activity.RunOnUiThread(() =>
+                   AndroidGameActivity.Instance.RunOnUiThread(() =>
                    {
                        throw ex;
                    });
@@ -637,7 +635,7 @@ namespace Microsoft.Xna.Framework
             if (prevRenderTime.Ticks == 0)
             {
                 var t = (curRenderTime - prevRenderTime).TotalMilliseconds;
-                renderEventArgs.Time = t < 0 ? 0 : t;
+                renderEventArgs.Elapsed = t < 0 ? 0 : t;
             }
 
             RenderFrameInternal(renderEventArgs);
@@ -822,7 +820,7 @@ namespace Microsoft.Xna.Framework
 
             int depth = 0;
             int stencil = 0;
-            switch (_game.InternalGraphicsDeviceManager.PreferredDepthStencilFormat)
+            switch (_game.GraphicsDeviceManager.PreferredDepthStencilFormat)
             {
                 case DepthFormat.Depth16:
                     depth = 16;
@@ -958,35 +956,35 @@ namespace Microsoft.Xna.Framework
 
         protected void CreateGLSurface()
         {
-            if (!glSurfaceAvailable)
+            if (glSurfaceAvailable)
+                return;
+
+            try
             {
-                try
-                {
-                    // If there is an existing surface, destroy the old one
-                    DestroyGLSurface();
+                // If there is an existing surface, destroy the old one
+                DestroyGLSurface();
 
-                    eglSurface = egl.EglCreateWindowSurface(eglDisplay, eglConfig, (Java.Lang.Object)this.Holder, null);
-                    if (eglSurface == null || eglSurface == EGL10.EglNoSurface)
-                        throw new Exception("Could not create EGL window surface" + GetErrorAsString());
+                eglSurface = egl.EglCreateWindowSurface(eglDisplay, eglConfig, (Java.Lang.Object)Holder, null);
+                if (eglSurface == null || eglSurface == EGL10.EglNoSurface)
+                    throw new Exception("Could not create EGL window surface" + GetErrorAsString());
 
-                    if (!egl.EglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext))
-                        throw new Exception("Could not make EGL current" + GetErrorAsString());
+                if (!egl.EglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext))
+                    throw new Exception("Could not make EGL current" + GetErrorAsString());
 
-                    glSurfaceAvailable = true;
+                glSurfaceAvailable = true;
 
-                    // Must set viewport after creation, the viewport has correct values in it already as we call it, but
-                    // the surface is created after the correct viewport is already applied so we must do it again.
-                    if (_game.GraphicsDevice != null)
-                        _game.InternalGraphicsDeviceManager.ResetClientBounds();
+                // Must set viewport after creation, the viewport has correct values in it already as we call it, but
+                // the surface is created after the correct viewport is already applied so we must do it again.
+                if (_game.GraphicsDevice != null)
+                    _game.GraphicsDeviceManager.ResetClientBounds();
 
-                    if (MonoGame.OpenGL.GL.GetError == null)
-                        MonoGame.OpenGL.GL.LoadEntryPoints();
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("AndroidGameView", ex.ToString());
-                    glSurfaceAvailable = false;
-                }
+                if (MonoGame.OpenGL.GL.GetError == null)
+                    MonoGame.OpenGL.GL.LoadEntryPoints();
+            }
+            catch (Exception ex)
+            {
+                Log.Error("AndroidGameView", ex.ToString());
+                glSurfaceAvailable = false;
             }
         }
 
@@ -995,7 +993,7 @@ namespace Microsoft.Xna.Framework
             IEGL10 egl = EGLContext.EGL.JavaCast<IEGL10>();
             EGLSurface result = egl.EglCreatePbufferSurface(eglDisplay, config, attribList);
             if (result == null || result == EGL10.EglNoSurface)
-                throw new Exception("EglCreatePBufferSurface");
+                throw new Exception("EglCreatePbufferSurface");
             return result;
         }
 
@@ -1009,24 +1007,21 @@ namespace Microsoft.Xna.Framework
 
                     IsResuming = true;
                     if (_gameWindow.Resumer != null)
-                    {
                         _gameWindow.Resumer.LoadContent();
-                    }
 
                     // Reload textures on a different thread so the resumer can be drawn
-                    System.Threading.Thread bgThread = new System.Threading.Thread(
-                        o =>
-                        {
-                            Android.Util.Log.Debug("MonoGame", "Begin reloading graphics content");
-                            Microsoft.Xna.Framework.Content.ContentManager.ReloadGraphicsContent();
-                            Android.Util.Log.Debug("MonoGame", "End reloading graphics content");
+                    var bgThread = new Thread(o =>
+                    {
+                        Android.Util.Log.Debug("MonoGame", "Begin reloading graphics content");
+                        Content.ContentManager.ReloadGraphicsContent();
+                        Android.Util.Log.Debug("MonoGame", "End reloading graphics content");
 
-                            // DeviceReset events
-                            _game.InternalGraphicsDeviceManager.OnDeviceReset();
-                            _game.GraphicsDevice.OnDeviceReset();
+                        // DeviceReset events
+                        _game.GraphicsDeviceManager.OnDeviceReset();
+                        _game.GraphicsDevice.OnDeviceReset();
 
-                            IsResuming = false;
-                        });
+                        IsResuming = false;
+                    });
 
                     bgThread.Start();
                 }
@@ -1037,7 +1032,7 @@ namespace Microsoft.Xna.Framework
         protected void ContextLostInternal()
         {
             OnContextLost();
-            _game.InternalGraphicsDeviceManager.OnDeviceResetting();
+            _game.GraphicsDeviceManager.OnDeviceResetting();
             if (_game.GraphicsDevice != null)
                 _game.GraphicsDevice.OnDeviceResetting();
         }
@@ -1167,38 +1162,38 @@ namespace Microsoft.Xna.Framework
 
         public delegate void FrameEvent(object sender, FrameEventArgs e);
 
-        public class FrameEventArgs : EventArgs
+        public class FrameEventArgs
         {
-            double elapsed;
+            private double _elapsed;
 
             /// <summary>
-            /// Constructs a new FrameEventArgs instance.
+            /// Gets a <see cref="double"/> that indicates how many seconds of time elapsed since the previous event.
+            /// </summary>
+            public double Elapsed
+            {
+                get => _elapsed;
+                set
+                {
+                    if (value < 0)
+                        throw new ArgumentOutOfRangeException();
+                    _elapsed = value;
+                }
+            }
+
+            /// <summary>
+            /// Constructs a new <see cref="FrameEventArgs"/> instance.
             /// </summary>
             public FrameEventArgs()
             {
             }
 
             /// <summary>
-            /// Constructs a new FrameEventArgs instance.
+            /// Constructs a new <see cref="FrameEventArgs"/> instance.
             /// </summary>
             /// <param name="elapsed">The amount of time that has elapsed since the previous event, in seconds.</param>
             public FrameEventArgs(double elapsed)
             {
-                Time = elapsed;
-            }
-
-            /// <summary>
-            /// Gets a <see cref="System.Double"/> that indicates how many seconds of time elapsed since the previous event.
-            /// </summary>
-            public double Time
-            {
-                get { return elapsed; }
-                internal set
-                {
-                    if (value < 0)
-                        throw new ArgumentOutOfRangeException();
-                    elapsed = value;
-                }
+                Elapsed = elapsed;
             }
         }
 

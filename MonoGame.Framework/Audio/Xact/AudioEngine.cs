@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
+using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework.Audio
 {
@@ -62,7 +63,7 @@ namespace MonoGame.Framework.Audio
         {
             var stream = TitleContainer.OpenStream(filePath);
 #if ANDROID
-            stream = RecyclableMemoryManager.Instance.GetBufferedStream(stream, leaveOpen: false);
+            stream = RecyclableMemoryManager.Default.GetBufferedStream(stream, leaveOpen: false);
 #endif
             return stream;
         }

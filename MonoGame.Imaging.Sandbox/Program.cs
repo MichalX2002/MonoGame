@@ -49,12 +49,12 @@ namespace MonoGame.Imaging.Tests
             var archive = new ZipArchive(File.OpenRead(DataZip), ZipArchiveMode.Read, false);
             
             //var stream = archive.GetEntry("png/32bit.png").Open();
-            var stream = archive.GetEntry("bmp/32bit.bmp").Open();
+            //var stream = archive.GetEntry("bmp/32bit.bmp").Open();
             //var stream = archive.GetEntry("bmp/24bit.bmp").Open();
             //var stream = archive.GetEntry("bmp/8bit.bmp").Open();
 
             var encoded = new MemoryStream(1024 * 1024 * 8);
-            //using (var stream = new FileStream("big img.png", FileMode.Open))
+            using (var stream = new FileStream("big img.png", FileMode.Open))
             //using (var stream = new FileStream("smol img.png", FileMode.Open))
             stream.CopyTo(encoded);
 

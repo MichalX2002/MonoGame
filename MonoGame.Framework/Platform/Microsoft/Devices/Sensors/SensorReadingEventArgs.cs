@@ -13,7 +13,7 @@ namespace Microsoft.Devices.Sensors
 
         public SensorReadingEventArgs(T sensorReading)
         {
-            this.SensorReading = sensorReading;
+            SensorReading = sensorReading;
         }
     }
 }

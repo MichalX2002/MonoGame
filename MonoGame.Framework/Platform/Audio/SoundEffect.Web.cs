@@ -7,10 +7,10 @@ using System.Collections.Generic;
 using System.IO;
 
 using Microsoft.Xna;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
+using MonoGame.Framework;
+using MonoGame.Framework.Audio;
 
-namespace Microsoft.Xna.Framework.Audio
+namespace MonoGame.Framework.Audio
 {
     public sealed partial class SoundEffect : IDisposable
     {

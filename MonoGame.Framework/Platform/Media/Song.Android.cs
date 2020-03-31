@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     public sealed partial class Song : IDisposable
     {
@@ -18,7 +18,7 @@ namespace Microsoft.Xna.Framework.Media
         private bool _looping;
         private bool _paused;
         private float _volume = 1f;
-        private TimeSpan _duration;
+        private TimeSpan? _duration;
 
         private void PlatformInitialize(string fileName)
         {
@@ -29,7 +29,7 @@ namespace Microsoft.Xna.Framework.Media
 
         private void OnPlayerCompletion(object sender, EventArgs e)
         {
-            OnFinish?.Invoke(this);
+            Finished?.Invoke(this);
         }
 
         private static void PlatformMasterVolumeChanged()
@@ -52,7 +52,7 @@ namespace Microsoft.Xna.Framework.Media
                 }
             }
 
-            var fd = Game.Activity.Assets.OpenFd(_fileName);
+            var fd = AndroidGameActivity.Instance.Assets.OpenFd(_fileName);
             try
             {
                 if (fd == null)
@@ -210,7 +210,7 @@ namespace Microsoft.Xna.Framework.Media
             _androidPlayer.SeekTo((int)value.TotalMilliseconds);
         }
 
-        private TimeSpan PlatformGetDuration()
+        private TimeSpan? PlatformGetDuration()
         {
             return _duration;
         }

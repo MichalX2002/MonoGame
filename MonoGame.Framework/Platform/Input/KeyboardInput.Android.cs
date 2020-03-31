@@ -3,7 +3,7 @@ using Android.App;
 using Android.Content;
 using Android.Widget;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     public static partial class KeyboardInput
     {
@@ -13,15 +13,16 @@ namespace Microsoft.Xna.Framework.Input
         private static Task<string> PlatformShow(string title, string description, string defaultText, bool usePasswordMode)
         {
             tcs = new TaskCompletionSource<string>();
+            var activity = AndroidGameActivity.Instance;
 
-            Game.Activity.RunOnUiThread(() =>
+            activity.RunOnUiThread(() =>
             {
-                alert = new AlertDialog.Builder(Game.Activity).Create();
+                alert = new AlertDialog.Builder(activity).Create();
 
                 alert.SetTitle(title);
                 alert.SetMessage(description);
 
-                var input = new EditText(Game.Activity) { Text = defaultText };
+                var input = new EditText(activity) { Text = defaultText };
 
                 if (defaultText != null)
                     input.SetSelection(defaultText.Length);

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using UIKit;
 
-namespace Microsoft.Xna.Framework.Input
+namespace MonoGame.Framework.Input
 {
     public static partial class MessageBox
     {
@@ -22,7 +22,7 @@ namespace Microsoft.Xna.Framework.Input
                 alert.Dismissed += (sender, e) =>
                 {
                     if (!tcs.Task.IsCompleted)
-					    tcs.SetResult((int)e.ButtonIndex);
+                        tcs.SetResult((int)e.ButtonIndex);
                 };
                 alert.Show();
             });

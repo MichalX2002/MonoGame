@@ -16,7 +16,6 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Color = MonoGame.Framework.Color;
 
 namespace MonoGame.Testing
 {
@@ -86,8 +85,8 @@ namespace MonoGame.Testing
             string[] songs = new string[]
             {
                 "retro level 1",
-                //"retro level 2",
-                //"retro level 3",
+                "retro level 2",
+                "retro level 3",
             };
 
             _songs = new Song[songs.Length];
@@ -102,9 +101,29 @@ namespace MonoGame.Testing
                 Console.WriteLine("Content.Load<Song>('" + songs[i] + "') Time: " + _watch.ElapsedMilliseconds + "ms");
             }
 
-            if (_songs.Length > 0)
-                _songs[0].Volume *= 0.9f;
+            readers = new List<VorbisReader>();
+            foreach (var file in Directory.EnumerateFiles(@"C:\Users\Michal Piatkowski\Music", "*.ogg",
+                new EnumerationOptions()
+                {
+                    RecurseSubdirectories = true,
+                    MatchCasing = MatchCasing.CaseInsensitive
+                }))
+            {
+                try
+                {
+                    Console.Write(file + " - ");
+                    var reader = new VorbisReader(new NVorbis.Ogg.LightOggContainerReader(File.OpenRead(file), false));
+                    readers.Add(reader);
+                    Console.WriteLine("Duration: " + reader.TotalTime);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+            }
         }
+
+        List<VorbisReader> readers;
 
         protected override void UnloadContent()
         {
@@ -121,7 +140,7 @@ namespace MonoGame.Testing
                 Exit();
 
             f += time.ElapsedTotalSeconds;
-            if (f >= 2f && _songs.Length > 0)
+            if (f >= 1f && _songs.Length > 0)
             {
                 f = 0f;
 
@@ -129,7 +148,7 @@ namespace MonoGame.Testing
 
                 //_lastSong?.Stop();
                 _lastSong = _songs[songIndex++];
-                _lastSong.Play(immediate: false);
+                _lastSong.Play();
                 if (songIndex >= _songs.Length)
                     songIndex = 0;
 
@@ -176,7 +195,7 @@ namespace MonoGame.Testing
             var updateTimes = Song.UpdateTiming.Span;
             for (int i = 0; i < updateTimes.Length; i++)
                 avg += updateTimes[i].TotalMilliseconds;
-            
+
             float xx = (MathF.Sin((float)time.TotalGameTime.TotalSeconds) + 1) / 2 * 50;
             float yy = (MathF.Cos((float)time.TotalGameTime.TotalSeconds) + 1) / 2 * 50;
             _spriteBatch.Draw(_test, new Vector2(0 + xx, 0 + yy), Color.White);

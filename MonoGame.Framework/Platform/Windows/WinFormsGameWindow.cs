@@ -322,7 +322,7 @@ namespace MonoGame.Framework
         private void OnKeyPress(object sender, KeyPressEventArgs e)
         {
             var key = (Keys)(VkKeyScanEx(e.KeyChar, InputLanguage.CurrentInputLanguage.Handle) & 0xff);
-            OnTextInput(new TextInputEvent(e.KeyChar, key));
+            OnTextInput(new TextInputEventArgs(e.KeyChar, key));
         }
 
         internal void Initialize(int width, int height)

@@ -39,23 +39,23 @@ purpose and non-infringement.
 #endregion License
 
 using System;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Framework.Content;
+using MonoGame.Framework.Graphics;
 
-namespace Microsoft.Xna.Framework
+namespace MonoGame.Framework
 {
     /// <summary>
     /// A default implementation of IResumeManager. Loads a user specified
     /// image file (eg png) and draws it the middle of the screen.
     /// 
-    /// Example usage in Game.Initialise():
+    /// Example usage in Game.Initialize():
     /// 
     /// #if ANDROID
-    ///    this.Window.SetResumer(new ResumeManager(this.Services, 
-    ///                                             spriteBatch, 
-    ///                                             "UI/ResumingTexture",
-    ///                                             1.0f, 0.01f));
+    ///    this.Window.SetResumer(new ResumeManager(
+    ///        this.Services, 
+    ///        spriteBatch, 
+    ///        "UI/ResumingTexture",
+    ///        1.0f, 0.01f));
     /// #endif                                         
     /// </summary>
     public class ResumeManager : IResumeManager
@@ -69,14 +69,15 @@ namespace Microsoft.Xna.Framework
         float scale;
         float rotateSpeed;
 
-        public ResumeManager(IServiceProvider services,
-                             SpriteBatch spriteBatch,
-                             string resumeTextureName,
-                             float scale,
-                             float rotateSpeed)
+        public ResumeManager(
+            IServiceProvider services,
+            SpriteBatch spriteBatch,
+            string resumeTextureName,
+            float scale,
+            float rotateSpeed)
         {
-            this.content = new ContentManager(services, "Content");
-            this.device = ((IGraphicsDeviceService)services.GetService(typeof(IGraphicsDeviceService))).GraphicsDevice;
+            content = new ContentManager(services, "Content");
+            device = services.GetService<IGraphicsDeviceService>().GraphicsDevice;
             this.spriteBatch = spriteBatch;
             this.resumeTextureName = resumeTextureName;
             this.scale = scale;
@@ -100,11 +101,12 @@ namespace Microsoft.Xna.Framework
 
             // Draw the resume texture in the middle of the screen and make it spin
             spriteBatch.Begin();
-            spriteBatch.Draw(resumeTexture,
-                            new Vector2(sw / 2, sh / 2), 
-                            null, Color.White, rotation,
-                            new Vector2(tw / 2, th / 2),
-                            scale, SpriteEffects.None, 0.0f);
+            spriteBatch.Draw(
+                resumeTexture,
+                new Vector2(sw / 2, sh / 2),
+                null, Color.White, rotation,
+                new Vector2(tw / 2, th / 2),
+                scale, SpriteEffects.None, 0.0f);
 
             spriteBatch.End();
         }

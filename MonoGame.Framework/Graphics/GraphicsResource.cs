@@ -18,6 +18,11 @@ namespace MonoGame.Framework.Graphics
         private WeakReference _selfReference;
 
         /// <summary>
+        /// Occurs when the <see cref="GraphicsResource"/> is disposed.
+        /// </summary>
+        public event DatalessEvent<GraphicsResource> Disposing;
+
+        /// <summary>
         /// Gets whether the <see cref="GraphicsResource"/> is disposed.
         /// </summary>
         public bool IsDisposed { get; private set; }
@@ -31,11 +36,6 @@ namespace MonoGame.Framework.Graphics
         /// Gets or sets the tag of this <see cref="GraphicsResource"/>.
         /// </summary>
         public object Tag { get; set; }
-
-        /// <summary>
-        /// Occurs when the <see cref="GraphicsResource"/> is disposed.
-        /// </summary>
-        public event DatalessEvent<GraphicsResource> Disposing;
 
         /// <summary>
         /// Gets the <see cref="Graphics.GraphicsDevice"/> assigned to this <see cref="GraphicsResource"/>.
@@ -116,7 +116,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// The method that derived classes should override to implement disposing of managed and native resources.
         /// </summary>
-        /// <param name="disposing">True if managed objects should be disposed.</param>
+        /// <param name="disposing"><see langword="true"/> if managed objects should be disposed.</param>
         /// <remarks>
         /// Unmanaged resources should always be released regardless of the value of the disposing parameter.
         /// </remarks>
@@ -129,11 +129,10 @@ namespace MonoGame.Framework.Graphics
                     Disposing?.Invoke(this);
 
                 // Remove from the global list of graphics resources
-                if (_graphicsDevice != null)
-                    _graphicsDevice.RemoveResourceReference(_selfReference);
+                _graphicsDevice?.RemoveResourceReference(_selfReference);
 
-                _selfReference = null;
                 _graphicsDevice = null;
+                _selfReference = null;
                 IsDisposed = true;
             }
         }

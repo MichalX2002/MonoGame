@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using SharpDX.Direct3D11;
 
-
 namespace MonoGame.Framework.Graphics
 {
     partial class VertexInputLayout
@@ -13,11 +12,12 @@ namespace MonoGame.Framework.Graphics
         public InputElement[] GetInputElements()
         {
             var list = new List<InputElement>();
+
             for (int i = 0; i < Count; i++)
             {
-                foreach (var vertexElement in VertexDeclarations[i].InternalVertexElements)
+                foreach (var elements in VertexDeclarations[i].VertexElements.Span)
                 {
-                    var inputElement = vertexElement.GetInputElement(i, InstanceFrequencies[i]);
+                    var inputElement = elements.GetInputElement(i, InstanceFrequencies[i]);
                     list.Add(inputElement);
                 }
             }
@@ -32,7 +32,8 @@ namespace MonoGame.Framework.Graphics
                 int semanticIndex = inputElements[i].SemanticIndex;
                 for (int j = 0; j < i; j++)
                 {
-                    if (inputElements[j].SemanticName == semanticName && inputElements[j].SemanticIndex == semanticIndex)
+                    if (inputElements[j].SemanticName == semanticName && 
+                        inputElements[j].SemanticIndex == semanticIndex)
                     {
                         // Semantic index already used.
                         semanticIndex++;

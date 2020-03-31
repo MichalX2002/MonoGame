@@ -28,7 +28,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Whether the device supports anisotropic texture filtering
         /// </summary>
-		internal bool SupportsTextureFilterAnisotropic { get; private set; }
+        internal bool SupportsTextureFilterAnisotropic { get; private set; }
 
         internal bool SupportsDepth24 { get; private set; }
 

@@ -6,7 +6,7 @@ using System;
 using System.IO;
 using System.Linq;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     /// <summary>
     /// Represents a video.
@@ -20,7 +20,7 @@ namespace Microsoft.Xna.Framework.Media
             Player = new Android.Media.MediaPlayer();
             if (Player != null)
             {
-                var afd = Game.Activity.Assets.OpenFd(FileName);
+                var afd = AndroidGameActivity.Instance.Assets.OpenFd(FileName);
                 if (afd != null)
                 {
                     Player.SetDataSource(afd.FileDescriptor, afd.StartOffset, afd.Length);

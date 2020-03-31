@@ -8,8 +8,8 @@ using System.Collections.Generic;
 
 namespace MonoGame.Framework.Media
 {
-	public class SongCollection : ICollection<Song>, IEnumerable<Song>, IEnumerable, IDisposable
-	{
+    public class SongCollection : ICollection<Song>, IEnumerable<Song>, IEnumerable, IDisposable
+    {
         private IList<Song> _innerList;
 
         public Song this[int index] => _innerList[index];
@@ -27,8 +27,8 @@ namespace MonoGame.Framework.Media
             foreach(Song song in songs)
                 _innerList.Add(song);
         }
-		
-		public void Add(Song item)
+        
+        public void Add(Song item)
         {
             if (item == null)
                 throw new ArgumentNullException();
@@ -50,8 +50,8 @@ namespace MonoGame.Framework.Media
 
             _innerList.Add(item);
         }
-		
-		public void Clear()
+        
+        public void Clear()
         {
             _innerList.Clear();
         }
@@ -65,8 +65,8 @@ namespace MonoGame.Framework.Media
         {
             _innerList.CopyTo(array, arrayIndex);
         }
-		
-		public int IndexOf(Song item)
+        
+        public int IndexOf(Song item)
         {
             return _innerList.IndexOf(item);
         }

@@ -18,7 +18,7 @@ namespace MonoGame.Imaging.Coding.Decoding
         public new int ImageIndex { get => base.ImageIndex; set => base.ImageIndex = value; }
 
         private StateReadyCallback _onStateReady;
-        private OutputByteRowCallback _onOutputByteRow;
+        private OutputByteDataCallback _onOutputByteData;
 
         public ImageStbDecoderState(
             ImagingConfig imagingConfig,
@@ -27,7 +27,7 @@ namespace MonoGame.Imaging.Coding.Decoding
             base(imagingConfig, decoder, stream)
         {
             _onStateReady = OnStateReady;
-            _onOutputByteRow = OnOutputByteRow;
+            _onOutputByteData = OnOutputByteData;
         }
 
         public ReadState CreateReadState()
@@ -47,7 +47,7 @@ namespace MonoGame.Imaging.Coding.Decoding
 
             return new ReadState(
                 _onStateReady,
-                _onOutputByteRow,
+                _onOutputByteData,
                 null,
                 null);
         }
@@ -60,7 +60,8 @@ namespace MonoGame.Imaging.Coding.Decoding
             CurrentImage = Image.Create(dstType, size);
         }
 
-        private void OnOutputByteRow(in ReadState state, int row, ReadOnlySpan<byte> pixelRow)
+        private void OnOutputByteData(
+            in ReadState state, int address, AddressingMajor addressMajor, ReadOnlySpan<byte> pixels)
         {
             if (SourcePixelType == null)
                 throw new InvalidOperationException("Missing source pixel type.");
@@ -69,7 +70,12 @@ namespace MonoGame.Imaging.Coding.Decoding
 
             if (SourcePixelType == CurrentImage.PixelType)
             {
-                CurrentImage.SetPixelByteRow(0, row, pixelRow);
+                if (addressMajor == AddressingMajor.Row)
+                    CurrentImage.SetPixelByteRow(0, address, pixels);
+                else if (addressMajor == AddressingMajor.Column)
+                    CurrentImage.SetPixelByteColumn(0, address, pixels);
+                else
+                    throw new ArgumentOutOfRangeException(nameof(addressMajor));
             }
             else
             {

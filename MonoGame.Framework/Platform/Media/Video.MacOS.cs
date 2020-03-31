@@ -9,7 +9,7 @@ using ObjCRuntime;
 using Foundation;
 using AVFoundation;
 
-namespace Microsoft.Xna.Framework.Media
+namespace MonoGame.Framework.Media
 {
     /// <summary>
     /// Represents a video.

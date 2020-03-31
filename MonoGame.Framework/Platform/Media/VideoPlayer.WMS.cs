@@ -46,7 +46,7 @@ namespace MonoGame.Framework.Media
             return _videoCache;
         }
 
-        private void PlatformGetState(ref MediaState result)
+        private MediaState PlatformGetState()
         {
             if (_clock != null)
             {
@@ -55,16 +55,13 @@ namespace MonoGame.Framework.Media
                 switch (state)
                 {
                     case ClockState.Running:
-                        result = MediaState.Playing;
-                        return;
-
+                        return MediaState.Playing;
+                        
                     case ClockState.Paused:
-                        result = MediaState.Paused;
-                        return;
+                        return MediaState.Paused;
                 }
             }
-
-            result = MediaState.Stopped;
+            return MediaState.Stopped;
         }
 
         private void PlatformPause()

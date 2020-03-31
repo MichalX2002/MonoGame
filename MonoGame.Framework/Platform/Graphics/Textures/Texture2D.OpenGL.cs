@@ -154,11 +154,15 @@ namespace MonoGame.Framework.Graphics
             GraphicsExtensions.CheckGLError();
 
             GL.FramebufferTexture2D(
-                FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, glTexture, 0);
+                FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, 
+                _glTexture, 0);
             GraphicsExtensions.CheckGLError();
 
-            GL.ReadPixels(rect.X, rect.Y, rect.Width, rect.Height, glFormat, glType, data);
-            GraphicsExtensions.CheckGLError();
+            fixed (T* ptr = destination)
+            {
+                GL.ReadPixels(rect.X, rect.Y, rect.Width, rect.Height, glFormat, glType, (IntPtr)ptr);
+                GraphicsExtensions.CheckGLError();
+            }
             GraphicsDevice.DisposeFramebuffer(framebufferId);
 #else
             GL.BindTexture(TextureTarget.Texture2D, _glTexture);

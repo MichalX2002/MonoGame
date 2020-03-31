@@ -4,10 +4,10 @@
 
 using System;
 
-namespace Microsoft.Xna.Framework.Graphics
+namespace MonoGame.Framework.Graphics
 {
-	public partial class Texture3D : Texture
-	{
+    public partial class Texture3D : Texture
+    {
         private void PlatformConstruct(
             GraphicsDevice graphicsDevice, 
             int width,
@@ -52,6 +52,6 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             throw new NotImplementedException();
         }
-	}
+    }
 }
 

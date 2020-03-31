@@ -8,6 +8,10 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class DepthStencilState : GraphicsResource
     {
+        public static DepthStencilState Default { get; }
+        public static DepthStencilState DepthRead { get; }
+        public static DepthStencilState None { get; }
+
         private readonly bool _defaultStateObject;
 
         private bool _depthBufferEnable;
@@ -26,6 +30,8 @@ namespace MonoGame.Framework.Graphics
         private StencilOperation _stencilPass;
         private int _stencilWriteMask;
         private bool _twoSidedStencilMode;
+
+        #region Properties
 
         public bool DepthBufferEnable
         {
@@ -187,29 +193,18 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        internal void BindToGraphicsDevice(GraphicsDevice device)
-        {
-            if (_defaultStateObject)
-                throw new InvalidOperationException("You cannot bind a default state object.");
+        #endregion
 
-            if (GraphicsDevice != null && GraphicsDevice != device)
-                throw new InvalidOperationException(
-                    "This depth stencil state is already bound to a different graphics device.");
-            GraphicsDevice = device;
+        #region Constructors
+
+        static DepthStencilState()
+        {
+            Default = new DepthStencilState("DepthStencilState.Default", true, true);
+            DepthRead = new DepthStencilState("DepthStencilState.DepthRead", true, false);
+            None = new DepthStencilState("DepthStencilState.None", false, false);
         }
 
-        internal void ThrowIfBound()
-        {
-            if (_defaultStateObject)
-                throw new InvalidOperationException(
-                    "You cannot modify a default depth stencil state object.");
-
-            if (GraphicsDevice != null)
-                throw new InvalidOperationException(
-                    "You cannot modify the depth stencil state after it has been bound to the graphics device!");
-        }
-
-        public DepthStencilState ()
+        public DepthStencilState()
         {
             DepthBufferEnable = true;
             DepthBufferWriteEnable = true;
@@ -259,15 +254,29 @@ namespace MonoGame.Framework.Graphics
             _twoSidedStencilMode = cloneSource._twoSidedStencilMode;
         }
 
-        public static readonly DepthStencilState Default;
-        public static readonly DepthStencilState DepthRead;
-        public static readonly DepthStencilState None;
+#endregion
 
-        static DepthStencilState ()
+        internal void BindToGraphicsDevice(GraphicsDevice device)
         {
-            Default = new DepthStencilState("DepthStencilState.Default", true, true);
-            DepthRead = new DepthStencilState("DepthStencilState.DepthRead", true, false);
-            None = new DepthStencilState("DepthStencilState.None", false, false);
+            if (_defaultStateObject)
+                throw new InvalidOperationException(
+                    "You cannot bind a default state object.");
+
+            if (GraphicsDevice != null && GraphicsDevice != device)
+                throw new InvalidOperationException(
+                    "This depth stencil state is already bound to a different graphics device.");
+            GraphicsDevice = device;
+        }
+
+        internal void ThrowIfBound()
+        {
+            if (_defaultStateObject)
+                throw new InvalidOperationException(
+                    "You cannot modify a default depth stencil state object.");
+
+            if (GraphicsDevice != null)
+                throw new InvalidOperationException(
+                    "You cannot modify the depth stencil state after it has been bound to the graphics device!");
         }
 
         internal DepthStencilState Clone()

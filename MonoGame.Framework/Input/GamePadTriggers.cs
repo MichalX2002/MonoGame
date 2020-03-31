@@ -49,14 +49,7 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Serves as a hash function for a <see cref="GamePadTriggers"/> object.
         /// </summary>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int code = 7 + Left.GetHashCode();
-                return code * 31 + Right.GetHashCode();
-            }
-        }
+        public override int GetHashCode() => HashCode.Combine(Left, Right);
 
         /// <summary>
         /// Returns a string that represents the current <see cref="GamePadTriggers"/>.
