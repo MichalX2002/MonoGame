@@ -28,7 +28,7 @@ namespace MonoGame.Imaging
             where TDelegate : Delegate
         {
             var delegateParams = typeof(TDelegate).GetDelegateParameters().AsTypes();
-            var lambdaParams = delegateParams.Select(x => Expression.Parameter(x)).ToArray();
+            var lambdaParams = delegateParams.Select(x => Expression.Parameter(x)).ToList();
             var call = Expression.Call(method, lambdaParams);
             var lambda = Expression.Lambda<TDelegate>(call, lambdaParams);
             return lambda.Compile();
@@ -58,8 +58,8 @@ namespace MonoGame.Imaging
             if (!_loadPixelSpanDelegateCache.TryGetValue(delegateKey, out var loadDelegate))
             {
                 var delegateParams = typeof(LoadPixelSpanDelegate).GetDelegateParameters().AsTypes();
-                var lambdaParams = delegateParams.Select(x => Expression.Parameter(x)).ToArray();
-                var callParams = lambdaParams.Cast<Expression>().ToArray();
+                var lambdaParams = delegateParams.Select(x => Expression.Parameter(x)).ToList();
+                var callParams = lambdaParams.Cast<Expression>().ToList();
                 var body = new List<Expression>();
 
                 var spanCast = ImagingReflectionHelper.SpanCastMethod.MakeGenericMethod(typeof(byte), fromPixelType.Type);

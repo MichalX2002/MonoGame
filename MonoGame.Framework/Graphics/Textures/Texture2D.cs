@@ -44,7 +44,7 @@ namespace MonoGame.Framework.Graphics
 
         static Texture2D()
         {
-            InitializeVectorSaveFormats();
+            InitializeVectorFormats();
         }
 
         /// <summary>
@@ -378,11 +378,11 @@ namespace MonoGame.Framework.Graphics
         {
             CheckRect(level, rectangle, out Rectangle checkedRect);
 
-            var saveFormat = GetVectorSaveFormat(Format);
+            var saveFormat = GetVectorFormat(Format);
             var data = saveFormat.GetData(this, checkedRect, level, arraySlice);
             try
             {
-                return Image.WrapMemory(saveFormat.Types.Span[0], data, checkedRect.Size, leaveOpen: false);
+                return Image.WrapMemory(saveFormat.VectorTypes.Span[0], data, checkedRect.Size, leaveOpen: false);
             }
             catch
             {
@@ -405,11 +405,11 @@ namespace MonoGame.Framework.Graphics
         {
             CheckRect(level, rectangle, out Rectangle checkedRect);
 
-            var saveFormat = GetVectorSaveFormat(Format);
+            var saveFormat = GetVectorFormat(Format);
             var data = saveFormat.GetData(this, checkedRect, level, arraySlice);
             try
             {
-                var types = saveFormat.Types.Span;
+                var types = saveFormat.VectorTypes.Span;
                 foreach (var vectorType in types)
                     if (vectorType.Type == typeof(TPixel))
                         return Image.WrapMemory<TPixel>(data, checkedRect.Size, leaveOpen: false);
@@ -549,8 +549,8 @@ namespace MonoGame.Framework.Graphics
             if (graphicsDevice == null)
                 throw new ArgumentNullException(deviceParamName);
 
-            if (!SaveFormatsBySurfaceRO.TryGetValue(format, out _))
-                throw GetUnsupportedSurfaceFormatForImagingException(format, formatParamName);
+            if (!VectorFormatsBySurfaceRO.TryGetValue(format, out _))
+                throw UnsupportedSurfaceFormatForImagingException(format, formatParamName);
         }
 
         private void ValidateParams(

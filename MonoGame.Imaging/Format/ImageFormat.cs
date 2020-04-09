@@ -66,7 +66,7 @@ namespace MonoGame.Imaging
         /// <param name="fullName">The full name of the format.</param>
         /// <param name="shortName">The short name of the format.</param>
         public ImageFormat(
-            string fullName, string shortName, 
+            string fullName, string shortName,
             string primaryMimeType, string primaryExtension,
             IReadOnlySet<string> mimeTypes,
             IReadOnlySet<string> extensions)
@@ -94,10 +94,10 @@ namespace MonoGame.Imaging
             string fullName, string shortName,
             string mimeType, string extension) :
             this(
-                fullName, shortName, 
+                fullName, shortName,
                 mimeType, extension,
-                new ReadOnlySet<string>(new[] { mimeType }),
-                new ReadOnlySet<string>(new[] { extension }))
+                new ReadOnlySet<string>(new[] { mimeType }, StringComparer.OrdinalIgnoreCase),
+                new ReadOnlySet<string>(new[] { extension }, StringComparer.OrdinalIgnoreCase))
         {
         }
 
@@ -107,9 +107,9 @@ namespace MonoGame.Imaging
             IReadOnlySet<string> extensions) :
             this(
                 fullName, shortName,
-                mimeTypes.First(), 
+                mimeTypes.First(),
                 extensions.First(),
-                mimeTypes, 
+                mimeTypes,
                 extensions)
         {
         }

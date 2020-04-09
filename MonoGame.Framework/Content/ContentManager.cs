@@ -366,7 +366,7 @@ namespace MonoGame.Framework.Content
                 _disposableAssets.Add(disposable);
         }
 
-        public virtual void ReloadGraphicsAssets()
+        protected virtual void ReloadGraphicsAssets()
         {
             foreach (var asset in LoadedAssets)
             {
@@ -409,12 +409,9 @@ namespace MonoGame.Framework.Content
                 throw new ObjectDisposedException(nameof(ContentManager));
 
             if (_graphicsDeviceService == null)
-            {
-                _graphicsDeviceService = ServiceProvider.GetService<IGraphicsDeviceService>();
-                if (_graphicsDeviceService == null)
-                    throw new InvalidOperationException(FrameworkResources.NoGraphicsDeviceService);
-            }
-
+                _graphicsDeviceService = ServiceProvider.GetService<IGraphicsDeviceService>()
+                    ?? throw new InvalidOperationException(FrameworkResources.NoGraphicsDeviceService);
+            
             using (var stream = OpenStream(assetName))
             using (var xnbReader = new BinaryReader(stream))
             using (var reader = GetContentReaderFromXnb(assetName, stream, xnbReader, recordDisposableObject))

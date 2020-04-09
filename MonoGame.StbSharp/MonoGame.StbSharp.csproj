@@ -23,7 +23,6 @@
   <ItemGroup>
     <Compile Remove="..\ThirdParty\StbSharp\Image\src\ImageRead.Gif.cs" />
     <Compile Remove="..\ThirdParty\StbSharp\Image\src\ImageRead.Jpeg.cs" />
-    <Compile Remove="..\ThirdParty\StbSharp\Image\src\ImageRead.Png.cs" />
     <Compile Remove="..\ThirdParty\StbSharp\Image\src\ImageRead.Psd.cs" />
     <Compile Remove="..\ThirdParty\StbSharp\Image\src\ImageRead.Tga.cs" />
   </ItemGroup>

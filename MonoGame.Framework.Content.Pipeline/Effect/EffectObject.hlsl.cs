@@ -1,13 +1,13 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 namespace MonoGame.Effect
 {
     partial class EffectObject
     {
-        public static byte[] CompileHLSL(ShaderResult shaderResult, string shaderFunction, string shaderProfile, ref string errorsAndWarnings)
+        public static byte[] CompileHLSL(
+            ShaderResult shaderResult, string shaderFunction, string shaderProfile, 
+            ref string errorsAndWarnings)
         {
-            SharpDX.D3DCompiler.ShaderBytecode shaderByteCode;
             try
             {
                 SharpDX.D3DCompiler.ShaderFlags shaderFlags = 0;
@@ -47,17 +47,17 @@ namespace MonoGame.Effect
                 if (result.Bytecode == null)
                     throw new ShaderCompilerException();
                 
-                shaderByteCode = result.Bytecode;
+                var shaderByteCode = result.Bytecode;
                 //var source = shaderByteCode.Disassemble();
+
+                // Return a copy of the shader bytecode.
+                return shaderByteCode.Data;
             }
             catch (SharpDX.CompilationException ex)
             {
                 errorsAndWarnings += ex.Message;
                 throw new ShaderCompilerException();
             }
-
-            // Return a copy of the shader bytecode.
-            return shaderByteCode.Data.ToArray();
         }
     }
 }

@@ -3,11 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
-using MonoGame.Framework.Content.Pipeline;
 
 namespace MonoGame.Tools.Pipeline
 {
@@ -33,8 +31,8 @@ namespace MonoGame.Tools.Pipeline
                 var contentItem = context.Instance as ContentItem;
                 if (contentItem.BuildAction == BuildAction.Copy)
                     return false;
-            }                
-                        
+            }
+
             return true;
         }
 
@@ -45,47 +43,42 @@ namespace MonoGame.Tools.Pipeline
 
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
-            return PipelineTypes.ProcessorsStandardValuesCollection;            
+            return PipelineTypes.ProcessorsStandardValuesCollection;
         }
 
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
-            if (sourceType == typeof (string))
-            {
+            if (sourceType == typeof(string))
                 return true;
-            }
 
             return base.CanConvertFrom(context, sourceType);
         }
 
 
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object ConvertFrom(
+            ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string)
             {
                 foreach (var i in PipelineTypes.Processors)
-                {
                     if (i.DisplayName.Equals(value))
-                    {
                         return i;
-                    }
-                }
             }
 
             return base.ConvertFrom(context, culture, value);
         }
 
 
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        public override object ConvertTo(
+            ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
-            if (destinationType == typeof (string))
+            if (destinationType == typeof(string))
             {
                 var processor = (ProcessorTypeDescription)value;
-
                 if (processor == PipelineTypes.MissingProcessor)
                 {
                     var contentItem = context.Instance as ContentItem;
-                    return string.Format("[missing] {0}", contentItem.ProcessorName);
+                    return string.Format("[Missing] {0}", contentItem.ProcessorName);
                 }
 
                 return ((ProcessorTypeDescription)value).DisplayName;
@@ -94,10 +87,10 @@ namespace MonoGame.Tools.Pipeline
             return base.ConvertTo(context, culture, value, destinationType);
         }
 
-        public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
+        public override PropertyDescriptorCollection GetProperties(
+            ITypeDescriptorContext context, object value, Attribute[] attributes)
         {
             var props = new PropertyDescriptorCollection(null);
-
             var processor = value as ProcessorTypeDescription;
 
             if (context.Instance is Array)
@@ -105,20 +98,23 @@ namespace MonoGame.Tools.Pipeline
                 var array = context.Instance as object[];
 
                 foreach (PropertyDescriptor prop in TypeDescriptor.GetProperties(value, attributes, true))
-                    props.Add(new MultiTargetPropertyDescriptor(prop.Name, prop.PropertyType, prop.ComponentType, prop, array));
+                    props.Add(new MultiTargetPropertyDescriptor(
+                        prop.Name, prop.PropertyType, prop.ComponentType, prop, array));
 
                 var paramArray = array.Select(e => ((ContentItem)e).ProcessorParams).ToArray();
 
                 foreach (var p in processor.Properties)
                 {
-                    var prop = new OpaqueDataDictionaryElementPropertyDescriptor(p.Name,
-                                                                                 p.Type,
-                                                                                 null);
-                    var prop2 = new MultiTargetPropertyDescriptor(prop.Name,
-                                                             prop.PropertyType,
-                                                             prop.ComponentType,
-                                                             prop,
-                                                             paramArray);
+                    var prop = new OpaqueDataDictionaryElementPropertyDescriptor(
+                        p.Name, p.Type, null);
+
+                    var prop2 = new MultiTargetPropertyDescriptor(
+                        prop.Name,
+                        prop.PropertyType,
+                        prop.ComponentType,
+                        prop,
+                        paramArray);
+
                     props.Add(prop2);
                 }
             }
@@ -129,14 +125,13 @@ namespace MonoGame.Tools.Pipeline
                 if (value == PipelineTypes.MissingProcessor)
                 {
 
-                    props.Add(new ReadonlyPropertyDescriptor("Name", typeof (string), typeof (ProcessorTypeDescription), contentItem.ProcessorName));
+                    props.Add(new ReadonlyPropertyDescriptor(
+                        "Name", typeof(string), typeof(ProcessorTypeDescription), contentItem.ProcessorName));
 
                     foreach (var p in contentItem.ProcessorParams)
                     {
-                        var desc = new OpaqueDataDictionaryElementPropertyDescriptor(p.Key,
-                                                                                     p.Value.GetType(),
-                                                                                     contentItem.ProcessorParams);
-
+                        var desc = new OpaqueDataDictionaryElementPropertyDescriptor(
+                            p.Key, p.Value.GetType(), contentItem.ProcessorParams);
 
                         props.Add(desc);
                     }
@@ -150,9 +145,8 @@ namespace MonoGame.Tools.Pipeline
                     // Emit processor parameters.
                     foreach (var p in processor.Properties)
                     {
-                        var desc = new OpaqueDataDictionaryElementPropertyDescriptor(p.Name,
-                                                                                     p.Type,
-                                                                                     contentItem.ProcessorParams);
+                        var desc = new OpaqueDataDictionaryElementPropertyDescriptor(
+                            p.Name, p.Type, contentItem.ProcessorParams);
 
                         props.Add(desc);
                     }
@@ -185,7 +179,7 @@ namespace MonoGame.Tools.Pipeline
                         return false;
 
                     if (!item.Processor.Properties.Any())
-                        return false;                    
+                        return false;
                 }
             }
             else
@@ -195,9 +189,9 @@ namespace MonoGame.Tools.Pipeline
                     return false;
 
                 if (!item.Processor.Properties.Any())
-                    return false;          
+                    return false;
             }
-            
+
             return true;
         }
     }

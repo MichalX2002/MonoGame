@@ -63,8 +63,6 @@ namespace MonoGame.Testing
 
             _font = Content.Load<SpriteFont>("arial");
 
-            Content.ReloadGraphicsAssets();
-
             //using (var s = File.OpenRead(@"C:\Users\Michal Piatkowski\Pictures\ikon 100.png"))
             //{
             //    var tex = Texture2D.FromStream(s, GraphicsDevice);

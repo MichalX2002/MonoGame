@@ -48,7 +48,6 @@ namespace MonoGame.Imaging.Coding.Decoding
             return new ReadState(
                 _onStateReady,
                 _onOutputByteData,
-                null,
                 null);
         }
 
@@ -61,7 +60,7 @@ namespace MonoGame.Imaging.Coding.Decoding
         }
 
         private void OnOutputByteData(
-            in ReadState state, int address, AddressingMajor addressMajor, ReadOnlySpan<byte> pixels)
+            in ReadState state, int line, AddressingMajor addressMajor, ReadOnlySpan<byte> pixels)
         {
             if (SourcePixelType == null)
                 throw new InvalidOperationException("Missing source pixel type.");
@@ -71,9 +70,9 @@ namespace MonoGame.Imaging.Coding.Decoding
             if (SourcePixelType == CurrentImage.PixelType)
             {
                 if (addressMajor == AddressingMajor.Row)
-                    CurrentImage.SetPixelByteRow(0, address, pixels);
+                    CurrentImage.SetPixelByteRow(0, line, pixels);
                 else if (addressMajor == AddressingMajor.Column)
-                    CurrentImage.SetPixelByteColumn(0, address, pixels);
+                    CurrentImage.SetPixelByteColumn(0, line, pixels);
                 else
                     throw new ArgumentOutOfRangeException(nameof(addressMajor));
             }
@@ -81,6 +80,11 @@ namespace MonoGame.Imaging.Coding.Decoding
             {
                 throw new NotImplementedException();
             }
+        }
+
+        private void OnOutputFloatData(
+            in ReadState state, int line, AddressingMajor addressMajor, ReadOnlySpan<float> pixels)
+        {
         }
 
         public static VectorTypeInfo GetVectorType(in ReadState state)
