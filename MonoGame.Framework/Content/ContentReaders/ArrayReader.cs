@@ -2,8 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using MonoGame.Framework.Utilities;
-
 namespace MonoGame.Framework.Content
 {
     internal class ArrayReader<T> : ContentTypeReader<T[]>
@@ -15,7 +13,7 @@ namespace MonoGame.Framework.Content
         }
 
         protected internal override void Initialize(ContentTypeReaderManager manager)
-		{
+        {
             _elementReader = manager.GetTypeReader<T>();
         }
 
@@ -27,20 +25,20 @@ namespace MonoGame.Framework.Content
             if (array == null)
                 array = new T[count];
 
-            if (ReflectionHelpers.IsValueType<T>())
-			{
+            if (typeof(T).IsValueType)
+            {
                 for (uint i = 0; i < count; i++)
-                	array[i] = input.ReadObject<T>(_elementReader);
-			}
-			else
-			{
+                    array[i] = input.ReadObject<T>(_elementReader);
+            }
+            else
+            {
                 for (uint i = 0; i < count; i++)
                 {
                     var readerType = input.Read7BitEncodedInt();
-                	array[i] = readerType > 0 ?
+                    array[i] = readerType > 0 ?
                         input.ReadObject<T>(input.TypeReaders[readerType - 1]) : default;
                 }
-			}
+            }
             return array;
         }
     }

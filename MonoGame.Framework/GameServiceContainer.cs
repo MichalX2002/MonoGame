@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework
 {
@@ -25,7 +24,7 @@ namespace MonoGame.Framework
             if (provider == null)
                 throw new ArgumentNullException(nameof(provider));
 
-            if (!ReflectionHelpers.IsAssignableFrom(type, provider))
+            if (!type.IsAssignableFrom(provider.GetType()))
                 throw new ArgumentException("The provider does not match the specified service type.");
 
             _services.Add(type, provider);

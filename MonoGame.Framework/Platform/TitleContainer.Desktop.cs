@@ -16,9 +16,12 @@ namespace MonoGame.Framework
             // Check for the package Resources Folder first. This is where the assets will be bundled.
             if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
                 Location = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources");
+
             if (!Directory.Exists(Location))
 #endif
-            Location = AppDomain.CurrentDomain.BaseDirectory;
+            {
+                Location = AppDomain.CurrentDomain.BaseDirectory;
+            }
 #endif
         }
 

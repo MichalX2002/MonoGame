@@ -110,7 +110,7 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public override string ToString()
         {
-            return string.IsNullOrEmpty(Name) ? base.ToString() : Name;
+            return base.ToString() + (string.IsNullOrEmpty(Name) ? "" : (": \"" + Name + "\""));
         }
 
         /// <summary>

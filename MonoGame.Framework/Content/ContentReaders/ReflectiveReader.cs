@@ -30,7 +30,7 @@ namespace MonoGame.Framework.Content
         {
             base.Initialize(manager);
 
-            var baseType = ReflectionHelpers.GetBaseType(TargetType);
+            var baseType = TargetType.BaseType;
             if (baseType != null && baseType != typeof(object))
                 _baseTypeReader = manager.GetTypeReader(baseType);
 
@@ -75,10 +75,10 @@ namespace MonoGame.Framework.Content
             }
 
             // Are we explicitly asked to ignore this item?
-            if (ReflectionHelpers.GetCustomAttribute<ContentSerializerIgnoreAttribute>(member) != null) 
+            if (member.GetCustomAttribute<ContentSerializerIgnoreAttribute>() != null) 
                 return null;
 
-            var contentSerializerAttribute = ReflectionHelpers.GetCustomAttribute<ContentSerializerAttribute>(member);
+            var contentSerializerAttribute = member.GetCustomAttribute<ContentSerializerAttribute>();
             if (contentSerializerAttribute == null)
             {
                 if (property != null)

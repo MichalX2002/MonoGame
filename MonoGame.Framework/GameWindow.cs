@@ -12,6 +12,8 @@ namespace MonoGame.Framework
 {
     public abstract class GameWindow
     {
+        public delegate void FileDropEvent(GameWindow window, string filePath);
+
         private string _title;
         internal bool _allowAltF4 = true;
 
@@ -95,6 +97,7 @@ namespace MonoGame.Framework
         public event DatalessEvent<GameWindow> ClientSizeChanged;
         public event DatalessEvent<GameWindow> OrientationChanged;
         public event DatalessEvent<GameWindow> ScreenDeviceNameChanged;
+        public event FileDropEvent FileDropped;
 
 #if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
 
@@ -144,19 +147,33 @@ namespace MonoGame.Framework
         {
         }
 
-        internal void OnClientSizeChanged() => ClientSizeChanged?.Invoke(this);
+        internal void OnClientSizeChanged()
+        {
+            ClientSizeChanged?.Invoke(this);
+        }
 
         protected void OnDeactivated()
         {
         }
 
-        protected void OnOrientationChanged() => OrientationChanged?.Invoke(this);
+        protected void OnOrientationChanged()
+        {
+            OrientationChanged?.Invoke(this);
+        }
 
         protected void OnPaint()
         {
         }
 
-        protected void OnScreenDeviceNameChanged() => ScreenDeviceNameChanged?.Invoke(this);
+        protected void OnScreenDeviceNameChanged()
+        {
+            ScreenDeviceNameChanged?.Invoke(this);
+        }
+
+        protected void OnFileDropped(GameWindow window, string filePath)
+        {
+            FileDropped?.Invoke(window, filePath);
+        }
 
         protected internal abstract void SetSupportedOrientations(DisplayOrientation orientations);
 

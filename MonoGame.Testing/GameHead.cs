@@ -63,6 +63,8 @@ namespace MonoGame.Testing
 
             _font = Content.Load<SpriteFont>("arial");
 
+            Content.ReloadGraphicsAssets();
+
             //using (var s = File.OpenRead(@"C:\Users\Michal Piatkowski\Pictures\ikon 100.png"))
             //{
             //    var tex = Texture2D.FromStream(s, GraphicsDevice);
@@ -101,26 +103,26 @@ namespace MonoGame.Testing
                 Console.WriteLine("Content.Load<Song>('" + songs[i] + "') Time: " + _watch.ElapsedMilliseconds + "ms");
             }
 
-            readers = new List<VorbisReader>();
-            foreach (var file in Directory.EnumerateFiles(@"C:\Users\Michal Piatkowski\Music", "*.ogg",
-                new EnumerationOptions()
-                {
-                    RecurseSubdirectories = true,
-                    MatchCasing = MatchCasing.CaseInsensitive
-                }))
-            {
-                try
-                {
-                    Console.Write(file + " - ");
-                    var reader = new VorbisReader(new NVorbis.Ogg.LightOggContainerReader(File.OpenRead(file), false));
-                    readers.Add(reader);
-                    Console.WriteLine("Duration: " + reader.TotalTime);
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine("Error: " + ex.Message);
-                }
-            }
+            //readers = new List<VorbisReader>();
+            //foreach (var file in Directory.EnumerateFiles(@"C:\Users\Michal Piatkowski\Music", "*.ogg",
+            //    new EnumerationOptions()
+            //    {
+            //        RecurseSubdirectories = true,
+            //        MatchCasing = MatchCasing.CaseInsensitive
+            //    }))
+            //{
+            //    try
+            //    {
+            //        Console.Write(file + " - ");
+            //        var reader = new VorbisReader(new NVorbis.Ogg.LightOggContainerReader(File.OpenRead(file), false));
+            //        readers.Add(reader);
+            //        Console.WriteLine("Duration: " + reader.TotalTime);
+            //    }
+            //    catch(Exception ex)
+            //    {
+            //        Console.WriteLine("Error: " + ex.Message);
+            //    }
+            //}
         }
 
         List<VorbisReader> readers;

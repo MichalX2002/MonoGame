@@ -18,10 +18,10 @@ namespace MonoGame.Imaging
     {
         private static void SetupReflection()
         {
-            SetupReflectionLoadPixels();
-            SetupReflectionLoadPixelRows();
-            SetupReflectionWrapMemory();
-            SetupReflectionCreate();
+            SetupReflection_LoadPixels();
+            SetupReflection_LoadPixelRows();
+            SetupReflection_WrapMemory();
+            SetupReflection_Create();
         }
 
         private static TDelegate CreateDelegateForMethod<TDelegate>(MethodInfo method)
@@ -42,7 +42,7 @@ namespace MonoGame.Imaging
         private static MethodInfo _loadPixelSpanMethod;
         private static ConcurrentDictionary<FromToPixelTypes, LoadPixelSpanDelegate> _loadPixelSpanDelegateCache;
 
-        private static void SetupReflectionLoadPixels()
+        private static void SetupReflection_LoadPixels()
         {
             _loadPixelSpanMethod = typeof(Image).GetMethod(nameof(LoadPixelSpan), BindingFlags.NonPublic | BindingFlags.Static);
             _loadPixelSpanDelegateCache = new ConcurrentDictionary<FromToPixelTypes, LoadPixelSpanDelegate>();
@@ -89,7 +89,7 @@ namespace MonoGame.Imaging
         private static MethodInfo _loadPixelRowsMethod;
         private static ConcurrentDictionary<FromToPixelTypes, LoadPixelRowsDelegate> _loadPixelRowsDelegateCache;
 
-        private static void SetupReflectionLoadPixelRows()
+        private static void SetupReflection_LoadPixelRows()
         {
             _loadPixelRowsMethod = typeof(Image).GetMethod(nameof(LoadPixelRows), BindingFlags.NonPublic | BindingFlags.Static);
             _loadPixelRowsDelegateCache = new ConcurrentDictionary<FromToPixelTypes, LoadPixelRowsDelegate>();
@@ -121,7 +121,7 @@ namespace MonoGame.Imaging
         private static MethodInfo _wrapMemoryMethod;
         private static ConcurrentDictionary<VectorTypeInfo, WrapMemoryDelegate> _wrapMemoryDelegateCache;
 
-        private static void SetupReflectionWrapMemory()
+        private static void SetupReflection_WrapMemory()
         {
             var arguments = typeof(WrapMemoryDelegate).GetDelegateParameters().AsTypes();
 
@@ -151,7 +151,7 @@ namespace MonoGame.Imaging
         private static Type[] _createMethodArguments;
         private static ConcurrentDictionary<VectorTypeInfo, CreateDelegate> _createDelegateCache;
 
-        private static void SetupReflectionCreate()
+        private static void SetupReflection_Create()
         {
             _createMethodArguments = typeof(CreateDelegate).GetDelegateParameters().AsTypes();
             _createDelegateCache = new ConcurrentDictionary<VectorTypeInfo, CreateDelegate>(

@@ -81,6 +81,13 @@ namespace MonoGame
             GameController = 0x00002000,
         }
 
+        public enum EventState : int
+        {
+            Query = -1,
+            Ignore = 0,
+            Enable = 1,
+        }
+
         public enum EventType : uint
         {
             First = 0,
@@ -126,6 +133,9 @@ namespace MonoGame
             ClipboardUpdate = 0x900,
 
             DropFile = 0x1000,
+            DropText = 0x1001,          
+            DropBegin = 0x1002,         
+            DropCompleted = 0x1003,
 
             AudioDeviceAdded = 0x1100,
             AudioDeviceRemoved = 0x1101,
@@ -157,6 +167,7 @@ namespace MonoGame
             [FieldOffset(0)] public Mouse.WheelEvent Wheel;
             [FieldOffset(0)] public Joystick.DeviceEvent JoystickDevice;
             [FieldOffset(0)] public GameController.DeviceEvent ControllerDevice;
+            [FieldOffset(0)] public Drop.DropEvent Drop;
         }
 
         public struct Rectangle
@@ -249,6 +260,11 @@ namespace MonoGame
         public delegate int d_sdl_pumpevents();
         public static d_sdl_pumpevents PumpEvents =
             FL.LoadFunction<d_sdl_pumpevents>(NativeLibrary, "SDL_PumpEvents");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate EventState d_sdl_eventstate(EventType type, EventState state);
+        public static d_sdl_eventstate SetEventState =
+            FL.LoadFunction<d_sdl_eventstate>(NativeLibrary, "SDL_EventState");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_creatergbsurfacefrom(

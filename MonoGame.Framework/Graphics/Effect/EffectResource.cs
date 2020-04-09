@@ -40,7 +40,7 @@ namespace MonoGame.Framework.Graphics
                         if (_bytecode != null)
                             return _bytecode;
 
-                        var assembly = ReflectionHelpers.GetAssembly(typeof(EffectResource));
+                        var assembly = typeof(EffectResource).Assembly;
                         var stream = assembly.GetManifestResourceStream(_name);
                         if (stream == null)
                             throw new ContentLoadException($"Missing effect resource named \"{_name}\".");

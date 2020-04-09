@@ -14,6 +14,8 @@ namespace MonoGame.Framework
 {
     internal class SdlGamePlatform : GamePlatform
     {
+        const int MouseWheelDelta = 120;
+
         public override GameRunBehavior DefaultRunBehavior => GameRunBehavior.Synchronous;
 
         private readonly Game _game;
@@ -98,7 +100,7 @@ namespace MonoGame.Framework
                 switch (ev.Type)
                 {
                     case SDL.EventType.Quit:
-                        _isExiting++;
+                        Interlocked.Increment(ref _isExiting);
                         break;
 
                     case SDL.EventType.JoyDeviceAdded:
@@ -120,9 +122,8 @@ namespace MonoGame.Framework
                         break;
 
                     case SDL.EventType.MouseWheel:
-                        const int wheelDelta = 120;
-                        Mouse.ScrollY += ev.Wheel.Y * wheelDelta;
-                        Mouse.ScrollX += ev.Wheel.X * wheelDelta;
+                        Mouse.ScrollY += ev.Wheel.Y * MouseWheelDelta;
+                        Mouse.ScrollX += ev.Wheel.X * MouseWheelDelta;
                         break;
 
                     case SDL.EventType.MouseMotion:
@@ -157,8 +158,18 @@ namespace MonoGame.Framework
                             ProcessTextInput(ev.Text.Text);
                         break;
 
-                    case SDL.EventType.WindowEvent:
+                    case SDL.EventType.DropFile:
+                        try
+                        {
+                            _window.InvokeFileDropped(InteropHelpers.Utf8ToString(ev.Drop.File));
+                        }
+                        finally
+                        {
+                            SDL.Free(ev.Drop.File);
+                        }
+                        break;
 
+                    case SDL.EventType.WindowEvent:
                         switch (ev.Window.EventId)
                         {
                             case SDL.Window.EventId.Resized:
@@ -179,7 +190,7 @@ namespace MonoGame.Framework
                                 break;
 
                             case SDL.Window.EventId.Close:
-                                _isExiting++;
+                                Interlocked.Increment(ref _isExiting);
                                 break;
                         }
                         break;
@@ -189,13 +200,13 @@ namespace MonoGame.Framework
 
         private unsafe void ProcessTextInput(byte* text)
         {
-            int len = 0;
+            int length = 0;
             int utf8character = 0; // using an int to encode multibyte characters longer than 2 bytes
             int charByteSize = 0; // UTF8 char length to decode
             int remainingShift = 0;
 
             byte currentByte;
-            while ((currentByte = Marshal.ReadByte((IntPtr)text, len)) != 0)
+            while ((currentByte = Marshal.ReadByte((IntPtr)text, length)) != 0)
             {
                 // we're reading the first UTF8 byte, we need to check if it's multibyte
                 if (charByteSize == 0)
@@ -230,11 +241,12 @@ namespace MonoGame.Framework
                     int codepoint = UTF8ToUnicode(utf8character);
                     if (codepoint >= 0)
                     {
-                        _window.OnTextInput(new TextInputEventArgs(codepoint, KeyboardUtil.ToXna(codepoint)));
+                        _window.OnTextInput(
+                            new TextInputEventArgs(codepoint, KeyboardUtil.ToXna(codepoint)));
                     }
                 }
 
-                len++;
+                length++;
             }
         }
 

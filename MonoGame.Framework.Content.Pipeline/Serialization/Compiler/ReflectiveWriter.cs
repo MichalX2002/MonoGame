@@ -32,7 +32,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         protected override void Initialize(ContentCompiler compiler)
         {
             _compiler = compiler;
-            var type = ReflectionHelpers.GetBaseType(TargetType);                
+            var type = TargetType.BaseType;         
             if (type != null && type != typeof(object) && !TargetType.IsValueType)
                 _baseType = type;
 
@@ -70,10 +70,10 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                 return false;
 
             // Are we explicitly asked to ignore this item?
-            if (ReflectionHelpers.GetCustomAttribute<ContentSerializerIgnoreAttribute>(property) != null)
+            if (property.GetCustomAttribute<ContentSerializerIgnoreAttribute>() != null)
                 return false;
 
-            var contentSerializerAttribute = ReflectionHelpers.GetCustomAttribute<ContentSerializerAttribute>(property);
+            var contentSerializerAttribute = property.GetCustomAttribute<ContentSerializerAttribute>();
             if (contentSerializerAttribute == null)
             {
                 // There is no ContentSerializerAttribute, so non-public
@@ -100,10 +100,10 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         private bool IsValidField(FieldInfo field)
         {
             // Are we explicitly asked to ignore this item?
-            if (ReflectionHelpers.GetCustomAttribute<ContentSerializerIgnoreAttribute>(field) != null)
+            if (field.GetCustomAttribute<ContentSerializerIgnoreAttribute>() != null)
                 return false;
 
-            var contentSerializerAttribute = ReflectionHelpers.GetCustomAttribute<ContentSerializerAttribute>(field);
+            var contentSerializerAttribute = field.GetCustomAttribute<ContentSerializerAttribute>();
             if (contentSerializerAttribute == null)
             {
                 // There is no ContentSerializerAttribute, so non-public

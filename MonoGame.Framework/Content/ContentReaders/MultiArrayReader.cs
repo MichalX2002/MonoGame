@@ -41,8 +41,10 @@ namespace MonoGame.Framework.Content
             for (int i = 0; i < count; i++)
             {
                 T value;
-                if (ReflectionHelpers.IsValueType<T>())
+                if (typeof(T).IsValueType)
+                {
                     value = input.ReadObject<T>(elementReader);
+                }
                 else
                 {
                     var readerType = input.Read7BitEncodedInt();

@@ -7,7 +7,6 @@ using System.Collections;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework.Content
 {
@@ -23,7 +22,7 @@ namespace MonoGame.Framework.Content
         {
             _syncRoot = new object();
             _contentReadersCache = new Dictionary<Type, ContentTypeReader>(255);
-            _assemblyName = ReflectionHelpers.GetAssembly(typeof(ContentTypeReaderManager)).FullName;
+            _assemblyName = typeof(ContentTypeReaderManager).Assembly.FullName;
         }
 
         public ContentTypeReader GetTypeReader(Type targetType)

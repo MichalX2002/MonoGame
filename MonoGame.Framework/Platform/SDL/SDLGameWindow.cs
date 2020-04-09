@@ -355,6 +355,11 @@ namespace MonoGame.Framework
             OnClientSizeChanged();
         }
 
+        public void InvokeFileDropped(string filePath)
+        {
+            OnFileDropped(this, filePath);
+        }
+
         protected internal override void SetSupportedOrientations(DisplayOrientation orientations)
         {
         }

@@ -48,7 +48,7 @@ namespace MonoGame.Framework.Input
         /// </summary>
         internal static void InitDatabase()
         {
-            var assembly = ReflectionHelpers.GetAssembly(typeof(GamePad));
+            var assembly = typeof(GamePad).Assembly;
             using var stream = assembly.GetManifestResourceStream("gamecontrollerdb.txt");
             if (stream == null)
                 return;

@@ -134,7 +134,7 @@ namespace MonoGame.Framework.Content
 
         public T ReadObject<T>(ContentTypeReader typeReader, T existingInstance)
         {
-            if (!ReflectionHelpers.IsValueType(typeReader.TargetType))
+            if (!typeReader.TargetType.IsValueType)
                 return ReadObject(existingInstance);
 
             T result = (T)typeReader.Read(this, existingInstance);

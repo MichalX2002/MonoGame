@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System.Collections.Generic;
-using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework.Content
 {
@@ -19,7 +18,7 @@ namespace MonoGame.Framework.Content
 
         protected internal override void Initialize(ContentTypeReaderManager manager)
         {
-			_elementReader = manager.GetTypeReader(typeof(T));
+            _elementReader = manager.GetTypeReader(typeof(T));
         }
 
         protected internal override List<T> Read(ContentReader input, List<T> existingInstance)
@@ -29,15 +28,15 @@ namespace MonoGame.Framework.Content
 
             for (int i = 0; i < count; i++)
             {
-                if (ReflectionHelpers.IsValueType<T>())
-				{
-                	list.Add(input.ReadObject<T>(_elementReader));
-				}
-				else
-				{
+                if (typeof(T).IsValueType)
+                {
+                    list.Add(input.ReadObject<T>(_elementReader));
+                }
+                else
+                {
                     var readerType = input.Read7BitEncodedInt();
-                	list.Add(readerType > 0 ? input.ReadObject<T>(input.TypeReaders[readerType - 1]) : default);
-				}
+                    list.Add(readerType > 0 ? input.ReadObject<T>(input.TypeReaders[readerType - 1]) : default);
+                }
             }
             return list;
         }

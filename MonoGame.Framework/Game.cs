@@ -56,7 +56,7 @@ namespace MonoGame.Framework
 
         private TimeSpan _accumulatedElapsedTime;
         private Stopwatch _gameTimer = new Stopwatch();
-        private long _previousTicks;
+        private TimeSpan _previousTicks;
         private int _updateFrameLag;
 
         private bool _isDisposed;
@@ -284,7 +284,7 @@ namespace MonoGame.Framework
             _gameTimer.Restart();
             _accumulatedElapsedTime = TimeSpan.Zero;
             Time.ElapsedGameTime = TimeSpan.Zero;
-            _previousTicks = 0L;
+            _previousTicks = TimeSpan.Zero;
         }
 
         public void SuppressDraw()
@@ -392,8 +392,8 @@ namespace MonoGame.Framework
             }
 
             // Advance the accumulated elapsed time.
-            long currentTicks = _gameTimer.Elapsed.Ticks;
-            _accumulatedElapsedTime += TimeSpan.FromTicks(currentTicks - _previousTicks);
+            var currentTicks = _gameTimer.Elapsed;
+            _accumulatedElapsedTime += currentTicks - _previousTicks;
             _previousTicks = currentTicks;
 
             if (IsFixedTimeStep && _accumulatedElapsedTime < TargetElapsedTime)
