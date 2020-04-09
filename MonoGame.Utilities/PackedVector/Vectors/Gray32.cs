@@ -36,7 +36,7 @@ namespace MonoGame.Framework.PackedVector
             var v = Vector4.Clamp(scaledVector, 0, 1);
             v *= uint.MaxValue;
 
-            L = PackedVectorHelper.Get32BitBT709Luminance((uint)v.X, (uint)v.Y, (uint)v.Z);
+            L = (uint)PackedVectorHelper.GetBT709Luminance(v.X, v.Y, v.Z);
         }
 
         public readonly void ToScaledVector4(out Vector4 scaledVector)
@@ -49,30 +49,43 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPixel
 
-        public void FromGray8(Gray8 source) => L = PackedVectorHelper.UpScale8To32Bit(source.L);
+        public void FromGray8(Gray8 source)
+        {
+            L = PackedVectorHelper.UpScale8To32Bit(source.L);
+        }
 
-        public void FromGray16(Gray16 source) => L = PackedVectorHelper.UpScale16To32Bit(source.L);
+        public void FromGray16(Gray16 source)
+        {
+            L = PackedVectorHelper.UpScale16To32Bit(source.L);
+        }
 
-        public void FromGrayAlpha16(GrayAlpha16 source) => L = PackedVectorHelper.UpScale8To32Bit(source.L);
+        public void FromGrayAlpha16(GrayAlpha16 source)
+        {
+            L = PackedVectorHelper.UpScale8To32Bit(source.L);
+        }
 
         public void FromRgb24(Rgb24 source)
         {
-            L = PackedVectorHelper.UpScale8To32Bit(PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
+            L = PackedVectorHelper.UpScale8To32Bit(
+                PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
         }
 
         public void FromColor(Color source)
         {
-            L = PackedVectorHelper.UpScale8To32Bit(PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
+            L = PackedVectorHelper.UpScale8To32Bit(
+                PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
         }
 
         public void FromRgb48(Rgb48 source)
         {
-            L = PackedVectorHelper.UpScale16To32Bit(PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
+            L = PackedVectorHelper.UpScale16To32Bit(
+                PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
         }
 
         public void FromRgba64(Rgba64 source)
         {
-            L = PackedVectorHelper.UpScale16To32Bit(PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
+            L = PackedVectorHelper.UpScale16To32Bit(
+                PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
         }
 
         public readonly void ToColor(ref Color destination)

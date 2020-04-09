@@ -1,8 +1,17 @@
 ﻿using System;
 using System.IO;
+using MonoGame.Framework;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
+    /// <summary>
+    /// Represents a progress update for image decoding.
+    /// </summary>
+    public delegate void DecodeProgressCallback(
+        ImageDecoderState decoderState,
+        double percentage,
+        Rectangle? rectangle);
+
     public abstract class ImageDecoderState : ImageCodecState
     {
         #region Properties

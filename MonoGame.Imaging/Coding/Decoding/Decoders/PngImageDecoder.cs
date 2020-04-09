@@ -9,7 +9,7 @@ namespace MonoGame.Imaging.Coding.Decoding
         public override ImageFormat Format => ImageFormat.Png;
 
         protected override bool ReadFirst(
-            ImageStbDecoderState decoderState, ref ReadState readState)
+            StbImageDecoderState decoderState, ref ReadState readState)
         {
             throw new System.Exception("fix me");
             //return Png.Load(decoderState.ReadContext, ref readState);

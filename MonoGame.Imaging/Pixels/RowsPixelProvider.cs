@@ -94,63 +94,63 @@ namespace MonoGame.Imaging.Pixels
         private static unsafe bool Transform32<TPixel>(
             ReadOnlySpan<TPixel> sourceRow,
             int components,
-            int count,
+            int pixelCount,
             Span<byte> destination,
             ref int bufferOffset,
             ref PixelConverter32 pixelConverter)
             where TPixel : unmanaged, IPixel
         {
             // some for-loops in the following cases use "count - 1" so
-            // we can copy leftover bytes if the request length is irregular
+            // we can copy leftover bytes if the request length is not aligned
             int i = 0;
-            Vector4 tmpVector;
+            Vector4 vector;
             switch (components)
             {
                 case 1:
-                    for (; i < count; i++, bufferOffset++)
+                    for (; i < pixelCount; i++, bufferOffset++)
                     {
-                        sourceRow[i].ToScaledVector4(out tmpVector);
-                        pixelConverter.Gray.FromScaledVector4(tmpVector);
+                        sourceRow[i].ToScaledVector4(out vector);
+                        pixelConverter.Gray.FromScaledVector4(vector);
                         destination[bufferOffset] = pixelConverter.Raw[0];
                     }
                     return true;
 
                 // TODO: deduplicate conversion code, think about some dynamic way of
-                // creating conversion functions, maybe with some heavy LINQ expressions?
+                // creating conversion functions, maybe with some complex LINQ expressions?
 
                 case 2:
-                    for (; i < count - 1; i++, bufferOffset += sizeof(GrayAlpha16))
+                    for (; i < pixelCount - 1; i++, bufferOffset += sizeof(GrayAlpha16))
                     {
-                        sourceRow[i].ToScaledVector4(out tmpVector);
-                        pixelConverter.GrayAlpha.FromScaledVector4(tmpVector);
+                        sourceRow[i].ToScaledVector4(out vector);
+                        pixelConverter.GrayAlpha.FromScaledVector4(vector);
                         for (int j = 0; j < sizeof(GrayAlpha16); j++)
                             destination[j + bufferOffset] = pixelConverter.Raw[j];
                     }
 
-                    sourceRow[i].ToScaledVector4(out tmpVector);
-                    pixelConverter.GrayAlpha.FromScaledVector4(tmpVector);
+                    sourceRow[i].ToScaledVector4(out vector);
+                    pixelConverter.GrayAlpha.FromScaledVector4(vector);
                     return false;
 
                 case 3:
-                    for (; i < count - 1; i++, bufferOffset += sizeof(Rgb24))
+                    for (; i < pixelCount - 1; i++, bufferOffset += sizeof(Rgb24))
                     {
-                        sourceRow[i].ToScaledVector4(out tmpVector);
-                        pixelConverter.Rgb.FromScaledVector4(tmpVector);
+                        sourceRow[i].ToScaledVector4(out vector);
+                        pixelConverter.Rgb.FromScaledVector4(vector);
                         for (int j = 0; j < sizeof(Rgb24); j++)
                             destination[j + bufferOffset] = pixelConverter.Raw[j];
                     }
 
-                    sourceRow[i].ToScaledVector4(out tmpVector);
-                    pixelConverter.Rgb.FromScaledVector4(tmpVector);
+                    sourceRow[i].ToScaledVector4(out vector);
+                    pixelConverter.Rgb.FromScaledVector4(vector);
                     return false;
 
                 case 4:
                     if (typeof(TPixel) == typeof(Color))
                     {
-                        fixed (TPixel* srcPtr =sourceRow)
+                        fixed (TPixel* srcPtr = sourceRow)
                         fixed (byte* dstPtr = destination)
                         {
-                            int bytes = count * sizeof(TPixel);
+                            int bytes = pixelCount * sizeof(TPixel);
                             Buffer.MemoryCopy(srcPtr, dstPtr + bufferOffset, bytes, bytes);
                             bufferOffset += bytes;
                         }
@@ -158,7 +158,7 @@ namespace MonoGame.Imaging.Pixels
                     }
                     else
                     {
-                        for (; i < count - 1; i++, bufferOffset += sizeof(Color))
+                        for (; i < pixelCount - 1; i++, bufferOffset += sizeof(Color))
                         {
                             sourceRow[i].ToColor(ref pixelConverter.Rgba);
                             for (int j = 0; j < sizeof(Color); j++)

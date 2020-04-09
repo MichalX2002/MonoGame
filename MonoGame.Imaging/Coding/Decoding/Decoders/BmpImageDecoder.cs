@@ -7,7 +7,7 @@ namespace MonoGame.Imaging.Coding.Decoding
         public override ImageFormat Format => ImageFormat.Bmp;
 
         protected override bool ReadFirst(
-            ImageStbDecoderState decoderState, ref ReadState readState)
+            StbImageDecoderState decoderState, ref ReadState readState)
         {
             return Bmp.Load(decoderState.Context, ref readState);
         }

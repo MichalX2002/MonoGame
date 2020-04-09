@@ -36,7 +36,7 @@ namespace MonoGame.Framework.PackedVector
             v += Vector4.Half;
             v.Clamp(0, byte.MaxValue);
 
-            L = PackedVectorHelper.Get8BitBT709Luminance((byte)v.X, (byte)v.Y, (byte)v.Z);
+            L = (byte)(PackedVectorHelper.GetBT709Luminance(v.X, v.Y, v.Z) + 0.5f);
         }
 
         public readonly void ToScaledVector4(out Vector4 scaledVector)
@@ -47,27 +47,42 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPixel
 
-        public void FromGray8(Gray8 source) => L = source.L;
+        public void FromGray8(Gray8 source)
+        {
+            L = source.L;
+        }
 
-        public void FromGray16(Gray16 source) => L = PackedVectorHelper.DownScale16To8Bit(source.L);
+        public void FromGray16(Gray16 source)
+        {
+            L = PackedVectorHelper.DownScale16To8Bit(source.L);
+        }
 
-        public void FromGrayAlpha16(GrayAlpha16 source) => L = source.L;
+        public void FromGrayAlpha16(GrayAlpha16 source)
+        {
+            L = source.L;
+        }
 
-        public void FromRgb24(Rgb24 source) => L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
+        public void FromRgb24(Rgb24 source)
+        {
+            L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
+        }
 
-        public void FromColor(Color source) => L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
+        public void FromColor(Color source)
+        {
+            L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
+        }
 
-        public void FromRgb48(Rgb48 source) =>
-            L = PackedVectorHelper.Get8BitBT709Luminance(
-                PackedVectorHelper.DownScale16To8Bit(source.R),
-                PackedVectorHelper.DownScale16To8Bit(source.G),
-                PackedVectorHelper.DownScale16To8Bit(source.B));
+        public void FromRgb48(Rgb48 source)
+        {
+            L = PackedVectorHelper.DownScale16To8Bit(
+                PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
+        }
 
-        public void FromRgba64(Rgba64 source) =>
-            L = PackedVectorHelper.Get8BitBT709Luminance(
-                PackedVectorHelper.DownScale16To8Bit(source.R),
-                PackedVectorHelper.DownScale16To8Bit(source.G),
-                PackedVectorHelper.DownScale16To8Bit(source.B));
+        public void FromRgba64(Rgba64 source)
+        {
+            L = PackedVectorHelper.DownScale16To8Bit(
+                PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
+        }
 
         public readonly void ToColor(ref Color destination)
         {

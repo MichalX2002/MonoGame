@@ -10,9 +10,9 @@ namespace MonoGame.Imaging.Coding.Decoding
 
         #region Decode Abstraction
 
-        protected abstract bool ReadFirst(ImageStbDecoderState decoderState, ref ReadState readState);
+        protected abstract bool ReadFirst(StbImageDecoderState decoderState, ref ReadState readState);
 
-        protected virtual bool ReadNext(ImageStbDecoderState decoderState, ref ReadState readState)
+        protected virtual bool ReadNext(StbImageDecoderState decoderState, ref ReadState readState)
         {
             ImagingArgumentGuard.AssertAnimationSupport(this, decoderState.ImagingConfig);
             return false;
@@ -63,10 +63,9 @@ namespace MonoGame.Imaging.Coding.Decoding
         public ImageDecoderState DecodeFirst(
             ImagingConfig config,
             ImageReadStream stream,
-            VectorTypeInfo pixelType = null,
-            DecodeProgressCallback onProgress = null)
+            VectorTypeInfo pixelType = null)
         {
-            var state = new ImageStbDecoderState(config, this, stream);
+            var state = new StbImageDecoderState(config, this, stream);
             state.PreferredPixelType = pixelType;
 
             var readState = state.CreateReadState();
@@ -86,10 +85,9 @@ namespace MonoGame.Imaging.Coding.Decoding
 
         public void DecodeNext(
             ImageDecoderState decoderState,
-            VectorTypeInfo pixelType = null,
-            DecodeProgressCallback onProgress = null)
+            VectorTypeInfo pixelType = null)
         {
-            var state = (ImageStbDecoderState)decoderState;
+            var state = (StbImageDecoderState)decoderState;
             if (state.ImageIndex < 0)
                 throw new InvalidOperationException("The decoder state is invalid.");
             state.PreferredPixelType = pixelType;

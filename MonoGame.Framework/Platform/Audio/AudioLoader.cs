@@ -357,6 +357,7 @@ namespace MonoGame.Framework.Audio
 
             if (Vector.IsHardwareAccelerated)
             {
+                // TODO: also consider SSE for this, which may be a bit faster
                 // this is roughly 2x perf on AVX2
 
                 var maxValueVec = new Vector<float>(short.MaxValue);

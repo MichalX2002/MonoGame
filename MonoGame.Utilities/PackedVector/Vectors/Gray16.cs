@@ -40,7 +40,7 @@ namespace MonoGame.Framework.PackedVector
             v += Vector4.Half;
             v.Clamp(0, ushort.MaxValue);
 
-            L = PackedVectorHelper.Get16BitBT709Luminance((ushort)v.X, (ushort)v.Y, (ushort)v.Z);
+            L = (ushort)PackedVectorHelper.GetBT709Luminance(v.X, v.Y, v.Z);
         }
 
         public readonly void ToScaledVector4(out Vector4 scaledVector)
@@ -53,31 +53,42 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPixel
 
-        public void FromGray8(Gray8 source) =>
+        public void FromGray8(Gray8 source)
+        {
             L = PackedVectorHelper.UpScale8To16Bit(source.L);
+        }
 
-        public void FromGrayAlpha16(GrayAlpha16 source) =>
+        public void FromGrayAlpha16(GrayAlpha16 source)
+        {
             L = PackedVectorHelper.UpScale8To16Bit(source.L);
+        }
 
-        public void FromGray16(Gray16 source) => L = source.L;
+        public void FromGray16(Gray16 source)
+        {
+            L = source.L;
+        }
 
-        public void FromRgb24(Rgb24 source) =>
-            L = PackedVectorHelper.Get16BitBT709Luminance(
-                PackedVectorHelper.UpScale8To16Bit(source.R),
-                PackedVectorHelper.UpScale8To16Bit(source.G),
-                PackedVectorHelper.UpScale8To16Bit(source.B));
+        public void FromRgb24(Rgb24 source)
+        {
+            L = PackedVectorHelper.UpScale8To16Bit(
+                PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
+        }
 
-        public void FromColor(Color source) =>
-            L = PackedVectorHelper.Get16BitBT709Luminance(
-                PackedVectorHelper.UpScale8To16Bit(source.R),
-                PackedVectorHelper.UpScale8To16Bit(source.G),
-                PackedVectorHelper.UpScale8To16Bit(source.B));
+        public void FromColor(Color source)
+        {
+            L = PackedVectorHelper.UpScale8To16Bit(
+                PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
+        }
 
-        public void FromRgb48(Rgb48 source) =>
+        public void FromRgb48(Rgb48 source)
+        {
             L = PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B);
+        }
 
-        public void FromRgba64(Rgba64 source) =>
+        public void FromRgba64(Rgba64 source)
+        {
             L = PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B);
+        }
 
         public readonly void ToColor(ref Color destination)
         {
@@ -88,23 +99,29 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        public void FromArgb32(Argb32 source) =>
+        public void FromArgb32(Argb32 source)
+        {
             L = PackedVectorHelper.Get16BitBT709Luminance(
-                PackedVectorHelper.UpScale8To16Bit(source.R),
-                PackedVectorHelper.UpScale8To16Bit(source.G),
-                PackedVectorHelper.UpScale8To16Bit(source.B));
+                    PackedVectorHelper.UpScale8To16Bit(source.R),
+                    PackedVectorHelper.UpScale8To16Bit(source.G),
+                    PackedVectorHelper.UpScale8To16Bit(source.B));
+        }
 
-        public void FromBgr24(Bgr24 source) =>
+        public void FromBgr24(Bgr24 source)
+        {
             L = PackedVectorHelper.Get16BitBT709Luminance(
-                PackedVectorHelper.UpScale8To16Bit(source.R),
-                PackedVectorHelper.UpScale8To16Bit(source.G),
-                PackedVectorHelper.UpScale8To16Bit(source.B));
+                    PackedVectorHelper.UpScale8To16Bit(source.R),
+                    PackedVectorHelper.UpScale8To16Bit(source.G),
+                    PackedVectorHelper.UpScale8To16Bit(source.B));
+        }
 
-        public void FromBgra32(Bgra32 source) =>
+        public void FromBgra32(Bgra32 source)
+        {
             L = PackedVectorHelper.Get16BitBT709Luminance(
-                PackedVectorHelper.UpScale8To16Bit(source.R),
-                PackedVectorHelper.UpScale8To16Bit(source.G),
-                PackedVectorHelper.UpScale8To16Bit(source.B));
+                    PackedVectorHelper.UpScale8To16Bit(source.R),
+                    PackedVectorHelper.UpScale8To16Bit(source.G),
+                    PackedVectorHelper.UpScale8To16Bit(source.B));
+        }
 
         #region Equals
 

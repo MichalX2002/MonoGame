@@ -48,7 +48,7 @@ namespace MonoGame.Framework.PackedVector
             v += Vector4.Half;
             v.Clamp(0, ushort.MaxValue);
 
-            L = PackedVectorHelper.Get16BitBT709Luminance((ushort)v.X, (ushort)v.Y, (ushort)v.Z);
+            L = (ushort)PackedVectorHelper.GetBT709Luminance(v.X, v.Y, v.Z);
             A = (ushort)v.W;
         }
 
@@ -92,13 +92,15 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromRgb24(Rgb24 source)
         {
-            L = PackedVectorHelper.UpScale8To16Bit(PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
+            L = PackedVectorHelper.UpScale8To16Bit(
+                PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
             A = ushort.MaxValue;
         }
 
         public void FromColor(Color source)
         {
-            L = PackedVectorHelper.UpScale8To16Bit(PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
+            L = PackedVectorHelper.UpScale8To16Bit(
+                PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
             A = ushort.MaxValue;
         }
 

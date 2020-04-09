@@ -1,19 +1,9 @@
 ﻿using System.IO;
 using System.Threading;
-using MonoGame.Framework;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Coding.Encoding
 {
-    /// <summary>
-    /// Represents a progress update for image encoding.
-    /// </summary>
-    public delegate void EncodeProgressCallback(
-        ImageEncoderState encoderState,
-        double percentage,
-        Rectangle? rectangle);
-
     /// <summary>
     /// Encapsulates encoding of images to a stream.
     /// </summary>
@@ -38,8 +28,7 @@ namespace MonoGame.Imaging.Coding.Encoding
             IReadOnlyPixelRows image,
             Stream stream,
             EncoderOptions encoderOptions = null,
-            CancellationToken? cancellationToken = null,
-            EncodeProgressCallback onProgress = null);
+            CancellationToken? cancellationToken = null);
 
         /// <summary>
         /// Encodes an image to a stream after an initial first.
@@ -53,7 +42,6 @@ namespace MonoGame.Imaging.Coding.Encoding
             ImageEncoderState encoderState,
             IReadOnlyPixelRows image,
             EncoderOptions encoderOptions = null,
-            CancellationToken? cancellationToken = null,
-            EncodeProgressCallback onProgress = null);
+            CancellationToken? cancellationToken = null);
     }
 }
