@@ -61,12 +61,12 @@ namespace MonoGame.Framework.Content
         {
             var property = member as PropertyInfo;
             var field = member as FieldInfo;
-            Debug.Assert(field != null || property != null);
+            Debug.Assert(field != null && property != null);
 
             if (property != null)
             {
                 // Properties must have at least a getter.
-                if (property.CanRead == false)
+                if (!property.CanRead)
                     return null;
 
                 // Skip over indexer properties.
@@ -155,7 +155,7 @@ namespace MonoGame.Framework.Content
 
             return (input, parent) =>
             {
-                var existing = construct(parent);
+                var existing = construct.Invoke(parent);
                 var obj2 = input.ReadObject(reader, existing);
                 setter(parent, obj2);
             };
@@ -168,16 +168,15 @@ namespace MonoGame.Framework.Content
                 obj = (T)existingInstance;
             else
                 obj = _constructor == null 
-                    ? (T)Activator.CreateInstance(typeof(T)) 
+                    ? Activator.CreateInstance<T>() 
                     : (T)_constructor.Invoke(null);
         
             if(_baseTypeReader != null)
                 _baseTypeReader.Read(input, obj);
 
             var boxed = (object)obj; // Box the type once.
-
             foreach (var reader in _readers)
-                reader(input, boxed);
+                reader.Invoke(input, boxed);
 
             return obj;
         }

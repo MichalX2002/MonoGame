@@ -15,14 +15,14 @@ namespace MonoGame.Imaging.Coding.Encoding
 
         public Memory<byte> ScratchBuffer => Buffer;
         public new IReadOnlyPixelRows CurrentImage { get => base.CurrentImage; set => base.CurrentImage = value; }
-        public new int ImageIndex { get => base.ImageIndex; set => base.ImageIndex = value; }
+        public new int ImageIndex { get => base.FrameIndex; set => base.FrameIndex = value; }
 
         public StbImageEncoderState(
-            ImagingConfig config,
             IImageEncoder encoder,
+            ImagingConfig config,
             Stream stream,
             bool leaveOpen) :
-            base(config, encoder, stream, leaveOpen)
+            base(encoder, config, stream, leaveOpen)
         {
             Buffer = RecyclableMemoryManager.Default.GetBlock();
             ProgressCallback = (progress) => InvokeProgress(progress, null);

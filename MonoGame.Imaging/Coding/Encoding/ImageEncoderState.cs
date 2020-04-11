@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using MonoGame.Framework;
 using MonoGame.Imaging.Pixels;
 
@@ -15,22 +16,43 @@ namespace MonoGame.Imaging.Coding.Encoding
 
     public abstract class ImageEncoderState : ImageCodecState
     {
-        /// <summary>
-        /// Gets the encoder that the state originates from.
-        /// </summary>
-        public IImageEncoder Encoder { get; }
-
-        public IReadOnlyPixelRows CurrentImage { get; protected set; }
+        private EncoderOptions _encoderOptions;
 
         public event EncodeProgressCallback Progress;
 
-        public ImageEncoderState(
-            ImagingConfig config,
-            IImageEncoder encoder,
-            Stream stream,
-            bool leaveOpen) : base(config, stream, leaveOpen)
+        /// <summary>
+        /// Gets the encoder that the state originates from.
+        /// </summary>
+        public IImageEncoder Encoder => (IImageEncoder)Codec;
+
+        public IReadOnlyPixelRows CurrentImage { get; protected set; }
+
+        public CancellationToken CancellationToken { get; set; }
+
+        public EncoderOptions EncoderOptions
         {
-            Encoder = encoder ?? throw new ArgumentNullException(nameof(encoder));
+            get => _encoderOptions;
+            set
+            {
+                if (value == null)
+                {
+                    _encoderOptions = Encoder.DefaultOptions;
+                }
+                else
+                {
+                    EncoderOptions.AssertTypeEqual(Encoder.DefaultOptions, value, nameof(value));
+                    _encoderOptions = value;
+                }
+            }
+        }
+
+        public ImageEncoderState(
+            IImageEncoder encoder,
+            ImagingConfig config,
+            Stream stream,
+            bool leaveOpen) :
+            base(encoder, config, stream, leaveOpen)
+        {
         }
 
         protected void InvokeProgress(double percentage, Rectangle? rectangle)

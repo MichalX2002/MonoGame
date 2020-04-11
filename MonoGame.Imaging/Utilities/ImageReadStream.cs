@@ -4,7 +4,6 @@ using System.IO;
 using System.Threading;
 using MonoGame.Framework;
 using MonoGame.Framework.IO;
-using MonoGame.Framework.Memory;
 using static StbSharp.ImageRead;
 
 namespace MonoGame.Imaging

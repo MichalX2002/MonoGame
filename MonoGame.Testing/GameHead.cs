@@ -176,7 +176,7 @@ namespace MonoGame.Testing
                         }
 
                         frameIndex++;
-                        image.Save("frames/yo mom " + frameIndex + ".png", null, null, null, OnProgress);
+                        image.Save("frames/yo mom " + frameIndex + ".png", null, null, default, OnProgress);
                         image.Dispose();
                     });
                 }

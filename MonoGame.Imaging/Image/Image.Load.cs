@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Threading;
 using MonoGame.Framework.PackedVector;
@@ -7,93 +6,24 @@ using MonoGame.Imaging.Coding.Decoding;
 
 namespace MonoGame.Imaging
 {
-    // TODO: FIXME: change return collection type on LoadFrames methods
-
     public partial class Image
     {
-        #region LoadFrames(Stream)
-
-        public static ImageDecoderEnumerator LoadFrames(
-            ImagingConfig config,
-            Stream stream,
-            out ImageFormat format,
-            VectorTypeInfo pixelType = null,
-            CancellationToken? cancellationToken = null,
-            DecodeProgressCallback onProgress = null)
-        {
-            if (config == null)
-                throw new ArgumentNullException(nameof(config));
-
-            using (var imageStream = config.CreateReadStream(stream, cancellationToken))
-            {
-                if (!TryDetectFormat(config, imageStream, out format))
-                    throw new UnknownImageFormatException();
-
-                if (!TryGetDecoder(format, out var decoder))
-                    throw new MissingDecoderException(format);
-
-                return new ImageDecoderEnumerator(
-                    config, decoder, imageStream, pixelType, onProgress);
-            }
-        }
-
-        public static ImageDecoderEnumerator LoadFrames(
-            Stream stream,
-            out ImageFormat format,
-            VectorTypeInfo pixelType = null,
-            CancellationToken? cancellationToken = null,
-            DecodeProgressCallback onProgress = null)
-        {
-            return LoadFrames(
-                ImagingConfig.Default, stream, out format, pixelType, cancellationToken, onProgress);
-        }
-
-        #endregion
-
-        /* TODO: fix this (UnmanagedMemoryStream?) :)
-
-        #region LoadFrames(IReadOnlyMemory)
-
-        public static ImageDecoderEnumerator<TPixel> LoadFrames<TPixel>(
-            IReadOnlyMemory<byte> data, ImagingConfig config, int? frameLimit, out ImageFormat format,
-            CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
-            where TPixel : unmanaged, IPixel
-        {
-            if (config == null) throw new ArgumentNullException(nameof(config));
-            if (data.IsEmpty()) throw new ArgumentEmptyException(nameof(data));
-
-            format = DetectFormat(data, config, cancellation);
-            var decoder = GetDecoder(format);
-            return decoder.Decode(data, config, frameLimit, cancellation, onProgress);
-        }
-
-        public static ImageDecoderEnumerator<TPixel> LoadFrames<TPixel>(
-            IReadOnlyMemory<byte> data, int? frameLimit, out ImageFormat format,
-            CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
-            where TPixel : unmanaged, IPixel
-        {
-            return LoadFrames(
-                data, ImagingConfig.Default, frameLimit, 
-                out format, cancellation, onProgress);
-        }
-
-        #endregion
-
-        */
-
         #region Load(Stream)
 
         public static Image Load(
             ImagingConfig config,
             Stream stream,
             out ImageFormat format,
-            VectorTypeInfo pixelType = null,
-            CancellationToken? cancellationToken = null,
-            DecodeProgressCallback onProgress = null)
+            VectorTypeInfo preferredPixelType = null,
+            DecodeProgressCallback onProgress = null,
+            CancellationToken cancellationToken = default)
         {
-            using (var frames = LoadFrames(
-                config, stream, out format, pixelType, cancellationToken, onProgress))
+            using (var frames = EnumerateFrames(
+                config, stream, out format, cancellationToken))
             {
+                frames.State.PreferredPixelType = preferredPixelType;
+                frames.State.Progress += onProgress;
+
                 return frames.First();
             }
         }
@@ -101,32 +31,31 @@ namespace MonoGame.Imaging
         public static Image Load(
             ImagingConfig config,
             Stream stream,
-            VectorTypeInfo pixelType = null,
-            CancellationToken? cancellationToken = null,
-            DecodeProgressCallback onProgress = null)
+            VectorTypeInfo preferredPixelType = null,
+            DecodeProgressCallback onProgress = null,
+            CancellationToken cancellationToken = default)
         {
-            return Load(config, stream, out _, pixelType, cancellationToken, onProgress);
+            return Load(config, stream, out _, preferredPixelType, onProgress, cancellationToken);
         }
-
 
         public static Image Load(
             Stream stream,
             out ImageFormat format,
-            VectorTypeInfo pixelType = null,
-            CancellationToken? cancellationToken = null,
-            DecodeProgressCallback onProgress = null)
+            VectorTypeInfo preferredPixelType = null,
+            DecodeProgressCallback onProgress = null,
+            CancellationToken cancellationToken = default)
         {
             return Load(
-                ImagingConfig.Default, stream, out format, pixelType, cancellationToken, onProgress);
+                ImagingConfig.Default, stream, out format, preferredPixelType, onProgress, cancellationToken);
         }
 
         public static Image Load(
             Stream stream,
-            VectorTypeInfo pixelType = null,
-            CancellationToken? cancellationToken = null,
-            DecodeProgressCallback onProgress = null)
+            VectorTypeInfo preferredPixelType = null,
+            DecodeProgressCallback onProgress = null,
+            CancellationToken cancellationToken = default)
         {
-            return Load(stream, out _, pixelType, cancellationToken, onProgress);
+            return Load(stream, out _, preferredPixelType, onProgress, cancellationToken);
         }
 
         #endregion

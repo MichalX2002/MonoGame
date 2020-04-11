@@ -1,6 +1,4 @@
-﻿using MonoGame.Framework;
-using MonoGame.Framework.PackedVector;
-
+﻿
 namespace MonoGame.Imaging.Coding.Decoding
 {
     /// <summary>
@@ -9,33 +7,17 @@ namespace MonoGame.Imaging.Coding.Decoding
     public interface IImageDecoder : IImageCodec
     {
         /// <summary>
-        /// Decodes the first image of a stream and returns a
-        /// state that can be used to decode following images.
+        /// Creates a state that can be used to decode images.
         /// </summary>
-        /// <param name="imagingConfig">The imaging configuration.</param>
+        /// <param name="config">The imaging configuration.</param>
         /// <param name="stream">The stream to read from.</param>
-        /// <param name="pixelType">
-        /// The desired pixel type of the resulting image.
-        /// Can be <see langword="null"/> to load the image without any conversion.
-        /// </param>
-        /// <param name="onProgress">Optional delegate for reporting decode progress.</param>
-        /// <returns>The state used to continue decoding of subsequent images.</returns>
-        ImageDecoderState DecodeFirst(
-            ImagingConfig imagingConfig,
-            ImageReadStream stream,
-            VectorTypeInfo pixelType = null);
+        /// <returns>The state used to decode images.</returns>
+        ImageDecoderState CreateState(ImagingConfig config, ImageReadStream stream);
 
         /// <summary>
-        /// Decodes the next image of a stream using the state from the first decode call. 
+        /// Decodes an image from the decoder state stream. 
         /// </summary>
-        /// <param name="decoderState">The state from the first decode call.</param>
-        /// <param name="pixelType">
-        /// The desired pixel type of the resulting image.
-        /// Can be <see langword="null"/> to load the image without any conversion.
-        /// </param>
-        /// <param name="onProgress">Optional delegate for reporting decode progress.</param>
-        void DecodeNext(
-            ImageDecoderState decoderState,
-            VectorTypeInfo pixelType = null);
+        /// <param name="decoderState">The state to decode from.</param>
+        bool Decode(ImageDecoderState decoderState);
     }
 }

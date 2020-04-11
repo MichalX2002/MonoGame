@@ -18,7 +18,7 @@ namespace MonoGame.Imaging
             Stream output,
             ImageFormat format,
             EncoderOptions encoderOptions = null,
-            CancellationToken? cancellationToken = null,
+            CancellationToken cancellationToken = default,
             EncodeProgressCallback onProgress = null)
         {
             AssertValidOutput(output);
@@ -28,20 +28,18 @@ namespace MonoGame.Imaging
             if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
             if (images == null) throw new ArgumentNullException(nameof(images));
 
-            var enumerator = images.GetEnumerator();
-            if (!enumerator.MoveNext())
-                return;
-
-            using (ImageEncoderState state = encoder.EncodeFirst(
-                imagingConfig, enumerator.Current, output, encoderOptions, cancellationToken, onProgress))
+            using (ImageEncoderState state = encoder.CreateState(imagingConfig, output))
             {
-                if (!(format is IAnimatedFormatAttribute && encoder is IAnimatedFormatAttribute))
-                    return;
+                state.EncoderOptions = encoderOptions;
+                state.CancellationToken = cancellationToken;
+                state.Progress += onProgress;
 
-                while (enumerator.MoveNext())
+                foreach (var image in images)
                 {
-                    encoder.EncodeNext(
-                        state, enumerator.Current, encoderOptions, cancellationToken, onProgress);
+                    encoder.Encode(state, image);
+
+                    if (!(format is IAnimatedFormatAttribute && encoder is IAnimatedFormatAttribute))
+                        return;
                 }
             }
         }
@@ -51,7 +49,7 @@ namespace MonoGame.Imaging
             Stream output,
             ImageFormat format,
             EncoderOptions encoderOptions = null,
-            CancellationToken? cancellationToken = null,
+            CancellationToken cancellationToken = default,
             EncodeProgressCallback onProgress = null)
         {
             Save(
@@ -65,7 +63,7 @@ namespace MonoGame.Imaging
             string filePath,
             ImageFormat format = null,
             EncoderOptions encoderOptions = null,
-            CancellationToken? cancellationToken = null,
+            CancellationToken cancellationToken = default,
             EncodeProgressCallback onProgress = null)
         {
             if (format == null)
@@ -82,7 +80,7 @@ namespace MonoGame.Imaging
             string filePath,
             ImageFormat format = null,
             EncoderOptions encoderOptions = null,
-            CancellationToken? cancellationToken = null,
+            CancellationToken cancellationToken = default,
             EncodeProgressCallback onProgress = null)
         {
             Save(
@@ -98,7 +96,7 @@ namespace MonoGame.Imaging
             Stream output,
             ImageFormat format,
             EncoderOptions encoderOptions = null,
-            CancellationToken? cancellationToken = null,
+            CancellationToken cancellationToken = default,
             EncodeProgressCallback onProgress = null)
         {
             if (image == null)
@@ -117,7 +115,7 @@ namespace MonoGame.Imaging
             Stream output,
             ImageFormat format,
             EncoderOptions encoderOptions = null,
-            CancellationToken? cancellationToken = null,
+            CancellationToken cancellationToken = default,
             EncodeProgressCallback onProgress = null)
         {
             Save(
@@ -135,7 +133,7 @@ namespace MonoGame.Imaging
             string filePath,
             ImageFormat format = null,
             EncoderOptions encoderOptions = null,
-            CancellationToken? cancellationToken = null,
+            CancellationToken cancellationToken = default,
             EncodeProgressCallback onProgress = null)
         {
             if (format == null)
@@ -153,7 +151,7 @@ namespace MonoGame.Imaging
             string filePath,
             ImageFormat format = null,
             EncoderOptions encoderOptions = null,
-            CancellationToken? cancellationToken = null,
+            CancellationToken cancellationToken = default,
             EncodeProgressCallback onProgress = null)
         {
             Save(

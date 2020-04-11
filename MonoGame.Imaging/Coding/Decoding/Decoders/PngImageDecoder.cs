@@ -1,5 +1,4 @@
 ﻿using MonoGame.Imaging.Attributes.Codec;
-using StbSharp;
 using static StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coding.Decoding
@@ -8,11 +7,9 @@ namespace MonoGame.Imaging.Coding.Decoding
     {
         public override ImageFormat Format => ImageFormat.Png;
 
-        protected override bool ReadFirst(
-            StbImageDecoderState decoderState, ref ReadState readState)
+        protected override bool Read(StbImageDecoderState decoderState, ref ReadState readState)
         {
-            throw new System.Exception("fix me");
-            //return Png.Load(decoderState.ReadContext, ref readState);
+            return Png.Load(decoderState.Context, ref readState);
         }
     }
 }

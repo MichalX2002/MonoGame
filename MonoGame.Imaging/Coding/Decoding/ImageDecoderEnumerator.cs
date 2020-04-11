@@ -1,50 +1,40 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
     public class ImageDecoderEnumerator : IEnumerable<Image>, IEnumerator<Image>, IImagingConfigProvider
     {
-        private ImageReadStream _readStream;
-        private VectorTypeInfo _pixelType;
-        private DecodeProgressCallback _progressCallback;
+        public ImageDecoderState State { get; }
+        public ImagingConfig ImagingConfig => State.ImagingConfig;
 
-        public ImagingConfig ImagingConfig { get; }
-        public IImageDecoder Decoder { get; }
-
-        public ImageDecoderState State { get; private set; }
         public Image Current => State.CurrentImage;
         object IEnumerator.Current => Current;
 
         #region Constructors
 
         public ImageDecoderEnumerator(
-            ImagingConfig config,
             IImageDecoder decoder,
-            ImageReadStream readStream,
-            VectorTypeInfo pixelType = null,
-            DecodeProgressCallback progressCallback = null)
+            ImagingConfig config,
+            ImageReadStream stream)
         {
-            ImagingConfig = config ?? throw new ArgumentNullException(nameof(config));
-            Decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
-            _readStream = readStream ?? throw new ArgumentNullException(nameof(readStream));
-            _pixelType = pixelType;
-            _progressCallback = progressCallback;
+            if (decoder == null)
+                throw new ArgumentNullException(nameof(decoder));
+            State = decoder.CreateState(config, stream);
         }
 
         #endregion
 
         public bool MoveNext()
         {
-            if (State == null)
-                State = Decoder.DecodeFirst(ImagingConfig, _readStream, _pixelType, _progressCallback);
-            else
-                Decoder.DecodeNext(State, _pixelType, _progressCallback);
-
-            if (State.CurrentImage != null)
+            if (State.Decoder.Decode(State))
+            {
+                if (State.CurrentImage == null)
+                    throw new Exception(
+                        "The decoder reported a successful decode, but there is no resulting image.");
                 return true;
+            }
             return false;
         }
 
@@ -65,10 +55,6 @@ namespace MonoGame.Imaging.Coding.Decoding
                 return;
 
             State?.Dispose();
-            State = null;
-
-            _readStream?.Dispose();
-            _readStream = null;
         }
 
         public void Dispose()

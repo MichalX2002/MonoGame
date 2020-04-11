@@ -9,16 +9,18 @@ namespace MonoGame.Imaging.Coding
 
         public bool IsDisposed { get; protected set; }
 
+        public IImageCodec Codec { get; }
         public ImagingConfig ImagingConfig { get; }
-        public Stream Stream { get; }
+        public Stream Stream { get; private set; }
 
         /// <summary>
         /// Gets the zero-based index of the most recently processed image.
         /// </summary>
-        public int ImageIndex { get; protected set; } = -1;
+        public int FrameIndex { get; protected set; }
 
-        public ImageCodecState(ImagingConfig config, Stream stream, bool leaveOpen)
+        public ImageCodecState(IImageCodec codec, ImagingConfig config, Stream stream, bool leaveOpen)
         {
+            Codec = codec ?? throw new ArgumentNullException(nameof(codec));
             ImagingConfig = config ?? throw new ArgumentNullException(nameof(config));
             Stream = stream ?? throw new ArgumentNullException(nameof(stream));
             _leaveOpen = leaveOpen;
@@ -28,20 +30,22 @@ namespace MonoGame.Imaging.Coding
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!IsDisposed)
+            if (IsDisposed)
+                return;
+
+            try
             {
-                try
+                if (disposing)
                 {
-                    if (disposing)
-                    {
-                        if (!_leaveOpen)
-                            Stream?.Dispose();
-                    }
+                    if (!_leaveOpen)
+                        Stream?.Dispose();
+
+                    Stream = null;
                 }
-                finally
-                {
-                    IsDisposed = true;
-                }
+            }
+            finally
+            {
+                IsDisposed = true;
             }
         }
 

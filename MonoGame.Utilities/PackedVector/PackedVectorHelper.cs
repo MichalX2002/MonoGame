@@ -78,7 +78,7 @@ namespace MonoGame.Framework.PackedVector
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte Get8BitBT709Luminance(byte r, byte g, byte b)
         {
-            return (byte)((r * .2126F) + (g * .7152F) + (b * .0722F) + 0.5f);
+            return (byte)(GetBT709Luminance(r, g, b) + 0.5f);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace MonoGame.Framework.PackedVector
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort Get16BitBT709Luminance(ushort r, ushort g, ushort b)
         {
-            return (ushort)((r * .2126F) + (g * .7152F) + (b * .0722F));
+            return (ushort)GetBT709Luminance(r, g, b);
         }
 
         #endregion

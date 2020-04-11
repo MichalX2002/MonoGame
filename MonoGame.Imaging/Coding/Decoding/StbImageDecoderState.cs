@@ -8,25 +8,24 @@ namespace MonoGame.Imaging.Coding.Decoding
 {
     public class StbImageDecoderState : ImageDecoderState
     {
-        public new ImageReadStream Stream => (ImageReadStream)base.Stream;
-        public ReadContext Context => Stream.Context;
-
-        public VectorTypeInfo PreferredPixelType { get; set; }
-        public VectorTypeInfo SourcePixelType { get; set; }
-
-        public new Image CurrentImage { get => base.CurrentImage; set => base.CurrentImage = value; }
-        public new int ImageIndex { get => base.ImageIndex; set => base.ImageIndex = value; }
-
         private StateReadyCallback _onStateReady;
         private OutputByteDataCallback _onOutputByteData;
         private OutputShortDataCallback _onOutputShortData;
         private OutputFloatDataCallback _onOutputFloatData;
 
+        public VectorTypeInfo SourcePixelType { get; private set; }
+
+        public ReadContext Context => Stream.Context;
+        public new ImageReadStream Stream => (ImageReadStream)base.Stream;
+
+        public new Image CurrentImage { get => base.CurrentImage; set => base.CurrentImage = value; }
+        public new int FrameIndex { get => base.FrameIndex; set => base.FrameIndex = value; }
+
         public StbImageDecoderState(
-            ImagingConfig imagingConfig,
             IImageDecoder decoder,
+            ImagingConfig config,
             ImageReadStream stream) :
-            base(imagingConfig, decoder, stream)
+            base(decoder, config, stream)
         {
             _onStateReady = OnStateReady;
             _onOutputByteData = OnOutputByteData;

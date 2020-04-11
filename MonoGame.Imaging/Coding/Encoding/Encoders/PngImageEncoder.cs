@@ -25,14 +25,12 @@ namespace MonoGame.Imaging.Coding.Encoding
         public override ImageFormat Format => ImageFormat.Png;
         public override EncoderOptions DefaultOptions => PngEncoderOptions.Default;
 
-        protected override bool WriteFirst(
-            ImagingConfig imagingConfig,
-            in WriteState state,
-            IReadOnlyPixelRows image,
-            EncoderOptions encoderOptions)
+        protected override bool Write(
+            StbImageEncoderState encoderState,
+            in WriteState writeState)
         {
-            var options = encoderOptions as PngEncoderOptions;
-            return Png.WriteCore(state, options.CompressionLevel);
+            var options = (PngEncoderOptions)encoderState.EncoderOptions;
+            return Png.WriteCore(writeState, options.CompressionLevel);
         }
     }
 }

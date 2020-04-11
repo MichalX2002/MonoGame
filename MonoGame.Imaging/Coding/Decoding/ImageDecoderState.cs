@@ -1,6 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using MonoGame.Framework;
+using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Imaging.Coding.Decoding
 {
@@ -14,24 +14,28 @@ namespace MonoGame.Imaging.Coding.Decoding
 
     public abstract class ImageDecoderState : ImageCodecState
     {
-        #region Properties
+        public event DecodeProgressCallback Progress;
 
         /// <summary>
         /// Gets the decoder that the state originates from.
         /// </summary>
-        public IImageDecoder Decoder { get; }
+        public IImageDecoder Decoder => (IImageDecoder)Codec;
 
         public Image CurrentImage { get; protected set; }
 
-        #endregion
+        public VectorTypeInfo PreferredPixelType { get; set; }
 
         public ImageDecoderState(
-            ImagingConfig imagingConfig,
             IImageDecoder decoder,
-            Stream stream) : 
-            base(imagingConfig, stream, leaveOpen: false)
+            ImagingConfig config,
+            Stream stream) :
+            base(decoder, config, stream, leaveOpen: false)
         {
-            Decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
+        }
+
+        protected void InvokeProgress(double percentage, Rectangle? rectangle)
+        {
+            Progress?.Invoke(this, percentage, rectangle);
         }
     }
 }

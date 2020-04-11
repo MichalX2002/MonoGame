@@ -161,7 +161,7 @@ namespace MonoGame.Imaging
         public static ImageInfo Identify(
             ImagingConfig config,
             Stream stream, 
-            CancellationToken? cancellationToken = null)
+            CancellationToken cancellationToken = default)
         {
             if (config == null)
                 throw new ArgumentNullException(nameof(config));

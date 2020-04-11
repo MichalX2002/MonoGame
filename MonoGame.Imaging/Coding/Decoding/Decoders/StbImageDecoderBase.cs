@@ -1,5 +1,4 @@
 ﻿using System;
-using MonoGame.Framework.PackedVector;
 using static StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coding.Decoding
@@ -8,15 +7,7 @@ namespace MonoGame.Imaging.Coding.Decoding
     {
         public abstract ImageFormat Format { get; }
 
-        #region Decode Abstraction
-
-        protected abstract bool ReadFirst(StbImageDecoderState decoderState, ref ReadState readState);
-
-        protected virtual bool ReadNext(StbImageDecoderState decoderState, ref ReadState readState)
-        {
-            ImagingArgumentGuard.AssertAnimationSupport(this, decoderState.ImagingConfig);
-            return false;
-        }
+        protected abstract bool Read(StbImageDecoderState decoderState, ref ReadState readState);
 
         //protected virtual unsafe Image ParseMemoryResult(
         //    ImagingConfig config, IMemoryHolder result, in ReadState state, VectorTypeInfo pixelType = null)
@@ -50,62 +41,28 @@ namespace MonoGame.Imaging.Coding.Decoding
         //    }
         //}
 
-        protected Exception GetFailureException(ImagingConfig config, ReadContext context)
+        public ImageDecoderState CreateState(ImagingConfig config, ImageReadStream stream)
         {
-            // TODO: get some error message from the context
-            return new ImagingException(context.ErrorCode.ToString());
+            return new StbImageDecoderState(this, config, stream);
         }
 
-        #endregion
-
-        #region IImageDecoder
-
-        public ImageDecoderState DecodeFirst(
-            ImagingConfig config,
-            ImageReadStream stream,
-            VectorTypeInfo pixelType = null)
-        {
-            var state = new StbImageDecoderState(config, this, stream);
-            state.PreferredPixelType = pixelType;
-
-            var readState = state.CreateReadState();
-            bool result = ReadFirst(state, ref readState);
-            if (result && state.Context.ErrorCode == ErrorCode.Ok)
-            {
-                state.ImageIndex++;
-                return state;
-            }
-            else
-            {
-                state.CurrentImage?.Dispose();
-                state.CurrentImage = null;
-                throw GetFailureException(config, stream.Context);
-            }
-        }
-
-        public void DecodeNext(
-            ImageDecoderState decoderState,
-            VectorTypeInfo pixelType = null)
+        public bool Decode(ImageDecoderState decoderState)
         {
             var state = (StbImageDecoderState)decoderState;
-            if (state.ImageIndex < 0)
+            if (state.FrameIndex < 0)
                 throw new InvalidOperationException("The decoder state is invalid.");
-            state.PreferredPixelType = pixelType;
 
             var readState = state.CreateReadState();
-            bool result = ReadNext(state, ref readState);
-            if (result && state.Context.ErrorCode == ErrorCode.Ok)
+            if (!Read(state, ref readState))
             {
-                state.ImageIndex++;
-            }
-            else
-            {
-                state.CurrentImage?.Dispose();
-                state.CurrentImage = null;
-                throw GetFailureException(state.ImagingConfig, state.Context);
-            }
-        }
+                //// TODO: get some error message from the context
+                //throw new ImagingException(state.Context.ErrorCode.ToString());
 
-        #endregion
+                return false;
+            }
+
+            state.FrameIndex++;
+            return true;
+        }
     }
 }

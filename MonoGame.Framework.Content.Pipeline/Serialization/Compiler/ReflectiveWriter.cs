@@ -62,7 +62,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         private bool IsValidProperty(PropertyInfo property)
         {
             // Properties must have at least a getter.
-            if (property.CanRead == false)
+            if (!property.CanRead)
                 return false;
 
             // Skip over indexer properties.

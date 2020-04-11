@@ -83,7 +83,7 @@ namespace MonoGame.Imaging.Tests
 
                 image?.Dispose();
                 watch.Start();
-                image = Image.Load(encoded, null, null, OnReadProgress);
+                image = Image.Load(encoded, null, OnReadProgress, default);
                 watch.Stop();
 
                 if (i == 0)
@@ -116,7 +116,7 @@ namespace MonoGame.Imaging.Tests
                 result.Seek(0, SeekOrigin.Begin);
 
                 watch.Start();
-                image.Save(result, ImageFormat.Png, null, null, OnWriteProgress);
+                image.Save(result, ImageFormat.Png, null, default, OnWriteProgress);
                 watch.Stop();
 
                 if (i == 0)
