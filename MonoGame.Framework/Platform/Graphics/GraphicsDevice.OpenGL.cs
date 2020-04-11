@@ -341,8 +341,9 @@ namespace MonoGame.Framework.Graphics
                 bufferMask |= ClearBufferMask.DepthBufferBit;
             }
 
-#if MONOMAC
-            if (GL.CheckFramebufferStatus(FramebufferTarget.FramebufferExt) == FramebufferErrorCode.FramebufferComplete)
+#if MONOMAC || IOS
+            if (GL.CheckFramebufferStatus(FramebufferTarget.FramebufferExt) == 
+                FramebufferErrorCode.FramebufferComplete)
 #endif
             {
                 GL.Clear(bufferMask);

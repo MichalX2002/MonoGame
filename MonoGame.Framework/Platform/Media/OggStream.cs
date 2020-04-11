@@ -25,9 +25,7 @@ namespace MonoGame.Framework.Media
 
         private uint _alFilterId;
         private Queue<ALBuffer> _queuedBuffers;
-        private EffectsExtension _efx;
 
-        private float _lowPassHfGain;
         private float _volume;
         private float _pitch;
 
@@ -40,22 +38,6 @@ namespace MonoGame.Framework.Media
         public Action OnFinished { get; private set; }
         public int QueuedBufferCount => _queuedBuffers.Count;
         public uint SourceId { get; private set; }
-
-        public float LowPassHFGain
-        {
-            get => _lowPassHfGain;
-            set
-            {
-                if (_efx.IsAvailable)
-                {
-                    _efx.Filter(_alFilterId, EfxFilterf.LowpassGainHF, _lowPassHfGain = value);
-                    ALHelper.CheckError("Failed to set Efx filter.");
-
-                    _efx.BindFilterToSource(SourceId, _alFilterId);
-                    ALHelper.CheckError("Failed to bind Efx filter to source.");
-                }
-            }
-        }
 
         public float Volume
         {
@@ -87,20 +69,6 @@ namespace MonoGame.Framework.Media
 
             _queuedBuffers = new Queue<ALBuffer>();
             SourceId = ALController.Instance.ReserveSource();
-
-            _efx = ALController.Instance.Efx;
-            if (_efx.IsAvailable)
-            {
-                _alFilterId = _efx.GenFilter();
-                ALHelper.CheckError("Failed to generate Efx filter.");
-
-                _efx.Filter(_alFilterId, EfxFilteri.FilterType, (int)EfxFilterType.Lowpass);
-                ALHelper.CheckError("Failed to set Efx filter type.");
-
-                _efx.Filter(_alFilterId, EfxFilterf.LowpassGain, 1);
-                ALHelper.CheckError("Failed to set Efx filter value.");
-                LowPassHFGain = 1;
-            }
 
             Volume = 1;
             Pitch = 1;
@@ -360,12 +328,6 @@ namespace MonoGame.Framework.Media
 
             ALController.Instance.RecycleSource(SourceId);
             SourceId = 0;
-
-            if (_efx.IsAvailable)
-            {
-                _efx.DeleteFilter(_alFilterId);
-                ALHelper.CheckError("Failed to delete EFX filter.");
-            }
         }
     }
 }

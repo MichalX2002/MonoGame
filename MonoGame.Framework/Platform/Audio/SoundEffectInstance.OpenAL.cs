@@ -21,7 +21,7 @@ namespace MonoGame.Framework.Audio
         private EfxFilterType _filterType;
         private float _filterQ; // unused?
         private float _frequency;
-        
+
         /// <summary>
         /// Gets the OpenAL sound controller, constructs the sound buffer, 
         /// and sets up the event delegates for the reserved and recycled events.
@@ -29,13 +29,6 @@ namespace MonoGame.Framework.Audio
         internal void InitializeSound()
         {
             Controller = ALController.Instance;
-        }
-
-        internal void FreeSource()
-        {
-            Controller.RecycleSource(SourceId.Value);
-            SourceId = null;
-            SoundState = SoundState.Stopped;
         }
 
         private void PlatformApply3D(AudioListener listener, AudioEmitter emitter)
@@ -82,8 +75,9 @@ namespace MonoGame.Framework.Audio
 
         private void PlatformPlay()
         {
-            SourceId = Controller.ReserveSource();
-            
+            if (!SourceId.HasValue)
+                SourceId = Controller.ReserveSource();
+
             AL.Source(SourceId.Value, ALSourcei.Buffer, _effect.SoundBuffer.BufferId);
             ALHelper.CheckError("Failed to bind buffer to source.");
 
@@ -91,22 +85,22 @@ namespace MonoGame.Framework.Audio
 
             AL.Source(SourceId.Value, ALSourcei.SourceRelative, 1);
             ALHelper.CheckError("Failed set source relative.");
-            
+
             AL.DistanceModel(ALDistanceModel.InverseDistanceClamped);
             ALHelper.CheckError("Failed set source distance.");
-            
+
             AL.Source(SourceId.Value, ALSource3f.Position, _pan, 0f, 0f);
             ALHelper.CheckError("Failed to set source pan.");
-            
+
             AL.Source(SourceId.Value, ALSource3f.Velocity, 0f, 0f, 0f);
             ALHelper.CheckError("Failed to set source pan.");
-            
+
             AL.Source(SourceId.Value, ALSourcef.Gain, _alVolume);
             ALHelper.CheckError("Failed to set source volume.");
-            
+
             AL.Source(SourceId.Value, ALSourceb.Looping, IsLooped);
             ALHelper.CheckError("Failed to set source loop state.");
-            
+
             AL.Source(SourceId.Value, ALSourcef.Pitch, _pitch);
             ALHelper.CheckError("Failed to set source pitch.");
 
@@ -123,7 +117,7 @@ namespace MonoGame.Framework.Audio
         {
             if (!SourceId.HasValue)
             {
-                Play();
+                PlatformPlay();
                 return;
             }
 
@@ -138,26 +132,27 @@ namespace MonoGame.Framework.Audio
 
         private void PlatformStop(bool immediate)
         {
-            if (SourceId.HasValue && AL.IsSource(SourceId.Value))
+            if (!SourceId.HasValue)
+                return;
+
+            AL.SourceStop(SourceId.Value);
+            ALHelper.CheckError("Failed to stop source.");
+
+            // Reset the SendFilter to 0 if we are NOT using reverb since sources are recycled
+            if (Controller.Efx.IsAvailable)
             {
-                AL.SourceStop(SourceId.Value);
-                ALHelper.CheckError("Failed to stop source.");
+                Controller.Efx.BindSourceToAuxiliarySlot(SourceId.Value, 0, 0, 0);
+                ALHelper.CheckError("Failed to unset reverb.");
 
-                // Reset the SendFilter to 0 if we are NOT using reverb since sources are recycled
-                if (Controller.Efx.IsAvailable)
-                {
-                    Controller.Efx.BindSourceToAuxiliarySlot(SourceId.Value, 0, 0, 0);
-                    ALHelper.CheckError("Failed to unset reverb.");
-
-                    AL.Source(SourceId.Value, ALSourcei.EfxDirectFilter, 0);
-                    ALHelper.CheckError("Failed to unset filter.");
-                }
-
-                AL.Source(SourceId.Value, ALSourcei.Buffer, 0);
-                ALHelper.CheckError("Failed to free source from buffer.");
-
-                FreeSource();
+                AL.Source(SourceId.Value, ALSourcei.EfxDirectFilter, 0);
+                ALHelper.CheckError("Failed to unset filter.");
             }
+
+            AL.Source(SourceId.Value, ALSourcei.Buffer, 0);
+            ALHelper.CheckError("Failed to free source from buffer.");
+
+            Controller.RecycleSource(SourceId.Value);
+            SourceId = null;
         }
 
         private void PlatformSetIsLooped(bool value)
@@ -197,7 +192,7 @@ namespace MonoGame.Framework.Audio
         {
             if (!SourceId.HasValue)
                 return SoundState.Stopped;
-            
+
             var alState = AL.GetSourceState(SourceId.Value);
             ALHelper.CheckError("Failed to get source state.");
 
@@ -245,50 +240,50 @@ namespace MonoGame.Framework.Audio
 
         private void ApplyReverb()
         {
-            if (_reverb > 0f && SoundEffect.ReverbSlot != 0)
-            {
-                Controller.Efx.BindSourceToAuxiliarySlot(SourceId.Value, (int)SoundEffect.ReverbSlot, 0, 0);
-                ALHelper.CheckError("Failed to set reverb.");
-            }
+            if (_reverb <= 0f || SoundEffect.ReverbSlot == 0)
+                return;
+            
+            Controller.Efx.BindSourceToAuxiliarySlot(SourceId.Value, (int)SoundEffect.ReverbSlot, 0, 0);
+            ALHelper.CheckError("Failed to set reverb.");
         }
 
         private void ApplyFilter()
         {
-            if (_needsFilterUpdate && Controller.Filter > 0)
+            if (!_needsFilterUpdate || Controller.Filter == 0)
+                return;
+
+            float freq = _frequency / 20000f;
+            float lf = 1f - freq;
+            var efx = Controller.Efx;
+
+            efx.Filter(Controller.Filter, EfxFilteri.FilterType, (int)_filterType);
+            ALHelper.CheckError("Failed to set filter.");
+
+            switch (_filterType)
             {
-                float freq = _frequency / 20000f;
-                float lf = 1f - freq;
-                var efx = Controller.Efx;
+                case EfxFilterType.Lowpass:
+                    efx.Filter(Controller.Filter, EfxFilterf.LowpassGainHF, freq);
+                    ALHelper.CheckError("Failed to set LowpassGainHF.");
+                    break;
 
-                efx.Filter(Controller.Filter, EfxFilteri.FilterType, (int)_filterType);
-                ALHelper.CheckError("Failed to set filter.");
+                case EfxFilterType.Highpass:
+                    efx.Filter(Controller.Filter, EfxFilterf.HighpassGainLF, freq);
+                    ALHelper.CheckError("Failed to set HighpassGainLF.");
+                    break;
 
-                switch (_filterType)
-                {
-                    case EfxFilterType.Lowpass:
-                        efx.Filter(Controller.Filter, EfxFilterf.LowpassGainHF, freq);
-                        ALHelper.CheckError("Failed to set LowpassGainHF.");
-                        break;
+                case EfxFilterType.Bandpass:
+                    efx.Filter(Controller.Filter, EfxFilterf.BandpassGainHF, freq);
+                    ALHelper.CheckError("Failed to set BandpassGainHF.");
 
-                    case EfxFilterType.Highpass:
-                        efx.Filter(Controller.Filter, EfxFilterf.HighpassGainLF, freq);
-                        ALHelper.CheckError("Failed to set HighpassGainLF.");
-                        break;
-
-                    case EfxFilterType.Bandpass:
-                        efx.Filter(Controller.Filter, EfxFilterf.BandpassGainHF, freq);
-                        ALHelper.CheckError("Failed to set BandpassGainHF.");
-
-                        efx.Filter(Controller.Filter, EfxFilterf.BandpassGainLF, lf);
-                        ALHelper.CheckError("Failed to set BandpassGainLF.");
-                        break;
-                }
-
-                AL.Source(SourceId.Value, ALSourcei.EfxDirectFilter, Controller.Filter);
-                ALHelper.CheckError("Failed to set DirectFilter.");
-
-                _needsFilterUpdate = false;
+                    efx.Filter(Controller.Filter, EfxFilterf.BandpassGainLF, lf);
+                    ALHelper.CheckError("Failed to set BandpassGainLF.");
+                    break;
             }
+
+            AL.Source(SourceId.Value, ALSourcei.EfxDirectFilter, Controller.Filter);
+            ALHelper.CheckError("Failed to set DirectFilter.");
+
+            _needsFilterUpdate = false;
         }
 
         internal void PlatformSetFilter(FilterMode mode, float filterQ, float frequency)

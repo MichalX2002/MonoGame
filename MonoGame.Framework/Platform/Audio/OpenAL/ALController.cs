@@ -333,10 +333,13 @@ namespace MonoGame.Framework.Audio
 
         public void RecycleSource(uint sourceId)
         {
+            AL.Source(sourceId, ALSourcei.Buffer, 0);
+            ALHelper.CheckError("Failed to free source from buffers.");
+
             lock (_availableSources)
             {
-                _sourcesInUse.Remove(sourceId);
-                _availableSources.Enqueue(sourceId);
+                if (_sourcesInUse.Remove(sourceId))
+                    _availableSources.Enqueue(sourceId);
             }
         }
 

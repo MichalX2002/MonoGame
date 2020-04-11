@@ -9,7 +9,6 @@ using System.Threading;
 #if IOS
 using Foundation;
 using OpenGLES;
-using MonoGame.OpenGL;
 #endif
 
 namespace MonoGame.Framework
@@ -20,6 +19,10 @@ namespace MonoGame.Framework
         public static readonly TimeSpan MaxWaitForMainThread = TimeSpan.FromMilliseconds(1000);
 
         private static int _mainThreadId;
+
+#if IOS
+        public static EAGLContext BackgroundContext;
+#endif
 
         static Threading()
         {
@@ -61,7 +64,7 @@ namespace MonoGame.Framework
                 throw new ArgumentNullException(nameof(action));
 
 #if DIRECTX || PSM
-            // The platform supports doesn't need any special handling.
+            // The platform supports async and doesn't need any special handling.
             action.Invoke();
 #else
             // If we are already on the main thread, just call the action and be done with it.
@@ -70,22 +73,6 @@ namespace MonoGame.Framework
                 action.Invoke();
                 return;
             }
-
-#if IOS
-            lock (BackgroundContext)
-            {
-                // Make the context current on this thread if it is not already
-                if (!ReferenceEquals(EAGLContext.CurrentContext, BackgroundContext))
-                    EAGLContext.SetCurrentContext(BackgroundContext);
-
-                // Execute the action
-                action.Invoke();
-
-                // Must flush the GL calls so the GPU asset is ready for the main context to use it
-                GL.Flush();
-                GraphicsExtensions.CheckGLError();
-            }
-#else
 
             var resetEvent = new ManualResetEventSlim(false);
             Add(() =>
@@ -100,23 +87,16 @@ namespace MonoGame.Framework
 
             if (!resetEvent.Wait(MaxWaitForMainThread))
                 throw new TimeoutException();
-#endif // IOS
-
-#endif // DIRECTX || PSM
+#endif
         }
 
-#if IOS
-        public static EAGLContext BackgroundContext;
-
-#elif !(DIRECTX || PSM)
+#if !(DIRECTX || PSM)
         private static List<Action> _actionList = new List<Action>();
 
         private static void Add(Action action)
         {
             lock (_actionList)
-            {
                 _actionList.Add(action);
-            }
         }
 
         /// <summary>
@@ -126,12 +106,26 @@ namespace MonoGame.Framework
         {
             EnsureMainThread();
 
+#if IOS
+            lock (BackgroundContext)
+            {
+                // Make the context current on this thread if it is not already
+                if (!Object.ReferenceEquals(EAGLContext.CurrentContext, BackgroundContext))
+                    EAGLContext.SetCurrentContext(BackgroundContext);
+#endif
             lock (_actionList)
             {
+
                 foreach (Action action in _actionList)
                     action.Invoke();
                 _actionList.Clear();
             }
+#if IOS
+                // Must flush the GL calls so the GPU asset is ready for the main context to use it
+                GL.Flush();
+                GraphicsExtensions.CheckGLError();
+            }
+#endif
         }
 #endif
     }
