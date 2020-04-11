@@ -12,14 +12,13 @@ namespace MonoGame.Tools.Pipeline
     {
         public override void Edit(PixelLayout control)
         {
-            var editText = new TextBox
-            {
-                Tag = this,
-                Style = "OverrideSize",
-                Width = _lastRec.Width,
-                Height = _lastRec.Height,
-                Text = (Value == null) ? "" : Value.ToString()
-            };
+            SkipCellDraw = true;
+            var editText = new TextBox();
+            editText.Tag = this;
+            editText.Style = "OverrideSize";
+            editText.Width = _lastRec.Width;
+            editText.Height = _lastRec.Height;
+            editText.Text = (Value == null) ? "" : Value.ToString();
 
             control.Add(editText, _lastRec.X, _lastRec.Y);
 
@@ -28,6 +27,7 @@ namespace MonoGame.Tools.Pipeline
             
             OnKill += delegate
             {
+                SkipCellDraw = false;
                 OnKill = null;
 
                 if (_eventHandler == null)

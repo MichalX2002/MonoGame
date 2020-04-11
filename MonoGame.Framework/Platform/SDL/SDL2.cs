@@ -18,59 +18,17 @@ namespace MonoGame
     {
         public static IntPtr NativeLibrary = GetNativeLibrary();
 
-        private static IntPtr GetNativeLibrary()
-        {
-            var ret = IntPtr.Zero;
-
-            // Load bundled library
-            var assemblyLocation = Path.GetDirectoryName(typeof(SDL).Assembly.Location) ?? "./";
-            
-            if (PlatformInfo.OS == OS.Windows && Environment.Is64BitProcess)
-                ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "x64/SDL2.dll"));
-            else if (PlatformInfo.OS == OS.Windows && !Environment.Is64BitProcess)
-                ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "x86/SDL2.dll"));
-            else if (PlatformInfo.OS == OS.Linux && Environment.Is64BitProcess)
-                ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "x64/libSDL2-2.0.so.0"));
-            else if (PlatformInfo.OS == OS.Linux && !Environment.Is64BitProcess)
-                ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "x86/libSDL2-2.0.so.0"));
-            else if (PlatformInfo.OS == OS.MacOSX)
-            {
-                ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "libSDL2-2.0.0.dylib"));
-
-                //Look in Frameworks for .app bundles
-                if (ret == IntPtr.Zero)
-                    ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "..", "Frameworks", "libSDL2-2.0.0.dylib"));
-            }
-
-            // Load system library
-            if (ret == IntPtr.Zero)
-            {
-                if (PlatformInfo.OS == OS.Windows)
-                    ret = FL.LoadLibrary("SDL2.dll");
-                else if (PlatformInfo.OS == OS.Linux)
-                    ret = FL.LoadLibrary("libSDL2-2.0.so.0");
-                else
-                    ret = FL.LoadLibrary("libSDL2-2.0.0.dylib");
-            }
-
-            // Try extra locations for Windows because of .NET Core rids
-            if (PlatformInfo.OS == OS.Windows)
-            {
-                var rid = Environment.Is64BitProcess ? "win-x64" : "win-x86";
-
-                if (ret == IntPtr.Zero)
-                    ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "../../runtimes", rid, "native/SDL2.dll"));
-
-                if (ret == IntPtr.Zero)
-                    ret = FL.LoadLibrary(Path.Combine(assemblyLocation, "runtimes", rid, "native/SDL2.dll"));
-            }
-
-            // Welp, all failed, PANIC!!!
-            if (ret == IntPtr.Zero)
-                throw new Exception("Failed to load SDL library.");
-
-            return ret;
-        }
+    private static IntPtr GetNativeLibrary()
+    {
+        if (CurrentPlatform.OS == OS.Windows)
+            return FuncLoader.LoadLibraryExt("SDL2.dll");
+        else if (CurrentPlatform.OS == OS.Linux)
+            return FuncLoader.LoadLibraryExt("libSDL2-2.0.so.0");
+        else if (CurrentPlatform.OS == OS.MacOSX)
+            return FuncLoader.LoadLibraryExt("libSDL2-2.0.0.dylib");
+        else
+            return FuncLoader.LoadLibraryExt("sdl2");
+    }
 
         [Flags]
         public enum InitFlags

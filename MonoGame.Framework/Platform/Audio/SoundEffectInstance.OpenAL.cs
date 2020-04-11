@@ -122,7 +122,10 @@ namespace MonoGame.Framework.Audio
         private void PlatformResume()
         {
             if (!SourceId.HasValue)
+            {
+                Play();
                 return;
+            }
 
             if (SoundState == SoundState.Paused)
             {

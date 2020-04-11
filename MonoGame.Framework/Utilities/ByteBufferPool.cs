@@ -4,12 +4,20 @@ namespace MonoGame.Framework
 {
     internal class ByteBufferPool
     {
-        public int FreeAmount => _freeBuffers.Count;
+        private readonly int _minBufferSize;
+        private readonly int _maxBuffers;
+
+        public int FreeAmount
+        {
+            get { return _freeBuffers.Count; }
+        }
 
         private readonly List<byte[]> _freeBuffers;
 
-        public ByteBufferPool()
+        public ByteBufferPool(int minBufferSize = 0, int maxBuffers = int.MaxValue)
         {
+            _minBufferSize = minBufferSize;
+            _maxBuffers = maxBuffers;
             _freeBuffers = new List<byte[]>();
         }
 
@@ -18,12 +26,20 @@ namespace MonoGame.Framework
         /// </summary>
         public byte[] Get(int size)
         {
+            if (size < _minBufferSize)
+                size = _minBufferSize;
+
             byte[] result;
             lock (_freeBuffers)
             {
-                int index = FirstLargerThan(size);
+                var index = FirstLargerThan(size);
+
                 if (index == -1)
+                {
+                    if (_freeBuffers.Count > 0)
+                        _freeBuffers.RemoveAt(0);
                     result = new byte[size];
+                }
                 else
                 {
                     result = _freeBuffers[index];
@@ -36,12 +52,13 @@ namespace MonoGame.Framework
         /// <summary>
         /// Return the given buffer to the pool.
         /// </summary>
-        /// <param name="buffer"></param>
         public void Return(byte[] buffer)
         {
             lock (_freeBuffers)
             {
-                int index = FirstLargerThan(buffer.Length);
+                if (FreeAmount >= _maxBuffers)
+                    return;
+                var index = FirstLargerThan(buffer.Length);
                 if (index == -1)
                     _freeBuffers.Add(buffer);
                 else
@@ -52,16 +69,15 @@ namespace MonoGame.Framework
         // Find the smallest buffer that is larger than or equally large as size or -1 if none exist
         private int FirstLargerThan(int size)
         {
-            if (_freeBuffers.Count == 0)
-                return -1;
+            if (_freeBuffers.Count == 0) return -1;
 
-            int l = 0;
-            int r = _freeBuffers.Count - 1;
+            var l = 0;
+            var r = _freeBuffers.Count - 1;
 
             while (l <= r)
             {
-                int m = (l + r)/2;
-                byte[] buffer = _freeBuffers[m];
+                var m = (l + r)/2;
+                var buffer = _freeBuffers[m];
                 if (buffer.Length < size)
                 {
                     l = m + 1;
@@ -69,11 +85,12 @@ namespace MonoGame.Framework
                 else if (buffer.Length > size)
                 {
                     r = m;
-                    if (l == r)
-                        return l;
+                    if (l == r) return l;
                 }
                 else
+                {
                     return m;
+                }
             }
 
             return -1;

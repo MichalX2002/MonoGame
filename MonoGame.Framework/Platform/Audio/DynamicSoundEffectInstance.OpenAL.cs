@@ -112,17 +112,8 @@ namespace MonoGame.Framework.Audio
 
         private void PlatformDispose(bool disposing)
         {
-            // Stop the source and bind null buffer so that it can be recycled
-            if (SourceId.HasValue && AL.IsSource(SourceId.Value))
-            {
-                AL.SourceStop(SourceId.Value);
-                ALHelper.CheckError("Failed to stop the source.");
-
-                AL.Source(SourceId.Value, ALSourcei.Buffer, 0);
-                ALHelper.CheckError("Failed to unbind the buffer.");
-
-                FreeSource();
-            }
+            // SFXI disposal handles buffer detachment and source recycling
+            base.Dispose(disposing);
 
             if (disposing)
             {

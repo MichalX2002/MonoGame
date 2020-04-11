@@ -6,6 +6,7 @@ using System;
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.Xna.Framework.Utilities;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -25,7 +26,7 @@ namespace MonoGame.Framework.Graphics
             /// We should avoid supporting old versions for very long if at all 
             /// as users should be rebuilding content when packaging their game.
             /// </remarks>
-            public const int MGFXVersion = 8;
+            public const int MGFXVersion = 9;
 
             public int Signature;
             public int Version;
@@ -86,7 +87,7 @@ namespace MonoGame.Framework.Graphics
                 fixed (byte* effectCodePtr = effectCode.Slice(headerSize))
                 {
                     using (var stream = new UnmanagedMemoryStream(effectCodePtr, effectCode.Length - headerSize))
-                    using (var reader = new BinaryReader(stream))
+                    using (var reader = new BinaryReaderEx(stream))
                     {
                         cloneSource = new Effect(graphicsDevice);
                         cloneSource.ReadEffect(reader);
@@ -219,7 +220,7 @@ namespace MonoGame.Framework.Graphics
 
         #region Effect Filer Reader
 
-        private void ReadEffect(BinaryReader reader)
+        private void ReadEffect(BinaryReaderEx reader)
         {
             // TODO: Maybe we should be reading in a string 
             // table here to save some bytes in the file.
@@ -369,9 +370,9 @@ namespace MonoGame.Framework.Graphics
             return new EffectPassCollection(passes);
         }
 
-        private static EffectParameterCollection ReadParameters(BinaryReader reader)
-        {
-            var count = (int)reader.ReadByte();
+		private static EffectParameterCollection ReadParameters(BinaryReaderEx reader)
+		{
+			var count = reader.Read7BitEncodedInt();
             if (count == 0)
                 return EffectParameterCollection.Empty;
 

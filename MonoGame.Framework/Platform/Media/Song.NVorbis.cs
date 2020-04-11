@@ -23,6 +23,7 @@ namespace MonoGame.Framework.Media
 
             _stream = new OggStream(this, stream, leaveOpen, OnFinishedPlaying);
             _stream.Prepare(immediate: true);
+
             _duration = _stream.GetLength();
         }
 
@@ -150,11 +151,8 @@ namespace MonoGame.Framework.Media
         {
             if (disposing)
             {
-                if (_stream != null)
-                {
-                    _stream.Dispose();
-                    _stream = null;
-                }
+                _stream?.Dispose();
+                _stream = null;
             }
         }
     }

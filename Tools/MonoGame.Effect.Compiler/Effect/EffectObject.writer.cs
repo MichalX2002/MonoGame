@@ -2,17 +2,17 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using System.IO;
 using MonoGame.Framework.Graphics;
-using MonoGame.Framework.Memory;
-using MonoGame.Framework.Utilities;
+using MonoGame.Framework.Content.Pipeline.Utilities;
 
 namespace MonoGame.Effect
 {
     internal partial class EffectObject
     {
         private const string Header = "MGFX";
-        private const int Version = 8;
+        private const int Version = 9;
 
         /// <summary>
         /// Writes the effect for loading later.
@@ -29,8 +29,8 @@ namespace MonoGame.Effect
             writer.Write(profile);
 
             // Write the rest to a memory stream.
-            using (var memStream = RecyclableMemoryManager.Default.GetMemoryStream())
-            using (var memWriter = new BinaryWriter(memStream))
+            using(MemoryStream memStream = new MemoryStream())
+            using(BinaryWriterEx memWriter = new BinaryWriterEx(memStream))
             {
                 // Write all the constant buffers.
                 memWriter.Write((byte)ConstantBuffers.Count);
@@ -138,14 +138,14 @@ namespace MonoGame.Effect
             }
         }
 
-        private static void WriteParameters(BinaryWriter writer, d3dx_parameter[] parameters, int count)
+        private static void WriteParameters(BinaryWriterEx writer, d3dx_parameter[] parameters, int count)
         {
-            writer.Write((byte)count);
+            writer.Write7BitEncodedInt(count);
             for (var i = 0; i < count; i++)
                 WriteParameter(writer, parameters[i]);
         }
 
-        private static void WriteParameter(BinaryWriter writer, d3dx_parameter param)
+        private static void WriteParameter(BinaryWriterEx writer, d3dx_parameter param)
         {
             var class_ = ToXNAParameterClass(param.class_);
             var type = ToXNAParameterType(param.type);
@@ -176,7 +176,7 @@ namespace MonoGame.Effect
             }
         }
 
-        private static void WriteAnnotations(BinaryWriter writer, d3dx_parameter[] annotations)
+        private static void WriteAnnotations(BinaryWriterEx writer, d3dx_parameter[] annotations)
         {
             var count = annotations == null ? 0 : annotations.Length;
             writer.Write((byte)count);

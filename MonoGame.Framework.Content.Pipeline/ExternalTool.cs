@@ -115,32 +115,35 @@ namespace MonoGame.Framework.Content.Pipeline
                 return command;
 
             // For Linux check specific subfolder
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Linux)
-                return "linux/" + command;
+            var lincom = "linux/" + command;
+            if (CurrentPlatform.OS == OS.Linux && File.Exists(lincom))
+                return lincom;
 
             // For Mac check specific subfolder
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
-                return "osx/" + command;
+            var maccom = "osx/" + command;
+            if (CurrentPlatform.OS == OS.MacOSX && File.Exists(maccom))
+                return maccom;
 
             // We don't have a full path, so try running through the system path to find it.
             var paths = AppDomain.CurrentDomain.BaseDirectory +
                 Path.PathSeparator +
                 Environment.GetEnvironmentVariable("PATH");
 
-            string fileName = Path.GetFileName(command);
+            var justTheName = Path.GetFileName(command);
             foreach (var path in paths.Split(Path.PathSeparator))
             {
-                string fullName = Path.Combine(path, fileName);
+                var fullName = Path.Combine(path, justTheName);
                 if (File.Exists(fullName))
                     return fullName;
 
-                if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
+                if (CurrentPlatform.OS == OS.Windows)
                 {
-                    string fullExeName = string.Concat(fullName, ".exe");
+                    var fullExeName = string.Concat(fullName, ".exe");
                     if (File.Exists(fullExeName))
                         return fullExeName;
                 }
             }
+
             return null;
         }
 
@@ -168,7 +171,7 @@ namespace MonoGame.Framework.Content.Pipeline
         }
 
         /// <summary>
-        /// Safely tries to delete the specified file.
+        /// Safely deletes the file if it exists.
         /// </summary>
         /// <param name="filePath">The path to the file to delete.</param>
         public static void DeleteFile(string filePath)
@@ -178,7 +181,7 @@ namespace MonoGame.Framework.Content.Pipeline
                 File.Delete(filePath);
             }
             catch (Exception)
-            {
+            {                    
             }
         }
     }
