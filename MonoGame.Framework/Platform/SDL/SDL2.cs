@@ -3,32 +3,29 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.IO;
-using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using FL = MonoGame.Framework.FuncLoader;
 
 namespace MonoGame
 {
-    using OS = PlatformInfo.OperatingSystem;
-
     [Guid("DA23ADEA-3FBC-41B8-B748-F378E9C7BB24")]
     internal static partial class SDL
     {
         public static IntPtr NativeLibrary = GetNativeLibrary();
 
-    private static IntPtr GetNativeLibrary()
-    {
-        if (CurrentPlatform.OS == OS.Windows)
-            return FuncLoader.LoadLibraryExt("SDL2.dll");
-        else if (CurrentPlatform.OS == OS.Linux)
-            return FuncLoader.LoadLibraryExt("libSDL2-2.0.so.0");
-        else if (CurrentPlatform.OS == OS.MacOSX)
-            return FuncLoader.LoadLibraryExt("libSDL2-2.0.0.dylib");
-        else
-            return FuncLoader.LoadLibraryExt("sdl2");
-    }
+        private static IntPtr GetNativeLibrary()
+        {
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
+                return FL.LoadLibraryExt("SDL2.dll");
+            else if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Linux)
+                return FL.LoadLibraryExt("libSDL2-2.0.so.0");
+            else if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
+                return FL.LoadLibraryExt("libSDL2-2.0.0.dylib");
+            else
+                return FL.LoadLibraryExt("sdl2");
+        }
 
         [Flags]
         public enum InitFlags
@@ -91,8 +88,8 @@ namespace MonoGame
             ClipboardUpdate = 0x900,
 
             DropFile = 0x1000,
-            DropText = 0x1001,          
-            DropBegin = 0x1002,         
+            DropText = 0x1001,
+            DropBegin = 0x1002,
             DropCompleted = 0x1003,
 
             AudioDeviceAdded = 0x1100,
@@ -150,7 +147,7 @@ namespace MonoGame
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int d_sdl_init(int flags);
-        private static d_sdl_init SDL_Init = 
+        private static d_sdl_init SDL_Init =
             FL.LoadFunction<d_sdl_init>(NativeLibrary, "SDL_Init");
 
         public static void Init(int flags)
@@ -191,12 +188,12 @@ namespace MonoGame
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate IntPtr d_sdl_free(IntPtr pointer);
-        public static readonly d_sdl_free Free = 
+        public static readonly d_sdl_free Free =
             FL.LoadFunction<d_sdl_free>(NativeLibrary, "SDL_free");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_sdl_setclipboardtext(string value);
-        public static readonly d_sdl_setclipboardtext SetClipboardText = 
+        public static readonly d_sdl_setclipboardtext SetClipboardText =
             FL.LoadFunction<d_sdl_setclipboardtext>(NativeLibrary, "SDL_SetClipboardText");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -211,7 +208,7 @@ namespace MonoGame
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int d_sdl_pollevent([Out] out Event _event);
-        public static d_sdl_pollevent PollEvent = 
+        public static d_sdl_pollevent PollEvent =
             FL.LoadFunction<d_sdl_pollevent>(NativeLibrary, "SDL_PollEvent");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -243,7 +240,7 @@ namespace MonoGame
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_geterror();
-        private static readonly d_sdl_geterror SDL_GetError = 
+        private static readonly d_sdl_geterror SDL_GetError =
             FL.LoadFunction<d_sdl_geterror>(NativeLibrary, "SDL_GetError");
 
         public static string GetError()
@@ -297,7 +294,7 @@ namespace MonoGame
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr d_sdl_rwfrommem(byte[] mem, int size);
-        private static readonly d_sdl_rwfrommem SDL_RWFromMem = 
+        private static readonly d_sdl_rwfrommem SDL_RWFromMem =
             FL.LoadFunction<d_sdl_rwfrommem>(NativeLibrary, "SDL_RWFromMem");
 
         public static IntPtr RwFromMem(byte[] mem, int size)

@@ -458,8 +458,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                             outputFile),
                         out ffmpegStdout,
                         out ffmpegStderr,
-                        null,
-                        logger);
+                        null);
 
                     if (ffmpegExitCode != 0)
                         quality--;

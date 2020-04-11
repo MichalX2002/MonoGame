@@ -9,6 +9,8 @@ namespace MonoGame.Framework.Utilities
     /// </summary>
     public enum MonoGamePlatform
     {
+        Unknown,
+
         /// <summary>
         /// MonoGame Android platform.
         /// </summary>

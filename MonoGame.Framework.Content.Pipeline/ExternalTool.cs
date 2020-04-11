@@ -30,8 +30,7 @@ namespace MonoGame.Framework.Content.Pipeline
             string arguments,
             out StringBuilder stdout,
             out StringBuilder stderr,
-            string stdin = null,
-            ContentBuildLogger logger = null)
+            string stdin = null)
         {
             // This particular case is likely to be the most common and thus
             // warrants its own specific error message rather than falling
@@ -48,13 +47,12 @@ namespace MonoGame.Framework.Content.Pipeline
             var stderrTmp = new StringBuilder();
 
             static void RedirectStream(
-                StreamReader input, StringBuilder output, ContentBuildLogger log = null)
+                StreamReader input, StringBuilder output)
             {
                 string line;
                 while ((line = input.ReadLine()) != null)
                 {
                     output.AppendLine(line);
-                    log?.LogMessage(line);
                 }
             }
 
@@ -78,7 +76,7 @@ namespace MonoGame.Framework.Content.Pipeline
 
                 // We have to run these in threads, because reading on one stream can deadlock.
                 var stdoutThread = new Thread(() => RedirectStream(process.StandardOutput, stdoutTmp));
-                var stderrThread = new Thread(() => RedirectStream(process.StandardError, stderrTmp, logger));
+                var stderrThread = new Thread(() => RedirectStream(process.StandardError, stderrTmp));
                 stdoutThread.Start();
                 stderrThread.Start();
 
@@ -116,12 +114,12 @@ namespace MonoGame.Framework.Content.Pipeline
 
             // For Linux check specific subfolder
             var lincom = "linux/" + command;
-            if (CurrentPlatform.OS == OS.Linux && File.Exists(lincom))
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Linux && File.Exists(lincom))
                 return lincom;
 
             // For Mac check specific subfolder
             var maccom = "osx/" + command;
-            if (CurrentPlatform.OS == OS.MacOSX && File.Exists(maccom))
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX && File.Exists(maccom))
                 return maccom;
 
             // We don't have a full path, so try running through the system path to find it.
@@ -136,7 +134,7 @@ namespace MonoGame.Framework.Content.Pipeline
                 if (File.Exists(fullName))
                     return fullName;
 
-                if (CurrentPlatform.OS == OS.Windows)
+                if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
                 {
                     var fullExeName = string.Concat(fullName, ".exe");
                     if (File.Exists(fullExeName))

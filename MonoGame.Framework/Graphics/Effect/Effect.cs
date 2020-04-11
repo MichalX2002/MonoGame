@@ -6,7 +6,7 @@ using System;
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.IO;
-using Microsoft.Xna.Framework.Utilities;
+using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -370,9 +370,9 @@ namespace MonoGame.Framework.Graphics
             return new EffectPassCollection(passes);
         }
 
-		private static EffectParameterCollection ReadParameters(BinaryReaderEx reader)
-		{
-			var count = reader.Read7BitEncodedInt();
+        private static EffectParameterCollection ReadParameters(BinaryReaderEx reader)
+        {
+            var count = reader.Read7BitEncodedInt();
             if (count == 0)
                 return EffectParameterCollection.Empty;
 

@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework
@@ -47,6 +48,8 @@ namespace MonoGame.Framework
                 return MonoGamePlatform.PSVita;
 #elif STADIA
                 return MonoGamePlatform.Stadia;
+#else
+                return MonoGamePlatform.Unknown;
 #endif
             }
         }
@@ -63,6 +66,23 @@ namespace MonoGame.Framework
 #else
                 return GraphicsBackend.OpenGL;
 #endif
+            }
+        }
+
+        public static string Rid
+        {
+            get
+            {
+                if (OS == OperatingSystem.Windows && Environment.Is64BitProcess)
+                    return "win-x64";
+                else if (OS == OperatingSystem.Windows && !Environment.Is64BitProcess)
+                    return "win-x86";
+                else if (OS == OperatingSystem.Linux)
+                    return "linux-x64";
+                else if (OS == OperatingSystem.MacOSX)
+                    return "osx";
+                else
+                    return "unknown";
             }
         }
     }

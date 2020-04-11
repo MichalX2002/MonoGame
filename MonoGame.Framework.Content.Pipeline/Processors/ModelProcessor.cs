@@ -332,8 +332,11 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
 
         // From the XNA CPU Skinning Sample under Ms-PL, (c) Microsoft Corporation
         private static void ConvertWeights(
-            BoneWeightCollection weights, Dictionary<string, int> boneIndices,
-            Byte4[] outIndices, Vector4[] outWeights, int vertexIndex)
+            BoneWeightCollection weights, 
+            Dictionary<string, int> boneIndices,
+            Byte4[] outIndices, 
+            Vector4[] outWeights, 
+            int vertexIndex)
         {
             // we only handle 4 weights per bone
             const int maxWeights = 4;

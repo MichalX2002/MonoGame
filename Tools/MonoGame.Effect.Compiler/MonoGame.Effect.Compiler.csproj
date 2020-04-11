@@ -13,12 +13,6 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Compile Include="..\..\MonoGame.Framework\BoundingBox.cs" />
-    <Compile Include="..\..\MonoGame.Framework\BoundingFrustum.cs" />
-    <Compile Include="..\..\MonoGame.Framework\BoundingSphere.cs" />
-    <Compile Include="..\..\MonoGame.Framework\Color.cs" />
-    <Compile Include="..\..\MonoGame.Framework\ContainmentType.cs" />
-    <Compile Include="..\..\MonoGame.Framework\EventHelpers.cs" />
     <Compile Include="..\..\MonoGame.Framework\Graphics\ColorWriteChannels.cs" />
     <Compile Include="..\..\MonoGame.Framework\Graphics\Effect\EffectParameterClass.cs" />
     <Compile Include="..\..\MonoGame.Framework\Graphics\Effect\EffectParameterType.cs" />
@@ -48,6 +42,8 @@
     <Compile Include="..\..\MonoGame.Framework\Utilities\PlatformInfo.cs" />
     <Compile Include="..\..\MonoGame.Framework\Utilities\PlatformInfo.OperatingSystem.cs" />
     <Compile Include="..\..\MonoGame.Framework\Platform\Utilities\Threading.cs" />
+    <Compile Include="..\..\MonoGame.Framework\AsyncResourceNotSupportedException.cs" />
+    <Compile Include="..\..\MonoGame.Framework\FrameworkResources.cs" />
     <Compile Include="..\..\MonoGame.Framework.Content.Pipeline\ExternalTool.cs" />
     <Compile Include="..\..\MonoGame.Framework.Content.Pipeline\LoadedTypeCollection.cs" />
     <Compile Include="..\..\MonoGame.Framework.Content.Pipeline\Utilities\BinaryWriterEx.cs" />

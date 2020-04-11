@@ -39,11 +39,11 @@ namespace MonoGame.Framework
 
         public static IntPtr LoadLibraryExt(string libname)
         {
-            var ret = IntPtr.Zero;
             var assemblyLocation = Path.GetDirectoryName(typeof(FuncLoader).Assembly.Location) ?? "./";
+            IntPtr ret;
 
-            // Try .NET Framework / mono locations
-            if (CurrentPlatform.OS == OS.MacOSX)
+            // Try .NET Framework / Mono locations
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
             {
                 ret = LoadLibrary(Path.Combine(assemblyLocation, libname));
 
@@ -61,7 +61,8 @@ namespace MonoGame.Framework
 
             // Try .NET Core development locations
             if (ret == IntPtr.Zero)
-                ret = LoadLibrary(Path.Combine(assemblyLocation, "runtimes", CurrentPlatform.Rid, "native", libname));
+                ret = LoadLibrary(
+                    Path.Combine(assemblyLocation, "runtimes", PlatformInfo.Rid, "native", libname));
 
             // Try current folder (.NET Core will copy it there after publish)
             if (ret == IntPtr.Zero)
@@ -80,10 +81,10 @@ namespace MonoGame.Framework
 
         public static IntPtr LoadLibrary(string libname)
         {
-            if (CurrentPlatform.OS == OS.Windows)
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
                 return Windows.LoadLibraryW(libname);
 
-            if (CurrentPlatform.OS == OS.MacOSX)
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
                 return OSX.dlopen(libname, RTLD_LAZY);
 
             return Linux.dlopen(libname, RTLD_LAZY);
@@ -93,9 +94,9 @@ namespace MonoGame.Framework
         {
             var ret = IntPtr.Zero;
 
-            if (CurrentPlatform.OS == OS.Windows)
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
                 ret = Windows.GetProcAddress(library, function);
-            else if (CurrentPlatform.OS == OS.MacOSX)
+            else if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
                 ret = OSX.dlsym(library, function);
             else
                 ret = Linux.dlsym(library, function);
@@ -105,7 +106,7 @@ namespace MonoGame.Framework
                 if (throwIfNotFound)
                     throw new EntryPointNotFoundException(function);
 
-                return default(T);
+                return default;
             }
 
 #if NETSTANDARD

@@ -24,7 +24,7 @@ namespace MonoGame.Framework.Input
         public int Y { get; internal set; }
 
         /// <summary>
-        /// Gets the cumulative scroll wheel value since the game start.
+        /// Gets the cumulative vertical scroll wheel value since the game start.
         /// </summary>
         public int Scroll { get; internal set; }
 
@@ -49,7 +49,7 @@ namespace MonoGame.Framework.Input
         public ButtonState LeftButton
         {
             get => Buttons.HasFlags(MouseButton.Left) ? ButtonState.Pressed : ButtonState.Released;
-            internal set => Buttons = value.ToBoolean() ? Buttons | MouseButton.Left : Buttons & ~MouseButton.Left;
+            internal set => Buttons = value.ToBool() ? Buttons | MouseButton.Left : Buttons & ~MouseButton.Left;
         }
 
         /// <summary>
@@ -58,63 +58,7 @@ namespace MonoGame.Framework.Input
         public ButtonState MiddleButton
         {
             get => Buttons.HasFlags(MouseButton.Middle) ? ButtonState.Pressed : ButtonState.Released;
-            internal set => Buttons = value.ToBoolean() ? Buttons | MouseButton.Middle : Buttons & ~MouseButton.Middle;
-        }
-
-        /// <summary>
-        /// Returns a string describing the mouse state.
-        /// </summary>
-        public override string ToString()
-        {
-            string buttons;
-            if (_buttons == 0)
-                buttons = "None";
-            else
-            {
-                buttons = string.Empty;
-                if ((_buttons & LeftButtonFlag) == LeftButtonFlag)
-                {
-                    if (buttons.Length > 0)
-                        buttons += " Left";
-                    else
-                        buttons += "Left";
-                }
-                if ((_buttons & RightButtonFlag) == RightButtonFlag)
-                {
-                    if (buttons.Length > 0)
-                        buttons += " Right";
-                    else
-                        buttons += "Right";
-                }
-                if ((_buttons & MiddleButtonFlag) == MiddleButtonFlag)
-                {
-                    if (buttons.Length > 0)
-                        buttons += " Middle";
-                    else
-                        buttons += "Middle";
-                }
-                if ((_buttons & XButton1Flag) == XButton1Flag)
-                {
-                    if (buttons.Length > 0)
-                        buttons += " XButton1";
-                    else
-                        buttons += "XButton1";
-                }
-                if ((_buttons & XButton2Flag) == XButton2Flag)
-                {
-                    if (buttons.Length > 0)
-                        buttons += " XButton2";
-                    else
-                        buttons += "XButton2";
-                }
-            }
-
-            return  "[MouseState X=" + _x +
-                    ", Y=" + _y +
-                    ", Buttons=" + buttons +
-                    ", Wheel=" + _scrollWheelValue +
-                    ", HWheel=" + _horizontalScrollWheelValue +
-                    "]";
+            internal set => Buttons = value.ToBool() ? Buttons | MouseButton.Middle : Buttons & ~MouseButton.Middle;
         }
 
         /// <summary>
@@ -123,7 +67,7 @@ namespace MonoGame.Framework.Input
         public ButtonState RightButton
         {
             get => Buttons.HasFlags(MouseButton.Right) ? ButtonState.Pressed : ButtonState.Released;
-            internal set => Buttons = value.ToBoolean() ? Buttons | MouseButton.Right : Buttons & ~MouseButton.Right;
+            internal set => Buttons = value.ToBool() ? Buttons | MouseButton.Right : Buttons & ~MouseButton.Right;
         }
 
         /// <summary>
@@ -132,7 +76,7 @@ namespace MonoGame.Framework.Input
         public ButtonState XButton1
         {
             get => Buttons.HasFlags(MouseButton.X1) ? ButtonState.Pressed : ButtonState.Released;
-            internal set => Buttons = value.ToBoolean() ? Buttons | MouseButton.X1 : Buttons & ~MouseButton.X1;
+            internal set => Buttons = value.ToBool() ? Buttons | MouseButton.X1 : Buttons & ~MouseButton.X1;
         }
 
         /// <summary>
@@ -141,7 +85,7 @@ namespace MonoGame.Framework.Input
         public ButtonState XButton2
         {
             get => Buttons.HasFlags(MouseButton.X2) ? ButtonState.Pressed : ButtonState.Released;
-            internal set => Buttons = value.ToBoolean() ? Buttons | MouseButton.X2 : Buttons & ~MouseButton.X2;
+            internal set => Buttons = value.ToBool() ? Buttons | MouseButton.X2 : Buttons & ~MouseButton.X2;
         }
 
         #endregion
@@ -214,10 +158,10 @@ namespace MonoGame.Framework.Input
         /// <returns>true if the instances are equal; false otherwise.</returns>
         public static bool operator ==(in MouseState left, in MouseState right)
         {
-            return left.X == right.X 
-                && left.Y == right.Y 
+            return left.X == right.X
+                && left.Y == right.Y
                 && left.Buttons == right.Buttons
-                && left.Scroll == right.Scroll 
+                && left.Scroll == right.Scroll
                 && left.HorizontalScroll == right.HorizontalScroll;
         }
 
@@ -248,16 +192,20 @@ namespace MonoGame.Framework.Input
         /// <returns>Hash code of the object.</returns>
         public override int GetHashCode()
         {
-            unchecked
-            {
-                int code = 17;
-                code = code * 31 + X;
-                code = code * 31 + Y;
-                code = code * 31 + Scroll;
-                code = code * 31 + HorizontalScroll;
-                code = code * 31 + Buttons.GetHashCode();
-                return code;
-            }
+            return HashCode.Combine(X, Y, Scroll, HorizontalScroll, Buttons);
+        }
+
+        /// <summary>
+        /// Returns a string describing the mouse state.
+        /// </summary>
+        public override string ToString()
+        {
+            return "[MouseState X=" + X +
+                    ", Y=" + Y +
+                    ", Buttons=" + Buttons +
+                    ", Scroll=" + Scroll +
+                    ", HScroll=" + HorizontalScroll +
+                    "]";
         }
     }
 }

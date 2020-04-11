@@ -5,14 +5,9 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text.RegularExpressions;
 using MonoGame.Framework.Content.Pipeline.Graphics;
-using MonoGame.Effect;
-using MonoGame.Framework.Content.Pipeline;
-using MonoGame.Framework.Content.Pipeline.Processors;
-using MonoGame.Framework;
 
-namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
+namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     /// <summary>
     /// Processes a string representation to a platform-specific compiled effect.
@@ -53,22 +48,25 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
         /// </remarks>
         public override CompiledEffectContent Process(EffectContent input, ContentProcessorContext context)
         {
-            var mgfxc = Path.Combine(Path.GetDirectoryName(typeof(EffectProcessor).Assembly.Location), "mgfxc.dll");
+            var mgfxc = Path.Combine(
+                Path.GetDirectoryName(typeof(EffectProcessor).Assembly.Location), "mgfxc.dll");
             var sourceFile = Path.GetTempFileName();
             var destFile = Path.GetTempFileName();
-            var target = context.TargetPlatform.ToString().Contains("Windows");
+            //var target = context.TargetPlatform.ToString().Contains("Windows");
             
             File.WriteAllText(sourceFile, input.EffectCode);
 
             var proc = new Process();
             proc.StartInfo.FileName = "dotnet";
-            proc.StartInfo.Arguments = "\"" + mgfxc + "\" \"" + sourceFile + "\" \"" + destFile + "\" /Profile:" + GetProfileForPlatform(context.TargetPlatform.ToString());
+            proc.StartInfo.Arguments = 
+                "\"" + mgfxc + "\" \"" + sourceFile + "\" \"" + destFile + 
+                "\" /Profile:" + GetProfileForPlatform(context.TargetPlatform.ToString());
 
-            if (debugMode == EffectProcessorDebugMode.Debug)
+            if (DebugMode == EffectProcessorDebugMode.Debug)
                 proc.StartInfo.Arguments += " /Debug";
 
-            if (!string.IsNullOrWhiteSpace(defines))
-                proc.StartInfo.Arguments += " \"/Defines:" + defines + "\"";
+            if (!string.IsNullOrWhiteSpace(Defines))
+                proc.StartInfo.Arguments += " \"/Defines:" + Defines + "\"";
 
             proc.Start();
             proc.WaitForExit();

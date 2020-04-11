@@ -2,10 +2,10 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using System.IO;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Content.Pipeline.Utilities;
+using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Effect
 {
