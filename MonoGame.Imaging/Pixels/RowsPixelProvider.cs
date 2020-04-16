@@ -15,7 +15,7 @@ namespace MonoGame.Imaging.Pixels
     public readonly struct RowsPixelProvider : IPixelProvider
     {
         private static ConcurrentDictionary<VectorTypeInfo, Transform32Delegate> _transform32DelegateCache =
-            new ConcurrentDictionary<VectorTypeInfo, Transform32Delegate>(VectorTypeInfoEqualityComparer.Instance);
+            new ConcurrentDictionary<VectorTypeInfo, Transform32Delegate>();
 
         private delegate bool Transform32Delegate(
             ReadOnlySpan<byte> sourceRow,

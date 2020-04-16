@@ -9,6 +9,8 @@ namespace MonoGame.Imaging.Coding.Identification
     {
         public abstract ImageFormat Format { get; }
 
+        public virtual CodecOptions DefaultOptions => CodecOptions.Default;
+
         public static VectorTypeInfo GetVectorType(int components, int depth)
         {
             Exception CreateDepthNotSupportedException()
@@ -29,15 +31,15 @@ namespace MonoGame.Imaging.Coding.Identification
                 case 2:
                     return
                         depth == 8 ? VectorTypeInfo.Get<GrayAlpha16>() :
-                        depth == 16 ? VectorTypeInfo.Get<Short2>() :
-                        depth == 32 ? VectorTypeInfo.Get<Vector2>() :
+                        depth == 16 ? VectorTypeInfo.Get<GrayAlpha32>() :
+                        //depth == 32 ? VectorTypeInfo.Get<Vector2>() :
                         throw CreateDepthNotSupportedException();
 
                 case 3:
                     return
                         depth == 8 ? VectorTypeInfo.Get<Rgb24>() :
                         depth == 16 ? VectorTypeInfo.Get<Rgb48>() :
-                        depth == 32 ? VectorTypeInfo.Get<Vector3>() :
+                        depth == 32 ? VectorTypeInfo.Get<Vector3>() : // TODO: RgbVector
                         throw CreateDepthNotSupportedException();
 
                 case 4:

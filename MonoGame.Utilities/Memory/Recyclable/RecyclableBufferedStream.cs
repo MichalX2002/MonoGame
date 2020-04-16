@@ -75,7 +75,7 @@ namespace MonoGame.Framework.Memory
             _leaveOpen = leaveOpen;
 
             if (!_stream.CanRead && !_stream.CanWrite)
-                throw new ArgumentException("The stream is neither readable or writable.");
+                throw new IOException("The stream is neither readable or writable.");
         }
 
         #region Assert

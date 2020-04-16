@@ -21,10 +21,11 @@ namespace MonoGame.Imaging
             where TPixel : unmanaged, IPixel
         {
             ArgumentGuard.AssertDimensionsGreaterThanZero(size, nameof(size));
-            ImagingArgumentGuard.AssertContigousLargeEnough(memory.Count, size.Area, nameof(memory));
+            ImagingArgumentGuard.AssertContigousLargeEnough(memory.Length, size.Area, nameof(memory));
 
             int stride = byteStride ?? (size.Width * Unsafe.SizeOf<TPixel>());
-            AssertValidStride<TPixel>(size, memory.Count * memory.ElementSize, stride, nameof(byteStride));
+            AssertValidStride<TPixel>(size, memory.Length * memory.ElementSize, stride, nameof(byteStride));
+            AssertValidMemory(size, memory.Length * memory.ElementSize, stride, nameof(memory));
 
             var buffer = new Image<TPixel>.PixelBuffer(memory, stride, leaveOpen);
             return new Image<TPixel>(buffer, size);
@@ -40,6 +41,7 @@ namespace MonoGame.Imaging
             int elementSize = Unsafe.SizeOf<TPixel>();
             int stride = byteStride ?? (size.Width * elementSize);
             AssertValidStride<TPixel>(size, memory.Length * elementSize, stride, nameof(byteStride));
+            AssertValidMemory(size, memory.Length * elementSize, stride, nameof(memory));
 
             var buffer = new Image<TPixel>.PixelBuffer(memory, stride);
             return new Image<TPixel>(buffer, size);
@@ -54,12 +56,12 @@ namespace MonoGame.Imaging
 
             int stride = byteStride ?? (size.Width * Unsafe.SizeOf<TPixel>());
             AssertValidStride<TPixel>(size, memory.Length, stride, nameof(byteStride));
+            AssertValidMemory(size, memory.Length, stride, nameof(memory));
 
             var buffer = new Image<TPixel>.PixelBuffer(memory, stride);
             return new Image<TPixel>(buffer, size);
         }
 
-        [DebuggerHidden]
         private static void AssertValidStride<T>(
             Size size, int memoryByteSize, int byteStride, string paramName)
             where T : unmanaged
@@ -71,6 +73,14 @@ namespace MonoGame.Imaging
             if (memoryByteSize % byteStride != 0)
                 throw new ArgumentException(
                     "The byte stride must be aligned with the memory size.", paramName);
+        }
+
+        private static void AssertValidMemory(
+            Size size, int memoryByteSize, int byteStride, string paramName)
+        {
+            if (memoryByteSize < byteStride * size.Height)
+                throw new ArgumentException(
+                    "Not enough bytes for the given size.", paramName);
         }
     }
 }

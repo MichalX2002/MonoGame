@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
 {
-    public class VectorTypeInfo
+    public class VectorTypeInfo : IEquatable<VectorTypeInfo>
     {
         private static ConcurrentDictionary<Type, VectorTypeInfo> InfoCache { get; } =
             new ConcurrentDictionary<Type, VectorTypeInfo>();
@@ -26,6 +26,22 @@ namespace MonoGame.Framework.PackedVector
 
             var vectorInstance = (IPackedVector)Activator.CreateInstance(type);
             ComponentInfo = vectorInstance.ComponentInfo;
+        }
+
+        public bool Equals(VectorTypeInfo other)
+        {
+            // only compare the type as every other property is dependent on it
+            return Type == other.Type;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is VectorTypeInfo info && Equals(info);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Type);
         }
 
         public static VectorTypeInfo Get(Type type)

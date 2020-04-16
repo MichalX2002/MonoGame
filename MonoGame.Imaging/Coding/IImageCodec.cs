@@ -11,5 +11,10 @@ namespace MonoGame.Imaging.Coding
         /// Gets the format associated with this codec.
         /// </summary>
         ImageFormat Format { get; }
+
+        /// <summary>
+        /// Gets the default options for this codec.
+        /// </summary>
+        CodecOptions DefaultOptions { get; }
     }
 }

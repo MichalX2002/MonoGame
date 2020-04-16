@@ -38,7 +38,7 @@ namespace MonoGame.Framework.Memory
         /// <summary>
         /// Gets or sets the length of the allocated memory in elements.
         /// </summary>
-        public int Count
+        public int Length
 
         {
             get

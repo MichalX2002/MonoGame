@@ -8,7 +8,9 @@ namespace MonoGame.Imaging.Coding.Encoding
     public abstract partial class StbImageEncoderBase : IImageEncoder
     {
         public abstract ImageFormat Format { get; }
-        public abstract EncoderOptions DefaultOptions { get; }
+        public virtual EncoderOptions DefaultOptions => EncoderOptions.Default;
+
+        CodecOptions IImageCodec.DefaultOptions => DefaultOptions;
 
         protected abstract bool Write(StbImageEncoderState encoderState, in WriteState writeState);
 

@@ -12,7 +12,7 @@ namespace MonoGame.Framework.Memory
 
         public static int ByteLength(this IReadOnlyMemory memory)
         {
-            return memory.Count * memory.ElementSize;
+            return memory.Length * memory.ElementSize;
         }
     }
 }

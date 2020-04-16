@@ -16,14 +16,19 @@ namespace MonoGame.Imaging.Coding.Decoding
     {
         public event DecodeProgressCallback Progress;
 
+        public Image CurrentImage { get; protected set; }
+        public VectorTypeInfo PreferredPixelType { get; set; }
+
         /// <summary>
         /// Gets the decoder that the state originates from.
         /// </summary>
         public IImageDecoder Decoder => (IImageDecoder)Codec;
 
-        public Image CurrentImage { get; protected set; }
-
-        public VectorTypeInfo PreferredPixelType { get; set; }
+        public DecoderOptions DecoderOptions
+        {
+            get => (DecoderOptions)CodecOptions;
+            set => CodecOptions = value;
+        }
 
         public ImageDecoderState(
             IImageDecoder decoder,

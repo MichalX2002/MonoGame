@@ -109,7 +109,7 @@ namespace MonoGame.Imaging
             {
                 _imemory = memory ?? throw new ArgumentNullException(nameof(memory));
                 _leaveOpen = leaveOpen;
-                ElementCount = memory.Count;
+                ElementCount = memory.Length;
                 ByteStride = byteStride;
             }
 

@@ -7,9 +7,11 @@ namespace MonoGame.Imaging.Coding.Decoding
     {
         public override ImageFormat Format => ImageFormat.Png;
 
-        protected override bool Read(StbImageDecoderState decoderState, ref ReadState readState)
+        public override DecoderOptions DefaultOptions => DecoderOptions.Default;
+
+        protected override bool Read(StbImageDecoderState decoderState, ReadState readState)
         {
-            return Png.Load(decoderState.Context, ref readState);
+            return Png.Load(decoderState.Context, readState, ScanMode.Load);
         }
     }
 }

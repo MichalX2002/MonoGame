@@ -32,7 +32,7 @@ namespace MonoGame.Framework.IO
         public PrefixedStream(Memory<byte> prefix, Stream stream, bool leaveOpen)
         {
             if (!stream.CanRead)
-                throw new ArgumentException("The stream is not readable.", nameof(stream));
+                throw new IOException("The stream is not readable.");
 
             _prefix = prefix;
             _stream = stream;
@@ -43,7 +43,7 @@ namespace MonoGame.Framework.IO
         public PrefixedStream(Stream stream, int readAhead, bool leaveOpen)
         {
             if (!stream.CanRead)
-                throw new ArgumentException("The stream is not readable.", nameof(stream));
+                throw new IOException("The stream is not readable.");
 
             if (readAhead < 0)
                 throw new ArgumentOutOfRangeException("Value may not be negative.", nameof(readAhead));
@@ -144,7 +144,6 @@ namespace MonoGame.Framework.IO
             return _position;
         }
 
-        [DebuggerHidden]
         private void ValidateSeekPosition(long value)
         {
             if (value < 0)

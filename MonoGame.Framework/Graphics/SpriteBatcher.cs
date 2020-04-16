@@ -60,13 +60,13 @@ namespace MonoGame.Framework.Graphics
         private void SetupBuffers(int itemCount, int oldItemCount = 0)
         {
             int minVertices = itemCount * 4; // 4 vertices per item
-            if (minVertices > _vertexBuffer.Count)
-                _vertexBuffer.Count = minVertices;
+            if (minVertices > _vertexBuffer.Length)
+                _vertexBuffer.Length = minVertices;
 
             int minIndices = itemCount * 6; // 6 indices per item
-            if (minIndices > _indexBuffer.Count)
+            if (minIndices > _indexBuffer.Length)
             {
-                _indexBuffer.Count = minIndices;
+                _indexBuffer.Length = minIndices;
 
                 int oldIndices = oldItemCount * 6;
                 int oldVertices = oldItemCount * 4;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO.Compression;
 using MonoGame.Imaging.Attributes.Codec;
-using MonoGame.Imaging.Pixels;
 using static StbSharp.ImageWrite;
 
 namespace MonoGame.Imaging.Coding.Encoding
@@ -9,7 +8,7 @@ namespace MonoGame.Imaging.Coding.Encoding
     [Serializable]
     public class PngEncoderOptions : EncoderOptions
     {
-        public static PngEncoderOptions Default { get; } =
+        public new static PngEncoderOptions Default { get; } =
             new PngEncoderOptions(CompressionLevel.Optimal);
 
         public CompressionLevel CompressionLevel { get; }

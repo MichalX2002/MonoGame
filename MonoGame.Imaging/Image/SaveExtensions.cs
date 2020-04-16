@@ -169,7 +169,6 @@ namespace MonoGame.Imaging
 
         #region Argument Validation
 
-        [DebuggerHidden]
         private static IImageEncoder AssertValidArguments(
             ImagingConfig imagingConfig, ImageFormat format, EncoderOptions encoderOptions = null)
         {
@@ -185,7 +184,6 @@ namespace MonoGame.Imaging
             return encoder;
         }
 
-        [DebuggerHidden]
         private static void AssertValidOutput(Stream output)
         {
             if (output == null)
@@ -195,7 +193,6 @@ namespace MonoGame.Imaging
                 throw new ArgumentException("The stream is not writable.", nameof(output));
         }
 
-        [DebuggerHidden]
         public static void AssertValidPath(string filePath)
         {
             if (filePath == null)

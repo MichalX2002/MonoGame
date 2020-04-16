@@ -912,7 +912,6 @@ namespace MonoGame.OpenGL
         internal static List<string> Extensions = new List<string>();
 
         //[Conditional("DEBUG")]
-        //[DebuggerHidden]
         static void LogExtensions()
         {
 #if __ANDROID__

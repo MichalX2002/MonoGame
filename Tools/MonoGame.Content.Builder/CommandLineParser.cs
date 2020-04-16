@@ -236,7 +236,7 @@ namespace MonoGame.Content.Builder
             if (arg.StartsWith("/@") || 
                 arg.StartsWith("--@") ||
                 arg.StartsWith("-@") ||
-                (arg.EndsWith(".mgcb")))
+                arg.EndsWith(".mgcb"))
             {
                 var file = arg;
                 if (file.StartsWith("/@") || file.StartsWith("-@"))

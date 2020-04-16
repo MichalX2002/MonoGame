@@ -146,7 +146,7 @@ namespace MonoGame.Imaging
 
         #region Create
 
-        private delegate Image CreateDelegate(Size size);
+        private delegate Image CreateDelegate(Size size, bool zeroFill);
 
         private static Type[] _createMethodArguments;
         private static ConcurrentDictionary<VectorTypeInfo, CreateDelegate> _createDelegateCache;
@@ -154,8 +154,7 @@ namespace MonoGame.Imaging
         private static void SetupReflection_Create()
         {
             _createMethodArguments = typeof(CreateDelegate).GetDelegateParameters().AsTypes();
-            _createDelegateCache = new ConcurrentDictionary<VectorTypeInfo, CreateDelegate>(
-                VectorTypeInfoEqualityComparer.Instance);
+            _createDelegateCache = new ConcurrentDictionary<VectorTypeInfo, CreateDelegate>();
         }
 
         private static CreateDelegate GetCreateDelegate(VectorTypeInfo pixelType)
@@ -165,8 +164,10 @@ namespace MonoGame.Imaging
 
             if (!_createDelegateCache.TryGetValue(pixelType, out var createDelegate))
             {
+                const BindingFlags binding = BindingFlags.Static | BindingFlags.NonPublic;
                 var imageType = typeof(Image<>).MakeGenericType(pixelType.Type);
-                var genericCreateMethod = imageType.GetMethod("Create", _createMethodArguments);
+                var genericCreateMethod = imageType.GetMethod(
+                    "CreateCore", binding, null, _createMethodArguments, null);
                 createDelegate = CreateDelegateForMethod<CreateDelegate>(genericCreateMethod);
                 _createDelegateCache.TryAdd(pixelType, createDelegate);
             }

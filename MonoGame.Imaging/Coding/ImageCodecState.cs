@@ -6,6 +6,7 @@ namespace MonoGame.Imaging.Coding
     public abstract class ImageCodecState : IImagingConfigProvider, IDisposable
     {
         private bool _leaveOpen;
+        private CodecOptions _codecOptions;
 
         public bool IsDisposed { get; protected set; }
 
@@ -17,6 +18,17 @@ namespace MonoGame.Imaging.Coding
         /// Gets the zero-based index of the most recently processed image.
         /// </summary>
         public int FrameIndex { get; protected set; }
+
+        public CodecOptions CodecOptions
+        {
+            get => _codecOptions ?? Codec.DefaultOptions;
+            set
+            {
+                if (value != null)
+                    CodecOptions.AssertTypeEqual(Codec.DefaultOptions, value, nameof(value));
+                _codecOptions = value;
+            }
+        }
 
         public ImageCodecState(IImageCodec codec, ImagingConfig config, Stream stream, bool leaveOpen)
         {

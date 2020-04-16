@@ -76,7 +76,9 @@ namespace MonoGame.Imaging
                 {
                     long previous = context.Stream.Position;
                     long current = context.Stream.Seek(count, SeekOrigin.Current);
-                    return (int)(current - previous);
+                    int skipped = (int)(current - previous);
+
+                    return skipped;
                 }
                 else
                 {
@@ -108,7 +110,8 @@ namespace MonoGame.Imaging
         {
             try
             {
-                return context.Stream.Read(buffer);
+                int read = context.Stream.Read(buffer);
+                return read;
             }
             catch (Exception ex)
             {

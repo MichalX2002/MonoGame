@@ -16,6 +16,9 @@
     <None Update="big img.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="PngSuite-2017jul19.zip">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="smol img.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

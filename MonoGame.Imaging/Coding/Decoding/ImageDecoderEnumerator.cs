@@ -35,6 +35,7 @@ namespace MonoGame.Imaging.Coding.Decoding
                         "The decoder reported a successful decode, but there is no resulting image.");
                 return true;
             }
+
             return false;
         }
 

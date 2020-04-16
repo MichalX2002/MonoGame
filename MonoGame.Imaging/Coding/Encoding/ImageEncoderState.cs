@@ -16,34 +16,20 @@ namespace MonoGame.Imaging.Coding.Encoding
 
     public abstract class ImageEncoderState : ImageCodecState
     {
-        private EncoderOptions _encoderOptions;
-
         public event EncodeProgressCallback Progress;
+
+        public IReadOnlyPixelRows CurrentImage { get; protected set; }
+        public CancellationToken CancellationToken { get; set; }
 
         /// <summary>
         /// Gets the encoder that the state originates from.
         /// </summary>
         public IImageEncoder Encoder => (IImageEncoder)Codec;
 
-        public IReadOnlyPixelRows CurrentImage { get; protected set; }
-
-        public CancellationToken CancellationToken { get; set; }
-
         public EncoderOptions EncoderOptions
         {
-            get => _encoderOptions;
-            set
-            {
-                if (value == null)
-                {
-                    _encoderOptions = Encoder.DefaultOptions;
-                }
-                else
-                {
-                    EncoderOptions.AssertTypeEqual(Encoder.DefaultOptions, value, nameof(value));
-                    _encoderOptions = value;
-                }
-            }
+            get => (EncoderOptions)CodecOptions;
+            set => CodecOptions = value;
         }
 
         public ImageEncoderState(

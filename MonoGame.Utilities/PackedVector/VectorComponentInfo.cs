@@ -5,7 +5,7 @@ namespace MonoGame.Framework.PackedVector
     /// <summary>
     /// Describes a vector and the data it stores.
     /// </summary>
-    public readonly struct VectorComponentInfo
+    public readonly struct VectorComponentInfo : IEquatable<VectorComponentInfo>
     {
         /// <summary>
         /// Gets the vector component definitions in data order.
@@ -68,6 +68,34 @@ namespace MonoGame.Framework.PackedVector
             if (components == null) throw new ArgumentNullException(nameof(components));
             if (components.Length == 0) throw new ArgumentEmptyException(nameof(components));
             Components = (VectorComponent[])components.Clone();
+        }
+
+        public bool Equals(VectorComponentInfo other)
+        {
+            return Components.Span.SequenceEqual(other.Components.Span);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is VectorComponentInfo info && Equals(info);
+        }
+
+        public override int GetHashCode()
+        {
+            HashCode code = default;
+            foreach (var comp in Components.Span)
+                code.Add(comp);
+            return code.ToHashCode();
+        }
+
+        public static bool operator ==(VectorComponentInfo a, VectorComponentInfo b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(VectorComponentInfo a, VectorComponentInfo b)
+        {
+            return !(a == b);
         }
     }
 }

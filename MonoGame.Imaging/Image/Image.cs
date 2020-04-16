@@ -43,7 +43,7 @@ namespace MonoGame.Imaging
         public bool IsPixelContiguous => Width * PixelType.ElementSize == ByteStride;
 
         int IElementContainer.ElementSize => PixelType.ElementSize;
-        int IElementContainer.Count => Width * Height;
+        int IElementContainer.Length => Width * Height;
 
         #endregion
 
@@ -68,7 +68,7 @@ namespace MonoGame.Imaging
         public static Image Create(VectorTypeInfo pixelType, Size size)
         {
             var createDelegate = GetCreateDelegate(pixelType);
-            return createDelegate.Invoke(size);
+            return createDelegate.Invoke(size, zeroFill: true);
         }
 
         /// <summary>
@@ -77,6 +77,25 @@ namespace MonoGame.Imaging
         public static Image Create(VectorTypeInfo pixelType, int width, int height)
         {
             return Create(pixelType, new Size(width, height));
+        }
+
+        /// <summary>
+        /// Creates an image with the given size and pixel type
+        /// without clearing the allocated memory.
+        /// </summary>
+        public static Image CreateUninitialized(VectorTypeInfo pixelType, Size size)
+        {
+            var createDelegate = GetCreateDelegate(pixelType);
+            return createDelegate.Invoke(size, zeroFill: false);
+        }
+
+        /// <summary>
+        /// Creates an image with the given size and pixel type
+        /// without clearing the allocated memory.
+        /// </summary>
+        public static Image CreateUninitialized(VectorTypeInfo pixelType, int width, int height)
+        {
+            return CreateUninitialized(pixelType, new Size(width, height));
         }
 
         #endregion

@@ -6,8 +6,11 @@ namespace MonoGame.Imaging.Coding.Decoding
     public abstract partial class StbImageDecoderBase : IImageDecoder
     {
         public abstract ImageFormat Format { get; }
+        public virtual DecoderOptions DefaultOptions => DecoderOptions.Default;
 
-        protected abstract bool Read(StbImageDecoderState decoderState, ref ReadState readState);
+        CodecOptions IImageCodec.DefaultOptions => DefaultOptions;
+
+        protected abstract bool Read(StbImageDecoderState decoderState, ReadState readState);
 
         //protected virtual unsafe Image ParseMemoryResult(
         //    ImagingConfig config, IMemoryHolder result, in ReadState state, VectorTypeInfo pixelType = null)
@@ -53,10 +56,11 @@ namespace MonoGame.Imaging.Coding.Decoding
                 throw new InvalidOperationException("The decoder state is invalid.");
 
             var readState = state.CreateReadState();
-            if (!Read(state, ref readState))
+            if (!Read(state, readState))
             {
-                //// TODO: get some error message from the context
-                //throw new ImagingException(state.Context.ErrorCode.ToString());
+                // TODO: get some error message from the context
+                if (state.Context.ErrorCode != ErrorCode.Ok)
+                    throw new ImagingException(state.Context.ErrorCode.ToString());
 
                 return false;
             }

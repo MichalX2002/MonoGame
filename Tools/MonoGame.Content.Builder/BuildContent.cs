@@ -474,7 +474,7 @@ namespace MonoGame.Content.Builder
 
                     // Destination file should not be read-only even if original was.
                     var fileAttr = File.GetAttributes(dest);
-                    fileAttr &= (~FileAttributes.ReadOnly);
+                    fileAttr &= ~FileAttributes.ReadOnly;
                     File.SetAttributes(dest, fileAttr);
 
                     if (string.IsNullOrEmpty(c.Link))

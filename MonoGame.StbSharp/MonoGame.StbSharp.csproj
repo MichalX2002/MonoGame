@@ -27,4 +27,8 @@
     <Compile Remove="..\ThirdParty\StbSharp\Image\src\ImageRead.Tga.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.1" />
+  </ItemGroup>
+
 </Project>

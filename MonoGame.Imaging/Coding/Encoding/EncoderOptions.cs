@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using MonoGame.Imaging.Coding;
 
 namespace MonoGame.Imaging
 {
@@ -7,25 +7,12 @@ namespace MonoGame.Imaging
     /// Base class for encoder options.
     /// </summary>
     [Serializable]
-    public abstract class EncoderOptions
+    public abstract class EncoderOptions : CodecOptions
     {
-        public static bool TypeEquals(EncoderOptions a, Type b)
-        {
-            return a.GetType() == b;
-        }
+        public static new EncoderOptions Default { get; } = new DefaultEncoderOptions();
 
-        public static bool TypeEquals(EncoderOptions a, EncoderOptions b)
+        private class DefaultEncoderOptions : EncoderOptions
         {
-            return TypeEquals(a, b.GetType());
-        }
-
-        [DebuggerHidden]
-        public static void AssertTypeEqual(
-            EncoderOptions required, EncoderOptions other, string argName)
-        {
-            if(!TypeEquals(required, other))
-                throw new ArgumentException(
-                    $"The encoder options are not of the required type '{required.GetType()}'.", argName);
         }
     }
 }

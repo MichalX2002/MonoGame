@@ -113,7 +113,7 @@ namespace MonoGame.Imaging.Processing
             public Rectangle SourceRectangle { get; }
 
             public Size Size => SourceRectangle.Size;
-            public int Count => Size.Area;
+            public int Length => Size.Area;
 
             public int ElementSize => Pixels.ElementSize;
             public VectorTypeInfo PixelType => Pixels.PixelType;

@@ -478,7 +478,7 @@ namespace StbSharp
                 return (int)Math.Ceiling(
                     stbir__filter_info_table[filter].support(1 / scale) * 2);
             else
-                return (int)Math.Ceiling((stbir__filter_info_table[filter].support(scale) * 2));
+                return (int)Math.Ceiling(stbir__filter_info_table[filter].support(scale) * 2);
         }
 
         public static int stbir__get_contributors(float scale, int filter, int input_size, int output_size)

@@ -13,7 +13,7 @@ namespace MonoGame.Imaging.Processing
 
         public bool IsEmpty => Pixels == null;
 
-        public int Count => Pixels.Count;
+        public int Length => Pixels.Length;
         public int ElementSize => Pixels.ElementSize;
 
         public Size Size => Pixels.Size;

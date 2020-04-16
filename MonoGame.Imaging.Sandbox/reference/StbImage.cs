@@ -254,7 +254,7 @@ namespace StbImageSharp
 		public static void stbi__gif_parse_colortable(stbi__context s, byte* pal, int num_entries, int transp)
 		{
 			int i;
-			for (i = 0; (i) < (num_entries); ++i)
+			for (i = 0; i < num_entries; ++i)
 			{
 				pal[i * 4 + 2] = stbi__get8(s);
 				pal[i * 4 + 1] = stbi__get8(s);

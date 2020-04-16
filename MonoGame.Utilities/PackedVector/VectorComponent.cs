@@ -5,7 +5,7 @@ namespace MonoGame.Framework.PackedVector
     /// <summary>
     /// Describes a single vector component.
     /// </summary>
-    public struct VectorComponent
+    public struct VectorComponent : IEquatable<VectorComponent>
     {
         /// <summary>
         /// Gets the data type of the component.
@@ -31,6 +31,32 @@ namespace MonoGame.Framework.PackedVector
 
             Type = type;
             Bits = bits;
+        }
+
+        public bool Equals(VectorComponent other)
+        {
+            return Type == other.Type
+                && Bits == other.Bits;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is VectorComponent comp && Equals(comp);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Type, Bits);
+        }
+
+        public static bool operator ==(VectorComponent a, VectorComponent b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(VectorComponent a, VectorComponent b)
+        {
+            return !(a == b);
         }
     }
 }

@@ -8,10 +8,9 @@ namespace MonoGame.Imaging.Coding.Decoding
 {
     public class StbImageDecoderState : ImageDecoderState
     {
-        private StateReadyCallback _onStateReady;
-        private OutputByteDataCallback _onOutputByteData;
-        private OutputShortDataCallback _onOutputShortData;
-        private OutputFloatDataCallback _onOutputFloatData;
+        private StateReadyDelegate _onStateReady;
+        private OutputPixelLineDelegate _onOutputPixelLine;
+        private OutputPixelDelegate _onOutputPixel;
 
         public VectorTypeInfo SourcePixelType { get; private set; }
 
@@ -28,9 +27,8 @@ namespace MonoGame.Imaging.Coding.Decoding
             base(decoder, config, stream)
         {
             _onStateReady = OnStateReady;
-            _onOutputByteData = OnOutputByteData;
-            _onOutputShortData = OnOutputShortData;
-            _onOutputFloatData = OnOutputFloatData;
+            _onOutputPixelLine = OnOutputPixelLine;
+            _onOutputPixel = OnOutputPixel;
         }
 
         public ReadState CreateReadState()
@@ -48,19 +46,22 @@ namespace MonoGame.Imaging.Coding.Decoding
             //        onProgress.Invoke(decoderState, percentage, rectangle);
             //    };
 
-            return new ReadState(
-                _onStateReady,
-                _onOutputByteData,
-                _onOutputShortData,
-                _onOutputFloatData);
+            return new ReadState()
+            {
+                StateReadyCallback = _onStateReady,
+                OutputPixelLineCallback = _onOutputPixelLine,
+                OutputPixelCallback = _onOutputPixel
+            };
         }
 
-        private void OnStateReady(in ReadState state)
+        private void OnStateReady(ReadState state)
         {
             SourcePixelType = GetVectorType(state);
             var dstType = PreferredPixelType ?? SourcePixelType;
             var size = new Size(state.Width, state.Height);
             CurrentImage = Image.Create(dstType, size);
+
+            InvokeProgress(0, null);
         }
 
         private void AssertValidStateForOutput()
@@ -72,17 +73,17 @@ namespace MonoGame.Imaging.Coding.Decoding
                 throw new InvalidOperationException("Missing image buffer.");
         }
 
-        private void OnOutputByteData(
-            in ReadState state, int line, AddressingMajor addressMajor, ReadOnlySpan<byte> pixels)
+        private void OnOutputPixelLineContiguous(
+            ReadState state, AddressingMajor addressMajor, int line, int start, ReadOnlySpan<byte> pixels)
         {
             AssertValidStateForOutput();
 
             if (SourcePixelType == CurrentImage.PixelType)
             {
                 if (addressMajor == AddressingMajor.Row)
-                    CurrentImage.SetPixelByteRow(0, line, pixels);
+                    CurrentImage.SetPixelByteRow(start, line, pixels);
                 else if (addressMajor == AddressingMajor.Column)
-                    CurrentImage.SetPixelByteColumn(0, line, pixels);
+                    CurrentImage.SetPixelByteColumn(start, line, pixels);
                 else
                     throw new ArgumentOutOfRangeException(nameof(addressMajor));
             }
@@ -92,25 +93,67 @@ namespace MonoGame.Imaging.Coding.Decoding
             }
         }
 
-        private void OnOutputShortData(
-            in ReadState state, int line, AddressingMajor addressMajor, ReadOnlySpan<ushort> pixels)
+        private void OnOutputPixelLine(
+            ReadState state, AddressingMajor addressMajor, int line, int start, int spacing, ReadOnlySpan<byte> pixels)
+        {
+            if (spacing == 1)
+            {
+                OnOutputPixelLineContiguous(state, addressMajor, line, start, pixels);
+                return;
+            }
+
+            if (spacing == 0)
+                throw new ArgumentOutOfRangeException(nameof(spacing));
+
+            AssertValidStateForOutput();
+
+            if (SourcePixelType == CurrentImage.PixelType)
+            {
+                int elementSize = SourcePixelType.ElementSize;
+
+                if (addressMajor == AddressingMajor.Row)
+                {
+                    var byteRow = CurrentImage.GetPixelByteRowSpan(line).Slice(start * elementSize);
+                    for (int x = 0; x < pixels.Length; x += elementSize)
+                    {
+                        var src = pixels.Slice(x, elementSize);
+                        var dst = byteRow.Slice(x * spacing, elementSize);
+                        src.CopyTo(dst);
+                    }
+                }
+                else if (addressMajor == AddressingMajor.Column)
+                {
+                    throw new NotImplementedException();
+                    CurrentImage.SetPixelByteColumn(start, line, pixels);
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException(nameof(addressMajor));
+                }
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private void OnOutputPixel(ReadState state, int x, int y, ReadOnlySpan<byte> pixel)
         {
             AssertValidStateForOutput();
 
-            throw new NotImplementedException();
+            if (SourcePixelType == CurrentImage.PixelType)
+            {
+                CurrentImage.SetPixelByteRow(x, y, pixel);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
 
-        private void OnOutputFloatData(
-            in ReadState state, int line, AddressingMajor addressMajor, ReadOnlySpan<float> pixels)
+        public static VectorTypeInfo GetVectorType(ReadState state)
         {
-            AssertValidStateForOutput();
-
-            throw new NotImplementedException();
-        }
-
-        public static VectorTypeInfo GetVectorType(in ReadState state)
-        {
-            return StbIdentifierBase.GetVectorType(state.Components, state.OutDepth);
+            return StbIdentifierBase.GetVectorType(state.OutComponents, state.OutDepth);
         }
     }
 }

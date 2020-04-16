@@ -11,7 +11,7 @@ namespace MonoGame.Imaging.Coding.Encoding
         /// <summary>
         /// Gets the default options for this encoder.
         /// </summary>
-        EncoderOptions DefaultOptions { get; }
+        new EncoderOptions DefaultOptions { get; }
 
         /// <summary>
         /// Creates a state that can be used to encode images.

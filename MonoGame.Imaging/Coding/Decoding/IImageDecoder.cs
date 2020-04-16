@@ -7,6 +7,11 @@ namespace MonoGame.Imaging.Coding.Decoding
     public interface IImageDecoder : IImageCodec
     {
         /// <summary>
+        /// Gets the default options for this decoder.
+        /// </summary>
+        new DecoderOptions DefaultOptions { get; }
+
+        /// <summary>
         /// Creates a state that can be used to decode images.
         /// </summary>
         /// <param name="config">The imaging configuration.</param>
