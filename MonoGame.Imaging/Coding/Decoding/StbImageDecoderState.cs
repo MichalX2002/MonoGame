@@ -74,18 +74,18 @@ namespace MonoGame.Imaging.Coding.Decoding
         }
 
         private void OnOutputPixelLineContiguous(
-            ReadState state, AddressingMajor addressMajor, int line, int start, ReadOnlySpan<byte> pixels)
+            AddressingMajor addressing, int line, int start, ReadOnlySpan<byte> pixels)
         {
             AssertValidStateForOutput();
 
             if (SourcePixelType == CurrentImage.PixelType)
             {
-                if (addressMajor == AddressingMajor.Row)
+                if (addressing == AddressingMajor.Row)
                     CurrentImage.SetPixelByteRow(start, line, pixels);
-                else if (addressMajor == AddressingMajor.Column)
+                else if (addressing == AddressingMajor.Column)
                     CurrentImage.SetPixelByteColumn(start, line, pixels);
                 else
-                    throw new ArgumentOutOfRangeException(nameof(addressMajor));
+                    throw new ArgumentOutOfRangeException(nameof(addressing));
             }
             else
             {
@@ -94,16 +94,16 @@ namespace MonoGame.Imaging.Coding.Decoding
         }
 
         private void OnOutputPixelLine(
-            ReadState state, AddressingMajor addressMajor, int line, int start, int spacing, ReadOnlySpan<byte> pixels)
+            ReadState state, AddressingMajor addressing, int line, int start, int increment, ReadOnlySpan<byte> pixels)
         {
-            if (spacing == 1)
+            if (increment == 1)
             {
-                OnOutputPixelLineContiguous(state, addressMajor, line, start, pixels);
+                OnOutputPixelLineContiguous(addressing, line, start, pixels);
                 return;
             }
 
-            if (spacing == 0)
-                throw new ArgumentOutOfRangeException(nameof(spacing));
+            if (increment == 0)
+                throw new ArgumentOutOfRangeException(nameof(increment));
 
             AssertValidStateForOutput();
 
@@ -111,24 +111,24 @@ namespace MonoGame.Imaging.Coding.Decoding
             {
                 int elementSize = SourcePixelType.ElementSize;
 
-                if (addressMajor == AddressingMajor.Row)
+                if (addressing == AddressingMajor.Row)
                 {
                     var byteRow = CurrentImage.GetPixelByteRowSpan(line).Slice(start * elementSize);
                     for (int x = 0; x < pixels.Length; x += elementSize)
                     {
                         var src = pixels.Slice(x, elementSize);
-                        var dst = byteRow.Slice(x * spacing, elementSize);
+                        var dst = byteRow.Slice(x * increment, elementSize);
                         src.CopyTo(dst);
                     }
                 }
-                else if (addressMajor == AddressingMajor.Column)
+                else if (addressing == AddressingMajor.Column)
                 {
                     throw new NotImplementedException();
                     CurrentImage.SetPixelByteColumn(start, line, pixels);
                 }
                 else
                 {
-                    throw new ArgumentOutOfRangeException(nameof(addressMajor));
+                    throw new ArgumentOutOfRangeException(nameof(addressing));
                 }
             }
             else

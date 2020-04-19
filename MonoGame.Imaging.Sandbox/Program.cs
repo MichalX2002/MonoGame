@@ -50,7 +50,7 @@ namespace MonoGame.Imaging.Tests
             {
                 Directory.CreateDirectory("wtf");
 
-                //var testtt = "g10n0g16.png";
+                //var testtt = "f99n0g04.png";
                 //
                 //var endmee = new MemoryStream();
                 //archive.GetEntry(testtt).Open().CopyTo(endmee);
@@ -96,7 +96,7 @@ namespace MonoGame.Imaging.Tests
                         {
                             Image img = null;
 
-                            for (int i = 0; i < 1; i++)
+                            for (int i = 0; i < 1000; i++)
                             {
                                 img?.Dispose();
                                 ms.Position = 0;
@@ -127,10 +127,14 @@ namespace MonoGame.Imaging.Tests
                             //    Image.WrapMemory(vec, uu, new Size(w, h)).Save("wtf/" + entry.Name);
                             //}
                         }
-                        catch (Exception ex)
+                        catch(NotImplementedException)
                         {
-                            Console.WriteLine("ex: " + ex);
+
                         }
+                        //catch (Exception ex)
+                        //{
+                        //    Console.WriteLine("ex: " + ex);
+                        //}
                     }
 
                     Console.WriteLine();

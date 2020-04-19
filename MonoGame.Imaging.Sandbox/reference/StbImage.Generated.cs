@@ -2958,7 +2958,6 @@ namespace StbImageSharp
                 {
                     int nk = (int)((width - 1) * filter_bytes);
 
-                    var pp = new Span<ushort>(prior, width);
                     switch (filter)
                     {
                         case STBI__F_none:
