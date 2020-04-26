@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using MonoGame.Framework;
 using MonoGame.Framework.IO;
 using static StbSharp.ImageRead;
 
@@ -52,7 +50,7 @@ namespace MonoGame.Imaging
             if (DisposalMethod == StreamDisposeMethod.CancellableClose && cancellationToken.CanBeCanceled)
                 _cancellationRegistration = cancellationToken.Register(() => _stream?.Dispose());
 
-            Context = new ReadContext(_stream, cancellationToken, ReadCallback, SkipCallback);
+            Context = new ReadContext(_stream, true, cancellationToken);
         }
 
         public override int Read(byte[] buffer, int offset, int count) => _stream.Read(buffer, offset, count);
@@ -61,67 +59,6 @@ namespace MonoGame.Imaging
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
         public override void SetLength(long value) => throw new NotSupportedException();
         public override void Flush() => throw new NotSupportedException();
-
-        #region IO Callbacks
-
-        private static int SkipCallback(ReadContext context, int count)
-        {
-            ArgumentGuard.AssertAtleastZero(count, nameof(count), false);
-            try
-            {
-                if (count == 0)
-                    return 0;
-
-                if (context.Stream.CanSeek)
-                {
-                    long previous = context.Stream.Position;
-                    long current = context.Stream.Seek(count, SeekOrigin.Current);
-                    int skipped = (int)(current - previous);
-
-                    return skipped;
-                }
-                else
-                {
-                    Span<byte> buffer = stackalloc byte[1024];
-                    int skipped = 0;
-                    int left = count;
-                    while (left > 0)
-                    {
-                        int toRead = Math.Min(left, buffer.Length);
-                        int read = context.Stream.Read(buffer.Slice(0, toRead));
-                        if (read == 0)
-                            break;
-
-                        left -= read;
-                        skipped += read;
-                    }
-                    return skipped;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-                // TODO manage exception somehow
-                return 0;
-            }
-        }
-
-        private static int ReadCallback(ReadContext context, Span<byte> buffer)
-        {
-            try
-            {
-                int read = context.Stream.Read(buffer);
-                return read;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-                // TODO manage exception somehow
-                return 0;
-            }
-        }
-
-        #endregion
 
         protected override void Dispose(bool disposing)
         {

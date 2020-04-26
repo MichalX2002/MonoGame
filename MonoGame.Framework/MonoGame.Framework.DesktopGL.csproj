@@ -71,7 +71,6 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
     <Compile Include="Platform\Graphics\GraphicsAdapter.Legacy.cs" />
     <Compile Include="Platform\GamePlatform.Desktop.cs" />
     <Compile Include="Platform\GraphicsDeviceManager.SDL.cs" />
-    <Compile Include="Platform\Utilities\TimerHelper.cs" />
     <Compile Include="Platform\Windows\TaskbarList.Windows.cs" />
   </ItemGroup>
 

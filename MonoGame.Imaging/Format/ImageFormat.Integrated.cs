@@ -8,7 +8,7 @@ namespace MonoGame.Imaging
     {
         private static HashSet<ImageFormat> _integratedFormats = new HashSet<ImageFormat>();
 
-        #region Getters (+ Initializers)
+        #region Getters (and Initializers)
 
         /// <summary>
         /// Gets the "Portable Network Graphics" format.
@@ -23,8 +23,8 @@ namespace MonoGame.Imaging
         /// </summary>
         public static ImageFormat Jpeg { get; } = AddIntegrated(
             "Joint Photographic Experts Group", "JPEG",
-            new[] { "image/jpeg" },
-            new[] { ".jpeg", ".jpg", ".jpe", ".jfif", ".jif" });
+            new[] { "image/jpeg", "image/pjpeg" },
+            new[] { ".jpeg", ".jpg", ".jfif", ".jpe", ".jif" });
 
         /// <summary>
         /// Gets the "Graphics Interchange Format".
@@ -40,8 +40,8 @@ namespace MonoGame.Imaging
         /// </summary>
         public static ImageFormat Bmp { get; } = AddIntegrated(
             "Bitmap", "BMP",
-            new[] { "image/bmp", "image/x-bmp" },
-            new[] { ".bmp", ".bm" });
+            new[] { "image/bmp", "image/x-bmp", "image/x-windows-bmp" },
+            new[] { ".bmp", ".bm", ".dip" });
 
         /// <summary>
         /// Gets the "Truevision Graphics Adapter" format.
@@ -49,7 +49,7 @@ namespace MonoGame.Imaging
         public static ImageFormat Tga { get; } = AddIntegrated(
             "Truevision Graphics Adapter", "TGA",
             new[] { "image/x-tga", "image/x-targa" },
-            new[] { ".tga" });
+            new[] { ".tga", ".icb", ".vda", ".vst" });
 
         /// <summary>
         /// Gets the "RGBE" format (also known as "Radiance HDR").
@@ -94,7 +94,8 @@ namespace MonoGame.Imaging
             var extensionSet = new ReadOnlySet<string>(extensions, StringComparer.OrdinalIgnoreCase);
 
             var format = new ImageFormat(
-                fullName, name, mimeTypes[0], extensions[0], mimeSet, extensionSet);
+                fullName, name,
+                mimeTypes[0], extensions[0], mimeSet, extensionSet);
 
             _integratedFormats.Add(format);
             AddFormat(format);

@@ -15,7 +15,7 @@ namespace MonoGame.Imaging
             TimeSpan minimumAnimationDelay) :
             base(fullName, shortName, mimeTypes, extensions)
         {
-            MinimumAnimationDelay = minimumAnimationDelay;
+            MinimumAnimationDelay = minimumAnimationDelay.Duration();
         }
     }
 }

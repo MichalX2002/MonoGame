@@ -7,7 +7,7 @@ namespace MonoGame.Imaging.Coding.Decoding
     public class ImageDecoderEnumerator : IEnumerable<Image>, IEnumerator<Image>, IImagingConfigProvider
     {
         public ImageDecoderState State { get; }
-        public ImagingConfig ImagingConfig => State.ImagingConfig;
+        public ImagingConfig Config => State.Config;
 
         public Image Current => State.CurrentImage;
         object IEnumerator.Current => Current;

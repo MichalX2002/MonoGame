@@ -66,8 +66,10 @@ namespace MonoGame.Imaging
         /// <param name="fullName">The full name of the format.</param>
         /// <param name="shortName">The short name of the format.</param>
         public ImageFormat(
-            string fullName, string shortName,
-            string primaryMimeType, string primaryExtension,
+            string fullName,
+            string shortName, 
+            string primaryMimeType, 
+            string primaryExtension,
             IReadOnlySet<string> mimeTypes,
             IReadOnlySet<string> extensions)
         {
@@ -75,7 +77,7 @@ namespace MonoGame.Imaging
             ShortName = shortName ?? throw new ArgumentNullException(nameof(shortName));
             MimeType = primaryMimeType ?? throw new ArgumentNullException(nameof(primaryMimeType));
             Extension = ValidateExtension(primaryExtension) ?? throw new ArgumentNullException(nameof(primaryExtension));
-
+            
             if (mimeTypes == null) throw new ArgumentNullException(nameof(mimeTypes));
             if (mimeTypes.Count == 0) throw new ArgumentEmptyException(nameof(mimeTypes));
             if (!mimeTypes.Contains(primaryMimeType))
@@ -91,18 +93,23 @@ namespace MonoGame.Imaging
         }
 
         public ImageFormat(
-            string fullName, string shortName,
-            string mimeType, string extension) :
+            string fullName,
+            string shortName,
+            string mimeType,
+            string extension) :
             this(
-                fullName, shortName,
-                mimeType, extension,
+                fullName,
+                shortName,
+                mimeType,
+                extension,
                 new ReadOnlySet<string>(new[] { mimeType }, StringComparer.OrdinalIgnoreCase),
                 new ReadOnlySet<string>(new[] { extension }, StringComparer.OrdinalIgnoreCase))
         {
         }
 
         public ImageFormat(
-            string fullName, string shortName,
+            string fullName,
+            string shortName,
             IReadOnlySet<string> mimeTypes,
             IReadOnlySet<string> extensions) :
             this(

@@ -1046,8 +1046,10 @@ namespace MonoGame.Framework.Graphics
         /// An index of zero in the index span points to the first vertex in the vertex span.
         /// </remarks>
         public void DrawUserIndexedPrimitives<TVertex, TIndex>(
-            PrimitiveType primitiveType, ReadOnlySpan<TVertex> vertexData,
-            ReadOnlySpan<TIndex> indexData, int primitiveCount)
+            PrimitiveType primitiveType, 
+            ReadOnlySpan<TVertex> vertexData,
+            ReadOnlySpan<TIndex> indexData, 
+            int primitiveCount)
             where TVertex : unmanaged, IVertexType
             where TIndex : unmanaged
         {
@@ -1072,8 +1074,11 @@ namespace MonoGame.Framework.Graphics
         /// An index of zero in the index span points to the first vertex in the vertex span.
         /// </remarks>
         public unsafe void DrawUserIndexedPrimitives<TVertex, TIndex>(
-            PrimitiveType primitiveType, ReadOnlySpan<TVertex> vertexData,
-            ReadOnlySpan<TIndex> indexData, int primitiveCount, VertexDeclaration vertexDeclaration)
+            PrimitiveType primitiveType,
+            ReadOnlySpan<TVertex> vertexData,
+            ReadOnlySpan<TIndex> indexData, 
+            int primitiveCount,
+            VertexDeclaration vertexDeclaration)
             where TVertex : unmanaged
             where TIndex : unmanaged
         {
@@ -1095,9 +1100,9 @@ namespace MonoGame.Framework.Graphics
             IndexElementSize indexElementSize;
             int indexSize = sizeof(TIndex);
             if (indexSize == 2)
-                indexElementSize = IndexElementSize.Short16;
+                indexElementSize = IndexElementSize.Short;
             else if (indexSize == 4)
-                indexElementSize = IndexElementSize.Int32;
+                indexElementSize = IndexElementSize.Int;
             else
                 throw new ArgumentException(
                     "The only index element sizes supported are 2 or 4 bytes.", nameof(indexData));

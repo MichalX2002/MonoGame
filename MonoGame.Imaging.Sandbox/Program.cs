@@ -18,6 +18,9 @@ using MonoGame.Imaging.Coding.Encoding;
 using System.Numerics;
 using StbSharp;
 using MonoGame.Framework.PackedVector;
+using System.Security.Cryptography;
+using System.Xml;
+using MonoGame.Imaging.Processing;
 
 namespace MonoGame.Imaging.Tests
 {
@@ -27,55 +30,89 @@ namespace MonoGame.Imaging.Tests
 
         static void TestBmp(ZipArchive archive)
         {
+            Directory.CreateDirectory("test/bmp");
+
             using (var stream = archive.GetEntry("bmp/32bit.bmp").Open())
             using (var img = Image.Load(stream))
-                img.Save("32.png");
+                img.Save("32bit.png");
 
             using (var stream = archive.GetEntry("bmp/24bit.bmp").Open())
             using (var img = Image.Load(stream))
-                img.Save("24.png");
+                img.Save("24bit.png");
 
             using (var stream = archive.GetEntry("bmp/8bit.bmp").Open())
             using (var img = Image.Load(stream))
-                img.Save("8.png");
+                img.Save("8bit.png");
 
             using (var stream = archive.GetEntry("bmp/4bit.bmp").Open())
             using (var img = Image.Load(stream))
-                img.Save("4.png");
+                img.Save("4bit.png");
         }
 
         static void TestPng()
         {
+            Directory.CreateDirectory("test/png/cgbi");
+
+            using (var archive = new ZipArchive(File.OpenRead("testdata.zip"), ZipArchiveMode.Read, false))
+            {
+                var entri = archive.GetEntry("png/cgbi/prop.png");
+                using (var ffff = entri.Open())
+                using (var ihponeimg = Image.Load(ffff))
+                {
+                    ihponeimg.Save("test/png/cgbi/prop.png");
+                }
+            }
+
             using (var archive = new ZipArchive(File.OpenRead("PngSuite-2017jul19.zip"), ZipArchiveMode.Read, false))
             {
                 Directory.CreateDirectory("wtf");
 
-                //var testtt = "f99n0g04.png";
+                //var testtt = "tbrn2c08.png";
                 //
                 //var endmee = new MemoryStream();
                 //archive.GetEntry(testtt).Open().CopyTo(endmee);
-                //fixed (byte* omg = endmee.GetBuffer())
+                //
+                //var original = new MemoryStream();
+                //endmee.Position = 0;
+                //endmee.CopyTo(original);
+                //
+                //for (int i = 0; i < 1; i++)
                 //{
-                //    var ccc = new StbImageSharp.StbImage.stbi__context();
-                //    ccc.img_buffer = omg;
-                //    ccc.img_buffer_end = omg + endmee.Length;
+                //    fixed (byte* omg = endmee.GetBuffer())
+                //    {
+                //        var ccc = new StbImageSharp.StbImage.stbi__context();
+                //        ccc.img_buffer = omg;
+                //        ccc.img_buffer_end = omg + endmee.Length;
                 //
-                //    int w;
-                //    int h;
-                //    int comp;
-                //    StbImageSharp.StbImage.stbi__result_info ri;
-                //    void* pp = StbImageSharp.StbImage.stbi__png_load(ccc, &w, &h, &comp, 0, &ri);
+                //        int w;
+                //        int h;
+                //        int comp;
+                //        StbImageSharp.StbImage.stbi__result_info ri;
+                //        void* pp = StbImageSharp.StbImage.stbi__png_load(ccc, &w, &h, &comp, 0, &ri);
                 //
-                //    var vec = StbImageDecoderState.GetVectorType(
-                //        new ImageRead.ReadState() { OutComponents = comp, OutDepth = ri.bits_per_channel });
-                //    var uu = new UnmanagedMemory<byte>(w * h * comp * ri.bits_per_channel / 8);
-                //    new Span<byte>(pp, w * h * comp * ri.bits_per_channel / 8).CopyTo(uu.Span);
-                //    var mg = Image.WrapMemory(vec, uu, new Size(w, h));
-                //    mg.Save("wtf/OMG.png");
+                //        var vec = StbImageDecoderState.GetVectorType(
+                //            new ImageRead.ReadState() { OutComponents = comp, OutDepth = ri.bits_per_channel });
+                //        var uu = new UnmanagedMemory<byte>(w * h * comp * ri.bits_per_channel / 8);
+                //        new Span<byte>(pp, w * h * comp * ri.bits_per_channel / 8).CopyTo(uu.Span);
+                //        var mg = Image.WrapMemory(vec, uu, new Size(w, h));
+                //        mg.Save("wtf/" + i + "_OMG.png");
+                //
+                //        Image x = null;
+                //        for (int j = 0; j < 1; j++)
+                //        {
+                //            x?.Dispose();
+                //            endmee.Position = 0;
+                //            x = Image.Load(endmee);
+                //        }
+                //        x.Save("wtf/" + i + "_" + testtt);
+                //    }
                 //}
                 //
-                //var x = Image.Load(archive.GetEntry(testtt).Open());
-                //x.Save("wtf/" + testtt);
+                //endmee.Position = 0;
+                //original.Position = 0;
+                //for (int i = 0; i < endmee.Length; i++)
+                //    if (endmee.ReadByte() != original.ReadByte())
+                //        throw new Exception();
                 //return;
 
                 foreach (var entry in archive.Entries)
@@ -87,32 +124,50 @@ namespace MonoGame.Imaging.Tests
                         continue;
 
                     Console.WriteLine(entry.Name);
+
                     using (var stream = entry.Open())
                     {
                         var ms = new MemoryStream();
                         stream.CopyTo(ms);
 
+                        var sha = SHA1.Create();
+
                         try
                         {
                             Image img = null;
 
-                            for (int i = 0; i < 1000; i++)
+                            for (int i = 0; i < 1; i++)
                             {
                                 img?.Dispose();
+
                                 ms.Position = 0;
-                                img = Image.Load(ms);
+                                img = Image.Load(ms, VectorTypeInfo.Get<Color>());
+
+                                byte[] hash = sha.ComputeHash(((Image<Color>)img).GetPixelByteSpan().ToArray());
+                                //Console.WriteLine("hash: " + BitConverter.ToString(hash));
                             }
 
-                            img.Save("wtf/" + entry.Name);
+                            string dstName = "wtf/" + entry.Name;
+                            img.Save(dstName);
+
+                            //for (int i = 0; i < 100; i++)
+                            //{
+                            //    File.Copy(dstName, "wtf/" + Guid.NewGuid() + ".png");
+                            //}
+
+                            img.Mutate((x) =>
+                            {
+                                
+                                //x.
+                            });
+
                             img.Dispose();
 
-                            //var endme = new MemoryStream();
-                            //stream.CopyTo(endme);
-                            //fixed (byte* omg = endme.GetBuffer())
+                            //fixed (byte* omg = ms.GetBuffer())
                             //{
                             //    var ccc = new StbImageSharp.StbImage.stbi__context();
                             //    ccc.img_buffer = omg;
-                            //    ccc.img_buffer_end = omg + endme.Length;
+                            //    ccc.img_buffer_end = omg + ms.Length;
                             //
                             //    int w;
                             //    int h;
@@ -124,17 +179,21 @@ namespace MonoGame.Imaging.Tests
                             //        new ImageRead.ReadState() { OutComponents = comp, OutDepth = ri.bits_per_channel });
                             //    var uu = new UnmanagedMemory<byte>(w * h * comp * ri.bits_per_channel / 8);
                             //    new Span<byte>(pp, w * h * comp * ri.bits_per_channel / 8).CopyTo(uu.Span);
-                            //    Image.WrapMemory(vec, uu, new Size(w, h)).Save("wtf/" + entry.Name);
+                            //    Image.WrapMemory(vec, uu, new Size(w, h)).Save("wtf/" + entry.Name[0..^4] + "_.png");
                             //}
                         }
-                        catch(NotImplementedException)
-                        {
-
-                        }
+                        //catch (NotImplementedException ex)
+                        //{
+                        //    //Console.WriteLine("what " + ex);
+                        //}
                         //catch (Exception ex)
                         //{
                         //    Console.WriteLine("ex: " + ex);
                         //}
+                        finally
+                        {
+
+                        }
                     }
 
                     Console.WriteLine();
@@ -146,6 +205,37 @@ namespace MonoGame.Imaging.Tests
 
         static void Main(string[] args)
         {
+            {
+                int size = 256;
+                var imagee = new Image<Color>(new Size(size));
+                var pixels = imagee.GetPixelSpan();
+                for (int x = 0; x < size; x++)
+                {
+                    for (int y = 0; y < size; y++)
+                    {
+                        pixels[y * size + x] = new Color(
+                            x * 255 / (size - 1),
+                            y * 255 / (size - 1),
+                            127);
+                    }
+                }
+
+                Directory.CreateDirectory("savetest");
+
+                var ms = new MemoryStream();
+                for (int i = 0; i < 1; i++)
+                {
+                    ms.Position = 0;
+                    imagee.Save(ms, ImageFormat.Jpeg);
+                }
+                File.WriteAllBytes("savetest/test.jpeg", ms.GetBuffer());
+
+                imagee.Save("savetest/test.png");
+                imagee.Save("savetest/test.tga");
+                imagee.Save("savetest/test_norle.tga", null, TgaEncoderOptions.NoRLE);
+                imagee.Save("savetest/test.bmp");
+            }
+
             TestPng();
             return;
 
@@ -186,7 +276,7 @@ namespace MonoGame.Imaging.Tests
 
                 image?.Dispose();
                 watch.Start();
-                image = Image.Load(encoded, null, OnReadProgress, default);
+                image = Image.Load(encoded, onProgress: OnReadProgress);
                 watch.Stop();
 
                 if (i == 0)

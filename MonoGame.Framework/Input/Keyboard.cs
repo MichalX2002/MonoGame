@@ -19,16 +19,5 @@ namespace MonoGame.Framework.Input
         {
             return PlatformGetState();
         }
-
-        /// <summary>
-        /// Returns the current keyboard state for a given player.
-        /// </summary>
-        /// <param name="playerIndex">Player index of the keyboard.</param>
-        /// <returns>Snapshot of current keyboard state.</returns>
-        [Obsolete("Use GetState() instead. In future versions this method can be removed.")]
-        public static KeyboardState GetState(PlayerIndex playerIndex)
-        {
-            return PlatformGetState();
-        }
     }
 }

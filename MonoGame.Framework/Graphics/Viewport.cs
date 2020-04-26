@@ -11,7 +11,7 @@ namespace MonoGame.Framework.Graphics
     /// Describes the view bounds for render-target surface.
     /// </summary>
     [DataContract]
-    public struct Viewport
+    public struct Viewport : IEquatable<Viewport>
     {
         #region Properties
 
@@ -192,10 +192,10 @@ namespace MonoGame.Framework.Graphics
                 (source.Z - MinDepth) / (MaxDepth - MinDepth));
 
             var result = Vector3.Transform(usource, matrix);
-            float a = 
-                (usource.X * matrix.M14) + 
-                (usource.Y * matrix.M24) + 
-                (usource.Z * matrix.M34) + 
+            float a =
+                (usource.X * matrix.M14) +
+                (usource.Y * matrix.M24) +
+                (usource.Z * matrix.M34) +
                 matrix.M44;
 
             if (!WithinEpsilon(a, 1f))
@@ -216,6 +216,21 @@ namespace MonoGame.Framework.Graphics
             return (-1.401298E-45f <= num) && (num <= float.Epsilon);
         }
 
+        public readonly bool Equals(Viewport other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Viewport other && this == other;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(X, Y, Width, Height, MinDepth, MaxDepth);
+        }
+
         /// <summary>
         /// Returns a <see cref="string"/> representation of this <see cref="Viewport"/> in the format:
         /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>] 
@@ -229,6 +244,21 @@ namespace MonoGame.Framework.Graphics
                 "{X:" + X + " Y:" + Y +
                 " Width:" + Width + " Height:" + Height +
                 " MinDepth:" + MinDepth + " MaxDepth:" + MaxDepth + "}";
+        }
+
+        public static bool operator ==(in Viewport a, in Viewport b)
+        {
+            return a.X == b.X
+                && a.Y == b.Y
+                && a.Width == b.Width
+                && a.Height == b.Height
+                && a.MinDepth == b.MinDepth
+                && a.MaxDepth == b.MaxDepth;
+        }
+
+        public static bool operator !=(in Viewport a, in Viewport b)
+        {
+            return !(a == b);
         }
     }
 }

@@ -17,6 +17,9 @@ namespace MonoGame.Imaging
             {
                 _encoders = new List<IImageEncoder>();
                 _encoders.Add(new PngImageEncoder());
+                _encoders.Add(new BmpImageEncoder());
+                _encoders.Add(new TgaImageEncoder());
+                _encoders.Add(new JpegImageEncoder());
             }
             return _encoders;
         }
@@ -29,7 +32,8 @@ namespace MonoGame.Imaging
             {
                 _encoderByFormat = new ConcurrentDictionary<ImageFormat, IImageEncoder>();
 
-                _encoderByFormat.TryAdd(GetEncoders()[0].Format, GetEncoders()[0]);
+                foreach (var enc in GetEncoders())
+                    _encoderByFormat.TryAdd(enc.Format, enc);
             }
             return _encoderByFormat.TryGetValue(format, out encoder);
         }

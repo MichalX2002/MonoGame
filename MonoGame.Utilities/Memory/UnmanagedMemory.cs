@@ -46,7 +46,7 @@ namespace MonoGame.Framework.Memory
                 AssertNotDisposed();
                 return _length;
             }
-            set => Reallocate(value);
+            set => ReAllocate(value);
         }
 
         public ref T this[int index]
@@ -74,7 +74,7 @@ namespace MonoGame.Framework.Memory
         /// <see langword="true"/> to zero-fill the allocated memory.</param>
         public UnmanagedMemory(int length, bool zeroFill = false)
         {
-            Reallocate(length, zeroFill);
+            ReAllocate(length, zeroFill);
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace MonoGame.Framework.Memory
         /// </summary>
         /// <param name="length">The new size in elements. Can be zero to free memory.</param>
         /// <param name="zeroFill"><see langword="true"/> to zero-fill the allocated memory.</param>
-        public void Reallocate(int length, bool zeroFill = false)
+        public void ReAllocate(int length, bool zeroFill = false)
         {
             AssertNotDisposed();
             ArgumentGuard.AssertAtleastZero(length, nameof(length));

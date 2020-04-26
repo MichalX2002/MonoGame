@@ -5,7 +5,6 @@ namespace MonoGame.Imaging.Coding.Decoding
     public class BmpImageDecoder : StbImageDecoderBase
     {
         public override ImageFormat Format => ImageFormat.Bmp;
-
         public override DecoderOptions DefaultOptions => DecoderOptions.Default;
 
         protected override bool Read(StbImageDecoderState decoderState, ReadState readState)

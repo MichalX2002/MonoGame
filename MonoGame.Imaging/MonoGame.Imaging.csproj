@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>7.3</LangVersion>
     <BaseOutputPath>..\Artifacts\MonoGame.Imaging</BaseOutputPath>
   </PropertyGroup>
 
@@ -11,6 +10,7 @@
     <Compile Remove="Coding\Decoding\Decoders\StbImageDecoderBase.ResultWrapper.cs" />
     <Compile Remove="Coding\Encoding\Encoders\StbImageEncoderBase.CustomDeflate.cs" />
     <Compile Remove="ColorEncoding.cs" />
+    <Compile Remove="Pixels\PixelRowProvider old.cs" />
     <Compile Remove="Utilities\BufferPixelProvider.Expressions.cs" />
     <Compile Remove="Utilities\ImageWriter.cs" />
   </ItemGroup>

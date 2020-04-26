@@ -6,7 +6,7 @@ namespace MonoGame.Imaging
 {
     public partial class Image
     {
-        private static unsafe void LoadPixelSpan<TPixelFrom, TPixelTo>(
+        public static unsafe void LoadPixels<TPixelFrom, TPixelTo>(
             ReadOnlySpan<TPixelFrom> pixels,
             Rectangle sourceRectangle,
             int? byteStride,
@@ -81,7 +81,7 @@ namespace MonoGame.Imaging
             var image = new Image<TPixelTo>(sourceRectangle.Size);
             try
             {
-                LoadPixelSpan(pixels, sourceRectangle, byteStride, image);
+                LoadPixels(pixels, sourceRectangle, byteStride, image);
             }
             catch
             {

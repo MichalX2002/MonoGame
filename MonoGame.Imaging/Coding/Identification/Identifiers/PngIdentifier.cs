@@ -1,4 +1,5 @@
-﻿using static StbSharp.ImageRead;
+﻿using System;
+using static StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coding.Identification
 {
@@ -6,9 +7,11 @@ namespace MonoGame.Imaging.Coding.Identification
     {
         public override ImageFormat Format => ImageFormat.Png;
 
-        protected override bool TestFormat(ImagingConfig config, ReadContext context)
+        public override int HeaderSize => 8;
+
+        protected override bool TestFormat(ImagingConfig config, ReadOnlySpan<byte> header)
         {
-            return Png.Test(context);
+            return Png.Test(header);
         }
 
         protected override bool GetInfo(

@@ -317,7 +317,7 @@ namespace MonoGame.Framework
         /// <returns>The distance between two vectors.</returns>
         public static float Distance(in Vector2 a, in Vector2 b)
         {
-            return FastVector2.Distance(a, b);
+            return FastVector2.Distance(a.Base, b.Base);
         }
 
         #endregion

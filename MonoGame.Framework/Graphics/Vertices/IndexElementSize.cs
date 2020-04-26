@@ -12,11 +12,11 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Use 16-bit integer (signed or unsigned) indices.
         /// </summary>
-        Short16 = 2,
+        Short = 2,
 
         /// <summary>
         /// Use 32-bit integer (signed or unsigned) indices.
         /// </summary>
-        Int32 = 4
+        Int = 4
     }
 }

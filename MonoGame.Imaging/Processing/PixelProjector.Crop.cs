@@ -10,46 +10,44 @@ namespace MonoGame.Imaging.Processing
         #region Crop (IReadOnlyPixelRows)
 
         /// <summary>
-        /// Creates a cropped view of the source image.
+        /// Creates a cropped view of the source context.
         /// </summary>
         public static IReadOnlyPixelRows Crop(
-            this ReadOnlyPixelRowsContext context, Rectangle sourceRectangle)
+            this IReadOnlyPixelRowsContext context, Rectangle sourceRectangle)
         {
-            if (context.IsEmpty) throw new ArgumentEmptyException(nameof(context));
-            if (context.Pixels.GetBounds() == sourceRectangle) return context;
-            ImagingArgumentGuard.AssertRectangleInSource(context, sourceRectangle, nameof(sourceRectangle));
+            if (CheckBounds(context, sourceRectangle))
+                return context;
 
             return new ReadOnlyCropRows(context.Pixels, sourceRectangle);
         }
 
         /// <summary>
-        /// Creates a cropped view of the source image.
+        /// Creates a cropped view of the source context.
         /// </summary>
         public static IReadOnlyPixelRows Crop(
-            this ReadOnlyPixelRowsContext context, int x, int y, int width, int height)
+            this IReadOnlyPixelRowsContext context, int x, int y, int width, int height)
         {
             return Crop(context, new Rectangle(x, y, width, height));
         }
 
         /// <summary>
-        /// Creates a cropped view of the source image.
+        /// Creates a cropped view of the source context.
         /// </summary>
         public static IReadOnlyPixelRows<TPixel> Crop<TPixel>(
-            this ReadOnlyPixelRowsContext<TPixel> context, Rectangle sourceRectangle)
+            this IReadOnlyPixelRowsContext<TPixel> context, Rectangle sourceRectangle)
             where TPixel : unmanaged, IPixel
         {
-            if (context.IsEmpty) throw new ArgumentEmptyException(nameof(context));
-            if (context.Pixels.GetBounds() == sourceRectangle) return context;
-            ImagingArgumentGuard.AssertRectangleInSource(context, sourceRectangle, nameof(sourceRectangle));
+            if (CheckBounds(context, sourceRectangle))
+                return context;
 
             return new ReadOnlyCropRows<TPixel>(context.Pixels, sourceRectangle);
         }
 
         /// <summary>
-        /// Creates a cropped view of the source image.
+        /// Creates a cropped view of the source context.
         /// </summary>
         public static IReadOnlyPixelRows<TPixel> Crop<TPixel>(
-            this ReadOnlyPixelRowsContext<TPixel> context, int x, int y, int width, int height)
+            this IReadOnlyPixelRowsContext<TPixel> context, int x, int y, int width, int height)
             where TPixel : unmanaged, IPixel
         {
             return Crop(context, new Rectangle(x, y, width, height));
@@ -60,44 +58,39 @@ namespace MonoGame.Imaging.Processing
         #region Crop (IPixelRows)
 
         /// <summary>
-        /// Creates a cropped view of the source image.
+        /// Creates a cropped view of the source context.
         /// </summary>
-        public static IPixelRows Crop(this PixelRowsContext context, Rectangle sourceRectangle)
+        public static IPixelRows Crop(this IPixelRowsContext context, Rectangle sourceRectangle)
         {
-            if (context.IsEmpty) throw new ArgumentEmptyException(nameof(context));
-            if (context.Pixels.GetBounds() == sourceRectangle) return context;
-            ImagingArgumentGuard.AssertRectangleInSource(context, sourceRectangle, nameof(sourceRectangle));
-
             return new CropRows(context.Pixels, sourceRectangle);
         }
 
         /// <summary>
-        /// Creates a cropped view of the source image.
+        /// Creates a cropped view of the source context.
         /// </summary>
-        public static IPixelRows Crop(this PixelRowsContext context, int x, int y, int width, int height)
+        public static IPixelRows Crop(this IPixelRowsContext context, int x, int y, int width, int height)
         {
             return Crop(context, new Rectangle(x, y, width, height));
         }
 
         /// <summary>
-        /// Creates a cropped view of the source image.
+        /// Creates a cropped view of the source context.
         /// </summary>
-        public static IPixelRows<TPixel> Crop<TPixel>(this PixelRowsContext<TPixel> context, 
-            Rectangle sourceRectangle)
+        public static IPixelRows<TPixel> Crop<TPixel>(
+            this IPixelRowsContext<TPixel> context, Rectangle sourceRectangle)
             where TPixel : unmanaged, IPixel
         {
-            if (context.IsEmpty) throw new ArgumentEmptyException(nameof(context));
-            if (context.Pixels.GetBounds() == sourceRectangle) return context;
-            ImagingArgumentGuard.AssertRectangleInSource(context, sourceRectangle, nameof(sourceRectangle));
+            if (CheckBounds(context, sourceRectangle))
+                return context;
 
             return new CropRows<TPixel>(context.Pixels, sourceRectangle);
         }
 
         /// <summary>
-        /// Creates a cropped view of the source image.
+        /// Creates a cropped view of the source context.
         /// </summary>
-        public static IPixelRows<TPixel> Crop<TPixel>(this PixelRowsContext<TPixel> context,
-            int x, int y, int width, int height)
+        public static IPixelRows<TPixel> Crop<TPixel>(
+            this IPixelRowsContext<TPixel> context, int x, int y, int width, int height)
             where TPixel : unmanaged, IPixel
         {
             return Crop(context, new Rectangle(x, y, width, height));
@@ -190,7 +183,7 @@ namespace MonoGame.Imaging.Processing
             where TPixel : unmanaged, IPixel
         {
             private new IPixelRows<TPixel> Pixels => (IPixelRows<TPixel>)base.Pixels;
-            
+
             public CropRows(IPixelRows<TPixel> rows, Rectangle sourceRectangle) : base(rows, sourceRectangle)
             {
             }

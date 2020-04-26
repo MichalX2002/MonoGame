@@ -50,7 +50,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Creates a new texture of the given size
         /// </summary>
-        public Texture2D(GraphicsDevice graphicsDevice, int width, int height) 
+        public Texture2D(GraphicsDevice graphicsDevice, int width, int height)
             : this(graphicsDevice, width, height, false, SurfaceFormat.Color, SurfaceType.Texture, false, 1)
         {
         }
@@ -71,7 +71,7 @@ namespace MonoGame.Framework.Graphics
         /// Given <see cref="GraphicsDevice"/> can't work with texture arrays.
         /// </exception>
         public Texture2D(
-            GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format, int arraySize) 
+            GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format, int arraySize)
             : this(graphicsDevice, width, height, mipmap, format, SurfaceType.Texture, false, arraySize)
         {
 
@@ -81,14 +81,14 @@ namespace MonoGame.Framework.Graphics
         /// Creates a new texture of a given size with a surface format and optional mipmaps.
         /// </summary>
         internal Texture2D(
-            GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format, SurfaceType type) 
+            GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format, SurfaceType type)
             : this(graphicsDevice, width, height, mipmap, format, type, false, 1)
         {
         }
 
         protected Texture2D(
             GraphicsDevice graphicsDevice, int width, int height, bool mipmap,
-            SurfaceFormat format, SurfaceType type, bool shared, int arraySize) 
+            SurfaceFormat format, SurfaceType type, bool shared, int arraySize)
             : base(graphicsDevice)
         {
             if (arraySize > 1 && !graphicsDevice.GraphicsCapabilities.SupportsTextureArrays)
@@ -142,6 +142,24 @@ namespace MonoGame.Framework.Graphics
                 PlatformSetData(level, arraySlice, checkedRect, data);
             else
                 PlatformSetData(level, arraySlice, rect: null, data);
+        }
+
+        /// <summary>
+        /// Changes the pixels of the texture.
+        /// </summary>
+        /// <typeparam name="T">The pixel type.</typeparam>
+        /// <param name="data">New data for the texture.</param>
+        /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
+        /// <param name="level">Layer of the texture to modify.</param>
+        /// <param name="arraySlice">Index inside the texture array.</param>
+        /// <exception cref="ArgumentException">
+        ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
+        /// </exception>
+        public void SetData<T>(
+            T[] data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
+            where T : unmanaged
+        {
+            SetData((ReadOnlySpan<T>)data, rectangle, level, arraySlice);
         }
 
         /// <summary>
@@ -645,8 +663,8 @@ namespace MonoGame.Framework.Graphics
             int level, int arraySlice, Rectangle? rect, int elementCount, out Rectangle checkedRect)
             where T : unmanaged
         {
-            ValidateParams<T>(level, arraySlice, rect, out int byteSize, out checkedRect);
-            ValidateSizes(Unsafe.SizeOf<T>(), elementCount, byteSize);
+            ValidateParams<T>(level, arraySlice, rect, out int minByteSize, out checkedRect);
+            ValidateSizes(Unsafe.SizeOf<T>(), elementCount, minByteSize);
         }
 
         private Rectangle CheckRect(int level, Rectangle? rect, out Rectangle checkedRect)

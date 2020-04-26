@@ -7,14 +7,14 @@ namespace MonoGame.Imaging
     /// Base class for decoder options.
     /// </summary>
     [Serializable]
-    public abstract class DecoderOptions : CodecOptions
+    public class DecoderOptions : CodecOptions
     {
         public static new DecoderOptions Default { get; } = new DefaultDecoderOptions();
 
         /// <summary>
         /// Gets or sets whether image memory should be 
         /// cleared on allocation as it may contain garbage otherwise. 
-        /// This is useful when the image will be used before it is fully decoded.
+        /// Useful when the image will be used before it is fully decoded.
         /// <para>
         /// Defaults to <see langword="true"/>.
         /// </para>

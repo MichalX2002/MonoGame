@@ -50,13 +50,13 @@ namespace MonoGame.Framework
         private IGraphicsDeviceManager _graphicsDeviceManager;
         private IGraphicsDeviceService _graphicsDeviceService;
 
-        private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(166667); // 60fps
-        private TimeSpan _inactiveSleepTime = TimeSpan.FromTicks(333333); // 30fps
-        private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
+        private TimeSpan _targetElapsedTime;
+        private TimeSpan _inactiveSleepTime;
+        private TimeSpan _maxElapsedTime;
 
-        private TimeSpan _accumulatedElapsedTime;
-        private Stopwatch _gameTimer = new Stopwatch();
-        private TimeSpan _previousTicks;
+        private long _targetElapsedTicks;
+        private long _accumulatedElapsedTicks;
+        private long _previousTicks;
         private int _updateFrameLag;
 
         private bool _isDisposed;
@@ -71,6 +71,10 @@ namespace MonoGame.Framework
             Services = new GameServiceContainer();
             Components = new GameComponentCollection();
             _content = new ContentManager(Services);
+
+            TargetElapsedTime = TimeSpan.FromTicks(166667); // 60fps
+            InactiveSleepTime = TimeSpan.FromTicks(333333); // 30fps
+            MaxElapsedTime = TimeSpan.FromMilliseconds(500);
 
             Platform = GamePlatform.PlatformCreate(this);
             Platform.Activated += OnActivated;
@@ -189,14 +193,16 @@ namespace MonoGame.Framework
             set
             {
                 if (value < TimeSpan.Zero)
-                    throw new ArgumentOutOfRangeException(nameof(value), "The time must be positive.");
+                    throw new ArgumentOutOfRangeException(
+                        nameof(value), "The time must be positive.");
+
                 _inactiveSleepTime = value;
             }
         }
 
         /// <summary>
-        /// The maximum amount of time we will frameskip over and only perform Update calls with no Draw calls.
-        /// MonoGame extension.
+        /// The maximum amount of time we will frameskip over
+        /// and only perform Update calls with no Draw calls.
         /// </summary>
         public TimeSpan MaxElapsedTime
         {
@@ -204,9 +210,12 @@ namespace MonoGame.Framework
             set
             {
                 if (value < TimeSpan.Zero)
-                    throw new ArgumentOutOfRangeException(nameof(value), "The time must be positive.");
+                    throw new ArgumentOutOfRangeException(
+                        nameof(value), "The time must be positive.");
                 if (value < _targetElapsedTime)
-                    throw new ArgumentOutOfRangeException(nameof(value), "The time must be at least TargetElapsedTime.");
+                    throw new ArgumentOutOfRangeException(
+                        nameof(value), "The time must be at least TargetElapsedTime.");
+
                 _maxElapsedTime = value;
             }
         }
@@ -216,9 +225,8 @@ namespace MonoGame.Framework
             get => _targetElapsedTime;
             set
             {
-                // Give GamePlatform implementations an opportunity to override
-                // the new value.
-                value = Platform.TargetElapsedTimeChanging(value);
+                // Give GamePlatform implementations an opportunity to override the new value.
+                value = Platform != null ? Platform.TargetElapsedTimeChanging(value) : value;
                 if (value <= TimeSpan.Zero)
                     throw new ArgumentOutOfRangeException(
                         "The time must be positive and non-zero.", default(Exception));
@@ -226,7 +234,8 @@ namespace MonoGame.Framework
                 if (value != _targetElapsedTime)
                 {
                     _targetElapsedTime = value;
-                    Platform.TargetElapsedTimeChanged();
+                    _targetElapsedTicks = _targetElapsedTime.Ticks;
+                    Platform?.TargetElapsedTimeChanged();
                 }
             }
         }
@@ -281,10 +290,10 @@ namespace MonoGame.Framework
         public void ResetElapsedTime()
         {
             Platform.ResetElapsedTime();
-            _gameTimer.Restart();
-            _accumulatedElapsedTime = TimeSpan.Zero;
+            ResetGameTimer();
             Time.ElapsedGameTime = TimeSpan.Zero;
-            _previousTicks = TimeSpan.Zero;
+            _accumulatedElapsedTicks = 0;
+            _previousTicks = 00;
         }
 
         public void SuppressDraw()
@@ -303,7 +312,7 @@ namespace MonoGame.Framework
             if (!Initialized)
             {
                 DoInitialize();
-                _gameTimer.Restart();
+                ResetGameTimer();
                 Initialized = true;
             }
 
@@ -325,13 +334,10 @@ namespace MonoGame.Framework
         {
             AssertNotDisposed();
 
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
-                TimerHelper.UpdateResolution();
-
             if (!Platform.BeforeRun())
             {
                 BeginRun();
-                _gameTimer.Restart();
+                ResetGameTimer();
                 return;
             }
 
@@ -348,7 +354,8 @@ namespace MonoGame.Framework
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
 
             BeginRun();
-            _gameTimer.Restart();
+            ResetGameTimer();
+
             switch (runBehavior)
             {
                 case GameRunBehavior.Asynchronous:
@@ -372,6 +379,11 @@ namespace MonoGame.Framework
             }
         }
 
+        private void ResetGameTimer()
+        {
+            _previousTicks = Stopwatch.GetTimestamp();
+        }
+
         public void Tick()
         {
             // NOTE: This code is very sensitive and can break very badly
@@ -392,33 +404,38 @@ namespace MonoGame.Framework
             }
 
             // Advance the accumulated elapsed time.
-            var currentTicks = _gameTimer.Elapsed;
-            _accumulatedElapsedTime += currentTicks - _previousTicks;
+            var currentTicks = Stopwatch.GetTimestamp();
+            _accumulatedElapsedTicks += currentTicks - _previousTicks;
             _previousTicks = currentTicks;
 
-            if (IsFixedTimeStep && _accumulatedElapsedTime < TargetElapsedTime)
+            if (IsFixedTimeStep && _accumulatedElapsedTicks < _targetElapsedTicks)
             {
-                // Sleep for as long as possible without overshooting the update time
-                TimeSpan sleepTime = TargetElapsedTime - _accumulatedElapsedTime;
-
-                // We only have a precision timer on Windows, so other platforms may still overshoot
-                switch (_currentOS)
+                // Sleep for as long as possible without overshooting the update time.
+                long sleepTicks = _targetElapsedTicks - _accumulatedElapsedTicks;
+                
+                // Check if the sleep time is more than 1 millisecond.
+                if (sleepTicks >= Stopwatch.Frequency / 1000)
                 {
-                    case PlatformInfo.OperatingSystem.Windows:
-                        if (PlatformInfo.Platform == MonoGamePlatform.WindowsUniversal)
-                        {
-                            lock (_locker)
-                                Monitor.Wait(_locker, sleepTime);
-                        }
-                        else
-                        {
-                            TimerHelper.SleepForNoMoreThan(sleepTime);
-                        }
-                        break;
+                    var sleepTime = TimeSpan.FromTicks(sleepTicks);
 
-                    default:
-                        Thread.Sleep(sleepTime);
-                        break;
+                    switch (_currentOS)
+                    {
+                        case PlatformInfo.OperatingSystem.Windows:
+                            if (PlatformInfo.Platform == MonoGamePlatform.WindowsUniversal)
+                            {
+                                lock (_locker)
+                                    Monitor.Wait(_locker, sleepTime);
+                            }
+                            else
+                            {
+                                Thread.Sleep(sleepTime);
+                            }
+                            break;
+
+                        default:
+                            Thread.Sleep(sleepTime);
+                            break;
+                    }
                 }
 
                 // Keep looping until it's time to perform the next update
@@ -426,8 +443,8 @@ namespace MonoGame.Framework
             }
 
             // Do not allow any update to take longer than our maximum.
-            if (_accumulatedElapsedTime > _maxElapsedTime)
-                _accumulatedElapsedTime = _maxElapsedTime;
+            if (_accumulatedElapsedTicks > _maxElapsedTime.Ticks)
+                _accumulatedElapsedTicks = _maxElapsedTime.Ticks;
 
             if (IsFixedTimeStep)
             {
@@ -435,11 +452,11 @@ namespace MonoGame.Framework
                 int stepCount = 0;
 
                 // Perform as many full fixed length time steps as we can.
-                while (_accumulatedElapsedTime >= TargetElapsedTime && !_shouldExit)
+                while (_accumulatedElapsedTicks >= _targetElapsedTicks && !_shouldExit)
                 {
                     Time.TotalGameTime += TargetElapsedTime;
-                    _accumulatedElapsedTime -= TargetElapsedTime;
-                    ++stepCount;
+                    _accumulatedElapsedTicks -= _targetElapsedTicks;
+                    stepCount++;
 
                     DoUpdate(Time);
                 }
@@ -470,9 +487,9 @@ namespace MonoGame.Framework
             else
             {
                 // Perform a single variable length update.
-                Time.ElapsedGameTime = _accumulatedElapsedTime;
-                Time.TotalGameTime += _accumulatedElapsedTime;
-                _accumulatedElapsedTime = TimeSpan.Zero;
+                Time.ElapsedGameTime = TimeSpan.FromTicks(_accumulatedElapsedTicks);
+                Time.TotalGameTime += Time.ElapsedGameTime;
+                _accumulatedElapsedTicks = 0;
 
                 DoUpdate(Time);
             }

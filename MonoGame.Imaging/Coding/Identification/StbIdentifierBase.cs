@@ -11,6 +11,8 @@ namespace MonoGame.Imaging.Coding.Identification
 
         public virtual CodecOptions DefaultOptions => CodecOptions.Default;
 
+        public abstract int HeaderSize { get; }
+
         public static VectorTypeInfo GetVectorType(int components, int depth)
         {
             Exception CreateDepthNotSupportedException()
@@ -58,18 +60,13 @@ namespace MonoGame.Imaging.Coding.Identification
 
         #region DetectFormat Abstraction
 
-        protected abstract bool TestFormat(ImagingConfig config, ReadContext context);
+        protected abstract bool TestFormat(ImagingConfig config, ReadOnlySpan<byte> header);
 
-        private ImageFormat DetectFormat(ImagingConfig config, ReadContext context)
+        public ImageFormat DetectFormat(ImagingConfig config, ReadOnlySpan<byte> header)
         {
-            if (TestFormat(config, context))
+            if (TestFormat(config, header))
                 return Format;
-            return default;
-        }
-
-        public ImageFormat DetectFormat(ImagingConfig config, ImageReadStream stream)
-        {
-            return DetectFormat(config, stream.Context);
+            return null;
         }
 
         #endregion
@@ -87,10 +84,9 @@ namespace MonoGame.Imaging.Coding.Identification
                 int bitsPerComp = readState.Depth;
 
                 var vectorType = GetVectorType(comp, bitsPerComp);
-                var compInfo = vectorType != null
-                    ? vectorType.ComponentInfo :
-                    new VectorComponentInfo(
-                        new VectorComponent(VectorComponentType.Raw, comp * bitsPerComp));
+
+                var compInfo = vectorType?.ComponentInfo ??
+                    new VectorComponentInfo(new VectorComponent(VectorComponentType.Raw, comp * bitsPerComp));
 
                 return new ImageInfo(readState.Width, readState.Height, compInfo, Format);
             }

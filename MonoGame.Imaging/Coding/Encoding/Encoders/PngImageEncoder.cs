@@ -28,7 +28,7 @@ namespace MonoGame.Imaging.Coding.Encoding
             StbImageEncoderState encoderState,
             in WriteState writeState)
         {
-            var options = (PngEncoderOptions)encoderState.EncoderOptions;
+            var options = encoderState.GetCodecOptions<PngEncoderOptions>();
             return Png.WriteCore(writeState, options.CompressionLevel);
         }
     }

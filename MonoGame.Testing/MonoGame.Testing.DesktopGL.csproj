@@ -17,6 +17,7 @@
   <ItemGroup>
     <Compile Remove="GameHead - copy.cs" />
     <Compile Remove="GameHead - music test.cs" />
+    <Compile Remove="GameHead - vector drawing.cs" />
   </ItemGroup>
   
   <ItemGroup>

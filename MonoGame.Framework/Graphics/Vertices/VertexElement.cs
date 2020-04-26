@@ -44,7 +44,8 @@ namespace MonoGame.Framework.Graphics
         /// <param name="elementFormat">The element format.</param>
         /// <param name="elementUsage">The HLSL semantic of the element in the vertex shader input-signature.</param>
         /// <param name="usageIndex">The semantic index, which is required if the semantic is used for more than one vertex element.</param>
-        public VertexElement(int offset, VertexElementFormat elementFormat, VertexElementUsage elementUsage, int usageIndex)
+        public VertexElement(
+            int offset, VertexElementFormat elementFormat, VertexElementUsage elementUsage, int usageIndex)
         {
             Offset = offset;
             VertexElementFormat = elementFormat;

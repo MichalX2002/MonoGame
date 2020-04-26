@@ -12,7 +12,7 @@ using StbSharp;
 
 namespace MonoGame.Imaging.Pixels
 {
-    public readonly struct RowsPixelProvider : IPixelProvider
+    public readonly struct PixelRowProvider : IPixelRowProvider
     {
         private static ConcurrentDictionary<VectorTypeInfo, Transform32Delegate> _transform32DelegateCache =
             new ConcurrentDictionary<VectorTypeInfo, Transform32Delegate>();
@@ -33,7 +33,7 @@ namespace MonoGame.Imaging.Pixels
         public int Width => _pixels.Size.Width;
         public int Height => _pixels.Size.Height;
 
-        public RowsPixelProvider(IReadOnlyPixelRows pixels, int components)
+        public PixelRowProvider(IReadOnlyPixelRows pixels, int components)
         {
             _pixels = pixels;
             Components = components;
@@ -46,7 +46,7 @@ namespace MonoGame.Imaging.Pixels
             }
         }
 
-        public unsafe void Fill(Span<byte> destination, int dataOffset)
+        public unsafe void Fill(int pixelOffset, Span<byte> destination)
         {
             int startPixelOffset = dataOffset / Components;
             int requestedPixelCount = (int)MathF.Ceiling(destination.Length / (float)Components);
@@ -205,7 +205,7 @@ namespace MonoGame.Imaging.Pixels
             string transformMethodName, VectorTypeInfo pixelType)
             where TDelegate : Delegate
         {
-            var transformMethod = typeof(RowsPixelProvider).GetMethod(
+            var transformMethod = typeof(PixelRowProvider).GetMethod(
                 transformMethodName, BindingFlags.NonPublic | BindingFlags.Static);
 
             var methodParams = transformMethod.GetParameters();

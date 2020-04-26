@@ -32,16 +32,16 @@ namespace MonoGame.Imaging.Coding.Encoding
             var state = (StbImageEncoderState)encoderState;
 
             int components = 4; // TODO: change this so it's dynamic/controlled
-            var provider = new RowsPixelProvider(image, components);
+            var provider = new PixelRowProvider(image, components, 8);
 
             var writeState = new WriteState(
-                readBytePixels: provider.Fill,
-                readFloatPixels: provider.Fill,
+                getPixelByteRow: provider.GetRow,
+                getPixelFloatRow: provider.GetRow,
+                (data) => state.Stream.Write(data),
                 state.ProgressCallback,
                 image.Size.Width,
                 image.Size.Height,
                 components,
-                state.Stream,
                 state.CancellationToken,
                 state.ScratchBuffer);
 

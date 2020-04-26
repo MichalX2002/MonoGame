@@ -19,13 +19,4 @@ namespace MonoGame.Imaging.Pixels
         /// </summary>
         VectorTypeInfo PixelType { get; }
     }
-
-    /// <summary>
-    /// Base interface for objects that store a defined type of pixels.
-    /// </summary>
-    /// <typeparam name="TPixel">The type of pixels that the source stores.</typeparam>
-    public interface IPixelSource<TPixel> : IPixelSource
-        where TPixel : unmanaged, IPixel
-    {
-    }
 }

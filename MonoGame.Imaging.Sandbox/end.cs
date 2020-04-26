@@ -1026,28 +1026,30 @@ namespace StbSharp
             return &ring_buffer[index * ring_buffer_length];
         }
 
-        public static float* stbir__add_empty_ring_buffer_entry(stbir__info stbir_info, int n)
+        public static float* stbir__add_empty_ring_buffer_entry(stbir__info info, int n)
         {
             int ring_buffer_index;
             float* ring_buffer;
-            stbir_info.ring_buffer_last_scanline = n;
-            if (stbir_info.ring_buffer_begin_index < 0)
+            info.ring_buffer_last_scanline = n;
+            if (info.ring_buffer_begin_index < 0)
             {
-                ring_buffer_index = stbir_info.ring_buffer_begin_index = 0;
-                stbir_info.ring_buffer_first_scanline = n;
+                ring_buffer_index = info.ring_buffer_begin_index = 0;
+                info.ring_buffer_first_scanline = n;
             }
             else
             {
-                ring_buffer_index =
-
-                    (stbir_info.ring_buffer_begin_index +
-                      (stbir_info.ring_buffer_last_scanline - stbir_info.ring_buffer_first_scanline)) %
-                     stbir_info.ring_buffer_num_entries;
+                ring_buffer_index = 
+                    (info.ring_buffer_begin_index + (info.ring_buffer_last_scanline - info.ring_buffer_first_scanline))
+                    % info.ring_buffer_num_entries;
             }
 
-            ring_buffer = stbir__get_ring_buffer_entry(stbir_info.ring_buffer, ring_buffer_index,
-                stbir_info.ring_buffer_length_bytes / sizeof(float));
-            CRuntime.MemSet(ring_buffer, 0, stbir_info.ring_buffer_length_bytes);
+            ring_buffer = stbir__get_ring_buffer_entry(
+                info.ring_buffer, 
+                ring_buffer_index,
+                info.ring_buffer_length_bytes / sizeof(float));
+
+            new Span<byte>(ring_buffer, info.ring_buffer_length_bytes).Clear();
+
             return ring_buffer;
         }
 
@@ -1291,8 +1293,7 @@ namespace StbSharp
         public static void stbir__decode_and_resample_downsample(stbir__info stbir_info, int n)
         {
             stbir__decode_scanline(stbir_info, n);
-            CRuntime.MemSet(stbir_info.horizontal_buffer, 0,
-                stbir_info.output_w * stbir_info.channels * sizeof(float));
+            new Span<float>(stbir_info.horizontal_buffer, stbir_info.output_w * stbir_info.channels).Clear();
 
             if (stbir__use_width_upsampling(stbir_info) != 0)
                 stbir__resample_horizontal_upsample(stbir_info, n, stbir_info.horizontal_buffer);
@@ -1507,7 +1508,7 @@ namespace StbSharp
             n0 = vertical_contributors[contributor].n0;
             n1 = vertical_contributors[contributor].n1;
             output_row_start = n * stbir_info.output_stride_bytes;
-            CRuntime.MemSet(encode_buffer, 0, output_w * sizeof(float) * channels);
+            new Span<float>(encode_buffer, output_w * channels).Clear();
             coefficient_counter = 0;
             switch (channels)
             {
@@ -1978,7 +1979,7 @@ namespace StbSharp
             if (tempmem_size_in_bytes < memory_required)
                 return 0;
 
-            CRuntime.MemSet(tempmem, 0, (int)tempmem_size_in_bytes);
+            new Span<byte>(tempmem, (int)tempmem_size_in_bytes).Clear();
             info.alpha_channel = alpha_channel;
             info.flags = flags;
             info.type = type;

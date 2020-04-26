@@ -6,26 +6,13 @@ namespace MonoGame.Imaging.Coding
     /// Base class for codec options.
     /// </summary>
     [Serializable]
-    public abstract class CodecOptions
+    public class CodecOptions
     {
         public static CodecOptions Default { get; } = new DefaultCodecOptions();
 
-        public static bool TypeEquals(CodecOptions a, Type b)
+        public bool IsAssignableFrom(CodecOptions other)
         {
-            return a.GetType() == b;
-        }
-
-        public static bool TypeEquals(CodecOptions a, CodecOptions b)
-        {
-            return TypeEquals(a, b.GetType());
-        }
-
-        public static void AssertTypeEqual(
-            CodecOptions required, CodecOptions other, string argName)
-        {
-            if (!TypeEquals(required, other))
-                throw new ArgumentException(
-                    $"The codec options are not of the required type '{required.GetType()}'.", argName);
+            return GetType().IsAssignableFrom(other.GetType());
         }
 
         private class DefaultCodecOptions : CodecOptions

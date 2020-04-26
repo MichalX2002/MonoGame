@@ -9,16 +9,16 @@ namespace MonoGame.Imaging
         #region LoadPixelData(FromType, ToType, ReadOnlySpan<byte>)
 
         public static Image LoadPixelData(
-            VectorTypeInfo fromPixelType,
-            VectorTypeInfo toPixelType,
+            VectorTypeInfo sourceType,
+            VectorTypeInfo destinationType,
             ReadOnlySpan<byte> pixelData,
             Rectangle sourceRectangle,
             int? byteStride = null)
         {
             // TODO: make this row based instead
 
-            var loadDelegate = GetLoadPixelSpanDelegate(fromPixelType, toPixelType);
-            var image = Create(toPixelType, sourceRectangle.Size);
+            var loadDelegate = GetLoadPixelSpanDelegate(sourceType, destinationType);
+            var image = Create(destinationType, sourceRectangle.Size);
             try
             {
                 loadDelegate.Invoke(pixelData, sourceRectangle, byteStride, image);
@@ -32,14 +32,14 @@ namespace MonoGame.Imaging
         }
 
         public static Image LoadPixelData(
-            VectorTypeInfo fromPixelType,
-            VectorTypeInfo toPixelType,
+            VectorTypeInfo sourceType,
+            VectorTypeInfo destinationType,
             ReadOnlySpan<byte> pixelData,
             Size size,
             int? byteStride = null)
         {
             return LoadPixelData(
-                fromPixelType, toPixelType, pixelData, new Rectangle(size), byteStride);
+                sourceType, destinationType, pixelData, new Rectangle(size), byteStride);
         }
 
         #endregion
@@ -67,21 +67,21 @@ namespace MonoGame.Imaging
         #region LoadPixelData<T>(Type, ReadOnlySpan<byte>)
 
         public static Image<TPixelTo> LoadPixelData<TPixelTo>(
-            VectorTypeInfo fromPixelType,
+            VectorTypeInfo sourceType,
             ReadOnlySpan<byte> pixelData,
             Rectangle sourceRectangle,
             int? byteStride = null)
             where TPixelTo : unmanaged, IPixel
         {
             var toType = VectorTypeInfo.Get<TPixelTo>();
-            return (Image<TPixelTo>)LoadPixelData(fromPixelType, toType, pixelData, sourceRectangle, byteStride);
+            return (Image<TPixelTo>)LoadPixelData(sourceType, toType, pixelData, sourceRectangle, byteStride);
         }
 
         public static Image<TPixelTo> LoadPixelData<TPixelTo>(
-            VectorTypeInfo fromPixelType, ReadOnlySpan<byte> pixelData, Size size, int? byteStride = null)
+            VectorTypeInfo sourceType, ReadOnlySpan<byte> pixelData, Size size, int? byteStride = null)
             where TPixelTo : unmanaged, IPixel
         {
-            return LoadPixelData<TPixelTo>(fromPixelType, pixelData, new Rectangle(size), byteStride);
+            return LoadPixelData<TPixelTo>(sourceType, pixelData, new Rectangle(size), byteStride);
         }
 
         #endregion
@@ -89,22 +89,22 @@ namespace MonoGame.Imaging
         #region LoadPixelData<T>(Type, Span<byte>)
 
         public static Image<TPixelTo> LoadPixelData<TPixelTo>(
-            VectorTypeInfo fromPixelType,
+            VectorTypeInfo sourceType,
             Span<byte> pixelData,
             Rectangle sourceRectangle,
             int? byteStride = null)
             where TPixelTo : unmanaged, IPixel
         {
             return LoadPixelData<TPixelTo>(
-                fromPixelType, (ReadOnlySpan<byte>)pixelData, sourceRectangle, byteStride);
+                sourceType, (ReadOnlySpan<byte>)pixelData, sourceRectangle, byteStride);
         }
 
         public static Image<TPixelTo> LoadPixelData<TPixelTo>(
-            VectorTypeInfo fromPixelType, Span<byte> pixelData, Size size, int? byteStride = null)
+            VectorTypeInfo sourceType, Span<byte> pixelData, Size size, int? byteStride = null)
             where TPixelTo : unmanaged, IPixel
         {
             return LoadPixelData<TPixelTo>(
-                fromPixelType, (ReadOnlySpan<byte>)pixelData, size, byteStride);
+                sourceType, (ReadOnlySpan<byte>)pixelData, size, byteStride);
         }
 
         #endregion

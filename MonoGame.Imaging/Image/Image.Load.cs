@@ -15,12 +15,14 @@ namespace MonoGame.Imaging
             Stream stream,
             out ImageFormat format,
             VectorTypeInfo preferredPixelType = null,
+            DecoderOptions decoderOptions = null,
             DecodeProgressCallback onProgress = null,
             CancellationToken cancellationToken = default)
         {
             using (var frames = EnumerateFrames(
                 config, stream, out format, cancellationToken))
             {
+                frames.State.DecoderOptions = decoderOptions;
                 frames.State.PreferredPixelType = preferredPixelType;
                 frames.State.Progress += onProgress;
 
@@ -32,30 +34,38 @@ namespace MonoGame.Imaging
             ImagingConfig config,
             Stream stream,
             VectorTypeInfo preferredPixelType = null,
+            DecoderOptions decoderOptions = null,
             DecodeProgressCallback onProgress = null,
             CancellationToken cancellationToken = default)
         {
-            return Load(config, stream, out _, preferredPixelType, onProgress, cancellationToken);
+            return Load(
+                config, stream, out _,
+                preferredPixelType, decoderOptions, onProgress, cancellationToken);
         }
 
         public static Image Load(
             Stream stream,
             out ImageFormat format,
             VectorTypeInfo preferredPixelType = null,
+            DecoderOptions decoderOptions = null,
             DecodeProgressCallback onProgress = null,
             CancellationToken cancellationToken = default)
         {
             return Load(
-                ImagingConfig.Default, stream, out format, preferredPixelType, onProgress, cancellationToken);
+                ImagingConfig.Default, stream, out format,
+                preferredPixelType, decoderOptions, onProgress, cancellationToken);
         }
 
         public static Image Load(
             Stream stream,
             VectorTypeInfo preferredPixelType = null,
+            DecoderOptions decoderOptions = null,
             DecodeProgressCallback onProgress = null,
             CancellationToken cancellationToken = default)
         {
-            return Load(stream, out _, preferredPixelType, onProgress, cancellationToken);
+            return Load(
+                stream, out _,
+                preferredPixelType, decoderOptions, onProgress, cancellationToken);
         }
 
         #endregion

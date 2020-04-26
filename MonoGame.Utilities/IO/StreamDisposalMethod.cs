@@ -35,6 +35,6 @@ namespace MonoGame.Framework.IO
         /// Leave the inner stream open after disposal but close it when the
         /// <see cref="CancellationToken"/> requests cancellation.
         /// </summary>
-        CancellableLeaveOpen,
+        CancellableLeaveOpen
     }
 }

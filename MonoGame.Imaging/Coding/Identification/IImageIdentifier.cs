@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace MonoGame.Imaging.Coding.Identification
 {
     /// <summary>
@@ -7,12 +8,17 @@ namespace MonoGame.Imaging.Coding.Identification
     public interface IImageIdentifier : IImageCodec
     {
         /// <summary>
-        /// Tries to detect the format of an image from a stream.
+        /// Gets the maximum size of the image header.
+        /// </summary>
+        int HeaderSize { get; }
+
+        /// <summary>
+        /// Tries to detect the format of an image from a data span.
         /// </summary>
         /// <param name="config">The imaging configuration.</param>
-        /// <param name="stream">The stream to read from.</param>
+        /// <param name="header">The data to inspect.</param>
         /// <returns>The format that was detected.</returns>
-        ImageFormat DetectFormat(ImagingConfig config, ImageReadStream stream);
+        ImageFormat DetectFormat(ImagingConfig config, ReadOnlySpan<byte> header);
 
         /// <summary>
         /// Tries to identify information about an image from a stream.

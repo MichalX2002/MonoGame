@@ -12,6 +12,8 @@ namespace MonoGame.Imaging.Coding.Decoding
         private OutputPixelLineDelegate _onOutputPixelLine;
         private OutputPixelDelegate _onOutputPixel;
 
+        private Image.ConvertPixelsDelegate _convertPixelSpan;
+
         public VectorTypeInfo SourcePixelType { get; private set; }
 
         public ReadContext Context => Stream.Context;
@@ -59,7 +61,13 @@ namespace MonoGame.Imaging.Coding.Decoding
             SourcePixelType = GetVectorType(state);
             var dstType = PreferredPixelType ?? SourcePixelType;
             var size = new Size(state.Width, state.Height);
-            CurrentImage = Image.Create(dstType, size);
+
+            if (DecoderOptions.ClearImageMemory)
+                CurrentImage = Image.Create(dstType, size);
+            else
+                CurrentImage = Image.CreateUninitialized(dstType, size);
+
+            _convertPixelSpan = Image.GetConvertPixelsDelegate(SourcePixelType, dstType);
 
             InvokeProgress(0, null);
         }
@@ -89,21 +97,34 @@ namespace MonoGame.Imaging.Coding.Decoding
             }
             else
             {
-                throw new NotImplementedException();
+                if (addressing == AddressingMajor.Row)
+                {
+                    var dstSpan = CurrentImage.GetPixelByteRowSpan(line);
+                    _convertPixelSpan.Invoke(pixels, dstSpan);
+                }
+                else if (addressing == AddressingMajor.Column)
+                {
+                    throw new NotImplementedException();
+                    CurrentImage.SetPixelByteColumn(start, line, pixels);
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException(nameof(addressing));
+                }
             }
         }
 
         private void OnOutputPixelLine(
-            ReadState state, AddressingMajor addressing, int line, int start, int increment, ReadOnlySpan<byte> pixels)
+            ReadState state, AddressingMajor addressing, int line, int start, int spacing, ReadOnlySpan<byte> pixels)
         {
-            if (increment == 1)
+            if (spacing == 1)
             {
                 OnOutputPixelLineContiguous(addressing, line, start, pixels);
                 return;
             }
 
-            if (increment == 0)
-                throw new ArgumentOutOfRangeException(nameof(increment));
+            if (spacing == 0)
+                throw new ArgumentOutOfRangeException(nameof(spacing));
 
             AssertValidStateForOutput();
 
@@ -117,14 +138,13 @@ namespace MonoGame.Imaging.Coding.Decoding
                     for (int x = 0; x < pixels.Length; x += elementSize)
                     {
                         var src = pixels.Slice(x, elementSize);
-                        var dst = byteRow.Slice(x * increment, elementSize);
+                        var dst = byteRow.Slice(x * spacing, elementSize);
                         src.CopyTo(dst);
                     }
                 }
                 else if (addressing == AddressingMajor.Column)
                 {
                     throw new NotImplementedException();
-                    CurrentImage.SetPixelByteColumn(start, line, pixels);
                 }
                 else
                 {

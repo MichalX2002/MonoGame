@@ -51,13 +51,13 @@ namespace MonoGame.Framework.Graphics
             for (int i = 0; i < _batchItems.Length; i++)
                 _batchItems[i] = new SpriteBatchItem();
 
-            SetupBuffers(InitialBatchSize);
+            SetupBuffers(InitialBatchSize, 0);
         }
 
         /// <summary>
         /// Calculates indices and resizes buffer capacity (up to <see cref="MaxBatchSize"/>).
         /// </summary>
-        private void SetupBuffers(int itemCount, int oldItemCount = 0)
+        private void SetupBuffers(int itemCount, int oldItemCount)
         {
             int minVertices = itemCount * 4; // 4 vertices per item
             if (minVertices > _vertexBuffer.Length)
@@ -68,8 +68,8 @@ namespace MonoGame.Framework.Graphics
             {
                 _indexBuffer.Length = minIndices;
 
-                int oldIndices = oldItemCount * 6;
                 int oldVertices = oldItemCount * 4;
+                int oldIndices = oldItemCount * 6;
                 var indexSpan = _indexBuffer.Span;
                 for (int i = oldIndices, v = oldVertices; i < minIndices; i += 6, v += 4)
                 {
@@ -109,7 +109,7 @@ namespace MonoGame.Framework.Graphics
                 for (int i = oldSize; i < newSize; i++)
                     _batchItems[i] = new SpriteBatchItem();
 
-                SetupBuffers(Math.Min(newSize, MaxBatchSize), _batchItems.Length);
+                SetupBuffers(Math.Min(newSize, MaxBatchSize), oldSize);
             }
             return _batchItems[_itemCount++];
         }
@@ -141,6 +141,7 @@ namespace MonoGame.Framework.Graphics
 
             // iterate through the batches, doing clamped sets of vertices at the time
             var vertexSpan = _vertexBuffer.Span;
+            var indexSpan = _indexBuffer.Span;
             int itemsLeft = _itemCount;
             while (itemsLeft > 0)
             {
@@ -160,7 +161,7 @@ namespace MonoGame.Framework.Graphics
                     // if the texture changed, we need to flush and bind the new texture
                     if (!ReferenceEquals(item.Texture, tex))
                     {
-                        FlushVertexArray(vertexCount, effect, tex);
+                        FlushVertexArray(vertexSpan.Slice(0, vertexCount), indexSpan, effect, tex);
                         vertexCount = 0;
 
                         tex = item.Texture;
@@ -177,7 +178,7 @@ namespace MonoGame.Framework.Graphics
                 }
 
                 // flush the remaining data
-                FlushVertexArray(vertexCount, effect, tex);
+                FlushVertexArray(vertexSpan.Slice(0, vertexCount), indexSpan, effect, tex);
             }
 
             unchecked
@@ -190,15 +191,16 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Sends the triangle list to the graphics device. Here is where the actual drawing starts.
         /// </summary>
-        /// <param name="count">The amount of vertices to draw.</param>
+        /// <param name="vertices">The vertices to draw.</param>
+        /// <param name="indices">The indices used to draw.</param>
         /// <param name="effect">The custom effect to apply to the geometry.</param>
         /// <param name="texture">The texture to draw.</param>
-        private void FlushVertexArray(int count, Effect effect, Texture texture)
+        private void FlushVertexArray(
+            ReadOnlySpan<VertexPositionColorTexture> vertices, ReadOnlySpan<ushort> indices,
+            Effect effect, Texture texture)
         {
-            if (count == 0)
+            if (vertices.IsEmpty)
                 return;
-
-            var vertices = _vertexBuffer.Span.Slice(0, count);
 
             // If the effect is not null, then apply each pass and render the geometry
             if (effect != null)
@@ -211,15 +213,15 @@ namespace MonoGame.Framework.Graphics
                     // ends up in Textures[0].
                     _device.Textures[0] = texture;
 
-                    _device.DrawUserIndexedPrimitives<VertexPositionColorTexture, ushort>(
-                        PrimitiveType.TriangleList, vertices, _indexBuffer.Span, count / 2);
+                    _device.DrawUserIndexedPrimitives(
+                        PrimitiveType.TriangleList, vertices, indices, vertices.Length / 2);
                 }
             }
             else
             {
                 // If no custom effect is defined, then simply render.
-                _device.DrawUserIndexedPrimitives<VertexPositionColorTexture, ushort>(
-                    PrimitiveType.TriangleList, vertices, _indexBuffer.Span, count / 2);
+                _device.DrawUserIndexedPrimitives(
+                    PrimitiveType.TriangleList, vertices, indices, vertices.Length / 2);
             }
         }
 

@@ -22,19 +22,19 @@ namespace MonoGame.Framework.Graphics
             bool isDynamic) :
             base(graphicsDevice, capacity, bufferUsage, isDynamic)
         {
-            if (elementSize == IndexElementSize.Int32)
+            if (elementSize == IndexElementSize.Int)
             {
                 if (graphicsDevice.GraphicsProfile == GraphicsProfile.Reach)
                     throw new NotSupportedException(
                         $"The current graphics profile does not support an element size of " +
-                        $"{IndexElementSize.Int32}; use {IndexElementSize.Short16} instead.");
+                        $"{IndexElementSize.Int}; use {IndexElementSize.Short} instead.");
             }
-            else if (elementSize != IndexElementSize.Short16)
+            else if (elementSize != IndexElementSize.Short)
             {
                 throw new ArgumentOutOfRangeException(nameof(elementSize));
             }
             ElementSize = elementSize;
-            _elementSize = ElementSize == IndexElementSize.Int32 ? 4 : 2;
+            _elementSize = ElementSize == IndexElementSize.Int ? 4 : 2;
 
             PlatformConstruct();
         }

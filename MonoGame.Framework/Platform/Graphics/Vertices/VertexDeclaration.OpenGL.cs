@@ -53,18 +53,22 @@ namespace MonoGame.Framework.Graphics
             // Apply the vertex attribute info
             foreach(var element in attrInfo.Elements.Span)
             { 
-                GL.VertexAttribPointer(element.AttributeLocation,
+                GL.VertexAttribPointer(
+                    element.AttributeLocation,
                     element.NumberOfElements,
                     element.VertexAttribPointerType,
                     element.Normalized,
                     VertexStride,
-                    new IntPtr(offset.ToInt64() + element.Offset));
+                    offset + element.Offset);
+                GraphicsExtensions.CheckGLError();
 
 #if !(GLES || MONOMAC)
                 if (GraphicsDevice.GraphicsCapabilities.SupportsInstancing)
+                {
                     GL.VertexAttribDivisor(element.AttributeLocation, 0);
+                    GraphicsExtensions.CheckGLError();
+                }
 #endif
-                GraphicsExtensions.CheckGLError();
             }
 
             GraphicsDevice.SetVertexAttributeArray(attrInfo.EnabledAttributes);

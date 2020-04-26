@@ -18,6 +18,8 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Size : IEquatable<Size>
     {
+        // TODO: add float operators that return a SizeF
+
         /// <summary>
         ///     Returns a <see cref="Size" /> with <see cref="Width" /> and <see cref="Height" /> equal to <c>0f</c>.
         /// </summary>
@@ -51,6 +53,14 @@ namespace MonoGame.Framework
         {
             Width = width;
             Height = height;
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="Size" /> structure with one value for all dimensions.
+        /// </summary>
+        /// <param name="value">The width and height.</param>
+        public Size(int value) : this(value, value)
+        {
         }
 
         /// <summary>

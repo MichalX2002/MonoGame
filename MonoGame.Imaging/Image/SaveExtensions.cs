@@ -23,7 +23,7 @@ namespace MonoGame.Imaging
         {
             AssertValidOutput(output);
 
-            var encoder = AssertValidArguments(imagingConfig, format, encoderOptions);
+            var encoder = AssertValidArguments(imagingConfig, format);
             if (encoder == null) throw new ArgumentNullException(nameof(encoder));
             if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
             if (images == null) throw new ArgumentNullException(nameof(images));
@@ -102,7 +102,7 @@ namespace MonoGame.Imaging
             if (image == null)
                 throw new ArgumentNullException(nameof(image));
 
-            AssertValidArguments(imagingConfig, format, encoderOptions);
+            AssertValidArguments(imagingConfig, format);
             AssertValidOutput(output);
 
             Save(
@@ -138,7 +138,7 @@ namespace MonoGame.Imaging
         {
             if (format == null)
                 format = ImageFormat.GetByPath(filePath)[0];
-            AssertValidArguments(imagingConfig, format, encoderOptions);
+            AssertValidArguments(imagingConfig, format);
             AssertValidPath(filePath);
 
             Save(
@@ -170,18 +170,12 @@ namespace MonoGame.Imaging
         #region Argument Validation
 
         private static IImageEncoder AssertValidArguments(
-            ImagingConfig imagingConfig, ImageFormat format, EncoderOptions encoderOptions = null)
+            ImagingConfig imagingConfig, ImageFormat format)
         {
             if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
             if (format == null) throw new ArgumentNullException(nameof(format));
 
-            var encoder = Image.GetEncoder(format);
-
-            if (encoderOptions != null)
-                EncoderOptions.AssertTypeEqual(
-                    encoder.DefaultOptions, encoderOptions, nameof(encoderOptions));
-
-            return encoder;
+            return Image.GetEncoder(format);
         }
 
         private static void AssertValidOutput(Stream output)

@@ -21,13 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="..\ThirdParty\StbSharp\Image\src\ImageRead.Gif.cs" />
-    <Compile Remove="..\ThirdParty\StbSharp\Image\src\ImageRead.Jpeg.cs" />
-    <Compile Remove="..\ThirdParty\StbSharp\Image\src\ImageRead.Psd.cs" />
-    <Compile Remove="..\ThirdParty\StbSharp\Image\src\ImageRead.Tga.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.1" />
   </ItemGroup>
 

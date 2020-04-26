@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace MonoGame.Imaging.Coding
 {
@@ -11,7 +12,7 @@ namespace MonoGame.Imaging.Coding
         public bool IsDisposed { get; protected set; }
 
         public IImageCodec Codec { get; }
-        public ImagingConfig ImagingConfig { get; }
+        public ImagingConfig Config { get; }
         public Stream Stream { get; private set; }
 
         /// <summary>
@@ -22,20 +23,26 @@ namespace MonoGame.Imaging.Coding
         public CodecOptions CodecOptions
         {
             get => _codecOptions ?? Codec.DefaultOptions;
-            set
-            {
-                if (value != null)
-                    CodecOptions.AssertTypeEqual(Codec.DefaultOptions, value, nameof(value));
-                _codecOptions = value;
-            }
+            set => _codecOptions = value;
         }
 
         public ImageCodecState(IImageCodec codec, ImagingConfig config, Stream stream, bool leaveOpen)
         {
             Codec = codec ?? throw new ArgumentNullException(nameof(codec));
-            ImagingConfig = config ?? throw new ArgumentNullException(nameof(config));
+            Config = config ?? throw new ArgumentNullException(nameof(config));
             Stream = stream ?? throw new ArgumentNullException(nameof(stream));
             _leaveOpen = leaveOpen;
+        }
+
+        public TOptions GetCodecOptions<TOptions>()
+            where TOptions : CodecOptions
+        {
+            if (typeof(TOptions) != Codec.DefaultOptions.GetType())
+                throw new InvalidOperationException();
+
+            if (Codec.DefaultOptions.IsAssignableFrom(CodecOptions))
+                return (TOptions)CodecOptions;
+            return (TOptions)Codec.DefaultOptions;
         }
 
         #region IDisposable
