@@ -4,7 +4,7 @@ using MonoGame.Framework.PackedVector;
 namespace MonoGame.Imaging.Pixels
 {
     /// <summary>
-    /// Represents a read-only way to get pixel rows in bytes.
+    /// Represents a way to get and set pixel rows in bytes.
     /// </summary>
     public interface IPixelRows : IReadOnlyPixelRows
     {
@@ -17,7 +17,7 @@ namespace MonoGame.Imaging.Pixels
     }
 
     /// <summary>
-    /// Represents a read-only way to get pixel rows.
+    /// Represents a way to get and set pixel rows.
     /// </summary>
     public interface IPixelRows<TPixel> : IPixelRows, IReadOnlyPixelRows<TPixel>
         where TPixel : unmanaged, IPixel

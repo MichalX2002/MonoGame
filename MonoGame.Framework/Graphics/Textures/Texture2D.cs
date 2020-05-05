@@ -136,6 +136,10 @@ namespace MonoGame.Framework.Graphics
             ReadOnlySpan<T> data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
             where T : unmanaged
         {
+            if (rectangle.HasValue)
+                if (rectangle.Value.Width == 0 || rectangle.Value.Height == 0)
+                    return;
+
             ValidateParams<T>(level, arraySlice, rectangle, data.Length, out Rectangle checkedRect);
 
             if (rectangle.HasValue)
@@ -299,7 +303,7 @@ namespace MonoGame.Framework.Graphics
         {
             ValidateFromImageParams(graphicsDevice, nameof(graphicsDevice), format, nameof(format));
 
-            using (var image = Image.Load(imagingConfig, stream))
+            using (var image = Image.LoadAsync(imagingConfig, stream).GetAwaiter().GetResult())
                 return FromImage(image, graphicsDevice, mipmap, format);
         }
 
@@ -363,14 +367,12 @@ namespace MonoGame.Framework.Graphics
                     $"Texture dimensions may not be changed after construction.");
             }
 
-            var readStream = config.CreateReadStream(stream);
-
-            var info = Image.Identify(config, readStream);
-            if (info.Width != Width) throw GetSizeException("width");
-            if (info.Height != Height) throw GetSizeException("height");
-
-            using (var image = Image.Load(config, readStream))
+            using (var image = Image.LoadAsync(config, stream).GetAwaiter().GetResult())
+            {
+                if (image.Width != Width) throw GetSizeException("width");
+                if (image.Height != Height) throw GetSizeException("height");
                 SetData(image);
+            }
         }
 
         /// <summary>
@@ -472,7 +474,7 @@ namespace MonoGame.Framework.Graphics
             if (format == null) throw new ArgumentNullException(nameof(format));
 
             using (var image = ToImage(rectangle, level, arraySlice))
-                image.Save(imagingConfig, stream, format, encoderOptions);
+                image.SaveAsync(imagingConfig, stream, format, encoderOptions);
         }
 
         /// <summary>
@@ -526,7 +528,7 @@ namespace MonoGame.Framework.Graphics
             if (format == null)
                 format = ImageFormat.GetByPath(filePath).FirstOrDefault();
 
-            using (var fs = SaveExtensions.OpenWrite(filePath))
+            using (var fs = SaveExtensions.OpenWriteStream(filePath))
                 Save(imagingConfig, fs, format, encoderOptions, rectangle, level, arraySlice);
         }
 
@@ -671,7 +673,7 @@ namespace MonoGame.Framework.Graphics
         {
             var texBounds = new Rectangle(0, 0, Math.Max(Bounds.Width >> level, 1), Math.Max(Bounds.Height >> level, 1));
             checkedRect = rect ?? texBounds;
-            if (rect.HasValue && !texBounds.Contains(checkedRect) || checkedRect.Width <= 0 || checkedRect.Height <= 0)
+            if (rect.HasValue && !texBounds.Contains(checkedRect) || checkedRect.Width < 0 || checkedRect.Height < 0)
                 throw new ArgumentException("Rectangle must be inside the texture bounds.", nameof(rect));
             return texBounds;
         }

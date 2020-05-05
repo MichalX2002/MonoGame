@@ -23,6 +23,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  
   <Target Name="BuildMFGXC" BeforeTargets="Restore">
     <MSBuild Projects="..\MonoGame.Effect.Compiler\MonoGame.Effect.Compiler.csproj" Properties="Configuration=$(Configuration);UseAppHost=False" Targets="Restore" />
     <MSBuild Projects="..\MonoGame.Effect.Compiler\MonoGame.Effect.Compiler.csproj" Properties="Configuration=$(Configuration);UseAppHost=False" Targets="Build" />

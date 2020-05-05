@@ -6,6 +6,16 @@
     <BaseOutputPath>..\Artifacts\MonoGame.StbSharp</BaseOutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="..\ThirdParty\StbSharp\Image\src\**\*.cs" Exclude="..\ThirdParty\StbSharp\Image\src\obj\**">
       <Link>ImageRead\%(FileName)%(Extension)</Link>
@@ -18,6 +28,13 @@
     <Compile Include="..\ThirdParty\StbSharp\Shared\src\**\*.cs" Exclude="..\ThirdParty\StbSharp\Shared\src\obj\**">
       <Link>Shared\%(FileName)%(Extension)</Link>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="..\ThirdParty\StbSharp\Image\src\ImageRead.Gif.cs" />
+    <Compile Remove="..\ThirdParty\StbSharp\Image\src\ImageRead.Psd.cs" />
+    <Compile Remove="..\ThirdParty\StbSharp\Image\src\ImageRead.ReadContext.cs" />
+    <Compile Remove="..\ThirdParty\StbSharp\Image\src\ImageRead.Tga.cs" />
   </ItemGroup>
 
   <ItemGroup>

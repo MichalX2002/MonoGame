@@ -52,7 +52,7 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromVector4(in Vector4 vector)
         {
-            var v = Vector4.Clamp(vector, 0, 1);
+            var v = Vector4.Clamp(vector, Vector4.Zero, Vector4.One);
             v *= 1023f;
 
             PackedValue = (uint)(

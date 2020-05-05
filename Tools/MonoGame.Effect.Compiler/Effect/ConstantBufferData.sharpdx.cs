@@ -14,7 +14,7 @@ namespace MonoGame.Effect
 
             ParameterIndex = new List<int>();
 
-            var parameters = new List<EffectObject.d3dx_parameter>();
+            var parameters = new List<EffectObject.D3Dx_parameter>();
 
             // Gather all the parameters.
             for (var i = 0; i < cb.Description.VariableCount; i++)
@@ -47,9 +47,9 @@ namespace MonoGame.Effect
                 ParameterOffset.Add(param.bufferOffset);
         }
 
-        private static EffectObject.d3dx_parameter GetParameterFromType(SharpDX.D3DCompiler.ShaderReflectionType type)
+        private static EffectObject.D3Dx_parameter GetParameterFromType(SharpDX.D3DCompiler.ShaderReflectionType type)
         {
-            var param = new EffectObject.d3dx_parameter
+            var param = new EffectObject.D3Dx_parameter
             {
                 rows = (uint)type.Description.RowCount,
                 columns = (uint)type.Description.ColumnCount,
@@ -99,7 +99,7 @@ namespace MonoGame.Effect
 
             if (param.member_count > 0)
             {
-                param.member_handles = new EffectObject.d3dx_parameter[param.member_count];
+                param.member_handles = new EffectObject.D3Dx_parameter[param.member_count];
                 for (var i = 0; i < param.member_count; i++)
                 {
                     var mparam = GetParameterFromType(type.GetMemberType(i));
@@ -109,10 +109,10 @@ namespace MonoGame.Effect
             }
             else
             {
-                param.member_handles = new EffectObject.d3dx_parameter[param.element_count];
+                param.member_handles = new EffectObject.D3Dx_parameter[param.element_count];
                 for (var i = 0; i < param.element_count; i++)
                 {
-                    var mparam = new EffectObject.d3dx_parameter
+                    var mparam = new EffectObject.D3Dx_parameter
                     {
                         name = string.Empty,
                         semantic = string.Empty,

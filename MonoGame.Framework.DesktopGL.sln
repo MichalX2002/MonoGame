@@ -24,8 +24,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Content.Builder", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Content.Builder.Editor.Windows", "Tools\MonoGame.Content.Builder.Editor\MonoGame.Content.Builder.Editor.Windows.csproj", "{8B7BC92C-3B3B-48B2-B971-A60072DB3023}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Content.Builder.Task", "Tools\MonoGame.Content.Builder.Task\MonoGame.Content.Builder.Task.csproj", "{ECA436E6-FC00-4E14-A746-B13442B97C10}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Effect.Compiler", "Tools\MonoGame.Effect.Compiler\MonoGame.Effect.Compiler.csproj", "{FA99AF38-6238-4607-9296-F0C51EBC91AA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.StbSharp", "MonoGame.StbSharp\MonoGame.StbSharp.csproj", "{BDBE9C86-5BC3-46DA-9FEB-2C0B65643B9C}"
@@ -128,18 +126,6 @@ Global
 		{8B7BC92C-3B3B-48B2-B971-A60072DB3023}.Release|x64.Build.0 = Release|Any CPU
 		{8B7BC92C-3B3B-48B2-B971-A60072DB3023}.Release|x86.ActiveCfg = Release|Any CPU
 		{8B7BC92C-3B3B-48B2-B971-A60072DB3023}.Release|x86.Build.0 = Release|Any CPU
-		{ECA436E6-FC00-4E14-A746-B13442B97C10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ECA436E6-FC00-4E14-A746-B13442B97C10}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ECA436E6-FC00-4E14-A746-B13442B97C10}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{ECA436E6-FC00-4E14-A746-B13442B97C10}.Debug|x64.Build.0 = Debug|Any CPU
-		{ECA436E6-FC00-4E14-A746-B13442B97C10}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{ECA436E6-FC00-4E14-A746-B13442B97C10}.Debug|x86.Build.0 = Debug|Any CPU
-		{ECA436E6-FC00-4E14-A746-B13442B97C10}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ECA436E6-FC00-4E14-A746-B13442B97C10}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ECA436E6-FC00-4E14-A746-B13442B97C10}.Release|x64.ActiveCfg = Release|Any CPU
-		{ECA436E6-FC00-4E14-A746-B13442B97C10}.Release|x64.Build.0 = Release|Any CPU
-		{ECA436E6-FC00-4E14-A746-B13442B97C10}.Release|x86.ActiveCfg = Release|Any CPU
-		{ECA436E6-FC00-4E14-A746-B13442B97C10}.Release|x86.Build.0 = Release|Any CPU
 		{FA99AF38-6238-4607-9296-F0C51EBC91AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FA99AF38-6238-4607-9296-F0C51EBC91AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA99AF38-6238-4607-9296-F0C51EBC91AA}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -195,7 +181,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{C5BB18B0-6A06-4A78-AC06-2FE61437D212} = {66492C32-F94B-4A3F-A8D1-85C4DEE4D585}
 		{8B7BC92C-3B3B-48B2-B971-A60072DB3023} = {66492C32-F94B-4A3F-A8D1-85C4DEE4D585}
-		{ECA436E6-FC00-4E14-A746-B13442B97C10} = {66492C32-F94B-4A3F-A8D1-85C4DEE4D585}
 		{FA99AF38-6238-4607-9296-F0C51EBC91AA} = {66492C32-F94B-4A3F-A8D1-85C4DEE4D585}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

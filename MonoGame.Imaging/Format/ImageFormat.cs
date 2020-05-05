@@ -123,7 +123,7 @@ namespace MonoGame.Imaging
 
         #endregion
 
-        private static string ValidateExtension(string extension)
+        private static string? ValidateExtension(string extension)
         {
             if (extension == null)
                 return null;
@@ -172,7 +172,7 @@ namespace MonoGame.Imaging
 
         #region [Try]GetByMimeType
 
-        public static bool TryGetByMimeType(string mimeType, out ReadOnlyCollection<ImageFormat> formats)
+        public static bool TryGetByMimeType(string mimeType, out ReadOnlyCollection<ImageFormat>? formats)
         {
             if (_byMimeType.TryGetValue(mimeType, out var list))
             {
@@ -187,7 +187,7 @@ namespace MonoGame.Imaging
 
         #region [Try]GetByExtension
 
-        public static bool TryGetByExtension(string extension, out ReadOnlyCollection<ImageFormat> formats)
+        public static bool TryGetByExtension(string extension, out ReadOnlyCollection<ImageFormat>? formats)
         {
             if (extension == null)
                 throw new ArgumentNullException(nameof(extension));
@@ -210,10 +210,10 @@ namespace MonoGame.Imaging
                 throw new KeyNotFoundException(
                     $"No image formats with extension '{extension}' are defined.");
 
-            return formats;
+            return formats!;
         }
 
-        public static bool TryGetByPath(string path, out ReadOnlyCollection<ImageFormat> formats)
+        public static bool TryGetByPath(string path, out ReadOnlyCollection<ImageFormat>? formats)
         {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));

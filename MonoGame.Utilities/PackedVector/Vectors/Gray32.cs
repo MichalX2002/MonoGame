@@ -33,7 +33,7 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromScaledVector4(in Vector4 scaledVector)
         {
-            var v = Vector4.Clamp(scaledVector, 0, 1);
+            var v = Vector4.Clamp(scaledVector, Vector4.Zero, Vector4.One);
             v *= uint.MaxValue;
 
             L = (uint)PackedVectorHelper.GetBT709Luminance(v.X, v.Y, v.Z);

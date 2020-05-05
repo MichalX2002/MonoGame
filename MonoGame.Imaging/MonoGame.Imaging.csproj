@@ -2,13 +2,23 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <BaseOutputPath>..\Artifacts\MonoGame.Imaging</BaseOutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
   <ItemGroup>
-    <Compile Remove="Coding\Decoding\Decoders\StbImageDecoderBase.ResultWrapper.cs" />
-    <Compile Remove="Coding\Encoding\Encoders\StbImageEncoderBase.CustomDeflate.cs" />
+    <Compile Remove="Codecs\Encoding\StbImageEncoderBase.CustomDeflate.cs" />
     <Compile Remove="ColorEncoding.cs" />
     <Compile Remove="Pixels\PixelRowProvider old.cs" />
     <Compile Remove="Utilities\BufferPixelProvider.Expressions.cs" />
@@ -16,9 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Image\Specialized\**" />
-    <EmbeddedResource Remove="Image\Specialized\**" />
-    <None Remove="Image\Specialized\**" />
+    <Compile Remove="Containers\Specialized\**" />
+    <EmbeddedResource Remove="Containers\Specialized\**" />
+    <None Remove="Containers\Specialized\**" />
   </ItemGroup>
 
   <ItemGroup>

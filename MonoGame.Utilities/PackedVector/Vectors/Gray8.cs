@@ -34,7 +34,7 @@ namespace MonoGame.Framework.PackedVector
         {
             var v = scaledVector * byte.MaxValue;
             v += Vector4.Half;
-            v.Clamp(0, byte.MaxValue);
+            v.Clamp(Vector4.Zero, Vector4.MaxValueByte);
 
             L = (byte)(PackedVectorHelper.GetBT709Luminance(v.X, v.Y, v.Z) + 0.5f);
         }

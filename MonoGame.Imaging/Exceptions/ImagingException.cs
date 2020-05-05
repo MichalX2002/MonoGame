@@ -7,7 +7,7 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Gets the <see cref="ImageFormat"/> associated with the exception.
         /// </summary>
-        public ImageFormat Format { get; }
+        public ImageFormat? Format { get; }
 
         public ImagingException()
         {

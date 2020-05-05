@@ -14,7 +14,7 @@ namespace MonoGame.Effect
 
             ParameterIndex = new List<int>();
             ParameterOffset = new List<int>();
-            Parameters = new List<EffectObject.d3dx_parameter>();
+            Parameters = new List<EffectObject.D3Dx_parameter>();
 
             int minRegister = short.MaxValue;
             int maxRegister = 0;
@@ -43,9 +43,9 @@ namespace MonoGame.Effect
             Size = Math.Max(maxRegister - minRegister, 0) * registerSize;
         }
 
-        private static EffectObject.d3dx_parameter GetParameterFromSymbol(MojoShader.MOJOSHADER_symbol symbol)
+        private static EffectObject.D3Dx_parameter GetParameterFromSymbol(MojoShader.MOJOSHADER_symbol symbol)
         {
-            var param = new EffectObject.d3dx_parameter
+            var param = new EffectObject.D3Dx_parameter
             {
                 rows = symbol.info.rows,
                 columns = symbol.info.columns,
@@ -102,7 +102,7 @@ namespace MonoGame.Effect
 
             if (param.member_count > 0)
             {
-                param.member_handles = new EffectObject.d3dx_parameter[param.member_count];
+                param.member_handles = new EffectObject.D3Dx_parameter[param.member_count];
 
                 var members = MarshalHelper.UnmarshalArray<MojoShader.MOJOSHADER_symbol>(
                     symbol.info.members, (int)symbol.info.member_count);
@@ -115,10 +115,10 @@ namespace MonoGame.Effect
             }
             else
             {
-                param.member_handles = new EffectObject.d3dx_parameter[param.element_count];
+                param.member_handles = new EffectObject.D3Dx_parameter[param.element_count];
                 for (var i = 0; i < param.element_count; i++)
                 {
-                    var mparam = new EffectObject.d3dx_parameter
+                    var mparam = new EffectObject.D3Dx_parameter
                     {
                         name = string.Empty,
                         semantic = string.Empty,

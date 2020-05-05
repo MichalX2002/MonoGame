@@ -1,12 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="$(MSBuildExtensionsPath)\MonoGame\MonoGame.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\MonoGame\MonoGame.Common.props')" />
+  
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <PublishReadyToRun>false</PublishReadyToRun>
     <TieredCompilation>false</TieredCompilation>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <MonoGamePlatform>DesktopGL</MonoGamePlatform>
@@ -14,16 +16,26 @@
     <StartupObject />
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="GameHead - copy.cs" />
     <Compile Remove="GameHead - music test.cs" />
     <Compile Remove="GameHead - vector drawing.cs" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <MonoGameContentReference Include="Content\Content.DesktopGL.mgcb" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <None Include="..\ThirdParty\Dependencies\MonoGame.Framework.dll.config">
       <Platforms>WindowsGL,Linux,MacOS</Platforms>
@@ -81,7 +93,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj" />
     <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj" />
@@ -91,4 +103,7 @@
   <ItemGroup>
     <TrimmerRootAssembly Include="MonoGame.Framework.Content.ContentTypeReader" Visible="false" />
   </ItemGroup>
+
+  <Import Project="$(MSBuildExtensionsPath)\MonoGame\MonoGame.Content.Builder.targets" />
+
 </Project>

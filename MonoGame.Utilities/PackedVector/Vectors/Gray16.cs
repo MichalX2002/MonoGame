@@ -38,7 +38,7 @@ namespace MonoGame.Framework.PackedVector
         {
             var v = vector * ushort.MaxValue;
             v += Vector4.Half;
-            v.Clamp(0, ushort.MaxValue);
+            v.Clamp(Vector4.Zero, Vector4.MaxValueUInt16);
 
             L = (ushort)PackedVectorHelper.GetBT709Luminance(v.X, v.Y, v.Z);
         }

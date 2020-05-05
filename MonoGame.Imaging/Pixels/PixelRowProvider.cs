@@ -8,8 +8,8 @@ namespace MonoGame.Imaging.Pixels
     public readonly struct PixelRowProvider : IPixelRowProvider
     {
         private readonly IReadOnlyPixelRows _pixelRows;
-        private readonly IReadOnlyPixelBuffer _pixelBuffer;
-        private readonly byte[] _rowBuffer;
+        private readonly IReadOnlyPixelBuffer? _pixelBuffer;
+        private readonly byte[]? _rowBuffer;
         private readonly Image.ConvertPixelsDelegate _convertPixels;
 
         public int Components { get; }

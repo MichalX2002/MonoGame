@@ -12,7 +12,7 @@ namespace MonoGame.Effect
 
         public List<int> ParameterOffset { get; private set; }
 
-        public List<EffectObject.d3dx_parameter> Parameters { get; private set; }
+        public List<EffectObject.D3Dx_parameter> Parameters { get; private set; }
 
         public ConstantBufferData(string name)
         {
@@ -20,7 +20,7 @@ namespace MonoGame.Effect
 
             ParameterIndex = new List<int>();
             ParameterOffset = new List<int>();
-            Parameters = new List<EffectObject.d3dx_parameter>();
+            Parameters = new List<EffectObject.D3Dx_parameter>();
             Size = 0;
         }
 

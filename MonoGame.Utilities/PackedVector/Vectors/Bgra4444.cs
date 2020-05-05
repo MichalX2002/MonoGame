@@ -16,6 +16,8 @@ namespace MonoGame.Framework.PackedVector
     [StructLayout(LayoutKind.Sequential)]
     public struct Bgra4444 : IPackedVector<ushort>, IEquatable<Bgra4444>, IPixel
     {
+        private static readonly Vector4 _maxValue = new Vector4(15);
+
         VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Blue, 4),
             new VectorComponent(VectorComponentType.Green, 4),
@@ -57,7 +59,7 @@ namespace MonoGame.Framework.PackedVector
         {
             var v = vector * 15f;
             v += Vector4.Half;
-            v = Vector4.Clamp(v, 0, 15);
+            v.Clamp(Vector4.Zero, _maxValue);
 
             PackedValue = (ushort)(
                 (((int)v.W & 0x0F) << 12) |
@@ -72,7 +74,7 @@ namespace MonoGame.Framework.PackedVector
             vector.Base.Y = (PackedValue >> 4) & 0x0F;
             vector.Base.Z = PackedValue & 0x0F;
             vector.Base.W = (PackedValue >> 12) & 0x0F;
-            vector /= 15f; 
+            vector /= 15f;
         }
 
         public void FromScaledVector4(in Vector4 scaledVector)

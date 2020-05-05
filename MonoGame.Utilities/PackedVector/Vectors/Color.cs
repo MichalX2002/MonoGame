@@ -9,6 +9,7 @@ using System.Diagnostics;
 using MonoGame.Framework.PackedVector;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Numerics;
 
 namespace MonoGame.Framework
 {
@@ -262,7 +263,7 @@ namespace MonoGame.Framework
         {
             var v = scaledVector * byte.MaxValue;
             v += Vector4.Half;
-            v.Clamp(0, byte.MaxValue);
+            v.Clamp(Vector4.Zero, Vector4.MaxValueByte);
 
             R = (byte)v.X;
             G = (byte)v.Y;

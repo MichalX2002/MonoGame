@@ -9,7 +9,7 @@ namespace MonoGame.Imaging.Processing
     {
         public new IReadOnlyPixelRows<TPixel> Pixels => (IReadOnlyPixelRows<TPixel>)base.Pixels;
 
-        public ReadOnlyPixelRowsContext(ImagingConfig imagingConfig, IReadOnlyPixelRows<TPixel> pixels) :
+        public ReadOnlyPixelRowsContext(IImagingConfig imagingConfig, IReadOnlyPixelRows<TPixel> pixels) :
             base(imagingConfig, pixels)
         {
         }

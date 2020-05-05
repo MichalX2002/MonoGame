@@ -1,5 +1,5 @@
 ﻿using System;
-using MonoGame.Imaging.Coding;
+using MonoGame.Imaging.Codecs;
 
 namespace MonoGame.Imaging
 {

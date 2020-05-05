@@ -33,6 +33,7 @@ namespace MonoGame.Framework.Graphics
 
             AddVectorFormat(SurfaceFormat.Alpha8, typeof(Alpha8));
             AddVectorFormat(SurfaceFormat.Single, typeof(Gray32));
+            AddVectorFormat(SurfaceFormat.Rgb24, typeof(Rgb24));
             //AddVectorFormat(SurfaceFormat.Rgba32SRgb, typeof(Rgba32SRgb));
             AddVectorFormat(SurfaceFormat.Color, typeof(Color), typeof(Byte4), typeof(NormalizedByte4));
             AddVectorFormat(SurfaceFormat.Rg32, typeof(Rg32));

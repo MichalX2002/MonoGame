@@ -27,6 +27,71 @@ namespace MonoGame.Framework.IO
         /// </summary>
         public int Crc32Result => unchecked((int)~_register);
 
+        #region Constructors
+
+        /// <summary>
+        ///   Create an instance of the CRC32 class using the default settings: no
+        ///   bit reversal, and a polynomial of 0xEDB88320.
+        /// </summary>
+        public Crc32() : this(false)
+        {
+        }
+
+        /// <summary>
+        ///   Create an instance of the CRC32 class, specifying whether to reverse
+        ///   data bits or not.
+        /// </summary>
+        /// <param name='reverseBits'>
+        ///   specify true if the instance should reverse data bits.
+        /// </param>
+        /// <remarks>
+        ///   <para>
+        ///     In the CRC-32 used by BZip2, the bits are reversed. Therefore if you
+        ///     want a CRC32 with compatibility with BZip2, you should pass true
+        ///     here. In the CRC-32 used by GZIP and PKZIP, the bits are not
+        ///     reversed; Therefore if you want a CRC32 with compatibility with
+        ///     those, you should pass false.
+        ///   </para>
+        /// </remarks>
+        public Crc32(bool reverseBits) : this(unchecked((int)0xEDB88320), reverseBits)
+        {
+        }
+
+
+        /// <summary>
+        ///   Create an instance of the CRC32 class, specifying the polynomial and
+        ///   whether to reverse data bits or not.
+        /// </summary>
+        /// <param name='polynomial'>
+        ///   The polynomial to use for the CRC, expressed in the reversed (LSB)
+        ///   format: the highest ordered bit in the polynomial value is the
+        ///   coefficient of the 0th power; the second-highest order bit is the
+        ///   coefficient of the 1 power, and so on. Expressed this way, the
+        ///   polynomial for the CRC-32C used in IEEE 802.3, is 0xEDB88320.
+        /// </param>
+        /// <param name='reverseBits'>
+        ///   specify true if the instance should reverse data bits.
+        /// </param>
+        ///
+        /// <remarks>
+        ///   <para>
+        ///     In the CRC-32 used by BZip2, the bits are reversed. Therefore if you
+        ///     want a CRC32 with compatibility with BZip2, you should pass true
+        ///     here for the <c>reverseBits</c> parameter. In the CRC-32 used by
+        ///     GZIP and PKZIP, the bits are not reversed; Therefore if you want a
+        ///     CRC32 with compatibility with those, you should pass false for the
+        ///     <c>reverseBits</c> parameter.
+        ///   </para>
+        /// </remarks>
+        public Crc32(int polynomial, bool reverseBits)
+        {
+            _reverseBits = reverseBits;
+            _dwPolynomial = (uint)polynomial;
+            GenerateLookupTable();
+        }
+
+        #endregion
+
         /// <summary>
         /// Returns the CRC32 for the specified stream.
         /// </summary>
@@ -339,68 +404,6 @@ namespace MonoGame.Framework.IO
 
             //return (int) crc1;
             return;
-        }
-
-
-        /// <summary>
-        ///   Create an instance of the CRC32 class using the default settings: no
-        ///   bit reversal, and a polynomial of 0xEDB88320.
-        /// </summary>
-        public Crc32() : this(false)
-        {
-        }
-
-        /// <summary>
-        ///   Create an instance of the CRC32 class, specifying whether to reverse
-        ///   data bits or not.
-        /// </summary>
-        /// <param name='reverseBits'>
-        ///   specify true if the instance should reverse data bits.
-        /// </param>
-        /// <remarks>
-        ///   <para>
-        ///     In the CRC-32 used by BZip2, the bits are reversed. Therefore if you
-        ///     want a CRC32 with compatibility with BZip2, you should pass true
-        ///     here. In the CRC-32 used by GZIP and PKZIP, the bits are not
-        ///     reversed; Therefore if you want a CRC32 with compatibility with
-        ///     those, you should pass false.
-        ///   </para>
-        /// </remarks>
-        public Crc32(bool reverseBits) : this(unchecked((int)0xEDB88320), reverseBits)
-        {
-        }
-
-
-        /// <summary>
-        ///   Create an instance of the CRC32 class, specifying the polynomial and
-        ///   whether to reverse data bits or not.
-        /// </summary>
-        /// <param name='polynomial'>
-        ///   The polynomial to use for the CRC, expressed in the reversed (LSB)
-        ///   format: the highest ordered bit in the polynomial value is the
-        ///   coefficient of the 0th power; the second-highest order bit is the
-        ///   coefficient of the 1 power, and so on. Expressed this way, the
-        ///   polynomial for the CRC-32C used in IEEE 802.3, is 0xEDB88320.
-        /// </param>
-        /// <param name='reverseBits'>
-        ///   specify true if the instance should reverse data bits.
-        /// </param>
-        ///
-        /// <remarks>
-        ///   <para>
-        ///     In the CRC-32 used by BZip2, the bits are reversed. Therefore if you
-        ///     want a CRC32 with compatibility with BZip2, you should pass true
-        ///     here for the <c>reverseBits</c> parameter. In the CRC-32 used by
-        ///     GZIP and PKZIP, the bits are not reversed; Therefore if you want a
-        ///     CRC32 with compatibility with those, you should pass false for the
-        ///     <c>reverseBits</c> parameter.
-        ///   </para>
-        /// </remarks>
-        public Crc32(int polynomial, bool reverseBits)
-        {
-            _reverseBits = reverseBits;
-            _dwPolynomial = (uint)polynomial;
-            GenerateLookupTable();
         }
 
         /// <summary>

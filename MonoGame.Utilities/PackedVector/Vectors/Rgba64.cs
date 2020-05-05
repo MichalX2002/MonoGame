@@ -88,7 +88,7 @@ namespace MonoGame.Framework.PackedVector
         {
             var v = scaledVector * ushort.MaxValue;
             v += Vector4.Half;
-            v.Clamp(0, ushort.MaxValue);
+            v.Clamp(Vector4.Zero, Vector4.MaxValueUInt16);
 
             R = (ushort)v.X;
             G = (ushort)v.Y;

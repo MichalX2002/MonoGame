@@ -76,7 +76,8 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromVector4(in Vector4 vector)
         {
-            var v = Vector4.Clamp(vector, 0, byte.MaxValue);
+            var v = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxValueByte);
+
             X = (byte)v.X;
             Y = (byte)v.Y;
             Z = (byte)v.Z;

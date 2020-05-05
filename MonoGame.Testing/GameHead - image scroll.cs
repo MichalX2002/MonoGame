@@ -434,8 +434,8 @@ namespace MonoGame.TestingO
                     using (var fs = File.OpenRead(_directory + "/" + FileName))
                     {
                         var pixelType = VectorTypeInfo.Get<Color>();
-                        var image = Image.Load(fs, pixelType, DecoderOptions, null, cancellationToken);
-                        PreviewImage = (Image<Color>)image;
+                        var image = Image.LoadAsync(fs, pixelType, DecoderOptions, null, cancellationToken);
+                        PreviewImage = (Image<Color>)image.GetAwaiter().GetResult();
                     }
                 }
                 catch

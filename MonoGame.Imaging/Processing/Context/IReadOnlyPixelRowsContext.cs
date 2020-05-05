@@ -2,7 +2,7 @@
 
 namespace MonoGame.Imaging.Processing
 {
-    public interface IReadOnlyPixelRowsContext : IImagingConfigProvider, IReadOnlyPixelRows
+    public interface IReadOnlyPixelRowsContext : IImagingConfigurable, IReadOnlyPixelRows
     {
         IReadOnlyPixelRows Pixels { get; }
     }

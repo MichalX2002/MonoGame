@@ -7,7 +7,7 @@ namespace MonoGame.Imaging.Processing
 {
     public class ReadOnlyPixelRowsContext : IReadOnlyPixelRowsContext
     {
-        public ImagingConfig Config { get; }
+        public IImagingConfig Config { get; }
         public IReadOnlyPixelRows Pixels { get; }
 
         public int Length => Pixels.Length;
@@ -16,7 +16,7 @@ namespace MonoGame.Imaging.Processing
         public VectorTypeInfo PixelType => Pixels.PixelType;
         public Size Size => Pixels.Size;
 
-        public ReadOnlyPixelRowsContext(ImagingConfig imagingConfig, IReadOnlyPixelRows pixels)
+        public ReadOnlyPixelRowsContext(IImagingConfig imagingConfig, IReadOnlyPixelRows pixels)
         {
             Config = imagingConfig ?? throw new ArgumentNullException(nameof(imagingConfig));
             Pixels = pixels ?? throw new ArgumentNullException(nameof(pixels));

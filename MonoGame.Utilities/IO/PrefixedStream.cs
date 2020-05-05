@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MonoGame.Framework.IO
 {
@@ -8,21 +9,22 @@ namespace MonoGame.Framework.IO
     {
         private Memory<byte> _prefix;
         private Stream _stream;
-        private int _readAheadLength;
         private bool _leaveOpen;
 
         private long _position;
         private int _readAheadPosition;
         private byte[] _readAheadBuffer;
 
-        public override bool CanSeek => _stream.CanSeek;
+        public int ReadAheadLength { get; }
+
         public override bool CanRead => _stream.CanRead;
+        public override bool CanSeek => false;
         public override bool CanWrite => false;
         public override bool CanTimeout => _stream.CanTimeout;
         public override int ReadTimeout { get => _stream.ReadTimeout; set => _stream.ReadTimeout = value; }
         public override int WriteTimeout { get => _stream.WriteTimeout; set => _stream.WriteTimeout = value; }
 
-        public override long Length => _stream.Length + _readAheadLength;
+        public override long Length => _stream.Length;
         public override long Position
         {
             get => _position;
@@ -36,8 +38,10 @@ namespace MonoGame.Framework.IO
 
             _prefix = prefix;
             _stream = stream;
-            _readAheadLength = -1;
             _leaveOpen = leaveOpen;
+
+            ReadAheadLength = 0;
+            _readAheadPosition = 0;
         }
 
         public PrefixedStream(Stream stream, int readAhead, bool leaveOpen)
@@ -49,111 +53,133 @@ namespace MonoGame.Framework.IO
                 throw new ArgumentOutOfRangeException("Value may not be negative.", nameof(readAhead));
 
             _stream = stream;
-            _readAheadLength = readAhead;
             _leaveOpen = leaveOpen;
 
-            if (_readAheadLength > 0)
-                _readAheadBuffer = new byte[_readAheadLength];
+            ReadAheadLength = readAhead;
+            if (ReadAheadLength > 0)
+                _readAheadBuffer = new byte[ReadAheadLength];
         }
 
         public PrefixedStream(Memory<byte> prefix, Stream stream) : this(prefix, stream, leaveOpen: false)
         {
         }
 
+        public Memory<byte> GetPrefix()
+        {
+            FillReadAheadBuffer();
+            return _prefix;
+        }
+
+        public async ValueTask<Memory<byte>> GetPrefixAsync(CancellationToken cancellationToken = default)
+        {
+            await FillReadAheadBufferAsync(cancellationToken);
+            return _prefix;
+        }
+
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (_readAheadPosition < _readAheadLength && _prefix.IsEmpty)
+            return Read(buffer.AsSpan(offset, count));
+        }
+
+        public override int Read(Span<byte> buffer)
+        {
+            if (buffer.IsEmpty)
+                return 0;
+
+            if (_prefix.IsEmpty)
+                FillReadAheadBuffer();
+
+            int left = buffer.Length;
+            int totalRead = 0;
+
+            while (left > 0)
+            {
+                int read = _position < _prefix.Length
+                    ? ReadBufferedPrefix(buffer.Slice(totalRead))
+                    : _stream.Read(buffer.Slice(totalRead));
+
+                if (read == 0)
+                    break;
+
+                _position += read;
+                totalRead += read;
+                left -= read;
+            }
+            return totalRead;
+        }
+
+        public override async ValueTask<int> ReadAsync(
+            Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            if (buffer.IsEmpty)
+                return 0;
+
+            if (_prefix.IsEmpty)
+                await FillReadAheadBufferAsync();
+
+            int left = buffer.Length;
+            int totalRead = 0;
+
+            while (left > 0)
+            {
+                int read = _position < _prefix.Length
+                    ? ReadBufferedPrefix(buffer.Slice(totalRead).Span)
+                    : await _stream.ReadAsync(buffer.Slice(totalRead));
+
+                if (read == 0)
+                    break;
+
+                _position += read;
+                totalRead += read;
+                left -= read;
+            }
+            return totalRead;
+        }
+
+        private int ReadBufferedPrefix(Span<byte> buffer)
+        {
+            int position = (int)_position;
+            int prefixAvailable = _prefix.Length - position;
+            int prefixToRead = Math.Min(prefixAvailable, buffer.Length);
+            _prefix.Slice(position, prefixToRead).Span.CopyTo(buffer);
+            return prefixToRead;
+        }
+
+        private void FillReadAheadBuffer()
+        {
+            if (_readAheadPosition < ReadAheadLength && _prefix.IsEmpty)
             {
                 int read;
-                while ((read = _stream.Read(_readAheadBuffer, _readAheadPosition, _readAheadLength - _readAheadPosition)) > 0)
+                while ((read = _stream.Read(
+                    _readAheadBuffer, _readAheadPosition, ReadAheadLength - _readAheadPosition)) > 0)
+                {
                     _readAheadPosition += read;
-
-                _prefix = new Memory<byte>(_readAheadBuffer, 0, _readAheadPosition);
-            }
-
-            if (offset + count > buffer.Length)
-                count = buffer.Length - offset;
-
-            int readBytes = 0;
-
-        TryRead:
-            if (_position < _prefix.Length)
-            {
-                int prefixBytesAvailable = _prefix.Length - (int)_position;
-                int prefixBytesToRead = Math.Min(prefixBytesAvailable, count);
-                _prefix.Slice(0, prefixBytesToRead).CopyTo(buffer.AsMemory(offset));
-
-                if (count > prefixBytesAvailable)
-                {
-                    _position += prefixBytesToRead;
-                    readBytes += prefixBytesToRead;
-                    count -= prefixBytesToRead;
-                    goto TryRead;
                 }
-                return readBytes;
+                _prefix = _readAheadBuffer.AsMemory(0, _readAheadPosition);
             }
-            else
-            {
-                int read = _stream.Read(buffer, offset + readBytes, count - readBytes);
-                _position += read;
-                readBytes += read;
-            }
-            return readBytes;
         }
 
-        public override long Seek(long offset, SeekOrigin origin)
+        private async ValueTask FillReadAheadBufferAsync(CancellationToken cancellationToken = default)
         {
-            if (!CanSeek)
-                throw new InvalidOperationException("The underlying stream is not seekable.");
-
-            if (offset == 0)
-                return _position;
-
-            switch (origin)
+            if (_readAheadPosition < ReadAheadLength && _prefix.IsEmpty)
             {
-                case SeekOrigin.Current:
+                int read;
+                while ((read = await _stream.ReadAsync(
+                    _readAheadBuffer.AsMemory(_readAheadPosition, ReadAheadLength - _readAheadPosition),
+                    cancellationToken)) > 0)
                 {
-                    long tmp = _position + offset;
-                    ValidateSeekPosition(tmp);
-                    _position = tmp;
-                    break;
+                    _readAheadPosition += read;
                 }
-
-                case SeekOrigin.Begin:
-                    ValidateSeekPosition(offset);
-                    _position = offset;
-                    break;
-
-                case SeekOrigin.End:
-                {
-                    long tmp = Length + offset;
-                    ValidateSeekPosition(tmp);
-                    _position = tmp;
-                    break;
-                }
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(origin));
+                _prefix = _readAheadBuffer.AsMemory(0, _readAheadPosition);
             }
-
-            if (_position < _prefix.Length)
-                _stream.Seek(0, SeekOrigin.Begin);
-            else
-                _stream.Seek(_position - _prefix.Length, SeekOrigin.Begin);
-
-            return _position;
         }
 
-        private void ValidateSeekPosition(long value)
-        {
-            if (value < 0)
-                throw new ArgumentOutOfRangeException("Can not seek before stream beginning.");
-            if (value > Length)
-                throw new ArgumentOutOfRangeException("Can not seek past stream end.");
-        }
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
-        public override void SetLength(long value) => new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
         public override void Flush() => throw new NotSupportedException();
 
         protected override void Dispose(bool disposing)
@@ -162,7 +188,6 @@ namespace MonoGame.Framework.IO
             {
                 if (!_leaveOpen)
                     _stream?.Dispose();
-                _stream = null;
             }
             base.Dispose(disposing);
         }

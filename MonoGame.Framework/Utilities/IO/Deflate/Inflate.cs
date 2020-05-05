@@ -249,7 +249,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                                 writeAt = q;
                                 return Flush(r);
                             }
-                            ;
+                            
                             n--;
                             b |= (_codec.InputBuffer[p++] & 0xff) << k;
                             k += 8;

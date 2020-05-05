@@ -61,7 +61,7 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromVector4(in Vector4 vector)
         {
-            var v = vector.ToVector3()* byte.MaxValue;
+            var v = vector.ToVector3() * byte.MaxValue;
             v += Vector3.Half;
             v.Clamp(0, byte.MaxValue);
 

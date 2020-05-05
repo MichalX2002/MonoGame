@@ -560,9 +560,7 @@ namespace StbSharp
                         return m;
                     }
 
-                    return n;
                 default:
-                    ;
                     return 0;
             }
 

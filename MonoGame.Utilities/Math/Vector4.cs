@@ -20,6 +20,17 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Vector4 : IEquatable<Vector4>, IPixel
     {
+        /// <summary>
+        /// Returns a <see cref="Vector4"/> with all components set to <see cref="ushort.MaxValue"/>.
+        /// </summary>
+        internal static readonly Vector4 MaxValueByte = new Vector4(byte.MaxValue);
+
+
+        /// <summary>
+        /// Returns a <see cref="Vector4"/> with all components set to <see cref="ushort.MaxValue"/>.
+        /// </summary>
+        internal static readonly Vector4 MaxValueUInt16 = new Vector4(ushort.MaxValue);
+
         #region Public Constants
 
         /// <summary>
@@ -36,6 +47,11 @@ namespace MonoGame.Framework
         /// Returns a <see cref="Vector4"/> with all components set to 1.
         /// </summary>
         public static readonly Vector4 One = new Vector4(1f);
+
+        /// <summary>
+        /// Returns a <see cref="Vector4"/> with all components set to -1.
+        /// </summary>
+        public static readonly Vector4 NegativeOne = new Vector4(-1f);
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 1, 0, 0, 0.
@@ -314,7 +330,7 @@ namespace MonoGame.Framework
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
         /// <returns>The clamped value.</returns>
-        public static Vector4 Clamp(in Vector4 value, in float min, in float max)
+        public static Vector4 Clamp(in Vector4 value, float min, float max)
         {
             return FastVector4.Clamp(value, new FastVector4(min), new FastVector4(max));
         }

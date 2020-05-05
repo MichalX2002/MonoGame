@@ -2072,12 +2072,13 @@ namespace StbImageSharp
                 decode_n = (int)(1);
             else
                 decode_n = (int)(z.s.img_n);
+
             {
                 int k = 0;
                 uint i = 0;
                 uint j = 0;
                 byte* output;
-                byte** coutput = stackalloc byte*[4];
+                var coutput = new byte*[4];
                 coutput[0] = (null);
                 coutput[1] = (null);
                 coutput[2] = (null);

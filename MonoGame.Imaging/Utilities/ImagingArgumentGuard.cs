@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Imaging.Attributes.Format;
-using MonoGame.Imaging.Coding;
+using MonoGame.Imaging.Codecs;
 using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging
@@ -13,10 +13,10 @@ namespace MonoGame.Imaging
             Type elementType, int width, int byteStride, string paramName)
         {
             ArgumentGuard.AssertGreaterThanZero(width, nameof(width));
-            
+
             if (byteStride < width * Marshal.SizeOf(elementType))
                 throw new ArgumentException(
-                    "The stride must be equal to or greater than the row size in bytes (excluding padding).", 
+                    "The stride must be equal to or greater than the row size in bytes (excluding padding).",
                     paramName);
         }
 
@@ -63,18 +63,16 @@ namespace MonoGame.Imaging
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
 
-            if (config.ShouldThrowOnException<AnimationNotSupportedException>())
-                if (!format.HasAttribute<IAnimatedFormatAttribute>())
-                    throw new AnimationNotSupportedException(format);
+            if (!format.HasAttribute<IAnimatedFormatAttribute>())
+                throw new AnimationNotSupportedException(format);
         }
 
         public static void AssertAnimationSupport(IImageCodec codec, ImagingConfig config)
         {
             AssertAnimationSupport(codec.Format, config);
 
-            if (config.ShouldThrowOnException<AnimationNotImplementedException>())
-                if (!codec.HasAttribute<IAnimatedFormatAttribute>())
-                    throw new AnimationNotImplementedException(codec);
+            if (!codec.HasAttribute<IAnimatedFormatAttribute>())
+                throw new AnimationNotImplementedException(codec);
         }
     }
 }
