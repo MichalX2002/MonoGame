@@ -17,6 +17,22 @@
   </PropertyGroup>
 
   <!--
+    Target flow diagram
+    * - only run if necessary
+
+                                      InstallMGCB*
+                                           ^
+                                           |
+         GetInstalledMGCB*     ->     UpdateMGCB*
+                                                        \
+                                                          -> RunContentBuilder -> IncludeContent
+                                                        /
+      CollectContentReferences -> PrepareContentBuilder
+  -->
+
+  <!--
+    Calls 'dotnet tool' commands to parse information about any locally installed MGCB tools.
+
     Outputs:
       - MGCBCommand: the command to run the MGCB tool without any arguments
   -->
