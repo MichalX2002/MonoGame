@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using MonoGame.Framework;
+using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Codecs.Detection;
 using static StbSharp.ImageRead;
@@ -16,6 +17,7 @@ namespace MonoGame.Imaging.Codecs.Decoding
         private OutputPixelDelegate _onOutputPixel;
 
         private Image.ConvertPixelsDelegate? _convertPixelSpan;
+        private byte[] Buffer { get; }
 
         public VectorTypeInfo? SourcePixelType { get; private set; }
         public BinReader Reader { get; }
@@ -35,7 +37,8 @@ namespace MonoGame.Imaging.Codecs.Decoding
             _onOutputPixelLine = OnOutputPixelLine;
             _onOutputPixel = OnOutputPixel;
 
-            Reader = new BinReader(Stream, leaveOpen: true, cancellationToken);
+            Buffer = RecyclableMemoryManager.Default.GetBlock();
+            Reader = new BinReader(Stream, Buffer, leaveOpen: true, cancellationToken);
         }
 
         public ReadState CreateReadState()
@@ -231,6 +234,8 @@ namespace MonoGame.Imaging.Codecs.Decoding
 
         public override async ValueTask DisposeAsync()
         {
+            RecyclableMemoryManager.Default.ReturnBlock(Buffer);
+
             await Reader.DisposeAsync();
             await base.DisposeAsync();
         }

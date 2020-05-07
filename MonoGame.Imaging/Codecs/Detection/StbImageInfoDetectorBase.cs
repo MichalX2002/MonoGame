@@ -45,8 +45,17 @@ namespace MonoGame.Imaging.Codecs.Detection
         public async Task<ImageInfo> Identify(
             IImagingConfig config, Stream stream, CancellationToken cancellationToken = default)
         {
-            var reader = new ImageRead.BinReader(stream, leaveOpen: true, cancellationToken);
-            return await Identify(config, reader);
+            // TODO: rent buffer
+            var buffer = new byte[1024 * 8];
+            var reader = new ImageRead.BinReader(stream, buffer, leaveOpen: true, cancellationToken);
+            try
+            {
+                return await Identify(config, reader);
+            }
+            finally
+            {
+                // return buffer
+            }
         }
 
         public static VectorTypeInfo GetVectorType(int components, int depth)

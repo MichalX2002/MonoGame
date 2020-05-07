@@ -218,23 +218,30 @@ namespace MonoGame.Imaging.Tests
                 Directory.CreateDirectory("savetest");
 
                 var ms = new MemoryStream();
-                for (int i = 0; i < 1; i++)
+                for (int i = 0; i < 1000; i++)
                 {
-                    ms.Position = 0;
-                    await imagee.SaveAsync(ms, ImageFormat.Jpeg);
+                    //ms.Position = 0;
+                    using (var fs = new FileStream(
+                        "savetest/test.jpeg", FileMode.Create, FileAccess.Write, FileShare.None, 4096, 
+                        FileOptions.Asynchronous | ((i != 999) ? FileOptions.DeleteOnClose : 0)))
+                    {
+                        await imagee.SaveAsync(fs, ImageFormat.Jpeg);
+                    }
                 }
 
-                using (var fs = new FileStream("savetest/test.jpeg", FileMode.Create))
-                {
-                    ms.Position = 0;
-                    ms.CopyTo(fs);
-                }
+                //using (var fs = new FileStream("savetest/test.jpeg", FileMode.Create))
+                //{
+                //    ms.Position = 0;
+                //    ms.CopyTo(fs);
+                //}
 
                 await imagee.SaveAsync("savetest/test.png");
                 await imagee.SaveAsync("savetest/test.tga");
                 await imagee.SaveAsync("savetest/test_norle.tga", null, TgaEncoderOptions.NoRLE);
                 await imagee.SaveAsync("savetest/test.bmp");
             }
+
+            return;
 
             await TestPng();
             return;

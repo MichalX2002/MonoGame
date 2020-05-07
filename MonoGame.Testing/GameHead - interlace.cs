@@ -62,7 +62,7 @@ namespace MonoGame.Testing
 
                     var http = new HttpClient();
 
-                    for (int i = 0; i < 1; i++)
+                    for (int i = 0; i < 20; i++)
                     {
                         using (var fs = new FileStream(
                             @"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg", //"../../very big interlace.png",

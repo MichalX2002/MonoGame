@@ -19,15 +19,15 @@ namespace MonoGame.Imaging.Codecs.Encoding
 
         public ImageEncoderState CreateState(
             IImagingConfig imagingConfig,
-            Stream stream, 
-            bool leaveOpen, 
+            Stream stream,
+            bool leaveOpen,
             CancellationToken cancellationToken = default)
         {
             return new StbImageEncoderState(
                 this, imagingConfig, stream, leaveOpen, cancellationToken);
         }
 
-        public Task Encode(
+        public async Task Encode(
             ImageEncoderState encoderState,
             IReadOnlyPixelRows image)
         {
@@ -39,17 +39,10 @@ namespace MonoGame.Imaging.Codecs.Encoding
             int components = 4; // TODO: change this so it's dynamic/controlled
             var provider = new PixelRowProvider(image, components, 8);
 
-            var writeState = new ImageWrite.WriteState(
-                state.Stream,
-                state.CancellationToken,
-                getPixelByteRow: provider.GetRow,
-                getPixelFloatRow: provider.GetRow,
-                state.ProgressCallback,
-                image.Size.Width,
-                image.Size.Height,
-                components);
-
-            return Write(state, writeState);
+            await using (var writeState = state.CreateWriteState(provider))
+            {
+                await Write(state, writeState);
+            }
         }
     }
 }

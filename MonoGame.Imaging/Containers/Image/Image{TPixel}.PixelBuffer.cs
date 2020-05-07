@@ -18,8 +18,9 @@ namespace MonoGame.Imaging
 
         public override Span<byte> GetPixelByteRowSpan(int row)
         {
-            if (row < 0 || row >= Height)
+            if ((uint)row >= Height)
                 throw new ArgumentOutOfRangeException(nameof(row), "The requested row is out of bounds.");
+
             return Buffer.ByteSpan.Slice(row * Buffer.ByteStride, Width * PixelType.ElementSize);
         }
 
@@ -27,6 +28,7 @@ namespace MonoGame.Imaging
         {
             if (!IsPixelContiguous)
                 throw new InvalidOperationException("The underlying memory is not pixel contiguous.");
+
             return Buffer.PixelSpan;
         }
 
