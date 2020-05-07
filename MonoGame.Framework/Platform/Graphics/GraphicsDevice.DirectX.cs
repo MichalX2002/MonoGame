@@ -1257,7 +1257,7 @@ namespace MonoGame.Framework.Graphics
                 {
                     _d3dContext.InputAssembler.SetIndexBuffer(
                         _indexBuffer._buffer,
-                        _indexBuffer.ElementSize == IndexElementSize.Short16 ?
+                        _indexBuffer.ElementSize == IndexElementSize.Short ?
                             Format.R16_UInt : Format.R32_UInt,
                         0);
                 }
@@ -1357,7 +1357,7 @@ namespace MonoGame.Framework.Graphics
         {
             DynamicIndexBuffer buffer;
             int requiredIndexCount = Math.Max(indexData.Length, 6000);
-            if (indexElementSize == IndexElementSize.Short16)
+            if (indexElementSize == IndexElementSize.Short)
             {
                 if (_userIndexBuffer16 == null || _userIndexBuffer16.Capacity < requiredIndexCount)
                 {

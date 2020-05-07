@@ -3,9 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using MonoGame.Framework;
 using SharpDX;
 using SharpDX.Multimedia;
 using SharpDX.XAudio2;
@@ -14,8 +14,7 @@ namespace MonoGame.Framework.Audio
 {
     public sealed partial class DynamicSoundEffectInstance : SoundEffectInstance
     {
-        private static ByteBufferPool _bufferPool = new ByteBufferPool();
-
+        private ArrayPool<byte> _pool;
         private Queue<DataItem> _queuedItems;
 
         private void PlatformCreate()
@@ -23,6 +22,8 @@ namespace MonoGame.Framework.Audio
             _format = new WaveFormat(_sampleRate, (int)_channels);
             _voice = new SourceVoice(SoundEffect.Device, _format, true);
             _voice.BufferEnd += OnBufferEnd;
+
+            _pool = ArrayPool<byte>.Shared;
             _queuedItems = new Queue<DataItem>();
         }
 
@@ -67,7 +68,7 @@ namespace MonoGame.Framework.Audio
 
             // The XAudio voice is always 16-bit, but we support 16-bit and 32-bit data.
             int bufferByteCount = sampleCount * sizeof(short);
-            byte[] pooledBuffer = _bufferPool.Get(bufferByteCount);
+            byte[] pooledBuffer = _pool.Rent(bufferByteCount);
 
             // we need to copy so datastream does not pin the buffer that the user might modify later
             if (depth == AudioDepth.Float)
@@ -122,7 +123,7 @@ namespace MonoGame.Framework.Audio
         {
             var item = _queuedItems.Dequeue();
             item.Audio.Stream.Dispose();
-            _bufferPool.Return(item.Buffer);
+            _pool.Return(item.Buffer);
         }
 
         private readonly struct DataItem

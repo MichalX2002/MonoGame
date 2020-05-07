@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging;
@@ -447,10 +448,10 @@ namespace MonoGame.Framework.Graphics
 
         #endregion
 
-        #region Save
+        #region SaveAsync
 
         /// <summary>
-        /// Saves the texture to a stream with the specified format and configurations.
+        /// Saves the texture to a stream with the specified format and configuration.
         /// </summary>
         /// <param name="imagingConfig">The imaging configuration.</param>
         /// <param name="stream">Destination for the texture.</param>
@@ -460,7 +461,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="level">The texture level to save.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
         [CLSCompliant(false)]
-        public void Save(
+        public async Task SaveAsync(
             ImagingConfig imagingConfig,
             Stream stream,
             ImageFormat format,
@@ -474,11 +475,11 @@ namespace MonoGame.Framework.Graphics
             if (format == null) throw new ArgumentNullException(nameof(format));
 
             using (var image = ToImage(rectangle, level, arraySlice))
-                image.SaveAsync(imagingConfig, stream, format, encoderOptions);
+                await image.SaveAsync(imagingConfig, stream, format, encoderOptions);
         }
 
         /// <summary>
-        /// Saves the texture to a stream with the specified format and configurations.
+        /// Saves the texture to a stream with the specified format and configuration.
         /// </summary>
         /// <param name="stream">Destination for the texture.</param>
         /// <param name="format">The format used to encode the texture.</param>
@@ -487,7 +488,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="level">The texture level to save.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
         [CLSCompliant(false)]
-        public void Save(
+        public Task SaveAsync(
             Stream stream,
             ImageFormat format,
             EncoderOptions encoderOptions = null,
@@ -495,7 +496,7 @@ namespace MonoGame.Framework.Graphics
             int level = 0,
             int arraySlice = 0)
         {
-            Save(ImagingConfig.Default, stream, format, encoderOptions, rectangle, level, arraySlice);
+            return SaveAsync(ImagingConfig.Default, stream, format, encoderOptions, rectangle, level, arraySlice);
         }
 
         /// <summary>
@@ -514,7 +515,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="level">The texture level to save.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
         [CLSCompliant(false)]
-        public void Save(
+        public async Task SaveAsync(
             ImagingConfig imagingConfig,
             string filePath,
             ImageFormat format = null,
@@ -529,7 +530,7 @@ namespace MonoGame.Framework.Graphics
                 format = ImageFormat.GetByPath(filePath).FirstOrDefault();
 
             using (var fs = SaveExtensions.OpenWriteStream(filePath))
-                Save(imagingConfig, fs, format, encoderOptions, rectangle, level, arraySlice);
+                await SaveAsync(imagingConfig, fs, format, encoderOptions, rectangle, level, arraySlice);
         }
 
         /// <summary>
@@ -547,7 +548,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="level">The texture level to save.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
         [CLSCompliant(false)]
-        public void Save(
+        public Task SaveAsync(
             string filePath,
             ImageFormat format = null,
             EncoderOptions encoderOptions = null,
@@ -555,7 +556,8 @@ namespace MonoGame.Framework.Graphics
             int level = 0,
             int arraySlice = 0)
         {
-            Save(ImagingConfig.Default, filePath, format, encoderOptions, rectangle, level, arraySlice);
+            return SaveAsync(
+                ImagingConfig.Default, filePath, format, encoderOptions, rectangle, level, arraySlice);
         }
 
         #endregion

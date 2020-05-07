@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 using SharpDX;
 using SharpDX.Direct3D11;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
-using MonoGame.Framework.PackedVector;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -18,21 +17,26 @@ namespace MonoGame.Framework.Graphics
         private bool mipMap;
 
         private void PlatformConstruct(
-            GraphicsDevice graphicsDevice, int width, int height, int depth, 
-            bool mipMap, SurfaceFormat format, bool renderTarget)
+            GraphicsDevice graphicsDevice,
+            int width,
+            int height,
+            int depth,
+            bool mipMap,
+            SurfaceFormat format,
+            bool renderTarget)
         {
             this.renderTarget = renderTarget;
             this.mipMap = mipMap;
 
             if (mipMap)
-                this.LevelCount = CalculateMipLevels(width, height, depth);
+                LevelCount = CalculateMipLevels(width, height, depth);
 
             // Create texture
             GetTexture();
         }
 
 
-        internal override Resource CreateTexture()
+        internal override void CreateTexture()
         {
             var description = new Texture3DDescription
             {
@@ -59,7 +63,7 @@ namespace MonoGame.Framework.Graphics
                 }
             }
 
-            return new SharpDX.Direct3D11.Texture3D(GraphicsDevice._d3dDevice, description);
+            _texture = new SharpDX.Direct3D11.Texture3D(GraphicsDevice._d3dDevice, description);
         }
 
         private unsafe void PlatformSetData<T>(
@@ -67,18 +71,19 @@ namespace MonoGame.Framework.Graphics
             int width, int height, int depth, ReadOnlySpan<T> data)
             where T : unmanaged
         {
-            fixed (T* dataPtr = data)
+            int rowPitch = GetPitch(width);
+            int slicePitch = rowPitch * height; // For 3D texture: Size of 2D image.
+            int subresourceIndex = level;
+            var region = new ResourceRegion(left, top, front, right, bottom, back);
+
+            var d3dContext = GraphicsDevice._d3dContext;
+            lock (d3dContext)
             {
-                int rowPitch = GetPitch(width);
-                int slicePitch = rowPitch * height; // For 3D texture: Size of 2D image.
-                var box = new DataBox((IntPtr)dataPtr, rowPitch, slicePitch);
-
-                int subresourceIndex = level;
-                var region = new ResourceRegion(left, top, front, right, bottom, back);
-
-                var d3dContext = GraphicsDevice._d3dContext;
-                lock (d3dContext)
+                fixed (T* dataPtr = data)
+                {
+                    var box = new DataBox((IntPtr)dataPtr, rowPitch, slicePitch);
                     d3dContext.UpdateSubresource(box, GetTexture(), subresourceIndex, region);
+                }
             }
         }
 
@@ -90,7 +95,7 @@ namespace MonoGame.Framework.Graphics
             // 
             // TODO: Like in Texture2D, we should probably be pooling these staging resources
             // and not creating a new one each time.
-            
+
             var desc = new Texture3DDescription
             {
                 Width = Width,
@@ -104,12 +109,12 @@ namespace MonoGame.Framework.Graphics
                 OptionFlags = ResourceOptionFlags.None,
             };
 
+            int columns = right - left;
+            int rows = bottom - top;
+            var region = new ResourceRegion(left, top, front, right, bottom, back);
+
             using (var stagingTex = new SharpDX.Direct3D11.Texture3D(GraphicsDevice._d3dDevice, desc))
             {
-                int columns = right - left;
-                int rows = bottom - top;
-                var region = new ResourceRegion(left, top, front, right, bottom, back);
-
                 var d3dContext = GraphicsDevice._d3dContext;
                 lock (d3dContext)
                 {
@@ -124,4 +129,3 @@ namespace MonoGame.Framework.Graphics
         }
     }
 }
-

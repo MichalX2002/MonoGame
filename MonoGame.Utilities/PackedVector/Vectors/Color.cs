@@ -397,27 +397,6 @@ namespace MonoGame.Framework
             PackedVectorHelper.UpScale8To16Bit(A));
 
         /// <summary>
-        /// Deconstruction method for <see cref="Color"/>.
-        /// </summary>
-        public readonly void Deconstruct(out float r, out float g, out float b)
-        {
-            r = R;
-            g = G;
-            b = B;
-        }
-
-        /// <summary>
-        /// Deconstruction method for <see cref="Color"/> with alpha.
-        /// </summary>
-        public readonly void Deconstruct(out float r, out float g, out float b, out float a)
-        {
-            r = R;
-            g = G;
-            b = B;
-            a = A;
-        }
-
-        /// <summary>
         /// Translate a non-premultipled alpha <see cref="Vector4"/> color to a
         /// <see cref="Color"/> that contains premultiplied alpha.
         /// </summary>
@@ -482,6 +461,66 @@ namespace MonoGame.Framework
             uint hexOrder = (uint)(A << 0 | B << 8 | G << 16 | R << 24);
             return hexOrder.ToString("x8");
         }
+
+        #region Deconstruct
+
+        /// <summary>
+        /// Deconstruction method for <see cref="Color"/>.
+        /// </summary>
+        /// <param name="r">Red component value from 0 to 255.</param>
+        /// <param name="g">Green component value from 0 to 255.</param>
+        /// <param name="b">Blue component value from 0 to 255.</param>
+        public void Deconstruct(out byte r, out byte g, out byte b)
+        {
+            r = R;
+            g = G;
+            b = B;
+        }
+
+        /// <summary>
+        /// Deconstruction method for <see cref="Color"/>.
+        /// </summary>
+        /// <param name="r">Red component value from 0.0f to 1.0f.</param>
+        /// <param name="g">Green component value from 0.0f to 1.0f.</param>
+        /// <param name="b">Blue component value from 0.0f to 1.0f.</param>
+        public void Deconstruct(out float r, out float g, out float b)
+        {
+            r = R / 255f;
+            g = G / 255f;
+            b = B / 255f;
+        }
+
+        /// <summary>
+        /// Deconstruction method for <see cref="Color"/> with Alpha.
+        /// </summary>
+        /// <param name="r">Red component value from 0 to 255.</param>
+        /// <param name="g">Green component value from 0 to 255.</param>
+        /// <param name="b">Blue component value from 0 to 255.</param>
+        /// <param name="a">Alpha component value from 0 to 255.</param>
+        public void Deconstruct(out byte r, out byte g, out byte b, out byte a)
+        {
+            r = R;
+            g = G;
+            b = B;
+            a = A;
+        }
+
+        /// <summary>
+        /// Deconstruction method for <see cref="Color"/> with Alpha.
+        /// </summary>
+        /// <param name="r">Red component value from 0.0f to 1.0f.</param>
+        /// <param name="g">Green component value from 0.0f to 1.0f.</param>
+        /// <param name="b">Blue component value from 0.0f to 1.0f.</param>
+        /// <param name="a">Alpha component value from 0.0f to 1.0f.</param>
+        public void Deconstruct(out float r, out float g, out float b, out float a)
+        {
+            r = R / 255f;
+            g = G / 255f;
+            b = B / 255f;
+            a = A / 255f;
+        }
+
+        #endregion
 
         #region Equals
 

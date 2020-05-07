@@ -3,10 +3,10 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.IO;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
-using Resource = SharpDX.Direct3D11.Resource;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -14,7 +14,9 @@ namespace MonoGame.Framework.Graphics
     {
         protected bool Shared { get; private set; }
         protected bool Mipmap { get; private set; }
-        internal SampleDescription SampleDescription { get; private set; }
+
+        [CLSCompliant(false)]
+        protected SampleDescription SampleDescription { get; private set; }
 
         private SharpDX.Direct3D11.Texture2D _cachedStagingTexture;
 
@@ -23,6 +25,7 @@ namespace MonoGame.Framework.Graphics
         {
             Shared = shared;
             Mipmap = mipmap;
+            SampleDescription = new SampleDescription(1, 0);
         }
 
         private unsafe void PlatformSetData<T>(
@@ -76,41 +79,39 @@ namespace MonoGame.Framework.Graphics
             lock (d3dContext)
             {
                 fixed (T* ptr = data)
-                    d3dContext.UpdateSubresource(GetTexture(), subresourceIndex, region, (IntPtr)ptr, pitch, 0);
+                {
+                    d3dContext.UpdateSubresource(
+                        GetTexture(), subresourceIndex, region, (IntPtr)ptr, pitch, 0);
+                }
             }
         }
 
-        private unsafe void PlatformGetData<T>(
+        private void PlatformGetData<T>(
             int level, int arraySlice, Rectangle rect, Span<T> destination)
             where T : unmanaged
         {
-            // Create a tmp staging resource for copying the data.
-            
+            // Create a temp staging resource for copying the data.
+            // 
             // TODO: We should probably be pooling these staging resources
             // and not creating a new one each time.
-            
-            int min = Format.IsCompressedFormat() ? 4 : 1;
-            int levelWidth = Math.Max(Width >> level, min);
-            int levelHeight = Math.Max(Height >> level, min);
+            //
+            var min = Format.IsCompressedFormat() ? 4 : 1;
+            var levelWidth = Math.Max(Width >> level, min);
+            var levelHeight = Math.Max(Height >> level, min);
 
             if (_cachedStagingTexture == null)
             {
-                var desc = new Texture2DDescription
-                {
-                    Width = levelWidth,
-                    Height = levelHeight,
-                    MipLevels = 1,
-                    ArraySize = 1,
-                    Format = SharpDXHelper.ToFormat(Format),
-                    BindFlags = BindFlags.None,
-                    CpuAccessFlags = CpuAccessFlags.Read,
-                    SampleDescription = CreateSampleDescription(),
-                    Usage = ResourceUsage.Staging,
-                    OptionFlags = ResourceOptionFlags.None
-                };
-
-                // Save sampling description.
-                SampleDescription = desc.SampleDescription;
+                var desc = new Texture2DDescription();
+                desc.Width = levelWidth;
+                desc.Height = levelHeight;
+                desc.MipLevels = 1;
+                desc.ArraySize = 1;
+                desc.Format = SharpDXHelper.ToFormat(Format);
+                desc.BindFlags = BindFlags.None;
+                desc.CpuAccessFlags = CpuAccessFlags.Read;
+                desc.SampleDescription = SampleDescription;
+                desc.Usage = ResourceUsage.Staging;
+                desc.OptionFlags = ResourceOptionFlags.None;
 
                 _cachedStagingTexture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc);
             }
@@ -118,15 +119,14 @@ namespace MonoGame.Framework.Graphics
             var d3dContext = GraphicsDevice._d3dContext;
             lock (d3dContext)
             {
-                int subresourceIndex = CalculateSubresourceIndex(arraySlice, level);
+                var subresourceIndex = CalculateSubresourceIndex(arraySlice, level);
 
                 // Copy the data from the GPU to the staging texture.
-                int columns = rect.Width;
-                int rows = rect.Height;
+                var columns = rect.Width;
+                var rows = rect.Height;
                 var region = new ResourceRegion(rect.Left, rect.Top, 0, rect.Right, rect.Bottom, 1);
                 d3dContext.CopySubresourceRegion(GetTexture(), subresourceIndex, region, _cachedStagingTexture, 0);
 
-                // Copy the data to the array.
                 try
                 {
                     if (Format.IsCompressedFormat())
@@ -147,13 +147,13 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        /// <summary>
-        /// Releases resources held by the <see cref="Texture2D"/>.
-        /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
+            {
                 SharpDX.Utilities.Dispose(ref _cachedStagingTexture);
+            }
+
             base.Dispose(disposing);
         }
 
@@ -162,7 +162,8 @@ namespace MonoGame.Framework.Graphics
             return arraySlice * LevelCount + level;
         }
 
-        internal virtual Texture2DDescription GetTexture2DDescription()
+        [CLSCompliant(false)]
+        protected internal virtual Texture2DDescription GetTexture2DDescription()
         {
             var desc = new Texture2DDescription
             {
@@ -173,7 +174,7 @@ namespace MonoGame.Framework.Graphics
                 Format = SharpDXHelper.ToFormat(Format),
                 BindFlags = BindFlags.ShaderResource,
                 CpuAccessFlags = CpuAccessFlags.None,
-                SampleDescription = CreateSampleDescription(),
+                SampleDescription = SampleDescription,
                 Usage = ResourceUsage.Default,
                 OptionFlags = ResourceOptionFlags.None
             };
@@ -184,21 +185,16 @@ namespace MonoGame.Framework.Graphics
             return desc;
         }
 
-        internal override Resource CreateTexture()
+        internal override void CreateTexture()
         {
             // TODO: Move this to SetData() if we want to make Immutable textures!
             var desc = GetTexture2DDescription();
-
-            // Save sampling description.
-            SampleDescription = desc.SampleDescription;
-
-            return new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc);
+            _texture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc);
         }
 
-        internal virtual SampleDescription CreateSampleDescription()
+        private void PlatformReload(Stream stream)
         {
-            return new SampleDescription(1, 0);
+            throw new NotImplementedException();
         }
     }
 }
-
