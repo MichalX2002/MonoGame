@@ -37,7 +37,7 @@ namespace MonoGame.Imaging.Codecs.Detection
 
             var vectorType = GetVectorType(comp, bitsPerComp);
             var compInfo = vectorType?.ComponentInfo ??
-                new VectorComponentInfo(new VectorComponent(VectorComponentType.Raw, comp * bitsPerComp));
+                new VectorComponentInfo(new VectorComponent(VectorComponentChannel.Raw, comp * bitsPerComp));
 
             return new ImageInfo(readState.Width, readState.Height, compInfo, Format);
         }

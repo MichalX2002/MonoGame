@@ -19,7 +19,7 @@ namespace MonoGame.Framework
 #endif
     [DataContract]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    public struct Vector3 : IEquatable<Vector3>, IPixel
+    public struct Vector3 : IPixel<Vector3>, IEquatable<Vector3>
     {
         #region Public Constants
 
@@ -95,10 +95,10 @@ namespace MonoGame.Framework
 
         #endregion
 
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(float) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(float) * 8),
-            new VectorComponent(VectorComponentType.Blue, sizeof(float) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Blue));
 
         internal string DebuggerDisplay => string.Concat(
             X.ToString(), "  ",
@@ -186,12 +186,12 @@ namespace MonoGame.Framework
             vector.Base = new FastVector4(Base, 1);
         }
 
-        void IPackedVector.FromScaledVector4(in Vector4 scaledVector)
+        void IVector.FromScaledVector4(in Vector4 scaledVector)
         {
             FromVector4(scaledVector);
         }
 
-        readonly void IPackedVector.ToScaledVector4(out Vector4 scaledVector)
+        readonly void IVector.ToScaledVector4(out Vector4 scaledVector)
         {
             ToVector4(out scaledVector);
         }
@@ -199,12 +199,6 @@ namespace MonoGame.Framework
         #endregion
 
         #region IPixel
-
-        public void FromColor(Color source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromVector4(vector);
-        }
 
         void IPixel.FromGray8(Gray8 source)
         {
@@ -240,12 +234,6 @@ namespace MonoGame.Framework
         {
             source.ToScaledVector4(out var vector);
             FromVector4(vector);
-        }
-
-        public readonly void ToColor(ref Color destination)
-        {
-            ToVector4(out var vector);
-            destination.FromVector4(vector);
         }
 
         #endregion

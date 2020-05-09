@@ -15,12 +15,12 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Bgr565 : IPackedVector<ushort>, IEquatable<Bgr565>, IPixel
+    public struct Bgr565 : IPackedPixel<Bgr565, ushort>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Blue, 5),
-            new VectorComponent(VectorComponentType.Green, 6),
-            new VectorComponent(VectorComponentType.Red, 5));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Blue, 5),
+            new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Green, 6),
+            new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Red, 5));
 
         #region Constructors
 
@@ -29,13 +29,19 @@ namespace MonoGame.Framework.PackedVector
         /// </summary>
         /// <param name="alpha">The alpha component.</param>
         [CLSCompliant(false)]
-        public Bgr565(ushort packed) => PackedValue = packed;
+        public Bgr565(ushort packed)
+        {
+            PackedValue = packed;
+        }
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector3"/> containing the components.</param>
-        public Bgr565(Vector3 vector) => PackedValue = Pack(vector);
+        public Bgr565(Vector3 vector)
+        {
+            PackedValue = Pack(vector);
+        }
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
@@ -88,65 +94,27 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        #region IPixel
-
-        public void FromColor(Color source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGray8(Gray8 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGray16(Gray16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGrayAlpha16(GrayAlpha16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb24(Rgb24 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb48(Rgb48 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgba64(Rgba64 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public readonly void ToColor(ref Color destination)
-        {
-            ToScaledVector4(out var vector);
-            destination.FromScaledVector4(vector);
-        }
-
-        #endregion
-
         #region Equals
 
-        public static bool operator ==(Bgr565 a, Bgr565 b) => a.PackedValue == b.PackedValue;
-        public static bool operator !=(Bgr565 a, Bgr565 b) => a.PackedValue != b.PackedValue;
+        public static bool operator ==(Bgr565 a, Bgr565 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public bool Equals(Bgr565 other) => this == other;
-        public override bool Equals(object obj) => obj is Bgr565 other && Equals(other);
+        public static bool operator !=(Bgr565 a, Bgr565 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
+
+        public bool Equals(Bgr565 other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Bgr565 other && Equals(other);
+        }
 
         #endregion
 

@@ -37,9 +37,11 @@ namespace MonoGame.Framework.Memory
     /// There are two pools managed in here. The small pool contains same-sized
     /// buffers that are handed to streams as they write more data.
     /// 
-    /// For scenarios that need to call GetBuffer(), the large pool contains buffers of various sizes, all
-    /// multiples/exponentials of LargeBufferMultiple (1 MB by default). They are split by size to avoid overly-wasteful buffer
-    /// usage. There should be far fewer 8 MB buffers than 1 MB buffers, for example.
+    /// For scenarios that need to call GetBuffer(), 
+    /// the large pool contains buffers of various sizes,
+    /// all multiples/exponentials of LargeBufferMultiple (1 MB by default). 
+    /// They are split by size to avoid overly-wasteful buffer usage. 
+    /// There should be far fewer 8 MB buffers than 1 MB buffers, for example.
     /// </remarks>
     public partial class RecyclableMemoryManager
     {
@@ -172,12 +174,30 @@ namespace MonoGame.Framework.Memory
         /// <summary>
         /// Number of bytes in large pool not currently in use
         /// </summary>
-        public long LargePoolFreeSize => _largeBufferFreeSize.Sum();
+        public long LargePoolFreeSize
+        {
+            get
+            {
+                long sum = 0;
+                foreach (var item in _largeBufferFreeSize)
+                    sum += item;
+                return sum;
+            }
+        }
 
         /// <summary>
         /// Number of bytes currently in use by streams from the large pool
         /// </summary>
-        public long LargePoolInUseSize => _largeBufferInUseSize.Sum();
+        public long LargePoolInUseSize
+        {
+            get
+            {
+                long sum = 0;
+                foreach (var item in _largeBufferInUseSize)
+                    sum += item;
+                return sum;
+            }
+        }
 
         /// <summary>
         /// How many blocks are in the small pool
@@ -551,9 +571,12 @@ namespace MonoGame.Framework.Memory
                 _smallPool.Push(block);
             }
             else
+            {
                 ReportBlockDiscarded(tag);
+            }
 
-            ReportUsageReport(_smallPoolInUseSize, _smallPoolFreeSize, LargePoolInUseSize, LargePoolFreeSize);
+            if (UsageReport != null)
+                ReportUsageReport(_smallPoolInUseSize, _smallPoolFreeSize, LargePoolInUseSize, LargePoolFreeSize);
         }
 
         /// <summary>
@@ -622,18 +645,23 @@ namespace MonoGame.Framework.Memory
         internal void ReportStreamFinalized() => StreamFinalized?.Invoke();
 
         internal void ReportBlockDiscarded(string tag) => BlockDiscarded?.Invoke(tag);
-      
+
         // also grab the stack, we want to know who requires such large buffers
         internal void ReportLargeBufferCreated(string tag) => LargeBufferCreated?.Invoke(tag, GetCallStack());
         internal void ReportStreamToArray(string tag) => StreamConvertedToArray?.Invoke(tag, GetCallStack());
 
         internal void ReportStreamLength(long bytes) => StreamLength?.Invoke(bytes);
-        internal void ReportLargeBufferDiscarded(string tag, MemoryDiscardReason reason) => 
+
+        internal void ReportLargeBufferDiscarded(string tag, MemoryDiscardReason reason)
+        {
             LargeBufferDiscarded?.Invoke(tag, reason);
+        }
 
         internal void ReportUsageReport(
-            long smallPoolInUseBytes, long smallPoolFreeBytes, long largePoolInUseBytes, long largePoolFreeBytes) =>
+            long smallPoolInUseBytes, long smallPoolFreeBytes, long largePoolInUseBytes, long largePoolFreeBytes)
+        {
             UsageReport?.Invoke(smallPoolInUseBytes, smallPoolFreeBytes, largePoolInUseBytes, largePoolFreeBytes);
+        }
 
         #endregion
 
@@ -668,7 +696,7 @@ namespace MonoGame.Framework.Memory
         /// </summary>
         /// <param name="requiredSize">The minimum desired capacity for the stream.</param>
         /// <returns>The <see cref="RecyclableMemoryStream"/>.</returns>
-        public RecyclableMemoryStream GetMemoryStream(long requiredSize) => 
+        public RecyclableMemoryStream GetMemoryStream(long requiredSize) =>
             new RecyclableMemoryStream(this, null, requiredSize);
 
         /// <summary>
@@ -678,7 +706,7 @@ namespace MonoGame.Framework.Memory
         /// <param name="tag">A tag which can be used to track the source of the stream.</param>
         /// <param name="requiredSize">The minimum desired capacity for the stream.</param>
         /// <returns>The <see cref="RecyclableMemoryStream"/>.</returns>
-        public RecyclableMemoryStream GetMemoryStream(string tag, long requiredSize) => 
+        public RecyclableMemoryStream GetMemoryStream(string tag, long requiredSize) =>
             new RecyclableMemoryStream(this, tag, requiredSize);
 
         /// <summary>
@@ -749,8 +777,8 @@ namespace MonoGame.Framework.Memory
             RecyclableMemoryStream result = null;
             try
             {
-                result = stream.CanSeek 
-                    ? GetMemoryStream(tag, stream.Length) 
+                result = stream.CanSeek
+                    ? GetMemoryStream(tag, stream.Length)
                     : GetMemoryStream(tag);
 
                 stream.PooledCopyTo(result);

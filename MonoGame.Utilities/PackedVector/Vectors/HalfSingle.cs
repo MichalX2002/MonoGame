@@ -12,10 +12,10 @@ namespace MonoGame.Framework.PackedVector
     /// <para>Ranges from [-1, 0, 0, 1] to [1, 0, 0, 1] in vector form.</para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct HalfSingle : IPackedVector<ushort>, IEquatable<HalfSingle>, IPixel
+    public struct HalfSingle : IPackedPixel<HalfSingle, ushort>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(ushort) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Float16, VectorComponentChannel.Red));
 
         [CLSCompliant(false)]
         public ushort X;
@@ -26,7 +26,10 @@ namespace MonoGame.Framework.PackedVector
         /// Constructs the packed vector with raw values.
         /// </summary>
         [CLSCompliant(false)]
-        public HalfSingle(ushort x) => X = x;
+        public HalfSingle(ushort x)
+        {
+            X = x;
+        }
 
         /// <summary>
         /// Constructs the packed vector with a vector form value.
@@ -40,14 +43,20 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Gets the packed vector as a <see cref="float"/>.
         /// </summary>
-        public readonly float ToSingle() => HalfTypeHelper.Unpack(PackedValue);
+        public readonly float ToSingle()
+        {
+            return HalfTypeHelper.Unpack(PackedValue);
+        }
 
         #region IPackedVector
 
         [CLSCompliant(false)]
         public ushort PackedValue { readonly get => X; set => X = value; }
 
-        public void FromVector4(in Vector4 vector) => X = HalfTypeHelper.Pack(vector.X);
+        public void FromVector4(in Vector4 vector)
+        {
+            X = HalfTypeHelper.Pack(vector.X);
+        }
 
         public readonly void ToVector4(out Vector4 vector)
         {
@@ -75,67 +84,32 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        #region IPixel
-
-        public void FromGray8(Gray8 source)
+        public static implicit operator float(HalfSingle value)
         {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
+            return value.ToSingle();
         }
-
-        public void FromGray16(Gray16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGrayAlpha16(GrayAlpha16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb24(Rgb24 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb48(Rgb48 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgba64(Rgba64 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromColor(Color source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public readonly void ToColor(ref Color destination)
-        {
-            ToScaledVector4(out var vector);
-            destination.FromScaledVector4(vector);
-        }
-
-        #endregion
-
-        public static implicit operator float(HalfSingle value) => value.ToSingle();
 
         #region Equals
 
-        public static bool operator ==(HalfSingle a, HalfSingle b) => a.PackedValue == b.PackedValue;
-        public static bool operator !=(HalfSingle a, HalfSingle b) => a.PackedValue != b.PackedValue;
+        public static bool operator ==(HalfSingle a, HalfSingle b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public bool Equals(HalfSingle other) => this == other;
-        public override bool Equals(object obj) => obj is HalfSingle other && Equals(other);
+        public static bool operator !=(HalfSingle a, HalfSingle b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
+
+        public bool Equals(HalfSingle other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is HalfSingle other && Equals(other);
+        }
 
         #endregion
 

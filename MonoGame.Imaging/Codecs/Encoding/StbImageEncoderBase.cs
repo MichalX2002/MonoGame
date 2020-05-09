@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using MonoGame.Framework.PackedVector;
 using MonoGame.Imaging.Pixels;
 using StbSharp;
 
@@ -35,9 +36,22 @@ namespace MonoGame.Imaging.Codecs.Encoding
             if (image == null) throw new ArgumentNullException(nameof(image));
 
             var state = (StbImageEncoderState)encoderState;
+            var pixelInfo = image.PixelType.ComponentInfo;
 
-            int components = 4; // TODO: change this so it's dynamic/controlled
-            var provider = new PixelRowProvider(image, components, 8);
+            // TODO: change components to dynamic/controlled (maybe in encoder options)
+            bool imageHasAlpha = pixelInfo.HasComponentType(VectorComponentChannel.Alpha);
+            bool encoderSupportsAlpha = true; // TODO: implement (encoderState.Encoder.SupportedComponents HasAttribute();)
+            int colors = 3; // TODO: also implement grayscale
+            int alpha = (imageHasAlpha && encoderSupportsAlpha) ? 1 : 0;
+            int components = colors + alpha;
+
+            int imageMaxDepth = pixelInfo.MaxBitDepth;
+            int encoderMinDepth = 8; // TODO: implement
+            int encoderMaxDepth = 8; // TODO: implement
+            int variableDepth = Math.Max(encoderMinDepth, imageMaxDepth);
+            int depth = Math.Min(encoderMaxDepth, variableDepth);
+
+            var provider = new PixelRowProvider(image, components, depth);
 
             await using (var writeState = state.CreateWriteState(provider))
             {

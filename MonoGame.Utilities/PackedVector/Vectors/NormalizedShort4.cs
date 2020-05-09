@@ -15,13 +15,13 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct NormalizedShort4 : IPackedVector<ulong>, IEquatable<NormalizedShort4>, IPixel
+    public struct NormalizedShort4 : IPackedPixel<NormalizedShort4, ulong>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(short) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(short) * 8),
-            new VectorComponent(VectorComponentType.Blue, sizeof(short) * 8),
-            new VectorComponent(VectorComponentType.Alpha, sizeof(short) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Blue),
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Alpha));
 
         public short X;
         public short Y;
@@ -39,9 +39,15 @@ namespace MonoGame.Framework.PackedVector
         }
 
         [CLSCompliant(false)]
-        public NormalizedShort4(ulong packed) : this() => PackedValue = packed;
+        public NormalizedShort4(ulong packed) : this()
+        {
+            PackedValue = packed;
+        }
 
-        public NormalizedShort4(in Vector4 vector) : this() => FromVector4(vector);
+        public NormalizedShort4(in Vector4 vector) : this()
+        {
+            FromVector4(vector);
+        }
 
         public NormalizedShort4(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
         {
@@ -138,8 +144,10 @@ namespace MonoGame.Framework.PackedVector
             FromScaledVector4(vector);
         }
 
-        public readonly void ToColor(ref Color destination)
+        public readonly void ToColor(out Color destination)
         {
+            destination = default; // TODO: Unsafe.SkipInit
+
             ToScaledVector4(out var vector);
             destination.FromScaledVector4(vector);
         }
@@ -148,11 +156,25 @@ namespace MonoGame.Framework.PackedVector
 
         #region Equals
 
-        public static bool operator ==(NormalizedShort4 a, NormalizedShort4 b) => a.PackedValue == b.PackedValue;
-        public static bool operator !=(NormalizedShort4 a, NormalizedShort4 b) => a.PackedValue == b.PackedValue;
+        public static bool operator ==(NormalizedShort4 a, NormalizedShort4 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public bool Equals(NormalizedShort4 other) => this == other;
-        public override bool Equals(object obj) => obj is NormalizedShort4 other && Equals(other);
+        public static bool operator !=(NormalizedShort4 a, NormalizedShort4 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
+
+        public bool Equals(NormalizedShort4 other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is NormalizedShort4 other && Equals(other);
+        }
 
         #endregion
 

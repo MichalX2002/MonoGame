@@ -70,6 +70,14 @@ namespace MonoGame.Framework.PackedVector
             Components = (VectorComponent[])components.Clone();
         }
 
+        public bool HasComponentType(VectorComponentChannel componentType)
+        {
+            foreach (var component in Components.Span)
+                if (component.Channel == componentType)
+                    return true;
+            return false;
+        }
+
         public bool Equals(VectorComponentInfo other)
         {
             return Components.Span.SequenceEqual(other.Components.Span);

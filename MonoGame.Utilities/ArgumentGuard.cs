@@ -63,7 +63,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Throws if the <paramref name="value"/> is less than zero.
         /// </summary>
-        public static void AssertAtleastZero(long value, string paramName, bool inlineParamName = true)
+        public static void AssertAtLeastZero(long value, string paramName, bool inlineParamName = true)
         {
             if (value < 0)
             {

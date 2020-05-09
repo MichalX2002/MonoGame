@@ -22,8 +22,8 @@ namespace MonoGame.Imaging
 
         public static void AssertNonEmptyRectangle(Rectangle rectangle, string paramName)
         {
-            ArgumentGuard.AssertAtleastZero(rectangle.X, paramName + ".X");
-            ArgumentGuard.AssertAtleastZero(rectangle.Y, paramName + ".Y");
+            ArgumentGuard.AssertAtLeastZero(rectangle.X, paramName + ".X");
+            ArgumentGuard.AssertAtLeastZero(rectangle.Y, paramName + ".Y");
             ArgumentGuard.AssertGreaterThanZero(rectangle.Width, paramName + ".Width");
             ArgumentGuard.AssertGreaterThanZero(rectangle.Height, paramName + ".Height");
         }

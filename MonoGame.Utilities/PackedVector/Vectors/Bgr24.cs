@@ -14,12 +14,12 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Bgr24 : IEquatable<Bgr24>, IPixel
+    public struct Bgr24 : IPixel<Bgr24>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Blue, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Red, sizeof(byte) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Blue),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Red));
 
         [CLSCompliant(false)]
         public byte R;
@@ -52,13 +52,22 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        public readonly Vector3 ToVector3() => new Vector3(R, G, B) / byte.MaxValue;
+        public readonly Vector3 ToVector3()
+        {
+            return new Vector3(R, G, B) / byte.MaxValue;
+        }
 
         #region IPackedVector
 
-        public void FromVector4(in Vector4 vector) => FromScaledVector4(vector);
+        public void FromVector4(in Vector4 vector)
+        {
+            FromScaledVector4(vector);
+        }
 
-        public readonly void ToVector4(out Vector4 vector) => ToScaledVector4(out vector);
+        public readonly void ToVector4(out Vector4 vector)
+        {
+            ToScaledVector4(out vector);
+        }
 
         public void FromScaledVector4(in Vector4 scaledVector)
         {
@@ -76,19 +85,20 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPixel
 
-        public readonly void ToColor(ref Color destination)
+        public void FromGray8(Gray8 source)
         {
-            destination.R = R;
-            destination.G = G;
-            destination.B = B;
-            destination.A = byte.MaxValue;
+            B = G = R = source.L;
         }
 
-        public void FromGray8(Gray8 source) => B = G = R = source.L;
+        public void FromGray16(Gray16 source)
+        {
+            B = G = R = PackedVectorHelper.DownScale16To8Bit(source.L);
+        }
 
-        public void FromGray16(Gray16 source) => B = G = R = PackedVectorHelper.DownScale16To8Bit(source.L);
-
-        public void FromGrayAlpha16(GrayAlpha16 source) => B = G = R = source.L;
+        public void FromGrayAlpha16(GrayAlpha16 source)
+        {
+            B = G = R = source.L;
+        }
 
         public void FromRgb24(Rgb24 source)
         {
@@ -118,17 +128,37 @@ namespace MonoGame.Framework.PackedVector
             B = PackedVectorHelper.DownScale16To8Bit(source.B);
         }
 
+        public readonly void ToColor(out Color destination)
+        {
+            destination.R = R;
+            destination.G = G;
+            destination.B = B;
+            destination.A = byte.MaxValue;
+        }
+
         #endregion
 
         #region Equals
 
-        public override bool Equals(object obj) => obj is Bgr24 other && Equals(other);
-        public bool Equals(Bgr24 other) => this == other;
+        public override bool Equals(object obj)
+        {
+            return obj is Bgr24 other && Equals(other);
+        }
 
-        public static bool operator ==(in Bgr24 a, in Bgr24 b) =>
-            a.R == b.R && a.G == b.G && a.B == b.B;
+        public bool Equals(Bgr24 other)
+        {
+            return this == other;
+        }
 
-        public static bool operator !=(in Bgr24 a, in Bgr24 b) => !(a == b);
+        public static bool operator ==(in Bgr24 a, in Bgr24 b)
+        {
+            return a.R == b.R && a.G == b.G && a.B == b.B;
+        }
+
+        public static bool operator !=(in Bgr24 a, in Bgr24 b)
+        {
+            return !(a == b);
+        }
 
         #endregion
 

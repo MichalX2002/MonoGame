@@ -14,11 +14,11 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct GrayAlpha32 : IPackedVector<uint>, IEquatable<GrayAlpha32>, IPixel
+    public struct GrayAlpha32 : IPackedPixel<GrayAlpha32, uint>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Luminance, sizeof(ushort) * 8),
-            new VectorComponent(VectorComponentType.Alpha, sizeof(ushort) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Luminance),
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Alpha));
 
         [CLSCompliant(false)]
         public ushort L;
@@ -116,7 +116,7 @@ namespace MonoGame.Framework.PackedVector
             A = ushort.MaxValue;
         }
 
-        public readonly void ToColor(ref Color destination)
+        public readonly void ToColor(out Color destination)
         {
             destination.R = destination.G = destination.B = PackedVectorHelper.DownScale16To8Bit(L);
             destination.A = PackedVectorHelper.DownScale16To8Bit(A);
@@ -126,11 +126,25 @@ namespace MonoGame.Framework.PackedVector
 
         #region Equals
 
-        public static bool operator ==(GrayAlpha32 a, GrayAlpha32 b) => a.L == b.L && a.A == b.A;
-        public static bool operator !=(GrayAlpha32 a, GrayAlpha32 b) => !(a == b);
+        public static bool operator ==(GrayAlpha32 a, GrayAlpha32 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public bool Equals(GrayAlpha32 other) => this == other;
-        public override bool Equals(object obj) => obj is GrayAlpha32 other && Equals(other);
+        public static bool operator !=(GrayAlpha32 a, GrayAlpha32 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
+
+        public bool Equals(GrayAlpha32 other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is GrayAlpha32 other && Equals(other);
+        }
 
         #endregion
 

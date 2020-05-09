@@ -15,11 +15,11 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct HalfVector2 : IPackedVector<uint>, IEquatable<HalfVector2>, IPixel
+    public struct HalfVector2 : IPackedPixel<HalfVector2, uint>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, Unsafe.SizeOf<HalfSingle>() * 8),
-            new VectorComponent(VectorComponentType.Green, Unsafe.SizeOf<HalfSingle>() * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Float16, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Float16, VectorComponentChannel.Green));
 
         public HalfSingle X;
         public HalfSingle Y;
@@ -39,13 +39,19 @@ namespace MonoGame.Framework.PackedVector
         /// Constructs the packed vector with a packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public HalfVector2(uint packed) : this() => PackedValue = packed;
+        public HalfVector2(uint packed) : this()
+        {
+            PackedValue = packed;
+        }
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector2"/> containing the components.</param>
-        public HalfVector2(Vector2 vector) => Pack(vector, out this);
+        public HalfVector2(Vector2 vector)
+        {
+            Pack(vector, out this);
+        }
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
@@ -62,7 +68,10 @@ namespace MonoGame.Framework.PackedVector
             destination.Y = new HalfSingle(vector.Y);
         }
 
-        public readonly Vector2 ToVector2() => new Vector2(X, Y);
+        public readonly Vector2 ToVector2()
+        {
+            return new Vector2(X, Y);
+        }
 
         #region IPackedVector
 
@@ -75,7 +84,7 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromVector4(in Vector4 vector)
         {
-            Pack(vector.ToVector2(), out this);
+            Pack(vector.XY, out this);
         }
 
         public readonly void ToVector4(out Vector4 vector)
@@ -98,65 +107,27 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        #region IPixel
-
-        public void FromColor(Color source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGray8(Gray8 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGray16(Gray16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGrayAlpha16(GrayAlpha16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb24(Rgb24 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb48(Rgb48 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgba64(Rgba64 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public readonly void ToColor(ref Color destination)
-        {
-            ToScaledVector4(out var vector);
-            destination.FromScaledVector4(vector);
-        }
-
-        #endregion
-
         #region Equals
 
-        public static bool operator ==(HalfVector2 a, HalfVector2 b) => a.PackedValue == b.PackedValue;
-        public static bool operator !=(HalfVector2 a, HalfVector2 b) => a.PackedValue != b.PackedValue;
+        public static bool operator ==(HalfVector2 a, HalfVector2 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public bool Equals(HalfVector2 other) => this == other;
-        public override bool Equals(object obj) => obj is HalfVector2 other && Equals(other);
+        public static bool operator !=(HalfVector2 a, HalfVector2 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
+
+        public bool Equals(HalfVector2 other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is HalfVector2 other && Equals(other);
+        }
 
         #endregion
 

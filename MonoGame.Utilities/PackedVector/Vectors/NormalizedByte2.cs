@@ -15,11 +15,11 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct NormalizedByte2 : IPackedVector<ushort>, IEquatable<NormalizedByte2>, IPixel
+    public struct NormalizedByte2 : IPackedPixel<NormalizedByte2, ushort>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(sbyte) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(sbyte) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Green));
 
         [CLSCompliant(false)]
         public sbyte X;
@@ -43,13 +43,19 @@ namespace MonoGame.Framework.PackedVector
         /// Constructs the packed vector with a packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public NormalizedByte2(ushort packed) : this() => PackedValue = packed;
+        public NormalizedByte2(ushort packed) : this()
+        {
+            PackedValue = packed;
+        }
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public NormalizedByte2(Vector2 vector) => Pack(vector, out this);
+        public NormalizedByte2(Vector2 vector)
+        {
+            Pack(vector, out this);
+        }
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
@@ -60,7 +66,10 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        public readonly Vector2 ToVector2() => new Vector2(X, Y) / 127f;
+        public readonly Vector2 ToVector2()
+        {
+            return new Vector2(X, Y) / 127f;
+        }
 
         private static void Pack(in Vector2 vector, out NormalizedByte2 destination)
         {
@@ -155,8 +164,10 @@ namespace MonoGame.Framework.PackedVector
             FromScaledVector4(vector);
         }
 
-        public readonly void ToColor(ref Color destination)
+        public readonly void ToColor(out Color destination)
         {
+            destination = default; // TODO: Unsafe.SkipInit
+
             ToScaledVector4(out var vector);
             destination.FromScaledVector4(vector);
         }
@@ -165,12 +176,25 @@ namespace MonoGame.Framework.PackedVector
 
         #region Equals
 
-        public static bool operator ==(in NormalizedByte2 a, in NormalizedByte2 b) => a.X == b.X && a.Y == b.Y;
-        public static bool operator !=(in NormalizedByte2 a, in NormalizedByte2 b) => !(a == b);
+        public static bool operator ==(in NormalizedByte2 a, in NormalizedByte2 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public override bool Equals(object obj) => obj is NormalizedByte2 other && Equals(other);
+        public static bool operator !=(in NormalizedByte2 a, in NormalizedByte2 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
 
-        public bool Equals(NormalizedByte2 other) => this == other;
+        public override bool Equals(object obj)
+        {
+            return obj is NormalizedByte2 other && Equals(other);
+        }
+
+        public bool Equals(NormalizedByte2 other)
+        {
+            return this == other;
+        }
 
         #endregion
 

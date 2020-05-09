@@ -14,22 +14,34 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Gray32 : IPackedVector<uint>, IEquatable<Gray32>, IPixel
+    public struct Gray32 : IPackedPixel<Gray32, uint>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Luminance, sizeof(uint) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int32, VectorComponentChannel.Luminance));
 
         [CLSCompliant(false)]
         public uint L;
+
+        [CLSCompliant(false)]
+        public Gray32(uint luminance)
+        {
+            L = luminance;
+        }
 
         #region IPackedVector
 
         [CLSCompliant(false)]
         public uint PackedValue { readonly get => L; set => L = value; }
 
-        public void FromVector4(in Vector4 vector) => FromScaledVector4(vector);
+        public void FromVector4(in Vector4 vector)
+        {
+            FromScaledVector4(vector);
+        }
 
-        public readonly void ToVector4(out Vector4 vector) => ToScaledVector4(out vector);
+        public readonly void ToVector4(out Vector4 vector)
+        {
+            ToScaledVector4(out vector);
+        }
 
         public void FromScaledVector4(in Vector4 scaledVector)
         {
@@ -41,7 +53,9 @@ namespace MonoGame.Framework.PackedVector
 
         public readonly void ToScaledVector4(out Vector4 scaledVector)
         {
-            scaledVector.Base.X = scaledVector.Base.Y = scaledVector.Base.Z = (float)(L / (double)uint.MaxValue);
+            scaledVector.Base.X = scaledVector.Base.Y = scaledVector.Base.Z =
+                (float)(L / (double)uint.MaxValue);
+
             scaledVector.Base.W = 1;
         }
 
@@ -88,7 +102,7 @@ namespace MonoGame.Framework.PackedVector
                 PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
         }
 
-        public readonly void ToColor(ref Color destination)
+        public readonly void ToColor(out Color destination)
         {
             destination.R = destination.G = destination.B = PackedVectorHelper.DownScale32To8Bit(L);
             destination.A = byte.MaxValue;
@@ -98,11 +112,25 @@ namespace MonoGame.Framework.PackedVector
 
         #region Equals
 
-        public static bool operator ==(in Gray32 a, in Gray32 b) => a.L == b.L;
-        public static bool operator !=(in Gray32 a, in Gray32 b) => a.L != b.L;
+        public static bool operator ==(in Gray32 a, in Gray32 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public bool Equals(Gray32 other) => this == other;
-        public override bool Equals(object obj) => obj is Gray32 other && Equals(other);
+        public static bool operator !=(in Gray32 a, in Gray32 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
+
+        public bool Equals(Gray32 other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Gray32 other && Equals(other);
+        }
 
         #endregion
 
@@ -110,7 +138,7 @@ namespace MonoGame.Framework.PackedVector
 
         public override string ToString() => nameof(Gray32) + $"({L})";
 
-        public override int GetHashCode() => L.GetHashCode();
+        public override int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

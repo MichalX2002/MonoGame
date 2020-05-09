@@ -14,10 +14,10 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Alpha8 : IPackedVector<byte>, IEquatable<Alpha8>, IPixel
+    public struct Alpha8 : IPackedPixel<Alpha8, byte>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Alpha, sizeof(byte) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Alpha));
 
         public byte A;
 
@@ -26,20 +26,29 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Constructs the packed vector with a raw value.
         /// </summary>
-        public Alpha8(byte value) => A = value;
+        public Alpha8(byte value)
+        {
+            A = value;
+        }
 
         /// <summary>
         /// Constructs the packed vector with a vector form value.
         /// </summary>
         /// <param name="alpha">The W component.</param>
-        public Alpha8(float alpha) => Pack(alpha, out A);
+        public Alpha8(float alpha)
+        {
+            Pack(alpha, out A);
+        }
 
         #endregion
 
         /// <summary>
         /// Gets the packed vector as a <see cref="float"/>.
         /// </summary>
-        public readonly float ToAlpha() => A / (float)byte.MaxValue;
+        public readonly float ToAlpha()
+        {
+            return A / (float)byte.MaxValue;
+        }
 
         private static void Pack(float alpha, out byte destination)
         {
@@ -53,9 +62,15 @@ namespace MonoGame.Framework.PackedVector
 
         public byte PackedValue { readonly get => A; set => A = value; }
 
-        public void FromVector4(in Vector4 vector) => FromScaledVector4(vector);
+        public void FromVector4(in Vector4 vector)
+        {
+            FromScaledVector4(vector);
+        }
 
-        public readonly void ToVector4(out Vector4 vector) => ToScaledVector4(out vector);
+        public readonly void ToVector4(out Vector4 vector)
+        {
+            ToScaledVector4(out vector);
+        }
 
         public void FromScaledVector4(in Vector4 scaledVector)
         {
@@ -72,21 +87,42 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPixel
 
-        public void FromGray8(Gray8 source) => A = byte.MaxValue;
+        public void FromGray8(Gray8 source)
+        {
+            A = byte.MaxValue;
+        }
 
-        public void FromGray16(Gray16 source) => A = byte.MaxValue;
+        public void FromGray16(Gray16 source)
+        {
+            A = byte.MaxValue;
+        }
 
-        public void FromGrayAlpha16(GrayAlpha16 source) => A = source.A;
+        public void FromGrayAlpha16(GrayAlpha16 source)
+        {
+            A = source.A;
+        }
 
-        public void FromRgb24(Rgb24 source) => A = byte.MaxValue;
+        public void FromRgb24(Rgb24 source)
+        {
+            A = byte.MaxValue;
+        }
 
-        public void FromColor(Color source) => A = source.A;
+        public void FromColor(Color source)
+        {
+            A = source.A;
+        }
 
-        public void FromRgb48(Rgb48 source) => A = byte.MaxValue;
+        public void FromRgb48(Rgb48 source)
+        {
+            A = byte.MaxValue;
+        }
 
-        public void FromRgba64(Rgba64 source) => A = PackedVectorHelper.DownScale16To8Bit(source.A);
+        public void FromRgba64(Rgba64 source)
+        {
+            A = PackedVectorHelper.DownScale16To8Bit(source.A);
+        }
 
-        public readonly void ToColor(ref Color destination)
+        public readonly void ToColor(out Color destination)
         {
             destination.R = destination.G = destination.B = byte.MaxValue;
             destination.A = A;
@@ -96,8 +132,15 @@ namespace MonoGame.Framework.PackedVector
 
         #region Equals
 
-        public static bool operator ==(Alpha8 a, Alpha8 b) => a.A == b.A;
-        public static bool operator !=(Alpha8 a, Alpha8 b) => a.A != b.A;
+        public static bool operator ==(Alpha8 a, Alpha8 b)
+        {
+            return a.A == b.A;
+        }
+
+        public static bool operator !=(Alpha8 a, Alpha8 b)
+        {
+            return a.A != b.A;
+        }
 
         public bool Equals(Alpha8 other) => this == other;
         public override bool Equals(object obj) => obj is Alpha8 other && Equals(other);

@@ -15,18 +15,24 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Byte4 : IPackedVector<uint>, IEquatable<Byte4>, IPixel
+    public struct Byte4 : IPackedPixel<Byte4, uint>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Blue, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Alpha, sizeof(byte) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Blue),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Alpha));
 
         public byte X;
         public byte Y;
         public byte Z;
         public byte W;
+
+        public Color Rgba
+        {
+            readonly get => UnsafeUtils.As<Byte4, Color>(this);
+            set => Unsafe.As<Byte4, Color>(ref this) = value;
+        }
 
         #region Constructors
 
@@ -34,7 +40,10 @@ namespace MonoGame.Framework.PackedVector
         /// Constructs the packed vector with a packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public Byte4(uint packed) : this() => PackedValue = packed;
+        public Byte4(uint packed) : this()
+        {
+            PackedValue = packed;
+        }
 
         /// <summary>
         /// Constructs the packed vector with raw values.
@@ -152,35 +161,42 @@ namespace MonoGame.Framework.PackedVector
 
         public void FromColor(Color source)
         {
-            X = source.R;
-            Y = source.G;
-            Z = source.B;
-            W = source.A;
+            Rgba = source;
         }
 
-        public readonly void ToColor(ref Color destination)
+        public readonly void ToColor(out Color destination)
         {
-            destination.R = X;
-            destination.G = Y;
-            destination.B = Z;
-            destination.A = W;
+            destination = Rgba;
         }
 
         #endregion
 
         #region Equals
 
-        public static bool operator !=(in Byte4 a, in Byte4 b) => !(a == b);
-        public static bool operator ==(in Byte4 a, in Byte4 b) =>
-            a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
+        public static bool operator ==(in Byte4 a, in Byte4 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public bool Equals(Byte4 other) => this == other;
-        public override bool Equals(object obj) => obj is Byte4 other && Equals(other);
+        public static bool operator !=(in Byte4 a, in Byte4 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
+
+        public bool Equals(Byte4 other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Byte4 other && Equals(other);
+        }
 
         #endregion
 
         /// <summary>
-        /// Gets the hexadecimal <see cref="string"/> representation of this <see cref="Color"/>.
+        /// Gets the hexadecimal <see cref="string"/> representation of this <see cref="Rgba"/>.
         /// </summary>
         public string ToHex()
         {

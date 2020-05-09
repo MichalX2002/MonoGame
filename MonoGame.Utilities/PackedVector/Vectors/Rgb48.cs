@@ -14,12 +14,12 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Rgb48 : IEquatable<Rgb48>, IPixel
+    public struct Rgb48 : IPixel<Rgb48>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(ushort) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(ushort) * 8),
-            new VectorComponent(VectorComponentType.Blue, sizeof(ushort) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Blue));
 
         [CLSCompliant(false)]
         public ushort R;
@@ -51,7 +51,10 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        public readonly Vector3 ToVector3() => new Vector3(R, G, B) / ushort.MaxValue;
+        public readonly Vector3 ToVector3()
+        {
+            return new Vector3(R, G, B) / ushort.MaxValue;
+        }
 
         #region IPackedVector
 
@@ -89,19 +92,20 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPixel
 
-        public readonly void ToColor(ref Color destination)
+        public void FromGray8(Gray8 source)
         {
-            destination.R = PackedVectorHelper.DownScale16To8Bit(R);
-            destination.G = PackedVectorHelper.DownScale16To8Bit(G);
-            destination.B = PackedVectorHelper.DownScale16To8Bit(B);
-            destination.A = byte.MaxValue;
+            R = G = B = PackedVectorHelper.UpScale8To16Bit(source.L);
         }
 
-        public void FromGray8(Gray8 source) => R = G = B = PackedVectorHelper.UpScale8To16Bit(source.L);
+        public void FromGray16(Gray16 source)
+        {
+            R = G = B = source.L;
+        }
 
-        public void FromGray16(Gray16 source) => R = G = B = source.L;
-
-        public void FromGrayAlpha16(GrayAlpha16 source) => R = G = B = PackedVectorHelper.UpScale8To16Bit(source.L);
+        public void FromGrayAlpha16(GrayAlpha16 source)
+        {
+            R = G = B = PackedVectorHelper.UpScale8To16Bit(source.L);
+        }
 
         public void FromRgb24(Rgb24 source)
         {
@@ -117,7 +121,10 @@ namespace MonoGame.Framework.PackedVector
             B = PackedVectorHelper.UpScale8To16Bit(source.B);
         }
 
-        public void FromRgb48(Rgb48 source) => this = source;
+        public void FromRgb48(Rgb48 source)
+        {
+            this = source;
+        }
 
         public void FromRgba64(Rgba64 source)
         {
@@ -126,17 +133,37 @@ namespace MonoGame.Framework.PackedVector
             B = source.B;
         }
 
+        public readonly void ToColor(out Color destination)
+        {
+            destination.R = PackedVectorHelper.DownScale16To8Bit(R);
+            destination.G = PackedVectorHelper.DownScale16To8Bit(G);
+            destination.B = PackedVectorHelper.DownScale16To8Bit(B);
+            destination.A = byte.MaxValue;
+        }
+
         #endregion
 
         #region Equals
 
-        public override bool Equals(object obj) => obj is Rgb48 other && Equals(other);
-        public bool Equals(Rgb48 other) => this == other;
+        public static bool operator ==(in Rgb48 a, in Rgb48 b)
+        {
+            return a.R == b.R && a.G == b.G && a.B == b.B;
+        }
 
-        public static bool operator ==(in Rgb48 a, in Rgb48 b) =>
-            a.R == b.R && a.G == b.G && a.B == b.B;
+        public static bool operator !=(in Rgb48 a, in Rgb48 b)
+        {
+            return !(a == b);
+        }
 
-        public static bool operator !=(in Rgb48 a, in Rgb48 b) => !(a == b);
+        public override bool Equals(object obj)
+        {
+            return obj is Rgb48 other && Equals(other);
+        }
+
+        public bool Equals(Rgb48 other)
+        {
+            return this == other;
+        }
 
         #endregion
 
@@ -150,16 +177,7 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int code = 17;
-                code = code * 23 + R;
-                code = code * 23 + G;
-                return code * 23 + B;
-            }
-        }
+        public override int GetHashCode() => HashCode.Combine(R, G, B);
 
         #endregion
     }

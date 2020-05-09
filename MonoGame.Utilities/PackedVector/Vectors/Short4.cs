@@ -15,17 +15,17 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Short4 : IPackedVector<ulong>, IEquatable<Short4>, IPixel
+    public struct Short4 : IPackedPixel<Short4, ulong>
     {
         private static readonly Vector4 MinValue = new Vector4(short.MinValue);
         private static readonly Vector4 MaxValue = new Vector4(short.MaxValue);
         private static readonly Vector4 Offset = new Vector4(32768);
 
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(short) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(short) * 8),
-            new VectorComponent(VectorComponentType.Blue, sizeof(short) * 8),
-            new VectorComponent(VectorComponentType.Alpha, sizeof(short) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Blue),
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Alpha));
 
         public short X;
         public short Y;
@@ -62,6 +62,20 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Short4, ulong>(ref this) = value;
         }
 
+        public void FromScaledVector4(in Vector4 scaledVector)
+        {
+            var v = scaledVector * ushort.MaxValue;
+            v -= Offset;
+            FromVector4(v);
+        }
+
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        {
+            ToVector4(out scaledVector);
+            scaledVector += Offset;
+            scaledVector /= ushort.MaxValue;
+        }
+
         public void FromVector4(in Vector4 vector)
         {
             var v = vector + Vector4.Half;
@@ -81,83 +95,29 @@ namespace MonoGame.Framework.PackedVector
             vector.Base.W = W;
         }
 
-        public void FromScaledVector4(in Vector4 scaledVector)
-        {
-            var v = scaledVector * ushort.MaxValue;
-            v -= Offset;
-            FromVector4(v);
-        }
-
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
-        {
-            ToVector4(out scaledVector);
-            scaledVector += Offset;
-            scaledVector /= ushort.MaxValue;
-        }
-
-        #endregion
-
-        #region IPixel
-
-        public void FromGray8(Gray8 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGray16(Gray16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGrayAlpha16(GrayAlpha16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb24(Rgb24 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb48(Rgb48 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgba64(Rgba64 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromColor(Color source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public readonly void ToColor(ref Color destination)
-        {
-            ToScaledVector4(out var vector);
-            destination.FromScaledVector4(vector);
-        }
-
         #endregion
 
         #region Equals
 
-        public static bool operator ==(in Short4 a, in Short4 b) =>
-            a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
+        public static bool operator ==(in Short4 a, in Short4 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public static bool operator !=(in Short4 a, in Short4 b) => !(a == b);
+        public static bool operator !=(in Short4 a, in Short4 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
 
-        public bool Equals(Short4 other) => this == other;
-        public override bool Equals(object obj) => obj is Short4 other && Equals(other);
+        public bool Equals(Short4 other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Short4 other && Equals(other);
+        }
 
         #endregion
 

@@ -11,13 +11,13 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct RgbaVector : IPixel, IEquatable<RgbaVector>
+    public struct RgbaVector : IPixel<RgbaVector>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(float) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(float) * 8),
-            new VectorComponent(VectorComponentType.Blue, sizeof(float) * 8),
-            new VectorComponent(VectorComponentType.Alpha, sizeof(float) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Blue),
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Alpha));
 
         public float R;
         public float G;
@@ -49,10 +49,6 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPackedVector
 
-        public void FromVector4(in Vector4 vector) => FromScaledVector4(vector);
-
-        public readonly void ToVector4(out Vector4 vector) => ToScaledVector4(out vector);
-
         public void FromScaledVector4(in Vector4 scaledVector)
         {
             R = scaledVector.X;
@@ -69,26 +65,59 @@ namespace MonoGame.Framework.PackedVector
             scaledVector.Base.W = A;
         }
 
+        public void FromVector4(in Vector4 vector)
+        {
+            FromScaledVector4(vector);
+        }
+
+        public readonly void ToVector4(out Vector4 vector)
+        {
+            ToScaledVector4(out vector);
+        }
+
         #endregion
 
         #region IPixel
 
-        public void FromGray8(Gray8 source) => source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
-
-        public void FromGray16(Gray16 source) => source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
-
-        public void FromGrayAlpha16(GrayAlpha16 source) => source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
-
-        public void FromRgb24(Rgb24 source) => source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
-
-        public void FromRgb48(Rgb48 source) => source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
-
-        public void FromRgba64(Rgba64 source) => source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
-
-        public void FromColor(Color source) => source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
-
-        public readonly void ToColor(ref Color destination)
+        public void FromGray8(Gray8 source)
         {
+            source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
+        }
+
+        public void FromGray16(Gray16 source)
+        {
+            source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
+        }
+
+        public void FromGrayAlpha16(GrayAlpha16 source)
+        {
+            source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
+        }
+
+        public void FromRgb24(Rgb24 source)
+        {
+            source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
+        }
+
+        public void FromRgb48(Rgb48 source)
+        {
+            source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
+        }
+
+        public void FromRgba64(Rgba64 source)
+        {
+            source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
+        }
+
+        public void FromColor(Color source)
+        {
+            source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
+        }
+
+        public readonly void ToColor(out Color destination)
+        {
+            destination = default; // TODO: Unsafe.SkipInit
+
             destination.FromScaledVector4(UnsafeUtils.As<RgbaVector, Vector4>(this));
         }
 
@@ -96,11 +125,25 @@ namespace MonoGame.Framework.PackedVector
 
         #region Equals
 
-        public static bool operator ==(in RgbaVector a, in RgbaVector b) => a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A;
-        public static bool operator !=(in RgbaVector a, in RgbaVector b) => !(a == b);
+        public static bool operator ==(in RgbaVector a, in RgbaVector b)
+        {
+            return a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A;
+        }
 
-        public bool Equals(RgbaVector other) => this == other;
-        public override bool Equals(object obj) => obj is RgbaVector other && Equals(other);
+        public static bool operator !=(in RgbaVector a, in RgbaVector b)
+        {
+            return !(a == b);
+        }
+
+        public bool Equals(RgbaVector other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is RgbaVector other && Equals(other);
+        }
 
         #endregion
 

@@ -14,11 +14,11 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct GrayAlpha16 : IPackedVector<ushort>, IEquatable<GrayAlpha16>, IPixel
+    public struct GrayAlpha16 : IPackedPixel<GrayAlpha16, ushort>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Luminance, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Alpha, sizeof(byte) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Luminance),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Alpha));
 
         public byte L;
         public byte A;
@@ -112,7 +112,7 @@ namespace MonoGame.Framework.PackedVector
             A = byte.MaxValue;
         }
 
-        public readonly void ToColor(ref Color destination)
+        public readonly void ToColor(out Color destination)
         {
             destination.R = destination.G = destination.B = L;
             destination.A = A;
@@ -140,11 +140,25 @@ namespace MonoGame.Framework.PackedVector
 
         #region Equals
 
-        public static bool operator ==(GrayAlpha16 a, GrayAlpha16 b) => a.L == b.L && a.A == b.A;
-        public static bool operator !=(GrayAlpha16 a, GrayAlpha16 b) => !(a == b);
+        public static bool operator ==(GrayAlpha16 a, GrayAlpha16 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public bool Equals(GrayAlpha16 other) => this == other;
-        public override bool Equals(object obj) => obj is GrayAlpha16 other && Equals(other);
+        public static bool operator !=(GrayAlpha16 a, GrayAlpha16 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
+
+        public bool Equals(GrayAlpha16 other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is GrayAlpha16 other && Equals(other);
+        }
 
         #endregion
 

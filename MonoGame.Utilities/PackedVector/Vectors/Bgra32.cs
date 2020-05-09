@@ -15,13 +15,13 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Bgra32 : IPackedVector<uint>, IEquatable<Bgra32>, IPixel
+    public struct Bgra32 : IPackedPixel<Bgra32, uint>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Blue, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Red, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Alpha, sizeof(byte) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Blue),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Alpha));
 
         public byte B;
         public byte G;
@@ -45,7 +45,10 @@ namespace MonoGame.Framework.PackedVector
         #region Constructors
 
         [CLSCompliant(false)]
-        public Bgra32(uint packedValue) : this() => PackedValue = packedValue;
+        public Bgra32(uint packedValue) : this()
+        {
+            PackedValue = packedValue;
+        }
 
         [CLSCompliant(false)]
         public Bgra32(byte r, byte g, byte b, byte a)
@@ -106,7 +109,7 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPixel
 
-        public readonly void ToColor(ref Color destination)
+        public readonly void ToColor(out Color destination)
         {
             destination.R = R;
             destination.G = G;
@@ -168,11 +171,25 @@ namespace MonoGame.Framework.PackedVector
 
         #region Equals
 
-        public static bool operator ==(in Bgra32 a, in Bgra32 b) => a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A;
-        public static bool operator !=(in Bgra32 a, in Bgra32 b) => !(a == b);
+        public static bool operator ==(in Bgra32 a, in Bgra32 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public bool Equals(Bgra32 other) => this == other;
-        public override bool Equals(object obj) => obj is Bgra32 other && Equals(other);
+        public static bool operator !=(in Bgra32 a, in Bgra32 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
+
+        public bool Equals(Bgra32 other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Bgra32 other && Equals(other);
+        }
 
         #endregion
 

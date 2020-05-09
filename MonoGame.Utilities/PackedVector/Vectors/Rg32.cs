@@ -15,11 +15,11 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Rg32 : IPackedVector<uint>, IEquatable<Rg32>, IPixel
+    public struct Rg32 : IPackedPixel<Rg32, uint>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(ushort) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(ushort) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Green));
 
         [CLSCompliant(false)]
         public ushort R;
@@ -37,7 +37,10 @@ namespace MonoGame.Framework.PackedVector
         }
 
         [CLSCompliant(false)]
-        public Rg32(uint packed) : this() => PackedValue = packed;
+        public Rg32(uint packed) : this()
+        {
+            PackedValue = packed;
+        }
 
         public Rg32(Vector2 vector) : this()
         {
@@ -53,7 +56,10 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Gets the packed vector in <see cref="Vector2"/> format.
         /// </summary>
-        public readonly Vector2 ToVector2() => new Vector2(R, G) / ushort.MaxValue;
+        public readonly Vector2 ToVector2()
+        {
+            return new Vector2(R, G) / ushort.MaxValue;
+        }
 
         #region IPackedVector
 
@@ -97,11 +103,20 @@ namespace MonoGame.Framework.PackedVector
 
         #region IPixel
 
-        public void FromGray8(Gray8 source) => R = G = PackedVectorHelper.UpScale8To16Bit(source.L);
+        public void FromGray8(Gray8 source)
+        {
+            R = G = PackedVectorHelper.UpScale8To16Bit(source.L);
+        }
 
-        public void FromGray16(Gray16 source) => R = G = source.L;
+        public void FromGray16(Gray16 source)
+        {
+            R = G = source.L;
+        }
 
-        public void FromGrayAlpha16(GrayAlpha16 source) => R = G = source.L;
+        public void FromGrayAlpha16(GrayAlpha16 source)
+        {
+            R = G = source.L;
+        }
 
         public void FromRgb24(Rgb24 source)
         {
@@ -127,33 +142,47 @@ namespace MonoGame.Framework.PackedVector
             G = source.G;
         }
 
-        public readonly void ToColor(ref Color destination)
+        public readonly void ToColor(out Color destination)
         {
             destination.R = PackedVectorHelper.DownScale16To8Bit(R);
             destination.G = PackedVectorHelper.DownScale16To8Bit(G);
+            destination.B = 0;
+            destination.A = byte.MaxValue;
         }
 
         #endregion
 
         #region Equals
 
-        public static bool operator ==(in Rg32 a, in Rg32 b) => a.R == b.R && a.G == b.G;
-        public static bool operator !=(in Rg32 a, in Rg32 b) => !(a == b);
+        public static bool operator ==(in Rg32 a, in Rg32 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
+
+        public static bool operator !=(in Rg32 a, in Rg32 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
 
         /// <summary>
         /// Compares another Rg32 packed vector with the packed vector.
         /// </summary>
         /// <param name="other">The Rg32 packed vector to compare.</param>
         /// <returns>True if the packed vectors are equal.</returns>
-        public bool Equals(Rg32 other) => this == other;
-
+        public bool Equals(Rg32 other)
+        {
+            return this == other;
+        }
 
         /// <summary>
         /// Compares an object with the packed vector.
         /// </summary>
         /// <param name="obj">The object to compare.</param>
         /// <returns>True if the object is equal to the packed vector.</returns>
-        public override bool Equals(object obj) => obj is Rg32 other && Equals(other);
+        public override bool Equals(object obj)
+        {
+            return obj is Rg32 other && Equals(other);
+        }
 
         #endregion
 

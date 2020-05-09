@@ -217,7 +217,7 @@ namespace MonoGame.Imaging.Tests
 
                 Directory.CreateDirectory("savetest");
 
-                var ms = new MemoryStream();
+                //var ms = new MemoryStream();
                 for (int i = 0; i < 1000; i++)
                 {
                     //ms.Position = 0;

@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.PackedVector
@@ -15,12 +14,12 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Rgb24 : IEquatable<Rgb24>, IPixel
+    public struct Rgb24 : IPixel<Rgb24>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Blue, sizeof(byte) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Blue));
 
         [CLSCompliant(false)]
         public byte R;
@@ -79,15 +78,21 @@ namespace MonoGame.Framework.PackedVector
             scaledVector /= byte.MaxValue;
         }
 
-        public void FromScaledVector4(in Vector4 scaledVector) => FromVector4(scaledVector);
+        public void FromScaledVector4(in Vector4 scaledVector)
+        {
+            FromVector4(scaledVector);
+        }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector) => ToVector4(out scaledVector);
+        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        {
+            ToVector4(out scaledVector);
+        }
 
         #endregion
 
         #region IPixel
 
-        public readonly void ToColor(ref Color destination)
+        public readonly void ToColor(out Color destination)
         {
             destination.R = R;
             destination.G = G;
@@ -95,13 +100,25 @@ namespace MonoGame.Framework.PackedVector
             destination.A = byte.MaxValue;
         }
 
-        public void FromGray8(Gray8 source) => R = G = B = source.L;
+        public void FromGray8(Gray8 source)
+        {
+            R = G = B = source.L;
+        }
 
-        public void FromGray16(Gray16 source) => R = G = B = PackedVectorHelper.DownScale16To8Bit(source.L);
+        public void FromGray16(Gray16 source)
+        {
+            R = G = B = PackedVectorHelper.DownScale16To8Bit(source.L);
+        }
 
-        public void FromGrayAlpha16(GrayAlpha16 source) => R = G = B = source.L;
+        public void FromGrayAlpha16(GrayAlpha16 source)
+        {
+            R = G = B = source.L;
+        }
 
-        public void FromRgb24(Rgb24 source) => this = source;
+        public void FromRgb24(Rgb24 source)
+        {
+            this = source;
+        }
 
         public void FromColor(Color source)
         {
@@ -128,13 +145,25 @@ namespace MonoGame.Framework.PackedVector
 
         #region Equals
 
-        public override bool Equals(object obj) => obj is Rgb24 other && Equals(other);
-        public bool Equals(Rgb24 other) => this == other;
+        public static bool operator ==(in Rgb24 a, in Rgb24 b)
+        {
+            return a.R == b.R && a.G == b.G && a.B == b.B;
+        }
 
-        public static bool operator ==(in Rgb24 a, in Rgb24 b) =>
-            a.R == b.R && a.G == b.G && a.B == b.B;
+        public static bool operator !=(in Rgb24 a, in Rgb24 b)
+        {
+            return !(a == b);
+        }
 
-        public static bool operator !=(in Rgb24 a, in Rgb24 b) => !(a == b);
+        public override bool Equals(object obj)
+        {
+            return obj is Rgb24 other && Equals(other);
+        }
+
+        public bool Equals(Rgb24 other)
+        {
+            return this == other;
+        }
 
         #endregion
 
@@ -148,16 +177,7 @@ namespace MonoGame.Framework.PackedVector
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int code = 17;
-                code = code * 23 + R;
-                code = code * 23 + G;
-                return code * 23 + B;
-            }
-        }
+        public override int GetHashCode() => HashCode.Combine(R, G, B);
 
         #endregion
     }

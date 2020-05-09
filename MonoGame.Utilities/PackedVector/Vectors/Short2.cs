@@ -15,13 +15,13 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Short2 : IPackedVector<uint>, IEquatable<Short2>, IPixel
-    {
+    public struct Short2 : IPackedPixel<Short2, uint> 
+    { 
         private static readonly Vector2 Offset = new Vector2(32768);
 
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(short) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(short) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Green));
 
         public short X;
         public short Y;
@@ -42,13 +42,19 @@ namespace MonoGame.Framework.PackedVector
         /// Constructs the packed vector with a packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public Short2(uint packed) : this() => PackedValue = packed;
+        public Short2(uint packed) : this()
+        {
+            PackedValue = packed;
+        }
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public Short2(Vector2 vector) => Pack(vector, out this);
+        public Short2(Vector2 vector)
+        {
+            Pack(vector, out this);
+        }
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
@@ -59,7 +65,10 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        public readonly Vector2 ToVector2() => new Vector2(X, Y);
+        public readonly Vector2 ToVector2()
+        {
+            return new Vector2(X, Y);
+        }
 
         private static void Pack(in Vector2 vector, out Short2 destination)
         {
@@ -79,19 +88,6 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Short2, uint>(ref this) = value;
         }
 
-        public void FromVector4(in Vector4 vector)
-        {
-            Pack(vector.ToVector2(), out this);
-        }
-
-        public readonly void ToVector4(out Vector4 vector)
-        {
-            vector.Base.X = X;
-            vector.Base.Y = Y;
-            vector.Base.Z = 0;
-            vector.Base.W = 1;
-        }
-
         public void FromScaledVector4(in Vector4 scaledVector)
         {
             var v = scaledVector.ToVector2() * ushort.MaxValue;
@@ -108,67 +104,42 @@ namespace MonoGame.Framework.PackedVector
             scaledVector /= ushort.MaxValue;
         }
 
-        #endregion
-
-        #region IPixel
-
-        public void FromGray8(Gray8 source)
+        public void FromVector4(in Vector4 vector)
         {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
+            Pack(vector.ToVector2(), out this);
         }
 
-        public void FromGray16(Gray16 source)
+        public readonly void ToVector4(out Vector4 vector)
         {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGrayAlpha16(GrayAlpha16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb24(Rgb24 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb48(Rgb48 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgba64(Rgba64 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromColor(Color source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public readonly void ToColor(ref Color destination)
-        {
-            ToScaledVector4(out var vector);
-            destination.FromScaledVector4(vector);
+            vector.Base.X = X;
+            vector.Base.Y = Y;
+            vector.Base.Z = 0;
+            vector.Base.W = 1;
         }
 
         #endregion
 
         #region Equals
 
-        public static bool operator ==(in Short2 a, in Short2 b) => a.X == b.X && a.Y == b.Y;
-        public static bool operator !=(in Short2 a, in Short2 b) => !(a == b);
+        public static bool operator ==(in Short2 a, in Short2 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public bool Equals(Short2 other) => this == other;
-        public override bool Equals(object obj) => obj is Short2 other && Equals(other);
+        public static bool operator !=(in Short2 a, in Short2 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
+
+        public bool Equals(Short2 other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Short2 other && Equals(other);
+        }
 
         #endregion
 

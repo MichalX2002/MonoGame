@@ -18,7 +18,7 @@ namespace MonoGame.Framework
 #endif
     [DataContract]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    public struct Vector4 : IEquatable<Vector4>, IPixel
+    public struct Vector4 : IPixel<Vector4>, IEquatable<Vector4>
     {
         /// <summary>
         /// Returns a <see cref="Vector4"/> with all components set to <see cref="ushort.MaxValue"/>.
@@ -75,11 +75,11 @@ namespace MonoGame.Framework
 
         #endregion
 
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(float) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(float) * 8),
-            new VectorComponent(VectorComponentType.Blue, sizeof(float) * 8),
-            new VectorComponent(VectorComponentType.Alpha, sizeof(float) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Blue),
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Alpha));
 
         internal string DebuggerDisplay => string.Concat(
             X.ToString(), "  ",
@@ -196,33 +196,59 @@ namespace MonoGame.Framework
 
         #region IPackedVector
 
-        void IPackedVector.FromVector4(in Vector4 vector) => this = vector;
+        void IVector.FromVector4(in Vector4 vector) => this = vector;
 
-        readonly void IPackedVector.ToVector4(out Vector4 vector) => vector = this;
+        readonly void IVector.ToVector4(out Vector4 vector) => vector = this;
 
-        void IPackedVector.FromScaledVector4(in Vector4 scaledVector) => this = scaledVector;
+        void IVector.FromScaledVector4(in Vector4 scaledVector) => this = scaledVector;
 
-        readonly void IPackedVector.ToScaledVector4(out Vector4 scaledVector) => scaledVector = this;
+        readonly void IVector.ToScaledVector4(out Vector4 scaledVector) => scaledVector = this;
 
         #endregion
 
         #region IPixel
 
-        public void FromColor(Color source) => source.ToScaledVector4(out this);
+        public void FromColor(Color source)
+        {
+            source.ToScaledVector4(out this);
+        }
 
-        void IPixel.FromGray8(Gray8 source) => source.ToScaledVector4(out this);
+        void IPixel.FromGray8(Gray8 source)
+        {
+            source.ToScaledVector4(out this);
+        }
 
-        void IPixel.FromGray16(Gray16 source) => source.ToScaledVector4(out this);
+        void IPixel.FromGray16(Gray16 source)
+        {
+            source.ToScaledVector4(out this);
+        }
 
-        void IPixel.FromGrayAlpha16(GrayAlpha16 source) => source.ToScaledVector4(out this);
+        void IPixel.FromGrayAlpha16(GrayAlpha16 source)
+        {
+            source.ToScaledVector4(out this);
+        }
 
-        void IPixel.FromRgb24(Rgb24 source) => source.ToScaledVector4(out this);
+        void IPixel.FromRgb24(Rgb24 source)
+        {
+            source.ToScaledVector4(out this);
+        }
 
-        void IPixel.FromRgb48(Rgb48 source) => source.ToScaledVector4(out this);
+        void IPixel.FromRgb48(Rgb48 source)
+        {
+            source.ToScaledVector4(out this);
+        }
 
-        void IPixel.FromRgba64(Rgba64 source) => source.ToScaledVector4(out this);
+        void IPixel.FromRgba64(Rgba64 source)
+        {
+            source.ToScaledVector4(out this);
+        }
 
-        public readonly void ToColor(ref Color destination) => destination.FromScaledVector4(this);
+        public readonly void ToColor(out Color destination)
+        {
+            destination = default; // TODO: Unsafe.SkipInit
+
+            destination.FromScaledVector4(this);
+        }
 
         #endregion
 
@@ -929,7 +955,10 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the <see cref="Vector2"/> representation of this vector.
         /// </summary>
-        public readonly Vector2 ToVector2() => UnsafeUtils.As<Vector4, Vector2>(this);
+        public readonly Vector2 ToVector2()
+        {
+            return UnsafeUtils.As<Vector4, Vector2>(this);
+        }
 
         #endregion
 

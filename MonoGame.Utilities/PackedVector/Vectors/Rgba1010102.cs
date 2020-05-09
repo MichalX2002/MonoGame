@@ -15,19 +15,22 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Rgba1010102 : IPackedVector<uint>, IEquatable<Rgba1010102>, IPixel
+    public struct Rgba1010102 : IPackedPixel<Rgba1010102, uint>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, 10),
-            new VectorComponent(VectorComponentType.Green, 10),
-            new VectorComponent(VectorComponentType.Blue, 10),
-            new VectorComponent(VectorComponentType.Alpha, 2));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Red, 10),
+            new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Green, 10),
+            new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Blue, 10),
+            new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Alpha, 2));
 
         /// <summary>
         /// Constructs the packed vector with a packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public Rgba1010102(uint packed) => PackedValue = packed;
+        public Rgba1010102(uint packed)
+        {
+            PackedValue = packed;
+        }
 
         /// <summary>
         /// Constructs the packed vector with vector form values.
@@ -83,65 +86,27 @@ namespace MonoGame.Framework.PackedVector
 
         #endregion
 
-        #region IPixel
-
-        public void FromColor(Color source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGray8(Gray8 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGray16(Gray16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGrayAlpha16(GrayAlpha16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb24(Rgb24 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb48(Rgb48 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgba64(Rgba64 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public readonly void ToColor(ref Color destination)
-        {
-            ToScaledVector4(out var vector);
-            destination.FromScaledVector4(vector);
-        }
-
-        #endregion
-
         #region Equals
 
-        public static bool operator ==(Rgba1010102 a, Rgba1010102 b) => a.PackedValue == b.PackedValue;
-        public static bool operator !=(Rgba1010102 a, Rgba1010102 b) => a.PackedValue != b.PackedValue;
+        public static bool operator ==(Rgba1010102 a, Rgba1010102 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public bool Equals(Rgba1010102 other) => this == other;
-        public override bool Equals(object obj) => obj is Rgba1010102 other && Equals(other);
+        public static bool operator !=(Rgba1010102 a, Rgba1010102 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
+
+        public bool Equals(Rgba1010102 other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Rgba1010102 other && Equals(other);
+        }
 
         #endregion
 

@@ -17,14 +17,14 @@ namespace MonoGame.Framework.PackedVector
 
         public VectorTypeInfo(Type type)
         {
-            if (!typeof(IPackedVector).IsAssignableFrom(type))
+            if (!typeof(IVector).IsAssignableFrom(type))
                 throw new ArgumentException(
-                    $"The type does not implement {nameof(IPackedVector)}.", nameof(type));
+                    $"The type does not implement {nameof(IVector)}.", nameof(type));
 
             Type = type;
             ElementSize = Marshal.SizeOf(type);
 
-            var vectorInstance = (IPackedVector)Activator.CreateInstance(type);
+            var vectorInstance = (IVector)Activator.CreateInstance(type);
             ComponentInfo = vectorInstance.ComponentInfo;
         }
 
@@ -58,7 +58,7 @@ namespace MonoGame.Framework.PackedVector
         }
 
         public static VectorTypeInfo Get<TPackedVector>()
-            where TPackedVector : unmanaged, IPackedVector
+            where TPackedVector : unmanaged, IVector
         {
             return Get(typeof(TPackedVector));
         }

@@ -126,12 +126,12 @@ namespace MonoGame.Imaging.Processing
 
             protected void AssertValidRange(int x, int y, int count, string verb)
             {
-                ArgumentGuard.AssertAtleastZero(x, nameof(x));
+                ArgumentGuard.AssertAtLeastZero(x, nameof(x));
                 if (x + count > SourceRectangle.X + SourceRectangle.Width)
                     throw new ArgumentOutOfRangeException(
                         nameof(x), $"The {verb} amount of pixels exceeds the cropped row.");
 
-                ArgumentGuard.AssertAtleastZero(y, nameof(y));
+                ArgumentGuard.AssertAtLeastZero(y, nameof(y));
                 if (y >= SourceRectangle.Height)
                     throw new ArgumentOutOfRangeException(
                         nameof(y), $"The {verb} row is not within the cropped view.");

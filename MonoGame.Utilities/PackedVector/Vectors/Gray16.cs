@@ -14,25 +14,34 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Gray16 : IPackedVector<ushort>, IEquatable<Gray16>, IPixel
+    public struct Gray16 : IPackedPixel<Gray16, ushort>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Luminance, sizeof(ushort) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Luminance));
 
         [CLSCompliant(false)]
         public ushort L;
 
         [CLSCompliant(false)]
-        public Gray16(ushort luminance) => L = luminance;
+        public Gray16(ushort luminance)
+        {
+            L = luminance;
+        }
 
         #region IPackedVector
 
         [CLSCompliant(false)]
         public ushort PackedValue { readonly get => L; set => L = value; }
 
-        public void FromVector4(in Vector4 vector) => FromScaledVector4(vector);
+        public void FromVector4(in Vector4 vector)
+        {
+            FromScaledVector4(vector);
+        }
 
-        public readonly void ToVector4(out Vector4 vector) => ToScaledVector4(out vector);
+        public readonly void ToVector4(out Vector4 vector)
+        {
+            ToScaledVector4(out vector);
+        }
 
         public void FromScaledVector4(in Vector4 vector)
         {
@@ -90,10 +99,9 @@ namespace MonoGame.Framework.PackedVector
             L = PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B);
         }
 
-        public readonly void ToColor(ref Color destination)
+        public readonly void ToColor(out Color destination)
         {
-            destination.R = destination.G = destination.B =
-                PackedVectorHelper.DownScale16To8Bit(L);
+            destination.R = destination.G = destination.B = PackedVectorHelper.DownScale16To8Bit(L);
             destination.A = byte.MaxValue;
         }
 
@@ -102,34 +110,48 @@ namespace MonoGame.Framework.PackedVector
         public void FromArgb32(Argb32 source)
         {
             L = PackedVectorHelper.Get16BitBT709Luminance(
-                    PackedVectorHelper.UpScale8To16Bit(source.R),
-                    PackedVectorHelper.UpScale8To16Bit(source.G),
-                    PackedVectorHelper.UpScale8To16Bit(source.B));
+                PackedVectorHelper.UpScale8To16Bit(source.R),
+                PackedVectorHelper.UpScale8To16Bit(source.G),
+                PackedVectorHelper.UpScale8To16Bit(source.B));
         }
 
         public void FromBgr24(Bgr24 source)
         {
             L = PackedVectorHelper.Get16BitBT709Luminance(
-                    PackedVectorHelper.UpScale8To16Bit(source.R),
-                    PackedVectorHelper.UpScale8To16Bit(source.G),
-                    PackedVectorHelper.UpScale8To16Bit(source.B));
+                PackedVectorHelper.UpScale8To16Bit(source.R),
+                PackedVectorHelper.UpScale8To16Bit(source.G),
+                PackedVectorHelper.UpScale8To16Bit(source.B));
         }
 
         public void FromBgra32(Bgra32 source)
         {
             L = PackedVectorHelper.Get16BitBT709Luminance(
-                    PackedVectorHelper.UpScale8To16Bit(source.R),
-                    PackedVectorHelper.UpScale8To16Bit(source.G),
-                    PackedVectorHelper.UpScale8To16Bit(source.B));
+                PackedVectorHelper.UpScale8To16Bit(source.R),
+                PackedVectorHelper.UpScale8To16Bit(source.G),
+                PackedVectorHelper.UpScale8To16Bit(source.B));
         }
 
         #region Equals
 
-        public static bool operator ==(Gray16 a, Gray16 b) => a.L == b.L;
-        public static bool operator !=(Gray16 a, Gray16 b) => a.L != b.L;
+        public static bool operator ==(Gray16 a, Gray16 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public bool Equals(Gray16 other) => this == other;
-        public override bool Equals(object obj) => obj is Gray16 other && Equals(other);
+        public static bool operator !=(Gray16 a, Gray16 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
+
+        public bool Equals(Gray16 other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Gray16 other && Equals(other);
+        }
 
         #endregion
 
@@ -137,7 +159,7 @@ namespace MonoGame.Framework.PackedVector
 
         public override string ToString() => nameof(Gray16) + $"({L})";
 
-        public override int GetHashCode() => L.GetHashCode();
+        public override int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

@@ -24,8 +24,8 @@ namespace MonoGame.Framework.Utilities
         /// <param name="total">Specifies when the operation is complete.</param>
         public TaskbarProgressValue(long completed, long total)
         {
-            ArgumentGuard.AssertAtleastZero(completed, nameof(completed), false);
-            ArgumentGuard.AssertAtleastZero(total, nameof(total), false);
+            ArgumentGuard.AssertAtLeastZero(completed, nameof(completed), false);
+            ArgumentGuard.AssertAtLeastZero(total, nameof(total), false);
 
             Completed = completed;
             Total = total;

@@ -15,13 +15,13 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Rgba64 : IPackedVector<ulong>, IEquatable<Rgba64>, IPixel
+    public struct Rgba64 : IPackedPixel<Rgba64, ulong>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(ushort) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(ushort) * 8),
-            new VectorComponent(VectorComponentType.Blue, sizeof(ushort) * 8),
-            new VectorComponent(VectorComponentType.Alpha, sizeof(ushort) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Blue),
+            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Alpha));
 
         [CLSCompliant(false)]
         public ushort R;
@@ -80,10 +80,6 @@ namespace MonoGame.Framework.PackedVector
             set => Unsafe.As<Rgba64, ulong>(ref this) = value;
         }
 
-        public void FromVector4(in Vector4 vector) => FromScaledVector4(vector);
-
-        public readonly void ToVector4(out Vector4 vector) => ToScaledVector4(out vector);
-
         public void FromScaledVector4(in Vector4 scaledVector)
         {
             var v = scaledVector * ushort.MaxValue;
@@ -105,17 +101,19 @@ namespace MonoGame.Framework.PackedVector
             scaledVector /= ushort.MaxValue;
         }
 
+        public void FromVector4(in Vector4 vector)
+        {
+            FromScaledVector4(vector);
+        }
+
+        public readonly void ToVector4(out Vector4 vector)
+        {
+            ToScaledVector4(out vector);
+        }
+
         #endregion
 
         #region IPixel
-
-        public readonly void ToColor(ref Color destination)
-        {
-            destination.R = PackedVectorHelper.DownScale16To8Bit(R);
-            destination.G = PackedVectorHelper.DownScale16To8Bit(G);
-            destination.B = PackedVectorHelper.DownScale16To8Bit(B);
-            destination.A = PackedVectorHelper.DownScale16To8Bit(A);
-        }
 
         public void FromGray8(Gray8 source)
         {
@@ -159,19 +157,42 @@ namespace MonoGame.Framework.PackedVector
             A = byte.MaxValue;
         }
 
-        public void FromRgba64(Rgba64 source) => this = source;
+        public void FromRgba64(Rgba64 source)
+        {
+            this = source;
+        }
+
+        public readonly void ToColor(out Color destination)
+        {
+            destination.R = PackedVectorHelper.DownScale16To8Bit(R);
+            destination.G = PackedVectorHelper.DownScale16To8Bit(G);
+            destination.B = PackedVectorHelper.DownScale16To8Bit(B);
+            destination.A = PackedVectorHelper.DownScale16To8Bit(A);
+        }
 
         #endregion
 
         #region Equals
 
-        public override bool Equals(object obj) => obj is Rgba64 other && Equals(other);
-        public bool Equals(Rgba64 other) => this == other;
+        public static bool operator ==(in Rgba64 a, in Rgba64 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public static bool operator ==(in Rgba64 a, in Rgba64 b) =>
-            a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A;
+        public static bool operator !=(in Rgba64 a, in Rgba64 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
 
-        public static bool operator !=(in Rgba64 a, in Rgba64 b) => !(a == b);
+        public override bool Equals(object obj)
+        {
+            return obj is Rgba64 other && Equals(other);
+        }
+
+        public bool Equals(Rgba64 other)
+        {
+            return this == other;
+        }
 
         #endregion
 

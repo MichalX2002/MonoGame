@@ -107,7 +107,7 @@ namespace MonoGame.Framework.Memory
         public void ReAllocate(int length, bool zeroFill = false)
         {
             AssertNotDisposed();
-            ArgumentGuard.AssertAtleastZero(length, nameof(length));
+            ArgumentGuard.AssertAtLeastZero(length, nameof(length));
 
             if (_length == length)
                 return;

@@ -23,7 +23,7 @@ namespace MonoGame.Framework
 #endif
     [DataContract]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    public struct Vector2 : IEquatable<Vector2>, IPackedVector<ulong>, IPixel
+    public struct Vector2 : IPackedPixel<Vector2, ulong>, IEquatable<Vector2>
     {
         #region Public Constants
 
@@ -54,12 +54,12 @@ namespace MonoGame.Framework
 
         #endregion
 
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Red, sizeof(float) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(float) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Green));
 
         internal string DebuggerDisplay => string.Concat(
-            X.ToString(), "  ", 
+            X.ToString(), "  ",
             Y.ToString());
 
         [IgnoreDataMember]
@@ -120,12 +120,12 @@ namespace MonoGame.Framework
             vector.Base = new FastVector4(Base, 0, 1);
         }
 
-        void IPackedVector.FromScaledVector4(in Vector4 scaledVector)
+        void IVector.FromScaledVector4(in Vector4 scaledVector)
         {
             FromVector4(scaledVector);
         }
 
-        readonly void IPackedVector.ToScaledVector4(out Vector4 scaledVector)
+        readonly void IVector.ToScaledVector4(out Vector4 scaledVector)
         {
             ToVector4(out scaledVector);
         }
@@ -134,24 +134,29 @@ namespace MonoGame.Framework
 
         #region IPixel
 
-        public void FromColor(Color source) => FromVector4(source.ToScaledVector4());
-
-        void IPixel.FromGray8(Gray8 source) => FromVector4(source.ToScaledVector4());
-
-        void IPixel.FromGray16(Gray16 source) => FromVector4(source.ToScaledVector4());
-
-        void IPixel.FromGrayAlpha16(GrayAlpha16 source) => FromVector4(source.ToScaledVector4());
-
-        void IPixel.FromRgb24(Rgb24 source) => FromVector4(source.ToScaledVector4());
-
-        void IPixel.FromRgb48(Rgb48 source) => FromVector4(source.ToScaledVector4());
-
-        public void FromRgba64(Rgba64 source) => FromVector4(source.ToScaledVector4());
-
-        public readonly void ToColor(ref Color destination)
+        void IPixel.FromGray8(Gray8 source)
         {
-            ToVector4(out var vector);
-            destination.FromScaledVector4(vector);
+            FromVector4(source.ToScaledVector4());
+        }
+
+        void IPixel.FromGray16(Gray16 source)
+        {
+            FromVector4(source.ToScaledVector4());
+        }
+
+        void IPixel.FromGrayAlpha16(GrayAlpha16 source)
+        {
+            FromVector4(source.ToScaledVector4());
+        }
+
+        void IPixel.FromRgb24(Rgb24 source)
+        {
+            FromVector4(source.ToScaledVector4());
+        }
+
+        void IPixel.FromRgb48(Rgb48 source)
+        {
+            FromVector4(source.ToScaledVector4());
         }
 
         #endregion
@@ -161,7 +166,10 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the <see cref="Vector3"/> representation of this <see cref="Vector2"/>.
         /// </summary>
-        public readonly Vector3 ToVector3() => new Vector3(X, Y, 0);
+        public readonly Vector3 ToVector3()
+        {
+            return new Vector3(X, Y, 0);
+        }
 
         #endregion
 
@@ -477,7 +485,7 @@ namespace MonoGame.Framework
         /// Gets the hash code of this <see cref="Vector2"/>.
         /// </summary>
         /// <returns>Hash code of this <see cref="Vector2"/>.</returns>
-        public override int GetHashCode() => HashCode.Combine(X, Y);
+        public override int GetHashCode() => Base.GetHashCode();
 
         #endregion
 
@@ -493,8 +501,8 @@ namespace MonoGame.Framework
         /// <param name="amount">Weighting factor.</param>
         /// <returns>The hermite spline interpolation vector.</returns>
         public static Vector2 Hermite(
-            in Vector2 position1, in Vector2 tangent1, 
-            in Vector2 position2, in Vector2 tangent2, 
+            in Vector2 position1, in Vector2 tangent1,
+            in Vector2 position2, in Vector2 tangent2,
             float amount)
         {
             return new Vector2(

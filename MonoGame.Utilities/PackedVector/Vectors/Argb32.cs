@@ -15,13 +15,13 @@ namespace MonoGame.Framework.PackedVector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Argb32 : IPackedVector<uint>, IEquatable<Argb32>, IPixel
+    public struct Argb32 : IPackedPixel<Argb32, uint>
     {
-        VectorComponentInfo IPackedVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Alpha, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Red, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Green, sizeof(byte) * 8),
-            new VectorComponent(VectorComponentType.Blue, sizeof(byte) * 8));
+        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Alpha),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Blue));
 
         public byte A;
         public byte R;
@@ -53,7 +53,7 @@ namespace MonoGame.Framework.PackedVector
             A = a;
         }
 
-        public Argb32(Vector4 vector): this()
+        public Argb32(Vector4 vector) : this()
         {
             FromVector4(vector);
         }
@@ -98,14 +98,6 @@ namespace MonoGame.Framework.PackedVector
         #endregion
 
         #region IPixel
-
-        public readonly void ToColor(ref Color destination)
-        {
-            destination.R = R;
-            destination.G = G;
-            destination.B = B;
-            destination.A = A;
-        }
 
         public void FromGray8(Gray8 source)
         {
@@ -157,17 +149,37 @@ namespace MonoGame.Framework.PackedVector
             A = PackedVectorHelper.DownScale16To8Bit(source.A);
         }
 
+        public readonly void ToColor(out Color destination)
+        {
+            destination.R = R;
+            destination.G = G;
+            destination.B = B;
+            destination.A = A;
+        }
+
         #endregion
 
         #region Equals
 
-        public override bool Equals(object obj) => obj is Argb32 other && Equals(other);
-        public bool Equals(Argb32 other) => this == other;
+        public static bool operator ==(in Argb32 a, in Argb32 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public static bool operator ==(in Argb32 a, in Argb32 b) =>
-            a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A;
+        public static bool operator !=(in Argb32 a, in Argb32 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
 
-        public static bool operator !=(in Argb32 a, in Argb32 b) => !(a == b);
+        public override bool Equals(object obj)
+        {
+            return obj is Argb32 other && Equals(other);
+        }
+
+        public bool Equals(Argb32 other)
+        {
+            return this == other;
+        }
 
         #endregion
 
