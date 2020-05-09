@@ -4,7 +4,7 @@ using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
 using MonoGame.Framework.Media;
 using MonoGame.Imaging;
-using MonoGame.Imaging.Coding.Encoding;
+using MonoGame.Imaging.Codecs.Encoding;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Processing;
 using NVorbis;
@@ -17,7 +17,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MonoGame.Testing
+namespace MonoGame.TestingA
 {
     public class GameHead : Game
     {
@@ -165,7 +165,7 @@ namespace MonoGame.Testing
                     var image = Image<Color>.Create(w, h);
                     GraphicsDevice.GetBackBufferData(image.GetPixelSpan(), new Rectangle(x, y, w, h));
 
-                    Task.Run(() =>
+                    Task.Run(async () =>
                     {
                         static void OnProgress(
                             ImageEncoderState encoderState,
@@ -176,7 +176,8 @@ namespace MonoGame.Testing
                         }
 
                         frameIndex++;
-                        image.Save("frames/yo mom " + frameIndex + ".png", null, null, default, OnProgress);
+                        await image.SaveAsync(
+                            "frames/yo mom " + frameIndex + ".png", onProgress: OnProgress);
                         image.Dispose();
                     });
                 }

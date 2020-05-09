@@ -12,6 +12,7 @@ using System.Text;
 using MonoGame.Framework.IO;
 using MonoGame.Framework.Memory;
 using MonoGame.OpenAL;
+using GenericVector = System.Numerics.Vector;
 
 namespace MonoGame.Framework.Audio
 {
@@ -352,10 +353,7 @@ namespace MonoGame.Framework.Audio
             if (dst.Length < src.Length)
                 throw new ArgumentException("The destination span is too small.");
 
-            // TODO: FIXME: HACK: for netstandard2.1
-            var mSrc = MemoryMarshal.CreateSpan(ref Unsafe.AsRef(src.GetPinnableReference()), src.Length);
-
-            if (Vector.IsHardwareAccelerated)
+            if (GenericVector.IsHardwareAccelerated)
             {
                 // TODO: also consider SSE for this, which may be a bit faster
                 // this is roughly 2x perf on AVX2
@@ -364,26 +362,26 @@ namespace MonoGame.Framework.Audio
                 var minValueVec = new Vector<float>(short.MinValue);
                 var halfValueVec = new Vector<float>(0.5f);
 
-                while (mSrc.Length >= Vector<float>.Count)
+                while (src.Length >= Vector<float>.Count)
                 {
-                    var srcVec = new Vector<float>(mSrc);
-                    var resultVec = Vector.Multiply(srcVec, maxValueVec);
-                    resultVec = Vector.Max(resultVec, minValueVec);
-                    resultVec = Vector.Min(resultVec, maxValueVec);
-                    resultVec = Vector.Add(resultVec, halfValueVec);
+                    var srcVec = new Vector<float>(src);
+                    var resultVec = GenericVector.Multiply(srcVec, maxValueVec);
+                    resultVec = GenericVector.Max(resultVec, minValueVec);
+                    resultVec = GenericVector.Min(resultVec, maxValueVec);
+                    resultVec = GenericVector.Add(resultVec, halfValueVec);
 
-                    var resultInt32 = Vector.ConvertToInt32(resultVec);
+                    var resultInt32 = GenericVector.ConvertToInt32(resultVec);
                     for (int j = 0; j < Vector<float>.Count; j++)
                         dst[j] = (short)resultInt32[j];
 
-                    mSrc = mSrc.Slice(Vector<float>.Count);
+                    src = src.Slice(Vector<float>.Count);
                     dst = dst.Slice(Vector<float>.Count);
                 }
             }
 
-            for (int i = 0; i < mSrc.Length; i++)
+            for (int i = 0; i < src.Length; i++)
             {
-                int tmp = (int)(mSrc[i] * short.MaxValue);
+                int tmp = (int)(src[i] * short.MaxValue);
                 if (tmp > short.MaxValue)
                     dst[i] = short.MaxValue;
                 else if (tmp < short.MinValue)

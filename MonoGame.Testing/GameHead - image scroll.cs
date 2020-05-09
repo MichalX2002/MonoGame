@@ -18,7 +18,7 @@ using MonoGame.Framework.Input;
 using MonoGame.Framework.Vector;
 using MonoGame.Imaging;
 
-namespace MonoGame.TestingO
+namespace MonoGame.TestingC
 {
     public class GameHead : Game
     {
