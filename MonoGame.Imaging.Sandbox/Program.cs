@@ -17,7 +17,7 @@ using MonoGame.Imaging.Codecs.Decoding;
 using MonoGame.Imaging.Codecs.Encoding;
 using System.Numerics;
 using StbSharp;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 using System.Security.Cryptography;
 using System.Xml;
 using MonoGame.Imaging.Processing;

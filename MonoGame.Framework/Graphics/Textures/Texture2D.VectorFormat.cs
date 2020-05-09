@@ -9,7 +9,7 @@ using System.Linq;
 using System.Reflection;
 using MonoGame.Framework.Collections;
 using MonoGame.Framework.Memory;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 
 namespace MonoGame.Framework.Graphics
 {

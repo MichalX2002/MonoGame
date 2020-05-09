@@ -5,7 +5,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 using FastVector4 = System.Numerics.Vector4;
 
 namespace MonoGame.Framework

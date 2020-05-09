@@ -8,7 +8,7 @@ using System.ComponentModel;
 using System.Linq;
 using MonoGame.Framework.Content.Pipeline.Graphics;
 using MonoGame.Framework.Graphics;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 
 namespace MonoGame.Framework.Content.Pipeline.Processors
 {

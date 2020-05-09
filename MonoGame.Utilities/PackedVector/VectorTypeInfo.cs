@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 
-namespace MonoGame.Framework.PackedVector
+namespace MonoGame.Framework.Vector
 {
     public class VectorTypeInfo : IEquatable<VectorTypeInfo>
     {

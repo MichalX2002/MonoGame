@@ -3,7 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using MonoGame.Framework.Graphics;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 using System;
 using System.Runtime.InteropServices;
 

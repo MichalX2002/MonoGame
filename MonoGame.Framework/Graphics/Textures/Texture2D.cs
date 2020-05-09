@@ -8,7 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using MonoGame.Framework.Memory;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 using MonoGame.Imaging;
 
 namespace MonoGame.Framework.Graphics

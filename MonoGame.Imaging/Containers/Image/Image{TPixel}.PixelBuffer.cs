@@ -2,7 +2,7 @@
 using MonoGame.Framework;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Framework.Memory;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 

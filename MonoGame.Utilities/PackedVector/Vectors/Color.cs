@@ -6,7 +6,7 @@ using System;
 using System.Text;
 using System.Runtime.Serialization;
 using System.Diagnostics;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 

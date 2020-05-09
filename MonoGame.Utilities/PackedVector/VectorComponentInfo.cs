@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MonoGame.Framework.PackedVector
+namespace MonoGame.Framework.Vector
 {
     /// <summary>
     /// Describes a vector and the data it stores.

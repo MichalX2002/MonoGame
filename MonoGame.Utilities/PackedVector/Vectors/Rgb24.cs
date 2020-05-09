@@ -5,7 +5,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace MonoGame.Framework.PackedVector
+namespace MonoGame.Framework.Vector
 {
     /// <summary>
     /// Packed vector type containing four unsigned 8-bit XYZ components.

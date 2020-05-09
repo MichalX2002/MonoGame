@@ -5,7 +5,7 @@
 using System;
 using MonoGame.Framework.Graphics;
 using ATI.TextureConverter;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {

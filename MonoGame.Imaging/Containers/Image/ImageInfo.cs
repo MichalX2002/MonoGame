@@ -1,5 +1,5 @@
 ﻿
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 
 namespace MonoGame.Imaging
 {

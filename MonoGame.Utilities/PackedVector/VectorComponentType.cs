@@ -1,5 +1,5 @@
 ﻿
-namespace MonoGame.Framework.PackedVector
+namespace MonoGame.Framework.Vector
 {
     public enum VectorComponentType
     {

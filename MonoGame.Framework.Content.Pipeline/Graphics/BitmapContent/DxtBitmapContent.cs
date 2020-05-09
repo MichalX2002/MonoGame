@@ -6,7 +6,7 @@ using System;
 using MonoGame.Framework.Graphics;
 using Nvidia.TextureTools;
 using System.Runtime.InteropServices;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {

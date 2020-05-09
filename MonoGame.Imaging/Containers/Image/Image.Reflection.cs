@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Utilities;
 

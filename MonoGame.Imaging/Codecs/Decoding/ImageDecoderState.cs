@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Threading;
 using MonoGame.Framework;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 
 namespace MonoGame.Imaging.Codecs.Decoding
 {

@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 using SharpFont;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
