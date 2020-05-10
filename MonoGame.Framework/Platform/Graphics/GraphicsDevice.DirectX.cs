@@ -1067,7 +1067,7 @@ namespace MonoGame.Framework.Graphics
         // Only implemented for DirectX right now, so not in GraphicsDevice.cs
         public void SetRenderTarget(RenderTarget2D renderTarget, int arraySlice)
         {
-            if (!GraphicsCapabilities.SupportsTextureArrays)
+            if (!Capabilities.SupportsTextureArrays)
                 throw new InvalidOperationException(
                     "Texture arrays are not supported on this graphics device.");
 
@@ -1634,11 +1634,11 @@ namespace MonoGame.Framework.Graphics
         }
 
         internal static unsafe void CopyResourceTo<T>(
-            SurfaceFormat format, DataBox box, int columns, int rows, Span<T> dst)
+            SurfaceFormat format, DataBox box, int columns, int rows, Span<T> destination)
             where T : unmanaged
         {
             var byteSrc = new ReadOnlySpan<byte>((void*)box.DataPointer, box.RowPitch * rows);
-            var byteDst = MemoryMarshal.AsBytes(dst);
+            var byteDst = MemoryMarshal.AsBytes(destination);
 
             int rowBytes = format.GetSize() * columns;
             if (rowBytes == box.RowPitch)
@@ -1660,9 +1660,9 @@ namespace MonoGame.Framework.Graphics
 
                     // iterate between start and end of the row in memory
                     for (int i = start; i < end; i++, x++)
-                        dst[i] = srcSlice[x];
+                        destination[i] = srcSlice[x];
 
-                    if (end >= dst.Length)
+                    if (end >= destination.Length)
                         break;
 
                     byteOffset += x * sizeof(T);

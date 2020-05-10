@@ -16,10 +16,10 @@ namespace MonoGame.Framework.Graphics
         #region Constructors
 
         protected VertexBuffer(
-            GraphicsDevice graphicsDevice, 
-            VertexDeclaration vertexDeclaration, 
-            int capacity, 
-            BufferUsage bufferUsage, 
+            GraphicsDevice graphicsDevice,
+            VertexDeclaration vertexDeclaration,
+            int capacity,
+            BufferUsage bufferUsage,
             bool isDynamic) :
             base(graphicsDevice, capacity, bufferUsage, isDynamic)
         {
@@ -29,13 +29,16 @@ namespace MonoGame.Framework.Graphics
 
             VertexDeclaration = vertexDeclaration;
 
-            PlatformConstruct();
+            if (IsValidThreadContext)
+                PlatformConstruct();
+            else
+                Threading.BlockOnMainThread(PlatformConstruct);
         }
 
         public VertexBuffer(
-            GraphicsDevice graphicsDevice, 
-            VertexDeclaration vertexDeclaration, 
-            int capacity, 
+            GraphicsDevice graphicsDevice,
+            VertexDeclaration vertexDeclaration,
+            int capacity,
             BufferUsage bufferUsage) :
             this(graphicsDevice, vertexDeclaration, capacity, bufferUsage, false)
         {
@@ -43,8 +46,8 @@ namespace MonoGame.Framework.Graphics
 
         public VertexBuffer(
             GraphicsDevice graphicsDevice,
-            Type vertexType, 
-            int capacity, 
+            Type vertexType,
+            int capacity,
             BufferUsage bufferUsage) :
             this(graphicsDevice, VertexDeclaration.FromType(vertexType), capacity, bufferUsage, false)
         {
@@ -70,9 +73,9 @@ namespace MonoGame.Framework.Graphics
             where T : unmanaged
         {
             if (BufferUsage == BufferUsage.WriteOnly)
-                throw new InvalidOperationException(
-                    $"Calling {nameof(GetData)} on a resource that was " +
-                    $"created with {BufferUsage.WriteOnly} is not supported.");
+                throw new InvalidOperationException(FrameworkResources.WriteOnlyResource);
+
+            AssertMainThread(true);
 
             if (elementStride == 0)
                 elementStride = sizeof(T);
@@ -131,7 +134,7 @@ namespace MonoGame.Framework.Graphics
         /// </code>
         /// </remarks>
         public unsafe void SetData<T>(
-            int byteOffset, 
+            int byteOffset,
             ReadOnlySpan<T> data,
             int elementStride = 0,
             SetDataOptions options = SetDataOptions.None)
@@ -139,6 +142,8 @@ namespace MonoGame.Framework.Graphics
         {
             if (data.IsEmpty)
                 throw new ArgumentEmptyException(nameof(data));
+
+            AssertMainThread(true);
 
             if (elementStride == 0)
                 elementStride = sizeof(T);
@@ -170,9 +175,9 @@ namespace MonoGame.Framework.Graphics
         }
 
         public void SetData<T>(
-            int byteOffset, 
-            Span<T> data, 
-            int elementStride = 0, 
+            int byteOffset,
+            Span<T> data,
+            int elementStride = 0,
             SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
@@ -180,7 +185,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         public void SetData<T>(
-            Span<T> data, 
+            Span<T> data,
             int elementStride = 0,
             SetDataOptions options = SetDataOptions.None)
             where T : unmanaged

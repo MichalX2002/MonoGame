@@ -48,10 +48,10 @@ namespace MonoGame.Framework
         /// <exception cref="InvalidOperationException">
         /// The caller is not running on the main thread.
         /// </exception>
-        public static void EnsureMainThread()
+        public static void AssertMainThread()
         {
             if (!IsOnMainThread)
-                throw new InvalidOperationException("Method was not called on the main thread.");
+                throw new OffThreadNotSupportedException();
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace MonoGame.Framework
         /// </summary>
         internal static void Run()
         {
-            EnsureMainThread();
+            AssertMainThread();
 
 #if IOS
             lock (BackgroundContext)

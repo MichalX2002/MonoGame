@@ -32,9 +32,8 @@ namespace MonoGame.Framework.Graphics
         protected override void Dispose(bool disposing)
         {
             if (!IsDisposed)
-            {
                 GraphicsDevice?.PlatformDeleteRenderTarget(this);
-            }
+            
             base.Dispose(disposing);
         }
     }

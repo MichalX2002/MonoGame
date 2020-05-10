@@ -29,7 +29,7 @@ namespace MonoGame.Framework.Graphics
             switch (Filter)
       {
       case TextureFilter.Point:
-                if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
+                if (GraphicsDevice.Capabilities.SupportsTextureFilterAnisotropic)
                 {
                     GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
@@ -40,7 +40,7 @@ namespace MonoGame.Framework.Graphics
                 GraphicsExtensions.CheckGLError();
         break;
       case TextureFilter.Linear:
-                if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
+                if (GraphicsDevice.Capabilities.SupportsTextureFilterAnisotropic)
                 {
                     GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
@@ -51,9 +51,9 @@ namespace MonoGame.Framework.Graphics
                 GraphicsExtensions.CheckGLError();
         break;
       case TextureFilter.Anisotropic:
-                if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
+                if (GraphicsDevice.Capabilities.SupportsTextureFilterAnisotropic)
                 {
-                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, MathHelper.Clamp(MaxAnisotropy, 1f, GraphicsDevice.GraphicsCapabilities.MaxTextureAnisotropy));
+                    GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, MathHelper.Clamp(MaxAnisotropy, 1f, GraphicsDevice.Capabilities.MaxTextureAnisotropy));
                     GraphicsExtensions.CheckGLError();
                 }
         GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureMinFilter, (int)(useMipmaps ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
@@ -62,7 +62,7 @@ namespace MonoGame.Framework.Graphics
                 GraphicsExtensions.CheckGLError();
         break;
       case TextureFilter.PointMipLinear:
-                if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
+                if (GraphicsDevice.Capabilities.SupportsTextureFilterAnisotropic)
                 {
                     GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
@@ -73,7 +73,7 @@ namespace MonoGame.Framework.Graphics
                 GraphicsExtensions.CheckGLError();
         break;
             case TextureFilter.LinearMipPoint:
-                if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
+                if (GraphicsDevice.Capabilities.SupportsTextureFilterAnisotropic)
                 {
                     GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
@@ -84,7 +84,7 @@ namespace MonoGame.Framework.Graphics
                 GraphicsExtensions.CheckGLError();
                 break;
             case TextureFilter.MinLinearMagPointMipLinear:
-                if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
+                if (GraphicsDevice.Capabilities.SupportsTextureFilterAnisotropic)
                 {
                     GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
@@ -95,7 +95,7 @@ namespace MonoGame.Framework.Graphics
                 GraphicsExtensions.CheckGLError();
                 break;
             case TextureFilter.MinLinearMagPointMipPoint:
-                if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
+                if (GraphicsDevice.Capabilities.SupportsTextureFilterAnisotropic)
                 {
                     GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
@@ -106,7 +106,7 @@ namespace MonoGame.Framework.Graphics
                 GraphicsExtensions.CheckGLError();
                 break;
             case TextureFilter.MinPointMagLinearMipLinear:
-                if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
+                if (GraphicsDevice.Capabilities.SupportsTextureFilterAnisotropic)
                 {
                     GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
@@ -117,7 +117,7 @@ namespace MonoGame.Framework.Graphics
                 GraphicsExtensions.CheckGLError();
                 break;
             case TextureFilter.MinPointMagLinearMipPoint:
-                if (GraphicsDevice.GraphicsCapabilities.SupportsTextureFilterAnisotropic)
+                if (GraphicsDevice.Capabilities.SupportsTextureFilterAnisotropic)
                 {
                     GL.TexParameter(target, TextureParameterNameTextureMaxAnisotropy, 1f);
                     GraphicsExtensions.CheckGLError();
@@ -164,7 +164,7 @@ namespace MonoGame.Framework.Graphics
                     throw new InvalidOperationException("Invalid filter mode!");
             }
 #endif
-            if (GraphicsDevice.GraphicsCapabilities.SupportsTextureMaxLevel)
+            if (GraphicsDevice.Capabilities.SupportsTextureMaxLevel)
             {
                 if (MaxMipLevel > 0)
                 {

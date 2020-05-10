@@ -27,7 +27,7 @@ namespace MonoGame.Framework.Graphics
             get => _textures[index];
             set
             {
-                if (_applyToVertexStage && !_graphicsDevice.GraphicsCapabilities.SupportsVertexTextures)
+                if (_applyToVertexStage && !_graphicsDevice.Capabilities.SupportsVertexTextures)
                     throw new NotSupportedException("Vertex textures are not supported on this device.");
 
                 if (_textures[index] == value)
@@ -57,7 +57,7 @@ namespace MonoGame.Framework.Graphics
 
         internal void SetTextures(GraphicsDevice device)
         {
-            if (_applyToVertexStage && !device.GraphicsCapabilities.SupportsVertexTextures)
+            if (_applyToVertexStage && !device.Capabilities.SupportsVertexTextures)
                 return;
             PlatformSetTextures(device);
         }

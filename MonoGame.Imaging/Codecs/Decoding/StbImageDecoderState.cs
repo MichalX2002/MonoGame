@@ -170,7 +170,7 @@ namespace MonoGame.Imaging.Codecs.Decoding
                     try
                     {
                         // Create buffer with size aligned to element size.
-                        Span<byte> buffer = stackalloc byte[1024 / elementSize * elementSize];
+                        Span<byte> buffer = stackalloc byte[2048 / elementSize * elementSize];
                         var imageRow = CurrentImage.GetPixelByteRowSpan(line).Slice(start * elementSize);
                         int srcElementSize = SourcePixelType!.ElementSize;
 

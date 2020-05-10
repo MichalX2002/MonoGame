@@ -39,7 +39,7 @@ namespace MonoGame.Framework.Graphics
                     BorderColor = BorderColor.ToColor4(),
 #endif
                     Filter = GetFilter(Filter, FilterMode),
-                    MaximumAnisotropy = Math.Min(MaxAnisotropy, device.GraphicsCapabilities.MaxTextureAnisotropy),
+                    MaximumAnisotropy = Math.Min(MaxAnisotropy, device.Capabilities.MaxTextureAnisotropy),
                     MipLodBias = MipMapLevelOfDetailBias,
                     ComparisonFunction = ComparisonFunction.ToComparison(),
 

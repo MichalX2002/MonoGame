@@ -7,16 +7,6 @@
     <BaseOutputPath>..\Artifacts\MonoGame.Imaging</BaseOutputPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>portable</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DebugType>portable</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="Codecs\Encoding\StbImageEncoderBase.CustomDeflate.cs" />
     <Compile Remove="ColorEncoding.cs" />

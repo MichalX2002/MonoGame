@@ -6,16 +6,6 @@
     <BaseOutputPath>..\Artifacts\MonoGame.StbSharp</BaseOutputPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>portable</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DebugType>portable</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="..\ThirdParty\StbSharp\Image\src\**\*.cs" Exclude="..\ThirdParty\StbSharp\Image\src\obj\**">
       <Link>ImageRead\%(FileName)%(Extension)</Link>

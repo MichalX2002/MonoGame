@@ -573,7 +573,7 @@ namespace MonoGame.Framework.Utilities.Deflate
             // workitem 8460
             var output = RecyclableMemoryManager.Default.GetMemoryStream();
 
-            Span<byte> working = stackalloc byte[1024];
+            Span<byte> working = stackalloc byte[2048];
             int n;
             while ((n = decompressor.Read(working)) != 0)
                 output.Write(working.Slice(0, n));

@@ -45,9 +45,9 @@ namespace MonoGame.Framework.Graphics
             SupportsTextureFilterAnisotropic = GL.Extensions.Contains("GL_EXT_texture_filter_anisotropic");
 
 #if GLES
-			SupportsDepth24 = GL.Extensions.Contains("GL_OES_depth24");
-			SupportsPackedDepthStencil = GL.Extensions.Contains("GL_OES_packed_depth_stencil");
-			SupportsDepthNonLinear = GL.Extensions.Contains("GL_NV_depth_nonlinear");
+            SupportsDepth24 = GL.Extensions.Contains("GL_OES_depth24");
+            SupportsPackedDepthStencil = GL.Extensions.Contains("GL_OES_packed_depth_stencil");
+            SupportsDepthNonLinear = GL.Extensions.Contains("GL_NV_depth_nonlinear");
             SupportsTextureMaxLevel = GL.Extensions.Contains("GL_APPLE_texture_max_level");
 #else
             SupportsDepth24 = true;
@@ -128,6 +128,8 @@ namespace MonoGame.Framework.Graphics
 #else
             SupportsSeparateBlendStates = device._glMajorVersion >= 4 || GL.Extensions.Contains("GL_ARB_draw_buffers_blend");
 #endif
+
+            SupportsAsync = false;
         }
 
     }

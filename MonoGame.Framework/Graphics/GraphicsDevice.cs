@@ -101,7 +101,7 @@ namespace MonoGame.Framework.Graphics
         public int MaxTexture3DSize { get; private set; }
         public int MaxTextureCubeSize { get; private set; }
 
-        internal GraphicsCapabilities GraphicsCapabilities { get; private set; }
+        internal GraphicsCapabilities Capabilities { get; private set; }
         public TextureCollection VertexTextures { get; private set; }
         public SamplerStateCollection VertexSamplerStates { get; private set; }
         public TextureCollection Textures { get; private set; }
@@ -330,7 +330,7 @@ namespace MonoGame.Framework.Graphics
                 if (_rasterizerState == value)
                     return;
 
-                if (!value.DepthClipEnable && !GraphicsCapabilities.SupportsDepthClamp)
+                if (!value.DepthClipEnable && !Capabilities.SupportsDepthClamp)
                     throw new InvalidOperationException("Cannot set RasterizerState.DepthClipEnable to false on this graphics device");
 
                 _rasterizerState = value;
@@ -377,8 +377,10 @@ namespace MonoGame.Framework.Graphics
                 DepthStencilFormat = DepthFormat.Depth24
             };
             Setup();
-            GraphicsCapabilities = new GraphicsCapabilities();
-            GraphicsCapabilities.Initialize(this);
+
+            Capabilities = new GraphicsCapabilities();
+            Capabilities.Initialize(this);
+
             Initialize();
         }
 
@@ -391,7 +393,8 @@ namespace MonoGame.Framework.Graphics
         /// <exception cref="ArgumentNullException">
         /// <paramref name="presentationParameters"/> is <see langword="null"/>.
         /// </exception>
-        public GraphicsDevice(GraphicsAdapter adapter, GraphicsProfile graphicsProfile, PresentationParameters presentationParameters)
+        public GraphicsDevice(
+            GraphicsAdapter adapter, GraphicsProfile graphicsProfile, PresentationParameters presentationParameters)
         {
             Adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
             if (!adapter.IsProfileSupported(graphicsProfile))
@@ -403,8 +406,9 @@ namespace MonoGame.Framework.Graphics
 
             GraphicsProfile = graphicsProfile;
             Setup();
-            GraphicsCapabilities = new GraphicsCapabilities();
-            GraphicsCapabilities.Initialize(this);
+
+            Capabilities = new GraphicsCapabilities();
+            Capabilities.Initialize(this);
 
             Initialize();
         }
@@ -426,6 +430,7 @@ namespace MonoGame.Framework.Graphics
             PresentationParameters presentationParameters)
         {
             Adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
+
             if (!adapter.IsProfileSupported(graphicsProfile))
                 throw new NoSuitableGraphicsDeviceException(
                     $"Adapter '{ adapter.Description}' does not support the {graphicsProfile} profile.");
@@ -442,8 +447,9 @@ namespace MonoGame.Framework.Graphics
             GraphicsProfile = graphicsProfile;
             UseHalfPixelOffset = useHalfPixelOffset;
             Setup();
-            GraphicsCapabilities = new GraphicsCapabilities();
-            GraphicsCapabilities.Initialize(this);
+
+            Capabilities = new GraphicsCapabilities();
+            Capabilities.Initialize(this);
 
             Initialize();
         }
@@ -1216,8 +1222,8 @@ namespace MonoGame.Framework.Graphics
                 msc |= msc >> 4;
                 msc -= msc >> 1;
                 // and clamp it to what the device can handle
-                if (msc > GraphicsCapabilities.MaxMultiSampleCount)
-                    msc = GraphicsCapabilities.MaxMultiSampleCount;
+                if (msc > Capabilities.MaxMultiSampleCount)
+                    msc = Capabilities.MaxMultiSampleCount;
 
                 return msc;
             }

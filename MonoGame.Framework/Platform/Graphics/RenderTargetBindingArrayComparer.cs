@@ -11,7 +11,8 @@ namespace MonoGame.Framework.Graphics
     {
         private class RenderTargetBindingArrayComparer : IEqualityComparer<RenderTargetBinding[]>
         {
-            public static readonly RenderTargetBindingArrayComparer Instance = new RenderTargetBindingArrayComparer();
+            public static RenderTargetBindingArrayComparer Instance { get; } =
+                new RenderTargetBindingArrayComparer();
 
             public bool Equals(RenderTargetBinding[] first, RenderTargetBinding[] second)
             {

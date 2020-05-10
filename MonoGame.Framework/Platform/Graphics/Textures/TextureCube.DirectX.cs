@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using SharpDX;
 using SharpDX.Direct3D11;
@@ -52,7 +53,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         private unsafe void PlatformGetData<T>(
-            CubeMapFace cubeMapFace, int level, Rectangle rect, T[] data, int startIndex, int elementCount)
+            CubeMapFace cubeMapFace, int level, Rectangle rect, Span<T> destination)
             where T : unmanaged
         {
             // Create a temp staging resource for copying the data.
@@ -77,89 +78,57 @@ namespace MonoGame.Framework.Graphics
                 OptionFlags = ResourceOptionFlags.None,
             };
 
+            var subresourceIndex = CalculateSubresourceIndex(cubeMapFace, level);
+            var columns = rect.Width;
+            var rows = rect.Height;
+            var region = new ResourceRegion(rect.Left, rect.Top, 0, rect.Right, rect.Bottom, 1);
+
             var d3dContext = GraphicsDevice._d3dContext;
             using (var stagingTex = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc))
             {
                 lock (d3dContext)
                 {
                     // Copy the data from the GPU to the staging texture.
-                    var subresourceIndex = CalculateSubresourceIndex(cubeMapFace, level);
-                    var elementsInRow = rect.Width;
-                    var rows = rect.Height;
-                    var region = new ResourceRegion(rect.Left, rect.Top, 0, rect.Right, rect.Bottom, 1);
                     d3dContext.CopySubresourceRegion(GetTexture(), subresourceIndex, region, stagingTex, 0);
 
-                    // Copy the data to the array.
-                    DataStream stream = null;
-                    try
+                    var elementSize = Format.GetSize();
+                    if (Format.IsCompressedFormat())
                     {
-                        var databox = d3dContext.MapSubresource(stagingTex, 0, MapMode.Read, MapFlags.None, out stream);
-
-                        var elementSize = Format.GetSize();
-                        if (Format.IsCompressedFormat())
-                        {
-                            // for 4x4 block compression formats an element is one block, so elementsInRow
-                            // and number of rows are 1/4 of number of pixels in width and height of the rectangle
-                            elementsInRow /= 4;
-                            rows /= 4;
-                        }
-                        var rowSize = elementSize * elementsInRow;
-                        if (rowSize == databox.RowPitch)
-                            stream.ReadRange(data, startIndex, elementCount);
-                        else
-                        {
-                            // Some drivers may add pitch to rows.
-                            // We need to copy each row separatly and skip trailing zeros.
-                            stream.Seek(0, SeekOrigin.Begin);
-
-                            for (var row = 0; row < rows; row++)
-                            {
-                                int i;
-                                for (i = row * rowSize / sizeof(T); i < (row + 1) * rowSize / sizeof(T); i++)
-                                    data[i + startIndex] = stream.Read<T>();
-
-                                if (i >= elementCount)
-                                    break;
-
-                                stream.Seek(databox.RowPitch - rowSize, SeekOrigin.Current);
-                            }
-                        }
+                        // for 4x4 block compression formats an element is one block, so elementsInRow
+                        // and number of rows are 1/4 of number of pixels in width and height of the rectangle
+                        columns /= 4;
+                        rows /= 4;
                     }
-                    finally
-                    {
-                        SharpDX.Utilities.Dispose(ref stream);
-                    }
+
+                    var box = d3dContext.MapSubresource(stagingTex, 0, MapMode.Read, MapFlags.None);
+                    GraphicsDevice.CopyResourceTo(Format, box, columns, rows, destination);
                 }
             }
         }
 
         private unsafe void PlatformSetData<T>(
-            CubeMapFace face, int level, Rectangle rect, T[] data, int startIndex, int elementCount)
+            CubeMapFace face, int level, Rectangle rect, ReadOnlySpan<T> data)
             where T : unmanaged
         {
-            var dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            try
+            var subresourceIndex = CalculateSubresourceIndex(face, level);
+            int pitch = GetPitch(rect.Width);
+            var region = new ResourceRegion
             {
-                var dataPtr = (IntPtr)(dataHandle.AddrOfPinnedObject().ToInt64() + startIndex * sizeof(T));
-                var box = new DataBox(dataPtr, GetPitch(rect.Width), 0);
-                var subresourceIndex = CalculateSubresourceIndex(face, level);
-                var region = new ResourceRegion
-                {
-                    Top = rect.Top,
-                    Front = 0,
-                    Back = 1,
-                    Bottom = rect.Bottom,
-                    Left = rect.Left,
-                    Right = rect.Right
-                };
+                Top = rect.Top,
+                Front = 0,
+                Back = 1,
+                Bottom = rect.Bottom,
+                Left = rect.Left,
+                Right = rect.Right
+            };
 
-                var d3dContext = GraphicsDevice._d3dContext;
-                lock (d3dContext)
-                    d3dContext.UpdateSubresource(box, GetTexture(), subresourceIndex, region);
-            }
-            finally
+            var d3dContext = GraphicsDevice._d3dContext;
+            lock (d3dContext)
             {
-                dataHandle.Free();
+                var texture = GetTexture();
+                ref var mutableData = ref Unsafe.AsRef(data.GetPinnableReference());
+                d3dContext.UpdateSubresource(ref mutableData, texture, subresourceIndex, pitch, 0, region);
+
             }
         }
 

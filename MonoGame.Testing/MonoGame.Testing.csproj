@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="$(MSBuildExtensionsPath)\MonoGame\MonoGame.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\MonoGame\MonoGame.Common.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\MonoGame\MonoGame.Common.props" 
+          Condition="Exists('$(MSBuildExtensionsPath)\MonoGame\MonoGame.Common.props')" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -13,16 +14,6 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon />
     <StartupObject />
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
@@ -122,6 +113,7 @@
     <TrimmerRootAssembly Include="MonoGame.Framework.Content.ContentTypeReader" Visible="false" />
   </ItemGroup>
 
-  <Import Project="$(MSBuildExtensionsPath)\MonoGame\MonoGame.Content.Builder.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\MonoGame\MonoGame.Content.Builder.targets" 
+          Condition="Exists('$(MSBuildExtensionsPath)\MonoGame\MonoGame.Content.Builder.targets')" />
 
 </Project>

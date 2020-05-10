@@ -12,7 +12,7 @@ namespace MonoGame.Framework.Graphics
 
         internal void ClearTargets(GraphicsDevice device, RenderTargetBinding[] targets)
         {
-            if (_applyToVertexStage && !device.GraphicsCapabilities.SupportsVertexTextures)
+            if (_applyToVertexStage && !device.Capabilities.SupportsVertexTextures)
                 return;
 
             if (_applyToVertexStage)

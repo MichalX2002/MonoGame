@@ -14,8 +14,6 @@ namespace MonoGame.Framework.Graphics
         private void PlatformConstruct(
             int width, int height, bool mipmap, SurfaceFormat format, SurfaceType type, bool shared)
         {
-            AssertMainThread();
-
             _glTarget = TextureTarget.Texture2D;
             format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
 
@@ -26,9 +24,10 @@ namespace MonoGame.Framework.Graphics
             {
                 if (glFormat == GLPixelFormat.CompressedTextureFormats)
                 {
-                    int imageSize;
                     // PVRTC has explicit calculations for imageSize
                     // https://www.khronos.org/registry/OpenGL/extensions/IMG/IMG_texture_compression_pvrtc.txt
+
+                    int imageSize;
                     switch (format)
                     {
                         case SurfaceFormat.RgbPvrtc2Bpp:
@@ -77,9 +76,6 @@ namespace MonoGame.Framework.Graphics
             int level, int arraySlice, Rectangle? rect, ReadOnlySpan<T> data)
             where T : unmanaged
         {
-            AssertMainThread();
-
-            // Store the current bound texture.
             var prevTexture = GraphicsExtensions.GetBoundTexture2D();
             if (prevTexture != _glTexture)
             {
@@ -88,6 +84,7 @@ namespace MonoGame.Framework.Graphics
             }
 
             GenerateGLTextureIfRequired();
+
             int unpackSize = Format.GetSize();
             if (unpackSize == 3)
                 unpackSize = 1;
@@ -102,28 +99,38 @@ namespace MonoGame.Framework.Graphics
                     if (glFormat == GLPixelFormat.CompressedTextureFormats)
                     {
                         GL.CompressedTexSubImage2D(
-                            TextureTarget.Texture2D, level, r.X, r.Y, r.Width, r.Height, glInternalFormat, bytes, (IntPtr)ptr);
+                            TextureTarget.Texture2D, level, r.X, r.Y, r.Width, r.Height,
+                            glInternalFormat, bytes, (IntPtr)ptr);
                     }
                     else
                     {
                         GL.TexSubImage2D(
-                            TextureTarget.Texture2D, level, r.X, r.Y, r.Width, r.Height, glFormat, glType, (IntPtr)ptr);
+                            TextureTarget.Texture2D, level, r.X, r.Y, r.Width, r.Height,
+                            glFormat, glType, (IntPtr)ptr);
                     }
                 }
                 else
                 {
                     GetSizeForLevel(Width, Height, level, out int w, out int h);
                     if (glFormat == GLPixelFormat.CompressedTextureFormats)
-                        GL.CompressedTexImage2D(TextureTarget.Texture2D, level, glInternalFormat, w, h, 0, bytes, (IntPtr)ptr);
+                    {
+                        GL.CompressedTexImage2D(
+                            TextureTarget.Texture2D, level, glInternalFormat, 
+                            w, h, 0, bytes, (IntPtr)ptr);
+                    }
                     else
-                        GL.TexImage2D(TextureTarget.Texture2D, level, glInternalFormat, w, h, 0, glFormat, glType, (IntPtr)ptr);
+                    {
+                        GL.TexImage2D(
+                            TextureTarget.Texture2D, level, glInternalFormat,
+                            w, h, 0, glFormat, glType, (IntPtr)ptr);
+                    }
                 }
             }
             GraphicsExtensions.CheckGLError();
 
 #if !ANDROID
-            // Required to make sure that any texture uploads on a thread are completed
-            // before the main thread tries to use the texture.
+            // Required to make sure that any texture uploads on a thread are 
+            // completed before the main thread tries to use the texture.
             GL.Finish();
             GraphicsExtensions.CheckGLError();
 #endif
@@ -140,8 +147,6 @@ namespace MonoGame.Framework.Graphics
             int level, int arraySlice, Rectangle rect, Span<T> destination)
             where T : unmanaged
         {
-            AssertMainThread();
-
 #if GLES
             // TODO: check for for non renderable formats (formats that can't be attached to FBO)
             GL.GenFramebuffers(1, out int framebufferId);
@@ -263,7 +268,7 @@ namespace MonoGame.Framework.Graphics
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
 #endif
             GraphicsExtensions.CheckGLError();
-            if (GraphicsDevice.GraphicsCapabilities.SupportsTextureMaxLevel)
+            if (GraphicsDevice.Capabilities.SupportsTextureMaxLevel)
             {
                 var paramName = SamplerState.TextureParameterNameTextureMaxLevel;
                 if (LevelCount > 0)

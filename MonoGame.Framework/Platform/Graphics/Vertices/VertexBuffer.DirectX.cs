@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
@@ -166,11 +167,8 @@ namespace MonoGame.Framework.Graphics
 
                     lock (deviceContext)
                     {
-                        fixed (T* ptr = data)
-                        {
-                            var box = new SharpDX.DataBox((IntPtr)ptr, bytes, 0);
-                            deviceContext.UpdateSubresource(box, _buffer, 0, region);
-                        }
+                        ref var mutableData = ref Unsafe.AsRef(data.GetPinnableReference());
+                        deviceContext.UpdateSubresource(ref mutableData, _buffer, 0, bytes, 0, region);
                     }
                 }
                 else

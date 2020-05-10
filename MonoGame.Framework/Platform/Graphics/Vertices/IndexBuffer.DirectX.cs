@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
@@ -36,7 +37,7 @@ namespace MonoGame.Framework.Graphics
 
             _buffer = new SharpDX.Direct3D11.Buffer(
                 GraphicsDevice._d3dDevice,
-                Capacity * _elementSize,
+                Capacity * (int)ElementSize,
                 resUsage,
                 SharpDX.Direct3D11.BindFlags.IndexBuffer,
                 accessflags,
@@ -73,7 +74,7 @@ namespace MonoGame.Framework.Graphics
                         var box = deviceContext.MapSubresource(
                             stagingBuffer, 0, SharpDX.Direct3D11.MapMode.Read, SharpDX.Direct3D11.MapFlags.None);
 
-                        int srcBytes = Capacity * _elementSize;
+                        int srcBytes = Capacity * (int)ElementSize;
                         var byteSrc = new ReadOnlySpan<byte>((void*)(box.DataPointer + offsetInBytes), srcBytes);
                         var byteDst = MemoryMarshal.AsBytes(destination);
                         byteSrc.Slice(0, byteDst.Length).CopyTo(byteDst);
@@ -106,7 +107,7 @@ namespace MonoGame.Framework.Graphics
                 {
                     var box = d3dContext.MapSubresource(_buffer, 0, mode, SharpDX.Direct3D11.MapFlags.None);
 
-                    int dstBytes = Capacity * _elementSize;
+                    int dstBytes = Capacity * (int)ElementSize;
                     var dst = new Span<T>((void*)(box.DataPointer + offsetInBytes), dstBytes);
                     data.CopyTo(dst);
 
@@ -129,11 +130,8 @@ namespace MonoGame.Framework.Graphics
                 var d3dContext = GraphicsDevice._d3dContext;
                 lock (d3dContext)
                 {
-                    fixed (T* ptr = data)
-                    {
-                        var box = new SharpDX.DataBox((IntPtr)ptr, bytes, 0);
-                        d3dContext.UpdateSubresource(box, _buffer, 0, region);
-                    }
+                    ref var mutableData = ref Unsafe.AsRef(data.GetPinnableReference());
+                    d3dContext.UpdateSubresource(ref mutableData, _buffer, 0, bytes, 0, region);
                 }
             }
         }

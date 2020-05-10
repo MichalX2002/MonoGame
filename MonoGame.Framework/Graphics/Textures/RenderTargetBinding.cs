@@ -40,9 +40,11 @@ namespace MonoGame.Framework.Graphics
         {
             if (renderTarget == null)
                 throw new ArgumentNullException(nameof(renderTarget));
+
             if (arraySlice < 0 || arraySlice >= renderTarget.ArraySize)
                 throw new ArgumentOutOfRangeException(nameof(arraySlice));
-            if (!renderTarget.GraphicsDevice.GraphicsCapabilities.SupportsTextureArrays)
+
+            if (!renderTarget.GraphicsDevice.Capabilities.SupportsTextureArrays)
                 throw new InvalidOperationException("Texture arrays are not supported on this graphics device.");
 
             RenderTarget = renderTarget;

@@ -37,7 +37,7 @@ namespace MonoGame.Framework.Graphics
         {
             if (!IsDisposed)
                 GraphicsDevice?.PlatformDeleteRenderTarget(this);
-            
+
             base.Dispose(disposing);
         }
     }

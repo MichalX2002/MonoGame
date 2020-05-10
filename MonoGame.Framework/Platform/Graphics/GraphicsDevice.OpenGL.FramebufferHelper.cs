@@ -43,8 +43,8 @@ namespace MonoGame.Framework.Graphics
 
             public static FramebufferHelper Create(GraphicsDevice gd)
             {
-                if (gd.GraphicsCapabilities.SupportsFramebufferObjectARB ||
-                    gd.GraphicsCapabilities.SupportsFramebufferObjectEXT)
+                if (gd.Capabilities.SupportsFramebufferObjectARB ||
+                    gd.Capabilities.SupportsFramebufferObjectEXT)
                 {
                     _instance = new FramebufferHelper(gd);
                     return _instance;

@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using SharpDX;
 using SharpDX.Direct3D11;
@@ -79,11 +80,9 @@ namespace MonoGame.Framework.Graphics
             var d3dContext = GraphicsDevice._d3dContext;
             lock (d3dContext)
             {
-                fixed (T* dataPtr = data)
-                {
-                    var box = new DataBox((IntPtr)dataPtr, rowPitch, slicePitch);
-                    d3dContext.UpdateSubresource(box, GetTexture(), subresourceIndex, region);
-                }
+                var texture = GetTexture();
+                ref var mutableData = ref Unsafe.AsRef(data.GetPinnableReference());
+                d3dContext.UpdateSubresource(ref mutableData, texture, subresourceIndex, rowPitch, slicePitch, region);
             }
         }
 

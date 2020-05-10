@@ -27,7 +27,7 @@ namespace MonoGame.Framework.Graphics
 
         internal void PlatformSetSamplers(GraphicsDevice device)
         {
-            if (_applyToVertexStage && !device.GraphicsCapabilities.SupportsVertexTextures)
+            if (_applyToVertexStage && !device.Capabilities.SupportsVertexTextures)
                 return;
 
             // Skip out if nothing has changed.
@@ -38,9 +38,9 @@ namespace MonoGame.Framework.Graphics
             // locked the d3dContext for us to use.
             SharpDX.Direct3D11.CommonShaderStage shaderStage;
             if (_applyToVertexStage)
-	            shaderStage = device._d3dContext.VertexShader;
+                shaderStage = device._d3dContext.VertexShader;
             else
-	            shaderStage = device._d3dContext.PixelShader;
+                shaderStage = device._d3dContext.PixelShader;
 
             for (var i = 0; i < _actualSamplers.Length; i++)
             {

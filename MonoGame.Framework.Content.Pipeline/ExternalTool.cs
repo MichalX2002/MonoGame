@@ -114,12 +114,12 @@ namespace MonoGame.Framework.Content.Pipeline
 
             // For Linux check specific subfolder
             var lincom = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "linux", command);
-            if (CurrentPlatform.OS == OS.Linux && File.Exists(lincom))
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Linux && File.Exists(lincom))
                 return lincom;
 
             // For Mac check specific subfolder
             var maccom = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "osx", command);
-            if (CurrentPlatform.OS == OS.MacOSX && File.Exists(maccom))
+            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX && File.Exists(maccom))
                 return maccom;
 
             // We don't have a full path, so try running through the system path to find it.

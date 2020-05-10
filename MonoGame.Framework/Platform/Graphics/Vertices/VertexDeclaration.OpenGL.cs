@@ -63,7 +63,7 @@ namespace MonoGame.Framework.Graphics
                 GraphicsExtensions.CheckGLError();
 
 #if !(GLES || MONOMAC)
-                if (GraphicsDevice.GraphicsCapabilities.SupportsInstancing)
+                if (GraphicsDevice.Capabilities.SupportsInstancing)
                 {
                     GL.VertexAttribDivisor(element.AttributeLocation, 0);
                     GraphicsExtensions.CheckGLError();

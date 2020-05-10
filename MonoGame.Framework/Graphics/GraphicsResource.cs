@@ -37,7 +37,17 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public object Tag { get; set; }
 
-        public virtual bool SupportsAsync => GraphicsDevice.SupportsAsync;
+        /// <summary>
+        /// Gets whether various operations are accessible outside the main thread.
+        /// </summary>
+        public virtual bool SupportsAsync => GraphicsDevice.Capabilities.SupportsAsync;
+
+        /// <summary>
+        /// Gets whether the caller is on the main thread or whether operations 
+        /// are supported outside the main thread and are therefore always in a valid context.
+        /// </summary>
+        protected bool IsValidThreadContext =>
+            Threading.IsOnMainThread || (!Threading.IsOnMainThread && SupportsAsync);
 
         /// <summary>
         /// Gets the <see cref="Graphics.GraphicsDevice"/> assigned to this <see cref="GraphicsResource"/>.
@@ -67,7 +77,7 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        internal GraphicsResource(GraphicsDevice graphicsDevice = null)
+        internal GraphicsResource(GraphicsDevice graphicsDevice)
         {
             GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(
                 nameof(graphicsDevice), FrameworkResources.ResourceCreationWithNullDevice);
@@ -100,13 +110,16 @@ namespace MonoGame.Framework.Graphics
         /// <exception cref="InvalidOperationException">
         /// The caller is not running on the main thread.
         /// </exception>
-        protected void AssertMainThread()
+        protected void AssertMainThread(bool isSpanOverload)
         {
             if (SupportsAsync)
                 return;
 
             if (!Threading.IsOnMainThread)
-                throw new AsyncResourceNotSupportedException();
+            {
+                var msg = isSpanOverload ? FrameworkResources.OffThreadSpanNotSupported : null;
+                throw new OffThreadNotSupportedException(msg);
+            }
         }
 
         /// <summary>

@@ -105,7 +105,7 @@ namespace MonoGame.Framework.Graphics
                 device._lastRasterizerState.SlopeScaleDepthBias = SlopeScaleDepthBias;
             }
 
-            if (device.GraphicsCapabilities.SupportsDepthClamp &&
+            if (device.Capabilities.SupportsDepthClamp &&
                 (force || DepthClipEnable != device._lastRasterizerState.DepthClipEnable))
             {
                 if (!DepthClipEnable)

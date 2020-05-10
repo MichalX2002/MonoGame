@@ -15,7 +15,7 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class Texture2D : Texture
     {
-        internal int ArraySize;
+        internal int ArraySize { get; private set; }
 
         #region Properties
 
@@ -92,16 +92,12 @@ namespace MonoGame.Framework.Graphics
             SurfaceFormat format, SurfaceType type, bool shared, int arraySize)
             : base(graphicsDevice)
         {
-            if (arraySize > 1 && !graphicsDevice.GraphicsCapabilities.SupportsTextureArrays)
+            if (arraySize > 1 && !graphicsDevice.Capabilities.SupportsTextureArrays)
                 throw new ArgumentException(
                     "Texture arrays are not supported on this graphics device", nameof(arraySize));
 
-            if (width <= 0)
-                throw new ArgumentOutOfRangeException(
-                    nameof(width), "Texture width must be greater than zero");
-            if (height <= 0)
-                throw new ArgumentOutOfRangeException(
-                    nameof(height), "Texture height must be greater than zero");
+            ArgumentGuard.AssertGreaterThanZero(width, nameof(width));
+            ArgumentGuard.AssertGreaterThanZero(height, nameof(height));
 
             GraphicsDevice = graphicsDevice;
             Bounds = new Rectangle(0, 0, width, height);
@@ -115,7 +111,11 @@ namespace MonoGame.Framework.Graphics
             if (type == SurfaceType.SwapChainRenderTarget)
                 return;
 
-            PlatformConstruct(width, height, mipmap, format, type, shared);
+            void Construct() => PlatformConstruct(width, height, mipmap, format, type, shared);
+            if (IsValidThreadContext)
+                Construct();
+            else
+                Threading.BlockOnMainThread(Construct);
         }
 
         #endregion
@@ -143,6 +143,8 @@ namespace MonoGame.Framework.Graphics
 
             ValidateParams<T>(level, arraySlice, rectangle, data.Length, out Rectangle checkedRect);
 
+            AssertMainThread(true);
+
             if (rectangle.HasValue)
                 PlatformSetData(level, arraySlice, checkedRect, data);
             else
@@ -161,7 +163,7 @@ namespace MonoGame.Framework.Graphics
         ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
         public void SetData<T>(
-            T[] data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
+            Span<T> data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
             where T : unmanaged
         {
             SetData((ReadOnlySpan<T>)data, rectangle, level, arraySlice);
@@ -179,10 +181,63 @@ namespace MonoGame.Framework.Graphics
         ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
         public void SetData<T>(
-            Span<T> data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
+            ReadOnlyMemory<T> data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
             where T : unmanaged
         {
-            SetData((ReadOnlySpan<T>)data, rectangle, level, arraySlice);
+            if (rectangle.HasValue)
+                if (rectangle.Value.Width == 0 || rectangle.Value.Height == 0)
+                    return;
+
+            ValidateParams<T>(level, arraySlice, rectangle, data.Length, out Rectangle checkedRect);
+
+            void SetData()
+            {
+                if (rectangle.HasValue)
+                    PlatformSetData(level, arraySlice, checkedRect, data.Span);
+                else
+                    PlatformSetData(level, arraySlice, rect: null, data.Span);
+            }
+
+            if (IsValidThreadContext)
+                SetData();
+            else
+                Threading.BlockOnMainThread(SetData);
+        }
+
+        /// <summary>
+        /// Changes the pixels of the texture.
+        /// </summary>
+        /// <typeparam name="T">The pixel type.</typeparam>
+        /// <param name="data">New data for the texture.</param>
+        /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
+        /// <param name="level">Layer of the texture to modify.</param>
+        /// <param name="arraySlice">Index inside the texture array.</param>
+        /// <exception cref="ArgumentException">
+        ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
+        /// </exception>
+        public void SetData<T>(
+            Memory<T> data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
+            where T : unmanaged
+        {
+            SetData((ReadOnlyMemory<T>)data, rectangle, level, arraySlice);
+        }
+
+        /// <summary>
+        /// Changes the pixels of the texture.
+        /// </summary>
+        /// <typeparam name="T">The pixel type.</typeparam>
+        /// <param name="data">New data for the texture.</param>
+        /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
+        /// <param name="level">Layer of the texture to modify.</param>
+        /// <param name="arraySlice">Index inside the texture array.</param>
+        /// <exception cref="ArgumentException">
+        ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
+        /// </exception>
+        public void SetData<T>(
+            T[] data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
+            where T : unmanaged
+        {
+            SetData(data.AsMemory(), rectangle, level, arraySlice);
         }
 
         #endregion
@@ -234,7 +289,37 @@ namespace MonoGame.Framework.Graphics
         {
             ValidateParams<T>(level, arraySlice, rectangle, destination.Length, out Rectangle checkedRect);
 
+            AssertMainThread(true);
+
             PlatformGetData(level, arraySlice, checkedRect, destination);
+        }
+
+        /// <summary>
+        /// Retrieves the contents of the texture.
+        /// </summary>
+        /// <param name="destination">Destination span for the data.</param>
+        /// <param name="rectangle">Area of the texture; defaults to texture bounds.</param>
+        /// <param name="level">Layer of the texture.</param>
+        /// <param name="arraySlice">Index inside the texture array.</param>
+        /// <exception cref="ArgumentEmptyException"><paramref name="destination"/> is empty.</exception>
+        /// <exception cref="ArgumentException">
+        ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
+        /// </exception>
+        public void GetData<T>(
+            Memory<T> destination, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
+            where T : unmanaged
+        {
+            ValidateParams<T>(level, arraySlice, rectangle, destination.Length, out Rectangle checkedRect);
+
+            void GetData()
+            {
+                PlatformGetData(level, arraySlice, checkedRect, destination.Span);
+            }
+
+            if (IsValidThreadContext)
+                GetData();
+            else
+                Threading.BlockOnMainThread(GetData);
         }
 
         /// <summary>
@@ -583,7 +668,7 @@ namespace MonoGame.Framework.Graphics
                 throw new ArgumentException(
                     $"{nameof(level)} must be smaller than the number of levels in this texture.", nameof(level));
 
-            if (arraySlice > 0 && !GraphicsDevice.GraphicsCapabilities.SupportsTextureArrays)
+            if (arraySlice > 0 && !GraphicsDevice.Capabilities.SupportsTextureArrays)
                 throw new ArgumentException(
                     "Texture arrays are not supported on this graphics device", nameof(arraySlice));
 

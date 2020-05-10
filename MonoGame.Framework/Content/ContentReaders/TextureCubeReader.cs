@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using System.IO;
 using MonoGame.Framework.Graphics;
 
@@ -27,10 +28,10 @@ namespace MonoGame.Framework.Content
                     byte[] faceData = reader.ContentManager.GetScratchBuffer(faceSize);
                     try
                     {
-                        if(reader.Read(faceData, 0, faceSize) != faceSize)
+                        if (reader.Read(faceData, 0, faceSize) != faceSize)
                             throw new InvalidDataException();
 
-                        textureCube.SetData((CubeMapFace)face, i, null, faceData, 0, faceSize);
+                        textureCube.SetData((CubeMapFace)face, i, null, faceData.AsSpan(0, faceSize));
                     }
                     finally
                     {

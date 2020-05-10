@@ -7,7 +7,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using MonoGame.Framework.PackedVector;
+using MonoGame.Framework.Vector;
 
 namespace MonoGame.Framework.Input
 {

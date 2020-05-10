@@ -36,18 +36,21 @@ namespace MonoGame.Framework.Graphics
             MaxTextureAnisotropy = (device.GraphicsProfile == GraphicsProfile.Reach) ? 2 : 16;
 
             MaxMultiSampleCount = GetMaxMultiSampleCount(device);
+
+            SupportsAsync = true;
         }
 
         private int GetMaxMultiSampleCount(GraphicsDevice device)
         {
             var format = SharpDXHelper.ToFormat(device.PresentationParameters.BackBufferFormat);
+
             // Find the maximum supported level starting with the game's requested multisampling level
             // and halving each time until reaching 0 (meaning no multisample support).
-            var qualityLevels = 0;
-            var maxLevel = MultiSampleCountLimit;
+
+            int maxLevel = MultiSampleCountLimit;
             while (maxLevel > 0)
             {
-                qualityLevels = device._d3dDevice.CheckMultisampleQualityLevels(format, maxLevel);
+                int qualityLevels = device._d3dDevice.CheckMultisampleQualityLevels(format, maxLevel);
                 if (qualityLevels > 0)
                     break;
                 maxLevel /= 2;

@@ -517,15 +517,15 @@ namespace MonoGame.Framework.Graphics
             glFormat = PixelFormat.Rgba;
             glType = PixelType.UnsignedByte;
 
-            var supportsSRgb = graphicsDevice.GraphicsCapabilities.SupportsSRgb;
-            var supportsS3tc = graphicsDevice.GraphicsCapabilities.SupportsS3tc;
-            var supportsPvrtc = graphicsDevice.GraphicsCapabilities.SupportsPvrtc;
-            var supportsEtc1 = graphicsDevice.GraphicsCapabilities.SupportsEtc1;
-            var supportsEtc2 = graphicsDevice.GraphicsCapabilities.SupportsEtc2;
-            var supportsAtitc = graphicsDevice.GraphicsCapabilities.SupportsAtitc;
-            var supportsFloat = graphicsDevice.GraphicsCapabilities.SupportsFloatTextures;
-            var supportsHalfFloat = graphicsDevice.GraphicsCapabilities.SupportsHalfFloatTextures;
-            var supportsNormalized = graphicsDevice.GraphicsCapabilities.SupportsNormalized;
+            var supportsSRgb = graphicsDevice.Capabilities.SupportsSRgb;
+            var supportsS3tc = graphicsDevice.Capabilities.SupportsS3tc;
+            var supportsPvrtc = graphicsDevice.Capabilities.SupportsPvrtc;
+            var supportsEtc1 = graphicsDevice.Capabilities.SupportsEtc1;
+            var supportsEtc2 = graphicsDevice.Capabilities.SupportsEtc2;
+            var supportsAtitc = graphicsDevice.Capabilities.SupportsAtitc;
+            var supportsFloat = graphicsDevice.Capabilities.SupportsFloatTextures;
+            var supportsHalfFloat = graphicsDevice.Capabilities.SupportsHalfFloatTextures;
+            var supportsNormalized = graphicsDevice.Capabilities.SupportsNormalized;
             var isGLES2 = GL.BoundApi == GL.RenderApi.ES && graphicsDevice._glMajorVersion == 2;
 
             switch (format)

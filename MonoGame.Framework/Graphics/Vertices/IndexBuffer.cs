@@ -8,8 +8,6 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class IndexBuffer : BufferBase
     {
-        internal int _elementSize;
-
         public IndexElementSize ElementSize { get; }
 
         #region Constructors
@@ -27,16 +25,18 @@ namespace MonoGame.Framework.Graphics
                 if (graphicsDevice.GraphicsProfile == GraphicsProfile.Reach)
                     throw new NotSupportedException(
                         $"The current graphics profile does not support an element size of " +
-                        $"{IndexElementSize.Int}; use {IndexElementSize.Short} instead.");
+                        $"{elementSize}; use {IndexElementSize.Short} instead.");
             }
             else if (elementSize != IndexElementSize.Short)
             {
                 throw new ArgumentOutOfRangeException(nameof(elementSize));
             }
             ElementSize = elementSize;
-            _elementSize = ElementSize == IndexElementSize.Int ? 4 : 2;
 
-            PlatformConstruct();
+            if (IsValidThreadContext)
+                PlatformConstruct();
+            else
+                Threading.BlockOnMainThread(PlatformConstruct);
         }
 
         public IndexBuffer(
@@ -52,13 +52,15 @@ namespace MonoGame.Framework.Graphics
 
         #region GetData
 
-        public unsafe void GetData<T>(int offsetInBytes, Span<T> destination) where T : unmanaged
+        public unsafe void GetData<T>(int offsetInBytes, Span<T> destination) 
+            where T : unmanaged
         {
             if (BufferUsage == BufferUsage.WriteOnly)
-                throw new NotSupportedException(
-                    $"Calling {nameof(GetData)} on a resource that was created with {BufferUsage.WriteOnly} is not supported.");
+                throw new InvalidOperationException(FrameworkResources.WriteOnlyResource);
 
-            int bufferSize = Capacity * _elementSize;
+            AssertMainThread(true);
+
+            int bufferSize = Capacity * (int)ElementSize;
             int requestedBytes = destination.Length * sizeof(T);
 
             if (requestedBytes > bufferSize)
@@ -72,7 +74,8 @@ namespace MonoGame.Framework.Graphics
             PlatformGetData(offsetInBytes, destination);
         }
 
-        public void GetData<T>(Span<T> destination) where T : unmanaged
+        public void GetData<T>(Span<T> destination) 
+            where T : unmanaged
         {
             GetData(0, destination);
         }
@@ -90,7 +93,9 @@ namespace MonoGame.Framework.Graphics
             if (data.IsEmpty)
                 throw new ArgumentEmptyException(nameof(data));
 
-            int bufferBytes = Capacity * _elementSize;
+            AssertMainThread(true);
+
+            int bufferBytes = Capacity * (int)ElementSize;
             int requestedBytes = data.Length * sizeof(T);
 
             if (requestedBytes > bufferBytes)
@@ -102,7 +107,7 @@ namespace MonoGame.Framework.Graphics
                     nameof(byteOffset), "The range reaches beyond the buffer.");
 
             PlatformSetData(byteOffset, data, options);
-            Count = data.Length * sizeof(T) / _elementSize;
+            Count = data.Length * sizeof(T) / (int)ElementSize;
         }
 
         public void SetData<T>(

@@ -12,14 +12,12 @@ namespace MonoGame.Framework.Graphics
     {
         private void PlatformConstruct()
         {
-            base.PlatformConstruct(BufferTarget.ElementArrayBuffer, _elementSize);
+            base.PlatformConstruct(BufferTarget.ElementArrayBuffer, (int)ElementSize);
         }
 
         private unsafe void PlatformGetData<T>(int byteOffset, Span<T> destination) 
             where T : unmanaged
         {
-            AssertMainThread();
-
 #if GLES
             // Buffers are write-only on OpenGL ES 1.1 and 2.0. See the GL_OES_mapbuffer extension for more information.
             // http://www.khronos.org/registry/gles/extensions/OES/OES_mapbuffer.txt
@@ -30,7 +28,7 @@ namespace MonoGame.Framework.Graphics
 
             IntPtr mapPtr = GL.MapBuffer(BufferTarget.ElementArrayBuffer, BufferAccess.ReadOnly);
 
-            int srcBytes = Capacity * _elementSize;
+            int srcBytes = Capacity * (int)ElementSize;
             var byteSrc = new ReadOnlySpan<byte>((byte*)mapPtr + byteOffset, srcBytes);
             var byteDst = MemoryMarshal.AsBytes(destination);
             byteSrc.Slice(0, byteDst.Length).CopyTo(byteDst);
@@ -44,18 +42,17 @@ namespace MonoGame.Framework.Graphics
             int byteOffset, ReadOnlySpan<T> data, SetDataOptions options)
             where T : unmanaged
         {
-            AssertMainThread();
             GenerateIfRequired();
 
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, _vbo);
             GraphicsExtensions.CheckGLError();
 
-            DiscardBuffer(BufferTarget.ElementArrayBuffer, options, Capacity * _elementSize);
+            DiscardBuffer(BufferTarget.ElementArrayBuffer, options, Capacity * (int)ElementSize);
 
             fixed (T* ptr = data)
             {
-                var size = new IntPtr(data.Length * sizeof(T));
-                GL.BufferSubData(BufferTarget.ElementArrayBuffer, (IntPtr)byteOffset, size, (IntPtr)ptr);
+                int size = data.Length * sizeof(T);
+                GL.BufferSubData(BufferTarget.ElementArrayBuffer, (IntPtr)byteOffset, (IntPtr)size, (IntPtr)ptr);
                 GraphicsExtensions.CheckGLError();
             }
         }

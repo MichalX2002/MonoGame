@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
@@ -73,16 +74,15 @@ namespace MonoGame.Framework.Graphics
                 };
             }
 
-            // TODO: We need to deal with threaded contexts here!
             var subresourceIndex = CalculateSubresourceIndex(arraySlice, level);
+
+            // TODO: We need to deal with threaded contexts here!
             var d3dContext = GraphicsDevice._d3dContext;
             lock (d3dContext)
             {
-                fixed (T* ptr = data)
-                {
-                    d3dContext.UpdateSubresource(
-                        GetTexture(), subresourceIndex, region, (IntPtr)ptr, pitch, 0);
-                }
+                var texture = GetTexture();
+                ref var mutableData = ref Unsafe.AsRef(data.GetPinnableReference());
+                d3dContext.UpdateSubresource(ref mutableData, texture, subresourceIndex, pitch, 0, region);
             }
         }
 

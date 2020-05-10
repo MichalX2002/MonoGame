@@ -21,7 +21,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         internal TextureCube(
-            GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format, bool renderTarget) 
+            GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format, bool renderTarget)
             : base(graphicsDevice)
         {
             if (size <= 0)
@@ -31,62 +31,75 @@ namespace MonoGame.Framework.Graphics
             Format = format;
             LevelCount = mipMap ? CalculateMipLevels(size) : 1;
 
-            PlatformConstruct(graphicsDevice, size, mipMap, format, renderTarget);
+            void Construct() => PlatformConstruct(graphicsDevice, size, mipMap, format, renderTarget);
+            if (IsValidThreadContext)
+                Construct();
+            else
+                Threading.BlockOnMainThread(Construct);
+        }
+
+        #region GetData
+
+        public void GetData<T>(
+            CubeMapFace cubeMapFace, int level, Rectangle? rect, Span<T> destination)
+            where T : unmanaged
+        {
+            AssertMainThread(true);
+
+            ValidateParams<T>(level, rect, destination.Length, out Rectangle checkedRect);
+
+            PlatformGetData(cubeMapFace, level, checkedRect, destination);
         }
 
         /// <summary>
         /// Gets a copy of cube texture data specifying a cubemap face.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="cubeMapFace">The cube map face.</param>
-        /// <param name="data">The data.</param>
-        public void GetData<T>(CubeMapFace cubeMapFace, T[] data)
+        /// <param name="destination">The data destination.</param>
+        public void GetData<T>(CubeMapFace cubeMapFace, Span<T> destination)
             where T : unmanaged
         {
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-            GetData(cubeMapFace, 0, null, data, 0, data.Length);
+            GetData(cubeMapFace, 0, null, destination);
         }
 
-        public void GetData<T>(CubeMapFace cubeMapFace, T[] data, int startIndex, int elementCount)
+        #endregion
+
+        #region SetData
+
+        public void SetData<T>(
+            CubeMapFace face, int level, Rectangle? rect, ReadOnlySpan<T> data)
             where T : unmanaged
         {
-            GetData(cubeMapFace, 0, null, data, startIndex, elementCount);
+            AssertMainThread(true);
+
+            ValidateParams<T>(level, rect, data.Length, out Rectangle checkedRect);
+
+            PlatformSetData(face, level, checkedRect, data);
         }
 
-        public void GetData<T>(
-            CubeMapFace cubeMapFace, int level, Rectangle? rect, T[] data, int startIndex, int elementCount)
+        public void SetData<T>(CubeMapFace face, ReadOnlySpan<T> data)
             where T : unmanaged
         {
-            ValidateParams(level, rect, data, startIndex, elementCount, out Rectangle checkedRect);
-            PlatformGetData(cubeMapFace, level, checkedRect, data, startIndex, elementCount);
-        }
-
-        public void SetData<T>(CubeMapFace face, T[] data)
-            where T : unmanaged
-        {
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-            SetData(face, 0, null, data, 0, data.Length);
-        }
-
-        public void SetData<T>(CubeMapFace face, T[] data, int startIndex, int elementCount)
-            where T : unmanaged
-        {
-            SetData(face, 0, null, data, startIndex, elementCount);
+            SetData(face, 0, null, data);
         }
 
         public void SetData<T>(
-            CubeMapFace face, int level, Rectangle? rect, T[] data, int startIndex, int elementCount)
+            CubeMapFace face, int level, Rectangle? rect, Span<T> data)
             where T : unmanaged
         {
-            ValidateParams(level, rect, data, startIndex, elementCount, out Rectangle checkedRect);
-            PlatformSetData(face, level, checkedRect, data, startIndex, elementCount);
+            SetData(face, 0, rect, (ReadOnlySpan<T>)data);
         }
 
+        public void SetData<T>(CubeMapFace face, Span<T> data)
+            where T : unmanaged
+        {
+            SetData(face, (ReadOnlySpan<T>)data);
+        }
+
+        #endregion
+
         private unsafe void ValidateParams<T>(
-            int level, Rectangle? rect, T[] data, int startIndex,
-            int elementCount, out Rectangle checkedRect)
+            int level, Rectangle? rect, int dataLength, out Rectangle checkedRect)
             where T : unmanaged
         {
             var textureBounds = new Rectangle(0, 0, Math.Max(Size >> level, 1), Math.Max(Size >> level, 1));
@@ -99,21 +112,10 @@ namespace MonoGame.Framework.Graphics
             if (!textureBounds.Contains(checkedRect) || checkedRect.Width <= 0 || checkedRect.Height <= 0)
                 throw new ArgumentException("Rectangle must be inside the texture bounds", nameof(rect));
 
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
             var fSize = Format.GetSize();
             if (sizeof(T) > fSize || fSize % sizeof(T) != 0)
                 throw new ArgumentException(
                     $"Type {nameof(T)} is of an invalid size for the format of this texture.", nameof(T));
-
-            if (startIndex < 0 || startIndex >= data.Length)
-                throw new ArgumentException(
-                    $"{nameof(startIndex)} must be at least zero and smaller than {nameof(data)}.{nameof(data.Length)}.",
-                    nameof(startIndex));
-
-            if (data.Length < startIndex + elementCount)
-                throw new ArgumentException("The data array is too small.");
 
             int dataByteSize;
             if (Format.IsCompressedFormat())
@@ -137,11 +139,11 @@ namespace MonoGame.Framework.Graphics
             {
                 dataByteSize = checkedRect.Width * checkedRect.Height * fSize;
             }
-            if (elementCount * sizeof(T) != dataByteSize)
+
+            if (dataLength * sizeof(T) != dataByteSize)
                 throw new ArgumentException(
-                    $"{nameof(elementCount)} is not the right size, " +
-                    $"{nameof(elementCount)} * sizeof({nameof(T)}) is {elementCount * sizeof(T)}, " +
-                    $"but data size is {dataByteSize}.", nameof(elementCount));
+                    $"Buffer length is not the right size, " +
+                    $"expected {dataLength * sizeof(T)} bytes, but is {dataByteSize}.");
         }
     }
 }

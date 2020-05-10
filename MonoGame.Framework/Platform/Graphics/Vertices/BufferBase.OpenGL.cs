@@ -38,10 +38,7 @@ namespace MonoGame.Framework.Graphics
             _elementSize = elementSize;
             _usageHint = IsDynamic ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw;
 
-            if (Threading.IsOnMainThread)
-                GenerateIfRequired();
-            else
-                Threading.BlockOnMainThread(GenerateIfRequired);
+            GenerateIfRequired();
         }
 
         internal void GenerateIfRequired()

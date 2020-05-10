@@ -146,7 +146,7 @@ namespace MonoGame.Framework.Graphics
                         offset + element.Offset);
 
                     // only set the divisor if instancing is supported
-                    if (GraphicsCapabilities.SupportsInstancing)
+                    if (Capabilities.SupportsInstancing)
                         GL.VertexAttribDivisor(element.AttributeLocation, vertexBufferBinding.InstanceFrequency);
 
                     GraphicsExtensions.CheckGLError();
@@ -491,9 +491,9 @@ namespace MonoGame.Framework.Graphics
             lock (_disposeActionsLock)
             {
                 // Swap lists so resources added during this draw will be released after the next draw
-                var temp = _disposeThisFrame;
+                var tmp = _disposeThisFrame;
                 _disposeThisFrame = _disposeNextFrame;
-                _disposeNextFrame = temp;
+                _disposeNextFrame = tmp;
             }
         }
 
@@ -549,7 +549,7 @@ namespace MonoGame.Framework.Graphics
             int preferredMultiSampleCount,
             RenderTargetUsage usage)
         {
-            void Create()
+            void Construct()
             {
                 int color = 0;
                 int depth = 0;
@@ -574,21 +574,21 @@ namespace MonoGame.Framework.Graphics
                             break;
 #if GLES
                         case DepthFormat.Depth24:
-                            if (GraphicsCapabilities.SupportsDepth24)
+                            if (Capabilities.SupportsDepth24)
                                 depthInternalFormat = RenderbufferStorage.DepthComponent24Oes;
-                            else if (GraphicsCapabilities.SupportsDepthNonLinear)
+                            else if (Capabilities.SupportsDepthNonLinear)
                                 depthInternalFormat = (RenderbufferStorage)0x8E2C;
                             else
                                 depthInternalFormat = RenderbufferStorage.DepthComponent16;
                             break;
                         case DepthFormat.Depth24Stencil8:
-                            if (GraphicsCapabilities.SupportsPackedDepthStencil)
+                            if (Capabilities.SupportsPackedDepthStencil)
                                 depthInternalFormat = RenderbufferStorage.Depth24Stencil8Oes;
                             else
                             {
-                                if (GraphicsCapabilities.SupportsDepth24)
+                                if (Capabilities.SupportsDepth24)
                                     depthInternalFormat = RenderbufferStorage.DepthComponent24Oes;
-                                else if (GraphicsCapabilities.SupportsDepthNonLinear)
+                                else if (Capabilities.SupportsDepthNonLinear)
                                     depthInternalFormat = (RenderbufferStorage)0x8E2C;
                                 else
                                     depthInternalFormat = RenderbufferStorage.DepthComponent16;
@@ -597,12 +597,12 @@ namespace MonoGame.Framework.Graphics
                             }
                             break;
 #else
-                        case DepthFormat.Depth24:
-                            depthInternalFormat = RenderbufferStorage.DepthComponent24;
-                            break;
-                        case DepthFormat.Depth24Stencil8:
-                            depthInternalFormat = RenderbufferStorage.Depth24Stencil8;
-                            break;
+                    case DepthFormat.Depth24:
+                        depthInternalFormat = RenderbufferStorage.DepthComponent24;
+                        break;
+                    case DepthFormat.Depth24Stencil8:
+                        depthInternalFormat = RenderbufferStorage.Depth24Stencil8;
+                        break;
 #endif
                     }
 
@@ -633,9 +633,9 @@ namespace MonoGame.Framework.Graphics
             }
 
             if (Threading.IsOnMainThread)
-                Create();
+                Construct();
             else
-                Threading.BlockOnMainThread(Create);
+                Threading.BlockOnMainThread(Construct);
         }
 
         internal void PlatformDeleteRenderTarget(IRenderTarget renderTarget)
@@ -897,7 +897,7 @@ namespace MonoGame.Framework.Graphics
 
         internal void PlatformBeginApplyState()
         {
-            Threading.EnsureMainThread();
+            Threading.AssertMainThread();
         }
 
         private void PlatformApplyBlend(bool force = false)
@@ -980,7 +980,7 @@ namespace MonoGame.Framework.Graphics
             ApplyState(true);
             ApplyAttribs(_vertexShader, baseVertex);
 
-            var elementType = _indexBuffer.ElementSize == IndexElementSize.Short 
+            var elementType = _indexBuffer.ElementSize == IndexElementSize.Short
                 ? IndexElementType.UnsignedShort : IndexElementType.UnsignedInt;
             int elementCount = GetElementCountForType(primitiveType, primitiveCount);
             var indexOffsetInBytes = new IntPtr(startIndex * (int)elementType);
@@ -1073,17 +1073,17 @@ namespace MonoGame.Framework.Graphics
             AssertSupportsInstancing();
             ApplyState(true);
 
-            var elementType = _indexBuffer.ElementSize == IndexElementSize.Short 
+            var elementType = _indexBuffer.ElementSize == IndexElementSize.Short
                 ? IndexElementType.UnsignedShort : IndexElementType.UnsignedInt;
             var elementCount = GetElementCountForType(primitiveType, primitiveCount);
 
             var indexOffsetInBytes = new IntPtr(startIndex * (int)elementType);
-            
+
             ApplyAttribs(_vertexShader, baseVertex);
 
             if (baseInstance > 0)
             {
-                if (!GraphicsCapabilities.SupportsBaseIndexInstancing)
+                if (!Capabilities.SupportsBaseIndexInstancing)
                     throw new PlatformNotSupportedException(
                         "Instanced geometry drawing with base instance requires at least OpenGL 4.2. " +
                         "Try upgrading your graphics card drivers.");
@@ -1111,7 +1111,7 @@ namespace MonoGame.Framework.Graphics
         [DebuggerHidden]
         private void AssertSupportsInstancing()
         {
-            if (!GraphicsCapabilities.SupportsInstancing)
+            if (!Capabilities.SupportsInstancing)
                 throw new PlatformNotSupportedException(
                     "Instanced geometry drawing requires at least OpenGL 3.2 or GLES 3.2. " +
                     "Try upgrading your graphics card drivers.");

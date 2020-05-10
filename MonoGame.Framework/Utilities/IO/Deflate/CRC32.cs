@@ -143,7 +143,7 @@ namespace MonoGame.Framework.Utilities.Deflate
 
             unchecked
             {
-                Span<byte> buffer = stackalloc byte[1024];
+                Span<byte> buffer = stackalloc byte[2048];
                 TotalBytesRead = 0;
 
                 int count = input.Read(buffer);
