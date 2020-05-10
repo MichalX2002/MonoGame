@@ -16,7 +16,7 @@ namespace MonoGame.Framework.Input
         /// <param name="description">Description of the message box.</param>
         /// <param name="buttons">Captions of the message box buttons. Up to three supported.</param>
         /// <returns>Index of button selected by the player. Null if back was used.</returns>
-        /// <exception cref="System.Exception">Thrown when the message box is already visible</exception>
+        /// <exception cref="Exception">Thrown when the message box is already visible</exception>
         /// <example>
         /// <code>
         /// var color = await MessageBox.Show("Color", "What's your favorite color?", new[] { "Red", "Green", "Blue" });
@@ -44,7 +44,7 @@ namespace MonoGame.Framework.Input
         /// Hides the message box interface and returns the parameter as the result of <see cref="Show"/>
         /// </summary>
         /// <param name="result">Result to return</param>
-        /// <exception cref="System.Exception">Thrown when the message box is not visible</exception>
+        /// <exception cref="Exception">Thrown when the message box is not visible</exception>
         /// <example>
         /// <code>
         /// var colorTask = MessageBox.Show("Color", "What's your favorite color?", new[] { "Red", "Green", "Blue" });

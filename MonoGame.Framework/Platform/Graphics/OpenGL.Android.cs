@@ -44,12 +44,12 @@ namespace MonoGame.OpenGL
 
             Android.Util.Log.Verbose("GL", "Bound {0}", BoundApi);
 
-            if (GL.BoundApi == GL.RenderApi.ES && libES3 != IntPtr.Zero)
+            if (BoundApi == RenderApi.ES && libES3 != IntPtr.Zero)
                 Library = libES3;
 
-            if (GL.BoundApi == GL.RenderApi.ES && libES2 != IntPtr.Zero)
+            if (BoundApi == RenderApi.ES && libES2 != IntPtr.Zero)
                 Library = libES2;
-            else if (GL.BoundApi == GL.RenderApi.GL && libGL != IntPtr.Zero)
+            else if (BoundApi == RenderApi.GL && libGL != IntPtr.Zero)
                 Library = libGL;
         }
 

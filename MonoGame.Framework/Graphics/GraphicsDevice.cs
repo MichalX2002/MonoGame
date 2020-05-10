@@ -229,7 +229,7 @@ namespace MonoGame.Framework.Graphics
         /// The color used as blend factor when alpha blending.
         /// </summary>
         /// <remarks>
-        /// When only changing BlendFactor, use this rather than <see cref="Graphics.BlendState.BlendFactor"/> to
+        /// When only changing BlendFactor, use this rather than <see cref="BlendState.BlendFactor"/> to
         /// only update BlendFactor so the whole BlendState does not have to be updated.
         /// </remarks>
         public Color BlendFactor

@@ -129,8 +129,7 @@ namespace MonoGame.Framework.Graphics
         {
             if (!disposed)
             {
-                if (disposing)
-                    Clear();
+                Clear();
                 disposed = true;
             }
         }

@@ -163,8 +163,8 @@ namespace MonoGame.Framework.Audio
 
 #if ANDROID
                 // Attach activity event handlers so we can pause and resume all playing sounds
-                MonoGameAndroidGameView.OnPauseGameThread += Activity_Paused;
-                MonoGameAndroidGameView.OnResumeGameThread += Activity_Resumed;
+                MonoGameAndroidGameView.OnGameThreadPause += Activity_Paused;
+                MonoGameAndroidGameView.OnGameThreadResume += Activity_Resumed;
 
                 // Query the device for the ideal frequency and update buffer size so
                 // we can get the low latency sound path.

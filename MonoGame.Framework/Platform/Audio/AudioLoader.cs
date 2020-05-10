@@ -364,7 +364,15 @@ namespace MonoGame.Framework.Audio
 
                 while (src.Length >= Vector<float>.Count)
                 {
+#if ANDROID
+                    // TODO: FIXME: hack for netstandard2.1
+                    ref float srcRef = ref Unsafe.AsRef(src.GetPinnableReference());
+                    var mutableSrc = MemoryMarshal.CreateSpan(ref srcRef, src.Length);
+                    var srcVec = new Vector<float>(mutableSrc);
+#else
                     var srcVec = new Vector<float>(src);
+#endif
+
                     var resultVec = GenericVector.Multiply(srcVec, maxValueVec);
                     resultVec = GenericVector.Max(resultVec, minValueVec);
                     resultVec = GenericVector.Min(resultVec, maxValueVec);
@@ -398,7 +406,7 @@ namespace MonoGame.Framework.Audio
             return outData;
         }
 
-        #region IMA4 decoding
+#region IMA4 decoding
 
         // Step table
         private static int[] stepTable = new int[]
@@ -572,9 +580,9 @@ namespace MonoGame.Framework.Audio
             return samples;
         }
 
-        #endregion
+#endregion
 
-        #region MS-ADPCM decoding
+#region MS-ADPCM decoding
 
         private static int[] adaptationTable = new int[]
         {
@@ -772,6 +780,6 @@ namespace MonoGame.Framework.Audio
             return samples;
         }
 
-        #endregion
+#endregion
     }
 }

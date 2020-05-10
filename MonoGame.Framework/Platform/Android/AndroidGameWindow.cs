@@ -236,7 +236,7 @@ namespace MonoGame.Framework
 
                 bool didOrientationChange = false;
                 // Android 2.3 and above support reverse orientations
-                int sdkVer = (int)Android.OS.Build.VERSION.SdkInt;
+                int sdkVer = (int)Build.VERSION.SdkInt;
                 if (sdkVer >= 10)
                 {
                     // Check if the requested orientation is supported. Default means all are supported.

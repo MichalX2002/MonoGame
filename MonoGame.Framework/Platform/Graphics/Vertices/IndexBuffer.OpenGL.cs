@@ -18,7 +18,7 @@ namespace MonoGame.Framework.Graphics
         private unsafe void PlatformGetData<T>(int byteOffset, Span<T> destination) 
             where T : unmanaged
         {
-            AssertOnMainThreadForSpan();
+            AssertMainThread();
 
 #if GLES
             // Buffers are write-only on OpenGL ES 1.1 and 2.0. See the GL_OES_mapbuffer extension for more information.
@@ -44,7 +44,7 @@ namespace MonoGame.Framework.Graphics
             int byteOffset, ReadOnlySpan<T> data, SetDataOptions options)
             where T : unmanaged
         {
-            AssertOnMainThreadForSpan();
+            AssertMainThread();
             GenerateIfRequired();
 
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, _vbo);

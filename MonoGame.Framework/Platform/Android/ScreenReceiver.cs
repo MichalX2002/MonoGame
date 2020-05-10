@@ -1,25 +1,26 @@
 using Android.Content;
 using Android.App;
+using Android.OS;
 
 namespace MonoGame.Framework
 {
     internal class ScreenReceiver : BroadcastReceiver
     {
         public static bool ScreenLocked;
-        
+
         public ScreenReceiver()
         {
         }
-        
+
         public override void OnReceive(Context context, Intent intent)
         {
             Android.Util.Log.Info("MonoGame", intent.Action.ToString());
 
-            if(intent.Action == Intent.ActionScreenOff)
+            if (intent.Action == Intent.ActionScreenOff)
             {
                 OnLocked();
             }
-            else if(intent.Action == Intent.ActionScreenOn)
+            else if (intent.Action == Intent.ActionScreenOn)
             {
                 // If the user turns the screen on just after it has automatically turned off, 
                 // the keyguard will not have had time to activate and the ActionUserPreset intent
@@ -27,10 +28,17 @@ namespace MonoGame.Framework
                 // and if not re-enable the game related functions.
                 // http://stackoverflow.com/questions/4260794/how-to-tell-if-device-is-sleeping
                 var keyguard = context.GetSystemService(Context.KeyguardService) as KeyguardManager;
-                if (!keyguard.InKeyguardRestrictedInputMode())
+
+                bool isKeyguardLocked = Build.VERSION.SdkInt >= BuildVersionCodes.P
+                    ? keyguard.IsKeyguardLocked
+#pragma warning disable CS0618 
+                    : keyguard.InKeyguardRestrictedInputMode();
+#pragma warning restore CS0618 
+
+                if (!isKeyguardLocked)
                     OnUnlocked();
             }
-            else if(intent.Action == Intent.ActionUserPresent)
+            else if (intent.Action == Intent.ActionUserPresent)
             {
                 // This intent is broadcast when the user unlocks the phone
                 OnUnlocked();

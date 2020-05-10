@@ -14,76 +14,70 @@ namespace MonoGame.Framework.Graphics
         private void PlatformConstruct(
             int width, int height, bool mipmap, SurfaceFormat format, SurfaceType type, bool shared)
         {
-            void Construct()
+            AssertMainThread();
+
+            _glTarget = TextureTarget.Texture2D;
+            format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
+
+            GenerateGLTextureIfRequired();
+            int level = 0;
+
+            while (true)
             {
-                _glTarget = TextureTarget.Texture2D;
-                format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
-
-                GenerateGLTextureIfRequired();
-                int level = 0;
-
-                while (true)
+                if (glFormat == GLPixelFormat.CompressedTextureFormats)
                 {
-                    if (glFormat == GLPixelFormat.CompressedTextureFormats)
+                    int imageSize;
+                    // PVRTC has explicit calculations for imageSize
+                    // https://www.khronos.org/registry/OpenGL/extensions/IMG/IMG_texture_compression_pvrtc.txt
+                    switch (format)
                     {
-                        int imageSize;
-                        // PVRTC has explicit calculations for imageSize
-                        // https://www.khronos.org/registry/OpenGL/extensions/IMG/IMG_texture_compression_pvrtc.txt
-                        switch (format)
+                        case SurfaceFormat.RgbPvrtc2Bpp:
+                        case SurfaceFormat.RgbaPvrtc2Bpp:
+                            imageSize = (Math.Max(width, 16) * Math.Max(height, 8) * 2 + 7) / 8;
+                            break;
+
+                        case SurfaceFormat.RgbPvrtc4Bpp:
+                        case SurfaceFormat.RgbaPvrtc4Bpp:
+                            imageSize = (Math.Max(width, 8) * Math.Max(height, 8) * 4 + 7) / 8;
+                            break;
+
+                        default:
                         {
-                            case SurfaceFormat.RgbPvrtc2Bpp:
-                            case SurfaceFormat.RgbaPvrtc2Bpp:
-                                imageSize = (Math.Max(width, 16) * Math.Max(height, 8) * 2 + 7) / 8;
-                                break;
-
-                            case SurfaceFormat.RgbPvrtc4Bpp:
-                            case SurfaceFormat.RgbaPvrtc4Bpp:
-                                imageSize = (Math.Max(width, 8) * Math.Max(height, 8) * 4 + 7) / 8;
-                                break;
-
-                            default:
-                            {
-                                format.GetBlockSize(out int blockWidth, out int blockHeight);
-                                int wBlocks = (width + (blockWidth - 1)) / blockWidth;
-                                int hBlocks = (height + (blockHeight - 1)) / blockHeight;
-                                imageSize = wBlocks * hBlocks * format.GetSize();
-                                break;
-                            }
+                            format.GetBlockSize(out int blockWidth, out int blockHeight);
+                            int wBlocks = (width + (blockWidth - 1)) / blockWidth;
+                            int hBlocks = (height + (blockHeight - 1)) / blockHeight;
+                            imageSize = wBlocks * hBlocks * format.GetSize();
+                            break;
                         }
-
-                        GL.CompressedTexImage2D(
-                            TextureTarget.Texture2D, level, glInternalFormat, width, height, 0, imageSize, IntPtr.Zero);
-                        GraphicsExtensions.CheckGLError();
-                    }
-                    else
-                    {
-                        GL.TexImage2D(
-                            TextureTarget.Texture2D, level, glInternalFormat, width, height, 0, glFormat, glType, IntPtr.Zero);
-                        GraphicsExtensions.CheckGLError();
                     }
 
-                    if ((width == 1 && height == 1) || !mipmap)
-                        break;
-
-                    if (width > 1)
-                        width /= 2;
-                    if (height > 1)
-                        height /= 2;
-                    level++;
+                    GL.CompressedTexImage2D(
+                        TextureTarget.Texture2D, level, glInternalFormat, width, height, 0, imageSize, IntPtr.Zero);
+                    GraphicsExtensions.CheckGLError();
                 }
-            }
+                else
+                {
+                    GL.TexImage2D(
+                        TextureTarget.Texture2D, level, glInternalFormat, width, height, 0, glFormat, glType, IntPtr.Zero);
+                    GraphicsExtensions.CheckGLError();
+                }
 
-            if (Threading.IsOnMainThread)
-                Construct();
-            else
-                Threading.BlockOnMainThread(Construct);
+                if ((width == 1 && height == 1) || !mipmap)
+                    break;
+
+                if (width > 1)
+                    width /= 2;
+                if (height > 1)
+                    height /= 2;
+                level++;
+            }
         }
 
         private unsafe void PlatformSetData<T>(
             int level, int arraySlice, Rectangle? rect, ReadOnlySpan<T> data)
             where T : unmanaged
         {
-            AssertOnMainThreadForSpan();
+            AssertMainThread();
 
             // Store the current bound texture.
             var prevTexture = GraphicsExtensions.GetBoundTexture2D();
@@ -133,6 +127,7 @@ namespace MonoGame.Framework.Graphics
             GL.Finish();
             GraphicsExtensions.CheckGLError();
 #endif
+
             // Restore the bound texture.
             if (prevTexture != _glTexture)
             {
@@ -145,16 +140,18 @@ namespace MonoGame.Framework.Graphics
             int level, int arraySlice, Rectangle rect, Span<T> destination)
             where T : unmanaged
         {
-            AssertOnMainThreadForSpan();
+            AssertMainThread();
+
 #if GLES
             // TODO: check for for non renderable formats (formats that can't be attached to FBO)
             GL.GenFramebuffers(1, out int framebufferId);
             GraphicsExtensions.CheckGLError();
+
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, framebufferId);
             GraphicsExtensions.CheckGLError();
 
             GL.FramebufferTexture2D(
-                FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, 
+                FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D,
                 _glTexture, 0);
             GraphicsExtensions.CheckGLError();
 
@@ -232,46 +229,48 @@ namespace MonoGame.Framework.Graphics
 
         private void GenerateGLTextureIfRequired()
         {
-            if (_glTexture < 0)
-            {
-                GL.GenTextures(1, out _glTexture);
-                GraphicsExtensions.CheckGLError();
+            if (_glTexture >= 0)
+                return;
 
-                // For best compatibility and to keep the default wrap mode of XNA, only set ClampToEdge if
-                // either dimension is not a power of two.
-                var wrap = TextureWrapMode.Repeat;
+            GL.GenTextures(1, out _glTexture);
+            GraphicsExtensions.CheckGLError();
 
-                if (((Width & (Width - 1)) != 0) || ((Height & (Height - 1)) != 0))
-                    wrap = TextureWrapMode.ClampToEdge;
+            // For best compatibility and to keep the default wrap mode of XNA, 
+            // only set ClampToEdge if either dimension is not a power of two.
+            var wrap = TextureWrapMode.Repeat;
 
-                GL.BindTexture(TextureTarget.Texture2D, _glTexture);
-                GraphicsExtensions.CheckGLError();
+            if (((Width & (Width - 1)) != 0) || ((Height & (Height - 1)) != 0))
+                wrap = TextureWrapMode.ClampToEdge;
 
-                var minFilter = (LevelCount > 1) ? (int)TextureMinFilter.LinearMipmapLinear : (int)TextureMinFilter.Linear;
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, minFilter);
-                GraphicsExtensions.CheckGLError();
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-                GraphicsExtensions.CheckGLError();
+            GL.BindTexture(TextureTarget.Texture2D, _glTexture);
+            GraphicsExtensions.CheckGLError();
 
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrap);
-                GraphicsExtensions.CheckGLError();
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrap);
-                GraphicsExtensions.CheckGLError();
+            var minFilter = (LevelCount > 1) ? (int)TextureMinFilter.LinearMipmapLinear : (int)TextureMinFilter.Linear;
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, minFilter);
+            GraphicsExtensions.CheckGLError();
 
-                // Set mipmap levels
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GraphicsExtensions.CheckGLError();
+
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrap);
+            GraphicsExtensions.CheckGLError();
+
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrap);
+            GraphicsExtensions.CheckGLError();
+
 #if !GLES
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
+            // Set mipmap levels
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
 #endif
+            GraphicsExtensions.CheckGLError();
+            if (GraphicsDevice.GraphicsCapabilities.SupportsTextureMaxLevel)
+            {
+                var paramName = SamplerState.TextureParameterNameTextureMaxLevel;
+                if (LevelCount > 0)
+                    GL.TexParameter(TextureTarget.Texture2D, paramName, LevelCount - 1);
+                else
+                    GL.TexParameter(TextureTarget.Texture2D, paramName, 1000);
                 GraphicsExtensions.CheckGLError();
-                if (GraphicsDevice.GraphicsCapabilities.SupportsTextureMaxLevel)
-                {
-                    var paramName = SamplerState.TextureParameterNameTextureMaxLevel;
-                    if (LevelCount > 0)
-                        GL.TexParameter(TextureTarget.Texture2D, paramName, LevelCount - 1);
-                    else
-                        GL.TexParameter(TextureTarget.Texture2D, paramName, 1000);
-                    GraphicsExtensions.CheckGLError();
-                }
             }
         }
     }

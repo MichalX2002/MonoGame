@@ -265,7 +265,7 @@ namespace MonoGame.Framework.Content
                     stream = TitleContainer.OpenStream(assetPath);
                 }
 #if ANDROID
-                stream = Utilities.RecyclableMemoryManager.Default.GetBufferedStream(stream, leaveOpen: false);
+                stream = RecyclableMemoryManager.Default.GetBufferedStream(stream, leaveOpen: false);
 #endif
                 return stream;
             }

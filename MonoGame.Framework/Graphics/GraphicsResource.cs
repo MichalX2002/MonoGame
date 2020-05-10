@@ -37,6 +37,8 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public object Tag { get; set; }
 
+        public virtual bool SupportsAsync => GraphicsDevice.SupportsAsync;
+
         /// <summary>
         /// Gets the <see cref="Graphics.GraphicsDevice"/> assigned to this <see cref="GraphicsResource"/>.
         /// </summary>
@@ -92,17 +94,19 @@ namespace MonoGame.Framework.Graphics
         }
 
         /// <summary>
-        /// Throws an exception if the caller is not running on the main thread.
+        /// Throws an exception if the caller is not running on the main thread
+        /// and the resource does not support asynchronous operations.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// The caller is not running on the main thread.
         /// </exception>
-        [DebuggerHidden]
-        protected static void AssertOnMainThreadForSpan()
+        protected void AssertMainThread()
         {
+            if (SupportsAsync)
+                return;
+
             if (!Threading.IsOnMainThread)
-                throw new AsyncResourceNotSupportedException(
-                    FrameworkResources.AsyncResourceNotSupported);
+                throw new AsyncResourceNotSupportedException();
         }
 
         /// <summary>

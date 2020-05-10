@@ -4,10 +4,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
 using Android.Media;
+using Android.OS;
 using Android.Runtime;
 using Android.Util;
 using Android.Views;
@@ -19,64 +21,58 @@ using MonoGame.Framework.Input.Touch;
 namespace MonoGame.Framework
 {
     [CLSCompliant(false)]
-    public class MonoGameAndroidGameView : SurfaceView, ISurfaceHolderCallback, View.IOnTouchListener
+    public partial class MonoGameAndroidGameView : SurfaceView, ISurfaceHolderCallback, View.IOnTouchListener
     {
-        // What is the state of the app, for tracking surface recreation inside this class.
-        // This acts as a replacement for the all-out monitor wait approach which caused code to be quite fragile.
-        enum InternalState
-        {
-            Pausing_UIThread,  // set by android UI thread and the game thread process it and transitions into 'Paused' state
-            Resuming_UIThread, // set by android UI thread and the game thread process it and transitions into 'Running' state
-            Exiting,           // set either by game or android UI thread and the game thread process it and transitions into 'Exited' state          
+        public static event DatalessEvent<MonoGameAndroidGameView> OnGameThreadPause;
+        public static event DatalessEvent<MonoGameAndroidGameView> OnGameThreadResume;
 
-            Paused_GameThread,  // set by game thread after processing 'Pausing' state
-            Running_GameThread, // set by game thread after processing 'Resuming' state
-            Exited_GameThread,  // set by game thread after processing 'Exiting' state
+        public event DataEvent<MonoGameAndroidGameView, FrameEventArgs> RenderFrame;
+        public event DataEvent<MonoGameAndroidGameView, FrameEventArgs> UpdateFrame;
 
-            ForceRecreateSurface, // also used to create the surface the 1st time or when screen orientation changes
-        }
+        private bool _disposed = false;
+        private bool _loaded = false;
+        private bool _androidSurfaceAvailable;
+        private bool _glSurfaceAvailable;
+        private bool _glContextAvailable;
+        private bool _glContextLost;
+        private volatile InternalState _internalState = InternalState.Exited_GameThread;
 
-        bool disposed = false;
-        ISurfaceHolder mHolder;
-        System.Drawing.Size size;
-
-        ManualResetEvent _waitForPausedStateProcessed = new ManualResetEvent(false);
-        ManualResetEvent _waitForResumedStateProcessed = new ManualResetEvent(false);
-        ManualResetEvent _waitForExitedStateProcessed = new ManualResetEvent(false);
-        AutoResetEvent _waitForMainGameLoop = new AutoResetEvent(false);
-        object _lockObject = new object();
-        volatile InternalState _internalState = InternalState.Exited_GameThread;
-
-        bool androidSurfaceAvailable = false;
-        bool glSurfaceAvailable;
-        bool glContextAvailable;
-        bool lostglContext;
-        System.Diagnostics.Stopwatch stopWatch;
-        double tick = 0;
-
-        bool loaded = false;
-
-        Task renderTask;
-        CancellationTokenSource cts = null;
+        private Task _renderTask;
+        private CancellationTokenSource _renderCancellation = null;
         private readonly AndroidTouchEventManager _touchManager;
         private readonly AndroidGameWindow _gameWindow;
         private readonly Game _game;
+        private Size _surfaceSize;
 
-        // Events that are triggered on the game thread
-        public static event DatalessEvent<MonoGameAndroidGameView> OnPauseGameThread;
-        public static event DatalessEvent<MonoGameAndroidGameView> OnResumeGameThread;
+        private ManualResetEvent _waitForPausedStateProcessed = new ManualResetEvent(false);
+        private ManualResetEvent _waitForResumedStateProcessed = new ManualResetEvent(false);
+        private ManualResetEvent _waitForExitedStateProcessed = new ManualResetEvent(false);
+        private AutoResetEvent _waitForMainGameLoop = new AutoResetEvent(false);
+        private readonly object _lockObject = new object();
+
+        private Stopwatch _stopWatch;
+        private double _tick = 0;
+        private int _frames = 0;
+        private double _prev = 0;
+        private double _avgFps = 0;
+
+        private DateTime _prevUpdateTime;
+        private DateTime _prevRenderTime;
+        private DateTime _curUpdateTime;
+        private DateTime _curRenderTime;
+        private FrameEventArgs _updateEventArgs = new FrameEventArgs();
+
+        public bool IsResuming { get; private set; }
 
         public bool TouchEnabled
         {
-            get { return _touchManager.Enabled; }
+            get => _touchManager.Enabled;
             set
             {
                 _touchManager.Enabled = value;
                 SetOnTouchListener(value ? this : null);
             }
         }
-
-        public bool IsResuming { get; private set; }
 
         public MonoGameAndroidGameView(
             Context context, AndroidGameWindow gameWindow, Game game) : base(context)
@@ -89,11 +85,13 @@ namespace MonoGame.Framework
 
         private void Init()
         {
-            // default
-            mHolder = Holder;
             // Add callback to get the SurfaceCreated etc events
-            mHolder.AddCallback(this);
-            mHolder.SetType(Android.Views.SurfaceType.Gpu);
+            Holder.AddCallback(this);
+
+            if (Build.VERSION.SdkInt < BuildVersionCodes.IceCreamSandwichMr1)
+#pragma warning disable CS0618 
+                Holder.SetType(Android.Views.SurfaceType.Gpu);
+#pragma warning restore CS0618
         }
 
         public void SurfaceChanged(ISurfaceHolder holder, Android.Graphics.Format format, int width, int height)
@@ -112,7 +110,7 @@ namespace MonoGame.Framework
         {
             lock (_lockObject)
             {
-                androidSurfaceAvailable = true;
+                _androidSurfaceAvailable = true;
             }
         }
 
@@ -120,7 +118,7 @@ namespace MonoGame.Framework
         {
             lock (_lockObject)
             {
-                androidSurfaceAvailable = false;
+                _androidSurfaceAvailable = false;
             }
         }
 
@@ -137,9 +135,9 @@ namespace MonoGame.Framework
             {
                 if (egl.EglGetError() == 0)
                 {
-                    if (lostglContext)
+                    if (_glContextLost)
                         System.Diagnostics.Debug.WriteLine("Lost EGL context" + GetErrorAsString());
-                    lostglContext = true;
+                    _glContextLost = true;
                 }
             }
         }
@@ -176,18 +174,19 @@ namespace MonoGame.Framework
 
         public virtual void Run(double updatesPerSecond)
         {
-            cts = new CancellationTokenSource();
+            _renderCancellation = new CancellationTokenSource();
             if (LogFPS)
-                avgFps = 1;
+                _avgFps = 1;
             updates = 1000 / updatesPerSecond;
 
             // We always start a new task, regardless if we render on UI thread or not.
             var syncContext = SynchronizationContext.Current;
-            renderTask = Task.Factory.StartNew(
-                () => WorkerThreadFrameDispatcher(syncContext),
-                cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
-            renderTask.ContinueWith((t) => OnStopped());
+            _renderTask = Task.Factory.StartNew(
+                () => WorkerThreadFrameDispatcher(syncContext),
+                _renderCancellation.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+            _renderTask.ContinueWith((t) => OnStopped());
         }
 
         public virtual void Pause()
@@ -207,14 +206,14 @@ namespace MonoGame.Framework
 
             lock (_lockObject)
             {
-                if (!androidSurfaceAvailable)
+                if (!_androidSurfaceAvailable)
                     _internalState = InternalState.Paused_GameThread; // prepare for next game loop iteration
             }
 
             lock (_lockObject)
             {
                 // processing the pausing state only if the surface was created already
-                if (androidSurfaceAvailable)
+                if (_androidSurfaceAvailable)
                 {
                     _waitForPausedStateProcessed.Reset();
                     _internalState = InternalState.Pausing_UIThread;
@@ -261,14 +260,14 @@ namespace MonoGame.Framework
         public void Stop()
         {
             AssertNotDisposed();
-            if (cts != null)
+            if (_renderCancellation != null)
             {
                 lock (_lockObject)
                 {
                     _internalState = InternalState.Exiting;
                 }
 
-                cts.Cancel();
+                _renderCancellation.Cancel();
 
                 if (!RenderOnUIThread)
                     _waitForExitedStateProcessed.Reset();
@@ -282,11 +281,11 @@ namespace MonoGame.Framework
             Threading.ResetThread(Thread.CurrentThread.ManagedThreadId);
             try
             {
-                stopWatch = System.Diagnostics.Stopwatch.StartNew();
-                tick = 0;
-                prevUpdateTime = DateTime.Now;
+                _stopWatch = Stopwatch.StartNew();
+                _tick = 0;
+                _prevUpdateTime = DateTime.Now;
 
-                while (!cts.IsCancellationRequested)
+                while (!_renderCancellation.IsCancellationRequested)
                 {
                     // either use UI thread to render one frame or this worker thread
                     bool pauseThread = false;
@@ -294,12 +293,12 @@ namespace MonoGame.Framework
                     {
                         uiThreadSyncContext.Send((s) =>
                         {
-                            pauseThread = RunIteration(cts.Token);
+                            pauseThread = RunIteration(_renderCancellation.Token);
                         }, null);
                     }
                     else
                     {
-                        pauseThread = RunIteration(cts.Token);
+                        pauseThread = RunIteration(_renderCancellation.Token);
                     }
 
 
@@ -316,14 +315,14 @@ namespace MonoGame.Framework
             }
             finally
             {
-                bool c = cts.IsCancellationRequested;
+                bool c = _renderCancellation.IsCancellationRequested;
 
-                cts = null;
+                _renderCancellation = null;
 
-                if (glSurfaceAvailable)
+                if (_glSurfaceAvailable)
                     DestroyGLSurface();
 
-                if (glContextAvailable)
+                if (_glContextAvailable)
                 {
                     DestroyGLContext();
                     ContextLostInternal();
@@ -336,12 +335,6 @@ namespace MonoGame.Framework
             }
 
         }
-
-        DateTime prevUpdateTime;
-        DateTime prevRenderTime;
-        DateTime curUpdateTime;
-        DateTime curRenderTime;
-        FrameEventArgs updateEventArgs = new FrameEventArgs();
 
         void ProcessStateDefault()
         {
@@ -358,7 +351,7 @@ namespace MonoGame.Framework
             // do not run game if surface is not avalible
             lock (_lockObject)
             {
-                if (!androidSurfaceAvailable)
+                if (!_androidSurfaceAvailable)
                     return;
             }
 
@@ -385,12 +378,12 @@ namespace MonoGame.Framework
 
             if (updates > 0)
             {
-                var t = updates - (stopWatch.Elapsed.TotalMilliseconds - tick);
+                var t = updates - (_stopWatch.Elapsed.TotalMilliseconds - _tick);
                 if (t > 0)
                 {
                     if (LogFPS)
                     {
-                        Log.Verbose("AndroidGameView", "took {0:F2}ms, should take {1:F2}ms, sleeping for {2:F2}", stopWatch.Elapsed.TotalMilliseconds - tick, updates, t);
+                        Log.Verbose("AndroidGameView", "took {0:F2}ms, should take {1:F2}ms, sleeping for {2:F2}", _stopWatch.Elapsed.TotalMilliseconds - _tick, updates, t);
                     }
 
                 }
@@ -400,17 +393,17 @@ namespace MonoGame.Framework
 
         void ProcessStatePausing()
         {
-            if (glSurfaceAvailable)
+            if (_glSurfaceAvailable)
             {
                 // Surface we are using needs to go away
                 DestroyGLSurface();
 
-                if (loaded)
+                if (_loaded)
                     OnUnload();
             }
 
             // trigger callbacks, must pause openAL device here
-            OnPauseGameThread?.Invoke(this);
+            OnGameThreadPause?.Invoke(this);
 
             // go to next state
             lock (_lockObject)
@@ -424,7 +417,7 @@ namespace MonoGame.Framework
             bool isSurfaceAvalible = false;
             lock (_lockObject)
             {
-                isSurfaceAvalible = androidSurfaceAvailable;
+                isSurfaceAvalible = _androidSurfaceAvailable;
             }
 
             // must sleep outside lock!
@@ -438,11 +431,11 @@ namespace MonoGame.Framework
             // in this case we skip the resume process and pause sets a new state.   
             lock (_lockObject)
             {
-                if (!androidSurfaceAvailable)
+                if (!_androidSurfaceAvailable)
                     return;
 
                 // create surface if context is avalible
-                if (glContextAvailable && !lostglContext)
+                if (_glContextAvailable && !_glContextLost)
                 {
                     try
                     {
@@ -456,11 +449,11 @@ namespace MonoGame.Framework
                 }
 
                 // create context if not avalible
-                if ((!glContextAvailable || lostglContext))
+                if ((!_glContextAvailable || _glContextLost))
                 {
                     // Start or Restart due to context loss
                     bool contextLost = false;
-                    if (lostglContext || glContextAvailable)
+                    if (_glContextLost || _glContextAvailable)
                     {
                         // we actually lost the context
                         // so we need to free up our existing 
@@ -474,10 +467,10 @@ namespace MonoGame.Framework
                     CreateGLContext();
                     CreateGLSurface();
 
-                    if (!loaded && glContextAvailable)
+                    if (!_loaded && _glContextAvailable)
                         OnLoad();
 
-                    if (contextLost && glContextAvailable)
+                    if (contextLost && _glContextAvailable)
                     {
                         // we lost the gl context, we need to let the programmer
                         // know so they can re-create textures etc.
@@ -485,10 +478,10 @@ namespace MonoGame.Framework
                     }
 
                 }
-                else if (glSurfaceAvailable) // finish state if surface created, may take a frame or two until the android UI thread callbacks fire
+                else if (_glSurfaceAvailable) // finish state if surface created, may take a frame or two until the android UI thread callbacks fire
                 {
                     // trigger callbacks, must resume openAL device here
-                    OnResumeGameThread?.Invoke(this);
+                    OnGameThreadResume?.Invoke(this);
 
                     // go to next state
                     _internalState = InternalState.Running_GameThread;
@@ -510,7 +503,7 @@ namespace MonoGame.Framework
             // needed at app start
             lock (_lockObject)
             {
-                if (!androidSurfaceAvailable || !glContextAvailable)
+                if (!_androidSurfaceAvailable || !_glContextAvailable)
                     return;
             }
 
@@ -548,7 +541,7 @@ namespace MonoGame.Framework
                     lock (_lockObject)
                     {
                         _waitForExitedStateProcessed.Set();
-                        cts.Cancel();
+                        _renderCancellation.Cancel();
                     }
                     break;
 
@@ -584,7 +577,7 @@ namespace MonoGame.Framework
                 // default case, error
                 default:
                     ProcessStateDefault();
-                    cts.Cancel();
+                    _renderCancellation.Cancel();
                     break;
             }
 
@@ -599,22 +592,21 @@ namespace MonoGame.Framework
 
         protected virtual void OnUpdateFrame(FrameEventArgs e)
         {
-
         }
 
         // this method is called on the main thread
         void UpdateAndRenderFrame()
         {
-            curUpdateTime = DateTime.Now;
-            if (prevUpdateTime.Ticks != 0)
+            _curUpdateTime = DateTime.Now;
+            if (_prevUpdateTime.Ticks != 0)
             {
-                var t = (curUpdateTime - prevUpdateTime).TotalMilliseconds;
-                updateEventArgs.Elapsed = t < 0 ? 0 : t;
+                var t = (_curUpdateTime - _prevUpdateTime).TotalMilliseconds;
+                _updateEventArgs.Elapsed = t < 0 ? 0 : t;
             }
 
             try
             {
-                UpdateFrameInternal(updateEventArgs);
+                UpdateFrameInternal(_updateEventArgs);
             }
             catch (Content.ContentLoadException ex)
             {
@@ -622,25 +614,25 @@ namespace MonoGame.Framework
                     throw ex;
                 else
                 {
-                   AndroidGameActivity.Instance.RunOnUiThread(() =>
-                   {
-                       throw ex;
-                   });
+                    AndroidGameActivity.Instance.RunOnUiThread(() =>
+                    {
+                        throw ex;
+                    });
                 }
             }
 
-            prevUpdateTime = curUpdateTime;
+            _prevUpdateTime = _curUpdateTime;
 
-            curRenderTime = DateTime.Now;
-            if (prevRenderTime.Ticks == 0)
+            _curRenderTime = DateTime.Now;
+            if (_prevRenderTime.Ticks == 0)
             {
-                var t = (curRenderTime - prevRenderTime).TotalMilliseconds;
+                var t = (_curRenderTime - _prevRenderTime).TotalMilliseconds;
                 renderEventArgs.Elapsed = t < 0 ? 0 : t;
             }
 
             RenderFrameInternal(renderEventArgs);
 
-            prevRenderTime = curRenderTime;
+            _prevRenderTime = _curRenderTime;
         }
 
         void RenderFrameInternal(FrameEventArgs e)
@@ -657,35 +649,31 @@ namespace MonoGame.Framework
 
         }
 
-        int frames = 0;
-        double prev = 0;
-        double avgFps = 0;
-
         void Mark()
         {
-            double cur = stopWatch.Elapsed.TotalMilliseconds;
+            double cur = _stopWatch.Elapsed.TotalMilliseconds;
             if (cur < 2000)
                 return;
 
-            frames++;
+            _frames++;
 
-            if (cur - prev >= 995)
+            if (cur - _prev >= 995)
             {
-                avgFps = 0.8 * avgFps + 0.2 * frames;
+                _avgFps = 0.8 * _avgFps + 0.2 * _frames;
 
                 Log.Verbose("AndroidGameView", "frames {0} elapsed {1}ms {2:F2} fps",
-                    frames,
-                    cur - prev,
-                    avgFps);
+                    _frames,
+                    cur - _prev,
+                    _avgFps);
 
-                frames = 0;
-                prev = cur;
+                _frames = 0;
+                _prev = cur;
             }
         }
 
         protected void AssertNotDisposed()
         {
-            if (disposed)
+            if (_disposed)
                 throw new ObjectDisposedException("");
         }
 
@@ -704,7 +692,7 @@ namespace MonoGame.Framework
                 eglDisplay = null;
             }
 
-            glContextAvailable = false;
+            _glContextAvailable = false;
         }
 
         protected void DestroyGLSurface()
@@ -723,7 +711,7 @@ namespace MonoGame.Framework
                 }
             }
             eglSurface = null;
-            glSurfaceAvailable = false;
+            _glSurfaceAvailable = false;
 
         }
 
@@ -739,36 +727,43 @@ namespace MonoGame.Framework
             public int[] ToConfigAttribs()
             {
                 var attribs = new List<int>();
+
                 if (Red != 0)
                 {
                     attribs.Add(EGL11.EglRedSize);
                     attribs.Add(Red);
                 }
+
                 if (Green != 0)
                 {
                     attribs.Add(EGL11.EglGreenSize);
                     attribs.Add(Green);
                 }
+
                 if (Blue != 0)
                 {
                     attribs.Add(EGL11.EglBlueSize);
                     attribs.Add(Blue);
                 }
+
                 if (Alpha != 0)
                 {
                     attribs.Add(EGL11.EglAlphaSize);
                     attribs.Add(Alpha);
                 }
+
                 if (Depth != 0)
                 {
                     attribs.Add(EGL11.EglDepthSize);
                     attribs.Add(Depth);
                 }
+
                 if (Stencil != 0)
                 {
                     attribs.Add(EGL11.EglStencilSize);
                     attribs.Add(Stencil);
                 }
+
                 attribs.Add(EGL11.EglRenderableType);
                 attribs.Add(4);
                 attribs.Add(EGL11.EglNone);
@@ -806,7 +801,7 @@ namespace MonoGame.Framework
 
         protected void CreateGLContext()
         {
-            lostglContext = false;
+            _glContextLost = false;
 
             egl = EGLContext.EGL.JavaCast<IEGL10>();
 
@@ -890,8 +885,8 @@ namespace MonoGame.Framework
             if (!found || numConfigs[0] <= 0)
                 throw new Exception("No valid EGL configs found" + GetErrorAsString());
 
-            var createdVersion = new MonoGame.OpenGL.GLESVersion();
-            foreach (var v in MonoGame.OpenGL.GLESVersion.GetSupportedGLESVersions())
+            var createdVersion = new OpenGL.GLESVersion();
+            foreach (var v in OpenGL.GLESVersion.GetSupportedGLESVersions())
             {
                 Log.Verbose("AndroidGameView", "Creating GLES {0} Context", v);
                 eglContext = egl.EglCreateContext(eglDisplay, results[0], EGL10.EglNoContext, v.GetAttributes());
@@ -911,7 +906,7 @@ namespace MonoGame.Framework
             }
             Log.Verbose("AndroidGameView", "Created GLES {0} Context", createdVersion);
             eglConfig = results[0];
-            glContextAvailable = true;
+            _glContextAvailable = true;
         }
 
         private string GetErrorAsString()
@@ -956,7 +951,7 @@ namespace MonoGame.Framework
 
         protected void CreateGLSurface()
         {
-            if (glSurfaceAvailable)
+            if (_glSurfaceAvailable)
                 return;
 
             try
@@ -971,20 +966,20 @@ namespace MonoGame.Framework
                 if (!egl.EglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext))
                     throw new Exception("Could not make EGL current" + GetErrorAsString());
 
-                glSurfaceAvailable = true;
+                _glSurfaceAvailable = true;
 
                 // Must set viewport after creation, the viewport has correct values in it already as we call it, but
                 // the surface is created after the correct viewport is already applied so we must do it again.
                 if (_game.GraphicsDevice != null)
                     _game.GraphicsDeviceManager.ResetClientBounds();
 
-                if (MonoGame.OpenGL.GL.GetError == null)
-                    MonoGame.OpenGL.GL.LoadEntryPoints();
+                if (OpenGL.GL.GetError == null)
+                    OpenGL.GL.LoadEntryPoints();
             }
             catch (Exception ex)
             {
                 Log.Error("AndroidGameView", ex.ToString());
-                glSurfaceAvailable = false;
+                _glSurfaceAvailable = false;
             }
         }
 
@@ -999,7 +994,7 @@ namespace MonoGame.Framework
 
         protected void ContextSetInternal()
         {
-            if (lostglContext)
+            if (_glContextLost)
             {
                 if (_game.GraphicsDevice != null)
                 {
@@ -1012,9 +1007,9 @@ namespace MonoGame.Framework
                     // Reload textures on a different thread so the resumer can be drawn
                     var bgThread = new Thread(o =>
                     {
-                        Android.Util.Log.Debug("MonoGame", "Begin reloading graphics content");
+                        Log.Debug("MonoGame", "Begin reloading graphics content");
                         Content.ContentManager.ReloadGraphicsContent();
-                        Android.Util.Log.Debug("MonoGame", "End reloading graphics content");
+                        Log.Debug("MonoGame", "End reloading graphics content");
 
                         // DeviceReset events
                         _game.GraphicsDeviceManager.OnDeviceReset();
@@ -1071,6 +1066,7 @@ namespace MonoGame.Framework
                 return true;
 
             handled = Keyboard.KeyDown(keyCode);
+
 #if !OUYA
             // we need to handle the Back key here because it doesnt work any other way
             if (keyCode == Keycode.Back)
@@ -1100,8 +1096,10 @@ namespace MonoGame.Framework
         {
             if (keyCode == Keycode.Back)
                 GamePad.Back = false;
+
             if (GamePad.OnKeyUp(keyCode, e))
                 return true;
+
             return Keyboard.KeyUp(keyCode);
         }
 
@@ -1140,102 +1138,27 @@ namespace MonoGame.Framework
         }
 
         /// <summary>The size of the current view.</summary>
-        /// <value>A <see cref="T:System.Drawing.Size" /> which is the size of the current view.</value>
-        /// <exception cref="T:System.ObjectDisposed">The instance has been disposed</exception>
-        public virtual System.Drawing.Size Size
+        /// <value>A <see cref="Size" /> which is the size of the current view.</value>
+        /// <exception cref="ObjectDisposedException">The instance has been disposed.</exception>
+        public virtual Size Size
         {
             get
             {
                 AssertNotDisposed();
-                return size;
+                return _surfaceSize;
             }
             set
             {
                 AssertNotDisposed();
-                size = value;
+                _surfaceSize = value;
             }
         }
+
         #endregion
-
-        public event FrameEvent RenderFrame;
-        public event FrameEvent UpdateFrame;
-
-        public delegate void FrameEvent(object sender, FrameEventArgs e);
-
-        public class FrameEventArgs
-        {
-            private double _elapsed;
-
-            /// <summary>
-            /// Gets a <see cref="double"/> that indicates how many seconds of time elapsed since the previous event.
-            /// </summary>
-            public double Elapsed
-            {
-                get => _elapsed;
-                set
-                {
-                    if (value < 0)
-                        throw new ArgumentOutOfRangeException();
-                    _elapsed = value;
-                }
-            }
-
-            /// <summary>
-            /// Constructs a new <see cref="FrameEventArgs"/> instance.
-            /// </summary>
-            public FrameEventArgs()
-            {
-            }
-
-            /// <summary>
-            /// Constructs a new <see cref="FrameEventArgs"/> instance.
-            /// </summary>
-            /// <param name="elapsed">The amount of time that has elapsed since the previous event, in seconds.</param>
-            public FrameEventArgs(double elapsed)
-            {
-                Elapsed = elapsed;
-            }
-        }
 
         public BackgroundContext CreateBackgroundContext()
         {
             return new BackgroundContext(this);
-        }
-
-        public class BackgroundContext
-        {
-            EGLContext eglContext;
-            MonoGameAndroidGameView view;
-            EGLSurface surface;
-
-            public BackgroundContext(MonoGameAndroidGameView view)
-            {
-                this.view = view;
-                foreach (var v in MonoGame.OpenGL.GLESVersion.GetSupportedGLESVersions())
-                {
-                    eglContext = view.egl.EglCreateContext(view.eglDisplay, view.eglConfig, EGL10.EglNoContext, v.GetAttributes());
-                    if (eglContext == null || eglContext == EGL10.EglNoContext)
-                        continue;
-                    break;
-                }
-
-                if (eglContext == null || eglContext == EGL10.EglNoContext)
-                {
-                    eglContext = null;
-                    throw new Exception("Could not create EGL context" + view.GetErrorAsString());
-                }
-
-                int[] pbufferAttribList = new int[] { EGL10.EglWidth, 64, EGL10.EglHeight, 64, EGL10.EglNone };
-                surface = view.CreatePBufferSurface(view.eglConfig, pbufferAttribList);
-                if (surface == EGL10.EglNoSurface)
-                    throw new Exception("Could not create Pbuffer Surface" + view.GetErrorAsString());
-            }
-
-            public void MakeCurrent()
-            {
-                view.ClearCurrent();
-                view.egl.EglMakeCurrent(view.eglDisplay, surface, surface, eglContext);
-            }
         }
     }
 }

@@ -203,7 +203,10 @@ namespace MonoGame.Framework.Input
             if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
                 vibrator.Vibrate(VibrationEffect.CreateOneShot(durationsMs, VibrationEffect.DefaultAmplitude));
             else
+#pragma warning disable CS0618 
                 vibrator.Vibrate(durationsMs);
+#pragma warning restore CS0618 
+
             return true;
         }
 

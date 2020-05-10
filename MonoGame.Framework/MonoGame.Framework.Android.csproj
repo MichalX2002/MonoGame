@@ -1,4 +1,4 @@
-<Project Sdk="MSBuild.Sdk.Extras">
+﻿<Project Sdk="MSBuild.Sdk.Extras">
 
   <PropertyGroup>
     <TargetFramework>monoandroid90</TargetFramework>
@@ -27,6 +27,7 @@ This package provides you with MonoGame Framework that works on Android.</Descri
 
   <ItemGroup>
     <None Remove="Platform\**\*" />
+    <None Remove="obj\**\*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,7 +53,10 @@ This package provides you with MonoGame Framework that works on Android.</Descri
     <Compile Include="Platform\Android\Input\Keyboard.cs" />
     <Compile Include="Platform\Android\Input\Touch\AndroidTouchEventManager.cs" />
     <Compile Include="Platform\Android\IResumeManager.cs" />
+    <Compile Include="Platform\Android\MonoGameAndroidGameView.BackgroundContext.cs" />
     <Compile Include="Platform\Android\MonoGameAndroidGameView.cs" />
+    <Compile Include="Platform\Android\MonoGameAndroidGameView.FrameEventArgs.cs" />
+    <Compile Include="Platform\Android\MonoGameAndroidGameView.InternalState.cs" />
     <Compile Include="Platform\Android\OrientationListener.cs" />
     <Compile Include="Platform\Android\ResumeManager.cs" />
     <Compile Include="Platform\Android\ScreenReceiver.cs" />
@@ -89,10 +93,6 @@ This package provides you with MonoGame Framework that works on Android.</Descri
     <Compile Include="Platform\TitleContainer.Android.cs" />
     <Compile Include="Platform\Utilities\FuncLoader.Android.cs" />
     <Compile Include="Platform\Utilities\InteropHelpers.cs" />
-    <Compile Include="Platform\Utilities\TimerHelper.cs">
-      <SubType>Code</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Compile>
     
     <Compile Include="..\ThirdParty\StbImageSharp\src\StbImageSharp\**\*.cs" LinkBase="Utilities\StbImageSharp" />
     <Compile Include="..\ThirdParty\StbImageWriteSharp\src\StbImageWriteSharp\**\*.cs" LinkBase="Utilities\StbImageWriteSharp" />

@@ -15,6 +15,8 @@ namespace MonoGame.Framework.Graphics
         private void PlatformConstruct(
             GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format, bool renderTarget)
         {
+            AssertMainThread();
+
             _glTarget = TextureTarget.TextureCubeMap;
 
             void Construct()
@@ -29,14 +31,14 @@ namespace MonoGame.Framework.Graphics
                     TextureParameterName.TextureMinFilter,
                     mipMap ? (int)TextureMinFilter.LinearMipmapLinear : (int)TextureMinFilter.Linear);
                 GraphicsExtensions.CheckGLError();
-                GL.TexParameter(TextureTarget.TextureCubeMap, 
+                GL.TexParameter(TextureTarget.TextureCubeMap,
                     TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
                 GraphicsExtensions.CheckGLError();
 
                 GL.TexParameter(TextureTarget.TextureCubeMap,
                     TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
                 GraphicsExtensions.CheckGLError();
-                GL.TexParameter(TextureTarget.TextureCubeMap, 
+                GL.TexParameter(TextureTarget.TextureCubeMap,
                     TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
                 GraphicsExtensions.CheckGLError();
 
@@ -117,117 +119,94 @@ namespace MonoGame.Framework.Graphics
         }
 
         private void PlatformGetData<T>(
-            CubeMapFace cubeMapFace, int level, Rectangle rect, T[] data, int startIndex, int elementCount)
+            CubeMapFace cubeMapFace, int level, Rectangle rect, Span<T> destination)
             where T : unmanaged
         {
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
+            AssertMainThread();
 
-#if OPENGL && DESKTOPGL
-            void Get()
+#if OPENGL
+            int dstSize = destination.Length * Unsafe.SizeOf<T>();
+
+            try
             {
-                var dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-                IntPtr dataPointer = dataHandle.AddrOfPinnedObject();
-                int dstSize = data.Length * Unsafe.SizeOf<T>();
+                TextureTarget target = GetGLCubeFace(cubeMapFace);
+                GL.BindTexture(TextureTarget.TextureCubeMap, _glTexture);
 
-                try
+                if (glFormat == GLPixelFormat.CompressedTextureFormats)
                 {
-                    TextureTarget target = GetGLCubeFace(cubeMapFace);
-                    GL.BindTexture(TextureTarget.TextureCubeMap, _glTexture);
+                    // Note: for compressed format Format.GetSize() returns the size of a 4x4 block
+                    var pixelToT = Format.GetSize() / Unsafe.SizeOf<T>();
+                    var tFullWidth = Math.Max(Size >> level, 1) / 4 * pixelToT;
+                    IntPtr tmp = Marshal.AllocHGlobal(Math.Max(Size >> level, 1) / 4 * tFullWidth * Unsafe.SizeOf<T>());
+                    GL.GetCompressedTexImage(target, level, tmp);
+                    GraphicsExtensions.CheckGLError();
 
-                    if (glFormat == GLPixelFormat.CompressedTextureFormats)
+                    var rowCount = rect.Height / 4;
+                    var tRectWidth = rect.Width / 4 * Format.GetSize() / Unsafe.SizeOf<T>();
+                    for (var r = 0; r < rowCount; r++)
                     {
-                        // Note: for compressed format Format.GetSize() returns the size of a 4x4 block
-                        var pixelToT = Format.GetSize() / Unsafe.SizeOf<T>();
-                        var tFullWidth = Math.Max(Size >> level, 1) / 4 * pixelToT;
-                        IntPtr tmp = Marshal.AllocHGlobal(Math.Max(Size >> level, 1) / 4 * tFullWidth * Unsafe.SizeOf<T>());
-                        GL.GetCompressedTexImage(target, level, tmp);
-                        GraphicsExtensions.CheckGLError();
+                        var tmpStart = rect.X / 4 * pixelToT + (rect.Top / 4 + r) * tFullWidth;
+                        var dstStart = destination.Slice(r * tRectWidth);
 
-                        var rowCount = rect.Height / 4;
-                        var tRectWidth = rect.Width / 4 * Format.GetSize() / Unsafe.SizeOf<T>();
-                        for (var r = 0; r < rowCount; r++)
-                        {
-                            var tempStart = rect.X / 4 * pixelToT + (rect.Top / 4 + r) * tFullWidth;
-                            var dataStart = startIndex + r * tRectWidth;
-
-                            CopyMemory(tmp, tempStart, dataPointer, dataStart, dstSize, tRectWidth, Unsafe.SizeOf<T>());
-                        }
-                    }
-                    else
-                    {
-                        // we need to convert from our format size to the size of T here
-                        var tFullWidth = Math.Max(Size >> level, 1) * Format.GetSize() / Unsafe.SizeOf<T>();
-                        IntPtr tmp = Marshal.AllocHGlobal(Math.Max(Size >> level, 1) * tFullWidth * Unsafe.SizeOf<T>());
-                        GL.GetTexImage(target, level, glFormat, glType, tmp);
-                        GraphicsExtensions.CheckGLError();
-
-                        var pixelToT = Format.GetSize() / Unsafe.SizeOf<T>();
-                        var rowCount = rect.Height;
-                        var tRectWidth = rect.Width * pixelToT;
-                        for (var r = 0; r < rowCount; r++)
-                        {
-                            var tempStart = rect.X * pixelToT + (r + rect.Top) * tFullWidth;
-                            var dataStart = startIndex + r * tRectWidth;
-
-                            CopyMemory(tmp, tempStart, dataPointer, dataStart, dstSize, tRectWidth, Unsafe.SizeOf<T>());
-                        }
+                        CopyMemory(tmp, tmpStart, dataPointer, dstStart, dstSize, tRectWidth, Unsafe.SizeOf<T>());
                     }
                 }
-                finally
+                else
                 {
-                    dataHandle.Free();
+                    // we need to convert from our format size to the size of T here
+                    var tFullWidth = Math.Max(Size >> level, 1) * Format.GetSize() / Unsafe.SizeOf<T>();
+                    IntPtr tmp = Marshal.AllocHGlobal(Math.Max(Size >> level, 1) * tFullWidth * Unsafe.SizeOf<T>());
+                    GL.GetTexImage(target, level, glFormat, glType, tmp);
+                    GraphicsExtensions.CheckGLError();
+
+                    var pixelToT = Format.GetSize() / Unsafe.SizeOf<T>();
+                    var rowCount = rect.Height;
+                    var tRectWidth = rect.Width * pixelToT;
+                    for (var r = 0; r < rowCount; r++)
+                    {
+                        var tmpStart = rect.X * pixelToT + (r + rect.Top) * tFullWidth;
+                        var dstStart = destination.Slice(r * tRectWidth);
+
+                        CopyMemory(tmp, tmpStart, dataPointer, dstStart, dstSize, tRectWidth, Unsafe.SizeOf<T>());
+                    }
                 }
             }
-            if (Threading.IsOnMainThread)
-                Get();
-            else
-                Threading.BlockOnMainThread(Get);
+            finally
+            {
+                dataHandle.Free();
+            }
 #else
             throw new NotImplementedException();
 #endif
         }
 
-        private void PlatformSetData<T>(
-            CubeMapFace face, int level, Rectangle rect, T[] data, int startIndex, int elementCount)
+        private unsafe void PlatformSetData<T>(
+            CubeMapFace face, int level, Rectangle rect, ReadOnlySpan<T> data)
             where T : unmanaged
         {
-            void Set()
+            AssertMainThread();
+
+            GL.BindTexture(TextureTarget.TextureCubeMap, _glTexture);
+            GraphicsExtensions.CheckGLError();
+
+            var target = GetGLCubeFace(face);
+            fixed (T* dataPtr = data)
             {
-                var dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-                // Use try..finally to make sure dataHandle is freed in case of an error
-                try
+                if (glFormat == GLPixelFormat.CompressedTextureFormats)
                 {
-                    var startBytes = startIndex * Unsafe.SizeOf<T>();
-                    var dataPtr = new IntPtr(dataHandle.AddrOfPinnedObject().ToInt64() + startBytes);
-
-                    GL.BindTexture(TextureTarget.TextureCubeMap, _glTexture);
+                    GL.CompressedTexSubImage2D(
+                        target, level, rect.X, rect.Y, rect.Width, rect.Height,
+                         glInternalFormat, data.Length * Unsafe.SizeOf<T>(), (IntPtr)dataPtr);
                     GraphicsExtensions.CheckGLError();
-
-                    var target = GetGLCubeFace(face);
-                    if (glFormat == GLPixelFormat.CompressedTextureFormats)
-                    {
-                        GL.CompressedTexSubImage2D(target, level, rect.X, rect.Y, rect.Width, rect.Height,
-                             glInternalFormat, elementCount * Unsafe.SizeOf<T>(), dataPtr);
-                        GraphicsExtensions.CheckGLError();
-                    }
-                    else
-                    {
-                        GL.TexSubImage2D(target, level, rect.X, rect.Y, rect.Width, rect.Height,
-                            glFormat, glType, dataPtr);
-                        GraphicsExtensions.CheckGLError();
-                    }
                 }
-                finally
+                else
                 {
-                    dataHandle.Free();
+                    GL.TexSubImage2D(
+                        target, level, rect.X, rect.Y, rect.Width, rect.Height,
+                        glFormat, glType, (IntPtr)dataPtr);
+                    GraphicsExtensions.CheckGLError();
                 }
             }
-
-            if (Threading.IsOnMainThread)
-                Set();
-            else
-                Threading.BlockOnMainThread(Set);
         }
 
         private TextureTarget GetGLCubeFace(CubeMapFace face)
@@ -247,8 +226,8 @@ namespace MonoGame.Framework.Graphics
         internal unsafe static void CopyMemory(
             IntPtr src, int srcIndex, IntPtr dst, int dstIndex, int dstSize, int elementCount, int elementSize)
         {
-            IntPtr srcOffset = new IntPtr(src.ToInt64() + srcIndex * elementSize);
-            IntPtr dstOffset = new IntPtr(dst.ToInt64() + dstIndex * elementSize);
+            var srcOffset = new IntPtr(src.ToInt64() + srcIndex * elementSize);
+            var dstOffset = new IntPtr(dst.ToInt64() + dstIndex * elementSize);
             Buffer.MemoryCopy((void*)srcOffset, (void*)dstOffset, dstSize, elementCount * elementSize);
         }
     }

@@ -45,8 +45,8 @@ using MonoGame.Framework.Graphics;
 namespace MonoGame.Framework
 {
     /// <summary>
-    /// A default implementation of IResumeManager. Loads a user specified
-    /// image file (eg png) and draws it the middle of the screen.
+    /// A default implementation of IResumeManager. 
+    /// Loads a user specified image and draws it the middle of the screen.
     /// 
     /// Example usage in Game.Initialize():
     /// 
@@ -60,14 +60,14 @@ namespace MonoGame.Framework
     /// </summary>
     public class ResumeManager : IResumeManager
     {
-        ContentManager content;
-        GraphicsDevice device;
-        SpriteBatch spriteBatch;
-        string resumeTextureName;
-        Texture2D resumeTexture;
-        float rotation;
-        float scale;
-        float rotateSpeed;
+        private ContentManager _content;
+        private GraphicsDevice _device;
+        private SpriteBatch _spriteBatch;
+        private string _resumeTextureName;
+        private Texture2D _resumeTexture;
+        private float _rotation;
+        private float _scale;
+        private float _rotateSpeed;
 
         public ResumeManager(
             IServiceProvider services,
@@ -76,39 +76,40 @@ namespace MonoGame.Framework
             float scale,
             float rotateSpeed)
         {
-            content = new ContentManager(services, "Content");
-            device = services.GetService<IGraphicsDeviceService>().GraphicsDevice;
-            this.spriteBatch = spriteBatch;
-            this.resumeTextureName = resumeTextureName;
-            this.scale = scale;
-            this.rotateSpeed = rotateSpeed;
+            _content = new ContentManager(services, "Content");
+            _device = services.GetService<IGraphicsDeviceService>().GraphicsDevice;
+            _spriteBatch = spriteBatch;
+            _resumeTextureName = resumeTextureName;
+            _scale = scale;
+            _rotateSpeed = rotateSpeed;
         }
 
         public virtual void LoadContent()
         {
-            content.Unload();
-            resumeTexture = content.Load<Texture2D>(resumeTextureName);
+            _content.Unload();
+            _resumeTexture = _content.Load<Texture2D>(_resumeTextureName);
         }
 
         public virtual void Draw()
         {
-            rotation += rotateSpeed;
+            _rotation += _rotateSpeed;
 
-            int sw = device.PresentationParameters.BackBufferWidth;
-            int sh = device.PresentationParameters.BackBufferHeight;
-            int tw = resumeTexture.Width;
-            int th = resumeTexture.Height;
+            int sw = _device.PresentationParameters.BackBufferWidth;
+            int sh = _device.PresentationParameters.BackBufferHeight;
+            int tw = _resumeTexture.Width;
+            int th = _resumeTexture.Height;
 
             // Draw the resume texture in the middle of the screen and make it spin
-            spriteBatch.Begin();
-            spriteBatch.Draw(
-                resumeTexture,
-                new Vector2(sw / 2, sh / 2),
-                null, Color.White, rotation,
-                new Vector2(tw / 2, th / 2),
-                scale, SpriteEffects.None, 0.0f);
+            _spriteBatch.Begin();
 
-            spriteBatch.End();
+            _spriteBatch.Draw(
+                _resumeTexture,
+                new Vector2(sw, sh) / 2,
+                null, Color.White, _rotation,
+                new Vector2(tw, th) / 2,
+                _scale, SpriteEffects.None, 0f);
+
+            _spriteBatch.End();
         }
     }
 }
