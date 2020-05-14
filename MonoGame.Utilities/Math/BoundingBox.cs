@@ -25,7 +25,7 @@ namespace MonoGame.Framework
             "Min(", Min.ToString(), " \n",
             "Max(", Max.ToString());
 
-        public BoundingBox(in Vector3 min, in Vector3 max)
+        public BoundingBox(Vector3 min, Vector3 max)
         {
             Min = min;
             Max = max;
@@ -155,13 +155,14 @@ namespace MonoGame.Framework
             return ContainmentType.Disjoint;
         }
 
-        public readonly ContainmentType Contains(in Vector3 point)
+        public readonly ContainmentType Contains(Vector3 point)
         {
             //first we get if point is out of box
             if (point.X < Min.X || point.X > Max.X ||
                 point.Y < Min.Y || point.Y > Max.Y ||
                 point.Z < Min.Z || point.Z > Max.Z)
                 return ContainmentType.Disjoint;
+
             return ContainmentType.Contains;
         }
 

@@ -2,7 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using System.IO;
 using MonoGame.Framework.Graphics;
 
@@ -17,28 +16,25 @@ namespace MonoGame.Framework.Content
             bool sixteenBits = input.ReadBoolean();
             int dataSize = input.ReadInt32();
 
-            byte[] data = input.ContentManager.GetScratchBuffer(dataSize);
-            try
+            var elementSize = sixteenBits ? IndexElementSize.Short : IndexElementSize.Int;
+            int elementCount = dataSize / (int)elementSize;
+
+            using (var buffer = input.ContentManager.GetScratchBuffer(dataSize))
             {
-                if (input.Read(data, 0, dataSize) != dataSize)
+                if (input.Read(buffer.AsSpan(0, dataSize)) != dataSize)
                     throw new InvalidDataException();
 
-                if (indexBuffer == null)
+                if (indexBuffer == null || 
+                    indexBuffer.ElementSize != elementSize ||
+                    indexBuffer.Capacity < elementCount)
                 {
                     indexBuffer = new IndexBuffer(
-                        input.GetGraphicsDevice(),
-                        sixteenBits ? IndexElementSize.Short : IndexElementSize.Int,
-                        dataSize / (sixteenBits ? 2 : 4), BufferUsage.None);
+                        input.GetGraphicsDevice(), elementSize, elementCount, BufferUsage.None);
                 }
 
-                indexBuffer.SetData(data.AsSpan().Slice(0, dataSize));
+                indexBuffer.SetData(buffer.AsSpan().Slice(0, dataSize));
+                return indexBuffer;
             }
-            finally
-            {
-                input.ContentManager.ReturnScratchBuffer(data);
-            }
-
-            return indexBuffer;
         }
     }
 }

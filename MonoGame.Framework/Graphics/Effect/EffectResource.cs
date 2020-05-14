@@ -2,9 +2,10 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
+using System.IO;
 using MonoGame.Framework.Content;
 using MonoGame.Framework.Memory;
-using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -22,7 +23,7 @@ namespace MonoGame.Framework.Graphics
 
         private readonly object _readMutex = new object();
         private readonly string _name;
-        private volatile byte[] _bytecode;
+        private byte[] _byteCode;
 
         private EffectResource(string name)
         {
@@ -33,26 +34,30 @@ namespace MonoGame.Framework.Graphics
         {
             get
             {
-                if (_bytecode == null)
+                if (_byteCode == null)
                 {
                     lock (_readMutex)
                     {
-                        if (_bytecode != null)
-                            return _bytecode;
+                        if (_byteCode != null)
+                            return _byteCode;
 
                         var assembly = typeof(EffectResource).Assembly;
                         var stream = assembly.GetManifestResourceStream(_name);
                         if (stream == null)
                             throw new ContentLoadException($"Missing effect resource named \"{_name}\".");
 
-                        using (var ms = RecyclableMemoryManager.Default.GetMemoryStream())
-                        {
-                            stream.PooledCopyTo(ms);
-                            _bytecode = ms.ToArray();
-                        }
+                        _byteCode = new byte[stream.Length];
+                        var byteCode = _byteCode.AsMemory();
+
+                        int read;
+                        while ((read = stream.Read(byteCode.Span)) != 0)
+                            byteCode = byteCode.Slice(read);
+
+                        if (!byteCode.IsEmpty)
+                            throw new EndOfStreamException();
                     }
                 }
-                return _bytecode;
+                return _byteCode;
             }
         }
     }

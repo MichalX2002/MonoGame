@@ -25,17 +25,12 @@ namespace MonoGame.Framework.Content
                 for (int i = 0; i < levels; i++)
                 {
                     int faceSize = reader.ReadInt32();
-                    byte[] faceData = reader.ContentManager.GetScratchBuffer(faceSize);
-                    try
+                    using (var buffer = reader.ContentManager.GetScratchBuffer(faceSize))
                     {
-                        if (reader.Read(faceData, 0, faceSize) != faceSize)
+                        if (reader.Read(buffer.AsSpan(0, faceSize)) != faceSize)
                             throw new InvalidDataException();
 
-                        textureCube.SetData((CubeMapFace)face, i, null, faceData.AsSpan(0, faceSize));
-                    }
-                    finally
-                    {
-                        reader.ContentManager.ReturnScratchBuffer(faceData);
+                        textureCube.SetData((CubeMapFace)face, i, null, buffer.AsSpan(0, faceSize));
                     }
                 }
             }

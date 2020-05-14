@@ -190,7 +190,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="point">A <see cref="Vector3"/> for testing.</param>
         /// <returns>Containment between this <see cref="BoundingFrustum"/> and specified <see cref="Vector3"/>.</returns>
-        public ContainmentType Contains(in Vector3 point)
+        public ContainmentType Contains(Vector3 point)
         {
             for (var i = 0; i < _planes.Length; ++i)
             {

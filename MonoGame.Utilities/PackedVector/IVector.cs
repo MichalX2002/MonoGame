@@ -23,25 +23,31 @@ namespace MonoGame.Framework.Vector
         /// Sets the vector from a scaled <see cref="Vector4"/>
         /// where the XYZW components correspond to RGBA. 
         /// </summary>
-        void FromScaledVector4(in Vector4 scaledVector);
+        void FromScaledVector4(Vector4 scaledVector);
 
         /// <summary>
         /// Gets the vector as a scaled <see cref="Vector4"/>
         /// where the XYZW components correspond to RGBA. 
         /// </summary>
-        void ToScaledVector4(out Vector4 scaledVector);
+        Vector4 ToScaledVector4();
 
         /// <summary>
         /// Sets the vector from a <see cref="Vector4"/> 
         /// where the XYZW components correspond to RGBA. 
         /// </summary>
-        void FromVector4(in Vector4 vector);
+        void FromVector4(Vector4 vector)
+        {
+            FromScaledVector4(vector);
+        }
 
         /// <summary>
         /// Gets the vector as a <see cref="Vector4"/>
         /// where the XYZW components correspond to RGBA. 
         /// </summary>
-        void ToVector4(out Vector4 vector);
+        Vector4 ToVector4()
+        {
+            return ToScaledVector4();
+        }
     }
 
     public interface IVector<TSelf> : IVector, IEquatable<TSelf>

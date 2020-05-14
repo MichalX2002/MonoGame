@@ -928,8 +928,8 @@ namespace MonoGame.Framework.Graphics
         /// <param name="effects">Modificators for drawing. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this string.</param>
         public void DrawString(
-            SpriteFont spriteFont, StringBuilder text, in Vector2 position, in Color color,
-            float rotation, in Vector2 origin, float scale, SpriteEffects effects, float layerDepth)
+            SpriteFont spriteFont, StringBuilder text, Vector2 position, Color color,
+            float rotation, Vector2 origin, float scale, SpriteEffects effects, float layerDepth)
         {
             var scaleVec = new Vector2(scale, scale);
             DrawString(spriteFont, text, position, color, rotation, origin, scaleVec, effects, layerDepth);

@@ -37,42 +37,18 @@ namespace MonoGame.Framework.Vector
             A = a;
         }
 
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public RgbaVector(in Vector4 vector) : this(vector.X, vector.Y, vector.Z, vector.W)
-        {
-        }
-
         #endregion
 
         #region IPackedVector
 
-        public void FromScaledVector4(in Vector4 scaledVector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            R = scaledVector.X;
-            G = scaledVector.Y;
-            B = scaledVector.Z;
-            A = scaledVector.W;
+            Unsafe.As<RgbaVector, Vector4>(ref this) = scaledVector;
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        public readonly Vector4 ToScaledVector4()
         {
-            scaledVector.Base.X = R;
-            scaledVector.Base.Y = G;
-            scaledVector.Base.Z = B;
-            scaledVector.Base.W = A;
-        }
-
-        public void FromVector4(in Vector4 vector)
-        {
-            FromScaledVector4(vector);
-        }
-
-        public readonly void ToVector4(out Vector4 vector)
-        {
-            ToScaledVector4(out vector);
+            return UnsafeR.As<RgbaVector, Vector4>(this);
         }
 
         #endregion
@@ -81,49 +57,59 @@ namespace MonoGame.Framework.Vector
 
         public void FromGray8(Gray8 source)
         {
-            source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
+            Unsafe.As<RgbaVector, Vector4>(ref this) = source.ToScaledVector4();
         }
 
         public void FromGray16(Gray16 source)
         {
-            source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
+            Unsafe.As<RgbaVector, Vector4>(ref this) = source.ToScaledVector4();
         }
 
         public void FromGrayAlpha16(GrayAlpha16 source)
         {
-            source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
+            Unsafe.As<RgbaVector, Vector4>(ref this) = source.ToScaledVector4();
         }
 
         public void FromRgb24(Rgb24 source)
         {
-            source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
+            Unsafe.As<RgbaVector, Vector4>(ref this) = source.ToScaledVector4();
         }
 
         public void FromRgb48(Rgb48 source)
         {
-            source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
+            Unsafe.As<RgbaVector, Vector4>(ref this) = source.ToScaledVector4();
         }
 
         public void FromRgba64(Rgba64 source)
         {
-            source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
+            Unsafe.As<RgbaVector, Vector4>(ref this) = source.ToScaledVector4();
         }
 
         public void FromColor(Color source)
         {
-            source.ToScaledVector4(out Unsafe.As<RgbaVector, Vector4>(ref this));
+            Unsafe.As<RgbaVector, Vector4>(ref this) = source.ToScaledVector4();
         }
 
         public readonly void ToColor(out Color destination)
         {
             destination = default; // TODO: Unsafe.SkipInit
 
-            destination.FromScaledVector4(UnsafeUtils.As<RgbaVector, Vector4>(this));
+            destination.FromScaledVector4(UnsafeR.As<RgbaVector, Vector4>(this));
         }
 
         #endregion
 
         #region Equals
+
+        public readonly bool Equals(RgbaVector other)
+        {
+            return this == other;
+        }
+
+        public override readonly bool Equals(object obj)
+        {
+            return obj is RgbaVector other && Equals(other);
+        }
 
         public static bool operator ==(in RgbaVector a, in RgbaVector b)
         {
@@ -135,16 +121,6 @@ namespace MonoGame.Framework.Vector
             return !(a == b);
         }
 
-        public bool Equals(RgbaVector other)
-        {
-            return this == other;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is RgbaVector other && Equals(other);
-        }
-
         #endregion
 
         #region Object Overrides
@@ -152,12 +128,12 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(RgbaVector) + $"(R:{R}, G:{G}, B:{B}, A:{A})";
+        public override readonly string ToString() => nameof(RgbaVector) + $"({ToScaledVector4()})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => HashCode.Combine(R, G, B, A);
+        public override readonly int GetHashCode() => HashCode.Combine(R, G, B, A);
 
         #endregion
     }

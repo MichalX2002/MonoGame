@@ -53,15 +53,6 @@ namespace MonoGame.Framework.Vector
             A = a;
         }
 
-        public Argb32(Vector4 vector) : this()
-        {
-            FromVector4(vector);
-        }
-
-        public Argb32(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
-        {
-        }
-
         #endregion
 
         #region IPackedVector
@@ -69,30 +60,20 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public uint PackedValue
         {
-            readonly get => UnsafeUtils.As<Argb32, uint>(this);
+            readonly get => UnsafeR.As<Argb32, uint>(this);
             set => Unsafe.As<Argb32, uint>(ref this) = value;
         }
 
-        public void FromVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            Color color = default;
-            color.FromVector4(vector);
+            Color color = default; // TODO: Unsafe.SkipInit
+            color.FromVector4(scaledVector);
             FromColor(color);
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            vector = new Vector4(R, G, B, A) / byte.MaxValue;
-        }
-
-        public void FromScaledVector4(in Vector4 vector)
-        {
-            FromVector4(vector);
-        }
-
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
-        {
-            ToVector4(out scaledVector);
+            return new Vector4(R, G, B, A) / byte.MaxValue;
         }
 
         #endregion
@@ -161,6 +142,16 @@ namespace MonoGame.Framework.Vector
 
         #region Equals
 
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Argb32 other && Equals(other);
+        }
+
+        public readonly bool Equals(Argb32 other)
+        {
+            return this == other;
+        }
+
         public static bool operator ==(in Argb32 a, in Argb32 b)
         {
             return a.PackedValue == b.PackedValue;
@@ -171,16 +162,6 @@ namespace MonoGame.Framework.Vector
             return a.PackedValue != b.PackedValue;
         }
 
-        public override bool Equals(object obj)
-        {
-            return obj is Argb32 other && Equals(other);
-        }
-
-        public bool Equals(Argb32 other)
-        {
-            return this == other;
-        }
-
         #endregion
 
         #region Object Overrides
@@ -188,12 +169,12 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(Argb32) + $"(R:{R}, G:{G}, B:{B}, A:{A})";
+        public override readonly string ToString() => nameof(Argb32) + $"(R:{R}, G:{G}, B:{B}, A:{A})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

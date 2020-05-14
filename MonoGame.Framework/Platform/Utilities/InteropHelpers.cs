@@ -17,7 +17,7 @@ namespace MonoGame.Framework
             if (handle == IntPtr.Zero)
                 return string.Empty;
 
-            byte* ptr = (byte*)handle;
+            var ptr = (byte*)handle;
             while (*ptr != 0)
                 ptr++;
 

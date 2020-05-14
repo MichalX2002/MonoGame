@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using MonoGame.Framework.Utilities;
+using System.Text;
 
 namespace MonoGame.Framework.Input
 {
@@ -53,11 +53,27 @@ namespace MonoGame.Framework.Input
             if (stream == null)
                 return;
 
-            using var reader = new BinaryReader(stream);
             try
             {
-                IntPtr src = SDL.RwFromMem(reader.ReadBytes((int)stream.Length), (int)stream.Length);
-                SDL.GameController.AddMappingFromRw(src, 1);
+                using (var reader = new StreamReader(stream))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (string.IsNullOrWhiteSpace(line))
+                            continue;
+
+                        if (line.StartsWith("#"))
+                            continue;
+
+                        switch (SDL.GameController.AddMapping(line))
+                        {
+                            case -1:
+                                Debug.WriteLine(SDL.GetError());
+                                break;
+                        }
+                    }
+                }
             }
             catch (Exception exc)
             {

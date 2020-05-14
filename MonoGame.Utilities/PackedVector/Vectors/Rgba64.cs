@@ -40,13 +40,8 @@ namespace MonoGame.Framework.Vector
         /// </summary>
         public Rgb48 Rgb
         {
-            readonly get => UnsafeUtils.As<Rgba64, Rgb48>(this);
-            set
-            {
-                R = value.R;
-                G = value.G;
-                B = value.B;
-            }
+            readonly get => UnsafeR.As<Rgba64, Rgb48>(this);
+            set => Unsafe.As<Rgba64, Rgb48>(ref this) = value;
         }
 
         #region Constructors
@@ -60,15 +55,6 @@ namespace MonoGame.Framework.Vector
             A = a;
         }
 
-        public Rgba64(Vector4 vector) : this()
-        {
-            FromVector4(vector);
-        }
-
-        public Rgba64(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
-        {
-        }
-
         #endregion
 
         #region IPackedVector
@@ -76,39 +62,25 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public ulong PackedValue
         {
-            readonly get => UnsafeUtils.As<Rgba64, ulong>(this);
+            readonly get => UnsafeR.As<Rgba64, ulong>(this);
             set => Unsafe.As<Rgba64, ulong>(ref this) = value;
         }
 
-        public void FromScaledVector4(in Vector4 scaledVector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            var v = scaledVector * ushort.MaxValue;
-            v += Vector4.Half;
-            v.Clamp(Vector4.Zero, Vector4.MaxValueUInt16);
+            scaledVector.Clamp(Vector4.Zero, Vector4.One);
+            scaledVector *= ushort.MaxValue;
+            scaledVector += Vector4.Half;
 
-            R = (ushort)v.X;
-            G = (ushort)v.Y;
-            B = (ushort)v.Z;
-            A = (ushort)v.W;
+            R = (ushort)scaledVector.X;
+            G = (ushort)scaledVector.Y;
+            B = (ushort)scaledVector.Z;
+            A = (ushort)scaledVector.W;
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        public readonly Vector4 ToScaledVector4()
         {
-            scaledVector.Base.X = R;
-            scaledVector.Base.Y = G;
-            scaledVector.Base.Z = B;
-            scaledVector.Base.W = A;
-            scaledVector /= ushort.MaxValue;
-        }
-
-        public void FromVector4(in Vector4 vector)
-        {
-            FromScaledVector4(vector);
-        }
-
-        public readonly void ToVector4(out Vector4 vector)
-        {
-            ToScaledVector4(out vector);
+            return new Vector4(R, G, B, A) / ushort.MaxValue;
         }
 
         #endregion
@@ -174,6 +146,16 @@ namespace MonoGame.Framework.Vector
 
         #region Equals
 
+        public readonly bool Equals(Rgba64 other)
+        {
+            return this == other;
+        }
+
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Rgba64 other && Equals(other);
+        }
+
         public static bool operator ==(in Rgba64 a, in Rgba64 b)
         {
             return a.PackedValue == b.PackedValue;
@@ -184,16 +166,6 @@ namespace MonoGame.Framework.Vector
             return a.PackedValue != b.PackedValue;
         }
 
-        public override bool Equals(object obj)
-        {
-            return obj is Rgba64 other && Equals(other);
-        }
-
-        public bool Equals(Rgba64 other)
-        {
-            return this == other;
-        }
-
         #endregion
 
         #region Object Overrides
@@ -201,12 +173,12 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(Rgba64) + $"(R:{R}, G:{G}, B:{B}, A:{A})";
+        public override readonly string ToString() => nameof(Rgba64) + $"(R:{R}, G:{G}, B:{B}, A:{A})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

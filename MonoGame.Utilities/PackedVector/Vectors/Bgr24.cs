@@ -22,13 +22,27 @@ namespace MonoGame.Framework.Vector
             new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Red));
 
         [CLSCompliant(false)]
-        public byte R;
+        public byte B;
 
         [CLSCompliant(false)]
         public byte G;
 
         [CLSCompliant(false)]
-        public byte B;
+        public byte R;
+
+        /// <summary>
+        /// Gets or sets the RGB components of this struct as <see cref="Rgb24"/>
+        /// </summary>
+        public Rgb24 Rgb
+        {
+            readonly get => new Rgb24(R, G, B);
+            set
+            {
+                R = value.R;
+                G = value.G;
+                B = value.B;
+            }
+        }
 
         #region Constructors
 
@@ -40,16 +54,6 @@ namespace MonoGame.Framework.Vector
             B = b;
         }
 
-        public Bgr24(Vector3 vector) : this()
-        {
-            vector.ToVector4(out var v);
-            FromScaledVector4(v);
-        }
-
-        public Bgr24(float x, float y, float z) : this(new Vector3(x, y, z))
-        {
-        }
-
         #endregion
 
         public readonly Vector3 ToVector3()
@@ -59,26 +63,16 @@ namespace MonoGame.Framework.Vector
 
         #region IPackedVector
 
-        public void FromVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            FromScaledVector4(vector);
-        }
-
-        public readonly void ToVector4(out Vector4 vector)
-        {
-            ToScaledVector4(out vector);
-        }
-
-        public void FromScaledVector4(in Vector4 scaledVector)
-        {
-            Rgb24 rgb = default;
+            Rgb24 rgb = default; // TODO: Unsafe.SkipInit
             rgb.FromScaledVector4(scaledVector);
             FromRgb24(rgb);
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        public readonly Vector4 ToScaledVector4()
         {
-            scaledVector = new Vector4(R, G, B, byte.MaxValue) / byte.MaxValue;
+            return new Vector4(R, G, B, byte.MaxValue) / byte.MaxValue;
         }
 
         #endregion
@@ -140,12 +134,12 @@ namespace MonoGame.Framework.Vector
 
         #region Equals
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is Bgr24 other && Equals(other);
         }
 
-        public bool Equals(Bgr24 other)
+        public readonly bool Equals(Bgr24 other)
         {
             return this == other;
         }
@@ -167,12 +161,12 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(Bgr24) + $"(R:{R}, G:{G}, B:{B})";
+        public override readonly string ToString() => nameof(Bgr24) + $"(R:{R}, G:{G}, B:{B})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => HashCode.Combine(R, G, B);
+        public override readonly int GetHashCode() => HashCode.Combine(R, G, B);
 
         #endregion
     }

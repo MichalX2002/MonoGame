@@ -53,20 +53,7 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public ushort PackedValue { readonly get => X; set => X = value; }
 
-        public void FromVector4(in Vector4 vector)
-        {
-            X = HalfTypeHelper.Pack(vector.X);
-        }
-
-        public readonly void ToVector4(out Vector4 vector)
-        {
-            vector.Base.X = ToSingle();
-            vector.Base.Y = 0;
-            vector.Base.Z = 0;
-            vector.Base.W = 1;
-        }
-
-        public void FromScaledVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 vector)
         {
             float scaled = vector.X;
             scaled *= 2;
@@ -74,12 +61,19 @@ namespace MonoGame.Framework.Vector
             PackedValue = HalfTypeHelper.Pack(scaled);
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        public readonly Vector4 ToScaledVector4()
         {
-            scaledVector.Base.X = (ToSingle() + 1) / 2f;
-            scaledVector.Base.Y = 0;
-            scaledVector.Base.Z = 0;
-            scaledVector.Base.W = 1;
+            return new Vector4((ToSingle() + 1) / 2f, 0, 0, 1);
+        }
+
+        public void FromVector4(Vector4 vector)
+        {
+            X = HalfTypeHelper.Pack(vector.X);
+        }
+
+        public readonly Vector4 ToVector4()
+        {
+            return new Vector4(ToSingle(), 0, 0, 1);
         }
 
         #endregion
@@ -91,6 +85,16 @@ namespace MonoGame.Framework.Vector
 
         #region Equals
 
+        public readonly bool Equals(HalfSingle other)
+        {
+            return this == other;
+        }
+
+        public override readonly bool Equals(object obj)
+        {
+            return obj is HalfSingle other && Equals(other);
+        }
+
         public static bool operator ==(HalfSingle a, HalfSingle b)
         {
             return a.PackedValue == b.PackedValue;
@@ -101,16 +105,6 @@ namespace MonoGame.Framework.Vector
             return a.PackedValue != b.PackedValue;
         }
 
-        public bool Equals(HalfSingle other)
-        {
-            return this == other;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is HalfSingle other && Equals(other);
-        }
-
         #endregion
 
         #region Object Overrides
@@ -118,12 +112,12 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => ToSingle().ToString();
+        public override readonly string ToString() => ToSingle().ToString();
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

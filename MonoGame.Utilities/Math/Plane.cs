@@ -32,7 +32,7 @@ namespace MonoGame.Framework
             Base = new FastPlane(value);
         }
 
-        public Plane(in Vector3 normal, float d)
+        public Plane(Vector3 normal, float d)
         {
             Base = new FastPlane(normal, d);
         }
@@ -46,12 +46,12 @@ namespace MonoGame.Framework
 
         public readonly Vector4 ToVector4()
         {
-            return UnsafeUtils.As<Plane, Vector4>(this);
+            return UnsafeR.As<Plane, Vector4>(this);
         }
 
         #region CreateFromVertices
 
-        public static Plane CreateFromVertices(in Vector3 a, in Vector3 b, in Vector3 c)
+        public static Plane CreateFromVertices(Vector3 a, Vector3 b, Vector3 c)
         {
             return FastPlane.CreateFromVertices(a, b, c);
         }
@@ -63,12 +63,12 @@ namespace MonoGame.Framework
             return FastPlane.Dot(plane, value);
         }
 
-        public static float DotNormal(in Plane plane, in Vector3 value)
+        public static float DotNormal(in Plane plane, Vector3 value)
         {
             return FastPlane.DotNormal(plane, value);
         }
 
-        public static float DotCoordinate(in Plane plane, in Vector3 value)
+        public static float DotCoordinate(in Plane plane, Vector3 value)
         {
             return FastPlane.DotCoordinate(plane, value);
         }
@@ -135,7 +135,7 @@ namespace MonoGame.Framework
 
         public override int GetHashCode() => Base.GetHashCode();
 
-        internal PlaneIntersectionType Intersects(in Vector3 point)
+        internal PlaneIntersectionType Intersects(Vector3 point)
         {
             float distance = DotCoordinate(this, point);
             if (distance > 0)
@@ -166,7 +166,7 @@ namespace MonoGame.Framework
         /// less than zero if on the negative size, 
         /// zero otherwise.
         /// </returns>
-        public static float ClassifyPoint(in Vector3 point, in Plane plane)
+        public static float ClassifyPoint(Vector3 point, in Plane plane)
         {
             return Vector3.Dot(point, plane.Normal) + plane.D;
         }

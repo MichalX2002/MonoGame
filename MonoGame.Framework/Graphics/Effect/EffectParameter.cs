@@ -836,7 +836,7 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        public void SetValue(in Vector3 value)
+        public void SetValue(Vector3 value)
         {
             if (ParameterClass != EffectParameterClass.Vector ||
                 ParameterType != EffectParameterType.Single)

@@ -37,7 +37,7 @@ namespace MonoGame.Framework
         /// Represents the value of pi times two.
         /// </summary>
         public const float TwoPi = (float)(Math.PI * 2.0);
-        
+
         #endregion
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace MonoGame.Framework
                 double t2 = tangent2;
                 double s = amount;
                 double sSquared = s * s;
-                double sCubed = s * s * s;
+                double sCubed = sSquared * s;
 
                 return (float)(
                     (2 * v1 - 2 * v2 + t2 + t1) * sCubed +
@@ -194,7 +194,8 @@ namespace MonoGame.Framework
         /// </remarks>
         public static float Lerp(float a, float b, float amount)
         {
-            return a + (b - a) * amount;
+            // TODO: MathF.FusedMultiplyAdd
+            return (b - a) * amount + a;
         }
 
 
@@ -220,7 +221,8 @@ namespace MonoGame.Framework
         /// </remarks>
         public static float LerpPrecise(float a, float b, float amount)
         {
-            return ((1 - amount) * a) + (b * amount);
+            // TODO: MathF.FusedMultiplyAdd
+            return (1 - amount) * a + (b * amount);
         }
 
         /// <summary>

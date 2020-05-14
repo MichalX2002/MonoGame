@@ -75,7 +75,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a <see cref="Vector2" />.
         /// </returns>
-        public static PointF operator +(in PointF point, in Vector2 vector) => Add(point, vector);
+        public static PointF operator +(in PointF point, Vector2 vector) => Add(point, vector);
 
         /// <summary>
         ///     Calculates the <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a
@@ -86,7 +86,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a <see cref="Vector2" />.
         /// </returns>
-        public static PointF Add(in PointF point, in Vector2 vector) => new PointF(point.X + vector.X, point.Y + vector.Y);
+        public static PointF Add(in PointF point, Vector2 vector) => new PointF(point.X + vector.X, point.Y + vector.Y);
 
         /// <summary>
         ///     Calculates the <see cref="PointF" /> representing the subtraction of a <see cref="PointF" /> and a
@@ -97,7 +97,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The <see cref="PointF" /> representing the substraction of a <see cref="PointF" /> and a <see cref="Vector2" />.
         /// </returns>
-        public static PointF operator -(in PointF point, in Vector2 vector) => Subtract(point, vector);
+        public static PointF operator -(in PointF point, Vector2 vector) => Subtract(point, vector);
 
         /// <summary>
         ///     Calculates the <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a
@@ -108,7 +108,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The <see cref="PointF" /> representing the substraction of a <see cref="PointF" /> and a <see cref="Vector2" />.
         /// </returns>
-        public static PointF Subtract(in PointF point, in Vector2 vector) => new PointF(point.X - vector.X, point.Y - vector.Y);
+        public static PointF Subtract(in PointF point, Vector2 vector) => new PointF(point.X - vector.X, point.Y - vector.Y);
 
         /// <summary>
         ///     Calculates the <see cref="Vector2" /> representing the displacement of two <see cref="PointF" /> structures.
@@ -220,7 +220,7 @@ namespace MonoGame.Framework
         /// <returns>
         ///     The resulting <see cref="PointF" />.
         /// </returns>
-        public static implicit operator PointF(in Vector2 vector) => new PointF(vector.X, vector.Y);
+        public static implicit operator PointF(Vector2 vector) => new PointF(vector.X, vector.Y);
 
 
         /// <summary>

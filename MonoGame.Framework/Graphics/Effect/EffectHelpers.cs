@@ -190,9 +190,9 @@ namespace MonoGame.Framework.Graphics
         internal static void SetMaterialColor(
             bool lightingEnabled,
             float alpha,
-            in Vector3 diffuseColor,
-            in Vector3 emissiveColor,
-            in Vector3 ambientLightColor,
+            Vector3 diffuseColor,
+            Vector3 emissiveColor,
+            Vector3 ambientLightColor,
             EffectParameter diffuseColorParam,
             EffectParameter emissiveColorParam)
         {

@@ -378,6 +378,7 @@ namespace MonoGame.Framework.Content.Pipeline
                         // A 24-bit format is slightly different
                         if (header.ddspf.dwRgbBitCount == 24)
                             byteCount = 3 * w * h;
+
                         var bytes = reader.ReadBytes(byteCount);
                         if (rbSwap)
                         {

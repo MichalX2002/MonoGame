@@ -28,7 +28,7 @@ namespace MonoGame
         }
 
         [Flags]
-        public enum InitFlags
+        public enum InitFlags : int
         {
             Video = 0x00000020,
             Joystick = 0x00000200,
@@ -146,11 +146,11 @@ namespace MonoGame
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate int d_sdl_init(int flags);
+        public delegate int d_sdl_init(InitFlags flags);
         private static d_sdl_init SDL_Init =
             FL.LoadFunction<d_sdl_init>(NativeLibrary, "SDL_Init");
 
-        public static void Init(int flags)
+        public static void Init(InitFlags flags)
         {
             GetError(SDL_Init(flags));
         }
@@ -293,11 +293,11 @@ namespace MonoGame
             FL.LoadFunction<d_sdl_quit>(NativeLibrary, "SDL_Quit");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate IntPtr d_sdl_rwfrommem(byte[] mem, int size);
+        private delegate IntPtr d_sdl_rwfrommem(IntPtr mem, int size);
         private static readonly d_sdl_rwfrommem SDL_RWFromMem =
             FL.LoadFunction<d_sdl_rwfrommem>(NativeLibrary, "SDL_RWFromMem");
 
-        public static IntPtr RwFromMem(byte[] mem, int size)
+        public static IntPtr RwFromMem(IntPtr mem, int size)
         {
             return GetError(SDL_RWFromMem(mem, size));
         }

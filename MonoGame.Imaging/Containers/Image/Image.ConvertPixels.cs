@@ -30,6 +30,28 @@ namespace MonoGame.Imaging
                 var src = MemoryMarshal.Cast<TPixelFrom, TPixelTo>(source);
                 src.CopyTo(destination);
             }
+            //else if (typeof(TPixelTo) == typeof(Color))
+            //{
+            //    var colorDestination = MemoryMarshal.Cast<TPixelTo, Color>(destination);
+            //    for (int x = 0; x < source.Length; x++)
+            //        source[x].ToColor(out colorDestination[x]);
+            //}
+            //else if (typeof(TPixelFrom) == typeof(Color))
+            //{
+            //    var colorSource = MemoryMarshal.Cast<TPixelFrom, Color>(source);
+            //    for (int x = 0; x < source.Length; x++)
+            //        destination[x].FromColor(colorSource[x]);
+            //}
+            else if(typeof(TPixelFrom) == typeof(Rgb24))
+            {
+                var dst = MemoryMarshal.Cast<TPixelTo, Color>(destination);
+                var colorSource = MemoryMarshal.Cast<TPixelFrom, Rgb24>(source);
+                for (int x = 0; x < source.Length; x++)
+                {
+                    var tmp = colorSource[x].ToVector4e();
+                    dst[x].FromScaledVector4e(tmp);
+                }
+            }
             else
             {
                 for (int x = 0; x < source.Length; x++)

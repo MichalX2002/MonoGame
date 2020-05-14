@@ -35,31 +35,7 @@ namespace MonoGame.Framework.Vector
             Z = z;
         }
 
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public HalfVector3(Vector3 vector)
-        {
-            this = Pack(vector);
-        }
-
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        public HalfVector3(float x, float y, float z) : this(new Vector3(x, y, z))
-        {
-        }
-
         #endregion
-
-        private static HalfVector3 Pack(in Vector3 vector)
-        {
-            return new HalfVector3(
-                new HalfSingle(vector.X),
-                new HalfSingle(vector.Y),
-                new HalfSingle(vector.Z));
-        }
 
         public readonly Vector3 ToVector3()
         {
@@ -68,36 +44,53 @@ namespace MonoGame.Framework.Vector
 
         #region IPackedVector
 
-        public void FromVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            this = Pack(vector.XYZ);
+            var vector = scaledVector.ToVector3();
+            vector *= 2;
+            vector -= Vector3.One;
+
+            X = new HalfSingle(vector.X);
+            Y = new HalfSingle(vector.Y);
+            Z = new HalfSingle(vector.Z);
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            vector.Base.X = X;
-            vector.Base.Y = Y;
-            vector.Base.Z = Z;
-            vector.Base.W = 1;
+            var vector = ToVector3();
+            vector += Vector3.One;
+            vector /= 2f;
+            return new Vector4(vector, 1);
         }
 
-        public void FromScaledVector4(in Vector4 scaledVector)
+        public void FromVector4(Vector4 vector)
         {
-            var v = scaledVector * 2;
-            v -= Vector4.One;
-            FromVector4(v);
+            X = new HalfSingle(vector.X);
+            Y = new HalfSingle(vector.Y);
+            Z = new HalfSingle(vector.Z);
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        public readonly Vector4 ToVector4()
         {
-            ToVector4(out scaledVector);
-            scaledVector += Vector4.One;
-            scaledVector /= 2;
+            return new Vector4(X, Y, Z, 1);
         }
 
         #endregion
 
         #region Equals
+
+        /// <summary>
+        /// Returns a value that indicates whether the current instance is equal to a specified object.
+        /// </summary>
+        public override readonly bool Equals(object obj)
+        {
+            return obj is HalfVector3 other && Equals(other);
+        }
+
+        public readonly bool Equals(HalfVector3 other)
+        {
+            return this == other;
+        }
 
         /// <summary>
         /// Compares the current instance to another to determine whether they are the same.
@@ -115,22 +108,6 @@ namespace MonoGame.Framework.Vector
             return !(a == b);
         }
 
-        /// <summary>
-        /// Returns a value that indicates whether the current instance is equal to a specified object.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            return obj is HalfVector3 other && Equals(other);
-        }
-
-        /// <summary>
-        /// Returns a value that indicates whether the current instance is equal to a specified object.
-        /// </summary>
-        public bool Equals(HalfVector3 other)
-        {
-            return this == other;
-        }
-
         #endregion
 
         #region Object Overrides
@@ -138,12 +115,12 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Returns a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(HalfVector3) + $"({ToVector3()})";
+        public override readonly string ToString() => nameof(HalfVector3) + $"({ToVector3()})";
 
         /// <summary>
         /// Gets the hash code for the current instance.
         /// </summary>
-        public override int GetHashCode() => HashCode.Combine(X, Y, Z);
+        public override readonly int GetHashCode() => HashCode.Combine(X, Y, Z);
 
         #endregion
     }

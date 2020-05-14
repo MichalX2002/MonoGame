@@ -24,9 +24,9 @@ namespace MonoGame.Framework.Vector
             new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Red),
             new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Padding));
 
-        public byte R;
-        public byte G;
         public byte B;
+        public byte G;
+        public byte R;
         public byte Padding;
 
         #region Constructors
@@ -45,19 +45,6 @@ namespace MonoGame.Framework.Vector
             Padding = padding;
         }
 
-        public Bgr32(Vector4 vector) : this()
-        {
-            FromVector4(vector);
-        }
-
-        public Bgr32(Vector3 vector) : this(new Vector4(vector, 1))
-        {
-        }
-
-        public Bgr32(float x, float y, float z) : this(new Vector3(x, y, z))
-        {
-        }
-
         #endregion
 
         public readonly Vector3 ToVector3()
@@ -70,30 +57,20 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public uint PackedValue
         {
-            readonly get => UnsafeUtils.As<Bgr32, uint>(this);
+            readonly get => UnsafeR.As<Bgr32, uint>(this);
             set => Unsafe.As<Bgr32, uint>(ref this) = value;
         }
 
-        public void FromVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
             Color rgba = default;
-            rgba.FromVector4(vector);
+            rgba.FromVector4(scaledVector);
             FromColor(rgba);
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            vector = new Vector4(R, G, B, byte.MaxValue) / byte.MaxValue;
-        }
-
-        public void FromScaledVector4(in Vector4 scaledVector)
-        {
-            FromVector4(scaledVector);
-        }
-
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
-        {
-            ToVector4(out scaledVector);
+            return new Vector4(R, G, B, byte.MaxValue) / byte.MaxValue;
         }
 
         #endregion
@@ -155,24 +132,25 @@ namespace MonoGame.Framework.Vector
 
         #region Equals
 
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Bgr32 other && Equals(other);
+        }
+
+        public readonly bool Equals(Bgr32 other)
+        {
+            return this == other;
+        }
+
         public static bool operator ==(in Bgr32 a, in Bgr32 b)
         {
+            // we don't want to compare padding
             return a.R == b.R && a.G == b.G && a.B == b.B;
         }
 
         public static bool operator !=(in Bgr32 a, in Bgr32 b)
         {
             return !(a == b);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Bgr32 other && Equals(other);
-        }
-
-        public bool Equals(Bgr32 other)
-        {
-            return this == other;
         }
 
         #endregion
@@ -182,13 +160,13 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(Bgr32) + $"(R:{R}, G:{G}, B:{B})";
+        public override readonly string ToString() => nameof(Bgr32) + $"(R:{R}, G:{G}, B:{B})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => HashCode.Combine(R, G, B);
-        
+        public override readonly int GetHashCode() => HashCode.Combine(R, G, B);
+
         #endregion
     }
 }

@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Runtime.Serialization;
 using MonoGame.Framework.Vector;
 using FastVector3 = System.Numerics.Vector3;
-using FastVector4 = System.Numerics.Vector4;
 
 namespace MonoGame.Framework
 {
@@ -26,72 +25,72 @@ namespace MonoGame.Framework
         /// <summary>
         /// <see cref="Vector3"/> with all components set to <see cref="float.MaxValue"/>.
         /// </summary>
-        public static Vector3 MaxValue { get; } = new Vector3(float.MaxValue);
+        public static Vector3 MaxValue => new Vector3(float.MaxValue);
 
         /// <summary>
         /// <see cref="Vector3"/> with all components set to <see cref="float.MinValue"/>.
         /// </summary>
-        public static Vector3 MinValue { get; } = new Vector3(float.MinValue);
+        public static Vector3 MinValue => new Vector3(float.MinValue);
 
         /// <summary>
         /// <see cref="Vector3"/> with all components set to 0.
         /// </summary>
-        public static Vector3 Zero { get; } = new Vector3(0f);
+        public static Vector3 Zero => new Vector3();
 
         /// <summary>
         /// <see cref="Vector3"/> with all components set to 0.5.
         /// </summary>
-        public static Vector3 Half { get; } = new Vector3(0.5f);
+        public static Vector3 Half => new Vector3(0.5f);
 
         /// <summary>
         /// <see cref="Vector3"/> with all components set to 1.
         /// </summary>
-        public static Vector3 One { get; } = new Vector3(1f);
+        public static Vector3 One => new Vector3(1f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 1, 0, 0.
         /// </summary>
-        public static Vector3 UnitX { get; } = new Vector3(1f, 0f, 0f);
+        public static Vector3 UnitX => new Vector3(1f, 0f, 0f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 0, 1, 0.
         /// </summary>
-        public static Vector3 UnitY { get; } = new Vector3(0f, 1f, 0f);
+        public static Vector3 UnitY => new Vector3(0f, 1f, 0f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 0, 0, 1.
         /// </summary>
-        public static Vector3 UnitZ { get; } = new Vector3(0f, 0f, 1f);
+        public static Vector3 UnitZ => new Vector3(0f, 0f, 1f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 0, 1, 0.
         /// </summary>
-        public static Vector3 Up { get; } = new Vector3(0f, 1f, 0f);
+        public static Vector3 Up => new Vector3(0f, 1f, 0f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 0, -1, 0.
         /// </summary>
-        public static Vector3 Down { get; } = new Vector3(0f, -1f, 0f);
+        public static Vector3 Down => new Vector3(0f, -1f, 0f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 1, 0, 0.
         /// </summary>
-        public static Vector3 Right { get; } = new Vector3(1f, 0f, 0f);
+        public static Vector3 Right => new Vector3(1f, 0f, 0f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components -1, 0, 0.
         /// </summary>
-        public static Vector3 Left { get; } = new Vector3(-1f, 0f, 0f);
+        public static Vector3 Left => new Vector3(-1f, 0f, 0f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 0, 0, -1.
         /// </summary>
-        public static Vector3 Forward { get; } = new Vector3(0f, 0f, -1f);
+        public static Vector3 Forward => new Vector3(0f, 0f, -1f);
 
         /// <summary>
         /// <see cref="Vector3"/> with components 0, 0, 1.
         /// </summary>
-        public static Vector3 Backward { get; } = new Vector3(0f, 0f, 1f);
+        public static Vector3 Backward => new Vector3(0f, 0f, 1f);
 
         #endregion
 
@@ -165,7 +164,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">The x and y coordinates in 3D-space.</param>
         /// <param name="z">The z coordinate in 3D-space.</param>
-        public Vector3(in Vector2 value, float z)
+        public Vector3(Vector2 value, float z)
         {
             Base = new FastVector3(value.Base, z);
         }
@@ -174,66 +173,26 @@ namespace MonoGame.Framework
 
         #region IPackedVector
 
-        public void FromVector4(in Vector4 vector)
+        void IVector.FromScaledVector4(Vector4 scaledVector)
+        {
+            FromVector4(scaledVector);
+        }
+
+        readonly Vector4 IVector.ToScaledVector4()
+        {
+            return ToVector4();
+        }
+
+        public void FromVector4(Vector4 vector)
         {
             Base.X = vector.Base.X;
             Base.Y = vector.Base.Y;
             Base.Z = vector.Base.Z;
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToVector4()
         {
-            vector.Base = new FastVector4(Base, 1);
-        }
-
-        void IVector.FromScaledVector4(in Vector4 scaledVector)
-        {
-            FromVector4(scaledVector);
-        }
-
-        readonly void IVector.ToScaledVector4(out Vector4 scaledVector)
-        {
-            ToVector4(out scaledVector);
-        }
-
-        #endregion
-
-        #region IPixel
-
-        void IPixel.FromGray8(Gray8 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromVector4(vector);
-        }
-
-        void IPixel.FromGray16(Gray16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromVector4(vector);
-        }
-
-        void IPixel.FromGrayAlpha16(GrayAlpha16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromVector4(vector);
-        }
-
-        void IPixel.FromRgb24(Rgb24 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromVector4(vector);
-        }
-
-        void IPixel.FromRgb48(Rgb48 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromVector4(vector);
-        }
-
-        void IPixel.FromRgba64(Rgba64 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromVector4(vector);
+            return new Vector4(Base, 1);
         }
 
         #endregion
@@ -250,7 +209,7 @@ namespace MonoGame.Framework
         /// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 3D-triangle.</param>
         /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 3D-triangle.</param>
         /// <returns>The cartesian translation of barycentric coordinates.</returns>
-        public static Vector3 Barycentric(in Vector3 a, in Vector3 b, in Vector3 c, float amount1, float amount2)
+        public static Vector3 Barycentric(Vector3 a, Vector3 b, Vector3 c, float amount1, float amount2)
         {
             return new Vector3(
                 MathHelper.Barycentric(a.X, b.X, c.X, amount1, amount2),
@@ -271,7 +230,7 @@ namespace MonoGame.Framework
         /// <param name="d">The fourth vector in interpolation.</param>
         /// <param name="amount">Weighting factor.</param>
         /// <returns>The result of CatmullRom interpolation.</returns>
-        public static Vector3 CatmullRom(in Vector3 a, in Vector3 b, in Vector3 c, in Vector3 d, float amount)
+        public static Vector3 CatmullRom(Vector3 a, Vector3 b, Vector3 c, Vector3 d, float amount)
         {
             return new Vector3(
                 MathHelper.CatmullRom(a.X, b.X, c.X, d.X, amount),
@@ -288,7 +247,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <returns>The rounded <see cref="Vector3"/>.</returns>
-        public static Vector3 Ceiling(in Vector3 value)
+        public static Vector3 Ceiling(Vector3 value)
         {
             return new Vector3(
                 MathF.Ceiling(value.X),
@@ -301,7 +260,9 @@ namespace MonoGame.Framework
         /// </summary>
         public void Ceiling()
         {
-            this = Ceiling(this);
+            X = MathF.Ceiling(X);
+            Y = MathF.Ceiling(Y);
+            Z = MathF.Ceiling(Z);
         }
 
         #endregion
@@ -315,7 +276,7 @@ namespace MonoGame.Framework
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
         /// <returns>The clamped value.</returns>
-        public static Vector3 Clamp(in Vector3 value, in Vector3 min, in Vector3 max)
+        public static Vector3 Clamp(Vector3 value, Vector3 min, Vector3 max)
         {
             return FastVector3.Clamp(value, min, max);
         }
@@ -325,7 +286,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
-        public void Clamp(in Vector3 min, in Vector3 max)
+        public void Clamp(Vector3 min, Vector3 max)
         {
             this = Clamp(this, min, max);
         }
@@ -337,7 +298,7 @@ namespace MonoGame.Framework
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
         /// <returns>The clamped value.</returns>
-        public static Vector3 Clamp(in Vector3 value, float min, float max)
+        public static Vector3 Clamp(Vector3 value, float min, float max)
         {
             return FastVector3.Clamp(value, new FastVector3(min), new FastVector3(max));
         }
@@ -362,7 +323,7 @@ namespace MonoGame.Framework
         /// <param name="left">The first vector.</param>
         /// <param name="right">The second vector.</param>
         /// <returns>The cross product of two vectors.</returns>
-        public static Vector3 Cross(in Vector3 left, in Vector3 right)
+        public static Vector3 Cross(Vector3 left, Vector3 right)
         {
             return FastVector3.Cross(left, right);
         }
@@ -391,7 +352,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The squared distance between two vectors.</returns>
-        public static float DistanceSquared(in Vector3 a, in Vector3 b)
+        public static float DistanceSquared(Vector3 a, Vector3 b)
         {
             return FastVector3.DistanceSquared(a, b);
         }
@@ -406,7 +367,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The distance between two vectors.</returns>
-        public static float Distance(in Vector3 a, in Vector3 b)
+        public static float Distance(Vector3 a, Vector3 b)
         {
             return FastVector3.Distance(a, b);
         }
@@ -421,7 +382,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The dot product of two vectors.</returns>
-        public static float Dot(in Vector3 a, in Vector3 b)
+        public static float Dot(Vector3 a, Vector3 b)
         {
             return FastVector3.Dot(a, b);
         }
@@ -456,7 +417,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Vector3"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="Vector3"/> instance on the right of the equal sign.</param>
         /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
-        public static bool operator ==(in Vector3 a, in Vector3 b)
+        public static bool operator ==(Vector3 a, Vector3 b)
         {
             return a.Base == b.Base;
         }
@@ -467,7 +428,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Vector3"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="Vector3"/> instance on the right of the not equal sign.</param>
         /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>	
-        public static bool operator !=(in Vector3 a, in Vector3 b)
+        public static bool operator !=(Vector3 a, Vector3 b)
         {
             return a.Base != b.Base;
         }
@@ -481,7 +442,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <returns>The rounded <see cref="Vector3"/>.</returns>
-        public static Vector3 Floor(in Vector3 value)
+        public static Vector3 Floor(Vector3 value)
         {
             return new Vector3(
                 MathF.Floor(value.X),
@@ -494,7 +455,9 @@ namespace MonoGame.Framework
         /// </summary>
         public void Floor()
         {
-            this = Floor(this);
+            X = MathF.Floor(X);
+            Y = MathF.Floor(Y);
+            Z = MathF.Floor(Z);
         }
 
         #endregion
@@ -520,8 +483,8 @@ namespace MonoGame.Framework
         /// <param name="amount">Weighting factor.</param>
         /// <returns>The hermite spline interpolation vector.</returns>
         public static Vector3 Hermite(
-            in Vector3 position1, in Vector3 tangent1,
-            in Vector3 position2, in Vector3 tangent2,
+            Vector3 position1, Vector3 tangent1,
+            Vector3 position2, Vector3 tangent2,
             float amount)
         {
             return new Vector3(
@@ -565,7 +528,7 @@ namespace MonoGame.Framework
         /// <param name="b">The second vector.</param>
         /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
         /// <returns>The result of linear interpolation of the specified vectors.</returns>
-        public static Vector3 Lerp(in Vector3 a, in Vector3 b, float amount)
+        public static Vector3 Lerp(Vector3 a, Vector3 b, float amount)
         {
             return FastVector3.Lerp(a, b, amount);
         }
@@ -583,7 +546,7 @@ namespace MonoGame.Framework
         /// <param name="b">The second vector.</param>
         /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
         /// <returns>The result of linear interpolation of the specified vectors.</returns>
-        public static Vector3 LerpPrecise(in Vector3 a, in Vector3 b, float amount)
+        public static Vector3 LerpPrecise(Vector3 a, Vector3 b, float amount)
         {
             return new Vector3(
                 MathHelper.LerpPrecise(a.X, b.X, amount),
@@ -601,7 +564,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The <see cref="Vector3"/> with maximal values from the two vectors.</returns>
-        public static Vector3 Max(in Vector3 a, in Vector3 b)
+        public static Vector3 Max(Vector3 a, Vector3 b)
         {
             return FastVector3.Max(a, b);
         }
@@ -616,7 +579,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The <see cref="Vector3"/> with minimal values from the two vectors.</returns>
-        public static Vector3 Min(in Vector3 a, in Vector3 b)
+        public static Vector3 Min(Vector3 a, Vector3 b)
         {
             return FastVector3.Min(a, b);
         }
@@ -631,7 +594,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector to add.</param>
         /// <param name="b">The second vector to add.</param>
         /// <returns>The result of the vector addition.</returns>
-        public static Vector3 Add(in Vector3 a, in Vector3 b)
+        public static Vector3 Add(Vector3 a, Vector3 b)
         {
             return FastVector3.Add(a, b);
         }
@@ -642,7 +605,7 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Vector3"/> on the left of the add sign.</param>
         /// <param name="b">Source <see cref="Vector3"/> on the right of the add sign.</param>
         /// <returns>Sum of the vectors.</returns>
-        public static Vector3 operator +(in Vector3 a, in Vector3 b)
+        public static Vector3 operator +(Vector3 a, Vector3 b)
         {
             return a.Base + b.Base;
         }
@@ -657,7 +620,7 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector3"/>.</param>
         /// <param name="right">Source <see cref="Vector3"/>.</param>
         /// <returns>The result of the vector subtraction.</returns>
-        public static Vector3 Subtract(in Vector3 left, in Vector3 right)
+        public static Vector3 Subtract(Vector3 left, Vector3 right)
         {
             return FastVector3.Subtract(left, right);
         }
@@ -668,7 +631,7 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector3"/> on the left of the sub sign.</param>
         /// <param name="right">Source <see cref="Vector3"/> on the right of the sub sign.</param>
         /// <returns>Result of the vector subtraction.</returns>
-        public static Vector3 operator -(in Vector3 left, in Vector3 right)
+        public static Vector3 operator -(Vector3 left, Vector3 right)
         {
             return left.Base - right.Base;
         }
@@ -682,7 +645,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <returns>The result of the vector inversion.</returns>
-        public static Vector3 Negate(in Vector3 value)
+        public static Vector3 Negate(Vector3 value)
         {
             return FastVector3.Negate(value);
         }
@@ -692,7 +655,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector3"/> on the right of the sub sign.</param>
         /// <returns>Result of the inversion.</returns>
-        public static Vector3 operator -(in Vector3 value)
+        public static Vector3 operator -(Vector3 value)
         {
             return -value.Base;
         }
@@ -707,7 +670,7 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Vector3"/>.</param>
         /// <param name="b">Source <see cref="Vector3"/>.</param>
         /// <returns>The result of the vector multiplication.</returns>
-        public static Vector3 Multiply(in Vector3 a, in Vector3 b)
+        public static Vector3 Multiply(Vector3 a, Vector3 b)
         {
             return FastVector3.Multiply(a, b);
         }
@@ -718,7 +681,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <param name="scaleFactor">Scalar value.</param>
         /// <returns>The result of the vector multiplication with a scalar.</returns>
-        public static Vector3 Multiply(in Vector3 value, float scaleFactor)
+        public static Vector3 Multiply(Vector3 value, float scaleFactor)
         {
             return FastVector3.Multiply(value, scaleFactor);
         }
@@ -729,7 +692,7 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Vector3"/> on the left of the mul sign.</param>
         /// <param name="b">Source <see cref="Vector3"/> on the right of the mul sign.</param>
         /// <returns>Result of the vector multiplication.</returns>
-        public static Vector3 operator *(in Vector3 a, in Vector3 b)
+        public static Vector3 operator *(Vector3 a, Vector3 b)
         {
             return a.Base * b.Base;
         }
@@ -740,7 +703,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector3"/> on the left of the mul sign.</param>
         /// <param name="scaleFactor">Scalar value on the right of the mul sign.</param>
         /// <returns>Result of the vector multiplication with a scalar.</returns>
-        public static Vector3 operator *(in Vector3 value, float scaleFactor)
+        public static Vector3 operator *(Vector3 value, float scaleFactor)
         {
             return value.Base * scaleFactor;
         }
@@ -751,7 +714,7 @@ namespace MonoGame.Framework
         /// <param name="scaleFactor">Scalar value on the left of the mul sign.</param>
         /// <param name="value">Source <see cref="Vector3"/> on the right of the mul sign.</param>
         /// <returns>Result of the vector multiplication with a scalar.</returns>
-        public static Vector3 operator *(float scaleFactor, in Vector3 value)
+        public static Vector3 operator *(float scaleFactor, Vector3 value)
         {
             return scaleFactor * value.Base;
         }
@@ -766,7 +729,7 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector3"/>.</param>
         /// <param name="right">Divisor <see cref="Vector3"/>.</param>
         /// <returns>The result of dividing the vectors.</returns>
-        public static Vector3 Divide(in Vector3 left, in Vector3 right)
+        public static Vector3 Divide(Vector3 left, Vector3 right)
         {
             return FastVector3.Divide(left, right);
         }
@@ -777,7 +740,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <param name="divisor">Divisor scalar.</param>
         /// <returns>The result of dividing a vector by a scalar.</returns>
-        public static Vector3 Divide(in Vector3 value, float divisor)
+        public static Vector3 Divide(Vector3 value, float divisor)
         {
             return FastVector3.Divide(value, divisor);
         }
@@ -788,7 +751,7 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector3"/> on the left of the div sign.</param>
         /// <param name="right">Divisor <see cref="Vector3"/> on the right of the div sign.</param>
         /// <returns>The result of dividing the vectors.</returns>
-        public static Vector3 operator /(in Vector3 left, in Vector3 right)
+        public static Vector3 operator /(Vector3 left, Vector3 right)
         {
             return left.Base / right.Base;
         }
@@ -799,7 +762,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector3"/> on the left of the div sign.</param>
         /// <param name="divisor">Divisor scalar on the right of the div sign.</param>
         /// <returns>The result of dividing a vector by a scalar.</returns>
-        public static Vector3 operator /(in Vector3 value, float divisor)
+        public static Vector3 operator /(Vector3 value, float divisor)
         {
             return value.Base / divisor;
         }
@@ -813,7 +776,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <returns>The normalized unit vector.</returns>
-        public static Vector3 Normalize(in Vector3 value)
+        public static Vector3 Normalize(Vector3 value)
         {
             return FastVector3.Normalize(value);
         }
@@ -836,7 +799,7 @@ namespace MonoGame.Framework
         /// <param name="vector">Source <see cref="Vector3"/>.</param>
         /// <param name="normal">Reflection normal.</param>
         /// <returns>The reflect vector.</returns>
-        public static Vector3 Reflect(in Vector3 vector, in Vector3 normal)
+        public static Vector3 Reflect(Vector3 vector, Vector3 normal)
         {
             return FastVector3.Reflect(vector, normal);
         }
@@ -850,12 +813,10 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <returns>The rounded <see cref="Vector3"/>.</returns>
-        public static Vector3 Round(in Vector3 value)
+        public static Vector3 Round(Vector3 value)
         {
-            return new Vector3(
-                MathF.Round(value.X),
-                MathF.Round(value.Y),
-                MathF.Round(value.Z));
+            value.Round();
+            return value;
         }
 
         /// <summary>
@@ -863,7 +824,9 @@ namespace MonoGame.Framework
         /// </summary>
         public void Round()
         {
-            this = Round(this);
+            X = MathF.Round(X);
+            Y = MathF.Round(Y);
+            Z = MathF.Round(Z);
         }
 
         #endregion
@@ -877,7 +840,7 @@ namespace MonoGame.Framework
         /// <param name="b">Source <see cref="Vector3"/>.</param>
         /// <param name="amount">Weighting value.</param>
         /// <returns>Cubic interpolation of the specified vectors.</returns>
-        public static Vector3 SmoothStep(in Vector3 a, in Vector3 b, float amount)
+        public static Vector3 SmoothStep(Vector3 a, Vector3 b, float amount)
         {
             return new Vector3(
                 MathHelper.SmoothStep(a.X, b.X, amount),
@@ -903,7 +866,10 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the <see cref="Vector2"/> representation of this <see cref="Vector3"/>.
         /// </summary>
-        public readonly Vector2 ToVector2() => UnsafeUtils.As<Vector3, Vector2>(this);
+        public readonly Vector2 ToVector2()
+        {
+            return UnsafeR.As<Vector3, Vector2>(this);
+        }
 
         #endregion
 
@@ -915,7 +881,7 @@ namespace MonoGame.Framework
         /// <param name="position">Source <see cref="Vector3"/>.</param>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
         /// <returns>Transformed <see cref="Vector3"/>.</returns>
-        public static Vector3 Transform(in Vector3 position, in Matrix matrix)
+        public static Vector3 Transform(Vector3 position, in Matrix matrix)
         {
             return FastVector3.Transform(position, matrix);
         }
@@ -927,7 +893,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
         /// <returns>Transformed <see cref="Vector3"/>.</returns>
-        public static Vector3 Transform(in Vector3 value, in Quaternion rotation)
+        public static Vector3 Transform(Vector3 value, in Quaternion rotation)
         {
             return FastVector3.Transform(value, rotation);
         }
@@ -971,7 +937,7 @@ namespace MonoGame.Framework
         /// <param name="normal">Source <see cref="Vector3"/> which represents a normal vector.</param>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
         /// <returns>Transformed normal.</returns>
-        public static Vector3 TransformNormal(in Vector3 normal, in Matrix matrix)
+        public static Vector3 TransformNormal(Vector3 normal, in Matrix matrix)
         {
             return FastVector3.TransformNormal(normal, matrix);
         }
@@ -992,7 +958,7 @@ namespace MonoGame.Framework
 
         #endregion
 
-        public static implicit operator FastVector3(in Vector3 value)
+        public static implicit operator FastVector3(Vector3 value)
         {
             return value.Base;
         }

@@ -45,75 +45,69 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public HalfVector4(ulong packed) : this()
         {
+            // TODO: Unsafe.SkipInit(out this)
             PackedValue = packed;
         }
 
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public HalfVector4(Vector4 vector)
-        {
-            this = Pack(vector);
-        }
-
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        public HalfVector4(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
-        {
-        }
-
         #endregion
-
-        private static HalfVector4 Pack(in Vector4 vector)
-        {
-            return new HalfVector4(
-                new HalfSingle(vector.X),
-                new HalfSingle(vector.Y),
-                new HalfSingle(vector.Z),
-                new HalfSingle(vector.W));
-        }
 
         #region IPackedVector
 
         [CLSCompliant(false)]
         public ulong PackedValue
         {
-            readonly get => UnsafeUtils.As<HalfVector4, ulong>(this);
+            readonly get => UnsafeR.As<HalfVector4, ulong>(this);
             set => Unsafe.As<HalfVector4, ulong>(ref this) = value;
         }
 
-        public void FromVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            this = Pack(vector);
+            scaledVector *= 2;
+            scaledVector -= Vector4.One;
+
+            X = new HalfSingle(scaledVector.X);
+            Y = new HalfSingle(scaledVector.Y);
+            Z = new HalfSingle(scaledVector.Z);
+            W = new HalfSingle(scaledVector.W);
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            vector.Base.X = X;
-            vector.Base.Y = Y;
-            vector.Base.Z = Z;
-            vector.Base.W = W;
+            var vector = ToVector4();
+            vector += Vector4.One;
+            vector /= 2f;
+            return vector;
         }
 
-        public void FromScaledVector4(in Vector4 scaledVector)
+        public void FromVector4(Vector4 vector)
         {
-            var v = scaledVector * 2;
-            v -= Vector4.One;
-            FromVector4(v);
+            X = new HalfSingle(vector.X);
+            Y = new HalfSingle(vector.Y);
+            Z = new HalfSingle(vector.Z);
+            W = new HalfSingle(vector.W);
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        public readonly Vector4 ToVector4()
         {
-            ToVector4(out scaledVector);
-            scaledVector += Vector4.One;
-            scaledVector /= 2;
+            return new Vector4(X, Y, Z, W);
         }
 
         #endregion
 
         #region Equals
+
+        public readonly bool Equals(HalfVector4 other)
+        {
+            return this == other;
+        }
+
+        /// <summary>
+        /// Returns a value that indicates whether the current instance is equal to a specified object.
+        /// </summary>
+        public override readonly bool Equals(object obj)
+        {
+            return obj is HalfVector4 other && Equals(other);
+        }
 
         /// <summary>
         /// Compares the current instance to another to determine whether they are the same.
@@ -131,22 +125,6 @@ namespace MonoGame.Framework.Vector
             return a.PackedValue != b.PackedValue;
         }
 
-        /// <summary>
-        /// Returns a value that indicates whether the current instance is equal to a specified object.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            return obj is HalfVector4 other && Equals(other);
-        }
-
-        /// <summary>
-        /// Returns a value that indicates whether the current instance is equal to a specified object.
-        /// </summary>
-        public bool Equals(HalfVector4 other)
-        {
-            return this == other;
-        }
-
         #endregion
 
         #region Object Overrides
@@ -154,12 +132,12 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Returns a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(HalfVector4) + $"({this.ToVector4()})";
+        public override readonly string ToString() => nameof(HalfVector4) + $"({this.ToVector4()})";
 
         /// <summary>
         /// Gets the hash code for the current instance.
         /// </summary>
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

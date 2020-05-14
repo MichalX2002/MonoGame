@@ -5,6 +5,8 @@ namespace MonoGame.Framework.Vector
 {
     public static class PackedVectorHelper
     {
+        private static readonly Vector3 _bt709Factors = new Vector3(.2126f, .7152f, .0722f);
+
         #region Component scaling
 
         // TODO: optimize some of these
@@ -62,6 +64,16 @@ namespace MonoGame.Framework.Vector
         #endregion
 
         #region Luminance
+
+        /// <summary>
+        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float GetBT709Luminance(Vector3 rgb)
+        {
+            rgb *= _bt709Factors;
+            return rgb.X + rgb.Y + rgb.Z;
+        }
 
         /// <summary>
         /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.

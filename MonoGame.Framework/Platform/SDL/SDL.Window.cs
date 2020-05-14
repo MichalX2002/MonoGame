@@ -98,7 +98,7 @@ namespace MonoGame
 
                 public fixed byte dummy[WindowInfoSizeInBytes];
 
-                public WindowInfo_WINDOWS Windows => UnsafeUtils.As<WindowInfo, WindowInfo_WINDOWS>(this);
+                public WindowInfo_WINDOWS Windows => UnsafeR.As<WindowInfo, WindowInfo_WINDOWS>(this);
 
                 // TODO:
                 //public WindowInfo_X11 X11 => UnsafeUtils.As<WindowInfo, WindowInfo_X11>(this);

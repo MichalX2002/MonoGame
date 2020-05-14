@@ -21,57 +21,57 @@ namespace MonoGame.Framework
     public struct Vector4 : IPixel<Vector4>, IEquatable<Vector4>
     {
         /// <summary>
-        /// Returns a <see cref="Vector4"/> with all components set to <see cref="ushort.MaxValue"/>.
+        /// Returns a <see cref="Vector4"/> with all components set to <see cref="byte.MaxValue"/>.
         /// </summary>
-        internal static readonly Vector4 MaxValueByte = new Vector4(byte.MaxValue);
+        internal static Vector4 MaxValueByte => new Vector4(byte.MaxValue);
 
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with all components set to <see cref="ushort.MaxValue"/>.
         /// </summary>
-        internal static readonly Vector4 MaxValueUInt16 = new Vector4(ushort.MaxValue);
+        internal static Vector4 MaxValueUInt16 => new Vector4(ushort.MaxValue);
 
         #region Public Constants
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with all components set to 0.
         /// </summary>
-        public static readonly Vector4 Zero = new Vector4(0, 0, 0, 0);
+        public static Vector4 Zero => new Vector4();
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with all components set to 0.5.
         /// </summary>
-        public static readonly Vector4 Half = new Vector4(0.5f);
+        public static Vector4 Half => new Vector4(0.5f);
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with all components set to 1.
         /// </summary>
-        public static readonly Vector4 One = new Vector4(1f);
+        public static Vector4 One => new Vector4(1f);
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with all components set to -1.
         /// </summary>
-        public static readonly Vector4 NegativeOne = new Vector4(-1f);
+        public static Vector4 NegativeOne => new Vector4(-1f);
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 1, 0, 0, 0.
         /// </summary>
-        public static readonly Vector4 UnitX = new Vector4(1f, 0f, 0f, 0f);
+        public static Vector4 UnitX => new Vector4(1f, 0f, 0f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 1, 0, 0.
         /// </summary>
-        public static readonly Vector4 UnitY = new Vector4(0f, 1f, 0f, 0f);
+        public static Vector4 UnitY => new Vector4(0f, 1f, 0f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 0, 1, 0.
         /// </summary>
-        public static readonly Vector4 UnitZ = new Vector4(0f, 0f, 1f, 0f);
+        public static Vector4 UnitZ => new Vector4(0f, 0f, 1f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with components 0, 0, 0, 1.
         /// </summary>
-        public static readonly Vector4 UnitW = new Vector4(0, 0, 0, 1);
+        public static Vector4 UnitW => new Vector4(0, 0, 0, 1);
 
         #endregion
 
@@ -141,7 +141,7 @@ namespace MonoGame.Framework
         public Vector2 XW { readonly get => new Vector2(X, W); set { X = value.X; W = value.Y; } }
 
         /// <summary>
-        /// Gets or sets the x and y coordinates as a <see cref="Vector3"/>.
+        /// Gets or sets the x, y and z coordinates as a <see cref="Vector3"/>.
         /// </summary>
         [IgnoreDataMember]
         public Vector3 XYZ { readonly get => ToVector3(); set { X = value.X; Y = value.Y; Z = value.Z; } }
@@ -168,7 +168,7 @@ namespace MonoGame.Framework
         /// <param name="value">The x and y coordinates in 4D-space.</param>
         /// <param name="z">The z coordinate in 4D-space.</param>
         /// <param name="w">The w coordinate in 4D-space.</param>
-        public Vector4(in Vector2 value, float z, float w)
+        public Vector4(Vector2 value, float z, float w)
         {
             Base = new FastVector4(value.Base, z, w);
         }
@@ -178,7 +178,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">The x, y and z coordinates in 4D-space.</param>
         /// <param name="w">The w coordinate in 4D-space.</param>
-        public Vector4(in Vector3 value, float w)
+        public Vector4(Vector3 value, float w)
         {
             Base = new FastVector4(value.Base, w);
         }
@@ -196,58 +196,24 @@ namespace MonoGame.Framework
 
         #region IPackedVector
 
-        void IVector.FromVector4(in Vector4 vector) => this = vector;
-
-        readonly void IVector.ToVector4(out Vector4 vector) => vector = this;
-
-        void IVector.FromScaledVector4(in Vector4 scaledVector) => this = scaledVector;
-
-        readonly void IVector.ToScaledVector4(out Vector4 scaledVector) => scaledVector = this;
-
-        #endregion
-
-        #region IPixel
-
-        public void FromColor(Color source)
+        void IVector.FromScaledVector4(Vector4 scaledVector)
         {
-            source.ToScaledVector4(out this);
+            this = scaledVector;
         }
 
-        void IPixel.FromGray8(Gray8 source)
+        readonly Vector4 IVector.ToScaledVector4()
         {
-            source.ToScaledVector4(out this);
+            return this;
         }
 
-        void IPixel.FromGray16(Gray16 source)
+        void IVector.FromVector4(Vector4 vector)
         {
-            source.ToScaledVector4(out this);
+            this = vector;
         }
 
-        void IPixel.FromGrayAlpha16(GrayAlpha16 source)
+        readonly Vector4 IVector.ToVector4()
         {
-            source.ToScaledVector4(out this);
-        }
-
-        void IPixel.FromRgb24(Rgb24 source)
-        {
-            source.ToScaledVector4(out this);
-        }
-
-        void IPixel.FromRgb48(Rgb48 source)
-        {
-            source.ToScaledVector4(out this);
-        }
-
-        void IPixel.FromRgba64(Rgba64 source)
-        {
-            source.ToScaledVector4(out this);
-        }
-
-        public readonly void ToColor(out Color destination)
-        {
-            destination = default; // TODO: Unsafe.SkipInit
-
-            destination.FromScaledVector4(this);
+            return this;
         }
 
         #endregion
@@ -320,6 +286,35 @@ namespace MonoGame.Framework
                 MathHelper.CatmullRom(a.Y, b.Y, c.Y, d.Y, amount),
                 MathHelper.CatmullRom(a.Z, b.Z, c.Z, d.Z, amount),
                 MathHelper.CatmullRom(a.W, b.W, c.W, d.W, amount));
+        }
+
+        #endregion
+
+        #region Ceiling
+
+        /// <summary>
+        /// Rounds components towards positive infinity and returns them.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/>.</param>
+        /// <returns>The rounded <see cref="Vector4"/>.</returns>
+        public static Vector4 Ceiling(in Vector4 value)
+        {
+            return new Vector4(
+                MathF.Ceiling(value.X),
+                MathF.Ceiling(value.Y),
+                MathF.Ceiling(value.Z),
+                MathF.Ceiling(value.W));
+        }
+
+        /// <summary>
+        /// Round components towards positive infinity.
+        /// </summary>
+        public void Ceiling()
+        {
+            X = MathF.Ceiling(X);
+            Y = MathF.Ceiling(Y);
+            Z = MathF.Ceiling(Z);
+            W = MathF.Ceiling(W);
         }
 
         #endregion
@@ -524,6 +519,35 @@ namespace MonoGame.Framework
         public static bool operator !=(in Vector4 a, in Vector4 b)
         {
             return a.Base != b.Base;
+        }
+
+        #endregion
+
+        #region Floor
+
+        /// <summary>
+        /// Rounds components towards negative infinity and returns them.
+        /// </summary>
+        /// <param name="value">Source <see cref="Vector4"/>.</param>
+        /// <returns>The rounded <see cref="Vector4"/>.</returns>
+        public static Vector4 Floor(in Vector4 value)
+        {
+            return new Vector4(
+                MathF.Floor(value.X),
+                MathF.Floor(value.Y),
+                MathF.Floor(value.Z),
+                MathF.Floor(value.W));
+        }
+
+        /// <summary>
+        /// Round components towards negative infinity.
+        /// </summary>
+        public void Floor()
+        {
+            X = MathF.Floor(X);
+            Y = MathF.Floor(Y);
+            Z = MathF.Floor(Z);
+            W = MathF.Floor(W);
         }
 
         #endregion
@@ -779,7 +803,10 @@ namespace MonoGame.Framework
         /// </summary>
         public void Round()
         {
-            this = Round(this);
+            X = MathF.Round(X);
+            Y = MathF.Round(Y);
+            Z = MathF.Round(Z);
+            W = MathF.Round(W);
         }
 
         #endregion
@@ -839,7 +866,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
         /// <returns>Transformed <see cref="Vector2"/>.</returns>
-        public static Vector4 Transform(in Vector2 value, in Matrix matrix)
+        public static Vector4 Transform(Vector2 value, in Matrix matrix)
         {
             return FastVector4.Transform(value, matrix);
         }
@@ -851,7 +878,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
-        public static Vector4 Transform(in Vector2 value, in Quaternion rotation)
+        public static Vector4 Transform(Vector2 value, in Quaternion rotation)
         {
             return FastVector4.Transform(value, rotation);
         }
@@ -863,7 +890,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
-        public static Vector4 Transform(in Vector3 value, in Matrix matrix)
+        public static Vector4 Transform(Vector3 value, in Matrix matrix)
         {
             return FastVector4.Transform(value, matrix);
         }
@@ -875,7 +902,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector3"/>.</param>
         /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
         /// <returns>Transformed <see cref="Vector4"/>.</returns>
-        public static Vector4 Transform(in Vector3 value, in Quaternion rotation)
+        public static Vector4 Transform(Vector3 value, in Quaternion rotation)
         {
             return FastVector4.Transform(value, rotation);
         }
@@ -957,7 +984,7 @@ namespace MonoGame.Framework
         /// </summary>
         public readonly Vector2 ToVector2()
         {
-            return UnsafeUtils.As<Vector4, Vector2>(this);
+            return UnsafeR.As<Vector4, Vector2>(this);
         }
 
         #endregion
@@ -967,7 +994,10 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the <see cref="Vector3"/> representation of this vector.
         /// </summary>
-        public readonly Vector3 ToVector3() => UnsafeUtils.As<Vector4, Vector3>(this);
+        public readonly Vector3 ToVector3()
+        {
+            return UnsafeR.As<Vector4, Vector3>(this);
+        }
 
         #endregion
 

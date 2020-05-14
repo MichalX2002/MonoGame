@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using MonoGame.Framework.Vector;
 using FastVector2 = System.Numerics.Vector2;
-using FastVector4 = System.Numerics.Vector4;
 
 namespace MonoGame.Framework
 {
@@ -30,27 +29,32 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns a <see cref="Vector2"/> with all components set to 0.
         /// </summary>
-        public static readonly Vector2 Zero = new Vector2(0f);
+        public static Vector2 Zero => new Vector2();
 
         /// <summary>
         /// Returns a <see cref="Vector2"/> with all components set 0.5.
         /// </summary>
-        public static readonly Vector2 Half = new Vector2(0.5f);
+        public static Vector2 Half => new Vector2(0.5f);
 
         /// <summary>
         /// Returns a <see cref="Vector2"/> with all components set to 1.
         /// </summary>
-        public static readonly Vector2 One = new Vector2(1f);
+        public static Vector2 One => new Vector2(1f);
+
+        /// <summary>
+        /// Returns a <see cref="Vector2"/> with all components set to -1.
+        /// </summary>
+        public static Vector2 NegativeOne => new Vector2(-1f);
 
         /// <summary>
         /// Returns a <see cref="Vector2"/> with components 1, 0.
         /// </summary>
-        public static readonly Vector2 UnitX = new Vector2(1f, 0f);
+        public static Vector2 UnitX => new Vector2(1f, 0f);
 
         /// <summary>
         /// Returns a <see cref="Vector2"/> with components 0, 1.
         /// </summary>
-        public static readonly Vector2 UnitY = new Vector2(0f, 1f);
+        public static Vector2 UnitY => new Vector2(0f, 1f);
 
         #endregion
 
@@ -105,58 +109,29 @@ namespace MonoGame.Framework
         [CLSCompliant(false)]
         public ulong PackedValue
         {
-            readonly get => UnsafeUtils.As<Vector2, ulong>(this);
+            readonly get => UnsafeR.As<Vector2, ulong>(this);
             set => Unsafe.As<Vector2, ulong>(ref this) = value;
         }
 
-        public void FromVector4(in Vector4 vector)
+        void IVector.FromScaledVector4(Vector4 scaledVector)
+        {
+            FromVector4(scaledVector);
+        }
+
+        readonly Vector4 IVector.ToScaledVector4()
+        {
+            return ToVector4();
+        }
+
+        public void FromVector4(Vector4 vector)
         {
             Base.X = vector.Base.X;
             Base.Y = vector.Base.Y;
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToVector4()
         {
-            vector.Base = new FastVector4(Base, 0, 1);
-        }
-
-        void IVector.FromScaledVector4(in Vector4 scaledVector)
-        {
-            FromVector4(scaledVector);
-        }
-
-        readonly void IVector.ToScaledVector4(out Vector4 scaledVector)
-        {
-            ToVector4(out scaledVector);
-        }
-
-        #endregion
-
-        #region IPixel
-
-        void IPixel.FromGray8(Gray8 source)
-        {
-            FromVector4(source.ToScaledVector4());
-        }
-
-        void IPixel.FromGray16(Gray16 source)
-        {
-            FromVector4(source.ToScaledVector4());
-        }
-
-        void IPixel.FromGrayAlpha16(GrayAlpha16 source)
-        {
-            FromVector4(source.ToScaledVector4());
-        }
-
-        void IPixel.FromRgb24(Rgb24 source)
-        {
-            FromVector4(source.ToScaledVector4());
-        }
-
-        void IPixel.FromRgb48(Rgb48 source)
-        {
-            FromVector4(source.ToScaledVector4());
+            return new Vector4(Base, 0, 1);
         }
 
         #endregion
@@ -181,7 +156,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector to add.</param>
         /// <param name="b">The second vector to add.</param>
         /// <returns>The result of the vector addition.</returns>
-        public static Vector2 Add(in Vector2 a, in Vector2 b)
+        public static Vector2 Add(Vector2 a, Vector2 b)
         {
             return FastVector2.Add(a, b);
         }
@@ -192,7 +167,7 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Vector2"/> on the left of the add sign.</param>
         /// <param name="b">Source <see cref="Vector2"/> on the right of the add sign.</param>
         /// <returns>Sum of the vectors.</returns>
-        public static Vector2 operator +(in Vector2 a, in Vector2 b)
+        public static Vector2 operator +(Vector2 a, Vector2 b)
         {
             return a.Base + b.Base;
         }
@@ -212,7 +187,7 @@ namespace MonoGame.Framework
         /// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 2D-triangle.</param>
         /// <returns>The cartesian translation of barycentric coordinates.</returns>
         public static Vector2 Barycentric(
-            in Vector2 a, in Vector2 b, in Vector2 c, float amount1, float amount2)
+            Vector2 a, Vector2 b, Vector2 c, float amount1, float amount2)
         {
             return new Vector2(
                 MathHelper.Barycentric(a.X, b.X, c.X, amount1, amount2),
@@ -233,7 +208,7 @@ namespace MonoGame.Framework
         /// <param name="amount">Weighting factor.</param>
         /// <returns>The result of CatmullRom interpolation.</returns>
         public static Vector2 CatmullRom(
-            in Vector2 a, in Vector2 b, in Vector2 c, in Vector2 d, float amount)
+            Vector2 a, Vector2 b, Vector2 c, Vector2 d, float amount)
         {
             return new Vector2(
                 MathHelper.CatmullRom(a.X, b.X, c.X, d.X, amount),
@@ -250,7 +225,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>The rounded <see cref="Vector2"/>.</returns>
-        public static Vector2 Ceiling(in Vector2 value)
+        public static Vector2 Ceiling(Vector2 value)
         {
             return new Vector2(
                 MathF.Ceiling(value.X),
@@ -262,7 +237,8 @@ namespace MonoGame.Framework
         /// </summary>
         public void Ceiling()
         {
-            this = Ceiling(this);
+            X = MathF.Ceiling(X);
+            Y = MathF.Ceiling(Y);
         }
 
         #endregion
@@ -276,7 +252,7 @@ namespace MonoGame.Framework
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
         /// <returns>The clamped value.</returns>
-        public static Vector2 Clamp(in Vector2 value, in Vector2 min, in Vector2 max)
+        public static Vector2 Clamp(Vector2 value, Vector2 min, Vector2 max)
         {
             return FastVector2.Clamp(value, min, max);
         }
@@ -286,7 +262,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
-        public void Clamp(in Vector2 min, in Vector2 max)
+        public void Clamp(Vector2 min, Vector2 max)
         {
             this = Clamp(this, min, max);
         }
@@ -298,7 +274,7 @@ namespace MonoGame.Framework
         /// <param name="min">The min value.</param>
         /// <param name="max">The max value.</param>
         /// <returns>The clamped value.</returns>
-        public static Vector2 Clamp(in Vector2 value, float min, float max)
+        public static Vector2 Clamp(Vector2 value, float min, float max)
         {
             return FastVector2.Clamp(value, new FastVector2(min), new FastVector2(max));
         }
@@ -323,7 +299,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The distance between two vectors.</returns>
-        public static float Distance(in Vector2 a, in Vector2 b)
+        public static float Distance(Vector2 a, Vector2 b)
         {
             return FastVector2.Distance(a.Base, b.Base);
         }
@@ -338,7 +314,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The squared distance between two vectors.</returns>
-        public static float DistanceSquared(in Vector2 a, in Vector2 b)
+        public static float DistanceSquared(Vector2 a, Vector2 b)
         {
             return FastVector2.DistanceSquared(a, b);
         }
@@ -353,7 +329,7 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector2"/>.</param>
         /// <param name="right">Divisor <see cref="Vector2"/>.</param>
         /// <returns>The result of dividing the vectors.</returns>
-        public static Vector2 Divide(in Vector2 left, in Vector2 right)
+        public static Vector2 Divide(Vector2 left, Vector2 right)
         {
             return FastVector2.Divide(left, right);
         }
@@ -364,7 +340,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <param name="divisor">Divisor scalar.</param>
         /// <returns>The result of dividing a vector by a scalar.</returns>
-        public static Vector2 Divide(in Vector2 value, float divisor)
+        public static Vector2 Divide(Vector2 value, float divisor)
         {
             return FastVector2.Divide(value, divisor);
         }
@@ -375,7 +351,7 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector2"/> on the left of the div sign.</param>
         /// <param name="right">Divisor <see cref="Vector2"/> on the right of the div sign.</param>
         /// <returns>The result of dividing the vectors.</returns>
-        public static Vector2 operator /(in Vector2 left, in Vector2 right)
+        public static Vector2 operator /(Vector2 left, Vector2 right)
         {
             return left.Base / right.Base;
         }
@@ -386,7 +362,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector2"/> on the left of the div sign.</param>
         /// <param name="divisor">Divisor scalar on the right of the div sign.</param>
         /// <returns>The result of dividing a vector by a scalar.</returns>
-        public static Vector2 operator /(in Vector2 value, float divisor)
+        public static Vector2 operator /(Vector2 value, float divisor)
         {
             return value.Base / divisor;
         }
@@ -401,7 +377,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The dot product of two vectors.</returns>
-        public static float Dot(in Vector2 a, in Vector2 b)
+        public static float Dot(Vector2 a, Vector2 b)
         {
             return FastVector2.Dot(a, b);
         }
@@ -436,7 +412,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Vector2"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="Vector2"/> instance on the right of the equal sign.</param>
         /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
-        public static bool operator ==(in Vector2 a, in Vector2 b)
+        public static bool operator ==(Vector2 a, Vector2 b)
         {
             return a.Base == b.Base;
         }
@@ -447,7 +423,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Vector2"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="Vector2"/> instance on the right of the not equal sign.</param>
         /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>	
-        public static bool operator !=(in Vector2 a, in Vector2 b)
+        public static bool operator !=(Vector2 a, Vector2 b)
         {
             return a.Base != b.Base;
         }
@@ -462,7 +438,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>The rounded <see cref="Vector2"/>.</returns>
-        public static Vector2 Floor(in Vector2 value)
+        public static Vector2 Floor(Vector2 value)
         {
             return new Vector2(
                 MathF.Floor(value.X),
@@ -474,7 +450,8 @@ namespace MonoGame.Framework
         /// </summary>
         public void Floor()
         {
-            this = Floor(this);
+            X = MathF.Floor(X);
+            Y = MathF.Floor(Y);
         }
 
         #endregion
@@ -501,8 +478,8 @@ namespace MonoGame.Framework
         /// <param name="amount">Weighting factor.</param>
         /// <returns>The hermite spline interpolation vector.</returns>
         public static Vector2 Hermite(
-            in Vector2 position1, in Vector2 tangent1,
-            in Vector2 position2, in Vector2 tangent2,
+            Vector2 position1, Vector2 tangent1,
+            Vector2 position2, Vector2 tangent2,
             float amount)
         {
             return new Vector2(
@@ -545,7 +522,7 @@ namespace MonoGame.Framework
         /// <param name="value2">The second vector.</param>
         /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
         /// <returns>The result of linear interpolation of the specified vectors.</returns>
-        public static Vector2 Lerp(in Vector2 value1, in Vector2 value2, float amount)
+        public static Vector2 Lerp(Vector2 value1, Vector2 value2, float amount)
         {
             return FastVector2.Lerp(value1, value2, amount);
         }
@@ -563,7 +540,7 @@ namespace MonoGame.Framework
         /// <param name="value2">The second vector.</param>
         /// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
         /// <returns>The result of linear interpolation of the specified vectors.</returns>
-        public static Vector2 LerpPrecise(in Vector2 value1, in Vector2 value2, float amount)
+        public static Vector2 LerpPrecise(Vector2 value1, Vector2 value2, float amount)
         {
             return new Vector2(
                 MathHelper.LerpPrecise(value1.X, value2.X, amount),
@@ -580,7 +557,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The <see cref="Vector2"/> with maximal values from the two vectors.</returns>
-        public static Vector2 Max(in Vector2 a, in Vector2 b)
+        public static Vector2 Max(Vector2 a, Vector2 b)
         {
             return FastVector2.Max(a, b);
         }
@@ -595,7 +572,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector.</param>
         /// <param name="b">The second vector.</param>
         /// <returns>The <see cref="Vector2"/> with minimal values from the two vectors.</returns>
-        public static Vector2 Min(in Vector2 a, in Vector2 b)
+        public static Vector2 Min(Vector2 a, Vector2 b)
         {
             return FastVector2.Min(a, b);
         }
@@ -610,7 +587,7 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Vector2"/>.</param>
         /// <param name="b">Source <see cref="Vector2"/>.</param>
         /// <returns>The result of the vector multiplication.</returns>
-        public static Vector2 Multiply(in Vector2 a, in Vector2 b)
+        public static Vector2 Multiply(Vector2 a, Vector2 b)
         {
             return FastVector2.Multiply(a, b);
         }
@@ -621,7 +598,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <param name="scaleFactor">Scalar value.</param>
         /// <returns>The result of the vector multiplication with a scalar.</returns>
-        public static Vector2 Multiply(in Vector2 value, float scaleFactor)
+        public static Vector2 Multiply(Vector2 value, float scaleFactor)
         {
             return FastVector2.Multiply(value, scaleFactor);
         }
@@ -632,7 +609,7 @@ namespace MonoGame.Framework
         /// <param name="a">Source <see cref="Vector2"/> on the left of the mul sign.</param>
         /// <param name="b">Source <see cref="Vector2"/> on the right of the mul sign.</param>
         /// <returns>Result of the vector multiplication.</returns>
-        public static Vector2 operator *(in Vector2 a, in Vector2 b)
+        public static Vector2 operator *(Vector2 a, Vector2 b)
         {
             return a.Base * b.Base;
         }
@@ -643,7 +620,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector2"/> on the left of the mul sign.</param>
         /// <param name="scaleFactor">Scalar value on the right of the mul sign.</param>
         /// <returns>Result of the vector multiplication with a scalar.</returns>
-        public static Vector2 operator *(in Vector2 value, float scaleFactor)
+        public static Vector2 operator *(Vector2 value, float scaleFactor)
         {
             return value.Base * scaleFactor;
         }
@@ -654,7 +631,7 @@ namespace MonoGame.Framework
         /// <param name="scaleFactor">Scalar value on the left of the mul sign.</param>
         /// <param name="value">Source <see cref="Vector2"/> on the right of the mul sign.</param>
         /// <returns>Result of the vector multiplication with a scalar.</returns>
-        public static Vector2 operator *(float scaleFactor, in Vector2 value)
+        public static Vector2 operator *(float scaleFactor, Vector2 value)
         {
             return scaleFactor * value.Base;
         }
@@ -668,7 +645,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>The result of the vector inversion.</returns>
-        public static Vector2 Negate(in Vector2 value)
+        public static Vector2 Negate(Vector2 value)
         {
             return FastVector2.Negate(value);
         }
@@ -678,7 +655,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/> on the right of the sub sign.</param>
         /// <returns>Result of the inversion.</returns>
-        public static Vector2 operator -(in Vector2 value)
+        public static Vector2 operator -(Vector2 value)
         {
             return -value.Base;
         }
@@ -692,7 +669,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>Unit vector.</returns>
-        public static Vector2 Normalize(in Vector2 value)
+        public static Vector2 Normalize(Vector2 value)
         {
             return FastVector2.Normalize(value);
         }
@@ -715,7 +692,7 @@ namespace MonoGame.Framework
         /// <param name="vector">Source <see cref="Vector2"/>.</param>
         /// <param name="normal">Reflection normal.</param>
         /// <returns>Reflected vector.</returns>
-        public static Vector2 Reflect(in Vector2 vector, in Vector2 normal)
+        public static Vector2 Reflect(Vector2 vector, Vector2 normal)
         {
             return FastVector2.Reflect(vector, normal);
         }
@@ -730,11 +707,10 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <returns>The rounded <see cref="Vector2"/>.</returns>
-        public static Vector2 Round(in Vector2 value)
+        public static Vector2 Round(Vector2 value)
         {
-            return new Vector2(
-                MathF.Round(value.X),
-                MathF.Round(value.Y));
+            value.Round();
+            return value;
         }
 
         /// <summary>
@@ -742,7 +718,8 @@ namespace MonoGame.Framework
         /// </summary>
         public void Round()
         {
-            this = Round(this);
+            X = MathF.Round(X);
+            Y = MathF.Round(Y);
         }
 
         #endregion
@@ -756,7 +733,7 @@ namespace MonoGame.Framework
         /// <param name="b">Source <see cref="Vector2"/>.</param>
         /// <param name="amount">Weighting value.</param>
         /// <returns>Cubic interpolation of the specified vectors.</returns>
-        public static Vector2 SmoothStep(in Vector2 a, in Vector2 b, float amount)
+        public static Vector2 SmoothStep(Vector2 a, Vector2 b, float amount)
         {
             return new Vector2(
                 MathHelper.SmoothStep(a.X, b.X, amount),
@@ -773,7 +750,7 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector2"/>.</param>
         /// <param name="right">Source <see cref="Vector2"/>.</param>
         /// <returns>The result of the vector subtraction.</returns>
-        public static Vector2 Subtract(in Vector2 left, in Vector2 right)
+        public static Vector2 Subtract(Vector2 left, Vector2 right)
         {
             return FastVector2.Subtract(left, right);
         }
@@ -784,7 +761,7 @@ namespace MonoGame.Framework
         /// <param name="left">Source <see cref="Vector2"/> on the left of the sub sign.</param>
         /// <param name="right">Source <see cref="Vector2"/> on the right of the sub sign.</param>
         /// <returns>Result of the vector subtraction.</returns>
-        public static Vector2 operator -(in Vector2 left, in Vector2 right)
+        public static Vector2 operator -(Vector2 left, Vector2 right)
         {
             return left.Base - right.Base;
         }
@@ -819,7 +796,7 @@ namespace MonoGame.Framework
         /// <param name="position">Source <see cref="Vector2"/>.</param>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
         /// <returns>Transformed <see cref="Vector2"/>.</returns>
-        public static Vector2 Transform(in Vector2 position, in Matrix matrix)
+        public static Vector2 Transform(Vector2 position, in Matrix matrix)
         {
             return FastVector2.Transform(position, matrix);
         }
@@ -830,7 +807,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Vector2"/>.</param>
         /// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
         /// <returns>Transformed <see cref="Vector2"/>.</returns>
-        public static Vector2 Transform(in Vector2 value, in Quaternion rotation)
+        public static Vector2 Transform(Vector2 value, in Quaternion rotation)
         {
             return FastVector2.Transform(value, rotation);
         }
@@ -878,7 +855,7 @@ namespace MonoGame.Framework
         /// <param name="normal">Source <see cref="Vector2"/> which represents a normal vector.</param>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
         /// <returns>Transformed normal.</returns>
-        public static Vector2 TransformNormal(in Vector2 normal, in Matrix matrix)
+        public static Vector2 TransformNormal(Vector2 normal, in Matrix matrix)
         {
             return FastVector2.TransformNormal(normal, matrix);
         }
@@ -901,7 +878,7 @@ namespace MonoGame.Framework
 
         #endregion
 
-        public static implicit operator FastVector2(in Vector2 value)
+        public static implicit operator FastVector2(Vector2 value)
         {
             return value.Base;
         }

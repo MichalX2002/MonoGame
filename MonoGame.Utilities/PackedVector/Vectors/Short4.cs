@@ -58,46 +58,56 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public ulong PackedValue
         {
-            readonly get => UnsafeUtils.As<Short4, ulong>(this);
+            readonly get => UnsafeR.As<Short4, ulong>(this);
             set => Unsafe.As<Short4, ulong>(ref this) = value;
         }
 
-        public void FromScaledVector4(in Vector4 scaledVector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            var v = scaledVector * ushort.MaxValue;
-            v -= Offset;
-            FromVector4(v);
+            scaledVector *= ushort.MaxValue;
+            scaledVector -= Offset;
+
+            FromVector4(scaledVector);
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        public readonly Vector4 ToScaledVector4()
         {
-            ToVector4(out scaledVector);
+            var scaledVector = ToVector4();
             scaledVector += Offset;
             scaledVector /= ushort.MaxValue;
+
+            return scaledVector;
         }
 
-        public void FromVector4(in Vector4 vector)
+        public void FromVector4(Vector4 vector)
         {
-            var v = vector + Vector4.Half;
-            v.Clamp(MinValue, MaxValue);
+            vector.Clamp(MinValue, MaxValue);
+            vector.Round();
 
-            X = (short)v.X;
-            Y = (short)v.Y;
-            Z = (short)v.Z;
-            W = (short)v.W;
+            X = (short)vector.X;
+            Y = (short)vector.Y;
+            Z = (short)vector.Z;
+            W = (short)vector.W;
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToVector4()
         {
-            vector.Base.X = X;
-            vector.Base.Y = Y;
-            vector.Base.Z = Z;
-            vector.Base.W = W;
+            return new Vector4(X, Y, Z, W);
         }
 
         #endregion
 
         #region Equals
+
+        public readonly bool Equals(Short4 other)
+        {
+            return this == other;
+        }
+
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Short4 other && Equals(other);
+        }
 
         public static bool operator ==(in Short4 a, in Short4 b)
         {
@@ -109,23 +119,13 @@ namespace MonoGame.Framework.Vector
             return a.PackedValue != b.PackedValue;
         }
 
-        public bool Equals(Short4 other)
-        {
-            return this == other;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Short4 other && Equals(other);
-        }
-
         #endregion
 
         #region Object Overrides
 
-        public override string ToString() => nameof(Short4) + $"({X}, {Y}, {Z}, {W})";
+        public override readonly string ToString() => nameof(Short4) + $"({X}, {Y}, {Z}, {W})";
 
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

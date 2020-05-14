@@ -26,7 +26,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the identity matrix.
         /// </summary>
-        public static Matrix Identity { get; } = FastMatrix.Identity;
+        public static Matrix Identity => FastMatrix.Identity;
 
         [IgnoreDataMember]
         public FastMatrix Base;
@@ -408,10 +408,10 @@ namespace MonoGame.Framework
         /// <param name="cameraForwardVector">The camera forward vector.</param>
         /// <returns>The <see cref="Matrix"/> for spherical billboarding.</returns>
         public static Matrix CreateBillboard(
-            in Vector3 objectPosition,
-            in Vector3 cameraPosition,
-            in Vector3 cameraUpVector,
-            in Vector3 cameraForwardVector)
+            Vector3 objectPosition,
+            Vector3 cameraPosition,
+            Vector3 cameraUpVector,
+            Vector3 cameraForwardVector)
         {
             return FastMatrix.CreateBillboard(
                 objectPosition, cameraPosition, cameraUpVector, cameraForwardVector);
@@ -432,11 +432,11 @@ namespace MonoGame.Framework
         /// <param name="objectForwardVector">Object forward vector.</param>
         /// <returns>The <see cref="Matrix"/> for cylindrical billboarding.</returns>
         public static Matrix CreateConstrainedBillboard(
-            in Vector3 objectPosition,
-            in Vector3 cameraPosition,
-            in Vector3 rotateAxis,
-            in Vector3 cameraForwardVector,
-            in Vector3 objectForwardVector)
+            Vector3 objectPosition,
+            Vector3 cameraPosition,
+            Vector3 rotateAxis,
+            Vector3 cameraForwardVector,
+            Vector3 objectForwardVector)
         {
             return FastMatrix.CreateConstrainedBillboard(
                 objectPosition, cameraPosition, rotateAxis, cameraForwardVector, objectForwardVector);
@@ -453,7 +453,7 @@ namespace MonoGame.Framework
         /// <param name="axis">The axis of rotation.</param>
         /// <param name="angle">The angle of rotation in radians.</param>
         /// <returns>The rotation <see cref="Matrix"/>.</returns>
-        public static Matrix CreateFromAxisAngle(in Vector3 axis, float angle)
+        public static Matrix CreateFromAxisAngle(Vector3 axis, float angle)
         {
             return FastMatrix.CreateFromAxisAngle(axis, angle);
         }
@@ -500,9 +500,9 @@ namespace MonoGame.Framework
         /// <param name="cameraUpVector">The direction of the upper edge of the camera.</param>
         /// <returns>The viewing <see cref="Matrix"/>.</returns>
         public static Matrix CreateLookAt(
-            in Vector3 cameraPosition,
-            in Vector3 cameraTarget,
-            in Vector3 cameraUpVector)
+            Vector3 cameraPosition,
+            Vector3 cameraTarget,
+            Vector3 cameraUpVector)
         {
             return FastMatrix.CreateLookAt(cameraPosition, cameraTarget, cameraUpVector);
         }
@@ -658,7 +658,7 @@ namespace MonoGame.Framework
         /// <param name="radians">Angle in radians.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <returns>The rotation <see cref="Matrix"/> around X axis.</returns>
-        public static Matrix CreateRotationX(float radians, in Vector3 centerPoint)
+        public static Matrix CreateRotationX(float radians, Vector3 centerPoint)
         {
             return FastMatrix.CreateRotationX(radians, centerPoint);
         }
@@ -683,7 +683,7 @@ namespace MonoGame.Framework
         /// <param name="radians">Angle in radians.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <returns>The rotation <see cref="Matrix"/> around Y axis.</returns>
-        public static Matrix CreateRotationY(float radians, in Vector3 centerPoint)
+        public static Matrix CreateRotationY(float radians, Vector3 centerPoint)
         {
             return FastMatrix.CreateRotationY(radians, centerPoint);
         }
@@ -708,7 +708,7 @@ namespace MonoGame.Framework
         /// <param name="radians">Angle in radians.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <returns>The rotation <see cref="Matrix"/> around Z axis.</returns>
-        public static Matrix CreateRotationZ(float radians, in Vector3 centerPoint)
+        public static Matrix CreateRotationZ(float radians, Vector3 centerPoint)
         {
             return FastMatrix.CreateRotationZ(radians, centerPoint);
         }
@@ -722,7 +722,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="scales"><see cref="Vector3"/> representing x,y and z scale values.</param>
         /// <returns>The scaling <see cref="Matrix"/>.</returns>
-        public static Matrix CreateScale(in Vector3 scales)
+        public static Matrix CreateScale(Vector3 scales)
         {
             return FastMatrix.CreateScale(scales);
         }
@@ -733,7 +733,7 @@ namespace MonoGame.Framework
         /// <param name="scales"><see cref="Vector3"/> representing x,y and z scale values.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <returns>The scaling <see cref="Matrix"/>.</returns>
-        public static Matrix CreateScale(in Vector3 scales, in Vector3 centerPoint)
+        public static Matrix CreateScale(Vector3 scales, Vector3 centerPoint)
         {
             return FastMatrix.CreateScale(scales, centerPoint);
         }
@@ -759,7 +759,7 @@ namespace MonoGame.Framework
         /// <param name="centerPoint">The center point.</param>
         /// <returns>The scaling <see cref="Matrix"/>.</returns>
         public static Matrix CreateScale(
-            float xScale, float yScale, float zScale, in Vector3 centerPoint)
+            float xScale, float yScale, float zScale, Vector3 centerPoint)
         {
             return FastMatrix.CreateScale(xScale, yScale, zScale, centerPoint);
         }
@@ -780,7 +780,7 @@ namespace MonoGame.Framework
         /// <param name="scale">Scale value for all three axises.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <returns>The scaling <see cref="Matrix"/>.</returns>
-        public static Matrix CreateScale(float scale, in Vector3 centerPoint)
+        public static Matrix CreateScale(float scale, Vector3 centerPoint)
         {
             return FastMatrix.CreateScale(scale, centerPoint);
         }
@@ -803,7 +803,7 @@ namespace MonoGame.Framework
         /// A <see cref="Matrix"/> that can be used to flatten geometry
         /// onto the specified plane from the specified direction.
         /// </returns>
-        public static Matrix CreateShadow(in Vector3 lightDirection, in Plane plane)
+        public static Matrix CreateShadow(Vector3 lightDirection, in Plane plane)
         {
             return FastMatrix.CreateShadow(lightDirection, plane);
         }
@@ -817,7 +817,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="position">X,Y and Z coordinates of translation.</param>
         /// <returns>The translation <see cref="Matrix"/>.</returns>
-        public static Matrix CreateTranslation(in Vector3 position)
+        public static Matrix CreateTranslation(Vector3 position)
         {
             return FastMatrix.CreateTranslation(position);
         }
@@ -859,7 +859,7 @@ namespace MonoGame.Framework
         /// <param name="forward">The forward direction vector.</param>
         /// <param name="up">The upward direction vector. Usually <see cref="Vector3.Up"/>.</param>
         /// <returns>The world <see cref="Matrix"/>.</returns>
-        public static Matrix CreateWorld(in Vector3 position, in Vector3 forward, in Vector3 up)
+        public static Matrix CreateWorld(Vector3 position, Vector3 forward, Vector3 up)
         {
             return FastMatrix.CreateWorld(position, forward, up);
         }

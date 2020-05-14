@@ -58,13 +58,8 @@ namespace MonoGame.Framework
         /// </summary>
         public Rgb24 Rgb
         {
-            readonly get => UnsafeUtils.As<Color, Rgb24>(this);
-            set
-            {
-                R = value.R;
-                G = value.G;
-                B = value.B;
-            }
+            readonly get => UnsafeR.As<Color, Rgb24>(this);
+            set => Unsafe.As<Color, Rgb24>(ref this) = value;
         }
 
         /// <summary>
@@ -168,7 +163,7 @@ namespace MonoGame.Framework
         /// Constructs the <see cref="Color"/> with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public Color(Vector4 color) : this(color.X, color.Y, color.Z, color.W)
+        public Color(in Vector4 color) : this(color.X, color.Y, color.Z, color.W)
         {
         }
 
@@ -248,37 +243,33 @@ namespace MonoGame.Framework
         [CLSCompliant(false)]
         public uint PackedValue
         {
-            readonly get => UnsafeUtils.As<Color, uint>(this);
+            readonly get => UnsafeR.As<Color, uint>(this);
             set => Unsafe.As<Color, uint>(ref this) = value;
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        public readonly Vector4 ToScaledVector4()
         {
-            scaledVector.Base.X = R;
-            scaledVector.Base.Y = G;
-            scaledVector.Base.Z = B;
-            scaledVector.Base.W = A;
-            scaledVector /= byte.MaxValue;
+            return new Vector4(R, G, B, A) / byte.MaxValue;
         }
 
-        public void FromScaledVector4(in Vector4 scaledVector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            var v = scaledVector * byte.MaxValue;
-            v += Vector4.Half;
-            v.Clamp(Vector4.Zero, Vector4.MaxValueByte);
+            scaledVector *= byte.MaxValue;
+            scaledVector += Vector4.Half;
+            scaledVector.Clamp(Vector4.Zero, Vector4.MaxValueByte);
 
-            R = (byte)v.X;
-            G = (byte)v.Y;
-            B = (byte)v.Z;
-            A = (byte)v.W;
+            R = (byte)scaledVector.X;
+            G = (byte)scaledVector.Y;
+            B = (byte)scaledVector.Z;
+            A = (byte)scaledVector.W;
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToVector4()
         {
-            ToScaledVector4(out vector);
+            return ToScaledVector4();
         }
 
-        public void FromVector4(in Vector4 vector)
+        public void FromVector4(Vector4 vector)
         {
             FromScaledVector4(vector);
         }
@@ -434,9 +425,12 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="vector">A <see cref="Vector4"/> representing color.</param>
         /// <returns>A <see cref="Color"/> which contains premultiplied alpha data.</returns>
-        public static Color FromNonPremultiplied(in Vector4 vector)
+        public static Color FromNonPremultiplied(Vector4 vector)
         {
-            return new Color(vector.X * vector.W, vector.Y * vector.W, vector.Z * vector.W, vector.W);
+            float w = vector.W;
+            vector.W = 1;
+            vector *= w;
+            return new Color(vector);
         }
 
         /// <summary>
@@ -459,7 +453,7 @@ namespace MonoGame.Framework
         /// <param name="end">Destination <see cref="Color"/>.</param>
         /// <param name="amount">Interpolation factor.</param>
         /// <returns>Interpolated <see cref="Color"/>.</returns>
-        public static Color Lerp(in Color start, in Color end, float amount)
+        public static Color Lerp(Color start, Color end, float amount)
         {
             amount = MathHelper.Clamp(amount, 0, 1);
 
@@ -476,7 +470,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Color"/>.</param>
         /// <param name="scale">Factor.</param>
         /// <returns>Multiplication result.</returns>
-        public static Color Multiply(in Color value, float scale)
+        public static Color Multiply(Color value, float scale)
         {
             return value * scale;
         }
@@ -487,7 +481,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Color"/>.</param>
         /// <param name="scale">Factor.</param>
         /// <returns>Multiplication result.</returns>
-        public static Color operator *(in Color value, float scale)
+        public static Color operator *(Color value, float scale)
         {
             return new Color(
                 (int)(value.R * scale),
@@ -513,7 +507,7 @@ namespace MonoGame.Framework
         /// <param name="r">Red component value from 0 to 255.</param>
         /// <param name="g">Green component value from 0 to 255.</param>
         /// <param name="b">Blue component value from 0 to 255.</param>
-        public void Deconstruct(out byte r, out byte g, out byte b)
+        public readonly void Deconstruct(out byte r, out byte g, out byte b)
         {
             r = R;
             g = G;
@@ -526,7 +520,7 @@ namespace MonoGame.Framework
         /// <param name="r">Red component value from 0.0f to 1.0f.</param>
         /// <param name="g">Green component value from 0.0f to 1.0f.</param>
         /// <param name="b">Blue component value from 0.0f to 1.0f.</param>
-        public void Deconstruct(out float r, out float g, out float b)
+        public readonly void Deconstruct(out float r, out float g, out float b)
         {
             r = R / 255f;
             g = G / 255f;
@@ -540,7 +534,7 @@ namespace MonoGame.Framework
         /// <param name="g">Green component value from 0 to 255.</param>
         /// <param name="b">Blue component value from 0 to 255.</param>
         /// <param name="a">Alpha component value from 0 to 255.</param>
-        public void Deconstruct(out byte r, out byte g, out byte b, out byte a)
+        public readonly void Deconstruct(out byte r, out byte g, out byte b, out byte a)
         {
             r = R;
             g = G;
@@ -555,7 +549,7 @@ namespace MonoGame.Framework
         /// <param name="g">Green component value from 0.0f to 1.0f.</param>
         /// <param name="b">Blue component value from 0.0f to 1.0f.</param>
         /// <param name="a">Alpha component value from 0.0f to 1.0f.</param>
-        public void Deconstruct(out float r, out float g, out float b, out float a)
+        public readonly void Deconstruct(out float r, out float g, out float b, out float a)
         {
             r = R / 255f;
             g = G / 255f;
@@ -566,6 +560,22 @@ namespace MonoGame.Framework
         #endregion
 
         #region Equals
+
+        /// <summary>
+        /// Compares whether current instance is equal to specified <see cref="Color"/>.
+        /// </summary>
+        public readonly bool Equals(Color other)
+        {
+            return this == other;
+        }
+
+        /// <summary>
+        /// Compares whether current instance is equal to specified object.
+        /// </summary>
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Color other && Equals(other);
+        }
 
         /// <summary>
         /// Compares whether two <see cref="Color"/> instances are equal.
@@ -582,23 +592,6 @@ namespace MonoGame.Framework
         {
             return a.PackedValue != b.PackedValue;
         }
-
-        /// <summary>
-        /// Compares whether current instance is equal to specified <see cref="Color"/>.
-        /// </summary>
-        public bool Equals(Color other)
-        {
-            return this == other;
-        }
-
-        /// <summary>
-        /// Compares whether current instance is equal to specified object.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            return obj is Color other && Equals(other);
-        }
-
         #endregion
 
         #region Object Overrides
@@ -606,9 +599,10 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns a <see cref="string"/> representation of this <see cref="Color"/>.
         /// </summary>
-        public override string ToString()
+        public override readonly string ToString()
         {
-            var sb = new StringBuilder(28);
+            var sb = new StringBuilder(28 + nameof(Color).Length);
+            sb.Append(nameof(Color));
             sb.Append("(R:");
             sb.Append(R);
             sb.Append(", G:");
@@ -624,7 +618,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets a hash code of the <see cref="Color"/>.
         /// </summary>
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

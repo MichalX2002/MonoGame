@@ -97,11 +97,13 @@ namespace MonoGame.Framework
         public event DatalessEvent<GameWindow> ClientSizeChanged;
         public event DatalessEvent<GameWindow> OrientationChanged;
         public event DatalessEvent<GameWindow> ScreenDeviceNameChanged;
-        public event FileDropEvent FileDropped;
 
-#if WINDOWS || WINDOWS_UAP || DESKTOPGL || ANGLE
+        public event FileDropEvent FileDropped;
+        public event DataEvent<GameWindow, string> TextDropped;
 
         internal bool IsTextInputHandled => TextInput != null;
+        internal bool IsFileDroppedHandled => FileDropped != null;
+        internal bool IsTextDroppedHandled => TextDropped != null;
 
         /// <summary>
         /// Use this event to retrieve text for objects like textboxes.
@@ -110,18 +112,24 @@ namespace MonoGame.Framework
         /// http://msdn.microsoft.com/en-AU/library/system.windows.forms.control.keypress.aspx
         /// </summary>
         /// <remarks>
-        /// This event is only supported on the Windows DirectX, Windows OpenGL and Linux platforms.
+        /// This event is only supported on the Windows and Linux platforms.
         /// </remarks>
         public event DataEvent<GameWindow, TextInputEventArgs> TextInput;
 
         /// <summary>
         /// Buffered keyboard KeyDown event.
         /// </summary>
+        /// <remarks>
+        /// This event is only supported on the Windows and Linux platforms.
+        /// </remarks>
         public event DataEvent<GameWindow, KeyInputEventArgs> KeyDown;
 
         /// <summary>
         /// Buffered keyboard KeyUp event.
         /// </summary>
+        /// <remarks>
+        /// This event is only supported on the Windows and Linux platforms.
+        /// </remarks>
         public event DataEvent<GameWindow, KeyInputEventArgs> KeyUp;
 
         internal void OnTextInput(TextInputEventArgs ev) => TextInput?.Invoke(this, ev);
@@ -129,8 +137,6 @@ namespace MonoGame.Framework
         internal void OnKeyDown(KeyInputEventArgs e) => KeyDown?.Invoke(this, e);
 
         internal void OnKeyUp(KeyInputEventArgs e) => KeyUp?.Invoke(this, e);
-
-#endif
 
         #endregion
 
@@ -173,6 +179,11 @@ namespace MonoGame.Framework
         protected void OnFileDropped(GameWindow window, string filePath)
         {
             FileDropped?.Invoke(window, filePath);
+        }
+
+        protected void OnTextDropped(GameWindow window, string text)
+        {
+            TextDropped?.Invoke(window, text);
         }
 
         protected internal abstract void SetSupportedOrientations(DisplayOrientation orientations);

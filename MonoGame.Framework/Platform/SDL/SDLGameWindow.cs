@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using MonoGame.Framework.Graphics;
+using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework
 {
@@ -101,9 +102,12 @@ namespace MonoGame.Framework
             _height = GraphicsDeviceManager.DefaultBackBufferHeight;
             _defaultTitle = AssemblyHelper.GetDefaultWindowTitle();
 
-            byte[] iconBytes = ReadEmbeddedIconBytes();
+            var iconBytes = ReadEmbeddedIconBytes(arrayTag: "EmbeddedIconBytes");
             if (iconBytes != null)
-                _icon = LoadBmp(iconBytes);
+            {
+                using (iconBytes)
+                    _icon = LoadBmp(iconBytes.AsMemory(0, iconBytes.BaseLength));
+            }
 
             SDL.SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "0");
             SDL.SetHint("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1");
@@ -117,20 +121,20 @@ namespace MonoGame.Framework
                 SDL.Window.State.Hidden);
         }
 
-        private static IntPtr LoadBmp(byte[] data)
+        private static unsafe IntPtr LoadBmp(Memory<byte> data)
         {
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
+            fixed (byte* dataPtr = data.Span)
+            {
+                var dataSrc = SDL.RwFromMem((IntPtr)dataPtr, data.Length);
+                if (dataSrc == IntPtr.Zero)
+                    return IntPtr.Zero;
 
-            var dataSrc = SDL.RwFromMem(data, data.Length);
-            if (dataSrc == IntPtr.Zero)
-                return IntPtr.Zero;
+                var icon = SDL.LoadBMP_RW(dataSrc, freesrc: 1);
+                if (icon == IntPtr.Zero)
+                    return IntPtr.Zero;
 
-            var icon = SDL.LoadBMP_RW(dataSrc, freesrc: 1);
-            if (icon == IntPtr.Zero)
-                return IntPtr.Zero;
-
-            return icon;
+                return icon;
+            }
         }
 
         public IntPtr GetSubsystemWindowHandle()
@@ -143,7 +147,7 @@ namespace MonoGame.Framework
                 if (SDL.Window.GetWindowWMInfo(_handle, ref wmInfo))
                 {
                     if (wmInfo.subsystem == SDL.Window.SysWMType.Windows &&
-                        wmInfo.version.Major >= 2 && 
+                        wmInfo.version.Major >= 2 &&
                         wmInfo.version.Minor >= 0 &&
                         wmInfo.version.Patch >= 6)
                     {
@@ -196,35 +200,32 @@ namespace MonoGame.Framework
             SetCursorVisible(_mouseVisible);
         }
 
-        private static byte[] ReadEmbeddedIconBytes()
+        private static RecyclableBuffer ReadEmbeddedIconBytes(string arrayTag)
         {
             // when running NUnit tests entry assembly can be null
             var entryAssembly = Assembly.GetEntryAssembly();
-            if (entryAssembly != null)
+            if (entryAssembly == null)
+                return null;
+
+            var entryDeclaringType = entryAssembly.EntryPoint.DeclaringType;
+            using (var stream =
+                entryAssembly.GetManifestResourceStream(entryDeclaringType.Namespace + ".Icon.bmp") ??
+                entryAssembly.GetManifestResourceStream("Icon.bmp") ??
+                Assembly.GetExecutingAssembly().GetManifestResourceStream("MonoGame.bmp"))
             {
-                var entryDeclaringType = entryAssembly.EntryPoint.DeclaringType;
-                using (var stream =
-                        entryAssembly.GetManifestResourceStream(entryDeclaringType.Namespace + ".Icon.bmp") ??
-                        entryAssembly.GetManifestResourceStream("Icon.bmp") ??
-                        Assembly.GetExecutingAssembly().GetManifestResourceStream("MonoGame.bmp"))
+                if (stream != null)
                 {
-                    if (stream != null)
+                    try
                     {
-                        using (var br = new BinaryReader(stream))
-                        {
-                            try
-                            {
-                                int length = (int)stream.Length;
-                                return br.ReadBytes(length);
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine("Failed to load icon from embedded resources: {0}", ex);
-                            }
-                        }
+                        return RecyclableBuffer.ReadBytes(stream, (int)stream.Length, arrayTag);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine("Failed to load icon from embedded resources: {0}", ex);
                     }
                 }
             }
+
             return null;
         }
 
@@ -344,7 +345,7 @@ namespace MonoGame.Framework
             if (_game.GraphicsDevice.PresentationParameters.BackBufferWidth == width &&
                 _game.GraphicsDevice.PresentationParameters.BackBufferHeight == height)
                 return;
-            
+
             _game.GraphicsDevice.PresentationParameters.BackBufferWidth = width;
             _game.GraphicsDevice.PresentationParameters.BackBufferHeight = height;
             _game.GraphicsDevice.Viewport = new Viewport(0, 0, width, height);
@@ -356,6 +357,11 @@ namespace MonoGame.Framework
         public void InvokeFileDropped(string filePath)
         {
             OnFileDropped(this, filePath);
+        }
+
+        public void InvokeTextDropped(string text)
+        {
+            OnTextDropped(this, text);
         }
 
         protected internal override void SetSupportedOrientations(DisplayOrientation orientations)

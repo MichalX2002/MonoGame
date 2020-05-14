@@ -33,30 +33,18 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public uint PackedValue { readonly get => L; set => L = value; }
 
-        public void FromVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            FromScaledVector4(vector);
+            scaledVector.Clamp(Vector4.Zero, Vector4.One);
+            scaledVector *= uint.MaxValue;
+
+            L = (uint)(PackedVectorHelper.GetBT709Luminance(scaledVector.ToVector3()) + 0.5f);
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            ToScaledVector4(out vector);
-        }
-
-        public void FromScaledVector4(in Vector4 scaledVector)
-        {
-            var v = Vector4.Clamp(scaledVector, Vector4.Zero, Vector4.One);
-            v *= uint.MaxValue;
-
-            L = (uint)PackedVectorHelper.GetBT709Luminance(v.X, v.Y, v.Z);
-        }
-
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
-        {
-            scaledVector.Base.X = scaledVector.Base.Y = scaledVector.Base.Z =
-                (float)(L / (double)uint.MaxValue);
-
-            scaledVector.Base.W = 1;
+            float l = L / (float)uint.MaxValue;
+            return new Vector4(l, l, l, 1);
         }
 
         #endregion
@@ -112,33 +100,33 @@ namespace MonoGame.Framework.Vector
 
         #region Equals
 
-        public static bool operator ==(in Gray32 a, in Gray32 b)
-        {
-            return a.PackedValue == b.PackedValue;
-        }
-
-        public static bool operator !=(in Gray32 a, in Gray32 b)
-        {
-            return a.PackedValue != b.PackedValue;
-        }
-
-        public bool Equals(Gray32 other)
+        public readonly bool Equals(Gray32 other)
         {
             return this == other;
         }
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is Gray32 other && Equals(other);
+        }
+
+        public static bool operator ==(Gray32 a, Gray32 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
+
+        public static bool operator !=(Gray32 a, Gray32 b)
+        {
+            return a.PackedValue != b.PackedValue;
         }
 
         #endregion
 
         #region Object Overrides
 
-        public override string ToString() => nameof(Gray32) + $"({L})";
+        public override readonly string ToString() => nameof(Gray32) + $"({L})";
 
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

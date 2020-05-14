@@ -30,7 +30,7 @@ namespace MonoGame.Framework.Vector
 
         public Color Rgba
         {
-            readonly get => UnsafeUtils.As<Byte4, Color>(this);
+            readonly get => UnsafeR.As<Byte4, Color>(this);
             set => Unsafe.As<Byte4, Color>(ref this) = value;
         }
 
@@ -42,6 +42,7 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public Byte4(uint packed) : this()
         {
+            // TODO: Unsafe.SkipInit(out this)
             PackedValue = packed;
         }
 
@@ -56,22 +57,6 @@ namespace MonoGame.Framework.Vector
             W = w;
         }
 
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public Byte4(Vector4 vector) : this()
-        {
-            FromVector4(vector);
-        }
-
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        public Byte4(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
-        {
-        }
-
         #endregion
 
         #region IPackedVector
@@ -79,38 +64,33 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public uint PackedValue
         {
-            readonly get => UnsafeUtils.As<Byte4, uint>(this);
+            readonly get => UnsafeR.As<Byte4, uint>(this);
             set => Unsafe.As<Byte4, uint>(ref this) = value;
         }
 
-        public void FromVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            var v = Vector4.Clamp(vector, Vector4.Zero, Vector4.MaxValueByte);
-
-            X = (byte)v.X;
-            Y = (byte)v.Y;
-            Z = (byte)v.Z;
-            W = (byte)v.W;
+            FromVector4(scaledVector * byte.MaxValue);
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            vector.Base.X = X;
-            vector.Base.Y = Y;
-            vector.Base.Z = Z;
-            vector.Base.W = W;
+            return ToVector4() / byte.MaxValue;
         }
 
-        public void FromScaledVector4(in Vector4 scaledVector)
+        public void FromVector4(Vector4 vector)
         {
-            var v = scaledVector * byte.MaxValue;
-            FromVector4(v);
+            vector.Clamp(Vector4.Zero, Vector4.MaxValueByte);
+
+            X = (byte)vector.X;
+            Y = (byte)vector.Y;
+            Z = (byte)vector.Z;
+            W = (byte)vector.W;
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        public readonly Vector4 ToVector4()
         {
-            ToVector4(out scaledVector);
-            scaledVector /= byte.MaxValue;
+            return new Vector4(X, Y, Z, W);
         }
 
         #endregion
@@ -173,6 +153,16 @@ namespace MonoGame.Framework.Vector
 
         #region Equals
 
+        public readonly bool Equals(Byte4 other)
+        {
+            return this == other;
+        }
+
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Byte4 other && Equals(other);
+        }
+
         public static bool operator ==(in Byte4 a, in Byte4 b)
         {
             return a.PackedValue == b.PackedValue;
@@ -183,22 +173,12 @@ namespace MonoGame.Framework.Vector
             return a.PackedValue != b.PackedValue;
         }
 
-        public bool Equals(Byte4 other)
-        {
-            return this == other;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Byte4 other && Equals(other);
-        }
-
         #endregion
 
         /// <summary>
         /// Gets the hexadecimal <see cref="string"/> representation of this <see cref="Rgba"/>.
         /// </summary>
-        public string ToHex()
+        public readonly string ToHex()
         {
             uint hexOrder = (uint)(W << 0 | Z << 8 | Y << 16 | X << 24);
             return hexOrder.ToString("x8");
@@ -209,12 +189,12 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Returns a <see cref="string"/> representation of this packed vector.
         /// </summary>
-        public override string ToString() => nameof(Byte4) + $"({X}, {Y}, {Z}, {W})";
+        public override readonly string ToString() => nameof(Byte4) + $"({ToVector4()}";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

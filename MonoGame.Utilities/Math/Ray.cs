@@ -14,11 +14,15 @@ namespace MonoGame.Framework
     {
         [DataMember]
         public Vector3 Direction;
-      
+
         [DataMember]
         public Vector3 Position;
 
-        public Ray(in Vector3 position, in Vector3 direction)
+        internal string DebuggerDisplay => string.Concat(
+            "Pos(", Position.DebuggerDisplay, ") \n",
+            "Dir(", Direction.DebuggerDisplay, ")");
+
+        public Ray(Vector3 position, Vector3 direction)
         {
             Position = position;
             Direction = direction;
@@ -26,24 +30,14 @@ namespace MonoGame.Framework
 
         #region Public Methods
 
-        public override bool Equals(object obj)
-        {
-            return (obj is Ray other) ? Equals(other) : false;
-        }
-
         public bool Equals(Ray other)
         {
             return this == other;
         }
 
-        public override int GetHashCode()
+        public override bool Equals(object obj)
         {
-            unchecked
-            {
-                int code = Direction.GetHashCode();
-                code = code * 23 + Position.GetHashCode();
-                return code;
-            }
+            return obj is Ray other && Equals(other);
         }
 
         // adapted from
@@ -131,7 +125,7 @@ namespace MonoGame.Framework
             if (tMin < 0)
                 return false;
 
-            if(tMin.HasValue)
+            if (tMin.HasValue)
             {
                 distance = tMin.Value;
                 return true;
@@ -159,8 +153,8 @@ namespace MonoGame.Framework
             // the radius of the sphere, it means we've intersected. N.B. checking the LengthSquared is faster.
             if (differenceLengthSquared < sphereRadiusSquared)
                 return true;
-            
-        
+
+
             float distanceAlongRay = Vector3.Dot(Direction, difference);
             // If the ray is pointing away from the sphere then we don't ever intersect
             if (distanceAlongRay < 0)
@@ -209,15 +203,6 @@ namespace MonoGame.Framework
                 && a.Direction.Equals(b.Direction);
         }
 
-        internal string DebuggerDisplay => string.Concat(
-            "Pos(", Position.DebuggerDisplay, ") \n",
-            "Dir(", Direction.DebuggerDisplay, ")");
-
-        public override string ToString()
-        {
-            return "{Position:" + Position.ToString() + " Direction:" + Direction.ToString() + "}";
-        }
-
         /// <summary>
         /// Deconstruction method for <see cref="Ray"/>.
         /// </summary>
@@ -227,6 +212,16 @@ namespace MonoGame.Framework
         {
             position = Position;
             direction = Direction;
+        }
+
+        public override string ToString()
+        {
+            return "{Position:" + Position.ToString() + " Direction:" + Direction.ToString() + "}";
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Direction, Position);
         }
 
         #endregion

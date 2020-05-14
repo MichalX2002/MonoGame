@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework
 {
@@ -12,17 +11,10 @@ namespace MonoGame.Framework
         /// </summary>
         public static void PooledCopyTo(this Stream source, Stream destination)
         {
-            byte[] buffer = RecyclableMemoryManager.Default.GetBlock();
-            try
-            {
-                int read;
-                while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
-                    destination.Write(buffer, 0, read);
-            }
-            finally
-            {
-                RecyclableMemoryManager.Default.ReturnBlock(buffer);
-            }
+            Span<byte> buffer = stackalloc byte[2048];
+            int read;
+            while ((read = source.Read(buffer)) != 0)
+                destination.Write(buffer.Slice(0, read));
         }
 
         /// <summary>
@@ -38,19 +30,12 @@ namespace MonoGame.Framework
                 return;
             }
 
-            byte[] buffer = RecyclableMemoryManager.Default.GetBlock();
-            try
+            Span<byte> buffer = stackalloc byte[2048];
+            int read;
+            while ((read = source.Read(buffer)) != 0)
             {
-                int read;
-                while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
-                {
-                    destination.Write(buffer, 0, read);
-                    onWrite.Invoke(read);
-                }
-            }
-            finally
-            {
-                RecyclableMemoryManager.Default.ReturnBlock(buffer);
+                destination.Write(buffer.Slice(0, read));
+                onWrite.Invoke(read);
             }
         }
     }

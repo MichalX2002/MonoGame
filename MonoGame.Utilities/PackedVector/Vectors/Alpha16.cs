@@ -57,6 +57,7 @@ namespace MonoGame.Framework.Vector
             alpha *= ushort.MaxValue;
             alpha += 0.5f;
             alpha = MathHelper.Clamp(alpha, 0, ushort.MaxValue);
+
             return (ushort)alpha;
         }
 
@@ -65,25 +66,14 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public ushort PackedValue { readonly get => A; set => A = value; }
 
-        public void FromVector4(in Vector4 vector)
-        {
-            FromScaledVector4(vector);
-        }
-
-        public readonly void ToVector4(out Vector4 vector)
-        {
-            ToScaledVector4(out vector);
-        }
-
-        public void FromScaledVector4(in Vector4 scaledVector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
             A = Pack(scaledVector.W);
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        public readonly Vector4 ToScaledVector4()
         {
-            scaledVector.Base.X = scaledVector.Base.Y = scaledVector.Base.Z = 1;
-            scaledVector.Base.W = ToAlpha();
+            return new Vector4(1, 1, 1, ToAlpha());
         }
 
         #endregion
@@ -135,6 +125,16 @@ namespace MonoGame.Framework.Vector
 
         #region Equals
 
+        public readonly bool Equals(Alpha16 other)
+        {
+            return this == other;
+        }
+
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Alpha16 other && Equals(other);
+        }
+
         public static bool operator ==(Alpha16 a, Alpha16 b)
         {
             return a.PackedValue == b.PackedValue;
@@ -145,16 +145,6 @@ namespace MonoGame.Framework.Vector
             return a.PackedValue != b.PackedValue;
         }
 
-        public bool Equals(Alpha16 other)
-        {
-            return this == other;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Alpha16 other && Equals(other);
-        }
-
         #endregion
 
         #region Object Overrides
@@ -162,12 +152,12 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(Alpha16) + $"({A})";
+        public override readonly string ToString() => nameof(Alpha16) + $"({A})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => A;
+        public override readonly int GetHashCode() => A;
 
         #endregion
     }

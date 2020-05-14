@@ -17,6 +17,8 @@ namespace MonoGame.Framework.Vector
     [StructLayout(LayoutKind.Sequential)]
     public struct NormalizedShort4 : IPackedPixel<NormalizedShort4, ulong>
     {
+        internal static Vector4 Offset => new Vector4(-short.MinValue);
+
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Red),
             new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Green),
@@ -44,15 +46,6 @@ namespace MonoGame.Framework.Vector
             PackedValue = packed;
         }
 
-        public NormalizedShort4(in Vector4 vector) : this()
-        {
-            FromVector4(vector);
-        }
-
-        public NormalizedShort4(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
-        {
-        }
-
         #endregion
 
         #region IPackedVector
@@ -60,129 +53,84 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public ulong PackedValue
         {
-            readonly get => UnsafeUtils.As<NormalizedShort4, ulong>(this);
+            readonly get => UnsafeR.As<NormalizedShort4, ulong>(this);
             set => Unsafe.As<NormalizedShort4, ulong>(ref this) = value;
         }
 
-        public void FromVector4(in Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            var v = Vector4.Clamp(vector, Vector4.NegativeOne, Vector4.One);
-            v *= short.MaxValue;
+            var scaled = new Vector4(X, Y, Z, W);
+            scaled += Offset;
+            scaled /= ushort.MaxValue;
 
-            X = (short)v.X;
-            Y = (short)v.Y;
-            Z = (short)v.Z;
-            W = (short)v.W;
+            return scaled;
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            vector.Base.X = X;
-            vector.Base.Y = Y;
-            vector.Base.Z = Z;
-            vector.Base.W = W;
-            vector /= short.MaxValue;
+            scaledVector.Clamp(Vector4.Zero, Vector4.One);
+            scaledVector *= ushort.MaxValue;
+            scaledVector -= Offset;
+
+            X = (short)scaledVector.X;
+            Y = (short)scaledVector.Y;
+            Z = (short)scaledVector.Z;
+            W = (short)scaledVector.W;
         }
 
-        public void FromScaledVector4(in Vector4 scaledVector)
+        public readonly Vector4 ToVector4()
         {
-            var v = scaledVector * 2;
-            v -= Vector4.One;
-            FromVector4(v);
+            var vector = new Vector4(X, Y, Z, W);
+            vector += Offset;
+            vector *= 2f / ushort.MaxValue;
+            vector -= Vector4.One;
+
+            return vector;
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        public void FromVector4(Vector4 vector)
         {
-            ToVector4(out scaledVector);
-            scaledVector += Vector4.One;
-            scaledVector /= 2;
-        }
+            vector.Clamp(Vector4.NegativeOne, Vector4.One);
+            vector *= ushort.MaxValue / 2f;
+            vector -= Vector4.Half;
 
-        #endregion
-
-        #region IPixel
-
-        public void FromGray8(Gray8 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGray16(Gray16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGrayAlpha16(GrayAlpha16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb24(Rgb24 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb48(Rgb48 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgba64(Rgba64 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromColor(Color source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public readonly void ToColor(out Color destination)
-        {
-            destination = default; // TODO: Unsafe.SkipInit
-
-            ToScaledVector4(out var vector);
-            destination.FromScaledVector4(vector);
+            X = (short)vector.X;
+            Y = (short)vector.Y;
+            Z = (short)vector.Z;
+            W = (short)vector.W;
         }
 
         #endregion
 
         #region Equals
 
-        public static bool operator ==(NormalizedShort4 a, NormalizedShort4 b)
-        {
-            return a.PackedValue == b.PackedValue;
-        }
-
-        public static bool operator !=(NormalizedShort4 a, NormalizedShort4 b)
-        {
-            return a.PackedValue != b.PackedValue;
-        }
-
-        public bool Equals(NormalizedShort4 other)
+        public readonly bool Equals(NormalizedShort4 other)
         {
             return this == other;
         }
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is NormalizedShort4 other && Equals(other);
+        }
+
+        public static bool operator ==(in NormalizedShort4 a, in NormalizedShort4 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
+
+        public static bool operator !=(in NormalizedShort4 a, in NormalizedShort4 b)
+        {
+            return a.PackedValue != b.PackedValue;
         }
 
         #endregion
 
         #region Object Overrides
 
-        public override string ToString() => nameof(NormalizedShort4) + $"({X}, {Y}, {Z}, {W})";
+        public override readonly string ToString() => nameof(NormalizedShort4) + $"({X}, {Y}, {Z}, {W})";
 
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

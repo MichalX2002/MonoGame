@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MonoGame.Framework;
 using MonoGame.Framework.Graphics;
+using MonoGame.Framework.Input;
 using MonoGame.Imaging;
 using MonoGame.Imaging.Codecs.Decoding;
 
@@ -59,14 +60,16 @@ namespace MonoGame.Testing
                     Thread.Sleep(500);
 
                     var ww = new Stopwatch();
-
+                        
                     var http = new HttpClient();
 
-                    for (int i = 0; i < 20; i++)
+                    for (int i = 0; i < 2; i++)
                     {
                         using (var fs = new FileStream(
-                            @"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg", //"../../very big interlace.png",
-                            FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 64,
+                            //@"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg",
+                            //"../../very big interlace.png",
+                            "../../very_big_interlace pog.jpg",
+                            FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 4,
                             FileOptions.Asynchronous))
                         //using(var fs = await http.GetStreamAsync(
                         //    "https://upload.wikimedia.org/wikipedia/commons/3/3d/LARGE_elevation.jpg"))
@@ -109,6 +112,11 @@ namespace MonoGame.Testing
 
         protected override void Update(GameTime gameTime)
         {
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+            {
+                Exit();
+                return;
+            }
 
             base.Update(gameTime);
         }
@@ -151,32 +159,35 @@ namespace MonoGame.Testing
             if (tex != null)
             {
                 float rot = 0; // -MathF.PI / 2;
-                float scale = 1 / 6f; // 5.5f
+                float scale = 1 / 2f; // 5.5f
                 var pos = new Vector2(0, 0); // tex.Width * scale);
 
                 _spriteBatch.Draw(
                     tex, pos, null, Color.White, rot, Vector2.Zero, scale, SpriteEffects.None, 0);
             }
 
-            long totalMem = Environment.WorkingSet;
-            long gcMem = GC.GetTotalMemory(false);
-            double totalMb = totalMem / (1024 * 1024.0);
-            double gcMb = gcMem / (1024 * 1024.0);
+            if (true)
+            {
+                long totalMem = Environment.WorkingSet;
+                long gcMem = GC.GetTotalMemory(false);
+                double totalMb = totalMem / (1024 * 1024.0);
+                double gcMb = gcMem / (1024 * 1024.0);
 
-            int gc0 = GC.CollectionCount(0);
-            int gc1 = GC.CollectionCount(1);
-            int gc2 = GC.CollectionCount(2);
+                int gc0 = GC.CollectionCount(0);
+                int gc1 = GC.CollectionCount(1);
+                int gc2 = GC.CollectionCount(2);
 
-            int totalMbDecimals = (int)Math.Max(0, 4 - Math.Log10(totalMb));
-            int gcMbDecimals = (int)Math.Max(0, 4 - Math.Log10(gcMb));
-            var str =
-                $"Memory: {Math.Round(totalMb, totalMbDecimals).ToString("0." + new string('0', totalMbDecimals))}M \n" +
-                $"GC Heap: {Math.Round(gcMb, gcMbDecimals).ToString("0." + new string('0', gcMbDecimals))}M \n" +
-                $"GC Counts: 0>{gc0} 1>{gc1} 2>{gc2}";
+                int totalMbDecimals = (int)Math.Max(0, 4 - Math.Log10(totalMb));
+                int gcMbDecimals = (int)Math.Max(0, 4 - Math.Log10(gcMb));
+                var str =
+                    $"Memory: {Math.Round(totalMb, totalMbDecimals).ToString("0." + new string('0', totalMbDecimals))}M \n" +
+                    $"GC Heap: {Math.Round(gcMb, gcMbDecimals).ToString("0." + new string('0', gcMbDecimals))}M \n" +
+                    $"GC Counts: 0>{gc0} 1>{gc1} 2>{gc2}";
 
-            _spriteBatch.DrawString(_font, str, new Vector2(-1, -1), Color.White);
-            _spriteBatch.DrawString(_font, str, new Vector2(1, 1), Color.Black);
-            _spriteBatch.DrawString(_font, str, new Vector2(0, 0), Color.Cyan);
+                _spriteBatch.DrawString(_font, str, new Vector2(-1, -1), Color.White);
+                _spriteBatch.DrawString(_font, str, new Vector2(1, 1), Color.Black);
+                _spriteBatch.DrawString(_font, str, new Vector2(0, 0), Color.Cyan);
+            }
 
             _spriteBatch.End();
 

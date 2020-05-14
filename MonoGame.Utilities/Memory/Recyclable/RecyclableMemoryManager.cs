@@ -25,21 +25,20 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading;
 
 namespace MonoGame.Framework.Memory
 {
     /// <summary>
-    /// Manages pools of small and large byte arrays.
+    /// Manages pools of small block arrays and large buffer arrays.
     /// </summary>
     /// <remarks>
-    /// There are two pools managed in here. The small pool contains same-sized
+    /// There are two pools managed in here. The small block pool contains same-sized
     /// buffers that are handed to streams as they write more data.
     /// 
-    /// For scenarios that need to call GetBuffer(), 
-    /// the large pool contains buffers of various sizes,
-    /// all multiples/exponentials of LargeBufferMultiple (1 MB by default). 
+    /// For scenarios that need to call <see cref="GetBuffer"/>, 
+    /// the large buffer pool contains buffers of various sizes,
+    /// all multiples/exponentials of <see cref="BufferMultiple"/> (<see cref="DefaultBufferMultiple"/> MB by default). 
     /// They are split by size to avoid overly-wasteful buffer usage. 
     /// There should be far fewer 8 MB buffers than 1 MB buffers, for example.
     /// </remarks>
@@ -51,14 +50,14 @@ namespace MonoGame.Framework.Memory
             EnoughFree
         }
 
-        #region Delegates
+        #region Delegate Definitions
 
         /// <summary>
-        /// Delegate for handling large buffer discard reports.
+        /// Delegate for handling buffer discard reports.
         /// </summary>
         /// <param name="tag">The tag associated with the event.</param>
         /// <param name="reason">Reason the buffer was discarded.</param>
-        public delegate void LargeBufferDiscardedEventHandler(string tag, MemoryDiscardReason reason);
+        public delegate void BufferDiscardedEventHandler(string tag, MemoryDiscardReason reason);
 
         /// <summary>
         /// Delegate for handling reports of stream size when streams are allocated
@@ -83,51 +82,57 @@ namespace MonoGame.Framework.Memory
         /// <summary>
         /// Delegate for handling periodic reporting of memory use statistics.
         /// </summary>
-        /// <param name="smallPoolInUseBytes">Bytes currently in use in the small pool.</param>
-        /// <param name="smallPoolFreeBytes">Bytes currently free in the small pool.</param>
-        /// <param name="largePoolInUseBytes">Bytes currently in use in the large pool.</param>
-        /// <param name="largePoolFreeBytes">Bytes currently free in the large pool.</param>
+        /// <param name="blockPoolInUseBytes">Bytes currently in use in the block pool.</param>
+        /// <param name="blockPoolFreeBytes">Bytes currently free in the block pool.</param>
+        /// <param name="bufferPoolInUseBytes">Bytes currently in use in the buffer pool.</param>
+        /// <param name="bufferPoolFreeBytes">Bytes currently free in the buffer pool.</param>
         public delegate void UsageReportEventHandler(
-            long smallPoolInUseBytes, long smallPoolFreeBytes, long largePoolInUseBytes, long largePoolFreeBytes);
+            long blockPoolInUseBytes, long blockPoolFreeBytes, long bufferPoolInUseBytes, long bufferPoolFreeBytes);
 
         #endregion
 
-        public const int DefaultBlockSize = 80 * 1024;
-        public const int DefaultLargeBufferMultiple = 1024 * 1024;
+        public const int DefaultBlockSize = 64 * 1024;
+        public const int DefaultBufferMultiple = 1024;
         public const int DefaultMaximumBufferSize = 16 * 1024 * 1024;
+        public const bool DefaultUseExponentialBuffer = true;
 
-        private static object _instanceInitMutex = new object();
-        private static RecyclableMemoryManager _instance;
+        private static object DefaultInitMutex { get; } = new object();
+        private static RecyclableMemoryManager _defaultInstance;
 
         public static RecyclableMemoryManager Default
         {
             get
             {
-                lock (_instanceInitMutex)
+                if (_defaultInstance == null)
                 {
-                    if (_instance == null)
-                        _instance = new RecyclableMemoryManager();
-                    return _instance;
+                    lock (DefaultInitMutex)
+                    {
+                        if (_defaultInstance != null)
+                            return _defaultInstance;
+                        _defaultInstance = new RecyclableMemoryManager();
+                    }
                 }
+                return _defaultInstance;
             }
         }
 
         #region Instance Fields
 
-        private readonly long[] _largeBufferFreeSize;
-        private readonly long[] _largeBufferInUseSize;
+        private readonly long[] _bufferFreeSize;
+        private readonly long[] _bufferInUseSize;
 
         /// <summary>
-        /// pools[0] = 1x largeBufferMultiple buffers
-        /// pools[1] = 2x largeBufferMultiple buffers
-        /// pools[2] = 3x(multiple)/4x(exponential) largeBufferMultiple buffers
+        /// pools[0] = 1x BufferMultiple buffers
+        /// pools[1] = 2x BufferMultiple buffers
+        /// pools[2] = 3x(multiple)/4x(exponential) BufferMultiple buffers
+        /// pools[3] = 4x(multiple)/8x(exponential) BufferMultiple buffers
         /// etc., up to maximumBufferSize
         /// </summary>
-        private readonly ConcurrentStack<byte[]>[] _largePools;
-        private readonly ConcurrentStack<byte[]> _smallPool;
+        private readonly ConcurrentStack<byte[]>[] _bufferPools;
+        private readonly ConcurrentStack<byte[]> _blockPool;
 
-        private long _smallPoolFreeSize;
-        private long _smallPoolInUseSize;
+        private long _blockPoolFreeSize;
+        private long _blockPoolInUseSize;
 
         #endregion
 
@@ -141,98 +146,95 @@ namespace MonoGame.Framework.Memory
         /// <summary>
         /// All buffers are multiples/exponentials of this number. It must be set at creation and cannot be changed.
         /// </summary>
-        public int LargeBufferMultiple { get; }
+        public int BufferMultiple { get; }
 
         /// <summary>
-        /// Use multiple large buffer allocation strategy. It must be set at creation and cannot be changed.
+        /// Use exponential allocation strategy for buffers. It must be set at creation and cannot be changed.
         /// </summary>
-        public bool UseMultipleLargeBuffer => !UseExponentialLargeBuffer;
+        public bool UseExponentialBuffer { get; }
 
         /// <summary>
-        /// Use exponential large buffer allocation strategy. It must be set at creation and cannot be changed.
+        /// Use multiple allocation strategy for buffers. It must be set at creation and cannot be changed.
         /// </summary>
-        public bool UseExponentialLargeBuffer { get; }
+        public bool UseMultipleBuffer => !UseExponentialBuffer;
 
         /// <summary>
-        /// Gets the maximum buffer size of large buffers.
+        /// Gets the maximum buffer size of buffers.
         /// </summary>
         /// <remarks>
         /// Any buffer that is returned to the pool that is larger than this will be ignored.
         /// </remarks>
-        public int MaximumLargeBufferSize { get; }
+        public int MaximumBufferSize { get; }
 
         /// <summary>
-        /// Number of bytes in small pool not currently in use
+        /// Number of bytes in block pool not currently in use
         /// </summary>
-        public long SmallPoolFreeSize => _smallPoolFreeSize;
+        public long BlockPoolFreeSize => _blockPoolFreeSize;
 
         /// <summary>
-        /// Number of bytes currently in use by stream from the small pool
+        /// Number of bytes currently in use by stream from the block pool.
         /// </summary>
-        public long SmallPoolInUseSize => _smallPoolInUseSize;
+        public long BlockPoolInUseSize => _blockPoolInUseSize;
 
         /// <summary>
-        /// Number of bytes in large pool not currently in use
+        /// Number of bytes in buffer pool not currently in use.
         /// </summary>
-        public long LargePoolFreeSize
+        public long BufferPoolFreeSize
         {
             get
             {
                 long sum = 0;
-                foreach (var item in _largeBufferFreeSize)
+                foreach (var item in _bufferFreeSize)
                     sum += item;
                 return sum;
             }
         }
 
         /// <summary>
-        /// Number of bytes currently in use by streams from the large pool
+        /// Number of bytes currently in use by streams from the buffer pool.
         /// </summary>
-        public long LargePoolInUseSize
+        public long BufferPoolInUseSize
         {
             get
             {
                 long sum = 0;
-                foreach (var item in _largeBufferInUseSize)
+                foreach (var item in _bufferInUseSize)
                     sum += item;
                 return sum;
             }
         }
 
         /// <summary>
-        /// How many blocks are in the small pool
+        /// How many blocks are in the block pool.
         /// </summary>
-        public long SmallBlocksFree => _smallPool.Count;
+        public long BlocksFree => _blockPool.Count;
 
         /// <summary>
-        /// How many buffers are in the large pool
+        /// How many buffers are in the buffer pool.
         /// </summary>
-        public long LargeBuffersFree
+        public long BuffersFree
         {
             get
             {
                 long free = 0;
-                foreach (var pool in _largePools)
+                foreach (var pool in _bufferPools)
                     free += pool.Count;
                 return free;
             }
         }
 
         /// <summary>
-        /// How many bytes of small free blocks to allow before we start dropping
-        /// those returned to us.
+        /// How many bytes of free blocks to allow before we start dropping those returned to us.
         /// </summary>
-        public long MaximumFreeSmallPoolBytes { get; set; }
+        public long MaximumFreeBlockPoolBytes { get; set; }
 
         /// <summary>
-        /// How many bytes of large free buffers to allow before we start dropping
-        /// those returned to us.
+        /// How many bytes of free buffers to allow before we start dropping those returned to us.
         /// </summary>
-        public long MaximumFreeLargePoolBytes { get; set; }
+        public long MaximumFreeBufferPoolBytes { get; set; }
 
         /// <summary>
-        /// Maximum stream capacity in bytes. Attempts to set a larger capacity will
-        /// result in an exception.
+        /// Maximum stream capacity in bytes. Attempts to set a larger capacity will result in an exception.
         /// </summary>
         /// <remarks>A value of 0 indicates no limit.</remarks>
         public long MaximumStreamCapacity { get; set; }
@@ -244,21 +246,21 @@ namespace MonoGame.Framework.Memory
         public bool GenerateCallStacks { get; set; }
 
         /// <summary>
-        /// Whether dirty buffers can be immediately returned to the buffer pool when GetBuffer() is called on
+        /// Whether dirty buffers can be immediately returned to the buffer pool when <see cref="GetBuffer"/> is called on
         /// a stream and creates a single large buffer, if this setting is enabled, the other blocks will be
         /// returned to the buffer pool immediately.
         /// </summary>
         public bool AggresiveBlockReturn { get; set; }
 
         /// <summary>
-        /// Whether dirty buffers can be immediately returned to the buffer pool. E.g. when GetBuffer() is called on
+        /// Whether dirty buffers can be immediately returned to the buffer pool. E.g. when <see cref="GetBuffer"/> is called on
         /// a stream and creates a single large buffer, if this setting is enabled, the other blocks will be returned
         /// to the buffer pool immediately.
         /// Note when enabling this setting that the user is responsible for ensuring that any buffer previously
         /// retrieved from a stream which is subsequently modified is not used after modification (as it may no longer
         /// be valid).
         /// </summary>
-        public bool AggressiveLargeBufferReturn { get; set; }
+        public bool AggressiveBufferReturn { get; set; }
 
         #endregion
 
@@ -275,9 +277,9 @@ namespace MonoGame.Framework.Memory
         public event TaggedActionHandler BlockDiscarded;
 
         /// <summary>
-        /// Triggered when a new large buffer is created.
+        /// Triggered when a new buffer is created.
         /// </summary>
-        public event ImportantActionHandler LargeBufferCreated;
+        public event ImportantActionHandler BufferCreated;
 
         /// <summary>
         /// Triggered when a new stream is created.
@@ -305,9 +307,9 @@ namespace MonoGame.Framework.Memory
         public event StreamLengthReportHandler StreamLength;
 
         /// <summary>
-        /// Triggered when a large buffer is discarded, along with the reason for the discard.
+        /// Triggered when a buffer is discarded, along with the reason for the discard.
         /// </summary>
-        public event LargeBufferDiscardedEventHandler LargeBufferDiscarded;
+        public event BufferDiscardedEventHandler BufferDiscarded;
 
         /// <summary>
         /// Periodically triggered to report usage statistics.
@@ -321,70 +323,76 @@ namespace MonoGame.Framework.Memory
         /// <summary>
         /// Initializes the memory manager with the default block/buffer specifications.
         /// </summary>
-        public RecyclableMemoryManager()
-            : this(DefaultBlockSize, DefaultLargeBufferMultiple, DefaultMaximumBufferSize, false)
+        public RecyclableMemoryManager() : this(
+            DefaultBlockSize, DefaultBufferMultiple, DefaultMaximumBufferSize, DefaultUseExponentialBuffer)
         {
         }
 
         /// <summary>
-        /// Initializes the memory manager with the given block requiredSize.
+        /// Initializes the memory manager with the given block size.
         /// </summary>
         /// <param name="blockSize">Size of each block that is pooled. Must be > 0.</param>
-        /// <param name="largeBufferMultiple">Each large buffer will be a multiple of this value.</param>
+        /// <param name="bufferMultiple">Each buffer will be a multiple of this value.</param>
         /// <param name="maximumBufferSize">Buffers larger than this are not pooled</param>
-        /// <exception cref="ArgumentOutOfRangeException">blockSize is not a positive number, or largeBufferMultiple is not a positive number, or maximumBufferSize is less than blockSize.</exception>
-        /// <exception cref="ArgumentException">maximumBufferSize is not a multiple of largeBufferMultiple</exception>
-        public RecyclableMemoryManager(int blockSize, int largeBufferMultiple, int maximumBufferSize)
-            : this(blockSize, largeBufferMultiple, maximumBufferSize, false)
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// blockSize is not a positive number, or bufferMultiple is not a positive number,
+        /// or maximumBufferSize is less than blockSize.
+        /// </exception>
+        /// <exception cref="ArgumentException">maximumBufferSize is not a multiple of bufferMultiple</exception>
+        public RecyclableMemoryManager(int blockSize, int bufferMultiple, int maximumBufferSize)
+            : this(blockSize, bufferMultiple, maximumBufferSize, DefaultUseExponentialBuffer)
         {
         }
 
         /// <summary>
-        /// Initializes the memory manager with the given block requiredSize.
+        /// Initializes the memory manager with the given block size.
         /// </summary>
         /// <param name="blockSize">Size of each block that is pooled. Must be > 0.</param>
-        /// <param name="largeBufferMultiple">Each large buffer will be a multiple/exponential of this value.</param>
+        /// <param name="bufferMultiple">Each buffer will be a multiple/exponential of this value.</param>
         /// <param name="maximumBufferSize">Buffers larger than this are not pooled</param>
-        /// <param name="useExponentialLargeBuffer">Switch to exponential large buffer allocation strategy</param>
-        /// <exception cref="ArgumentOutOfRangeException">blockSize is not a positive number, or largeBufferMultiple is not a positive number, or maximumBufferSize is less than blockSize.</exception>
-        /// <exception cref="ArgumentException">maximumBufferSize is not a multiple/exponential of largeBufferMultiple</exception>
-        public RecyclableMemoryManager(int blockSize, int largeBufferMultiple, int maximumBufferSize, bool useExponentialLargeBuffer)
+        /// <param name="useExponentialBuffer">Switch to exponential buffer allocation strategy</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// blockSize is not a positive number, or bufferMultiple is not a positive number,
+        /// or maximumBufferSize is less than blockSize.
+        /// </exception>
+        /// <exception cref="ArgumentException">maximumBufferSize is not a multiple/exponential of bufferMultiple</exception>
+        public RecyclableMemoryManager(int blockSize, int bufferMultiple, int maximumBufferSize, bool useExponentialBuffer)
         {
             if (blockSize <= 0)
                 throw new ArgumentOutOfRangeException(
-                    nameof(blockSize), blockSize, "blockSize must be a positive number");
+                    nameof(blockSize), blockSize, "Must be a positive number");
 
-            if (largeBufferMultiple <= 0)
+            if (bufferMultiple <= 0)
                 throw new ArgumentOutOfRangeException(
-                    nameof(largeBufferMultiple), "largeBufferMultiple must be a positive number");
+                    nameof(bufferMultiple), "Must be a positive number");
 
             if (maximumBufferSize < blockSize)
                 throw new ArgumentOutOfRangeException(
-                    nameof(maximumBufferSize), "maximumBufferSize must be at least blockSize");
+                    nameof(maximumBufferSize), "Must be at least blockSize.");
 
             BlockSize = blockSize;
-            LargeBufferMultiple = largeBufferMultiple;
-            MaximumLargeBufferSize = maximumBufferSize;
-            UseExponentialLargeBuffer = useExponentialLargeBuffer;
+            BufferMultiple = bufferMultiple;
+            MaximumBufferSize = maximumBufferSize;
+            UseExponentialBuffer = useExponentialBuffer;
             AggresiveBlockReturn = true;
 
-            if (!IsLargeBufferSize(maximumBufferSize))
+            if (!IsBufferSize(maximumBufferSize))
                 throw new ArgumentException(
-                    string.Format("maximumBufferSize is not {0} of largeBufferMultiple",
-                    UseExponentialLargeBuffer ? "an exponential" : "a multiple"), nameof(maximumBufferSize));
+                    string.Format("maximumBufferSize is not {0} of bufferMultiple",
+                    UseExponentialBuffer ? "an exponential" : "a multiple"), nameof(maximumBufferSize));
 
-            _smallPool = new ConcurrentStack<byte[]>();
-            int numLargePools = useExponentialLargeBuffer
-                ? ((int)Math.Log(maximumBufferSize / largeBufferMultiple, 2) + 1)
-                : (maximumBufferSize / largeBufferMultiple);
+            _blockPool = new ConcurrentStack<byte[]>();
+            int bufferPoolCount = useExponentialBuffer
+                ? ((int)Math.Log(maximumBufferSize / bufferMultiple, 2) + 1)
+                : (maximumBufferSize / bufferMultiple);
 
             // +1 to store size of bytes in use that are too large to be pooled
-            _largeBufferInUseSize = new long[numLargePools + 1];
-            _largeBufferFreeSize = new long[numLargePools];
+            _bufferInUseSize = new long[bufferPoolCount + 1];
+            _bufferFreeSize = new long[bufferPoolCount];
 
-            _largePools = new ConcurrentStack<byte[]>[numLargePools];
-            for (var i = 0; i < _largePools.Length; ++i)
-                _largePools[i] = new ConcurrentStack<byte[]>();
+            _bufferPools = new ConcurrentStack<byte[]>[bufferPoolCount];
+            for (int i = 0; i < _bufferPools.Length; ++i)
+                _bufferPools[i] = new ConcurrentStack<byte[]>();
         }
 
         #endregion
@@ -397,7 +405,7 @@ namespace MonoGame.Framework.Memory
         /// <returns>A byte[] array</returns>
         public byte[] GetBlock()
         {
-            if (!_smallPool.TryPop(out byte[] block))
+            if (!_blockPool.TryPop(out byte[] block))
             {
                 // We'll add this back to the pool when the stream is disposed
                 // (unless our free pool is too large)
@@ -405,34 +413,34 @@ namespace MonoGame.Framework.Memory
                 ReportBlockCreated();
             }
             else
-                Interlocked.Add(ref _smallPoolFreeSize, -BlockSize);
+                Interlocked.Add(ref _blockPoolFreeSize, -BlockSize);
 
-            Interlocked.Add(ref _smallPoolInUseSize, BlockSize);
+            Interlocked.Add(ref _blockPoolInUseSize, BlockSize);
             return block;
         }
 
         /// <summary>
-        /// Returns a buffer of arbitrary size from the large buffer pool. This buffer
-        /// will be at least the requiredSize and always be a multiple/exponential of largeBufferMultiple.
+        /// Returns a buffer of arbitrary size from the buffer pool. This buffer
+        /// will be at least the minimumSize and always be a multiple/exponential of <see cref="BufferMultiple"/>.
         /// </summary>
-        /// <param name="requiredSize">The minimum length of the buffer</param>
+        /// <param name="minimumLength">The minimum length of the buffer</param>
         /// <param name="tag">The tag of the stream returning this buffer, for logging if necessary.</param>
-        /// <returns>A buffer of at least the required size.</returns>
-        public byte[] GetLargeBuffer(long requiredSize, string tag)
+        /// <returns>A buffer of at least the minimum size.</returns>
+        public RecyclableBuffer GetBuffer(long minimumLength, string tag)
         {
-            requiredSize = RoundToLargeBufferSize(requiredSize);
-            int poolIndex = GetPoolIndex(requiredSize);
+            int roundedLength = RoundToBufferSize(minimumLength);
+            int poolIndex = GetPoolIndex(roundedLength);
 
             byte[] buffer;
-            if (poolIndex < _largePools.Length)
+            if (poolIndex < _bufferPools.Length)
             {
-                if (!_largePools[poolIndex].TryPop(out buffer))
+                if (!_bufferPools[poolIndex].TryPop(out buffer))
                 {
-                    buffer = new byte[requiredSize];
-                    ReportLargeBufferCreated(tag);
+                    buffer = new byte[roundedLength];
+                    ReportBufferCreated(tag);
                 }
                 else
-                    Interlocked.Add(ref _largeBufferFreeSize[poolIndex], -buffer.Length);
+                    Interlocked.Add(ref _bufferFreeSize[poolIndex], -buffer.Length);
             }
             else
             {
@@ -440,59 +448,60 @@ namespace MonoGame.Framework.Memory
 
                 // We still want to track the size, though, and we've reserved a slot
                 // in the end of the inuse array for nonpooled bytes in use.
-                poolIndex = _largeBufferInUseSize.Length - 1;
+                poolIndex = _bufferInUseSize.Length - 1;
 
                 // We still want to round up to reduce heap fragmentation.
-                buffer = new byte[requiredSize];
-                ReportLargeBufferCreated(tag);
+                buffer = new byte[roundedLength];
+                ReportBufferCreated(tag);
             }
 
-            Interlocked.Add(ref _largeBufferInUseSize[poolIndex], buffer.Length);
-            return buffer;
+            Interlocked.Add(ref _bufferInUseSize[poolIndex], buffer.Length);
+            return new RecyclableBuffer(this, buffer, (int)minimumLength, tag);
         }
 
         /// <summary>
-        /// Returns the buffer to the large pool
+        /// Returns the buffer to the large buffer pool.
         /// </summary>
         /// <param name="buffer">The buffer to return.</param>
         /// <param name="tag">The tag of the stream returning this buffer, for logging if necessary.</param>
         /// <exception cref="ArgumentNullException">buffer is null</exception>
         /// <exception cref="ArgumentException">
-        /// buffer.Length is not a multiple/exponential of LargeBufferMultiple (it did not originate from this pool)
+        /// buffer.Length is not a multiple/exponential of <see cref="BufferMultiple"/> 
+        /// (it did not originate from this pool).
         /// </exception>
-        public void ReturnLargeBuffer(byte[] buffer, string tag)
+        public void ReturnBuffer(byte[] buffer, string tag = null)
         {
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
 
-            if (buffer.Length > MaximumLargeBufferSize)
+            if (buffer.Length > MaximumBufferSize)
                 return;
 
-            if (!IsLargeBufferSize(buffer.Length))
+            if (!IsBufferSize(buffer.Length))
                 throw new ArgumentException(string.Format("The size is not {0} of {1}.",
-                    UseExponentialLargeBuffer ? "an exponential" : "a multiple", LargeBufferMultiple));
+                    UseExponentialBuffer ? "an exponential" : "a multiple", BufferMultiple));
 
             int poolIndex = GetPoolIndex(buffer.Length);
-            if (poolIndex < _largePools.Length)
+            if (poolIndex < _bufferPools.Length)
             {
-                if ((_largePools[poolIndex].Count + 1) * buffer.Length <= MaximumFreeLargePoolBytes ||
-                    MaximumFreeLargePoolBytes == 0)
+                if ((_bufferPools[poolIndex].Count + 1) * buffer.Length <= MaximumFreeBufferPoolBytes ||
+                    MaximumFreeBufferPoolBytes == 0)
                 {
-                    _largePools[poolIndex].Push(buffer);
-                    Interlocked.Add(ref _largeBufferFreeSize[poolIndex], buffer.Length);
+                    _bufferPools[poolIndex].Push(buffer);
+                    Interlocked.Add(ref _bufferFreeSize[poolIndex], buffer.Length);
                 }
-                ReportLargeBufferDiscarded(tag, MemoryDiscardReason.EnoughFree);
+                ReportBufferDiscarded(tag, MemoryDiscardReason.EnoughFree);
             }
             else
             {
                 // This is a non-poolable buffer, but we still want to track its size for inuse
                 // analysis. We have space in the inuse array for this.
-                poolIndex = _largeBufferInUseSize.Length - 1;
-                ReportLargeBufferDiscarded(tag, MemoryDiscardReason.TooLarge);
+                poolIndex = _bufferInUseSize.Length - 1;
+                ReportBufferDiscarded(tag, MemoryDiscardReason.TooLarge);
             }
 
-            Interlocked.Add(ref _largeBufferInUseSize[poolIndex], -buffer.Length);
-            ReportUsageReport(_smallPoolInUseSize, _smallPoolFreeSize, LargePoolInUseSize, LargePoolFreeSize);
+            Interlocked.Add(ref _bufferInUseSize[poolIndex], -buffer.Length);
+            ReportUsageReport(_blockPoolInUseSize, _blockPoolFreeSize, BufferPoolInUseSize, BufferPoolFreeSize);
         }
 
         /// <summary>
@@ -515,10 +524,10 @@ namespace MonoGame.Framework.Memory
 
             bool PushBlock(byte[] block)
             {
-                if (MaximumFreeSmallPoolBytes == 0 || SmallPoolFreeSize < MaximumFreeSmallPoolBytes)
+                if (MaximumFreeBlockPoolBytes == 0 || BlockPoolFreeSize < MaximumFreeBlockPoolBytes)
                 {
-                    Interlocked.Add(ref _smallPoolFreeSize, BlockSize);
-                    _smallPool.Push(block);
+                    Interlocked.Add(ref _blockPoolFreeSize, BlockSize);
+                    _blockPool.Push(block);
                     return true;
                 }
                 ReportBlockDiscarded(tag);
@@ -526,13 +535,14 @@ namespace MonoGame.Framework.Memory
             }
 
             int bytesToReturn = blocks.Count * BlockSize;
-            Interlocked.Add(ref _smallPoolInUseSize, -bytesToReturn);
+            Interlocked.Add(ref _blockPoolInUseSize, -bytesToReturn);
 
             // small thing to reduce 2 IEnumerable+IEnumerator allocations in most cases
             if (blocks is List<byte[]> blockList)
             {
                 foreach (byte[] block in blockList)
                     CheckBlock(block);
+
                 foreach (byte[] block in blockList)
                     if (!PushBlock(block))
                         break;
@@ -541,12 +551,13 @@ namespace MonoGame.Framework.Memory
             {
                 foreach (byte[] block in blocks)
                     CheckBlock(block);
+
                 foreach (byte[] block in blocks)
                     if (!PushBlock(block))
                         break;
             }
 
-            ReportUsageReport(_smallPoolInUseSize, _smallPoolFreeSize, LargePoolInUseSize, LargePoolFreeSize);
+            ReportUsageReport(_blockPoolInUseSize, _blockPoolFreeSize, BufferPoolInUseSize, BufferPoolFreeSize);
         }
 
         /// <summary>
@@ -555,7 +566,7 @@ namespace MonoGame.Framework.Memory
         /// <param name="block">The block to return to the pool.</param>
         /// <exception cref="ArgumentNullException">block is null.</exception>
         /// <exception cref="ArgumentException">block is the wrong size for this memory manager.</exception>
-        public void ReturnBlock(byte[] block, string tag)
+        public void ReturnBlock(byte[] block, string tag = null)
         {
             if (block == null)
                 throw new ArgumentNullException(nameof(block));
@@ -563,12 +574,12 @@ namespace MonoGame.Framework.Memory
             if (block.Length != BlockSize)
                 throw new ArgumentException("The block is the wrong size for this memory manager.");
 
-            Interlocked.Add(ref _smallPoolInUseSize, -BlockSize);
+            Interlocked.Add(ref _blockPoolInUseSize, -BlockSize);
 
-            if (MaximumFreeSmallPoolBytes == 0 || SmallPoolFreeSize < MaximumFreeSmallPoolBytes)
+            if (MaximumFreeBlockPoolBytes == 0 || BlockPoolFreeSize < MaximumFreeBlockPoolBytes)
             {
-                Interlocked.Add(ref _smallPoolFreeSize, BlockSize);
-                _smallPool.Push(block);
+                Interlocked.Add(ref _blockPoolFreeSize, BlockSize);
+                _blockPool.Push(block);
             }
             else
             {
@@ -576,16 +587,8 @@ namespace MonoGame.Framework.Memory
             }
 
             if (UsageReport != null)
-                ReportUsageReport(_smallPoolInUseSize, _smallPoolFreeSize, LargePoolInUseSize, LargePoolFreeSize);
+                ReportUsageReport(_blockPoolInUseSize, _blockPoolFreeSize, BufferPoolInUseSize, BufferPoolFreeSize);
         }
-
-        /// <summary>
-        /// Returns a block to the pool.
-        /// </summary>
-        /// <param name="block">The block to return to the pool.</param>
-        /// <exception cref="ArgumentNullException">block is null.</exception>
-        /// <exception cref="ArgumentException">block is the wrong size for this memory manager.</exception>
-        public void ReturnBlock(byte[] block) => ReturnBlock(block, null);
 
         #endregion
 
@@ -599,39 +602,40 @@ namespace MonoGame.Framework.Memory
             return null;
         }
 
-        private int RoundToLargeBufferSize(long requiredSize)
+        private int RoundToBufferSize(long minimumSize)
         {
-            if (UseExponentialLargeBuffer)
+            if (UseExponentialBuffer)
             {
                 int pow = 1;
-                while (LargeBufferMultiple * pow < requiredSize)
+                while (BufferMultiple * pow < minimumSize)
                     pow <<= 1;
-
-                return LargeBufferMultiple * pow;
+                return BufferMultiple * pow;
             }
             else
-                return (int)((requiredSize + LargeBufferMultiple - 1) / LargeBufferMultiple * LargeBufferMultiple);
+            {
+                return (int)((minimumSize + BufferMultiple - 1) / BufferMultiple * BufferMultiple);
+            }
         }
 
-        private bool IsLargeBufferSize(int value)
+        private bool IsBufferSize(int value)
         {
-            return (value != 0) && (UseExponentialLargeBuffer
-                ? (value == RoundToLargeBufferSize(value))
-                : (value % LargeBufferMultiple) == 0);
+            return (value != 0) && (UseExponentialBuffer
+                ? (value == RoundToBufferSize(value))
+                : (value % BufferMultiple) == 0);
         }
 
         private int GetPoolIndex(long length)
         {
-            if (UseExponentialLargeBuffer)
+            if (UseExponentialBuffer)
             {
                 int index = 0;
-                while ((LargeBufferMultiple << index) < length)
-                    ++index;
+                while ((BufferMultiple << index) < length)
+                    index++;
                 return index;
             }
             else
             {
-                return (int)(length / LargeBufferMultiple - 1);
+                return (int)(length / BufferMultiple - 1);
             }
         }
 
@@ -647,20 +651,22 @@ namespace MonoGame.Framework.Memory
         internal void ReportBlockDiscarded(string tag) => BlockDiscarded?.Invoke(tag);
 
         // also grab the stack, we want to know who requires such large buffers
-        internal void ReportLargeBufferCreated(string tag) => LargeBufferCreated?.Invoke(tag, GetCallStack());
+        internal void ReportBufferCreated(string tag) => BufferCreated?.Invoke(tag, GetCallStack());
         internal void ReportStreamToArray(string tag) => StreamConvertedToArray?.Invoke(tag, GetCallStack());
 
         internal void ReportStreamLength(long bytes) => StreamLength?.Invoke(bytes);
 
-        internal void ReportLargeBufferDiscarded(string tag, MemoryDiscardReason reason)
+        internal void ReportBufferDiscarded(string tag, MemoryDiscardReason reason)
         {
-            LargeBufferDiscarded?.Invoke(tag, reason);
+            BufferDiscarded?.Invoke(tag, reason);
         }
 
         internal void ReportUsageReport(
-            long smallPoolInUseBytes, long smallPoolFreeBytes, long largePoolInUseBytes, long largePoolFreeBytes)
+            long blockPoolInUseBytes, long blockPoolFreeBytes,
+            long bufferPoolInUseBytes, long bufferPoolFreeBytes)
         {
-            UsageReport?.Invoke(smallPoolInUseBytes, smallPoolFreeBytes, largePoolInUseBytes, largePoolFreeBytes);
+            UsageReport?.Invoke(
+                blockPoolInUseBytes, blockPoolFreeBytes, bufferPoolInUseBytes, bufferPoolFreeBytes);
         }
 
         #endregion
@@ -673,15 +679,20 @@ namespace MonoGame.Framework.Memory
         /// <param name="stream"></param>
         /// <param name="leaveOpen"></param>
         /// <returns>The <see cref="RecyclableBufferedStream"/>.</returns>
-        public RecyclableBufferedStream GetBufferedStream(Stream stream, bool leaveOpen) =>
-            new RecyclableBufferedStream(this, stream, leaveOpen);
+        public RecyclableBufferedStream GetBufferedStream(Stream stream, bool leaveOpen)
+        {
+            return new RecyclableBufferedStream(this, stream, leaveOpen);
+        }
 
         /// <summary>
         /// Constructs a new <see cref="RecyclableMemoryStream"/> with no tag
         /// tag and a default initial capacity.
         /// </summary>
         /// <returns>The <see cref="RecyclableMemoryStream"/>.</returns>
-        public RecyclableMemoryStream GetMemoryStream() => new RecyclableMemoryStream(this);
+        public RecyclableMemoryStream GetMemoryStream()
+        {
+            return new RecyclableMemoryStream(this);
+        }
 
         /// <summary>
         /// Constructs a new <see cref="RecyclableMemoryStream"/> with the given 
@@ -689,25 +700,32 @@ namespace MonoGame.Framework.Memory
         /// </summary>
         /// <param name="tag">A tag which can be used to track the source of the stream.</param>
         /// <returns>The <see cref="RecyclableMemoryStream"/>.</returns>
-        public RecyclableMemoryStream GetMemoryStream(string tag) => new RecyclableMemoryStream(this, tag);
+        public RecyclableMemoryStream GetMemoryStream(string tag)
+        {
+            return new RecyclableMemoryStream(this, tag);
+        }
 
         /// <summary>
         /// Constructs a new <see cref="RecyclableMemoryStream"/> with at least the given capacity.
         /// </summary>
-        /// <param name="requiredSize">The minimum desired capacity for the stream.</param>
+        /// <param name="minimumSize">The minimum desired capacity for the stream.</param>
         /// <returns>The <see cref="RecyclableMemoryStream"/>.</returns>
-        public RecyclableMemoryStream GetMemoryStream(long requiredSize) =>
-            new RecyclableMemoryStream(this, null, requiredSize);
+        public RecyclableMemoryStream GetMemoryStream(long minimumSize)
+        {
+            return new RecyclableMemoryStream(this, null, minimumSize);
+        }
 
         /// <summary>
         /// Constructs a new <see cref="RecyclableMemoryStream"/> with the given 
         /// tag and at least the given capacity.
         /// </summary>
         /// <param name="tag">A tag which can be used to track the source of the stream.</param>
-        /// <param name="requiredSize">The minimum desired capacity for the stream.</param>
+        /// <param name="minimumSize">The minimum desired capacity for the stream.</param>
         /// <returns>The <see cref="RecyclableMemoryStream"/>.</returns>
-        public RecyclableMemoryStream GetMemoryStream(string tag, long requiredSize) =>
-            new RecyclableMemoryStream(this, tag, requiredSize);
+        public RecyclableMemoryStream GetMemoryStream(string tag, long minimumSize)
+        {
+            return new RecyclableMemoryStream(this, tag, minimumSize);
+        }
 
         /// <summary>
         /// Constructs a new <see cref="RecyclableMemoryStream"/> with the given tag 
@@ -718,14 +736,15 @@ namespace MonoGame.Framework.Memory
         /// buffers to a single large one. This is most helpful when you know that you will always call GetBuffer
         /// on the underlying stream.</remarks>
         /// <param name="tag">A tag which can be used to track the source of the stream.</param>
-        /// <param name="requiredSize">The minimum desired capacity for the stream.</param>
+        /// <param name="minimumSize">The minimum desired capacity for the stream.</param>
         /// <param name="asContiguousBuffer">Whether to attempt to use a single contiguous buffer.</param>
         /// <returns>A MemoryStream.</returns>
-        public RecyclableMemoryStream GetMemoryStream(string tag, long requiredSize, bool asContiguousBuffer)
+        public RecyclableMemoryStream GetMemoryStream(string tag, long minimumSize, bool asContiguousBuffer)
         {
-            if (!asContiguousBuffer || requiredSize <= BlockSize)
-                return GetMemoryStream(tag, requiredSize);
-            return new RecyclableMemoryStream(this, tag, requiredSize, GetLargeBuffer(requiredSize, tag));
+            if (!asContiguousBuffer || minimumSize <= BlockSize)
+                return GetMemoryStream(tag, minimumSize);
+
+            return new RecyclableMemoryStream(this, minimumSize, tag, GetBuffer(minimumSize, tag));
         }
 
         /// <summary>
@@ -761,8 +780,10 @@ namespace MonoGame.Framework.Memory
         /// <param name="offset">The offset from the start of the buffer to copy from.</param>
         /// <param name="count">The number of bytes to copy from the buffer.</param>
         /// <returns>The <see cref="RecyclableMemoryStream"/>.</returns>
-        public RecyclableMemoryStream GetMemoryStream(string tag, byte[] buffer, int offset, int count) =>
-            GetMemoryStream(tag, buffer.AsSpan(offset, count));
+        public RecyclableMemoryStream GetMemoryStream(string tag, byte[] buffer, int offset, int count)
+        {
+            return GetMemoryStream(tag, buffer.AsSpan(offset, count));
+        }
 
         /// <summary>
         /// Constructs a new <see cref="RecyclableMemoryStream"/> with the given 
@@ -777,10 +798,7 @@ namespace MonoGame.Framework.Memory
             RecyclableMemoryStream result = null;
             try
             {
-                result = stream.CanSeek
-                    ? GetMemoryStream(tag, stream.Length)
-                    : GetMemoryStream(tag);
-
+                result = GetMemoryStream(tag);
                 stream.PooledCopyTo(result);
                 result.Position = 0;
                 return result;

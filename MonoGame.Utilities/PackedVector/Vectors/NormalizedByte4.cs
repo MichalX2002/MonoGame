@@ -17,6 +17,8 @@ namespace MonoGame.Framework.Vector
     [StructLayout(LayoutKind.Sequential)]
     public struct NormalizedByte4 : IPackedPixel<NormalizedByte4, uint>
     {
+        internal static Vector4 Offset => new Vector4(-sbyte.MinValue);
+
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Red),
             new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Green),
@@ -58,22 +60,6 @@ namespace MonoGame.Framework.Vector
             PackedValue = packed;
         }
 
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public NormalizedByte4(Vector4 vector) : this()
-        {
-            FromVector4(vector);
-        }
-
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        public NormalizedByte4(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
-        {
-        }
-
         #endregion
 
         #region IPackedVector
@@ -81,101 +67,65 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public uint PackedValue
         {
-            readonly get => UnsafeUtils.As<NormalizedByte4, uint>(this);
+            readonly get => UnsafeR.As<NormalizedByte4, uint>(this);
             set => Unsafe.As<NormalizedByte4, uint>(ref this) = value;
         }
-
-        public void FromVector4(in Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            var v = Vector4.Clamp(vector, Vector4.NegativeOne, Vector4.One);
-            v *= sbyte.MaxValue;
+            var scaled = new Vector4(X, Y, Z, W);
+            scaled += Offset;
+            scaled /= byte.MaxValue;
 
-            X = (sbyte)v.X;
-            Y = (sbyte)v.Y;
-            Z = (sbyte)v.Z;
-            W = (sbyte)v.W;
+            return scaled;
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            vector.Base.X = X;
-            vector.Base.Y = Y;
-            vector.Base.Z = Z;
-            vector.Base.W = W;
-            vector /= sbyte.MaxValue;
+            scaledVector.Clamp(Vector4.Zero, Vector4.One);
+            scaledVector *= byte.MaxValue;
+            scaledVector -= Offset;
+
+            X = (sbyte)scaledVector.X;
+            Y = (sbyte)scaledVector.Y;
+            Z = (sbyte)scaledVector.Z;
+            W = (sbyte)scaledVector.W;
         }
 
-        public void FromScaledVector4(in Vector4 scaledVector)
+        public readonly Vector4 ToVector4()
         {
-            var v = scaledVector * 2;
-            v -= Vector4.One;
-            FromVector4(v);
+            var vector = new Vector4(X, Y, Z, W);
+            vector += Offset;
+            vector *= 2f / byte.MaxValue;
+            vector -= Vector4.One;
+
+            return vector;
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        public void FromVector4(Vector4 vector)
         {
-            ToVector4(out scaledVector);
-            scaledVector += Vector4.One;
-            scaledVector /= 2;
-        }
+            vector.Clamp(Vector4.NegativeOne, Vector4.One);
+            vector *= byte.MaxValue / 2f;
+            vector -= Vector4.Half;
 
-        #endregion
-
-        #region IPixel
-
-        public void FromColor(Color source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGray8(Gray8 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGray16(Gray16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromGrayAlpha16(GrayAlpha16 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb24(Rgb24 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgb48(Rgb48 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public void FromRgba64(Rgba64 source)
-        {
-            source.ToScaledVector4(out var vector);
-            FromScaledVector4(vector);
-        }
-
-        public readonly void ToColor(out Color destination)
-        {
-            destination = default; // TODO: Unsafe.SkipInit
-
-            ToScaledVector4(out var vector);
-            destination.FromScaledVector4(vector);
+            X = (sbyte)vector.X;
+            Y = (sbyte)vector.Y;
+            Z = (sbyte)vector.Z;
+            W = (sbyte)vector.W;
         }
 
         #endregion
 
         #region Equals
+
+        public readonly bool Equals(NormalizedByte4 other)
+        {
+            return this == other;
+        }
+
+        public override readonly bool Equals(object obj)
+        {
+            return obj is NormalizedByte4 other && Equals(other);
+        }
 
         public static bool operator ==(in NormalizedByte4 a, in NormalizedByte4 b)
         {
@@ -187,23 +137,13 @@ namespace MonoGame.Framework.Vector
             return a.PackedValue != b.PackedValue;
         }
 
-        public bool Equals(NormalizedByte4 other)
-        {
-            return this == other;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is NormalizedByte4 other && Equals(other);
-        }
-
         #endregion
 
         #region Object Overrides
 
-        public override string ToString() => nameof(NormalizedByte4) + $"({X}, {Y}, {Z}, {W})";
+        public override readonly string ToString() => nameof(NormalizedByte4) + $"({X}, {Y}, {Z}, {W})";
 
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

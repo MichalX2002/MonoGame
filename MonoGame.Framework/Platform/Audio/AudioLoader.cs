@@ -98,8 +98,8 @@ namespace MonoGame.Framework.Audio
         /// <param name="bitsPerSample">Gets the number of bits per sample.</param>
         /// <param name="samplesPerBlock">Gets the number of samples per block.</param>
         /// <param name="sampleCount">Gets the total number of samples.</param>
-        /// <returns>The stream containing the waveform data or compressed blocks.</returns>
-        public static RecyclableMemoryStream Load(
+        /// <returns>The large buffer containing the waveform data or compressed blocks.</returns>
+        public static RecyclableBuffer Load(
             Stream stream, out ALFormat format, out int frequency, out int channels,
             out int blockAlignment, out int bitsPerSample, out int samplesPerBlock, out int sampleCount)
         {
@@ -137,41 +137,7 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        public static RecyclableMemoryStream ReadBytes(Stream stream, int bytes)
-        {
-            var result = RecyclableMemoryManager.Default.GetMemoryStream(nameof(ReadBytes), bytes);
-            byte[] buffer = RecyclableMemoryManager.Default.GetBlock();
-            try
-            {
-                int left = bytes;
-                do
-                {
-                    int toRead = Math.Min(left, buffer.Length);
-                    int n = stream.Read(buffer, 0, toRead);
-                    if (n == 0)
-                        break;
-                    result.Write(buffer, 0, n);
-                    left -= n;
-                } while (left > 0);
-
-                if (left > 0)
-                    throw new EndOfStreamException("Failed to read enough data.");
-
-                result.Position = 0;
-                return result;
-            }
-            catch
-            {
-                result.Dispose();
-                throw;
-            }
-            finally
-            {
-                RecyclableMemoryManager.Default.ReturnBlock(buffer);
-            }
-        }
-
-        private static RecyclableMemoryStream LoadWave(
+        private static RecyclableBuffer LoadWave(
             Stream stream, out ALFormat format, out int frequency, out int channels,
             out int blockAlignment, out int bitsPerSample, out int samplesPerBlock, out int sampleCount)
         {
@@ -186,7 +152,7 @@ namespace MonoGame.Framework.Audio
                 if (wformat != "WAVE")
                     throw new ArgumentException("Specified stream is not a wave file.");
 
-                RecyclableMemoryStream audioData = null;
+                RecyclableBuffer audioData = null;
                 int audioFormat = 0;
                 channels = 0;
                 bitsPerSample = 0;
@@ -257,7 +223,8 @@ namespace MonoGame.Framework.Audio
                                 break;
 
                             case "data":
-                                audioData = ReadBytes(reader.BaseStream, chunkSize);
+                                audioData = RecyclableBuffer.ReadBytes(
+                                    reader.BaseStream, chunkSize, nameof(audioData));
                                 break;
 
                             default:
@@ -286,13 +253,13 @@ namespace MonoGame.Framework.Audio
                             case FormatIma4:
                             case FormatMsAdpcm:
                                 sampleCount =
-                                    ((int)audioData.Length / blockAlignment * samplesPerBlock) +
-                                    SampleAlignment(format, (int)audioData.Length % blockAlignment);
+                                    (audioData.BaseLength / blockAlignment * samplesPerBlock) +
+                                    SampleAlignment(format, audioData.BaseLength % blockAlignment);
                                 break;
 
                             case FormatPcm:
                             case FormatIeee:
-                                sampleCount = (int)audioData.Length / (channels * bitsPerSample / 8);
+                                sampleCount = audioData.BaseLength / (channels * bitsPerSample / 8);
                                 break;
 
                             default:
@@ -304,7 +271,7 @@ namespace MonoGame.Framework.Audio
                 }
                 catch
                 {
-                    audioData?.Dispose();
+                    audioData.Dispose();
                     throw;
                 }
             }
@@ -322,11 +289,12 @@ namespace MonoGame.Framework.Audio
             // Sample count includes both channels if stereo
             int sampleCount = data.Length / 3;
             size = sampleCount * sizeof(short);
-            bool isRecyclable = size <= RecyclableMemoryManager.Default.MaximumLargeBufferSize;
+            bool isRecyclable = size <= RecyclableMemoryManager.Default.MaximumBufferSize;
 
             bufferTag = isRecyclable ? nameof(Convert24To16) : null;
-            byte[] outData = isRecyclable ?
-                RecyclableMemoryManager.Default.GetLargeBuffer(size, bufferTag) : new byte[size];
+            var outData = isRecyclable
+                ? RecyclableMemoryManager.Default.GetBuffer(size, bufferTag).Buffer
+                : new byte[size];
 
             fixed (byte* src = data)
             fixed (byte* dst = outData)
@@ -406,7 +374,7 @@ namespace MonoGame.Framework.Audio
             return outData;
         }
 
-#region IMA4 decoding
+        #region IMA4 decoding
 
         // Step table
         private static int[] stepTable = new int[]
@@ -580,9 +548,9 @@ namespace MonoGame.Framework.Audio
             return samples;
         }
 
-#endregion
+        #endregion
 
-#region MS-ADPCM decoding
+        #region MS-ADPCM decoding
 
         private static int[] adaptationTable = new int[]
         {
@@ -780,6 +748,6 @@ namespace MonoGame.Framework.Audio
             return samples;
         }
 
-#endregion
+        #endregion
     }
 }

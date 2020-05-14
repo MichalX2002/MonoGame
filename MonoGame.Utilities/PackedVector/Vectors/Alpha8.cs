@@ -37,7 +37,7 @@ namespace MonoGame.Framework.Vector
         /// <param name="alpha">The W component.</param>
         public Alpha8(float alpha)
         {
-            Pack(alpha, out A);
+            A = Pack(alpha);
         }
 
         #endregion
@@ -50,37 +50,27 @@ namespace MonoGame.Framework.Vector
             return A / (float)byte.MaxValue;
         }
 
-        private static void Pack(float alpha, out byte destination)
+        private static byte Pack(float alpha)
         {
             alpha *= byte.MaxValue;
             alpha += 0.5f;
             alpha = MathHelper.Clamp(alpha, 0, 255);
-            destination = (byte)alpha;
+            
+            return (byte)alpha;
         }
 
         #region IPackedVector
 
         public byte PackedValue { readonly get => A; set => A = value; }
 
-        public void FromVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            FromScaledVector4(vector);
+            A = Pack(scaledVector.W);
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            ToScaledVector4(out vector);
-        }
-
-        public void FromScaledVector4(in Vector4 scaledVector)
-        {
-            Pack(scaledVector.W, out A);
-        }
-
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
-        {
-            scaledVector.Base.X = scaledVector.Base.Y = scaledVector.Base.Z = 1;
-            scaledVector.Base.W = ToAlpha();
+            return new Vector4(1, 1, 1, ToAlpha());
         }
 
         #endregion
@@ -132,6 +122,16 @@ namespace MonoGame.Framework.Vector
 
         #region Equals
 
+        public readonly bool Equals(Alpha8 other)
+        {
+            return this == other;
+        }
+
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Alpha8 other && Equals(other);
+        }
+
         public static bool operator ==(Alpha8 a, Alpha8 b)
         {
             return a.A == b.A;
@@ -142,9 +142,6 @@ namespace MonoGame.Framework.Vector
             return a.A != b.A;
         }
 
-        public bool Equals(Alpha8 other) => this == other;
-        public override bool Equals(object obj) => obj is Alpha8 other && Equals(other);
-
         #endregion
 
         #region Object Overrides
@@ -152,12 +149,12 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(Alpha8) + $"({A})";
+        public override readonly string ToString() => nameof(Alpha8) + $"({A})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => A;
+        public override readonly int GetHashCode() => A;
 
         #endregion
     }

@@ -69,11 +69,10 @@ namespace MonoGame.Framework.Content
             for (int level = 0; level < levelCount; level++)
             {
                 int levelDataSizeInBytes = reader.ReadInt32();
-                byte[] levelDataBuffer = reader.ContentManager.GetScratchBuffer(levelDataSizeInBytes);
-                try
+                using (var levelDataBuffer = reader.ContentManager.GetScratchBuffer(levelDataSizeInBytes))
                 {
-                    byte[] levelData = levelDataBuffer;
-                    if (reader.Read(levelData, 0, levelDataSizeInBytes) != levelDataSizeInBytes)
+                    byte[] levelData = levelDataBuffer.Buffer;
+                    if (reader.Read(levelData.AsSpan(0, levelDataSizeInBytes)) != levelDataSizeInBytes)
                         throw new InvalidDataException();
 
                     int levelWidth = Math.Max(width >> level, 1);
@@ -173,10 +172,6 @@ namespace MonoGame.Framework.Content
 #endif
                     }
                     texture.SetData(levelData.AsSpan(0, levelDataSizeInBytes), null, level);
-                }
-                finally
-                {
-                    reader.ContentManager.ReturnScratchBuffer(levelDataBuffer);
                 }
             }
 

@@ -38,10 +38,11 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Constructs the packed vector with vector form values.
         /// </summary>
-        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public Bgra4444(Vector4 vector) : this()
+        /// <param name="scaledVector"><see cref="Vector4"/> containing the components.</param>
+        public Bgra4444(Vector4 scaledVector) : this()
         {
-            FromVector4(vector);
+            // TODO: Unsafe.SkipInit(out this)
+            FromScaledVector4(scaledVector);
         }
 
         /// <summary>
@@ -58,41 +59,41 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public ushort PackedValue { get; set; }
 
-        public void FromVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            var v = vector * 15f;
-            v += Vector4.Half;
-            v.Clamp(Vector4.Zero, _maxValue);
+            scaledVector *= 15f;
+            scaledVector += Vector4.Half;
+            scaledVector.Clamp(Vector4.Zero, _maxValue);
 
             PackedValue = (ushort)(
-                (((int)v.W & 0x0F) << 12) |
-                (((int)v.X & 0x0F) << 8) |
-                (((int)v.Y & 0x0F) << 4) |
-                ((int)v.Z & 0x0F));
+                (((int)scaledVector.W & 0x0F) << 12) |
+                (((int)scaledVector.X & 0x0F) << 8) |
+                (((int)scaledVector.Y & 0x0F) << 4) |
+                ((int)scaledVector.Z & 0x0F));
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            vector.Base.X = (PackedValue >> 8) & 0x0F;
-            vector.Base.Y = (PackedValue >> 4) & 0x0F;
-            vector.Base.Z = PackedValue & 0x0F;
-            vector.Base.W = (PackedValue >> 12) & 0x0F;
-            vector /= 15f;
-        }
-
-        public void FromScaledVector4(in Vector4 scaledVector)
-        {
-            FromVector4(scaledVector);
-        }
-
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
-        {
-            ToVector4(out scaledVector);
+            return new Vector4(
+                (PackedValue >> 8) & 0x0F,
+                (PackedValue >> 4) & 0x0F,
+                PackedValue & 0x0F,
+                (PackedValue >> 12) & 0x0F) / 15f;
         }
 
         #endregion
 
         #region Equals
+
+        public readonly bool Equals(Bgra4444 other)
+        {
+            return this == other;
+        }
+
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Bgra4444 other && Equals(other);
+        }
 
         public static bool operator ==(Bgra4444 a, Bgra4444 b)
         {
@@ -104,16 +105,6 @@ namespace MonoGame.Framework.Vector
             return a.PackedValue != b.PackedValue;
         }
 
-        public bool Equals(Bgra4444 other)
-        {
-            return this == other;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Bgra4444 other && Equals(other);
-        }
-
         #endregion
 
         #region Object Overrides
@@ -121,12 +112,12 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(Bgra4444) + $"({this.ToVector4()})";
+        public override readonly string ToString() => nameof(Bgra4444) + $"({ToScaledVector4()})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

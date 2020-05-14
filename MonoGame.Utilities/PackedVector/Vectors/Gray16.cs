@@ -33,29 +33,19 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public ushort PackedValue { readonly get => L; set => L = value; }
 
-        public void FromVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            FromScaledVector4(vector);
+            scaledVector *= ushort.MaxValue;
+            scaledVector += Vector4.Half;
+            scaledVector.Clamp(Vector4.Zero, Vector4.MaxValueUInt16);
+
+            L = (ushort)(PackedVectorHelper.GetBT709Luminance(scaledVector.ToVector3()) + 0.5f);
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            ToScaledVector4(out vector);
-        }
-
-        public void FromScaledVector4(in Vector4 vector)
-        {
-            var v = vector * ushort.MaxValue;
-            v += Vector4.Half;
-            v.Clamp(Vector4.Zero, Vector4.MaxValueUInt16);
-
-            L = (ushort)PackedVectorHelper.GetBT709Luminance(v.X, v.Y, v.Z);
-        }
-
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
-        {
-            scaledVector.Base.X = scaledVector.Base.Y = scaledVector.Base.Z = L / (float)ushort.MaxValue;
-            scaledVector.Base.W = 1;
+            float l = L / (float)ushort.MaxValue;
+            return new Vector4(l, l, l, 1);
         }
 
         #endregion
@@ -133,6 +123,16 @@ namespace MonoGame.Framework.Vector
 
         #region Equals
 
+        public readonly bool Equals(Gray16 other)
+        {
+            return this == other;
+        }
+
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Gray16 other && Equals(other);
+        }
+
         public static bool operator ==(Gray16 a, Gray16 b)
         {
             return a.PackedValue == b.PackedValue;
@@ -143,23 +143,13 @@ namespace MonoGame.Framework.Vector
             return a.PackedValue != b.PackedValue;
         }
 
-        public bool Equals(Gray16 other)
-        {
-            return this == other;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Gray16 other && Equals(other);
-        }
-
         #endregion
 
         #region Object Overrides
 
-        public override string ToString() => nameof(Gray16) + $"({L})";
+        public override readonly string ToString() => nameof(Gray16) + $"({L})";
 
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

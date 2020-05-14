@@ -11,7 +11,7 @@ namespace MonoGame.Framework.Vector
     /// <summary>
     /// Packed vector type containing 16-bit floating-point XY components.
     /// <para>
-    /// Ranges from [0, 0, 0, 1] to [1, 1, 0, 1] in vector form.
+    /// Ranges from [-1, -1, 0, 1] to [1, 1, 0, 1] in vector form.
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
@@ -41,32 +41,11 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public HalfVector2(uint packed) : this()
         {
+            // TODO: Unsafe.SkipInit(out this)
             PackedValue = packed;
         }
 
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        /// <param name="vector"><see cref="Vector2"/> containing the components.</param>
-        public HalfVector2(Vector2 vector)
-        {
-            Pack(vector, out this);
-        }
-
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        public HalfVector2(float x, float y) : this(new Vector2(x, y))
-        {
-        }
-
         #endregion
-
-        private static void Pack(in Vector2 vector, out HalfVector2 destination)
-        {
-            destination.X = new HalfSingle(vector.X);
-            destination.Y = new HalfSingle(vector.Y);
-        }
 
         public readonly Vector2 ToVector2()
         {
@@ -78,64 +57,70 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public uint PackedValue
         {
-            readonly get => UnsafeUtils.As<HalfVector2, uint>(this);
+            readonly get => UnsafeR.As<HalfVector2, uint>(this);
             set => Unsafe.As<HalfVector2, uint>(ref this) = value;
         }
 
-        public void FromVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            Pack(vector.XY, out this);
+            var vector = scaledVector.ToVector2();
+            vector *= 2;
+            vector -= Vector2.One;
+
+            X = new HalfSingle(vector.X);
+            Y = new HalfSingle(vector.Y);
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            vector.Base.X = X;
-            vector.Base.Y = Y;
-            vector.Base.Z = 0;
-            vector.Base.W = 1;
+            var vector = ToVector2();
+            vector += Vector2.One;
+            vector /= 2f;
+            return new Vector4(vector, 0, 1);
         }
 
-        public void FromScaledVector4(in Vector4 scaledVector)
+        public void FromVector4(Vector4 vector)
         {
-            FromVector4(scaledVector);
+            X = new HalfSingle(vector.X);
+            Y = new HalfSingle(vector.Y);
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        public readonly Vector4 ToVector4()
         {
-            ToVector4(out scaledVector);
+            return new Vector4(X, Y, 0, 1);
         }
 
         #endregion
 
         #region Equals
 
-        public static bool operator ==(HalfVector2 a, HalfVector2 b)
-        {
-            return a.PackedValue == b.PackedValue;
-        }
-
-        public static bool operator !=(HalfVector2 a, HalfVector2 b)
-        {
-            return a.PackedValue != b.PackedValue;
-        }
-
-        public bool Equals(HalfVector2 other)
+        public readonly bool Equals(HalfVector2 other)
         {
             return this == other;
         }
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is HalfVector2 other && Equals(other);
+        }
+
+        public static bool operator ==(in HalfVector2 a, in HalfVector2 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
+
+        public static bool operator !=(in HalfVector2 a, in HalfVector2 b)
+        {
+            return a.PackedValue != b.PackedValue;
         }
 
         #endregion
 
         #region Object Overrides
 
-        public override string ToString() => nameof(HalfVector2) + $"({ToVector2()})";
+        public override readonly string ToString() => nameof(HalfVector2) + $"({ToVector2()})";
 
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

@@ -14,15 +14,17 @@ namespace MonoGame.Framework
 {
     internal class SdlGamePlatform : GamePlatform
     {
-        const int MouseWheelDelta = 120;
-
-        public override GameRunBehavior DefaultRunBehavior => GameRunBehavior.Synchronous;
+        private const int MouseWheelDelta = 120;
 
         private readonly Game _game;
+
+        // Slightly faster than HashSet as low item count is the norm.
         private readonly List<Keys> _keys;
 
         private int _isExiting;
         private SdlGameWindow _window;
+
+        public override GameRunBehavior DefaultRunBehavior => GameRunBehavior.Synchronous;
 
         public SdlGamePlatform(Game game) : base(game)
         {
@@ -41,11 +43,11 @@ namespace MonoGame.Framework
                 PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
                 SDL.SetHint("SDL_WINDOWS_DISABLE_THREAD_NAMING", "1");
 
-            SDL.Init((int)(
+            SDL.Init(
                 SDL.InitFlags.Video |
                 SDL.InitFlags.Joystick |
                 SDL.InitFlags.GameController |
-                SDL.InitFlags.Haptic));
+                SDL.InitFlags.Haptic);
 
             SDL.DisableScreenSaver();
 
@@ -161,12 +163,23 @@ namespace MonoGame.Framework
                     case SDL.EventType.DropFile:
                         try
                         {
-                            _window.InvokeFileDropped(InteropHelpers.Utf8ToString(ev.Drop.File));
+                            if (_window.IsFileDroppedHandled)
+                            {
+                                string text = InteropHelpers.Utf8ToString(ev.Drop.File);
+                                _window.InvokeFileDropped(text);
+                            }
                         }
                         finally
                         {
                             SDL.Free(ev.Drop.File);
                         }
+                        break;
+
+                    case SDL.EventType.DropBegin:
+                    case SDL.EventType.DropCompleted:
+                    case SDL.EventType.DropText:
+
+                        Console.WriteLine("SDLGamePlatform: " + ev.Type);
                         break;
 
                     case SDL.EventType.WindowEvent:

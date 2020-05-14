@@ -6,6 +6,7 @@ using System;
 using System.Buffers.Binary;
 using System.IO;
 using MonoGame.Framework.Audio;
+using MonoGame.Framework.Memory;
 using MonoGame.OpenAL;
 
 namespace MonoGame.Framework.Content
@@ -49,10 +50,9 @@ namespace MonoGame.Framework.Content
             int rawSize = input.ReadInt32();
             short format = BinaryPrimitives.ReadInt16LittleEndian(header);
 
-            SoundEffect CreateSoundEffect(MemoryStream stream)
+            SoundEffect CreateSoundEffect(RecyclableBuffer buffer)
             {
-                var buffer = stream.GetBuffer();
-                var data = buffer.AsSpan(0, (int)stream.Length);
+                var data = buffer.AsSpan(0, buffer.BaseLength);
                 var duration = TimeSpan.FromMilliseconds(durationMs);
 
                 return new SoundEffect(header, data, duration, loopStart, loopLength)
@@ -76,7 +76,8 @@ namespace MonoGame.Framework.Content
             }
             else
             {
-                using (var data = AudioLoader.ReadBytes(input.BaseStream, rawSize))
+                using (var data = RecyclableBuffer.ReadBytes(
+                    input.BaseStream, rawSize, nameof(SoundEffectReader)))
                     effect = CreateSoundEffect(data);
             }
 

@@ -19,7 +19,7 @@ namespace MonoGame.Framework.Graphics
         public Color Color;
         public Vector2 TextureCoordinate;
 
-        public VertexPositionColorTexture(in Vector3 position, in Color color, in Vector2 textureCoordinate)
+        public VertexPositionColorTexture(Vector3 position, Color color, Vector2 textureCoordinate)
         {
             Position = position;
             Color = color;

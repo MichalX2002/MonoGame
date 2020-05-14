@@ -32,80 +32,56 @@ namespace MonoGame.Framework.Vector
             PackedValue = packed;
         }
 
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public Rgba1010102(in Vector4 vector) : this()
-        {
-            FromVector4(vector);
-        }
-
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        public Rgba1010102(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
-        {
-        }
-
         #region IPackedVector
 
         [CLSCompliant(false)]
         public uint PackedValue { get; set; }
 
-        public void FromVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            var v = Vector4.Clamp(vector, Vector4.Zero, Vector4.One);
-            v *= 1023f;
+            scaledVector.Clamp(Vector4.Zero, Vector4.One);
+            scaledVector *= 1023f;
+            scaledVector.W *= 3f / 1023f;
+            scaledVector += Vector4.Half;
 
             PackedValue = (uint)(
-                (((int)MathF.Round(v.X) & 0x03FF) << 0) |
-                (((int)MathF.Round(v.Y) & 0x03FF) << 10) |
-                (((int)MathF.Round(v.Z) & 0x03FF) << 20) |
-                (((int)MathF.Round(v.W / 1023f * 3f) & 0x03) << 30));
+                (((int)scaledVector.X & 0x03FF) << 0) |
+                (((int)scaledVector.Y & 0x03FF) << 10) |
+                (((int)scaledVector.Z & 0x03FF) << 20) |
+                (((int)scaledVector.W) & 0x03) << 30);
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            vector.Base.X = (PackedValue >> 0) & 0x03FF;
-            vector.Base.Y = (PackedValue >> 10) & 0x03FF;
-            vector.Base.Z = (PackedValue >> 20) & 0x03FF;
-            vector.Base.W = ((PackedValue >> 30) & 0x03) * 1023f / 3f;
-            vector /= 1023;
-        }
-
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
-        {
-            ToVector4(out scaledVector);
-        }
-
-        public void FromScaledVector4(in Vector4 vector)
-        {
-            FromVector4(vector);
+            return new Vector4(
+                (PackedValue >> 0) & 0x03FF,
+                (PackedValue >> 10) & 0x03FF,
+                (PackedValue >> 20) & 0x03FF,
+                ((PackedValue >> 30) & 0x03) * 1023f / 3f) / 1023f;
         }
 
         #endregion
 
         #region Equals
 
-        public static bool operator ==(Rgba1010102 a, Rgba1010102 b)
-        {
-            return a.PackedValue == b.PackedValue;
-        }
-
-        public static bool operator !=(Rgba1010102 a, Rgba1010102 b)
-        {
-            return a.PackedValue != b.PackedValue;
-        }
-
-        public bool Equals(Rgba1010102 other)
+        public readonly bool Equals(Rgba1010102 other)
         {
             return this == other;
         }
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is Rgba1010102 other && Equals(other);
+        }
+
+        public static bool operator ==(in Rgba1010102 a, in Rgba1010102 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
+
+        public static bool operator !=(in Rgba1010102 a, in Rgba1010102 b)
+        {
+            return a.PackedValue != b.PackedValue;
         }
 
         #endregion
@@ -115,12 +91,12 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(Rgba1010102) + $"({this.ToVector4()})";
+        public override readonly string ToString() => nameof(Rgba1010102) + $"({this.ToVector4()})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

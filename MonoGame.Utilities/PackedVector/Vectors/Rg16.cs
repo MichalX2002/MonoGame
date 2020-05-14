@@ -42,15 +42,6 @@ namespace MonoGame.Framework.Vector
             PackedValue = packed;
         }
 
-        public Rg16(Vector2 vector) : this()
-        {
-            FromVector4(new Vector4(vector, 0, 1));
-        }
-
-        public Rg16(float x, float y) : this(new Vector2(x, y))
-        {
-        }
-
         #endregion
 
         /// <summary>
@@ -66,37 +57,24 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public ushort PackedValue
         {
-            readonly get => UnsafeUtils.As<Rg16, ushort>(this);
+            readonly get => UnsafeR.As<Rg16, ushort>(this);
             set => Unsafe.As<Rg16, ushort>(ref this) = value;
         }
 
-        public void FromVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            var v = vector.ToVector2() * byte.MaxValue;
-            v += Vector2.Half;
-            v.Clamp(0, byte.MaxValue);
+            var vector = scaledVector.ToVector2();
+            vector *= byte.MaxValue;
+            vector += Vector2.Half;
+            vector.Clamp(0, byte.MaxValue);
 
-            R = (byte)v.X;
-            G = (byte)v.Y;
+            R = (byte)vector.X;
+            G = (byte)vector.Y;
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            vector.Base.X = R;
-            vector.Base.Y = G;
-            vector.Base.Z = 0;
-            vector.Base.W = byte.MaxValue;
-            vector /= byte.MaxValue;
-        }
-
-        public void FromScaledVector4(in Vector4 scaledVector)
-        {
-            FromVector4(scaledVector);
-        }
-
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
-        {
-            ToVector4(out scaledVector);
+            return new Vector4(ToVector2(), 0, 1);
         }
 
         #endregion
@@ -154,6 +132,16 @@ namespace MonoGame.Framework.Vector
 
         #region Equals
 
+        public readonly bool Equals(Rg16 other)
+        {
+            return this == other;
+        }
+
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Rg16 other && Equals(other);
+        }
+
         public static bool operator ==(in Rg16 a, in Rg16 b)
         {
             return a.PackedValue == b.PackedValue;
@@ -164,26 +152,6 @@ namespace MonoGame.Framework.Vector
             return a.PackedValue != b.PackedValue;
         }
 
-        /// <summary>
-        /// Compares another <see cref="Rg16"/> packed vector with the packed vector.
-        /// </summary>
-        /// <param name="other">The <see cref="Rg16"/> packed vector to compare.</param>
-        /// <returns>True if the packed vectors are equal.</returns>
-        public bool Equals(Rg16 other)
-        {
-            return this == other;
-        }
-
-        /// <summary>
-        /// Compares an object with the packed vector.
-        /// </summary>
-        /// <param name="obj">The object to compare.</param>
-        /// <returns>True if the object is equal to the packed vector.</returns>
-        public override bool Equals(object obj)
-        {
-            return obj is Rg16 other && Equals(other);
-        }
-
         #endregion
 
         #region Object Overrides
@@ -191,12 +159,12 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(Rg16) + $"(R:{R}, G:{G})";
+        public override readonly string ToString() => nameof(Rg16) + $"(R:{R}, G:{G})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

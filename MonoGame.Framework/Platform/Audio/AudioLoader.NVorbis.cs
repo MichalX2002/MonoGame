@@ -9,13 +9,13 @@ namespace MonoGame.Framework.Audio
 {
     internal static partial class AudioLoader
     {
-        private static RecyclableMemoryStream LoadVorbis(
-            Stream stream, out ALFormat format, out int frequency, out int channels, 
+        private static RecyclableBuffer LoadVorbis(
+            Stream stream, out ALFormat format, out int frequency, out int channels,
             out int blockAlignment, out int bitsPerSample, out int samplesPerBlock, out int sampleCount)
         {
             byte[] pcmBufferBlock = null;
             byte[] floatBufferBlock = null;
-            RecyclableMemoryStream result = null;
+            RecyclableBuffer result = null;
             var reader = new VorbisReader(stream, leaveOpen: false);
             try
             {
@@ -40,7 +40,7 @@ namespace MonoGame.Framework.Audio
                 if (outputBytes > int.MaxValue)
                     throw new InvalidDataException("Size of decoded audio data exceeds " + int.MaxValue + " bytes.");
 
-                result = RecyclableMemoryManager.Default.GetMemoryStream((int)outputBytes);
+                result = RecyclableMemoryManager.Default.GetBuffer((int)outputBytes, "Vorbis audio data");
                 pcmBufferBlock = RecyclableMemoryManager.Default.GetBlock();
                 floatBufferBlock = RecyclableMemoryManager.Default.GetBlock();
 
@@ -50,15 +50,16 @@ namespace MonoGame.Framework.Audio
                 Span<short> pcmBuffer = MemoryMarshal.Cast<byte, short>(pcmBufferBlock);
                 Span<byte> pcmBufferBytes = MemoryMarshal.AsBytes(pcmBuffer);
 
+                var resultSpan = result.AsSpan();
                 int totalSamples = 0;
                 int samplesRead;
                 while ((samplesRead = reader.ReadSamples(sampleBuffer)) > 0)
                 {
+                    Span<byte> bytes;
                     if (useFloat)
                     {
                         // we can copy directly to output
-                        int bytes = samplesRead * sizeof(float);
-                        result.Write(sampleBufferBytes.Slice(0, bytes));
+                        bytes = sampleBufferBytes.Slice(0, samplesRead * sizeof(float));
                     }
                     else
                     {
@@ -67,18 +68,18 @@ namespace MonoGame.Framework.Audio
                         var dst = pcmBuffer.Slice(0, samplesRead);
                         ConvertSingleToInt16(src, dst);
 
-                        int bytes = samplesRead * sizeof(short);
-                        result.Write(pcmBufferBytes.Slice(0, bytes));
+                        bytes = pcmBufferBytes.Slice(0, samplesRead * sizeof(short));
                     }
+
+                    bytes.CopyTo(resultSpan);
+                    resultSpan = resultSpan.Slice(bytes.Length);
                     totalSamples += samplesRead;
                 }
 
-                long? readerSamples = reader.TotalSamples;
-                if (readerSamples.HasValue && totalSamples < readerSamples)
+                if (!resultSpan.IsEmpty)
                     throw new InvalidDataException(
                         "Reached end of stream before reading expected amount of samples.");
 
-                result.Position = 0;
                 return result;
             }
             catch

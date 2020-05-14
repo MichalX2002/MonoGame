@@ -87,7 +87,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">The x, y, z coordinates in 3d-space.</param>
         /// <param name="scalarPart">The rotation component.</param>
-        public Quaternion(in Vector3 value, float scalarPart) : 
+        public Quaternion(Vector3 value, float scalarPart) : 
             this(value.X, value.Y, value.Z, scalarPart)
         {
         }
@@ -108,7 +108,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets a <see cref="Vector4"/> representation for this object.
         /// </summary>
-        public readonly Vector4 ToVector4() => UnsafeUtils.As<Quaternion, Vector4>(this);
+        public readonly Vector4 ToVector4() => UnsafeR.As<Quaternion, Vector4>(this);
         
         #endregion
 
@@ -162,7 +162,7 @@ namespace MonoGame.Framework
         /// <param name="axis">The axis of rotation.</param>
         /// <param name="angle">The angle in radians.</param>
         /// <returns>The new quaternion builded from axis and angle.</returns>
-        public static Quaternion CreateFromAxisAngle(in Vector3 axis, float angle)
+        public static Quaternion CreateFromAxisAngle(Vector3 axis, float angle)
         {
             return FastQuaternion.CreateFromAxisAngle(axis, angle);
         }

@@ -17,21 +17,16 @@ namespace MonoGame.Framework.Content
         protected internal override Effect Read(ContentReader input, Effect existingInstance)
         {
             int dataSize = input.ReadInt32();
-            byte[] data = input.ContentManager.GetScratchBuffer(dataSize);
-            try
+            using (var buffer = input.ContentManager.GetScratchBuffer(dataSize))
             {
-                if (input.Read(data, 0, dataSize) != dataSize)
+                if (input.Read(buffer.AsSpan(0, dataSize)) != dataSize)
                     throw new InvalidDataException();
 
-                var effect = new Effect(input.GetGraphicsDevice(), data.AsSpan(0, dataSize))
+                var effect = new Effect(input.GetGraphicsDevice(), buffer.AsSpan(0, dataSize))
                 {
                     Name = input.AssetName
                 };
                 return effect;
-            }
-            finally
-            {
-                input.ContentManager.ReturnScratchBuffer(data);
             }
         }
     }

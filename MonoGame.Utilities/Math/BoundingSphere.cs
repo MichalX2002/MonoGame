@@ -37,7 +37,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="center">The sphere center.</param>
         /// <param name="radius">The sphere radius.</param>
-        public BoundingSphere(in Vector3 center, float radius)
+        public BoundingSphere(Vector3 center, float radius)
         {
             Center = center;
             Radius = radius;
@@ -150,7 +150,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="point">The vector in 3D-space for testing.</param>
         /// <returns>The containment type.</returns>
-        public ContainmentType Contains(in Vector3 point)
+        public ContainmentType Contains(Vector3 point)
         {
             float sqRadius = Radius * Radius;
             float sqDistance = Vector3.DistanceSquared(point, Center);

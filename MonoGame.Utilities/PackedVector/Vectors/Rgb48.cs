@@ -40,15 +40,6 @@ namespace MonoGame.Framework.Vector
             B = b;
         }
 
-        public Rgb48(Vector3 vector) : this()
-        {
-            FromVector4(new Vector4(vector, 1));
-        }
-
-        public Rgb48(float x, float y, float z) : this(new Vector3(x, y, z))
-        {
-        }
-
         #endregion
 
         public readonly Vector3 ToVector3()
@@ -58,34 +49,21 @@ namespace MonoGame.Framework.Vector
 
         #region IPackedVector
 
-        public void FromVector4(in Vector4 vector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            var v = vector.ToVector3() * ushort.MaxValue;
-            v += Vector3.Half;
-            v.Clamp(0, ushort.MaxValue);
+            var vector = scaledVector.ToVector3();
+            vector *= ushort.MaxValue;
+            vector += Vector3.Half;
+            vector.Clamp(0, ushort.MaxValue);
 
             R = (ushort)vector.X;
             G = (ushort)vector.Y;
             B = (ushort)vector.Z;
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
         {
-            vector.Base.X = R;
-            vector.Base.Y = G;
-            vector.Base.Z = B;
-            vector.Base.W = ushort.MaxValue;
-            vector /= ushort.MaxValue;
-        }
-
-        public void FromScaledVector4(in Vector4 scaledVector)
-        {
-            FromVector4(scaledVector);
-        }
-
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
-        {
-            ToVector4(out scaledVector);
+            return new Vector4(ToVector3(), 1);
         }
 
         #endregion
@@ -145,6 +123,16 @@ namespace MonoGame.Framework.Vector
 
         #region Equals
 
+        public readonly bool Equals(Rgb48 other)
+        {
+            return this == other;
+        }
+
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Rgb48 other && Equals(other);
+        }
+
         public static bool operator ==(in Rgb48 a, in Rgb48 b)
         {
             return a.R == b.R && a.G == b.G && a.B == b.B;
@@ -155,16 +143,6 @@ namespace MonoGame.Framework.Vector
             return !(a == b);
         }
 
-        public override bool Equals(object obj)
-        {
-            return obj is Rgb48 other && Equals(other);
-        }
-
-        public bool Equals(Rgb48 other)
-        {
-            return this == other;
-        }
-
         #endregion
 
         #region Object Overrides
@@ -172,12 +150,12 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override string ToString() => nameof(Rgb48) + $"(R:{R}, G:{G}, B:{B})";
+        public override readonly string ToString() => nameof(Rgb48) + $"(R:{R}, G:{G}, B:{B})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override int GetHashCode() => HashCode.Combine(R, G, B);
+        public override readonly int GetHashCode() => HashCode.Combine(R, G, B);
 
         #endregion
     }

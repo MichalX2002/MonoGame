@@ -37,7 +37,7 @@ namespace MonoGame.Framework.Audio
             {
                 duration = TimeSpan.FromSeconds(sampleCount / (float)freq);
 
-                var span = data.GetBuffer().AsSpan(0, (int)data.Length);
+                var span = data.AsSpan(0, data.BaseLength);
                 PlatformInitializeBuffer(span, format, channels, freq, blockAlignment, bitsPerSample, 0, 0);
             }
         }
@@ -65,7 +65,7 @@ namespace MonoGame.Framework.Audio
             finally
             {
                 if (largeBuffer != null)
-                    RecyclableMemoryManager.Default.ReturnLargeBuffer(largeBuffer, bufferTag);
+                    RecyclableMemoryManager.Default.ReturnBuffer(largeBuffer, bufferTag);
             }
         }
 
@@ -76,14 +76,14 @@ namespace MonoGame.Framework.Audio
             {
                 var floatData = MemoryMarshal.Cast<byte, float>(data);
                 int byteCount = floatData.Length * sizeof(short);
-                bool isRecyclable = byteCount <= RecyclableMemoryManager.Default.MaximumLargeBufferSize;
+                bool isRecyclable = byteCount <= RecyclableMemoryManager.Default.MaximumBufferSize;
 
                 byte[] largeBuffer = null;
                 string bufferTag = nameof(PlatformInitializeIeeeFloat);
                 try
                 {
                     largeBuffer = isRecyclable
-                        ? RecyclableMemoryManager.Default.GetLargeBuffer(byteCount, bufferTag)
+                        ? RecyclableMemoryManager.Default.GetBuffer(byteCount, bufferTag).Buffer
                         : new byte[byteCount];
 
                     // If 32-bit IEEE float is not supported, convert to 16-bit signed PCM
@@ -94,7 +94,7 @@ namespace MonoGame.Framework.Audio
                 finally
                 {
                     if (isRecyclable)
-                        RecyclableMemoryManager.Default.ReturnLargeBuffer(largeBuffer, bufferTag);
+                        RecyclableMemoryManager.Default.ReturnBuffer(largeBuffer, bufferTag);
                 }
             }
 

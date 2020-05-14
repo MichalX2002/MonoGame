@@ -15,9 +15,9 @@ namespace MonoGame.Framework.Vector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Short2 : IPackedPixel<Short2, uint> 
-    { 
-        private static readonly Vector2 Offset = new Vector2(32768);
+    public struct Short2 : IPackedPixel<Short2, uint>
+    {
+        private static Vector2 Offset => new Vector2(32768);
 
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Red),
@@ -47,22 +47,6 @@ namespace MonoGame.Framework.Vector
             PackedValue = packed;
         }
 
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public Short2(Vector2 vector)
-        {
-            Pack(vector, out this);
-        }
-
-        /// <summary>
-        /// Constructs the packed vector with vector form values.
-        /// </summary>
-        public Short2(float x, float y) : this(new Vector2(x, y))
-        {
-        }
-
         #endregion
 
         public readonly Vector2 ToVector2()
@@ -70,13 +54,13 @@ namespace MonoGame.Framework.Vector
             return new Vector2(X, Y);
         }
 
-        private static void Pack(in Vector2 vector, out Short2 destination)
+        private static void Pack(Vector2 vector, out Short2 destination)
         {
-            var v = vector + Vector2.Half;
-            v.Clamp(short.MinValue, short.MaxValue);
+            vector.Clamp(short.MinValue, short.MaxValue);
+            vector.Round();
 
-            destination.X = (short)v.X;
-            destination.Y = (short)v.Y;
+            destination.X = (short)vector.X;
+            destination.Y = (short)vector.Y;
         }
 
         #region IPackedVector
@@ -84,42 +68,51 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public uint PackedValue
         {
-            readonly get => UnsafeUtils.As<Short2, uint>(this);
+            readonly get => UnsafeR.As<Short2, uint>(this);
             set => Unsafe.As<Short2, uint>(ref this) = value;
         }
 
-        public void FromScaledVector4(in Vector4 scaledVector)
+        public void FromScaledVector4(Vector4 scaledVector)
         {
-            var v = scaledVector.ToVector2() * ushort.MaxValue;
-            v -= Offset;
-            Pack(v, out this);
+            var vector = scaledVector.ToVector2();
+            vector *= ushort.MaxValue;
+            vector -= Offset;
+
+            Pack(vector, out this);
         }
 
-        public readonly void ToScaledVector4(out Vector4 scaledVector)
+        public readonly Vector4 ToScaledVector4()
         {
-            scaledVector.Base.X = X + Offset.X;
-            scaledVector.Base.Y = Y + Offset.Y;
-            scaledVector.Base.Z = 0;
-            scaledVector.Base.W = ushort.MaxValue;
+            var scaledVector = ToVector2();
+            scaledVector += Offset;
             scaledVector /= ushort.MaxValue;
+
+            return new Vector4(scaledVector, 0, 1);
         }
 
-        public void FromVector4(in Vector4 vector)
+        public void FromVector4(Vector4 vector)
         {
             Pack(vector.ToVector2(), out this);
         }
 
-        public readonly void ToVector4(out Vector4 vector)
+        public readonly Vector4 ToVector4()
         {
-            vector.Base.X = X;
-            vector.Base.Y = Y;
-            vector.Base.Z = 0;
-            vector.Base.W = 1;
+            return new Vector4(ToVector2(), 0, 1);
         }
 
         #endregion
 
         #region Equals
+
+        public readonly bool Equals(Short2 other)
+        {
+            return this == other;
+        }
+
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Short2 other && Equals(other);
+        }
 
         public static bool operator ==(in Short2 a, in Short2 b)
         {
@@ -131,23 +124,13 @@ namespace MonoGame.Framework.Vector
             return a.PackedValue != b.PackedValue;
         }
 
-        public bool Equals(Short2 other)
-        {
-            return this == other;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Short2 other && Equals(other);
-        }
-
         #endregion
 
         #region Object Overrides
 
-        public override string ToString() => nameof(Short2) + $"({X}, {Y})";
+        public override readonly string ToString() => nameof(Short2) + $"({X}, {Y})";
 
-        public override int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
     }

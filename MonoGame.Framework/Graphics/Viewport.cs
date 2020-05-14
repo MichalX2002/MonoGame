@@ -144,7 +144,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="world">The world <see cref="Matrix"/>.</param>
         /// <returns>The vector projected into screen space.</returns>
         public Vector3 Project(
-            in Vector3 source, in Matrix projection, in Matrix view, in Matrix world)
+            Vector3 source, in Matrix projection, in Matrix view, in Matrix world)
         {
             var matrix = Matrix.Multiply(Matrix.Multiply(world, view), projection);
             var result = Vector3.Transform(source, matrix);
@@ -181,7 +181,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="world">The world <see cref="Matrix"/>.</param>
         /// <returns>The vector vector unprojected into model space.</returns>
         public Vector3 Unproject(
-            in Vector3 source, in Matrix projection, in Matrix view, in Matrix world)
+            Vector3 source, in Matrix projection, in Matrix view, in Matrix world)
         {
             var matrix = world * view * projection;
             matrix = Matrix.Invert(matrix);

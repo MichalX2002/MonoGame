@@ -12,7 +12,7 @@ namespace MonoGame
         public static class Drop
         {
             [StructLayout(LayoutKind.Sequential)]
-            public unsafe struct DropEvent
+            public struct DropEvent
             {
                 public EventType Type;
                 public uint Timestamp;

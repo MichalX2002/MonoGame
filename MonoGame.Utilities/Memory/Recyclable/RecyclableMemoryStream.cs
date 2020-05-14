@@ -92,7 +92,7 @@ namespace MonoGame.Framework.Memory
         /// If this field is non-null, it contains the concatenation of the bytes found in the individual blocks.
         /// Once it is created, this (or a larger) largeBuffer will be used for the life of the stream.
         /// </remarks>
-        private byte[] _largeBuffer;
+        private RecyclableBuffer _largeBuffer;
 
         #endregion
 
@@ -158,7 +158,7 @@ namespace MonoGame.Framework.Memory
         /// </summary>
         /// <param name="memoryManager">The memory manager</param>
         public RecyclableMemoryStream(RecyclableMemoryManager memoryManager)
-            : this(memoryManager, null, 0, null)
+            : this(memoryManager, 0, null, default)
         {
         }
 
@@ -168,7 +168,7 @@ namespace MonoGame.Framework.Memory
         /// <param name="memoryManager">The memory manager</param>
         /// <param name="tag">A string identifying this stream for logging and debugging purposes</param>
         public RecyclableMemoryStream(RecyclableMemoryManager memoryManager, string tag)
-            : this(memoryManager, tag, 0, null)
+            : this(memoryManager, 0, tag, default)
         {
         }
 
@@ -179,7 +179,7 @@ namespace MonoGame.Framework.Memory
         /// <param name="tag">A string identifying this stream for logging and debugging purposes</param>
         /// <param name="requestedSize">The initial requested size to prevent future allocations</param>
         public RecyclableMemoryStream(RecyclableMemoryManager memoryManager, string tag, long requestedSize)
-            : this(memoryManager, tag, requestedSize, null)
+            : this(memoryManager, requestedSize, tag, default)
         {
         }
 
@@ -187,13 +187,14 @@ namespace MonoGame.Framework.Memory
         /// Constructs a new <see cref="RecyclableMemoryStream"/> object.
         /// </summary>
         /// <param name="memoryManager">The memory manager</param>
-        /// <param name="tag">A string identifying this stream for logging and debugging purposes</param>
         /// <param name="requestedSize">The initial requested size to prevent future allocations</param>
+        /// <param name="tag">A string identifying this stream for logging and debugging purposes</param>
         /// <param name="initialLargeBuffer">
         /// This buffer will be owned by the stream and returned to the memory manager upon Dispose.
         /// </param>
         internal RecyclableMemoryStream(
-            RecyclableMemoryManager memoryManager, string tag, long requestedSize, byte[] initialLargeBuffer)
+            RecyclableMemoryManager memoryManager, long requestedSize, string tag,
+            RecyclableBuffer initialLargeBuffer)
             : base(Array.Empty<byte>())
         {
             _memoryManager = memoryManager;
@@ -213,7 +214,7 @@ namespace MonoGame.Framework.Memory
 
             _memoryManager.ReportStreamCreated();
         }
-        
+
         #endregion
 
         #region Dispose and Finalize
@@ -258,13 +259,12 @@ namespace MonoGame.Framework.Memory
 
             _memoryManager.ReportStreamLength(_length);
 
-            if (_largeBuffer != null)
-                _memoryManager.ReturnLargeBuffer(_largeBuffer, _tag);
+            _largeBuffer?.Dispose();
 
             if (_dirtyBuffers != null)
             {
                 foreach (var buffer in _dirtyBuffers)
-                    _memoryManager.ReturnLargeBuffer(buffer, _tag);
+                    _memoryManager.ReturnBuffer(buffer, _tag);
             }
 
             _memoryManager.ReturnBlocks(_blocks, _tag);
@@ -310,8 +310,9 @@ namespace MonoGame.Framework.Memory
             get
             {
                 CheckDisposed();
+
                 if (_largeBuffer != null)
-                    return _largeBuffer.Length;
+                    return _largeBuffer.BufferLength;
 
                 long size = (long)_blocks.Count * _memoryManager.BlockSize;
                 return (int)Math.Min(int.MaxValue, size);
@@ -404,7 +405,7 @@ namespace MonoGame.Framework.Memory
             CheckDisposed();
 
             if (_largeBuffer != null)
-                return _largeBuffer;
+                return _largeBuffer.Buffer;
 
             if (_blocks.Count == 1)
                 return _blocks[0];
@@ -413,7 +414,7 @@ namespace MonoGame.Framework.Memory
             // because it's possible that people will manipulate the buffer directly
             // and set the length afterward. Capacity sets the expectation
             // for the size of the buffer.
-            byte[] newBuffer = _memoryManager.GetLargeBuffer(Capacity, _tag);
+            var newBuffer = _memoryManager.GetBuffer(Capacity, _tag);
 
             // InternalRead will check for existence of largeBuffer, so make sure we
             // don't set it until after we've copied the data.
@@ -426,7 +427,7 @@ namespace MonoGame.Framework.Memory
                 _blocks.Clear();
             }
 
-            return _largeBuffer;
+            return _largeBuffer.Buffer;
         }
 
         /// <summary>
@@ -626,7 +627,7 @@ namespace MonoGame.Framework.Memory
                 value = _blocks[blockAndOffset.Block][blockAndOffset.Offset];
             }
             else
-                value = _largeBuffer[streamPosition];
+                value = _largeBuffer.Buffer[streamPosition];
 
             streamPosition++;
             return value;
@@ -718,7 +719,7 @@ namespace MonoGame.Framework.Memory
                 }
             }
             else
-                stream.Write(_largeBuffer, 0, _length);
+                stream.Write(_largeBuffer.Buffer, 0, _length);
         }
         #endregion
 
@@ -788,15 +789,15 @@ namespace MonoGame.Framework.Memory
                 _memoryManager.MaximumStreamCapacity > 0)
             {
                 throw new InvalidOperationException(
-                    "Requested capacity is too large (" + newCapacity + 
+                    "Requested capacity is too large (" + newCapacity +
                     "). Limit is " + _memoryManager.MaximumStreamCapacity);
             }
 
-            if (_largeBuffer != null)
+            if (_largeBuffer == null)
             {
-                if (newCapacity > _largeBuffer.Length)
+                if (newCapacity > _largeBuffer.BufferLength)
                 {
-                    var newBuffer = _memoryManager.GetLargeBuffer(newCapacity, _tag);
+                    var newBuffer = _memoryManager.GetBuffer(newCapacity, _tag);
                     InternalRead(newBuffer.AsSpan(0, _length), 0);
 
                     ReleaseLargeBuffer();
@@ -815,9 +816,9 @@ namespace MonoGame.Framework.Memory
         /// </summary>
         private void ReleaseLargeBuffer()
         {
-            if (_memoryManager.AggressiveLargeBufferReturn)
+            if (_memoryManager.AggressiveBufferReturn)
             {
-                _memoryManager.ReturnLargeBuffer(_largeBuffer, _tag);
+                _largeBuffer.Dispose();
             }
             else
             {
@@ -825,9 +826,8 @@ namespace MonoGame.Framework.Memory
                     // We most likely will only ever need space for one
                     _dirtyBuffers = new List<byte[]>(1);
 
-                _dirtyBuffers.Add(_largeBuffer);
+                _dirtyBuffers.Add(_largeBuffer.Buffer);
             }
-
             _largeBuffer = null;
         }
         #endregion

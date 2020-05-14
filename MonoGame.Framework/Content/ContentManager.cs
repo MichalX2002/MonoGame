@@ -436,14 +436,9 @@ namespace MonoGame.Framework.Content
             LoadedAssets.Clear();
         }
 
-        internal byte[] GetScratchBuffer(int size)
+        internal RecyclableBuffer GetScratchBuffer(int size)
         {
-            return RecyclableMemoryManager.Default.GetLargeBuffer(size, nameof(ContentManager));
-        }
-
-        internal void ReturnScratchBuffer(byte[] buffer)
-        {
-            RecyclableMemoryManager.Default.ReturnLargeBuffer(buffer, nameof(ContentManager));
+            return RecyclableMemoryManager.Default.GetBuffer(size, nameof(ContentManager));
         }
     }
 }

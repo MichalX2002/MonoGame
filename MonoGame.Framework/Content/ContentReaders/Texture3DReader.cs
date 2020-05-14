@@ -24,9 +24,11 @@ namespace MonoGame.Framework.Content
             for (int i = 0; i < levelCount; i++)
             {
                 int dataSize = reader.ReadInt32();
-                byte[] data = reader.ContentManager.GetScratchBuffer(dataSize);
-                reader.Read(data, 0, dataSize);
-                texture.SetData(i, 0, 0, width, height, 0, depth, data.AsSpan(0, dataSize));
+                using (var buffer = reader.ContentManager.GetScratchBuffer(dataSize))
+                {
+                    reader.Read(buffer.AsSpan(0, dataSize));
+                    texture.SetData(i, 0, 0, width, height, 0, depth, buffer.AsSpan(0, dataSize));
+                }
 
                 // Calculate dimensions of next mip level.
                 width = Math.Max(width / 2, 1);

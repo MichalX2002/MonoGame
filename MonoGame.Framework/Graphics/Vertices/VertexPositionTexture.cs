@@ -17,7 +17,7 @@ namespace MonoGame.Framework.Graphics
         public Vector3 Position;
         public Vector2 TextureCoordinate;
 
-        public VertexPositionTexture(in Vector3 position, in Vector2 textureCoordinate)
+        public VertexPositionTexture(Vector3 position, Vector2 textureCoordinate)
         {
             Position = position;
             TextureCoordinate = textureCoordinate;
