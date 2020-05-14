@@ -53,52 +53,6 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        #region IPixel
-
-        public void FromGray8(Gray8 source)
-        {
-            Unsafe.As<RgbaVector, Vector4>(ref this) = source.ToScaledVector4();
-        }
-
-        public void FromGray16(Gray16 source)
-        {
-            Unsafe.As<RgbaVector, Vector4>(ref this) = source.ToScaledVector4();
-        }
-
-        public void FromGrayAlpha16(GrayAlpha16 source)
-        {
-            Unsafe.As<RgbaVector, Vector4>(ref this) = source.ToScaledVector4();
-        }
-
-        public void FromRgb24(Rgb24 source)
-        {
-            Unsafe.As<RgbaVector, Vector4>(ref this) = source.ToScaledVector4();
-        }
-
-        public void FromRgb48(Rgb48 source)
-        {
-            Unsafe.As<RgbaVector, Vector4>(ref this) = source.ToScaledVector4();
-        }
-
-        public void FromRgba64(Rgba64 source)
-        {
-            Unsafe.As<RgbaVector, Vector4>(ref this) = source.ToScaledVector4();
-        }
-
-        public void FromColor(Color source)
-        {
-            Unsafe.As<RgbaVector, Vector4>(ref this) = source.ToScaledVector4();
-        }
-
-        public readonly void ToColor(out Color destination)
-        {
-            destination = default; // TODO: Unsafe.SkipInit
-
-            destination.FromScaledVector4(UnsafeR.As<RgbaVector, Vector4>(this));
-        }
-
-        #endregion
-
         #region Equals
 
         public readonly bool Equals(RgbaVector other)

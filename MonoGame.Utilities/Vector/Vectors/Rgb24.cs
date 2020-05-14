@@ -69,14 +69,6 @@ namespace MonoGame.Framework.Vector
 
         #region IPixel
 
-        public readonly void ToColor(out Color destination)
-        {
-            destination.R = R;
-            destination.G = G;
-            destination.B = B;
-            destination.A = byte.MaxValue;
-        }
-
         public void FromGray8(Gray8 source)
         {
             R = G = B = source.L;
@@ -116,6 +108,11 @@ namespace MonoGame.Framework.Vector
             R = PackedVectorHelper.DownScale16To8Bit(source.R);
             G = PackedVectorHelper.DownScale16To8Bit(source.G);
             B = PackedVectorHelper.DownScale16To8Bit(source.B);
+        }
+
+        public readonly Color ToColor()
+        {
+            return new Color(R, G, B, byte.MaxValue);
         }
 
         #endregion

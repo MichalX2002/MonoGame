@@ -12,7 +12,7 @@ namespace MonoGame.Framework.Vector
     /// <para>Ranges from [-1, 0, 0, 1] to [1, 0, 0, 1] in vector form.</para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct HalfSingle : IPackedPixel<HalfSingle, ushort>
+    public struct HalfSingle : IPackedPixel<HalfSingle, ushort>, IPixel
     {
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Float16, VectorComponentChannel.Red));
@@ -48,6 +48,14 @@ namespace MonoGame.Framework.Vector
             return HalfTypeHelper.Unpack(PackedValue);
         }
 
+        /// <summary>
+        /// Gets the packed vector as a <see cref="float"/>.
+        /// </summary>
+        public readonly float ToScaledSingle()
+        {
+            return (ToSingle() + 1) / 2f;
+        }
+
         #region IPackedVector
 
         [CLSCompliant(false)]
@@ -58,12 +66,13 @@ namespace MonoGame.Framework.Vector
             float scaled = vector.X;
             scaled *= 2;
             scaled -= 1;
+
             PackedValue = HalfTypeHelper.Pack(scaled);
         }
 
         public readonly Vector4 ToScaledVector4()
         {
-            return new Vector4((ToSingle() + 1) / 2f, 0, 0, 1);
+            return new Vector4(ToScaledSingle(), 0, 0, 1);
         }
 
         public void FromVector4(Vector4 vector)
@@ -74,6 +83,15 @@ namespace MonoGame.Framework.Vector
         public readonly Vector4 ToVector4()
         {
             return new Vector4(ToSingle(), 0, 0, 1);
+        }
+
+        #endregion
+
+        #region IPixel
+
+        public readonly Color ToColor()
+        {
+            return new Color(ToScaledSingle(), 0, 0, 1);
         }
 
         #endregion

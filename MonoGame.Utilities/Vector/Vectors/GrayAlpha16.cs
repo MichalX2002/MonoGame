@@ -101,10 +101,9 @@ namespace MonoGame.Framework.Vector
             A = byte.MaxValue;
         }
 
-        public readonly void ToColor(out Color destination)
+        public readonly Color ToColor()
         {
-            destination.R = destination.G = destination.B = L;
-            destination.A = A;
+            return new Color(L, A);
         }
 
         #endregion

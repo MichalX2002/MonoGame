@@ -102,15 +102,41 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
+        /// Constructs the <see cref="Color"/> with raw values.
+        /// </summary>
+        /// <remarks>
+        /// This overload sets the values directly without clamping and 
+        /// may therefore be faster than the other overloads.
+        /// </remarks>
+        public Color(byte r, byte g, byte b) : this(r, g, b, byte.MaxValue)
+        {
+        }
+
+        /// <summary>
+        /// Constructs the <see cref="Color"/> with raw values.
+        /// </summary>
+        /// <remarks>
+        /// This overload sets the values directly without clamping and 
+        /// may therefore be faster than the other overloads.
+        /// </remarks>
+        public Color(byte luminance, byte alpha) : this(luminance, luminance, luminance, alpha)
+        {
+        }
+
+        /// <summary>
         /// Constructs the <see cref="Color"/> with a packed value.
         /// R in the least significant byte.
         /// </summary>
+        /// <remarks>
+        /// This overload sets the values directly without clamping and 
+        /// may therefore be faster than the other overloads.
+        /// </remarks>
         [CLSCompliant(false)]
         public Color(uint packed) : this()
         {
+            // TODO: Unsafe.SkipInit(out this)
             PackedValue = packed;
         }
-
 
         /// <summary>
         /// Constructs the <see cref="Color"/> with clamped raw values. 
@@ -140,8 +166,26 @@ namespace MonoGame.Framework
         /// <param name="r">Red component value from 0 to 255.</param>
         /// <param name="g">Green component value from 0 to 255.</param>
         /// <param name="b">Blue component value from 0 to 255.</param>
-        public Color(int r, int g, int b) : this(r, g, b, byte.MaxValue)
+        public Color(int r, int g, int b) : this(
+            MathHelper.Clamp(r, byte.MinValue, byte.MaxValue),
+            MathHelper.Clamp(g, byte.MinValue, byte.MaxValue),
+            MathHelper.Clamp(b, byte.MinValue, byte.MaxValue))
         {
+        }
+
+        /// <summary>
+        /// Constructs the <see cref="Color"/> with vector form values.
+        /// </summary>
+        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
+        public Color(Vector4 color)
+        {
+            color *= byte.MaxValue;
+            color.Clamp(Vector4.Zero, Vector4.MaxValueByte);
+
+            R = (byte)color.X;
+            G = (byte)color.Y;
+            B = (byte)color.Z;
+            A = (byte)color.W;
         }
 
         /// <summary>
@@ -150,31 +194,8 @@ namespace MonoGame.Framework
         /// <param name="r">Red component value from 0 to 1.</param>
         /// <param name="g">Green component value from 0 to 1.</param>
         /// <param name="b">Blue component value from 0 to 1.</param>
-        /// <param name="alpha">Alpha component value from 0 to 1.</param>
-        public Color(float r, float g, float b, float alpha) : this(
-            (int)(r * byte.MaxValue),
-            (int)(g * byte.MaxValue),
-            (int)(b * byte.MaxValue),
-            (int)(alpha * byte.MaxValue))
-        {
-        }
-
-        /// <summary>
-        /// Constructs the <see cref="Color"/> with vector form values.
-        /// </summary>
-        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public Color(in Vector4 color) : this(color.X, color.Y, color.Z, color.W)
-        {
-        }
-
-        /// <summary>
-        /// Constructs the <see cref="Color"/> with vector form values. 
-        /// Alpha value will be opaque.
-        /// </summary>
-        /// <param name="r">Red component value from 0 to 1.</param>
-        /// <param name="g">Green component value from 0 to 1.</param>
-        /// <param name="b">Blue component value from 0 to 1.</param>
-        public Color(float r, float g, float b) : this(r, g, b, 1f)
+        /// <param name="a">Alpha component value from 0 to 1.</param>
+        public Color(float r, float g, float b, float a) : this(new Vector4(r, g, b, a))
         {
         }
 
@@ -184,7 +205,25 @@ namespace MonoGame.Framework
         /// <para>The values are clamped between 0 and 1.</para>
         /// </summary>
         /// <param name="color"><see cref="Vector3"/> containing the components.</param>
-        public Color(Vector3 color) : this(color.X, color.Y, color.Z)
+        public Color(Vector3 color)
+        {
+            color *= byte.MaxValue;
+            color.Clamp(Vector3.Zero, Vector3.MaxValueByte);
+
+            R = (byte)color.X;
+            G = (byte)color.Y;
+            B = (byte)color.Z;
+            A = byte.MaxValue;
+        }
+
+        /// <summary>
+        /// Constructs the <see cref="Color"/> with vector form values. 
+        /// Alpha value will be opaque.
+        /// </summary>
+        /// <param name="r">Red component value from 0 to 1.</param>
+        /// <param name="g">Green component value from 0 to 1.</param>
+        /// <param name="b">Blue component value from 0 to 1.</param>
+        public Color(float r, float g, float b) : this(new Vector3(r, g, b))
         {
         }
 
@@ -212,7 +251,8 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="color">The RGB values.</param>
         /// <param name="alpha">The alpha component value from 0 to 255.</param>
-        public Color(Rgb24 color, byte alpha) : this(color.R, color.G, color.B, alpha)
+        public Color(Rgb24 color, byte alpha) :
+            this(color.R, color.G, color.B, alpha)
         {
         }
 
@@ -231,7 +271,8 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="color">The RGB values.</param>
         /// <param name="alpha">Alpha component value from 0 to 1.</param>
-        public Color(Rgb24 color, float alpha) : this(color, (int)(alpha * byte.MaxValue))
+        public Color(Rgb24 color, float alpha) :
+            this(color, (int)(alpha * byte.MaxValue))
         {
         }
 
@@ -320,9 +361,9 @@ namespace MonoGame.Framework
             A = PackedVectorHelper.DownScale16To8Bit(source.A);
         }
 
-        public readonly void ToColor(out Color destination)
+        public readonly Color ToColor()
         {
-            destination = this;
+            return this;
         }
 
         #endregion

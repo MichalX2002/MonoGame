@@ -20,6 +20,8 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Vector3 : IPixel<Vector3>, IEquatable<Vector3>
     {
+        internal static Vector3 MaxValueByte => new Vector3(byte.MaxValue);
+
         #region Public Constants
 
         /// <summary>

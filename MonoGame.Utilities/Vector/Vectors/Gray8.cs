@@ -2,7 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vector
@@ -86,10 +85,9 @@ namespace MonoGame.Framework.Vector
                 PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
         }
 
-        public readonly void ToColor(out Color destination)
+        public readonly Color ToColor()
         {
-            destination.R = destination.G = destination.B = L;
-            destination.A = byte.MaxValue;
+            return new Color(L, byte.MaxValue);
         }
 
         #endregion

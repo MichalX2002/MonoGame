@@ -90,10 +90,9 @@ namespace MonoGame.Framework.Vector
                 PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
         }
 
-        public readonly void ToColor(out Color destination)
+        public readonly Color ToColor()
         {
-            destination.R = destination.G = destination.B = PackedVectorHelper.DownScale32To8Bit(L);
-            destination.A = byte.MaxValue;
+            return new Color(PackedVectorHelper.DownScale32To8Bit(L), byte.MaxValue);
         }
 
         #endregion

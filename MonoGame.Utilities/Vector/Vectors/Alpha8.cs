@@ -112,10 +112,9 @@ namespace MonoGame.Framework.Vector
             A = PackedVectorHelper.DownScale16To8Bit(source.A);
         }
 
-        public readonly void ToColor(out Color destination)
+        public readonly Color ToColor()
         {
-            destination.R = destination.G = destination.B = byte.MaxValue;
-            destination.A = A;
+            return new Color(byte.MaxValue, A);
         }
 
         #endregion
