@@ -165,7 +165,7 @@ namespace MonoGame.TestingA
                     var image = Image<Color>.Create(w, h);
                     GraphicsDevice.GetBackBufferData(image.GetPixelSpan(), new Rectangle(x, y, w, h));
 
-                    Task.Run(async () =>
+                    Task.Run(() =>
                     {
                         static void OnProgress(
                             ImageEncoderState encoderState,
@@ -176,7 +176,7 @@ namespace MonoGame.TestingA
                         }
 
                         frameIndex++;
-                        await image.SaveAsync(
+                        image.Save(
                             "frames/yo mom " + frameIndex + ".png", onProgress: OnProgress);
                         image.Dispose();
                     });

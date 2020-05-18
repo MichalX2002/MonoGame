@@ -1,17 +1,18 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MonoGame.Imaging.Codecs.Decoding
 {
-    public class ImageDecoderEnumerator : IAsyncEnumerator<Image>, IImagingConfigurable
+    public class ImageDecoderEnumerator : IEnumerator<Image>, IImagingConfigurable
     {
         public ImageDecoderState State { get; }
         public IImagingConfig Config => State.Config;
 
         public Image Current => State.CurrentImage!;
+        object? IEnumerator.Current => Current;
 
         #region Constructors
 
@@ -22,30 +23,33 @@ namespace MonoGame.Imaging.Codecs.Decoding
             bool leaveOpen,
             CancellationToken cancellationToken = default)
         {
-            if (decoder == null) throw new ArgumentNullException(nameof(decoder));
+            if (decoder == null) 
+                throw new ArgumentNullException(nameof(decoder));
 
             State = decoder.CreateState(config, stream, leaveOpen, cancellationToken);
         }
 
         #endregion
 
-        public async ValueTask<bool> MoveNextAsync()
+        public bool MoveNext()
         {
-            if (await State.Decoder.Decode(State))
-            {
-                if (State.CurrentImage == null)
-                    throw new Exception(
-                        "The decoder reported a successful decode, but there is no resulting image.");
+            State.Decoder.Decode(State);
 
-                return true;
-            }
+            if (State.CurrentImage == null)
+                throw new Exception("The decoder did not output an image.");
 
-            return false;
+            return true;
         }
 
-        public ValueTask DisposeAsync()
+        public void Reset()
         {
-            return State.DisposeAsync();
+            // consider implementation for seekable streams
+            throw new NotSupportedException();
+        }
+
+        public void Dispose()
+        {
+            State.Dispose();
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Threading.Tasks;
 using MonoGame.Imaging.Attributes.Codec;
 using MonoGame.Imaging.Codecs.Encoding;
+using MonoGame.Imaging.Pixels;
 using StbSharp;
 
 namespace MonoGame.Imaging.Codecs.Formats
@@ -26,13 +26,17 @@ namespace MonoGame.Imaging.Codecs.Formats
             public override ImageFormat Format => ImageFormat.Jpeg;
             public override EncoderOptions DefaultOptions => JpegEncoderOptions.Default;
 
-            protected override Task Write(
+            protected override void Write(
                 StbImageEncoderState encoderState,
+                IReadOnlyPixelRows image,
                 ImageWrite.WriteState writeState)
             {
                 var options = encoderState.GetCodecOptions<JpegEncoderOptions>();
+
+                bool useFloatPixels = writeState.Depth > 8;
+
                 // TODO: utilize readFloatPixels
-                return ImageWrite.Jpeg.WriteCore(writeState, options.Quality, useFloatPixels: false);
+                ImageWrite.Jpeg.WriteCore(writeState, options.Quality, useFloatPixels);
             }
         }
     }

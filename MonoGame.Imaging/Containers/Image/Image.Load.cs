@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using MonoGame.Framework.Vector;
 using MonoGame.Imaging.Codecs.Decoding;
 
@@ -12,7 +10,7 @@ namespace MonoGame.Imaging
     {
         #region Load(Stream)
 
-        public static async Task<Image?> LoadAsync(
+        public static Image? Load(
             IImagingConfig config,
             Stream stream,
             VectorTypeInfo? preferredPixelType = null,
@@ -20,29 +18,29 @@ namespace MonoGame.Imaging
             DecodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
         {
-            var frames = await CreateDecoderEnumeratorAsync(
+            var frames = CreateDecoderEnumerator(
                 config, stream, leaveOpen: true, cancellationToken);
 
-            await using (frames)
+            using (frames)
             {
                 frames.State.DecoderOptions = decoderOptions;
                 frames.State.PreferredPixelType = preferredPixelType;
                 frames.State.Progress += onProgress;
 
-                if (await frames.MoveNextAsync())
+                if (frames.MoveNext())
                     return frames.Current;
             }
             return null;
         }
 
-        public static Task<Image?> LoadAsync(
+        public static Image? Load(
             Stream stream,
             VectorTypeInfo? preferredPixelType = null,
             DecoderOptions? decoderOptions = null,
             DecodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
         {
-            return LoadAsync(
+            return Load(
                 ImagingConfig.Default,
                 stream, preferredPixelType, decoderOptions, onProgress, cancellationToken);
         }
@@ -51,7 +49,7 @@ namespace MonoGame.Imaging
 
         #region Load<TPixel>(Stream)
 
-        public static async Task<Image<TPixel>?> LoadAsync<TPixel>(
+        public static Image<TPixel>? Load<TPixel>(
             IImagingConfig config,
             Stream stream,
             DecoderOptions? decoderOptions = null,
@@ -61,20 +59,20 @@ namespace MonoGame.Imaging
         {
             var preferredType = VectorTypeInfo.Get<TPixel>();
 
-            var image = await LoadAsync(
+            var image = Load(
                 config, stream, preferredType, decoderOptions, onProgress, cancellationToken);
 
             return (Image<TPixel>?)image;
         }
 
-        public static Task<Image<TPixel>?> LoadAsync<TPixel>(
+        public static Image<TPixel>? Load<TPixel>(
             Stream stream,
             DecoderOptions? decoderOptions = null,
             DecodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
             where TPixel : unmanaged, IPixel
         {
-            return LoadAsync<TPixel>(
+            return Load<TPixel>(
                 ImagingConfig.Default, stream, decoderOptions, onProgress, cancellationToken);
         }
 
@@ -83,7 +81,7 @@ namespace MonoGame.Imaging
         public Stream OpenReadStream(string filePath)
         {
             // All Stb decoders read file sequentially, so there's nothing to lose.
-            var options = FileOptions.Asynchronous | FileOptions.SequentialScan;
+            var options = FileOptions.SequentialScan;
 
             throw new NotImplementedException();
         }

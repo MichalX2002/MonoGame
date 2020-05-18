@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using StbSharp;
 
 namespace MonoGame.Imaging.Codecs.Decoding
@@ -9,7 +8,7 @@ namespace MonoGame.Imaging.Codecs.Decoding
     public abstract partial class StbImageDecoderBase : IImageDecoder
     {
         public abstract ImageFormat Format { get; }
-        
+
         public virtual DecoderOptions DefaultOptions => DecoderOptions.Default;
         CodecOptions IImageCodec.DefaultOptions => DefaultOptions;
 
@@ -22,21 +21,19 @@ namespace MonoGame.Imaging.Codecs.Decoding
             return new StbImageDecoderState(this, config, stream, leaveOpen, cancellationToken);
         }
 
-        public async Task<bool> Decode(ImageDecoderState decoderState)
+        public void Decode(ImageDecoderState decoderState)
         {
             var state = (StbImageDecoderState)decoderState;
             if (state.FrameIndex < 0)
                 throw new InvalidOperationException("The decoder state is invalid.");
 
             var readState = state.CreateReadState();
-            if (!await Read(state, readState))
-                return false;
+            Read(state, readState);
 
             state.FrameIndex++;
-            return true;
         }
 
-        protected abstract Task<bool> Read(
+        protected abstract void Read(
             StbImageDecoderState decoderState, ImageRead.ReadState readState);
     }
 }

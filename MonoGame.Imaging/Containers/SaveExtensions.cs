@@ -14,7 +14,7 @@ namespace MonoGame.Imaging
 {
     public static partial class SaveExtensions
     {
-        public static async Task SaveAsync(
+        public static void Save(
             this IEnumerable<IReadOnlyPixelRows> images,
             IImagingConfig imagingConfig,
             Stream output,
@@ -33,7 +33,7 @@ namespace MonoGame.Imaging
             var state = encoder.CreateState(
                 imagingConfig, output, leaveOpen: true, cancellationToken);
 
-            await using (state)
+            using (state)
             {
                 state.EncoderOptions = encoderOptions;
                 state.Progress += onProgress;
@@ -44,7 +44,7 @@ namespace MonoGame.Imaging
 
                 foreach (var image in images)
                 {
-                    await encoder.Encode(state, image);
+                    encoder.Encode(state, image);
 
                     if (!hasAnimationSupport)
                         break;
@@ -52,7 +52,7 @@ namespace MonoGame.Imaging
             }
         }
 
-        public static Task SaveAsync(
+        public static void Save(
             this IEnumerable<IReadOnlyPixelRows> images,
             Stream output,
             ImageFormat format,
@@ -60,12 +60,12 @@ namespace MonoGame.Imaging
             EncodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
         {
-            return SaveAsync(
+            Save(
                 images, ImagingConfig.Default, output, format,
                 encoderOptions, onProgress, cancellationToken);
         }
 
-        public static async Task SaveAsync(
+        public static void Save(
             this IEnumerable<IReadOnlyPixelRows> images,
             IImagingConfig imagingConfig,
             string filePath,
@@ -78,12 +78,12 @@ namespace MonoGame.Imaging
                 format = ImageFormat.GetByPath(filePath)[0];
 
             using (var outputStream = OpenWriteStream(filePath))
-                await SaveAsync(
+                Save(
                     images, imagingConfig, outputStream, format,
                     encoderOptions, onProgress, cancellationToken);
         }
 
-        public static Task SaveAsync(
+        public static void Save(
             this IEnumerable<IReadOnlyPixelRows> images,
             string filePath,
             ImageFormat? format = null,
@@ -91,14 +91,14 @@ namespace MonoGame.Imaging
             EncodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
         {
-            return SaveAsync(
+            Save(
                 images, ImagingConfig.Default, filePath, format,
                 encoderOptions, onProgress, cancellationToken);
         }
 
-        #region SaveAsync(Stream)
+        #region Save(Stream)
 
-        public static async Task SaveAsync(
+        public static void Save(
             this IReadOnlyPixelRows image,
             IImagingConfig imagingConfig,
             Stream output,
@@ -113,12 +113,12 @@ namespace MonoGame.Imaging
             AssertValidArguments(imagingConfig, format);
             AssertValidOutput(output);
 
-            await SaveAsync(
+            Save(
                 new[] { image }, imagingConfig, output, format,
                 encoderOptions, onProgress, cancellationToken);
         }
 
-        public static Task SaveAsync(
+        public static void Save(
             this IReadOnlyPixelRows image,
             Stream output,
             ImageFormat format,
@@ -126,16 +126,16 @@ namespace MonoGame.Imaging
             EncodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
         {
-            return SaveAsync(
+            Save(
                 image, ImagingConfig.Default, output, format,
                 encoderOptions, onProgress, cancellationToken);
         }
 
         #endregion
 
-        #region SaveAsync(FilePath)
+        #region Save(FilePath)
 
-        public static async Task SaveAsync(
+        public static void Save(
             this IReadOnlyPixelRows image,
             IImagingConfig imagingConfig,
             string filePath,
@@ -150,12 +150,12 @@ namespace MonoGame.Imaging
             AssertValidArguments(imagingConfig, format);
             AssertValidPath(filePath);
 
-            await SaveAsync(
+            Save(
                 new[] { image }, imagingConfig, filePath, format,
                 encoderOptions, onProgress, cancellationToken);
         }
 
-        public static Task SaveAsync(
+        public static void Save(
             this IReadOnlyPixelRows image,
             string filePath,
             ImageFormat? format = null,
@@ -163,7 +163,7 @@ namespace MonoGame.Imaging
             EncodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
         {
-            return SaveAsync(
+            Save(
                 image, ImagingConfig.Default, filePath, format,
                 encoderOptions, onProgress, cancellationToken);
         }
@@ -172,8 +172,8 @@ namespace MonoGame.Imaging
 
         public static FileStream OpenWriteStream(string filePath)
         {
-            const FileOptions options = FileOptions.Asynchronous;
-            const int bufferSize = 1024 * 16;
+            const FileOptions options = FileOptions.None;
+            const int bufferSize = 1024 * 4;
 
             AssertValidPath(filePath);
 

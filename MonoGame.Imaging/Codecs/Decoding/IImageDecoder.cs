@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MonoGame.Imaging.Codecs.Decoding
 {
@@ -23,8 +22,8 @@ namespace MonoGame.Imaging.Codecs.Decoding
         /// <param name="cancellationToken">The token used for cancellation.</param>
         /// <returns>The state used to decode images.</returns>
         ImageDecoderState CreateState(
-            IImagingConfig config, 
-            Stream stream, 
+            IImagingConfig config,
+            Stream stream,
             bool leaveOpen,
             CancellationToken cancellationToken = default);
 
@@ -32,6 +31,6 @@ namespace MonoGame.Imaging.Codecs.Decoding
         /// Decodes an image from the decoder state stream. 
         /// </summary>
         /// <param name="decoderState">The shared state used to decode images.</param>
-        Task<bool> Decode(ImageDecoderState decoderState);
+        void Decode(ImageDecoderState decoderState);
     }
 }

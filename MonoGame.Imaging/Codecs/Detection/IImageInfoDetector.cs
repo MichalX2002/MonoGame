@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MonoGame.Imaging.Codecs.Decoding
 {
@@ -16,7 +15,7 @@ namespace MonoGame.Imaging.Codecs.Decoding
         /// <param name="stream">The stream to read from.</param>
         /// <param name="cancellationToken">The token used for cancellation.</param>
         /// <returns>The information that was identified.</returns>
-        Task<ImageInfo> Identify(
+        ImageInfo Identify(
             IImagingConfig config, Stream stream, CancellationToken cancellationToken = default);
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using MonoGame.Framework.Vector;
 using MonoGame.Imaging.Pixels;
 using StbSharp;
@@ -15,8 +14,10 @@ namespace MonoGame.Imaging.Codecs.Encoding
 
         CodecOptions IImageCodec.DefaultOptions => DefaultOptions;
 
-        protected abstract Task Write(
-            StbImageEncoderState encoderState, ImageWrite.WriteState writeState);
+        protected abstract void Write(
+            StbImageEncoderState encoderState,
+            IReadOnlyPixelRows image,
+            ImageWrite.WriteState writeState);
 
         public ImageEncoderState CreateState(
             IImagingConfig imagingConfig,
@@ -28,7 +29,7 @@ namespace MonoGame.Imaging.Codecs.Encoding
                 this, imagingConfig, stream, leaveOpen, cancellationToken);
         }
 
-        public async Task Encode(
+        public void Encode(
             ImageEncoderState encoderState,
             IReadOnlyPixelRows image)
         {
@@ -53,9 +54,9 @@ namespace MonoGame.Imaging.Codecs.Encoding
 
             var provider = new PixelRowProvider(image, components, depth);
 
-            await using (var writeState = state.CreateWriteState(provider))
+            using (var writeState = state.CreateWriteState(provider))
             {
-                await Write(state, writeState);
+                Write(state, image, writeState);
             }
         }
     }

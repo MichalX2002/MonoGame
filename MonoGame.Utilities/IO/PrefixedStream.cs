@@ -64,9 +64,9 @@ namespace MonoGame.Framework.IO
         {
         }
 
-        public Memory<byte> GetPrefix()
+        public Memory<byte> GetPrefix(CancellationToken cancellationToken = default)
         {
-            FillReadAheadBuffer();
+            FillReadAheadBuffer(cancellationToken);
             return _prefix;
         }
 
@@ -87,7 +87,7 @@ namespace MonoGame.Framework.IO
                 return 0;
 
             if (_prefix.IsEmpty)
-                FillReadAheadBuffer();
+                FillReadAheadBuffer(default);
 
             int left = buffer.Length;
             int totalRead = 0;
@@ -115,7 +115,7 @@ namespace MonoGame.Framework.IO
                 return 0;
 
             if (_prefix.IsEmpty)
-                await FillReadAheadBufferAsync();
+                await FillReadAheadBufferAsync(cancellationToken);
 
             int left = buffer.Length;
             int totalRead = 0;
@@ -145,7 +145,7 @@ namespace MonoGame.Framework.IO
             return prefixToRead;
         }
 
-        private void FillReadAheadBuffer()
+        private void FillReadAheadBuffer(CancellationToken cancellationToken)
         {
             if (_readAheadPosition < ReadAheadLength && _prefix.IsEmpty)
             {
@@ -154,12 +154,13 @@ namespace MonoGame.Framework.IO
                     _readAheadBuffer, _readAheadPosition, ReadAheadLength - _readAheadPosition)) > 0)
                 {
                     _readAheadPosition += read;
+                    cancellationToken.ThrowIfCancellationRequested();
                 }
                 _prefix = _readAheadBuffer.AsMemory(0, _readAheadPosition);
             }
         }
 
-        private async ValueTask FillReadAheadBufferAsync(CancellationToken cancellationToken = default)
+        private async ValueTask FillReadAheadBufferAsync(CancellationToken cancellationToken)
         {
             if (_readAheadPosition < ReadAheadLength && _prefix.IsEmpty)
             {

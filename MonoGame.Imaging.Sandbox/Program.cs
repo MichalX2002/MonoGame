@@ -29,25 +29,25 @@ namespace MonoGame.Imaging.Tests
     {
         public const string DataZip = "testdata.zip";
 
-        static async Task TestBmp(ZipArchive archive)
+        static void TestBmp(ZipArchive archive)
         {
             Directory.CreateDirectory("test/bmp");
 
             using (var stream = archive.GetEntry("bmp/32bit.bmp").Open())
-            using (var img = await Image.LoadAsync(stream))
-                await img.SaveAsync("32bit.png");
+            using (var img = Image.Load(stream))
+                img.Save("32bit.png");
 
             using (var stream = archive.GetEntry("bmp/24bit.bmp").Open())
-            using (var img = await Image.LoadAsync(stream))
-                await img.SaveAsync("24bit.png");
+            using (var img = Image.Load(stream))
+                img.Save("24bit.png");
 
             using (var stream = archive.GetEntry("bmp/8bit.bmp").Open())
-            using (var img = await Image.LoadAsync(stream))
-                await img.SaveAsync("8bit.png");
+            using (var img = Image.Load(stream))
+                img.Save("8bit.png");
 
             using (var stream = archive.GetEntry("bmp/4bit.bmp").Open())
-            using (var img = await Image.LoadAsync(stream))
-                await img.SaveAsync("4bit.png");
+            using (var img = Image.Load(stream))
+                img.Save("4bit.png");
         }
 
         static unsafe void bröh(MemoryStream endmee)
@@ -69,11 +69,11 @@ namespace MonoGame.Imaging.Tests
                 var uu = new UnmanagedMemory<byte>(w * h * comp * ri.bits_per_channel / 8);
                 new Span<byte>(pp, w * h * comp * ri.bits_per_channel / 8).CopyTo(uu.Span);
                 var mg = Image.WrapMemory(vec, uu, new Size(w, h));
-                mg.SaveAsync("wtf/_OMG.png").Wait();
+                mg.Save("wtf/_OMG.png");
             }
         }
 
-        static async Task TestPng()
+        static void TestPng()
         {
             Directory.CreateDirectory("test/png/cgbi");
 
@@ -81,9 +81,9 @@ namespace MonoGame.Imaging.Tests
             //{
             //    var entri = archive.GetEntry("png/cgbi/prop.png");
             //    using (var ffff = entri.Open())
-            //    using (var ihponeimg = await Image.LoadAsync(ffff))
+            //    using (var ihponeimg = Image.Load(ffff))
             //    {
-            //        await ihponeimg.SaveAsync("test/png/cgbi/prop.png");
+            //        ihponeimg.Save("test/png/cgbi/prop.png");
             //    }
             //}
 
@@ -107,7 +107,7 @@ namespace MonoGame.Imaging.Tests
                 //for (int i = 0; i < endmee.Length; i++)
                 //    if (endmee.ReadByte() != original.ReadByte())
                 //        throw new Exception();
-                
+
                 foreach (var entry in archive.Entries)
                 {
                     if (!entry.Name.EndsWith(".png"))
@@ -137,14 +137,14 @@ namespace MonoGame.Imaging.Tests
                                 img?.Dispose();
 
                                 ms.Position = 0;
-                                img = await Image.LoadAsync(ms, VectorTypeInfo.Get<Color>());
-                                
+                                img = Image.Load(ms, VectorTypeInfo.Get<Color>());
+
                                 byte[] hash = sha.ComputeHash(((Image<Color>)img).GetPixelByteSpan().ToArray());
                                 //Console.WriteLine("hash: " + BitConverter.ToString(hash));
                             }
 
                             string dstName = "wtf/" + entry.Name;
-                            await img.SaveAsync(dstName);
+                            img.Save(dstName);
 
                             //for (int i = 0; i < 100; i++)
                             //{
@@ -210,7 +210,7 @@ namespace MonoGame.Imaging.Tests
             return imagee;
         }
 
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             {
                 var imagee = CreateImegee(256);
@@ -222,10 +222,10 @@ namespace MonoGame.Imaging.Tests
                 {
                     //ms.Position = 0;
                     using (var fs = new FileStream(
-                        "savetest/test.jpeg", FileMode.Create, FileAccess.Write, FileShare.None, 4096, 
-                        FileOptions.Asynchronous | ((i != 999) ? FileOptions.DeleteOnClose : 0)))
+                        "savetest/test.jpeg", FileMode.Create, FileAccess.Write, FileShare.None, 4096,
+                        ((i != 999) ? FileOptions.DeleteOnClose : 0)))
                     {
-                        await imagee.SaveAsync(fs, ImageFormat.Jpeg);
+                        imagee.Save(fs, ImageFormat.Jpeg);
                     }
                 }
 
@@ -235,15 +235,15 @@ namespace MonoGame.Imaging.Tests
                 //    ms.CopyTo(fs);
                 //}
 
-                await imagee.SaveAsync("savetest/test.png");
-                await imagee.SaveAsync("savetest/test.tga");
-                await imagee.SaveAsync("savetest/test_norle.tga", null, TgaEncoderOptions.NoRLE);
-                await imagee.SaveAsync("savetest/test.bmp");
+                imagee.Save("savetest/test.png");
+                imagee.Save("savetest/test.tga");
+                imagee.Save("savetest/test_norle.tga", null, TgaEncoderOptions.NoRLE);
+                imagee.Save("savetest/test.bmp");
             }
 
             return;
 
-            await TestPng();
+            TestPng();
             return;
 
             var archive = new ZipArchive(File.OpenRead(DataZip), ZipArchiveMode.Read, false);
@@ -283,7 +283,7 @@ namespace MonoGame.Imaging.Tests
 
                 image?.Dispose();
                 watch.Start();
-                image = await Image.LoadAsync(encoded, onProgress: OnReadProgress);
+                image = Image.Load(encoded, onProgress: OnReadProgress);
                 watch.Stop();
 
                 if (i == 0)
@@ -316,7 +316,7 @@ namespace MonoGame.Imaging.Tests
                 result.Seek(0, SeekOrigin.Begin);
 
                 watch.Start();
-                await image.SaveAsync(result, ImageFormat.Png, null, OnWriteProgress, default);
+                image.Save(result, ImageFormat.Png, null, OnWriteProgress, default);
                 watch.Stop();
 
                 if (i == 0)
@@ -369,7 +369,7 @@ namespace MonoGame.Imaging.Tests
                 Thread.Sleep(500);
 
                 watch.Restart();
-                await resizeDst.SaveAsync("resized" + writeFormat.Extension);
+                resizeDst.Save("resized" + writeFormat.Extension);
                 watch.Stop();
 
                 Console.WriteLine("Saved resized in " +

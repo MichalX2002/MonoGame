@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using MonoGame.Framework;
+using MonoGame.Framework.Memory;
 using MonoGame.Framework.Vector;
 using MonoGame.Imaging.Codecs.Decoding;
 using StbSharp;
@@ -25,11 +26,11 @@ namespace MonoGame.Imaging.Codecs.Detection
 
         public abstract ImageFormat Format { get; }
 
-        protected abstract Task<InfoResult> GetInfo(IImagingConfig config, ImageRead.BinReader reader);
+        protected abstract InfoResult GetInfo(IImagingConfig config, ImageRead.BinReader reader);
 
-        private async Task<ImageInfo> Identify(IImagingConfig config, ImageRead.BinReader reader)
+        private ImageInfo Identify(IImagingConfig config, ImageRead.BinReader reader)
         {
-            var info = await GetInfo(config, reader);
+            var info = GetInfo(config, reader);
             var readState = info.ReadState;
 
             int comp = readState.Components;
@@ -42,19 +43,18 @@ namespace MonoGame.Imaging.Codecs.Detection
             return new ImageInfo(readState.Width, readState.Height, compInfo, Format);
         }
 
-        public async Task<ImageInfo> Identify(
+        public ImageInfo Identify(
             IImagingConfig config, Stream stream, CancellationToken cancellationToken = default)
         {
-            // TODO: rent buffer
-            var buffer = new byte[1024 * 8];
+            var buffer = RecyclableMemoryManager.Default.GetBlock();
             var reader = new ImageRead.BinReader(stream, buffer, leaveOpen: true, cancellationToken);
             try
             {
-                return await Identify(config, reader);
+                return Identify(config, reader);
             }
             finally
             {
-                // return buffer
+                RecyclableMemoryManager.Default.ReturnBlock(buffer);
             }
         }
 

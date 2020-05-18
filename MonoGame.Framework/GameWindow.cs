@@ -64,8 +64,6 @@ namespace MonoGame.Framework
 
         public TaskbarList TaskbarList { get; }
 
-        public abstract bool AllowFileDropping { get; set; }
-
         public abstract bool AllowUserResizing { get; set; }
         public abstract Rectangle ClientBounds { get; }
 

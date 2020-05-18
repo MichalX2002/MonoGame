@@ -10,7 +10,7 @@ namespace MonoGame.Imaging
     {
         #region CreateDecoderEnumeratorAsync(Stream)
 
-        public static async Task<ImageDecoderEnumerator> CreateDecoderEnumeratorAsync(
+        public static ImageDecoderEnumerator CreateDecoderEnumerator(
             IImagingConfig config,
             Stream stream,
             bool leaveOpen,
@@ -21,7 +21,7 @@ namespace MonoGame.Imaging
 
             using (var prefixStream = config.CreateStreamWithHeaderPrefix(stream, leaveOpen))
             {
-                var prefix = await prefixStream.GetPrefixAsync(cancellationToken);
+                var prefix = prefixStream.GetPrefix();
 
                 var format = DetectFormat(config, prefix.Span);
                 if (format == null)
@@ -33,18 +33,18 @@ namespace MonoGame.Imaging
             }
         }
 
-        public static Task<ImageDecoderEnumerator> CreateDecoderEnumeratorAsync(
+        public static ImageDecoderEnumerator CreateDecoderEnumerator(
             Stream stream,
             bool leaveOpen,
             CancellationToken cancellationToken = default)
         {
-            return CreateDecoderEnumeratorAsync(
+            return CreateDecoderEnumerator(
                 ImagingConfig.Default, stream, leaveOpen, cancellationToken);
         }
 
         #endregion
 
-        /* TODO: fix this (UnmanagedMemoryStream?) :)
+        /* TODO: fix this (maybe go easy with UnmanagedMemoryStream?) :)
 
         #region LoadFrames(IReadOnlyMemory)
 

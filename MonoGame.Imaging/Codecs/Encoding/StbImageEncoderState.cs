@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Imaging.Pixels;
@@ -12,7 +11,7 @@ namespace MonoGame.Imaging.Codecs.Encoding
     public class StbImageEncoderState : ImageEncoderState
     {
         public WriteProgressCallback ProgressCallback { get; }
-        private byte[] Buffer { get; }
+        private byte[] Buffer { get; set; }
 
         public new IReadOnlyPixelRows? CurrentImage { get => base.CurrentImage; set => base.CurrentImage = value; }
         public new int FrameIndex { get => base.FrameIndex; set => base.FrameIndex = value; }
@@ -45,10 +44,12 @@ namespace MonoGame.Imaging.Codecs.Encoding
                 provider);
         }
 
-        public override async ValueTask DisposeAsync()
+        public override void Dispose()
         {
             RecyclableMemoryManager.Default.ReturnBlock(Buffer);
-            await base.DisposeAsync();
+            Buffer = null;
+
+            base.Dispose();
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.Vector;
@@ -17,7 +16,7 @@ namespace MonoGame.Imaging.Codecs.Decoding
         private OutputPixelDelegate _onOutputPixel;
 
         private Image.ConvertPixelsDelegate? _convertPixelSpan;
-        private byte[] Buffer { get; }
+        private byte[] Buffer { get; set; }
 
         public VectorTypeInfo? SourcePixelType { get; private set; }
         public BinReader Reader { get; }
@@ -232,12 +231,14 @@ namespace MonoGame.Imaging.Codecs.Decoding
             return StbImageInfoDetectorBase.GetVectorType(state.OutComponents, state.OutDepth);
         }
 
-        public override async ValueTask DisposeAsync()
+        public override void Dispose()
         {
             RecyclableMemoryManager.Default.ReturnBlock(Buffer);
+            Buffer = null;
 
-            await Reader.DisposeAsync();
-            await base.DisposeAsync();
+            Reader.Dispose();
+
+            base.Dispose();
         }
     }
 }

@@ -12,7 +12,7 @@ using MonoGame.Framework.Input;
 using MonoGame.Imaging;
 using MonoGame.Imaging.Codecs.Decoding;
 
-namespace MonoGame.TestingB
+namespace MonoGame.Testing
 {
     public class GameHead : Game
     {
@@ -60,22 +60,21 @@ namespace MonoGame.TestingB
                     Thread.Sleep(500);
 
                     var ww = new Stopwatch();
-                        
+
                     var http = new HttpClient();
 
-                    for (int i = 0; i < 2; i++)
+                    for (int i = 0; i < 4; i++)
                     {
                         using (var fs = new FileStream(
                             //@"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg",
-                            //"../../very big interlace.png",
-                            "../../very_big_interlace pog.jpg",
-                            FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 4,
-                            FileOptions.Asynchronous))
+                            "../../very big interlace.png",
+                            //"../../very_big_interlace pog.jpg",
+                            FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 4))
                         //using(var fs = await http.GetStreamAsync(
                         //    "https://upload.wikimedia.org/wikipedia/commons/3/3d/LARGE_elevation.jpg"))
                         {
                             ww.Restart();
-                            var x = await Image.LoadAsync<Color>(fs, onProgress: OnProgress);
+                            var x = Image.Load<Color>(fs, onProgress: OnProgress);
 
                             _finished = true;
                             ww.Stop();

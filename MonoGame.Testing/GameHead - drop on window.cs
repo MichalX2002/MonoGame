@@ -1,18 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using MonoGame.Framework;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
-using MonoGame.Imaging;
-using MonoGame.Imaging.Codecs.Decoding;
 
-namespace MonoGame.Testing
+namespace MonoGame.TestingD
 {
     public class GameHead : Game
     {
@@ -20,8 +12,6 @@ namespace MonoGame.Testing
         private SpriteBatch _spriteBatch;
 
         private SpriteFont _font;
-
-        private float _zmusc;
 
         public GameHead()
         {
@@ -66,16 +56,6 @@ namespace MonoGame.Testing
                 return;
             }
 
-            _zmusc += gameTime.ElapsedTotalSeconds;
-
-            if(_zmusc >= 5f)
-            {
-                Window.AllowFileDropping = !Window.AllowFileDropping;
-                Console.WriteLine(Window.AllowFileDropping);
-
-                _zmusc = 0;
-            }
-
             base.Update(gameTime);
         }
 
@@ -94,8 +74,6 @@ namespace MonoGame.Testing
             _spriteBatch.DrawString(_font, text, textPos - new Vector2(1), Color.White);
             _spriteBatch.DrawString(_font, text, textPos + new Vector2(1), new Color(textColor * 0.1f, 255));
             _spriteBatch.DrawString(_font, text, textPos, textColor);
-
-            _spriteBatch.DrawString(_font, _zmusc.ToString(), textPos + new Vector2(0, 50), Color.Red);
 
             _spriteBatch.End();
 

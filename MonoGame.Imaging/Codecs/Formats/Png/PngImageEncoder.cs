@@ -3,6 +3,7 @@ using System.IO.Compression;
 using System.Threading.Tasks;
 using MonoGame.Imaging.Attributes.Codec;
 using MonoGame.Imaging.Codecs.Encoding;
+using MonoGame.Imaging.Pixels;
 using StbSharp;
 
 namespace MonoGame.Imaging.Codecs.Formats
@@ -28,12 +29,14 @@ namespace MonoGame.Imaging.Codecs.Formats
             public override ImageFormat Format => ImageFormat.Png;
             public override EncoderOptions DefaultOptions => PngEncoderOptions.Default;
 
-            protected override Task Write(
+            protected override void Write(
                 StbImageEncoderState encoderState,
+                IReadOnlyPixelRows image,
                 ImageWrite.WriteState writeState)
             {
                 var options = encoderState.GetCodecOptions<PngEncoderOptions>();
-                return ImageWrite.Png.Write(writeState, options.CompressionLevel);
+                
+                ImageWrite.Png.Write(writeState, options.CompressionLevel);
             }
         }
     }

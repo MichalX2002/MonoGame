@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MonoGame.Imaging
 {
@@ -32,25 +31,25 @@ namespace MonoGame.Imaging
 
         #region Identify
 
-        public static async Task<ImageInfo> IdentifyAsync(
+        public static ImageInfo Identify(
             IImagingConfig config, Stream stream, CancellationToken cancellationToken = default)
         {
             using (var prefixedStream = config.CreateStreamWithHeaderPrefix(stream, true))
             {
-                var prefix = await prefixedStream.GetPrefixAsync(cancellationToken);
+                var prefix = prefixedStream.GetPrefix(cancellationToken);
 
                 var format = DetectFormat(config, prefix.Span);
                 if (format == null)
                     throw new UnknownImageFormatException();
 
                 var infoDetector = config.GetInfoDetector(format);
-                return await infoDetector.Identify(config, prefixedStream, cancellationToken);
+                return infoDetector.Identify(config, prefixedStream, cancellationToken);
             }
         }
 
-        public static Task<ImageInfo> IdentifyAsync(Stream stream, CancellationToken cancellationToken = default)
+        public static ImageInfo Identify(Stream stream, CancellationToken cancellationToken = default)
         {
-            return IdentifyAsync(ImagingConfig.Default, stream, cancellationToken);
+            return Identify(ImagingConfig.Default, stream, cancellationToken);
         }
 
         #endregion

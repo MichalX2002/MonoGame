@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MonoGame.Imaging.Codecs
 {
-    public abstract class ImageCodecState : IImagingConfigurable, IAsyncDisposable
+    public abstract class ImageCodecState : IImagingConfigurable, IDisposable
     {
         public IImageCodec Codec { get; }
         public IImagingConfig Config { get; }
@@ -46,10 +46,10 @@ namespace MonoGame.Imaging.Codecs
             return (TOptions)Codec.DefaultOptions;
         }
 
-        public virtual async ValueTask DisposeAsync()
+        public virtual void Dispose()
         {
             if (!LeaveOpen)
-                await Stream.DisposeAsync();
+                Stream.Dispose();
         }
     }
 }
