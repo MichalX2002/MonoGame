@@ -228,7 +228,7 @@ namespace MonoGame.Framework.Input
                 gamePadType: GamePadType.GamePad);
         }
 
-        private static float GetFromSdlAxis(int axis)
+        private static float GetFromSDLAxis(int axis)
         {
             // SDL Axis ranges from -32768 to 32767, 
             // so we need to divide with different numbers depending on if it's positive
@@ -248,17 +248,17 @@ namespace MonoGame.Framework.Input
             // Y gamepad axis is inverted between SDL and XNA
             var thumbSticks = new GamePadThumbSticks(
                 new Vector2(
-                    GetFromSdlAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.LeftX)),
-                    GetFromSdlAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.LeftY)) * -1f),
+                    GetFromSDLAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.LeftX)),
+                    GetFromSDLAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.LeftY)) * -1f),
                 new Vector2(
-                    GetFromSdlAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.RightX)),
-                    GetFromSdlAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.RightY)) * -1f),
+                    GetFromSDLAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.RightX)),
+                    GetFromSDLAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.RightY)) * -1f),
                 leftDeadZoneMode,
                 rightDeadZoneMode);
 
             var triggers = new GamePadTriggers(
-                GetFromSdlAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.TriggerLeft)),
-                GetFromSdlAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.TriggerRight)));
+                GetFromSDLAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.TriggerLeft)),
+                GetFromSDLAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.TriggerRight)));
 
             var buttons = new GamePadButtons(
                 ((SDL.GameController.GetButton(device, SDL.GameController.Button.A) == 1) ? Buttons.A : 0) |

@@ -179,7 +179,7 @@ namespace MonoGame.Framework.Graphics
             _programCache = new ShaderProgramCache(this);
 
 #if DESKTOPGL || ANGLE
-            var windowInfo = new WindowInfo(SdlGameWindow.Instance.Handle);
+            var windowInfo = new WindowInfo(SDLGameWindow.Instance.Handle);
 
             if (Context == null || Context.IsDisposed)
                 Context = GL.CreateContext(windowInfo);
@@ -1183,7 +1183,7 @@ namespace MonoGame.Framework.Graphics
         internal void OnPresentationChanged()
         {
 #if DESKTOPGL || ANGLE
-            Context.MakeCurrent(new WindowInfo(SdlGameWindow.Instance.Handle));
+            Context.MakeCurrent(new WindowInfo(SDLGameWindow.Instance.Handle));
             Context.SwapInterval = PresentationParameters.PresentationInterval.GetSwapInterval();
 #endif
 
@@ -1202,7 +1202,7 @@ namespace MonoGame.Framework.Graphics
         // FIXME: why is this even here
         //private void GetModeSwitchedSize(out int width, out int height)
         //{
-        //    var mode = new Sdl.Display.Mode
+        //    var mode = new SDL.Display.Mode
         //    {
         //        Width = PresentationParameters.BackBufferWidth,
         //        Height = PresentationParameters.BackBufferHeight,
@@ -1210,14 +1210,14 @@ namespace MonoGame.Framework.Graphics
         //        RefreshRate = 0,
         //        DriverData = IntPtr.Zero
         //    };
-        //    Sdl.Display.GetClosestDisplayMode(0, mode, out Sdl.Display.Mode closest);
+        //    SDL.Display.GetClosestDisplayMode(0, mode, out SDL.Display.Mode closest);
         //    width = closest.Width;
         //    height = closest.Height;
         //}
         //
         //private void GetDisplayResolution(out int width, out int height)
         //{
-        //    Sdl.Display.GetCurrentDisplayMode(0, out Sdl.Display.Mode mode);
+        //    SDL.Display.GetCurrentDisplayMode(0, out SDL.Display.Mode mode);
         //    width = mode.Width;
         //    height = mode.Height;
         //}

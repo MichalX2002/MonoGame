@@ -2,16 +2,9 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-using MonoGame.Framework.Content;
-using MonoGame.Framework.Graphics;
-
 namespace MonoGame.Framework.Content
 {
-	internal class CharReader : ContentTypeReader<char>
+    internal class CharReader : ContentTypeReader<char>
     {
         public CharReader()
         {

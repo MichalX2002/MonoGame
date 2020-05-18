@@ -6,11 +6,6 @@
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!-- Add MonoGameContentReference to item type selection in Visual Studio -->
-  <ItemGroup>
-    <AvailableItemName Include="MonoGameContentReference" />
-  </ItemGroup>
-
   <!-- This disables the IDE feature that skips executing msbuild in some build situations. -->
   <PropertyGroup>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
@@ -39,7 +34,7 @@
   <Target Name="UpdateMGCB" Condition="'$(MGCBCommand)' == ''">
 
     <PropertyGroup>
-      <MGCBExe Condition="'$(MGCBExe)' == ''">$(MSBuildThisFileDirectory)\Tools\MGCB.exe</MGCBExe>
+      <MGCBExe Condition="'$(MGCBExe)' == ''">$(MSBuildThisFileDirectory)Tools\MGCB.exe</MGCBExe>
       <MGCBCommand>&quot;$(MGCBExe)&quot;</MGCBCommand>
     </PropertyGroup>
 
@@ -67,10 +62,6 @@
           - ContentIntermediateOutputDir: C:/Game/Game.Shared/obj/DesktopGL/Content
   -->
   <Target Name="CollectContentReferences">
-
-    <ItemGroup Condition="'$(EnableMGCBItems)' == 'true'">
-      <MonoGameContentReference Include="**/*.mgcb" />
-    </ItemGroup>
 
     <ItemGroup>
 
@@ -173,6 +164,7 @@
       <ExtraContent
         Condition="'%(ContentReference.ContentOutputDir)' != ''"
         Include="%(ContentReference.ContentOutputDir)\**\*.*">
+        
         <ContentDir>%(ContentReference.ContentDir)</ContentDir>
       </ExtraContent>
     </ItemGroup>
@@ -189,20 +181,21 @@
   <Target
     Name="IncludeContent"
     DependsOnTargets="RunContentBuilder"
-    Condition="'$(EnableMGCBItems)' == 'true' OR '@(MonoGameContentReference)' != ''"
-    Outputs="%(ExtraContent.RecursiveDir)%(ExtraContent.Filename)%(ExtraContent.Extension)"
-    BeforeTargets="PrepareForBuild">
+    BeforeTargets="PrepareForBuild"
+    Condition="'@(MonoGameContentReference)' != ''"
+    Outputs="%(ExtraContent.RecursiveDir)%(ExtraContent.Filename)%(ExtraContent.Extension)">
 
     <!-- Call CreateItem on each piece of ExtraContent so it's easy to switch the item type by platform. -->
     <CreateItem
       Include="%(ExtraContent.FullPath)"
       AdditionalMetadata="Link=$(PlatformResourcePrefix)%(ExtraContent.ContentDir)%(ExtraContent.RecursiveDir)%(ExtraContent.Filename)%(ExtraContent.Extension);CopyToOutputDirectory=PreserveNewest"
       Condition="'%(ExtraContent.Filename)' != ''">
+
       <Output TaskParameter="Include" ItemName="Content" Condition="'$(MonoGamePlatform)' != 'Android' And '$(MonoGamePlatform)' != 'iOS' And '$(MonoGamePlatform)' != 'MacOSX'" />
       <Output TaskParameter="Include" ItemName="BundleResource" Condition="'$(MonoGamePlatform)' == 'MacOSX' Or '$(MonoGamePlatform)' == 'iOS'" />
       <Output TaskParameter="Include" ItemName="AndroidAsset" Condition="'$(MonoGamePlatform)' == 'Android'" />
     </CreateItem>
-
+ 
   </Target>
 
 </Project>

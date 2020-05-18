@@ -10,8 +10,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
     [ContentTypeSerializer]
     class ByteSerializer : ElementSerializer<byte>
     {
-        public ByteSerializer() :
-            base("byte", 1)
+        public ByteSerializer() : base("byte", 1)
         {
         }
 

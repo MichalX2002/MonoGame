@@ -333,7 +333,7 @@ namespace MonoGame.Framework.Audio
                 while (src.Length >= Vector<float>.Count)
                 {
 #if ANDROID
-                    // TODO: FIXME: hack for netstandard2.1
+                    // HACK: TODO: FIXME: for netstandard2.1
                     ref float srcRef = ref Unsafe.AsRef(src.GetPinnableReference());
                     var mutableSrc = MemoryMarshal.CreateSpan(ref srcRef, src.Length);
                     var srcVec = new Vector<float>(mutableSrc);

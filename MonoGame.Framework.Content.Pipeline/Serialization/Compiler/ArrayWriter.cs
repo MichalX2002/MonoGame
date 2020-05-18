@@ -37,6 +37,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                 throw new ArgumentNullException(nameof(value));
 
             output.Write(value.Length);
+
             foreach (var element in value)
                 output.WriteObject(element, _elementWriter);
         }

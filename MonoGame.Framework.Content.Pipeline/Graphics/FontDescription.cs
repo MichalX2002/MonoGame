@@ -5,28 +5,29 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
-    internal class CharacterCollection : ICollection<char>
+    internal class CharacterCollection : ICollection<Rune>
     {
-        private List<char> _items;
+        private List<Rune> _items;
 
         public CharacterCollection()
         {
-            _items = new List<char>();
+            _items = new List<Rune>();
         }
 
-        public CharacterCollection(IEnumerable<char> characters)
+        public CharacterCollection(IEnumerable<Rune> characters)
         {
-            _items = new List<char>();
+            _items = new List<Rune>();
             foreach (var c in characters)
                 Add(c);
         }
 
-        #region ICollection<char> Members
+        #region ICollection<Rune> Members
 
-        public void Add(char item)
+        public void Add(Rune item)
         {
             if (!_items.Contains(item))
                 _items.Add(item);
@@ -37,12 +38,12 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             _items.Clear();
         }
 
-        public bool Contains(char item)
+        public bool Contains(Rune item)
         {
             return _items.Contains(item);
         }
 
-        public void CopyTo(char[] array, int arrayIndex)
+        public void CopyTo(Rune[] array, int arrayIndex)
         {
             _items.CopyTo(array, arrayIndex);
         }
@@ -51,7 +52,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
 
         public bool IsReadOnly => false;
 
-        public bool Remove(char item)
+        public bool Remove(Rune item)
         {
             return _items.Remove(item);
         }
@@ -60,7 +61,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
 
         #region IEnumerable<char> Members
 
-        public IEnumerator<char> GetEnumerator()
+        public IEnumerator<Rune> GetEnumerator()
         {
             return _items.GetEnumerator();
         }
@@ -77,21 +78,21 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         #endregion
     }
 
-	/// <summary>
-	/// Provides information to the FontDescriptionProcessor describing which font to rasterize, which font size to utilize, and which Unicode characters to include in the processor output.
-	/// </summary>
-	public class FontDescription : ContentItem
-	{
+    /// <summary>
+    /// Provides information to the FontDescriptionProcessor describing which font to rasterize, which font size to utilize, and which Unicode characters to include in the processor output.
+    /// </summary>
+    public class FontDescription : ContentItem
+    {
         private string fontName;
         private float size;
         private bool useKerning;
-	    private CharacterCollection characters = new CharacterCollection();
+        private CharacterCollection characters = new CharacterCollection();
 
-		/// <summary>
-		/// Gets or sets the name of the font, such as "Times New Roman" or "Arial". This value cannot be null or empty.
-		/// </summary>
+        /// <summary>
+        /// Gets or sets the name of the font, such as "Times New Roman" or "Arial". This value cannot be null or empty.
+        /// </summary>
         [ContentSerializer(AllowNull = false)]
-		public string FontName
+        public string FontName
         {
             get => fontName;
             set
@@ -141,7 +142,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// Gets or sets the default character for the font.
         /// </summary>
         [ContentSerializer(Optional = true)]
-        public char? DefaultCharacter { get; set; }
+        public Rune? DefaultCharacter { get; set; }
 
         [ContentSerializer(CollectionItemName = "CharacterRegion")]
         internal CharacterRegion[] CharacterRegions
@@ -155,9 +156,9 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 var start = chars[0];
                 var end = chars[0];
 
-                for (var i=1; i < chars.Count; i++)
+                for (var i = 1; i < chars.Count; i++)
                 {
-                    if (chars[i] != (end+1))
+                    if (chars[i].Value != (end.Value + 1))
                     {
                         regions.Add(new CharacterRegion(start, end));
                         start = chars[i];
@@ -178,14 +179,14 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                     if (characterRegion.End < characterRegion.Start)
                         throw new ArgumentException("CharacterRegion.End must be greater than CharacterRegion.Start");
 
-                    for (var start = characterRegion.Start; start <= characterRegion.End; start++)
-                        Characters.Add(start);
+                    for (int start = characterRegion.Start.Value; start <= characterRegion.End.Value; start++)
+                        Characters.Add((Rune)start);
                 }
             }
         }
-		
-	    [ContentSerializerIgnore]
-	    public ICollection<char> Characters
+
+        [ContentSerializerIgnore]
+        public ICollection<Rune> Characters
         {
             get => characters;
             internal set => characters = new CharacterCollection(value);
@@ -195,45 +196,46 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         {
         }
 
-		/// <summary>
-		/// Initializes a new instance of FontDescription and initializes its members to the specified font, size, and spacing, using FontDescriptionStyle.Regular as the default value for Style.
-		/// </summary>
-		/// <param name="fontName">The name of the font, such as Times New Roman.</param>
-		/// <param name="size">The size, in points, of the font.</param>
-		/// <param name="spacing">The amount of space, in pixels, to insert between letters in a string.</param>
-		public FontDescription(string fontName, float size, float spacing)
-			: this(fontName, size, spacing, FontDescriptionStyle.Regular, false)
-		{
-		}
+        /// <summary>
+        /// Initializes a new instance of FontDescription and initializes its members to the specified
+        /// font, size, and spacing, using FontDescriptionStyle.Regular as the default value for Style.
+        /// </summary>
+        /// <param name="fontName">The name of the font, such as Times New Roman.</param>
+        /// <param name="size">The size, in points, of the font.</param>
+        /// <param name="spacing">The amount of space, in pixels, to insert between letters in a string.</param>
+        public FontDescription(string fontName, float size, float spacing)
+            : this(fontName, size, spacing, FontDescriptionStyle.Regular, false)
+        {
+        }
 
-		/// <summary>
-		/// Initializes a new instance of FontDescription and initializes its members to the specified font, size, spacing, and style.
-		/// </summary>
-		/// <param name="fontName">The name of the font, such as Times New Roman.</param>
-		/// <param name="size">The size, in points, of the font.</param>
-		/// <param name="spacing">The amount of space, in pixels, to insert between letters in a string.</param>
-		/// <param name="fontStyle">The font style for the font.</param>
-		public FontDescription(string fontName, float size, float spacing, FontDescriptionStyle fontStyle)
+        /// <summary>
+        /// Initializes a new instance of FontDescription and initializes its members to the specified font, size, spacing, and style.
+        /// </summary>
+        /// <param name="fontName">The name of the font, such as Times New Roman.</param>
+        /// <param name="size">The size, in points, of the font.</param>
+        /// <param name="spacing">The amount of space, in pixels, to insert between letters in a string.</param>
+        /// <param name="fontStyle">The font style for the font.</param>
+        public FontDescription(string fontName, float size, float spacing, FontDescriptionStyle fontStyle)
             : this(fontName, size, spacing, fontStyle, false)
-		{
-		}
+        {
+        }
 
-		/// <summary>
-		/// Initializes a new instance of FontDescription using the specified values.
-		/// </summary>
-		/// <param name="fontName">The name of the font, such as Times New Roman.</param>
-		/// <param name="size">The size, in points, of the font.</param>
-		/// <param name="spacing">The amount of space, in pixels, to insert between letters in a string.</param>
-		/// <param name="fontStyle">The font style for the font.</param>
-		/// <param name="useKerning">true if kerning information is used when drawing characters; false otherwise.</param>
-		public FontDescription(string fontName, float size, float spacing, FontDescriptionStyle fontStyle, bool useKerning)            
-		{
-			// Write to the properties so the validation is run
-			FontName = fontName;
-			Size = size;
-			Spacing = spacing;
-			Style = fontStyle;
-			UseKerning = useKerning;			
-		}
-	}
+        /// <summary>
+        /// Initializes a new instance of FontDescription using the specified values.
+        /// </summary>
+        /// <param name="fontName">The name of the font, such as Times New Roman.</param>
+        /// <param name="size">The size, in points, of the font.</param>
+        /// <param name="spacing">The amount of space, in pixels, to insert between letters in a string.</param>
+        /// <param name="fontStyle">The font style for the font.</param>
+        /// <param name="useKerning">true if kerning information is used when drawing characters; false otherwise.</param>
+        public FontDescription(string fontName, float size, float spacing, FontDescriptionStyle fontStyle, bool useKerning)
+        {
+            // Write to the properties so the validation is run
+            FontName = fontName;
+            Size = size;
+            Spacing = spacing;
+            Style = fontStyle;
+            UseKerning = useKerning;
+        }
+    }
 }

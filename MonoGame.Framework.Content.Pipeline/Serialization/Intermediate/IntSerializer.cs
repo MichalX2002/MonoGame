@@ -10,8 +10,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
     [ContentTypeSerializer]
     class IntSerializer : ElementSerializer<int>
     {
-        public IntSerializer() :
-            base("int", 1)
+        public IntSerializer() : base("int", 1)
         {
         }
 

@@ -46,7 +46,7 @@ namespace MonoGame.Framework
             SDL.GL.SetAttribute(SDL.GL.Attribute.ContextMajorVersion, 2);
             SDL.GL.SetAttribute(SDL.GL.Attribute.ContextMinorVersion, 1);
 
-            ((SdlGameWindow)_game.Window).CreateWindow();
+            ((SDLGameWindow)_game.Window).CreateWindow();
         }
     }
 }

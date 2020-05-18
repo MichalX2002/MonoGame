@@ -294,14 +294,18 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             if (skeleton == null)
             {
                 throw new InvalidContentException(
-                    "Skeleton not found. Meshes that contain a Weights vertex channel cannot be processed without access to the skeleton data.",
+                    "Skeleton not found. Meshes that contain a Weights vertex channel cannot " +
+                    "be processed without access to the skeleton data.",
                     identity);
             }
 
-            var boneIndices = new Dictionary<string, int>();
+            var boneIndices = new Dictionary<string, byte>();
             var flattenedBones = MeshHelper.FlattenSkeleton(skeleton);
-            for (var i = 0; i < flattenedBones.Count; i++)
-                boneIndices.Add(flattenedBones[i].Name, i);
+            if (flattenedBones.Count > byte.MaxValue)
+                throw new NotSupportedException("The flattened skeleton contains more than 255 bones.");
+
+            for (int i = 0; i < flattenedBones.Count; i++)
+                boneIndices.Add(flattenedBones[i].Name, (byte)i);
 
             var vertexChannel = geometry.Vertices.Channels[vertexChannelIndex];
             if (!(vertexChannel is VertexChannel<BoneWeightCollection> inputWeights))
@@ -333,7 +337,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
         // From the XNA CPU Skinning Sample under Ms-PL, (c) Microsoft Corporation
         private static void ConvertWeights(
             BoneWeightCollection weights, 
-            Dictionary<string, int> boneIndices,
+            Dictionary<string, byte> boneIndices,
             Byte4[] outIndices, 
             Vector4[] outWeights, 
             int vertexIndex)
@@ -342,7 +346,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             const int maxWeights = 4;
 
             // create some tmp spans to hold our values
-            Span<int> tmpIndices = stackalloc int[maxWeights];
+            Span<byte> tmpIndices = stackalloc byte[maxWeights];
             Span<float> tmpWeights = stackalloc float[maxWeights];
 
             // cull out any extra bones

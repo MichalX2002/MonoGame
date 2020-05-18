@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="$(MSBuildExtensionsPath)\MonoGame\MonoGame.Common.props" 
+  <Import Project="$(MSBuildExtensionsPath)\MonoGame\MonoGame.Common.props"
           Condition="Exists('$(MSBuildExtensionsPath)\MonoGame\MonoGame.Common.props')" />
 
   <PropertyGroup>
@@ -8,9 +8,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <PublishReadyToRun>false</PublishReadyToRun>
     <TieredCompilation>false</TieredCompilation>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon />
     <StartupObject />
@@ -26,25 +23,19 @@
       <PropertyGroup>
         <MonoGamePlatform>DesktopGL</MonoGamePlatform>
       </PropertyGroup>
-
-      <ItemGroup>
-        <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj" />
-        <MonoGameContentReference Include="Content\Content.DesktopGL.mgcb" />
-      </ItemGroup>
     </When>
 
-    <When Condition="'$(SolutionName)' == 'MonoGame.Framework.WindowsDX'">
+    <When Condition="'$(SolutionName)' == 'MonoGame.Framework.Windows'">
       <PropertyGroup>
         <MonoGamePlatform>Windows</MonoGamePlatform>
       </PropertyGroup>
-
-      <ItemGroup>
-        <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.WindowsDX.csproj" />
-        <MonoGameContentReference Include="Content\Content.Windows.mgcb" />
-      </ItemGroup>
     </When>
-    
   </Choose>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.$(MonoGamePlatform).csproj" />
+    <MonoGameContentReference Include="Content\Content.$(MonoGamePlatform).mgcb" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\ThirdParty\Dependencies\MonoGame.Framework.dll.config">
@@ -113,7 +104,7 @@
     <TrimmerRootAssembly Include="MonoGame.Framework.Content.ContentTypeReader" Visible="false" />
   </ItemGroup>
 
-  <Import Project="$(MSBuildExtensionsPath)\MonoGame\MonoGame.Content.Builder.targets" 
+  <Import Project="$(MSBuildExtensionsPath)\MonoGame\MonoGame.Content.Builder.targets"
           Condition="Exists('$(MSBuildExtensionsPath)\MonoGame\MonoGame.Content.Builder.targets')" />
 
 </Project>

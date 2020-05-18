@@ -3,34 +3,35 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System.Collections.Generic;
+using System.Text;
 using System.Xml;
 
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 {
     [ContentTypeSerializer]
-    class CharSerializer : ElementSerializer<char>
+    class RuneSerializer : ElementSerializer<Rune>
     {
-        public CharSerializer() : base("char", 1)
+        public RuneSerializer() : base("Rune", 1)
         {
         }
 
-        protected internal override char Deserialize(string[] inputs, ref int index)
+        protected internal override Rune Deserialize(string[] inputs, ref int index)
         {
             var str = inputs[index++];
             if (str.Length == 1)
-                return XmlConvert.ToChar(str);
+                return (Rune)XmlConvert.ToChar(str);
 
             // Try parsing it as a UTF code.
             if (int.TryParse(str, out int val))
-                return char.ConvertFromUtf32(val)[0];
+                return (Rune)val;
 
             // Last ditch effort to decode it as XML escape value.
-            return XmlConvert.ToChar(XmlConvert.DecodeName(str));
+            return (Rune)XmlConvert.ToChar(XmlConvert.DecodeName(str));
         }
 
-        protected internal override void Serialize(char value, List<string> results)
+        protected internal override void Serialize(Rune value, List<string> results)
         {
-            results.Add(XmlConvert.ToString(value));
+            results.Add(XmlConvert.ToString(value.Value));
         }
     }
 }

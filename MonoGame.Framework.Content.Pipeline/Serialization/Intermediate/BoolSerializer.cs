@@ -10,8 +10,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
     [ContentTypeSerializer]
     class BoolSerializer : ElementSerializer<bool>
     {
-        public BoolSerializer() :
-            base("bool", 1)
+        public BoolSerializer() : base("bool", 1)
         {
         }
 

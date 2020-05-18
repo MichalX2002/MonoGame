@@ -15,6 +15,7 @@ namespace MonoGame.Imaging
             where TPixelTo : unmanaged, IPixel
         {
             // TODO: check if the pixel span isn't padded and copy everything at once
+            // TODO: use Image.ConvertPixels
 
             int srcRowBytes = sizeof(TPixelFrom) * sourceRectangle.Width;
             int srcStride = byteStride ?? srcRowBytes;
@@ -56,10 +57,7 @@ namespace MonoGame.Imaging
                             var dstRow = (TPixelTo*)(dstPtr + (sourceRectangle.Y + y) * dstStride);
 
                             for (int x = 0; x < sourceRectangle.Width; x++)
-                            {
-                                srcRow[x].ToScaledVector4(out var vector);
-                                dstRow[x].FromScaledVector4(vector);
-                            }
+                                dstRow[x].FromScaledVector4(srcRow[x].ToScaledVector4());
                         }
                     }
                 }

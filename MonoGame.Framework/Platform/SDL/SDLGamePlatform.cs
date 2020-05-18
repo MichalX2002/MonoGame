@@ -3,30 +3,34 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
+using System.IO;
+using System.Text;
 using System.Threading;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
 
 namespace MonoGame.Framework
 {
-    internal class SdlGamePlatform : GamePlatform
+    internal class SDLGamePlatform : GamePlatform
     {
         private const int MouseWheelDelta = 120;
 
         private readonly Game _game;
 
-        // Slightly faster than HashSet as low item count is the norm.
-        private readonly List<Keys> _keys;
-
         private int _isExiting;
-        private SdlGameWindow _window;
+        private SDLGameWindow _window;
+
+        // List is slightly faster than HashSet as low item count is the norm.
+        private List<Keys> _keys;
+
+        private List<string> _fileDropList;
 
         public override GameRunBehavior DefaultRunBehavior => GameRunBehavior.Synchronous;
 
-        public SdlGamePlatform(Game game) : base(game)
+        public SDLGamePlatform(Game game) : base(game)
         {
             _game = game;
             _keys = new List<Keys>();
@@ -52,12 +56,12 @@ namespace MonoGame.Framework
             SDL.DisableScreenSaver();
 
             GamePad.InitDatabase();
-            Window = _window = new SdlGameWindow(_game);
+            Window = _window = new SDLGameWindow(_game);
         }
 
         public override void BeforeInitialize()
         {
-            PollSdlEvents();
+            PollSDLEvents();
 
             base.BeforeInitialize();
         }
@@ -82,7 +86,7 @@ namespace MonoGame.Framework
 
             while (true)
             {
-                PollSdlEvents();
+                PollSDLEvents();
                 Keyboard.Modifiers = SDL.Keyboard.GetModState();
 
                 Game.Tick();
@@ -95,7 +99,7 @@ namespace MonoGame.Framework
             }
         }
 
-        private unsafe void PollSdlEvents()
+        private void PollSDLEvents()
         {
             while (SDL.PollEvent(out SDL.Event ev) == 1)
             {
@@ -135,38 +139,65 @@ namespace MonoGame.Framework
 
                     case SDL.EventType.KeyDown:
                     {
-                        var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
-                        if (!_keys.Contains(key))
-                            _keys.Add(key);
+                        bool hasMapping = KeyboardUtil.ToXna(ev.Key.Keysym.Sym, out var key);
+                        if (hasMapping)
+                            if (!_keys.Contains(key))
+                                _keys.Add(key);
 
-                        char character = (char)ev.Key.Keysym.Sym;
-                        _window.OnKeyDown(new KeyInputEventArgs(key));
+                        Rune.TryCreate(ev.Key.Keysym.Sym, out var rune);
+                        var inputEv = new TextInputEventArgs(rune, hasMapping ? key : (Keys?)null);
+                        _window.OnKeyDown(inputEv);
 
-                        if (char.IsControl(character))
-                            _window.OnTextInput(new TextInputEventArgs(character, key));
+                        if (Rune.IsControl(rune))
+                            _window.OnTextInput(inputEv);
                         break;
                     }
 
                     case SDL.EventType.KeyUp:
                     {
-                        var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
-                        _keys.Remove(key);
-                        _window.OnKeyUp(new KeyInputEventArgs(key));
+                        bool hasMapping = KeyboardUtil.ToXna(ev.Key.Keysym.Sym, out var key);
+                        if (hasMapping)
+                            _keys.Remove(key);
+
+                        Rune.TryCreate(ev.Key.Keysym.Sym, out var rune);
+                        _window.OnKeyUp(new TextInputEventArgs(rune, hasMapping ? key : (Keys?)null));
                         break;
                     }
 
                     case SDL.EventType.TextInput:
-                        if (_window.IsTextInputHandled)
-                            ProcessTextInput(ev.Text.Text);
+                        unsafe
+                        {
+                            var utf8 = new Span<byte>(ev.Text.Text, SDL.Keyboard.TextInputEvent.TextSize);
+                            int length = utf8.IndexOf((byte)0);
+                            if (length == -1)
+                                throw new InvalidDataException();
+
+                            utf8 = utf8.Slice(0, length);
+                            while (utf8.Length > 0)
+                            {
+                                var status = Rune.DecodeFromUtf8(utf8, out Rune rune, out int consumed);
+                                if (status != OperationStatus.Done)
+                                    break;
+                                utf8 = utf8.Slice(consumed);
+
+                                var nkey = KeyboardUtil.ToXna(rune.Value, out var key) ? key : (Keys?)null;
+                                _window.OnTextInput(new TextInputEventArgs(rune, nkey));
+                            }
+                        }
+                        break;
+
+                    case SDL.EventType.DropBegin:
+                        if (_fileDropList == null)
+                            _fileDropList = new List<string>();
                         break;
 
                     case SDL.EventType.DropFile:
                         try
                         {
-                            if (_window.IsFileDroppedHandled)
+                            if (_window.IsFilesDroppedHandled)
                             {
-                                string text = InteropHelpers.Utf8ToString(ev.Drop.File);
-                                _window.InvokeFileDropped(text);
+                                string filePath = InteropHelpers.Utf8ToString(ev.Drop.File);
+                                _fileDropList.Add(filePath);
                             }
                         }
                         finally
@@ -175,11 +206,12 @@ namespace MonoGame.Framework
                         }
                         break;
 
-                    case SDL.EventType.DropBegin:
                     case SDL.EventType.DropCompleted:
-                    case SDL.EventType.DropText:
-
-                        Console.WriteLine("SDLGamePlatform: " + ev.Type);
+                        if (_fileDropList.Count > 0)
+                        {
+                            _window.InvokeFileDropped(_fileDropList);
+                            _fileDropList = null;
+                        }
                         break;
 
                     case SDL.EventType.WindowEvent:
@@ -209,79 +241,6 @@ namespace MonoGame.Framework
                         break;
                 }
             }
-        }
-
-        private unsafe void ProcessTextInput(byte* text)
-        {
-            int length = 0;
-            int utf8character = 0; // using an int to encode multibyte characters longer than 2 bytes
-            int charByteSize = 0; // UTF8 char length to decode
-            int remainingShift = 0;
-
-            byte currentByte;
-            while ((currentByte = Marshal.ReadByte((IntPtr)text, length)) != 0)
-            {
-                // we're reading the first UTF8 byte, we need to check if it's multibyte
-                if (charByteSize == 0)
-                {
-                    if (currentByte < 192)
-                        charByteSize = 1;
-                    else if (currentByte < 224)
-                        charByteSize = 2;
-                    else if (currentByte < 240)
-                        charByteSize = 3;
-                    else
-                        charByteSize = 4;
-
-                    utf8character = 0;
-                    remainingShift = 4;
-                }
-
-                // assembling the character
-                utf8character <<= 8;
-                utf8character |= currentByte;
-
-                charByteSize--;
-                remainingShift--;
-
-                if (charByteSize == 0) // finished decoding the current character
-                {
-                    utf8character <<= remainingShift * 8; // shifting it to full UTF8 scope
-
-                    // SDL returns UTF8-encoded characters while C# char type is UTF16-encoded 
-                    // (and limited to the 0-FFFF range / does not support surrogate pairs)
-                    // so we need to convert it to Unicode codepoint and check if it's within the supported range
-                    int codepoint = UTF8ToUnicode(utf8character);
-                    if (codepoint >= 0)
-                    {
-                        _window.OnTextInput(
-                            new TextInputEventArgs(codepoint, KeyboardUtil.ToXna(codepoint)));
-                    }
-                }
-
-                length++;
-            }
-        }
-
-        private int UTF8ToUnicode(int utf8)
-        {
-            int byte4 = utf8 & 0xFF,
-                byte3 = (utf8 >> 8) & 0xFF,
-                byte2 = (utf8 >> 16) & 0xFF,
-                byte1 = (utf8 >> 24) & 0xFF;
-
-            if (byte1 < 0x80)
-                return byte1;
-            else if (byte1 < 0xC0)
-                return -1;
-            else if (byte1 < 0xE0 && byte2 >= 0x80 && byte2 < 0xC0)
-                return byte1 % 0x20 * 0x40 + (byte2 % 0x40);
-            else if (byte1 < 0xF0 && byte2 >= 0x80 && byte2 < 0xC0 && byte3 >= 0x80 && byte3 < 0xC0)
-                return byte1 % 0x10 * 0x40 * 0x40 + byte2 % 0x40 * 0x40 + (byte3 % 0x40);
-            else if (byte1 < 0xF8 && byte2 >= 0x80 && byte2 < 0xC0 && byte3 >= 0x80 && byte3 < 0xC0 && byte4 >= 0x80 && byte4 < 0xC0)
-                return byte1 % 0x8 * 0x40 * 0x40 * 0x40 + byte2 % 0x40 * 0x40 * 0x40 + byte3 % 0x40 * 0x40 + (byte4 % 0x40);
-            else
-                return -1;
         }
 
         public override void StartRunLoop()

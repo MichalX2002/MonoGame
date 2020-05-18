@@ -21,7 +21,7 @@ namespace MonoGame.Framework
         /// <summary>
         ///     Returns a <see cref="SizeF" /> with <see cref="Width" /> and <see cref="Height" /> equal to <c>0f</c>.
         /// </summary>
-        public static readonly SizeF Empty = new SizeF();
+        public static SizeF Empty => new SizeF();
 
         /// <summary>
         ///     The horizontal component of this <see cref="SizeF" />.
@@ -189,28 +189,21 @@ namespace MonoGame.Framework
         /// <summary>
         ///     Indicates whether this <see cref="SizeF" /> is equal to another <see cref="SizeF" />.
         /// </summary>
-        public bool Equals(SizeF other) => this == other;
+        public readonly bool Equals(SizeF other) => this == other;
 
         /// <summary>
         ///     Returns a value indicating whether this <see cref="SizeF" /> is equal to a specified object.
         /// </summary>
-        public override bool Equals(object obj) => obj is SizeF other && Equals(other);
+        public override readonly bool Equals(object obj) => obj is SizeF other && Equals(other);
 
         /// <summary>
         ///     Returns a <see cref="string" /> that represents this <see cref="SizeF" />.
         /// </summary>
-        public override string ToString() => $"Width: {Width}, Height: {Height}";
+        public override readonly string ToString() => $"Width: {Width}, Height: {Height}";
 
         /// <summary>
         ///     Returns a hash code of this <see cref="SizeF" />.
         /// </summary>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 7 + Width.GetHashCode();
-                return hash * 31 + Height.GetHashCode();
-            }
-        }
+        public override readonly int GetHashCode() => HashCode.Combine(Width, Height);
     }
 }

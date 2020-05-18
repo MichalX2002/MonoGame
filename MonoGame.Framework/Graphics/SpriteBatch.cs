@@ -195,24 +195,10 @@ namespace MonoGame.Framework.Graphics
             AssertBeginCalled(callerName);
         }
 
-        void AssertValidArguments(SpriteFont spriteFont, string text, string callerName)
+        void AssertValidArguments(SpriteFont spriteFont, string callerName)
         {
             if (spriteFont == null)
                 throw new ArgumentNullException(nameof(spriteFont));
-
-            if (text == null)
-                throw new ArgumentNullException(nameof(text));
-
-            AssertBeginCalled(callerName);
-        }
-
-        void AssertValidArguments(SpriteFont spriteFont, StringBuilder text, string callerName)
-        {
-            if (spriteFont == null)
-                throw new ArgumentNullException(nameof(spriteFont));
-
-            if (text == null)
-                throw new ArgumentNullException(nameof(text));
 
             AssertBeginCalled(callerName);
         }
@@ -315,7 +301,7 @@ namespace MonoGame.Framework.Graphics
             else // Call Draw() using drawRectangle
             {
                 Draw(
-                    texture, destinationRectangle.Value, sourceRectangle, color.Value, 
+                    texture, destinationRectangle.Value, sourceRectangle, color.Value,
                     rotation, origin.Value, effects, layerDepth);
             }
         }
@@ -609,28 +595,27 @@ namespace MonoGame.Framework.Graphics
         }
 
         /// <summary>
-        /// Submit a text string of sprites for drawing in the current batch.
+        /// Submit text for drawing in the current batch.
         /// </summary>
         /// <param name="spriteFont">A font.</param>
         /// <param name="text">The text which will be drawn.</param>
         /// <param name="position">The drawing location on screen.</param>
         /// <param name="color">A color mask.</param>
-        public unsafe void DrawString(SpriteFont spriteFont, string text, Vector2 position, Color color)
+        public unsafe void DrawString(SpriteFont spriteFont, RuneEnumerator text, Vector2 position, Color color)
         {
-            AssertValidArguments(spriteFont, text, nameof(DrawString));
+            AssertValidArguments(spriteFont, nameof(DrawString));
             float sortKey = GetSortKey(spriteFont.Texture, 0);
 
             var offset = Vector2.Zero;
             bool firstGlyphOfLine = true;
-            var glyphs = spriteFont.Glyphs.Span;
+            var glyphs = spriteFont.Glyphs;
 
-            for (var i = 0; i < text.Length; ++i)
+            foreach (Rune c in text)
             {
-                char c = text[i];
-                if (c == '\r')
+                if (c == (Rune)'\r')
                     continue;
 
-                if (c == '\n')
+                if (c == (Rune)'\n')
                 {
                     offset.X = 0;
                     offset.Y += spriteFont.LineSpacing;
@@ -638,8 +623,8 @@ namespace MonoGame.Framework.Graphics
                     continue;
                 }
 
-                int currentGlyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
-                SpriteFont.Glyph glyph = glyphs[currentGlyphIndex];
+                int glyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
+                ref readonly SpriteFont.Glyph glyph = ref glyphs[glyphIndex];
 
                 // The first character on a line might have a negative left side bearing.
                 // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
@@ -680,7 +665,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         /// <summary>
-        /// Submit a text string of sprites for drawing in the current batch.
+        /// Submit text for drawing in the current batch.
         /// </summary>
         /// <param name="spriteFont">A font.</param>
         /// <param name="text">The text which will be drawn.</param>
@@ -699,7 +684,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         /// <summary>
-        /// Submit a text string of sprites for drawing in the current batch.
+        /// Submit text for drawing in the current batch.
         /// </summary>
         /// <param name="spriteFont">A font.</param>
         /// <param name="text">The text which will be drawn.</param>
@@ -711,10 +696,10 @@ namespace MonoGame.Framework.Graphics
         /// <param name="effects">Modificators for drawing. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this string.</param>
         public unsafe void DrawString(
-            SpriteFont spriteFont, string text, Vector2 position, Color color,
+            SpriteFont spriteFont, RuneEnumerator text, Vector2 position, Color color,
             float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
         {
-            AssertValidArguments(spriteFont, text, nameof(DrawString));
+            AssertValidArguments(spriteFont, nameof(DrawString));
             float sortKey = GetSortKey(spriteFont.Texture, layerDepth);
 
             var flipAdjustment = Vector2.Zero;
@@ -759,15 +744,14 @@ namespace MonoGame.Framework.Graphics
 
             var offset = Vector2.Zero;
             var firstGlyphOfLine = true;
-            var glyphs = spriteFont.Glyphs.Span;
+            var glyphs = spriteFont.Glyphs;
 
-            for (int i = 0; i < text.Length; ++i)
+            foreach (Rune c in text)
             {
-                char c = text[i];
-                if (c == '\r')
+                if (c == (Rune)'\r')
                     continue;
 
-                if (c == '\n')
+                if (c == (Rune)'\n')
                 {
                     offset.X = 0;
                     offset.Y += spriteFont.LineSpacing;
@@ -775,8 +759,8 @@ namespace MonoGame.Framework.Graphics
                     continue;
                 }
 
-                int currentGlyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
-                SpriteFont.Glyph glyph = glyphs[currentGlyphIndex];
+                int glyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
+                ref readonly SpriteFont.Glyph glyph = ref glyphs[glyphIndex];
 
                 // The first character on a line might have a negative left side bearing.
                 // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
@@ -834,235 +818,6 @@ namespace MonoGame.Framework.Graphics
                         color,
                         texCoord,
                         layerDepth);
-                }
-
-                offset.X += glyph.Width + glyph.RightSideBearing;
-            }
-
-            // We need to flush if we're using Immediate sort mode.
-            FlushIfNeeded();
-        }
-
-        /// <summary>
-        /// Submit a text string of sprites for drawing in the current batch.
-        /// </summary>
-        /// <param name="spriteFont">A font.</param>
-        /// <param name="text">The text which will be drawn.</param>
-        /// <param name="position">The drawing location on screen.</param>
-        /// <param name="color">A color mask.</param>
-        public unsafe void DrawString(SpriteFont spriteFont, StringBuilder text, Vector2 position, Color color)
-        {
-            AssertValidArguments(spriteFont, text, nameof(DrawString));
-
-            float sortKey = GetSortKey(spriteFont.Texture, 0);
-
-            var offset = Vector2.Zero;
-            var firstGlyphOfLine = true;
-            var glyphs = spriteFont.Glyphs.Span;
-
-            for (var i = 0; i < text.Length; ++i)
-            {
-                char c = text[i];
-                if (c == '\r')
-                    continue;
-
-                if (c == '\n')
-                {
-                    offset.X = 0;
-                    offset.Y += spriteFont.LineSpacing;
-                    firstGlyphOfLine = true;
-                    continue;
-                }
-
-                int currentGlyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
-                SpriteFont.Glyph glyph = glyphs[currentGlyphIndex];
-
-                // The first character on a line might have a negative left side bearing.
-                // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
-                //  so that text does not hang off the left side of its rectangle.
-                if (firstGlyphOfLine)
-                {
-                    offset.X = Math.Max(glyph.LeftSideBearing, 0);
-                    firstGlyphOfLine = false;
-                }
-                else
-                {
-                    offset.X += spriteFont.Spacing + glyph.LeftSideBearing;
-                }
-
-                var pos = offset;
-                pos.X += glyph.Cropping.X;
-                pos.Y += glyph.Cropping.Y;
-                pos += position;
-
-                var item = GetBatchItem(spriteFont.Texture);
-                item.SortKey = sortKey;
-
-                var texCoord = new Vector4(
-                    glyph.BoundsInTexture.X * spriteFont.Texture.Texel.X,
-                    glyph.BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
-                    (glyph.BoundsInTexture.X + glyph.BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
-                    (glyph.BoundsInTexture.Y + glyph.BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
-
-                item.Set(
-                    pos.X, pos.Y, glyph.BoundsInTexture.Width, glyph.BoundsInTexture.Height,
-                    color, texCoord, 0);
-
-                offset.X += glyph.Width + glyph.RightSideBearing;
-            }
-
-            // We need to flush if we're using Immediate sort mode.
-            FlushIfNeeded();
-        }
-
-        /// <summary>
-        /// Submit a text string of sprites for drawing in the current batch.
-        /// </summary>
-        /// <param name="spriteFont">A font.</param>
-        /// <param name="text">The text which will be drawn.</param>
-        /// <param name="position">The drawing location on screen.</param>
-        /// <param name="color">A color mask.</param>
-        /// <param name="rotation">A rotation of this string.</param>
-        /// <param name="origin">Center of the rotation. 0,0 by default.</param>
-        /// <param name="scale">A scaling of this string.</param>
-        /// <param name="effects">Modificators for drawing. Can be combined.</param>
-        /// <param name="layerDepth">A depth of the layer of this string.</param>
-        public void DrawString(
-            SpriteFont spriteFont, StringBuilder text, Vector2 position, Color color,
-            float rotation, Vector2 origin, float scale, SpriteEffects effects, float layerDepth)
-        {
-            var scaleVec = new Vector2(scale, scale);
-            DrawString(spriteFont, text, position, color, rotation, origin, scaleVec, effects, layerDepth);
-        }
-
-        /// <summary>
-        /// Submit a text string of sprites for drawing in the current batch.
-        /// </summary>
-        /// <param name="spriteFont">A font.</param>
-        /// <param name="text">The text which will be drawn.</param>
-        /// <param name="position">The drawing location on screen.</param>
-        /// <param name="color">A color mask.</param>
-        /// <param name="rotation">A rotation of this string.</param>
-        /// <param name="origin">Center of the rotation. 0,0 by default.</param>
-        /// <param name="scale">A scaling of this string.</param>
-        /// <param name="effects">Modificators for drawing. Can be combined.</param>
-        /// <param name="layerDepth">A depth of the layer of this string.</param>
-        public unsafe void DrawString(
-            SpriteFont spriteFont, StringBuilder text, Vector2 position, Color color,
-            float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
-        {
-            AssertValidArguments(spriteFont, text, nameof(DrawString));
-            float sortKey = GetSortKey(spriteFont.Texture, 0);
-
-            var flipAdjustment = Vector2.Zero;
-            var flippedVert = (effects & SpriteEffects.FlipVertically) == SpriteEffects.FlipVertically;
-            var flippedHorz = (effects & SpriteEffects.FlipHorizontally) == SpriteEffects.FlipHorizontally;
-
-            if (flippedVert || flippedHorz)
-            {
-                Vector2 size = spriteFont.MeasureString(text);
-                if (flippedHorz)
-                {
-                    origin.X *= -1;
-                    flipAdjustment.X = -size.X;
-                }
-                if (flippedVert)
-                {
-                    origin.Y *= -1;
-                    flipAdjustment.Y = spriteFont.LineSpacing - size.Y;
-                }
-            }
-
-            var transformation = Matrix.Identity;
-            float cos = 0, sin = 0;
-            if (rotation == 0)
-            {
-                transformation.M11 = flippedHorz ? -scale.X : scale.X;
-                transformation.M22 = flippedVert ? -scale.Y : scale.Y;
-                transformation.M41 = ((flipAdjustment.X - origin.X) * transformation.M11) + position.X;
-                transformation.M42 = ((flipAdjustment.Y - origin.Y) * transformation.M22) + position.Y;
-            }
-            else
-            {
-                cos = MathF.Cos(rotation);
-                sin = MathF.Sin(rotation);
-                transformation.M11 = (flippedHorz ? -scale.X : scale.X) * cos;
-                transformation.M12 = (flippedHorz ? -scale.X : scale.X) * sin;
-                transformation.M21 = (flippedVert ? -scale.Y : scale.Y) * (-sin);
-                transformation.M22 = (flippedVert ? -scale.Y : scale.Y) * cos;
-                transformation.M41 = ((flipAdjustment.X - origin.X) * transformation.M11) + (flipAdjustment.Y - origin.Y) * transformation.M21 + position.X;
-                transformation.M42 = ((flipAdjustment.X - origin.X) * transformation.M12) + (flipAdjustment.Y - origin.Y) * transformation.M22 + position.Y;
-            }
-
-            var offset = Vector2.Zero;
-            bool firstGlyphOfLine = true;
-            var glyphs = spriteFont.Glyphs.Span;
-
-            for (int i = 0; i < text.Length; ++i)
-            {
-                char c = text[i];
-                if (c == '\r')
-                    continue;
-
-                if (c == '\n')
-                {
-                    offset.X = 0;
-                    offset.Y += spriteFont.LineSpacing;
-                    firstGlyphOfLine = true;
-                    continue;
-                }
-
-                var currentGlyphIndex = spriteFont.GetGlyphIndexOrDefault(c);
-                SpriteFont.Glyph glyph = glyphs[currentGlyphIndex];
-
-                // The first character on a line might have a negative left side bearing.
-                // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
-                //  so that text does not hang off the left side of its rectangle.
-                if (firstGlyphOfLine)
-                {
-                    offset.X = Math.Max(glyph.LeftSideBearing, 0);
-                    firstGlyphOfLine = false;
-                }
-                else
-                {
-                    offset.X += spriteFont.Spacing + glyph.LeftSideBearing;
-                }
-
-                var p = offset;
-
-                if (flippedHorz)
-                    p.X += glyph.BoundsInTexture.Width;
-                p.X += glyph.Cropping.X;
-
-                if (flippedVert)
-                    p.Y += glyph.BoundsInTexture.Height - spriteFont.LineSpacing;
-                p.Y += glyph.Cropping.Y;
-
-                p = Vector2.Transform(p, transformation);
-
-                var item = GetBatchItem(spriteFont.Texture);
-                item.SortKey = sortKey;
-
-                var texCoord = new Vector4(
-                    glyph.BoundsInTexture.X * spriteFont.Texture.Texel.X,
-                    glyph.BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
-                    (glyph.BoundsInTexture.X + glyph.BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
-                    (glyph.BoundsInTexture.Y + glyph.BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
-
-                FlipTexCoords(ref texCoord, effects);
-
-                if (rotation == 0f)
-                {
-                    item.Set(
-                        p.X, p.Y, glyph.BoundsInTexture.Width * scale.X, glyph.BoundsInTexture.Height * scale.Y,
-                        color, texCoord, layerDepth);
-                }
-                else
-                {
-                    item.Set(
-                        p.X, p.Y, 0, 0,
-                        glyph.BoundsInTexture.Width * scale.X, glyph.BoundsInTexture.Height * scale.Y,
-                        sin, cos, color, texCoord, layerDepth);
                 }
 
                 offset.X += glyph.Width + glyph.RightSideBearing;

@@ -3,20 +3,22 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using MonoGame.Framework.Content.Pipeline.Builder;
 using MonoGame.Framework.Content.Pipeline.Utilities.LZ4;
 using MonoGame.Framework.Graphics;
-using MonoGame.Framework.Content.Pipeline.Builder;
-using System.Collections.Generic;
 using MonoGame.Framework.Memory;
+using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     /// <summary>
-    /// Provides an implementation for many of the ContentCompiler methods including compilation, state tracking for shared resources and creation of the header type manifest.
+    /// Provides an implementation for many of the ContentCompiler methods including 
+    /// compilation, state tracking for shared resources and creation of the header type manifest.
     /// </summary>
     /// <remarks>A new ContentWriter is constructed for each compilation operation.</remarks>
-    public sealed class ContentWriter : BinaryWriter
+    public sealed class ContentWriter : BinaryWriterEx
     {
         const byte XnbFormatVersion = 5;
         const byte HiDefContent = 0x01;
@@ -136,7 +138,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                 bodyStream.Position = 0;
                 bodyStream.WriteTo(contentStream);
                 contentStream.Position = 0;
-                
+
                 // Before we write the header, try to compress the body stream. If compression fails, we want to
                 // turn off the compressContent flag so the correct flags are written in the header
                 MemoryStream compressedStream = null;
@@ -326,7 +328,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                 var index = typeWriterMap[typeWriter.GetType()];
                 Write7BitEncodedInt(index + 1);
 
-                typeWriter.Write(this, value);                
+                typeWriter.Write(this, value);
             }
         }
 

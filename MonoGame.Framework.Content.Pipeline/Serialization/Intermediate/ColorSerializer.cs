@@ -4,15 +4,13 @@
 
 using System.Collections.Generic;
 using System.Globalization;
-using System.Xml;
 
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 {
     [ContentTypeSerializer]
     class ColorSerializer : ElementSerializer<Color>
     {
-        public ColorSerializer() :
-            base("Color", 1)
+        public ColorSerializer() : base("Color", 1)
         {
         }
 
@@ -20,10 +18,12 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
         {
             // NOTE: The value is serialized in ARGB format.
             var value = uint.Parse(inputs[index++], NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-            return new Color(   (int)(value >> 16 & 0xFF),
-                                (int)(value >> 8 & 0xFF),
-                                (int)(value >> 0 & 0xFF),
-                                (int)(value >> 24 & 0xFF));
+
+            return new Color(
+                (int)(value >> 16 & 0xFF),
+                (int)(value >> 8 & 0xFF),
+                (int)(value >> 0 & 0xFF),
+                (int)(value >> 24 & 0xFF));
         }
 
         protected internal override void Serialize(Color value, List<string> results)

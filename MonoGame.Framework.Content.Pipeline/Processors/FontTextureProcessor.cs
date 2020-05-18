@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Content.Pipeline.Graphics;
+using System.Text;
 
 namespace MonoGame.Framework.Content.Pipeline.Processors
 {
@@ -16,7 +17,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
         private static readonly Color _transparentPixel = Color.Magenta;
 
         [DefaultValue(' ')]
-        public virtual char FirstCharacter { get; set; }
+        public virtual Rune FirstCharacter { get; set; }
 
         [DefaultValue(true)]
         public virtual bool PremultiplyAlpha { get; set; }
@@ -25,13 +26,13 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
 
         public FontTextureProcessor()
         {
-            FirstCharacter = ' ';
+            FirstCharacter = (Rune)' ';
             PremultiplyAlpha = true;
         }
 
-        protected virtual char GetCharacterForIndex(int index)
+        protected virtual Rune GetCharacterForIndex(int index)
         {
-            return (char)(FirstCharacter + index);
+            return (Rune)(FirstCharacter.Value + index);
         }
 
         private List<Glyph> ExtractGlyphs(PixelBitmapContent<Color> bitmap)

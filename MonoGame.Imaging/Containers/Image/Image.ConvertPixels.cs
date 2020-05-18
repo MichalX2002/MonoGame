@@ -7,16 +7,6 @@ namespace MonoGame.Imaging
 {
     public partial class Image
     {
-        // TODO: move these methods somewhere else
-
-        private static void ConvertPixelsCore<TPixelFrom, TPixelTo>(
-           ReadOnlySpan<byte> source, Span<byte> destination)
-           where TPixelFrom : unmanaged, IPixel
-           where TPixelTo : unmanaged, IPixel
-        {
-            ConvertPixelBytes<TPixelFrom, TPixelTo>(source, destination);
-        }
-
         public static void ConvertPixels<TPixelFrom, TPixelTo>(
             ReadOnlySpan<TPixelFrom> source, Span<TPixelTo> destination)
             where TPixelFrom : unmanaged, IPixel
@@ -25,40 +15,35 @@ namespace MonoGame.Imaging
             if (destination.Length < source.Length)
                 throw new ArgumentException("Destination is too short.");
 
+            // TODO: finish types
+
             if (typeof(TPixelFrom) == typeof(TPixelTo))
             {
                 var src = MemoryMarshal.Cast<TPixelFrom, TPixelTo>(source);
                 src.CopyTo(destination);
             }
-            //else if (typeof(TPixelTo) == typeof(Color))
-            //{
-            //    var colorDestination = MemoryMarshal.Cast<TPixelTo, Color>(destination);
-            //    for (int x = 0; x < source.Length; x++)
-            //        source[x].ToColor(out colorDestination[x]);
-            //}
-            //else if (typeof(TPixelFrom) == typeof(Color))
-            //{
-            //    var colorSource = MemoryMarshal.Cast<TPixelFrom, Color>(source);
-            //    for (int x = 0; x < source.Length; x++)
-            //        destination[x].FromColor(colorSource[x]);
-            //}
-            else if(typeof(TPixelFrom) == typeof(Rgb24))
+            else if (typeof(TPixelTo) == typeof(Color))
             {
-                var dst = MemoryMarshal.Cast<TPixelTo, Color>(destination);
-                var colorSource = MemoryMarshal.Cast<TPixelFrom, Rgb24>(source);
+                var typedDestination = MemoryMarshal.Cast<TPixelTo, Color>(destination);
                 for (int x = 0; x < source.Length; x++)
-                {
-                    var tmp = colorSource[x].ToVector4e();
-                    dst[x].FromScaledVector4e(tmp);
-                }
+                    typedDestination[x] = source[x].ToColor();
+            }
+            else if (typeof(TPixelFrom) == typeof(Color))
+            {
+                var typedSource = MemoryMarshal.Cast<TPixelFrom, Color>(source);
+                for (int x = 0; x < source.Length; x++)
+                    destination[x].FromColor(typedSource[x]);
+            }
+            else if (typeof(TPixelFrom) == typeof(Rgb24))
+            {
+                var typedSource = MemoryMarshal.Cast<TPixelFrom, Rgb24>(source);
+                for (int x = 0; x < source.Length; x++)
+                    destination[x].FromRgb24(typedSource[x]);
             }
             else
             {
                 for (int x = 0; x < source.Length; x++)
-                {
-                    source[x].ToScaledVector4(out Vector4 tmp);
-                    destination[x].FromScaledVector4(tmp);
-                }
+                    destination[x].FromScaledVector4(source[x].ToScaledVector4());
             }
         }
 

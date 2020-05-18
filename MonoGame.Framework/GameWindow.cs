@@ -3,7 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.ComponentModel;
+using System.Collections.Generic;
 using MonoGame.Framework.Input;
 using MonoGame.Framework.Input.Touch;
 using MonoGame.Framework.Utilities;
@@ -12,24 +12,65 @@ namespace MonoGame.Framework
 {
     public abstract class GameWindow
     {
-        public delegate void FileDropEvent(GameWindow window, string filePath);
+        public delegate void FilesDroppedEvent(GameWindow window, List<string> files);
 
         private string _title;
-        internal bool _allowAltF4 = true;
+        private bool _allowAltF4 = true;
 
         internal MouseState MouseState;
         internal TouchPanelState TouchPanelState;
 
+        #region Events
+
+        public event DatalessEvent<GameWindow> ClientSizeChanged;
+        public event DatalessEvent<GameWindow> OrientationChanged;
+        public event DatalessEvent<GameWindow> ScreenDeviceNameChanged;
+
+        public event FilesDroppedEvent FilesDropped;
+
+        /// <summary>
+        /// Use this event to retrieve text for objects like textboxes.
+        /// This event is not raised by non-character keys and supports key repeat.
+        /// For more information this event is based off:
+        /// http://msdn.microsoft.com/en-AU/library/system.windows.forms.control.keypress.aspx
+        /// </summary>
+        /// <remarks>
+        /// This event is only supported on the Windows and Linux platforms.
+        /// </remarks>
+        public event DataEvent<GameWindow, TextInputEventArgs> TextInput;
+
+        /// <summary>
+        /// Buffered keyboard KeyDown event.
+        /// </summary>
+        /// <remarks>
+        /// This event is only supported on the Windows and Linux platforms.
+        /// </remarks>
+        public event DataEvent<GameWindow, TextInputEventArgs> KeyDown;
+
+        /// <summary>
+        /// Buffered keyboard KeyUp event.
+        /// </summary>
+        /// <remarks>
+        /// This event is only supported on the Windows and Linux platforms.
+        /// </remarks>
+        public event DataEvent<GameWindow, TextInputEventArgs> KeyUp;
+
+        #endregion
+
         #region Properties
 
-        [DefaultValue(false)]
+        internal bool IsTextInputHandled => TextInput != null;
+        internal bool IsFilesDroppedHandled => FilesDropped != null;
+
+        public TaskbarList TaskbarList { get; }
+
+        public abstract bool AllowFileDropping { get; set; }
+
         public abstract bool AllowUserResizing { get; set; }
         public abstract Rectangle ClientBounds { get; }
 
         public abstract bool HasClipboardText { get; }
         public abstract string ClipboardText { get; set; }
-
-        public TaskbarList TaskbarList { get; }
 
         /// <summary>
         /// Gets or sets whether the usage of Alt+F4 closes the window on desktop platforms. 
@@ -37,13 +78,11 @@ namespace MonoGame.Framework
         /// </summary>
         public virtual bool AllowAltF4 { get => _allowAltF4; set => _allowAltF4 = value; }
 
-#if (WINDOWS && !WINDOWS_UAP) || DESKTOPGL
         /// <summary>
         /// The location of this window on the desktop, 
         /// i.e. global coordinate space which stretches across all screens.
         /// </summary>
         public abstract Point Position { get; set; }
-#endif
 
         public abstract DisplayOrientation CurrentOrientation { get; }
         public abstract IntPtr Handle { get; }
@@ -73,15 +112,15 @@ namespace MonoGame.Framework
         /// <para>
         /// Determines whether the border of the window is visible.
         /// </para>
-        /// Currently only supported on the WinDX and WinGL/Linux platforms.
+        /// Currently only supported on the Windows and Linux platforms.
         /// </summary>
-        /// <exception cref="NotImplementedException">
-        /// Set on a platform other than the WinDX and WinGL/Linux platforms.
+        /// <exception cref="PlatformNotSupportedException">
+        /// Set on a platform other than the Windows and Linux platforms.
         /// </exception>
         public virtual bool IsBorderless
         {
             get => false;
-            set => throw new NotImplementedException();
+            set => throw new PlatformNotSupportedException();
         }
 
         #endregion
@@ -91,54 +130,6 @@ namespace MonoGame.Framework
             TouchPanelState = new TouchPanelState(this);
             TaskbarList = new TaskbarList();
         }
-
-        #region Events
-
-        public event DatalessEvent<GameWindow> ClientSizeChanged;
-        public event DatalessEvent<GameWindow> OrientationChanged;
-        public event DatalessEvent<GameWindow> ScreenDeviceNameChanged;
-
-        public event FileDropEvent FileDropped;
-        public event DataEvent<GameWindow, string> TextDropped;
-
-        internal bool IsTextInputHandled => TextInput != null;
-        internal bool IsFileDroppedHandled => FileDropped != null;
-        internal bool IsTextDroppedHandled => TextDropped != null;
-
-        /// <summary>
-        /// Use this event to retrieve text for objects like textboxes.
-        /// This event is not raised by non-character keys and supports key repeat.
-        /// For more information this event is based off:
-        /// http://msdn.microsoft.com/en-AU/library/system.windows.forms.control.keypress.aspx
-        /// </summary>
-        /// <remarks>
-        /// This event is only supported on the Windows and Linux platforms.
-        /// </remarks>
-        public event DataEvent<GameWindow, TextInputEventArgs> TextInput;
-
-        /// <summary>
-        /// Buffered keyboard KeyDown event.
-        /// </summary>
-        /// <remarks>
-        /// This event is only supported on the Windows and Linux platforms.
-        /// </remarks>
-        public event DataEvent<GameWindow, KeyInputEventArgs> KeyDown;
-
-        /// <summary>
-        /// Buffered keyboard KeyUp event.
-        /// </summary>
-        /// <remarks>
-        /// This event is only supported on the Windows and Linux platforms.
-        /// </remarks>
-        public event DataEvent<GameWindow, KeyInputEventArgs> KeyUp;
-
-        internal void OnTextInput(TextInputEventArgs ev) => TextInput?.Invoke(this, ev);
-
-        internal void OnKeyDown(KeyInputEventArgs e) => KeyDown?.Invoke(this, e);
-
-        internal void OnKeyUp(KeyInputEventArgs e) => KeyUp?.Invoke(this, e);
-
-        #endregion
 
         public abstract void BeginScreenDeviceChange(bool willBeFullScreen);
 
@@ -167,23 +158,29 @@ namespace MonoGame.Framework
             OrientationChanged?.Invoke(this);
         }
 
-        protected void OnPaint()
-        {
-        }
-
         protected void OnScreenDeviceNameChanged()
         {
             ScreenDeviceNameChanged?.Invoke(this);
         }
 
-        protected void OnFileDropped(GameWindow window, string filePath)
+        protected void OnFilesDropped(GameWindow window, List<string> files)
         {
-            FileDropped?.Invoke(window, filePath);
+            FilesDropped?.Invoke(window, files);
         }
 
-        protected void OnTextDropped(GameWindow window, string text)
+        internal void OnTextInput(TextInputEventArgs ev)
         {
-            TextDropped?.Invoke(window, text);
+            TextInput?.Invoke(this, ev);
+        }
+
+        internal void OnKeyDown(TextInputEventArgs e)
+        {
+            KeyDown?.Invoke(this, e);
+        }
+
+        internal void OnKeyUp(TextInputEventArgs e)
+        {
+            KeyUp?.Invoke(this, e);
         }
 
         protected internal abstract void SetSupportedOrientations(DisplayOrientation orientations);

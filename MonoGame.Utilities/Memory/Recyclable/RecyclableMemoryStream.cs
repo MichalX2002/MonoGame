@@ -793,7 +793,7 @@ namespace MonoGame.Framework.Memory
                     "). Limit is " + _memoryManager.MaximumStreamCapacity);
             }
 
-            if (_largeBuffer == null)
+            if (_largeBuffer != null)
             {
                 if (newCapacity > _largeBuffer.BufferLength)
                 {
@@ -806,8 +806,13 @@ namespace MonoGame.Framework.Memory
             }
             else
             {
-                while (Capacity < newCapacity)
-                    _blocks.Add(_memoryManager.GetBlock());
+                long currentCapacity = Capacity;
+                while (currentCapacity < newCapacity)
+                {
+                    var block = _memoryManager.GetBlock();
+                    _blocks.Add(block);
+                    currentCapacity += block.Length;
+                }
             }
         }
 

@@ -4,6 +4,8 @@
 
 // Original code from SilverSprite Project
 
+using System.Text;
+
 namespace MonoGame.Framework.Graphics
 {
     public partial class SpriteFont
@@ -15,45 +17,47 @@ namespace MonoGame.Framework.Graphics
         public readonly struct Glyph
         {
             /// <summary>
-            /// The char associated with this glyph.
+            /// The Unicode scalar associated with this glyph.
             /// </summary>
-            public readonly char Character;
+            public Rune Character { get; }
 
             /// <summary>
             /// Rectangle in the font texture where this letter exists.
             /// </summary>
-            public readonly Rectangle BoundsInTexture;
+            public Rectangle BoundsInTexture { get; }
 
             /// <summary>
             /// Cropping applied to the BoundsInTexture to calculate the bounds of the actual character.
             /// </summary>
-            public readonly Rectangle Cropping;
+            public Rectangle Cropping { get; }
 
             /// <summary>
             /// The amount of space between the left side ofthe character and its first pixel in the X dimention.
             /// </summary>
-            public readonly float LeftSideBearing;
+            public float LeftSideBearing { get; }
 
             /// <summary>
             /// The amount of space between the right side of the character and its last pixel in the X dimention.
             /// </summary>
-            public readonly float RightSideBearing;
+            public float RightSideBearing { get; }
 
             /// <summary>
             /// Width of the character before kerning is applied. 
             /// </summary>
-            public readonly float Width;
+            public float Width { get; }
 
             /// <summary>
             /// Width of the character before kerning is applied. 
             /// </summary>
-            public readonly float WidthIncludingBearings;
-
-            public static readonly Glyph Empty = new Glyph();
+            public float WidthIncludingBearings { get; }
 
             public Glyph(
-                char character, in Rectangle boundsInTexture, in Rectangle cropping,
-                float leftSideBearing, float rightSideBearing, float width, float widthIncludingBearings)
+                Rune character, 
+                in Rectangle boundsInTexture,
+                in Rectangle cropping,
+                float leftSideBearing, 
+                float rightSideBearing, 
+                float width)
             {
                 Character = character;
                 BoundsInTexture = boundsInTexture;
@@ -61,10 +65,11 @@ namespace MonoGame.Framework.Graphics
                 LeftSideBearing = leftSideBearing;
                 RightSideBearing = rightSideBearing;
                 Width = width;
-                WidthIncludingBearings = widthIncludingBearings;
+
+                WidthIncludingBearings = Width + LeftSideBearing + RightSideBearing;
             }
 
-            public override string ToString()
+            public override readonly string ToString()
             {
                 return
                     "CharacterIndex=" + Character +

@@ -7,6 +7,7 @@ using System.Collections;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.Text;
 
 namespace MonoGame.Framework.Content
 {
@@ -59,6 +60,7 @@ namespace MonoGame.Framework.Content
                 var hBoundingFrustumReader = new BoundingFrustumReader();
                 var hRayReader = new RayReader();
                 var hCharListReader = new ListReader<char>();
+                var hRuneListReader = new ListReader<Rune>();
                 var hRectangleListReader = new ListReader<Rectangle>();
                 var hRectangleArrayReader = new ArrayReader<Rectangle>();
                 var hVector3ListReader = new ListReader<Vector3>();
@@ -67,6 +69,7 @@ namespace MonoGame.Framework.Content
                 var hSpriteFontReader = new SpriteFontReader();
                 var hTexture2DReader = new Texture2DReader();
                 var hCharReader = new CharReader();
+                var hRuneReader = new RuneReader();
                 var hRectangleReader = new RectangleReader();
                 var hStringReader = new StringReader();
                 var hVector2Reader = new Vector2Reader();
@@ -179,7 +182,7 @@ namespace MonoGame.Framework.Content
                 }
 
                 // Initialize any new readers.
-                for (var i = 0; i < contentReaders.Length; i++)
+                for (int i = 0; i < contentReaders.Length; i++)
                 {
                     if (needsInitialize.Get(i))
                         contentReaders[i].Initialize(this);

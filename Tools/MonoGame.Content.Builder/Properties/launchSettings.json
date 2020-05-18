@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MonoGame.Content.Builder": {
+      "commandName": "Project",
+      "commandLineArgs": "\"D:/Repositories/MonoGame/MonoGame.Testing/Content/Content.DesktopGL.mgcb\" /workingDir:\"D:/Repositories/MonoGame/MonoGame.Testing\""
+    }
+  }
+}

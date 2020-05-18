@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using TOutput = System.Char;
+using TOutput = System.Text.Rune;
 
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
@@ -10,7 +10,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
     /// Writes the character value to the output.
     /// </summary>
     [ContentTypeWriter]
-    class CharWriter : BuiltInContentWriter<TOutput>
+    class RuneWriter : BuiltInContentWriter<TOutput>
     {
         /// <summary>
         /// Writes the value to the output.
@@ -19,7 +19,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         /// <param name="value">The value to write to the output.</param>
         protected internal override void Write(ContentWriter output, TOutput value)
         {
-            output.Write(value);
+            output.Write7BitEncodedInt(value.Value);
         }
     }
 }

@@ -52,8 +52,11 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                     {
                         // Find the content type this writer implements
                         Type baseType = type.BaseType;
-                        while ((baseType != null) && (baseType.GetGenericTypeDefinition() != contentTypeWriterType))
+
+                        while ((baseType != null) && 
+                            (baseType.GetGenericTypeDefinition() != contentTypeWriterType))
                             baseType = baseType.BaseType;
+
                         if (baseType != null)
                             typeWriterMap.Add(baseType, type);
                     }
@@ -73,19 +76,29 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             ContentTypeWriter result;
 
             if (type == typeof(Array))
+            {
                 result = new ArrayWriter<Array>();
+            }
             else if (typeWriterMap.TryGetValue(contentTypeWriterType, out Type typeWriterType))
+            {
                 result = (ContentTypeWriter)Activator.CreateInstance(typeWriterType);
+            }
             else if (type.IsArray)
             {
-                var writerType = type.GetArrayRank() == 1 ? typeof(ArrayWriter<>) : typeof(MultiArrayWriter<>);
+                var writerType = type.GetArrayRank() == 1 
+                    ? typeof(ArrayWriter<>) 
+                    : typeof(MultiArrayWriter<>);
 
-                result = (ContentTypeWriter)Activator.CreateInstance(writerType.MakeGenericType(type.GetElementType()));
+                result = (ContentTypeWriter)Activator.CreateInstance(
+                    writerType.MakeGenericType(type.GetElementType()));
+                
                 typeWriterMap.Add(contentTypeWriterType, result.GetType());
             }
             else if (type.IsEnum)
             {
-                result = (ContentTypeWriter)Activator.CreateInstance(typeof(EnumWriter<>).MakeGenericType(type));
+                result = (ContentTypeWriter)Activator.CreateInstance(
+                    typeof(EnumWriter<>).MakeGenericType(type));
+
                 typeWriterMap.Add(contentTypeWriterType, result.GetType());
             }
             else if (type.IsGenericType)
@@ -118,11 +131,15 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                 try
                 {
                     if (chosen == null)
-                        result = (ContentTypeWriter)Activator.CreateInstance(typeof(ReflectiveWriter<>).MakeGenericType(type));
+                    {
+                        result = (ContentTypeWriter)Activator.CreateInstance(
+                            typeof(ReflectiveWriter<>).MakeGenericType(type));
+                    }
                     else
                     {
                         var concreteType = type.GetGenericArguments();
-                        result = (ContentTypeWriter)Activator.CreateInstance(chosen.MakeGenericType(concreteType));
+                        result = (ContentTypeWriter)Activator.CreateInstance(
+                            chosen.MakeGenericType(concreteType));
                     }
 
                     // save it for next time.
@@ -130,17 +147,22 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                 }
                 catch (Exception)
                 {
-                    throw new InvalidContentException(string.Format("Could not find ContentTypeWriter for type '{0}'", type.Name));
+                    throw new InvalidContentException(
+                        string.Format("Could not find ContentTypeWriter for type '{0}'", type.Name));
                 }
             }
             else
             {
-                result = (ContentTypeWriter)Activator.CreateInstance(typeof(ReflectiveWriter<>).MakeGenericType(type));
+                result = (ContentTypeWriter)Activator.CreateInstance(
+                    typeof(ReflectiveWriter<>).MakeGenericType(type));
+                
                 typeWriterMap.Add(contentTypeWriterType, result.GetType());
             }
 
 
-            var initMethod = result.GetType().GetMethod("Initialize", BindingFlags.NonPublic | BindingFlags.Instance);
+            var initMethod = result.GetType().GetMethod(
+                "Initialize", BindingFlags.NonPublic | BindingFlags.Instance);
+            
             initMethod.Invoke(result, new object[] { this });
 
             return result;
@@ -155,10 +177,16 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         /// <param name="targetProfile">The graphics profile of the target.</param>
         /// <param name="compressContent">True if the content should be compressed.</param>
         /// <param name="rootDirectory">The root directory of the content.</param>
-        /// <param name="referenceRelocationPath">The path of the XNB file, used to calculate relative paths for external references.</param>
-        public void Compile(Stream stream, object content, TargetPlatform targetPlatform, GraphicsProfile targetProfile, bool compressContent, string rootDirectory, string referenceRelocationPath)
+        /// <param name="referenceRelocationPath">
+        /// The path of the XNB file, used to calculate relative paths for external references.
+        /// </param>
+        public void Compile(
+            Stream stream, object content, TargetPlatform targetPlatform, GraphicsProfile targetProfile,
+            bool compressContent, string rootDirectory, string referenceRelocationPath)
         {
-            using (var writer = new ContentWriter(this, stream, targetPlatform, targetProfile, compressContent, rootDirectory, referenceRelocationPath))
+            using (var writer = new ContentWriter(
+                this, stream, targetPlatform, targetProfile,
+                compressContent, rootDirectory, referenceRelocationPath))
             {
                 writer.WriteObject(content);
                 writer.Flush();

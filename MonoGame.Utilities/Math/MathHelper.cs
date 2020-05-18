@@ -194,8 +194,7 @@ namespace MonoGame.Framework
         /// </remarks>
         public static float Lerp(float a, float b, float amount)
         {
-            // TODO: MathF.FusedMultiplyAdd
-            return (b - a) * amount + a;
+            return MathF.FusedMultiplyAdd((b - a), amount, a);
         }
 
 
@@ -221,8 +220,7 @@ namespace MonoGame.Framework
         /// </remarks>
         public static float LerpPrecise(float a, float b, float amount)
         {
-            // TODO: MathF.FusedMultiplyAdd
-            return (1 - amount) * a + (b * amount);
+            return MathF.FusedMultiplyAdd(1 - amount, a, b * amount);
         }
 
         /// <summary>

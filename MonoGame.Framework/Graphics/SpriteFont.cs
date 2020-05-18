@@ -2,40 +2,47 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-// Original code from SilverSprite Project
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
 
 namespace MonoGame.Framework.Graphics
 {
-    public partial class SpriteFont
+    public partial class SpriteFont : IEnumerable<KeyValuePair<Rune, int>>
     {
-        internal const string TextContainsUnresolvableCharacters =
+        internal const string UnresolvableCharacters =
             "Text contains characters that cannot be resolved by this font.";
 
         internal const string UnresolvableCharacter =
             "Character cannot be resolved by this font.";
 
-        private readonly CharacterRegion[] _regions;
-        private char? _defaultCharacter;
+        private Dictionary<Rune, int> _glyphIndexMap;
+        private Glyph[] _glyphs;
+        private Rune? _defaultCharacter;
         private int _defaultGlyphIndex = -1;
-
-        /// <summary>
-        /// Gets all the glyphs in this font.
-        /// </summary>
-        public ReadOnlyMemory<Glyph> Glyphs { get; }
 
         /// <summary>
         /// Gets a collection of the characters in the font.
         /// </summary>
-        public ReadOnlyMemory<char> Characters { get; private set; }
+        public Dictionary<Rune, int>.KeyCollection Characters => _glyphIndexMap.Keys;
 
         /// <summary>
-        /// Gets the texture that this SpriteFont draws from.
+        /// Gets a collectioon of the glyph indicies in the font.
         /// </summary>
-        /// <remarks>Can be used to implement custom rendering of a SpriteFont</remarks>
+        public Dictionary<Rune, int>.ValueCollection GlyphIndices => _glyphIndexMap.Values;
+
+        /// <summary>
+        /// Gets all the glyphs in the font.
+        /// </summary>
+        public ReadOnlySpan<Glyph> Glyphs => _glyphs.AsSpan();
+
+        /// <summary>
+        /// Gets the texture that the font draws from.
+        /// </summary>
+        /// <remarks>
+        /// Can be used to implement custom rendering of a <see cref="SpriteFont"/>.
+        /// </remarks>
         public Texture2D Texture { get; }
 
         /// <summary>
@@ -54,7 +61,7 @@ namespace MonoGame.Framework.Graphics
         /// Gets or sets the character that will be substituted when a
         /// given character is not included in the font.
         /// </summary>
-        public char? DefaultCharacter
+        public Rune? DefaultCharacter
         {
             get => _defaultCharacter;
             set
@@ -66,8 +73,9 @@ namespace MonoGame.Framework.Graphics
                         throw new ArgumentException(UnresolvableCharacter);
                 }
                 else
+                {
                     _defaultGlyphIndex = -1;
-
+                }
                 _defaultCharacter = value;
             }
         }
@@ -77,109 +85,80 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="texture">The font texture.</param>
         /// <param name="glyphBounds">The rectangles in the font texture containing letters.</param>
-        /// <param name="cropping">The cropping rectangles, which are applied to the corresponding glyphBounds to calculate the bounds of the actual character.</param>
+        /// <param name="cropping">
+        /// The cropping rectangles, which are applied to the corresponding glyphBounds
+        /// to calculate the bounds of the actual character.
+        /// </param>
         /// <param name="characters">The characters.</param>
-        /// <param name="lineSpacing">The line spacing (the distance from baseline to baseline) of the font.</param>
-        /// <param name="spacing">The spacing (tracking) between characters in the font.</param>
-        /// <param name="kerning">The letters kernings(X - left side bearing, Y - width and Z - right side bearing).</param>
-        /// <param name="defaultCharacter">The character that will be substituted when a given character is not included in the font.</param>
+        /// <param name="lineSpacing">
+        /// The line spacing (the distance from baseline to baseline) of the font.
+        /// </param>
+        /// <param name="spacing">
+        /// The spacing (tracking) between characters in the font.
+        /// </param>
+        /// <param name="kerning">
+        /// The letters kernings(X - left side bearing, Y - width and Z - right side bearing).
+        /// </param>
+        /// <param name="defaultCharacter">
+        /// The character that will be substituted when a given character is not included in the font.
+        /// </param>
         public SpriteFont(
-            Texture2D texture, List<Rectangle> glyphBounds, List<Rectangle> cropping, List<char> characters,
-            int lineSpacing, float spacing, List<Vector3> kerning, char? defaultCharacter)
+            Texture2D texture,
+            IReadOnlyList<Rectangle> glyphBounds,
+            IReadOnlyList<Rectangle> cropping,
+            IReadOnlyList<Rune> characters,
+            int lineSpacing,
+            float spacing,
+            IReadOnlyList<Vector3> kerning,
+            Rune? defaultCharacter)
         {
-            Texture = texture;
+            // TODO: better argument validation
+
+            Texture = texture ?? throw new ArgumentNullException(nameof(texture));
             LineSpacing = lineSpacing;
             Spacing = spacing;
-            Characters = characters.ToArray();
+            DefaultCharacter = defaultCharacter;
 
-            var regions = new Stack<CharacterRegion>();
-            var glyphs = new Glyph[characters.Count];
-            for (var i = 0; i < characters.Count; i++)
+            _glyphIndexMap = new Dictionary<Rune, int>(characters.Count);
+            _glyphs = new Glyph[characters.Count];
+            for (int i = 0; i < _glyphs.Length; i++)
             {
-                glyphs[i] = new Glyph(
+                _glyphs[i] = new Glyph(
                     boundsInTexture: glyphBounds[i],
                     cropping: cropping[i],
                     character: characters[i],
 
                     leftSideBearing: kerning[i].X,
-                    width: kerning[i].Y,
                     rightSideBearing: kerning[i].Z,
+                    width: kerning[i].Y);
 
-                    widthIncludingBearings: kerning[i].X + kerning[i].Y + kerning[i].Z);
-
-                if (regions.Count == 0 || characters[i] > (regions.Peek().End + 1))
-                {
-                    // Start a new region
-                    regions.Push(new CharacterRegion(characters[i], i));
-                }
-                else if (characters[i] == (regions.Peek().End + 1))
-                {
-                    var currentRegion = regions.Pop();
-                    // include character in currentRegion
-                    currentRegion.End++;
-                    regions.Push(currentRegion);
-                }
-                else // characters[i] < (regions.Peek().End+1)
-                {
-                    throw new InvalidOperationException(
-                        "Invalid SpriteFont. Character map must be in ascending order.");
-                }
+                _glyphIndexMap.Add(_glyphs[i].Character, i);
             }
-            Glyphs = glyphs;
+        }
 
-            _regions = regions.ToArray();
-            Array.Reverse(_regions);
-
-            DefaultCharacter = defaultCharacter;
+        public ReadOnlyMemory<Glyph> GetGlyphs()
+        {
+            return _glyphs.AsMemory();
         }
 
         /// <summary>
-        /// Returns the size of a string when rendered in this font.
+        /// Returns the size of text rendered in the font.
         /// </summary>
         /// <param name="text">The text to measure.</param>
-        /// <returns>The size, in pixels, of 'text' when rendered in
-        /// this font.</returns>
-        public Vector2 MeasureString(string text)
+        /// <returns>The size, in pixels, of <paramref name="text"/> when rendered in the font.</returns>
+        public SizeF MeasureString(RuneEnumerator text)
         {
-            MeasureString(new CharacterSource(text), out Vector2 size);
-            return size;
-        }
-
-        /// <summary>
-        /// Returns the size of the contents of a StringBuilder when
-        /// rendered in this font.
-        /// </summary>
-        /// <param name="text">The text to measure.</param>
-        /// <returns>The size, in pixels, of 'text' when rendered in
-        /// this font.</returns>
-        public Vector2 MeasureString(StringBuilder text)
-        {
-            MeasureString(new CharacterSource(text), out Vector2 size);
-            return size;
-        }
-
-        internal unsafe void MeasureString(in CharacterSource text, out Vector2 size)
-        {
-            if (text.Length == 0)
-            {
-                size = Vector2.Zero;
-                return;
-            }
-
             float width = 0f;
             float finalLineHeight = LineSpacing;
-
-            var offset = Vector2.Zero;
             bool firstGlyphOfLine = true;
+            var offset = Vector2.Zero;
 
-            var glyphs = Glyphs.Span;
-            for (int i = 0; i < text.Length; ++i)
+            foreach (var c in text)
             {
-                char c = text[i];
-                if (c == '\r')
+                if (c.Value == '\r')
                     continue;
 
-                if (c == '\n')
+                if (c.Value == '\n')
                 {
                     finalLineHeight = LineSpacing;
 
@@ -189,12 +168,12 @@ namespace MonoGame.Framework.Graphics
                     continue;
                 }
 
-                int currentGlyphIndex = GetGlyphIndexOrDefault(c);
-                Glyph glyph = glyphs[currentGlyphIndex];
+                int glyphIndex = GetGlyphIndexOrDefault(c);
+                ref readonly Glyph glyph = ref _glyphs[glyphIndex];
 
                 // The first character on a line might have a negative left side bearing.
                 // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
-                //  so that text does not hang off the left side of its rectangle.
+                // so that text does not hang off the left side of its rectangle.
                 if (firstGlyphOfLine)
                 {
                     offset.X = Math.Max(glyph.LeftSideBearing, 0);
@@ -217,104 +196,38 @@ namespace MonoGame.Framework.Graphics
                     finalLineHeight = glyph.Cropping.Height;
             }
 
-            size.Base.X = width;
-            size.Base.Y = offset.Y + finalLineHeight;
+            return new SizeF(width, offset.Y + finalLineHeight);
         }
 
-        internal unsafe bool TryGetGlyphIndex(char c, out int index)
+        public bool TryGetGlyphIndex(Rune rune, out int index)
         {
-            fixed (CharacterRegion* pRegions = _regions)
-            {
-                // Get region Index 
-                int regionIdx = -1;
-                int l = 0;
-                int r = _regions.Length - 1;
-                while (l <= r)
-                {
-                    int m = (l + r) >> 1;
-                    Debug.Assert(m >= 0 && m < _regions.Length, "Index was outside the bounds of the array.");
-
-                    if (pRegions[m].End < c)
-                        l = m + 1;
-                    else if (pRegions[m].Start > c)
-                        r = m - 1;
-                    else
-                    {
-                        regionIdx = m;
-                        break;
-                    }
-                }
-
-                if (regionIdx == -1)
-                {
-                    index = -1;
-                    return false;
-                }
-
-                index = pRegions[regionIdx].StartIndex + (c - pRegions[regionIdx].Start);
-            }
-
-            return true;
+            return _glyphIndexMap.TryGetValue(rune, out index);
         }
 
-        internal int GetGlyphIndexOrDefault(char c)
+        public int GetGlyphIndexOrDefault(Rune rune)
         {
-            if (!TryGetGlyphIndex(c, out int glyphIdx))
-            {
-                if (_defaultGlyphIndex == -1)
-                    throw new ArgumentException(
-                        TextContainsUnresolvableCharacters, nameof(c));
+            if (_glyphIndexMap.TryGetValue(rune, out int index))
+                return index;
 
-                return _defaultGlyphIndex;
-            }
-            else
-                return glyphIdx;
+            if (_defaultGlyphIndex == -1)
+                throw new KeyNotFoundException(UnresolvableCharacters);
+
+            return _defaultGlyphIndex;
         }
 
-        internal readonly struct CharacterSource
+        public Dictionary<Rune, int>.Enumerator GetEnumerator()
         {
-            private readonly string _string;
-            private readonly StringBuilder _builder;
-
-            public readonly int Length;
-
-            public CharacterSource(string s)
-            {
-                _string = s;
-                _builder = null;
-                Length = s.Length;
-            }
-
-            public CharacterSource(StringBuilder builder)
-            {
-                _builder = builder;
-                _string = null;
-                Length = _builder.Length;
-            }
-
-            public char this[int index]
-            {
-                get
-                {
-                    if (_string != null)
-                        return _string[index];
-                    return _builder[index];
-                }
-            }
+            return _glyphIndexMap.GetEnumerator();
         }
 
-        private struct CharacterRegion
+        IEnumerator<KeyValuePair<Rune, int>> IEnumerable<KeyValuePair<Rune, int>>.GetEnumerator()
         {
-            public readonly char Start;
-            public char End;
-            public readonly int StartIndex;
+            return GetEnumerator();
+        }
 
-            public CharacterRegion(char start, int startIndex)
-            {
-                Start = start;
-                End = start;
-                StartIndex = startIndex;
-            }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

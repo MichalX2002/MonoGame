@@ -23,12 +23,12 @@ namespace MonoGame.Framework
         {
         }
 
-		public GameTime (TimeSpan totalRealTime, TimeSpan elapsedRealTime, bool isRunningSlowly)
-		{
+        public GameTime (TimeSpan totalRealTime, TimeSpan elapsedRealTime, bool isRunningSlowly)
+        {
             TotalGameTime = totalRealTime;
             ElapsedGameTime = elapsedRealTime;
-		    IsRunningSlowly = isRunningSlowly;
-		}
+            IsRunningSlowly = isRunningSlowly;
+        }
     }
 }
 

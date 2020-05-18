@@ -3,21 +3,23 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.Vector;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Imaging.Utilities;
 
 namespace MonoGame.Imaging
 {
+    // TODO: put Reflection* methods into seperate class
+
     using SrcDstTypePair = ValueTuple<VectorTypeInfo, VectorTypeInfo>;
 
     public partial class Image
     {
         private static void SetupReflection()
         {
-            SetupReflection_ConvertPixelSpan();
+            SetupReflection_ConvertPixels();
             SetupReflection_LoadPixelSpan();
             SetupReflection_LoadPixelRows();
             SetupReflection_WrapMemory();
@@ -38,13 +40,25 @@ namespace MonoGame.Imaging
 
         public delegate void ConvertPixelsDelegate(ReadOnlySpan<byte> source, Span<byte> destination);
 
-        private static MethodInfo _convertPixelSpanMethod;
-        private static ConcurrentDictionary<SrcDstTypePair, ConvertPixelsDelegate> _convertPixelSpanDelegateCache;
+        private static MethodInfo? _convertPixelsMethod;
+        private static ConcurrentDictionary<SrcDstTypePair, ConvertPixelsDelegate> _convertPixelSpanDelegateCache =
+            new ConcurrentDictionary<SrcDstTypePair, ConvertPixelsDelegate>();
 
-        private static void SetupReflection_ConvertPixelSpan()
+        private static void ReflectionConvertPixels<TPixelFrom, TPixelTo>(
+           ReadOnlySpan<byte> source, Span<byte> destination)
+           where TPixelFrom : unmanaged, IPixel
+           where TPixelTo : unmanaged, IPixel
         {
-            _convertPixelSpanMethod = typeof(Image).GetMethod(nameof(ConvertPixelsCore), BindingFlags.NonPublic | BindingFlags.Static);
-            _convertPixelSpanDelegateCache = new ConcurrentDictionary<SrcDstTypePair, ConvertPixelsDelegate>();
+            ConvertPixelBytes<TPixelFrom, TPixelTo>(source, destination);
+        }
+
+        private static void SetupReflection_ConvertPixels()
+        {
+            _convertPixelsMethod = typeof(Image).GetMethod(
+                nameof(ReflectionConvertPixels), BindingFlags.NonPublic | BindingFlags.Static);
+
+            if (_convertPixelsMethod == null)
+                throw new Exception("Can not find required method for reflection.");
         }
 
         public static ConvertPixelsDelegate GetConvertPixelsDelegate(
@@ -56,7 +70,7 @@ namespace MonoGame.Imaging
             var delegateKey = (sourceType, destinationType);
             if (!_convertPixelSpanDelegateCache.TryGetValue(delegateKey, out var convertDelegate))
             {
-                var genericMethod = _convertPixelSpanMethod.MakeGenericMethod(sourceType.Type, destinationType.Type);
+                var genericMethod = _convertPixelsMethod!.MakeGenericMethod(sourceType.Type, destinationType.Type);
                 convertDelegate = CreateDelegateForMethod<ConvertPixelsDelegate>(genericMethod);
                 _convertPixelSpanDelegateCache.TryAdd(delegateKey, convertDelegate);
             }
@@ -70,13 +84,29 @@ namespace MonoGame.Imaging
         private delegate void LoadPixelSpanDelegate(
             ReadOnlySpan<byte> pixelData, Rectangle sourceRectangle, int? byteStride, Image destination);
 
-        private static MethodInfo _loadPixelSpanMethod;
-        private static ConcurrentDictionary<SrcDstTypePair, LoadPixelSpanDelegate> _loadPixelSpanDelegateCache;
+        private static MethodInfo? _loadPixelSpanMethod;
+        private static ConcurrentDictionary<SrcDstTypePair, LoadPixelSpanDelegate> _loadPixelSpanDelegateCache =
+            new ConcurrentDictionary<SrcDstTypePair, LoadPixelSpanDelegate>();
+
+        private static unsafe void ReflectionLoadPixelBytes<TPixelFrom, TPixelTo>(
+           ReadOnlySpan<byte> pixelData,
+           Rectangle sourceRectangle,
+           int? byteStride,
+           Image<TPixelTo> destination)
+           where TPixelFrom : unmanaged, IPixel
+           where TPixelTo : unmanaged, IPixel
+        {
+            var pixels = MemoryMarshal.Cast<byte, TPixelFrom>(pixelData);
+            LoadPixels(pixels, sourceRectangle, byteStride, destination);
+        }
 
         private static void SetupReflection_LoadPixelSpan()
         {
-            _loadPixelSpanMethod = typeof(Image).GetMethod(nameof(LoadPixels), BindingFlags.NonPublic | BindingFlags.Static);
-            _loadPixelSpanDelegateCache = new ConcurrentDictionary<SrcDstTypePair, LoadPixelSpanDelegate>();
+            _loadPixelSpanMethod = typeof(Image).GetMethod(
+                nameof(ReflectionLoadPixelBytes), BindingFlags.NonPublic | BindingFlags.Static);
+
+            if (_loadPixelSpanMethod == null)
+                throw new Exception("Can not find required method for reflection.");
         }
 
         private static LoadPixelSpanDelegate GetLoadPixelSpanDelegate(
@@ -86,18 +116,14 @@ namespace MonoGame.Imaging
             if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
 
             var delegateKey = (sourceType, destinationType);
-            if (!_loadPixelSpanDelegateCache.TryGetValue(delegateKey, out var loadDelegate))
+            if (!_loadPixelSpanDelegateCache!.TryGetValue(delegateKey, out var loadDelegate))
             {
                 var delegateParams = typeof(LoadPixelSpanDelegate).GetDelegateParameters().AsTypes();
                 var lambdaParams = delegateParams.Select(x => Expression.Parameter(x)).ToList();
                 var callParams = lambdaParams.Cast<Expression>().ToList();
-                
-                var spanCast = ImagingReflectionHelper.SpanCastMethod.MakeGenericMethod(typeof(byte), sourceType.Type);
-                var spanCastCall = Expression.Call(spanCast, lambdaParams[0]);
-                callParams[0] = spanCastCall;
                 callParams[3] = Expression.Convert(callParams[3], typeof(Image<>).MakeGenericType(destinationType.Type));
 
-                var genericMethod = _loadPixelSpanMethod.MakeGenericMethod(sourceType.Type, destinationType.Type);
+                var genericMethod = _loadPixelSpanMethod!.MakeGenericMethod(sourceType.Type, destinationType.Type);
                 var call = Expression.Call(genericMethod, callParams);
 
                 var lambda = Expression.Lambda<LoadPixelSpanDelegate>(call, lambdaParams);
@@ -114,13 +140,25 @@ namespace MonoGame.Imaging
         private delegate void LoadPixelRowsDelegate(
             IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image destination);
 
-        private static MethodInfo _loadPixelsMethod;
-        private static ConcurrentDictionary<SrcDstTypePair, LoadPixelRowsDelegate> _loadPixelsDelegateCache;
+        private static MethodInfo? _loadPixelsMethod;
+        private static ConcurrentDictionary<SrcDstTypePair, LoadPixelRowsDelegate> _loadPixelsDelegateCache =
+            new ConcurrentDictionary<SrcDstTypePair, LoadPixelRowsDelegate>();
+
+        private static void ReflectionLoadPixelRows<TPixelFrom, TPixelTo>(
+            IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image destination)
+            where TPixelFrom : unmanaged, IPixel
+            where TPixelTo : unmanaged, IPixel
+        {
+            LoadPixels<TPixelFrom, TPixelTo>(pixels, sourceRectangle, (Image<TPixelTo>)destination);
+        }
 
         private static void SetupReflection_LoadPixelRows()
         {
-            _loadPixelsMethod = typeof(Image).GetMethod(nameof(LoadPixelsCore), BindingFlags.NonPublic | BindingFlags.Static);
-            _loadPixelsDelegateCache = new ConcurrentDictionary<SrcDstTypePair, LoadPixelRowsDelegate>();
+            _loadPixelsMethod = typeof(Image).GetMethod(
+                nameof(ReflectionLoadPixelRows), BindingFlags.NonPublic | BindingFlags.Static);
+
+            if (_loadPixelsMethod == null)
+                throw new Exception("Can not find required method for reflection.");
         }
 
         private static LoadPixelRowsDelegate GetLoadPixelRowsDelegate(
@@ -130,9 +168,9 @@ namespace MonoGame.Imaging
             if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
 
             var delegateKey = (sourceType, destinationType);
-            if (!_loadPixelsDelegateCache.TryGetValue(delegateKey, out var loadDelegate))
+            if (!_loadPixelsDelegateCache!.TryGetValue(delegateKey, out var loadDelegate))
             {
-                var genericMethod = _loadPixelsMethod.MakeGenericMethod(sourceType.Type, destinationType.Type);
+                var genericMethod = _loadPixelsMethod!.MakeGenericMethod(sourceType.Type, destinationType.Type);
                 loadDelegate = CreateDelegateForMethod<LoadPixelRowsDelegate>(genericMethod);
                 _loadPixelsDelegateCache.TryAdd(delegateKey, loadDelegate);
             }
@@ -146,24 +184,34 @@ namespace MonoGame.Imaging
         private delegate Image WrapMemoryDelegate(
             IMemory memory, Size size, bool leaveOpen = false, int? byteStride = null);
 
-        private static MethodInfo _wrapMemoryMethod;
-        private static ConcurrentDictionary<VectorTypeInfo, WrapMemoryDelegate> _wrapMemoryDelegateCache;
+        private static MethodInfo? _wrapMemoryMethod;
+        private static ConcurrentDictionary<VectorTypeInfo, WrapMemoryDelegate>? _wrapMemoryDelegateCache =
+            new ConcurrentDictionary<VectorTypeInfo, WrapMemoryDelegate>();
+
+        private static Image ReflectionWrapMemory<TPixel>(
+            IMemory memory, Size size, bool leaveOpen = false, int? byteStride = null)
+            where TPixel : unmanaged, IPixel
+        {
+            return WrapMemory<TPixel>(memory, size, leaveOpen, byteStride);
+        }
 
         private static void SetupReflection_WrapMemory()
         {
-            var arguments = typeof(WrapMemoryDelegate).GetDelegateParameters().AsTypes();
+            _wrapMemoryMethod = typeof(Image).GetMethod(
+                nameof(ReflectionWrapMemory), BindingFlags.NonPublic | BindingFlags.Static);
 
-            _wrapMemoryMethod = typeof(Image).GetMethod(nameof(WrapMemory), arguments);
-            _wrapMemoryDelegateCache = new ConcurrentDictionary<VectorTypeInfo, WrapMemoryDelegate>();
+            if (_wrapMemoryMethod == null)
+                throw new Exception("Can not find required method for reflection.");
         }
 
         private static WrapMemoryDelegate GetWrapMemoryDelegate(VectorTypeInfo pixelType)
         {
-            if (pixelType == null) throw new ArgumentNullException(nameof(pixelType));
+            if (pixelType == null)
+                throw new ArgumentNullException(nameof(pixelType));
 
-            if (!_wrapMemoryDelegateCache.TryGetValue(pixelType, out var wrapMemoryDelegate))
+            if (!_wrapMemoryDelegateCache!.TryGetValue(pixelType, out var wrapMemoryDelegate))
             {
-                var genericMethod = _wrapMemoryMethod.MakeGenericMethod(pixelType.Type);
+                var genericMethod = _wrapMemoryMethod!.MakeGenericMethod(pixelType.Type);
                 wrapMemoryDelegate = CreateDelegateForMethod<WrapMemoryDelegate>(genericMethod);
                 _wrapMemoryDelegateCache.TryAdd(pixelType, wrapMemoryDelegate);
             }
@@ -176,13 +224,23 @@ namespace MonoGame.Imaging
 
         private delegate Image CreateDelegate(Size size, bool zeroFill);
 
-        private static Type[] _createMethodArguments;
-        private static ConcurrentDictionary<VectorTypeInfo, CreateDelegate> _createDelegateCache;
+        private static MethodInfo? _createMethod;
+        private static ConcurrentDictionary<VectorTypeInfo, CreateDelegate> _createDelegateCache =
+            new ConcurrentDictionary<VectorTypeInfo, CreateDelegate>();
+
+        internal static Image ReflectionCreate<TPixel>(Size size, bool zeroFill)
+           where TPixel : unmanaged, IPixel
+        {
+            return Image<TPixel>.CreateCore(size, zeroFill);
+        }
 
         private static void SetupReflection_Create()
         {
-            _createMethodArguments = typeof(CreateDelegate).GetDelegateParameters().AsTypes();
-            _createDelegateCache = new ConcurrentDictionary<VectorTypeInfo, CreateDelegate>();
+            _createMethod = typeof(Image).GetMethod(
+                nameof(ReflectionCreate), BindingFlags.NonPublic | BindingFlags.Static);
+
+            if (_createMethod == null)
+                throw new Exception("Can not find required method for reflection.");
         }
 
         private static CreateDelegate GetCreateDelegate(VectorTypeInfo pixelType)
@@ -190,13 +248,10 @@ namespace MonoGame.Imaging
             if (pixelType == null)
                 throw new ArgumentNullException(nameof(VectorTypeInfo));
 
-            if (!_createDelegateCache.TryGetValue(pixelType, out var createDelegate))
+            if (!_createDelegateCache!.TryGetValue(pixelType, out var createDelegate))
             {
-                const BindingFlags binding = BindingFlags.Static | BindingFlags.NonPublic;
-                var imageType = typeof(Image<>).MakeGenericType(pixelType.Type);
-                var genericCreateMethod = imageType.GetMethod(
-                    "CreateCore", binding, null, _createMethodArguments, null);
-                createDelegate = CreateDelegateForMethod<CreateDelegate>(genericCreateMethod);
+                var genericMethod = _createMethod!.MakeGenericMethod(pixelType.Type);
+                createDelegate = CreateDelegateForMethod<CreateDelegate>(genericMethod);
                 _createDelegateCache.TryAdd(pixelType, createDelegate);
             }
             return createDelegate;

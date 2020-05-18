@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System.Runtime.InteropServices;
-using MonoGame.Framework;
 using MonoGame.Framework.Input;
 using FL = MonoGame.Framework.FuncLoader;
 
@@ -37,10 +36,12 @@ namespace MonoGame
             [StructLayout(LayoutKind.Sequential)]
             public unsafe struct TextEditingEvent
             {
+                public const int TextSize = 32;
+
                 public EventType Type;
                 public uint Timestamp;
                 public uint WindowId;
-                public fixed byte Text[32];
+                public fixed byte Text[TextSize];
                 public int Start;
                 public int Length;
             }
@@ -48,10 +49,12 @@ namespace MonoGame
             [StructLayout(LayoutKind.Sequential)]
             public unsafe struct TextInputEvent
             {
+                public const int TextSize = 32;
+
                 public EventType Type;
                 public uint Timestamp;
                 public uint WindowId;
-                public fixed byte Text[32];
+                public fixed byte Text[TextSize];
             }
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

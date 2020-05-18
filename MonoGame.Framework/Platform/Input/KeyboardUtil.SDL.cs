@@ -155,11 +155,9 @@ namespace MonoGame.Framework.Input
             };
         }
 
-        public static Keys ToXna(int key)
+        public static bool ToXna(int rune, out Keys key)
         {
-            if (_map.TryGetValue(key, out Keys value))
-                return value;
-            return Keys.None;
+            return _map.TryGetValue(rune, out key);
         }
     }
 }

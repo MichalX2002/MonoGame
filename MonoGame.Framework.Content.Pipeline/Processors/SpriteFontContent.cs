@@ -3,10 +3,11 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System.Collections.Generic;
+using System.Text;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
-	public class SpriteFontContent
+    public class SpriteFontContent
     {
         public string FontName = string.Empty;
         private FontDescriptionStyle Style = FontDescriptionStyle.Regular;
@@ -14,11 +15,11 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public Texture2DContent Texture = new Texture2DContent();
         public List<Rectangle> Regions = new List<Rectangle>();
         public List<Rectangle> Croppings = new List<Rectangle>();
-        public List<char> CharacterMap = new List<char>();
+        public List<Rune> CharacterMap = new List<Rune>();
         public int VerticalLineSpacing;
         public float HorizontalSpacing;
         public List<Vector3> Kerning = new List<Vector3>();
-        public char? DefaultCharacter;
+        public Rune? DefaultCharacter;
 
         public SpriteFontContent() { }
 
@@ -27,7 +28,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             FontName = desc.FontName;
             Style = desc.Style;
             FontSize = desc.Size;
-            CharacterMap = new List<char>(desc.Characters.Count);
+            CharacterMap = new List<Rune>(desc.Characters.Count);
             VerticalLineSpacing = (int)desc.Spacing; // Will be replaced in the pipeline.
             HorizontalSpacing = desc.Spacing;
 

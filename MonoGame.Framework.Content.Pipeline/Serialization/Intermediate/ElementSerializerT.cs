@@ -2,10 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
 
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 {
@@ -13,8 +10,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
     {
         private readonly int _elementCount;
 
-        protected ElementSerializer(string xmlTypeName, int elementCount) :
-            base(xmlTypeName)
+        protected ElementSerializer(string xmlTypeName, int elementCount) : base(xmlTypeName)
         {
             _elementCount = elementCount;
         }
@@ -27,9 +23,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
         protected internal abstract T Deserialize(string [] inputs, ref int index);
 
         protected internal abstract void Serialize(T value, List<string> results);
-
         
-
         protected internal void Deserialize(IntermediateReader input, List<T> results)
         {
             var elements = PackedElementsHelper.ReadElements(input);
@@ -44,7 +38,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             }
         }
 
-        protected internal override T Deserialize(IntermediateReader input, ContentSerializerAttribute format, T existingInstance)
+        protected internal override T Deserialize(
+            IntermediateReader input, ContentSerializerAttribute format, T existingInstance)
         {
             var elements = PackedElementsHelper.ReadElements(input);
 
@@ -64,7 +59,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             output.Xml.WriteString(str);
         }
 
-        protected internal override void Serialize(IntermediateWriter output, T value, ContentSerializerAttribute format)
+        protected internal override void Serialize(
+            IntermediateWriter output, T value, ContentSerializerAttribute format)
         {
             var elements = new List<string>();
             Serialize(value, elements);

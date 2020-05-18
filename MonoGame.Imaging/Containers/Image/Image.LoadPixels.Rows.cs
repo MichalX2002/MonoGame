@@ -8,20 +8,14 @@ namespace MonoGame.Imaging
 {
     public partial class Image
     {
-        private static void LoadPixelsCore<TPixelFrom, TPixelTo>(
-            IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image<TPixelTo> destination)
-            where TPixelFrom : unmanaged, IPixel
-            where TPixelTo : unmanaged, IPixel
-        {
-            LoadPixels<TPixelFrom, TPixelTo>(pixels, sourceRectangle, destination);
-        }
-
         public static void LoadPixels<TPixelFrom, TPixelTo>(
             IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image<TPixelTo> destination)
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel
         {
             // TODO: use stack-allocated/ArrayPool buffer
+            // TODO: use Image.ConvertPixels
+
             var rowBuffer = new TPixelFrom[destination.Width];
             var rowBufferBytes = MemoryMarshal.AsBytes(rowBuffer.AsSpan());
 
@@ -31,10 +25,7 @@ namespace MonoGame.Imaging
 
                 var dstRow = destination.GetPixelRowSpan(y);
                 for (int x = 0; x < sourceRectangle.Width; x++)
-                {
-                    rowBuffer[x].ToScaledVector4(out var vector);
-                    dstRow[x].FromScaledVector4(vector);
-                }
+                    dstRow[x].FromScaledVector4(rowBuffer[x].ToScaledVector4());
             }
         }
 

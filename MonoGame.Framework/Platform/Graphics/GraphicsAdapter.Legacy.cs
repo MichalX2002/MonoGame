@@ -97,7 +97,7 @@ namespace MonoGame.Framework.Graphics
                 View view = ((AndroidGameWindow)AndroidGameActivity.Instance.Game.Window).GameView;
                 return new DisplayMode(view.Width, view.Height, SurfaceFormat.Color);
 #elif DESKTOPGL
-                var displayIndex = SDL.Display.GetWindowDisplayIndex(SdlGameWindow.Instance.Handle);
+                var displayIndex = SDL.Display.GetWindowDisplayIndex(SDLGameWindow.Instance.Handle);
                 SDL.Display.GetCurrentDisplayMode(displayIndex, out SDL.Display.Mode mode);
 
                 return new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Color);
@@ -309,7 +309,7 @@ namespace MonoGame.Framework.Graphics
             {
                 bool displayChanged = false;
 #if DESKTOPGL
-                var displayIndex = SDL.Display.GetWindowDisplayIndex(SdlGameWindow.Instance.Handle);
+                var displayIndex = SDL.Display.GetWindowDisplayIndex(SDLGameWindow.Instance.Handle);
                 displayChanged = displayIndex != _displayIndex;
 #endif
                 if (_supportedDisplayModes == null || displayChanged)

@@ -37,14 +37,15 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
 
         public void SetPixelData(ReadOnlySpan<TPixel> data)
         {
+            // TODO: use Image.ConvertPixels
+
             for (int y = 0; y < Height; y++)
             {
                 var srcRow = data.Slice(y * Width, Width);
                 var dstRow = GetRowSpan(y);
                 for (int x = 0; x < Width; x++)
                 {
-                    srcRow[x].ToScaledVector4(out var vector);
-                    dstRow[x].FromScaledVector4(vector);
+                    dstRow[x].FromScaledVector4(srcRow[x].ToScaledVector4());
                 }
             }
         }
@@ -139,6 +140,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 srcRegion.Width == dstRegion.Width &&
                 srcRegion.Height == dstRegion.Height)
             {
+                // TODO: use Image.ConvertPixels
+
                 for (int y = 0; y < srcRegion.Height; y++)
                 {
                     var srcRow = src.GetRowSpan(srcRegion.Top + y);
@@ -146,8 +149,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
 
                     for (int x = 0; x < srcRegion.Width; x++)
                     {
-                        srcRow[srcRegion.Left + x].ToScaledVector4(out var vector);
-                        dstRow[dstRegion.X + x].FromScaledVector4(vector);
+                        dstRow[dstRegion.X + x].FromScaledVector4(srcRow[srcRegion.Left + x].ToScaledVector4());
                     }
                 }
                 return true;
@@ -183,6 +185,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 srcRegion.Width == dstRegion.Width &&
                 srcRegion.Height == dstRegion.Height)
             {
+                // TODO: use Image.ConvertPixels
+
                 // Convert to a RgbaVector format
                 for (int y = 0; y < srcRegion.Height; y++)
                 {
@@ -190,8 +194,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                     var dstRow = dst.GetRowSpan(dstRegion.Top + y);
                     for (int x = 0; x < srcRegion.Width; x++)
                     {
-                        srcRow[srcRegion.Left + x].ToScaledVector4(out var vector);
-                        dstRow[dstRegion.Left + x].FromScaledVector4(vector);
+                        dstRow[dstRegion.Left + x].FromScaledVector4(
+                            srcRow[srcRegion.Left + x].ToScaledVector4());
                     }
                 }
                 return true;

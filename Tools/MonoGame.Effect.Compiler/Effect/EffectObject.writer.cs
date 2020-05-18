@@ -4,7 +4,7 @@
 
 using System.IO;
 using MonoGame.Framework.Graphics;
-using MonoGame.Framework.Content.Pipeline.Utilities;
+using MonoGame.Framework.Memory;
 using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Effect
@@ -29,8 +29,8 @@ namespace MonoGame.Effect
             writer.Write(profile);
 
             // Write the rest to a memory stream.
-            using(MemoryStream memStream = new MemoryStream())
-            using(BinaryWriterEx memWriter = new BinaryWriterEx(memStream))
+            using (var memStream = RecyclableMemoryManager.Default.GetMemoryStream())
+            using (var memWriter = new BinaryWriterEx(memStream))
             {
                 // Write all the constant buffers.
                 memWriter.Write((byte)ConstantBuffers.Count);

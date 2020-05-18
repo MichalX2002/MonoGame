@@ -13,7 +13,7 @@ namespace MonoGame.Framework
         internal static GamePlatform PlatformCreate(Game game)
         {
 #if DESKTOPGL || ANGLE
-            return new SdlGamePlatform(game);
+            return new SDLGamePlatform(game);
 #elif WINDOWS && DIRECTX
             return new WinFormsGamePlatform(game);
 #elif WINDOWS_UAP

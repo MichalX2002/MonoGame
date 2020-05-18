@@ -3,15 +3,15 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework
 {
-    internal class SdlGameWindow : GameWindow, IDisposable
+    internal class SDLGameWindow : GameWindow, IDisposable
     {
         public static GameWindow Instance;
 
@@ -32,7 +32,12 @@ namespace MonoGame.Framework
         public override string ScreenDeviceName => _screenDeviceName;
 
         public override bool HasClipboardText => SDL.HasClipboardText();
-        public override string ClipboardText { get => SDL.GetClipboardText(); set => SDL.SetClipboardText(value); }
+
+        public override string ClipboardText
+        {
+            get => SDL.GetClipboardText();
+            set => SDL.SetClipboardText(value);
+        }
 
         public override bool AllowUserResizing
         {
@@ -49,7 +54,8 @@ namespace MonoGame.Framework
                 else
                 {
                     throw new Exception(
-                        $"SDL {version} does not support changing the resizable parameter of the window after it's already been created.");
+                        $"SDL {version} does not support changing the resizable parameter " +
+                        $"of the window after it's already been created.");
                 }
                 _resizable = value;
             }
@@ -92,7 +98,7 @@ namespace MonoGame.Framework
             }
         }
 
-        public SdlGameWindow(Game game)
+        public SDLGameWindow(Game game)
         {
             Instance = this;
 
@@ -354,14 +360,9 @@ namespace MonoGame.Framework
             OnClientSizeChanged();
         }
 
-        public void InvokeFileDropped(string filePath)
+        public void InvokeFileDropped(List<string> files)
         {
-            OnFileDropped(this, filePath);
-        }
-
-        public void InvokeTextDropped(string text)
-        {
-            OnTextDropped(this, text);
+            OnFilesDropped(this, files);
         }
 
         protected internal override void SetSupportedOrientations(DisplayOrientation orientations)
@@ -393,7 +394,7 @@ namespace MonoGame.Framework
             _isDisposed = true;
         }
 
-        ~SdlGameWindow()
+        ~SDLGameWindow()
         {
             Dispose(false);
         }

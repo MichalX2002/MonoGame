@@ -380,7 +380,7 @@ namespace MonoGame.Content.Builder
                     newContent.SourceFiles.Add(c.SourceFile);
                     newContent.DestFiles.Add(c.OutputFile);
 
-                    ++successCount;
+                    successCount++;
                 }
                 catch (InvalidContentException ex)
                 {
