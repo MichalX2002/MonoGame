@@ -9,12 +9,11 @@ using System;
 namespace MonoGame.Framework.Graphics
 {
     // http://msdn.microsoft.com/en-us/library/ff434403.aspx
-    public struct RenderTargetBinding
+    public readonly struct RenderTargetBinding
     {
         public Texture RenderTarget { get; }
         public int ArraySlice { get; }
-
-        internal DepthFormat DepthFormat { get; }
+        public DepthFormat DepthFormat { get; }
 
         public RenderTargetBinding(RenderTarget2D renderTarget)
         {
@@ -71,20 +70,16 @@ namespace MonoGame.Framework.Graphics
             DepthFormat = renderTarget.DepthStencilFormat;
         }
 
-#endif 
-
-        public static implicit operator RenderTargetBinding(RenderTarget2D renderTarget)
-        {
-            return new RenderTargetBinding(renderTarget);
-        }
-
-#if DIRECTX
-
         public static implicit operator RenderTargetBinding(RenderTarget3D renderTarget)
         {
             return new RenderTargetBinding(renderTarget);
         }
 
 #endif
+
+        public static implicit operator RenderTargetBinding(RenderTarget2D renderTarget)
+        {
+            return new RenderTargetBinding(renderTarget);
+        }
     }
 }

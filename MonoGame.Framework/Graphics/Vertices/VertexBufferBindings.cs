@@ -96,10 +96,9 @@ namespace MonoGame.Framework.Graphics
         /// <see langword="true"/> if the input layout was changed; otherwise,
         /// <see langword="false"/>.
         /// </returns>
-        public bool Set(params VertexBufferBinding[] vertexBufferBindings)
+        public bool Set(ReadOnlySpan<VertexBufferBinding> vertexBufferBindings)
         {
-            Debug.Assert(vertexBufferBindings != null);
-            Debug.Assert(vertexBufferBindings.Length > 0);
+            Debug.Assert(!vertexBufferBindings.IsEmpty);
             Debug.Assert(vertexBufferBindings.Length <= _vertexBuffers.Length);
 
             bool isDirty = false;
@@ -136,6 +135,11 @@ namespace MonoGame.Framework.Graphics
             return isDirty;
         }
 
+        public bool Set(params VertexBufferBinding[] vertexBufferBindings)
+        {
+            return Set(vertexBufferBindings.AsSpan());
+        }
+
         /// <summary>
         /// Gets vertex buffer bound to the specified input slots.
         /// </summary>
@@ -153,18 +157,14 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets vertex buffers bound to the input slots.
         /// </summary>
-        /// <returns>The vertex buffer bindings.</returns>
-        public VertexBufferBinding[] Get()
+        /// <param name="destination">Destination for the vertex buffer bindings.</param>
+        public void Get(Span<VertexBufferBinding> destination)
         {
-            var bindings = new VertexBufferBinding[Count];
+            if (destination.Length < Count)
+                throw new ArgumentException("Not enough space.", nameof(destination));
 
-            for (int i = 0; i < bindings.Length; i++)
-                bindings[i] = new VertexBufferBinding(
-                    _vertexBuffers[i],
-                    _vertexOffsets[i],
-                    InstanceFrequencies[i]);
-
-            return bindings;
+            for (int i = 0; i < Count; i++)
+                destination[i] = Get(i);
         }
     }
 }

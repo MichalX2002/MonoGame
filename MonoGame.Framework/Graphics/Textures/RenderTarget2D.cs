@@ -77,7 +77,7 @@ namespace MonoGame.Framework.Graphics
 
         public RenderTarget2D(GraphicsDevice graphicsDevice, int width, int height)
             : this(
-                  graphicsDevice, width, height, false, SurfaceFormat.Color, 
+                  graphicsDevice, width, height, false, SurfaceFormat.Rgba32, 
                   DepthFormat.None, 0, RenderTargetUsage.DiscardContents)
         {
         }

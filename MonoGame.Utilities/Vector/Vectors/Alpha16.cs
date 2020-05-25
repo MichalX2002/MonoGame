@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Framework.Vector
 {
     /// <summary>
-    /// Packed vector type containing an 8-bit W component.
+    /// Packed vector type containing an 16-bit W component.
     /// <para>
     /// Ranges from [1, 1, 1, 0] to [1, 1, 1, 1] in vector form.
     /// </para>
@@ -44,10 +44,7 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        /// <summary>
-        /// Gets the packed vector as a <see cref="float"/>.
-        /// </summary>
-        public readonly float ToAlpha()
+        public readonly AlphaF ToAlphaF()
         {
             return A / (float)ushort.MaxValue;
         }
@@ -73,7 +70,7 @@ namespace MonoGame.Framework.Vector
 
         public readonly Vector4 ToScaledVector4()
         {
-            return new Vector4(1, 1, 1, ToAlpha());
+            return new Vector4(1, 1, 1, ToAlphaF());
         }
 
         #endregion
@@ -100,7 +97,7 @@ namespace MonoGame.Framework.Vector
             A = ushort.MaxValue;
         }
 
-        public void FromColor(Color source)
+        public void FromRgba32(Color source)
         {
             A = PackedVectorHelper.UpScale8To16Bit(source.A);
         }
@@ -159,5 +156,11 @@ namespace MonoGame.Framework.Vector
         public override readonly int GetHashCode() => A;
 
         #endregion
+
+        [CLSCompliant(false)]
+        public static implicit operator Alpha16(ushort alpha) => new Alpha16(alpha);
+
+        [CLSCompliant(false)]
+        public static implicit operator ushort(Alpha16 value) => value.A;
     }
 }

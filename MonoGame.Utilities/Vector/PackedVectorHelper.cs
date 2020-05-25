@@ -5,8 +5,6 @@ namespace MonoGame.Framework.Vector
 {
     public static class PackedVectorHelper
     {
-        private static readonly Vector3 _bt709Factors = new Vector3(.2126f, .7152f, .0722f);
-
         #region Component scaling
 
         // TODO: optimize some of these
@@ -71,7 +69,7 @@ namespace MonoGame.Framework.Vector
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float GetBT709Luminance(Vector3 rgb)
         {
-            rgb *= _bt709Factors;
+            rgb *= new Vector3(.2126f, .7152f, .0722f);
             return rgb.X + rgb.Y + rgb.Z;
         }
 
@@ -81,7 +79,7 @@ namespace MonoGame.Framework.Vector
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float GetBT709Luminance(float r, float g, float b)
         {
-            return (r * .2126F) + (g * .7152F) + (b * .0722F);
+            return GetBT709Luminance(new Vector3(r, g, b));
         }
 
         /// <summary>
@@ -96,11 +94,40 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte Get8BitBT709Luminance(Rgb24 rgb)
+        {
+            return Get8BitBT709Luminance(rgb.R, rgb.G, rgb.B);
+        }
+
+        /// <summary>
+        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static GrayAlpha16 Get8BitBT709LuminanceAlpha(Color rgba)
+        {
+            byte l = Get8BitBT709Luminance(rgba.Rgb);
+            return new GrayAlpha16(l, rgba.A);
+        }
+
+        /// <summary>
+        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
+        /// </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort Get16BitBT709Luminance(ushort r, ushort g, ushort b)
         {
-            return (ushort)GetBT709Luminance(r, g, b);
+            return (ushort)(GetBT709Luminance(r, g, b) + 0.5f);
+        }
+
+        /// <summary>
+        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
+        /// </summary>
+        [CLSCompliant(false)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ushort Get16BitBT709Luminance(Rgb48 rgb)
+        {
+            return Get16BitBT709Luminance(rgb.R, rgb.G, rgb.B);
         }
 
         #endregion

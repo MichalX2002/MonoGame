@@ -11,21 +11,21 @@ using System.Collections.Generic;
 namespace MonoGame.Framework.Content
 {
     internal class ModelReader : ContentTypeReader<Model>
-	{
+    {
 //      List<VertexBuffer> vertexBuffers = new List<VertexBuffer>();
 //      List<IndexBuffer> indexBuffers = new List<IndexBuffer>();
 //      List<Effect> effects = new List<Effect>();
 //      List<GraphicsResource> sharedResources = new List<GraphicsResource>();
 
-		public ModelReader ()
-		{
-		}
-		
-		static int ReadBoneReference(ContentReader reader, uint boneCount)
+        public ModelReader ()
+        {
+        }
+        
+        static int ReadBoneReference(ContentReader reader, uint boneCount)
         {
             uint boneId;
 
-            // Read the bone ID, which may be encoded as either an 8 or 32-bit value.
+            // Read the bone Id, which may be encoded as either an 8 or 32-bit value.
             if (boneCount < 255)
             {
                 boneId = reader.ReadByte();
@@ -35,7 +35,7 @@ namespace MonoGame.Framework.Content
                 boneId = reader.ReadUInt32();
             }
 
-            // Print out the bone ID.
+            // Print out the bone Id.
             if (boneId != 0)
             {
                 //Debug.WriteLine("bone #{0}", boneId - 1);
@@ -48,9 +48,9 @@ namespace MonoGame.Framework.Content
 
             return -1;
         }
-		
-		protected internal override Model Read(ContentReader reader, Model existingInstance)
-		{
+        
+        protected internal override Model Read(ContentReader reader, Model existingInstance)
+        {
             // Read the bone names and transforms.
             uint boneCount = reader.ReadUInt32();
             //Debug.WriteLine("Bone count: {0}", boneCount);
@@ -59,11 +59,11 @@ namespace MonoGame.Framework.Content
             for (uint i = 0; i < boneCount; i++)
             {
                 string name = reader.ReadObject<string>();
-				var matrix = reader.ReadMatrix();
+                var matrix = reader.ReadMatrix();
                 var bone = new ModelBone { Transform = matrix, Index = (int)i, Name = name };
                 bones.Add(bone);
             }
-			
+            
             // Read the bone hierarchy.
             for (int i = 0; i < boneCount; i++)
             {
@@ -110,7 +110,7 @@ namespace MonoGame.Framework.Content
                 //Debug.WriteLine("Mesh {0}", i);
                 string name = reader.ReadObject<string>();
                 var parentBoneIndex = ReadBoneReference(reader, boneCount);
-				var boundingSphere = reader.ReadBoundingSphere();
+                var boundingSphere = reader.ReadBoundingSphere();
 
                 // Tag
                 var meshTag = reader.ReadObject<object>();
@@ -129,31 +129,31 @@ namespace MonoGame.Framework.Content
                     else
                         part = new ModelMeshPart();
 
-					part.VertexOffset = reader.ReadInt32();
+                    part.VertexOffset = reader.ReadInt32();
                     part.NumVertices = reader.ReadInt32();
                     part.StartIndex = reader.ReadInt32();
                     part.PrimitiveCount = reader.ReadInt32();
 
                     // tag
                     part.Tag = reader.ReadObject<object>();
-					
-					parts.Add(part);
-					
-					int jj = (int)j;
-					reader.ReadSharedResource(delegate (VertexBuffer v)
-					{
-						parts[jj].VertexBuffer = v;
-					});
-					reader.ReadSharedResource(delegate (IndexBuffer v)
-					{
-						parts[jj].IndexBuffer = v;
-					});
-					reader.ReadSharedResource(delegate (Effect v)
-					{
-						parts[jj].Effect = v;
-					});
+                    
+                    parts.Add(part);
+                    
+                    int jj = (int)j;
+                    reader.ReadSharedResource(delegate (VertexBuffer v)
+                    {
+                        parts[jj].VertexBuffer = v;
+                    });
+                    reader.ReadSharedResource(delegate (IndexBuffer v)
+                    {
+                        parts[jj].IndexBuffer = v;
+                    });
+                    reader.ReadSharedResource(delegate (Effect v)
+                    {
+                        parts[jj].Effect = v;
+                    });
 
-					
+                    
                 }
 
                 if (existingInstance != null)
@@ -169,8 +169,8 @@ namespace MonoGame.Framework.Content
                     ParentBone = bones[parentBoneIndex]
                 };
                 mesh.ParentBone.AddMesh(mesh);
-				mesh.BoundingSphere = boundingSphere;
-				meshes.Add(mesh);
+                mesh.BoundingSphere = boundingSphere;
+                meshes.Add(mesh);
             }
 
             if (existingInstance != null)
@@ -190,12 +190,12 @@ namespace MonoGame.Framework.Content
             };
 
             model.BuildHierarchy();
-			
-			// Tag?
+            
+            // Tag?
             model.Tag = reader.ReadObject<object>();
-			
-			return model;
-		}
-	}
+            
+            return model;
+        }
+    }
 }
 

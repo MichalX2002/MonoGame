@@ -120,11 +120,11 @@ namespace MonoGame.Framework.Input
             RefreshTranslationTable();
         }
 
-        internal static void RemoveDevice(int instanceid)
+        internal static void RemoveDevice(int instanceId)
         {
             foreach (KeyValuePair<int, GamePadInfo> entry in GamePads)
             {
-                if (SDL.Joystick.InstanceID(SDL.GameController.GetJoystick(entry.Value.Device)) == instanceid)
+                if (SDL.Joystick.InstanceID(SDL.GameController.GetJoystick(entry.Value.Device)) == instanceId)
                 {
                     GamePads.Remove(entry.Key);
                     DisposeDevice(entry.Value);

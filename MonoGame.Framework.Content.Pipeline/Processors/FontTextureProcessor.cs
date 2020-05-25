@@ -102,7 +102,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             // after that.
             BitmapContent face = input.Faces[0][0];
             face.TryGetFormat(out SurfaceFormat faceFormat);
-            if (faceFormat != SurfaceFormat.Color)
+            if (faceFormat != SurfaceFormat.Rgba32)
             {
                 var colorFace = new PixelBitmapContent<Color>(face.Width, face.Height);
                 BitmapContent.Copy(face, colorFace);

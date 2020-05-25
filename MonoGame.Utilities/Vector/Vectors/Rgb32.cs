@@ -106,7 +106,7 @@ namespace MonoGame.Framework.Vector
             B = source.B;
         }
 
-        public void FromColor(Color source)
+        public void FromRgba32(Color source)
         {
             R = source.R;
             G = source.G;

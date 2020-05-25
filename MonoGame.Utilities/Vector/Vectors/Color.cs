@@ -3,12 +3,12 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Text;
-using System.Runtime.Serialization;
 using System.Diagnostics;
-using MonoGame.Framework.Vector;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.Text;
+using MonoGame.Framework.Vector;
 
 namespace MonoGame.Framework
 {
@@ -54,7 +54,7 @@ namespace MonoGame.Framework
         #region Properties
 
         /// <summary>
-        /// Gets or sets the RGB components of this <see cref="Color"/> as <see cref="Rgb24"/>
+        /// Gets or sets the RGB components of this <see cref="Framework.Color"/> as <see cref="Rgb24"/>
         /// </summary>
         public Rgb24 Rgb
         {
@@ -87,7 +87,7 @@ namespace MonoGame.Framework
         #region Constructors
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> with raw values.
+        /// Constructs the <see cref="Framework.Color"/> with raw values.
         /// </summary>
         /// <remarks>
         /// This overload sets the values directly without clamping and 
@@ -102,7 +102,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> with raw values.
+        /// Constructs the <see cref="Framework.Color"/> with raw values.
         /// </summary>
         /// <remarks>
         /// This overload sets the values directly without clamping and 
@@ -113,7 +113,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> with raw values.
+        /// Constructs the <see cref="Framework.Color"/> with raw values.
         /// </summary>
         /// <remarks>
         /// This overload sets the values directly without clamping and 
@@ -124,7 +124,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> with a packed value.
+        /// Constructs the <see cref="Framework.Color"/> with a packed value.
         /// R in the least significant byte.
         /// </summary>
         /// <remarks>
@@ -139,7 +139,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> with clamped raw values. 
+        /// Constructs the <see cref="Framework.Color"/> with clamped raw values. 
         /// <para>
         /// The values are clamped between <see cref="byte.MinValue"/> and <see cref="byte.MaxValue"/>.
         /// </para>
@@ -157,7 +157,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> with clamped raw values. 
+        /// Constructs the <see cref="Framework.Color"/> with clamped raw values. 
         /// Alpha value will be opaque.
         /// <para>
         /// The values are clamped between <see cref="byte.MinValue"/> and <see cref="byte.MaxValue"/>.
@@ -173,8 +173,10 @@ namespace MonoGame.Framework
         {
         }
 
+        #region Constructors (float and Vector)
+
         /// <summary>
-        /// Constructs the <see cref="Color"/> with vector form values.
+        /// Constructs the <see cref="Framework.Color"/> with vector form values.
         /// </summary>
         /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
         public Color(Vector4 color)
@@ -189,7 +191,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> from vector form values.
+        /// Constructs the <see cref="Framework.Color"/> from vector form values.
         /// </summary>
         /// <param name="r">Red component value from 0 to 1.</param>
         /// <param name="g">Green component value from 0 to 1.</param>
@@ -200,7 +202,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> with vector form values.
+        /// Constructs the <see cref="Framework.Color"/> with vector form values.
         /// Alpha value will be opaque.
         /// <para>The values are clamped between 0 and 1.</para>
         /// </summary>
@@ -217,7 +219,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> with vector form values. 
+        /// Constructs the <see cref="Framework.Color"/> with vector form values. 
         /// Alpha value will be opaque.
         /// </summary>
         /// <param name="r">Red component value from 0 to 1.</param>
@@ -227,8 +229,12 @@ namespace MonoGame.Framework
         {
         }
 
+        #endregion
+
+        #region Constructors (Color)
+
         /// <summary>
-        /// Constructs <see cref="Color"/> from a <see cref="Color"/> and alpha value.
+        /// Constructs <see cref="Framework.Color"/> from a <see cref="Framework.Color"/> and alpha value.
         /// </summary>
         /// <param name="color">The RGB values.</param>
         /// <param name="alpha">The alpha component value from 0 to 255.</param>
@@ -237,17 +243,40 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs the <see cref="Color"/> from a <see cref="Color"/> and alpha value.
+        /// Constructs <see cref="Framework.Color"/> from an <see cref="Framework.Color"/> and alpha value.
         /// </summary>
         /// <param name="color">The RGB values.</param>
         /// <param name="alpha">Alpha component value from 0 to 1.</param>
-        public Color(Color color, float alpha) :
-            this(color, MathHelper.Clamp((int)(alpha * byte.MaxValue), byte.MinValue, byte.MaxValue))
+        public Color(Color color, int alpha) :
+            this(color, MathHelper.Clamp(alpha, byte.MinValue, byte.MaxValue))
         {
         }
 
         /// <summary>
-        /// Constructs <see cref="Color"/> from an <see cref="Rgb24"/> and alpha value.
+        /// Constructs the <see cref="Framework.Color"/> from a <see cref="Framework.Color"/> and alpha value.
+        /// </summary>
+        /// <param name="color">The RGB values.</param>
+        /// <param name="alpha">Alpha component value from 0 to 1.</param>
+        public Color(Color color, float alpha) :
+            this(color, (int)(alpha * byte.MaxValue))
+        {
+        }
+
+        #endregion
+
+        #region Constructors (Rgb24)
+
+        /// <summary>
+        /// Constructs <see cref="Framework.Color"/> from an <see cref="Rgb24"/> and alpha value.
+        /// </summary>
+        /// <param name="color">The RGB values.</param>
+        public Color(Rgb24 color) :
+            this(color.R, color.G, color.B, byte.MaxValue)
+        {
+        }
+
+        /// <summary>
+        /// Constructs <see cref="Framework.Color"/> from an <see cref="Rgb24"/> and alpha value.
         /// </summary>
         /// <param name="color">The RGB values.</param>
         /// <param name="alpha">The alpha component value from 0 to 255.</param>
@@ -257,7 +286,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs <see cref="Rgb24"/> from an <see cref="Rgb24"/> and alpha value.
+        /// Constructs <see cref="Framework.Color"/> from an <see cref="Rgb24"/> and alpha value.
         /// </summary>
         /// <param name="color">The RGB values.</param>
         /// <param name="alpha">Alpha component value from 0 to 1.</param>
@@ -267,7 +296,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Constructs <see cref="Rgb24"/> from an <see cref="Rgb24"/> and alpha value.
+        /// Constructs <see cref="Framework.Color"/> from an <see cref="Rgb24"/> and alpha value.
         /// </summary>
         /// <param name="color">The RGB values.</param>
         /// <param name="alpha">Alpha component value from 0 to 1.</param>
@@ -275,6 +304,8 @@ namespace MonoGame.Framework
             this(color, (int)(alpha * byte.MaxValue))
         {
         }
+
+        #endregion
 
         #endregion
 
@@ -337,7 +368,7 @@ namespace MonoGame.Framework
             A = source.A;
         }
 
-        public void FromColor(Color color) => this = color;
+        public void FromRgba32(Color color) => this = color;
 
         public void FromRgb24(Rgb24 source)
         {
@@ -359,11 +390,6 @@ namespace MonoGame.Framework
             G = PackedVectorHelper.DownScale16To8Bit(source.G);
             B = PackedVectorHelper.DownScale16To8Bit(source.B);
             A = PackedVectorHelper.DownScale16To8Bit(source.A);
-        }
-
-        public readonly Color ToColor()
-        {
-            return this;
         }
 
         #endregion
@@ -396,7 +422,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Gets the <see cref="Bgra32"/> representation of this <see cref="Color"/>.
+        /// Gets the <see cref="Bgra32"/> representation of this <see cref="Framework.Color"/>.
         /// </summary>
         public readonly Bgra32 ToBgra32()
         {
@@ -404,7 +430,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Gets the <see cref="Argb32"/> representation of this <see cref="Color"/>.
+        /// Gets the <see cref="Argb32"/> representation of this <see cref="Framework.Color"/>.
         /// </summary>
         public readonly Argb32 ToArgb32()
         {
@@ -412,7 +438,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Gets the <see cref="Rgb24"/> representation of this <see cref="Color"/>.
+        /// Gets the <see cref="Rgb24"/> representation of this <see cref="Framework.Color"/>.
         /// </summary>
         public readonly Rgb24 ToRgb24()
         {
@@ -420,7 +446,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Gets the <see cref="Bgr24"/> representation of this <see cref="Color"/>.
+        /// Gets the <see cref="Bgr24"/> representation of this <see cref="Framework.Color"/>.
         /// </summary>
         public readonly Bgr24 ToBgr24()
         {
@@ -428,7 +454,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Gets the <see cref="Gray8"/> representation of this <see cref="Color"/>.
+        /// Gets the <see cref="Gray8"/> representation of this <see cref="Framework.Color"/>.
         /// </summary>
         public readonly Gray8 ToGray8()
         {
@@ -436,7 +462,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Gets the <see cref="GrayAlpha16 "/> representation of this <see cref="Color"/>.
+        /// Gets the <see cref="GrayAlpha16 "/> representation of this <see cref="Framework.Color"/>.
         /// </summary>
         public readonly GrayAlpha16 ToGrayAlpha16()
         {
@@ -444,7 +470,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Gets the <see cref="Vector3"/> representation of this <see cref="Color"/>.
+        /// Gets the <see cref="Vector3"/> representation of this <see cref="Framework.Color"/>.
         /// </summary>
         public readonly Vector3 ToVector3()
         {
@@ -462,10 +488,10 @@ namespace MonoGame.Framework
 
         /// <summary>
         /// Translate a non-premultipled alpha <see cref="Vector4"/> color to a
-        /// <see cref="Color"/> that contains premultiplied alpha.
+        /// <see cref="Framework.Color"/> that contains premultiplied alpha.
         /// </summary>
         /// <param name="vector">A <see cref="Vector4"/> representing color.</param>
-        /// <returns>A <see cref="Color"/> which contains premultiplied alpha data.</returns>
+        /// <returns>A <see cref="Framework.Color"/> which contains premultiplied alpha data.</returns>
         public static Color FromNonPremultiplied(Vector4 vector)
         {
             float w = vector.W;
@@ -475,25 +501,25 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Translate a non-premultipled alpha color to a <see cref="Color"/> that contains premultiplied alpha.
+        /// Translate a non-premultipled alpha color to a <see cref="Framework.Color"/> that contains premultiplied alpha.
         /// </summary>
         /// <param name="r">Red component value.</param>
         /// <param name="g">Green component value.</param>
         /// <param name="b">Blue component value.</param>
         /// <param name="a">Alpha component value.</param>
-        /// <returns>A <see cref="Color"/> which contains premultiplied alpha data.</returns>
+        /// <returns>A <see cref="Framework.Color"/> which contains premultiplied alpha data.</returns>
         public static Color FromNonPremultiplied(int r, int g, int b, int a)
         {
             return new Color(r * a / 255, g * a / 255, b * a / 255, a);
         }
 
         /// <summary>
-        /// Performs linear interpolation of <see cref="Color"/>.
+        /// Performs linear interpolation of <see cref="Framework.Color"/>.
         /// </summary>
-        /// <param name="start">Source <see cref="Color"/>.</param>
-        /// <param name="end">Destination <see cref="Color"/>.</param>
+        /// <param name="start">Source <see cref="Framework.Color"/>.</param>
+        /// <param name="end">Destination <see cref="Framework.Color"/>.</param>
         /// <param name="amount">Interpolation factor.</param>
-        /// <returns>Interpolated <see cref="Color"/>.</returns>
+        /// <returns>Interpolated <see cref="Framework.Color"/>.</returns>
         public static Color Lerp(Color start, Color end, float amount)
         {
             amount = MathHelper.Clamp(amount, 0, 1);
@@ -506,9 +532,9 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Multiply <see cref="Color"/> by value.
+        /// Multiply <see cref="Framework.Color"/> by value.
         /// </summary>
-        /// <param name="value">Source <see cref="Color"/>.</param>
+        /// <param name="value">Source <see cref="Framework.Color"/>.</param>
         /// <param name="scale">Factor.</param>
         /// <returns>Multiplication result.</returns>
         public static Color Multiply(Color value, float scale)
@@ -517,9 +543,9 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Multiply <see cref="Color"/> by a scalar.
+        /// Multiply <see cref="Framework.Color"/> by a scalar.
         /// </summary>
-        /// <param name="value">Source <see cref="Color"/>.</param>
+        /// <param name="value">Source <see cref="Framework.Color"/>.</param>
         /// <param name="scale">Factor.</param>
         /// <returns>Multiplication result.</returns>
         public static Color operator *(Color value, float scale)
@@ -532,7 +558,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Gets the hexadecimal <see cref="string"/> representation of this <see cref="Color"/>.
+        /// Gets the hexadecimal <see cref="string"/> representation of this <see cref="Framework.Color"/>.
         /// </summary>
         public string ToHex()
         {
@@ -543,7 +569,7 @@ namespace MonoGame.Framework
         #region Deconstruct
 
         /// <summary>
-        /// Deconstruction method for <see cref="Color"/>.
+        /// Deconstruction method for <see cref="Framework.Color"/>.
         /// </summary>
         /// <param name="r">Red component value from 0 to 255.</param>
         /// <param name="g">Green component value from 0 to 255.</param>
@@ -556,7 +582,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Deconstruction method for <see cref="Color"/>.
+        /// Deconstruction method for <see cref="Framework.Color"/>.
         /// </summary>
         /// <param name="r">Red component value from 0.0f to 1.0f.</param>
         /// <param name="g">Green component value from 0.0f to 1.0f.</param>
@@ -569,7 +595,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Deconstruction method for <see cref="Color"/> with Alpha.
+        /// Deconstruction method for <see cref="Framework.Color"/> with Alpha.
         /// </summary>
         /// <param name="r">Red component value from 0 to 255.</param>
         /// <param name="g">Green component value from 0 to 255.</param>
@@ -584,7 +610,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Deconstruction method for <see cref="Color"/> with Alpha.
+        /// Deconstruction method for <see cref="Framework.Color"/> with Alpha.
         /// </summary>
         /// <param name="r">Red component value from 0.0f to 1.0f.</param>
         /// <param name="g">Green component value from 0.0f to 1.0f.</param>
@@ -603,7 +629,7 @@ namespace MonoGame.Framework
         #region Equals
 
         /// <summary>
-        /// Compares whether current instance is equal to specified <see cref="Color"/>.
+        /// Compares whether current instance is equal to specified <see cref="Framework.Color"/>.
         /// </summary>
         public readonly bool Equals(Color other)
         {
@@ -619,7 +645,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Compares whether two <see cref="Color"/> instances are equal.
+        /// Compares whether two <see cref="Framework.Color"/> instances are equal.
         /// </summary>
         public static bool operator ==(in Color a, in Color b)
         {
@@ -627,7 +653,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Compares whether two <see cref="Color"/> instances are not equal.
+        /// Compares whether two <see cref="Framework.Color"/> instances are not equal.
         /// </summary>
         public static bool operator !=(in Color a, in Color b)
         {
@@ -638,12 +664,12 @@ namespace MonoGame.Framework
         #region Object Overrides
 
         /// <summary>
-        /// Returns a <see cref="string"/> representation of this <see cref="Color"/>.
+        /// Returns a <see cref="string"/> representation of this <see cref="Framework.Color"/>.
         /// </summary>
         public override readonly string ToString()
         {
-            var sb = new StringBuilder(28 + nameof(Color).Length);
-            sb.Append(nameof(Color));
+            var sb = new StringBuilder(28 + nameof(Framework.Color).Length);
+            sb.Append(nameof(Framework.Color));
             sb.Append("(R:");
             sb.Append(R);
             sb.Append(", G:");
@@ -657,7 +683,7 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Gets a hash code of the <see cref="Color"/>.
+        /// Gets a hash code of the <see cref="Framework.Color"/>.
         /// </summary>
         public override readonly int GetHashCode() => PackedValue.GetHashCode();
 

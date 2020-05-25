@@ -3,33 +3,31 @@
 namespace MonoGame.Framework.Vector
 {
     /// <summary>
-    /// Packed vector type containing four 32-bit floating-point XYZW components.
+    /// Packed vector type containing four 32-bit floating-point XYZ components.
     /// <para>
-    /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
+    /// Ranges from [0, 0, 0, 1] to [1, 1, 1, 1] in vector form.
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct RgbaVector : IPixel<RgbaVector>
+    public struct RgbVector : IPixel<RgbVector>
     {
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Red),
             new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Green),
-            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Blue),
-            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Alpha));
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Blue));
 
-        public Vector4 Base;
+        public Vector3 Base;
 
         public float R { readonly get => Base.X; set => Base.X = value; }
         public float G { readonly get => Base.Y; set => Base.Y = value; }
         public float B { readonly get => Base.Z; set => Base.Z = value; }
-        public float A { readonly get => Base.W; set => Base.W = value; }
 
         #region Constructors
 
         /// <summary>
         /// Constructs the packed vector with a vector.
         /// </summary>
-        public RgbaVector(Vector4 vector)
+        public RgbVector(Vector3 vector)
         {
             Base = vector;
         }
@@ -37,7 +35,7 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Constructs the packed vector with vector form values.
         /// </summary>
-        public RgbaVector(float r, float g, float b, float a) : this(new Vector4(r, g, b, a))
+        public RgbVector(float r, float g, float b) : this(new Vector3(r, g, b))
         {
         }
 
@@ -47,34 +45,34 @@ namespace MonoGame.Framework.Vector
 
         public void FromScaledVector4(Vector4 scaledVector)
         {
-            Base = scaledVector;
+            Base = scaledVector.ToVector3();
         }
 
         public readonly Vector4 ToScaledVector4()
         {
-            return Base;
+            return Base.ToVector4();
         }
 
         #endregion
 
         #region Equals
 
-        public readonly bool Equals(RgbaVector other)
+        public readonly bool Equals(RgbVector other)
         {
             return Base.Equals(other.Base);
         }
 
         public override readonly bool Equals(object obj)
         {
-            return obj is RgbaVector other && Equals(other);
+            return obj is RgbVector other && Equals(other);
         }
 
-        public static bool operator ==(in RgbaVector a, in RgbaVector b)
+        public static bool operator ==(in RgbVector a, in RgbVector b)
         {
             return a.Base == b.Base;
         }
 
-        public static bool operator !=(in RgbaVector a, in RgbaVector b)
+        public static bool operator !=(in RgbVector a, in RgbVector b)
         {
             return a.Base != b.Base;
         }
@@ -86,7 +84,7 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override readonly string ToString() => nameof(RgbaVector) + $"({Base})";
+        public override readonly string ToString() => nameof(RgbVector) + $"({Base})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
@@ -95,14 +93,14 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        public static implicit operator RgbaVector(in Vector4 vector)
+        public static implicit operator RgbVector(in Vector3 vector)
         {
-            return UnsafeR.As<Vector4, RgbaVector>(vector);
+            return UnsafeR.As<Vector3, RgbVector>(vector);
         }
 
-        public static implicit operator Vector4(in RgbaVector vector)
+        public static implicit operator Vector3(in RgbVector vector)
         {
-            return UnsafeR.As<RgbaVector, Vector4>(vector);
+            return UnsafeR.As<RgbVector, Vector3>(vector);
         }
     }
 }

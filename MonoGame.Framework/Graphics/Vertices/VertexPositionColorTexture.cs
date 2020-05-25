@@ -1,10 +1,12 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace MonoGame.Framework.Graphics
 {
+    [DataContract]
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct VertexPositionColorTexture : IVertexType
+    public struct VertexPositionColorTexture : IVertexType, IEquatable<VertexPositionColorTexture>
     {
         public static VertexDeclaration VertexDeclaration { get; } = new VertexDeclaration(new[]
         {
@@ -15,42 +17,52 @@ namespace MonoGame.Framework.Graphics
 
         VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
 
+        [DataMember]
         public Vector3 Position;
-        public Color Color;
-        public Vector2 TextureCoordinate;
 
-        public VertexPositionColorTexture(Vector3 position, Color color, Vector2 textureCoordinate)
+        [DataMember]
+        public Color Color;
+
+        [DataMember]
+        public Vector2 TexCoord;
+
+        public VertexPositionColorTexture(Vector3 position, Color color, Vector2 texCoord)
         {
             Position = position;
             Color = color;
-            TextureCoordinate = textureCoordinate;
+            TexCoord = texCoord;
         }
 
-        public override int GetHashCode()
+        public readonly bool Equals(VertexPositionColorTexture other)
         {
-            return HashCode.Combine(Position, Color, TextureCoordinate);
+            return other == this;
         }
 
-        public override string ToString()
+        public override readonly bool Equals(object obj)
         {
-            return "{Position:" + Position + " Color:" + Color + " TextureCoordinate:" + TextureCoordinate + "}";
+            return obj is VertexPositionColorTexture other && Equals(other);
         }
 
-        public static bool operator ==(in VertexPositionColorTexture left, in VertexPositionColorTexture right)
+        public override readonly int GetHashCode()
         {
-            return (left.Position == right.Position)
-                && (left.Color == right.Color)
-                && (left.TextureCoordinate == right.TextureCoordinate);
+            return HashCode.Combine(Position, Color, TexCoord);
         }
 
-        public static bool operator !=(in VertexPositionColorTexture left, in VertexPositionColorTexture right)
+        public override readonly string ToString()
         {
-            return !(left == right);
+            return "{Position:" + Position + " Color:" + Color + " TexCoord:" + TexCoord + "}";
         }
 
-        public override bool Equals(object obj)
+        public static bool operator ==(in VertexPositionColorTexture a, in VertexPositionColorTexture b)
         {
-            return obj is VertexPositionColorTexture other && other == this;
+            return (a.Position == b.Position)
+                && (a.Color == b.Color)
+                && (a.TexCoord == b.TexCoord);
+        }
+
+        public static bool operator !=(in VertexPositionColorTexture a, in VertexPositionColorTexture b)
+        {
+            return !(a == b);
         }
     }
 }

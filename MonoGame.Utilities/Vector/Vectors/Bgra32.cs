@@ -83,7 +83,7 @@ namespace MonoGame.Framework.Vector
         {
             Color rgba = default;
             rgba.FromVector4(vector);
-            FromColor(rgba);
+            FromRgba32(rgba);
         }
 
         public readonly Vector4 ToScaledVector4()
@@ -121,7 +121,7 @@ namespace MonoGame.Framework.Vector
             A = byte.MaxValue;
         }
 
-        public void FromColor(Color source)
+        public void FromRgba32(Color source)
         {
             R = source.R;
             G = source.G;

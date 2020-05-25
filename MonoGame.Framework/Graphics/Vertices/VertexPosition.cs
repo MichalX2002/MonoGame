@@ -4,60 +4,57 @@
 
 using System.Runtime.Serialization;
 using System.Runtime.InteropServices;
+using System;
 
 namespace MonoGame.Framework.Graphics
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-	public struct VertexPosition : IVertexType
-	{
+    public struct VertexPosition : IVertexType, IEquatable<VertexPosition>
+    {
         [DataMember]
-		public Vector3 Position;
+        public Vector3 Position;
 
-		public static readonly VertexDeclaration VertexDeclaration;
-
-		public VertexPosition(Vector3 position)
-		{
-			Position = position;
-		}
+        public static VertexDeclaration VertexDeclaration { get; } = new VertexDeclaration(new[]
+        {
+            new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0)
+        });
 
         VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
 
-        public override int GetHashCode() => Position.GetHashCode();
-
-        public override string ToString()
-		{
-            return "{{Position:" + Position + "}}";
-		}
-
-		public static bool operator == (VertexPosition left, VertexPosition right)
-		{
-			return left.Position == right.Position;
-		}
-
-		public static bool operator != (VertexPosition left, VertexPosition right)
-		{
-			return !(left == right);
-		}
-
-        public override bool Equals(object obj)
+        public VertexPosition(Vector3 position)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-            if (obj.GetType() != GetType())
-            {
-                return false;
-            }
-            return this == (VertexPosition) obj;
+            Position = position;
         }
 
-        static VertexPosition()
-		{
-			VertexElement[] elements = { new VertexElement (0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0) };
-            VertexDeclaration declaration = new VertexDeclaration(elements);
-			VertexDeclaration = declaration;
-		}
-	}
+        public readonly bool Equals(VertexPosition other)
+        {
+            return this == other;
+        }
+
+        public override readonly bool Equals(object obj)
+        {
+            return obj is VertexPosition other && Equals(other);
+        }
+
+        public override readonly int GetHashCode()
+        {
+            return Position.GetHashCode();
+        }
+
+        public override readonly string ToString()
+        {
+            return "{Position:" + Position + "}";
+        }
+
+        public static bool operator ==(VertexPosition a, VertexPosition b)
+        {
+            return a.Position == b.Position;
+        }
+
+        public static bool operator !=(VertexPosition a, VertexPosition b)
+        {
+            return !(a == b);
+        }
+    }
 }

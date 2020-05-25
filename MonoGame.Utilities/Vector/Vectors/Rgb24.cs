@@ -16,6 +16,9 @@ namespace MonoGame.Framework.Vector
     [StructLayout(LayoutKind.Sequential)]
     public struct Rgb24 : IPixel<Rgb24>
     {
+        public static Rgb24 Black => new Rgb24(0, 0, 0);
+        public static Rgb24 White => new Rgb24(255, 255, 255);
+
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Red),
             new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Green),
@@ -89,7 +92,7 @@ namespace MonoGame.Framework.Vector
             this = source;
         }
 
-        public void FromColor(Color source)
+        public void FromRgba32(Color source)
         {
             R = source.R;
             G = source.G;

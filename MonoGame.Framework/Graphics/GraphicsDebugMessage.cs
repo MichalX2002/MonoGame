@@ -2,14 +2,25 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
+
 namespace MonoGame.Framework.Graphics
 {
-    public class GraphicsDebugMessage
+    public readonly struct GraphicsDebugMessage
     {
-        public string Message { get; set; }
-        public string Severity { get; set; }
-        public int Id { get; set; }
-        public string IdName { get; set; }
-        public string Category { get; set; }
+        public int Id { get; }
+        public string IdName { get; }
+        public string Severity { get; }
+        public string Category { get; }
+        public string Message { get; }
+
+        public GraphicsDebugMessage(int id, string idName, string severity, string category, string message)
+        {
+            Id = id;
+            IdName = idName ?? throw new ArgumentNullException(nameof(idName));
+            Severity = severity ?? throw new ArgumentNullException(nameof(severity));
+            Category = category ?? throw new ArgumentNullException(nameof(category));
+            Message = message ?? throw new ArgumentNullException(nameof(message));
+        }
     }
 }

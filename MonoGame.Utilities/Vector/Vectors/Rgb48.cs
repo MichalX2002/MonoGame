@@ -92,7 +92,7 @@ namespace MonoGame.Framework.Vector
             B = PackedVectorHelper.UpScale8To16Bit(source.B);
         }
 
-        public void FromColor(Color source)
+        public void FromRgba32(Color source)
         {
             R = PackedVectorHelper.UpScale8To16Bit(source.R);
             G = PackedVectorHelper.UpScale8To16Bit(source.G);

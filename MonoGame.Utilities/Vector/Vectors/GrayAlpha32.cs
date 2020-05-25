@@ -86,7 +86,7 @@ namespace MonoGame.Framework.Vector
             A = ushort.MaxValue;
         }
 
-        public void FromColor(Color source)
+        public void FromRgba32(Color source)
         {
             L = PackedVectorHelper.UpScale8To16Bit(
                 PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));

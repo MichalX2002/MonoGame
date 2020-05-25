@@ -73,7 +73,7 @@ namespace MonoGame.Framework.Vector
                 PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
         }
 
-        public void FromColor(Color source)
+        public void FromRgba32(Color source)
         {
             L = PackedVectorHelper.UpScale8To16Bit(
                 PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
@@ -151,5 +151,11 @@ namespace MonoGame.Framework.Vector
         public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
+
+        [CLSCompliant(false)]
+        public static implicit operator Gray16(ushort luminance) => new Gray16(luminance);
+
+        [CLSCompliant(false)]
+        public static implicit operator ushort(Gray16 value) => value.L;
     }
 }

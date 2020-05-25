@@ -71,8 +71,11 @@ namespace MonoGame.Framework.Graphics
         private Shader _vertexShader;
         private Shader _pixelShader;
 
-        private readonly ConstantBufferCollection _vertexConstantBuffers = new ConstantBufferCollection(ShaderStage.Vertex, 16);
-        private readonly ConstantBufferCollection _pixelConstantBuffers = new ConstantBufferCollection(ShaderStage.Pixel, 16);
+        private readonly ConstantBufferCollection _vertexConstantBuffers =
+            new ConstantBufferCollection(ShaderStage.Vertex, 16);
+
+        private readonly ConstantBufferCollection _pixelConstantBuffers =
+            new ConstantBufferCollection(ShaderStage.Pixel, 16);
 
         /// <summary>
         /// The cache of effects from unique byte streams.
@@ -127,12 +130,12 @@ namespace MonoGame.Framework.Graphics
         public GraphicsProfile GraphicsProfile { get; }
 
         /// <summary>
-        /// <para>
         /// Indicates whether DX9 style pixel addressing or standard pixel addressing is used.
         /// When <see langword="true"/>, a half-pixel offset needs to be added to projection matrices.
         /// Set to <see langword="false"/> by default.
-        /// </para>
+        /// <para>
         /// See also <seealso cref="GraphicsDeviceManager.PreferHalfPixelOffset"/>.
+        /// </para>
         /// </summary>
         /// <remarks>
         /// XNA uses DirectX9 for its graphics. DirectX9 interprets UV
@@ -229,8 +232,8 @@ namespace MonoGame.Framework.Graphics
         /// The color used as blend factor when alpha blending.
         /// </summary>
         /// <remarks>
-        /// When only changing BlendFactor, use this rather than <see cref="BlendState.BlendFactor"/> to
-        /// only update BlendFactor so the whole BlendState does not have to be updated.
+        /// When only changing blend factor, use this rather than <see cref="BlendState.BlendFactor"/> to
+        /// only update blend factor so the whole <see cref="BlendState"/> does not have to be updated.
         /// </remarks>
         public Color BlendFactor
         {
@@ -239,6 +242,7 @@ namespace MonoGame.Framework.Graphics
             {
                 if (_blendFactor == value)
                     return;
+
                 _blendFactor = value;
                 BlendFactorDirty = true;
             }
@@ -331,7 +335,8 @@ namespace MonoGame.Framework.Graphics
                     return;
 
                 if (!value.DepthClipEnable && !Capabilities.SupportsDepthClamp)
-                    throw new InvalidOperationException("Cannot set RasterizerState.DepthClipEnable to false on this graphics device");
+                    throw new InvalidOperationException(
+                        "Cannot set RasterizerState.DepthClipEnable to false on this graphics device");
 
                 _rasterizerState = value;
 
@@ -400,7 +405,7 @@ namespace MonoGame.Framework.Graphics
             if (!adapter.IsProfileSupported(graphicsProfile))
                 throw new NoSuitableGraphicsDeviceException(
                     $"Adapter '{ adapter.Description}' does not support the {graphicsProfile} profile.");
-            
+
             PresentationParameters = presentationParameters ??
                 throw new ArgumentNullException(nameof(presentationParameters));
 
@@ -422,9 +427,11 @@ namespace MonoGame.Framework.Graphics
         /// Indicates if DX9 style pixel addressing or standard pixel addressing should be used.
         /// </param>
         /// <param name="presentationParameters">The presentation options.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="presentationParameters"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="presentationParameters"/> is <see langword="null"/>.
+        /// </exception>
         public GraphicsDevice(
-            GraphicsAdapter adapter, 
+            GraphicsAdapter adapter,
             GraphicsProfile graphicsProfile,
             bool useHalfPixelOffset,
             PresentationParameters presentationParameters)
@@ -542,12 +549,9 @@ namespace MonoGame.Framework.Graphics
 
         #region Clear
 
-        public void Clear(Color color)
+        public void Clear(ClearOptions options, Vector4 color, float depth, int stencil)
         {
-            var options = ClearOptions.Target;
-            options |= ClearOptions.DepthBuffer;
-            options |= ClearOptions.Stencil;
-            PlatformClear(options, color.ToVector4(), _viewport.MaxDepth, 0);
+            PlatformClear(options, color, depth, stencil);
 
             unchecked
             {
@@ -557,22 +561,12 @@ namespace MonoGame.Framework.Graphics
 
         public void Clear(ClearOptions options, Color color, float depth, int stencil)
         {
-            PlatformClear(options, color.ToVector4(), depth, stencil);
-
-            unchecked
-            {
-                _graphicsMetrics._clearCount++;
-            }
+            Clear(options, color.ToScaledVector4(), depth, stencil);
         }
 
-        public void Clear(ClearOptions options, Vector4 color, float depth, int stencil)
+        public void Clear(Color color)
         {
-            PlatformClear(options, color, depth, stencil);
-
-            unchecked
-            {
-                _graphicsMetrics._clearCount++;
-            }
+            Clear(ClearOptions.Full, color, _viewport.MaxDepth, 0);
         }
 
         #endregion
@@ -645,10 +639,10 @@ namespace MonoGame.Framework.Graphics
 
             // Update the back buffer.
             OnPresentationChanged();
-            
+
             PresentationChanged?.Invoke(this, PresentationParameters);
             DeviceReset?.Invoke(this);
-       }
+        }
 
         public void Reset(PresentationParameters presentationParameters)
         {
@@ -687,7 +681,7 @@ namespace MonoGame.Framework.Graphics
             DeviceReset?.Invoke(this);
         }
 
-#endregion
+        #endregion
 
         #region RenderTargets
 
@@ -717,24 +711,23 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        public void SetRenderTargets(params RenderTargetBinding[] renderTargets)
+        public void SetRenderTargets(ReadOnlySpan<RenderTargetBinding> renderTargets)
         {
             // Avoid having to check for null and zero length.
-            var renderTargetCount = 0;
+            int renderTargetCount = 0;
             if (renderTargets != null)
             {
                 renderTargetCount = renderTargets.Length;
                 if (renderTargetCount == 0)
-                {
                     renderTargets = null;
-                }
             }
 
             // Try to early out if the current and new bindings are equal.
             if (RenderTargetCount == renderTargetCount)
             {
-                var isEqual = true;
-                for (var i = 0; i < RenderTargetCount; i++)
+                bool isEqual = true;
+
+                for (int i = 0; i < RenderTargetCount; i++)
                 {
                     if (_currentRenderTargetBindings[i].RenderTarget != renderTargets[i].RenderTarget ||
                         _currentRenderTargetBindings[i].ArraySlice != renderTargets[i].ArraySlice)
@@ -750,23 +743,21 @@ namespace MonoGame.Framework.Graphics
 
             ApplyRenderTargets(renderTargets);
 
-            if (renderTargetCount == 0)
+            unchecked
             {
-                unchecked
-                {
+                if (renderTargetCount == 0)
                     _graphicsMetrics._targetCount++;
-                }
-            }
-            else
-            {
-                unchecked
-                {
+                else
                     _graphicsMetrics._targetCount += renderTargetCount;
-                }
             }
         }
 
-        internal void ApplyRenderTargets(RenderTargetBinding[] renderTargets)
+        public void SetRenderTargets(params RenderTargetBinding[] renderTargets)
+        {
+            SetRenderTargets(renderTargets.AsSpan());
+        }
+
+        internal void ApplyRenderTargets(ReadOnlySpan<RenderTargetBinding> renderTargets)
         {
             PlatformResolveRenderTargets();
 
@@ -776,7 +767,8 @@ namespace MonoGame.Framework.Graphics
             bool clearTarget;
             int renderTargetWidth;
             int renderTargetHeight;
-            if (renderTargets == null)
+
+            if (renderTargets.IsEmpty)
             {
                 RenderTargetCount = 0;
 
@@ -789,7 +781,7 @@ namespace MonoGame.Framework.Graphics
             else
             {
                 // Copy the new bindings.
-                Array.Copy(renderTargets, _currentRenderTargetBindings, renderTargets.Length);
+                renderTargets.CopyTo(_currentRenderTargetBindings);
                 RenderTargetCount = renderTargets.Length;
 
                 var renderTarget = PlatformApplyRenderTargets();
@@ -814,18 +806,14 @@ namespace MonoGame.Framework.Graphics
                 Clear(DiscardColor);
         }
 
-        public RenderTargetBinding[] GetRenderTargets()
+        public ReadOnlySpan<RenderTargetBinding> GetRenderTargets()
         {
-            // Return a correctly sized copy our internal array.
-            var bindings = new RenderTargetBinding[RenderTargetCount];
-            Array.Copy(_currentRenderTargetBindings, bindings, RenderTargetCount);
-            return bindings;
+            return _currentRenderTargetBindings.AsSpan(0, RenderTargetCount);
         }
 
-        public void GetRenderTargets(RenderTargetBinding[] outTargets)
+        public void GetRenderTargets(Span<RenderTargetBinding> destination)
         {
-            Debug.Assert(outTargets.Length == RenderTargetCount, "Invalid outTargets array length!");
-            Array.Copy(_currentRenderTargetBindings, outTargets, RenderTargetCount);
+            GetRenderTargets().CopyTo(destination);
         }
 
         #endregion
@@ -834,8 +822,9 @@ namespace MonoGame.Framework.Graphics
 
         public void SetVertexBuffer(VertexBuffer vertexBuffer)
         {
-            _vertexBuffersDirty |= vertexBuffer == null ?
-                _vertexBuffers.Clear() : _vertexBuffers.Set(vertexBuffer, 0);
+            _vertexBuffersDirty |= vertexBuffer == null
+                ? _vertexBuffers.Clear()
+                : _vertexBuffers.Set(vertexBuffer, 0);
         }
 
         public void SetVertexBuffer(VertexBuffer vertexBuffer, int vertexOffset)
@@ -848,13 +837,14 @@ namespace MonoGame.Framework.Graphics
                 throw new ArgumentOutOfRangeException(nameof(vertexOffset));
             }
 
-            _vertexBuffersDirty |= vertexBuffer == null ?
-                _vertexBuffers.Clear() : _vertexBuffers.Set(vertexBuffer, vertexOffset);
+            _vertexBuffersDirty |= vertexBuffer == null
+                ? _vertexBuffers.Clear()
+                : _vertexBuffers.Set(vertexBuffer, vertexOffset);
         }
 
-        public void SetVertexBuffers(params VertexBufferBinding[] vertexBuffers)
+        public void SetVertexBuffers(ReadOnlySpan<VertexBufferBinding> vertexBuffers)
         {
-            if (vertexBuffers == null || vertexBuffers.Length == 0)
+            if (vertexBuffers.IsEmpty)
             {
                 _vertexBuffersDirty |= _vertexBuffers.Clear();
             }
@@ -868,10 +858,16 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
+        public void SetVertexBuffers(params VertexBufferBinding[] vertexBuffers)
+        {
+            SetVertexBuffers(vertexBuffers.AsSpan());
+        }
+
         private void SetIndexBuffer(IndexBuffer indexBuffer)
         {
             if (_indexBuffer == indexBuffer)
                 return;
+
             _indexBuffer = indexBuffer;
             _indexBufferDirty = true;
         }
@@ -1011,13 +1007,16 @@ namespace MonoGame.Framework.Graphics
             PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount, int instanceCount)
         {
             if (_vertexShader == null)
-                throw new InvalidOperationException("Vertex shader must be set before calling DrawInstancedPrimitives.");
+                throw new InvalidOperationException(
+                    "Vertex shader must be set before calling DrawInstancedPrimitives.");
 
             if (_vertexBuffers.Count == 0)
-                throw new InvalidOperationException("Vertex buffer must be set before calling DrawInstancedPrimitives.");
+                throw new InvalidOperationException(
+                    "Vertex buffer must be set before calling DrawInstancedPrimitives.");
 
             if (_indexBuffer == null)
-                throw new InvalidOperationException("Index buffer must be set before calling DrawInstancedPrimitives.");
+                throw new InvalidOperationException(
+                    "Index buffer must be set before calling DrawInstancedPrimitives.");
 
             if (primitiveCount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(primitiveCount));
@@ -1052,9 +1051,9 @@ namespace MonoGame.Framework.Graphics
         /// An index of zero in the index span points to the first vertex in the vertex span.
         /// </remarks>
         public void DrawUserIndexedPrimitives<TVertex, TIndex>(
-            PrimitiveType primitiveType, 
+            PrimitiveType primitiveType,
             ReadOnlySpan<TVertex> vertexData,
-            ReadOnlySpan<TIndex> indexData, 
+            ReadOnlySpan<TIndex> indexData,
             int primitiveCount)
             where TVertex : unmanaged, IVertexType
             where TIndex : unmanaged
@@ -1082,7 +1081,7 @@ namespace MonoGame.Framework.Graphics
         public unsafe void DrawUserIndexedPrimitives<TVertex, TIndex>(
             PrimitiveType primitiveType,
             ReadOnlySpan<TVertex> vertexData,
-            ReadOnlySpan<TIndex> indexData, 
+            ReadOnlySpan<TIndex> indexData,
             int primitiveCount,
             VertexDeclaration vertexDeclaration)
             where TVertex : unmanaged
@@ -1115,11 +1114,11 @@ namespace MonoGame.Framework.Graphics
 
             PlatformDrawUserIndexedPrimitives(
                 primitiveType, vertexData, indexElementSize, indexData, primitiveCount, vertexDeclaration);
-            
+
             unchecked
             {
                 _graphicsMetrics._drawCount++;
-                _graphicsMetrics._primitiveCount +=  primitiveCount;
+                _graphicsMetrics._primitiveCount += primitiveCount;
             }
         }
 
@@ -1136,7 +1135,8 @@ namespace MonoGame.Framework.Graphics
         /// <param name="baseInstance">Used to offset the instance range indexed from the instance buffer.</param>
         /// <remarks>Draw geometry with data from multiple bound vertex streams at different frequencies.</remarks>
         public void DrawInstancedPrimitives(
-            PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount, int instanceCount, int baseInstance)
+            PrimitiveType primitiveType, int baseVertex, int startIndex,
+            int primitiveCount, int instanceCount, int baseInstance)
         {
             if (_vertexShader == null)
                 throw new InvalidOperationException("Vertex shader must be set before calling DrawInstancedPrimitives.");
@@ -1148,9 +1148,10 @@ namespace MonoGame.Framework.Graphics
                 throw new InvalidOperationException("Index buffer must be set before calling DrawInstancedPrimitives.");
 
             if (primitiveCount <= 0)
-                throw new ArgumentOutOfRangeException("primitiveCount");
+                throw new ArgumentOutOfRangeException(nameof(primitiveCount));
 
-            PlatformDrawInstancedPrimitives(primitiveType, baseVertex, startIndex, primitiveCount, instanceCount, baseInstance);
+            PlatformDrawInstancedPrimitives(
+                primitiveType, baseVertex, startIndex, primitiveCount, instanceCount, baseInstance);
         }
 
         #endregion
@@ -1169,9 +1170,10 @@ namespace MonoGame.Framework.Graphics
             {
                 rect = rectangle.Value;
                 if (rect.X < 0 || rect.Y < 0 || rect.Width <= 0 || rect.Height <= 0 ||
-                    rect.Right > PresentationParameters.BackBufferWidth || 
+                    rect.Right > PresentationParameters.BackBufferWidth ||
                     rect.Top > PresentationParameters.BackBufferHeight)
-                    throw new ArgumentException("The rectangle must fit in the backbuffer dimensions.", nameof(rectangle));
+                    throw new ArgumentException(
+                        "The rectangle must fit in the backbuffer dimensions.", nameof(rectangle));
             }
             else
             {
@@ -1181,7 +1183,8 @@ namespace MonoGame.Framework.Graphics
 
             int formatSize = PresentationParameters.BackBufferFormat.GetSize();
             if (sizeof(T) > formatSize || formatSize % sizeof(T) != 0)
-                throw new ArgumentException($"{nameof(T)} is of an invalid size for the format of the backbuffer.", nameof(T));
+                throw new ArgumentException(
+                    $"{nameof(T)} is of an invalid size for the format of the backbuffer.", nameof(T));
 
             int spanBytes = destination.Length * sizeof(T);
             if (spanBytes > rect.Width * rect.Height * formatSize)
@@ -1197,14 +1200,14 @@ namespace MonoGame.Framework.Graphics
 
         private static int GetElementCountForType(PrimitiveType primitiveType, int primitiveCount)
         {
-            switch (primitiveType)
+            return primitiveType switch
             {
-                case PrimitiveType.LineList: return primitiveCount * 2;
-                case PrimitiveType.LineStrip: return primitiveCount + 1;
-                case PrimitiveType.TriangleList: return primitiveCount * 3;
-                case PrimitiveType.TriangleStrip: return primitiveCount + 2;
-                default: throw new NotSupportedException();
-            }
+                PrimitiveType.LineList => primitiveCount * 2,
+                PrimitiveType.LineStrip => primitiveCount + 1,
+                PrimitiveType.TriangleList => primitiveCount * 3,
+                PrimitiveType.TriangleStrip => primitiveCount + 2,
+                _ => throw new NotSupportedException(),
+            };
         }
 
         internal int GetClampedMultisampleCount(int multiSampleCount)
@@ -1213,22 +1216,23 @@ namespace MonoGame.Framework.Graphics
             {
                 // Round down MultiSampleCount to the nearest power of two
                 // hack from http://stackoverflow.com/a/2681094
+
                 // Note: this will return an incorrect, but large value
                 // for very large numbers. That doesn't matter because
                 // the number will get clamped below anyway in this case.
-                var msc = multiSampleCount;
+                int msc = multiSampleCount;
                 msc |= msc >> 1;
                 msc |= msc >> 2;
                 msc |= msc >> 4;
                 msc -= msc >> 1;
+
                 // and clamp it to what the device can handle
                 if (msc > Capabilities.MaxMultiSampleCount)
                     msc = Capabilities.MaxMultiSampleCount;
 
                 return msc;
             }
-            else
-                return 0;
+            return 0;
         }
 
         // uniformly scales down the given rectangle by 10%
@@ -1265,9 +1269,10 @@ namespace MonoGame.Framework.Graphics
             {
                 if (disposing)
                 {
-                    // Dispose of all remaining graphics resources before disposing of the graphics device
+                    // Dispose of remaining graphics resources before disposing of the graphics device
                     lock (_resourcesLock)
                     {
+                        // Save to array as resources remove themselves from the list upon disposal.
                         foreach (var resource in _resources.ToArray())
                         {
                             if (resource.Target is IDisposable target)
@@ -1276,7 +1281,6 @@ namespace MonoGame.Framework.Graphics
                         _resources.Clear();
                     }
 
-                    // Clear the effect cache.
                     EffectCache.Clear();
 
                     _blendState = null;

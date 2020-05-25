@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace MonoGame.Framework.Graphics
 {
+    [DataContract]
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct VertexPositionNormalTexture : IVertexType
+    public struct VertexPositionNormalTexture : IVertexType, IEquatable<VertexPositionNormalTexture>
     {
         public static VertexDeclaration VertexDeclaration { get; } = new VertexDeclaration(new[]
         {
@@ -15,42 +17,52 @@ namespace MonoGame.Framework.Graphics
 
         VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
 
+        [DataMember]
         public Vector3 Position;
-        public Vector3 Normal;
-        public Vector2 TextureCoordinate;
 
-        public VertexPositionNormalTexture(Vector3 position, Vector3 normal, Vector2 textureCoordinate)
+        [DataMember]
+        public Vector3 Normal;
+
+        [DataMember]
+        public Vector2 TexCoord;
+
+        public VertexPositionNormalTexture(Vector3 position, Vector3 normal, Vector2 texCoord)
         {
             Position = position;
             Normal = normal;
-            TextureCoordinate = textureCoordinate;
+            TexCoord = texCoord;
         }
 
-        public override int GetHashCode()
+        public readonly bool Equals(VertexPositionNormalTexture other)
         {
-            return HashCode.Combine(Position, Normal, TextureCoordinate);
+            return this == other;
         }
 
-        public override string ToString()
+        public override readonly bool Equals(object obj)
         {
-            return "{{Position:" + Position + " Normal:" + Normal + " TextureCoordinate:" + TextureCoordinate + "}}";
+            return obj is VertexPositionNormalTexture other && Equals(other);
+        }
+
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(Position, Normal, TexCoord);
+        }
+
+        public override readonly string ToString()
+        {
+            return "{Position:" + Position + " Normal:" + Normal + " TexCoord:" + TexCoord + "}";
         }
 
         public static bool operator ==(in VertexPositionNormalTexture left, in VertexPositionNormalTexture right)
         {
             return (left.Position == right.Position)
                 && (left.Normal == right.Normal)
-                && (left.TextureCoordinate == right.TextureCoordinate);
+                && (left.TexCoord == right.TexCoord);
         }
 
         public static bool operator !=(in VertexPositionNormalTexture left, in VertexPositionNormalTexture right)
         {
             return !(left == right);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is VertexPositionNormalTexture other && this == other;
         }
     }
 }

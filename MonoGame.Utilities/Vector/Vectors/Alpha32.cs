@@ -8,25 +8,27 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Framework.Vector
 {
     /// <summary>
-    /// Packed vector type containing an 8-bit W component.
+    /// Packed vector type containing an 32-bit W component.
     /// <para>
     /// Ranges from [1, 1, 1, 0] to [1, 1, 1, 1] in vector form.
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Alpha8 : IPackedPixel<Alpha8, byte>
+    public struct Alpha32 : IPackedPixel<Alpha32, uint>
     {
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Alpha));
+            new VectorComponent(VectorComponentType.Int32, VectorComponentChannel.Alpha));
 
-        public byte A;
+        [CLSCompliant(false)]
+        public uint A;
 
         #region Constructors
 
         /// <summary>
         /// Constructs the packed vector with a raw value.
         /// </summary>
-        public Alpha8(byte value)
+        [CLSCompliant(false)]
+        public Alpha32(uint value)
         {
             A = value;
         }
@@ -35,7 +37,7 @@ namespace MonoGame.Framework.Vector
         /// Constructs the packed vector with a vector form value.
         /// </summary>
         /// <param name="alpha">The W component.</param>
-        public Alpha8(float alpha)
+        public Alpha32(float alpha)
         {
             A = Pack(alpha);
         }
@@ -47,21 +49,22 @@ namespace MonoGame.Framework.Vector
         /// </summary>
         public readonly float ToAlpha()
         {
-            return A / (float)byte.MaxValue;
+            return A / (float)uint.MaxValue;
         }
 
-        private static byte Pack(float alpha)
+        private static uint Pack(float alpha)
         {
-            alpha *= byte.MaxValue;
+            alpha *= uint.MaxValue;
             alpha += 0.5f;
-            alpha = MathHelper.Clamp(alpha, 0, 255);
-            
-            return (byte)alpha;
+            alpha = MathHelper.Clamp(alpha, 0, uint.MaxValue);
+
+            return (uint)alpha;
         }
 
         #region IPackedVector
 
-        public byte PackedValue { readonly get => A; set => A = value; }
+        [CLSCompliant(false)]
+        public uint PackedValue { readonly get => A; set => A = value; }
 
         public void FromScaledVector4(Vector4 scaledVector)
         {
@@ -79,66 +82,66 @@ namespace MonoGame.Framework.Vector
 
         public void FromGray8(Gray8 source)
         {
-            A = byte.MaxValue;
+            A = uint.MaxValue;
         }
 
         public void FromGray16(Gray16 source)
         {
-            A = byte.MaxValue;
+            A = uint.MaxValue;
         }
 
         public void FromGrayAlpha16(GrayAlpha16 source)
         {
-            A = source.A;
+            A = PackedVectorHelper.UpScale8To16Bit(source.A);
         }
 
         public void FromRgb24(Rgb24 source)
         {
-            A = byte.MaxValue;
+            A = uint.MaxValue;
         }
 
         public void FromRgba32(Color source)
         {
-            A = source.A;
+            A = PackedVectorHelper.UpScale8To16Bit(source.A);
         }
 
         public void FromRgb48(Rgb48 source)
         {
-            A = byte.MaxValue;
+            A = uint.MaxValue;
         }
 
         public void FromRgba64(Rgba64 source)
         {
-            A = PackedVectorHelper.DownScale16To8Bit(source.A);
+            A = source.A;
         }
 
         public readonly Color ToColor()
         {
-            return new Color(byte.MaxValue, A);
+            return new Color(byte.MaxValue, PackedVectorHelper.DownScale16To8Bit(A));
         }
 
         #endregion
 
         #region Equals
 
-        public readonly bool Equals(Alpha8 other)
+        public readonly bool Equals(Alpha32 other)
         {
             return this == other;
         }
 
         public override readonly bool Equals(object obj)
         {
-            return obj is Alpha8 other && Equals(other);
+            return obj is Alpha32 other && Equals(other);
         }
 
-        public static bool operator ==(Alpha8 a, Alpha8 b)
+        public static bool operator ==(in Alpha32 a, in Alpha32 b)
         {
-            return a.A == b.A;
+            return a.PackedValue == b.PackedValue;
         }
 
-        public static bool operator !=(Alpha8 a, Alpha8 b)
+        public static bool operator !=(in Alpha32 a, in Alpha32 b)
         {
-            return a.A != b.A;
+            return a.PackedValue != b.PackedValue;
         }
 
         #endregion
@@ -148,17 +151,19 @@ namespace MonoGame.Framework.Vector
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override readonly string ToString() => nameof(Alpha8) + $"({A})";
+        public override readonly string ToString() => nameof(Alpha32) + $"({A})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override readonly int GetHashCode() => A;
+        public override readonly int GetHashCode() => A.GetHashCode();
 
         #endregion
 
-        public static implicit operator Alpha8(byte alpha) => new Alpha8(alpha);
+        [CLSCompliant(false)]
+        public static implicit operator Alpha32(uint alpha) => new Alpha32(alpha);
 
-        public static implicit operator byte(Alpha8 value) => value.A;
+        [CLSCompliant(false)]
+        public static implicit operator uint(Alpha32 value) => value.A;
     }
 }

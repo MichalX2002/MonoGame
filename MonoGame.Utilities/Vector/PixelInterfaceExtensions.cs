@@ -1,10 +1,12 @@
-﻿
+﻿using System;
+
 namespace MonoGame.Framework.Vector
 {
     /// <summary>
     /// Provides extension methods that expose the default implementation of
     /// some <see cref="IPixel"/> methods.
     /// </summary>
+    [CLSCompliant(false)]
     public static class PixelInterfaceExtensions
     {
         #region FromGray

@@ -16,7 +16,7 @@ namespace MonoGame.Framework
         {
             if (_whitePixelTexture == null)
             {
-                _whitePixelTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+                _whitePixelTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1, false, SurfaceFormat.Rgba32);
                 _whitePixelTexture.SetData(new[] { Color.White });
 
                 spriteBatch.Disposing += (args) =>

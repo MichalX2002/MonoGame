@@ -1,4 +1,5 @@
-﻿namespace MonoGame.Framework.Graphics
+﻿
+namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Used to attach a vertex declaration to a vertex type for use in generic draw methods.

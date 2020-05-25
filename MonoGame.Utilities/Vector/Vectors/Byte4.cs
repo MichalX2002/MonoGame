@@ -28,10 +28,14 @@ namespace MonoGame.Framework.Vector
         public byte Z;
         public byte W;
 
-        public Color Rgba32
+        public Color ToRgba32()
         {
-            readonly get => UnsafeR.As<Byte4, Color>(this);
-            set => Unsafe.As<Byte4, Color>(ref this) = value;
+            return UnsafeR.As<Byte4, Color>(this);
+        }
+
+        public void SetRgba32(Color value)
+        {
+            Unsafe.As<Byte4, Color>(ref this) = value;
         }
 
         #region Constructors
@@ -139,14 +143,14 @@ namespace MonoGame.Framework.Vector
             W = PackedVectorHelper.DownScale16To8Bit(source.A);
         }
 
-        public void FromColor(Color source)
+        public void FromRgba32(Color source)
         {
-            Rgba32 = source;
+            SetRgba32(source);
         }
 
         public readonly Color ToColor()
         {
-            return Rgba32;
+            return ToRgba32();
         }
 
         #endregion
@@ -176,7 +180,7 @@ namespace MonoGame.Framework.Vector
         #endregion
 
         /// <summary>
-        /// Gets the hexadecimal <see cref="string"/> representation of this <see cref="Rgba32"/>.
+        /// Gets the hexadecimal <see cref="string"/> representation of this <see cref="ToRgba32()"/>.
         /// </summary>
         public readonly string ToHex()
         {

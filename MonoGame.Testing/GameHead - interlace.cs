@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -62,13 +63,13 @@ namespace MonoGame.Testing
                     var ww = new Stopwatch();
 
                     var http = new HttpClient();
-
-                    for (int i = 0; i < 4; i++)
+                    
+                    for (int i = 0; i < 1; i++)
                     {
                         using (var fs = new FileStream(
                             //@"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg",
-                            "../../very big interlace.png",
-                            //"../../very_big_interlace pog.jpg",
+                            //"../../very big interlace.png",
+                            "../../very_big_interlace pog.jpg",
                             FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 4))
                         //using(var fs = await http.GetStreamAsync(
                         //    "https://upload.wikimedia.org/wikipedia/commons/3/3d/LARGE_elevation.jpg"))
@@ -158,7 +159,7 @@ namespace MonoGame.Testing
             if (tex != null)
             {
                 float rot = 0; // -MathF.PI / 2;
-                float scale = 1 / 2f; // 5.5f
+                float scale = 1 / 5.5f; // 5.5f
                 var pos = new Vector2(0, 0); // tex.Width * scale);
 
                 _spriteBatch.Draw(

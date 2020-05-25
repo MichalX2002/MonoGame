@@ -46,7 +46,7 @@ namespace MonoGame.Imaging
                             var dstRow = (TPixelTo*)(dstPtr + (sourceRectangle.Y + y) * dstStride);
 
                             for (int x = 0; x < sourceRectangle.Width; x++)
-                                dstRow[x].FromColor(srcRow[x]);
+                                dstRow[x].FromRgba32(srcRow[x]);
                         }
                     }
                     else

@@ -18,7 +18,7 @@ namespace MonoGame.Framework
 #endif
     [DataContract]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    public struct Vector4 : IPixel<Vector4>, IEquatable<Vector4>
+    public struct Vector4 : IEquatable<Vector4>
     {
         /// <summary>
         /// Returns a <see cref="Vector4"/> with all components set to <see cref="byte.MaxValue"/>.
@@ -74,12 +74,6 @@ namespace MonoGame.Framework
         public static Vector4 UnitW => new Vector4(0, 0, 0, 1);
 
         #endregion
-
-        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Red),
-            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Green),
-            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Blue),
-            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Alpha));
 
         internal string DebuggerDisplay => string.Concat(
             X.ToString(), "  ",
@@ -190,30 +184,6 @@ namespace MonoGame.Framework
         public Vector4(float value)
         {
             Base = new FastVector4(value);
-        }
-
-        #endregion
-
-        #region IPackedVector
-
-        void IVector.FromScaledVector4(Vector4 scaledVector)
-        {
-            this = scaledVector;
-        }
-
-        readonly Vector4 IVector.ToScaledVector4()
-        {
-            return this;
-        }
-
-        void IVector.FromVector4(Vector4 vector)
-        {
-            this = vector;
-        }
-
-        readonly Vector4 IVector.ToVector4()
-        {
-            return this;
         }
 
         #endregion

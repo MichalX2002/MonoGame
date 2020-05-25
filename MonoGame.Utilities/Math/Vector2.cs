@@ -22,7 +22,7 @@ namespace MonoGame.Framework
 #endif
     [DataContract]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    public struct Vector2 : IPackedPixel<Vector2, ulong>, IEquatable<Vector2>
+    public struct Vector2 : IEquatable<Vector2>
     {
         #region Public Constants
 
@@ -57,10 +57,6 @@ namespace MonoGame.Framework
         public static Vector2 UnitY => new Vector2(0f, 1f);
 
         #endregion
-
-        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Red),
-            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Green));
 
         internal string DebuggerDisplay => string.Concat(
             X.ToString(), "  ",
@@ -100,38 +96,6 @@ namespace MonoGame.Framework
         public Vector2(float value)
         {
             Base = new FastVector2(value);
-        }
-
-        #endregion
-
-        #region IPackedVector
-
-        [CLSCompliant(false)]
-        public ulong PackedValue
-        {
-            readonly get => UnsafeR.As<Vector2, ulong>(this);
-            set => Unsafe.As<Vector2, ulong>(ref this) = value;
-        }
-
-        void IVector.FromScaledVector4(Vector4 scaledVector)
-        {
-            FromVector4(scaledVector);
-        }
-
-        readonly Vector4 IVector.ToScaledVector4()
-        {
-            return ToVector4();
-        }
-
-        public void FromVector4(Vector4 vector)
-        {
-            Base.X = vector.Base.X;
-            Base.Y = vector.Base.Y;
-        }
-
-        public readonly Vector4 ToVector4()
-        {
-            return new Vector4(Base, 0, 1);
         }
 
         #endregion

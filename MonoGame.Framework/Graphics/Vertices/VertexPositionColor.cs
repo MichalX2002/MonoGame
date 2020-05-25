@@ -1,69 +1,62 @@
-using System;
 using System.Runtime.Serialization;
 using System.Runtime.InteropServices;
+using System;
 
 namespace MonoGame.Framework.Graphics
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-	public struct VertexPositionColor : IVertexType
-	{
+    public struct VertexPositionColor : IVertexType, IEquatable<VertexPositionColor>
+    {
         [DataMember]
-		public Vector3 Position;
-        
-        [DataMember]
-		public Color Color;
+        public Vector3 Position;
 
-		public static readonly VertexDeclaration VertexDeclaration;
+        [DataMember]
+        public Color Color;
+
+        public static VertexDeclaration VertexDeclaration { get; } = new VertexDeclaration(new[]
+        {
+            new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0),
+            new VertexElement(12, VertexElementFormat.Color, VertexElementUsage.Color, 0)
+        });
 
         VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
 
-		public VertexPositionColor(Vector3 position, Color color)
-		{
-			Position = position;
-			Color = color;
-		}
+        public VertexPositionColor(Vector3 position, Color color)
+        {
+            Position = position;
+            Color = color;
+        }
 
-        public override int GetHashCode()
-	    {
-            unchecked
-            {
-                int code = 7 + Position.GetHashCode();
-                return code * 31 + Color.GetHashCode();
-            }
-	    }
+        public readonly bool Equals(VertexPositionColor other)
+        {
+            return this == other;
+        }
 
-	    public override string ToString()
-		{
-            return "{{Position:" + Position + " Color:" + Color + "}}";
-		}
+        public override readonly bool Equals(object obj)
+        {
+            return obj is VertexPositionColor other && Equals(other);
+        }
 
-		public static bool operator == (VertexPositionColor left, VertexPositionColor right)
-		{
-			return (left.Color == right.Color) && (left.Position == right.Position);
-		}
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(Position, Color);
+        }
 
-		public static bool operator != (VertexPositionColor left, VertexPositionColor right)
-		{
-			return !(left == right);
-		}
+        public override readonly string ToString()
+        {
+            return "{Position:" + Position + " Color:" + Color + "}";
+        }
 
-		public override bool Equals(object obj)
-		{
-			if (obj == null) {
-				return false;
-			}
-			if (obj.GetType () != GetType()) {
-				return false;
-			}
-			return this == ((VertexPositionColor)obj);
-		}
+        public static bool operator ==(in VertexPositionColor a, in VertexPositionColor b)
+        {
+            return (a.Color == b.Color)
+                && (a.Position == b.Position);
+        }
 
-		static VertexPositionColor()
-		{
-			VertexElement[] elements = new VertexElement[] { new VertexElement (0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0), new VertexElement (12, VertexElementFormat.Color, VertexElementUsage.Color, 0) };
-			VertexDeclaration declaration = new VertexDeclaration (elements);
-			VertexDeclaration = declaration;
-		}
-	}
+        public static bool operator !=(in VertexPositionColor a, in VertexPositionColor b)
+        {
+            return !(a == b);
+        }
+    }
 }

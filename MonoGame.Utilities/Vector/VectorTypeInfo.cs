@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vector
 {
+    // TODO: replace with C#9 shape and VectorComponentInfo as a required static field
     public class VectorTypeInfo : IEquatable<VectorTypeInfo>
     {
         private static ConcurrentDictionary<Type, VectorTypeInfo> InfoCache { get; } =

@@ -17,6 +17,9 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
         private readonly Dictionary<object, ExternalReference> _externalReferences;
         private readonly string _filePath;
 
+        public XmlWriter Xml { get; private set; }
+        public IntermediateSerializer Serializer { get; private set; }
+
         internal IntermediateWriter(IntermediateSerializer serializer, XmlWriter xmlWriter, string filePath)
         {
             Serializer = serializer;
@@ -28,21 +31,18 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             _externalReferences = new Dictionary<object, ExternalReference>();
         }
 
-        public XmlWriter Xml { get; private set; }
-
-        public IntermediateSerializer Serializer { get; private set; }
-
         public void WriteExternalReference<T>(ExternalReference<T> value)
         {
             if (!_externalReferences.TryGetValue(value, out ExternalReference externalReference))
+            {
                 _externalReferences.Add(value, externalReference = new ExternalReference
                 {
-                    ID = "#External" + (_externalReferences.Count + 1),
+                    Id = "#External" + (_externalReferences.Count + 1),
                     TargetType = typeof(T).FullName,
                     FileName = MakeRelativePath(value.Filename)
                 });
-
-            Xml.WriteElementString("Reference", externalReference.ID);
+            }
+            Xml.WriteElementString("Reference", externalReference.Id);
         }
 
         private string MakeRelativePath(string path)
@@ -54,7 +54,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 
         private class ExternalReference
         {
-            public string ID;
+            public string Id;
             public string TargetType;
             public string FileName;
         }
@@ -137,15 +137,15 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 
         public void WriteSharedResource<T>(T value, ContentSerializerAttribute format)
         {
-            var sharedResourceID = GetSharedResourceID(value);
+            var sharedResourceId = GetSharedResourceId(value);
 
             if (format.FlattenContent)
-                Xml.WriteValue(sharedResourceID);
+                Xml.WriteValue(sharedResourceId);
             else
-                Xml.WriteElementString(format.ElementName, sharedResourceID);
+                Xml.WriteElementString(format.ElementName, sharedResourceId);
         }
 
-        private string GetSharedResourceID(object value)
+        private string GetSharedResourceId(object value)
         {
             if (value == null)
                 return null;
@@ -200,8 +200,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             foreach (var externalReference in _externalReferences.Values)
             {
                 Xml.WriteStartElement("ExternalReference");
-                
-                Xml.WriteAttributeString("ID", externalReference.ID);
+
+                Xml.WriteAttributeString("ID", externalReference.Id);
                 Xml.WriteAttributeString("TargetType", externalReference.TargetType);
 
                 Xml.WriteValue(externalReference.FileName);
@@ -216,5 +216,5 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
         {
             Xml.WriteString(Serializer.GetFullTypeName(type));
         }
-    }        
+    }
 }

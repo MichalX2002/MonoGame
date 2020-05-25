@@ -68,7 +68,7 @@ namespace MonoGame.Framework.Vector
             L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
         }
 
-        public void FromColor(Color source)
+        public void FromRgba32(Color source)
         {
             L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B);
         }
@@ -138,5 +138,9 @@ namespace MonoGame.Framework.Vector
         public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
+
+        public static implicit operator Gray8(byte luminance) => new Gray8(luminance);
+
+        public static implicit operator byte(Gray8 value) => value.L;
     }
 }

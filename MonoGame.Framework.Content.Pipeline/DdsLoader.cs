@@ -196,7 +196,7 @@ namespace MonoGame.Framework.Content.Pipeline
                     else if (pixelFormat.dwRgbBitCount == 32)
                     {
                         rbSwap = pixelFormat.dwBBitMask == 0xFF;
-                        return SurfaceFormat.Color;
+                        return SurfaceFormat.Rgba32;
                     }
                     throw new ContentLoadException("Unsupported RGBA pixel format");
                 }
@@ -211,12 +211,12 @@ namespace MonoGame.Framework.Content.Pipeline
                     else if (pixelFormat.dwRgbBitCount == 24)
                     {
                         rbSwap = pixelFormat.dwBBitMask == 0xFF;
-                        return SurfaceFormat.Color;
+                        return SurfaceFormat.Rgba32;
                     }
                     else if (pixelFormat.dwRgbBitCount == 32)
                     {
                         rbSwap = pixelFormat.dwBBitMask == 0xFF;
-                        return SurfaceFormat.Color;
+                        return SurfaceFormat.Rgba32;
                     }
                     throw new ContentLoadException("Unsupported RGB pixel format");
                 }
@@ -232,7 +232,7 @@ namespace MonoGame.Framework.Content.Pipeline
         {
             switch (format)
             {
-                case SurfaceFormat.Color:
+                case SurfaceFormat.Rgba32:
                     return new PixelBitmapContent<Color>(width, height);
 
                 case SurfaceFormat.Bgra4444:
@@ -268,7 +268,7 @@ namespace MonoGame.Framework.Content.Pipeline
             int rows;
             switch (format)
             {
-                case SurfaceFormat.Color:
+                case SurfaceFormat.Rgba32:
                 case SurfaceFormat.Bgra4444:
                 case SurfaceFormat.Bgra5551:
                 case SurfaceFormat.Bgr565:
@@ -396,7 +396,7 @@ namespace MonoGame.Framework.Content.Pipeline
                                     ByteSwapBGRA5551(bytes);
                                     break;
 
-                                case SurfaceFormat.Color:
+                                case SurfaceFormat.Rgba32:
                                     if (header.ddspf.dwRgbBitCount == 32)
                                         ByteSwapRGBX(bytes);
                                     else if (header.ddspf.dwRgbBitCount == 24)
@@ -404,7 +404,7 @@ namespace MonoGame.Framework.Content.Pipeline
                                     break;
                             }
                         }
-                        if ((format == SurfaceFormat.Color) &&
+                        if ((format == SurfaceFormat.Rgba32) &&
                             header.ddspf.dwFlags.HasFlag(Ddpf.Rgb) && 
                             !header.ddspf.dwFlags.HasFlag(Ddpf.AlphaPixels))
                         {
@@ -532,7 +532,7 @@ namespace MonoGame.Framework.Content.Pipeline
                 for (int i = 0; i < 11; i++)
                     writer.Write((uint)0);
 
-                if (!bitmapContent.TryGetFormat(out SurfaceFormat format) || format != SurfaceFormat.Color)
+                if (!bitmapContent.TryGetFormat(out SurfaceFormat format) || format != SurfaceFormat.Rgba32)
                     throw new NotSupportedException("Unsupported bitmap content!");
 
                 header.ddspf.dwSize = 32;

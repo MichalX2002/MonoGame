@@ -534,7 +534,7 @@ namespace MonoGame.Framework.Audio
 
         #endregion
 
-        #region IDisposable Members
+        #region IDisposable
 
         /// <summary>
         /// Gets whether the object is disposed.

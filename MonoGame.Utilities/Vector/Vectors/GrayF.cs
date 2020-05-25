@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vector
@@ -14,16 +15,16 @@ namespace MonoGame.Framework.Vector
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Gray32 : IPackedPixel<Gray32, uint>
+    public struct GrayF : IPackedPixel<GrayF, uint>
     {
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Int32, VectorComponentChannel.Luminance));
+            new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Luminance));
 
         [CLSCompliant(false)]
-        public uint L;
+        public float L;
 
         [CLSCompliant(false)]
-        public Gray32(uint luminance)
+        public GrayF(float luminance)
         {
             L = luminance;
         }
@@ -31,20 +32,22 @@ namespace MonoGame.Framework.Vector
         #region IPackedVector
 
         [CLSCompliant(false)]
-        public uint PackedValue { readonly get => L; set => L = value; }
+        public uint PackedValue
+        {
+            readonly get => UnsafeR.As<GrayF, uint>(this);
+            set => Unsafe.As<GrayF, uint>(ref this) = value;
+        }
 
         public void FromScaledVector4(Vector4 scaledVector)
         {
             scaledVector.Clamp(Vector4.Zero, Vector4.One);
-            scaledVector *= uint.MaxValue;
 
-            L = (uint)(PackedVectorHelper.GetBT709Luminance(scaledVector.ToVector3()) + 0.5f);
+            L = PackedVectorHelper.GetBT709Luminance(scaledVector.ToVector3());
         }
 
         public readonly Vector4 ToScaledVector4()
         {
-            float l = L / (float)uint.MaxValue;
-            return new Vector4(l, l, l, 1);
+            return new Vector4(L, L, L, 1);
         }
 
         #endregion
@@ -53,68 +56,65 @@ namespace MonoGame.Framework.Vector
 
         public void FromGray8(Gray8 source)
         {
-            L = PackedVectorHelper.UpScale8To32Bit(source.L);
+            L = source.L / (float)byte.MaxValue;
         }
 
         public void FromGray16(Gray16 source)
         {
-            L = PackedVectorHelper.UpScale16To32Bit(source.L);
+            L = source.L / (float)ushort.MaxValue;
         }
 
         public void FromGrayAlpha16(GrayAlpha16 source)
         {
-            L = PackedVectorHelper.UpScale8To32Bit(source.L);
+            L = source.L / (float)byte.MaxValue;
         }
 
         public void FromRgb24(Rgb24 source)
         {
-            L = PackedVectorHelper.UpScale8To32Bit(
-                PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
+            L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B) / (float)byte.MaxValue;
         }
 
         public void FromRgba32(Color source)
         {
-            L = PackedVectorHelper.UpScale8To32Bit(
-                PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
+            L = PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B) / (float)byte.MaxValue;
         }
 
         public void FromRgb48(Rgb48 source)
         {
-            L = PackedVectorHelper.UpScale16To32Bit(
-                PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
+            L = PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B) / (float)ushort.MaxValue;
         }
 
         public void FromRgba64(Rgba64 source)
         {
-            L = PackedVectorHelper.UpScale16To32Bit(
-                PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B));
+            L = PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B) / (float)ushort.MaxValue;
         }
 
         public readonly Color ToColor()
         {
-            return new Color(PackedVectorHelper.DownScale32To8Bit(L), byte.MaxValue);
+            byte rgb = MathHelper.Clamp((int)(L * 255f), byte.MinValue, byte.MaxValue);
+            return new Color(rgb, byte.MaxValue);
         }
 
         #endregion
 
         #region Equals
 
-        public readonly bool Equals(Gray32 other)
+        public readonly bool Equals(GrayF other)
         {
             return this == other;
         }
 
         public override readonly bool Equals(object obj)
         {
-            return obj is Gray32 other && Equals(other);
+            return obj is GrayF other && Equals(other);
         }
 
-        public static bool operator ==(Gray32 a, Gray32 b)
+        public static bool operator ==(GrayF a, GrayF b)
         {
             return a.PackedValue == b.PackedValue;
         }
 
-        public static bool operator !=(Gray32 a, Gray32 b)
+        public static bool operator !=(GrayF a, GrayF b)
         {
             return a.PackedValue != b.PackedValue;
         }
@@ -123,16 +123,14 @@ namespace MonoGame.Framework.Vector
 
         #region Object Overrides
 
-        public override readonly string ToString() => nameof(Gray32) + $"({L})";
+        public override readonly string ToString() => nameof(GrayF) + $"({L})";
 
         public override readonly int GetHashCode() => PackedValue.GetHashCode();
 
         #endregion
 
-        [CLSCompliant(false)]
-        public static implicit operator Gray32(uint luminance) => new Gray32(luminance);
+        public static implicit operator GrayF(float luminance) => new GrayF(luminance);
 
-        [CLSCompliant(false)]
-        public static implicit operator uint(Gray32 value) => value.L;
+        public static implicit operator float(GrayF value) => value.L;
     }
 }

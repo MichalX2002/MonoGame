@@ -1,6 +1,5 @@
 ﻿using System;
 using MonoGame.Framework.Memory;
-using MonoGame.Imaging;
 
 namespace MonoGame.Framework.Graphics
 {

@@ -52,7 +52,7 @@ namespace MonoGame.Framework.Graphics
         /// Creates a new texture of the given size
         /// </summary>
         public Texture2D(GraphicsDevice graphicsDevice, int width, int height)
-            : this(graphicsDevice, width, height, false, SurfaceFormat.Color, SurfaceType.Texture, false, 1)
+            : this(graphicsDevice, width, height, false, SurfaceFormat.Rgba32, SurfaceType.Texture, false, 1)
         {
         }
 
@@ -413,12 +413,12 @@ namespace MonoGame.Framework.Graphics
         /// <param name="stream">The stream from which to read the image data.</param>
         /// <param name="graphicsDevice">The graphics device where the texture will be created.</param>
         /// <param name="config">The configuration used to load the image.</param>
-        /// <returns>The <see cref="SurfaceFormat.Color"/> texture created from the image stream.</returns>
+        /// <returns>The <see cref="SurfaceFormat.Rgba32"/> texture created from the image stream.</returns>
         [CLSCompliant(false)]
         public static Texture2D FromStream(
             ImagingConfig config, Stream stream, GraphicsDevice graphicsDevice)
         {
-            return FromStream(config, stream, graphicsDevice, mipmap: false, SurfaceFormat.Color);
+            return FromStream(config, stream, graphicsDevice, mipmap: false, SurfaceFormat.Rgba32);
         }
 
         /// <summary>
@@ -426,12 +426,12 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="stream">The stream from which to read the image data.</param>
         /// <param name="graphicsDevice">The graphics device where the texture will be created.</param>
-        /// <returns>The <see cref="SurfaceFormat.Color"/> texture created from the image stream.</returns>
+        /// <returns>The <see cref="SurfaceFormat.Rgba32"/> texture created from the image stream.</returns>
         [CLSCompliant(false)]
         public static Texture2D FromStream(Stream stream, GraphicsDevice graphicsDevice)
         {
             return FromStream(
-                ImagingConfig.Default, stream, graphicsDevice, mipmap: false, SurfaceFormat.Color);
+                ImagingConfig.Default, stream, graphicsDevice, mipmap: false, SurfaceFormat.Rgba32);
         }
 
         #endregion
