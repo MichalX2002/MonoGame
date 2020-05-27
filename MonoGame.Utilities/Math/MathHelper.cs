@@ -3,6 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 
 namespace MonoGame.Framework
 {
@@ -82,6 +85,28 @@ namespace MonoGame.Framework
                 (3.0 * b - a - 3.0 * c + d) * amountCubed));
         }
 
+        #region Clamp
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static float SseClamp(float value, float min, float max)
+        {
+            // around 2x faster (benchmarked on i7-4720HQ @ 2.6Ghz)
+            var vals = Vector128.CreateScalarUnsafe(value);
+            var mins = Vector128.CreateScalarUnsafe(min);
+            var maxs = Vector128.CreateScalarUnsafe(max);
+            return Sse.MinScalar(Sse.MaxScalar(vals, mins), maxs).ToScalar();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static double Sse2Clamp(double value, double min, double max)
+        {
+            // around 2x faster (benchmarked on i7-4720HQ @ 2.6Ghz)
+            var vals = Vector128.CreateScalarUnsafe(value);
+            var mins = Vector128.CreateScalarUnsafe(min);
+            var maxs = Vector128.CreateScalarUnsafe(max);
+            return Sse2.MinScalar(Sse2.MaxScalar(vals, mins), maxs).ToScalar();
+        }
+
         /// <summary>
         /// Restricts a value to be within a specified range.
         /// </summary>
@@ -91,14 +116,47 @@ namespace MonoGame.Framework
         /// <returns>The clamped value.</returns>
         public static float Clamp(float value, float min, float max)
         {
-            // First we check to see if we're greater than the max
-            value = (value > max) ? max : value;
+            if (Sse.IsSupported)
+            {
+                return SseClamp(value, min, max);
+            }
+            else
+            {
+                // First we check to see if we're greater than the max
+                value = (value > max) ? max : value;
 
-            // Then we check to see if we're less than the min.
-            value = (value < min) ? min : value;
+                // Then we check to see if we're less than the min.
+                value = (value < min) ? min : value;
 
-            // There's no check to see if min > max.
-            return value;
+                // There's no check to see if min > max.
+                return value;
+            }
+        }
+
+        /// <summary>
+        /// Restricts a value to be within a specified range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The minimum value. If <c>value</c> is less than <c>min</c>, <c>min</c> will be returned.</param>
+        /// <param name="max">The maximum value. If <c>value</c> is greater than <c>max</c>, <c>max</c> will be returned.</param>
+        /// <returns>The clamped value.</returns>
+        public static double Clamp(double value, double min, double max)
+        {
+            if (Sse2.IsSupported)
+            {
+                return Sse2Clamp(value, min, max);
+            }
+            else
+            {
+                // First we check to see if we're greater than the max
+                value = (value > max) ? max : value;
+
+                // Then we check to see if we're less than the min.
+                value = (value < min) ? min : value;
+
+                // There's no check to see if min > max.
+                return value;
+            }
         }
 
         /// <summary>
@@ -110,9 +168,16 @@ namespace MonoGame.Framework
         /// <returns>The clamped value.</returns>
         public static int Clamp(int value, int min, int max)
         {
-            value = (value > max) ? max : value;
-            value = (value < min) ? min : value;
-            return value;
+            if (Sse2.IsSupported)
+            {   
+                return (int)Sse2Clamp(value, min, max);
+            }
+            else
+            {
+                value = (value > max) ? max : value;
+                value = (value < min) ? min : value;
+                return value;
+            }
         }
 
         /// <summary>
@@ -124,10 +189,84 @@ namespace MonoGame.Framework
         /// <returns>The clamped value.</returns>
         public static byte Clamp(int value, byte min, byte max)
         {
-            value = (value > max) ? max : value;
-            value = (value < min) ? min : value;
-            return (byte)value;
+            if (Sse.IsSupported)
+            {
+                return (byte)SseClamp(value, min, max);
+            }
+            else
+            {
+                value = (value > max) ? max : value;
+                value = (value < min) ? min : value;
+                return (byte)value;
+            }
         }
+
+        /// <summary>
+        /// Restricts a value to be within a specified range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The minimum value. If <c>value</c> is less than <c>min</c>, <c>min</c> will be returned.</param>
+        /// <param name="max">The maximum value. If <c>value</c> is greater than <c>max</c>, <c>max</c> will be returned.</param>
+        /// <returns>The clamped value.</returns>
+        public static byte Clamp(float value, byte min, byte max)
+        {
+            if (Sse.IsSupported)
+            {
+                return (byte)SseClamp(value, min, max);
+            }
+            else
+            {
+                value = (value > max) ? max : value;
+                value = (value < min) ? min : value;
+                return (byte)value;
+            }
+        }
+
+        /// <summary>
+        /// Restricts a value to be within a specified range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The minimum value. If <c>value</c> is less than <c>min</c>, <c>min</c> will be returned.</param>
+        /// <param name="max">The maximum value. If <c>value</c> is greater than <c>max</c>, <c>max</c> will be returned.</param>
+        /// <returns>The clamped value.</returns>
+        [CLSCompliant(false)]
+        public static ushort Clamp(float value, ushort min, ushort max)
+        {
+            if (Sse.IsSupported)
+            {
+                return (ushort)SseClamp(value, min, max);
+            }
+            else
+            {
+                value = (value > max) ? max : value;
+                value = (value < min) ? min : value;
+                return (ushort)value;
+            }
+        }
+
+        /// <summary>
+        /// Restricts a value to be within a specified range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The minimum value. If <c>value</c> is less than <c>min</c>, <c>min</c> will be returned.</param>
+        /// <param name="max">The maximum value. If <c>value</c> is greater than <c>max</c>, <c>max</c> will be returned.</param>
+        /// <returns>The clamped value.</returns>
+        [CLSCompliant(false)]
+        public static uint Clamp(double value, uint min, uint max)
+        {
+            if (Sse2.IsSupported)
+            {
+                return (uint)Sse2Clamp(value, min, max);
+            }
+            else
+            {
+                value = (value > max) ? max : value;
+                value = (value < min) ? min : value;
+                return (uint)value;
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// Calculates the absolute value of the difference of two values.
@@ -179,7 +318,6 @@ namespace MonoGame.Framework
             }
         }
 
-
         /// <summary>
         /// Linearly interpolates between two values.
         /// </summary>
@@ -194,9 +332,8 @@ namespace MonoGame.Framework
         /// </remarks>
         public static float Lerp(float a, float b, float amount)
         {
-            return MathF.FusedMultiplyAdd((b - a), amount, a);
+            return MathF.FusedMultiplyAdd(b - a, amount, a);
         }
-
 
         /// <summary>
         /// Linearly interpolates between two values.
@@ -212,11 +349,13 @@ namespace MonoGame.Framework
         /// Passing amount a value of 0 will cause value1 to be returned, a value of 1 will cause value2 to be returned.
         /// This method does not have the floating-point precision issue that <see cref="Lerp"/> has.
         /// i.e. If there is a big gap between value1 and value2 in magnitude (e.g. value1=10000000000000000, value2=1),
-        /// right at the edge of the interpolation range (amount=1), <see cref="Lerp"/> will return 0 (whereas it should return 1).
+        /// right at the edge of the interpolation range (amount=1),
+        /// <see cref="Lerp"/> will return 0 (whereas it should return 1).
         /// This also holds for value1=10^17, value2=10; value1=10^18,value2=10^2... so on.
         /// For an in depth explanation of the issue, see below references:
-        /// Relevant Wikipedia Article: https://en.wikipedia.org/wiki/Linear_interpolation#Programming_language_support
-        /// Relevant StackOverflow Answer: http://stackoverflow.com/questions/4353525/floating-point-linear-interpolation#answer-23716956
+        /// Relevant Wikipedia Article and StackOverflow Answer: 
+        /// https://en.wikipedia.org/wiki/Linear_interpolation#Programming_language_support
+        /// http://stackoverflow.com/questions/4353525/floating-point-linear-interpolation#answer-23716956
         /// </remarks>
         public static float LerpPrecise(float a, float b, float amount)
         {
@@ -292,7 +431,9 @@ namespace MonoGame.Framework
         /// Determines if value is a power of two.
         /// </summary>
         /// <param name="value">A value.</param>
-        /// <returns><see langword="true"/> if <c>value</c> is a power of two; otherwise <see langword="false"/>.</returns>
+        /// <returns>
+        /// <see langword="true"/> if <c>value</c> is a power of two; otherwise <see langword="false"/>.
+        /// </returns>
         public static bool IsPowerOfTwo(int value)
         {
             return (value > 0) && ((value & (value - 1)) == 0);
