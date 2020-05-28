@@ -1,4 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace MonoGame.Framework.Vector
 {
@@ -8,16 +10,23 @@ namespace MonoGame.Framework.Vector
         {
             return type switch
             {
-                VectorComponentType.Int8 => sizeof(byte),
+                VectorComponentType.Int8 => sizeof(sbyte),
+                VectorComponentType.UInt8 => sizeof(byte),
+
                 VectorComponentType.Int16 => sizeof(short),
+                VectorComponentType.UInt16 => sizeof(ushort),
+
                 VectorComponentType.Int32 => sizeof(int),
+                VectorComponentType.UInt32 => sizeof(uint),
+
                 VectorComponentType.Int64 => sizeof(long),
+                VectorComponentType.UInt64 => sizeof(ulong),
 
                 VectorComponentType.Float16 => Unsafe.SizeOf<HalfSingle>(),
                 VectorComponentType.Float32 => sizeof(float),
                 VectorComponentType.Float64 => sizeof(double),
 
-                _ => 0,
+                _ => throw new InvalidOperationException(),
             };
         }
     }
