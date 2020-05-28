@@ -3,18 +3,120 @@ using System.Runtime.CompilerServices;
 
 namespace MonoGame.Framework.Vector
 {
-    public static class PackedVectorHelper
+    public static class VectorHelper
     {
-        #region Component scaling
-
         // TODO: optimize some of these
+
+        #region "Error catchers"
+
+        private const string ErrorMessage = "Did you mean to use the value directly?";
+
+        [CLSCompliant(false)]
+        [Obsolete(ErrorMessage)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte ToUInt8(byte value)
+        {
+            return value;
+        }
+
+        [CLSCompliant(false)]
+        [Obsolete(ErrorMessage)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ushort ToUInt16(ushort value)
+        {
+            return value;
+        }
+
+        [CLSCompliant(false)]
+        [Obsolete(ErrorMessage)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint ToUInt32(uint value)
+        {
+            return value;
+        }
+
+        [Obsolete(ErrorMessage)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float ToFloat32(float value)
+        {
+            return value;
+        }
+
+        [Obsolete(ErrorMessage)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double ToFloat64(double value)
+        {
+            return value;
+        }
+
+        #endregion
+
+        #region Float scaling
+
+        [CLSCompliant(false)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float ToFloat32(byte component)
+        {
+            return component / (float)byte.MaxValue;
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float ToFloat32(ushort component)
+        {
+            return component / (float)ushort.MaxValue;
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double ToFloat64(uint component)
+        {
+            return component / (double)uint.MaxValue;
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float ToFloat32(uint component)
+        {
+            return (float)ToFloat64(component);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte ToUInt8(float component)
+        {
+            component *= byte.MaxValue;
+            component += 0.5f;
+            return MathHelper.ClampTruncate(component, byte.MinValue, byte.MaxValue);
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ushort ToUInt16(float component)
+        {
+            component *= ushort.MaxValue;
+            component += 0.5f;
+            return MathHelper.ClampTruncate(component, ushort.MinValue, ushort.MaxValue);
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint ToUInt32(double component)
+        {
+            component *= uint.MaxValue;
+            component += 0.5f;
+            return MathHelper.ClampTruncate(component, uint.MinValue, uint.MaxValue);
+        }
+
+        #endregion
+
+        #region Integer scaling
 
         /// <summary>
         /// Scales a value from a 16-bit <see cref="ushort"/> to it's 8-bit <see cref="byte"/> equivalent.
         /// </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte DownScale16To8Bit(ushort component)
+        public static byte ToUInt8(ushort component)
         {
             return (byte)(((component * 255) + 32895) >> 16);
         }
@@ -24,7 +126,7 @@ namespace MonoGame.Framework.Vector
         /// </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte DownScale32To8Bit(uint component)
+        public static byte ToUInt8(uint component)
         {
             return (byte)(component / (double)uint.MaxValue * byte.MaxValue);
         }
@@ -34,7 +136,7 @@ namespace MonoGame.Framework.Vector
         /// </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ushort UpScale8To16Bit(byte component)
+        public static ushort ToUInt16(byte component)
         {
             return (ushort)(component * 257);
         }
@@ -44,9 +146,9 @@ namespace MonoGame.Framework.Vector
         /// </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint UpScale8To32Bit(byte component)
+        public static uint ToUInt32(byte component)
         {
-            return (uint)(component / (double)byte.MaxValue * uint.MaxValue);
+            return (uint)(component / (float)byte.MaxValue * uint.MaxValue);
         }
 
         /// <summary>
@@ -54,80 +156,9 @@ namespace MonoGame.Framework.Vector
         /// </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint UpScale16To32Bit(ushort component)
+        public static uint ToUInt32(ushort component)
         {
-            return (uint)(component / (double)ushort.MaxValue * uint.MaxValue);
-        }
-
-        #endregion
-
-        #region Luminance
-
-        /// <summary>
-        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float GetBT709Luminance(Vector3 rgb)
-        {
-            rgb *= new Vector3(.2126f, .7152f, .0722f);
-            return rgb.X + rgb.Y + rgb.Z;
-        }
-
-        /// <summary>
-        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float GetBT709Luminance(float r, float g, float b)
-        {
-            return GetBT709Luminance(new Vector3(r, g, b));
-        }
-
-        /// <summary>
-        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte Get8BitBT709Luminance(byte r, byte g, byte b)
-        {
-            return (byte)(GetBT709Luminance(r, g, b) + 0.5f);
-        }
-
-        /// <summary>
-        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte Get8BitBT709Luminance(Rgb24 rgb)
-        {
-            return Get8BitBT709Luminance(rgb.R, rgb.G, rgb.B);
-        }
-
-        /// <summary>
-        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GrayAlpha16 Get8BitBT709LuminanceAlpha(Color rgba)
-        {
-            byte l = Get8BitBT709Luminance(rgba.Rgb);
-            return new GrayAlpha16(l, rgba.A);
-        }
-
-        /// <summary>
-        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
-        /// </summary>
-        [CLSCompliant(false)]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ushort Get16BitBT709Luminance(ushort r, ushort g, ushort b)
-        {
-            return (ushort)(GetBT709Luminance(r, g, b) + 0.5f);
-        }
-
-        /// <summary>
-        /// Gets the luminance from the RGB components using the formula specified by ITU-R Recommendation BT.709.
-        /// </summary>
-        [CLSCompliant(false)]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ushort Get16BitBT709Luminance(Rgb48 rgb)
-        {
-            return Get16BitBT709Luminance(rgb.R, rgb.G, rgb.B);
+            return (uint)(component / (float)ushort.MaxValue * uint.MaxValue);
         }
 
         #endregion
