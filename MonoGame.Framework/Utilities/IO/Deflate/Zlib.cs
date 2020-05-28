@@ -326,14 +326,14 @@ namespace MonoGame.Framework.Utilities.Deflate
         public static int ReadInput(System.IO.TextReader sourceTextReader, byte[] target, int start, int count)
         {
             // Returns 0 bytes if not enough space in target
-            if (target.Length == 0) 
+            if (target.Length == 0)
                 return 0;
 
             var charArray = new char[target.Length];
             int bytesRead = sourceTextReader.Read(charArray, start, count);
 
             // Returns -1 if EOF
-            if (bytesRead == 0) 
+            if (bytesRead == 0)
                 return -1;
 
             for (int index = start; index < start + bytesRead; index++)
@@ -443,15 +443,22 @@ namespace MonoGame.Framework.Utilities.Deflate
             this.elems = elems;
             this.maxLength = maxLength;
         }
+
         static StaticTree()
         {
-            Literals = new StaticTree(lengthAndLiteralsTreeCodes, Tree.ExtraLengthBits, InternalConstants.LITERALS + 1, InternalConstants.L_CODES, InternalConstants.MAX_BITS);
-            Distances = new StaticTree(distTreeCodes, Tree.ExtraDistanceBits, 0, InternalConstants.D_CODES, InternalConstants.MAX_BITS);
-            BitLengths = new StaticTree(null, Tree.extra_blbits, 0, InternalConstants.BL_CODES, InternalConstants.MAX_BL_BITS);
+            Literals = new StaticTree(
+                lengthAndLiteralsTreeCodes, Tree.ExtraLengthBits, InternalConstants.LITERALS + 1,
+                InternalConstants.L_CODES, InternalConstants.MAX_BITS);
+
+            Distances = new StaticTree(
+                distTreeCodes, Tree.ExtraDistanceBits, 0,
+                InternalConstants.D_CODES, InternalConstants.MAX_BITS);
+
+            BitLengths = new StaticTree(
+                null, Tree.extra_blbits, 0,
+                InternalConstants.BL_CODES, InternalConstants.MAX_BL_BITS);
         }
     }
-
-
 
     /// <summary>
     /// Computes an Adler-32 checksum.
@@ -468,12 +475,9 @@ namespace MonoGame.Framework.Utilities.Deflate
     {
         // largest prime smaller than 65536
         private static readonly uint BASE = 65521;
+
         // NMAX is the largest n such that 255n(n+1)/2 + (n+1)(BASE-1) <= 2^32-1
         private static readonly int NMAX = 5552;
-
-
-#pragma warning disable 3001
-#pragma warning disable 3002
 
         /// <summary>
         ///   Calculates the Adler32 checksum.
@@ -490,6 +494,7 @@ namespace MonoGame.Framework.Utilities.Deflate
         ///    adler = Adler.Adler32(adler, buffer, index, length);
         ///  </code>
         /// </example>
+        [CLSCompliant(false)]
         public static uint Adler32(uint adler, byte[] buf, int index, int len)
         {
             if (buf == null)
@@ -537,8 +542,6 @@ namespace MonoGame.Framework.Utilities.Deflate
             }
             return s2 << 16 | s1;
         }
-#pragma warning restore 3001
-#pragma warning restore 3002
 
     }
 

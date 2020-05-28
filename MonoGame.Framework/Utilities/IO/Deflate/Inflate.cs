@@ -95,9 +95,8 @@ namespace MonoGame.Framework.Utilities.Deflate
         internal int table;                               // table lengths (14 bits)
         internal int index;                               // index into blens (or border)
         internal int[] blens;                             // bit lengths of codes
-        internal int[] bb = new int[1];                   // bit length tree depth
-        internal int[] tb = new int[1];                   // bit length decoding tree
-
+        internal readonly int[] bbtb = new int[2];          // [0]: bit length tree depth, [1]: bit length decoding tree
+        
         internal InflateCodes codes = new InflateCodes(); // if CODES, current state
 
         internal int last;                                // true if this block is the last block
@@ -162,6 +161,8 @@ namespace MonoGame.Framework.Utilities.Deflate
             q = writeAt;
             m = q < readAt ? readAt - q - 1 : end - q;
 
+            ref int bb = ref bbtb[0];
+            ref int tb = ref bbtb[1];
 
             // process input based on current state
             while (true)
@@ -203,12 +204,10 @@ namespace MonoGame.Framework.Utilities.Deflate
                                 break;
 
                             case 1:  // fixed
-                                int[] bl = new int[1];
-                                int[] bd = new int[1];
-                                int[][] tl = new int[1][];
-                                int[][] td = new int[1][];
-                                InfTree.inflate_trees_fixed(bl, bd, tl, td, _codec);
-                                codes.Init(bl[0], bd[0], tl[0], 0, td[0], 0);
+                                InfTree.inflate_trees_fixed(
+                                    out int bl, out int bd, out int[] tl, out int[] td, _codec);
+
+                                codes.Init(bl, bd, tl, 0, td, 0);
                                 b >>= 3; k -= 3;
                                 mode = InflateBlockMode.CODES;
                                 break;
@@ -249,7 +248,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                                 writeAt = q;
                                 return Flush(r);
                             }
-                            
+
                             n--;
                             b |= (_codec.InputBuffer[p++] & 0xff) << k;
                             k += 8;
@@ -370,10 +369,6 @@ namespace MonoGame.Framework.Utilities.Deflate
                         else
                         {
                             Array.Clear(blens, 0, t);
-                            // for (int i = 0; i < t; i++)
-                            // {
-                            //     blens[i] = 0;
-                            // }
                         }
 
                         b >>= 14;
@@ -418,8 +413,8 @@ namespace MonoGame.Framework.Utilities.Deflate
                             blens[border[index++]] = 0;
                         }
 
-                        bb[0] = 7;
-                        t = inftree.inflate_trees_bits(blens, bb, tb, hufts, _codec);
+                        bb = 7;
+                        t = inftree.inflate_trees_bits(blens, ref bb, ref tb, hufts, _codec);
                         if (t != ZlibConstants.Z_OK)
                         {
                             r = t;
@@ -452,7 +447,7 @@ namespace MonoGame.Framework.Utilities.Deflate
 
                             int i, j, c;
 
-                            t = bb[0];
+                            t = bbtb[0];
 
                             while (k < t)
                             {
@@ -475,8 +470,8 @@ namespace MonoGame.Framework.Utilities.Deflate
                                 k += 8;
                             }
 
-                            t = hufts[(tb[0] + (b & InternalInflateConstants.InflateMask[t])) * 3 + 1];
-                            c = hufts[(tb[0] + (b & InternalInflateConstants.InflateMask[t])) * 3 + 2];
+                            t = hufts[(tb + (b & InflateConstants.InflateMask[t])) * 3 + 1];
+                            c = hufts[(tb + (b & InflateConstants.InflateMask[t])) * 3 + 2];
 
                             if (c < 16)
                             {
@@ -512,7 +507,7 @@ namespace MonoGame.Framework.Utilities.Deflate
 
                                 b >>= t; k -= t;
 
-                                j += b & InternalInflateConstants.InflateMask[i];
+                                j += b & InflateConstants.InflateMask[i];
 
                                 b >>= i; k -= i;
 
@@ -543,15 +538,17 @@ namespace MonoGame.Framework.Utilities.Deflate
                             }
                         }
 
-                        tb[0] = -1;
+                        tb = -1;
                         {
-                            int[] bl = new int[] { 9 };  // must be <= 9 for lookahead assumptions
-                            int[] bd = new int[] { 6 }; // must be <= 9 for lookahead assumptions
-                            int[] tl = new int[1];
-                            int[] td = new int[1];
+                            int bl = 9;  // must be <= 9 for lookahead assumptions
+                            int bd = 6; // must be <= 9 for lookahead assumptions
+                            int tl = 0;
+                            int td = 0;
 
                             t = table;
-                            t = inftree.inflate_trees_dynamic(257 + (t & 0x1f), 1 + (t >> 5 & 0x1f), blens, bl, bd, tl, td, hufts, _codec);
+                            t = inftree.inflate_trees_dynamic(
+                                257 + (t & 0x1f), 1 + (t >> 5 & 0x1f), blens,
+                                ref bl, ref bd, ref tl, ref td, hufts, _codec);
 
                             if (t != ZlibConstants.Z_OK)
                             {
@@ -569,7 +566,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                                 writeAt = q;
                                 return Flush(r);
                             }
-                            codes.Init(bl[0], bd[0], hufts, tl[0], hufts, td[0]);
+                            codes.Init(bl, bd, hufts, tl, hufts, td);
                         }
                         mode = InflateBlockMode.CODES;
                         goto case InflateBlockMode.CODES;
@@ -737,7 +734,7 @@ namespace MonoGame.Framework.Utilities.Deflate
     }
 
 
-    internal static class InternalInflateConstants
+    internal static class InflateConstants
     {
         // And'ing with mask[n] masks the lower n bits
         internal static readonly int[] InflateMask = new int[] {
@@ -880,7 +877,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                             k += 8;
                         }
 
-                        tindex = (tree_index + (b & InternalInflateConstants.InflateMask[j])) * 3;
+                        tindex = (tree_index + (b & InflateConstants.InflateMask[j])) * 3;
 
                         b >>= tree[tindex + 1];
                         k -= tree[tindex + 1];
@@ -945,7 +942,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                             k += 8;
                         }
 
-                        len += b & InternalInflateConstants.InflateMask[j];
+                        len += b & InflateConstants.InflateMask[j];
 
                         b >>= j;
                         k -= j;
@@ -974,7 +971,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                             k += 8;
                         }
 
-                        tindex = (tree_index + (b & InternalInflateConstants.InflateMask[j])) * 3;
+                        tindex = (tree_index + (b & InflateConstants.InflateMask[j])) * 3;
 
                         b >>= tree[tindex + 1];
                         k -= tree[tindex + 1];
@@ -1023,7 +1020,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                             k += 8;
                         }
 
-                        dist += b & InternalInflateConstants.InflateMask[j];
+                        dist += b & InflateConstants.InflateMask[j];
 
                         b >>= j;
                         k -= j;
@@ -1190,8 +1187,8 @@ namespace MonoGame.Framework.Utilities.Deflate
             q = s.writeAt; m = q < s.readAt ? s.readAt - q - 1 : s.end - q;
 
             // initialize masks
-            ml = InternalInflateConstants.InflateMask[bl];
-            md = InternalInflateConstants.InflateMask[bd];
+            ml = InflateConstants.InflateMask[bl];
+            md = InflateConstants.InflateMask[bd];
 
             // do until not enough input or output space for fast loop
             do
@@ -1225,7 +1222,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                     if ((e & 16) != 0)
                     {
                         e &= 15;
-                        c = tp[tp_index_t_3 + 2] + (b & InternalInflateConstants.InflateMask[e]);
+                        c = tp[tp_index_t_3 + 2] + (b & InflateConstants.InflateMask[e]);
 
                         b >>= e; k -= e;
 
@@ -1259,7 +1256,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                                     b |= (z.InputBuffer[p++] & 0xff) << k; k += 8;
                                 }
 
-                                d = tp[tp_index_t_3 + 2] + (b & InternalInflateConstants.InflateMask[e]);
+                                d = tp[tp_index_t_3 + 2] + (b & InflateConstants.InflateMask[e]);
 
                                 b >>= e; k -= e;
 
@@ -1336,7 +1333,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                             else if ((e & 64) == 0)
                             {
                                 t += tp[tp_index_t_3 + 2];
-                                t += b & InternalInflateConstants.InflateMask[e];
+                                t += b & InflateConstants.InflateMask[e];
                                 tp_index_t_3 = (tp_index + t) * 3;
                                 e = tp[tp_index_t_3];
                             }
@@ -1360,7 +1357,7 @@ namespace MonoGame.Framework.Utilities.Deflate
                     if ((e & 64) == 0)
                     {
                         t += tp[tp_index_t_3 + 2];
-                        t += b & InternalInflateConstants.InflateMask[e];
+                        t += b & InflateConstants.InflateMask[e];
                         tp_index_t_3 = (tp_index + t) * 3;
                         if ((e = tp[tp_index_t_3]) == 0)
                         {
