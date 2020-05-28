@@ -39,7 +39,7 @@ namespace MonoGame.Framework.Graphics
 
         public override readonly int GetHashCode()
         {
-            return Position.GetHashCode();
+            return HashCode.Combine(Position);
         }
 
         public override readonly string ToString()

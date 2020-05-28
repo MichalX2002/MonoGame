@@ -54,7 +54,7 @@ namespace MonoGame.Testing
                 _lastRow = rect?.Y ?? 0;
             }
 
-            Task.Run(async () =>
+            Task.Run(() =>
             {
                 try
                 {

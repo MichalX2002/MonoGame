@@ -50,7 +50,7 @@ namespace MonoGame.Imaging.Tests
                 img.Save("4bit.png");
         }
 
-        static unsafe void bröh(MemoryStream endmee)
+        static unsafe void OriginalLoad(MemoryStream endmee)
         {
             fixed (byte* omg = endmee.GetBuffer())
             {
@@ -100,7 +100,7 @@ namespace MonoGame.Imaging.Tests
                 //endmee.Position = 0;
                 //endmee.CopyTo(original);
                 //
-                //bröh(endmee);
+                //OriginalLoad(endmee);
                 //
                 //endmee.Position = 0;
                 //original.Position = 0;
@@ -193,7 +193,7 @@ namespace MonoGame.Imaging.Tests
             }
         }
 
-        static Image<Color> CreateImegee(int size)
+        static Image<Color> CreateColorfulImage(int size)
         {
             var imagee = new Image<Color>(new Size(size));
             var pixels = imagee.GetPixelSpan();
@@ -213,7 +213,7 @@ namespace MonoGame.Imaging.Tests
         static void Main(string[] args)
         {
             {
-                var imagee = CreateImegee(256);
+                var imagee = CreateColorfulImage(256);
 
                 Directory.CreateDirectory("savetest");
 
