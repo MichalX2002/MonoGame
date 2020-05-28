@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace MonoGame.Framework.Vector
 {
-    public static class VectorHelper
+    public static class ScalingHelper
     {
         // TODO: optimize some of these
 
