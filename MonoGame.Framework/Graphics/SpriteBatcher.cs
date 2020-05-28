@@ -30,6 +30,8 @@ namespace MonoGame.Framework.Graphics
 
         private int _itemCount;
         private SpriteBatchItem[] _batchItems;
+
+        // TODO: allocate on Pinned Object Heap instead
         private UnmanagedMemory<VertexPositionColorTexture> _vertexBuffer;
 
         /// <summary>
@@ -119,7 +121,7 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="sortMode">The type of depth sorting desired for the rendering.</param>
         /// <param name="effect">The custom effect to apply to the drawn geometry</param>
-        public void DrawBatch(SpriteSortMode sortMode, Effect effect)
+        public unsafe void DrawBatch(SpriteSortMode sortMode, Effect effect)
         {
             if (effect != null && effect.IsDisposed)
                 throw new ObjectDisposedException(nameof(effect));
@@ -139,45 +141,52 @@ namespace MonoGame.Framework.Graphics
             }
 
             // iterate through the batches, doing clamped sets of vertices at the time
-            var vertexSpan = _vertexBuffer.Span;
+            var dstVertexSpan = _vertexBuffer.Span;
             var indexSpan = _indexBuffer.Span;
+            int itemIndex = 0;
             int itemsLeft = _itemCount;
-            while (itemsLeft > 0)
+
+            fixed (VertexPositionColorTexture* dstVertexPtr = dstVertexSpan)
             {
-                int itemsToProcess = itemsLeft;
-                if (itemsToProcess > MaxBatchSize)
-                    itemsToProcess = MaxBatchSize;
-
-                int vertexCount = 0;
-                Texture2D tex = null;
-
-                // draw the batches
-                for (int i = 0; i < itemsToProcess; i++, vertexCount += 4)
+                while (itemsLeft > 0)
                 {
-                    int offset = _itemCount - itemsLeft;
-                    var item = _batchItems[offset];
+                    int itemsToProcess = itemsLeft;
+                    if (itemsToProcess > MaxBatchSize)
+                        itemsToProcess = MaxBatchSize;
 
-                    // if the texture changed, we need to flush and bind the new texture
-                    if (!ReferenceEquals(item.Texture, tex))
+                    int count = 0;
+                    Texture2D tex = null;
+
+                    // TODO: create a path with sort-by-texture that does less ref-equality checks
+                    // (having such a path allows copying multiple items at once)
+
+                    // draw the batches
+                    for (int i = 0; i < itemsToProcess; i++, count += 4)
                     {
-                        FlushVertexArray(vertexSpan.Slice(0, vertexCount), indexSpan, effect, tex);
-                        vertexCount = 0;
+                        var item = _batchItems[itemIndex++];
 
-                        tex = item.Texture;
-                        _device.Textures[0] = tex;
+                        // if the texture changed, we need to flush and bind the new texture
+                        if (!ReferenceEquals(item.Texture, tex))
+                        {
+                            FlushVertexArray(dstVertexSpan.Slice(0, count), indexSpan, effect, tex);
+                            count = 0;
+
+                            tex = item.Texture;
+                            _device.Textures[0] = tex;
+                        }
+                        item.Texture = null; // release texture from item
+
+                        dstVertexPtr[count + 0] = item.VertexTL;
+                        dstVertexPtr[count + 1] = item.VertexTR;
+                        dstVertexPtr[count + 2] = item.VertexBL;
+                        dstVertexPtr[count + 3] = item.VertexBR;
                     }
-                    item.Texture = null; // release texture from item
 
-                    vertexSpan[vertexCount + 0] = item.VertexTL;
-                    vertexSpan[vertexCount + 1] = item.VertexTR;
-                    vertexSpan[vertexCount + 2] = item.VertexBL;
-                    vertexSpan[vertexCount + 3] = item.VertexBR;
+                    // flush the remaining data
+                    FlushVertexArray(dstVertexSpan.Slice(0, count), indexSpan, effect, tex);
 
-                    itemsLeft--; // update our count to continue culling down large batches
+                    itemsLeft -= itemsToProcess;
                 }
-
-                // flush the remaining data
-                FlushVertexArray(vertexSpan.Slice(0, vertexCount), indexSpan, effect, tex);
             }
 
             unchecked
