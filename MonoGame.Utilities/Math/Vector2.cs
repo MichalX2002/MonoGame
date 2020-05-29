@@ -107,7 +107,15 @@ namespace MonoGame.Framework
         /// </summary>
         public readonly Vector3 ToVector3()
         {
-            return new Vector3(X, Y, 0);
+            return new Vector3(this, 0);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="Vector4"/> representation of this <see cref="Vector2"/>.
+        /// </summary>
+        public readonly Vector4 ToVector4()
+        {
+            return new Vector4(this, 0, 1);
         }
 
         #endregion

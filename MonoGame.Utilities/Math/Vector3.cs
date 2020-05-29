@@ -842,6 +842,14 @@ namespace MonoGame.Framework
             return UnsafeR.As<Vector3, Vector2>(this);
         }
 
+        /// <summary>
+        /// Gets the <see cref="Vector4"/> representation of this <see cref="Vector3"/>.
+        /// </summary>
+        public readonly Vector4 ToVector4()
+        {
+            return new Vector4(this, 1);
+        }
+
         #endregion
 
         #region Transform
