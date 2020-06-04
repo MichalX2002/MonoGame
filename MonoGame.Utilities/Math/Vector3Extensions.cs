@@ -18,6 +18,12 @@ namespace MonoGame.Framework
             vector = Vector3.Clamp(vector, new Vector3(min), new Vector3(max));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Normalize(ref this Vector3 vector)
+        {
+            vector = Vector3.Normalize(vector);
+        }
+
         public static void Round(ref this Vector3 vector)
         {
             vector.X = MathF.Round(vector.X);

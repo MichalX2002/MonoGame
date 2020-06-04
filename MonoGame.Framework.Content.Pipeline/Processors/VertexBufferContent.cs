@@ -2,13 +2,12 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using MonoGame.Framework.Memory;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework.Content.Pipeline.Processors
 {
@@ -93,6 +92,8 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
         /// <exception cref="NotSupportedException">The specified data type cannot be packed into a vertex buffer.</exception>
         public void Write(int offset, int stride, Type dataType, IEnumerable data)
         {
+            // TODO: optimize
+
             var size = SizeOf(dataType);
             var bytes = new byte[size];
             var ptr = Marshal.AllocHGlobal(size);

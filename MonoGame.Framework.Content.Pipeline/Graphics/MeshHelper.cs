@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
@@ -531,17 +532,18 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <remarks>The node transforms themselves are unaffected.</remarks>
         /// <param name="scene">The root node of the scene to transform.</param>
         /// <param name="transform">The transform matrix to apply to the scene.</param>
-        public static void TransformScene(NodeContent scene, Matrix transform)
+        public static void TransformScene(NodeContent scene, in Matrix4x4 transform)
         {
             if (scene == null)
                 throw new ArgumentNullException(nameof(scene));
 
             // If the transformation is an identity matrix, this is a no-op and
             // we can save ourselves a bunch of work in the first place.
-            if (transform == Matrix.Identity)
+            if (transform == Matrix4x4.Identity)
                 return;
 
-            var inverseTransform = Matrix.Invert(transform);
+            if (Matrix4x4.Invert(transform, out var inverseTransform))
+                throw new ArgumentException("Failed to invert matrix.", nameof(transform));
 
             var work = new Stack<NodeContent>();
             work.Push(scene);
@@ -576,7 +578,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <see langword="true"/> if <paramref name="xform"/> is left-handed; otherwise,
         /// <see langword="false"/> if <paramref name="xform"/> is right-handed.
         /// </returns>
-        internal static bool IsLeftHanded(in Matrix xform)
+        internal static bool IsLeftHanded(in Matrix4x4 xform)
         {
             // Check sign of determinant of upper-left 3x3 matrix:
             //   positive determinant ... right-handed
@@ -586,7 +588,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             // (see http://en.wikipedia.org/wiki/Triple_product) to calculate the
             // determinant.
 
-            float d = Vector3.Dot(xform.Right, Vector3.Cross(xform.Forward, xform.Up));
+            float d = Vector3.Dot(xform.Right(), Vector3.Cross(xform.Forward(), xform.Up()));
             return d < 0.0f;
         }
 
@@ -615,6 +617,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             public int ComputeHash()
             {
                 var hash = PositionIndex;
+
                 foreach (var channel in ChannelData)
                     hash ^= channel.GetHashCode();
 
