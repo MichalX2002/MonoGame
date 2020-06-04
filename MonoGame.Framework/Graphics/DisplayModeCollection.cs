@@ -2,54 +2,56 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MonoGame.Framework.Graphics
 {
-    public class DisplayModeCollection : IEnumerable<DisplayMode>
+    public class DisplayModeCollection : IReadOnlyCollection<DisplayMode>
     {
-        private readonly List<DisplayMode> _modes;
+        private List<DisplayMode> _modes;
+
+        public int Count => _modes.Count;
 
         public IEnumerable<DisplayMode> this[SurfaceFormat format]
         {
-            get 
-            {
-                var list = new List<DisplayMode>();
-                foreach (var mode in _modes)
-                {
-                    if (mode.Format == format)
-                        list.Add(mode);
-                }
-                return list;
-            }
+            get => _modes.Where(m => m.Format == format);
         }
 
-        public IEnumerator<DisplayMode> GetEnumerator()
-        {
-            return _modes.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _modes.GetEnumerator();
-        }
-        
-        internal DisplayModeCollection(List<DisplayMode> modes) 
+        public DisplayModeCollection(IEnumerable<DisplayMode> modes)
         {
             // Sort the modes in a consistent way that happens
             // to match XNA behavior on some graphics devices.
 
-            modes.Sort(delegate(DisplayMode a, DisplayMode b)
+            if (modes == null)
+                throw new ArgumentNullException(nameof(modes));
+
+            _modes = new List<DisplayMode>(modes);
+            _modes.Sort(delegate (DisplayMode a, DisplayMode b)
             {
-                if (a == b) 
+                if (a == b)
                     return 0;
-                if (a.Format <= b.Format && a.Width <= b.Width && a.Height <= b.Height) 
+                if (a.Format <= b.Format && a.Width <= b.Width && a.Height <= b.Height)
                     return -1;
                 return 1;
             });
+        }
 
-            _modes = modes;
+        public List<DisplayMode>.Enumerator GetEnumerator()
+        {
+            return _modes.GetEnumerator();
+        }
+
+        IEnumerator<DisplayMode> IEnumerable<DisplayMode>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

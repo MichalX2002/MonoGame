@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using MonoGame.Framework.Content.Pipeline.Builder;
 using MonoGame.Framework.Content.Pipeline.Utilities.LZ4;
 using MonoGame.Framework.Graphics;
@@ -427,7 +428,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         /// Writes a Matrix value.
         /// </summary>
         /// <param name="value">Value to write.</param>
-        public void Write(Matrix value)
+        public void Write(Matrix4x4 value)
         {
             Write(value.M11);
             Write(value.M12);

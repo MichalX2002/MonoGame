@@ -162,7 +162,7 @@ namespace MonoGame
 
         public static bool HasClipboardText()
         {
-            return SDL_HasClipboardText() > 0 ? true : false;
+            return SDL_HasClipboardText() > 0;
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

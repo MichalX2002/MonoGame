@@ -163,7 +163,7 @@ namespace MonoGame.Testing
                 var pos = new Vector2(0, 0); // tex.Width * scale);
 
                 _spriteBatch.Draw(
-                    tex, pos, null, Color.White, rot, Vector2.Zero, scale, SpriteEffects.None, 0);
+                    tex, pos, null, Color.White, rot, Vector2.Zero, scale, SpriteFlip.None, 0);
             }
 
             if (true)

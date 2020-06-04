@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
@@ -20,14 +21,14 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Gets or sets the position described by this keyframe.
         /// </summary>
-        public Matrix Transform { get; set; }
+        public Matrix4x4 Transform { get; set; }
 
         /// <summary>
         /// Initializes a new instance of AnimationKeyframe with the specified time offsetand transform.
         /// </summary>
         /// <param name="time">Time offset of the keyframe.</param>
         /// <param name="transform">Position of the keyframe.</param>
-        public AnimationKeyframe(TimeSpan time, in Matrix transform)
+        public AnimationKeyframe(TimeSpan time, in Matrix4x4 transform)
         {
             Time = time;
             Transform = transform;

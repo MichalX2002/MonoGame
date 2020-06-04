@@ -2,12 +2,13 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using System.Runtime.Serialization;
 
 namespace MonoGame.Framework.Graphics
 {
     [DataContract]
-    public class DisplayMode
+    public class DisplayMode : IEquatable<DisplayMode>
     {
         public SurfaceFormat Format { get; }
         public int Height { get; }
@@ -25,11 +26,6 @@ namespace MonoGame.Framework.Graphics
 
         #region Operators
 
-        public static bool operator !=(DisplayMode left, DisplayMode right)
-        {
-            return !(left == right);
-        }
-
         public static bool operator ==(DisplayMode left, DisplayMode right)
         {
             if (ReferenceEquals(left, right)) //Same object or both are null
@@ -38,28 +34,33 @@ namespace MonoGame.Framework.Graphics
             if (left is null || right is null)
                 return false;
 
-            return (left.Format == right.Format) 
-                && (left.Height == right.Height) 
+            return (left.Format == right.Format)
+                && (left.Height == right.Height)
                 && (left.Width == right.Width);
+        }
+
+        public static bool operator !=(DisplayMode left, DisplayMode right)
+        {
+            return !(left == right);
         }
 
         #endregion Operators
 
         #region Public Methods
 
+        public bool Equals(DisplayMode other)
+        {
+            return this == other;
+        }
+
         public override bool Equals(object obj)
         {
-            return obj is DisplayMode other && this == other;
+            return obj is DisplayMode other && Equals(other);
         }
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                int code = 7 + Width.GetHashCode();
-                code = code * 31 + Height.GetHashCode();
-                return code * 31 + Format.GetHashCode();
-            }
+            return HashCode.Combine(Width, Height, Format);
         }
 
         public override string ToString()

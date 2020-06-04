@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using System.Runtime.Serialization;
 
 namespace MonoGame.Framework.Graphics
@@ -139,14 +140,14 @@ namespace MonoGame.Framework.Graphics
         /// finally from view space to screen space by the projection matrix.
         /// </summary>
         /// <param name="source">The <see cref="Vector3"/> to project.</param>
-        /// <param name="projection">The projection <see cref="Matrix"/>.</param>
-        /// <param name="view">The view <see cref="Matrix"/>.</param>
-        /// <param name="world">The world <see cref="Matrix"/>.</param>
+        /// <param name="projection">The projection <see cref="Matrix4x4"/>.</param>
+        /// <param name="view">The view <see cref="Matrix4x4"/>.</param>
+        /// <param name="world">The world <see cref="Matrix4x4"/>.</param>
         /// <returns>The vector projected into screen space.</returns>
-        public Vector3 Project(
-            Vector3 source, in Matrix projection, in Matrix view, in Matrix world)
+        public readonly Vector3 Project(
+            Vector3 source, in Matrix4x4 projection, in Matrix4x4 view, in Matrix4x4 world)
         {
-            var matrix = Matrix.Multiply(Matrix.Multiply(world, view), projection);
+            var matrix = world * view * projection;
             var result = Vector3.Transform(source, matrix);
 
             float a = (source.X * matrix.M14) + (source.Y * matrix.M24) + (source.Z * matrix.M34) + matrix.M44;
@@ -176,15 +177,16 @@ namespace MonoGame.Framework.Graphics
         /// Note source.Z must be less than or equal to MaxDepth.
         /// </summary>
         /// <param name="source">The <see cref="Vector3"/> to unproject.</param>
-        /// <param name="projection">The projection <see cref="Matrix"/>.</param>
-        /// <param name="view">The view <see cref="Matrix"/>.</param>
-        /// <param name="world">The world <see cref="Matrix"/>.</param>
+        /// <param name="projection">The projection <see cref="Matrix4x4"/>.</param>
+        /// <param name="view">The view <see cref="Matrix4x4"/>.</param>
+        /// <param name="world">The world <see cref="Matrix4x4"/>.</param>
         /// <returns>The vector vector unprojected into model space.</returns>
-        public Vector3 Unproject(
-            Vector3 source, in Matrix projection, in Matrix view, in Matrix world)
+        public readonly Vector3 Unproject(
+            Vector3 source, in Matrix4x4 projection, in Matrix4x4 view, in Matrix4x4 world)
         {
             var matrix = world * view * projection;
-            matrix = Matrix.Invert(matrix);
+            if (!Matrix4x4.Invert(matrix, out matrix))
+                throw new ArgumentException("Failed to invert final matrix.");
 
             var usource = new Vector3(
                 ((source.X - X) / Width * 2f) - 1f,
@@ -192,18 +194,12 @@ namespace MonoGame.Framework.Graphics
                 (source.Z - MinDepth) / (MaxDepth - MinDepth));
 
             var result = Vector3.Transform(usource, matrix);
-            float a =
-                (usource.X * matrix.M14) +
-                (usource.Y * matrix.M24) +
-                (usource.Z * matrix.M34) +
-                matrix.M44;
+
+            usource *= new Vector3(matrix.M14, matrix.M24, matrix.M34);
+            float a = usource.X + usource.Y + usource.Z + matrix.M44;
 
             if (!WithinEpsilon(a, 1f))
-            {
-                result.X /= a;
-                result.Y /= a;
-                result.Z /= a;
-            }
+                result /= a;
 
             return result;
         }
@@ -221,12 +217,12 @@ namespace MonoGame.Framework.Graphics
             return this == other;
         }
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is Viewport other && this == other;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(X, Y, Width, Height, MinDepth, MaxDepth);
         }
@@ -238,7 +234,7 @@ namespace MonoGame.Framework.Graphics
         /// MinDepth:[<see cref="MinDepth"/>] MaxDepth:[<see cref="MaxDepth"/>]}
         /// </summary>
         /// <returns>A <see cref="string"/> representation of this <see cref="Viewport"/>.</returns>
-        public readonly override string ToString()
+        public override readonly string ToString()
         {
             return
                 "{X:" + X + " Y:" + Y +

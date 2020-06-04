@@ -14,14 +14,10 @@
     <Compile Include="Platform\Graphics\GraphicsCapabilities.OpenGL.cs" />
     <Compile Include="Platform\Graphics\GraphicsDebug.Default.cs" />
     <Compile Include="Platform\Graphics\GraphicsDevice.OpenGL.FramebufferHelper.cs" />
-    <Compile Include="Platform\Graphics\GraphicsDevice.OpenGL.ResourceHandle.cs" />
     <Compile Include="Platform\Graphics\GraphicsDevice.OpenGL.cs" />
     <Compile Include="Platform\Graphics\IGraphicsContext.OpenGL.cs" />
     <Compile Include="Platform\Graphics\IWindowInfo.OpenGL.cs" />
     <Compile Include="Platform\Graphics\OcclusionQuery.OpenGL.cs" Condition="'$(MGOpenGL)' != 'GLES'"/>
-    <Compile Include="Platform\Graphics\OpenGL.cs" />
-    <Compile Include="Platform\Graphics\OpenGL.Common.cs" />
-    <Compile Include="Platform\Graphics\OpenGL.Enums.cs" />
     <Compile Include="Platform\Graphics\SamplerStateCollection.OpenGL.cs" />
     <Compile Include="Platform\Graphics\Shader\ConstantBuffer.OpenGL.cs" />
     <Compile Include="Platform\Graphics\Shader\Shader.OpenGL.cs" />
@@ -42,6 +38,10 @@
     <Compile Include="Platform\Graphics\Vertices\IndexBuffer.OpenGL.cs" />
     <Compile Include="Platform\Graphics\Vertices\VertexBuffer.OpenGL.cs" />
     <Compile Include="Platform\Graphics\Vertices\VertexDeclaration.OpenGL.cs" />
+    <Compile Include="Platform\Graphics\OpenGL\GLHandle.cs" />
+    <Compile Include="Platform\Graphics\OpenGL\OpenGL.cs" />
+    <Compile Include="Platform\Graphics\OpenGL\OpenGL.Common.cs" />
+    <Compile Include="Platform\Graphics\OpenGL\OpenGL.Enums.cs" />
     <Compile Include="Platform\Utilities\Threading.cs" />
   </ItemGroup>
 

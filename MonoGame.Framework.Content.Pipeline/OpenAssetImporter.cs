@@ -7,11 +7,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using Assimp;
 using Assimp.Unmanaged;
 using MonoGame.Framework.Content.Pipeline.Graphics;
-using MonoGame.Framework;
+using Matrix = System.Numerics.Matrix4x4;
+using Quaternion = System.Numerics.Quaternion;
+using Matrix4x4 = Assimp.Matrix4x4;
 
 namespace MonoGame.Framework.Content.Pipeline
 {
@@ -108,8 +111,8 @@ namespace MonoGame.Framework.Content.Pipeline
         /// </para>
         /// <para>
         /// Local Transform = Translation * RotationOffset * RotationPivot * PreRotation
-        ///                   * Rotation * PostRotation * RotationPivotInverse * ScalingOffset
-        ///                   * ScalingPivot * Scaling * ScalingPivotInverse
+        ///                 * Rotation * PostRotation * RotationPivotInverse * ScalingOffset
+        ///                 * ScalingPivot * Scaling * ScalingPivotInverse
         /// </para>
         /// <para>
         /// where the matrix multiplication order is right-to-left.
@@ -119,7 +122,7 @@ namespace MonoGame.Framework.Content.Pipeline
         /// </para>
         /// <para>
         /// Local Transform = Translation * Rotation * Scaling
-        ///                   * GeometricTranslation * GeometricRotation * GeometricScaling
+        ///           * GeometricTranslation * GeometricRotation * GeometricScaling
         /// </para>
         /// <para>
         /// Transformation pivots are stored per FBX node. When Assimp hits an FBX node with
@@ -822,9 +825,16 @@ namespace MonoGame.Framework.Content.Pipeline
                     bool isParentOffsetMatrixValid = _deformationBones.TryGetValue(
                         aiParent.Name, out Matrix parentOffsetMatrix);
 
+                    Matrix InvertedOffset()
+                    {
+                        if (!Matrix.Invert(offsetMatrix, out var result))
+                            throw new InvalidDataException("Failed to invert matrix.");
+                        return result;
+                    }
+
                     if (isOffsetMatrixValid && isParentOffsetMatrixValid)
                     {
-                        node.Transform = Matrix.Invert(offsetMatrix) * parentOffsetMatrix;
+                        node.Transform = InvertedOffset() * parentOffsetMatrix;
                     }
                     else if (isOffsetMatrixValid && aiNode == _rootBone)
                     {
@@ -838,7 +848,7 @@ namespace MonoGame.Framework.Content.Pipeline
                         else
                         {
                             // --> Let's assume that parent's transform is Identity.
-                            node.Transform = Matrix.Invert(offsetMatrix);
+                            node.Transform = InvertedOffset();
                         }
                     }
                     else if (isOffsetMatrixValid && aiParent == _rootBone)
@@ -847,7 +857,7 @@ namespace MonoGame.Framework.Content.Pipeline
                         // The parent offset matrix is missing. :(
                         // --> Derive matrix from parent bone, which is the root bone.
                         parentOffsetMatrix = Matrix.Invert(parent.Transform);
-                        node.Transform = Matrix.Invert(offsetMatrix) * parentOffsetMatrix;
+                        node.Transform = InvertedOffset() * parentOffsetMatrix;
                     }
                     else
                     {

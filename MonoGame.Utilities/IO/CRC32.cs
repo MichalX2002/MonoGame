@@ -46,11 +46,11 @@ namespace MonoGame.Framework.IO
         /// </param>
         /// <remarks>
         ///   <para>
-        ///     In the CRC-32 used by BZip2, the bits are reversed. Therefore if you
-        ///     want a CRC32 with compatibility with BZip2, you should pass true
-        ///     here. In the CRC-32 used by GZIP and PKZIP, the bits are not
-        ///     reversed; Therefore if you want a CRC32 with compatibility with
-        ///     those, you should pass false.
+        /// In the CRC-32 used by BZip2, the bits are reversed. Therefore if you
+        /// want a CRC32 with compatibility with BZip2, you should pass true
+        /// here. In the CRC-32 used by GZIP and PKZIP, the bits are not
+        /// reversed; Therefore if you want a CRC32 with compatibility with
+        /// those, you should pass false.
         ///   </para>
         /// </remarks>
         public Crc32(bool reverseBits) : this(unchecked((int)0xEDB88320), reverseBits)
@@ -75,12 +75,12 @@ namespace MonoGame.Framework.IO
         ///
         /// <remarks>
         ///   <para>
-        ///     In the CRC-32 used by BZip2, the bits are reversed. Therefore if you
-        ///     want a CRC32 with compatibility with BZip2, you should pass true
-        ///     here for the <c>reverseBits</c> parameter. In the CRC-32 used by
-        ///     GZIP and PKZIP, the bits are not reversed; Therefore if you want a
-        ///     CRC32 with compatibility with those, you should pass false for the
-        ///     <c>reverseBits</c> parameter.
+        /// In the CRC-32 used by BZip2, the bits are reversed. Therefore if you
+        /// want a CRC32 with compatibility with BZip2, you should pass true
+        /// here for the <c>reverseBits</c> parameter. In the CRC-32 used by
+        /// GZIP and PKZIP, the bits are not reversed; Therefore if you want a
+        /// CRC32 with compatibility with those, you should pass false for the
+        /// <c>reverseBits</c> parameter.
         ///   </para>
         /// </remarks>
         public Crc32(int polynomial, bool reverseBits)
@@ -116,26 +116,20 @@ namespace MonoGame.Framework.IO
 
             unchecked
             {
-                byte[] buffer = RecyclableMemoryManager.Default.GetBlock();
-                try
+                TotalBytesRead = 0;
+                Span<byte> buffer = stackalloc byte[4096];
+                int count = input.Read(buffer);
+                output?.Write(buffer.Slice(0, count));
+                TotalBytesRead += count;
+                while (count > 0)
                 {
-                    TotalBytesRead = 0;
-                    int count = input.Read(buffer, 0, buffer.Length);
-                    if (output != null) output.Write(buffer, 0, count);
+                    var slice = buffer.Slice(0, count);
+                    SlurpBlock(slice);
+                    count = input.Read(buffer);
+                    output?.Write(slice);
                     TotalBytesRead += count;
-                    while (count > 0)
-                    {
-                        SlurpBlock(buffer, 0, count);
-                        count = input.Read(buffer, 0, buffer.Length);
-                        if (output != null) output.Write(buffer, 0, count);
-                        TotalBytesRead += count;
-                    }
-                    return (int)~_register;
                 }
-                finally
-                {
-                    RecyclableMemoryManager.Default.ReturnBlock(buffer);
-                }
+                return (int)~_register;
             }
         }
 
@@ -162,18 +156,12 @@ namespace MonoGame.Framework.IO
         /// using the block of bytes.
         /// </summary>
         /// <param name="block">block of bytes to slurp</param>
-        /// <param name="offset">starting point in the block</param>
-        /// <param name="count">how many bytes within the block to slurp</param>
-        public void SlurpBlock(byte[] block, int offset, int count)
+        public void SlurpBlock(ReadOnlySpan<byte> block)
         {
-            if (block == null)
-                throw new ArgumentNullException("The buffer may not be null.", nameof(block));
-
             // bzip algorithm
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < block.Length; i++)
             {
-                int x = offset + i;
-                byte b = block[x];
+                byte b = block[i];
                 if (_reverseBits)
                 {
                     uint temp = (_register >> 24) ^ b;
@@ -185,7 +173,7 @@ namespace MonoGame.Framework.IO
                     _register = (_register >> 8) ^ crc32Table[temp];
                 }
             }
-            TotalBytesRead += count;
+            TotalBytesRead += block.Length;
         }
 
 
@@ -212,11 +200,11 @@ namespace MonoGame.Framework.IO
         /// </summary>
         /// <remarks>
         ///   <para>
-        ///     This method serves as an optimization for updating the CRC when a
-        ///     run of identical bytes is found. Rather than passing in a buffer of
-        ///     length n, containing all identical bytes b, this method accepts the
-        ///     byte value and the length of the (virtual) buffer - the length of
-        ///     the run.
+        /// This method serves as an optimization for updating the CRC when a
+        /// run of identical bytes is found. Rather than passing in a buffer of
+        /// length n, containing all identical bytes b, this method accepts the
+        /// byte value and the length of the (virtual) buffer - the length of
+        /// the run.
         ///   </para>
         /// </remarks>
         /// <param name = "b">the byte to include into the CRC.  </param>
@@ -227,23 +215,16 @@ namespace MonoGame.Framework.IO
             {
                 if (_reverseBits)
                 {
-                    uint temp = (_register >> 24) ^ b;
-                    _register = (_register << 8) ^ crc32Table[(temp >= 0)
-                                                              ? temp
-                                                              : (temp + 256)];
+                    uint tmp = (_register >> 24) ^ b;
+                    _register = (_register << 8) ^ crc32Table[(tmp >= 0) ? tmp : (tmp + 256)];
                 }
                 else
                 {
-                    uint temp = (_register & 0x000000FF) ^ b;
-                    _register = (_register >> 8) ^ crc32Table[(temp >= 0)
-                                                              ? temp
-                                                              : (temp + 256)];
-
+                    uint tmp = (_register & 0x000000FF) ^ b;
+                    _register = (_register >> 8) ^ crc32Table[(tmp >= 0) ? tmp : (tmp + 256)];
                 }
             }
         }
-
-
 
         private static uint ReverseBits(uint data)
         {
@@ -315,8 +296,8 @@ namespace MonoGame.Framework.IO
             Console.WriteLine();
 #endif
         }
-        
-        private uint Gf2_matrix_times(uint[] matrix, uint vec)
+
+        private uint Gf2_matrix_times(ReadOnlySpan<uint> matrix, uint vec)
         {
             uint sum = 0;
             int i = 0;
@@ -330,7 +311,7 @@ namespace MonoGame.Framework.IO
             return sum;
         }
 
-        private void Gf2_matrix_square(uint[] square, uint[] mat)
+        private void Gf2_matrix_square(Span<uint> square, ReadOnlySpan<uint> mat)
         {
             for (int i = 0; i < 32; i++)
                 square[i] = Gf2_matrix_times(mat, mat[i]);
@@ -349,8 +330,8 @@ namespace MonoGame.Framework.IO
         /// <param name="length">the length of data the CRC value was calculated on</param>
         public void Combine(int crc, int length)
         {
-            uint[] even = new uint[32];     // even-power-of-two zeros operator
-            uint[] odd = new uint[32];      // odd-power-of-two zeros operator
+            Span<uint> even = stackalloc uint[32];     // even-power-of-two zeros operator
+            Span<uint> odd = stackalloc uint[32];      // odd-power-of-two zeros operator
 
             if (length == 0)
                 return;

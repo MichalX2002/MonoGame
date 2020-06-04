@@ -799,7 +799,7 @@ namespace MonoGame.Framework.Memory
             try
             {
                 result = GetMemoryStream(tag);
-                stream.PooledCopyTo(result);
+                stream.StackCopyTo(result);
                 result.Position = 0;
                 return result;
             }

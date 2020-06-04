@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System.Collections.ObjectModel;
+using System.Numerics;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {

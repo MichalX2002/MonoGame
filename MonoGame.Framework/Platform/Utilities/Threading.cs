@@ -123,7 +123,7 @@ namespace MonoGame.Framework
 #if IOS
                 // Must flush the GL calls so the GPU asset is ready for the main context to use it
                 GL.Flush();
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 #endif
         }

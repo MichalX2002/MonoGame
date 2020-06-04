@@ -491,9 +491,9 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Creates a new <see cref="BoundingSphere"/> that contains a transformation of translation and scale from this sphere by the specified <see cref="Matrix"/>.
+        /// Creates a new <see cref="BoundingSphere"/> that contains a transformation of translation and scale from this sphere by the specified <see cref="Matrix4x4"/>.
         /// </summary>
-        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
+        /// <param name="matrix">The transformation <see cref="Matrix4x4"/>.</param>
         /// <returns>Transformed <see cref="BoundingSphere"/>.</returns>
         public BoundingSphere Transform(in Matrix4x4 matrix)
         {

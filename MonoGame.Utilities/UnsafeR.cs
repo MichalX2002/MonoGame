@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework
 {
@@ -21,6 +22,16 @@ namespace MonoGame.Framework
         public static ref readonly T AddByteOffset<T>(in T source, int byteOffset)
         {
             return ref AddByteOffset(source, (IntPtr)byteOffset);
+        }
+
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(in T value, int count = 1)
+        {
+            return MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(value), count);
+        }
+
+        public static Span<T> AsSpan<T>(ref T value, int count = 1)
+        {
+            return MemoryMarshal.CreateSpan(ref value, count);
         }
     }
 }

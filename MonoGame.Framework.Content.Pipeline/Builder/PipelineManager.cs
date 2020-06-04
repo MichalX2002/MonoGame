@@ -826,7 +826,7 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
 
             var type = content.GetType();
             var attrib = type.GetCustomAttribute<CompressedContentAttribute>(true);
-            bool compress = attrib != null ? false : CompressContent;
+            bool compress = attrib == null && CompressContent;
 
             // Write the XNB.
             using (var fs = new FileStream(

@@ -13,7 +13,7 @@ namespace MonoGame.Framework.Graphics
 	}
 
 	//// Summary:
-	////     Represents a collection of ModelMeshPart objects.
+	//// Represents a collection of ModelMeshPart objects.
 	//public sealed class ModelMeshPartCollection : ReadOnlyCollection<ModelMeshPart>
 	//{
 	//    internal ModelMeshPartCollection()

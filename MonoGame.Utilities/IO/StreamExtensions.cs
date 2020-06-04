@@ -7,11 +7,11 @@ namespace MonoGame.Framework
     {
         /// <summary>
         /// Reads the bytes from the current stream and writes them to another stream,
-        /// using a pooled buffer.
+        /// using a stack-allocated buffer buffer.
         /// </summary>
-        public static void PooledCopyTo(this Stream source, Stream destination)
+        public static void StackCopyTo(this Stream source, Stream destination)
         {
-            Span<byte> buffer = stackalloc byte[2048];
+            Span<byte> buffer = stackalloc byte[4096];
             int read;
             while ((read = source.Read(buffer)) != 0)
                 destination.Write(buffer.Slice(0, read));
@@ -19,23 +19,23 @@ namespace MonoGame.Framework
 
         /// <summary>
         /// Reads the bytes from the current stream and writes them to another stream,
-        /// using a pooled buffer and reporting every write.
+        /// using a stack-allocated buffer and reporting every read.
         /// </summary>
-        public static void PooledCopyTo(
-            this Stream source, Stream destination, Action<int> onWrite)
+        public static void StackCopyTo(
+            this Stream source, Stream destination, Action<int> onRead)
         {
-            if (onWrite == null)
+            if (onRead == null)
             {
-                PooledCopyTo(source, destination);
+                StackCopyTo(source, destination);
                 return;
             }
 
-            Span<byte> buffer = stackalloc byte[2048];
+            Span<byte> buffer = stackalloc byte[4096];
             int read;
             while ((read = source.Read(buffer)) != 0)
             {
+                onRead.Invoke(read);
                 destination.Write(buffer.Slice(0, read));
-                onWrite.Invoke(read);
             }
         }
     }

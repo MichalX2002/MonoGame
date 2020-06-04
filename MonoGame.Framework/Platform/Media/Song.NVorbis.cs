@@ -60,7 +60,7 @@ namespace MonoGame.Framework.Media
 
         private bool PlatformGetLooped()
         {
-            return _stream != null ? _stream.IsLooped : false;
+            return _stream != null && _stream.IsLooped;
         }
 
         private void PlatformSetLooped(bool value)

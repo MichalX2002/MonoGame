@@ -19,80 +19,8 @@ namespace MonoGame.Framework.Input
         /// </summary>
         public const int MaxKeysPerState = 256;
 
-        #region Key Data
-
         // Array of 256 bits:
         private uint _key0, _key1, _key2, _key3, _key4, _key5, _key6, _key7;
-
-        private readonly uint GetKeyValue(int index)
-        {
-            return index switch
-            {
-                0 => _key0,
-                1 => _key1,
-                2 => _key2,
-                3 => _key3,
-                4 => _key4,
-                5 => _key5,
-                6 => _key6,
-                7 => _key7,
-                _ => 0
-            };
-        }
-
-        private readonly bool GetKey(Keys key)
-        {
-            int index = ((int)key) >> 5;
-            uint field = GetKeyValue(index);
-            uint mask = (uint)1 << (((int)key) & 0x1f);
-            return (field & mask) != 0;
-        }
-
-        internal void SetKey(Keys key)
-        {
-            uint mask = (uint)1 << (((int)key) & 0x1f);
-            switch (((int)key) >> 5)
-            {
-                case 0: _key0 |= mask; break;
-                case 1: _key1 |= mask; break;
-                case 2: _key2 |= mask; break;
-                case 3: _key3 |= mask; break;
-                case 4: _key4 |= mask; break;
-                case 5: _key5 |= mask; break;
-                case 6: _key6 |= mask; break;
-                case 7: _key7 |= mask; break;
-            }
-        }
-
-        internal void ClearKey(Keys key)
-        {
-            uint mask = (uint)1 << (((int)key) & 0x1f);
-            switch (((int)key) >> 5)
-            {
-                case 0: _key0 &= ~mask; break;
-                case 1: _key1 &= ~mask; break;
-                case 2: _key2 &= ~mask; break;
-                case 3: _key3 &= ~mask; break;
-                case 4: _key4 &= ~mask; break;
-                case 5: _key5 &= ~mask; break;
-                case 6: _key6 &= ~mask; break;
-                case 7: _key7 &= ~mask; break;
-            }
-        }
-
-        internal void ClearAllKeys()
-        {
-            _key0 = 0;
-            _key1 = 0;
-            _key2 = 0;
-            _key3 = 0;
-            _key4 = 0;
-            _key5 = 0;
-            _key6 = 0;
-            _key7 = 0;
-        }
-
-        #endregion
 
         #region Properties
 
@@ -189,24 +117,103 @@ namespace MonoGame.Framework.Input
 
         #endregion
 
+        #region Key Data
+
+        private readonly uint GetKeyValue(int index)
+        {
+            return index switch
+            {
+                0 => _key0,
+                1 => _key1,
+                2 => _key2,
+                3 => _key3,
+                4 => _key4,
+                5 => _key5,
+                6 => _key6,
+                7 => _key7,
+                _ => 0
+            };
+        }
+
+        private readonly bool GetKey(Keys key)
+        {
+            int index = ((int)key) >> 5;
+            uint field = GetKeyValue(index);
+            uint mask = (uint)1 << (((int)key) & 0x1f);
+            return (field & mask) != 0;
+        }
+
+        internal void SetKey(Keys key)
+        {
+            uint mask = (uint)1 << (((int)key) & 0x1f);
+            switch (((int)key) >> 5)
+            {
+                case 0: _key0 |= mask; break;
+                case 1: _key1 |= mask; break;
+                case 2: _key2 |= mask; break;
+                case 3: _key3 |= mask; break;
+                case 4: _key4 |= mask; break;
+                case 5: _key5 |= mask; break;
+                case 6: _key6 |= mask; break;
+                case 7: _key7 |= mask; break;
+            }
+        }
+
+        internal void ClearKey(Keys key)
+        {
+            uint mask = (uint)1 << (((int)key) & 0x1f);
+            switch (((int)key) >> 5)
+            {
+                case 0: _key0 &= ~mask; break;
+                case 1: _key1 &= ~mask; break;
+                case 2: _key2 &= ~mask; break;
+                case 3: _key3 &= ~mask; break;
+                case 4: _key4 &= ~mask; break;
+                case 5: _key5 &= ~mask; break;
+                case 6: _key6 &= ~mask; break;
+                case 7: _key7 &= ~mask; break;
+            }
+        }
+
+        internal void ClearAllKeys()
+        {
+            _key0 = 0;
+            _key1 = 0;
+            _key2 = 0;
+            _key3 = 0;
+            _key4 = 0;
+            _key5 = 0;
+            _key6 = 0;
+            _key7 = 0;
+        }
+
+        #endregion
+
         /// <summary>
         /// Gets whether given key is currently being pressed.
         /// </summary>
         /// <param name="key">The key to query.</param>
         /// <returns>true if the key is pressed; false otherwise.</returns>
-        public readonly bool IsKeyDown(Keys key) => GetKey(key);
+        public readonly bool IsKeyDown(Keys key)
+        {
+            return GetKey(key);
+        }
 
         /// <summary>
         /// Gets whether given key is currently being not pressed.
         /// </summary>
         /// <param name="key">The key to query.</param>
         /// <returns>true if the key is not pressed; false otherwise.</returns>
-        public readonly bool IsKeyUp(Keys key) => !GetKey(key);
+        public readonly bool IsKeyUp(Keys key)
+        {
+            return !GetKey(key);
+        }
 
         /// <summary>
         /// Returns an array with keys that are currently being pressed.
         /// </summary>
         /// <returns>The keys that are currently being pressed.</returns>
+        [Obsolete("This method allocates a new array for every call.")]
         public readonly Keys[] GetPressedKeys()
         {
             var keys = new Keys[Count];
@@ -231,17 +238,11 @@ namespace MonoGame.Framework.Input
             return index;
         }
 
-        /// <summary>
-        /// Returns the hash code of the <see cref="KeyboardState"/>.
-        /// </summary>
-        public readonly override int GetHashCode()
-        {
-            return (int)(
-                CapsLock.GetHashCode() ^ NumLock.GetHashCode() ^
-                _key0 ^ _key1 ^ _key2 ^ _key3 ^ _key4 ^ _key5 ^ _key6 ^ _key7);
-        }
-
         #region Equals
+
+        public readonly bool Equals(KeyboardState other) => this == other;
+
+        public override readonly bool Equals(object obj) => obj is KeyboardState other && Equals(other);
 
         public static bool operator ==(in KeyboardState a, in KeyboardState b)
         {
@@ -257,22 +258,39 @@ namespace MonoGame.Framework.Input
                 && a._key7 == b._key7;
         }
 
-        public static bool operator !=(in KeyboardState a, in KeyboardState b) => !(a == b);
+        public static bool operator !=(in KeyboardState a, in KeyboardState b)
+        {
+            return !(a == b);
+        }
 
-        public readonly bool Equals(KeyboardState other) => this == other;
-        public readonly override bool Equals(object obj) => obj is KeyboardState other && Equals(other);
+        #endregion
+
+        #region Object overrides
+
+        /// <summary>
+        /// Gets a hash code of this <see cref="KeyboardState"/>.
+        /// </summary>
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(
+                HashCode.Combine(CapsLock, NumLock),
+                HashCode.Combine(_key0, _key1, _key2, _key3, _key4, _key5, _key6, _key7));
+        }
 
         #endregion
 
         #region IEnumerable and Enumerator
 
         /// <summary>
-        /// Returns an <see cref="Enumerator"/> that 
-        /// enumerates the currently pressed keys.
+        /// Returns an <see cref="Enumerator"/> that enumerates the currently pressed keys.
         /// </summary>
-        public readonly Enumerator GetEnumerator() => new Enumerator(this);
+        public readonly Enumerator GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
 
         readonly IEnumerator<Keys> IEnumerable<Keys>.GetEnumerator() => GetEnumerator();
+
         readonly IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
@@ -324,7 +342,7 @@ namespace MonoGame.Framework.Input
                                 int offset = _keyIndex * 32;
                                 Current = (Keys)(offset + _iterIndex);
 
-                                // the return exits the loop, so increment here too
+                                // the return exits the loop so increment here too
                                 _iterIndex++;
                                 return true;
                             }

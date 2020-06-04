@@ -5,7 +5,7 @@ namespace MonoGame.Framework.Graphics
     /// <summary>
     /// Represents a mesh that is part of a Model.
     /// </summary>
-	public sealed class ModelMesh
+    public sealed class ModelMesh
     {
         private GraphicsDevice _graphicsDevice;
 
@@ -23,18 +23,18 @@ namespace MonoGame.Framework.Graphics
         }
 
         /*internal void BuildEffectList()
-		{
-			List<Effect> effects = new List<Effect>();
-			foreach (ModelMeshPart item in parts) 
-			{
-				if (!effects.Contains(item.Effect))
-				{
-					if (item.Effect != null)
-						effects.Add(item.Effect);
-				}
-			}
-			Effects = new ModelEffectCollection(effects);
-		}*/
+        {
+            List<Effect> effects = new List<Effect>();
+            foreach (ModelMeshPart item in parts) 
+            {
+                if (!effects.Contains(item.Effect))
+                {
+                    if (item.Effect != null)
+                        effects.Add(item.Effect);
+                }
+            }
+            Effects = new ModelEffectCollection(effects);
+        }*/
 
         /// <summary>
         /// Gets the BoundingSphere that contains this mesh.
@@ -62,7 +62,7 @@ namespace MonoGame.Framework.Graphics
         /// transformation matrix that describes the mesh location relative to
         /// any parent meshes in a model.
         /// </summary>
-		public ModelBone ParentBone { get; set; }
+        public ModelBone ParentBone { get; set; }
 
         /// <summary>
         /// Gets or sets an object identifying this mesh.
@@ -97,7 +97,7 @@ namespace MonoGame.Framework.Graphics
 
 
     //// Summary:
-    ////     Represents a mesh that is part of a Model.
+    //// Represents a mesh that is part of a Model.
     //public sealed class ModelMesh
     //{
     //    // Summary:

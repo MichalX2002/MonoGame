@@ -70,7 +70,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <returns>The GPU texture format of the bitmap type.</returns>
         public override bool TryGetFormat(out SurfaceFormat format)
         {
-            if (typeof(TPixel) == typeof(Color) || typeof(TPixel) == typeof(Byte4))
+            if (typeof(TPixel) == typeof(Color) ||
+                typeof(TPixel) == typeof(Byte4))
                 format = SurfaceFormat.Rgba32;
             else if (typeof(TPixel) == typeof(Bgra4444))
                 format = SurfaceFormat.Bgra4444;
@@ -78,12 +79,6 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 format = SurfaceFormat.Bgra5551;
             else if (typeof(TPixel) == typeof(Bgr565))
                 format = SurfaceFormat.Bgr565;
-            else if (typeof(TPixel) == typeof(Vector4) || typeof(TPixel) == typeof(RgbaVector))
-                format = SurfaceFormat.Vector4;
-            else if (typeof(TPixel) == typeof(Vector2))
-                format = SurfaceFormat.Vector2;
-            else if (typeof(TPixel) == typeof(Gray32))
-                format = SurfaceFormat.Single;
             else if (typeof(TPixel) == typeof(Alpha8))
                 format = SurfaceFormat.Alpha8;
             else if (typeof(TPixel) == typeof(Rgba64))
@@ -102,9 +97,20 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 format = SurfaceFormat.HalfVector2;
             else if (typeof(TPixel) == typeof(HalfVector4))
                 format = SurfaceFormat.HalfVector4;
+            else if (typeof(TPixel) == typeof(RgbaVector))
+                format = SurfaceFormat.Vector4;
+            else if (typeof(TPixel) == typeof(RgVector))
+                format = SurfaceFormat.Vector2;
+            else if (
+                typeof(TPixel) == typeof(RedF) ||
+                typeof(TPixel) == typeof(GrayF) ||
+                typeof(TPixel) == typeof(AlphaF))
+            {
+                format = SurfaceFormat.Single;
+            }
             else
             {
-                format = SurfaceFormat.Rgba32;
+                format = default;
                 return false;
             }
             return true;
@@ -174,7 +180,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
 
             // A shortcut for copying the entire bitmap to another bitmap of the same type and format
             if (_format == destinationFormat &&
-                srcRegion == new Rectangle(0, 0, Width, Height) && 
+                srcRegion == new Rectangle(0, 0, Width, Height) &&
                 srcRegion == dstRegion)
             {
                 dstBitmap.SetPixelData(GetPixelData());

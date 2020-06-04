@@ -37,7 +37,7 @@ namespace MonoGame.Tools.Pipeline
 
         public override int GetHashCode()
         {
-            return TypeName == null ? 0 : TypeName.GetHashCode();
+            return HashCode.Combine(TypeName);
         }
 
         public override bool Equals(object obj)

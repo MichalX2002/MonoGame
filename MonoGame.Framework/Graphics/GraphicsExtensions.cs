@@ -1001,51 +1001,5 @@ namespace MonoGame.Framework.Graphics
                     break;
             }
         }
-
-#if OPENGL
-        public static int GetBoundTexture2D()
-        {
-            GL.GetInteger(GetPName.TextureBinding2D, out int prevTexture);
-            LogGLError("GraphicsExtensions.GetBoundTexture2D() GL.GetInteger");
-            return prevTexture;
-        }
-
-        [Conditional("DEBUG")]
-        [DebuggerHidden]
-        internal static void CheckGLError()
-        {
-            var error = GL.GetError();
-            if (error != ErrorCode.NoError)
-            {
-                Console.WriteLine(error);
-                throw new MonoGameGLException("GL.GetError() returned " + error);
-            }
-        }
-
-        [Conditional("DEBUG")]
-        internal static void LogGLError(string location)
-        {
-            try
-            {
-                CheckGLError();
-            }
-            catch (MonoGameGLException ex)
-            {
-#if ANDROID
-                // Todo: Add generic MonoGame logging interface
-                Android.Util.Log.Debug("MonoGame", "MonoGameGLException at " + location + " - " + ex.Message);
-#else
-                Debug.WriteLine("MonoGameGLException at " + location + " - " + ex.Message);
-#endif
-            }
-        }
-#endif
-    }
-
-    internal class MonoGameGLException : Exception
-    {
-        public MonoGameGLException(string message) : base(message)
-        {
-        }
     }
 }

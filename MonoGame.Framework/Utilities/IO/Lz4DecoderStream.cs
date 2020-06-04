@@ -104,9 +104,9 @@ namespace MonoGame.Framework
             //and pick up where we left off!
 
 #if LOCAL_SHADOW
-			var phase = this.phase;
-			var inBufPos = this.inBufPos;
-			var inBufEnd = this.inBufEnd;
+            var phase = this.phase;
+            var inBufPos = this.inBufPos;
+            var inBufEnd = this.inBufEnd;
 #endif
             switch (phase)
             {
@@ -138,13 +138,13 @@ namespace MonoGame.Framework
             else
             {
 #if LOCAL_SHADOW
-				this.inBufPos = inBufPos;
+                this.inBufPos = inBufPos;
 #endif
 
                 tok = ReadByteCore();
 #if LOCAL_SHADOW
-				inBufPos = this.inBufPos;
-				inBufEnd = this.inBufEnd;
+                inBufPos = this.inBufPos;
+                inBufEnd = this.inBufEnd;
 #endif
 #if CHECK_EOF
                 if (tok == -1)
@@ -179,12 +179,12 @@ namespace MonoGame.Framework
             else
             {
 #if LOCAL_SHADOW
-				this.inBufPos = inBufPos;
+                this.inBufPos = inBufPos;
 #endif
                 exLitLen = ReadByteCore();
 #if LOCAL_SHADOW
-				inBufPos = this.inBufPos;
-				inBufEnd = this.inBufEnd;
+                inBufPos = this.inBufPos;
+                inBufEnd = this.inBufEnd;
 #endif
 
 #if CHECK_EOF
@@ -216,12 +216,12 @@ namespace MonoGame.Framework
                 else
                 {
 #if LOCAL_SHADOW
-					this.inBufPos = inBufPos;
+                    this.inBufPos = inBufPos;
 #endif
                     nRead = ReadCore(buffer, offset, nReadLit);
 #if LOCAL_SHADOW
-					inBufPos = this.inBufPos;
-					inBufEnd = this.inBufEnd;
+                    inBufPos = this.inBufPos;
+                    inBufEnd = this.inBufEnd;
 #endif
 #if CHECK_EOF
                     if (nRead == 0)
@@ -253,12 +253,12 @@ namespace MonoGame.Framework
             else
             {
 #if LOCAL_SHADOW
-				this.inBufPos = inBufPos;
+                this.inBufPos = inBufPos;
 #endif
                 matDst = ReadOffsetCore();
 #if LOCAL_SHADOW
-				inBufPos = this.inBufPos;
-				inBufEnd = this.inBufEnd;
+                inBufPos = this.inBufPos;
+                inBufEnd = this.inBufEnd;
 #endif
 #if CHECK_EOF
                 if (matDst == -1)
@@ -286,12 +286,12 @@ namespace MonoGame.Framework
             else
             {
 #if LOCAL_SHADOW
-				this.inBufPos = inBufPos;
+                this.inBufPos = inBufPos;
 #endif
                 exMatLen = ReadByteCore();
 #if LOCAL_SHADOW
-				inBufPos = this.inBufPos;
-				inBufEnd = this.inBufEnd;
+                inBufPos = this.inBufPos;
+                inBufEnd = this.inBufEnd;
 #endif
 #if CHECK_EOF
                 if (exMatLen == -1)
@@ -366,8 +366,8 @@ namespace MonoGame.Framework
             }
 
 #if LOCAL_SHADOW
-			this.phase = phase;
-			this.inBufPos = inBufPos;
+            this.phase = phase;
+            this.inBufPos = inBufPos;
 #endif
             return nRead;
         }
