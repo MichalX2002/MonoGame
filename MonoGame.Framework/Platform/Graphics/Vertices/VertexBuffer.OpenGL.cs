@@ -20,12 +20,12 @@ namespace MonoGame.Framework.Graphics
             // http://www.khronos.org/registry/gles/extensions/OES/OES_mapbuffer.txt
             throw new NotSupportedException("Vertex buffers are write-only on OpenGL ES platforms");
 #else
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-            GraphicsExtensions.CheckGLError();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _handle);
+            GL.CheckError();
 
             // Pointer to the start of data in the vertex buffer
             IntPtr mapPtr = GL.MapBuffer(BufferTarget.ArrayBuffer, BufferAccess.ReadOnly);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             int bufferBytes = Capacity * VertexDeclaration.VertexStride;
             var src = new ReadOnlySpan<T>((void*)(mapPtr + offsetInBytes), bufferBytes);
@@ -51,7 +51,7 @@ namespace MonoGame.Framework.Graphics
             }
 
             GL.UnmapBuffer(BufferTarget.ArrayBuffer);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 #endif
         }
 
@@ -61,8 +61,8 @@ namespace MonoGame.Framework.Graphics
         {
             GenerateIfRequired();
 
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-            GraphicsExtensions.CheckGLError();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _handle);
+            GL.CheckError();
 
             DiscardBuffer(BufferTarget.ArrayBuffer, options, Capacity * VertexDeclaration.VertexStride);
 
@@ -73,7 +73,7 @@ namespace MonoGame.Framework.Graphics
                     // there are no gaps so we can copy in one go
                     var size = (IntPtr)(sizeof(T) * data.Length);
                     GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)offsetInBytes, size, (IntPtr)dataPtr);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                 }
             }
             else
@@ -95,7 +95,7 @@ namespace MonoGame.Framework.Graphics
 
                     var offset = new IntPtr(offsetInBytes + elementOffset * dataStride);
                     GL.BufferSubData(BufferTarget.ArrayBuffer, offset, (IntPtr)copyByteSize, (IntPtr)buffer);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
 
                     elementOffset += elementsToCopy;
                     left -= elementsToCopy;

@@ -1,27 +1,29 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using MonoGame.OpenGL;
 
 namespace MonoGame.Framework.Graphics
 {
     internal class ShaderProgram
     {
-        public readonly int Program;
-
         private readonly Dictionary<string, int> _uniformLocations = new Dictionary<string, int>();
 
-        public ShaderProgram(int program)
+        public GLHandle Program { get; }
+
+        public ShaderProgram(GLHandle program)
         {
             Program = program;
         }
 
         public int GetUniformLocation(string name)
         {
-            if (_uniformLocations.ContainsKey(name))
-                return _uniformLocations[name];
+            if (_uniformLocations.TryGetValue(name, out int value))
+                return value;
 
             var location = GL.GetUniformLocation(Program, name);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
+
             _uniformLocations[name] = location;
             return location;
         }
@@ -34,9 +36,11 @@ namespace MonoGame.Framework.Graphics
     /// </summary>
     internal class ShaderProgramCache : IDisposable
     {
-        private readonly Dictionary<int, ShaderProgram> _programCache = new Dictionary<int, ShaderProgram>();
-        GraphicsDevice _graphicsDevice;
-        bool disposed;
+        private Dictionary<int, ShaderProgram> _programCache =
+            new Dictionary<int, ShaderProgram>();
+
+        private GraphicsDevice _graphicsDevice;
+        private bool disposed;
 
         public ShaderProgramCache(GraphicsDevice graphicsDevice)
         {
@@ -55,7 +59,7 @@ namespace MonoGame.Framework.Graphics
         {
             foreach (var pair in _programCache)
             {
-                _graphicsDevice.DisposeProgram(pair.Value.Program);
+                _graphicsDevice.DisposeResource(pair.Value.Program);
             }
             _programCache.Clear();
         }
@@ -66,7 +70,7 @@ namespace MonoGame.Framework.Graphics
             // buffers here as well.  This would allow us to optimize
             // setting uniforms to only when a constant buffer changes.
 
-            var key = vertexShader.HashKey | pixelShader.HashKey;
+            int key = vertexShader.HashKey | pixelShader.HashKey;
             if (!_programCache.ContainsKey(key))
             {
                 // the key does not exist so we need to link the programs
@@ -82,40 +86,44 @@ namespace MonoGame.Framework.Graphics
             // as this is only called at draw time when we're in the
             // main drawing thread.
             var program = GL.CreateProgram();
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.AttachShader(program, vertexShader.GetShaderHandle());
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.AttachShader(program, pixelShader.GetShaderHandle());
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             //vertexShader.BindVertexAttributes(program);
 
             GL.LinkProgram(program);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.UseProgram(program);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             vertexShader.GetVertexAttributeLocations(program);
 
             pixelShader.ApplySamplerTextureUnits(program);
 
-
             GL.GetProgram(program, GetProgramParameterName.LinkStatus, out int linked);
-            GraphicsExtensions.LogGLError("VertexShaderCache.Link(), GL.GetProgram");
+            GL.LogError("VertexShaderCache.Link(), GL.GetProgram");
+
+            var programHandle = GLHandle.Program(program);
+
             if (linked == (int)Bool.False)
             {
                 var log = GL.GetProgramInfoLog(program);
-                Console.WriteLine(log);
+                Debug.WriteLine(log);
+
                 GL.DetachShader(program, vertexShader.GetShaderHandle());
                 GL.DetachShader(program, pixelShader.GetShaderHandle());
-                _graphicsDevice.DisposeProgram(program);
+
+                programHandle.Free();
                 throw new InvalidOperationException("Unable to link effect program");
             }
 
-            return new ShaderProgram(program);
+            return new ShaderProgram(programHandle);
         }
 
 

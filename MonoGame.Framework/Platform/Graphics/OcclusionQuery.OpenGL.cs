@@ -8,30 +8,32 @@ namespace MonoGame.Framework.Graphics
 {
     partial class OcclusionQuery
     {
-        private int glQueryId = -1;
+        private GLHandle _handle;
 
         private void PlatformConstruct()
         {
-            GL.GenQueries(1, out glQueryId);
-            GraphicsExtensions.CheckGLError();
+            GL.GenQueries(1, out int query);
+            GL.CheckError();
+
+            _handle = GLHandle.Query(query);
         }
 
         private void PlatformBegin()
         {
-            GL.BeginQuery(QueryTarget.SamplesPassed, glQueryId);
-            GraphicsExtensions.CheckGLError();
+            GL.BeginQuery(QueryTarget.SamplesPassed, _handle);
+            GL.CheckError();
         }
 
         private void PlatformEnd()
         {
             GL.EndQuery(QueryTarget.SamplesPassed);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
         }
 
         private bool PlatformGetResult(out int pixelCount)
         {
-            GL.GetQueryObject(glQueryId, GetQueryObjectParam.QueryResultAvailable, out int resultReady);
-            GraphicsExtensions.CheckGLError();
+            GL.GetQueryObject(_handle, GetQueryObjectParam.QueryResultAvailable, out int resultReady);
+            GL.CheckError();
 
             if (resultReady == 0)
             {
@@ -39,8 +41,8 @@ namespace MonoGame.Framework.Graphics
                 return false;
             }
 
-            GL.GetQueryObject(glQueryId, GetQueryObjectParam.QueryResult, out pixelCount);
-            GraphicsExtensions.CheckGLError();
+            GL.GetQueryObject(_handle, GetQueryObjectParam.QueryResult, out pixelCount);
+            GL.CheckError();
 
             return true;
         }
@@ -49,11 +51,7 @@ namespace MonoGame.Framework.Graphics
         {
             if (!IsDisposed)
             {
-                if (glQueryId > -1)
-                {
-                    GraphicsDevice.DisposeQuery(glQueryId);
-                    glQueryId = -1;
-                }
+                GraphicsDevice.DisposeResource(_handle);
             }
 
             base.Dispose(disposing);

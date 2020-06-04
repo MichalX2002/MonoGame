@@ -10,17 +10,20 @@ namespace MonoGame.Framework.Graphics
     {
         internal void PlatformApplyState(GraphicsDevice device, bool force = false)
         {
-            var blendEnabled = !(ColorSourceBlend == Blend.One &&
-                                 ColorDestinationBlend == Blend.Zero &&
-                                 AlphaSourceBlend == Blend.One &&
-                                 AlphaDestinationBlend == Blend.Zero);
+            var blendEnabled = 
+                !(ColorSourceBlend == Blend.One &&
+                ColorDestinationBlend == Blend.Zero &&
+                AlphaSourceBlend == Blend.One &&
+                AlphaDestinationBlend == Blend.Zero);
+
             if (force || blendEnabled != device._lastBlendEnable)
             {
                 if (blendEnabled)
                     GL.Enable(EnableCap.Blend);
                 else
                     GL.Disable(EnableCap.Blend);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
+
                 device._lastBlendEnable = blendEnabled;
             }
             if (_independentBlendEnable)
@@ -34,7 +37,8 @@ namespace MonoGame.Framework.Graphics
                         GL.BlendEquationSeparatei(i,
                             _targetBlendState[i].ColorBlendFunction.GetBlendEquationMode(),
                             _targetBlendState[i].AlphaBlendFunction.GetBlendEquationMode());
-                        GraphicsExtensions.CheckGLError();
+                        GL.CheckError();
+
                         device._lastBlendState[i].ColorBlendFunction = _targetBlendState[i].ColorBlendFunction;
                         device._lastBlendState[i].AlphaBlendFunction = _targetBlendState[i].AlphaBlendFunction;
                     }
@@ -50,7 +54,8 @@ namespace MonoGame.Framework.Graphics
                             _targetBlendState[i].ColorDestinationBlend.GetBlendFactorDest(),
                             _targetBlendState[i].AlphaSourceBlend.GetBlendFactorSrc(),
                             _targetBlendState[i].AlphaDestinationBlend.GetBlendFactorDest());
-                        GraphicsExtensions.CheckGLError();
+                        GL.CheckError();
+
                         device._lastBlendState[i].ColorSourceBlend = _targetBlendState[i].ColorSourceBlend;
                         device._lastBlendState[i].ColorDestinationBlend = _targetBlendState[i].ColorDestinationBlend;
                         device._lastBlendState[i].AlphaSourceBlend = _targetBlendState[i].AlphaSourceBlend;
@@ -67,7 +72,8 @@ namespace MonoGame.Framework.Graphics
                     GL.BlendEquationSeparate(
                         ColorBlendFunction.GetBlendEquationMode(),
                         AlphaBlendFunction.GetBlendEquationMode());
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
+
                     for (int i = 0; i < 4; i++)
                     {
                         device._lastBlendState[i].ColorBlendFunction = ColorBlendFunction;
@@ -86,7 +92,8 @@ namespace MonoGame.Framework.Graphics
                         ColorDestinationBlend.GetBlendFactorDest(),
                         AlphaSourceBlend.GetBlendFactorSrc(),
                         AlphaDestinationBlend.GetBlendFactorDest());
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
+
                     for (int i = 0; i < 4; i++)
                     {
                         device._lastBlendState[i].ColorSourceBlend = ColorSourceBlend;
@@ -104,7 +111,8 @@ namespace MonoGame.Framework.Graphics
                     (ColorWriteChannels & ColorWriteChannels.Green) != 0,
                     (ColorWriteChannels & ColorWriteChannels.Blue) != 0,
                     (ColorWriteChannels & ColorWriteChannels.Alpha) != 0);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
+
                 device._lastBlendState.ColorWriteChannels = ColorWriteChannels;
             }
         }

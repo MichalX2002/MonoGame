@@ -23,14 +23,14 @@ namespace MonoGame.Framework.Graphics
             if (CullMode == CullMode.None)
             {
                 GL.Disable(EnableCap.CullFace);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
             else
             {
                 GL.Enable(EnableCap.CullFace);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
                 GL.CullFace(CullFaceMode.Back);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
 
                 if (CullMode == CullMode.CullClockwiseFace)
                 {
@@ -38,7 +38,7 @@ namespace MonoGame.Framework.Graphics
                         GL.FrontFace(FrontFaceDirection.Cw);
                     else
                         GL.FrontFace(FrontFaceDirection.Ccw);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                 }
                 else
                 {
@@ -46,27 +46,27 @@ namespace MonoGame.Framework.Graphics
                         GL.FrontFace(FrontFaceDirection.Ccw);
                     else
                         GL.FrontFace(FrontFaceDirection.Cw);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                 }
             }
 
 #if WINDOWS || DESKTOPGL
-			if (FillMode == FillMode.Solid) 
-				GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            if (FillMode == FillMode.Solid) 
+                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             else
-				GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 #else
             if (FillMode != FillMode.Solid)
                 throw new NotImplementedException();
 #endif
 
             if (force || ScissorTestEnable != device._lastRasterizerState.ScissorTestEnable)
-			{
-			    if (ScissorTestEnable)
-				    GL.Enable(EnableCap.ScissorTest);
-			    else
-				    GL.Disable(EnableCap.ScissorTest);
-                GraphicsExtensions.CheckGLError();
+            {
+                if (ScissorTestEnable)
+                    GL.Enable(EnableCap.ScissorTest);
+                else
+                    GL.Disable(EnableCap.ScissorTest);
+                GL.CheckError();
                 device._lastRasterizerState.ScissorTestEnable = ScissorTestEnable;
             }
 
@@ -100,7 +100,7 @@ namespace MonoGame.Framework.Graphics
                 }
                 else
                     GL.Disable(EnableCap.PolygonOffsetFill);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
                 device._lastRasterizerState.DepthBias = DepthBias;
                 device._lastRasterizerState.SlopeScaleDepthBias = SlopeScaleDepthBias;
             }
@@ -112,7 +112,7 @@ namespace MonoGame.Framework.Graphics
                     GL.Enable((EnableCap) 0x864F); // should be EnableCap.DepthClamp, but not available in OpenTK.Graphics.ES20.EnableCap
                 else
                     GL.Disable((EnableCap) 0x864F);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
                 device._lastRasterizerState.DepthClipEnable = DepthClipEnable;
             }
 

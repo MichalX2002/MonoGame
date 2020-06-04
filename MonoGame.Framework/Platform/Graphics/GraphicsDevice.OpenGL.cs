@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Numerics;
 
 #if ANGLE
 using OpenTK.Graphics;
@@ -26,9 +27,9 @@ namespace MonoGame.Framework.Graphics
         private DrawBuffersEnum[] _drawBuffers;
 #endif
 
-        private List<ResourceHandle> _disposeThisFrame = new List<ResourceHandle>();
-        private List<ResourceHandle> _disposeNextFrame = new List<ResourceHandle>();
-        private object _disposeActionsLock = new object();
+        private List<GLHandle> _disposeThisFrame = new List<GLHandle>();
+        private List<GLHandle> _resourceFreeQueue = new List<GLHandle>();
+        private object _resourceFreeingLock = new object();
 
         private static List<IntPtr> _disposeContexts = new List<IntPtr>();
         private static object _disposeContextsLock = new object();
@@ -89,13 +90,13 @@ namespace MonoGame.Framework.Graphics
                 {
                     _enabledVertexAttributes.Add(i);
                     GL.EnableVertexAttribArray(i);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                 }
                 else if (!attrs[i] && contains)
                 {
                     _enabledVertexAttributes.Remove(i);
                     GL.DisableVertexAttribArray(i);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                 }
             }
         }
@@ -120,15 +121,15 @@ namespace MonoGame.Framework.Graphics
                     var info = _bufferBindingInfos[slot];
                     if (info.VertexOffset == offset &&
                         info.InstanceFrequency == vertexBufferBinding.InstanceFrequency &&
-                        info.Vbo == vertexBufferBinding.VertexBuffer._vbo &&
+                        info.Vbo == vertexBufferBinding.VertexBuffer._handle &&
                         ReferenceEquals(info.AttributeInfo, attrInfo))
                         continue;
                 }
 
                 bindingsChanged = true;
 
-                GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferBinding.VertexBuffer._vbo);
-                GraphicsExtensions.CheckGLError();
+                GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferBinding.VertexBuffer._handle);
+                GL.CheckError();
 
                 // If InstanceFrequency of the buffer is not zero
                 // and instancing is not supported, throw an exception.
@@ -149,13 +150,13 @@ namespace MonoGame.Framework.Graphics
                     if (Capabilities.SupportsInstancing)
                         GL.VertexAttribDivisor(element.AttributeLocation, vertexBufferBinding.InstanceFrequency);
 
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                 }
 
                 _bufferBindingInfos[slot].VertexOffset = offset;
                 _bufferBindingInfos[slot].AttributeInfo = attrInfo;
                 _bufferBindingInfos[slot].InstanceFrequency = vertexBufferBinding.InstanceFrequency;
-                _bufferBindingInfos[slot].Vbo = vertexBufferBinding.VertexBuffer._vbo;
+                _bufferBindingInfos[slot].Vbo = vertexBufferBinding.VertexBuffer._handle;
             }
 
             _attribsDirty = false;
@@ -191,22 +192,22 @@ namespace MonoGame.Framework.Graphics
 #endif
 
             GL.GetInteger(GetPName.MaxCombinedTextureImageUnits, out MaxTextureSlots);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.GetInteger(GetPName.MaxTextureSize, out int maxTexture2DSize);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
             MaxTexture2DSize = maxTexture2DSize;
 
             GL.GetInteger(GetPName.MaxTextureSize, out int maxTexture3DSize);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
             MaxTexture3DSize = maxTexture2DSize;
 
             GL.GetInteger(GetPName.MaxTextureSize, out int maxTextureCubeSize);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
             MaxTextureCubeSize = maxTextureCubeSize;
 
             GL.GetInteger(GetPName.MaxVertexAttribs, out MaxVertexAttributes);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             _maxVertexBufferSlots = MaxVertexAttributes;
             _newEnabledVertexAttributes = new bool[MaxVertexAttributes];
@@ -249,7 +250,7 @@ namespace MonoGame.Framework.Graphics
 #if !GLES
             // Initialize draw buffer attachment array
             GL.GetInteger(GetPName.MaxDrawBuffers, out int maxDrawBuffers);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             _drawBuffers = new DrawBuffersEnum[maxDrawBuffers];
             for (int i = 0; i < maxDrawBuffers; i++)
@@ -278,7 +279,7 @@ namespace MonoGame.Framework.Graphics
 
             _bufferBindingInfos = new BufferBindingInfo[_maxVertexBufferSlots];
             for (int i = 0; i < _bufferBindingInfos.Length; i++)
-                _bufferBindingInfos[i] = new BufferBindingInfo { Vbo = -1 };
+                _bufferBindingInfos[i] = new BufferBindingInfo { Vbo = default };
         }
 
         private void PlatformClear(ClearOptions options, Vector4 color, float depth, int stencil)
@@ -314,7 +315,7 @@ namespace MonoGame.Framework.Graphics
                 if (color != _lastClearColor)
                 {
                     GL.ClearColor(color.X, color.Y, color.Z, color.W);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                     _lastClearColor = color;
                 }
                 bufferMask |= ClearBufferMask.ColorBufferBit;
@@ -324,7 +325,7 @@ namespace MonoGame.Framework.Graphics
                 if (stencil != _lastClearStencil)
                 {
                     GL.ClearStencil(stencil);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                     _lastClearStencil = stencil;
                 }
                 bufferMask |= ClearBufferMask.StencilBufferBit;
@@ -335,7 +336,7 @@ namespace MonoGame.Framework.Graphics
                 if (depth != _lastClearDepth)
                 {
                     GL.ClearDepth(depth);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                     _lastClearDepth = depth;
                 }
                 bufferMask |= ClearBufferMask.DepthBufferBit;
@@ -347,7 +348,7 @@ namespace MonoGame.Framework.Graphics
 #endif
             {
                 GL.Clear(bufferMask);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 
             // Restore the previous render state.
@@ -388,79 +389,20 @@ namespace MonoGame.Framework.Graphics
             _clearDepthStencilState = null;
         }
 
-        internal void DisposeTexture(int handle)
+        internal void DisposeResource(GLHandle handle)
         {
-            if (IsDisposed)
+            if (IsDisposed || handle.IsNull)
                 return;
 
-            lock (_disposeActionsLock)
-            {
-                _disposeNextFrame.Add(ResourceHandle.Texture(handle));
-            }
-        }
-
-        internal void DisposeBuffer(int handle)
-        {
-            if (IsDisposed)
-                return;
-
-            lock (_disposeActionsLock)
-            {
-                _disposeNextFrame.Add(ResourceHandle.Buffer(handle));
-            }
-        }
-
-        internal void DisposeShader(int handle)
-        {
-            if (IsDisposed)
-                return;
-
-            lock (_disposeActionsLock)
-            {
-                _disposeNextFrame.Add(ResourceHandle.Shader(handle));
-            }
-        }
-
-        internal void DisposeProgram(int handle)
-        {
-            if (IsDisposed)
-                return;
-
-            lock (_disposeActionsLock)
-            {
-                _disposeNextFrame.Add(ResourceHandle.Program(handle));
-            }
-        }
-
-        internal void DisposeQuery(int handle)
-        {
-            if (IsDisposed)
-                return;
-
-            lock (_disposeActionsLock)
-            {
-                _disposeNextFrame.Add(ResourceHandle.Query(handle));
-            }
-        }
-
-        internal void DisposeFramebuffer(int handle)
-        {
-            if (IsDisposed)
-                return;
-
-            lock (_disposeActionsLock)
-            {
-                _disposeNextFrame.Add(ResourceHandle.Framebuffer(handle));
-            }
+            lock (_resourceFreeingLock)
+                _resourceFreeQueue.Add(handle);
         }
 
 #if DESKTOPGL || ANGLE
         static internal void DisposeContext(IntPtr resource)
         {
             lock (_disposeContextsLock)
-            {
                 _disposeContexts.Add(resource);
-            }
         }
 
         static internal void DisposeContexts()
@@ -480,20 +422,20 @@ namespace MonoGame.Framework.Graphics
 #if DESKTOPGL || ANGLE
             Context.SwapBuffers();
 #endif
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             // Dispose of any GL resources that were disposed in another thread
             int count = _disposeThisFrame.Count;
-            for (int i = 0; i < count; ++i)
+            for (int i = 0; i < count; i++)
                 _disposeThisFrame[i].Free();
             _disposeThisFrame.Clear();
 
-            lock (_disposeActionsLock)
+            lock (_resourceFreeingLock)
             {
                 // Swap lists so resources added during this draw will be released after the next draw
                 var tmp = _disposeThisFrame;
-                _disposeThisFrame = _disposeNextFrame;
-                _disposeNextFrame = tmp;
+                _disposeThisFrame = _resourceFreeQueue;
+                _resourceFreeQueue = tmp;
             }
         }
 
@@ -508,10 +450,10 @@ namespace MonoGame.Framework.Graphics
                 var pp = PresentationParameters;
                 GL.Viewport(value.X, pp.BackBufferHeight - value.Y - value.Height, value.Width, value.Height);
             }
-            GraphicsExtensions.LogGLError("GraphicsDevice.Viewport_set() GL.Viewport");
+            GL.LogError("GraphicsDevice.Viewport_set() GL.Viewport");
 
             GL.DepthRange(value.MinDepth, value.MaxDepth);
-            GraphicsExtensions.LogGLError("GraphicsDevice.Viewport_set() GL.DepthRange");
+            GL.LogError("GraphicsDevice.Viewport_set() GL.DepthRange");
 
             // In OpenGL we have to re-apply the special "posFixup"
             // vertex shader uniform if the viewport changes.
@@ -581,6 +523,7 @@ namespace MonoGame.Framework.Graphics
                             else
                                 depthInternalFormat = RenderbufferStorage.DepthComponent16;
                             break;
+
                         case DepthFormat.Depth24Stencil8:
                             if (Capabilities.SupportsPackedDepthStencil)
                                 depthInternalFormat = RenderbufferStorage.Depth24Stencil8Oes;
@@ -600,6 +543,7 @@ namespace MonoGame.Framework.Graphics
                     case DepthFormat.Depth24:
                         depthInternalFormat = RenderbufferStorage.DepthComponent24;
                         break;
+
                     case DepthFormat.Depth24Stencil8:
                         depthInternalFormat = RenderbufferStorage.Depth24Stencil8;
                         break;
@@ -643,44 +587,45 @@ namespace MonoGame.Framework.Graphics
             void Delete()
             {
                 int color = renderTarget.GLColorBuffer;
+                if (color == 0)
+                    return;
+
                 int depth = renderTarget.GLDepthBuffer;
                 int stencil = renderTarget.GLStencilBuffer;
                 bool colorIsRenderbuffer = color != renderTarget.GLTexture;
+                
+                if (colorIsRenderbuffer)
+                    _framebufferHelper.DeleteRenderbuffer(color);
+                if (stencil != 0 && stencil != depth)
+                    _framebufferHelper.DeleteRenderbuffer(stencil);
+                if (depth != 0)
+                    _framebufferHelper.DeleteRenderbuffer(depth);
 
-                if (color != 0)
+                var bindingsToDelete = new List<RenderTargetBinding[]>();
+                foreach (var bindings in _glFramebuffers.Keys)
                 {
-                    if (colorIsRenderbuffer)
-                        _framebufferHelper.DeleteRenderbuffer(color);
-                    if (stencil != 0 && stencil != depth)
-                        _framebufferHelper.DeleteRenderbuffer(stencil);
-                    if (depth != 0)
-                        _framebufferHelper.DeleteRenderbuffer(depth);
-
-                    var bindingsToDelete = new List<RenderTargetBinding[]>();
-                    foreach (var bindings in _glFramebuffers.Keys)
+                    foreach (var binding in bindings)
                     {
-                        foreach (var binding in bindings)
+                        if (binding.RenderTarget == renderTarget)
                         {
-                            if (binding.RenderTarget == renderTarget)
-                            {
-                                bindingsToDelete.Add(bindings);
-                                break;
-                            }
+                            bindingsToDelete.Add(bindings);
+                            break;
                         }
                     }
+                }
 
-                    foreach (var bindings in bindingsToDelete)
+                foreach (var bindings in bindingsToDelete)
+                {
+                    if (_glFramebuffers.TryGetValue(bindings, out int fbo))
                     {
-                        if (_glFramebuffers.TryGetValue(bindings, out int fbo))
-                        {
-                            _framebufferHelper.DeleteFramebuffer(fbo);
-                            _glFramebuffers.Remove(bindings);
-                        }
-                        if (_glResolveFramebuffers.TryGetValue(bindings, out fbo))
-                        {
-                            _framebufferHelper.DeleteFramebuffer(fbo);
-                            _glResolveFramebuffers.Remove(bindings);
-                        }
+                        _framebufferHelper.DeleteFramebuffer(fbo);
+                        _glFramebuffers.Remove(bindings);
+                    }
+
+                    if (_glResolveFramebuffers.TryGetValue(bindings, out fbo))
+                    {
+                        _framebufferHelper.DeleteFramebuffer(fbo);
+                        _glResolveFramebuffers.Remove(bindings);
                     }
                 }
             }
@@ -724,7 +669,7 @@ namespace MonoGame.Framework.Graphics
                 if (_lastRasterizerState.ScissorTestEnable)
                 {
                     GL.Disable(EnableCap.ScissorTest);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                 }
 
                 var glFramebuffer = _glFramebuffers[_currentRenderTargetBindings];
@@ -743,7 +688,7 @@ namespace MonoGame.Framework.Graphics
                 if (_lastRasterizerState.ScissorTestEnable)
                 {
                     GL.Enable(EnableCap.ScissorTest);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                 }
             }
             for (var i = 0; i < RenderTargetCount; ++i)
@@ -753,7 +698,7 @@ namespace MonoGame.Framework.Graphics
                 if (renderTarget.LevelCount > 1)
                 {
                     GL.BindTexture(renderTarget.GLTarget, renderTarget.GLTexture);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                     _framebufferHelper.GenerateMipmap((int)renderTarget.GLTarget);
                 }
             }
@@ -821,20 +766,20 @@ namespace MonoGame.Framework.Graphics
         }
 
         /// <summary>
-        /// Activates the Current Vertex/Pixel shader pair into a program.         
+        /// Activates the current vertex/pixel shader pair into a program.         
         /// </summary>
         private unsafe void ActivateShaderProgram()
         {
             // Lookup the shader program.
             var shaderProgram = _programCache.GetProgram(VertexShader, PixelShader);
-            if (shaderProgram.Program == -1)
+            if (shaderProgram.Program.IsNull)
                 return;
 
             // Set the new program if it has changed.
             if (_shaderProgram != shaderProgram)
             {
                 GL.UseProgram(shaderProgram.Program);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
                 _shaderProgram = shaderProgram;
             }
 
@@ -892,7 +837,7 @@ namespace MonoGame.Framework.Graphics
             }
 
             GL.Uniform4(posFixupLoc, 1, posFixup);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
         }
 
         internal void PlatformBeginApplyState()
@@ -916,7 +861,7 @@ namespace MonoGame.Framework.Graphics
                     BlendFactor.B / 255f,
                     BlendFactor.A / 255f);
 
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
                 _lastBlendState.BlendFactor = BlendFactor;
             }
         }
@@ -930,7 +875,7 @@ namespace MonoGame.Framework.Graphics
                     scissorRect.Y = PresentationParameters.BackBufferHeight - (scissorRect.Y + scissorRect.Height);
 
                 GL.Scissor(scissorRect.X, scissorRect.Y, scissorRect.Width, scissorRect.Height);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
                 _scissorRectangleDirty = false;
             }
 
@@ -940,8 +885,8 @@ namespace MonoGame.Framework.Graphics
 
             if (_indexBufferDirty && _indexBuffer != null)
             {
-                GL.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer._vbo);
-                GraphicsExtensions.CheckGLError();
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer._handle);
+                GL.CheckError();
             }
             _indexBufferDirty = false;
 
@@ -987,7 +932,7 @@ namespace MonoGame.Framework.Graphics
 
             GL.DrawElements(
                 PrimitiveTypeGL(primitiveType), elementCount, elementType, indexOffsetInBytes);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
         }
 
         private void PlatformDrawPrimitives(PrimitiveType primitiveType, int vertexStart, int vertexCount)
@@ -999,7 +944,7 @@ namespace MonoGame.Framework.Graphics
                 vertexStart = 0;
 
             GL.DrawArrays(PrimitiveTypeGL(primitiveType), vertexStart, vertexCount);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
         }
 
         private unsafe void PlatformDrawUserPrimitives<T>(
@@ -1010,10 +955,10 @@ namespace MonoGame.Framework.Graphics
 
             // Unbind current VBOs.
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
             _indexBufferDirty = true;
 
             fixed (T* vertexPtr = vertices)
@@ -1023,7 +968,7 @@ namespace MonoGame.Framework.Graphics
                 declaration.Apply(_vertexShader, (IntPtr)vertexPtr, ShaderProgramHash);
 
                 GL.DrawArrays(PrimitiveTypeGL(type), 0, vertices.Length);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
         }
 
@@ -1041,15 +986,16 @@ namespace MonoGame.Framework.Graphics
 
             // Unbind current VBOs.
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
             _indexBufferDirty = true;
 
+            var pType = PrimitiveTypeGL(primitiveType);
+            int elementCount = GetElementCountForType(primitiveType, primitiveCount);
             var elementType = indexElementSize == IndexElementSize.Short
                 ? IndexElementType.UnsignedShort : IndexElementType.UnsignedInt;
-            int elementCount = GetElementCountForType(primitiveType, primitiveCount);
 
             fixed (TVertex* vertexPtr = vertices)
             {
@@ -1059,9 +1005,8 @@ namespace MonoGame.Framework.Graphics
 
                 fixed (TIndex* indexPtr = indices)
                 {
-                    GL.DrawElements(
-                        PrimitiveTypeGL(primitiveType), elementCount, elementType, (IntPtr)indexPtr);
-                    GraphicsExtensions.CheckGLError();
+                    GL.DrawElements(pType, elementCount, elementType, (IntPtr)indexPtr);
+                    GL.CheckError();
                 }
             }
         }
@@ -1073,9 +1018,9 @@ namespace MonoGame.Framework.Graphics
             AssertSupportsInstancing();
             ApplyState(true);
 
+            var elementCount = GetElementCountForType(primitiveType, primitiveCount);
             var elementType = _indexBuffer.ElementSize == IndexElementSize.Short
                 ? IndexElementType.UnsignedShort : IndexElementType.UnsignedInt;
-            var elementCount = GetElementCountForType(primitiveType, primitiveCount);
 
             var indexOffsetInBytes = new IntPtr(startIndex * (int)elementType);
 
@@ -1105,16 +1050,7 @@ namespace MonoGame.Framework.Graphics
                     indexOffsetInBytes,
                     instanceCount);
             }
-            GraphicsExtensions.CheckGLError();
-        }
-
-        [DebuggerHidden]
-        private void AssertSupportsInstancing()
-        {
-            if (!Capabilities.SupportsInstancing)
-                throw new PlatformNotSupportedException(
-                    "Instanced geometry drawing requires at least OpenGL 3.2 or GLES 3.2. " +
-                    "Try upgrading your graphics card drivers.");
+            GL.CheckError();
         }
 
         private void PlatformGetBackBufferData<T>(Span<T> destination, Rectangle rect)
@@ -1136,7 +1072,7 @@ namespace MonoGame.Framework.Graphics
             int rowSize = rowBytes / Unsafe.SizeOf<T>();
             int count = destination.Length;
 
-            Span<byte> buffer = stackalloc byte[Math.Min(2048, rowBytes)];
+            Span<byte> buffer = stackalloc byte[Math.Min(4096, rowBytes)];
             var rowBuffer = MemoryMarshal.Cast<byte, T>(buffer);
 
             for (int dy = 0; dy < rect.Height / 2; dy++)
@@ -1195,8 +1131,16 @@ namespace MonoGame.Framework.Graphics
         {
             public IntPtr VertexOffset;
             public int InstanceFrequency;
-            public int Vbo;
+            public GLHandle Vbo;
             public VertexDeclaration.AttributeInfo AttributeInfo;
+        }
+
+        private void AssertSupportsInstancing()
+        {
+            if (!Capabilities.SupportsInstancing)
+                throw new PlatformNotSupportedException(
+                    "Instanced geometry drawing requires at least OpenGL 3.2 or GLES 3.2. " +
+                    "Try upgrading your graphics card drivers.");
         }
 
         // FIXME: why is this even here

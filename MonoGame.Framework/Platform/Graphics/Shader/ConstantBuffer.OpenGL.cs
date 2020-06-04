@@ -23,12 +23,10 @@ namespace MonoGame.Framework.Graphics
         private void PlatformInitialize()
         {
             var data = new byte[_parameters.Length];
-            for (var i = 0; i < _parameters.Length; i++)
+            unchecked
             {
-                unchecked
-                {
+                for (int i = 0; i < _parameters.Length; i++)
                     data[i] = (byte)(_parameters[i] | _offsets[i]);
-                }
             }
 
             HashKey = HashHelper.ComputeHash(data);
@@ -71,7 +69,7 @@ namespace MonoGame.Framework.Graphics
             // and cast this correctly... else it doesn't work as i guess
             // GL is checking the type of the uniform.
             GL.Uniform4(_location, _buffer.Length / 16, MemoryMarshal.Cast<byte, float>(_buffer));
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             // Clear the dirty flag.
             IsDirty = false;

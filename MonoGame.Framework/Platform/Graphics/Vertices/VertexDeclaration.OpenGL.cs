@@ -60,13 +60,13 @@ namespace MonoGame.Framework.Graphics
                     element.Normalized,
                     VertexStride,
                     offset + element.Offset);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
 
 #if !(GLES || MONOMAC)
                 if (GraphicsDevice.Capabilities.SupportsInstancing)
                 {
                     GL.VertexAttribDivisor(element.AttributeLocation, 0);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                 }
 #endif
             }

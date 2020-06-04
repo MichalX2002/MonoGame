@@ -23,8 +23,8 @@ namespace MonoGame.Framework.Graphics
             // http://www.khronos.org/registry/gles/extensions/OES/OES_mapbuffer.txt
             throw new NotSupportedException("Index buffers are write-only on OpenGL ES platforms");
 #else
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _vbo);
-            GraphicsExtensions.CheckGLError();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _handle);
+            GL.CheckError();
 
             IntPtr mapPtr = GL.MapBuffer(BufferTarget.ElementArrayBuffer, BufferAccess.ReadOnly);
 
@@ -34,7 +34,7 @@ namespace MonoGame.Framework.Graphics
             byteSrc.Slice(0, byteDst.Length).CopyTo(byteDst);
 
             GL.UnmapBuffer(BufferTarget.ElementArrayBuffer);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 #endif
         }
 
@@ -44,8 +44,8 @@ namespace MonoGame.Framework.Graphics
         {
             GenerateIfRequired();
 
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _vbo);
-            GraphicsExtensions.CheckGLError();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _handle);
+            GL.CheckError();
 
             DiscardBuffer(BufferTarget.ElementArrayBuffer, options, Capacity * (int)ElementSize);
 
@@ -53,7 +53,7 @@ namespace MonoGame.Framework.Graphics
             {
                 int size = data.Length * sizeof(T);
                 GL.BufferSubData(BufferTarget.ElementArrayBuffer, (IntPtr)byteOffset, (IntPtr)size, (IntPtr)ptr);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
         }
     }

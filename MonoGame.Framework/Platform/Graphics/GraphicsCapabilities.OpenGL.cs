@@ -91,7 +91,7 @@ namespace MonoGame.Framework.Graphics
             if (SupportsTextureFilterAnisotropic)
             {
                 GL.GetInteger(GetParamName.MaxTextureMaxAnisotropyExt, out anisotropy);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
             MaxTextureAnisotropy = anisotropy;
 

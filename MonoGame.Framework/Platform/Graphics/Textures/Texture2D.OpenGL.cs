@@ -52,13 +52,13 @@ namespace MonoGame.Framework.Graphics
 
                     GL.CompressedTexImage2D(
                         TextureTarget.Texture2D, level, glInternalFormat, width, height, 0, imageSize, IntPtr.Zero);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                 }
                 else
                 {
                     GL.TexImage2D(
                         TextureTarget.Texture2D, level, glInternalFormat, width, height, 0, glFormat, glType, IntPtr.Zero);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                 }
 
                 if ((width == 1 && height == 1) || !mipmap)
@@ -76,11 +76,11 @@ namespace MonoGame.Framework.Graphics
             int level, int arraySlice, Rectangle? rect, ReadOnlySpan<T> data)
             where T : unmanaged
         {
-            var prevTexture = GraphicsExtensions.GetBoundTexture2D();
+            var prevTexture = GL.GetBoundTexture2D();
             if (prevTexture != _glTexture)
             {
                 GL.BindTexture(TextureTarget.Texture2D, _glTexture);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 
             GenerateGLTextureIfRequired();
@@ -126,20 +126,20 @@ namespace MonoGame.Framework.Graphics
                     }
                 }
             }
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
 #if !ANDROID
             // Required to make sure that any texture uploads on a thread are 
             // completed before the main thread tries to use the texture.
             GL.Finish();
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 #endif
 
             // Restore the bound texture.
             if (prevTexture != _glTexture)
             {
                 GL.BindTexture(TextureTarget.Texture2D, prevTexture);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
         }
 
@@ -150,20 +150,20 @@ namespace MonoGame.Framework.Graphics
 #if GLES
             // TODO: check for for non renderable formats (formats that can't be attached to FBO)
             GL.GenFramebuffers(1, out int framebufferId);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, framebufferId);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.FramebufferTexture2D(
                 FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D,
                 _glTexture, 0);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             fixed (T* ptr = destination)
             {
                 GL.ReadPixels(rect.X, rect.Y, rect.Width, rect.Height, glFormat, glType, (IntPtr)ptr);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
             GraphicsDevice.DisposeFramebuffer(framebufferId);
 #else
@@ -185,7 +185,7 @@ namespace MonoGame.Framework.Graphics
                     var bufferSpan = new ReadOnlySpan<byte>((void*)buffer, bufferBytes);
 
                     GL.GetCompressedTexImage(TextureTarget.Texture2D, level, buffer);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
 
                     int rows = rect.Height / 4;
                     int tRectWidth = rect.Width / 4 * Format.GetSize() / sizeof(T);
@@ -209,7 +209,7 @@ namespace MonoGame.Framework.Graphics
                     var bufferSpan = new ReadOnlySpan<byte>((void*)buffer, bufferBytes);
 
                     GL.GetTexImage(TextureTarget.Texture2D, level, glFormat, glType, buffer);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
 
                     int pixelToT = Format.GetSize() / sizeof(T);
                     int tRectWidth = rect.Width * pixelToT;
@@ -238,7 +238,7 @@ namespace MonoGame.Framework.Graphics
                 return;
 
             GL.GenTextures(1, out _glTexture);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             // For best compatibility and to keep the default wrap mode of XNA, 
             // only set ClampToEdge if either dimension is not a power of two.
@@ -248,26 +248,26 @@ namespace MonoGame.Framework.Graphics
                 wrap = TextureWrapMode.ClampToEdge;
 
             GL.BindTexture(TextureTarget.Texture2D, _glTexture);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             var minFilter = (LevelCount > 1) ? (int)TextureMinFilter.LinearMipmapLinear : (int)TextureMinFilter.Linear;
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, minFilter);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrap);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrap);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
 #if !GLES
             // Set mipmap levels
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
 #endif
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
             if (GraphicsDevice.Capabilities.SupportsTextureMaxLevel)
             {
                 var paramName = SamplerState.TextureParameterNameTextureMaxLevel;
@@ -275,7 +275,7 @@ namespace MonoGame.Framework.Graphics
                     GL.TexParameter(TextureTarget.Texture2D, paramName, LevelCount - 1);
                 else
                     GL.TexParameter(TextureTarget.Texture2D, paramName, 1000);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
         }
     }

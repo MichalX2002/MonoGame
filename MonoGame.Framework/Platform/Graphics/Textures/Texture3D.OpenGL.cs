@@ -7,8 +7,8 @@ using MonoGame.OpenGL;
 
 namespace MonoGame.Framework.Graphics
 {
-	public partial class Texture3D : Texture
-	{
+    public partial class Texture3D : Texture
+    {
         private void PlatformConstruct(
             GraphicsDevice graphicsDevice, int width, int height, int depth, bool mipMap, SurfaceFormat format, bool renderTarget)
         {
@@ -21,15 +21,15 @@ namespace MonoGame.Framework.Graphics
                 throw new NotImplementedException(nameof(Texture3D) + " does not yet support mipmaps.");
 
             GL.GenTextures(1, out _glTexture);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.BindTexture(_glTarget, _glTexture);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
 
             GL.TexImage3D(_glTarget, 0, glInternalFormat, width, height, depth, 0, glFormat, glType, IntPtr.Zero);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 #endif
         }
 
@@ -46,10 +46,10 @@ namespace MonoGame.Framework.Graphics
             fixed (T* ptr = data)
             {
                 GL.BindTexture(_glTarget, _glTexture);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
 
                 GL.TexSubImage3D(_glTarget, level, left, top, front, width, height, depth, glFormat, glType, (IntPtr)ptr);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 #endif
         }
@@ -61,6 +61,6 @@ namespace MonoGame.Framework.Graphics
         {
             throw new NotImplementedException();
         }
-	}
+    }
 }
 

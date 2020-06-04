@@ -32,7 +32,7 @@ namespace MonoGame.Framework.Graphics
             Hardware,
 
             /// <summary>
-            /// Emulates the hardware device on CPU. Slowly, only for testing.
+            /// Emulates the hardware device on CPU. Slow, only for testing.
             /// </summary>
             Reference,
 
@@ -99,7 +99,6 @@ namespace MonoGame.Framework.Graphics
 #elif DESKTOPGL
                 var displayIndex = SDL.Display.GetWindowDisplayIndex(SDLGameWindow.Instance.Handle);
                 SDL.Display.GetCurrentDisplayMode(displayIndex, out SDL.Display.Mode mode);
-
                 return new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Rgba32);
 #elif WINDOWS
                 using (var graphics = System.Drawing.Graphics.FromHwnd(IntPtr.Zero))
@@ -314,14 +313,16 @@ namespace MonoGame.Framework.Graphics
 #endif
                 if (_supportedDisplayModes == null || displayChanged)
                 {
-                    var modes = new List<DisplayMode>(new[] { CurrentDisplayMode, });
+                    var modes = new List<DisplayMode>
+                    {
+                        CurrentDisplayMode
+                    };
 
 #if DESKTOPGL
                     _displayIndex = displayIndex;
                     modes.Clear();
 
-                    var modeCount = SDL.Display.GetNumDisplayModes(displayIndex);
-
+                    int modeCount = SDL.Display.GetNumDisplayModes(displayIndex);
                     for (int i = 0; i < modeCount; i++)
                     {
                         SDL.Display.GetDisplayMode(displayIndex, i, out SDL.Display.Mode mode);
@@ -329,8 +330,7 @@ namespace MonoGame.Framework.Graphics
                         // We are only using one format, Color
                         // mode.Format gets the Color format from SDL
                         var displayMode = new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Rgba32);
-                        if (!modes.Contains(displayMode))
-                            modes.Add(displayMode);
+                        modes.Add(displayMode);
                     }
 #elif DIRECTX
                     var dxgiFactory = new SharpDX.DXGI.Factory1();
@@ -343,9 +343,8 @@ namespace MonoGame.Framework.Graphics
                         var displayModes = output.GetDisplayModeList(formatTranslation.Key, 0);
                         foreach (var displayMode in displayModes)
                         {
-                            var xnaDisplayMode = new DisplayMode(displayMode.Width, displayMode.Height, formatTranslation.Value);
-                            if (!modes.Contains(xnaDisplayMode))
-                                modes.Add(xnaDisplayMode);
+                            var displayMode = new DisplayMode(displayMode.Width, displayMode.Height, formatTranslation.Value);
+                            modes.Add(displayMode);
                         }
                     }
 
@@ -353,12 +352,6 @@ namespace MonoGame.Framework.Graphics
                     adapter.Dispose();
                     dxgiFactory.Dispose();
 #endif
-                    modes.Sort((DisplayMode a, DisplayMode b) =>
-                    {
-                        if (a == b) return 0;
-                        if (a.Format <= b.Format && a.Width <= b.Width && a.Height <= b.Height) return -1;
-                        else return 1;
-                    });
                     _supportedDisplayModes = new DisplayModeCollection(modes);
                 }
 
@@ -377,9 +370,8 @@ namespace MonoGame.Framework.Graphics
         */
 
         /// <summary>
-        /// Gets a <see cref="bool"/> indicating whether
-        /// <see cref="CurrentDisplayMode"/> has a
-        /// Width:Height ratio corresponding to a widescreen <see cref="DisplayMode"/>.
+        /// Gets a <see cref="bool"/> indicating whether <see cref="CurrentDisplayMode"/> has 
+        /// a Width:Height ratio corresponding to a widescreen <see cref="DisplayMode"/>.
         /// Common widescreen modes include 16:9, 16:10 and 2:1.
         /// </summary>
         public bool IsWideScreen
@@ -416,7 +408,11 @@ namespace MonoGame.Framework.Graphics
         }
 
 #if WINDOWS && !OPENGL
-        [System.Runtime.InteropServices.DllImport("gdi32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto, SetLastError = true, ExactSpelling = true)]
+        [System.Runtime.InteropServices.DllImport(
+            "gdi32.dll", 
+            CharSet = System.Runtime.InteropServices.CharSet.Auto, 
+            SetLastError = true,
+            ExactSpelling = true)]
         public static extern int GetDeviceCaps(IntPtr hDC, int nIndex);
 
         private const int HORZRES = 8;

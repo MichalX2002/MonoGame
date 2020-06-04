@@ -9,7 +9,7 @@ namespace MonoGame.Framework.Graphics
 {
     public abstract partial class BufferBase : GraphicsResource
     {
-        internal int _vbo;
+        internal GLHandle _handle;
         internal BufferUsageHint _usageHint;
 
         private BufferTarget _target;
@@ -18,7 +18,7 @@ namespace MonoGame.Framework.Graphics
         /// <inheritdoc/>
         protected override void GraphicsDeviceResetting()
         {
-            _vbo = 0;
+            _handle = default;
         }
 
         internal virtual void DiscardBuffer(BufferTarget target, SetDataOptions options, int byteSize)
@@ -28,7 +28,7 @@ namespace MonoGame.Framework.Graphics
                 // By assigning NULL data to the buffer this gives a hint
                 // to the device to discard the previous content.
                 GL.BufferData(target, (IntPtr)byteSize, IntPtr.Zero, _usageHint);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
         }
 
@@ -43,18 +43,20 @@ namespace MonoGame.Framework.Graphics
 
         internal void GenerateIfRequired()
         {
-            if (_vbo != 0)
+            if (!_handle.IsNull)
                 return;
 
-            GL.GenBuffers(1, out _vbo);
-            GraphicsExtensions.CheckGLError();
+            GL.GenBuffers(1, out int buffer);
+            GL.CheckError();
 
-            GL.BindBuffer(_target, _vbo);
-            GraphicsExtensions.CheckGLError();
+            GL.BindBuffer(_target, buffer);
+            GL.CheckError();
 
             int sizeInBytes = Capacity * _elementSize;
             GL.BufferData(_target, (IntPtr)sizeInBytes, IntPtr.Zero, _usageHint);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
+
+            _handle = GLHandle.Buffer(buffer);
         }
 
         /// <summary>
@@ -64,7 +66,7 @@ namespace MonoGame.Framework.Graphics
         protected override void Dispose(bool disposing)
         {
             if (!IsDisposed)
-                GraphicsDevice.DisposeBuffer(_vbo);
+                GraphicsDevice.DisposeResource(_handle);
 
             base.Dispose(disposing);
         }

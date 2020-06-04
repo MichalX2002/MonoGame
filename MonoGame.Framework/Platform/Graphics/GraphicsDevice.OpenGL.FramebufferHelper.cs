@@ -60,19 +60,19 @@ namespace MonoGame.Framework.Graphics
             internal virtual void GenRenderbuffer(out int renderbuffer)
             {
                 GL.GenRenderbuffers(1, out renderbuffer);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 
             internal virtual void BindRenderbuffer(int renderbuffer)
             {
                 GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, renderbuffer);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 
             internal virtual void DeleteRenderbuffer(int renderbuffer)
             {
-                GL.DeleteRenderbuffers(1, ref renderbuffer);
-                GraphicsExtensions.CheckGLError();
+                GL.DeleteRenderbuffers(1, renderbuffer);
+                GL.CheckError();
             }
 
             internal virtual void RenderbufferStorageMultisample(int samples, int internalFormat, int width, int height)
@@ -82,25 +82,25 @@ namespace MonoGame.Framework.Graphics
                         RenderbufferTarget.RenderbufferExt, samples, (RenderbufferStorage)internalFormat, width, height);
                 else
                     GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, (RenderbufferStorage)internalFormat, width, height);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 
             internal virtual void GenFramebuffer(out int framebuffer)
             {
                 GL.GenFramebuffers(1, out framebuffer);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 
             internal virtual void BindFramebuffer(int framebuffer)
             {
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, framebuffer);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 
             internal virtual void BindReadFramebuffer(int readFramebuffer)
             {
                 GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, readFramebuffer);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 
             internal virtual void InvalidateDrawFramebuffer()
@@ -117,38 +117,38 @@ namespace MonoGame.Framework.Graphics
 
             internal virtual void DeleteFramebuffer(int framebuffer)
             {
-                GL.DeleteFramebuffers(1, ref framebuffer);
-                GraphicsExtensions.CheckGLError();
+                GL.DeleteFramebuffers(1, framebuffer);
+                GL.CheckError();
             }
 
             internal virtual void FramebufferTexture2D(int attachement, int target, int texture, int level = 0, int samples = 0)
             {
                 GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, (FramebufferAttachment)attachement, (TextureTarget)target, texture, level);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 
             internal virtual void FramebufferRenderbuffer(int attachement, int renderbuffer, int level = 0)
             {
                 GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, (FramebufferAttachment)attachement, RenderbufferTarget.Renderbuffer, renderbuffer);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 
             internal virtual void GenerateMipmap(int target)
             {
                 GL.GenerateMipmap((GenerateMipmapTarget)target);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 
             internal virtual void BlitFramebuffer(int iColorAttachment, int width, int height)
             {
                 GL.ReadBuffer(ReadBufferMode.ColorAttachment0 + iColorAttachment);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
 
                 GL.DrawBuffer(DrawBufferMode.ColorAttachment0 + iColorAttachment);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
 
                 GL.BlitFramebuffer(0, 0, width, height, 0, 0, width, height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 
             internal virtual void CheckFramebufferStatus()

@@ -17,27 +17,27 @@ namespace MonoGame.Framework.Graphics
             _glTarget = TextureTarget.TextureCubeMap;
 
             GL.GenTextures(1, out _glTexture);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.BindTexture(TextureTarget.TextureCubeMap, _glTexture);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.TexParameter(TextureTarget.TextureCubeMap,
                 TextureParameterName.TextureMinFilter,
                 mipMap ? (int)TextureMinFilter.LinearMipmapLinear : (int)TextureMinFilter.Linear);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.TexParameter(TextureTarget.TextureCubeMap,
                 TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.TexParameter(TextureTarget.TextureCubeMap,
                 TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             GL.TexParameter(TextureTarget.TextureCubeMap,
                 TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
 
@@ -90,7 +90,7 @@ namespace MonoGame.Framework.Graphics
                     GL.TexImage2D(
                         target, 0, glInternalFormat, size, size, 0, glFormat, glType, IntPtr.Zero);
                 }
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
 
             if (mipMap)
@@ -103,7 +103,7 @@ namespace MonoGame.Framework.Graphics
                 // This updates the mipmaps after a change in the base texture
                 GL.TexParameter(
                     TextureTarget.TextureCubeMap, TextureParameterName.GenerateMipmap, (int)Bool.True);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
 #endif
             }
         }
@@ -128,7 +128,7 @@ namespace MonoGame.Framework.Graphics
                 var tmpSize = Math.Max(Size >> level, 1) / 4 * tFullWidth * sizeof(T);
                 IntPtr tmp = Marshal.AllocHGlobal(tmpSize);
                 GL.GetCompressedTexImage(target, level, tmp);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
 
                 var tmpSpan = new Span<byte>((void*)tmp, tmpSize);
                 int rowCount = rect.Height / 4;
@@ -148,7 +148,7 @@ namespace MonoGame.Framework.Graphics
                 int tmpSize = Math.Max(Size >> level, 1) * tFullWidth * sizeof(T);
                 IntPtr tmp = Marshal.AllocHGlobal(tmpSize);
                 GL.GetTexImage(target, level, glFormat, glType, tmp);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
 
                 var tmpSpan = new Span<byte>((void*)tmp, tmpSize);
                 int rowCount = rect.Height;
@@ -171,7 +171,7 @@ namespace MonoGame.Framework.Graphics
             where T : unmanaged
         {
             GL.BindTexture(TextureTarget.TextureCubeMap, _glTexture);
-            GraphicsExtensions.CheckGLError();
+            GL.CheckError();
 
             var target = GetGLCubeFace(face);
             fixed (T* dataPtr = data)
@@ -188,7 +188,7 @@ namespace MonoGame.Framework.Graphics
                         target, level, rect.X, rect.Y, rect.Width, rect.Height,
                         glFormat, glType, (IntPtr)dataPtr);
                 }
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
             }
         }
 

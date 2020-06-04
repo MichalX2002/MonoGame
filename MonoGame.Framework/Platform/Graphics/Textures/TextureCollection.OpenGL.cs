@@ -36,7 +36,7 @@ namespace MonoGame.Framework.Graphics
                 var tex = _textures[i];
 
                 GL.ActiveTexture(TextureUnit.Texture0 + i);
-                GraphicsExtensions.CheckGLError();
+                GL.CheckError();
 
                 // Clear the previous binding if the 
                 // target is different from the new one.
@@ -44,14 +44,14 @@ namespace MonoGame.Framework.Graphics
                 {
                     GL.BindTexture(_targets[i], 0);
                     _targets[i] = 0;
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
                 }
 
                 if (tex != null)
                 {
                     _targets[i] = tex._glTarget;
                     GL.BindTexture(tex._glTarget, tex._glTexture);
-                    GraphicsExtensions.CheckGLError();
+                    GL.CheckError();
 
                     unchecked
                     {
