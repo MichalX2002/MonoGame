@@ -4,9 +4,7 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using MonoGame.Framework.Vector;
 using FastVector2 = System.Numerics.Vector2;
 
 namespace MonoGame.Framework
@@ -24,12 +22,14 @@ namespace MonoGame.Framework
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public struct Vector2 : IEquatable<Vector2>
     {
+        internal static Vector2 MaxValueByte => new Vector2(byte.MaxValue);
+
         #region Public Constants
 
         /// <summary>
         /// Returns a <see cref="Vector2"/> with all components set to 0.
         /// </summary>
-        public static Vector2 Zero => new Vector2();
+        public static Vector2 Zero => FastVector2.Zero;
 
         /// <summary>
         /// Returns a <see cref="Vector2"/> with all components set 0.5.
@@ -39,7 +39,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns a <see cref="Vector2"/> with all components set to 1.
         /// </summary>
-        public static Vector2 One => new Vector2(1f);
+        public static Vector2 One => FastVector2.One;
 
         /// <summary>
         /// Returns a <see cref="Vector2"/> with all components set to -1.
@@ -79,6 +79,11 @@ namespace MonoGame.Framework
 
         #region Constructors
 
+        private Vector2(FastVector2 value)
+        {
+            Base = value;
+        }
+
         /// <summary>
         /// Constructs a 2D vector with X and Y from two values.
         /// </summary>
@@ -96,26 +101,6 @@ namespace MonoGame.Framework
         public Vector2(float value)
         {
             Base = new FastVector2(value);
-        }
-
-        #endregion
-
-        #region ToVector3
-
-        /// <summary>
-        /// Gets the <see cref="Vector3"/> representation of this <see cref="Vector2"/>.
-        /// </summary>
-        public readonly Vector3 ToVector3()
-        {
-            return new Vector3(this, 0);
-        }
-
-        /// <summary>
-        /// Gets the <see cref="Vector4"/> representation of this <see cref="Vector2"/>.
-        /// </summary>
-        public readonly Vector4 ToVector4()
-        {
-            return new Vector4(this, 0, 1);
         }
 
         #endregion
@@ -298,7 +283,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Divides the components of a <see cref="Vector2"/> by the components of another <see cref="Vector2"/>.
         /// </summary>
-        /// <param name="left">Source <see cref="Vector2"/>.</param>
+        /// <param name="left">Left <see cref="Vector2"/>.</param>
         /// <param name="right">Divisor <see cref="Vector2"/>.</param>
         /// <returns>The result of dividing the vectors.</returns>
         public static Vector2 Divide(Vector2 left, Vector2 right)
@@ -320,7 +305,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Divides the components of a <see cref="Vector2"/> by the components of another <see cref="Vector2"/>.
         /// </summary>
-        /// <param name="left">Source <see cref="Vector2"/> on the left of the div sign.</param>
+        /// <param name="left">Left <see cref="Vector2"/> on the left of the div sign.</param>
         /// <param name="right">Divisor <see cref="Vector2"/> on the right of the div sign.</param>
         /// <returns>The result of dividing the vectors.</returns>
         public static Vector2 operator /(Vector2 left, Vector2 right)
@@ -428,16 +413,6 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #region GetHashCode
-
-        /// <summary>
-        /// Gets the hash code of this <see cref="Vector2"/>.
-        /// </summary>
-        /// <returns>Hash code of this <see cref="Vector2"/>.</returns>
-        public override int GetHashCode() => Base.GetHashCode();
-
-        #endregion
-
         #region Hermite
 
         /// <summary>
@@ -501,12 +476,12 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #region PreciseLerp
+        #region LerpPrecise
 
         /// <summary>
         /// Creates a new <see cref="Vector2"/> that contains linear interpolation of the specified vectors.
         /// Less efficient but more precise compared to <see cref="Lerp(Vector2, Vector2, float)"/>.
-        /// See remarks section of <see cref="MathHelper.LerpPrecise"/> on MathHelper for more info.
+        /// See remarks section of <see cref="MathHelper.LerpPrecise"/> for more info.
         /// </summary>
         /// <param name="value1">The first vector.</param>
         /// <param name="value2">The second vector.</param>
@@ -717,10 +692,10 @@ namespace MonoGame.Framework
         #region Subtract (operator -)
 
         /// <summary>
-        /// Creates a new <see cref="Vector2"/> that contains subtraction of on <see cref="Vector2"/> from a another.
+        /// Performs vector subtraction on <paramref name="a"/> and <paramref name="b"/>.
         /// </summary>
-        /// <param name="left">Source <see cref="Vector2"/>.</param>
-        /// <param name="right">Source <see cref="Vector2"/>.</param>
+        /// <param name="left">Left <see cref="Vector2"/>.</param>
+        /// <param name="right">Right <see cref="Vector2"/>.</param>
         /// <returns>The result of the vector subtraction.</returns>
         public static Vector2 Subtract(Vector2 left, Vector2 right)
         {
@@ -728,10 +703,10 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Subtracts a <see cref="Vector2"/> from a <see cref="Vector2"/>.
+        /// Subtracts left from right.
         /// </summary>
-        /// <param name="left">Source <see cref="Vector2"/> on the left of the sub sign.</param>
-        /// <param name="right">Source <see cref="Vector2"/> on the right of the sub sign.</param>
+        /// <param name="left">Left <see cref="Vector2"/> on the left of the sub sign.</param>
+        /// <param name="right">Right <see cref="Vector2"/> on the right of the sub sign.</param>
         /// <returns>Result of the vector subtraction.</returns>
         public static Vector2 operator -(Vector2 left, Vector2 right)
         {
@@ -739,25 +714,6 @@ namespace MonoGame.Framework
         }
 
         #endregion
-
-        /// <summary>
-        /// Returns a <see cref="string"/> representation of this <see cref="Vector2"/>.
-        /// </summary>
-        public override string ToString() => Base.ToString();
-
-        /// <summary>
-        /// Gets a <see cref="Point"/> representation for this object.
-        /// </summary>
-        public readonly Point ToPoint() => new Point((int)X, (int)Y);
-
-        /// <summary>
-        /// Deconstruction method for <see cref="Vector2"/>.
-        /// </summary>
-        public readonly void Deconstruct(out float x, out float y)
-        {
-            x = X;
-            y = Y;
-        }
 
         #region Transform
 
@@ -850,14 +806,85 @@ namespace MonoGame.Framework
 
         #endregion
 
-        public static implicit operator FastVector2(Vector2 value)
+        /// <summary>
+        /// Gets the <see cref="Vector3"/> representation of this <see cref="Vector2"/>.
+        /// </summary>
+        public readonly Vector3 ToVector3()
+        {
+            return new Vector3(this, 0);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="Vector4"/> representation of this <see cref="Vector2"/>.
+        /// </summary>
+        public readonly Vector4 ToVector4()
+        {
+            return new Vector4(this, 0, 1);
+        }
+
+        /// <summary>
+        /// Gets a <see cref="PointF"/> representation of this object.
+        /// </summary>
+        public readonly PointF ToPointF()
+        {
+            return UnsafeR.As<Vector2, PointF>(this);
+        }
+
+        /// <summary>
+        /// Gets a <see cref="SizeF"/> representation of this object.
+        /// </summary>
+        public readonly SizeF ToSizeF()
+        {
+            return UnsafeR.As<Vector2, SizeF>(this);
+        }
+
+        /// <summary>
+        /// Gets a <see cref="Point"/> representation of this object.
+        /// </summary>
+        public readonly Point ToPoint()
+        {
+            return new Point((int)X, (int)Y);
+        }
+
+        /// <summary>
+        /// Gets a <see cref="Size"/> representation of this object.
+        /// </summary>
+        public readonly Size ToSize()
+        {
+            return new Size((int)X, (int)Y);
+        }
+
+        /// <summary>
+        /// Deconstruction method for <see cref="Vector2"/>.
+        /// </summary>
+        public readonly void Deconstruct(out float x, out float y)
+        {
+            x = X;
+            y = Y;
+        }
+
+        #region Object overrides
+
+        /// <summary>
+        /// Gets a hash code of this <see cref="Vector2"/>.
+        /// </summary>
+        public override readonly int GetHashCode() => Base.GetHashCode();
+
+        /// <summary>
+        /// Returns a <see cref="string"/> representation of this <see cref="Vector2"/>.
+        /// </summary>
+        public override readonly string ToString() => Base.ToString();
+
+        #endregion
+
+        public static implicit operator FastVector2(in Vector2 value)
         {
             return value.Base;
         }
 
         public static implicit operator Vector2(in FastVector2 value)
         {
-            return new Vector2 { Base = value };
+            return new Vector2(value);
         }
     }
 }

@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.Serialization;
 
 namespace MonoGame.Framework
@@ -13,14 +14,14 @@ namespace MonoGame.Framework
     public struct Ray : IEquatable<Ray>
     {
         [DataMember]
-        public Vector3 Direction;
-
-        [DataMember]
         public Vector3 Position;
 
+        [DataMember]
+        public Vector3 Direction;
+
         internal string DebuggerDisplay => string.Concat(
-            "Pos(", Position.DebuggerDisplay, ") \n",
-            "Dir(", Direction.DebuggerDisplay, ")");
+            "Position = ", Position.ToString(), ", ",
+            "Direction = ", Direction.ToString());
 
         public Ray(Vector3 position, Vector3 direction)
         {
@@ -29,16 +30,6 @@ namespace MonoGame.Framework
         }
 
         #region Public Methods
-
-        public bool Equals(Ray other)
-        {
-            return this == other;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Ray other && Equals(other);
-        }
 
         // adapted from
         // http://www.scratchapixel.com/lessons/3d-basic-lessons/lesson-7-intersecting-simple-shapes/ray-box-intersection/
@@ -49,7 +40,7 @@ namespace MonoGame.Framework
 
             float? tMin = null, tMax = null;
 
-            if (Math.Abs(Direction.X) < Epsilon)
+            if (MathF.Abs(Direction.X) < Epsilon)
             {
                 if (Position.X < box.Min.X || Position.X > box.Max.X)
                     return false;
@@ -67,7 +58,7 @@ namespace MonoGame.Framework
                 }
             }
 
-            if (Math.Abs(Direction.Y) < Epsilon)
+            if (MathF.Abs(Direction.Y) < Epsilon)
             {
                 if (Position.Y < box.Min.Y || Position.Y > box.Max.Y)
                     return false;
@@ -91,7 +82,7 @@ namespace MonoGame.Framework
                 if (!tMax.HasValue || tMaxY < tMax) tMax = tMaxY;
             }
 
-            if (Math.Abs(Direction.Z) < Epsilon)
+            if (MathF.Abs(Direction.Z) < Epsilon)
             {
                 if (Position.Z < box.Min.Z || Position.Z > box.Max.Z)
                     return false;
@@ -137,6 +128,7 @@ namespace MonoGame.Framework
         {
             if (frustum == null)
                 throw new ArgumentNullException(nameof(frustum));
+
             return frustum.Intersects(this, out distance);
         }
 
@@ -153,7 +145,6 @@ namespace MonoGame.Framework
             // the radius of the sphere, it means we've intersected. N.B. checking the LengthSquared is faster.
             if (differenceLengthSquared < sphereRadiusSquared)
                 return true;
-
 
             float distanceAlongRay = Vector3.Dot(Direction, difference);
             // If the ray is pointing away from the sphere then we don't ever intersect
@@ -173,10 +164,10 @@ namespace MonoGame.Framework
             return true;
         }
 
-        public bool Intersects(in Plane plane, out float distance)
+        public bool Intersects(Plane plane, out float distance)
         {
             float dot = Vector3.Dot(Direction, plane.Normal);
-            if (Math.Abs(dot) < 0.00001f)
+            if (MathF.Abs(dot) < 0.00001f)
             {
                 distance = 0;
                 return false;
@@ -192,17 +183,6 @@ namespace MonoGame.Framework
             return true;
         }
 
-        public static bool operator !=(in Ray a, in Ray b)
-        {
-            return !a.Equals(b);
-        }
-
-        public static bool operator ==(in Ray a, in Ray b)
-        {
-            return a.Position.Equals(b.Position)
-                && a.Direction.Equals(b.Direction);
-        }
-
         /// <summary>
         /// Deconstruction method for <see cref="Ray"/>.
         /// </summary>
@@ -214,12 +194,35 @@ namespace MonoGame.Framework
             direction = Direction;
         }
 
-        public override string ToString()
+        #endregion
+
+        #region Equals
+
+        public readonly bool Equals(Ray other) => this == other;
+
+        public override readonly bool Equals(object obj) => obj is Ray other && Equals(other);
+
+        public static bool operator ==(in Ray a, in Ray b)
+        {
+            return a.Position == b.Position
+                && a.Direction == b.Direction;
+        }
+
+        public static bool operator !=(in Ray a, in Ray b)
+        {
+            return !(a == b);
+        }
+
+        #endregion
+
+        #region Object overrides
+
+        public override readonly string ToString()
         {
             return "{Position:" + Position.ToString() + " Direction:" + Direction.ToString() + "}";
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(Direction, Position);
         }

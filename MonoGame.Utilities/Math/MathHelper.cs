@@ -11,35 +11,6 @@ namespace MonoGame.Framework
     /// </summary>
     public static partial class MathHelper
     {
-        #region Constants
-
-        /// <summary>
-        /// Represents the log base ten of E.
-        /// </summary>
-        public const float Log10E = 0.4342945f;
-
-        /// <summary>
-        /// Represents the log base two of E.
-        /// </summary>
-        public const float Log2E = 1.442695f;
-
-        /// <summary>
-        /// Represents the value of pi divided by two.
-        /// </summary>
-        public const float PiOver2 = (float)(Math.PI / 2.0);
-
-        /// <summary>
-        /// Represents the value of pi divided by four.
-        /// </summary>
-        public const float PiOver4 = (float)(Math.PI / 4.0);
-
-        /// <summary>
-        /// Represents the value of pi times two.
-        /// </summary>
-        public const float TwoPi = (float)(Math.PI * 2.0);
-
-        #endregion
-
         /// <summary>
         /// Returns the Cartesian coordinate for one axis of a point that 
         /// is defined by a given triangle and two normalized barycentric (areal) coordinates.
@@ -58,7 +29,7 @@ namespace MonoGame.Framework
         /// <returns>Cartesian coordinate of the specified point with respect to the axis being used.</returns>
         public static float Barycentric(float a, float b, float c, float amount1, float amount2)
         {
-            return a + (b - a) * amount1 + (c - a) * amount2;
+            return MathF.FusedMultiplyAdd(c - a, amount2, MathF.FusedMultiplyAdd(b - a, amount1, a));
         }
 
         /// <summary>
@@ -74,12 +45,14 @@ namespace MonoGame.Framework
         {
             // Using formula from http://www.mvps.org/directx/articles/catmull/
             // Internally using doubles not to lose precission
-            double amountSquared = amount * amount;
-            double amountCubed = amountSquared * amount;
-            return (float)(0.5 * (2.0 * b +
+            double aSquared = amount * amount;
+            double aCubed = aSquared * amount;
+
+            return (float)(0.5 * (
                 (c - a) * amount +
-                (2.0 * a - 5.0 * b + 4.0 * c - d) * amountSquared +
-                (3.0 * b - a - 3.0 * c + d) * amountCubed));
+                (2.0 * a - 5.0 * b + 4.0 * c - d) * aSquared +
+                (3.0 * b - a - 3.0 * c + d) * aCubed +
+                2.0 * b));
         }
 
         /// <summary>
@@ -114,20 +87,20 @@ namespace MonoGame.Framework
             }
             else
             {
-                // All transformed to double not to lose precission
+                // Cast to double to not lose precision
                 // Otherwise, for high numbers of "amount" the result is NaN instead of Infinity
                 double v1 = position1;
                 double v2 = position2;
                 double t1 = tangent1;
                 double t2 = tangent2;
-                double s = amount;
-                double sSquared = s * s;
-                double sCubed = sSquared * s;
+                double a = amount;
+                double aSquared = a * a;
+                double aCubed = aSquared * a;
 
                 return (float)(
-                    (2 * v1 - 2 * v2 + t2 + t1) * sCubed +
-                    (3 * v2 - 3 * v1 - 2 * t1 - t2) * sSquared +
-                    t1 * s +
+                    (2 * v1 - 2 * v2 + t2 + t1) * aCubed +
+                    (3 * v2 - 3 * v1 - 2 * t1 - t2) * aSquared +
+                    t1 * a +
                     v1);
             }
         }
@@ -151,14 +124,15 @@ namespace MonoGame.Framework
 
         /// <summary>
         /// Linearly interpolates between two values.
-        /// This method is a less efficient, more precise version of <see cref="Lerp"/>.
+        /// This method is a slightly less efficient, more precise version of <see cref="Lerp"/>.
         /// See remarks for more info.
         /// </summary>
         /// <param name="a">Source value.</param>
         /// <param name="b">Destination value.</param>
         /// <param name="amount">Value between 0 and 1 indicating the weight of value2.</param>
-        /// <returns>Interpolated value.</returns>
-        /// <remarks>This method performs the linear interpolation based on the following formula:
+        /// <returns>The interpolated value.</returns>
+        /// <remarks>
+        /// This method performs the linear interpolation based on the following formula:
         /// <code>((1 - amount) * value1) + (value2 * amount)</code>.
         /// Passing amount a value of 0 will cause value1 to be returned, a value of 1 will cause value2 to be returned.
         /// This method does not have the floating-point precision issue that <see cref="Lerp"/> has.
@@ -166,10 +140,11 @@ namespace MonoGame.Framework
         /// right at the edge of the interpolation range (amount=1),
         /// <see cref="Lerp"/> will return 0 (whereas it should return 1).
         /// This also holds for value1=10^17, value2=10; value1=10^18,value2=10^2... so on.
-        /// For an in depth explanation of the issue, see below references:
-        /// Relevant Wikipedia Article and StackOverflow Answer: 
+        /// <para>
+        /// For an in depth explanation of the issue see relevant Wikipedia article and StackOverflow answer: 
         /// https://en.wikipedia.org/wiki/Linear_interpolation#Programming_language_support
         /// http://stackoverflow.com/questions/4353525/floating-point-linear-interpolation#answer-23716956
+        /// </para>
         /// </remarks>
         public static float LerpPrecise(float a, float b, float amount)
         {
@@ -189,9 +164,29 @@ namespace MonoGame.Framework
             // If amount < 0, return value1
             // If amount > 1, return value2
             float result = Clamp(amount, 0f, 1f);
-            result = Hermite(a, 0f, b, 0f, result);
+            return Hermite(a, 0f, b, 0f, result);
+        }
 
-            return result;
+        /// <summary>
+        /// Converts radians to degrees.
+        /// </summary>
+        /// <param name="radians">The angle in radians.</param>
+        /// <returns>The angle in degrees.</returns>
+        /// <remarks>Factor = 180 / PI</remarks>
+        public static double ToDegrees(double radians)
+        {
+            return radians * 57.295779513082320876798154814105;
+        }
+
+        /// <summary>
+        /// Converts degrees to radians.
+        /// </summary>
+        /// <param name="degrees">The angle in degrees.</param>
+        /// <returns>The angle in radians.</returns>
+        /// <remarks>Factor = PI / 180</remarks>
+        public static double ToRadians(double degrees)
+        {
+            return degrees * 0.017453292519943295769236907684886;
         }
 
         /// <summary>
@@ -200,9 +195,8 @@ namespace MonoGame.Framework
         /// <param name="radians">The angle in radians.</param>
         /// <returns>The angle in degrees.</returns>
         /// <remarks>
-        /// This method uses double precission internally,
-        /// though it returns single float
-        /// Factor = 180 / pi
+        /// This method uses double precission internally, though it returns single float.
+        /// Factor = 180 / PI
         /// </remarks>
         public static float ToDegrees(float radians)
         {
@@ -215,9 +209,8 @@ namespace MonoGame.Framework
         /// <param name="degrees">The angle in degrees.</param>
         /// <returns>The angle in radians.</returns>
         /// <remarks>
-        /// This method uses double precission internally,
-        /// though it returns single float
-        /// Factor = pi / 180
+        /// This method uses double precission internally, though it returns single float.
+        /// Factor = PI / 180
         /// </remarks>
         public static float ToRadians(float degrees)
         {
@@ -231,13 +224,34 @@ namespace MonoGame.Framework
         /// <returns>The new angle, in radians.</returns>
         public static float WrapAngle(float angle)
         {
+            const float TwoPI = MathF.PI * 2;
+
             if ((angle > -MathF.PI) && (angle <= MathF.PI))
                 return angle;
-            angle %= TwoPi;
+            angle %= TwoPI;
             if (angle <= -MathF.PI)
-                return angle + TwoPi;
+                return angle + TwoPI;
             if (angle > MathF.PI)
-                return angle - TwoPi;
+                return angle - TwoPI;
+            return angle;
+        }
+
+        /// <summary>
+        /// Reduces a given angle to a value between π and -π.
+        /// </summary>
+        /// <param name="angle">The angle to reduce, in radians.</param>
+        /// <returns>The new angle, in radians.</returns>
+        public static double WrapAngle(double angle)
+        {
+            const double TwoPI = Math.PI * 2;
+
+            if ((angle > -Math.PI) && (angle <= Math.PI))
+                return angle;
+            angle %= TwoPI;
+            if (angle <= -Math.PI)
+                return angle + TwoPI;
+            if (angle > Math.PI)
+                return angle - TwoPI;
             return angle;
         }
 

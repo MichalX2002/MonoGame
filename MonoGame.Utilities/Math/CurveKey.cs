@@ -18,17 +18,17 @@ namespace MonoGame.Framework
         #region Properties
 
         /// <summary>
+        /// Gets a position of the key on the curve.
+        /// </summary>
+        [DataMember]
+        public float Position { get; }
+
+        /// <summary>
         /// Gets or sets the indicator whether the segment between this
         /// point and the next point on the curve is discrete or continuous.
         /// </summary>
         [DataMember]
         public CurveContinuity Continuity { get; set; }
-
-        /// <summary>
-        /// Gets a position of the key on the curve.
-        /// </summary>
-        [DataMember]
-        public float Position { get; }
 
         /// <summary>
         /// Gets or sets a tangent when approaching this point from the previous point on the curve.
@@ -69,7 +69,6 @@ namespace MonoGame.Framework
         public CurveKey(float position, float value)
             : this(position, value, 0, 0, CurveContinuity.Smooth)
         {
-
         }
 
         /// <summary>
@@ -82,7 +81,6 @@ namespace MonoGame.Framework
         public CurveKey(float position, float value, float tangentIn, float tangentOut)
             : this(position, value, tangentIn, tangentOut, CurveContinuity.Smooth)
         {
-
         }
 
         /// <summary>

@@ -5,6 +5,7 @@
 using System;
 using System.Runtime.Serialization;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace MonoGame.Framework
 {
@@ -18,22 +19,26 @@ namespace MonoGame.Framework
         /// <summary>
         /// The x coordinate of the top-left corner of this <see cref="Rectangle"/>.
         /// </summary>
-        [DataMember] public int X;
+        [DataMember] 
+        public int X;
 
         /// <summary>
         /// The y coordinate of the top-left corner of this <see cref="Rectangle"/>.
         /// </summary>
-        [DataMember] public int Y;
+        [DataMember] 
+        public int Y;
 
         /// <summary>
         /// The width of this <see cref="Rectangle"/>.
         /// </summary>
-        [DataMember] public int Width;
+        [DataMember] 
+        public int Width;
 
         /// <summary>
         /// The height of this <see cref="Rectangle"/>.
         /// </summary>
-        [DataMember] public int Height;
+        [DataMember]
+        public int Height;
 
         internal string DebuggerDisplay => string.Concat(
             X.ToString(), "  ",
@@ -174,28 +179,6 @@ namespace MonoGame.Framework
                 a.Height - b.Height);
         }
 
-        /// <summary>
-        /// Compares whether two <see cref="Rectangle"/> instances are equal.
-        /// </summary>
-        /// <param name="a"><see cref="Rectangle"/> instance on the left of the equal sign.</param>
-        /// <param name="b"><see cref="Rectangle"/> instance on the right of the equal sign.</param>
-        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
-        public static bool operator ==(in Rectangle a, in Rectangle b)
-        {
-            return (a.X == b.X) && (a.Y == b.Y) && (a.Width == b.Width) && (a.Height == b.Height);
-        }
-
-        /// <summary>
-        /// Compares whether two <see cref="Rectangle"/> instances are not equal.
-        /// </summary>
-        /// <param name="a"><see cref="Rectangle"/> instance on the left of the not equal sign.</param>
-        /// <param name="b"><see cref="Rectangle"/> instance on the right of the not equal sign.</param>
-        /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>
-        public static bool operator !=(in Rectangle a, in Rectangle b)
-        {
-            return !(a == b);
-        }
-
         #endregion
 
         #region Public Methods
@@ -206,8 +189,13 @@ namespace MonoGame.Framework
         /// <param name="x">The x coordinate of the point to check for containment.</param>
         /// <param name="y">The y coordinate of the point to check for containment.</param>
         /// <returns><see langword="true"/> if the provided coordinates lie inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
-        public readonly bool Contains(int x, int y) =>
-            (X <= x) && (x < (X + Width)) && (Y <= y) && (y < (Y + Height));
+        public readonly bool Contains(int x, int y)
+        {
+            return (X <= x)
+                && (x < (X + Width))
+                && (Y <= y) 
+                && (y < (Y + Height));
+        }
 
         /// <summary>
         /// Gets whether or not the provided coordinates lie within the bounds of this <see cref="Rectangle"/>.
@@ -215,50 +203,46 @@ namespace MonoGame.Framework
         /// <param name="x">The x coordinate of the point to check for containment.</param>
         /// <param name="y">The y coordinate of the point to check for containment.</param>
         /// <returns><see langword="true"/> if the provided coordinates lie inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
-        public readonly bool Contains(float x, float y) => 
-            (X <= x) && (x < (X + Width)) && (Y <= y) && (y < (Y + Height));
+        public readonly bool Contains(float x, float y)
+        {
+            return (X <= x)
+                && (x < (X + Width))
+                && (Y <= y) 
+                && (y < (Y + Height));
+        }
 
         /// <summary>
         /// Gets whether or not the provided <see cref="Point"/> lies within the bounds of this <see cref="Rectangle"/>.
         /// </summary>
         /// <param name="value">The coordinates to check for inclusion in this <see cref="Rectangle"/>.</param>
         /// <returns><see langword="true"/> if the provided <see cref="Point"/> lies inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
-        public readonly bool Contains(Point value) =>
-            (X <= value.X) && (value.X < (X + Width)) &&
-            (Y <= value.Y) && (value.Y < (Y + Height));
+        public readonly bool Contains(Point value)
+        {
+            return (X <= value.X) && (value.X < (X + Width)) 
+                && (Y <= value.Y) && (value.Y < (Y + Height));
+        }
 
         /// <summary>
-        /// Gets whether or not the provided <see cref="Vector2"/> lies within the bounds of this <see cref="Rectangle"/>.
+        /// Gets whether or not the provided <see cref="PointF"/> lies within the bounds of this <see cref="Rectangle"/>.
         /// </summary>
         /// <param name="value">The coordinates to check for inclusion in this <see cref="Rectangle"/>.</param>
-        /// <returns><see langword="true"/> if the provided <see cref="Vector2"/> lies inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
-        public readonly bool Contains(Vector2 value) =>
-            (X <= value.X) && (value.X < (X + Width)) &&
-            (Y <= value.Y) && (value.Y < (Y + Height));
+        /// <returns><see langword="true"/> if the provided <see cref="PointF"/> lies inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
+        public readonly bool Contains(PointF value)
+        {
+            return (X <= value.X) && (value.X < (X + Width)) 
+                && (Y <= value.Y) && (value.Y < (Y + Height));
+        }
 
         /// <summary>
         /// Gets whether or not the provided <see cref="Rectangle"/> lies within the bounds of this <see cref="Rectangle"/>.
         /// </summary>
         /// <param name="value">The <see cref="Rectangle"/> to check for inclusion in this <see cref="Rectangle"/>.</param>
         /// <returns><see langword="true"/> if the provided <see cref="Rectangle"/>'s bounds lie entirely inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
-        public readonly bool Contains(in Rectangle value) => 
-            (X <= value.X) && ((value.X + value.Width) <= (X + Width)) && 
-            (Y <= value.Y) && ((value.Y + value.Height) <= (Y + Height));
-
-        /// <summary>
-        /// Compares whether current instance is equal to specified <see cref="object"/>.
-        /// </summary>
-        public override readonly bool Equals(object obj) => obj is Rectangle other && Equals(other);
-
-        /// <summary>
-        /// Compares whether current instance is equal to specified <see cref="Rectangle"/>.
-        /// </summary>
-        public readonly bool Equals(Rectangle other) => this == other;
-
-        /// <summary>
-        /// Gets the hash code of this <see cref="Rectangle"/>.
-        /// </summary>
-        public override readonly int GetHashCode() => HashCode.Combine(X, Y, Width, Height);
+        public readonly bool Contains(in Rectangle value)
+        {
+            return (X <= value.X) && ((value.X + value.Width) <= (X + Width)) 
+                && (Y <= value.Y) && ((value.Y + value.Height) <= (Y + Height));
+        }
 
         /// <summary>
         /// Adjusts the edges of this <see cref="Rectangle"/> by specified horizontal and vertical amounts. 
@@ -364,14 +348,6 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Returns a <see cref="string"/> representation of this <see cref="Rectangle"/> in the format:
-        /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>] Width:[<see cref="Width"/>] Height:[<see cref="Height"/>]}
-        /// </summary>
-        /// <returns><see cref="string"/> representation of this <see cref="Rectangle"/>.</returns>
-        public override readonly string ToString() =>
-            "{X:" + X + " Y:" + Y + " Width:" + Width + " Height:" + Height + "}";
-
-        /// <summary>
         /// Creates a new <see cref="Rectangle"/> that completely contains two other rectangles.
         /// </summary>
         /// <param name="a">The first <see cref="Rectangle"/>.</param>
@@ -381,6 +357,7 @@ namespace MonoGame.Framework
         {
             int x = Math.Min(a.X, b.X);
             int y = Math.Min(a.Y, b.Y);
+
             return new Rectangle(x, y,
                 Math.Max(a.Right, b.Right) - x,
                 Math.Max(a.Bottom, b.Bottom) - y);
@@ -397,7 +374,67 @@ namespace MonoGame.Framework
             height = Height;
         }
 
-        public readonly RectangleF ToRectangleF() => new RectangleF(X, Y, Width, Height);
+        public readonly RectangleF ToRectangleF()
+        {
+            return new RectangleF(X, Y, Width, Height);
+        }
+
+        #endregion
+
+        #region Equals
+
+        /// <summary>
+        /// Compares whether current instance is equal to specified <see cref="Rectangle"/>.
+        /// </summary>  
+        public readonly bool Equals(Rectangle other) => this == other;
+
+        /// <summary>
+        /// Compares whether current instance is equal to specified <see cref="object"/>.
+        /// </summary>
+        public override readonly bool Equals(object obj) => obj is Rectangle other && Equals(other);
+
+        /// <summary>
+        /// Compares whether two <see cref="Rectangle"/> instances are equal.
+        /// </summary>
+        /// <param name="a"><see cref="Rectangle"/> instance on the left of the equal sign.</param>
+        /// <param name="b"><see cref="Rectangle"/> instance on the right of the equal sign.</param>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
+        public static bool operator ==(in Rectangle a, in Rectangle b)
+        {
+            return (a.X == b.X)
+                && (a.Y == b.Y)
+                && (a.Width == b.Width)
+                && (a.Height == b.Height);
+        }
+
+        /// <summary>
+        /// Compares whether two <see cref="Rectangle"/> instances are not equal.
+        /// </summary>
+        /// <param name="a"><see cref="Rectangle"/> instance on the left of the not equal sign.</param>
+        /// <param name="b"><see cref="Rectangle"/> instance on the right of the not equal sign.</param>
+        /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>
+        public static bool operator !=(in Rectangle a, in Rectangle b)
+        {
+            return !(a == b);
+        }
+
+        #endregion
+
+        #region Object overrides
+
+        /// <summary>
+        /// Gets the hash code of this <see cref="Rectangle"/>.
+        /// </summary>
+        public override readonly int GetHashCode() => HashCode.Combine(X, Y, Width, Height);
+
+        /// <summary>
+        /// Returns a <see cref="string"/> representation of this <see cref="Rectangle"/>.
+        /// </summary>
+        /// <returns><see cref="string"/> representation of this <see cref="Rectangle"/>.</returns>
+        public override readonly string ToString()
+        {
+            return $"(X:{X}, Y:{Y}, W:{Width}, H:{Height})";
+        }
 
         #endregion
     }

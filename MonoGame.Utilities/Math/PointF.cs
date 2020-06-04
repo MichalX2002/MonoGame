@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.Serialization;
 
 namespace MonoGame.Framework
@@ -8,17 +9,17 @@ namespace MonoGame.Framework
     // A Math and Geometry Primer - Coordinate Systems and Points. pg 35
 
     /// <summary>
-    ///     A two-dimensional point defined by a 2-tuple of real numbers, (x, y).
+    /// Describes a 2D-point.
     /// </summary>
     /// <remarks>
     ///   <para>
-    ///       A point is a position in two-dimensional space, the location of which is described in terms of a
-    ///       two-dimensional coordinate system, given by a reference point, called the origin, and two coordinate axes.
+    ///   A point is a position in two-dimensional space, the location of which is described in terms of a
+    ///   two-dimensional coordinate system, given by a reference point, called the origin, and two coordinate axes.
     ///   </para>
     ///   <para>
-    ///       A common two-dimensional coordinate system is the Cartesian (or rectangular) coordinate system where the
-    ///       coordinate axes, conventionally denoted the X axis and Y axis, are perpindicular to each other. For the
-    ///       three-dimensional rectangular coordinate system, the third axis is called the Z axis.
+    ///   A common two-dimensional coordinate system is the Cartesian (or rectangular) coordinate system where the
+    ///   coordinate axes, conventionally denoted the X axis and Y axis, are perpindicular to each other. For the
+    ///   three-dimensional rectangular coordinate system, the third axis is called the Z axis.
     ///   </para>
     /// </remarks>
     /// <seealso cref="IEquatable{T}" />
@@ -27,31 +28,33 @@ namespace MonoGame.Framework
     public struct PointF : IEquatable<PointF>
     {
         /// <summary>
-        ///     <see cref="PointF" /> with <see cref="X" /> and <see cref="Y" /> equal to <c>0f</c>.
+        /// <see cref="PointF" /> with <see cref="X" /> and <see cref="Y" /> equal to <c>0f</c>.
         /// </summary>
-        public static readonly PointF Zero = new PointF();
+        public static PointF Zero => default;
 
         /// <summary>
-        ///     <see cref="PointF" /> with <see cref="X" /> and <see cref="Y" /> set to not a number.
+        /// <see cref="PointF" /> with <see cref="X" /> and <see cref="Y" /> set to not a number.
         /// </summary>
-        public static readonly PointF NaN = new PointF(float.NaN, float.NaN);
+        public static PointF NaN => new PointF(float.NaN, float.NaN);
 
         /// <summary>
-        ///     The x-coordinate of this <see cref="PointF" />.
+        /// The x-coordinate of this <see cref="PointF" />.
         /// </summary>
-        [DataMember] public float X;
+        [DataMember]
+        public float X;
 
         /// <summary>
-        ///     The y-coordinate of this <see cref="PointF" />.
+        /// The y-coordinate of this <see cref="PointF" />.
         /// </summary>
-        [DataMember] public float Y;
+        [DataMember]
+        public float Y;
 
         internal string DebuggerDisplay => string.Concat(
             X.ToString(), "  ",
             Y.ToString(), "  ");
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PointF" /> structure from the specified coordinates.
+        /// Initializes a new instance of the <see cref="PointF" /> structure from the specified coordinates.
         /// </summary>
         /// <param name="x">The x-coordinate.</param>
         /// <param name="y">The y-coordinate.</param>
@@ -62,217 +65,182 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Returns the <see cref="Vector2"/> representation of this instance.
+        /// Gets a <see cref="Vector2"/> representation of this object.
         /// </summary>
-        public readonly Vector2 ToVector2() => new Vector2(X, Y);
-
-        /// <summary>
-        ///     Calculates the <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a
-        ///     <see cref="Vector2" />.
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <param name="vector">The vector.</param>
-        /// <returns>
-        ///     The <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a <see cref="Vector2" />.
-        /// </returns>
-        public static PointF operator +(in PointF point, Vector2 vector) => Add(point, vector);
-
-        /// <summary>
-        ///     Calculates the <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a
-        ///     <see cref="Vector2" />.
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <param name="vector">The vector.</param>
-        /// <returns>
-        ///     The <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a <see cref="Vector2" />.
-        /// </returns>
-        public static PointF Add(in PointF point, Vector2 vector) => new PointF(point.X + vector.X, point.Y + vector.Y);
-
-        /// <summary>
-        ///     Calculates the <see cref="PointF" /> representing the subtraction of a <see cref="PointF" /> and a
-        ///     <see cref="Vector2" />.
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <param name="vector">The vector.</param>
-        /// <returns>
-        ///     The <see cref="PointF" /> representing the substraction of a <see cref="PointF" /> and a <see cref="Vector2" />.
-        /// </returns>
-        public static PointF operator -(in PointF point, Vector2 vector) => Subtract(point, vector);
-
-        /// <summary>
-        ///     Calculates the <see cref="PointF" /> representing the addition of a <see cref="PointF" /> and a
-        ///     <see cref="Vector2" />.
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <param name="vector">The vector.</param>
-        /// <returns>
-        ///     The <see cref="PointF" /> representing the substraction of a <see cref="PointF" /> and a <see cref="Vector2" />.
-        /// </returns>
-        public static PointF Subtract(in PointF point, Vector2 vector) => new PointF(point.X - vector.X, point.Y - vector.Y);
-
-        /// <summary>
-        ///     Calculates the <see cref="Vector2" /> representing the displacement of two <see cref="PointF" /> structures.
-        /// </summary>
-        /// <param name="point2">The second point.</param>
-        /// <param name="point1">The first point.</param>
-        /// <returns>
-        ///     The <see cref="Vector2" /> representing the displacement of two <see cref="PointF" /> structures.
-        /// </returns>
-        public static Vector2 operator -(in PointF point1, in PointF point2) => Displacement(point1, point2);
-
-        /// <summary>
-        ///     Calculates the <see cref="Vector2" /> representing the displacement of two <see cref="PointF" /> structures.
-        /// </summary>
-        /// <param name="point2">The second point.</param>
-        /// <param name="point1">The first point.</param>
-        /// <returns>
-        ///     The <see cref="Vector2" /> representing the displacement of two <see cref="PointF" /> structures.
-        /// </returns>
-        public static Vector2 Displacement(in PointF point2, in PointF point1) =>
-            new Vector2(point2.X - point1.X, point2.Y - point1.Y);
-
-        /// <summary>
-        ///     Translates a <see cref='PointF' /> by a given <see cref='SizeF' />.
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <param name="size">The size.</param>
-        /// <returns>
-        ///     The result of the operator.
-        /// </returns>
-        public static PointF operator +(in PointF point, in SizeF size) => Add(point, size);
-
-        /// <summary>
-        ///     Translates a <see cref='PointF' /> by a given <see cref='SizeF' />.
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <param name="size">The size.</param>
-        /// <returns>
-        ///     The result of the operator.
-        /// </returns>
-        public static PointF Add(in PointF point, in SizeF size) => 
-            new PointF(point.X + size.Width, point.Y + size.Height);
-
-        /// <summary>
-        ///     Translates a <see cref='PointF' /> by the negative of a given <see cref='SizeF' />.
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <param name="size">The size.</param>
-        /// <returns>
-        ///     The result of the operator.
-        /// </returns>
-        public static PointF operator -(in PointF point, in SizeF size) => Subtract(point, size);
-
-        /// <summary>
-        ///     Translates a <see cref='PointF' /> by the negative of a given <see cref='SizeF' /> .
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <param name="size">The size.</param>
-        /// <returns>
-        ///     The result of the operator.
-        /// </returns>
-        public static PointF Subtract(in PointF point, in SizeF size) => 
-            new PointF(point.X - size.Width, point.Y - size.Height);
-
-        /// <summary>
-        ///     Calculates the <see cref="PointF" /> that contains the minimal coordinate values from two <see cref="PointF" />
-        ///     structures.
-        ///     structures.
-        /// </summary>
-        /// <param name="first">The first point.</param>
-        /// <param name="second">The second point.</param>
-        /// <returns>
-        ///     The the <see cref="PointF" /> that contains the minimal coordinate values from two <see cref="PointF" />
-        ///     structures.
-        /// </returns>
-        public static PointF Min(in PointF first, in PointF second) =>
-            new PointF(
-                first.X < second.X ? first.X : second.X,
-                first.Y < second.Y ? first.Y : second.Y);
-
-        /// <summary>
-        ///     Calculates the <see cref="PointF" /> that contains the maximal coordinate values from two <see cref="PointF" />
-        ///     structures.
-        ///     structures.
-        /// </summary>
-        /// <param name="first">The first point.</param>
-        /// <param name="second">The second point.</param>
-        /// <returns>
-        ///     The the <see cref="PointF" /> that contains the maximal coordinate values from two <see cref="PointF" />
-        ///     structures.
-        /// </returns>
-        public static PointF Max(in PointF first, in PointF second) => new PointF(
-                first.X > second.X ? first.X : second.X,
-                first.Y > second.Y ? first.Y : second.Y);
-
-        /// <summary>
-        ///     Performs an implicit conversion from a <see cref="PointF" /> to a position <see cref="Vector2" />.
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <returns>
-        ///     The resulting <see cref="Vector2" />.
-        /// </returns>
-        public static implicit operator Vector2(in PointF point) => new Vector2(point.X, point.Y);
-
-        /// <summary>
-        ///     Performs an implicit conversion from a <see cref="Vector2" /> to a position <see cref="PointF" />.
-        /// </summary>
-        /// <param name="vector">The vector.</param>
-        /// <returns>
-        ///     The resulting <see cref="PointF" />.
-        /// </returns>
-        public static implicit operator PointF(Vector2 vector) => new PointF(vector.X, vector.Y);
-
-
-        /// <summary>
-        ///     Performs an implicit conversion from a <see cref="Point" /> to a <see cref="PointF" />.
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <returns>
-        ///     The resulting <see cref="PointF" />.
-        /// </returns>
-        public static implicit operator PointF(in Point point) => new PointF(point.X, point.Y);
-
-        /// <summary>
-        ///     Compares two <see cref="PointF" /> structures. The result specifies
-        ///     whether the values of the <see cref="X" /> and <see cref="Y" />
-        ///     fields of the two <see cref="PointF" />
-        ///     structures are equal.
-        /// </summary>
-        public static bool operator ==(in PointF a, in PointF b) => (a.X == b.X) && (a.Y == b.Y);
-
-        /// <summary>
-        ///     Compares two <see cref="PointF" /> structures. The result specifies
-        ///     whether the values of the <see cref="X" /> or <see cref="Y" />
-        ///     fields of the two <see cref="PointF" />
-        ///     structures are unequal.
-        /// </summary>
-        public static bool operator !=(in PointF first, in PointF second) => !(first == second);
-
-        /// <summary>
-        ///     Indicates whether this <see cref="PointF" /> is equal to another <see cref="PointF" />.
-        /// </summary>
-        public bool Equals(PointF other) => this == other;
-
-        /// <summary>
-        ///     Returns a value indicating whether this <see cref="PointF" /> is equal to a specified object.
-        /// </summary>
-        public override bool Equals(object obj) => obj is PointF other && Equals(other);
-
-        /// <summary>
-        ///     Returns a <see cref="string" /> that represents this <see cref="PointF" />.
-        /// </summary>
-        public override string ToString() => $"({X}, {Y})";
-
-        /// <summary>
-        ///     Returns a hash code of this <see cref="PointF" />.
-        /// </summary>
-        public override int GetHashCode()
+        public readonly Vector2 ToVector2()
         {
-            unchecked
-            {
-                int hash = 7 + X.GetHashCode();
-                return hash * 31 + Y.GetHashCode();
-            }
+            return UnsafeR.As<PointF, Vector2>(this);
+        }
+
+        /// <summary>
+        /// Gets a <see cref="SizeF"/> representation of this object.
+        /// </summary>
+        public readonly SizeF ToSizeF()
+        {
+            return UnsafeR.As<PointF, SizeF>(this);
+        }
+
+        /// <summary>
+        /// Gets a <see cref="Size"/> representation of this object.
+        /// </summary>
+        public readonly Size ToSize()
+        {
+            return ((Vector2)this).ToSize();
+        }
+
+        /// <summary>
+        /// Gets a <see cref="Point"/> representation of this object.
+        /// </summary>
+        public readonly Point ToPoint()
+        {
+            return ((Vector2)this).ToPoint();
+        }
+
+        #region Add (operator +)
+
+        /// <summary>
+        /// Performs vector addition on <paramref name="a"/> and <paramref name="b"/>.
+        /// </summary>
+        /// <param name="a">The first vector to add.</param>
+        /// <param name="b">The second vector to add.</param>
+        /// <returns>The result of the vector addition.</returns>
+        public static PointF Add(PointF a, PointF b)
+        {
+            return Vector2.Add(a, b);
+        }
+
+        /// <summary>
+        /// Performs vector addition on <paramref name="a"/> and <paramref name="b"/>.
+        /// </summary>
+        /// <param name="a">Source <see cref="PointF"/> on the left of the add sign.</param>
+        /// <param name="b">Source <see cref="PointF"/> on the right of the add sign.</param>
+        /// <returns>Sum of the vectors.</returns>
+        public static PointF operator +(PointF a, PointF b)
+        {
+            return (Vector2)a + (Vector2)b;
+        }
+
+        #endregion
+
+        #region Subtract (operator -)
+
+        /// <summary>
+        /// Performs vector subtraction on <paramref name="a"/> and <paramref name="b"/>.
+        /// </summary>
+        /// <param name="left">Left <see cref="PointF"/>.</param>
+        /// <param name="right">Right <see cref="PointF"/>.</param>
+        /// <returns>The result of the vector subtraction.</returns>
+        public static PointF Subtract(PointF left, PointF right)
+        {
+            return Vector2.Subtract(left, right);
+        }
+
+        /// <summary>
+        /// Subtracts left from right.
+        /// </summary>
+        /// <param name="left">Left <see cref="PointF"/> on the left of the sub sign.</param>
+        /// <param name="right">Right <see cref="PointF"/> on the right of the sub sign.</param>
+        /// <returns>Result of the vector subtraction.</returns>
+        public static PointF operator -(PointF left, PointF right)
+        {
+            return (Vector2)left - (Vector2)right;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Creates a new <see cref="PointF"/> that contains a minimal values from the two points.
+        /// </summary>
+        /// <param name="a">The first point.</param>
+        /// <param name="b">The second point.</param>
+        /// <returns>The <see cref="PointF"/> with minimal values from the two points.</returns>
+        public static PointF Min(PointF a, PointF b)
+        {
+            return Vector2.Min(a, b);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="PointF"/> that contains a maximal values from the two points.
+        /// </summary>
+        /// <param name="a">The first point.</param>
+        /// <param name="b">The second point.</param>
+        /// <returns>The <see cref="PointF"/> with maximal values from the two points.</returns>
+        public static PointF Max(PointF a, PointF b)
+        {
+            return Vector2.Max(a, b);
+        }
+
+        #region Equals
+
+        /// <summary>
+        /// Indicates whether this <see cref="PointF" /> is equal to another <see cref="PointF" />.
+        /// </summary>
+        public readonly bool Equals(PointF other) => this == other;
+
+        /// <summary>
+        /// Returns a value indicating whether this <see cref="PointF" /> is equal to a specified object.
+        /// </summary>
+        public override readonly bool Equals(object obj) => obj is PointF other && Equals(other);
+
+        /// <summary>
+        /// Compares two <see cref="PointF" /> structures. The result specifies
+        /// whether the values of the <see cref="X" /> and <see cref="Y" />
+        /// fields of the two <see cref="PointF" /> structures are equal.
+        /// </summary>
+        public static bool operator ==(PointF a, PointF b)
+        {
+            return (a.X == b.X) && (a.Y == b.Y);
+        }
+
+        /// <summary>
+        /// Compares two <see cref="PointF" /> structures. The result specifies
+        /// whether the values of the <see cref="X" /> or <see cref="Y" />
+        /// fields of the two <see cref="PointF" /> structures are unequal.
+        /// </summary>
+        public static bool operator !=(PointF first, PointF second)
+        {
+            return !(first == second);
+        }
+
+        #endregion
+
+        #region Object overrides
+
+        /// <summary>
+        /// Returns a hash code of this <see cref="PointF" />.
+        /// </summary>
+        public override readonly int GetHashCode() => HashCode.Combine(X, Y);
+
+        /// <summary>
+        /// Returns a <see cref="string" /> that represents this <see cref="PointF" />.
+        /// </summary>
+        public override readonly string ToString() => $"{{X:{X}, Y:{Y}}}";
+
+        #endregion
+
+        public static implicit operator PointF(in Vector2 vector)
+        {
+            return vector.ToPointF();
+        }
+
+        public static implicit operator PointF(in SizeF vector)
+        {
+            return vector.ToPointF();
+        }
+
+        public static implicit operator PointF(in Point point)
+        {
+            return point.ToPointF();
+        }
+
+        public static implicit operator PointF(in Size vector)
+        {
+            return new PointF(vector.Width, vector.Height);
+        }
+
+        public static implicit operator Vector2(in PointF point)
+        {
+            return point.ToVector2();
         }
     }
 }

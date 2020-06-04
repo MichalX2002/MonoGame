@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.Serialization;
 
 namespace MonoGame.Framework
@@ -29,8 +30,8 @@ namespace MonoGame.Framework
         public float Radius;
 
         internal string DebuggerDisplay => string.Concat(
-            "Center(", Center.DebuggerDisplay, ") \n",
-            "Radius(", Radius.ToString(), ")");
+            "Center = ", Center.ToString(), ", ",
+            "Radius = ", Radius.ToString());
 
         /// <summary>
         /// Constructs a bounding sphere with the specified center and radius.  
@@ -453,7 +454,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="plane">The plane for testing.</param>
         /// <returns>Type of intersection.</returns>
-        public PlaneIntersectionType Intersects(in Plane plane)
+        public PlaneIntersectionType Intersects(Plane plane)
         {
             // TODO: we might want to inline this for performance reasons
             float distance = Vector3.Dot(plane.Normal, Center);
@@ -494,13 +495,15 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
         /// <returns>Transformed <see cref="BoundingSphere"/>.</returns>
-        public BoundingSphere Transform(in Matrix matrix)
+        public BoundingSphere Transform(in Matrix4x4 matrix)
         {
             float v1 = (matrix.M11 * matrix.M11) + (matrix.M12 * matrix.M12) + (matrix.M13 * matrix.M13);
             float v2 = (matrix.M21 * matrix.M21) + (matrix.M22 * matrix.M22) + (matrix.M23 * matrix.M23);
             float v3 = (matrix.M31 * matrix.M31) + (matrix.M32 * matrix.M32) + (matrix.M33 * matrix.M33);
-            return new BoundingSphere(
-                Vector3.Transform(Center, matrix), Radius * MathF.Sqrt(Math.Max(v1, Math.Max(v2, v3))));
+
+            float newRadius = Radius * MathF.Sqrt(Math.Max(v1, Math.Max(v2, v3)));
+            var newCenter = Vector3.Transform(Center, matrix);
+            return new BoundingSphere(newCenter, newRadius);
         }
 
         /// <summary>

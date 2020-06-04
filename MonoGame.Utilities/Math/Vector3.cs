@@ -5,7 +5,6 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
-using MonoGame.Framework.Vector;
 using FastVector3 = System.Numerics.Vector3;
 
 namespace MonoGame.Framework
@@ -37,7 +36,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// <see cref="Vector3"/> with all components set to 0.
         /// </summary>
-        public static Vector3 Zero => new Vector3();
+        public static Vector3 Zero => FastVector3.Zero;
 
         /// <summary>
         /// <see cref="Vector3"/> with all components set to 0.5.
@@ -47,7 +46,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// <see cref="Vector3"/> with all components set to 1.
         /// </summary>
-        public static Vector3 One => new Vector3(1f);
+        public static Vector3 One => FastVector3.One;
 
         /// <summary>
         /// <see cref="Vector3"/> with components 1, 0, 0.
@@ -135,6 +134,11 @@ namespace MonoGame.Framework
         public Vector2 ZY { readonly get => new Vector2(Z, Y); set { Z = value.X; Y = value.Y; } }
 
         #region Constructors
+
+        private Vector3(FastVector3 value)
+        {
+            Base = value;
+        }
 
         /// <summary>
         /// Constructs a 3D vector with X, Y and Z from three values.
@@ -438,7 +442,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the hash code of this <see cref="Vector3"/>.
         /// </summary>
-        public readonly override int GetHashCode() => Base.GetHashCode();
+        public override readonly int GetHashCode() => Base.GetHashCode();
 
         #endregion
 
@@ -828,7 +832,10 @@ namespace MonoGame.Framework
         /// {X:[<see cref="X"/>] Y:[<see cref="Y"/>] Z:[<see cref="Z"/>]}
         /// </summary>
         /// <returns>A <see cref="string"/> representation of this <see cref="Vector3"/>.</returns>
-        public override readonly string ToString() => Base.ToString();
+        public override readonly string ToString()
+        {
+            return Base.ToString();
+        }
 
         #endregion
 
@@ -944,7 +951,7 @@ namespace MonoGame.Framework
 
         public static implicit operator Vector3(in FastVector3 value)
         {
-            return new Vector3 { Base = value };
+            return new Vector3(value);
         }
     }
 }

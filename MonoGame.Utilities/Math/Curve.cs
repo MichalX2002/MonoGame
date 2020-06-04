@@ -24,12 +24,6 @@ namespace MonoGame.Framework
         public CurveKeyCollection Keys { get; private set; }
 
         /// <summary>
-        /// Returns <see langword="true"/> if this curve is constant (has zero or one points); <see langword="false"/> otherwise.
-        /// </summary>
-        [DataMember]
-        public bool IsConstant => Keys.Count <= 1;
-
-        /// <summary>
         /// Defines how to handle weighting values that are less than the first control point in the curve.
         /// </summary>
         [DataMember]
@@ -40,6 +34,12 @@ namespace MonoGame.Framework
         /// </summary>
         [DataMember]
         public CurveLoopType PostLoop { get; set; }
+
+        /// <summary>
+        /// Gets whether this curve is constant (has zero or one points).
+        /// </summary>
+        [IgnoreDataMember]
+        public bool IsConstant => Keys.Count <= 1;
 
         #endregion
 
@@ -79,13 +79,14 @@ namespace MonoGame.Framework
         public float Evaluate(float position)
         {
             if (Keys.Count == 0)
-            	return 0f;
-
-            if (Keys.Count == 1)
-            	return Keys[0].Value;
+                return 0f;
 
             CurveKey first = Keys[0];
-            CurveKey last = Keys[Keys.Count - 1];
+
+            if (Keys.Count == 1)
+                return first.Value;
+
+            CurveKey last = Keys[^1];
 
             if (position < first.Position)
             {
@@ -151,11 +152,13 @@ namespace MonoGame.Framework
                         //go back on curve from end and target start 
                         // start-> end / end -> start
                         cycle = GetNumberOfCycle(position);
+
                         //virtualPos = position - (cycle * (last.Position - first.Position));
-                        if (0 == cycle % 2f)//if pair
+                        if (0 == cycle % 2f) //if pair
                             virtualPos = position - (cycle * (last.Position - first.Position));
                         else
                             virtualPos = last.Position - position + first.Position + (cycle * (last.Position - first.Position));
+
                         return GetCurvePosition(virtualPos);
                 }
             }
@@ -168,21 +171,21 @@ namespace MonoGame.Framework
         /// Computes tangents for all keys in the collection.
         /// </summary>
         /// <param name="tangentType">The tangent type for both in and out.</param>
-		public void ComputeTangents (CurveTangent tangentType)
-		{
-		    ComputeTangents(tangentType, tangentType);
-		}
-		
+        public void ComputeTangents(CurveTangent tangentType)
+        {
+            ComputeTangents(tangentType, tangentType);
+        }
+
         /// <summary>
         /// Computes tangents for all keys in the collection.
         /// </summary>
         /// <param name="tangentInType">The tangent in-type. <see cref="CurveKey.TangentIn"/> for more details.</param>
         /// <param name="tangentOutType">The tangent out-type. <see cref="CurveKey.TangentOut"/> for more details.</param>
-		public void ComputeTangents(CurveTangent tangentInType, CurveTangent tangentOutType)
-		{
-            for (var i = 0; i < Keys.Count; ++i)
+        public void ComputeTangents(CurveTangent tangentInType, CurveTangent tangentOutType)
+        {
+            for (int i = 0; i < Keys.Count; ++i)
                 ComputeTangent(i, tangentInType, tangentOutType);
-		}
+        }
 
         /// <summary>
         /// Computes tangent for the specific key in the collection.
@@ -207,18 +210,18 @@ namespace MonoGame.Framework
             var key = Keys[keyIndex];
 
             float p0, p, p1;
-            p0 = p = p1 = key.Position;
-
             float v0, v, v1;
+
+            p0 = p = p1 = key.Position;
             v0 = v = v1 = key.Value;
 
-            if ( keyIndex > 0 )
+            if (keyIndex > 0)
             {
                 p0 = Keys[keyIndex - 1].Position;
                 v0 = Keys[keyIndex - 1].Value;
             }
 
-            if (keyIndex < Keys.Count-1)
+            if (keyIndex < Keys.Count - 1)
             {
                 p1 = Keys[keyIndex + 1].Position;
                 v1 = Keys[keyIndex + 1].Value;
@@ -229,9 +232,11 @@ namespace MonoGame.Framework
                 case CurveTangent.Flat:
                     key.TangentIn = 0;
                     break;
+
                 case CurveTangent.Linear:
                     key.TangentIn = v - v0;
                     break;
+
                 case CurveTangent.Smooth:
                     var pn = p1 - p0;
                     if (Math.Abs(pn) < float.Epsilon)
@@ -246,9 +251,11 @@ namespace MonoGame.Framework
                 case CurveTangent.Flat:
                     key.TangentOut = 0;
                     break;
+
                 case CurveTangent.Linear:
                     key.TangentOut = v1 - v;
                     break;
+
                 case CurveTangent.Smooth:
                     var pn = p1 - p0;
                     if (Math.Abs(pn) < float.Epsilon)
@@ -259,13 +266,15 @@ namespace MonoGame.Framework
             }
         }
 
-	    #endregion
+        #endregion
 
         #region Private Methods
 
         private int GetNumberOfCycle(float position)
         {
-            float cycle = (position - Keys[0].Position) / (Keys[Keys.Count - 1].Position - Keys[0].Position);
+            float firstPos = Keys[0].Position;
+            float lastPos = Keys[^1].Position;
+            float cycle = (position - firstPos) / (lastPos - firstPos);
             if (cycle < 0f)
                 cycle--;
             return (int)cycle;
@@ -288,10 +297,11 @@ namespace MonoGame.Framework
                         return prev.Value;
                     }
 
-                    float t = (position - prev.Position) / (next.Position - prev.Position);//to have t in [0,1]
+                    float t = (position - prev.Position) / (next.Position - prev.Position); //to have t in [0,1]
                     float ts = t * t;
                     float tss = ts * t;
-                    //After a lot of search on internet I have found all about spline function
+
+                    // After a lot of search on internet I have found all about spline function
                     // and bezier (phi'sss ancien) but finaly use hermite curve 
                     //http://en.wikipedia.org/wiki/Cubic_Hermite_spline
                     //P(t) = (2*t^3 - 3t^2 + 1)*P0 + (t^3 - 2t^2 + t)m0 + (-2t^3 + 3t^2)P1 + (t^3-t^2)m1

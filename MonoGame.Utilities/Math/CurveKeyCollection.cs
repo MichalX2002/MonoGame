@@ -5,7 +5,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace MonoGame.Framework
@@ -15,7 +14,7 @@ namespace MonoGame.Framework
     /// </summary>
     // TODO : [TypeConverter(typeof(ExpandableObjectConverter))]
     [DataContract]
-    public class CurveKeyCollection : ICollection<CurveKey>
+    public class CurveKeyCollection : IList<CurveKey>
     {
         #region Private Fields
 
@@ -34,22 +33,7 @@ namespace MonoGame.Framework
         public CurveKey this[int index]
         {
             get => _keys[index];
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException();
-
-                if (index >= _keys.Count)
-                    throw new IndexOutOfRangeException();
-
-                if (_keys[index].Position == value.Position)
-                    _keys[index] = value;
-                else
-                {
-                    _keys.RemoveAt(index);
-                    _keys.Add(value);
-                }
-            }
+            set => Insert(index, value);
         }
 
         /// <summary>
@@ -81,30 +65,48 @@ namespace MonoGame.Framework
         /// <summary>
         /// Adds a key to this collection.
         /// </summary>
-        /// <param name="item">New key for the collection.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="item"/> is null.</exception>
-        /// <remarks>The new key would be added respectively to a position of that key and the position of other keys.</remarks>
-        public void Add(CurveKey item)
+        /// <param name="key">New key for the collection.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
+        /// <remarks>
+        /// The new key would be added respectively to a position of that key and the position of other keys.
+        /// </remarks>
+        public void Add(CurveKey key)
         {
-            if (item == null)
-                throw new ArgumentNullException(nameof(item));
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
 
             if (_keys.Count == 0)
             {
-                _keys.Add(item);
+                _keys.Add(key);
                 return;
             }
 
             for (int i = 0; i < _keys.Count; i++)
             {
-                if (item.Position < _keys[i].Position)
+                if (key.Position < _keys[i].Position)
                 {
-                    _keys.Insert(i, item);
+                    _keys.Insert(i, key);
                     return;
                 }
             }
 
-            _keys.Add(item);
+            _keys.Add(key);
+        }
+
+        public void Insert(int index, CurveKey key)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+            
+            if (_keys[index].Position == key.Position)
+            {
+                _keys[index] = key;
+            }
+            else
+            {
+                _keys.RemoveAt(index);
+                _keys.Add(key);
+            }
         }
 
         /// <summary>
@@ -121,20 +123,20 @@ namespace MonoGame.Framework
         /// <returns>A copy of this collection.</returns>
         public CurveKeyCollection Clone()
         {
-            CurveKeyCollection ckc = new CurveKeyCollection();
+            var collection = new CurveKeyCollection();
             foreach (CurveKey key in _keys)
-                ckc.Add(key);
-            return ckc;
+                collection.Add(key);
+            return collection;
         }
 
         /// <summary>
         /// Determines whether this collection contains a specific key.
         /// </summary>
-        /// <param name="item">The key to locate in this collection.</param>
+        /// <param name="key">The key to locate in this collection.</param>
         /// <returns><see langword="true"/> if the key is found; <see langword="false"/> otherwise.</returns>
-        public bool Contains(CurveKey item)
+        public bool Contains(CurveKey key)
         {
-            return _keys.Contains(item);
+            return _keys.Contains(key);
         }
 
         /// <summary>
@@ -148,22 +150,13 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Returns an enumerator that iterates through the collection.
-        /// </summary>
-        /// <returns>An enumerator for the <see cref="CurveKeyCollection"/>.</returns>
-        public List<CurveKey>.Enumerator GetEnumerator() => _keys.GetEnumerator();
-
-        IEnumerator<CurveKey> IEnumerable<CurveKey>.GetEnumerator() => GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        /// <summary>
         /// Finds element in the collection and returns its index.
         /// </summary>
-        /// <param name="item">Element for the search.</param>
+        /// <param name="key">Element for the search.</param>
         /// <returns>Index of the element; or -1 if item is not found.</returns>
-        public int IndexOf(CurveKey item)
+        public int IndexOf(CurveKey key)
         {
-            return _keys.IndexOf(item);
+            return _keys.IndexOf(key);
         }
 
         /// <summary>
@@ -174,15 +167,31 @@ namespace MonoGame.Framework
         {
             _keys.RemoveAt(index);
         }
-        
+
         /// <summary>
         /// Removes specific element.
         /// </summary>
-        /// <param name="item">The element</param>
-        /// <returns><see langword="true"/> if item is successfully removed; <see langword="false"/> otherwise. This method also returns <see langword="false"/> if item was not found.</returns>
-        public bool Remove(CurveKey item)
+        /// <param name="key">The element</param>
+        /// <returns>
+        /// <see langword="true"/> if item is successfully removed; <see langword="false"/> otherwise. 
+        /// This method also returns <see langword="false"/> if item was not found.
+        /// </returns>
+        public bool Remove(CurveKey key)
         {
-            return _keys.Remove(item);
+            return _keys.Remove(key);
         }
+
+        /// <summary>
+        /// Returns an enumerator that iterates through the collection.
+        /// </summary>
+        /// <returns>An enumerator for the <see cref="CurveKeyCollection"/>.</returns>
+        public List<CurveKey>.Enumerator GetEnumerator()
+        {
+            return _keys.GetEnumerator();
+        }
+
+        IEnumerator<CurveKey> IEnumerable<CurveKey>.GetEnumerator() => GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

@@ -5,7 +5,6 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
-using MonoGame.Framework.Vector;
 using FastVector4 = System.Numerics.Vector4;
 
 namespace MonoGame.Framework
@@ -25,7 +24,6 @@ namespace MonoGame.Framework
         /// </summary>
         internal static Vector4 MaxValueByte => new Vector4(byte.MaxValue);
 
-
         /// <summary>
         /// Returns a <see cref="Vector4"/> with all components set to <see cref="ushort.MaxValue"/>.
         /// </summary>
@@ -36,7 +34,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns a <see cref="Vector4"/> with all components set to 0.
         /// </summary>
-        public static Vector4 Zero => new Vector4();
+        public static Vector4 Zero => FastVector4.Zero;
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with all components set to 0.5.
@@ -46,7 +44,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns a <see cref="Vector4"/> with all components set to 1.
         /// </summary>
-        public static Vector4 One => new Vector4(1f);
+        public static Vector4 One => FastVector4.One;
 
         /// <summary>
         /// Returns a <see cref="Vector4"/> with all components set to -1.
@@ -143,6 +141,11 @@ namespace MonoGame.Framework
         #endregion
 
         #region Constructors
+
+        private Vector4(FastVector4 value)
+        {
+            Base = value;
+        }
 
         /// <summary>
         /// Constructs a 4D vector with XYZW values.
@@ -450,16 +453,6 @@ namespace MonoGame.Framework
         #region Equals (operator ==, !=)
 
         /// <summary>
-        /// Compares whether current instance is equal to specified <see cref="object"/>.
-        /// </summary>
-        /// <param name="obj">The <see cref="object"/> to compare.</param>
-        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
-        public readonly override bool Equals(object obj)
-        {
-            return obj is Vector4 other ? this == other : false;
-        }
-
-        /// <summary>
         /// Compares whether current instance is equal to specified <see cref="Vector4"/>.
         /// </summary>
         /// <param name="other">The <see cref="Vector4"/> to compare.</param>
@@ -467,6 +460,16 @@ namespace MonoGame.Framework
         public readonly bool Equals(Vector4 other)
         {
             return Base.Equals(other.Base);
+        }
+
+        /// <summary>
+        /// Compares whether current instance is equal to specified <see cref="object"/>.
+        /// </summary>
+        /// <param name="obj">The <see cref="object"/> to compare.</param>
+        /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
+        public override readonly bool Equals(object obj)
+        {
+            return obj is Vector4 other && Equals(other);
         }
 
         /// <summary>
@@ -527,7 +530,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the hash code of this <see cref="Vector4"/>.
         /// </summary>
-        public readonly override int GetHashCode() => Base.GetHashCode();
+        public override readonly int GetHashCode() => Base.GetHashCode();
 
         #endregion
 
@@ -940,10 +943,7 @@ namespace MonoGame.Framework
         /// Returns a <see cref="string"/> representation of this <see cref="Vector4"/>.
         /// </summary>
         /// <returns>The string representation of the current instance.</returns>
-        public override readonly string ToString()
-        {
-            return Base.ToString();
-        }
+        public override readonly string ToString() => Base.ToString();
 
         #endregion
 
@@ -978,7 +978,7 @@ namespace MonoGame.Framework
 
         public static implicit operator Vector4(in FastVector4 value)
         {
-            return new Vector4 { Base = value };
+            return new Vector4(value);
         }
     }
 }

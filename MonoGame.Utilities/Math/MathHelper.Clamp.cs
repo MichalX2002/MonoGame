@@ -10,7 +10,7 @@ namespace MonoGame.Framework
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float SseClamp(float value, float min, float max)
         {
-            // around 2x faster (benchmarked on i7-4720HQ @ 2.6Ghz)
+            // around 2x faster than managed (benchmarked on i7-4720HQ @ 2.6Ghz)
             var vals = Vector128.CreateScalarUnsafe(value);
             var mins = Vector128.CreateScalarUnsafe(min);
             var maxs = Vector128.CreateScalarUnsafe(max);
@@ -20,12 +20,14 @@ namespace MonoGame.Framework
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static double Sse2Clamp(double value, double min, double max)
         {
-            // around 2x faster (benchmarked on i7-4720HQ @ 2.6Ghz)
+            // around 2x faster than managed (benchmarked on i7-4720HQ @ 2.6Ghz)
             var vals = Vector128.CreateScalarUnsafe(value);
             var mins = Vector128.CreateScalarUnsafe(min);
             var maxs = Vector128.CreateScalarUnsafe(max);
             return Sse2.MinScalar(Sse2.MaxScalar(vals, mins), maxs).ToScalar();
         }
+
+        #region Clamp
 
         /// <summary>
         /// Restricts a value to be within a specified range.
@@ -121,6 +123,10 @@ namespace MonoGame.Framework
             }
         }
 
+        #endregion
+
+        #region ClampTruncate
+
         /// <summary>
         /// Restricts a value to be within a specified range.
         /// </summary>
@@ -185,5 +191,7 @@ namespace MonoGame.Framework
                 return (uint)value;
             }
         }
+
+        #endregion
     }
 }
