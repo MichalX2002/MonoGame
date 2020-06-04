@@ -7,8 +7,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Security;
+using MonoGame.Framework.Graphics;
 
 #if __IOS__ || __TVOS__ || MONOMAC
 using ObjCRuntime;
@@ -64,7 +64,7 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal unsafe delegate void GetIntegerDelegate(int param, [Out] int* data);
+        internal unsafe delegate void GetIntegerDelegate(int param, [Out] out int data);
         internal static GetIntegerDelegate GetIntegerv;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -190,7 +190,7 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal unsafe delegate void Uniform4fvDelegate(int location, int size, float* values);
+        internal unsafe delegate void Uniform4fvDelegate(int location, int size, [In] in float values);
         internal static Uniform4fvDelegate Uniform4fv;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -208,7 +208,8 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal delegate void ReadPixelsDelegate(int x, int y, int width, int height, PixelFormat format, PixelType type, IntPtr data);
+        internal delegate void ReadPixelsDelegate(
+            int x, int y, int width, int height, PixelFormat format, PixelType type, IntPtr data);
         internal static ReadPixelsDelegate ReadPixelsInternal;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -220,7 +221,8 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal delegate void DrawElementsDelegate(GLPrimitiveType primitiveType, int count, IndexElementType elementType, IntPtr offset);
+        internal delegate void DrawElementsDelegate(
+            GLPrimitiveType primitiveType, int count, IndexElementType elementType, IntPtr offset);
         internal static DrawElementsDelegate DrawElements;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -244,7 +246,7 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal delegate void DeleteRenderbuffersDelegate(int count, [In] [Out] ref int buffer);
+        internal delegate void DeleteRenderbuffersDelegate(int count, [In] in int buffer);
         internal static DeleteRenderbuffersDelegate DeleteRenderbuffers;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -269,26 +271,28 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal delegate void DeleteFramebuffersDelegate(int count, ref int buffer);
+        internal delegate void DeleteFramebuffersDelegate(int count, [In] in int buffer);
         internal static DeleteFramebuffersDelegate DeleteFramebuffers;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        public delegate void InvalidateFramebufferDelegate(FramebufferTarget target, int numAttachments, FramebufferAttachment[] attachments);
+        public delegate void InvalidateFramebufferDelegate(
+            FramebufferTarget target, int numAttachments, FramebufferAttachment[] attachments);
         public static InvalidateFramebufferDelegate InvalidateFramebuffer;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal delegate void FramebufferTexture2DDelegate(FramebufferTarget target, FramebufferAttachment attachement,
-            TextureTarget textureTarget, int texture, int level);
+        internal delegate void FramebufferTexture2DDelegate(
+            FramebufferTarget target, FramebufferAttachment attachement, TextureTarget textureTarget, int texture, int level);
         internal static FramebufferTexture2DDelegate FramebufferTexture2D;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal delegate void FramebufferTexture2DMultiSampleDelegate(FramebufferTarget target, FramebufferAttachment attachement,
+        internal delegate void FramebufferTexture2DMultiSampleDelegate(
+            FramebufferTarget target, FramebufferAttachment attachement,
             TextureTarget textureTarget, int texture, int level, int samples);
         internal static FramebufferTexture2DMultiSampleDelegate FramebufferTexture2DMultiSample;
 
@@ -302,7 +306,8 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        public delegate void RenderbufferStorageDelegate(RenderbufferTarget target, RenderbufferStorage storage, int width, int hegiht);
+        public delegate void RenderbufferStorageDelegate(
+            RenderbufferTarget target, RenderbufferStorage storage, int width, int hegiht);
         public static RenderbufferStorageDelegate RenderbufferStorage;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -353,7 +358,8 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal unsafe delegate void TexParameterFloatArrayDelegate(TextureTarget target, TextureParameterName name, float* values);
+        internal unsafe delegate void TexParameterFloatArrayDelegate(
+            TextureTarget target, TextureParameterName name, [In] in float values);
         internal static TexParameterFloatArrayDelegate TexParameterfv;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -389,7 +395,7 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal delegate void DeleteQueriesDelegate(int count, [In] [Out] ref int queryId);
+        internal delegate void DeleteQueriesDelegate(int count, [In] in int queryId);
         internal static DeleteQueriesDelegate DeleteQueries;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -407,7 +413,7 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal unsafe delegate void ShaderSourceDelegate(int shaderId, int count, IntPtr code, int* length);
+        internal unsafe delegate void ShaderSourceDelegate(int shaderId, int count, IntPtr code, int length);
         internal static ShaderSourceDelegate ShaderSourceInternal;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -419,7 +425,7 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal unsafe delegate void GetShaderDelegate(int shaderId, int parameter, int* value);
+        internal unsafe delegate void GetShaderDelegate(int shaderId, int parameter, out int value);
         internal static GetShaderDelegate GetShaderiv;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -485,7 +491,7 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal unsafe delegate void GetProgramDelegate(int programId, int name, int* linked);
+        internal unsafe delegate void GetProgramDelegate(int programId, int name, out int linked);
         internal static GetProgramDelegate GetProgramiv;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -623,13 +629,14 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal delegate void GetTexImageDelegate(TextureTarget target, int level, PixelFormat format, PixelType type, [Out] IntPtr pixels);
+        internal delegate void GetTexImageDelegate(
+            TextureTarget target, int level, PixelFormat format, PixelType type, IntPtr pixels);
         internal static GetTexImageDelegate GetTexImageInternal;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal delegate void GetCompressedTexImageDelegate(TextureTarget target, int level, [Out] IntPtr pixels);
+        internal delegate void GetCompressedTexImageDelegate(TextureTarget target, int level, IntPtr pixels);
         internal static GetCompressedTexImageDelegate GetCompressedTexImageInternal;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -649,7 +656,7 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal delegate void DeleteTexturesDelegate(int count, ref int id);
+        internal delegate void DeleteTexturesDelegate(int count, [In] in int id);
         internal static DeleteTexturesDelegate DeleteTextures;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -685,7 +692,7 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal delegate void DeleteBuffersDelegate(int count, [In] [Out] ref int buffer);
+        internal delegate void DeleteBuffersDelegate(int count, [In] in int buffer);
         internal static DeleteBuffersDelegate DeleteBuffers;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -1009,10 +1016,7 @@ namespace MonoGame.OpenGL
 
         internal static unsafe void Uniform4(int location, int size, ReadOnlySpan<float> values)
         {
-            fixed (float* ptr = values)
-            {
-                Uniform4fv(location, size, ptr);
-            }
+            Uniform4fv(location, size, values[0]);
         }
 
         internal unsafe static string GetString(StringName name)
@@ -1092,42 +1096,29 @@ namespace MonoGame.OpenGL
 
         internal unsafe static void ShaderSource(int shaderId, string code)
         {
-            int length = code.Length;
             IntPtr intPtr = MarshalStringArrayToPtr(new string[] { code });
-            ShaderSourceInternal(shaderId, 1, intPtr, &length);
+            ShaderSourceInternal(shaderId, 1, intPtr, code.Length);
             FreeStringArrayPtr(intPtr, 1);
         }
 
         internal unsafe static void GetShader(int shaderId, ShaderParameter name, out int result)
         {
-            fixed (int* ptr = &result)
-            {
-                GetShaderiv(shaderId, (int)name, ptr);
-            }
+            GetShaderiv(shaderId, (int)name, out result);
         }
 
         internal unsafe static void GetProgram(int programId, GetProgramParameterName name, out int result)
         {
-            fixed (int* ptr = &result)
-            {
-                GetProgramiv(programId, (int)name, ptr);
-            }
+            GetProgramiv(programId, (int)name, out result);
         }
 
-        internal unsafe static void GetInteger(GetPName name, out int value)
+        internal unsafe static void GetInteger(GetPName name, out int result)
         {
-            fixed (int* ptr = &value)
-            {
-                GetIntegerv((int)name, ptr);
-            }
+            GetIntegerv((int)name, out result);
         }
 
-        internal unsafe static void GetInteger(int name, out int value)
+        internal unsafe static void GetInteger(int name, out int result)
         {
-            fixed (int* ptr = &value)
-            {
-                GetIntegerv(name, ptr);
-            }
+            GetIntegerv(name, out result);
         }
 
         internal static void TexParameter(TextureTarget target, TextureParameterName name, float value)
@@ -1135,12 +1126,10 @@ namespace MonoGame.OpenGL
             TexParameterf(target, name, value);
         }
 
-        internal unsafe static void TexParameter(TextureTarget target, TextureParameterName name, float[] values)
+        internal unsafe static void TexParameter(
+            TextureTarget target, TextureParameterName name, ReadOnlySpan<float> values)
         {
-            fixed (float* ptr = &values[0])
-            {
-                TexParameterfv(target, name, ptr);
-            }
+            TexParameterfv(target, name, values[0]);
         }
 
         internal static void TexParameter(TextureTarget target, TextureParameterName name, int value)

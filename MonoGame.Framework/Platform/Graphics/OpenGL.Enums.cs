@@ -18,6 +18,7 @@ namespace MonoGame.OpenGL
         Front = 0x0404,
         Back = 0x0405,
     }
+
     internal enum DrawBuffersEnum
     {
         UnsignedShort,
