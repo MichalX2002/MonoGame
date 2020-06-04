@@ -11,7 +11,7 @@ namespace MonoGame.Framework.Graphics
         public RenderTargetUsage RenderTargetUsage { get; private set; }
         public bool IsContentLost => false;
 
-        public event DatalessEvent<RenderTarget2D> ContentLost;
+        public event Event<RenderTarget2D> ContentLost;
 
         public RenderTarget2D(
             GraphicsDevice graphicsDevice,

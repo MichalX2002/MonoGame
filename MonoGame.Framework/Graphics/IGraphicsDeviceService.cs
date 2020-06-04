@@ -8,10 +8,10 @@ namespace MonoGame.Framework.Graphics
     {
         GraphicsDevice GraphicsDevice { get; }
         
-        event DatalessEvent<IGraphicsDeviceService> DeviceCreated;
-        event DatalessEvent<IGraphicsDeviceService> DeviceDisposing;
-        event DatalessEvent<IGraphicsDeviceService> DeviceReset;
-        event DatalessEvent<IGraphicsDeviceService> DeviceResetting;
+        event Event<IGraphicsDeviceService> DeviceCreated;
+        event Event<IGraphicsDeviceService> DeviceDisposing;
+        event Event<IGraphicsDeviceService> DeviceReset;
+        event Event<IGraphicsDeviceService> DeviceResetting;
     }
 }
 

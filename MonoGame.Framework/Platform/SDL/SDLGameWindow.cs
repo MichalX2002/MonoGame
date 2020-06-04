@@ -79,7 +79,7 @@ namespace MonoGame.Framework
             }
         }
 
-        public override Rectangle ClientBounds
+        public override Rectangle Bounds
         {
             get
             {
@@ -268,7 +268,7 @@ namespace MonoGame.Framework
         {
             _screenDeviceName = screenDeviceName;
 
-            var prevBounds = ClientBounds;
+            var prevBounds = Bounds;
             var displayIndex = SDL.Window.GetDisplayIndex(Handle);
 
             SDL.Display.GetBounds(displayIndex, out SDL.Rectangle displayRect);
@@ -326,7 +326,7 @@ namespace MonoGame.Framework
                 SDL.Window.SetPosition(Handle, centerX, centerY);
 
             if (IsFullScreen != _willBeFullScreen)
-                OnClientSizeChanged();
+                OnSizeChanged();
 
             IsFullScreen = _willBeFullScreen;
 
@@ -357,7 +357,7 @@ namespace MonoGame.Framework
             _game.GraphicsDevice.Viewport = new Viewport(0, 0, width, height);
 
             SDL.Window.GetSize(Handle, out _width, out _height);
-            OnClientSizeChanged();
+            OnSizeChanged();
         }
 
         public void InvokeFileDropped(List<string> files)

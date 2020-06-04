@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework.Content
@@ -189,9 +190,9 @@ namespace MonoGame.Framework.Content
 
         #region Read helpers
 
-        public Matrix ReadMatrix()
+        public Matrix4x4 ReadMatrix4x4()
         {
-            return new Matrix(
+            return new Matrix4x4(
                 m11: ReadSingle(),
                 m12: ReadSingle(),
                 m13: ReadSingle(),

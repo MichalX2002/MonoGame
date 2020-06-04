@@ -6,7 +6,6 @@ using System;
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.IO;
-using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework.Audio
 {
@@ -290,13 +289,13 @@ namespace MonoGame.Framework.Audio
         /// The stream must point to the start of a valid audio file. The formats supported are:
         /// <list type="bullet">
         /// <item>
-        ///     <description>Ogg Vorbis</description>
-        ///     <description>8-bit unsigned PCM</description>
-        ///     <description>16-bit signed PCM</description>
-        ///     <description>24-bit signed PCM</description>
-        ///     <description>32-bit IEEE float PCM</description>
-        ///     <description>MS-ADPCM 4-bit compressed</description>
-        ///     <description>IMA/ADPCM (IMA4) 4-bit compressed</description>
+        /// <description>Ogg Vorbis</description>
+        /// <description>8-bit unsigned PCM</description>
+        /// <description>16-bit signed PCM</description>
+        /// <description>24-bit signed PCM</description>
+        /// <description>32-bit IEEE float PCM</description>
+        /// <description>MS-ADPCM 4-bit compressed</description>
+        /// <description>IMA/ADPCM (IMA4) 4-bit compressed</description>
         /// </item>
         /// </list>
         /// </remarks>

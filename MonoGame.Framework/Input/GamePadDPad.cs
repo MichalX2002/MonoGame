@@ -68,6 +68,23 @@ namespace MonoGame.Framework.Input
 
         #endregion
 
+        private void ConvertButtonToDirection(Buttons button,
+            ref ButtonState down, ref ButtonState left,
+            ref ButtonState right, ref ButtonState up)
+        {
+            if ((button & Buttons.DPadDown) == Buttons.DPadDown)
+                down = ButtonState.Pressed;
+
+            if ((button & Buttons.DPadLeft) == Buttons.DPadLeft)
+                left = ButtonState.Pressed;
+
+            if ((button & Buttons.DPadRight) == Buttons.DPadRight)
+                right = ButtonState.Pressed;
+
+            if ((button & Buttons.DPadUp) == Buttons.DPadUp)
+                up = ButtonState.Pressed;
+        }
+
         #region Equals
 
         public static bool operator ==(in GamePadDPad left, in GamePadDPad right)
@@ -85,7 +102,7 @@ namespace MonoGame.Framework.Input
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Returns the hash code of the <see cref="GamePadDPad"/>.
@@ -93,10 +110,10 @@ namespace MonoGame.Framework.Input
         public override int GetHashCode()
         {
             return
-                (Down == ButtonState.Pressed ? 1 : 2) +
-                (Left == ButtonState.Pressed ? 4 : 8) +
-                (Right == ButtonState.Pressed ? 16 : 32) +
-                (Up == ButtonState.Pressed ? 64 : 128);
+                (Down.ToBool() ? 1 : 2) +
+                (Left.ToBool() ? 4 : 8) +
+                (Right.ToBool() ? 16 : 32) +
+                (Up.ToBool() ? 64 : 128);
         }
 
         /// <summary>
@@ -104,29 +121,15 @@ namespace MonoGame.Framework.Input
         /// in a format of 0000 where each number represents a boolean value of each 
         /// respective property: <see cref="Left"/>, <see cref="Up"/>, <see cref="Right"/>, <see cref="Down"/>.
         /// </summary>
-        public override string ToString() => string.Concat(
+        public override string ToString()
+        {
+            return string.Concat(
                 ((int)Left).ToString(),
                 ((int)Up).ToString(),
                 ((int)Right).ToString(),
                 ((int)Down).ToString());
+        }
 
         #endregion
-
-        private void ConvertButtonToDirection(Buttons button,
-            ref ButtonState down, ref ButtonState left, 
-            ref ButtonState right, ref ButtonState up)
-        {
-            if ((button & Buttons.DPadDown) == Buttons.DPadDown)
-                down = ButtonState.Pressed;
-
-            if ((button & Buttons.DPadLeft) == Buttons.DPadLeft)
-                left = ButtonState.Pressed;
-
-            if ((button & Buttons.DPadRight) == Buttons.DPadRight)
-                right = ButtonState.Pressed;
-
-            if ((button & Buttons.DPadUp) == Buttons.DPadUp)
-                up = ButtonState.Pressed;
-        }
     }
 }

@@ -5,6 +5,8 @@
 // Microsoft XNA Community Game Platform
 // Copyright (C) Microsoft Corporation. All rights reserved.
 
+using System.Numerics;
+
 namespace MonoGame.Framework.Graphics
 {
     /// <summary>
@@ -14,7 +16,7 @@ namespace MonoGame.Framework.Graphics
     {
         private EffectParameter _matrixParam;
         private Viewport _lastViewport;
-        private Matrix _projection;
+        private Matrix4x4 _projection;
 
         /// <summary>
         /// Creates a new SpriteEffect.
@@ -27,9 +29,9 @@ namespace MonoGame.Framework.Graphics
 
         /// <summary>
         /// An optional matrix used to transform the sprite geometry.
-        /// Uses <see cref="Matrix.Identity"/> if null.
+        /// Uses <see cref="Matrix4x4.Identity"/> if null.
         /// </summary>
-        public Matrix? TransformMatrix { get; set; }
+        public Matrix4x4? TransformMatrix { get; set; }
 
         /// <summary>
         /// Creates a new <see cref="SpriteEffect"/> by 
@@ -71,7 +73,7 @@ namespace MonoGame.Framework.Graphics
                 // Normal 3D cameras look into the -z direction (z = 1 is in front of z = 0).
                 // The sprite batch layer depth is the opposite (z = 0 is in front of z = 1).
                 // --> We get the correct matrix with near plane 0 and far plane -1.
-                _projection = Matrix.CreateOrthographicOffCenter(
+                _projection = Matrix4x4.CreateOrthographicOffCenter(
                     0, vp.Width, vp.Height, 0, 0, -1);
 
                 if (GraphicsDevice.UseHalfPixelOffset)

@@ -38,8 +38,8 @@ namespace MonoGame.Framework
             }
         }
 
-        public event DatalessEvent<object> DrawOrderChanged;
-        public event DatalessEvent<object> VisibleChanged;
+        public event Event<object> DrawOrderChanged;
+        public event Event<object> VisibleChanged;
 
         public DrawableGameComponent(Game game) : base(game)
         {

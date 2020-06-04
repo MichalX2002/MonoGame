@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -71,7 +72,7 @@ namespace MonoGame.Framework.Graphics
             DepthStencilState depthStencilState = null,
             RasterizerState rasterizerState = null,
             Effect effect = null,
-            Matrix? transformMatrix = null)
+            Matrix4x4? transformMatrix = null)
         {
             if (_beginCalled)
                 throw new InvalidOperationException(
@@ -131,15 +132,16 @@ namespace MonoGame.Framework.Graphics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void FlipTexCoords(ref Vector4 texCoord, SpriteEffects effects)
+        private static void FlipTexCoords(ref Vector4 texCoord, SpriteFlip flip)
         {
-            if ((effects & SpriteEffects.FlipVertically) != 0)
+            if ((flip & SpriteFlip.Vertical) != 0)
             {
                 var tmp = texCoord.W;
                 texCoord.W = texCoord.Y;
                 texCoord.Y = tmp;
             }
-            if ((effects & SpriteEffects.FlipHorizontally) != 0)
+
+            if ((flip & SpriteFlip.Horizontal) != 0)
             {
                 var tmp = texCoord.Z;
                 texCoord.Z = texCoord.X;
@@ -253,7 +255,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rotation">An optional rotation of this sprite. 0 by default.</param>
         /// <param name="scale">An optional scale vector. Uses <see cref="Vector2.One"/> if null.</param>
         /// <param name="color">An optional color mask. Uses <see cref="Color.White"/> if null.</param>
-        /// <param name="effects">The optional drawing modificators. <see cref="SpriteEffects.None"/> by default.</param>
+        /// <param name="flip">Optional sprite mirroring. <see cref="SpriteFlip.None"/> by default.</param>
         /// <param name="layerDepth">An optional depth of the layer of this sprite. 0 by default.</param>
         /// <exception cref="ArgumentException">
         /// Throwns if both <paramref name="position"/> and <paramref name="destinationRectangle"/> been used.
@@ -273,7 +275,7 @@ namespace MonoGame.Framework.Graphics
             float rotation = 0f,
             Vector2? scale = null,
             Color? color = null,
-            SpriteEffects effects = SpriteEffects.None,
+            SpriteFlip flip = SpriteFlip.None,
             float layerDepth = 0f)
         {
             // Assign default values to null parameters here, as they are not compile-time constants
@@ -296,13 +298,13 @@ namespace MonoGame.Framework.Graphics
             {
                 Draw(
                     texture, position.Value, sourceRectangle, color.Value,
-                    rotation, origin.Value, scale.Value, effects, layerDepth);
+                    rotation, origin.Value, scale.Value, flip, layerDepth);
             }
             else // Call Draw() using drawRectangle
             {
                 Draw(
                     texture, destinationRectangle.Value, sourceRectangle, color.Value,
-                    rotation, origin.Value, effects, layerDepth);
+                    rotation, origin.Value, flip, layerDepth);
             }
         }
 
@@ -319,11 +321,11 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rotation">A rotation of this sprite.</param>
         /// <param name="origin">Center of the rotation. 0,0 by default.</param>
         /// <param name="scale">A scaling of this sprite.</param>
-        /// <param name="effects">Modificators for drawing. Can be combined.</param>
+        /// <param name="flip">Sprite mirroring flags. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this sprite.</param>
         public void Draw(
             Texture2D texture, Vector2 position, in RectangleF? sourceRectangle, Color color,
-            float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
+            float rotation, Vector2 origin, Vector2 scale, SpriteFlip flip, float layerDepth)
         {
             AssertValidArguments(texture, nameof(Draw));
 
@@ -339,10 +341,11 @@ namespace MonoGame.Framework.Graphics
                 RectangleF srcRect = sourceRectangle.Value;
                 w = srcRect.Width * scale.X;
                 h = srcRect.Height * scale.Y;
-                texCoord.Base.X = srcRect.X * texture.Texel.X;
-                texCoord.Base.Y = srcRect.Y * texture.Texel.Y;
-                texCoord.Base.Z = (srcRect.X + srcRect.Width) * texture.Texel.X;
-                texCoord.Base.W = (srcRect.Y + srcRect.Height) * texture.Texel.Y;
+                texCoord = new Vector4(
+                    srcRect.X * texture.Texel.X,
+                    srcRect.Y * texture.Texel.Y,
+                    (srcRect.X + srcRect.Width) * texture.Texel.X,
+                    (srcRect.Y + srcRect.Height) * texture.Texel.Y);
             }
             else
             {
@@ -351,7 +354,7 @@ namespace MonoGame.Framework.Graphics
                 texCoord = new Vector4(0, 0, 1, 1);
             }
 
-            FlipTexCoords(ref texCoord, effects);
+            FlipTexCoords(ref texCoord, flip);
 
             if (rotation == 0f)
             {
@@ -382,7 +385,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rotation">A rotation of this sprite.</param>
         /// <param name="origin">Center of the rotation. 0,0 by default.</param>
         /// <param name="scale">A scaling of this sprite.</param>
-        /// <param name="effects">Modificators for drawing. Can be combined.</param>
+        /// <param name="flip">Sprite mirroring flags. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this sprite.</param>
         public void Draw(
             Texture2D texture,
@@ -392,12 +395,12 @@ namespace MonoGame.Framework.Graphics
             float rotation,
             Vector2 origin,
             float scale,
-            SpriteEffects effects,
+            SpriteFlip flip,
             float layerDepth)
         {
             Draw(
                 texture, position, sourceRectangle, color,
-                rotation, origin, new Vector2(scale, scale), effects, layerDepth);
+                rotation, origin, new Vector2(scale, scale), flip, layerDepth);
         }
 
         /// <summary>
@@ -411,7 +414,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="color">A color mask.</param>
         /// <param name="rotation">A rotation of this sprite.</param>
         /// <param name="origin">Center of the rotation. 0,0 by default.</param>
-        /// <param name="effects">Modificators for drawing. Can be combined.</param>
+        /// <param name="flip">Sprite mirroring flags. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this sprite.</param>
         public void Draw(
             Texture2D texture,
@@ -420,7 +423,7 @@ namespace MonoGame.Framework.Graphics
             Color color,
             float rotation,
             Vector2 origin,
-            SpriteEffects effects,
+            SpriteFlip flip,
             float layerDepth)
         {
             AssertValidArguments(texture, nameof(Draw));
@@ -455,7 +458,7 @@ namespace MonoGame.Framework.Graphics
                 originY = origin.Y * destinationRectangle.Height * texture.Texel.Y;
             }
 
-            FlipTexCoords(ref texCoord, effects);
+            FlipTexCoords(ref texCoord, flip);
 
             if (rotation == 0f)
             {
@@ -674,13 +677,13 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rotation">A rotation of this string.</param>
         /// <param name="origin">Center of the rotation. 0,0 by default.</param>
         /// <param name="scale">A scaling of this string.</param>
-        /// <param name="effects">Modificators for drawing. Can be combined.</param>
+        /// <param name="flip">Sprite mirroring flags. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this string.</param>
         public void DrawString(
             SpriteFont spriteFont, string text, Vector2 position, Color color,
-            float rotation, Vector2 origin, float scale, SpriteEffects effects, float layerDepth)
+            float rotation, Vector2 origin, float scale, SpriteFlip flip, float layerDepth)
         {
-            DrawString(spriteFont, text, position, color, rotation, origin, new Vector2(scale), effects, layerDepth);
+            DrawString(spriteFont, text, position, color, rotation, origin, new Vector2(scale), flip, layerDepth);
         }
 
         /// <summary>
@@ -693,18 +696,18 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rotation">A rotation of this string.</param>
         /// <param name="origin">Center of the rotation. 0,0 by default.</param>
         /// <param name="scale">A scaling of this string.</param>
-        /// <param name="effects">Modificators for drawing. Can be combined.</param>
+        /// <param name="flip">Sprite mirroring flags. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this string.</param>
         public unsafe void DrawString(
             SpriteFont spriteFont, RuneEnumerator text, Vector2 position, Color color,
-            float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
+            float rotation, Vector2 origin, Vector2 scale, SpriteFlip flip, float layerDepth)
         {
             AssertValidArguments(spriteFont, nameof(DrawString));
             float sortKey = GetSortKey(spriteFont.Texture, layerDepth);
 
             var flipAdjustment = Vector2.Zero;
-            var flippedVert = (effects & SpriteEffects.FlipVertically) == SpriteEffects.FlipVertically;
-            var flippedHorz = (effects & SpriteEffects.FlipHorizontally) == SpriteEffects.FlipHorizontally;
+            var flippedVert = (flip & SpriteFlip.Vertical) == SpriteFlip.Vertical;
+            var flippedHorz = (flip & SpriteFlip.Horizontal) == SpriteFlip.Horizontal;
 
             if (flippedVert || flippedHorz)
             {
@@ -721,7 +724,7 @@ namespace MonoGame.Framework.Graphics
                 }
             }
 
-            var transformation = Matrix.Identity;
+            var transformation = Matrix4x4.Identity;
             float cos = 0, sin = 0;
             if (rotation == 0)
             {
@@ -738,8 +741,16 @@ namespace MonoGame.Framework.Graphics
                 transformation.M12 = (flippedHorz ? -scale.X : scale.X) * sin;
                 transformation.M21 = (flippedVert ? -scale.Y : scale.Y) * (-sin);
                 transformation.M22 = (flippedVert ? -scale.Y : scale.Y) * cos;
-                transformation.M41 = ((flipAdjustment.X - origin.X) * transformation.M11) + (flipAdjustment.Y - origin.Y) * transformation.M21 + position.X;
-                transformation.M42 = ((flipAdjustment.X - origin.X) * transformation.M12) + (flipAdjustment.Y - origin.Y) * transformation.M22 + position.Y;
+
+                transformation.M41 =
+                    ((flipAdjustment.X - origin.X) * transformation.M11) +
+                    (flipAdjustment.Y - origin.Y) * transformation.M21 +
+                    position.X;
+
+                transformation.M42 =
+                    ((flipAdjustment.X - origin.X) * transformation.M12) +
+                    (flipAdjustment.Y - origin.Y) * transformation.M22 +
+                    position.Y;
             }
 
             var offset = Vector2.Zero;
@@ -796,7 +807,7 @@ namespace MonoGame.Framework.Graphics
                     (glyph.BoundsInTexture.X + glyph.BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
                     (glyph.BoundsInTexture.Y + glyph.BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
 
-                FlipTexCoords(ref texCoord, effects);
+                FlipTexCoords(ref texCoord, flip);
 
                 if (rotation == 0f)
                 {

@@ -31,7 +31,7 @@ namespace MonoGame.Framework.Graphics
         int IRenderTarget.Height => Size;
 
         public bool IsContentLost => false;
-        public event DatalessEvent<RenderTargetCube> ContentLost;
+        public event Event<RenderTargetCube> ContentLost;
         
         /// <summary>
         /// Initializes a new instance of the <see cref="RenderTargetCube"/> class.

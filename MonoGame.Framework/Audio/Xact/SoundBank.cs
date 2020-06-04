@@ -25,7 +25,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// This event is triggered when the <see cref="SoundBank"/> is disposed.
         /// </summary>
-        public event DatalessEvent<SoundBank> Disposing;
+        public event Event<SoundBank> Disposing;
 
         /// <summary>
         /// Is true if the <see cref="SoundBank"/> has been disposed.

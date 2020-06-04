@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -12,7 +13,7 @@ namespace MonoGame.Framework.Graphics
     /// </summary>
     public sealed class Model : GraphicsResource
     {
-        private static Matrix[] _sharedDrawBoneMatrices;
+        private static Matrix4x4[] _sharedDrawBoneMatrices;
         
         /// <summary>
         /// A collection of <see cref="ModelBone"/> objects which describe how each mesh in the
@@ -64,13 +65,13 @@ namespace MonoGame.Framework.Graphics
 
         internal void BuildHierarchy()
         {
-            var globalScale = Matrix.CreateScale(0.01f);
+            var globalScale = Matrix4x4.CreateScale(0.01f);
             
             foreach(var node in Root.Children)
                 BuildHierarchy(node, Root.Transform * globalScale, 0);
         }
         
-        private void BuildHierarchy(ModelBone node, in Matrix parentTransform, int level)
+        private void BuildHierarchy(ModelBone node, in Matrix4x4 parentTransform, int level)
         {
             node.ModelTransform = node.Transform * parentTransform;
             
@@ -93,13 +94,13 @@ namespace MonoGame.Framework.Graphics
         /// <param name="world">The world transform.</param>
         /// <param name="view">The view transform.</param>
         /// <param name="projection">The projection transform.</param>
-        public void Draw(in Matrix world, in Matrix view, in Matrix projection) 
+        public void Draw(in Matrix4x4 world, in Matrix4x4 view, in Matrix4x4 projection) 
         {       
             int boneCount = Bones.Count;
             
             if (_sharedDrawBoneMatrices == null ||
                 _sharedDrawBoneMatrices.Length < boneCount)
-                _sharedDrawBoneMatrices = new Matrix[boneCount];
+                _sharedDrawBoneMatrices = new Matrix4x4[boneCount];
             
             // Look up combined bone matrices for the entire model.            
             CopyAbsoluteBoneTransformsTo(_sharedDrawBoneMatrices);
@@ -125,7 +126,7 @@ namespace MonoGame.Framework.Graphics
         /// Copies bone transforms relative to all parent bones of the each bone from this model to a given span.
         /// </summary>
         /// <param name="destinationBoneTransforms">The span receiving the transformed bones.</param>
-        public void CopyAbsoluteBoneTransformsTo(Span<Matrix> destinationBoneTransforms)
+        public void CopyAbsoluteBoneTransformsTo(Span<Matrix4x4> destinationBoneTransforms)
         {
             if (destinationBoneTransforms.IsEmpty)
                 throw new ArgumentNullException(nameof(destinationBoneTransforms));
@@ -143,8 +144,7 @@ namespace MonoGame.Framework.Graphics
                 else
                 {
                     int index2 = modelBone.Parent.Index;
-                    destinationBoneTransforms[i] = Matrix.Multiply(
-                        modelBone.Transform, destinationBoneTransforms[index2]);
+                    destinationBoneTransforms[i] = modelBone.Transform * destinationBoneTransforms[index2];
                 }
             }
         }
@@ -159,7 +159,7 @@ namespace MonoGame.Framework.Graphics
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="sourceBoneTransforms"/> is invalid.
         /// </exception>
-        public void CopyBoneTransformsFrom(ReadOnlySpan<Matrix> sourceBoneTransforms)
+        public void CopyBoneTransformsFrom(ReadOnlySpan<Matrix4x4> sourceBoneTransforms)
         {
             if (sourceBoneTransforms.IsEmpty)
                 throw new ArgumentEmptyException(nameof(sourceBoneTransforms));
@@ -181,7 +181,7 @@ namespace MonoGame.Framework.Graphics
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="destinationBoneTransforms"/> is invalid.
         /// </exception>
-        public void CopyBoneTransformsTo(Span<Matrix> destinationBoneTransforms)
+        public void CopyBoneTransformsTo(Span<Matrix4x4> destinationBoneTransforms)
         {
             if (destinationBoneTransforms.IsEmpty)
                 throw new ArgumentEmptyException(nameof(destinationBoneTransforms));

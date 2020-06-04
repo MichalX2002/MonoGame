@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace MonoGame.Framework.Input.Touch
 {
@@ -295,7 +296,7 @@ namespace MonoGame.Framework.Input.Touch
         private void UpdateTouchScale()
         {
             // Recalculate the touch scale.
-            _touchScale = _displaySize.ToVector2() / Window.ClientBounds.Size;
+            _touchScale = _displaySize.ToVector2() / Window.Bounds.Size;
         }
 
         private List<TouchLocation> _tmpReleased = new List<TouchLocation>();

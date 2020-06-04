@@ -13,6 +13,7 @@ namespace MonoGame.Framework
     public abstract class GameWindow
     {
         public delegate void FilesDroppedEvent(GameWindow window, List<string> files);
+        public delegate void TextInputEvent(GameWindow window, TextInputEventArgs textInput);
 
         private string _title;
         private bool _allowAltF4 = true;
@@ -22,10 +23,13 @@ namespace MonoGame.Framework
 
         #region Events
 
-        public event DatalessEvent<GameWindow> ClientSizeChanged;
-        public event DatalessEvent<GameWindow> OrientationChanged;
-        public event DatalessEvent<GameWindow> ScreenDeviceNameChanged;
+        public event Event<GameWindow> SizeChanged;
+        public event Event<GameWindow> OrientationChanged;
+        public event Event<GameWindow> ScreenDeviceNameChanged;
 
+        /// <summary>
+        /// Event for a file group that was dropped on the window.
+        /// </summary>
         public event FilesDroppedEvent FilesDropped;
 
         /// <summary>
@@ -37,7 +41,7 @@ namespace MonoGame.Framework
         /// <remarks>
         /// This event is only supported on the Windows and Linux platforms.
         /// </remarks>
-        public event DataEvent<GameWindow, TextInputEventArgs> TextInput;
+        public event TextInputEvent TextInput;
 
         /// <summary>
         /// Buffered keyboard KeyDown event.
@@ -45,7 +49,7 @@ namespace MonoGame.Framework
         /// <remarks>
         /// This event is only supported on the Windows and Linux platforms.
         /// </remarks>
-        public event DataEvent<GameWindow, TextInputEventArgs> KeyDown;
+        public event TextInputEvent KeyDown;
 
         /// <summary>
         /// Buffered keyboard KeyUp event.
@@ -53,7 +57,7 @@ namespace MonoGame.Framework
         /// <remarks>
         /// This event is only supported on the Windows and Linux platforms.
         /// </remarks>
-        public event DataEvent<GameWindow, TextInputEventArgs> KeyUp;
+        public event TextInputEvent KeyUp;
 
         #endregion
 
@@ -65,7 +69,7 @@ namespace MonoGame.Framework
         public TaskbarList TaskbarList { get; }
 
         public abstract bool AllowUserResizing { get; set; }
-        public abstract Rectangle ClientBounds { get; }
+        public abstract Rectangle Bounds { get; }
 
         public abstract bool HasClipboardText { get; }
         public abstract string ClipboardText { get; set; }
@@ -131,20 +135,20 @@ namespace MonoGame.Framework
 
         public abstract void BeginScreenDeviceChange(bool willBeFullScreen);
 
-        public abstract void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight);
+        public abstract void EndScreenDeviceChange(string screenDeviceName, int width, int height);
 
         public void EndScreenDeviceChange(string screenDeviceName)
         {
-            EndScreenDeviceChange(screenDeviceName, ClientBounds.Width, ClientBounds.Height);
+            EndScreenDeviceChange(screenDeviceName, Bounds.Width, Bounds.Height);
         }
 
         protected void OnActivated()
         {
         }
 
-        internal void OnClientSizeChanged()
+        internal void OnSizeChanged()
         {
-            ClientSizeChanged?.Invoke(this);
+            SizeChanged?.Invoke(this);
         }
 
         protected void OnDeactivated()

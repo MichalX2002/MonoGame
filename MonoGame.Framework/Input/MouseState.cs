@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 
 namespace MonoGame.Framework.Input
 {
@@ -12,6 +13,11 @@ namespace MonoGame.Framework.Input
     public struct MouseState : IEquatable<MouseState>
     {
         #region Properties
+
+        /// <summary>
+        /// Gets the state of all the mouse buttons.
+        /// </summary>
+        public MouseButton Buttons { get; internal set; }
 
         /// <summary>
         /// Gets horizontal position of the cursor in relation to the window.
@@ -24,24 +30,24 @@ namespace MonoGame.Framework.Input
         public int Y { get; internal set; }
 
         /// <summary>
-        /// Gets the cumulative vertical scroll wheel value since the game start.
-        /// </summary>
-        public int Scroll { get; internal set; }
-
-        /// <summary>
         /// Gets the cumulative horizontal scroll wheel value since the game start.
         /// </summary>
         public int HorizontalScroll { get; internal set; }
 
         /// <summary>
-        /// Gets the state of all the mouse buttons.
+        /// Gets the cumulative vertical scroll wheel value since the game start.
         /// </summary>
-        public MouseButton Buttons { get; internal set; }
+        public int VerticalScroll { get; internal set; }
 
         /// <summary>
         /// Gets the cursor position in relation to the window.
         /// </summary>
         public readonly Point Position => new Point(X, Y);
+
+        /// <summary>
+        /// Gets the cumulative scroll wheel values since the game start.
+        /// </summary>
+        public readonly Vector2 Scroll => new Vector2(HorizontalScroll, VerticalScroll);
 
         /// <summary>
         /// Gets state of the left mouse button.
@@ -108,7 +114,7 @@ namespace MonoGame.Framework.Input
         {
             X = x;
             Y = y;
-            Scroll = scroll;
+            VerticalScroll = scroll;
             HorizontalScroll = horizontalScroll;
             Buttons = buttons;
         }
@@ -150,6 +156,12 @@ namespace MonoGame.Framework.Input
 
         #endregion
 
+        #region Equals
+
+        public readonly bool Equals(MouseState other) => this == other;
+
+        public override readonly bool Equals(object obj) => obj is MouseState other && this == other;
+
         /// <summary>
         /// Compares whether two MouseState instances are equal.
         /// </summary>
@@ -161,7 +173,7 @@ namespace MonoGame.Framework.Input
             return left.X == right.X
                 && left.Y == right.Y
                 && left.Buttons == right.Buttons
-                && left.Scroll == right.Scroll
+                && left.VerticalScroll == right.VerticalScroll
                 && left.HorizontalScroll == right.HorizontalScroll;
         }
 
@@ -176,36 +188,33 @@ namespace MonoGame.Framework.Input
             return !(left == right);
         }
 
-        public bool Equals(MouseState other)
-        {
-            return this == other;
-        }
+        #endregion
 
-        public override bool Equals(object obj)
-        {
-            return obj is MouseState other ? this == other : false;
-        }
+        #region Object overrides
 
         /// <summary>
         /// Gets the hash code for <see cref="MouseState"/> instance.
         /// </summary>
         /// <returns>Hash code of the object.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            return HashCode.Combine(X, Y, Scroll, HorizontalScroll, Buttons);
+            return HashCode.Combine(Buttons, X, Y, HorizontalScroll, VerticalScroll);
         }
 
         /// <summary>
         /// Returns a string describing the mouse state.
         /// </summary>
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return "[MouseState X=" + X +
-                    ", Y=" + Y +
-                    ", Buttons=" + Buttons +
-                    ", Scroll=" + Scroll +
-                    ", HScroll=" + HorizontalScroll +
-                    "]";
+            return 
+                "{Buttons=" + Buttons +
+                ", X=" + X +
+                ", Y=" + Y +
+                ", HorizontalScroll=" + HorizontalScroll +
+                ", VerticalScroll=" + VerticalScroll +
+                "}";
         }
+
+        #endregion
     }
 }

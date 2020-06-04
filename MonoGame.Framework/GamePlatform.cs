@@ -97,9 +97,9 @@ namespace MonoGame.Framework
 
         #region Events
 
-        public event DatalessEvent<GamePlatform> AsyncRunLoopEnded;
-        public event DatalessEvent<Game> Activated;
-        public event DatalessEvent<Game> Deactivated;
+        public event Event<GamePlatform> AsyncRunLoopEnded;
+        public event Event<Game> Activated;
+        public event Event<Game> Deactivated;
 
         /// <summary>
         /// Raises the <see cref="AsyncRunLoopEnded"/> event. 

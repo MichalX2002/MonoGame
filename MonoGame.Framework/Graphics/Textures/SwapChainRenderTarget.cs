@@ -5,7 +5,6 @@ using SharpDX.DXGI;
 using SharpDX.Direct3D11;
 #endif
 
-
 namespace MonoGame.Framework.Graphics
 {
 #if WINDOWS && DIRECTX

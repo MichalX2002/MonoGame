@@ -89,7 +89,7 @@ namespace MonoGame.Framework.Input
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Returns the hash code of the <see cref="GamePadButtons"/>.
@@ -102,7 +102,7 @@ namespace MonoGame.Framework.Input
         public override string ToString()
         {
             return
-                "[GamePadButtons: A=" + (int)A +
+                "{A=" + (int)A +
                 ", B=" + (int)B +
                 ", Back=" + (int)Back +
                 ", X=" + (int)X +
@@ -113,7 +113,7 @@ namespace MonoGame.Framework.Input
                 ", RightShoulder=" + (int)RightShoulder +
                 ", RightStick=" + (int)RightStick +
                 ", BigButton=" + (int)BigButton +
-                "]";
+                "}";
         }
 
         #endregion

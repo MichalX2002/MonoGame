@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -363,13 +362,13 @@ namespace MonoGame.Framework.Graphics
         #region Events
 
         // TODO: Graphics Device events need implementing
-        internal event DataEvent<GraphicsDevice, PresentationParameters> PresentationChanged;
-        public event DatalessEvent<GraphicsDevice> DeviceLost;
-        public event DatalessEvent<GraphicsDevice> DeviceReset;
-        public event DatalessEvent<GraphicsDevice> DeviceResetting;
+        public event Event<GraphicsDevice> Disposing;
+        public event Event<GraphicsDevice> DeviceLost;
+        public event Event<GraphicsDevice> DeviceReset;
+        public event Event<GraphicsDevice> DeviceResetting;
         public event DataEvent<GraphicsDevice, object> ResourceCreated;
         public event DataEvent<GraphicsDevice, ResourceDestroyedEventArgs> ResourceDestroyed;
-        public event DatalessEvent<GraphicsDevice> Disposing;
+        internal event DataEvent<GraphicsDevice, PresentationParameters> PresentationChanged;
 
         #endregion
 
@@ -1087,9 +1086,9 @@ namespace MonoGame.Framework.Graphics
             where TVertex : unmanaged
             where TIndex : unmanaged
         {
-            if (vertexData.IsEmpty)
+            if (vertexData.IsEmpty) 
                 throw new ArgumentEmptyException(nameof(vertexData));
-            if (indexData.IsEmpty)
+            if (indexData.IsEmpty) 
                 throw new ArgumentEmptyException(nameof(indexData));
 
             if (primitiveCount <= 0 || GetElementCountForType(primitiveType, primitiveCount) > indexData.Length)

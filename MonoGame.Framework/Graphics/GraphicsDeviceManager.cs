@@ -270,7 +270,7 @@ namespace MonoGame.Framework
 
             // Assume the window client size as the default back 
             // buffer resolution in the landscape orientation.
-            var clientBounds = _game.Window.ClientBounds;
+            var clientBounds = _game.Window.Bounds;
             if (clientBounds.Width >= clientBounds.Height)
             {
                 _preferredBackBufferWidth = clientBounds.Width;
@@ -379,12 +379,12 @@ namespace MonoGame.Framework
 
         #region IGraphicsDeviceService
 
-        public event DatalessEvent<IGraphicsDeviceService> DeviceCreated;
-        public event DatalessEvent<IGraphicsDeviceService> DeviceDisposing;
-        public event DatalessEvent<IGraphicsDeviceService> DeviceReset;
-        public event DatalessEvent<IGraphicsDeviceService> DeviceResetting;
+        public event Event<IGraphicsDeviceService> DeviceCreated;
+        public event Event<IGraphicsDeviceService> DeviceDisposing;
+        public event Event<IGraphicsDeviceService> DeviceReset;
+        public event Event<IGraphicsDeviceService> DeviceResetting;
         public event DataEvent<IGraphicsDeviceService, GraphicsDeviceInformation> PreparingDeviceSettings;
-        public event DatalessEvent<IGraphicsDeviceService> Disposed;
+        public event Event<IGraphicsDeviceService> Disposed;
 
         internal void OnDeviceDisposing() => DeviceDisposing?.Invoke(this);
 

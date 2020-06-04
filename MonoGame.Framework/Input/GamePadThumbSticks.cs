@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 
 namespace MonoGame.Framework.Input
 {
@@ -14,12 +15,12 @@ namespace MonoGame.Framework.Input
 #if DIRECTX && !WINDOWS_UAP
         // XInput Xbox 360 Controller dead zones
         // Dead zones are slighty different between left and right sticks, this may come from Microsoft usability tests
-        private const float leftThumbDeadZone = SharpDX.XInput.Gamepad.LeftThumbDeadZone / (float)short.MaxValue;
-        private const float rightThumbDeadZone = SharpDX.XInput.Gamepad.RightThumbDeadZone / (float)short.MaxValue;
+        private const float LeftThumbDeadZone = SharpDX.XInput.Gamepad.LeftThumbDeadZone / (float)short.MaxValue;
+        private const float RightThumbDeadZone = SharpDX.XInput.Gamepad.RightThumbDeadZone / (float)short.MaxValue;
 #else
         // Default & SDL Xbox 360 Controller dead zones based on the XInput constants.
-        private const float leftThumbDeadZone = 0.24f;
-        private const float rightThumbDeadZone = 0.265f;
+        private const float LeftThumbDeadZone = 0.24f;
+        private const float RightThumbDeadZone = 0.265f;
 #endif
 
         internal readonly Buttons _virtualButtons;
@@ -46,24 +47,24 @@ namespace MonoGame.Framework.Input
             GamePadDeadZone leftDeadZoneMode, GamePadDeadZone rightDeadZoneMode) : this()
         {
             // Apply dead zone
-            Left = ApplyDeadZone(leftDeadZoneMode, leftThumbDeadZone, leftPosition);
-            Right = ApplyDeadZone(rightDeadZoneMode, rightThumbDeadZone, rightPosition);
+            Left = ApplyDeadZone(leftDeadZoneMode, LeftThumbDeadZone, leftPosition);
+            Right = ApplyDeadZone(rightDeadZoneMode, RightThumbDeadZone, rightPosition);
 
             // VirtualButtons should always behave like deadzone is IndependentAxes. 
             // This is consistent with XNA behaviour and generally most convenient (e.g. for menu navigation)
             _virtualButtons = 0;
 
-            if (leftPosition.X < -leftThumbDeadZone) _virtualButtons |= Buttons.LeftThumbstickLeft;
-            else if (leftPosition.X > leftThumbDeadZone) _virtualButtons |= Buttons.LeftThumbstickRight;
+            if (leftPosition.X < -LeftThumbDeadZone) _virtualButtons |= Buttons.LeftThumbstickLeft;
+            else if (leftPosition.X > LeftThumbDeadZone) _virtualButtons |= Buttons.LeftThumbstickRight;
 
-            if (leftPosition.Y < -leftThumbDeadZone) _virtualButtons |= Buttons.LeftThumbstickDown;
-            else if (leftPosition.Y > leftThumbDeadZone) _virtualButtons |= Buttons.LeftThumbstickUp;
+            if (leftPosition.Y < -LeftThumbDeadZone) _virtualButtons |= Buttons.LeftThumbstickDown;
+            else if (leftPosition.Y > LeftThumbDeadZone) _virtualButtons |= Buttons.LeftThumbstickUp;
 
-            if (rightPosition.X < -rightThumbDeadZone) _virtualButtons |= Buttons.RightThumbstickLeft;
-            else if (rightPosition.X > rightThumbDeadZone) _virtualButtons |= Buttons.RightThumbstickRight;
+            if (rightPosition.X < -RightThumbDeadZone) _virtualButtons |= Buttons.RightThumbstickLeft;
+            else if (rightPosition.X > RightThumbDeadZone) _virtualButtons |= Buttons.RightThumbstickRight;
 
-            if (rightPosition.Y < -rightThumbDeadZone) _virtualButtons |= Buttons.RightThumbstickDown;
-            else if (rightPosition.Y > rightThumbDeadZone) _virtualButtons |= Buttons.RightThumbstickUp;
+            if (rightPosition.Y < -RightThumbDeadZone) _virtualButtons |= Buttons.RightThumbstickDown;
+            else if (rightPosition.Y > RightThumbDeadZone) _virtualButtons |= Buttons.RightThumbstickUp;
         }
 
         private Vector2 ApplyDeadZone(GamePadDeadZone deadZoneMode, float deadZone, Vector2 thumbstickPosition)
@@ -76,9 +77,11 @@ namespace MonoGame.Framework.Input
             {
                 case GamePadDeadZone.None:
                     break;
+
                 case GamePadDeadZone.IndependentAxes:
                     thumbstickPosition = ExcludeIndependentAxesDeadZone(thumbstickPosition, deadZone);
                     break;
+
                 case GamePadDeadZone.Circular:
                     thumbstickPosition = ExcludeCircularDeadZone(thumbstickPosition, deadZone);
                     break;
@@ -92,17 +95,18 @@ namespace MonoGame.Framework.Input
             }
             else
             {
-                thumbstickPosition = new Vector2(
-                    MathHelper.Clamp(thumbstickPosition.X, -1f, 1f), MathHelper.Clamp(thumbstickPosition.Y, -1f, 1f));
+                thumbstickPosition.Clamp(-1, 1);
             }
 
             return thumbstickPosition;
         }
 
-        private Vector2 ExcludeIndependentAxesDeadZone(Vector2 value, float deadZone) => 
-            new Vector2(
+        private Vector2 ExcludeIndependentAxesDeadZone(Vector2 value, float deadZone)
+        {
+            return new Vector2(
                 ExcludeAxisDeadZone(value.X, deadZone),
                 ExcludeAxisDeadZone(value.Y, deadZone));
+        }
 
         private float ExcludeAxisDeadZone(float value, float deadZone)
         {
@@ -117,10 +121,11 @@ namespace MonoGame.Framework.Input
 
         private Vector2 ExcludeCircularDeadZone(Vector2 value, float deadZone)
         {
-            var originalLength = value.Length();
+            float originalLength = value.Length();
             if (originalLength <= deadZone)
                 return Vector2.Zero;
-            var newLength = (originalLength - deadZone) / (1f - deadZone);
+
+            float newLength = (originalLength - deadZone) / (1f - deadZone);
             return value * (newLength / originalLength);
         }
 
@@ -136,7 +141,7 @@ namespace MonoGame.Framework.Input
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Returns the hash code of the <see cref="GamePadThumbSticks"/>.
@@ -146,7 +151,7 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Returns a string that represents the current <see cref="GamePadThumbSticks"/>.
         /// </summary>
-        public override string ToString() => "[GamePadThumbSticks: Left=" + Left + ", Right=" + Right + "]";
+        public override string ToString() => "{Left=" + Left + ", Right=" + Right + "}";
 
         #endregion
     }

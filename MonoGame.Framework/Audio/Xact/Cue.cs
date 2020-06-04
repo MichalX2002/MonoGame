@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 
 namespace MonoGame.Framework.Audio
 {
@@ -30,7 +31,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// This event is triggered when the <see cref="Cue"/> is disposed.
         /// </summary>
-        public event DatalessEvent<Cue> Disposing;
+        public event Event<Cue> Disposing;
 
         /// <summary>
         /// Gets the friendly name of the cue.

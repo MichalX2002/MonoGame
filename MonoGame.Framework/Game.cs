@@ -264,10 +264,10 @@ namespace MonoGame.Framework
 
         #region Events
 
-        public event DatalessEvent<Game> Activated;
-        public event DatalessEvent<Game> Deactivated;
-        public event DatalessEvent<Game> Disposed;
-        public event DatalessEvent<Game> Exiting;
+        public event Event<Game> Activated;
+        public event Event<Game> Deactivated;
+        public event Event<Game> Disposed;
+        public event Event<Game> Exiting;
 
 #if WINDOWS_UAP
         [CLSCompliant(false)]
@@ -765,18 +765,18 @@ namespace MonoGame.Framework
 
             private readonly Predicate<T> _filter;
             private readonly Comparison<T> _sort;
-            private readonly Action<T, DatalessEvent<object>> _filterChangedSubscriber;
-            private readonly Action<T, DatalessEvent<object>> _filterChangedUnsubscriber;
-            private readonly Action<T, DatalessEvent<object>> _sortChangedSubscriber;
-            private readonly Action<T, DatalessEvent<object>> _sortChangedUnsubscriber;
+            private readonly Action<T, Event<object>> _filterChangedSubscriber;
+            private readonly Action<T, Event<object>> _filterChangedUnsubscriber;
+            private readonly Action<T, Event<object>> _sortChangedSubscriber;
+            private readonly Action<T, Event<object>> _sortChangedUnsubscriber;
 
             public SortingFilteringCollection(
                 Predicate<T> filter,
-                Action<T, DatalessEvent<object>> filterChangedSubscriber,
-                Action<T, DatalessEvent<object>> filterChangedUnsubscriber,
+                Action<T, Event<object>> filterChangedSubscriber,
+                Action<T, Event<object>> filterChangedUnsubscriber,
                 Comparison<T> sort,
-                Action<T, DatalessEvent<object>> sortChangedSubscriber,
-                Action<T, DatalessEvent<object>> sortChangedUnsubscriber)
+                Action<T, Event<object>> sortChangedSubscriber,
+                Action<T, Event<object>> sortChangedUnsubscriber)
             {
                 _items = new List<T>();
                 _addJournal = new List<AddJournalEntry<T>>();

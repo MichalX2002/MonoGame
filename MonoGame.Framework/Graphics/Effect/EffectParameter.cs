@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -203,30 +204,30 @@ namespace MonoGame.Framework.Graphics
         }
         */
 
-        public Matrix GetValueMatrix()
+        public Matrix4x4 GetValueMatrix()
         {
-            if (ParameterClass != EffectParameterClass.Matrix || 
+            if (ParameterClass != EffectParameterClass.Matrix ||
                 ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             if (RowCount != 4 || ColumnCount != 4)
                 throw new InvalidCastException();
 
-            float[] floatData = (float[])Data;
-            return new Matrix(
+            var floatData = (float[])Data;
+            return new Matrix4x4(
                 floatData[0], floatData[4], floatData[8], floatData[12],
                 floatData[1], floatData[5], floatData[9], floatData[13],
                 floatData[2], floatData[6], floatData[10], floatData[14],
                 floatData[3], floatData[7], floatData[11], floatData[15]);
         }
 
-        public Matrix[] GetValueMatrixArray(int count)
+        public Matrix4x4[] GetValueMatrixArray(int count)
         {
             if (ParameterClass != EffectParameterClass.Matrix ||
                 ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
-            var ret = new Matrix[count];
+            var ret = new Matrix4x4[count];
             for (var i = 0; i < count; i++)
                 ret[i] = Elements[i].GetValueMatrix();
 
@@ -239,7 +240,7 @@ namespace MonoGame.Framework.Graphics
                 ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
-            float[] vecInfo = (float[])Data;
+            var vecInfo = (float[])Data;
             return new Quaternion(vecInfo[0], vecInfo[1], vecInfo[2], vecInfo[3]);
         }
 
@@ -281,9 +282,9 @@ namespace MonoGame.Framework.Graphics
 
                 case EffectParameterClass.Vector:
                 case EffectParameterClass.Matrix:
-                    if (Data is Matrix matrix)
+                    if (Data is Matrix4x4 matrix)
                     {
-                        var array = new float[Matrix.ElementCount];
+                        var array = new float[4 * 4];
                         matrix.CopyTo(array);
                         return array;
                     }
@@ -318,7 +319,7 @@ namespace MonoGame.Framework.Graphics
 #if !GLES
         public Texture3D GetValueTexture3D()
         {
-            if (ParameterClass != EffectParameterClass.Object || 
+            if (ParameterClass != EffectParameterClass.Object ||
                 ParameterType != EffectParameterType.Texture3D)
                 throw new InvalidCastException();
 
@@ -328,7 +329,7 @@ namespace MonoGame.Framework.Graphics
 
         public TextureCube GetValueTextureCube()
         {
-            if (ParameterClass != EffectParameterClass.Object || 
+            if (ParameterClass != EffectParameterClass.Object ||
                 ParameterType != EffectParameterType.TextureCube)
                 throw new InvalidCastException();
 
@@ -377,7 +378,7 @@ namespace MonoGame.Framework.Graphics
 
         public Vector3[] GetValueVector3Array()
         {
-            if (ParameterClass != EffectParameterClass.Vector || 
+            if (ParameterClass != EffectParameterClass.Vector ||
                 ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
@@ -397,7 +398,7 @@ namespace MonoGame.Framework.Graphics
 
         public Vector4 GetValueVector4()
         {
-            if (ParameterClass != EffectParameterClass.Vector || 
+            if (ParameterClass != EffectParameterClass.Vector ||
                 ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
@@ -469,7 +470,7 @@ namespace MonoGame.Framework.Graphics
         }
         */
 
-        public void SetValue(in Matrix value)
+        public void SetValue(in Matrix4x4 value)
         {
             if (ParameterClass != EffectParameterClass.Matrix ||
                 ParameterType != EffectParameterType.Single)
@@ -564,9 +565,9 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        public void SetValueTranspose(in Matrix value)
+        public void SetValueTranspose(in Matrix4x4 value)
         {
-            if (ParameterClass != EffectParameterClass.Matrix || 
+            if (ParameterClass != EffectParameterClass.Matrix ||
                 ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
@@ -641,116 +642,116 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        public void SetValue(Matrix[] value)
+        public void SetValue(ReadOnlySpan<Matrix4x4> values)
         {
-            if (ParameterClass != EffectParameterClass.Matrix || 
+            if (ParameterClass != EffectParameterClass.Matrix ||
                 ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
             if (RowCount == 4 && ColumnCount == 4)
             {
-                for (var i = 0; i < value.Length; i++)
+                for (var i = 0; i < values.Length; i++)
                 {
                     var fData = (float[])Elements[i].Data;
 
-                    fData[0] = value[i].M11;
-                    fData[1] = value[i].M21;
-                    fData[2] = value[i].M31;
-                    fData[3] = value[i].M41;
+                    fData[0] = values[i].M11;
+                    fData[1] = values[i].M21;
+                    fData[2] = values[i].M31;
+                    fData[3] = values[i].M41;
 
-                    fData[4] = value[i].M12;
-                    fData[5] = value[i].M22;
-                    fData[6] = value[i].M32;
-                    fData[7] = value[i].M42;
+                    fData[4] = values[i].M12;
+                    fData[5] = values[i].M22;
+                    fData[6] = values[i].M32;
+                    fData[7] = values[i].M42;
 
-                    fData[8] = value[i].M13;
-                    fData[9] = value[i].M23;
-                    fData[10] = value[i].M33;
-                    fData[11] = value[i].M43;
+                    fData[8] = values[i].M13;
+                    fData[9] = values[i].M23;
+                    fData[10] = values[i].M33;
+                    fData[11] = values[i].M43;
 
-                    fData[12] = value[i].M14;
-                    fData[13] = value[i].M24;
-                    fData[14] = value[i].M34;
-                    fData[15] = value[i].M44;
+                    fData[12] = values[i].M14;
+                    fData[13] = values[i].M24;
+                    fData[14] = values[i].M34;
+                    fData[15] = values[i].M44;
                 }
             }
             else if (RowCount == 4 && ColumnCount == 3)
             {
-                for (var i = 0; i < value.Length; i++)
+                for (var i = 0; i < values.Length; i++)
                 {
                     var fData = (float[])Elements[i].Data;
 
-                    fData[0] = value[i].M11;
-                    fData[1] = value[i].M21;
-                    fData[2] = value[i].M31;
-                    fData[3] = value[i].M41;
+                    fData[0] = values[i].M11;
+                    fData[1] = values[i].M21;
+                    fData[2] = values[i].M31;
+                    fData[3] = values[i].M41;
 
-                    fData[4] = value[i].M12;
-                    fData[5] = value[i].M22;
-                    fData[6] = value[i].M32;
-                    fData[7] = value[i].M42;
+                    fData[4] = values[i].M12;
+                    fData[5] = values[i].M22;
+                    fData[6] = values[i].M32;
+                    fData[7] = values[i].M42;
 
-                    fData[8] = value[i].M13;
-                    fData[9] = value[i].M23;
-                    fData[10] = value[i].M33;
-                    fData[11] = value[i].M43;
+                    fData[8] = values[i].M13;
+                    fData[9] = values[i].M23;
+                    fData[10] = values[i].M33;
+                    fData[11] = values[i].M43;
                 }
             }
             else if (RowCount == 3 && ColumnCount == 4)
             {
-                for (var i = 0; i < value.Length; i++)
+                for (var i = 0; i < values.Length; i++)
                 {
                     var fData = (float[])Elements[i].Data;
 
-                    fData[0] = value[i].M11;
-                    fData[1] = value[i].M21;
-                    fData[2] = value[i].M31;
+                    fData[0] = values[i].M11;
+                    fData[1] = values[i].M21;
+                    fData[2] = values[i].M31;
 
-                    fData[3] = value[i].M12;
-                    fData[4] = value[i].M22;
-                    fData[5] = value[i].M32;
+                    fData[3] = values[i].M12;
+                    fData[4] = values[i].M22;
+                    fData[5] = values[i].M32;
 
-                    fData[6] = value[i].M13;
-                    fData[7] = value[i].M23;
-                    fData[8] = value[i].M33;
+                    fData[6] = values[i].M13;
+                    fData[7] = values[i].M23;
+                    fData[8] = values[i].M33;
 
-                    fData[9] = value[i].M14;
-                    fData[10] = value[i].M24;
-                    fData[11] = value[i].M34;
+                    fData[9] = values[i].M14;
+                    fData[10] = values[i].M24;
+                    fData[11] = values[i].M34;
                 }
             }
             else if (RowCount == 3 && ColumnCount == 3)
             {
-                for (var i = 0; i < value.Length; i++)
+                for (var i = 0; i < values.Length; i++)
                 {
                     var fData = (float[])Elements[i].Data;
 
-                    fData[0] = value[i].M11;
-                    fData[1] = value[i].M21;
-                    fData[2] = value[i].M31;
+                    fData[0] = values[i].M11;
+                    fData[1] = values[i].M21;
+                    fData[2] = values[i].M31;
 
-                    fData[3] = value[i].M12;
-                    fData[4] = value[i].M22;
-                    fData[5] = value[i].M32;
+                    fData[3] = values[i].M12;
+                    fData[4] = values[i].M22;
+                    fData[5] = values[i].M32;
 
-                    fData[6] = value[i].M13;
-                    fData[7] = value[i].M23;
-                    fData[8] = value[i].M33;
+                    fData[6] = values[i].M13;
+                    fData[7] = values[i].M23;
+                    fData[8] = values[i].M33;
                 }
             }
             else if (RowCount == 3 && ColumnCount == 2)
             {
-                for (var i = 0; i < value.Length; i++)
+                for (var i = 0; i < values.Length; i++)
                 {
                     var fData = (float[])Elements[i].Data;
 
-                    fData[0] = value[i].M11;
-                    fData[1] = value[i].M21;
-                    fData[2] = value[i].M31;
+                    fData[0] = values[i].M11;
+                    fData[1] = values[i].M21;
+                    fData[2] = values[i].M31;
 
-                    fData[3] = value[i].M12;
-                    fData[4] = value[i].M22;
-                    fData[5] = value[i].M32;
+                    fData[3] = values[i].M12;
+                    fData[4] = values[i].M22;
+                    fData[5] = values[i].M32;
                 }
             }
 
@@ -819,7 +820,7 @@ namespace MonoGame.Framework.Graphics
 
         public void SetValue(Vector2 value)
         {
-            if (ParameterClass != EffectParameterClass.Vector || 
+            if (ParameterClass != EffectParameterClass.Vector ||
                 ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
@@ -856,9 +857,9 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        public void SetValue(in Vector4 value)
+        public void SetValue(Vector4 value)
         {
-            if (ParameterClass != EffectParameterClass.Vector || 
+            if (ParameterClass != EffectParameterClass.Vector ||
                 ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 

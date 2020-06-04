@@ -271,7 +271,7 @@ namespace MonoGame.Framework.Input
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Returns the hash code of the <see cref="GamePadCapabilities"/>.
@@ -283,7 +283,8 @@ namespace MonoGame.Framework.Input
         /// </summary>
         public override string ToString()
         {
-            return "[GamePadCapabilities: IsConnected=" + IsConnected +
+            return 
+                "{IsConnected=" + IsConnected +
                 ", DisplayName=" + DisplayName +
                 ", Identifier=" + Identifier +
                 ", HasAButton=" + HasAButton +
@@ -311,7 +312,7 @@ namespace MonoGame.Framework.Input
                 ", HasRightVibrationMotor=" + HasRightVibrationMotor +
                 ", HasVoiceSupport=" + HasVoiceSupport +
                 ", GamePadType=" + GamePadType +
-                "]";
+                "}";
         }
 
         #endregion

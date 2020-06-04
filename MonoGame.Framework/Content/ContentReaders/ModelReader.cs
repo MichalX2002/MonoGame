@@ -59,7 +59,7 @@ namespace MonoGame.Framework.Content
             for (uint i = 0; i < boneCount; i++)
             {
                 string name = reader.ReadObject<string>();
-                var matrix = reader.ReadMatrix();
+                var matrix = reader.ReadMatrix4x4();
                 var bone = new ModelBone { Transform = matrix, Index = (int)i, Name = name };
                 bones.Add(bone);
             }

@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace MonoGame.Framework.Input.Touch
 {
@@ -12,7 +13,7 @@ namespace MonoGame.Framework.Input.Touch
         /// <summary>
         /// Helper for assigning an invalid touch location.
         /// </summary>
-        internal static readonly TouchLocation Invalid = new TouchLocation();
+        internal static TouchLocation Invalid => default;
 
         private Vector2 _position;
         private Vector2 _previousPosition;

@@ -210,8 +210,16 @@ namespace MonoGame.Framework.Graphics
             if (vertices.IsEmpty)
                 return;
 
+            const PrimitiveType primitiveType = PrimitiveType.TriangleList;
+            int primitiveCount = vertices.Length / 2;
+
             // If the effect is not null, then apply each pass and render the geometry
-            if (effect != null)
+            if (effect == null)
+            {
+                // If no custom effect is defined, then simply render.
+                _device.DrawUserIndexedPrimitives(primitiveType, vertices, indices, primitiveCount);
+            }
+            else
             {
                 foreach (var pass in effect.CurrentTechnique.Passes)
                 {
@@ -221,15 +229,8 @@ namespace MonoGame.Framework.Graphics
                     // ends up in Textures[0].
                     _device.Textures[0] = texture;
 
-                    _device.DrawUserIndexedPrimitives(
-                        PrimitiveType.TriangleList, vertices, indices, vertices.Length / 2);
+                    _device.DrawUserIndexedPrimitives(primitiveType, vertices, indices, primitiveCount);
                 }
-            }
-            else
-            {
-                // If no custom effect is defined, then simply render.
-                _device.DrawUserIndexedPrimitives(
-                    PrimitiveType.TriangleList, vertices, indices, vertices.Length / 2);
             }
         }
 

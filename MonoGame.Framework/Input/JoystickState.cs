@@ -82,7 +82,7 @@ namespace MonoGame.Framework.Input
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Returns the hash code of the <see cref="JoystickState"/>.

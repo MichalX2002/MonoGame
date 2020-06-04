@@ -12,7 +12,7 @@ namespace MonoGame.Framework.Content
 
         protected internal override BoundingFrustum Read(ContentReader input, BoundingFrustum existingInstance)
         {
-            return new BoundingFrustum(input.ReadMatrix());
+            return new BoundingFrustum(input.ReadMatrix4x4());
         }
     }
 }

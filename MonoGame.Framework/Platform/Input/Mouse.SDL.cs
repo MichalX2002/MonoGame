@@ -35,12 +35,12 @@ namespace MonoGame.Framework.Input
                 window.MouseState.XButton2 = (state & SDL.Mouse.Button.X2Mask) != 0 ? ButtonState.Pressed : ButtonState.Released;
 
                 window.MouseState.HorizontalScroll = ScrollX;
-                window.MouseState.Scroll = ScrollY;
+                window.MouseState.VerticalScroll = ScrollY;
             }
             else
             {
                 // Window does not have mouse focus, we need to manually get the position
-                var clientBounds = window.ClientBounds;
+                var clientBounds = window.Bounds;
                 window.MouseState.X = x - clientBounds.X;
                 window.MouseState.Y = y - clientBounds.Y;
             }

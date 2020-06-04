@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Text;
+using System.Numerics;
 
 namespace MonoGame.Framework.Content
 {
@@ -82,11 +83,11 @@ namespace MonoGame.Framework.Content
                 var hBasicEffectReader = new BasicEffectReader();
                 var hVertexBufferReader = new VertexBufferReader();
                 var hAlphaTestEffectReader = new AlphaTestEffectReader();
-                var hEnumSpriteEffectsReader = new EnumReader<Graphics.SpriteEffects>();
+                var hEnumSpriteEffectsReader = new EnumReader<Graphics.SpriteFlip>();
                 var hArrayFloatReader = new ArrayReader<float>();
                 var hArrayVector2Reader = new ArrayReader<Vector2>();
                 var hListVector2Reader = new ListReader<Vector2>();
-                var hArrayMatrixReader = new ArrayReader<Matrix>();
+                var hArrayMatrixReader = new ArrayReader<Matrix4x4>();
                 var hEnumBlendReader = new EnumReader<Graphics.Blend>();
                 var hNullableRectReader = new NullableReader<Rectangle>();
                 var hEffectMaterialReader = new EffectMaterialReader();
