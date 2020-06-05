@@ -2051,7 +2051,7 @@ namespace StbSharp
             stbir__choose_filter(info, h_filter, v_filter);
 
             memory_required = stbir__calculate_memory(info);
-            extra_memory = CRuntime.MAlloc((int)memory_required);
+            extra_memory = (void*)Marshal.AllocHGlobal((int)memory_required);
             if (extra_memory == null)
                 return 0;
 
@@ -2069,12 +2069,10 @@ namespace StbSharp
             info.output_data = output_data;
             info.output_stride_bytes = width_stride_output;
 
-            result =
-
-                stbir__resize_allocated(info, alpha_channel, flags, type,
+            result = stbir__resize_allocated(info, alpha_channel, flags, type,
                     edge_horizontal,
                     edge_vertical, colorspace, extra_memory, memory_required);
-            CRuntime.Free(extra_memory);
+            Marshal.FreeHGlobal((IntPtr)extra_memory);
             return result;
         }
 

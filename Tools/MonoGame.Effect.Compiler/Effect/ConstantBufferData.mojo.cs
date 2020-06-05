@@ -55,7 +55,8 @@ namespace MonoGame.Effect
 
             var registerSize =
                 (symbol.register_set == MojoShader.MOJOSHADER_symbolRegisterSet.MOJOSHADER_SYMREGSET_BOOL ? 1 : 4) * 4;
-            var offset = (int)symbol.register_index * registerSize;
+
+            int offset = (int)symbol.register_index * registerSize;
             param.bufferOffset = offset;
 
             switch (symbol.info.parameter_class)
@@ -107,7 +108,7 @@ namespace MonoGame.Effect
                 var members = MarshalHelper.UnmarshalArray<MojoShader.MOJOSHADER_symbol>(
                     symbol.info.members, (int)symbol.info.member_count);
 
-                for (var i = 0; i < param.member_count; i++)
+                for (int i = 0; i < param.member_count; i++)
                 {
                     var mparam = GetParameterFromSymbol(members[i]);
                     param.member_handles[i] = mparam;
@@ -116,7 +117,7 @@ namespace MonoGame.Effect
             else
             {
                 param.member_handles = new EffectObject.D3Dx_parameter[param.element_count];
-                for (var i = 0; i < param.element_count; i++)
+                for (int i = 0; i < param.element_count; i++)
                 {
                     var mparam = new EffectObject.D3Dx_parameter
                     {

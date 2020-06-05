@@ -10,11 +10,10 @@ namespace MonoGame.Effect
         {
             var ret = new T[count];
 
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < ret.Length; i++)
             {
-                int offset = i * Unsafe.SizeOf<T>();
-                var structPtr = new IntPtr(ptr.ToInt64() + offset);
-                ret[i] = (T)Marshal.PtrToStructure(structPtr, typeof(T));
+                var structPtr = ptr + i * Unsafe.SizeOf<T>();
+                ret[i] = Marshal.PtrToStructure<T>(structPtr);
             }
 
             return ret;

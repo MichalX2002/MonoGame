@@ -1444,8 +1444,6 @@ namespace StbSharp
                         (int)((s.ring_buffer_begin_index + 1) % s.ring_buffer_num_entries);
                 }
             }
-
-            //Console.WriteLine("NEW: " + Hash(s));
         }
 
         public static void BufferLoopDownsample(ref ResizeContext s)
@@ -1690,146 +1688,26 @@ namespace StbSharp
             ChooseFilters(ref s, (h_filter), (v_filter));
 
             int tmp_memory_required = CalculateMemory(ref s);
-            void* tmp_memory = CRuntime.MAlloc(tmp_memory_required);
-            if (tmp_memory == null)
-                return 0;
 
-            try
-            {
-                s.input_data = input_data;
-                s.input_stride_bytes = (int)((input_stride_in_bytes) != 0
-                        ? input_stride_in_bytes
-                        : s.channels * s.input_w * datatype_size[(int)datatype]);
+            // TODO: pool
+            Memory<byte> tmp_memory = new byte[tmp_memory_required];
 
-                s.output_data = output_data;
-                s.output_stride_bytes = (int)((output_stride_in_bytes) != 0
-                        ? output_stride_in_bytes
-                        : s.channels * s.output_w * datatype_size[(int)datatype]);
+            s.input_data = input_data;
+            s.input_stride_bytes = (int)((input_stride_in_bytes) != 0
+                    ? input_stride_in_bytes
+                    : s.channels * s.input_w * datatype_size[(int)datatype]);
 
-                return (int)(ResizeAllocated(
-                    ref s,
-                    (int)(alpha_channel), (uint)(flags), datatype,
-                    (wrap_horizontal), (wrap_vertical),
-                    colorspace,
-                    new Span<byte>(tmp_memory, tmp_memory_required)));
-            }
-            finally
-            {
-                CRuntime.Free(tmp_memory);
-            }
-        }
+            s.output_data = output_data;
+            s.output_stride_bytes = (int)((output_stride_in_bytes) != 0
+                    ? output_stride_in_bytes
+                    : s.channels * s.output_w * datatype_size[(int)datatype]);
 
-        public static unsafe long Hash(StbImageResize.ResizeContext x)
-        {
-            long hash = 17;
-            hash = hash * 31 + x.input_w;
-            hash = hash * 31 + x.input_h;
-            hash = hash * 31 + x.input_stride_bytes;
-            hash = hash * 31 + x.output_w;
-            hash = hash * 31 + x.output_h;
-            hash = hash * 31 + x.output_stride_bytes;
-            hash = hash * 31 + x.s0.GetHashCode();
-            hash = hash * 31 + x.t0.GetHashCode();
-            hash = hash * 31 + x.s1.GetHashCode();
-            hash = hash * 31 + x.t1.GetHashCode();
-            hash = hash * 31 + x.horizontal_shift.GetHashCode();
-            hash = hash * 31 + x.vertical_shift.GetHashCode();
-            hash = hash * 31 + x.horizontal_scale.GetHashCode();
-            hash = hash * 31 + x.vertical_scale.GetHashCode();
-            hash = hash * 31 + x.channels;
-            hash = hash * 31 + x.alpha_channel;
-            hash = hash * 31 + x.flags;
-            hash = hash * 31 + (int)x.datatype;
-            //hash = hash * 31 + (int)x.horizontal_filter;
-            //hash = hash * 31 + (int)x.vertical_filter;
-            hash = hash * 31 + (int)x.wrap_horizontal;
-            hash = hash * 31 + (int)x.wrap_vertical;
-            hash = hash * 31 + (int)x.colorspace;
-            hash = hash * 31 + x.horizontal_coefficient_width;
-            hash = hash * 31 + x.vertical_coefficient_width;
-            hash = hash * 31 + x.horizontal_filter_pixel_width;
-            hash = hash * 31 + x.vertical_filter_pixel_width;
-            hash = hash * 31 + x.horizontal_filter_pixel_margin;
-            hash = hash * 31 + x.vertical_filter_pixel_margin;
-            hash = hash * 31 + x.horizontal_num_contributors;
-            hash = hash * 31 + x.vertical_num_contributors;
-            hash = hash * 31 + x.ring_buffer_num_entries;
-            hash = hash * 31 + x.ring_buffer_first_scanline;
-            hash = hash * 31 + x.ring_buffer_last_scanline;
-            hash = hash * 31 + x.ring_buffer_begin_index;
-            hash = hash * 31 + x.horizontal_contributors_size;
-            hash = hash * 31 + x.horizontal_coefficients_size;
-            hash = hash * 31 + x.vertical_contributors_size;
-            hash = hash * 31 + x.vertical_coefficients_size;
-            hash = hash * 31 + x.decode_buffer_size;
-            hash = hash * 31 + x.horizontal_buffer_size;
-            hash = hash * 31 + x.ring_buffer_size;
-            hash = hash * 31 + x.encode_buffer_size;
-            hash = hash * 31 + x.decode_buffer_pixels;
-
-            for (int i = 0; i < x.input_stride_bytes * x.input_h; i++)
-            {
-                if (x.input_data.IsEmpty)
-                    continue;
-                hash = hash * 31 + (x.input_data)[i];
-            }
-            for (int i = 0; i < x.output_stride_bytes * x.output_h; i++)
-            {
-                if (x.output_data.IsEmpty)
-                    continue;
-                hash = hash * 31 + (x.output_data)[i];
-            }
-            for (int i = 0; i < x.horizontal_contributors_size / sizeof(Contributors); i++)
-            {
-                if (x.horizontal_contributors == null)
-                    continue;
-                hash = hash * 31 + x.horizontal_contributors[i].n0;
-                hash = hash * 31 + x.horizontal_contributors[i].n1;
-            }
-            for (int i = 0; i < x.horizontal_coefficients_size / sizeof(float); i++)
-            {
-                if (x.horizontal_coefficients == null)
-                    continue;
-                hash = hash * 31 + x.horizontal_coefficients[i].GetHashCode();
-            }
-            for (int i = 0; i < x.vertical_contributors_size / sizeof(Contributors); i++)
-            {
-                if (x.vertical_contributors == null)
-                    continue;
-                hash = hash * 31 + x.vertical_contributors[i].n0;
-                hash = hash * 31 + x.vertical_contributors[i].n1;
-            }
-            for (int i = 0; i < x.vertical_coefficients_size / sizeof(float); i++)
-            {
-                if (x.vertical_coefficients == null)
-                    continue;
-                hash = hash * 31 + x.vertical_coefficients[i].GetHashCode();
-            }
-            for (int i = 0; i < x.decode_buffer_size / sizeof(float); i++)
-            {
-                if (x.decode_buffer == null)
-                    continue;
-                hash = hash * 31 + x.decode_buffer[i].GetHashCode();
-            }
-            for (int i = 0; i < x.horizontal_buffer_size / sizeof(float); i++)
-            {
-                if (x.horizontal_buffer == null)
-                    continue;
-                hash = hash * 31 + x.horizontal_buffer[i].GetHashCode();
-            }
-            for (int i = 0; i < x.ring_buffer_size / sizeof(float); i++)
-            {
-                if (x.ring_buffer == null)
-                    continue;
-                hash = hash * 31 + x.ring_buffer[i].GetHashCode();
-            }
-            for (int i = 0; i < x.encode_buffer_size / sizeof(float); i++)
-            {
-                if (x.encode_buffer == null)
-                    continue;
-                hash = hash * 31 + x.encode_buffer[i].GetHashCode();
-            }
-            return hash;
+            return (int)(ResizeAllocated(
+                ref s,
+                (int)(alpha_channel), (uint)(flags), datatype,
+                (wrap_horizontal), (wrap_vertical),
+                colorspace,
+                tmp_memory.Span));
         }
 
         public static int Resize(
@@ -2006,6 +1884,122 @@ namespace StbSharp
                 (filter_horizontal), (filter_vertical),
                 (wrap_horizontal), (wrap_vertical),
                 colorspace));
+        }
+
+
+
+        // TODO: remove this, was just for debugging
+        public static unsafe long Hash(StbImageResize.ResizeContext x)
+        {
+            long hash = 17;
+            hash = hash * 31 + x.input_w;
+            hash = hash * 31 + x.input_h;
+            hash = hash * 31 + x.input_stride_bytes;
+            hash = hash * 31 + x.output_w;
+            hash = hash * 31 + x.output_h;
+            hash = hash * 31 + x.output_stride_bytes;
+            hash = hash * 31 + x.s0.GetHashCode();
+            hash = hash * 31 + x.t0.GetHashCode();
+            hash = hash * 31 + x.s1.GetHashCode();
+            hash = hash * 31 + x.t1.GetHashCode();
+            hash = hash * 31 + x.horizontal_shift.GetHashCode();
+            hash = hash * 31 + x.vertical_shift.GetHashCode();
+            hash = hash * 31 + x.horizontal_scale.GetHashCode();
+            hash = hash * 31 + x.vertical_scale.GetHashCode();
+            hash = hash * 31 + x.channels;
+            hash = hash * 31 + x.alpha_channel;
+            hash = hash * 31 + x.flags;
+            hash = hash * 31 + (int)x.datatype;
+            //hash = hash * 31 + (int)x.horizontal_filter;
+            //hash = hash * 31 + (int)x.vertical_filter;
+            hash = hash * 31 + (int)x.wrap_horizontal;
+            hash = hash * 31 + (int)x.wrap_vertical;
+            hash = hash * 31 + (int)x.colorspace;
+            hash = hash * 31 + x.horizontal_coefficient_width;
+            hash = hash * 31 + x.vertical_coefficient_width;
+            hash = hash * 31 + x.horizontal_filter_pixel_width;
+            hash = hash * 31 + x.vertical_filter_pixel_width;
+            hash = hash * 31 + x.horizontal_filter_pixel_margin;
+            hash = hash * 31 + x.vertical_filter_pixel_margin;
+            hash = hash * 31 + x.horizontal_num_contributors;
+            hash = hash * 31 + x.vertical_num_contributors;
+            hash = hash * 31 + x.ring_buffer_num_entries;
+            hash = hash * 31 + x.ring_buffer_first_scanline;
+            hash = hash * 31 + x.ring_buffer_last_scanline;
+            hash = hash * 31 + x.ring_buffer_begin_index;
+            hash = hash * 31 + x.horizontal_contributors_size;
+            hash = hash * 31 + x.horizontal_coefficients_size;
+            hash = hash * 31 + x.vertical_contributors_size;
+            hash = hash * 31 + x.vertical_coefficients_size;
+            hash = hash * 31 + x.decode_buffer_size;
+            hash = hash * 31 + x.horizontal_buffer_size;
+            hash = hash * 31 + x.ring_buffer_size;
+            hash = hash * 31 + x.encode_buffer_size;
+            hash = hash * 31 + x.decode_buffer_pixels;
+
+            for (int i = 0; i < x.input_stride_bytes * x.input_h; i++)
+            {
+                if (x.input_data.IsEmpty)
+                    continue;
+                hash = hash * 31 + (x.input_data)[i];
+            }
+            for (int i = 0; i < x.output_stride_bytes * x.output_h; i++)
+            {
+                if (x.output_data.IsEmpty)
+                    continue;
+                hash = hash * 31 + (x.output_data)[i];
+            }
+            for (int i = 0; i < x.horizontal_contributors_size / sizeof(Contributors); i++)
+            {
+                if (x.horizontal_contributors == null)
+                    continue;
+                hash = hash * 31 + x.horizontal_contributors[i].n0;
+                hash = hash * 31 + x.horizontal_contributors[i].n1;
+            }
+            for (int i = 0; i < x.horizontal_coefficients_size / sizeof(float); i++)
+            {
+                if (x.horizontal_coefficients == null)
+                    continue;
+                hash = hash * 31 + x.horizontal_coefficients[i].GetHashCode();
+            }
+            for (int i = 0; i < x.vertical_contributors_size / sizeof(Contributors); i++)
+            {
+                if (x.vertical_contributors == null)
+                    continue;
+                hash = hash * 31 + x.vertical_contributors[i].n0;
+                hash = hash * 31 + x.vertical_contributors[i].n1;
+            }
+            for (int i = 0; i < x.vertical_coefficients_size / sizeof(float); i++)
+            {
+                if (x.vertical_coefficients == null)
+                    continue;
+                hash = hash * 31 + x.vertical_coefficients[i].GetHashCode();
+            }
+            for (int i = 0; i < x.decode_buffer_size / sizeof(float); i++)
+            {
+                if (x.decode_buffer == null)
+                    continue;
+                hash = hash * 31 + x.decode_buffer[i].GetHashCode();
+            }
+            for (int i = 0; i < x.horizontal_buffer_size / sizeof(float); i++)
+            {
+                if (x.horizontal_buffer == null)
+                    continue;
+                hash = hash * 31 + x.horizontal_buffer[i].GetHashCode();
+            }
+            for (int i = 0; i < x.ring_buffer_size / sizeof(float); i++)
+            {
+                if (x.ring_buffer == null)
+                    continue;
+                hash = hash * 31 + x.ring_buffer[i].GetHashCode();
+            }
+            for (int i = 0; i < x.encode_buffer_size / sizeof(float); i++)
+            {
+                if (x.encode_buffer == null)
+                    continue;
+                hash = hash * 31 + x.encode_buffer[i].GetHashCode();
+            }
+            return hash;
         }
     }
 }
